@@ -3,7 +3,7 @@
     "version": "0.1.0",
     "private": true,
     "scripts": {
-      "dev": "uvicorn main:app --reload",
+      "dev": "./start-backend.sh",
       "start": "uvicorn main:app",
       "lint": "pylint **/*.py",
       "format": "black ."
