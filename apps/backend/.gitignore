@@ -1,2 +1,31 @@
+# Python
 __pycache__
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual Environment
 .venv
+venv/
+ENV/
+
+# Media files
+media/*
+
+# Environment variables
+.env
+.env.*
+
+# IDE-specific files
+.vscode/
+.idea/
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+
+# OS-specific files
+.DS_Store
+Thumbs.db
