@@ -1,0 +1,11 @@
+{
+    "name": "backend",
+    "version": "0.1.0",
+    "private": true,
+    "scripts": {
+      "dev": "uvicorn main:app --reload",
+      "start": "uvicorn main:app",
+      "lint": "pylint **/*.py",
+      "format": "black ."
+    }
+  }
