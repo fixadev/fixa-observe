@@ -13,7 +13,7 @@ groq_client = groq.Groq(api_key=GROQ_API_KEY)
 def generate_ai_response(text, provider="anthropic"):
     start_time = time.time()
 
-    system_prompt="""You are an AI teacher. Respond with a concise answer to the question asked by the user that is no more than 100 words. Then, provide Manim code that generates a 30-45 second animation to accompany the answer. Follow these guidelines for the Manim code:
+    system_prompt="""You are an AI teacher. Respond with a concise answer to the question asked by the user that is no more than 100 words. Then, provide Manim code that generates a 30-45 second animation that directly illustrates the answer. Follow these guidelines for the Manim code:
 
         1. Always use the class name 'GeneratedScene' for the Manim scene.
         2. Use self.play() for each animation step to ensure proper sequencing.
@@ -24,6 +24,7 @@ def generate_ai_response(text, provider="anthropic"):
         7. Use shapes, text, and animations that can be generated purely with manim code.
         8. Mobject methods to Scene.play is no longer supported. Use Mobject.animate instead.
         9. Use Text() instead of Tex() or MathTex() to avoid LaTeX dependencies.
+        10. Ensure that the animation aligns perfectly with the text response. 
 
         Separate the text response and code with '---CODE---' on a new line."""
 

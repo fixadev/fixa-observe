@@ -51,17 +51,17 @@ def generate_animation(manim_code, output_file):
     config.frame_rate = 30
     config.pixel_height = 720
     config.pixel_width = 1280
-    config.disable_caching = True
+    config.disable_cache = True
     # config.verbosity = "DEBUG"
-
     config.write_to_movie = True
-    config.renderer = "cairo" 
+    config.save_last_frame = False
+    # config.renderer = "cairo" 
     config.quality = "medium_quality" 
 
     # Enable parallel processing
     config.processes = multiprocessing.cpu_count()
 
-
+    print('NUMBER OF PROCESSES: ', config.processes)
 
     unique_id = uuid.uuid4().hex
     render_dir = os.path.join(config.media_dir, f"render_{unique_id}")
