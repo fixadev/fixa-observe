@@ -1,4 +1,3 @@
-import tempfile
 from manim import *
 import importlib.util
 import sys
@@ -6,6 +5,7 @@ import logging
 import os
 import uuid
 import shutil
+import multiprocessing
 
 logger = logging.getLogger(__name__)
 
@@ -54,8 +54,12 @@ def generate_animation(manim_code, output_file):
     config.disable_caching = True
     # config.verbosity = "DEBUG"
 
-    config.output_file = output_file
     config.write_to_movie = True
+    config.renderer = "cairo" 
+    config.quality = "medium_quality" 
+
+    # Enable parallel processing
+    config.processes = multiprocessing.cpu_count()
 
 
 
