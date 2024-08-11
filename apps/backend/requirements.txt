@@ -13,3 +13,4 @@ python-dotenv==1.0.0
 anthropic==0.33.0
 ffmpeg-python==0.2.0
 uuid==1.30
+groq==0.9.0
