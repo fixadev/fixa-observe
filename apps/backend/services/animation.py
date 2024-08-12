@@ -7,6 +7,7 @@ import uuid
 import shutil
 import multiprocessing
 
+logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 def generate_animation(manim_code, output_file):
@@ -79,7 +80,7 @@ def generate_animation(manim_code, output_file):
         shutil.move(expected_file, output_file)
     except Exception as e:
         logger.error(f"Error rendering animation: {str(e)}")
-        raise
+        return None
     finally:
         # Clean up the render directory
         shutil.rmtree(render_dir, ignore_errors=True)
