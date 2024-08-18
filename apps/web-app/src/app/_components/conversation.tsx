@@ -1,84 +1,42 @@
 "use client";
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect } from 'react';
+import { useWebSocket } from '../hooks/useWebSocket';
+import { useMediaSource } from '../hooks/useMediaSource';
+
+const MIME_TYPE = 'video/mp4; codecs="avc1.42E01E, mp4a.40.2"';
+const RECORDING_DURATION = 5000; // 5 seconds
 
 const AITeacher = () => {
-  const [isRecording, setIsRecording] = useState(false);
-  const [socket, setSocket] = useState<WebSocket | null>(null);
-  const videoRef = useRef<HTMLVideoElement | null>(null);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const { socket, isConnected } = useWebSocket();
+  const {
+    videoRef,
+    isMediaSourceReady,
+    isRecording,
+    startRecording,
+    handleWebSocketMessage
+  } = useMediaSource(socket);
 
   useEffect(() => {
-    const ws = new WebSocket('ws://localhost:8000/ws');
-    setSocket(ws);
+    if (!socket) return;
+
+    socket.onmessage = handleWebSocketMessage;
+    socket.onerror = (error) => console.error('WebSocket error:', error);
 
     return () => {
-      ws.close();
+      socket.onmessage = null;
+      socket.onerror = null;                
     };
-  }, []);
-
-  const startRecording = async () => {
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    const mediaRecorder = new MediaRecorder(stream);
-    const audioChunks: Blob[] = [];
-
-    mediaRecorder.addEventListener('dataavailable', (event) => {
-      audioChunks.push(event.data);
-    });
-
-    mediaRecorder.addEventListener('stop', () => {
-      const audioBlob = new Blob(audioChunks);
-      const reader = new FileReader();
-      reader.readAsDataURL(audioBlob);
-      reader.onloadend = () => {
-        if (socket && reader.result) {
-          if (typeof reader.result === 'string') {
-            socket.send(reader.result);
-          } else {
-            console.error('Unexpected result type from FileReader');
-          }
-        } else {
-          console.error('Socket is null or FileReader result is null');
-        }
-      };
-    });
-
-    mediaRecorder.start();
-    setIsRecording(true);
-
-    setTimeout(() => {
-      mediaRecorder.stop();
-      setIsRecording(false);
-    }, 5000); // Record for 5 seconds
-  };
-
-  useEffect(() => {
-    if (socket) {
-      socket.onmessage = (event) => {
-        if (typeof event.data === 'string') {
-          // Audio response
-          if (audioRef.current) {
-            audioRef.current.src = `data:audio/mp3;base64,${event.data}`;
-            audioRef.current.play();
-          }
-        } else {
-          // Video response
-          const videoBlob = new Blob([event.data], { type: 'video/mp4' });
-          const videoUrl = URL.createObjectURL(videoBlob);
-          if (videoRef.current) {
-            videoRef.current.src = videoUrl;
-            videoRef.current.play();
-          }
-        }
-      };
-    }
-  }, [socket]);
+  }, [socket, handleWebSocketMessage]);
 
   return (
     <div className='flex flex-col items-center justify-center h-screen'>
-      <audio ref={audioRef} />
-      <video ref={videoRef} width="640" height="480" controls />
-      <button className='bg-blue-500 text-white p-2 rounded-md' onClick={startRecording} disabled={isRecording}>
-        {isRecording ? 'Recording...' : 'Start Recording'}
+      <video ref={videoRef} width="640" height="480" controls autoPlay />
+      <button 
+        className='bg-blue-500 text-white p-2 rounded-md' 
+        onClick={startRecording} 
+        disabled={isRecording || !isConnected || !isMediaSourceReady}
+      >
+        {isRecording ? 'Recording...' : (isConnected ? 'Start Recording' : 'Connecting...')}
       </button>
     </div>
   );

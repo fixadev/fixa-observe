@@ -56,8 +56,8 @@ def generate_animation(manim_code, output_file):
     # config.verbosity = "DEBUG"
     config.write_to_movie = True
     config.save_last_frame = False
-    # config.renderer = "cairo" 
     config.quality = "medium_quality" 
+    config.renderer = "opengl"
 
     # Enable parallel processing
     config.processes = multiprocessing.cpu_count()

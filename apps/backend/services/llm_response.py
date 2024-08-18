@@ -13,7 +13,7 @@ client = anthropic.Anthropic(
 )
 groq_client = groq.Groq(api_key=GROQ_API_KEY)
 
-def generate_ai_response(text, provider="anthropic"):
+def generate_ai_response(text, provider="groq"):
     start_time = time.time()
 
     system_prompt="""You are an AI teacher. Respond with a concise answer to the question asked by the user that is no more than 100 words. 

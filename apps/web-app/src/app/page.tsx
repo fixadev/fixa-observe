@@ -4,16 +4,18 @@ import { LatestPost } from "~/app/_components/post";
 // import { getServerAuthSession } from "~/server/auth";
 // import { api, HydrateClient } from "~/trpc/server";
 import AITeacher from "./_components/conversation";
+import Preview from "./_components/preview";
 
 export default async function Home() {
   // const hello = await api.post.hello({ text: "from tRPC" });
   // const session = await getServerAuthSession();
   // void api.post.getLatest.prefetch();
 
-  
+
   return (
     <div className="flex flex-col items-center justify-center h-screen w-screen bg-black">
-      <AITeacher />
+      {/* <AITeacher /> */}
+      <Preview />
     </div>
   );
 }
