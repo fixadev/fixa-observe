@@ -6,7 +6,7 @@ websockets==10.4
 python-multipart==0.0.6
 pydub==0.25.1
 SpeechRecognition==3.10.0
-openai==0.27.8
+openai==1.41.0
 manim==0.17.3
 python-dotenv==1.0.0
 anthropic==0.33.0

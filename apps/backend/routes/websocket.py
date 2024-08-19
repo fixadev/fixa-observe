@@ -5,13 +5,13 @@ import os
 from fastapi import APIRouter, WebSocket
 from starlette.websockets import WebSocketDisconnect
 from services.speech_to_text import speech_to_text
-from services.llm_response import generate_ai_response
 from services.text_to_speech import text_to_speech
-from services.animation import generate_animation
+from services.execute_code import generate_animation
 from services.combine import combine_audio_video
 from services.concatenate import concatenate_videos
 from services.llm_initial import generate_segments
 from services.llm_codegen import generate_manim
+
 
 
 
