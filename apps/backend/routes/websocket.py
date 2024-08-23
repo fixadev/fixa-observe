@@ -35,30 +35,30 @@ async def websocket_endpoint(websocket: WebSocket):
 
             logger.debug(f"Speech-to-text result: {text}")
             
-            segments = generate_segments(text)
+            text_segments = generate_segments(text)
 
             combined_segments = []
             with tempfile.TemporaryDirectory() as temp_dir:
-                for index, text in enumerate(segments):
-                    print('===============SEGMENT IS===============\n', text)
-                    manim_code = generate_manim(text)
-                    print('===============MANIM CODE IS===============\n', manim_code)
+                for index, segment_text in enumerate(text_segments):
+                    print('===============SEGMENT IS===============\n', segment_text)
+                    segment_code = generate_manim(segment_text)
+                    print('===============MANIM CODE IS===============\n', segment_code)
 
                     audio_path = os.path.join(temp_dir, f"audio_{index}.mp3")
                     video_path = os.path.join(temp_dir, f"video_{index}.mp4")
-                    segment_path = os.path.join(temp_dir, f"segment_{index}.mp4")
+                    completed_segment_path = os.path.join(temp_dir, f"segment_{index}.mp4")
                     
-                    text_to_speech(text, audio_path)
-                    generate_animation(manim_code, video_path)
-                    combine_audio_video(video_path, audio_path, segment_path)
+                    text_to_speech(segment_text, audio_path)
+                    generate_animation(segment_code, video_path)
+                    combine_audio_video(video_path, audio_path, completed_segment_path)
 
-                    with open(segment_path, "rb") as segment_file:
+                    with open(completed_segment_path, "rb") as segment_file:
                         segment_data = segment_file.read()
                         print('sending segment')
                         await websocket.send_bytes(segment_data)
                         print('segment sent!')
 
-                    combined_segments.append(segment_path)
+                    combined_segments.append(completed_segment_path)
                 
                 await websocket.send_bytes(b"EOF")
 
