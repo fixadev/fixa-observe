@@ -31,6 +31,8 @@ async def websocket_endpoint(websocket: WebSocket):
             # logger.debug(f"Decoded audio data of length: {len(audio_data)}")
             
             # text = speech_to_text(audio_data)
+
+            # for rapid testing
             text = "teach me about physics"
 
             logger.debug(f"Speech-to-text result: {text}")
