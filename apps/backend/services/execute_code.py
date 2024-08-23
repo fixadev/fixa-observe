@@ -19,7 +19,6 @@ def generate_animation(manim_code, output_file):
         if module_name.startswith('manim.') or module_name == 'manim':
             del sys.modules[module_name]
     
-    # Create a unique name for the temporary module
     temp_module_name = f"temp_scene_{os.urandom(8).hex()}"
     
     # Create a temporary module to hold the scene class
@@ -28,7 +27,6 @@ def generate_animation(manim_code, output_file):
     temp_module = importlib.util.module_from_spec(spec)
     sys.modules[temp_module_name] = temp_module
 
-    # Execute the Manim code in the temporary module
     logger.debug("Executing Manim code in temporary module")
     try:
         exec(f"from manim import *\n{manim_code}", temp_module.__dict__)
@@ -36,7 +34,6 @@ def generate_animation(manim_code, output_file):
         logger.error(f"Error executing Manim code: {str(e)}")
         raise
 
-    # Find the GeneratedScene class in the module
     logger.debug("Finding GeneratedScene class")
     if 'GeneratedScene' not in temp_module.__dict__:
         logger.error("GeneratedScene class not found in the provided Manim code")
@@ -45,7 +42,6 @@ def generate_animation(manim_code, output_file):
     scene_class = temp_module.__dict__['GeneratedScene']
     logger.info(f"Found scene class: {scene_class.__name__}")
 
-    # Set up Manim configuration
     config.media_dir = os.path.join(os.getcwd(), "media")
     config.video_dir = os.path.join(config.media_dir, "videos")
     config.images_dir = os.path.join(config.media_dir, "images")
@@ -59,7 +55,6 @@ def generate_animation(manim_code, output_file):
     config.quality = "medium_quality" 
     # config.renderer = "opengl"
 
-    # Enable parallel processing
     config.processes = multiprocessing.cpu_count()
 
     print('NUMBER OF PROCESSES: ', config.processes)
