@@ -7,10 +7,10 @@ from starlette.websockets import WebSocketDisconnect
 from services.speech_to_text import speech_to_text
 from services.text_to_speech import text_to_speech
 from services.execute_code import generate_animation
-from services.combine import combine_audio_video
-from services.concatenate import concatenate_videos
-from services.llm_initial import generate_segments
-from services.llm_codegen import generate_manim
+from apps.backend.services.combine_audio_video import combine_audio_video
+from apps.backend.services.concatenate_segments import concatenate_videos
+from apps.backend.services.generate_text_segments import generate_segments
+from apps.backend.services.generate_manim import generate_manim
 
 
 
