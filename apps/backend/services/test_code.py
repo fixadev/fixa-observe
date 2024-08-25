@@ -1,3 +1,7 @@
+from manim import *
+from manim.opengl import *
+import numpy as np
+
 class GeneratedScene(Scene):
     def construct(self):
         hello_world = Tex("Hello World!").scale(3)

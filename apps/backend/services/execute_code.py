@@ -1,89 +1,40 @@
 from manim import *
-import importlib.util
-import sys
 import logging
 import os
-import uuid
 import shutil
-import multiprocessing
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 def generate_animation(manim_code, output_file):
     logger.info("Starting animation generation")
-    logger.debug(f"Received Manim code:\n{manim_code}")
     
-    # Clear any existing Manim-related modules
-    for module_name in list(sys.modules.keys()):
-        if module_name.startswith('manim.') or module_name == 'manim':
-            del sys.modules[module_name]
+    temp_file_path = f"/tmp/manim_code_{os.urandom(8).hex()}.py"
+    with open(temp_file_path, 'w') as temp_file:
+        temp_file.write(f"from manim import *\n{manim_code}")
     
-    temp_module_name = f"temp_scene_{os.urandom(8).hex()}"
-    
-    # Create a temporary module to hold the scene class
-    logger.debug(f"Creating temporary module: {temp_module_name}")
-    spec = importlib.util.spec_from_loader(temp_module_name, loader=None)
-    temp_module = importlib.util.module_from_spec(spec)
-    sys.modules[temp_module_name] = temp_module
+    logger.debug(f"Manim code written to temporary file: {temp_file_path}")
 
-    logger.debug("Executing Manim code in temporary module")
-    try:
-        exec(f"from manim import *\n{manim_code}", temp_module.__dict__)
-    except Exception as e:
-        logger.error(f"Error executing Manim code: {str(e)}")
-        raise
-
-    logger.debug("Finding GeneratedScene class")
-    if 'GeneratedScene' not in temp_module.__dict__:
-        logger.error("GeneratedScene class not found in the provided Manim code")
-        raise ValueError("GeneratedScene class not found in the provided Manim code")
-    
-    scene_class = temp_module.__dict__['GeneratedScene']
-    logger.info(f"Found scene class: {scene_class.__name__}")
-
+    # Set up Manim configuration
     config.media_dir = os.path.join(os.getcwd(), "media")
     config.video_dir = os.path.join(config.media_dir, "videos")
-    config.images_dir = os.path.join(config.media_dir, "images")
     config.frame_rate = 30
     config.pixel_height = 720
     config.pixel_width = 1280
-    config.disable_cache = True
-    # config.verbosity = "DEBUG"
-    config.write_to_movie = True
-    config.save_last_frame = False
-    config.quality = "medium_quality" 
-    # config.renderer = "opengl"
+    config.quality = "medium_quality"
+    config.renderer = "opengl"
 
-    config.processes = multiprocessing.cpu_count()
-
-    print('NUMBER OF PROCESSES: ', config.processes)
-
-    unique_id = uuid.uuid4().hex
-    render_dir = os.path.join(config.media_dir, f"render_{unique_id}")
-    os.makedirs(render_dir, exist_ok=True)
-
-    logger.info("Rendering animation")
-    scene = scene_class()
     try:
-        scene.render()
-        expected_file = os.path.join(config.video_dir, "1080p60", "GeneratedScene.mp4")
+        os.system(f"manim {temp_file_path} GeneratedScene -o {output_file} --renderer=opengl")
         
-        if not os.path.exists(expected_file):
-            raise FileNotFoundError(f"Expected MP4 file not found at {expected_file}")
+        if not os.path.exists(output_file):
+            raise FileNotFoundError(f"Expected output file not found at {output_file}")
         
-        shutil.move(expected_file, output_file)
+        logger.info(f"Animation saved to output file: {output_file}")
+        return output_file
     except Exception as e:
-        logger.error(f"Error rendering animation: {str(e)}")
+        logger.error(f"Error rendering animation: {str(e)}", exc_info=True)
         return None
     finally:
-        # Clean up the render directory
-        shutil.rmtree(render_dir, ignore_errors=True)
-
-    logger.info(f"Animation saved to output file: {output_file}")
-    
-    # Clean up the temporary module
-    logger.debug(f"Cleaning up temporary module: {temp_module_name}")
-    del sys.modules[temp_module_name]
-    
-    return output_file
+        # Clean up the temporary file
+        os.remove(temp_file_path)

@@ -16,7 +16,7 @@ def generate_segments(input_text):
     Separate the segments with '---SEGMENT---' on a new line. 
     Generate only the segments, do not include any other text.
     """
-    llm_response = call_llm(system_prompt, input_text, provider="groq")
+    llm_response = call_llm(system_prompt, input_text, provider="anthropic")
 
     print('llm_response', llm_response)
 

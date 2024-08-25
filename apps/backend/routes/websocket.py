@@ -25,7 +25,7 @@ async def websocket_endpoint(websocket: WebSocket):
     try:
         while True:
             data = await websocket.receive_text()
-            logger.debug(f"Received WebSocket data of length: {len(data)}")
+            # logger.debug(f"Received WebSocket data of length: {len(data)}")
             
             # audio_data = base64.b64decode(data.split(",")[1])
             # logger.debug(f"Decoded audio data of length: {len(audio_data)}")
