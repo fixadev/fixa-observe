@@ -1,0 +1,31 @@
+# Create initial block
+block1 = Rectangle(height=2, width=3).set_stroke(color=BLUE)
+block1_text = Text("Block 1", font_size=24).move_to(block1)
+hash1 = Text("Hash: 0x123", font_size=20).next_to(block1, DOWN)
+self.play(Create(block1), Write(block1_text), Write(hash1))
+# Add transaction
+transaction = Text("Transaction", font_size=20).next_to(block1, RIGHT, buff=1)
+arrow = Arrow(start=transaction.get_left(), end=block1.get_right(), color=GREEN)
+self.play(Write(transaction), GrowArrow(arrow))
+# Create new block
+block2 = Rectangle(height=2, width=3).next_to(block1, RIGHT, buff=2).set_stroke(color=BLUE)
+block2_text = Text("Block 2", font_size=24).move_to(block2)
+prev_hash = Text("Prev Hash: 0x123", font_size=16).next_to(block2, UP, buff=0.1)
+hash2 = Text("Hash: 0x456", font_size=20).next_to(block2, DOWN)
+self.play(Create(block2), Write(block2_text), Write(prev_hash), Write(hash2))
+# Link blocks
+link = Arrow(start=block1.get_right(), end=block2.get_left(), color=RED)
+self.play(GrowArrow(link))
+# Highlight chain
+chain = VGroup(block1, block2, link)
+self.play(Indicate(chain, color=YELLOW, scale_factor=1.1))
+# Add more blocks
+block3 = Rectangle(height=2, width=3).next_to(block2, RIGHT, buff=2).set_stroke(color=BLUE)
+block3_text = Text("Block 3", font_size=24).move_to(block3)
+prev_hash3 = Text("Prev Hash: 0x456", font_size=16).next_to(block3, UP, buff=0.1)
+hash3 = Text("Hash: 0x789", font_size=20).next_to(block3, DOWN)
+link2 = Arrow(start=block2.get_right(), end=block3.get_left(), color=RED)
+self.play(Create(block3), Write(block3_text), Write(prev_hash3), Write(hash3), GrowArrow(link2))
+# Final highlight
+final_chain = VGroup(block1, block2, block3, link, link2)
+self.play(Indicate(final_chain, color=YELLOW, scale_factor=1.1))
