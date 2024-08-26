@@ -1,7 +1,6 @@
 import subprocess
 import threading
-from services.call_llm import call_llm, anthropic_client
-import pexpect
+from services.call_llm import anthropic_client
 
 class ManimGenerator:
     def __init__(self):

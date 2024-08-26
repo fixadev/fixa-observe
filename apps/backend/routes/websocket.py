@@ -4,15 +4,10 @@ import tempfile
 import os
 from fastapi import APIRouter, WebSocket
 from starlette.websockets import WebSocketDisconnect
-from services.speech_to_text import speech_to_text
-from services.text_to_speech import text_to_speech
 from services.execute_code import generate_animation
 from services.combine_audio_video import combine_audio_video
-from services.concatenate_segments import concatenate_videos
 from services.generate_text_segments import generate_segments
 from services.generate_manim import generate_manim
-
-
 
 
 logger = logging.getLogger(__name__)
@@ -25,6 +20,8 @@ async def websocket_endpoint(websocket: WebSocket):
     try:
         while True:
             data = await websocket.receive_text()
+
+            
             # logger.debug(f"Received WebSocket data of length: {len(data)}")
             
             # audio_data = base64.b64decode(data.split(",")[1])
