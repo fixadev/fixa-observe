@@ -1,42 +1,68 @@
-from manim import *
+from manim import * 
 from manim.opengl import *
-import numpy as np
+
+class GrowArrowOpenGL(Animation):
+    def __init__(self, arrow, **kwargs):
+        super().__init__(arrow, **kwargs)
+        self.start_tip = arrow.get_start()
+        self.end_tip = arrow.get_end()
 
 class GeneratedScene(Scene):
     def construct(self):
-        hello_world = Tex("Hello World!").scale(3)
-        self.play(Write(hello_world))
-        self.play(
-            self.camera.animate.set_euler_angles(
-                theta=-10*DEGREES,
-                phi=50*DEGREES
-            )
-        )
-        self.play(FadeOut(hello_world))
-        surface = OpenGLSurface(
-            lambda u, v: (u, v, u*np.sin(v) + v*np.cos(u)),
-            u_range=(-3, 3),
-            v_range=(-3, 3)
-        )
-        surface_mesh = OpenGLSurfaceMesh(surface)
-        self.play(Create(surface_mesh))
-        self.play(FadeTransform(surface_mesh, surface))
-        self.wait()
-        light = self.camera.light_source
-        self.play(light.animate.shift([0, 0, -20]))
-        self.play(light.animate.shift([0, 0, 10]))
-        self.play(self.camera.animate.set_euler_angles(theta=60*DEGREES))
-        
-        # self.interactive_embed()
+        # Title
+        title = Tex("Physics")
+        self.play(Write(title))
+        self.wait(1)
+        self.play(title.animate.shift(UP))
 
-        # self.play(self.camera.animate.set_euler_angles(theta=0*DEGREES))
-        # self.play(FadeOut(surface, shift=np.array([0, 0, -2])))
+        # Matter and Energy
+        matter = Tex("Matter").shift(LEFT)
+        energy = Tex("Energy").shift(RIGHT)
+        interaction_arrow = Arrow(matter.get_right(), energy.get_left())
 
-        # red_sphere = Sphere(color=RED)
-        # self.play(Create(red_sphere))
-        # self.play(red_sphere.animate.scale(3))
+        self.play(Write(matter), Write(energy))
+        self.play(GrowArrowOpenGL(interaction_arrow))
+        self.wait(1)
 
-        # sphere_mesh = OpenGLSurfaceMesh(red_sphere)
-        # play(Transform(red_sphere, sphere_mesh))  # graphics glitch :-)
+        # Fundamental laws
+        laws = Tex("Fundamental Laws").scale(0.8).next_to(title, DOWN)
+        self.play(Write(laws))
+        self.wait(1)
 
-        # self.play(self.camera.animate.set_euler_angles(phi=0, theta=0))
+        # Universe representation
+        universe = Circle(radius=2).move_to(ORIGIN)
+        self.play(Create(universe))
+        self.wait(1)
+
+        # Particles to galaxies
+        particle = Dot().move_to(universe.point_from_proportion(0.2))
+        galaxy = Star().scale(0.5).move_to(universe.point_from_proportion(0.8))
+
+        self.play(FadeIn(particle), FadeIn(galaxy))
+        self.wait(1)
+
+        # Scale representation
+        scale_arrow = Arrow(particle, galaxy)
+        scale_text = Tex("Tiny to Vast").scale(0.6).next_to(scale_arrow, DOWN)
+
+        self.play(GrowArrowOpenGL(scale_arrow), Write(scale_text))
+        self.wait(2)
+
+        # Final fade out
+        # self.play(
+        #     FadeOut(matter),
+        #     FadeOut(energy),
+        #     FadeOut(interaction_arrow),
+        #     FadeOut(laws),
+        #     FadeOut(universe),
+        #     FadeOut(particle),
+        #     FadeOut(galaxy),
+        #     FadeOut(scale_arrow),
+        #     FadeOut(scale_text),
+        #     FadeOut(title)
+        # )
+        # self.wait(1)
+
+        all_objects = VGroup(matter, energy, interaction_arrow, laws, universe, particle, galaxy, scale_arrow, scale_text, title)
+        self.play(FadeOut(all_objects))
+        self.wait(1)
