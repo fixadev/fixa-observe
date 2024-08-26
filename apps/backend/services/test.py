@@ -1,5 +1,11 @@
-from manim import *
+from manim import * 
 from manim.opengl import *
+
+class GrowArrowOpenGL(Animation):
+    def __init__(self, arrow, **kwargs):
+        super().__init__(arrow, **kwargs)
+        self.start_tip = arrow.get_start()
+        self.end_tip = arrow.get_end()
 
 class GeneratedScene(Scene):
     def construct(self):
@@ -7,15 +13,15 @@ class GeneratedScene(Scene):
         title = Tex("Physics")
         self.play(Write(title))
         self.wait(1)
-        self.play(title.animate.to_edge(UP))
+        self.play(title.animate.shift(UP))
 
         # Matter and Energy
-        matter = Tex("Matter").to_edge(LEFT)
-        energy = Tex("Energy").to_edge(RIGHT)
+        matter = Tex("Matter").shift(LEFT)
+        energy = Tex("Energy").shift(RIGHT)
         interaction_arrow = Arrow(matter.get_right(), energy.get_left())
 
         self.play(Write(matter), Write(energy))
-        self.play(GrowArrow(interaction_arrow))
+        self.play(GrowArrowOpenGL(interaction_arrow))
         self.wait(1)
 
         # Fundamental laws
@@ -37,22 +43,26 @@ class GeneratedScene(Scene):
 
         # Scale representation
         scale_arrow = Arrow(particle, galaxy)
-        scale_Tex = Tex("Tiny to Vast").scale(0.6).next_to(scale_arrow, DOWN)
+        scale_text = Tex("Tiny to Vast").scale(0.6).next_to(scale_arrow, DOWN)
 
-        self.play(GrowArrow(scale_arrow), Write(scale_Tex))
+        self.play(GrowArrowOpenGL(scale_arrow), Write(scale_text))
         self.wait(2)
 
         # Final fade out
-        self.play(
-            FadeOut(matter),
-            FadeOut(energy),
-            FadeOut(interaction_arrow),
-            FadeOut(laws),
-            FadeOut(universe),
-            FadeOut(particle),
-            FadeOut(galaxy),
-            FadeOut(scale_arrow),
-            FadeOut(scale_Tex),
-            FadeOut(title)
-        )
+        # self.play(
+        #     FadeOut(matter),
+        #     FadeOut(energy),
+        #     FadeOut(interaction_arrow),
+        #     FadeOut(laws),
+        #     FadeOut(universe),
+        #     FadeOut(particle),
+        #     FadeOut(galaxy),
+        #     FadeOut(scale_arrow),
+        #     FadeOut(scale_text),
+        #     FadeOut(title)
+        # )
+        # self.wait(1)
+
+        all_objects = VGroup(matter, energy, interaction_arrow, laws, universe, particle, galaxy, scale_arrow, scale_text, title)
+        self.play(FadeOut(all_objects))
         self.wait(1)

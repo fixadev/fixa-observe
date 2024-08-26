@@ -10,7 +10,7 @@ def generate_animation(manim_code, output_file):
     
     temp_file_path = f"/tmp/manim_code_{os.urandom(8).hex()}.py"
     with open(temp_file_path, 'w') as temp_file:
-        temp_file.write(f"from manim import *\n from manim.opengl import *\n{manim_code}")
+        temp_file.write(f"from manim import *\nfrom manim.opengl import *\n{manim_code}")
     
     logger.debug(f"Manim code written to temporary file: {temp_file_path}")
 

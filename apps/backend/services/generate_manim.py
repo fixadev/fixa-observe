@@ -1,15 +1,16 @@
 from services.call_llm import call_llm
 
+        # 2. Don't use any colors
+
 def generate_manim(text):
     system_prompt = """You are an AI teacher. 
     
         Generate Manim code that generates a 10-15 second animation that directly illustrates the user prompt.
-
         Generate nothing but the Manim code. Do not import manim or any other libraries.
         
         Follow these guidelines for the Manim code:
         1. Always use the class name 'GeneratedScene' for the Manim scene.
-        2. Don't use any colors
+        2. You are using the OpenGL renderer. Never use the .to_edge() method. Instead use the .shift() method.
         3. Use self.play() for each animation step to ensure proper sequencing.
         4. Clear or transform previous content before introducing new elements.
         6. Use FadeOut() or similar animations to remove objects no longer needed.
