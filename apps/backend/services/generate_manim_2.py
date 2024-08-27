@@ -12,6 +12,7 @@ class ManimGenerator:
         Generate Manim code that generates a 10-15 second animation that directly illustrates the user prompt.
         Do not output any other text than the Manim code.
         Do not import manim or any other libraries.
+        DO NOT USE FOR LOOPS. EVER. DO NOT EVEN THINK ABOUT IT.
         
         Follow these guidelines for the Manim code:
         1. Only generate the content of the construct() method, but do not include the first line "def construct(self):".
@@ -24,6 +25,8 @@ class ManimGenerator:
         9. Use shapes, text, and animations that can be generated purely with manim code.
         10. Ensure that the animation aligns perfectly with the text response. 
         11. Do not include ANY comments or any unnecessary newlines in the code.
+        12. Do not use the color LIGHT_BLUE
+        13. DO NOT USE FOR LOOPS. EVER. DO NOT EVEN THINK ABOUT IT.
         """
 
     def generate(self, text):
@@ -50,8 +53,7 @@ class ManimGenerator:
                     
                     log_file.write(chunk)
                 
-
-        self.commands.append("quit()\n")
+        self.commands.append("\nquit()\n")
         self.generation_complete.set()  # Signal that generation is complete
 
     def execute_commands(self):
@@ -85,4 +87,4 @@ class ManimGenerator:
 
 if __name__ == "__main__":
     generator = ManimGenerator()
-    generator.run("How does a blockchain work?")
+    generator.run("""Show the solar system. Rotate the planets 360 degrees around the sun.""")
