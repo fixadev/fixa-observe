@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from "react";
 
 const Preview = () => {
   const [isRecording, setIsRecording] = useState(false);
@@ -8,7 +8,7 @@ const Preview = () => {
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
-    const ws = new WebSocket('ws://localhost:8000/ws');
+    const ws = new WebSocket("ws://localhost:8000/ws");
     setSocket(ws);
 
     return () => {
@@ -21,23 +21,23 @@ const Preview = () => {
     const mediaRecorder = new MediaRecorder(stream);
     const audioChunks: Blob[] = [];
 
-    mediaRecorder.addEventListener('dataavailable', (event) => {
+    mediaRecorder.addEventListener("dataavailable", (event) => {
       audioChunks.push(event.data);
     });
 
-    mediaRecorder.addEventListener('stop', () => {
+    mediaRecorder.addEventListener("stop", () => {
       const audioBlob = new Blob(audioChunks);
       const reader = new FileReader();
       reader.readAsDataURL(audioBlob);
       reader.onloadend = () => {
         if (socket && reader.result) {
-          if (typeof reader.result === 'string') {
+          if (typeof reader.result === "string") {
             socket.send(reader.result);
           } else {
-            console.error('Unexpected result type from FileReader');
+            console.error("Unexpected result type from FileReader");
           }
         } else {
-          console.error('Socket is null or FileReader result is null');
+          console.error("Socket is null or FileReader result is null");
         }
       };
     });
@@ -55,14 +55,14 @@ const Preview = () => {
     if (socket && socket.readyState === WebSocket.OPEN) {
       socket.send("teach me about physics");
     } else {
-      console.error('WebSocket is not open');
+      console.error("WebSocket is not open");
     }
   };
 
   useEffect(() => {
     if (socket) {
       socket.onmessage = (event) => {
-        if (typeof event.data === 'string') {
+        if (typeof event.data === "string") {
           // Audio response
           if (audioRef.current) {
             audioRef.current.src = `data:audio/mp3;base64,${event.data}`;
@@ -70,7 +70,7 @@ const Preview = () => {
           }
         } else {
           // Video response
-          const videoBlob = new Blob([event.data], { type: 'video/mp4' });
+          const videoBlob = new Blob([event.data], { type: "video/mp4" });
           const videoUrl = URL.createObjectURL(videoBlob);
           if (videoRef.current) {
             videoRef.current.src = videoUrl;
@@ -82,13 +82,20 @@ const Preview = () => {
   }, [socket]);
 
   return (
-    <div className='flex flex-col items-center justify-center h-screen'>
+    <div className="flex h-screen flex-col items-center justify-center">
       <audio ref={audioRef} />
       <video ref={videoRef} width="640" height="480" controls />
-      <button className='bg-blue-500 text-white p-2 rounded-md mt-4' onClick={startRecording} disabled={isRecording}>
-        {isRecording ? 'Recording...' : 'Start Recording'}
+      <button
+        className="mt-4 rounded-md bg-blue-500 p-2 text-white"
+        onClick={startRecording}
+        disabled={isRecording}
+      >
+        {isRecording ? "Recording..." : "Start Recording"}
       </button>
-      <button className='bg-green-500 text-white p-2 rounded-md mt-2' onClick={sendManualMessage}>
+      <button
+        className="mt-2 rounded-md bg-green-500 p-2 text-white"
+        onClick={sendManualMessage}
+      >
         Send Manual Message
       </button>
     </div>
