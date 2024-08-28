@@ -1,4 +1,4 @@
-from services.call_llm import call_llm
+from apps.backend.services.llm_clients import call_llm
 
         # 2. Don't use any colors
 

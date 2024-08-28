@@ -1,6 +1,6 @@
 import subprocess
 import threading
-from services.call_llm import anthropic_client
+from services.llm_clients import anthropic_client
 
 class ManimGenerator:
     def __init__(self):
@@ -24,7 +24,7 @@ class ManimGenerator:
         9. Use shapes, text, and animations that can be generated purely with manim code.
         10. Ensure that the animation aligns perfectly with the text response. 
         11. Do not include ANY comments or any unnecessary newlines in the code.
-        12. Do not use any LIGHT color variants such as LIGHT_BLUE, LIGHT_GREEN, LIGHT_RED, etc.
+        12. Do not use any LIGHT color variants such as LIGHT_BLUE, LIGHT_GREEN, LIGHT_RED, etc. And never use BROWN.
         13. DO NOT USE LIST COMPREHENSIONS SUCH AS [Circle(radius=d, color=WHITE, stroke_opacity=0.5).shift(LEFT * 5) for d in planet_distances]. EVER. DO NOT EVEN THINK ABOUT IT.
         14. DO NOT USE FOR LOOPS. EVER. DO NOT EVEN THINK ABOUT IT.
         """
@@ -40,6 +40,7 @@ class ManimGenerator:
         ) as stream:
             with open('log.txt', 'w') as log_file:
                 cur_chunk = ""
+                # TODO: investigate + handle edge cases. 1. missed newlines such as')self.play(\n' 2. list comprehensions (very rare rn) 3. 'prohibited colors'
                 for chunk in stream.text_stream:
                     if '\n' in chunk:
                         chunks = chunk.split('\n')
