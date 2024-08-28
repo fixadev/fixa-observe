@@ -2,10 +2,10 @@
 import React, { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { SignUpDialog } from "../app/_components/dialogue";
-import AnimatedPlaceholder from "./AnimatedPlaceholder";
+import { SignUpDialog } from "@/components/SignUpDialog";
+import AnimatedPlaceholder from "@/components/AnimatedPlaceholder";
 
-const ConceptInputPage = () => {
+const SplashPage = () => {
   const [showPlaceholder, setShowPlaceholder] = useState(true);
   const placeholders = [
     "Visualize matrix multiplication step-by-step with 2x2 matrices",
@@ -29,12 +29,12 @@ const ConceptInputPage = () => {
               onFocus={() => setShowPlaceholder(false)}
               onBlur={() => setShowPlaceholder(true)}
             />
+            <SignUpDialog />
           </div>
-          <SignUpDialog />
         </div>
       </div>
     </div>
   );
 };
 
-export default ConceptInputPage;
+export default SplashPage;
