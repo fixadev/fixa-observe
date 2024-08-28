@@ -1,5 +1,4 @@
-import Link from "next/link";
-import SplashPage from "@/components/splash";
+import SplashPage from "@/components/Splash";
 import Logo from "@/components/Logo";
 
 export default async function Home() {
