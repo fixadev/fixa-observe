@@ -24,8 +24,8 @@ class ManimGenerator:
         9. Use shapes, text, and animations that can be generated purely with manim code.
         10. Ensure that the animation aligns perfectly with the text response. 
         11. Do not include ANY comments or any unnecessary newlines in the code.
-        12. Do not use the color LIGHT_BLUE
-        13. DO NOT USE LIST COMPREHENSIONS. EVER. DO NOT EVEN THINK ABOUT IT.
+        12. Do not use any LIGHT color variants such as LIGHT_BLUE, LIGHT_GREEN, LIGHT_RED, etc.
+        13. DO NOT USE LIST COMPREHENSIONS SUCH AS [Circle(radius=d, color=WHITE, stroke_opacity=0.5).shift(LEFT * 5) for d in planet_distances]. EVER. DO NOT EVEN THINK ABOUT IT.
         14. DO NOT USE FOR LOOPS. EVER. DO NOT EVEN THINK ABOUT IT.
         """
 
@@ -87,4 +87,4 @@ class ManimGenerator:
 
 if __name__ == "__main__":
     generator = ManimGenerator()
-    generator.run("""Show the solar system with the sun in the center and the planets orbiting the sun.""")
+    generator.run("""Show the solar system with the sun in the center and the planets orbiting the sun at different speeds.""")
