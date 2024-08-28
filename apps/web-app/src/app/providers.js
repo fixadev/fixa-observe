@@ -9,7 +9,7 @@ if (typeof window !== "undefined") {
     ui_host: "https://us.posthog.com",
   });
 }
-// @ts-expect-error
+// @ts-expect-error this is not a typescript file.
 export function CSPostHogProvider({ children }) {
   return <PostHogProvider client={posthog}>{children}</PostHogProvider>;
 }
