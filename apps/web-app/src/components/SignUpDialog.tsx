@@ -55,9 +55,9 @@ export function SignUpDialog() {
         {stage === "initial" || stage === "loading" ? (
           <>
             <DialogHeader>
-              <DialogTitle>Join the waitlist</DialogTitle>
+              <DialogTitle>join the waitlist</DialogTitle>
               <DialogDescription>
-                If we spam you you can come to our house and kill us.
+                we haven't launched yet lol.
               </DialogDescription>
             </DialogHeader>
             <Input
