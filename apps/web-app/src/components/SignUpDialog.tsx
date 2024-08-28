@@ -82,9 +82,10 @@ export function SignUpDialog() {
         ) : (
           <>
             <DialogHeader>
-              <DialogTitle>Thank you!</DialogTitle>
+              <DialogTitle>done.</DialogTitle>
               <DialogDescription>
-                We'll email you when we launch.
+                thank you for trusting us with your email. we'll take good care
+                of it. mwahahahahaha {">:)"}
               </DialogDescription>
             </DialogHeader>
           </>
