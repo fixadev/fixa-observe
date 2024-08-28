@@ -86,8 +86,12 @@ export function SignUpDialog() {
               className="w-full placeholder:text-neutral-600"
             />
             <DialogFooter>
-              <Button type="submit" onClick={() => handleSubmit()}>
-                {stage === "loading" ? "Loading..." : "Submit"}
+              <Button
+                disabled={!isValidEmail(email) || stage === "loading"}
+                type="submit"
+                onClick={() => handleSubmit()}
+              >
+                {stage === "loading" ? "submitting..." : "submit"}
               </Button>
             </DialogFooter>
           </>
