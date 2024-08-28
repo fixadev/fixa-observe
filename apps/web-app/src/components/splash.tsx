@@ -1,13 +1,11 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Input } from "@/components/ui/input";
-import { useTheme } from "next-themes";
 import { SignUpDialog } from "@/components/SignUpDialog";
 import AnimatedPlaceholder from "@/components/AnimatedPlaceholder";
 
 const SplashPage = () => {
-  const { setTheme } = useTheme();
-  setTheme("dark");
+  const [text, setText] = useState("");
   const [showPlaceholder, setShowPlaceholder] = useState(true);
   const placeholders = [
     "Visualize matrix multiplication step-by-step with 2x2 matrices",
@@ -22,10 +20,12 @@ const SplashPage = () => {
         <h1 className="font-md mb-8 text-5xl">Bring any concept to life</h1>
         <div className="flex w-full flex-row gap-2">
           <div className="relative flex-grow">
-            {showPlaceholder && (
+            {showPlaceholder && text.length === 0 && (
               <AnimatedPlaceholder placeholders={placeholders} />
             )}
             <Input
+              value={text}
+              onChange={(e) => setText(e.target.value)}
               type="text"
               className="w-full rounded-lg border-none bg-neutral-800 px-6 py-7 text-xl text-white"
               onFocus={() => setShowPlaceholder(false)}

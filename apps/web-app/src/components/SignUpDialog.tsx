@@ -60,22 +60,19 @@ export function SignUpDialog() {
                 If we spam you you can come to our house and kill us.
               </DialogDescription>
             </DialogHeader>
-            <div className="grid gap-4 py-4">
-              <div className="items-center gap-4">
-                <Input
-                  id="username"
-                  placeholder="email@example.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") {
-                      handleSubmit();
-                    }
-                  }}
-                  className="w-full"
-                />
-              </div>
-            </div>
+            <Input
+              type="email"
+              autoComplete="email"
+              placeholder="dalton@ycombinator.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  handleSubmit();
+                }
+              }}
+              className="w-full"
+            />
             <DialogFooter>
               <Button type="submit" onClick={() => handleSubmit()}>
                 {stage === "loading" ? "Loading..." : "Submit"}
