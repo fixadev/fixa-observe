@@ -17,7 +17,7 @@ const SplashPage = () => {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-neutral-900 p-4 text-white">
       <div className="-mt-3 flex w-1/2 flex-col items-center justify-center gap-6">
-        <h1 className="font-md mb-8 text-5xl">Bring any concept to life</h1>
+        <h1 className="font-md mb-8 text-5xl">bring any concept to life.</h1>
         <div className="flex w-full flex-row gap-2">
           <div className="relative flex-grow">
             {showPlaceholder && text.length === 0 && (
