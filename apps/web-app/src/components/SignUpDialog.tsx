@@ -18,8 +18,19 @@ export function SignUpDialog() {
   const [stage, setStage] = useState<"initial" | "loading" | "success">(
     "initial",
   );
+  const [error, setError] = useState<boolean>(false);
+
+  const isValidEmail = (email: string): boolean => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
 
   const handleSubmit = () => {
+    if (stage === "loading") return;
+    if (!isValidEmail(email)) {
+      setError(true);
+      return;
+    }
     setStage("loading");
     fetch(
       "https://script.google.com/a/macros/play.ht/s/AKfycbz-zwahB1de3PGAo2burNFDBMyqjTew_VBZeBITm0gfC9TPSgbn_3G-X_oNNlmikjS-/exec",
@@ -41,7 +52,7 @@ export function SignUpDialog() {
         <ArrowRightCircleIcon className="absolute right-2 top-1/2 size-10 -translate-y-1/2 text-neutral-400 hover:cursor-pointer hover:text-neutral-200" />
       </DialogTrigger>
       <DialogContent className="min-h-[250px] bg-neutral-900 sm:max-w-[425px]">
-        {stage === "initial" && (
+        {stage === "initial" || stage === "loading" ? (
           <>
             <DialogHeader>
               <DialogTitle>join the waitlist</DialogTitle>
@@ -64,13 +75,20 @@ export function SignUpDialog() {
             />
             <DialogFooter>
               <Button type="submit" onClick={() => handleSubmit()}>
-                Submit
+                {stage === "loading" ? "Loading..." : "Submit"}
               </Button>
             </DialogFooter>
           </>
+        ) : (
+          <>
+            <DialogHeader>
+              <DialogTitle>Thank you!</DialogTitle>
+              <DialogDescription>
+                We'll email you when we launch.
+              </DialogDescription>
+            </DialogHeader>
+          </>
         )}
-        {stage === "loading" && <div>Loading...</div>}
-        {stage === "success" && <div>Success!</div>}
       </DialogContent>
     </Dialog>
   );
