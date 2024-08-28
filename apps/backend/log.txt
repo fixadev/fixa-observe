@@ -1,31 +1,36 @@
-# Create initial block
-block1 = Rectangle(height=2, width=3).set_stroke(color=BLUE)
-block1_text = Text("Block 1", font_size=24).move_to(block1)
-hash1 = Text("Hash: 0x123", font_size=20).next_to(block1, DOWN)
-self.play(Create(block1), Write(block1_text), Write(hash1))
-# Add transaction
-transaction = Text("Transaction", font_size=20).next_to(block1, RIGHT, buff=1)
-arrow = Arrow(start=transaction.get_left(), end=block1.get_right(), color=GREEN)
-self.play(Write(transaction), GrowArrow(arrow))
-# Create new block
-block2 = Rectangle(height=2, width=3).next_to(block1, RIGHT, buff=2).set_stroke(color=BLUE)
-block2_text = Text("Block 2", font_size=24).move_to(block2)
-prev_hash = Text("Prev Hash: 0x123", font_size=16).next_to(block2, UP, buff=0.1)
-hash2 = Text("Hash: 0x456", font_size=20).next_to(block2, DOWN)
-self.play(Create(block2), Write(block2_text), Write(prev_hash), Write(hash2))
-# Link blocks
-link = Arrow(start=block1.get_right(), end=block2.get_left(), color=RED)
-self.play(GrowArrow(link))
-# Highlight chain
-chain = VGroup(block1, block2, link)
-self.play(Indicate(chain, color=YELLOW, scale_factor=1.1))
-# Add more blocks
-block3 = Rectangle(height=2, width=3).next_to(block2, RIGHT, buff=2).set_stroke(color=BLUE)
-block3_text = Text("Block 3", font_size=24).move_to(block3)
-prev_hash3 = Text("Prev Hash: 0x456", font_size=16).next_to(block3, UP, buff=0.1)
-hash3 = Text("Hash: 0x789", font_size=20).next_to(block3, DOWN)
-link2 = Arrow(start=block2.get_right(), end=block3.get_left(), color=RED)
-self.play(Create(block3), Write(block3_text), Write(prev_hash3), Write(hash3), GrowArrow(link2))
-# Final highlight
-final_chain = VGroup(block1, block2, block3, link, link2)
-self.play(Indicate(final_chain, color=YELLOW, scale_factor=1.1))
+# Create sun
+sun = Circle(radius=0.5, fill_color=YELLOW, fill_opacity=1, stroke_color=ORANGE)
+self.play(Create(sun))
+# Create planets
+mercury = Dot(color=GRAY).shift(LEFT * 1.5)
+venus = Dot(color=ORANGE).shift(LEFT * 2)
+earth = Dot(color=BLUE).shift(LEFT * 2.5)
+mars = Dot(color=RED).shift(LEFT * 3)
+jupiter = Circle(radius=0.15, fill_color=ORANGE, fill_opacity=1).shift(LEFT * 3.5)
+saturn = Circle(radius=0.13, fill_color=YELLOW, fill_opacity=1).shift(LEFT * 4)
+uranus = Dot(color=BLUE).shift(LEFT * 4.5)
+neptune = Dot(color=BLUE).shift(LEFT * 5)
+planets = VGroup(mercury, venus, earth, mars, jupiter, saturn, uranus, neptune)
+self.play(Create(planets))
+# Animate planet orbits
+self.play(
+    Rotate(mercury, angle=TAU, about_point=ORIGIN, rate_func=linear, run_time=1),
+    Rotate(venus, angle=0.9*TAU, about_point=ORIGIN, rate_func=linear, run_time=1),
+    Rotate(earth, angle=0.8*TAU, about_point=ORIGIN, rate_func=linear, run_time=1),
+    Rotate(mars, angle=0.7*TAU, about_point=ORIGIN, rate_func=linear, run_time=1),
+    Rotate(jupiter, angle=0.6*TAU, about_point=ORIGIN, rate_func=linear, run_time=1),
+    Rotate(saturn, angle=0.5*TAU, about_point=ORIGIN, rate_func=linear, run_time=1),
+    Rotate(uranus, angle=0.4*TAU, about_point=ORIGIN, rate_func=linear, run_time=1),
+    Rotate(neptune, angle=0.3*TAU, about_point=ORIGIN, rate_func=linear, run_time=1)
+)
+self.play(
+    Rotate(mercury, angle=TAU, about_point=ORIGIN, rate_func=linear, run_time=1),
+    Rotate(venus, angle=0.9*TAU, about_point=ORIGIN, rate_func=linear, run_time=1),
+    Rotate(earth, angle=0.8*TAU, about_point=ORIGIN, rate_func=linear, run_time=1),
+    Rotate(mars, angle=0.7*TAU, about_point=ORIGIN, rate_func=linear, run_time=1),
+    Rotate(jupiter, angle=0.6*TAU, about_point=ORIGIN, rate_func=linear, run_time=1),
+    Rotate(saturn, angle=0.5*TAU, about_point=ORIGIN, rate_func=linear, run_time=1),
+    Rotate(uranus, angle=0.4*TAU, about_point=ORIGIN, rate_func=linear, run_time=1),
+    Rotate(neptune, angle=0.3*TAU, about_point=ORIGIN, rate_func=linear, run_time=1)
+)
+self.play(FadeOut(sun), FadeOut(planets))
