@@ -16,7 +16,7 @@ const SplashPage = () => {
   ];
 
   return (
-    <div className="flex h-screen w-screen flex-col items-center justify-center overflow-hidden p-2 text-white">
+    <div className="flex h-[100dvh] w-screen flex-col items-center justify-center overflow-hidden p-2 text-white">
       <div className="-mt-3 flex flex-col items-center justify-center gap-2 sm:gap-6">
         <div>
           <div
