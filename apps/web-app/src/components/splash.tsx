@@ -1,13 +1,10 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Input } from "@/components/ui/input";
-import { useTheme } from "next-themes";
 import { SignUpDialog } from "@/components/SignUpDialog";
 import AnimatedPlaceholder from "@/components/AnimatedPlaceholder";
 
 const SplashPage = () => {
-  const { setTheme } = useTheme();
-  setTheme("dark");
   const [showPlaceholder, setShowPlaceholder] = useState(true);
   const placeholders = [
     "Visualize matrix multiplication step-by-step with 2x2 matrices",
