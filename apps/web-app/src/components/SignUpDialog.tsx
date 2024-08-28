@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { ArrowRightCircleIcon } from "@heroicons/react/24/solid";
+import { Label } from "./ui/label";
 
 export function SignUpDialog() {
   const [email, setEmail] = useState<string>("");
@@ -72,7 +73,9 @@ export function SignUpDialog() {
               </div>
             </div>
 
+            <Label htmlFor="email">enter your email</Label>
             <Input
+              id="email"
               type="email"
               autoComplete="email"
               placeholder="dalton@ycombinator.com"
