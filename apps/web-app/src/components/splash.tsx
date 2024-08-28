@@ -27,7 +27,7 @@ const SplashPage = () => {
             )}
             <Input
               type="text"
-              className="w-full rounded-lg border-none bg-gray-800 px-6 py-7 text-xl text-white"
+              className="w-full rounded-lg border-none bg-neutral-800 px-6 py-7 text-xl text-white"
               onFocus={() => setShowPlaceholder(false)}
               onBlur={() => setShowPlaceholder(true)}
             />

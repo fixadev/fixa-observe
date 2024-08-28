@@ -22,7 +22,7 @@ export default function AnimatedPlaceholder({
   });
 
   return (
-    <div className="pointer-events-none absolute bottom-0 left-0 top-0 flex w-full items-center pl-6 text-xl text-gray-500">
+    <div className="pointer-events-none absolute bottom-0 left-0 top-0 flex w-full items-center pl-6 text-xl text-neutral-500">
       {transitions((style, i) => (
         <animated.div className="absolute w-full" style={style}>
           {placeholders[i]}
