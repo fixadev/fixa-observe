@@ -1,4 +1,4 @@
-import SplashPage from "@/components/Splash";
+import SplashPage from "@/components/SplashPage";
 import Logo from "@/components/Logo";
 
 export default async function Home() {
