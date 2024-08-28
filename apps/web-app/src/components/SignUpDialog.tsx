@@ -41,9 +41,13 @@ export function SignUpDialog() {
         },
         body: new URLSearchParams({ email }).toString(),
       },
-    ).then(() => {
-      setStage("success");
-    });
+    )
+      .then(() => {
+        setStage("success");
+      })
+      .catch(() => {
+        setStage("initial");
+      });
   };
 
   return (
@@ -92,8 +96,8 @@ export function SignUpDialog() {
             <DialogHeader>
               <DialogTitle>done.</DialogTitle>
               <DialogDescription>
-                thank you for trusting us with your email. we'll take good care
-                of it. mwahahahahaha {">:)"}
+                thank you for trusting us with your email. we&apos;ll take good
+                care of it. mwahahahahaha {">:)"}
               </DialogDescription>
             </DialogHeader>
           </>

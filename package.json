@@ -1,5 +1,5 @@
 {
-  "name": "merlin",
+  "name": "pixa.dev",
   "private": true,
   "scripts": {
     "build": "turbo build",
