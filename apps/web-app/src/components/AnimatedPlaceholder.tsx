@@ -11,7 +11,7 @@ export default function AnimatedPlaceholder({
   useEffect(() => {
     const timer = setInterval(() => {
       setIndex((state) => (state + 1) % placeholders.length);
-    }, 7000); // Change text every 3 seconds
+    }, 4000); // Change text every 4 seconds
     return () => clearInterval(timer);
   }, []);
 
@@ -22,7 +22,7 @@ export default function AnimatedPlaceholder({
   });
 
   return (
-    <div className="pointer-events-none absolute bottom-0 left-0 top-0 flex w-full items-center pl-6 text-xl text-neutral-500">
+    <div className="pointer-events-none absolute bottom-0 left-0 top-0 flex w-full items-center pl-4 text-lg text-neutral-500">
       {transitions((style, i) => (
         <animated.div className="absolute w-full truncate pr-20" style={style}>
           {placeholders[i]}
