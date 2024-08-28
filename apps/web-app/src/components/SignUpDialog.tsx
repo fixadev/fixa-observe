@@ -12,8 +12,15 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { ArrowRightCircleIcon } from "@heroicons/react/24/solid";
+import { Label } from "./ui/label";
 
-export function SignUpDialog() {
+export function SignUpDialog({
+  open,
+  onOpenChange,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}) {
   const [email, setEmail] = useState<string>("");
   const [stage, setStage] = useState<"initial" | "loading" | "success">(
     "initial",
@@ -51,7 +58,7 @@ export function SignUpDialog() {
   };
 
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogTrigger asChild>
         <ArrowRightCircleIcon className="absolute right-2 top-1/2 size-10 -translate-y-1/2 text-neutral-400 hover:cursor-pointer hover:text-neutral-200" />
       </DialogTrigger>
@@ -72,7 +79,9 @@ export function SignUpDialog() {
               </div>
             </div>
 
+            <Label htmlFor="email">enter your email</Label>
             <Input
+              id="email"
               type="email"
               autoComplete="email"
               placeholder="dalton@ycombinator.com"
@@ -86,8 +95,12 @@ export function SignUpDialog() {
               className="w-full placeholder:text-neutral-600"
             />
             <DialogFooter>
-              <Button type="submit" onClick={() => handleSubmit()}>
-                {stage === "loading" ? "Loading..." : "Submit"}
+              <Button
+                disabled={!isValidEmail(email) || stage === "loading"}
+                type="submit"
+                onClick={() => handleSubmit()}
+              >
+                {stage === "loading" ? "submitting..." : "submit"}
               </Button>
             </DialogFooter>
           </>
