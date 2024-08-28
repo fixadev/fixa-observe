@@ -1,10 +1,6 @@
 import Link from "next/link";
-import ConceptInputPage from "./_components/splash";
+import ConceptInputPage from "../components/splash";
 
 export default async function Home() {
-
-  return (
-      <ConceptInputPage />
-  );
+  return <ConceptInputPage />;
 }
-
