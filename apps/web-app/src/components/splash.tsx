@@ -7,7 +7,7 @@ import { ibmPlexMono } from "~/app/fonts";
 
 const SplashPage = () => {
   const [text, setText] = useState("");
-  const [showPlaceholder, setShowPlaceholder] = useState(true);
+  const [open, setOpen] = useState(false);
   const placeholders = [
     "visualize 2x2 matrix multiplication step-by-step",
     "illustrate the doppler effect with sound waves",
@@ -41,15 +41,13 @@ const SplashPage = () => {
               onChange={(e) => setText(e.target.value)}
               type="text"
               className="w-full rounded-lg border-none bg-neutral-800 py-7 pl-4 pr-12 text-lg text-white"
-              onFocus={() => setShowPlaceholder(false)}
-              onBlur={() => setShowPlaceholder(true)}
-              // onKeyDown={(e) => {
-              //   if (e.key === "Enter") {
-              //     handleSubmit();
-              //   }
-              // }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  setOpen(true);
+                }
+              }}
             />
-            <SignUpDialog />
+            <SignUpDialog open={open} onOpenChange={setOpen} />
           </div>
         </div>
       </div>
