@@ -56,10 +56,18 @@ export function SignUpDialog() {
           <>
             <DialogHeader>
               <DialogTitle>join the waitlist</DialogTitle>
-              <DialogDescription>
+              {/* <DialogDescription>
                 we haven't launched yet lol.
-              </DialogDescription>
+              </DialogDescription> */}
             </DialogHeader>
+
+            <div className="flex flex-col items-center">
+              <img src="/cat_typing.gif" className="w-4/5" />
+              <div className="mt-1 text-center text-sm text-neutral-400">
+                real-time footage of us trying to launch this
+              </div>
+            </div>
+
             <Input
               type="email"
               autoComplete="email"
@@ -71,7 +79,7 @@ export function SignUpDialog() {
                   handleSubmit();
                 }
               }}
-              className="w-full"
+              className="w-full placeholder:text-neutral-600"
             />
             <DialogFooter>
               <Button type="submit" onClick={() => handleSubmit()}>

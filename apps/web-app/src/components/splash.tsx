@@ -8,10 +8,10 @@ const SplashPage = () => {
   const [text, setText] = useState("");
   const [showPlaceholder, setShowPlaceholder] = useState(true);
   const placeholders = [
-    "Visualize matrix multiplication step-by-step with 2x2 matrices",
-    "Illustrate the Doppler effect with sound waves",
-    "Demonstrate the water cycle, from evaporation to precipitation",
-    "Show the formation and lifecycle of a star in space",
+    "visualize matrix multiplication step-by-step with 2x2 matrices",
+    "illustrate the Doppler effect with sound waves",
+    "demonstrate the water cycle, from evaporation to precipitation",
+    "show the formation and lifecycle of a star in space",
   ];
 
   return (
