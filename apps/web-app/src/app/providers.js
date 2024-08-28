@@ -9,7 +9,7 @@ if (typeof window !== "undefined") {
     ui_host: "https://us.posthog.com",
   });
 }
-// @ts-ignore
+// @ts-expect-error
 export function CSPostHogProvider({ children }) {
   return <PostHogProvider client={posthog}>{children}</PostHogProvider>;
 }
