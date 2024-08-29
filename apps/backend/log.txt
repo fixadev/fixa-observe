@@ -1,36 +1,29 @@
-# Create sun
 sun = Circle(radius=0.5, fill_opacity=1, color=YELLOW)
 self.play(Create(sun))
-# Create planets
-mercury = Dot(color=GRAY).shift(RIGHT * 1.5)
-venus = Dot(color=ORANGE).shift(RIGHT * 2)
-earth = Dot(color=BLUE).shift(RIGHT * 2.5)
-mars = Dot(color=RED).shift(RIGHT * 3)
-jupiter = Circle(radius=0.15, fill_opacity=1, color=ORANGE).shift(RIGHT * 3.5)
-saturn = Circle(radius=0.12, fill_opacity=1, color=YELLOW).shift(RIGHT * 4)
-uranus = Dot(color=BLUE).shift(RIGHT * 4.5)
-neptune = Dot(color=BLUE).shift(RIGHT * 5)
-planets = VGroup(mercury, venus, earth, mars, jupiter, saturn, uranus, neptune)
-self.play(Create(planets))
-# Animate orbits
-self.play(
-    Rotate(mercury, angle=TAU, about_point=ORIGIN, rate_func=linear, run_time=1),
-    Rotate(venus, angle=0.9*TAU, about_point=ORIGIN, rate_func=linear, run_time=1),
-    Rotate(earth, angle=0.8*TAU, about_point=ORIGIN, rate_func=linear, run_time=1),
-    Rotate(mars, angle=0.7*TAU, about_point=ORIGIN, rate_func=linear, run_time=1),
-    Rotate(jupiter, angle=0.6*TAU, about_point=ORIGIN, rate_func=linear, run_time=1),
-    Rotate(saturn, angle=0.5*TAU, about_point=ORIGIN, rate_func=linear, run_time=1),
-    Rotate(uranus, angle=0.4*TAU, about_point=ORIGIN, rate_func=linear, run_time=1),
-    Rotate(neptune, angle=0.3*TAU, about_point=ORIGIN, rate_func=linear, run_time=1)
-)
-self.play(
-    Rotate(mercury, angle=TAU, about_point=ORIGIN, rate_func=linear, run_time=1),
-    Rotate(venus, angle=0.9*TAU, about_point=ORIGIN, rate_func=linear, run_time=1),
-    Rotate(earth, angle=0.8*TAU, about_point=ORIGIN, rate_func=linear, run_time=1),
-    Rotate(mars, angle=0.7*TAU, about_point=ORIGIN, rate_func=linear, run_time=1),
-    Rotate(jupiter, angle=0.6*TAU, about_point=ORIGIN, rate_func=linear, run_time=1),
-    Rotate(saturn, angle=0.5*TAU, about_point=ORIGIN, rate_func=linear, run_time=1),
-    Rotate(uranus, angle=0.4*TAU, about_point=ORIGIN, rate_func=linear, run_time=1),
-    Rotate(neptune, angle=0.3*TAU, about_point=ORIGIN, rate_func=linear, run_time=1)
-)
-self.play(FadeOut(sun, planets))
+planets = [
+    Circle(radius=0.1, fill_opacity=1, color=BLUE).shift(RIGHT * 1.5),
+    Circle(radius=0.15, fill_opacity=1, color=ORANGE).shift(RIGHT * 2.5),
+    Circle(radius=0.2, fill_opacity=1, color=GREEN).shift(RIGHT * 3.5),
+    Circle(radius=0.18, fill_opacity=1, color=RED).shift(RIGHT * 4.5),
+    Circle(radius=0.3, fill_opacity=1, color=GOLD).shift(RIGHT * 5.5),
+    Circle(radius=0.25, fill_opacity=1, color=PURPLE).shift(RIGHT * 6.5),
+    Circle(radius=0.22, fill_opacity=1, color=TEAL).shift(RIGHT * 7.5),
+    Circle(radius=0.21, fill_opacity=1, color=BLUE_E).shift(RIGHT * 8.5)
+]
+for planet in planets:
+    self.play(Create(planet))
+orbits = [Circle(radius=r, color=WHITE).set_stroke(opacity=0.2) for r in [1.5, 2.5, 3.5, 4.5, 5.5, 6.5, 7.5, 8.5]]
+for orbit in orbits:
+    self.play(Create(orbit))
+rotations = [
+    Rotate(planets[0], angle=TAU, about_point=ORIGIN, rate_func=linear, run_time=3),
+    Rotate(planets[1], angle=TAU, about_point=ORIGIN, rate_func=linear, run_time=4),
+    Rotate(planets[2], angle=TAU, about_point=ORIGIN, rate_func=linear, run_time=5),
+    Rotate(planets[3], angle=TAU, about_point=ORIGIN, rate_func=linear, run_time=6),
+    Rotate(planets[4], angle=TAU, about_point=ORIGIN, rate_func=linear, run_time=7),
+    Rotate(planets[5], angle=TAU, about_point=ORIGIN, rate_func=linear, run_time=8),
+    Rotate(planets[6], angle=TAU, about_point=ORIGIN, rate_func=linear, run_time=9),
+    Rotate(planets[7], angle=TAU, about_point=ORIGIN, rate_func=linear, run_time=10)
+]
+self.play(*rotations)
+self.play(*[FadeOut(obj) for obj in self.mobjects])

@@ -1,5 +1,6 @@
 import subprocess
 import threading
+from regex_utils import replace_list_comprehensions, has_unclosed_parenthesis
 from services.llm_clients import anthropic_client
 
 class ManimGenerator:
@@ -29,6 +30,7 @@ class ManimGenerator:
         14. DO NOT USE FOR LOOPS. EVER. DO NOT EVEN THINK ABOUT IT.
         """
 
+
     def generate(self, text):
         with anthropic_client.messages.stream(
             model="claude-3-5-sonnet-20240620",
@@ -44,11 +46,16 @@ class ManimGenerator:
                 for chunk in stream.text_stream:
                     if '\n' in chunk:
                         chunks = chunk.split('\n')
-                        cur_chunk += chunks[0]
-                        self.commands.append(cur_chunk + '\n')
+                        cur_chunk += '\n'.join(chunks[:-1]) + '\n'
+                        if has_unclosed_parenthesis(cur_chunk):
+                            print('UNCLOSED PARENTHESIS')
+                            cur_chunk += chunks[-1]
+                            continue
+                        cur_chunk = replace_list_comprehensions(cur_chunk)
+                        self.commands.append(cur_chunk)
                         # print(cur_chunk)
                         self.command_ready.set()  # Signal that a command is ready
-                        cur_chunk = ''.join(chunks[1:])
+                        cur_chunk = chunks[-1]
                     else:
                         cur_chunk += chunk
                     
