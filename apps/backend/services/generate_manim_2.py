@@ -48,7 +48,6 @@ class ManimGenerator:
                         chunks = chunk.split('\n')
                         cur_chunk += '\n'.join(chunks[:-1]) + '\n'
                         if has_unclosed_parenthesis(cur_chunk):
-                            print('UNCLOSED PARENTHESIS')
                             cur_chunk += chunks[-1]
                             continue
                         cur_chunk = replace_list_comprehensions(cur_chunk)
