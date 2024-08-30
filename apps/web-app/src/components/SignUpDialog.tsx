@@ -13,6 +13,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { ArrowRightCircleIcon } from "@heroicons/react/24/solid";
 import { Label } from "./ui/label";
+import { usePostHog } from "posthog-js/react";
 
 export function SignUpDialog({
   open,
@@ -26,6 +27,7 @@ export function SignUpDialog({
     "initial",
   );
   const [error, setError] = useState<boolean>(false);
+  const posthog = usePostHog();
 
   const isValidEmail = (email: string): boolean => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -50,6 +52,7 @@ export function SignUpDialog({
       },
     )
       .then(() => {
+        posthog.identify(email, { email });
         setStage("success");
       })
       .catch(() => {
