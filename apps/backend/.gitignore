@@ -29,3 +29,6 @@ media/*
 # OS-specific files
 .DS_Store
 Thumbs.db
+
+FRAMES
+services/media
