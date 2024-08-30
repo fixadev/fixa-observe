@@ -1,24 +1,17 @@
-title = Text("The Solar System").scale(0.8).shift(UP * 3)
+title = Text("The Solar System").scale(0.8).shift(UP * 3.5)
 self.play(Write(title))
 sun = Circle(radius=0.5, fill_opacity=1, color=YELLOW)
 mercury = Dot(color=GRAY).shift(RIGHT * 1)
 venus = Dot(color=ORANGE).shift(RIGHT * 1.5)
 earth = Dot(color=BLUE).shift(RIGHT * 2)
 mars = Dot(color=RED).shift(RIGHT * 2.5)
-jupiter = Dot(color=ORANGE, radius=0.15).shift(RIGHT * 3)
-saturn = Dot(color=YELLOW, radius=0.12).shift(RIGHT * 3.5)
-uranus = Dot(color=BLUE, radius=0.1).shift(RIGHT * 4)
-neptune = Dot(color=BLUE, radius=0.1).shift(RIGHT * 4.5)
-self.play(FadeIn(sun, mercury, venus, earth, mars, jupiter, saturn, uranus, neptune))
-self.play(
-    Rotate(mercury, angle=TAU, about_point=ORIGIN, rate_func=linear),
-    Rotate(venus, angle=0.8*TAU, about_point=ORIGIN, rate_func=linear),
-    Rotate(earth, angle=0.6*TAU, about_point=ORIGIN, rate_func=linear),
-    Rotate(mars, angle=0.5*TAU, about_point=ORIGIN, rate_func=linear),
-    Rotate(jupiter, angle=0.3*TAU, about_point=ORIGIN, rate_func=linear),
-    Rotate(saturn, angle=0.25*TAU, about_point=ORIGIN, rate_func=linear),
-    Rotate(uranus, angle=0.2*TAU, about_point=ORIGIN, rate_func=linear),
-    Rotate(neptune, angle=0.15*TAU, about_point=ORIGIN, rate_func=linear),
-    run_time=8
+jupiter = Circle(radius=0.15, fill_opacity=1, color=ORANGE).shift(RIGHT * 3)
+saturn = Circle(radius=0.13, fill_opacity=1, color=YELLOW).shift(RIGHT * 3.5)
+uranus = Dot(color=BLUE).shift(RIGHT * 4)
+neptune = Dot(color=BLUE_E).shift(RIGHT * 4.5)
+planets = VGroup(mercury, venus, earth, mars, jupiter, saturn, uranus, neptune)
+self.play(FadeIn(sun), FadeIn(planets))
+self.play(Rotate(mercury, angle=TAU, about_point=ORIGIN, rate_func=linear, run_time=1),venus, angle=0.8*TAU, about_point=ORIGIN, rate_func=linear, run_time=1),earth, angle=0.6*TAU, about_point=ORIGIN, rate_func=linear, run_time=1),mars, angle=0.5*TAU, about_point=ORIGIN, rate_func=linear, run_timeRotate(jupiter, angle=0.3*TAU, about_point=ORIGIN, rate_func=linear, run_timeRotate(saturn, angle=0.25*TAU, about_point=ORIGIN, rate_func=linear, run_timeRotate(uranus, angle=0.2*TAU, about_point=ORIGIN, rate_func=linear, run_timeRotate(neptune, angle=0.15*TAU, about_point=ORIGIN, rate_func=linear, run_time=1)
 )
-self.play(FadeOut(title, sun, mercury, venus, earth, mars, jupiter, saturn, uranus, neptune))
+self.play(Rotate(mercury, angle=TAU, about_point=ORIGIN, rate_func=linear, run_time=1(venus, angle=0.8*TAU, about_point=ORIGIN, rate_func=linear, run_time=1(earth, angle=0.6*TAU, about_point=ORIGIN, rate_func=linear, run_time=1(mars, angle=0.5*TAU, about_point=ORIGIN, rate_func=linear, run_time=1(jupiter, angle=0.3*TAU, about_point=ORIGIN, rate_func=linear, run_time=1(saturn, angle=0.25*TAU, about_point=ORIGIN, rate_func=linear, run_time=1(uranus, angle=0.2*TAU, about_point=ORIGIN, rate_func=linear, run_time=Rotate(neptune, angle=0.15*TAU, about_point=ORIGIN, rate_func=linear, run_time
+self.play(FadeOut(sun), FadeOut(planets), FadeOut(title))

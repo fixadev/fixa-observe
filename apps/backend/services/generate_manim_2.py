@@ -1,6 +1,7 @@
 import subprocess
 import threading
-from services.call_llm import anthropic_client
+from regex_utils import replace_list_comprehensions, has_unclosed_parenthesis
+from services.llm_clients import anthropic_client
 
 class ManimGenerator:
     def __init__(self):
@@ -24,10 +25,11 @@ class ManimGenerator:
         9. Use shapes, text, and animations that can be generated purely with manim code.
         10. Ensure that the animation aligns perfectly with the text response. 
         11. Do not include ANY comments or any unnecessary newlines in the code.
-        12. Do not use any LIGHT color variants such as LIGHT_BLUE, LIGHT_GREEN, LIGHT_RED, etc.
+        12. Do not use any LIGHT color variants such as LIGHT_BLUE, LIGHT_GREEN, LIGHT_RED, etc. And never use BROWN.
         13. DO NOT USE LIST COMPREHENSIONS SUCH AS [Circle(radius=d, color=WHITE, stroke_opacity=0.5).shift(LEFT * 5) for d in planet_distances]. EVER. DO NOT EVEN THINK ABOUT IT.
         14. DO NOT USE FOR LOOPS. EVER. DO NOT EVEN THINK ABOUT IT.
         """
+
 
     def generate(self, text):
         with anthropic_client.messages.stream(
@@ -40,14 +42,19 @@ class ManimGenerator:
         ) as stream:
             with open('log.txt', 'w') as log_file:
                 cur_chunk = ""
+                # TODO: investigate + handle edge cases. 1. missed newlines such as')self.play(\n' 2. list comprehensions (very rare rn) 3. 'prohibited colors'
                 for chunk in stream.text_stream:
                     if '\n' in chunk:
                         chunks = chunk.split('\n')
-                        cur_chunk += chunks[0]
-                        self.commands.append(cur_chunk + '\n')
+                        cur_chunk += '\n'.join(chunks[:-1]) + '\n'
+                        if has_unclosed_parenthesis(cur_chunk):
+                            cur_chunk += chunks[-1]
+                            continue
+                        cur_chunk = replace_list_comprehensions(cur_chunk)
+                        self.commands.append(cur_chunk)
                         # print(cur_chunk)
                         self.command_ready.set()  # Signal that a command is ready
-                        cur_chunk = ''.join(chunks[1:])
+                        cur_chunk = chunks[-1]
                     else:
                         cur_chunk += chunk
                     
