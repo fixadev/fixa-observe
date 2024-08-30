@@ -40,7 +40,7 @@ export function SignUpDialog({
     }
     setStage("loading");
     fetch(
-      "https://script.google.com/a/macros/play.ht/s/AKfycbz-zwahB1de3PGAo2burNFDBMyqjTew_VBZeBITm0gfC9TPSgbn_3G-X_oNNlmikjS-/exec",
+      "https://script.google.com/macros/s/AKfycbxo9lGOTe-9-H0qKqufYQYYWVHOCb9Ci0kQnhJTB2msGpki1SW1nXq8MAhnROD8iMAU/exec",
       {
         method: "POST",
         headers: {

@@ -1,9 +1,10 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { SignUpDialog } from "@/components/SignUpDialog";
 import AnimatedPlaceholder from "@/components/AnimatedPlaceholder";
 import { ibmPlexMono } from "~/app/fonts";
+import { usePostHog } from "posthog-js/react";
 
 const SplashPage = () => {
   const [text, setText] = useState("");
@@ -14,6 +15,16 @@ const SplashPage = () => {
     "animate the process of how the water cycle works",
     "show the formation and lifecycle of a star in space",
   ];
+  const posthog = usePostHog();
+
+  useEffect(() => {
+    if (open && text.length > 0) {
+      // Means that user submitted prompt
+      posthog.capture("Landing page prompt submitted", {
+        prompt: text,
+      });
+    }
+  }, [open]);
 
   return (
     <div className="flex h-[100dvh] w-screen flex-col items-center justify-center overflow-hidden p-2 text-white">
