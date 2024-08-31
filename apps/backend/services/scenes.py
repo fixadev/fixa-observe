@@ -1,9 +1,53 @@
 from manim import *
 from manim.opengl import *
 
+import base64
+import io
+from PIL import Image
+import threading
+import time
+import os
+import json
 class BlankScene(Scene):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.is_running = True
+        self.output_file = f'/tmp/manim_output.json'
+
+
+    def send_to_websocket(self, message):
+        with open(self.output_file, 'w') as f:
+            json.dump({"frame": message}, f)
+
     def construct(self):
+        # Start a thread for continuous frame capture
+        self.capture_thread = threading.Thread(target=self.continuous_capture)
+        self.capture_thread.start()
         self.interactive_embed()
+
+    def continuous_capture(self):
+        while self.is_running:
+            self.capture_and_send_frame()
+            time.sleep(1/30)  # Adjust this for desired frame rate
+
+    def capture_and_send_frame(self):
+        if self.websocket:
+            frame = self.renderer.get_frame()
+            img = Image.fromarray(frame)
+            buffered = io.BytesIO()
+            img.save(buffered, format="JPEG", quality=70)
+            img_str = base64.b64encode(buffered.getvalue()).decode()
+            self.send_to_websocket(img_str)
+
+    def cleanup(self):
+        try:
+            os.remove(self.output_file)
+        except FileNotFoundError:
+            pass
+        self.is_running = False
+        if hasattr(self, 'capture_thread'):
+            self.capture_thread.join()
+        super().cleanup()
 
 class TestScene(Scene):
     def construct(self):

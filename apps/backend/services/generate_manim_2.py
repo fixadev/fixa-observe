@@ -1,13 +1,18 @@
 import subprocess
 import threading
-from regex_utils import replace_list_comprehensions, has_unclosed_parenthesis, has_unclosed_bracket
+import multiprocessing
+import os
+import json
+import time
+from services.regex_utils import replace_list_comprehensions, has_unclosed_parenthesis, has_unclosed_bracket
 from services.llm_clients import anthropic_client
 
 class ManimGenerator:
-    def __init__(self):
+    def __init__(self, websocket):
         self.commands = []
         self.command_ready = threading.Event()
         self.generation_complete = threading.Event()
+        self.websocket = websocket
         self.system_prompt = """You are an AI teacher. 
     
         Generate Manim code that generates a 10-15 second animation that directly illustrates the user prompt.
@@ -62,8 +67,25 @@ class ManimGenerator:
         self.commands.append("\nquit()\n")
         self.generation_complete.set()  # Signal that generation is complete
 
+
+    def send_frames_to_websocket(self):
+        output_file = f'/tmp/manim_output.json'
+        print("Starting websocket frame sender")
+        while True:
+            if os.path.exists(output_file):
+                with open(output_file, 'r') as f:
+                    try:
+                        data = json.load(f)
+                        frame = data.get('frame')
+                        if frame:
+                            self.websocket.send_text(frame)
+                    except json.JSONDecodeError:
+                        pass 
+            time.sleep(1/30)
+
     def execute_commands(self):
-        process = subprocess.Popen(["manim", "./services/scenes.py", "-p", "BlankScene", "--renderer=opengl"], stdin=subprocess.PIPE)
+        process = subprocess.Popen(["manim", "./services/scenes.py", "-p", f"BlankScene", "--renderer=opengl"], stdin=subprocess.PIPE)
+        threading.Thread(target=self.send_frames_to_websocket, daemon=True).start()
 
         while True:
             if self.commands:
@@ -80,11 +102,12 @@ class ManimGenerator:
             else:
                 self.command_ready.wait(timeout=1)  # Wait for a command to be ready
                 self.command_ready.clear()
+    
 
     def run(self, text):
         generate_thread = threading.Thread(target=self.generate, args=(text,))
         execute_thread = threading.Thread(target=self.execute_commands)
-
+        
         generate_thread.start()
         execute_thread.start()
 
