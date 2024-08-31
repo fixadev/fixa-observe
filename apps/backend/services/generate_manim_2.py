@@ -1,11 +1,11 @@
 import subprocess
 import threading
-import multiprocessing
 import os
 import json
 import time
 from services.regex_utils import replace_list_comprehensions, has_unclosed_parenthesis, has_unclosed_bracket
 from services.llm_clients import anthropic_client
+from services.scenes import frame_queue
 
 class ManimGenerator:
     def __init__(self, websocket):
@@ -69,24 +69,15 @@ class ManimGenerator:
 
 
     def send_frames_to_websocket(self):
-        output_file = f'/tmp/manim_output.json'
-        print("Starting websocket frame sender")
         while True:
-            if os.path.exists(output_file):
-                with open(output_file, 'r') as f:
-                    try:
-                        data = json.load(f)
-                        frame = data.get('frame')
-                        if frame:
-                            self.websocket.send_text(frame)
-                    except json.JSONDecodeError:
-                        pass 
+            if not frame_queue.empty():
+                frame = frame_queue.get()
+                print("===================frame===================", frame)
+                self.websocket.send_text(frame)
             time.sleep(1/30)
 
     def execute_commands(self):
         process = subprocess.Popen(["manim", "./services/scenes.py", "-p", f"BlankScene", "--renderer=opengl"], stdin=subprocess.PIPE)
-        threading.Thread(target=self.send_frames_to_websocket, daemon=True).start()
-
         while True:
             if self.commands:
                 command = self.commands.pop(0)
@@ -107,10 +98,13 @@ class ManimGenerator:
     def run(self, text):
         generate_thread = threading.Thread(target=self.generate, args=(text,))
         execute_thread = threading.Thread(target=self.execute_commands)
+        forwarding_thread = threading.Thread(target=self.send_frames_to_websocket, daemon=True)
         
+        forwarding_thread.start()
         generate_thread.start()
         execute_thread.start()
 
+        forwarding_thread.join()
         generate_thread.join()
         execute_thread.join()
 
