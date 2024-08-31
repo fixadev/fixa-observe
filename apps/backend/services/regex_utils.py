@@ -11,6 +11,17 @@ def has_unclosed_parenthesis(s):
             stack.pop()
     return len(stack) > 0  # True if there are unclosed parentheses
 
+def has_unclosed_bracket(s):
+    stack = []
+    for char in s:
+        if char == '[':
+            stack.append(char)
+        elif char == ']':
+            if not stack:
+                return True  
+            stack.pop()
+    return len(stack) > 0 
+
 def replace_list_comprehensions(code):
     def replacement(match):
         print('REPLACING LIST COMPREHENSIONS')

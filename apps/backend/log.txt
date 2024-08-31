@@ -1,17 +1,33 @@
-title = Text("The Solar System").scale(0.8).shift(UP * 3.5)
-self.play(Write(title))
+# Create sun
 sun = Circle(radius=0.5, fill_opacity=1, color=YELLOW)
-mercury = Dot(color=GRAY).shift(RIGHT * 1)
-venus = Dot(color=ORANGE).shift(RIGHT * 1.5)
-earth = Dot(color=BLUE).shift(RIGHT * 2)
-mars = Dot(color=RED).shift(RIGHT * 2.5)
-jupiter = Circle(radius=0.15, fill_opacity=1, color=ORANGE).shift(RIGHT * 3)
-saturn = Circle(radius=0.13, fill_opacity=1, color=YELLOW).shift(RIGHT * 3.5)
-uranus = Dot(color=BLUE).shift(RIGHT * 4)
-neptune = Dot(color=BLUE_E).shift(RIGHT * 4.5)
+self.play(Create(sun))
+# Create planets
+mercury = Dot(color=GRAY).shift(RIGHT * 1.5)
+venus = Dot(color=ORANGE).shift(RIGHT * 2)
+earth = Dot(color=BLUE).shift(RIGHT * 2.5)
+mars = Dot(color=RED).shift(RIGHT * 3)
+jupiter = Circle(radius=0.15, fill_opacity=1, color=ORANGE).shift(RIGHT * 3.5)
+saturn = Circle(radius=0.13, fill_opacity=1, color=YELLOW).shift(RIGHT * 4)
+uranus = Dot(color=BLUE).shift(RIGHT * 4.5)
+neptune = Dot(color=BLUE).shift(RIGHT * 5)
 planets = VGroup(mercury, venus, earth, mars, jupiter, saturn, uranus, neptune)
-self.play(FadeIn(sun), FadeIn(planets))
-self.play(Rotate(mercury, angle=TAU, about_point=ORIGIN, rate_func=linear, run_time=1),venus, angle=0.8*TAU, about_point=ORIGIN, rate_func=linear, run_time=1),earth, angle=0.6*TAU, about_point=ORIGIN, rate_func=linear, run_time=1),mars, angle=0.5*TAU, about_point=ORIGIN, rate_func=linear, run_timeRotate(jupiter, angle=0.3*TAU, about_point=ORIGIN, rate_func=linear, run_timeRotate(saturn, angle=0.25*TAU, about_point=ORIGIN, rate_func=linear, run_timeRotate(uranus, angle=0.2*TAU, about_point=ORIGIN, rate_func=linear, run_timeRotate(neptune, angle=0.15*TAU, about_point=ORIGIN, rate_func=linear, run_time=1)
-)
-self.play(Rotate(mercury, angle=TAU, about_point=ORIGIN, rate_func=linear, run_time=1(venus, angle=0.8*TAU, about_point=ORIGIN, rate_func=linear, run_time=1(earth, angle=0.6*TAU, about_point=ORIGIN, rate_func=linear, run_time=1(mars, angle=0.5*TAU, about_point=ORIGIN, rate_func=linear, run_time=1(jupiter, angle=0.3*TAU, about_point=ORIGIN, rate_func=linear, run_time=1(saturn, angle=0.25*TAU, about_point=ORIGIN, rate_func=linear, run_time=1(uranus, angle=0.2*TAU, about_point=ORIGIN, rate_func=linear, run_time=Rotate(neptune, angle=0.15*TAU, about_point=ORIGIN, rate_func=linear, run_time
-self.play(FadeOut(sun), FadeOut(planets), FadeOut(title))
+self.play(Create(planets))
+# Create orbits
+orbits = VGroup()
+orbit_radii = [1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5]
+for radius in orbit_radii:
+    orbit = Circle(radius=radius, color=WHITE, stroke_opacity=0.5)
+    orbits.add(orbit)
+self.play(Create(orbits))
+# Animate planet orbits
+self.play(Rotate(mercury, angle=TAU, about_point=ORIGIN, rate_func=linear, run_time=3(venus, angle=0.9*TAU, about_point=ORIGIN, rate_func=linear, run_timeRotate(earth, angle=0.8*TAU, about_point=ORIGIN, rate_func=linear, run_time=3),mars, angle=0.7*TAU, about_point=ORIGIN, rate_func=linear, run_time=3),jupiter, angle=0.6*TAU, about_point=ORIGIN, rate_func=linear, run_time=3),saturn, angle=0.5*TAU, about_point=ORIGIN, rate_func=linear, run_time=3),uranus, angle=0.4*TAU, about_point=ORIGIN, rate_func=linear, run_time=3(neptune, angle=0.3*TAU, about_point=ORIGIN, rate_func=linear, run_time=
+# Add labels
+labels = VGroup()
+planet_names = ["Mercury", "Venus", "Earth", "Mars", "Jupiter", "Saturn", "Uranus", "Neptune"]
+for planet, name in zip(planets, planet_names):
+    label = Text(name, font_size=16).next_to(planet, DOWN, buff=0.1)
+    labels.add(label)
+self.play(Create(labels))
+# Continue rotation
+self.play(mercury, angle=TAU, about_point=ORIGIN, rate_func=linear, run_time=3(venus, angle=0.9*TAU, about_point=ORIGIN, rate_func=linear, run_time=3(earth, angle=0.8*TAU, about_point=ORIGIN, rate_func=linear, run_time=3(mars, angle=0.7*TAU, about_point=ORIGIN, rate_func=linear, run_time=3(jupiter, angle=0.6*TAU, about_point=ORIGIN, rate_func=linear, run_time=3(saturn, angle=0.5*TAU, about_point=ORIGIN, rate_func=linear, run_time=3(uranus, angle=0.4*TAU, about_point=ORIGIN, rate_func=linear, run_time=Rotate(neptune, angle=0.3*TAU, about_point=ORIGIN, rate_func=linear, run_time=3),Rotate(labels, angle=0.5*TAU, about_point=ORIGIN, rate_func=linear, run_time
+self.play(FadeOut(orbits), FadeOut(labels), FadeOut(planets), FadeOut(sun))

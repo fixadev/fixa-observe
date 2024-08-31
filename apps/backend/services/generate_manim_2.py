@@ -1,6 +1,6 @@
 import subprocess
 import threading
-from regex_utils import replace_list_comprehensions, has_unclosed_parenthesis
+from regex_utils import replace_list_comprehensions, has_unclosed_parenthesis, has_unclosed_bracket
 from services.llm_clients import anthropic_client
 
 class ManimGenerator:
@@ -42,12 +42,11 @@ class ManimGenerator:
         ) as stream:
             with open('log.txt', 'w') as log_file:
                 cur_chunk = ""
-                # TODO: investigate + handle edge cases. 1. missed newlines such as')self.play(\n' 2. list comprehensions (very rare rn) 3. 'prohibited colors'
                 for chunk in stream.text_stream:
                     if '\n' in chunk:
                         chunks = chunk.split('\n')
                         cur_chunk += '\n'.join(chunks[:-1]) + '\n'
-                        if has_unclosed_parenthesis(cur_chunk):
+                        if has_unclosed_parenthesis(cur_chunk) or has_unclosed_bracket(cur_chunk):
                             cur_chunk += chunks[-1]
                             continue
                         cur_chunk = replace_list_comprehensions(cur_chunk)
