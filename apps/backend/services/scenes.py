@@ -2,15 +2,10 @@ from manim import *
 from manim.opengl import *
 import numpy as np
 from PIL import Image
-
 from multiprocessing import Queue
-
-import base64
-import io
 import threading
 import time
 import os
-import json
 
 frame_queue = Queue()
 class BlankScene(Scene):
