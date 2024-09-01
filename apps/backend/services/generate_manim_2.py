@@ -181,4 +181,4 @@ class ManimGenerator:
 
 if __name__ == "__main__":
     generator = ManimGenerator()
-    generator.run("""Show the solar system with the sun in the center and the planets orbiting the sun at different speeds.""")
+    generator.run("""how do microprocessors work? Make it easy to understand for a high schooler""")
