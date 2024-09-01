@@ -10,12 +10,18 @@ const ManimStream: React.FC = () => {
 
   useEffect(() => {
     const connectWebSocket = () => {
-      // wsRef.current = new WebSocket("ws://localhost:8000/ws");
-
       wsRef.current = new WebSocket("wss://pixa.ngrok.dev/ws");
 
       wsRef.current.onmessage = (event: MessageEvent) => {
-        setImageSrc(`data:image/jpeg;base64,${event.data}`);
+        if (typeof event.data === "string") {
+          setImageSrc(`data:image/jpeg;base64,${event.data}`);
+        } else {
+          console.error("Received non-string data from WebSocket");
+        }
+      };
+
+      wsRef.current.onopen = () => {
+        console.log("WebSocket connection opened.");
       };
 
       wsRef.current.onclose = () => {
