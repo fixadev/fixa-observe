@@ -89,7 +89,6 @@ class ManimGenerator:
                     process.stdin.flush()
 
                 if command == "\nquit()\n":
-                    print("Debug: Received quit command")
                     process.wait()
                     break
             else:
@@ -141,14 +140,9 @@ class ManimGenerator:
         generate_thread.start()
         execute_thread.start()
         capture_thread.start()
-
-        print("All threads started")
-
        
         generate_thread.join()
-        print("Generate thread finished")
         execute_thread.join()
-        print("Execute thread finished")
         self.execute_thread_running = False
         self.capture_thread_running = False
         capture_thread.join()
