@@ -6,7 +6,6 @@ import numpy as np
 import asyncio
 import cv2
 import base64
-from PIL import Image
 from multiprocessing import Queue
 from services.regex_utils import replace_list_comprehensions, has_unclosed_parenthesis, has_unclosed_bracket
 from services.llm_clients import anthropic_client
@@ -73,7 +72,7 @@ class ManimGenerator:
                     
                     log_file.write(chunk)
                 
-        self.commands.append("\nself.wait(3)\n")
+        self.commands.append("\nself.wait(5)\n")
         self.commands.append("\nquit()\n")
         self.generation_complete.set() # Signal that generation is complete
 
@@ -103,7 +102,7 @@ class ManimGenerator:
     def continuous_capture(self):
         frame_count = 0
         sct = mss.mss()
-        monitor = {"top": 75, "left": 1920 - 1150, "width": 1140, "height": 400}
+        monitor = {"top": 75, "left": 1920 - 1150, "width": 740, "height": 410}
         while self.capture_thread_running:
             try:
                 screenshot = sct.grab(monitor)
@@ -158,9 +157,8 @@ class ManimGenerator:
             try:
                 frame_queue.get_nowait()
             except Queue.Empty:
+                print("Frame queue empty")
                 break
-        
-        frame_queue.put(None)
 
     def _run_send_frames(self):
         self.loop.run_until_complete(self.send_frames_to_websocket())\
@@ -177,7 +175,9 @@ class ManimGenerator:
                 break
             except Exception as e:
                 print(f"Error in send_frames_to_websocket: {e}")
-                await asyncio.sleep(1)
+                break
+                # await asyncio.sleep(1)
+        await self.websocket.send_text("EOF")
 
 if __name__ == "__main__":
     generator = ManimGenerator()

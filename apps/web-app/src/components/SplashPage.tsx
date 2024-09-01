@@ -5,10 +5,16 @@ import { SignUpDialog } from "@/components/SignUpDialog";
 import AnimatedPlaceholder from "@/components/AnimatedPlaceholder";
 import { ibmPlexMono } from "~/app/fonts";
 import { usePostHog } from "posthog-js/react";
+import { ArrowRightCircleIcon } from "@heroicons/react/24/solid";
+import { useWebSocket } from "@/components/UseWebsocket";
+import { VideoPlayer } from "@/components/VideoPlayer";
 
 const SplashPage = () => {
   const [text, setText] = useState("");
   const [open, setOpen] = useState(false);
+  const [videoPlaying, setVideoPlaying] = useState(false);
+  const { data, sendMessage } = useWebSocket("wss://pixa.ngrok.dev/ws");
+
   const placeholders = [
     "visualize 2x2 matrix multiplication step-by-step",
     "illustrate the doppler effect with sound waves",
@@ -28,7 +34,9 @@ const SplashPage = () => {
 
   return (
     <div className="flex h-[100dvh] w-screen flex-col items-center justify-center overflow-hidden p-2 text-white">
-      <div className="-mt-3 flex flex-col items-center justify-center gap-2 sm:gap-6">
+      <div
+        className={`-mt-3 flex flex-col items-center justify-center gap-2 transition-[margin-top] duration-300 ease-in-out sm:gap-6`}
+      >
         <div>
           <div
             className={[
@@ -58,9 +66,22 @@ const SplashPage = () => {
                 }
               }}
             />
-            <SignUpDialog open={open} onOpenChange={setOpen} />
+            {/* <SignUpDialog open={open} onOpenChange={setOpen} /> */}
+            <button
+              className="absolute right-2 top-1/2 size-10 -translate-y-1/2"
+              onClick={() => sendMessage(text)}
+            >
+              <ArrowRightCircleIcon className="text-neutral-400 hover:cursor-pointer hover:text-neutral-200" />
+            </button>
           </div>
         </div>
+      </div>
+      <div
+        className={`transition-opacity duration-300 ease-in-out ${
+          data.imageSrc !== null ? "opacity-100" : "opacity-0"
+        }`}
+      >
+        {data.imageSrc !== null && <VideoPlayer imageSrc={data.imageSrc} />}
       </div>
     </div>
   );
