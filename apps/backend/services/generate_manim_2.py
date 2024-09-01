@@ -19,6 +19,9 @@ class ManimGenerator:
         self.command_ready = threading.Event()
         self.generation_complete = threading.Event()
         self.websocket = websocket
+
+        self.execute_thread_running = False
+
         self.system_prompt = """You are an AI teacher. 
     
         Generate Manim code that generates a 10-15 second animation that directly illustrates the user prompt.
@@ -71,55 +74,41 @@ class ManimGenerator:
                     log_file.write(chunk)
                 
         self.commands.append("\nquit()\n")
-        self.generation_complete.set()  # Signal that generation is complete
+        self.generation_complete.set() # Signal that generation is complete
 
-    async def send_frames_to_websocket(self):
-        while True:
-            if not frame_queue.empty():
-                frame = frame_queue.get()
-                try:
-                    await self.websocket.send_text(frame)
-                except Exception as e:
-                    print("Debug: Error sending frame to websocket:", str(e))
-            else:
-                print("Debug: Frame queue is empty")
-            await asyncio.sleep(1/30)
 
     def execute_commands(self):
         process = subprocess.Popen(["manim", "./services/scenes.py", "-p", f"BlankScene", "--renderer=opengl"], stdin=subprocess.PIPE)
-        while True:
+        while self.execute_thread_running:
             if self.commands:
                 command = self.commands.pop(0)
-                print(repr(command))
+                # print(repr(command))
 
                 if process.stdin is not None:
                     process.stdin.write(command.encode())
                     process.stdin.flush()
 
-                if command == "quit()\n":
+                if command == "\nquit()\n":
+                    print("Debug: Received quit command")
                     process.wait()
-                    return
+                    break
             else:
                 self.command_ready.wait(timeout=1)  # Wait for a command to be ready
                 self.command_ready.clear()
+        
+        if process.poll() is None:
+            process.kill()
+        self.execute_thread_running = False
     
     def continuous_capture(self):
         frame_count = 0
         sct = mss.mss()
-        monitor = {"top": 25, "left": 1920 - 1000, "width": 1000, "height": 500}
-        while self.is_running:
+        monitor = {"top": 75, "left": 1920 - 1100, "width": 1100, "height": 400}
+        while self.capture_thread_running:
             try:
                 screenshot = sct.grab(monitor)
                 frame = np.array(screenshot)
                 frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-
-                # image = Image.fromarray(frame)
-                # frame_directory = "frames"
-                # os.makedirs(frame_directory, exist_ok=True)
-                # frame_filename = os.path.join(frame_directory, f"frame_{frame_count:04d}.png")
-                # image.save(frame_filename)
-
-                # Convert the frame to a base64 encoded string before putting it in the queue
                 _, buffer = cv2.imencode('.jpg', frame, [cv2.IMWRITE_JPEG_QUALITY, 80])
                 base64_frame = base64.b64encode(buffer).decode('utf-8')
                 frame_queue.put(base64_frame)
@@ -132,41 +121,60 @@ class ManimGenerator:
             except frame_queue.full:
                 pass
             except Exception:
-                time.sleep(1)  
+                time.sleep(1)
         
-    def run_async_loop(self):
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
-        loop.run_forever()
 
     def run(self, text):
+        self.running = True
         generate_thread = threading.Thread(target=self.generate, args=(text,))
         execute_thread = threading.Thread(target=self.execute_commands)
         capture_thread = threading.Thread(target=self.continuous_capture)
 
-        # Create a new event loop for the asyncio operations
+        # Websocket thread
         self.loop = asyncio.new_event_loop()
         asyncio.set_event_loop(self.loop)
-
-        # Run the send_frames_to_websocket coroutine in the background
         asyncio_thread = threading.Thread(target=self._run_send_frames, daemon=True)
         asyncio_thread.start()
         
-        self.is_running = True
+        self.execute_thread_running = True
+        self.capture_thread_running = True
         generate_thread.start()
         execute_thread.start()
         capture_thread.start()
 
-        capture_thread.join()
+        print("All threads started")
+
+       
         generate_thread.join()
+        print("Generate thread finished")
         execute_thread.join()
-        self.is_running = False
+        print("Execute thread finished")
+        self.execute_thread_running = False
+        self.capture_thread_running = False
+        capture_thread.join()
+        print("Capture thread finished")
         
+        self.running = False
         self.loop.call_soon_threadsafe(self.loop.stop)
         asyncio_thread.join()
+        print("Asyncio thread joined")
 
     def _run_send_frames(self):
-        self.loop.run_until_complete(self.send_frames_to_websocket())
+        self.loop.run_until_complete(self.send_frames_to_websocket())\
+    
+    async def send_frames_to_websocket(self):
+        while self.running:
+            try:
+                if not frame_queue.empty():
+                    frame = frame_queue.get_nowait()
+                    await self.websocket.send_text(frame)
+                else:
+                    await asyncio.sleep(1/30)
+            except asyncio.CancelledError:
+                break
+            except Exception as e:
+                print(f"Error in send_frames_to_websocket: {e}")
+                await asyncio.sleep(1)
 
 if __name__ == "__main__":
     generator = ManimGenerator()
