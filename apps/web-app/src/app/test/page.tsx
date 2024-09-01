@@ -58,7 +58,7 @@ const ManimStream: React.FC = () => {
         },
       });
       console.log("response", response);
-      const data = await response.json();
+      const data: unknown = await response.json();
       console.log("data", data);
     } catch (error) {
       console.error("Error testing backend:", error);
