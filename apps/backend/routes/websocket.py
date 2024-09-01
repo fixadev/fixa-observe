@@ -1,5 +1,6 @@
 import logging
-from fastapi import APIRouter, WebSocket
+from fastapi import APIRouter, WebSocket, FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from starlette.websockets import WebSocketDisconnect
 from services.generate_manim_2 import ManimGenerator
 

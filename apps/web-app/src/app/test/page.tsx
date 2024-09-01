@@ -10,7 +10,9 @@ const ManimStream: React.FC = () => {
 
   useEffect(() => {
     const connectWebSocket = () => {
-      wsRef.current = new WebSocket("ws://localhost:8000/ws");
+      // wsRef.current = new WebSocket("ws://localhost:8000/ws");
+
+      wsRef.current = new WebSocket("wss://pixa.ngrok.dev/ws");
 
       wsRef.current.onmessage = (event: MessageEvent) => {
         setImageSrc(`data:image/jpeg;base64,${event.data}`);
@@ -41,6 +43,21 @@ const ManimStream: React.FC = () => {
       setMessage("");
     }
   };
+  const testBackend = async () => {
+    try {
+      const response = await fetch("https://pixa.ngrok.dev/", {
+        method: "GET",
+        headers: {
+          Accept: "application/json",
+        },
+      });
+      console.log("response", response);
+      const data = await response.json();
+      console.log("data", data);
+    } catch (error) {
+      console.error("Error testing backend:", error);
+    }
+  };
 
   return (
     <div>
@@ -58,6 +75,7 @@ const ManimStream: React.FC = () => {
           placeholder="Enter message"
         />
         <button onClick={sendMessage}>Send</button>
+        <button onClick={testBackend}>Test Backend</button>
       </div>
     </div>
   );
