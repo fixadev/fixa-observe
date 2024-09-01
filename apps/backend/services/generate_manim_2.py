@@ -83,7 +83,6 @@ class ManimGenerator:
                     print("Debug: Error sending frame to websocket:", str(e))
             else:
                 print("Debug: Frame queue is empty")
-            print("Debug: Sleeping for 1/30 second")
             await asyncio.sleep(1/30)
 
     def execute_commands(self):
@@ -106,10 +105,10 @@ class ManimGenerator:
     
     def continuous_capture(self):
         frame_count = 0
+        sct = mss.mss()
+        monitor = {"top": 25, "left": 1920 - 1000, "width": 1000, "height": 500}
         while self.is_running:
             try:
-                sct = mss.mss()
-                monitor = {"top": 0, "left": 1920 - 1000, "width": 1000, "height": 500}
                 screenshot = sct.grab(monitor)
                 frame = np.array(screenshot)
                 frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
@@ -118,7 +117,6 @@ class ManimGenerator:
                 # frame_directory = "frames"
                 # os.makedirs(frame_directory, exist_ok=True)
                 # frame_filename = os.path.join(frame_directory, f"frame_{frame_count:04d}.png")
-                
                 # image.save(frame_filename)
 
                 # Convert the frame to a base64 encoded string before putting it in the queue

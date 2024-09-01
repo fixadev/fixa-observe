@@ -1,17 +1,17 @@
 # Create sun
-sun = Circle(radius=0.5, color=YELLOW, fill_opacity=1).shift(UP * 0.5)
+sun = Circle(radius=0.5, color=YELLOW, fill_opacity=1)
 self.play(Create(sun))
 # Create planets
-mercury = Dot(color=GRAY).shift(UP * 0.5 + RIGHT * 1.2)
-venus = Dot(color=ORANGE).shift(UP * 0.5 + RIGHT * 1.8)
-earth = Dot(color=BLUE).shift(UP * 0.5 + RIGHT * 2.4)
-mars = Dot(color=RED).shift(UP * 0.5 + RIGHT * 3)
-jupiter = Circle(radius=0.15, color=ORANGE, fill_opacity=1).shift(UP * 0.5 + RIGHT * 3.8)
-saturn = Circle(radius=0.13, color=YELLOW, fill_opacity=1).shift(UP * 0.5 + RIGHT * 4.5)
-uranus = Dot(color=BLUE).shift(UP * 0.5 + RIGHT * 5.1)
-neptune = Dot(color=BLUE).shift(UP * 0.5 + RIGHT * 5.6)
+mercury = Circle(radius=0.1, color=GRAY, fill_opacity=1).shift(RIGHT * 1)
+venus = Circle(radius=0.15, color=ORANGE, fill_opacity=1).shift(RIGHT * 1.5)
+earth = Circle(radius=0.18, color=BLUE, fill_opacity=1).shift(RIGHT * 2)
+mars = Circle(radius=0.14, color=RED, fill_opacity=1).shift(RIGHT * 2.5)
+jupiter = Circle(radius=0.3, color=GOLD, fill_opacity=1).shift(RIGHT * 3.5)
+saturn = Circle(radius=0.28, color=YELLOW, fill_opacity=1).shift(RIGHT * 4.5)
+uranus = Circle(radius=0.22, color=GREEN, fill_opacity=1).shift(RIGHT * 5.5)
+neptune = Circle(radius=0.21, color=BLUE, fill_opacity=1).shift(RIGHT * 6.5)
 self.play(Create(mercury), Create(venus), Create(earth), Create(mars), Create(jupiter), Create(saturn), Create(uranus), Create(neptune))
 # Animate orbits
-self.play(Rotate(mercury, angle=TAU * 4, about_point=sun.get_center(venus, angle=TAU * 3, about_point=sun.get_center(earth, angle=TAU * 2, about_point=sun.get_center(mars, angle=TAU * 1.5, about_point=sun.get_Rotate(jupiter, angle=TAU, about_point=sun.get_center()),, angle=TAU * 0.8, about_point=sun.get_center(uranus, angle=TAU * 0.6, about_point=sun.get_center(neptune, angle=TAU * 0.4, about_point=sun.get_center()),run_time=8
-)
+selfRotate(mercury, angle=TAU, about_point=ORIGIN, rate_func=linear, run_time=1(venus, angle=0.8*TAU, about_point=ORIGIN, rate_func=linear, run_timeRotate(earth, angle=0.6*TAU, about_point=ORIGIN, rate_func=linear, run_timeRotate(mars, angle=0.5*TAU, about_point=ORIGIN, rate_func=linear, run_timeRotate(jupiter, angle=0.3*TAU, about_point=ORIGIN, rate_func=linear, run_timeRotate(saturn, angle=0.25*TAU, about_point=ORIGIN, rate_func=linear, run_timeRotate(uranus, angle=0.2*TAU, about_point=ORIGIN, rate_func=linear, run_time=1),une, angle=0.15*TAU, about_point=ORIGIN, rate_func=linear, run_time=1)
+self.play(, angle=TAU, about_point=ORIGIN, rate_func=linear, run_time=1),venus, angle=0.8*TAU, about_point=ORIGIN, rate_func=linear, run_time=1),earth, angle=0.6*TAU, about_point=ORIGIN, rate_func=linear, run_time=1),mars, angle=0.5*TAU, about_point=ORIGIN, rate_func=linear, run_time=1),jupiter, angle=0.3*TAU, about_point=ORIGIN, rate_func=linear, run_time=1),saturn, angle=0.25*TAU, about_point=ORIGIN, rate_func=linear, run_time=1),uranus, angle=0.2*TAU, about_point=ORIGIN, rate_func=linear, run_time=1(neptune, angle=0.15*TAU, about_point=ORIGIN, rate_func=linear, run_time=
 self.play(FadeOut(sun, mercury, venus, earth, mars, jupiter, saturn, uranus, neptune))
