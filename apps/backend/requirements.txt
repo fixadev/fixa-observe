@@ -59,6 +59,7 @@ mdurl==0.1.2
 mistune==3.0.2
 moderngl==5.11.1
 moderngl-window==2.4.4
+mss==9.0.1
 multipledispatch==1.0.0
 mypy-extensions==1.0.0
 nbclient==0.10.0
@@ -67,6 +68,7 @@ nbformat==5.10.4
 networkx==2.8.8
 numpy==1.26.4
 openai==1.41.0
+opencv-python==4.10.0.84
 packaging==24.1
 pandocfilters==1.5.1
 parso==0.8.4

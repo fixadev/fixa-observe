@@ -17,10 +17,8 @@ async def websocket_endpoint(websocket: WebSocket):
     try:
         while True:
             data = await websocket.receive_text()
-            # logger.debug(f"Received WebSocket data of length: {len(data)}")
             generator = ManimGenerator(websocket)
             generator.run(data)
-
 
     except WebSocketDisconnect:
         logger.info("WebSocket disconnected")

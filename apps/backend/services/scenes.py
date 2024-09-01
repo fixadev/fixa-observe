@@ -2,67 +2,9 @@ from manim import *
 from manim.opengl import *
 import numpy as np
 from PIL import Image
-from multiprocessing import Queue
-import threading
-import time
-import os
-
-frame_queue = Queue()
 class BlankScene(Scene):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.is_running = True
-        self.output_file = f'/tmp/manim_output.json'
-
-
     def construct(self):
-        # Start a thread for continuous frame capture
-        self.capture_thread = threading.Thread(target=self.continuous_capture)
-        self.capture_thread.start()
         self.interactive_embed()
-
-    def continuous_capture(self):
-        while self.is_running:
-            # self.capture_and_send_frame()
-            time.sleep(1/30)  # Adjust this for desired frame rate
-
-    # def capture_and_send_frame(self):
-        # print('hi')
-        # try:
-        #     print("Entering capture_and_send_frame method")
-        #     if self.renderer:
-        #         print("OpenGL Renderer is available")
-        #         # Get the pixel buffer from the OpenGL context
-        #         pixel_buffer = self.renderer.get_pixel_buffer()
-        #         # Convert the pixel buffer to a numpy array
-        #         frame = np.frombuffer(pixel_buffer, dtype=np.uint8).reshape(self.camera.pixel_height, self.camera.pixel_width, 4)
-        #         print(f"Frame shape: {frame.shape}")
-        #         # Convert RGBA to RGB
-        #         frame_rgb = frame[:, :, :3]
-        #         img = Image.fromarray(frame_rgb)
-        #         print(f"Image size: {img.size}")
-        #         buffered = io.BytesIO()
-        #         img.save(buffered, format="JPEG", quality=70)
-        #         print(f"Buffered size: {buffered.getbuffer().nbytes} bytes")
-        #         img_str = base64.b64encode(buffered.getvalue()).decode()
-        #         print(f"Encoded image string length: {len(img_str)}")
-        #         self.send_to_websocket(img_str)
-        #         print("Frame sent to websocket")
-        #     else:
-        #         print("OpenGL Renderer is not available")
-        #     print("Exiting capture_and_send_frame method")
-        # except Exception as e:
-        #     print(f"Error in capture_and_send_frame: {e}")
-
-    def cleanup(self):
-        try:
-            os.remove(self.output_file)
-        except FileNotFoundError:
-            pass
-        self.is_running = False
-        if hasattr(self, 'capture_thread'):
-            self.capture_thread.join()
-        super().cleanup()
 
 class TestScene(Scene):
     def construct(self):
