@@ -73,6 +73,7 @@ class ManimGenerator:
                     
                     log_file.write(chunk)
                 
+        self.commands.append("\nself.wait(3)\n")
         self.commands.append("\nquit()\n")
         self.generation_complete.set() # Signal that generation is complete
 
@@ -102,7 +103,7 @@ class ManimGenerator:
     def continuous_capture(self):
         frame_count = 0
         sct = mss.mss()
-        monitor = {"top": 75, "left": 1920 - 1100, "width": 1100, "height": 400}
+        monitor = {"top": 75, "left": 1920 - 1150, "width": 1140, "height": 400}
         while self.capture_thread_running:
             try:
                 screenshot = sct.grab(monitor)
@@ -143,6 +144,7 @@ class ManimGenerator:
        
         generate_thread.join()
         execute_thread.join()
+        print("Execute thread finished")
         self.execute_thread_running = False
         self.capture_thread_running = False
         capture_thread.join()
@@ -152,12 +154,19 @@ class ManimGenerator:
         self.loop.call_soon_threadsafe(self.loop.stop)
         asyncio_thread.join()
         print("Asyncio thread joined")
+        while not frame_queue.empty():
+            try:
+                frame_queue.get_nowait()
+            except Queue.Empty:
+                break
+        
+        frame_queue.put(None)
 
     def _run_send_frames(self):
         self.loop.run_until_complete(self.send_frames_to_websocket())\
     
     async def send_frames_to_websocket(self):
-        while self.running:
+        while self.running or not frame_queue.empty():
             try:
                 if not frame_queue.empty():
                     frame = frame_queue.get_nowait()
