@@ -1,17 +1,28 @@
 from manim import *
 from manim.opengl import *
 from manim.renderer.opengl_renderer import OpenGLRenderer
+from services.shared import frame_queue
+
+config.renderer = "opengl"
+config.write_to_movie = False
 
 class BlankScene(Scene):
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+        super().__init__(frame_queue, *args, **kwargs)
         assert isinstance(self.renderer, OpenGLRenderer), "This scene only works with the OpenGL renderer"
         self.pixel_shape = self.renderer.get_pixel_shape()
 
+        print("################################### QUEUE (scenes.py) = ", frame_queue)
+
     def construct(self):
-        self.interactive_embed()
+        self.interactive_shell("")
+        # self.interactive_embed()
 
 class TestScene(Scene):
+    def __init__(self, *args, **kwargs):
+        super().__init__(frame_queue, *args, **kwargs)
+        print("################################### QUEUE (scenes.py) = ", frame_queue)
+
     def construct(self):
         # Create the sun
         sun = Circle(radius=0.5, fill_opacity=1, color=YELLOW)

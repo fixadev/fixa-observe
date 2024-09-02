@@ -13,7 +13,7 @@ const SplashPage = () => {
   const [text, setText] = useState("");
   const [open, setOpen] = useState(false);
   const [videoPlaying, setVideoPlaying] = useState(false);
-  const { data, sendMessage } = useWebSocket("wss://pixa.ngrok.dev/ws");
+  const { data, sendMessage } = useWebSocket("ws://localhost:8000/ws");
 
   const placeholders = [
     "visualize 2x2 matrix multiplication step-by-step",

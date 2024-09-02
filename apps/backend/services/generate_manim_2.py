@@ -6,14 +6,15 @@ import numpy as np
 import asyncio
 import cv2
 import base64
-from multiprocessing import Queue
+from queue import Queue
+from io import BytesIO
 from services.regex_utils import replace_list_comprehensions, has_unclosed_parenthesis, has_unclosed_bracket
 from services.llm_clients import anthropic_client
-
-frame_queue = Queue()
+from services.shared import frame_queue
+from services.scenes import TestScene, BlankScene
 
 class ManimGenerator:
-    def __init__(self, websocket):
+    def __init__(self, websocket=None):
         self.commands = []
         self.command_ready = threading.Event()
         self.generation_complete = threading.Event()
@@ -45,6 +46,11 @@ class ManimGenerator:
 
 
     def generate(self, text):
+        # print("################################### QUEUE (generate_manim_2.py) = ", frame_queue)
+        # scene = TestScene()
+        # scene.render()
+        return
+        
         with anthropic_client.messages.stream(
             model="claude-3-5-sonnet-20240620",
             max_tokens=4000,
@@ -78,6 +84,13 @@ class ManimGenerator:
 
 
     def execute_commands(self):
+        print("################################### QUEUE (generate_manim_2.py) = ", frame_queue)
+        scene = BlankScene()
+        print('################################### RENDERING SCENE')
+        scene.render()
+        print('################################### SCENE RENDERED')
+        return 
+
         process = subprocess.Popen(["manim", "./services/scenes.py", "-p", f"BlankScene", "--renderer=opengl"], stdin=subprocess.PIPE)
         while self.execute_thread_running:
             if self.commands:
@@ -100,6 +113,10 @@ class ManimGenerator:
         self.execute_thread_running = False
     
     def continuous_capture(self):
+        return
+        if self.websocket is None:
+            return
+
         frame_count = 0
         sct = mss.mss()
         monitor = {"top": 75, "left": 1920 - 1150, "width": 740, "height": 410}
@@ -164,12 +181,23 @@ class ManimGenerator:
         self.loop.run_until_complete(self.send_frames_to_websocket())\
     
     async def send_frames_to_websocket(self):
+        if self.websocket is None:
+            return
+
+        print("################################### Starting to send frames")
+
         while self.running or not frame_queue.empty():
             try:
                 if not frame_queue.empty():
+                    print("################################### Sending frame")
                     frame = frame_queue.get_nowait()
-                    await self.websocket.send_text(frame)
+                    image = frame.convert('RGB')
+                    buffered = BytesIO()
+                    image.save(buffered, format="JPEG")
+                    img_str = base64.b64encode(buffered.getvalue()).decode('utf-8')
+                    await self.websocket.send_text(img_str)
                 else:
+                    print("################################### FRAME QUEUE EMPTY")
                     await asyncio.sleep(1/30)
             except asyncio.CancelledError:
                 break
