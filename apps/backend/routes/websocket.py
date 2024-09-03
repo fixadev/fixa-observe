@@ -16,6 +16,7 @@ async def websocket_endpoint(websocket: WebSocket):
     try:
         while True:
             data = await websocket.receive_text()
+            print('websocket recieved', data)
             # Ensure previous animation is stopped and resources are cleaned up
             generator.run(data)
     except WebSocketDisconnect:

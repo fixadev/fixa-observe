@@ -1,24 +1,37 @@
-# Create the axes
-axes = Axes([-1, 3range=[-1, 9_config={"color": BLUEshift(DOWN * 0.5)
-# Create the graph of x^2
-graph = axes.plot(lambda x: x**2, color=GREEN)
-# Create the area under the curve
-area = axes.get_area(graph, x_range=[0, 2], color=YELLOW, opacity=0.3)
-# Create labels
-x_label = axes.get_x_axis_label("x").shift(RIGHT * 3.5 + UP * 0.5)
-y_label = axes.get_y_axis_label("y").shift(UP * 3.5 + LEFT * 0.5)
-func_label = MathTex("f(x) = x^2").shift(UP * 3 + LEFT * 4)
-integral_label = MathTex("\int x^2 dx = \frac{x^3}{3} + C").shift(UP * 3 + RIGHT * 3)
-# Animate
-self.play(Create(axes), Create(x_label), Create(y_label))
-self.play(Create(graph))
-self.play(Create(func_label))
-self.play(Create(area))
-self.play(Create(integral_label))
-# Show the antiderivative
-antideriv_graph = axes.plot(lambda x: (x**3)/3, color=RED)
-self.play(Create(antideriv_graph))
-# Clean up
-self.play(FadeOut(area), FadeOut(func_label), FadeOut(integral_label))
-final_label = MathTex("F(x) = \int f(x) dx = \frac{x^3}{3} + C").shift(UP * 3)
-self.play(Create(final_label))
+# Create engine cylinder
+cylinder = Cylinder(height=2, radius=0.5, color=BLUE)
+cylinder.shift(LEFT * 3 + UP * 0.5)
+self.play(Create(cylinder))
+# Create piston
+piston = Cylinder(height=0.5, radius=0.45, color=RED)
+piston.shift(LEFT * 3 + DOWN * 0.5)
+self.play(Create(piston))
+# Create crankshaft
+crankshaft = Circle(radius=1, color=GREEN)
+crankshaft.shift(LEFT * 3 + DOWN * 2)
+self.play(Create(crankshaft))
+# Create connecting rod
+rod = Line(piston.get_bottom(), crankshaft.point_from_proportion(0), color=YELLOW)
+self.play(Create(rod))
+# Animate piston movement
+selfpiston.animate.shift(UP * 1),.put_start_and_end_on(piston.get_bottom(), crankshaft.point_from_proportion(0.25ankshaft.animate.rotate(PI/_time=1
+)
+self.play(.shift(DOWN *rod.animate.put_start_and_end_on(piston.get_bottom(), crankshaft.point_from_proportion(0.75shaft.animate.rotate(PI/2),1
+)
+# Create wheels
+wheel1 = Circle(radius=1, color=WHITE)
+wheel1.shift(RIGHT * 3 + DOWN * 2)
+wheel2 = Circle(radius=1, color=WHITE)
+wheel2.shift(RIGHT * 6 + DOWN * 2)
+self.play(Create(wheel1), Create(wheel2))
+# Create axle
+axle = Line(wheel1.get_center(), wheel2.get_center(), color=GRAY)
+self.play(Create(axle))
+# Animate wheel rotation
+self.play(Rotate(wheel1, angle=2*PI), Rotate(wheel2, angle=2*PI), run_time=2)
+# Create car body
+car_body = Rectangle(height=2, width=8, color=ORANGE)
+car_body.shift(RIGHT * 1.5)
+self.play(Create(car_body))
+# Move car
+self.play(animate.shift(RIGHT * 31.animate.shift(RIGHT * 3.animate.shift(RIGHT * 3),le.animate.shift(RIGHT * 3
