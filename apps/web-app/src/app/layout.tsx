@@ -1,6 +1,6 @@
 import "~/styles/globals.css";
 
-import { ThemeProvider } from "@/components/theme-provider";
+import { ThemeProvider } from "@/components/ThemeProvider";
 import { type Metadata } from "next";
 import { TRPCReactProvider } from "~/trpc/react";
 import { ibmPlexSans } from "./fonts";
