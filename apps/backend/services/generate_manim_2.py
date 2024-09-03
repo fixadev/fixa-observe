@@ -97,29 +97,32 @@ class ManimGenerator:
         self.loop.run_until_complete(self.send_frames_to_websocket())\
 
     def run(self, text):
-        self.running = True
-        generate_thread = threading.Thread(target=self.generate, args=(text,))
+        try:
+            self.running = True
+            generate_thread = threading.Thread(target=self.generate, args=(text,))
 
-        # Websocket thread
-        self.loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(self.loop)
-        asyncio_thread = threading.Thread(target=self._run_send_frames, daemon=True)
-        asyncio_thread.start()
-        
-        generate_thread.start()
-        self.run_scene()
-        generate_thread.join()
-        
-        self.running = False
-        self.loop.call_soon_threadsafe(self.loop.stop)
-        asyncio_thread.join()
-        print("Asyncio thread joined")
-        while not frame_queue.empty():
-            try:
-                frame_queue.get_nowait()
-            except Queue.Empty:
-                print("Frame queue empty")
-                break
+            # Websocket thread
+            self.loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(self.loop)
+            asyncio_thread = threading.Thread(target=self._run_send_frames, daemon=True)
+            asyncio_thread.start()
+            
+            generate_thread.start()
+            self.run_scene()
+            generate_thread.join()
+            
+            self.running = False
+            self.loop.call_soon_threadsafe(self.loop.stop)
+            asyncio_thread.join()
+            print("Asyncio thread joined")
+            while not frame_queue.empty():
+                try:
+                    frame_queue.get_nowait()
+                except Queue.Empty:
+                    print("Frame queue empty")
+                    break
+        except Exception as e:
+            print(f"Error in generator.run: {e}")
 
     
     

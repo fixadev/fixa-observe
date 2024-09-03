@@ -62,7 +62,7 @@ const SplashPage = () => {
               className="w-full rounded-lg border-none bg-neutral-800 py-7 pl-4 pr-12 text-lg text-white"
               onKeyDown={(e) => {
                 if (e.key === "Enter") {
-                  setOpen(true);
+                  sendMessage(text);
                 }
               }}
             />
