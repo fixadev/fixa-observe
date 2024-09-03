@@ -1,22 +1,19 @@
 from manim import *
 from manim.opengl import *
 from manim.renderer.opengl_renderer import OpenGLRenderer
-from services.shared import frame_queue
 
 config.renderer = "opengl"
 config.write_to_movie = False
 
 class BlankScene(Scene):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, frame_queue, commands, *args, **kwargs):
         super().__init__(frame_queue, *args, **kwargs)
-        assert isinstance(self.renderer, OpenGLRenderer), "This scene only works with the OpenGL renderer"
-        self.pixel_shape = self.renderer.get_pixel_shape()
-
-        print("################################### QUEUE (scenes.py) = ", frame_queue)
+        # assert isinstance(self.renderer, OpenGLRenderer), "This scene only works with the OpenGL renderer"
+        # self.pixel_shape = self.renderer.get_pixel_shape()
+        self.commands = commands
 
     def construct(self):
-        self.interactive_shell("")
-        # self.interactive_embed()
+        self.interactive_embed(self.commands)
 
 class TestScene(Scene):
     def __init__(self, *args, **kwargs):

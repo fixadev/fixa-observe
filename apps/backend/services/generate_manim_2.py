@@ -16,11 +16,7 @@ from services.scenes import TestScene, BlankScene
 class ManimGenerator:
     def __init__(self, websocket=None):
         self.commands = []
-        self.command_ready = threading.Event()
-        self.generation_complete = threading.Event()
         self.websocket = websocket
-
-        self.execute_thread_running = False
 
         self.system_prompt = """You are an AI teacher. 
     
@@ -44,13 +40,12 @@ class ManimGenerator:
         14. DO NOT USE FOR LOOPS. EVER. DO NOT EVEN THINK ABOUT IT.
         """
 
+    def run_scene(self):
+        scene = BlankScene(frame_queue, self.commands)
+        scene.render()
+
 
     def generate(self, text):
-        # print("################################### QUEUE (generate_manim_2.py) = ", frame_queue)
-        # scene = TestScene()
-        # scene.render()
-        return
-        
         with anthropic_client.messages.stream(
             model="claude-3-5-sonnet-20240620",
             max_tokens=4000,
@@ -71,7 +66,6 @@ class ManimGenerator:
                         cur_chunk = replace_list_comprehensions(cur_chunk)
                         self.commands.append(cur_chunk)
                         # print(cur_chunk)
-                        self.command_ready.set()  # Signal that a command is ready
                         cur_chunk = chunks[-1]
                     else:
                         cur_chunk += chunk
@@ -79,72 +73,11 @@ class ManimGenerator:
                     log_file.write(chunk)
                 
         self.commands.append("\nself.wait(5)\n")
-        self.commands.append("\nquit()\n")
-        self.generation_complete.set() # Signal that generation is complete
-
-
-    def execute_commands(self):
-        print("################################### QUEUE (generate_manim_2.py) = ", frame_queue)
-        scene = BlankScene()
-        print('################################### RENDERING SCENE')
-        scene.render()
-        print('################################### SCENE RENDERED')
-        return 
-
-        process = subprocess.Popen(["manim", "./services/scenes.py", "-p", f"BlankScene", "--renderer=opengl"], stdin=subprocess.PIPE)
-        while self.execute_thread_running:
-            if self.commands:
-                command = self.commands.pop(0)
-                # print(repr(command))
-
-                if process.stdin is not None:
-                    process.stdin.write(command.encode())
-                    process.stdin.flush()
-
-                if command == "\nquit()\n":
-                    process.wait()
-                    break
-            else:
-                self.command_ready.wait(timeout=1)  # Wait for a command to be ready
-                self.command_ready.clear()
-        
-        if process.poll() is None:
-            process.kill()
-        self.execute_thread_running = False
-    
-    def continuous_capture(self):
-        return
-        if self.websocket is None:
-            return
-
-        frame_count = 0
-        sct = mss.mss()
-        monitor = {"top": 75, "left": 1920 - 1150, "width": 740, "height": 410}
-        while self.capture_thread_running:
-            try:
-                screenshot = sct.grab(monitor)
-                frame = np.array(screenshot)
-                frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-                _, buffer = cv2.imencode('.jpg', frame, [cv2.IMWRITE_JPEG_QUALITY, 80])
-                base64_frame = base64.b64encode(buffer).decode('utf-8')
-                frame_queue.put(base64_frame)
-                time.sleep(1/30)
-                frame_count += 1
-            except mss.exception.ScreenShotError:
-                pass
-            except ValueError:
-                pass
-            except frame_queue.full:
-                pass
-            except Exception:
-                time.sleep(1)
-        
+        self.commands.append("")
 
     def run(self, text):
         self.running = True
         generate_thread = threading.Thread(target=self.generate, args=(text,))
-        execute_thread = threading.Thread(target=self.execute_commands)
-        capture_thread = threading.Thread(target=self.continuous_capture)
 
         # Websocket thread
         self.loop = asyncio.new_event_loop()
@@ -152,19 +85,9 @@ class ManimGenerator:
         asyncio_thread = threading.Thread(target=self._run_send_frames, daemon=True)
         asyncio_thread.start()
         
-        self.execute_thread_running = True
-        self.capture_thread_running = True
         generate_thread.start()
-        execute_thread.start()
-        capture_thread.start()
-       
+        self.run_scene()
         generate_thread.join()
-        execute_thread.join()
-        print("Execute thread finished")
-        self.execute_thread_running = False
-        self.capture_thread_running = False
-        capture_thread.join()
-        print("Capture thread finished")
         
         self.running = False
         self.loop.call_soon_threadsafe(self.loop.stop)
@@ -184,12 +107,9 @@ class ManimGenerator:
         if self.websocket is None:
             return
 
-        print("################################### Starting to send frames")
-
         while self.running or not frame_queue.empty():
             try:
                 if not frame_queue.empty():
-                    print("################################### Sending frame")
                     frame = frame_queue.get_nowait()
                     image = frame.convert('RGB')
                     buffered = BytesIO()
@@ -197,7 +117,6 @@ class ManimGenerator:
                     img_str = base64.b64encode(buffered.getvalue()).decode('utf-8')
                     await self.websocket.send_text(img_str)
                 else:
-                    print("################################### FRAME QUEUE EMPTY")
                     await asyncio.sleep(1/30)
             except asyncio.CancelledError:
                 break
