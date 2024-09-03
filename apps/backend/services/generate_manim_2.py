@@ -13,7 +13,8 @@ class ManimGenerator:
     def __init__(self, websocket=None):
         self.commands = []
         self.websocket = websocket
-
+        self.stop_commands = []
+        self.running = False
         self.system_prompt = """You are an AI teacher. 
     
         Generate Manim code that generates a 10-15 second animation that directly illustrates the user prompt.
@@ -38,8 +39,7 @@ class ManimGenerator:
 
     def run_scene(self):
         scene = BlankScene(frame_queue, self.commands)
-        scene.render()
-
+        scene.render(self.stop_commands)
 
     def generate(self, text):
         with anthropic_client.messages.stream(
@@ -104,27 +104,34 @@ class ManimGenerator:
             # Websocket thread
             self.loop = asyncio.new_event_loop()
             asyncio.set_event_loop(self.loop)
-            asyncio_thread = threading.Thread(target=self._run_send_frames, daemon=True)
-            asyncio_thread.start()
+            self.asyncio_thread = threading.Thread(target=self._run_send_frames, daemon=True)
+            self.asyncio_thread.start()
             
             generate_thread.start()
             self.run_scene()
             generate_thread.join()
             
-            self.running = False
-            self.loop.call_soon_threadsafe(self.loop.stop)
-            asyncio_thread.join()
-            print("Asyncio thread joined")
-            while not frame_queue.empty():
-                try:
-                    frame_queue.get_nowait()
-                except Queue.Empty:
-                    print("Frame queue empty")
-                    break
+            self.cleanup()
+
         except Exception as e:
             print(f"Error in generator.run: {e}")
-
     
+
+    def cleanup(self):
+        self.running = False
+        self.stop_commands.append("stop!")
+        self.loop.call_soon_threadsafe(self.loop.stop)
+        self.asyncio_thread.join()
+        print("socket thread joined")
+        while not frame_queue.empty():
+            try:
+                frame_queue.get_nowait()
+            except Queue.Empty:
+                print("Frame queue empty")
+                break
+        self.commands = []
+        self.stop_commands = []
+        print("Generator cleaned up")
     
     
 
