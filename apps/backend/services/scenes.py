@@ -1,3 +1,4 @@
+from queue import Queue
 from manim import *
 from manim.opengl import *
 from manim.renderer.opengl_renderer import OpenGLRenderer
@@ -8,8 +9,9 @@ config.write_to_movie = False
 class BlankScene(Scene):
     def __init__(self, frame_queue, commands, *args, **kwargs):
         super().__init__(frame_queue, *args, **kwargs)
-        # assert isinstance(self.renderer, OpenGLRenderer), "This scene only works with the OpenGL renderer"
+        assert isinstance(self.renderer, OpenGLRenderer), "This scene only works with the OpenGL renderer"
         # self.pixel_shape = self.renderer.get_pixel_shape()
+        # print("####### pixel shape!!!", self.pixel_shape)
         self.commands = commands
 
     def construct(self):
@@ -17,8 +19,7 @@ class BlankScene(Scene):
 
 class TestScene(Scene):
     def __init__(self, *args, **kwargs):
-        super().__init__(frame_queue, *args, **kwargs)
-        print("################################### QUEUE (scenes.py) = ", frame_queue)
+        super().__init__(Queue(), *args, **kwargs)
 
     def construct(self):
         # Create the sun
