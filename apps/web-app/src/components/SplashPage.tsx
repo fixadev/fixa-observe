@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { SignUpDialog } from "@/components/SignUpDialog";
 import AnimatedPlaceholder from "@/components/AnimatedPlaceholder";
@@ -11,8 +11,6 @@ import { VideoPlayer } from "@/components/VideoPlayer";
 
 const SplashPage = () => {
   const [text, setText] = useState("");
-  const [open, setOpen] = useState(false);
-  const [videoPlaying, setVideoPlaying] = useState(false);
   const { data, sendMessage } = useWebSocket("ws://localhost:8000/ws");
 
   const placeholders = [
@@ -23,14 +21,14 @@ const SplashPage = () => {
   ];
   const posthog = usePostHog();
 
-  useEffect(() => {
-    if (open && text.length > 0) {
-      // Means that user submitted prompt
+  const handleSubmit = useCallback(() => {
+    if (text.length > 0) {
+      sendMessage(text);
       posthog.capture("Landing page prompt submitted", {
         prompt: text,
       });
     }
-  }, [open]);
+  }, [text, sendMessage, posthog]);
 
   return (
     <div className="flex h-[100dvh] w-screen flex-col items-center justify-center overflow-hidden p-2 text-white">
@@ -62,14 +60,14 @@ const SplashPage = () => {
               className="w-full rounded-lg border-none bg-neutral-800 py-7 pl-4 pr-12 text-lg text-white"
               onKeyDown={(e) => {
                 if (e.key === "Enter") {
-                  sendMessage(text);
+                  handleSubmit();
                 }
               }}
             />
             {/* <SignUpDialog open={open} onOpenChange={setOpen} /> */}
             <button
               className="absolute right-2 top-1/2 size-10 -translate-y-1/2"
-              onClick={() => sendMessage(text)}
+              onClick={handleSubmit}
             >
               <ArrowRightCircleIcon className="text-neutral-400 hover:cursor-pointer hover:text-neutral-200" />
             </button>
