@@ -1,20 +1,24 @@
-title = Text("How Cells Work").scale(0.8).shift(UP * 3)
-self.play(Write(title))
-cell = Circle(radius=2, color=WHITE).shift(DOWN * 0.5)
-nucleus = Circle(radius=0.5, color=BLUE).shift(DOWN * 0.5)
-membrane = Text("Cell Membrane").scale(0.4).next_to(cell, UP)
-self.play(Create(cell), Create(nucleus), Write(membrane))
-organelles = VGroup(0.2, color=GREEN).shift(LEFT * 1 + DOWN * 0Circle(radius=0.2, color=YELLOW).shift(RIGHT * 1 + DOWN * 0Circle(radius=0.2, color=RED).shift(UP * 1 + DOWN * 0.5)
-)
-organelle_labels = VGroup(ochondria").scale(0.3).next_to(organelles[0], LEFTEndoplasmic Reticulum").scale(0.3).next_to(organelles[1], RIGHTGolgi Apparatus").scale(0.3).next_to(organelles[2
-self.play(Create(organelles), Write(organelle_labels))
-arrow1 = Arrow(start=LEFT * 3, end=cell.get_left(), color=YELLOW)
-arrow2 = Arrow(start=cell.get_right(), end=RIGHT * 3, color=YELLOW)
-input_text = Text("Nutrients In").scale(0.4).next_to(arrow1, LEFT)
-output_text = Text("Waste Out").scale(0.4).next_to(arrow2, RIGHT)
-self.play(Create(arrow1), Create(arrow2), Write(input_text), Write(output_text))
-energy_burst = Star(outer_radius=0.3, color=YELLOW).move_to(organelles[0])
-self.play(Create(energy_burst), energy_burst.animate.scale(1.5).fade_out())
-process_text = Text("Processing and Energy Production").scale(0.5).shift(DOWN * 3)
-self.play(Write(process_text))
-self.play(FadeOut(title), FadeOut(cell), FadeOut(nucleus), FadeOut(membrane), FadeOut(organelles), FadeOut(organelle_labels), FadeOut(arrow1), FadeOut(arrow2), FadeOut(input_text), FadeOut(output_text), FadeOut(process_text))
+# Create the axes
+axes = Axes([-1, 3range=[-1, 9_config={"color": BLUEshift(DOWN * 0.5)
+# Create the graph of x^2
+graph = axes.plot(lambda x: x**2, color=GREEN)
+# Create the area under the curve
+area = axes.get_area(graph, x_range=[0, 2], color=YELLOW, opacity=0.3)
+# Create labels
+x_label = axes.get_x_axis_label("x").shift(RIGHT * 3.5 + UP * 0.5)
+y_label = axes.get_y_axis_label("y").shift(UP * 3.5 + LEFT * 0.5)
+func_label = MathTex("f(x) = x^2").shift(UP * 3 + LEFT * 4)
+integral_label = MathTex("\int x^2 dx = \frac{x^3}{3} + C").shift(UP * 3 + RIGHT * 3)
+# Animate
+self.play(Create(axes), Create(x_label), Create(y_label))
+self.play(Create(graph))
+self.play(Create(func_label))
+self.play(Create(area))
+self.play(Create(integral_label))
+# Show the antiderivative
+antideriv_graph = axes.plot(lambda x: (x**3)/3, color=RED)
+self.play(Create(antideriv_graph))
+# Clean up
+self.play(FadeOut(area), FadeOut(func_label), FadeOut(integral_label))
+final_label = MathTex("F(x) = \int f(x) dx = \frac{x^3}{3} + C").shift(UP * 3)
+self.play(Create(final_label))

@@ -1,10 +1,6 @@
-import subprocess
 import threading
-import time
-import mss
 import numpy as np
 import asyncio
-import cv2
 import base64
 from queue import Queue
 from io import BytesIO
@@ -75,6 +71,31 @@ class ManimGenerator:
         self.commands.append("\nself.wait(5)\n")
         self.commands.append("")
 
+    async def send_frames_to_websocket(self):
+        if self.websocket is None:
+            return
+        while self.running or not frame_queue.empty():
+            try:
+                if not frame_queue.empty():
+                    frame = frame_queue.get_nowait()
+                    image = frame.convert('RGB')
+                    buffered = BytesIO()
+                    image.save(buffered, format="JPEG")
+                    img_str = base64.b64encode(buffered.getvalue()).decode('utf-8')
+                    await self.websocket.send_text(img_str)
+                else:
+                    await asyncio.sleep(1/30)
+            except asyncio.CancelledError:
+                break
+            except Exception as e:
+                print(f"Error in send_frames_to_websocket: {e}")
+                break
+                # await asyncio.sleep(1)
+        await self.websocket.send_text("EOF")
+
+    def _run_send_frames(self):
+        self.loop.run_until_complete(self.send_frames_to_websocket())\
+
     def run(self, text):
         self.running = True
         generate_thread = threading.Thread(target=self.generate, args=(text,))
@@ -100,31 +121,9 @@ class ManimGenerator:
                 print("Frame queue empty")
                 break
 
-    def _run_send_frames(self):
-        self.loop.run_until_complete(self.send_frames_to_websocket())\
     
-    async def send_frames_to_websocket(self):
-        if self.websocket is None:
-            return
-
-        while self.running or not frame_queue.empty():
-            try:
-                if not frame_queue.empty():
-                    frame = frame_queue.get_nowait()
-                    image = frame.convert('RGB')
-                    buffered = BytesIO()
-                    image.save(buffered, format="JPEG")
-                    img_str = base64.b64encode(buffered.getvalue()).decode('utf-8')
-                    await self.websocket.send_text(img_str)
-                else:
-                    await asyncio.sleep(1/30)
-            except asyncio.CancelledError:
-                break
-            except Exception as e:
-                print(f"Error in send_frames_to_websocket: {e}")
-                break
-                # await asyncio.sleep(1)
-        await self.websocket.send_text("EOF")
+    
+    
 
 if __name__ == "__main__":
     generator = ManimGenerator()
