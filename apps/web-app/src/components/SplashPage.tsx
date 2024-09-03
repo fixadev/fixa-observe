@@ -75,7 +75,7 @@ const SplashPage = () => {
         </div>
       </div>
       <div
-        className={`transition-opacity duration-300 ease-in-out ${
+        className={`mt-4 transition-opacity duration-300 ease-in-out ${
           data.imageSrc !== null ? "opacity-100" : "opacity-0"
         }`}
       >
