@@ -1,31 +1,22 @@
-# Create engine components
-piston = Rectangle(width=1, height=2, color=BLUE).shift(LEFT * 2)
-cylinder = Rectangle(width=1.2, height=2.5, color=GRAY).shift(LEFT * 2)
-crankshaft = Circle(radius=0.5, color=RED).shift(DOWN * 2 + LEFT * 2)
-connecting_rod = Line(piston.get_bottom(), crankshaft.get_top(), color=GREEN)
-
-# Create fuel injection
-fuel_drop = Triangle(color=YELLOW, fill_opacity=1).scale(0.2).next_to(cylinder, UP)
-
-# Create exhaust
-exhaust = Arrow(RIGHT, RIGHT * 3, color=GRAY).shift(RIGHT * 2 + UP)
-smoke = VGroup(*[Circle(radius=0.1, fill_opacity=0.5, color=GRAY) for _ in range(5)]).arrange(RIGHT, buff=0.1).next_to(exhaust, RIGHT)
-
-# Create wheels
-wheel1 = Circle(radius=0.8, color=WHITE).shift(LEFT * 3 + DOWN * 3)
-wheel2 = Circle(radius=0.8, color=WHITE).shift(RIGHT * 3 + DOWN * 3)
-
-# Create car body
-car_body = VGroup((width=8, height=2, color=RED, fill_opacity=0.8),(color=RED, fill_opacity=0.8).scale(0.8).rotate(-90 * DEGREES).next_to(Rectangle(width=8, height=2), LEFT, buff=0) * 1.5)
-
-# Animation
-self.play(Create(cylinder), Create(piston), Create(crankshaft), Create(connecting_rod))
-self.play(piston.animate.shift(UP * 0.5), connecting_rod.animate.put_start_and_end_on(piston.get_bottom(), crankshaft.get_top()), crankshaft.animate.rotate(45 * DEGREES))
-self.play(FadeIn(fuel_drop))
-self.play(fuel_drop.animate.shift(DOWN * 0.5), piston.animate.shift(DOWN * 1), connecting_rod.animate.put_start_and_end_on(piston.get_bottom(), crankshaft.get_top()), crankshaft.animate.rotate(-90 * DEGREES))
-self.play(Create(exhaust), FadeIn(smoke))
-self.play(smoke.animate.shift(RIGHT * 2), FadeOut(smoke, shift=RIGHT * 2))
-self.play(Create(wheel1), Create(wheel2))
-self.play(FadeIn(car_body))
-self.play(Rotate(wheel1, angle=180 * DEGREES), Rotate(wheel2, angle=180 * DEGREES), car_body.animate.shift(RIGHT * 2))
-self.play(FadeOut(cylinder, piston, crankshaft, connecting_rod, exhaust, wheel1, wheel2, car_body))
+title = Text("How Cars Work").scale(1.2).shift(UP * 3)
+self.play(Write(title))
+car = Rectangle(width=4, height=2, color=BLUE).shift(DOWN)
+wheels = VGroup(0.5, color=GRAY).shift(LEFT * 1.5 + DOWN * 1),=0.5, color=GRAY).shift(RIGHT * 1.5 + DOWN * 1)
+)
+self.play(Create(car), Create(wheels))
+engine = Rectangle(width=1, height=1, color=RED).shift(DOWN * 0.5)
+self.play(Create(engine))
+fuel_tank = Circle(radius=0.5, color=GREEN).shift(LEFT * 1.5 + DOWN * 0.5)
+self.play(Create(fuel_tank))
+fuel_line = Line(fuel_tank.get_right(), engine.get_left(), color=GREEN)
+self.play(Create(fuel_line))
+exhaust = Line(engine.get_right(), car.get_right(), color=GRAY)
+self.play(Create(exhaust))
+pistons = VGroup(=0.2, height=0.4, color=YELLOW).shift(DOWN * 0.3 + LEFT * 0.2width=0.2, height=0.4, color=YELLOW).shift(DOWN * 0.3 + RIGHT * 0.2)
+)
+self.play(Create(pistons))
+self.play(pistons[0].animate.shift(UP * 0.2), pistons[1].animate.shift(DOWN * 0.2))
+self.play(pistons[0].animate.shift(DOWN * 0.2), pistons[1].animate.shift(UP * 0.2))
+self.play(pistons[0].animate.shift(UP * 0.2), pistons[1].animate.shift(DOWN * 0.2))
+self.play(car.animate.shift(RIGHT * 2), wheels.animate.shift(RIGHT * 2))
+self.play(FadeOut(title, car, wheels, engine, fuel_tank, fuel_line, exhaust, pistons))
