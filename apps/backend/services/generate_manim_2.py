@@ -62,7 +62,7 @@ class ManimGenerator:
                     if not first_byte_received:
                         first_byte_received = True
                         end_time = time.time()
-                        print(f"INFO: first byte received at {end_time - start_time} seconds")
+                        print(f"INFO: first chunk received from anthropic at {end_time - start_time} seconds")
                     if '\n' in chunk:
                         chunks = chunk.split('\n')
                         cur_chunk += '\n'.join(chunks[:-1]) + '\n'
@@ -102,7 +102,7 @@ class ManimGenerator:
         print("EOF", flush=True)
 
     def run(self, text):
-        print("INFO:Inside python script")
+        print("INFO: running generator")
         try:
             self.running = True
             generate_thread = threading.Thread(target=self.generate, args=(text,))
@@ -133,6 +133,7 @@ class ManimGenerator:
     
 
 if __name__ == "__main__":
+    print("INFO:Starting python script")
     generator = ManimGenerator()
     
     if len(sys.argv) > 1:

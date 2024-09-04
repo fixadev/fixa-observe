@@ -1,24 +1,32 @@
-title = Text("How Do Planes Work?").scale(1.2).shift(UP * 3)
-self.play(Write(title))
-plane = SVGMobject("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48cGF0aCBkPSJNNDgwIDI1NkwyNjAuMjkzIDQzNS44MDhhMTYgMTYgMCAwIDEtMjEuMjQ3LTIwLjI5NUwyNzUuODY4IDI4OEgxNDhhMTYuMDMzIDE2LjAzMyAwIDAgMS0xNS4wMS0xMC40ODZMMzIgMGg0OGwxMDkuNjEgMTgyLjY4NkwyODMuMzEgOTcuN2ExNiAxNiAwIDAgMSAyMS4yNDcgMjAuMjk1TDI2OC4xMzIgMjI0SDQ4MHoiIGZpbGw9IiNmZmZmZmYiLz48L3N2Zz4=").scale(0.5).shift(DOWN * 0.5)
-self.play(FadeIn(plane))
-wing = Rectangle(height=0.1, width=3, fill_opacity=1, color=BLUE).shift(UP * 0.5)
-self.play(GrowFromCenter(wing))
-air_top = Text("Faster air flow", color=RED).scale(0.5).next_to(wing, UP)
-air_bottom = Text("Slower air flow", color=GREEN).scale(0.5).next_to(wing, DOWN)
-self.play(Write(air_top), Write(air_bottom))
-lift_arrow = Arrow(start=wing.get_center(), end=wing.get_center() + UP, color=YELLOW)
-lift_text = Text("Lift", color=YELLOW).scale(0.5).next_to(lift_arrow, RIGHT)
+# Create the plane body
+plane = Polygon([-3, 0, 0], [-2, 1, 0], [3, 1, 0], [4, 0, 0], [3, -1, 0], [-2, -1, 0], color=BLUE)
+self.play(Create(plane))
+# Add wings
+left_wing = Triangle([-1, 0, 0], [-2, 2, 0], [1, 0, 0], color=BLUE)
+right_wing = Triangle([-1, 0, 0], [-2, -2, 0], [1, 0, 0], color=BLUE)
+self.play(Create(left_wing), Create(right_wing))
+# Add airflow arrows
+arrow1 = Arrow(start=[-4, 1.5, 0], end=[-2, 1.5, 0], color=WHITE)
+arrow2 = Arrow(start=[-4, 0.5, 0], end=[-2, 1, 0], color=WHITE)
+arrow3 = Arrow(start=[-4, -0.5, 0], end=[-2, 0, 0], color=WHITE)
+arrow4 = Arrow(start=[-4, -1.5, 0], end=[-2, -1, 0], color=WHITE)
+self.play(Create(arrow1), Create(arrow2), Create(arrow3), Create(arrow4))
+# Show lift force
+lift_arrow = Arrow(start=[0, 0, 0], end=[0, 2, 0], color=GREEN, buff=0)
+lift_text = Text("Lift", color=GREEN).scale(0.5).next_to(lift_arrow, RIGHT)
 self.play(GrowArrow(lift_arrow), Write(lift_text))
-thrust_arrow = Arrow(start=plane.get_left(), end=plane.get_left() + LEFT * 2, color=ORANGE)
-thrust_text = Text("Thrust", color=ORANGE).scale(0.5).next_to(thrust_arrow, UP)
+# Show thrust force
+thrust_arrow = Arrow(start=[-3, 0, 0], end=[-5, 0, 0], color=RED, buff=0)
+thrust_text = Text("Thrust", color=RED).scale(0.5).next_to(thrust_arrow, LEFT)
 self.play(GrowArrow(thrust_arrow), Write(thrust_text))
-drag_arrow = Arrow(start=plane.get_right(), end=plane.get_right() + RIGHT * 2, color=RED)
-drag_text = Text("Drag", color=RED).scale(0.5).next_to(drag_arrow, UP)
-self.play(GrowArrow(drag_arrow), Write(drag_text))
-weight_arrow = Arrow(start=plane.get_bottom(), end=plane.get_bottom() + DOWN * 2, color=PURPLE)
-weight_text = Text("Weight", color=PURPLE).scale(0.5).next_to(weight_arrow, RIGHT)
-self.play(GrowArrow(weight_arrow), Write(weight_text))
-explanation = Text("Planes fly due to the balance of these four forces", color=WHITE).scale(0.6).shift(DOWN * 3)
-self.play(Write(explanation))
-self.play(FadeOut(title, plane, wing, air_top, air_bottom, lift_arrow, lift_text, thrust_arrow, thrust_text, drag_arrow, drag_text, weight_arrow, weight_text, explanation))
+# Animate airflow
+self.play(1.animate.shift(RIGHT * 6),animate.shift(RIGHT * 6.animate.shift(RIGHT * 6),animate.shift(RIGHT * 6),2
+# Explain Bernoulli's principle
+bernoulli_text = Text("Bernoulli's Principle:\nFaster air = Lower pressure", color=YELLOW).scale(0.5).shift(UP * 3)
+self.play(Write(bernoulli_text))
+# Show pressure difference
+high_pressure = Text("High Pressure", color=ORANGE).scale(0.4).next_to(plane, DOWN)
+low_pressure = Text("Low Pressure", color=BLUE).scale(0.4).next_to(plane, UP)
+self.play(Write(high_pressure), Write(low_pressure))
+# Final animation
+self.playanimate.shift(UP * 0left_wing.animate.shift(UP * 0.5wing.animate.shift(UP * 0lift_arrow.animate.shift(UP * 0.5),_text.animate.shift(UP * 0.5),animate.shift(UP * 0.5text.animate.shift(UP * 0run_time=2

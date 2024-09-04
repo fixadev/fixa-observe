@@ -13,7 +13,9 @@ export function runScene(prompt, socket) {
       const pythonScriptPath = path.resolve(__dirname, '../backend/services/generate_manim_2.py');
       const pythonPath = path.resolve(__dirname, '../backend');
 
-      console.log(`Initializing python process`);
+      let first_byte_received = false;
+      let start_time = new Date().getTime();
+      console.log(`Initializing python process`, start_time);
       
       const pythonProcess = spawn('python', [pythonScriptPath, prompt], {
         env: {
@@ -38,7 +40,13 @@ export function runScene(prompt, socket) {
           socket.emit('scene_progress', 'EOF');
           console.log('sent EOF')
         } else if (output.includes('INFO')){
-          console.log(`Received data from python process: ${data}`);
+          if (!first_byte_received) {
+          first_byte_received = true;
+          console.log(`Received first log from python process in ${new Date().getTime() - start_time} ms: ${output}`);
+          } else {
+            console.log(`Received data from python process in ${new Date().getTime() - start_time} ms: ${output}`);
+          }
+
         }
       });
   
