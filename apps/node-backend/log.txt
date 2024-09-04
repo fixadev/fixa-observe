@@ -1,32 +1,22 @@
-# Create the plane body
-plane = Polygon([-3, 0, 0], [-2, 1, 0], [3, 1, 0], [4, 0, 0], [3, -1, 0], [-2, -1, 0], color=BLUE)
-self.play(Create(plane))
-# Add wings
-left_wing = Triangle([-1, 0, 0], [-2, 2, 0], [1, 0, 0], color=BLUE)
-right_wing = Triangle([-1, 0, 0], [-2, -2, 0], [1, 0, 0], color=BLUE)
-self.play(Create(left_wing), Create(right_wing))
-# Add airflow arrows
-arrow1 = Arrow(start=[-4, 1.5, 0], end=[-2, 1.5, 0], color=WHITE)
-arrow2 = Arrow(start=[-4, 0.5, 0], end=[-2, 1, 0], color=WHITE)
-arrow3 = Arrow(start=[-4, -0.5, 0], end=[-2, 0, 0], color=WHITE)
-arrow4 = Arrow(start=[-4, -1.5, 0], end=[-2, -1, 0], color=WHITE)
-self.play(Create(arrow1), Create(arrow2), Create(arrow3), Create(arrow4))
-# Show lift force
-lift_arrow = Arrow(start=[0, 0, 0], end=[0, 2, 0], color=GREEN, buff=0)
-lift_text = Text("Lift", color=GREEN).scale(0.5).next_to(lift_arrow, RIGHT)
-self.play(GrowArrow(lift_arrow), Write(lift_text))
-# Show thrust force
-thrust_arrow = Arrow(start=[-3, 0, 0], end=[-5, 0, 0], color=RED, buff=0)
-thrust_text = Text("Thrust", color=RED).scale(0.5).next_to(thrust_arrow, LEFT)
-self.play(GrowArrow(thrust_arrow), Write(thrust_text))
-# Animate airflow
-self.play(1.animate.shift(RIGHT * 6),animate.shift(RIGHT * 6.animate.shift(RIGHT * 6),animate.shift(RIGHT * 6),2
-# Explain Bernoulli's principle
-bernoulli_text = Text("Bernoulli's Principle:\nFaster air = Lower pressure", color=YELLOW).scale(0.5).shift(UP * 3)
-self.play(Write(bernoulli_text))
-# Show pressure difference
-high_pressure = Text("High Pressure", color=ORANGE).scale(0.4).next_to(plane, DOWN)
-low_pressure = Text("Low Pressure", color=BLUE).scale(0.4).next_to(plane, UP)
-self.play(Write(high_pressure), Write(low_pressure))
-# Final animation
-self.playanimate.shift(UP * 0left_wing.animate.shift(UP * 0.5wing.animate.shift(UP * 0lift_arrow.animate.shift(UP * 0.5),_text.animate.shift(UP * 0.5),animate.shift(UP * 0.5text.animate.shift(UP * 0run_time=2
+title = Text("How Cars Work").scale(1.2).shift(UP * 3)
+self.play(Write(title))
+car = Rectangle(width=4, height=2, color=BLUE).shift(DOWN)
+wheels = VGroup(0.5, color=GRAY).shift(LEFT * 1.5 + DOWN * 1),=0.5, color=GRAY).shift(RIGHT * 1.5 + DOWN * 1)
+)
+self.play(Create(car), Create(wheels))
+engine = Rectangle(width=1, height=1, color=RED).shift(DOWN * 0.5)
+self.play(Create(engine))
+fuel_tank = Circle(radius=0.5, color=GREEN).shift(LEFT * 1.5 + DOWN * 0.5)
+self.play(Create(fuel_tank))
+fuel_line = Line(fuel_tank.get_right(), engine.get_left(), color=GREEN)
+self.play(Create(fuel_line))
+exhaust = Line(engine.get_right(), car.get_right(), color=GRAY)
+self.play(Create(exhaust))
+pistons = VGroup(=0.2, height=0.4, color=YELLOW).shift(DOWN * 0.3 + LEFT * 0.2width=0.2, height=0.4, color=YELLOW).shift(DOWN * 0.3 + RIGHT * 0.2)
+)
+self.play(Create(pistons))
+self.play(pistons[0].animate.shift(UP * 0.2), pistons[1].animate.shift(DOWN * 0.2))
+self.play(pistons[0].animate.shift(DOWN * 0.2), pistons[1].animate.shift(UP * 0.2))
+self.play(pistons[0].animate.shift(UP * 0.2), pistons[1].animate.shift(DOWN * 0.2))
+self.play(car.animate.shift(RIGHT * 2), wheels.animate.shift(RIGHT * 2))
+self.play(FadeOut(title, car, wheels, engine, fuel_tank, fuel_line, exhaust, pistons))

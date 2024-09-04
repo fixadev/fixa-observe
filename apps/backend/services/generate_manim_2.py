@@ -50,7 +50,7 @@ class ManimGenerator:
     def generate(self, text):
         first_byte_received = False
         start_time = time.time()
-        print("INFO: making anthropic call")
+        print("INFO: making anthropic call", flush=True)
         with anthropic_client.messages.stream(
             model="claude-3-5-sonnet-20240620",
             max_tokens=4000,
@@ -65,7 +65,7 @@ class ManimGenerator:
                     if not first_byte_received:
                         first_byte_received = True
                         end_time = time.time()
-                        print(f"INFO: first chunk received from anthropic at {end_time - start_time} seconds")
+                        print(f"INFO: first chunk received from anthropic at {end_time - start_time} seconds", flush=True)
                     if '\n' in chunk:
                         chunks = chunk.split('\n')
                         cur_chunk += '\n'.join(chunks[:-1]) + '\n'
@@ -108,7 +108,7 @@ class ManimGenerator:
         print("EOF", flush=True)
 
     def run(self, text):
-        print("INFO: running generator")
+        print("INFO: running generator", flush=True)
         try:
             self.running = True
             generate_thread = threading.Thread(target=self.generate, args=(text,))
