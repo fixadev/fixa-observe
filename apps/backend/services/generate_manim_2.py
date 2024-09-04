@@ -1,4 +1,5 @@
 import threading
+import time
 import numpy as np
 import asyncio
 import base64
@@ -38,9 +39,11 @@ class ManimGenerator:
         14. DO NOT USE FOR LOOPS. EVER. DO NOT EVEN THINK ABOUT IT.
         """
 
+        self.frame_rate = 60
+
     def run_scene(self):
-        scene = BlankScene(frame_queue, self.commands)
-        scene.render(self.stop_commands)
+        scene = BlankScene(frame_queue, self.commands, dimensions=(1920/2, 1080/2), frame_rate=self.frame_rate)
+        scene.render()
 
     def generate(self, text):
         with anthropic_client.messages.stream(
@@ -60,7 +63,7 @@ class ManimGenerator:
                         if has_unclosed_parenthesis(cur_chunk) or has_unclosed_bracket(cur_chunk):
                             cur_chunk += chunks[-1]
                             continue
-                        cur_chunk = replace_list_comprehensions(cur_chunk)
+                        # cur_chunk = replace_list_comprehensions(cur_chunk)
                         self.commands.append(cur_chunk)
                         # print(cur_chunk)
                         cur_chunk = chunks[-1]
@@ -69,7 +72,8 @@ class ManimGenerator:
                     
                     log_file.write(chunk)
                 
-        self.commands.append("\nself.wait(5)\n")
+        # self.commands.append("\nself.wait(5)\n")
+        time.sleep(5)
         self.commands.append("")
 
     async def send_frames_to_websocket(self):
@@ -85,7 +89,7 @@ class ManimGenerator:
                     img_str = base64.b64encode(buffered.getvalue()).decode('utf-8')
                     await self.websocket.send_text(img_str)
                 else:
-                    await asyncio.sleep(1/30)
+                    await asyncio.sleep(1/self.frame_rate)
             except asyncio.CancelledError:
                 break
             except Exception as e:
