@@ -2,16 +2,21 @@ from queue import Queue
 from manim import *
 from manim.opengl import *
 from manim.renderer.opengl_renderer import OpenGLRenderer
+import math
+import numpy as np
 
 config.renderer = "opengl"
 config.write_to_movie = False
 
 class BlankScene(Scene):
-    def __init__(self, frame_queue, commands, *args, **kwargs):
+    def __init__(self, frame_queue, commands, dimensions=(1920/4, 1080/4), frame_rate=60, *args, **kwargs):
+        config.pixel_width = math.floor(dimensions[0])
+        config.pixel_height = math.floor(dimensions[1])
+        config.frame_rate = frame_rate
+
         super().__init__(frame_queue, *args, **kwargs)
+
         assert isinstance(self.renderer, OpenGLRenderer), "This scene only works with the OpenGL renderer"
-        # self.pixel_shape = self.renderer.get_pixel_shape()
-        # print("####### pixel shape!!!", self.pixel_shape)
         self.commands = commands
 
     def construct(self):

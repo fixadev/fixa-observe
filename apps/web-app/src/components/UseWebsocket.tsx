@@ -1,25 +1,21 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 
 export function useWebSocket(url: string) {
-  const [data, setData] = useState<{ imageSrc: string | null; isEOF: boolean }>(
-    {
-      imageSrc: null,
-      isEOF: false,
-    },
-  );
+  const [data, setData] = useState<{ imageSrc: string | null }>({
+    imageSrc: null,
+  });
   const wsRef = useRef<WebSocket | null>(null);
 
   const connectWebSocket = useCallback(() => {
     wsRef.current = new WebSocket(url);
 
-    wsRef.current.onmessage = (event: MessageEvent) => {
+    wsRef.current.onmessage = async (event: MessageEvent) => {
       if (typeof event.data === "string") {
         if (event.data === "EOF") {
-          setData({ imageSrc: null, isEOF: true });
+          setData({ imageSrc: null });
         } else {
           setData({
             imageSrc: `data:image/jpeg;base64,${event.data}`,
-            isEOF: false,
           });
         }
       } else {
