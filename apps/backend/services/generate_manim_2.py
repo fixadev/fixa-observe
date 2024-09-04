@@ -12,6 +12,7 @@ from services.scenes import TestScene, BlankScene
 import sys
 class ManimGenerator:
     def __init__(self, websocket=None):
+        self.start_time = time.time()
         self.commands = []
         self.websocket = websocket
         self.stop_commands = []
@@ -41,7 +42,9 @@ class ManimGenerator:
         self.frame_rate = 60
 
     def run_scene(self):
-        scene = BlankScene(frame_queue, self.commands, dimensions=(1920/2, 1080/2), frame_rate=self.frame_rate)
+        print('INFO: Instantiate BlankScene at', time.time() - self.start_time)
+        scene = BlankScene(frame_queue, self.commands, dimensions=(1920/2, 1080/2), frame_rate=self.frame_rate, start_time=self.start_time)
+        print('INFO: BlankScene instantiated at', time.time() - self.start_time)
         scene.render()
 
     def generate(self, text):
@@ -86,6 +89,8 @@ class ManimGenerator:
         while self.running or not frame_queue.empty():
             try:
                 if not frame_queue.empty():
+                    # start = time.time()
+                    # print('got item in queue', time.time() - self.start_time)
                     frame = frame_queue.get_nowait()
                     image = frame.convert('RGB')
                     buffered = BytesIO()
@@ -93,6 +98,7 @@ class ManimGenerator:
                     frame_base64 = base64.b64encode(buffered.getvalue()).decode('utf-8')
                     print(f"data:image/jpeg;base64,{frame_base64}", flush=True)
                     print("==END_FRAME==", flush=True)
+                    # print('TIME to convert image:', time.time() - start)
                     sys.stdout.flush()
                 else:
                     time.sleep(1/self.frame_rate)
@@ -134,13 +140,13 @@ class ManimGenerator:
 
 if __name__ == "__main__":
     print("INFO:Starting python script")
-    generator = ManimGenerator()
     
     if len(sys.argv) > 1:
         # print('prompt provided', sys.argv[1])
         prompt = sys.argv[1]
     else:
         # print("No prompt provided")
-        prompt = "make a circle"
+        prompt = "how are babies made?"
     
+    generator = ManimGenerator()
     generator.run(prompt)

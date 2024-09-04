@@ -4,12 +4,14 @@ from manim.opengl import *
 from manim.renderer.opengl_renderer import OpenGLRenderer
 import math
 import numpy as np
+import time
 
 config.renderer = "opengl"
 config.write_to_movie = False
+# config.background_color = "#ffffff"
 
 class BlankScene(Scene):
-    def __init__(self, frame_queue, commands, dimensions=(1920/4, 1080/4), frame_rate=60, *args, **kwargs):
+    def __init__(self, frame_queue, commands, dimensions=(1920/4, 1080/4), frame_rate=60, start_time=time.time(), *args, **kwargs):
         config.pixel_width = math.floor(dimensions[0])
         config.pixel_height = math.floor(dimensions[1])
         config.frame_rate = frame_rate
@@ -18,9 +20,10 @@ class BlankScene(Scene):
 
         assert isinstance(self.renderer, OpenGLRenderer), "This scene only works with the OpenGL renderer"
         self.commands = commands
+        self.start_time = start_time
 
     def construct(self):
-        self.interactive_embed(self.commands)
+        self.interactive_embed(self.commands, self.start_time)
 
 class TestScene(Scene):
     def __init__(self, *args, **kwargs):
