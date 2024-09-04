@@ -8,6 +8,7 @@ from services.regex_utils import replace_list_comprehensions, has_unclosed_paren
 from services.llm_clients import anthropic_client
 from services.shared import frame_queue
 from services.scenes import TestScene, BlankScene
+import sys
 
 class ManimGenerator:
     def __init__(self, websocket=None):
@@ -137,4 +138,12 @@ class ManimGenerator:
 
 if __name__ == "__main__":
     generator = ManimGenerator()
-    generator.run("""how do microprocessors work? Make it easy to understand for a high schooler""")
+    
+    if len(sys.argv) > 1:
+        print('prompt provided', sys.argv[1])
+        prompt = sys.argv[1]
+    else:
+        print("No prompt provided")
+        prompt = "make a circle"
+    
+    generator.run(prompt)
