@@ -1,11 +1,45 @@
+import { fileURLToPath } from 'url';
 import { spawn } from 'child_process';
+import path from 'path';
+import { dirname } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+const FRAME_DELIMITER = '==END_FRAME==';
 
 export function runScene(prompt, socket) {
     return new Promise((resolve, reject) => {
-      const pythonProcess = spawn('python', ['../backend/services/generate_manim_2.py', prompt]);
+      const pythonScriptPath = path.resolve(__dirname, '../backend/services/generate_manim_2.py');
+      const pythonPath = path.resolve(__dirname, '../backend');
+
+      console.log(`Initializing python process`);
+      
+      const pythonProcess = spawn('python', [pythonScriptPath, prompt], {
+        env: {
+          ...process.env,
+          PYTHONPATH: `${process.env.PYTHONPATH || ''}:${pythonPath}`
+        }
+      });
+
+      let buffer = '';
   
       pythonProcess.stdout.on('data', (data) => {
-        socket.emit('scene_progress', data.toString());
+        
+        const output = data.toString();
+        buffer += output;
+        if (output.includes(FRAME_DELIMITER)) {
+          const frame = buffer.split(FRAME_DELIMITER)[0];
+          socket.emit('scene_progress', frame );
+          console.log('sent frame')
+          buffer = buffer.slice(buffer.indexOf(FRAME_DELIMITER) + FRAME_DELIMITER.length);
+        } 
+        else if (output.includes('EOF')) {
+          socket.emit('scene_progress', 'EOF');
+          console.log('sent EOF')
+        } else if (output.includes('INFO')){
+          console.log(`Received data from python process: ${data}`);
+        }
       });
   
       pythonProcess.stderr.on('data', (data) => {

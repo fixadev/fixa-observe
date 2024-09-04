@@ -5,13 +5,13 @@ import AnimatedPlaceholder from "@/components/AnimatedPlaceholder";
 import { ibmPlexMono } from "~/app/fonts";
 import { usePostHog } from "posthog-js/react";
 import { ArrowRightCircleIcon } from "@heroicons/react/24/solid";
-import { useWebSocket } from "@/components/UseWebsocket";
+import { useWebSocket } from "@/components/UseSocketIO";
 import { VideoPlayer } from "@/components/VideoPlayer";
 
 export default function LandingPageBody() {
   const [text, setText] = useState("");
   const [loading, setLoading] = useState(false);
-  const { data, sendMessage } = useWebSocket("ws://localhost:8000/ws");
+  const { data, sendMessage } = useWebSocket("ws://localhost:8000");
 
   const posthog = usePostHog();
 

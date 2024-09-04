@@ -10,7 +10,6 @@ from services.llm_clients import anthropic_client
 from services.shared import frame_queue
 from services.scenes import TestScene, BlankScene
 import sys
-
 class ManimGenerator:
     def __init__(self, websocket=None):
         self.commands = []
@@ -46,6 +45,9 @@ class ManimGenerator:
         scene.render()
 
     def generate(self, text):
+        first_byte_received = False
+        start_time = time.time()
+        print("INFO: making anthropic call")
         with anthropic_client.messages.stream(
             model="claude-3-5-sonnet-20240620",
             max_tokens=4000,
@@ -57,6 +59,10 @@ class ManimGenerator:
             with open('log.txt', 'w') as log_file:
                 cur_chunk = ""
                 for chunk in stream.text_stream:
+                    if not first_byte_received:
+                        first_byte_received = True
+                        end_time = time.time()
+                        print(f"INFO: first byte received at {end_time - start_time} seconds")
                     if '\n' in chunk:
                         chunks = chunk.split('\n')
                         cur_chunk += '\n'.join(chunks[:-1]) + '\n'
@@ -76,9 +82,7 @@ class ManimGenerator:
         time.sleep(5)
         self.commands.append("")
 
-    async def send_frames_to_websocket(self):
-        if self.websocket is None:
-            return
+    def send_frames_to_stdout(self):
         while self.running or not frame_queue.empty():
             try:
                 if not frame_queue.empty():
@@ -86,35 +90,29 @@ class ManimGenerator:
                     image = frame.convert('RGB')
                     buffered = BytesIO()
                     image.save(buffered, format="JPEG")
-                    img_str = base64.b64encode(buffered.getvalue()).decode('utf-8')
-                    await self.websocket.send_text(img_str)
+                    frame_base64 = base64.b64encode(buffered.getvalue()).decode('utf-8')
+                    print(f"data:image/jpeg;base64,{frame_base64}", flush=True)
+                    print("==END_FRAME==", flush=True)
+                    sys.stdout.flush()
                 else:
-                    await asyncio.sleep(1/self.frame_rate)
-            except asyncio.CancelledError:
-                break
+                    time.sleep(1/self.frame_rate)
             except Exception as e:
-                print(f"Error in send_frames_to_websocket: {e}")
+                print(f"Error in send_frames_to_stdout: {e}", file=sys.stderr)
                 break
-                # await asyncio.sleep(1)
-        await self.websocket.send_text("EOF")
-
-    def _run_send_frames(self):
-        self.loop.run_until_complete(self.send_frames_to_websocket())\
+        print("EOF", flush=True)
 
     def run(self, text):
+        print("INFO:Inside python script")
         try:
             self.running = True
             generate_thread = threading.Thread(target=self.generate, args=(text,))
-
-            # Websocket thread
-            self.loop = asyncio.new_event_loop()
-            asyncio.set_event_loop(self.loop)
-            self.asyncio_thread = threading.Thread(target=self._run_send_frames, daemon=True)
-            self.asyncio_thread.start()
+            send_frames_thread = threading.Thread(target=self.send_frames_to_stdout, daemon=True)
             
+            send_frames_thread.start()
             generate_thread.start()
             self.run_scene()
             generate_thread.join()
+            send_frames_thread.join()
             
             self.cleanup()
 
@@ -124,19 +122,13 @@ class ManimGenerator:
 
     def cleanup(self):
         self.running = False
-        self.stop_commands.append("stop!")
-        self.loop.call_soon_threadsafe(self.loop.stop)
-        self.asyncio_thread.join()
-        print("socket thread joined")
         while not frame_queue.empty():
             try:
                 frame_queue.get_nowait()
             except Queue.Empty:
-                print("Frame queue empty")
+                # print("Frame queue empty")
                 break
-        self.commands = []
-        self.stop_commands = []
-        print("Generator cleaned up")
+        # print("Generator cleaned up")
     
     
 
@@ -144,10 +136,10 @@ if __name__ == "__main__":
     generator = ManimGenerator()
     
     if len(sys.argv) > 1:
-        print('prompt provided', sys.argv[1])
+        # print('prompt provided', sys.argv[1])
         prompt = sys.argv[1]
     else:
-        print("No prompt provided")
+        # print("No prompt provided")
         prompt = "make a circle"
     
     generator.run(prompt)

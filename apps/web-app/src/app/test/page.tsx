@@ -14,7 +14,7 @@ const ManimStream: React.FC = () => {
 
       wsRef.current.onmessage = (event: MessageEvent) => {
         if (typeof event.data === "string") {
-          setImageSrc(`data:image/jpeg;base64,${event.data}`);
+          setImageSrc(event.data);
         } else {
           console.error("Received non-string data from WebSocket");
         }

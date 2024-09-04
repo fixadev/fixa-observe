@@ -15,7 +15,7 @@ export function useWebSocket(url: string) {
           setData({ imageSrc: null });
         } else {
           setData({
-            imageSrc: `data:image/jpeg;base64,${event.data}`,
+            imageSrc: event.data,
           });
         }
       } else {
