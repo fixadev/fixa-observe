@@ -31,24 +31,26 @@ class ManimGenerator:
         4. Clear or transform previous content before introducing new elements.
         6. Use FadeOut() or similar animations to remove objects no longer needed.
         7. Do not ever use wait()
-        8. DO NOT use any SVG objects or static assets -- including images, SVGs, videos, or audio files.
-        9. Use shapes, text, and animations that can be generated purely with manim code.
-        10. Ensure that the animation aligns perfectly with the text response. 
-        11. Do not include ANY comments or any unnecessary newlines in the code.
-        12. Do not use any LIGHT color variants such as LIGHT_BLUE, LIGHT_GREEN, LIGHT_RED, etc. And never use BROWN.
+        8. DO NOT ever use SVGMobject 
+        9. DO NOT reference any external static assets -- including images, SVGs, videos, or audio files.
+        10. Use shapes, text, and animations that can be generated purely with manim code.
+        11. Ensure that the animation aligns perfectly with the text response. 
+        12. Do not include ANY comments or any unnecessary newlines in the code.
+        13. Do not use any LIGHT color variants such as LIGHT_BLUE, LIGHT_GREEN, LIGHT_RED, etc. And never use BROWN.
         """
         #
         # 14. DO NOT USE FOR LOOPS. EVER. DO NOT EVEN THINK ABOUT IT.
         # 13. DO NOT USE LIST COMPREHENSIONS SUCH AS [Circle(radius=d, color=WHITE, stroke_opacity=0.5).shift(LEFT * 5) for d in planet_distances]. EVER. DO NOT EVEN THINK ABOUT IT.
         #
 
-        self.frame_rate = 60
+        self.frame_rate = 30
 
     def run_scene(self):
         print('INFO: Instantiate BlankScene at', time.time() - self.start_time)
-        scene = BlankScene(frame_queue, self.commands, dimensions=(1920/2, 1080/2), frame_rate=self.frame_rate, start_time=self.start_time)
+        scene = BlankScene(frame_queue, self.commands, dimensions=(1920/2, 1080/2), frame_rate=self.frame_rate, start_time=self.start_time, debug_mode=False)
         print('INFO: BlankScene instantiated at', time.time() - self.start_time)
         scene.render()
+        print('INFO: EVERYTHING completed at', time.time() - self.start_time)
 
     def generate(self, text):
         first_byte_received = False
@@ -68,7 +70,7 @@ class ManimGenerator:
                     if not first_byte_received:
                         first_byte_received = True
                         end_time = time.time()
-                        print(f"INFO: first chunk received from anthropic at {end_time - start_time} seconds", flush=True)
+                        print(f"INFO: first chunk received from anthropic at {end_time - self.start_time} seconds", flush=True)
 
                     if '\n' in chunk:
                         chunks = chunk.split('\n')

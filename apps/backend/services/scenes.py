@@ -11,12 +11,12 @@ config.write_to_movie = False
 # config.background_color = "#ffffff"
 
 class BlankScene(Scene):
-    def __init__(self, frame_queue, commands, dimensions=(1920/4, 1080/4), frame_rate=60, start_time=time.time(), *args, **kwargs):
+    def __init__(self, frame_queue, commands, dimensions=(1920/4, 1080/4), frame_rate=60, start_time=time.time(), debug_mode=False, *args, **kwargs):
         config.pixel_width = math.floor(dimensions[0])
         config.pixel_height = math.floor(dimensions[1])
         config.frame_rate = frame_rate
 
-        super().__init__(frame_queue, debug_mode=True, *args, **kwargs)
+        super().__init__(frame_queue, debug_mode=debug_mode, *args, **kwargs)
 
         assert isinstance(self.renderer, OpenGLRenderer), "This scene only works with the OpenGL renderer"
         self.commands = commands
