@@ -16,7 +16,7 @@ class BlankScene(Scene):
         config.pixel_height = math.floor(dimensions[1])
         config.frame_rate = frame_rate
 
-        super().__init__(frame_queue, *args, **kwargs)
+        super().__init__(frame_queue, debug_mode=True, *args, **kwargs)
 
         assert isinstance(self.renderer, OpenGLRenderer), "This scene only works with the OpenGL renderer"
         self.commands = commands
