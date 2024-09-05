@@ -55,6 +55,11 @@ def replace_list_comprehensions(code):
     
     return re.sub(pattern, replacement, code)
 
+def replace_svg_mobjects(code):
+    # Replace all instances of SVGMobject with Circle
+    pattern = r"SVGMobject\(.*?\)"
+    return re.sub(pattern, "Circle()", code)
+
 code2 = "planets = [Circle(radius=d, color=WHITE) for d in planet_distances]"
 code3 = """rotations = [\n Rotating(planets[i], radians=2*PI, about_point=sun.get_center(), rate_func=linear, run_time=10/(i+1))\n for i in range(8)\n]"""
 code4 = """self.play(\n*[Rotate(p, angle=TAU, about_point=ORIGIN, rate_func=linear, run_time=10/i) for i, p in enumerate(planets, start=1)], run_time=10)"""
@@ -85,11 +90,21 @@ for i in range(8):
     planet.move_to(RIGHT * distances[i])
     planets.add(planet)"""
 
+code8 = """        self.play(Transform(cells, more_cells))
+        # Forming embryo
+        embryo = Ellipse(width=1.5, height=2, color=RED, fill_opacity=0.8)
+        self.play(Transform(more_cells, embryo))
+        # Growing fetus
+        fetus = SVGMobject("baby").set_color(PINK).scale(0.5)
+        self.play(Transform(embryo, fetus))
+        # Final text
+        final_text = Text("9 months later...", color=GREEN).scale(0.8).shift(DOWN * 3)"""
 
 if __name__ == "__main__":
+    print(replace_svg_mobjects(code8))
+    quit()
     print(has_indented_statement(code7))
     extract_indented_statement(code7)
-    quit()
     print(replace_list_comprehensions(code2))
     print("\n")
     print(replace_list_comprehensions(code3))

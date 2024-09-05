@@ -5,7 +5,7 @@ import asyncio
 import base64
 from queue import Queue
 from io import BytesIO
-from services.regex_utils import replace_list_comprehensions, has_unclosed_parenthesis, has_unclosed_bracket, has_indented_statement, extract_indented_statement
+from services.regex_utils import replace_list_comprehensions, has_unclosed_parenthesis, has_unclosed_bracket, has_indented_statement, extract_indented_statement, replace_svg_mobjects
 from services.llm_clients import anthropic_client
 from services.shared import frame_queue
 from services.scenes import TestScene, BlankScene
@@ -90,6 +90,7 @@ class ManimGenerator:
 
                             continue
                         # cur_chunk = replace_list_comprehensions(cur_chunk)
+                        cur_chunk = replace_svg_mobjects(cur_chunk)
                         self.commands.append(cur_chunk)
                         cur_chunk = chunks[-1]
                     else:
