@@ -15,6 +15,7 @@ class BlankScene(Scene):
         config.pixel_width = math.floor(dimensions[0])
         config.pixel_height = math.floor(dimensions[1])
         config.frame_rate = frame_rate
+        config.progress_bar = "none"
 
         super().__init__(frame_queue, debug_mode=debug_mode, *args, **kwargs)
 
