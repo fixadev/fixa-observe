@@ -62,7 +62,6 @@ class ManimGenerator:
         self.frame_rate = 60
 
     def run_scene(self):
-        blockPrint()
         scene = BlankScene(frame_queue, self.commands, dimensions=(1920/2, 1080/2), frame_rate=self.frame_rate)
         scene.render()
 
@@ -93,7 +92,7 @@ class ManimGenerator:
                             continue
                         # cur_chunk = replace_list_comprehensions(cur_chunk)
                         self.commands.append(cur_chunk)
-                        # #print(cur_chunk)
+                        #print(cur_chunk)
                         cur_chunk = chunks[-1]
                     else:
                         cur_chunk += chunk
@@ -108,81 +107,20 @@ class ManimGenerator:
         while self.running or not frame_queue.empty():
             try:
                 if not frame_queue.empty():
-                    pil_image = frame_queue.get_nowait()
-                    rgb_image = pil_image.convert('RGB')
-                    
+                    frame = frame_queue.get_nowait()
+                    rgb_image = frame.convert('RGB')
                     numpy_image = np.array(rgb_image)
-                
-                    if numpy_image.shape[2] != 3:
-                        numpy_image = numpy_image.transpose(1, 0, 2)
-                    
-                    rgb24_frame = np.ascontiguousarray(numpy_image, dtype=np.uint8)   
-                    raw_bytes = rgb24_frame.tobytes()
-
-                    print(raw_bytes.hex(), flush=True)
-                    sys.stdout.flush()
+                    rgb24_frame = np.ascontiguousarray(numpy_image, dtype=np.uint8)
+                    sys.stdout.buffer.write(rgb24_frame.tobytes())
+                    sys.stdout.buffer.flush()
                 else:
                     time.sleep(1/self.frame_rate)
-                    print("frame_queue empty", flush=True)
+                    # print("frame_queue empty", flush=True)
             except Exception as e:
-                #print(f"Error in send_frames_to_stdout: {e}", file=sys.stderr)
+                print(f"Error in send_frames_to_stdout: {e}", file=sys.stderr)
                 break
         print("EOF", flush=True)
  
-    # def generate_and_stream_video(self):
-    #     ffmpeg_command = [
-    #         'ffmpeg',
-    #         '-f', 'rawvideo',
-    #         '-pix_fmt', 'rgb24',
-    #         '-s', f'{self.width}x{self.height}',
-    #         '-r', str(self.frame_rate),
-    #         '-i', '-',
-    #         '-c:v', 'libx264',
-    #         '-preset', 'ultrafast',
-    #         '-tune', 'zerolatency',
-    #         '-f', 'mp4',
-    #         '-movflags', 'frag_keyframe+empty_moov+default_base_moof+faststart',
-    #         'pipe:1'
-    #     ]
-        
-    #     ffmpeg_process = subprocess.Popen(ffmpeg_command, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-
-    #     while self.running or not frame_queue.empty():
-    #         try:
-    #             pil_image = frame_queue.get_nowait()
-                
-    #             # Convert PIL image to RGB mode (if it's not already)
-    #             rgb_image = pil_image.convert('RGB')
-                
-    #             # Convert PIL image to numpy array
-    #             numpy_image = np.array(rgb_image)
-                
-    #             # Ensure the image is in the correct format (height, width, channels)
-    #             if numpy_image.shape[2] != 3:
-    #                 numpy_image = numpy_image.transpose(1, 0, 2)
-                
-    #             # Convert numpy array to contiguous array of the correct type
-    #             rgb24_frame = np.ascontiguousarray(numpy_image, dtype=np.uint8)
-                
-    #             # Convert numpy array to bytes
-    #             raw_bytes = rgb24_frame.tobytes()
-                
-    #             # Write raw bytes to FFmpeg process
-    #             ffmpeg_process.stdin.write(raw_bytes)
-    #             ffmpeg_process.stdin.flush()
-                
-    #             data = ffmpeg_process.stdout.read(1024)
-    #             if data:
-    #                 print(f'<<VIDEO_FRAME>>{data.hex()}', flush=True)
-    #                 sys.stdout.flush()
-    #         except frame_queue.Empty:
-    #             time.sleep(0.1)
-    #         except Exception as e:
-    #             print(f"Error: {e}", file=sys.stderr)
-
-    #     ffmpeg_process.stdin.close()
-    #     ffmpeg_process.wait()
-    #     print("EOF", flush=True)
 
     def run(self, text):
         #print("INFO: running generator", flush=True)
@@ -195,7 +133,7 @@ class ManimGenerator:
         generate_thread.start()
 
         self.run_scene()
-
+        # print('scene done', flush=True)
         generate_thread.join()
         send_frames_thread.join()
         self.cleanup()

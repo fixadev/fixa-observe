@@ -43,7 +43,7 @@ export default function LandingPageBody() {
           onSubmit={handleSubmit}
         />
       </div>
-      {loading && socket && (
+      {socket && (
         <div className="flex w-full justify-center">
           <VideoPlayer className="mt-4" socket={socket} />
         </div>

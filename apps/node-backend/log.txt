@@ -1,27 +1,39 @@
-# Create car body
-car_body = Rectangle(width=4, height=1.5, fill_color=BLUE, fill_opacity=1).shift(UP * 0.5)
-wheels = VGroup(0.5, fill_color=GRAY, fill_opacity=1).shift(LEFT * 1.5 + DOWN * 0Circle(radius=0.5, fill_color=GRAY, fill_opacity=1).shift(RIGHT * 1.5 + DOWN * 0
-car = VGroup(car_body, wheels)
-self.play(Create(car))
-# Create engine
-engine = Rectangle(width=1, height=1, fill_color=RED, fill_opacity=1).shift(UP * 0.5)
-self.play(FadeIn(engine))
-# Create fuel tank
-fuel_tank = Circle(radius=0.3, fill_color=GREEN, fill_opacity=1).shift(RIGHT * 1.5 + UP * 0.5)
-self.play(FadeIn(fuel_tank))
-# Create piston
-piston = Rectangle(width=0.2, height=0.6, fill_color=YELLOW, fill_opacity=1).shift(UP * 0.7)
-self.play(FadeIn(piston))
-# Animate piston movement
-self.play(piston.animate.shift(DOWN * 0.4))
-self.play(piston.animate.shift(UP * 0.4))
-self.play(piston.animate.shift(DOWN * 0.4))
-self.play(piston.animate.shift(UP * 0.4))
-# Show power transmission
-power_line = Line(engine.get_right(), wheels[1].get_center(), color=YELLOW)
-self.play(Create(power_line))
-# Animate car movement
-self.play(car.animate.shift(RIGHT * 3))
-# Clean up
-self.play(FadeOut(engine), FadeOut(fuel_tank), FadeOut(piston), FadeOut(power_line))
-self.play(FadeOut(car))
+# Create train components
+train_body = Rectangle(width=6, height=2, fill_color=BLUE, fill_opacity=1)
+train_body.shift(LEFT * 3)
+wheel1 = Circle(radius=0.5, fill_color=GRAY, fill_opacity=1)
+wheel1.shift(LEFT * 4.5 + DOWN * 1)
+wheel2 = Circle(radius=0.5, fill_color=GRAY, fill_opacity=1)
+wheel2.shift(LEFT * 1.5 + DOWN * 1)
+smokestack = Rectangle(width=0.5, height=1, fill_color=GRAY, fill_opacity=1)
+smokestack.shift(LEFT * 5 + UP * 0.5)
+self.play(Create(train_body), Create(wheel1), Create(wheel2), Create(smokestack))
+# Add train details
+window = Circle(radius=0.4, fill_color=WHITE, fill_opacity=0.8)
+window.shift(LEFT * 2 + UP * 0.2)
+self.play(Create(window))
+# Show train movement
+self.play(train_body.animate.shift(RIGHT * 6), wheel1.animate.shift(RIGHT * 6), wheel2.animate.shift(RIGHT * 6), smokestack.animate.shift(RIGHT * 6), window.animate.shift(RIGHT * 6), run_time=2)
+# Demonstrate wheel rotation
+self.play(Rotate(wheel1, angle=2*PI), Rotate(wheel2, angle=2*PI), run_time=1)
+# Show steam generation
+steam = VGroup()
+steam_puff1 = Circle(radius=0.2, fill_color=WHITE, fill_opacity=0.8)
+steam_puff1.shift(LEFT * 2 + UP * 2)
+steam_puff2 = Circle(radius=0.3, fill_color=WHITE, fill_opacity=0.6)
+steam_puff2.shift(LEFT * 1.5 + UP * 2.5)
+steam_puff3 = Circle(radius=0.4, fill_color=WHITE, fill_opacity=0.4)
+steam_puff3.shift(LEFT * 1 + UP * 3)
+steam.add(steam_puff1, steam_puff2, steam_puff3)
+self.play(Create(steam), run_time=1)
+self.play(steam.animate.shift(UP * 1 + RIGHT * 1), steam.animate.set_opacity(0), run_time=1)
+# Show energy conversion
+fuel = Text("Fuel").scale(0.5)
+fuel.shift(DOWN * 2 + LEFT * 2)
+arrow = Arrow(start=fuel.get_top(), end=train_body.get_bottom(), buff=0.1)
+energy = Text("Energy").scale(0.5)
+energy.next_to(arrow, RIGHT)
+self.play(Write(fuel), Create(arrow), Write(energy))
+self.play(FadeOut(fuel), FadeOut(arrow), FadeOut(energy))
+# Final movement
+self.play(train_body.animate.shift(RIGHT * 6), wheel1.animate.shift(RIGHT * 6), wheel2.animate.shift(RIGHT * 6), smokestack.animate.shift(RIGHT * 6), window.animate.shift(RIGHT * 6), run_time=2)

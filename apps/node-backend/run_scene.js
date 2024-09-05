@@ -2,7 +2,8 @@ import { fileURLToPath } from 'url';
 import { spawn } from 'child_process';
 import path from 'path';
 import { dirname } from 'path';
-import { Readable } from 'stream';
+import fs from 'fs';
+
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -26,40 +27,53 @@ export function runScene(prompt, socket) {
         }
       });
 
+      const outputDir = path.join(__dirname, 'public', 'hls');
+      if (!fs.existsSync(outputDir)) {
+        fs.mkdirSync(outputDir, { recursive: true });
+      }
+
       const ffmpegProcess = spawn('ffmpeg', [
         '-y',
         '-f', 'rawvideo',
-        '-pix_fmt', 'argb',
+        '-vcodec', 'rawvideo',
+        '-pix_fmt', 'rgb24',
         '-s', '960x540',
         // '-framerate', '30', 
         '-i', '-',
-        '-c:v', 'libx264',
-        '-profile:v', 'baseline',
-        '-level:v', '3',
-        '-b:v', '2500',
-        'pipe:1'
+        '-c:v', 'libx264', 
+        '-preset', 'ultrafast',
+        '-tune', 'zerolatency',
+        '-bufsize', '1M',
+        '-maxrate', '2M',
+        '-g', '30',
+        '-f', 'hls',
+        '-hls_init_time', '0.5',
+        '-hls_time', '1',
+        '-hls_list_size', '5',
+        '-hls_flags', 'delete_segments+append_list',
+        '-hls_segment_type', 'mpegts',
+        '-hls_segment_filename', path.join(outputDir, 'stream%03d.ts'),
+        path.join(outputDir, 'playlist.m3u8')
       ]);
+ 
+
+      pythonProcess.stdout.pipe(ffmpegProcess.stdin);
 
       ffmpegProcess.stdout.on('data', (data) => {
-        console.log('FFmpeg stdout', data);
+        console.log('FFmpeg stdout=', data);
+
         socket.emit('video_data', data);
       });
 
       ffmpegProcess.stderr.on('data', (data) => {
-        console.log(`FFmpeg Stderr: ${data}`);
-      });
-
-
-      pythonProcess.stdout.on('data', (data) => {
-        console.log('Python stdout', data);
-        const bytes = Buffer.from(data.toString(), 'hex');
-        ffmpegProcess.stdin.write(bytes);
-
-        if (output.includes('EOF')) {
-          frameStream.push(null);
-          socket.emit('scene_progress', 'EOF');
+        console.log(`\FFmpeg Stderr: ${data}`);
+        if (data.toString().includes('Opening')) {
+          socket.emit('hls_ready', '/hls/playlist.m3u8');
+        }
+        if (data.toString().includes('EOF')) {
+          socket.emit('video_end1', 'EOF');
           console.log('Sent EOF');
-        } 
+        }
       });
 
       pythonProcess.stderr.on('data', (data) => {

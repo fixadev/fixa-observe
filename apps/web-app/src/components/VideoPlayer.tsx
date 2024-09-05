@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import { Socket } from "socket.io-client";
+import Hls from "hls.js";
 
 export function VideoPlayer({
   socket,
@@ -9,37 +10,39 @@ export function VideoPlayer({
   className: string;
 }) {
   const videoRef = useRef<HTMLVideoElement>(null);
-  const mediaSourceRef = useRef<MediaSource | null>(null);
-  const sourceBufferRef = useRef<SourceBuffer | null>(null);
+  const hlsRef = useRef<Hls | null>(null);
 
   useEffect(() => {
-    if ("MediaSource" in window) {
-      mediaSourceRef.current = new MediaSource();
-      videoRef.current!.src = URL.createObjectURL(mediaSourceRef.current);
+    if (Hls.isSupported()) {
+      hlsRef.current = new Hls();
+      //   console.log("loading source");
+      //   hlsRef.current.loadSource("http://localhost:8000/hls/playlist.m3u8");
+      //   console.log("attaching media");
 
-      mediaSourceRef.current.addEventListener("sourceopen", () => {
-        sourceBufferRef.current = mediaSourceRef.current!.addSourceBuffer(
-          'video/mp4; codecs="avc1.42E01E, mp4a.40.2"',
-        );
-
-        socket.on("video_data", (chunk) => {
-          if (sourceBufferRef.current && !sourceBufferRef.current.updating) {
-            console.log("appending buffer", chunk);
-            sourceBufferRef.current.appendBuffer(new Uint8Array(chunk));
-          }
-        });
-
-        socket.on("scene_progress", (progress) => {
-          if (progress === "EOF" && mediaSourceRef.current) {
-            mediaSourceRef.current.endOfStream();
-          }
-        });
+      socket.on("hls_ready", (playlistUrl: string) => {
+        if (videoRef.current && hlsRef.current) {
+          hlsRef.current.loadSource("http://localhost:8000" + playlistUrl);
+          hlsRef.current.attachMedia(videoRef.current);
+          hlsRef.current.on(Hls.Events.MANIFEST_PARSED, () => {
+            void videoRef.current?.play();
+          });
+        }
+      });
+    } else if (videoRef.current?.canPlayType("application/vnd.apple.mpegurl")) {
+      // For browsers that natively support HLS (like Safari)
+      socket.on("hls_ready", (playlistUrl) => {
+        if (videoRef.current) {
+          videoRef.current.src = "http://localhost:8000" + playlistUrl;
+          void videoRef.current.play();
+        }
       });
     }
 
     return () => {
-      socket.off("video_data");
-      socket.off("scene_progress");
+      socket.off("hls_ready");
+      if (hlsRef.current) {
+        hlsRef.current.destroy();
+      }
     };
   }, [socket]);
 
