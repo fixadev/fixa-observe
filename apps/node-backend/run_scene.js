@@ -71,7 +71,7 @@ export function runScene(prompt, socket) {
           socket.emit('hls_ready', '/hls/playlist.m3u8');
         }
         if (data.toString().includes('EOF')) {
-          socket.emit('video_end1', 'EOF');
+          socket.emit('video_end', 'EOF');
           console.log('Sent EOF');
         }
       });
