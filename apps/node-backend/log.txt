@@ -1,22 +1,27 @@
-title = Text("How Cars Work").scale(1.2).shift(UP * 3)
-self.play(Write(title))
-car = Rectangle(width=4, height=2, color=BLUE).shift(DOWN)
-wheels = VGroup(0.5, color=GRAY).shift(LEFT * 1.5 + DOWN * 1),=0.5, color=GRAY).shift(RIGHT * 1.5 + DOWN * 1)
-)
-self.play(Create(car), Create(wheels))
-engine = Rectangle(width=1, height=1, color=RED).shift(DOWN * 0.5)
-self.play(Create(engine))
-fuel_tank = Circle(radius=0.5, color=GREEN).shift(LEFT * 1.5 + DOWN * 0.5)
-self.play(Create(fuel_tank))
-fuel_line = Line(fuel_tank.get_right(), engine.get_left(), color=GREEN)
-self.play(Create(fuel_line))
-exhaust = Line(engine.get_right(), car.get_right(), color=GRAY)
-self.play(Create(exhaust))
-pistons = VGroup(=0.2, height=0.4, color=YELLOW).shift(DOWN * 0.3 + LEFT * 0.2width=0.2, height=0.4, color=YELLOW).shift(DOWN * 0.3 + RIGHT * 0.2)
-)
-self.play(Create(pistons))
-self.play(pistons[0].animate.shift(UP * 0.2), pistons[1].animate.shift(DOWN * 0.2))
-self.play(pistons[0].animate.shift(DOWN * 0.2), pistons[1].animate.shift(UP * 0.2))
-self.play(pistons[0].animate.shift(UP * 0.2), pistons[1].animate.shift(DOWN * 0.2))
-self.play(car.animate.shift(RIGHT * 2), wheels.animate.shift(RIGHT * 2))
-self.play(FadeOut(title, car, wheels, engine, fuel_tank, fuel_line, exhaust, pistons))
+# Create car body
+car_body = Rectangle(width=4, height=1.5, fill_color=BLUE, fill_opacity=1).shift(UP * 0.5)
+wheels = VGroup(0.5, fill_color=GRAY, fill_opacity=1).shift(LEFT * 1.5 + DOWN * 0Circle(radius=0.5, fill_color=GRAY, fill_opacity=1).shift(RIGHT * 1.5 + DOWN * 0
+car = VGroup(car_body, wheels)
+self.play(Create(car))
+# Create engine
+engine = Rectangle(width=1, height=1, fill_color=RED, fill_opacity=1).shift(UP * 0.5)
+self.play(FadeIn(engine))
+# Create fuel tank
+fuel_tank = Circle(radius=0.3, fill_color=GREEN, fill_opacity=1).shift(RIGHT * 1.5 + UP * 0.5)
+self.play(FadeIn(fuel_tank))
+# Create piston
+piston = Rectangle(width=0.2, height=0.6, fill_color=YELLOW, fill_opacity=1).shift(UP * 0.7)
+self.play(FadeIn(piston))
+# Animate piston movement
+self.play(piston.animate.shift(DOWN * 0.4))
+self.play(piston.animate.shift(UP * 0.4))
+self.play(piston.animate.shift(DOWN * 0.4))
+self.play(piston.animate.shift(UP * 0.4))
+# Show power transmission
+power_line = Line(engine.get_right(), wheels[1].get_center(), color=YELLOW)
+self.play(Create(power_line))
+# Animate car movement
+self.play(car.animate.shift(RIGHT * 3))
+# Clean up
+self.play(FadeOut(engine), FadeOut(fuel_tank), FadeOut(piston), FadeOut(power_line))
+self.play(FadeOut(car))

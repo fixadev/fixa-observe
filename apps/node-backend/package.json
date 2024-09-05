@@ -5,7 +5,7 @@
   "main": "main.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node main.js"
+    "dev": "if [ \"$BACKEND_ENV\" = \"node\" ]; then node main.js; else echo \"Skipping Node.js backend\"; fi"
   },
   "author": "",
   "license": "ISC",

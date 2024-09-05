@@ -3,7 +3,7 @@
     "version": "0.1.0",
     "private": true,
     "scripts": {
-      "dev": "./start-backend.sh",
+      "dev": "if [ \"$BACKEND_ENV\" = \"python\" ]; then ./start-backend.sh; else echo \"Skipping Python backend\"; fi",
       "start": "uvicorn main:app",
       "lint": "pylint **/*.py",
       "format": "black ."

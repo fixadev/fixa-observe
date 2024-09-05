@@ -1,8 +1,7 @@
 import logging
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
-from services.generate_manim_2 import ManimGenerator
-import asyncio
+from services.generate_manim_python import ManimGenerator
 
 
 logger = logging.getLogger(__name__)

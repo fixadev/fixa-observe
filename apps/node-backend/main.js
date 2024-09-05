@@ -21,7 +21,9 @@ app.get('/', (req, res) => {
   res.send('Server is running');
 });
 
-io.on('connection', (socket) => {
+const wsNamespace = io.of('/ws');
+
+wsNamespace.on('connection', (socket) => {
   console.log('New client connected');
   socket.on('disconnect', () => {
     console.log('Client disconnected');
@@ -34,5 +36,5 @@ io.on('connection', (socket) => {
 });
 
 server.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
+    console.log(`Node server is running on port ${PORT}`);
 });
