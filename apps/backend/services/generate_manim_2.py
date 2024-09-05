@@ -5,10 +5,11 @@ import asyncio
 import base64
 from queue import Queue
 from io import BytesIO
-from services.regex_utils import replace_list_comprehensions, has_unclosed_parenthesis, has_unclosed_bracket
+from services.regex_utils import replace_list_comprehensions, has_unclosed_parenthesis, has_unclosed_bracket, has_indented_statement, extract_indented_statement
 from services.llm_clients import anthropic_client
 from services.shared import frame_queue
 from services.scenes import TestScene, BlankScene
+import pprint
 import sys
 class ManimGenerator:
     def __init__(self, websocket=None):
@@ -30,14 +31,16 @@ class ManimGenerator:
         4. Clear or transform previous content before introducing new elements.
         6. Use FadeOut() or similar animations to remove objects no longer needed.
         7. Do not ever use wait()
-        8. DO NOT reference any external files or static assets -- including images, SVGs, videos, or audio files.
+        8. DO NOT use any SVG objects or static assets -- including images, SVGs, videos, or audio files.
         9. Use shapes, text, and animations that can be generated purely with manim code.
         10. Ensure that the animation aligns perfectly with the text response. 
         11. Do not include ANY comments or any unnecessary newlines in the code.
         12. Do not use any LIGHT color variants such as LIGHT_BLUE, LIGHT_GREEN, LIGHT_RED, etc. And never use BROWN.
-        13. DO NOT USE LIST COMPREHENSIONS SUCH AS [Circle(radius=d, color=WHITE, stroke_opacity=0.5).shift(LEFT * 5) for d in planet_distances]. EVER. DO NOT EVEN THINK ABOUT IT.
-        14. DO NOT USE FOR LOOPS. EVER. DO NOT EVEN THINK ABOUT IT.
         """
+        #
+        # 14. DO NOT USE FOR LOOPS. EVER. DO NOT EVEN THINK ABOUT IT.
+        # 13. DO NOT USE LIST COMPREHENSIONS SUCH AS [Circle(radius=d, color=WHITE, stroke_opacity=0.5).shift(LEFT * 5) for d in planet_distances]. EVER. DO NOT EVEN THINK ABOUT IT.
+        #
 
         self.frame_rate = 60
 
@@ -66,23 +69,36 @@ class ManimGenerator:
                         first_byte_received = True
                         end_time = time.time()
                         print(f"INFO: first chunk received from anthropic at {end_time - start_time} seconds", flush=True)
+
                     if '\n' in chunk:
                         chunks = chunk.split('\n')
                         cur_chunk += '\n'.join(chunks[:-1]) + '\n'
-                        if has_unclosed_parenthesis(cur_chunk) or has_unclosed_bracket(cur_chunk):
+                        if has_unclosed_parenthesis(cur_chunk) or has_unclosed_bracket(cur_chunk) or has_indented_statement(cur_chunk):
                             cur_chunk += chunks[-1]
+
+                            # Determine whether to add indented statement
+                            if has_indented_statement(cur_chunk):
+                                extracted = extract_indented_statement(cur_chunk)
+                                if len(extracted) > 2:
+                                    # Add the all the text execept for last two elements because 
+                                    # regex selector selects first character of the last line,
+                                    # i.e. "self.play()" becomes ["s", "elf.play()"]
+                                    self.commands.append(''.join(extracted[:-2]))
+                                    cur_chunk = ''.join(extracted[-2:])
+
                             continue
                         # cur_chunk = replace_list_comprehensions(cur_chunk)
                         self.commands.append(cur_chunk)
-                        # print(cur_chunk)
                         cur_chunk = chunks[-1]
                     else:
                         cur_chunk += chunk
                     
                     log_file.write(chunk)
                 
+            self.commands.append(cur_chunk)
+
         # self.commands.append("\nself.wait(5)\n")
-        time.sleep(5)
+        # time.sleep(5)
         self.commands.append("")
 
     def send_frames_to_stdout(self):

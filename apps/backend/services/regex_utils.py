@@ -1,4 +1,5 @@
 import re
+import pprint
 
 def has_unclosed_parenthesis(s):
     stack = []
@@ -21,6 +22,14 @@ def has_unclosed_bracket(s):
                 return True  
             stack.pop()
     return len(stack) > 0 
+
+def has_indented_statement(s):
+    return ':\n' in s # or bool(re.search(r'^    ', s))
+
+def extract_indented_statement(s):
+    group = re.compile(r'(.*:\n(?:    .*\n)+)(^[^\s])', re.MULTILINE)
+    split = group.split(s)
+    return split
 
 def replace_list_comprehensions(code):
     def replacement(match):
@@ -58,8 +67,29 @@ rotations = [
        ]
 """
 
+code7 = """print('hello')
+for i in range(8):
+    planet = Circle(radius=sizes[i], fill_opacity=1, color=colors[i])
+    planet.move_to(RIGHT * distances[i])
+    planets.add(planet)
+sizes = [0.1, 0.15, 0.2, 0.12, 0.4, 0.35, 0.3, 0.28]
+distances = [1, 1.4, 1.8, 2.2, 3, 4, 5, 6]
+for i in range(8):
+    planet = Circle(radius=sizes[i], fill_opacity=1, color=colors[i])
+    planet.move_to(RIGHT * distances[i])
+    planets.add(planet)
+system = VGroup(sun, planets)
+system.shift(DOWN * 0.5)
+for i in range(8):
+    planet = Circle(radius=sizes[i], fill_opacity=1, color=colors[i])
+    planet.move_to(RIGHT * distances[i])
+    planets.add(planet)"""
+
 
 if __name__ == "__main__":
+    print(has_indented_statement(code7))
+    extract_indented_statement(code7)
+    quit()
     print(replace_list_comprehensions(code2))
     print("\n")
     print(replace_list_comprehensions(code3))
