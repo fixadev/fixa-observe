@@ -57,7 +57,7 @@ class TestScene(Scene):
         embryo = Ellipse(width=1.5, height=2, color=RED, fill_opacity=0.8)
         self.play(Transform(more_cells, embryo))
         # Growing fetus
-        fetus = SVGMobject("baby").set_color(PINK).scale(0.5)
+        fetus = Circle().set_color(PINK).scale(0.5)
         self.play(Transform(embryo, fetus))
         # Final text
         final_text = Text("9 months later...", color=GREEN).scale(0.8).shift(DOWN * 3)
