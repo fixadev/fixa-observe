@@ -69,11 +69,7 @@ export default function LandingPageBody() {
           />
           {socket && (
             <div className="flex w-full justify-center">
-              <VideoPlayer
-                className="mt-4"
-                socket={socket}
-                isSocketIO={false}
-              />
+              <VideoPlayer className="mt-4" socket={socket} />
             </div>
           )}
         </div>
