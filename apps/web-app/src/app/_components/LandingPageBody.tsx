@@ -28,23 +28,25 @@ export default function LandingPageBody() {
   }, [text, sendMessage, posthog]);
 
   return (
-    <div className="flex h-[100dvh] w-screen flex-col items-center justify-center overflow-hidden p-2 text-white">
-      <div
-        className={`-mt-3 flex flex-col items-center justify-center gap-2 transition-[margin-top] duration-300 ease-in-out sm:gap-6`}
-      >
-        <LandingPageHeader />
-        <LandingPageTextField
-          text={text}
-          onChange={setText}
-          onSubmit={handleSubmit}
-        />
-      </div>
-      {socket && (
-        <div className="flex w-full justify-center">
-          <VideoPlayer className="mt-4" socket={socket} isSocketIO={false} />
+    <>
+      <div className="flex h-[100dvh] w-screen flex-col items-center justify-center overflow-hidden p-2 text-white">
+        <div
+          className={`-mt-3 flex flex-col items-center justify-center gap-2 transition-[margin-top] duration-300 ease-in-out sm:gap-6`}
+        >
+          <LandingPageHeader />
+          <LandingPageTextField
+            text={text}
+            onChange={setText}
+            onSubmit={handleSubmit}
+          />
+          {socket && (
+            <div className="flex w-full justify-center">
+              <VideoPlayer className="mt-4" socket={socket} />
+            </div>
+          )}
         </div>
-      )}
-    </div>
+      </div>
+    </>
   );
 }
 

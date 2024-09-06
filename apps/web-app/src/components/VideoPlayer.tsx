@@ -25,13 +25,14 @@ export function VideoPlayer({
           });
           hlsRef.current.on(Hls.Events.ERROR, (event, data) => {
             console.error("HLS error", event, data);
-            // Stop reading from HLS stream on HLS error
-            if (videoRef.current) {
-              videoRef.current.pause();
-            }
-            if (hlsRef.current) {
-              hlsRef.current.stopLoad();
-              hlsRef.current.detachMedia();
+            // Stop reading from HLS stream on HLS fatal error
+            if (data.fatal) {
+              if (videoRef.current) {
+                videoRef.current.pause();
+              }
+              if (hlsRef.current) {
+                hlsRef.current.stopLoad();
+              }
             }
           });
         }
