@@ -23,6 +23,17 @@ export function VideoPlayer({
           hlsRef.current.on(Hls.Events.MANIFEST_PARSED, () => {
             void videoRef.current?.play();
           });
+          hlsRef.current.on(Hls.Events.ERROR, (event, data) => {
+            console.error("HLS error", event, data);
+            // Stop reading from HLS stream on HLS error
+            if (videoRef.current) {
+              videoRef.current.pause();
+            }
+            if (hlsRef.current) {
+              hlsRef.current.stopLoad();
+              hlsRef.current.detachMedia();
+            }
+          });
         }
       } else if (
         videoRef.current?.canPlayType("application/vnd.apple.mpegurl")
