@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 
 export type SocketHook = (url: string) => {
   sendMessage: (message: string) => void;
-  socket: any;
+  socket: WebSocket;
 };
 
 export function useWebSocket(url: string) {

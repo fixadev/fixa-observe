@@ -5,12 +5,8 @@ import AnimatedPlaceholder from "@/components/AnimatedPlaceholder";
 import { ibmPlexMono } from "~/app/fonts";
 import { usePostHog } from "posthog-js/react";
 import { ArrowRightCircleIcon } from "@heroicons/react/24/solid";
-import { useSocketIO } from "@/components/UseSocketIO";
 import { useWebSocket, SocketHook } from "@/components/UseWebsocket";
 import { VideoPlayer } from "@/components/VideoPlayer";
-
-const socket: SocketHook =
-  process.env.NEXT_PUBLIC_BACKEND_ENV === "node" ? useSocketIO : useWebSocket;
 
 export default function LandingPageBody() {
   const [text, setText] = useState("");

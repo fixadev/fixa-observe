@@ -1,17 +1,12 @@
 import { useEffect, useRef } from "react";
-import { Socket as SocketIOSocket } from "socket.io-client";
 import Hls from "hls.js";
-
-type SocketType = SocketIOSocket | WebSocket;
 
 export function VideoPlayer({
   socket,
   className,
-  isSocketIO,
 }: {
-  socket: SocketType;
+  socket: WebSocket;
   className: string;
-  isSocketIO: boolean;
 }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const hlsRef = useRef<Hls | null>(null);
@@ -40,32 +35,31 @@ export function VideoPlayer({
       }
     };
 
-    if (isSocketIO) {
-      (socket as SocketIOSocket).on("hls_ready", handleHLSReady);
-    } else {
-      (socket as WebSocket).addEventListener("message", (event) => {
-        console.log("message", event);
-        const data = JSON.parse(event.data);
+    const handleMessage = (event: MessageEvent) => {
+      console.log("message", event);
+      if (typeof event.data === "string") {
+        const data = JSON.parse(event.data) as {
+          type: string;
+          playlistUrl: string;
+        };
         if (data.type === "hls_ready") {
           console.log("HLS ready", data.playlistUrl);
           handleHLSReady(data.playlistUrl);
         } else {
           console.error("Unknown message type", data);
         }
-      });
-    }
+      }
+    };
+
+    socket.addEventListener("message", handleMessage);
 
     return () => {
-      if (isSocketIO) {
-        (socket as SocketIOSocket).off("hls_ready");
-      } else {
-        (socket as WebSocket).removeEventListener("message", handleHLSReady);
-      }
+      socket.removeEventListener("message", handleMessage);
       if (hlsRef.current) {
         hlsRef.current.destroy();
       }
     };
-  }, [socket, isSocketIO]);
+  }, [socket]);
 
   return <video ref={videoRef} controls className={className} />;
 }
