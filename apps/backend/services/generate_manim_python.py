@@ -3,10 +3,9 @@ import time
 import numpy as np
 from fastapi import WebSocket
 import asyncio
-from queue import Queue
+from multiprocessing import Queue
 from services.regex_utils import has_unclosed_parenthesis, has_unclosed_bracket, has_indented_statement, extract_indented_statement, replace_svg_mobjects
 from services.llm_clients import anthropic_client
-from services.shared import frame_queue
 from services.scenes import BlankScene
 import sys
 import os
@@ -20,6 +19,8 @@ class ManimGenerator:
         self.websocket = websocket
         self.stop_commands = []
         self.running = False
+        self.frame_queue = Queue()
+
         self.system_prompt = """You are an AI teacher. 
     
         Generate Manim code that generates a 10-15 second animation that directly illustrates the user prompt.
@@ -49,7 +50,7 @@ class ManimGenerator:
 
     def run_scene(self):
         print('INFO: Instantiate BlankScene at', time.time() - self.start_time)
-        scene = BlankScene(frame_queue, self.commands, dimensions=(1920/2, 1080/2), frame_rate=self.frame_rate, start_time=self.start_time, debug_mode=False)
+        scene = BlankScene(self.frame_queue, self.commands, dimensions=(1920/2, 1080/2), frame_rate=self.frame_rate, start_time=self.start_time, debug_mode=False)
         print('INFO: BlankScene instantiated at', time.time() - self.start_time)
         scene.render()
         print('INFO: EVERYTHING completed at', time.time() - self.start_time)
@@ -107,10 +108,10 @@ class ManimGenerator:
         self.commands.append("")
 
     def send_frames_to_ffmpeg(self):
-        while self.running or not frame_queue.empty():
+        while self.running or not self.frame_queue.empty():
             try:
-                if not frame_queue.empty():
-                    frame = frame_queue.get_nowait()
+                if not self.frame_queue.empty():
+                    frame = self.frame_queue.get_nowait()
                     rgb_image = frame.convert('RGB')
                     numpy_image = np.array(rgb_image)
                     rgb24_frame = np.ascontiguousarray(numpy_image, dtype=np.uint8)
@@ -120,16 +121,16 @@ class ManimGenerator:
                     self.ffmpeg_process.stdin.flush()
                 else:
                     time.sleep(1/self.frame_rate)
-                    # print("frame_queue empty", flush=True)
+                    # print("self.frame_queue empty", flush=True)
             except Exception as e:
                 print(f"Error in send_frames_to_stdout: {e}", file=sys.stderr)
                 break
-        print("EOF", flush=True)
         self.ffmpeg_process.stdin.close()
 
-    def convert_to_hls(self):
-        os.makedirs("public/hls", exist_ok=True)
-        output_dir = "public/hls"
+    def convert_to_hls(self, output_dir):
+        output_dir_str = str(output_dir)
+        print("INFO, CONVERTING TO HLS AND WRITING TO FILE", output_dir)
+        os.makedirs(output_dir, exist_ok=True)
         ffmpeg_command = [
             'ffmpeg',
             '-y',
@@ -150,8 +151,8 @@ class ManimGenerator:
             # '-hls_list_size', '5',
             # '-hls_flags', 'delete_segments+append_list',
             '-hls_segment_type', 'mpegts',
-            '-hls_segment_filename', os.path.join(output_dir, 'stream%03d.ts'),
-            os.path.join(output_dir, 'playlist.m3u8')
+            '-hls_segment_filename', os.path.join(output_dir_str, 'stream%03d.ts'),
+            os.path.join(output_dir_str, 'playlist.m3u8')
         ]
         ffmpeg_process = subprocess.Popen(
             ffmpeg_command,
@@ -162,7 +163,7 @@ class ManimGenerator:
         return ffmpeg_process
 
 
-    def log_ffmpeg_output(self, process, loop, run_started_time):
+    def log_ffmpeg_output(self, process, run_started_time, output_dir):
         def run_cor(obj):
             if asyncio.iscoroutine(obj):
                 try:
@@ -179,10 +180,10 @@ class ManimGenerator:
         async def emit_ready_message(websocket):
             await websocket.send_json({
                 "type": "hls_ready", 
-                "playlistUrl": "http://localhost:8000/public/hls/playlist.m3u8"
+                "playlistUrl": f"http://localhost:8000/{output_dir}/playlist.m3u8"
             })
             
-        def read_stream(stream, loop):
+        def read_stream(stream):
             hls_ready = False
             for line in iter(stream.readline, b''):
                 line = line.decode().strip()
@@ -192,37 +193,38 @@ class ManimGenerator:
                     print(f'SENDING HLS READY in {time.time() - run_started_time} seconds', flush=True)
                     run_cor(emit_ready_message(self.websocket))
                     
-
-        threading.Thread(target=read_stream, args=(process.stderr, loop), daemon=True).start()
-        threading.Thread(target=read_stream, args=(process.stdout, loop), daemon=True).start()
+        threading.Thread(target=read_stream, args=(process.stderr,), daemon=True).start()
+        threading.Thread(target=read_stream, args=(process.stdout,), daemon=True).start()
 
         
 
-    def run(self, text):
+    def run(self, text, output_dir: str):
         run_started_time = time.time()
         print(f"INFO: running generator in {time.time() - run_started_time} seconds", flush=True)
         try:
             self.running = True
-            loop = asyncio.get_running_loop()
-            print('asyncio event loop is', loop)
 
             generate_thread = threading.Thread(target=self.generate, args=(text,), daemon=True)
             send_frames_thread = threading.Thread(target=self.send_frames_to_ffmpeg, daemon=True)
             generate_thread.start()
 
             print(f"INFO: starting ffmpeg in {time.time() - run_started_time} seconds", flush=True)
-            self.ffmpeg_process = self.convert_to_hls()
-            self.log_ffmpeg_output(self.ffmpeg_process, loop, run_started_time)
+            self.ffmpeg_process = self.convert_to_hls(output_dir)
+            self.log_ffmpeg_output(self.ffmpeg_process, run_started_time, output_dir)
             send_frames_thread.start()
 
             print(f"INFO: running scene in {time.time() - run_started_time} seconds", flush=True)
             self.run_scene()
-            # print('scene done', flush=True)
+            print('scene done', flush=True)
+            self.running = False
 
             generate_thread.join()
+            print('generate thread done', flush=True)
             send_frames_thread.join()
-            self.ffmpeg_process.stdin.close()
+            print('send frames thread done', flush=True)
             self.ffmpeg_process.wait()
+            print('ffmpeg process finished', flush=True)
+            print("INFO: ffmpeg process finished, cleaning up", flush=True)
             self.cleanup()
 
         except Exception as e:
@@ -230,14 +232,16 @@ class ManimGenerator:
     
 
     def cleanup(self):
-        self.running = False
-        while not frame_queue.empty():
+        if self.ffmpeg_process is not None:
+            self.ffmpeg_process.stdin.close()
+            self.ffmpeg_process.wait()
+        while not self.frame_queue.empty():
             try:
-                frame_queue.get_nowait()
+                self.frame_queue.get_nowait()
             except Queue.Empty:
-                # print("Frame queue empty")
+                print("Frame queue empty")
                 break
-        # print("Generator cleaned up")
+        print("Generator cleaned up")
     
     
 
