@@ -35,3 +35,5 @@ services/media
 
 log.txt
 log2.txt
+
+public/hls

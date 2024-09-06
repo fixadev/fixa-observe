@@ -13,5 +13,5 @@ LAMBDA_API_KEY = os.getenv("LAMBDA_API_KEY")
 LAMBDA_BASE_URL = 'https://api.lambdalabs.com/v1'
 PLAYHT_API_KEY = os.getenv("PLAYHT_API_KEY")
 PLAYHT_USER_ID = os.getenv("PLAYHT_USER_ID")
-
+BASE_URL = os.getenv("BASE_URL")
 # Manim configuration

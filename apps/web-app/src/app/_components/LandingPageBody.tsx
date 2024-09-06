@@ -5,15 +5,11 @@ import AnimatedPlaceholder from "@/components/AnimatedPlaceholder";
 import { ibmPlexMono } from "~/app/fonts";
 import { usePostHog } from "posthog-js/react";
 import { ArrowRightCircleIcon } from "@heroicons/react/24/solid";
-import { useSocketIO } from "@/components/UseSocketIO";
 import { useWebSocket, SocketHook } from "@/components/UseWebsocket";
 import { VideoPlayer } from "@/components/VideoPlayer";
 import { useAuth, useClerk } from "@clerk/nextjs";
 import { ANONYMOUS_PROMPT_SUBMISSION_LIMIT } from "~/lib/constants";
 import BookCallDialog from "./BookCallDialog";
-
-const socket: SocketHook =
-  process.env.NEXT_PUBLIC_BACKEND_ENV === "node" ? useSocketIO : useWebSocket;
 
 export default function LandingPageBody() {
   const posthog = usePostHog();
@@ -21,7 +17,7 @@ export default function LandingPageBody() {
   const [loading, setLoading] = useState(false);
 
   // const { sendMessage, socket: WebSocket } = socket("ws://localhost:8000/ws");
-  const { sendMessage, socket } = useSocketIO("ws://localhost:8000/ws");
+  const { sendMessage, socket } = useWebSocket("ws://localhost:8000/ws");
 
   const { openSignIn } = useClerk();
   const { isSignedIn } = useAuth();
@@ -71,12 +67,16 @@ export default function LandingPageBody() {
             onChange={setText}
             onSubmit={handleSubmit}
           />
+          {socket && (
+            <div className="flex w-full justify-center">
+              <VideoPlayer
+                className="mt-4"
+                socket={socket}
+                isSocketIO={false}
+              />
+            </div>
+          )}
         </div>
-        {socket && (
-          <div className="flex w-full justify-center">
-            <VideoPlayer className="mt-4" socket={socket} />
-          </div>
-        )}
       </div>
       <BookCallDialog
         open={bookCallDialogOpen}
