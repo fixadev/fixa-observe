@@ -46,7 +46,11 @@ export default function RootLayout({
                     <UserButton />
                   </SignedIn>
                   <SignedOut>
-                    <SignInButton mode="modal" />
+                    <SignInButton
+                      mode="modal"
+                      forceRedirectUrl="/"
+                      signUpForceRedirectUrl="/"
+                    />
                   </SignedOut>
                 </div>
 
