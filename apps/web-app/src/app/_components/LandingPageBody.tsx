@@ -9,6 +9,7 @@ import { useSocketIO } from "@/components/UseSocketIO";
 import { useWebSocket, SocketHook } from "@/components/UseWebsocket";
 import { VideoPlayer } from "@/components/VideoPlayer";
 import { useAuth, useClerk } from "@clerk/nextjs";
+import { ANONYMOUS_PROMPT_SUBMISSION_LIMIT } from "~/lib/constants";
 
 const socket: SocketHook =
   process.env.NEXT_PUBLIC_BACKEND_ENV === "node" ? useSocketIO : useWebSocket;
@@ -28,16 +29,21 @@ export default function LandingPageBody() {
     if (text.length > 0) {
       // If not signed in, check if the user has submitted a prompt before
       if (!isSignedIn) {
-        const submittedFirstPrompt = localStorage.getItem(
-          "submittedFirstPrompt",
-        );
+        const promptsSubmitted = localStorage.getItem("promptsSubmitted");
         // If the user has not submitted a prompt before, allow them to submit 1 prompt
         // Otherwise, open the sign in modal
-        if (!submittedFirstPrompt) {
-          localStorage.setItem("submittedFirstPrompt", "true");
+        if (!promptsSubmitted) {
+          localStorage.setItem("promptsSubmitted", "1");
         } else {
-          openSignIn();
-          return;
+          const promptsSubmittedInt = parseInt(promptsSubmitted);
+          if (promptsSubmittedInt >= ANONYMOUS_PROMPT_SUBMISSION_LIMIT) {
+            openSignIn();
+            return;
+          }
+          localStorage.setItem(
+            "promptsSubmitted",
+            (promptsSubmittedInt + 1).toString(),
+          );
         }
       }
 
