@@ -5,13 +5,19 @@ import AnimatedPlaceholder from "@/components/AnimatedPlaceholder";
 import { ibmPlexMono } from "~/app/fonts";
 import { usePostHog } from "posthog-js/react";
 import { ArrowRightCircleIcon } from "@heroicons/react/24/solid";
-import { useWebSocket } from "@/components/UseSocketIO";
+import { useSocketIO } from "@/components/UseSocketIO";
+import { useWebSocket, SocketHook } from "@/components/UseWebsocket";
 import { VideoPlayer } from "@/components/VideoPlayer";
+
+const socket: SocketHook =
+  process.env.NEXT_PUBLIC_BACKEND_ENV === "node" ? useSocketIO : useWebSocket;
 
 export default function LandingPageBody() {
   const [text, setText] = useState("");
   const [loading, setLoading] = useState(false);
-  const { data, sendMessage } = useWebSocket("ws://localhost:8000");
+
+  // const { sendMessage, socket: WebSocket } = socket("ws://localhost:8000/ws");
+  const { sendMessage, socket } = useSocketIO("ws://localhost:8000/ws");
 
   const posthog = usePostHog();
 
@@ -25,12 +31,6 @@ export default function LandingPageBody() {
     }
   }, [text, sendMessage, posthog]);
 
-  useEffect(() => {
-    if (data.imageSrc !== null) {
-      setLoading(false);
-    }
-  }, [data.imageSrc]);
-
   return (
     <div className="flex h-[100dvh] w-screen flex-col items-center justify-center overflow-hidden p-2 text-white">
       <div
@@ -43,9 +43,9 @@ export default function LandingPageBody() {
           onSubmit={handleSubmit}
         />
       </div>
-      {(loading || data.imageSrc !== null) && (
+      {socket && (
         <div className="flex w-full justify-center">
-          <VideoPlayer className="mt-4" imageSrc={data.imageSrc} />
+          <VideoPlayer className="mt-4" socket={socket} />
         </div>
       )}
     </div>

@@ -1,5 +1,10 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 
+export type SocketHook = (url: string) => {
+  sendMessage: (message: string) => void;
+  socket: any;
+};
+
 export function useWebSocket(url: string) {
   const [data, setData] = useState<{ imageSrc: string | null }>({
     imageSrc: null,
@@ -34,6 +39,7 @@ export function useWebSocket(url: string) {
 
     wsRef.current.onerror = (error) => {
       console.error("WebSocket error:", error);
+      console.log("WebSocket readyState:", wsRef.current?.readyState);
     };
   }, [url]);
 
@@ -53,5 +59,5 @@ export function useWebSocket(url: string) {
     };
   }, [connectWebSocket]);
 
-  return { data, sendMessage };
+  return { sendMessage, socket: wsRef.current };
 }

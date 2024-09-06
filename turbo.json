@@ -12,11 +12,14 @@
     },
     "dev": {
       "cache": false,
-      "persistent": true
+      "persistent": true,
+      "env": ["BACKEND_ENV"]
     },
     "backend#dev": {
       "cache": false,
-      "persistent": true
+      "persistent": true,
+      "env": ["BACKEND_ENV"]
     }
-  }
+  },
+  "globalEnv": ["BACKEND_ENV"]
 }

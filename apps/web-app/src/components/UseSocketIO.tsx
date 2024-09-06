@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { io, Socket } from "socket.io-client";
 
-export function useWebSocket(url: string) {
+export function useSocketIO(url: string) {
   const [data, setData] = useState<{ imageSrc: string | null }>({
     imageSrc: null,
   });
@@ -65,5 +65,5 @@ export function useWebSocket(url: string) {
     };
   }, [connectSocket]);
 
-  return { data, sendMessage };
+  return { sendMessage, socket };
 }

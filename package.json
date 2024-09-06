@@ -3,7 +3,8 @@
   "private": true,
   "scripts": {
     "build": "turbo build",
-    "dev": "turbo dev --concurrency 20",
+    "dev:python": "NEXT_PUBLIC_BACKEND_ENV=python BACKEND_ENV=python turbo dev --concurrency 20",
+    "dev:node": "NEXT_PUBLIC_BACKEND_ENV=node BACKEND_ENV=node turbo dev --concurrency 20",
     "lint": "turbo lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\""
   },
