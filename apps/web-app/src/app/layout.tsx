@@ -52,7 +52,7 @@ export default function RootLayout({
               disableTransitionOnChange
             >
               <TRPCReactProvider>
-                <div className="absolute left-0 top-0 flex w-full items-center justify-between bg-neutral-900 p-4">
+                <div className="absolute left-0 top-0 flex h-16 w-full items-center justify-between bg-neutral-900 p-4">
                   <Logo />
                   <SignedIn>
                     <UserButton />
@@ -66,7 +66,7 @@ export default function RootLayout({
                   </SignedOut>
                 </div>
 
-                {children}
+                <div className="mt-16">{children}</div>
               </TRPCReactProvider>
             </ThemeProvider>
           </body>

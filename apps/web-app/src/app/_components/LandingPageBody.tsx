@@ -20,6 +20,20 @@ export default function LandingPageBody() {
   const [text, setText] = useState("");
   const { sendMessage, socket } = useWebSocket("ws://localhost:8000/ws");
 
+  const chatHistoryRef = useRef<HTMLDivElement>(null);
+
+  // Function to scroll to bottom of chat history
+  const scrollToBottom = () => {
+    if (chatHistoryRef.current) {
+      chatHistoryRef.current.scrollTop = chatHistoryRef.current.scrollHeight;
+    }
+  };
+
+  // Scroll to bottom on mount and when chat history changes
+  useEffect(() => {
+    scrollToBottom();
+  }, [socket, chatHistory]);
+
   const { openSignIn } = useClerk();
   const { isSignedIn } = useAuth();
   const handleSubmit = useCallback(() => {
@@ -62,7 +76,7 @@ export default function LandingPageBody() {
 
   return (
     <>
-      <div className="flex h-[100dvh] w-screen flex-col items-center justify-center overflow-hidden p-2 text-white">
+      <div className="flex h-[calc(100dvh-64px)] w-screen flex-col items-center justify-center overflow-hidden p-2 text-white">
         {state === "initial" && (
           <div
             className={`-mt-3 flex flex-col items-center justify-center gap-2 transition-[margin-top] duration-300 ease-in-out sm:gap-6`}
@@ -77,15 +91,25 @@ export default function LandingPageBody() {
         )}
 
         {state === "chat" && (
-          <div className="w-full max-w-screen-lg">
-            {chatHistory.map((text) => (
-              <div key={text} className="mb-2 flex w-full justify-end">
-                <div className="inline-block rounded-lg bg-neutral-800 p-2">
-                  {text}
+          <div className="flex h-full w-full max-w-screen-lg flex-col justify-end px-4">
+            <div
+              ref={chatHistoryRef}
+              className="-mx-4 mb-4 overflow-y-auto px-4"
+            >
+              {chatHistory.map((text, i) => (
+                <div
+                  key={i}
+                  className="mb-2 flex w-full flex-col items-end gap-0.5"
+                >
+                  <div className="inline-block rounded-lg bg-neutral-700 px-4 py-3 text-base text-white">
+                    {text}
+                  </div>
                 </div>
-              </div>
-            ))}
-            {socket && <VideoPlayer className="mb-4 w-full" socket={socket} />}
+              ))}
+              {socket && (
+                <VideoPlayer className="mb-4 w-full" socket={socket} />
+              )}
+            </div>
             <LandingPageTextField
               className="mb-2"
               placeholder="ask pixa anything"
