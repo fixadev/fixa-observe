@@ -16,6 +16,8 @@
   },
   "dependencies": {
     "@auth/prisma-adapter": "^1.6.0",
+    "@clerk/nextjs": "^5.4.1",
+    "@clerk/themes": "^2.1.27",
     "@heroicons/react": "^2.1.5",
     "@prisma/client": "^5.14.0",
     "@radix-ui/react-alert-dialog": "^1.1.1",
