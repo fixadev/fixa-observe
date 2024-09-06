@@ -45,6 +45,8 @@ export function VideoPlayer({
         if (data.type === "hls_ready") {
           console.log("HLS ready", data.playlistUrl);
           handleHLSReady(data.playlistUrl);
+        } else if (data.type === "error") {
+          // TODO: display error toast
         } else {
           console.error("Unknown message type", data);
         }

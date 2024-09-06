@@ -1,15 +1,15 @@
+import sys
+import os
+import subprocess
 import threading
 import time
 import numpy as np
 from fastapi import WebSocket
-import asyncio
 from multiprocessing import Queue
 from services.regex_utils import has_unclosed_parenthesis, has_unclosed_bracket, has_indented_statement, extract_indented_statement, replace_svg_mobjects
+from services.async_utils import run_cor
 from services.llm_clients import anthropic_client
 from services.scenes import BlankScene
-import sys
-import os
-import subprocess
 
 
 class ManimGenerator:
@@ -129,7 +129,6 @@ class ManimGenerator:
 
     def convert_to_hls(self, output_dir):
         output_dir_str = str(output_dir)
-        print("INFO, CONVERTING TO HLS AND WRITING TO FILE", output_dir)
         os.makedirs(output_dir, exist_ok=True)
         ffmpeg_command = [
             'ffmpeg',
@@ -164,19 +163,6 @@ class ManimGenerator:
 
 
     def log_ffmpeg_output(self, process, run_started_time, output_dir):
-        def run_cor(obj):
-            if asyncio.iscoroutine(obj):
-                try:
-                    loop = asyncio.new_event_loop()
-                    result = loop.run_until_complete(obj)
-                    return result
-                except Exception as e:
-                    print(f"Error in run_cor: {e}", file=sys.stderr)
-                    return None
-            else:
-                print(f"INFO: run_cor obj is not a coroutine: {obj}", flush=True)
-                return obj
-            
         async def emit_ready_message(websocket):
             await websocket.send_json({
                 "type": "hls_ready", 
@@ -191,12 +177,12 @@ class ManimGenerator:
                 if "Opening" in line and not hls_ready:
                     hls_ready = True
                     print(f'SENDING HLS READY in {time.time() - run_started_time} seconds', flush=True)
+                    # executes async function in event loop
                     run_cor(emit_ready_message(self.websocket))
                     
         threading.Thread(target=read_stream, args=(process.stderr,), daemon=True).start()
         threading.Thread(target=read_stream, args=(process.stdout,), daemon=True).start()
 
-        
 
     def run(self, text, output_dir: str):
         run_started_time = time.time()
@@ -219,12 +205,8 @@ class ManimGenerator:
             self.running = False
 
             generate_thread.join()
-            print('generate thread done', flush=True)
             send_frames_thread.join()
-            print('send frames thread done', flush=True)
             self.ffmpeg_process.wait()
-            print('ffmpeg process finished', flush=True)
-            print("INFO: ffmpeg process finished, cleaning up", flush=True)
             self.cleanup()
 
         except Exception as e:
@@ -235,12 +217,7 @@ class ManimGenerator:
         if self.ffmpeg_process is not None:
             self.ffmpeg_process.stdin.close()
             self.ffmpeg_process.wait()
-        while not self.frame_queue.empty():
-            try:
-                self.frame_queue.get_nowait()
-            except Queue.Empty:
-                print("Frame queue empty")
-                break
+            
         print("Generator cleaned up")
     
     
