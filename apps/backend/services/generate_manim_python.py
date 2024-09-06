@@ -10,6 +10,7 @@ from services.regex_utils import has_unclosed_parenthesis, has_unclosed_bracket,
 from services.async_utils import run_cor
 from services.llm_clients import anthropic_client
 from services.scenes import BlankScene
+from config import BASE_URL
 
 
 class ManimGenerator:
@@ -166,7 +167,7 @@ class ManimGenerator:
         async def emit_ready_message(websocket):
             await websocket.send_json({
                 "type": "hls_ready", 
-                "playlistUrl": f"http://localhost:8000/{output_dir}/playlist.m3u8"
+                "playlistUrl": f"{BASE_URL}/{output_dir}/playlist.m3u8"
             })
             
         def read_stream(stream):
@@ -211,6 +212,10 @@ class ManimGenerator:
 
         except Exception as e:
             print(f"Error in generator.run: {e}")
+            run_cor(self.websocket.send_json({
+                "type": "error",
+                "error": str(e)
+            }))
     
 
     def cleanup(self):
