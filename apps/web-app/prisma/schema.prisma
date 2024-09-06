@@ -19,5 +19,5 @@ model User {
   email     String   @unique
   firstName String?
   lastName  String?
-  generationsLeft Int @default(30)
+  generationsLeft Int @default(15)
 }
