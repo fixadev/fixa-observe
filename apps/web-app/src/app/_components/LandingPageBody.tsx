@@ -10,18 +10,18 @@ import { VideoPlayer } from "@/components/VideoPlayer";
 import { useAuth, useClerk } from "@clerk/nextjs";
 import { ANONYMOUS_PROMPT_SUBMISSION_LIMIT } from "~/lib/constants";
 import BookCallDialog from "./BookCallDialog";
+import { cn } from "~/lib/utils";
 
 export default function LandingPageBody() {
+  const [state, setState] = useState<"initial" | "chat">("initial");
+  const [chatHistory, setChatHistory] = useState<string[]>([]);
+
   const posthog = usePostHog();
   const [text, setText] = useState("");
-  const [loading, setLoading] = useState(false);
-
-  // const { sendMessage, socket: WebSocket } = socket("ws://localhost:8000/ws");
   const { sendMessage, socket } = useWebSocket("ws://localhost:8000/ws");
 
   const { openSignIn } = useClerk();
   const { isSignedIn } = useAuth();
-
   const handleSubmit = useCallback(() => {
     if (text.length > 0) {
       // If not signed in, check if the user has submitted a prompt before
@@ -45,34 +45,59 @@ export default function LandingPageBody() {
         }
       }
 
-      setLoading(true);
       sendMessage(text);
       posthog.capture("Landing page prompt submitted", {
         prompt: text,
       });
+      setChatHistory([...chatHistory, text]);
+      setText("");
+
+      if (state === "initial") {
+        setState("chat");
+      }
     }
-  }, [text, isSignedIn, openSignIn, setLoading, sendMessage, posthog]);
+  }, [state, text, isSignedIn, openSignIn, sendMessage, posthog]);
 
   const [bookCallDialogOpen, setBookCallDialogOpen] = useState(false);
 
   return (
     <>
       <div className="flex h-[100dvh] w-screen flex-col items-center justify-center overflow-hidden p-2 text-white">
-        <div
-          className={`-mt-3 flex flex-col items-center justify-center gap-2 transition-[margin-top] duration-300 ease-in-out sm:gap-6`}
-        >
-          <LandingPageHeader />
-          <LandingPageTextField
-            text={text}
-            onChange={setText}
-            onSubmit={handleSubmit}
-          />
-          {socket && (
-            <div className="flex w-full justify-center">
-              <VideoPlayer className="mt-4" socket={socket} />
+        {state === "initial" && (
+          <div
+            className={`-mt-3 flex flex-col items-center justify-center gap-2 transition-[margin-top] duration-300 ease-in-out sm:gap-6`}
+          >
+            <LandingPageHeader />
+            <LandingPageTextField
+              text={text}
+              onChange={setText}
+              onSubmit={handleSubmit}
+            />
+          </div>
+        )}
+
+        {state === "chat" && (
+          <div className="w-full max-w-screen-lg">
+            {chatHistory.map((text) => (
+              <div key={text} className="mb-2 flex w-full justify-end">
+                <div className="inline-block rounded-lg bg-neutral-800 p-2">
+                  {text}
+                </div>
+              </div>
+            ))}
+            {socket && <VideoPlayer className="mb-4 w-full" socket={socket} />}
+            <LandingPageTextField
+              className="mb-2"
+              placeholder="ask pixa anything"
+              text={text}
+              onChange={setText}
+              onSubmit={handleSubmit}
+            />
+            <div className="text-muted-foreground">
+              you have 15 animation generations left.
             </div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
       <BookCallDialog
         open={bookCallDialogOpen}
@@ -104,10 +129,16 @@ const LandingPageTextField = ({
   text,
   onChange,
   onSubmit,
+
+  className,
+  placeholder,
 }: {
   text: string;
   onChange: (text: string) => void;
   onSubmit: () => void;
+
+  className?: string;
+  placeholder?: string;
 }) => {
   const inputRef = React.useRef<HTMLInputElement>(null);
 
@@ -124,13 +155,14 @@ const LandingPageTextField = ({
   ];
 
   return (
-    <div className="flex w-full flex-row gap-2">
+    <div className={cn("flex w-full flex-row gap-2", className)}>
       <div className="relative flex-grow">
-        {text.length === 0 && (
+        {text.length === 0 && !placeholder && (
           <AnimatedPlaceholder placeholders={placeholders} />
         )}
         <Input
           ref={inputRef}
+          placeholder={placeholder}
           value={text}
           onChange={(e) => onChange(e.target.value)}
           type="text"
