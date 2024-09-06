@@ -165,7 +165,7 @@ class ManimGenerator:
             print(f"FFmpeg: {line.decode().strip()}", flush=True)
 
     def run(self, text):
-        print("INFO: running generator", flush=True)
+        print("INFO: running generator at", time.time(), flush=True)
         try:
             self.running = True
             generate_thread = threading.Thread(target=self.generate, args=(text,))
@@ -176,7 +176,7 @@ class ManimGenerator:
             ffmpeg_log_thread = threading.Thread(target=self.log_ffmpeg_output, args=(self.ffmpeg_process,))
             send_frames_thread.start()
             ffmpeg_log_thread.start()
-
+            print("INFO: running scene at", time.time(), flush=True)
             self.run_scene()
             # print('scene done', flush=True)
             generate_thread.join()
@@ -203,7 +203,7 @@ class ManimGenerator:
     
 
 if __name__ == "__main__":
-    #print("INFO:Starting python script")
+    print("INFO: Starting python script at:", time.time(), flush=True)
     generator = ManimGenerator()
     
     if len(sys.argv) > 1:

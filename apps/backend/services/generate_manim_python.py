@@ -1,19 +1,20 @@
 import threading
 import time
 import numpy as np
+from fastapi import WebSocket
 import asyncio
-import base64
 from queue import Queue
-from io import BytesIO
-from services.regex_utils import replace_list_comprehensions, has_unclosed_parenthesis, has_unclosed_bracket, has_indented_statement, extract_indented_statement, replace_svg_mobjects
+from services.regex_utils import has_unclosed_parenthesis, has_unclosed_bracket, has_indented_statement, extract_indented_statement, replace_svg_mobjects
 from services.llm_clients import anthropic_client
 from services.shared import frame_queue
 from services.scenes import BlankScene
 import sys
+import os
+import subprocess
 
 
 class ManimGenerator:
-    def __init__(self, websocket=None):
+    def __init__(self, websocket: WebSocket):
         self.start_time = time.time()
         self.commands = []
         self.websocket = websocket
@@ -71,7 +72,7 @@ class ManimGenerator:
                     if not first_byte_received:
                         first_byte_received = True
                         end_time = time.time()
-                        print(f"INFO: first chunk received from anthropic at {end_time - self.start_time} seconds", flush=True)
+                        print(f"INFO: first chunk received from anthropic at {end_time - start_time} seconds", flush=True)
 
                     if '\n' in chunk:
                         chunks = chunk.split('\n')
@@ -105,45 +106,123 @@ class ManimGenerator:
         # time.sleep(5)
         self.commands.append("")
 
-    async def send_frames_to_websocket(self):
+    def send_frames_to_ffmpeg(self):
         while self.running or not frame_queue.empty():
             try:
                 if not frame_queue.empty():
-                    # start = time.time()
-                    # print('got item in queue', time.time() - self.start_time)
                     frame = frame_queue.get_nowait()
-                    image = frame.convert('RGB')
-                    buffered = BytesIO()
-                    image.save(buffered, format="JPEG")
-                    frame_base64 = base64.b64encode(buffered.getvalue()).decode('utf-8')
-                    await self.websocket.send(f"data:image/jpeg;base64,{frame_base64}")
+                    rgb_image = frame.convert('RGB')
+                    numpy_image = np.array(rgb_image)
+                    rgb24_frame = np.ascontiguousarray(numpy_image, dtype=np.uint8)
+                    if self.ffmpeg_process is None:
+                        print("INFO: ffmpeg_process is None", flush=True)
+                    self.ffmpeg_process.stdin.write(rgb24_frame.tobytes())
+                    self.ffmpeg_process.stdin.flush()
+                else:
+                    time.sleep(1/self.frame_rate)
+                    # print("frame_queue empty", flush=True)
             except Exception as e:
-                print(f"Error in send_frames_to_websocket: {e}", flush=True)
-        self.websocket.send("EOF")
+                print(f"Error in send_frames_to_stdout: {e}", file=sys.stderr)
+                break
+        print("EOF", flush=True)
+        self.ffmpeg_process.stdin.close()
+
+    def convert_to_hls(self):
+        os.makedirs("public/hls", exist_ok=True)
+        output_dir = "public/hls"
+        ffmpeg_command = [
+            'ffmpeg',
+            '-y',
+            '-f', 'rawvideo',
+            '-vcodec', 'rawvideo',
+            '-pix_fmt', 'rgb24',
+            '-s', '960x540',
+            '-i', '-',
+            '-c:v', 'libx264',
+            '-preset', 'ultrafast',
+            '-tune', 'zerolatency',
+            '-bufsize', '1M',
+            '-maxrate', '2M',
+            '-g', '30',
+            '-f', 'hls',
+            '-hls_init_time', '0.5',
+            '-hls_time', '1',
+            # '-hls_list_size', '5',
+            # '-hls_flags', 'delete_segments+append_list',
+            '-hls_segment_type', 'mpegts',
+            '-hls_segment_filename', os.path.join(output_dir, 'stream%03d.ts'),
+            os.path.join(output_dir, 'playlist.m3u8')
+        ]
+        ffmpeg_process = subprocess.Popen(
+            ffmpeg_command,
+            stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE
+        )
+        return ffmpeg_process
 
 
-    def _run_send_frames(self):
-        self.loop.run_until_complete(self.send_frames_to_websocket())\
+    def log_ffmpeg_output(self, process, loop, run_started_time):
+        def run_cor(obj):
+            if asyncio.iscoroutine(obj):
+                try:
+                    loop = asyncio.new_event_loop()
+                    result = loop.run_until_complete(obj)
+                    return result
+                except Exception as e:
+                    print(f"Error in run_cor: {e}", file=sys.stderr)
+                    return None
+            else:
+                print(f"INFO: run_cor obj is not a coroutine: {obj}", flush=True)
+                return obj
+            
+        async def emit_ready_message(websocket):
+            await websocket.send_json({
+                "type": "hls_ready", 
+                "playlistUrl": "http://localhost:8000/public/hls/playlist.m3u8"
+            })
+            
+        def read_stream(stream, loop):
+            hls_ready = False
+            for line in iter(stream.readline, b''):
+                line = line.decode().strip()
+                print(f"FFmpeg {stream.name}: {line}", flush=True)
+                if "Opening" in line and not hls_ready:
+                    hls_ready = True
+                    print(f'SENDING HLS READY in {time.time() - run_started_time} seconds', flush=True)
+                    run_cor(emit_ready_message(self.websocket))
                     
+
+        threading.Thread(target=read_stream, args=(process.stderr, loop), daemon=True).start()
+        threading.Thread(target=read_stream, args=(process.stdout, loop), daemon=True).start()
+
+        
+
     def run(self, text):
-        print("INFO: running generator", flush=True)
+        run_started_time = time.time()
+        print(f"INFO: running generator in {time.time() - run_started_time} seconds", flush=True)
         try:
             self.running = True
-            generate_thread = threading.Thread(target=self.generate, args=(text,))
-            
-            self.loop = asyncio.new_event_loop()
-            asyncio.set_event_loop(self.loop)
-            self.asyncio_thread = threading.Thread(target=self._run_send_frames, daemon=True)
-            self.asyncio_thread.start()
+            loop = asyncio.get_running_loop()
+            print('asyncio event loop is', loop)
 
+            generate_thread = threading.Thread(target=self.generate, args=(text,), daemon=True)
+            send_frames_thread = threading.Thread(target=self.send_frames_to_ffmpeg, daemon=True)
             generate_thread.start()
-            self.run_scene()
-            generate_thread.join()
 
-            self.loop.call_soon_threadsafe(self.loop.stop)
-            self.asyncio_thread.join()
-            
-            
+            print(f"INFO: starting ffmpeg in {time.time() - run_started_time} seconds", flush=True)
+            self.ffmpeg_process = self.convert_to_hls()
+            self.log_ffmpeg_output(self.ffmpeg_process, loop, run_started_time)
+            send_frames_thread.start()
+
+            print(f"INFO: running scene in {time.time() - run_started_time} seconds", flush=True)
+            self.run_scene()
+            # print('scene done', flush=True)
+
+            generate_thread.join()
+            send_frames_thread.join()
+            self.ffmpeg_process.stdin.close()
+            self.ffmpeg_process.wait()
             self.cleanup()
 
         except Exception as e:

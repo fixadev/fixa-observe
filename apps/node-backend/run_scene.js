@@ -14,7 +14,7 @@ export function runScene(prompt, socket) {
       const pythonPath = path.resolve(__dirname, '../backend');
 
       let first_byte_received = false;
-      let start_time = new Date().getTime();
+      let start_time = (Date.now() / 1000)
       console.log(`Initializing python process`, start_time);
       
       const pythonProcess = spawn('python', [pythonScriptPath, prompt], {

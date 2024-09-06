@@ -17,7 +17,7 @@ export default function LandingPageBody() {
   const [loading, setLoading] = useState(false);
 
   // const { sendMessage, socket: WebSocket } = socket("ws://localhost:8000/ws");
-  const { sendMessage, socket } = useSocketIO("ws://localhost:8000/ws");
+  const { sendMessage, socket } = useWebSocket("ws://localhost:8000/ws");
 
   const posthog = usePostHog();
 
@@ -45,7 +45,7 @@ export default function LandingPageBody() {
       </div>
       {socket && (
         <div className="flex w-full justify-center">
-          <VideoPlayer className="mt-4" socket={socket} />
+          <VideoPlayer className="mt-4" socket={socket} isSocketIO={false} />
         </div>
       )}
     </div>
