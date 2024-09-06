@@ -7,24 +7,11 @@ import asyncio
 import base64
 from queue import Queue
 from io import BytesIO
-from services.regex_utils import replace_list_comprehensions, has_unclosed_parenthesis, has_unclosed_bracket
+from services.regex_utils import has_unclosed_parenthesis, has_unclosed_bracket, has_indented_statement, extract_indented_statement, replace_svg_mobjects
 from services.llm_clients import anthropic_client
 from services.shared import frame_queue
 from services.scenes import TestScene, BlankScene
 import sys
-
-
-original_stdout = sys.stdout
-
-def blockPrint():
-    sys.stdout = open(os.devnull, 'w')
-
-def enablePrint():
-    sys.stdout = original_stdout
-
-def log_ffmpeg_output(process):
-    for line in iter(process.stderr.readline, b''):
-        print(f"FFmpeg: {line.decode().strip()}", file=sys.stderr, flush=True)
 
 class ManimGenerator:
     def __init__(self, websocket=None):
@@ -35,7 +22,6 @@ class ManimGenerator:
 
         self.width = 1280  # Set default width
         self.height = 720  # Set default height
-        self.frame_rate = 30  # Set default frame rate
 
         self.system_prompt = """You are an AI teacher. 
     
@@ -68,7 +54,7 @@ class ManimGenerator:
     def generate(self, text):
         first_byte_received = False
         start_time = time.time()
-        #print("INFO: making anthropic call", flush=True)
+        print("INFO: making anthropic call", flush=True)
         with anthropic_client.messages.stream(
             model="claude-3-5-sonnet-20240620",
             max_tokens=4000,
@@ -83,27 +69,41 @@ class ManimGenerator:
                     if not first_byte_received:
                         first_byte_received = True
                         end_time = time.time()
-                        #print(f"INFO: first chunk received from anthropic at {end_time - start_time} seconds", flush=True)
+                        print(f"INFO: first chunk received from anthropic at {end_time - start_time} seconds", flush=True)
+
                     if '\n' in chunk:
                         chunks = chunk.split('\n')
                         cur_chunk += '\n'.join(chunks[:-1]) + '\n'
-                        if has_unclosed_parenthesis(cur_chunk) or has_unclosed_bracket(cur_chunk):
+                        if has_unclosed_parenthesis(cur_chunk) or has_unclosed_bracket(cur_chunk) or has_indented_statement(cur_chunk):
                             cur_chunk += chunks[-1]
+
+                            # Determine whether to add indented statement
+                            if has_indented_statement(cur_chunk):
+                                extracted = extract_indented_statement(cur_chunk)
+                                if len(extracted) > 2:
+                                    # Add the all the text execept for last two elements because 
+                                    # regex selector selects first character of the last line,
+                                    # i.e. "self.play()" becomes ["s", "elf.play()"]
+                                    self.commands.append(''.join(extracted[:-2]))
+                                    cur_chunk = ''.join(extracted[-2:])
+
                             continue
                         # cur_chunk = replace_list_comprehensions(cur_chunk)
+                        cur_chunk = replace_svg_mobjects(cur_chunk)
                         self.commands.append(cur_chunk)
-                        #print(cur_chunk)
                         cur_chunk = chunks[-1]
                     else:
                         cur_chunk += chunk
                     
                     log_file.write(chunk)
                 
+            self.commands.append(cur_chunk)
+
         # self.commands.append("\nself.wait(5)\n")
-        time.sleep(5)
+        # time.sleep(5)
         self.commands.append("")
 
-    def send_frames_to_stdout(self):
+    def send_frames_to_ffmpeg(self):
         while self.running or not frame_queue.empty():
             try:
                 if not frame_queue.empty():
@@ -111,8 +111,10 @@ class ManimGenerator:
                     rgb_image = frame.convert('RGB')
                     numpy_image = np.array(rgb_image)
                     rgb24_frame = np.ascontiguousarray(numpy_image, dtype=np.uint8)
-                    sys.stdout.buffer.write(rgb24_frame.tobytes())
-                    sys.stdout.buffer.flush()
+                    if self.ffmpeg_process is None:
+                        print("INFO: ffmpeg_process is None", flush=True)
+                    self.ffmpeg_process.stdin.write(rgb24_frame.tobytes())
+                    self.ffmpeg_process.stdin.flush()
                 else:
                     time.sleep(1/self.frame_rate)
                     # print("frame_queue empty", flush=True)
@@ -120,27 +122,72 @@ class ManimGenerator:
                 print(f"Error in send_frames_to_stdout: {e}", file=sys.stderr)
                 break
         print("EOF", flush=True)
- 
+        self.ffmpeg_process.stdin.close()
+
+
+    def convert_to_hls(self):
+        output_dir = "public/hls"
+        ffmpeg_command = [
+            'ffmpeg',
+            '-y',
+            '-f', 'rawvideo',
+            '-vcodec', 'rawvideo',
+            '-pix_fmt', 'rgb24',
+            '-s', '960x540',
+            '-i', '-',
+            '-c:v', 'libx264',
+            '-preset', 'ultrafast',
+            '-tune', 'zerolatency',
+            '-bufsize', '1M',
+            '-maxrate', '2M',
+            '-g', '30',
+            '-f', 'hls',
+            '-hls_init_time', '0.5',
+            '-hls_time', '1',
+            '-hls_list_size', '5',
+            '-hls_flags', 'delete_segments+append_list',
+            '-hls_segment_type', 'mpegts',
+            '-hls_segment_filename', os.path.join(output_dir, 'stream%03d.ts'),
+            os.path.join(output_dir, 'playlist.m3u8')
+        ]
+        ffmpeg_process = subprocess.Popen(
+            ffmpeg_command,
+            stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE
+        )
+        return ffmpeg_process
+
+    def log_ffmpeg_output(self, process):
+        for line in iter(process.stderr.readline, b''):
+            print(f"FFmpeg: {line.decode().strip()}", flush=True)
+        for line in iter(process.stdout.readline, b''):
+            print(f"FFmpeg: {line.decode().strip()}", flush=True)
 
     def run(self, text):
-        #print("INFO: running generator", flush=True)
-        # try:
-        self.running = True
-        generate_thread = threading.Thread(target=self.generate, args=(text,))
-        send_frames_thread = threading.Thread(target=self.send_frames_to_stdout, daemon=True)
-        
-        send_frames_thread.start()
-        generate_thread.start()
-
-        self.run_scene()
-        # print('scene done', flush=True)
-        generate_thread.join()
-        send_frames_thread.join()
-        self.cleanup()
-
-        # except Exception as e:
+        print("INFO: running generator", flush=True)
+        try:
+            self.running = True
+            generate_thread = threading.Thread(target=self.generate, args=(text,))
+            send_frames_thread = threading.Thread(target=self.send_frames_to_ffmpeg, daemon=True)
             
-            #print(f"Error in generator.run: {e}")
+            generate_thread.start()
+            self.ffmpeg_process = self.convert_to_hls()
+            ffmpeg_log_thread = threading.Thread(target=self.log_ffmpeg_output, args=(self.ffmpeg_process,))
+            send_frames_thread.start()
+            ffmpeg_log_thread.start()
+
+            self.run_scene()
+            # print('scene done', flush=True)
+            generate_thread.join()
+            send_frames_thread.join()
+            self.ffmpeg_process.stdin.close()
+            self.ffmpeg_process.wait()
+            ffmpeg_log_thread.join()
+            self.cleanup()
+
+        except Exception as e:
+            print(f"Error in generator.run: {e}")
     
 
     def cleanup(self):

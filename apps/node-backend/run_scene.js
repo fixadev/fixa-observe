@@ -32,53 +32,25 @@ export function runScene(prompt, socket) {
         fs.mkdirSync(outputDir, { recursive: true });
       }
 
-      const ffmpegProcess = spawn('ffmpeg', [
-        '-y',
-        '-f', 'rawvideo',
-        '-vcodec', 'rawvideo',
-        '-pix_fmt', 'rgb24',
-        '-s', '960x540',
-        // '-framerate', '30', 
-        '-i', '-',
-        '-c:v', 'libx264', 
-        '-preset', 'ultrafast',
-        '-tune', 'zerolatency',
-        '-bufsize', '1M',
-        '-maxrate', '2M',
-        '-g', '30',
-        '-f', 'hls',
-        '-hls_init_time', '0.5',
-        '-hls_time', '1',
-        '-hls_list_size', '5',
-        '-hls_flags', 'delete_segments+append_list',
-        '-hls_segment_type', 'mpegts',
-        '-hls_segment_filename', path.join(outputDir, 'stream%03d.ts'),
-        path.join(outputDir, 'playlist.m3u8')
-      ]);
- 
-
-      pythonProcess.stdout.pipe(ffmpegProcess.stdin);
-
-      ffmpegProcess.stdout.on('data', (data) => {
-        console.log('FFmpeg stdout=', data);
-
-        socket.emit('video_data', data);
+      pythonProcess.stdout.on('data', (data) => {
+        const decodedData = data.toString('utf-8').trim();
+        console.log('FFmpeg stdout:', decodedData);
+        if (data.toString().includes('Opening')) {
+          console.log('HLS ready');
+          socket.emit('hls_ready', '/hls/playlist.m3u8');
+        }
       });
 
-      ffmpegProcess.stderr.on('data', (data) => {
+      pythonProcess.stderr.on('data', (data) => {
         console.log(`\FFmpeg Stderr: ${data}`);
         if (data.toString().includes('Opening')) {
+          console.log('HLS ready');
           socket.emit('hls_ready', '/hls/playlist.m3u8');
         }
         if (data.toString().includes('EOF')) {
           socket.emit('video_end', 'EOF');
           console.log('Sent EOF');
         }
-      });
-
-      pythonProcess.stderr.on('data', (data) => {
-        console.error(`Python Error: ${data}`);
-        socket.emit('pythonOutput', { type: 'stderr', data: data.toString() });
       });
 
       pythonProcess.on('close', (code) => {
