@@ -25,7 +25,11 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={`${ibmPlexSans.className}`}>
+    <html
+      lang="en"
+      className={`${ibmPlexSans.className} dark`}
+      style={{ colorScheme: "dark" }}
+    >
       <CSPostHogProvider>
         <ClerkProvider appearance={{ baseTheme: dark }}>
           <body>
