@@ -8,9 +8,6 @@ import fs from 'fs';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-const FRAME_DELIMITER = '==END_FRAME==';
-const DATA_URI_PREFIX = 'raw_bytes:,';
-
 export function runScene(prompt, socket) {
     return new Promise((resolve, reject) => {
       const pythonScriptPath = path.resolve(__dirname, '../backend/services/generate_manim_js.py');

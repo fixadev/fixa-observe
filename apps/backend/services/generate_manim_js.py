@@ -144,8 +144,8 @@ class ManimGenerator:
             '-f', 'hls',
             '-hls_init_time', '0.5',
             '-hls_time', '1',
-            '-hls_list_size', '5',
-            '-hls_flags', 'delete_segments+append_list',
+            # '-hls_list_size', '5',
+            # '-hls_flags', 'delete_segments+append_list',
             '-hls_segment_type', 'mpegts',
             '-hls_segment_filename', os.path.join(output_dir, 'stream%03d.ts'),
             os.path.join(output_dir, 'playlist.m3u8')
