@@ -14,8 +14,10 @@ datasource db {
 }
 
 model User {
-  id      String   @id @default(auto()) @map("_id") @db.ObjectId
-  email   String   @unique
-  name    String?
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  clerkId   String   @unique
+  email     String   @unique
+  firstName String?
+  lastName  String?
   generationsLeft Int @default(30)
 }

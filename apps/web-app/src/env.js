@@ -11,6 +11,7 @@ export const env = createEnv({
     NODE_ENV: z
       .enum(["development", "test", "production"])
       .default("development"),
+    CLERK_WEBHOOK_SECRET: z.string(),
     // Temporarily disabled Discord auth functionality
     // DISCORD_CLIENT_ID: z.string(),
     // DISCORD_CLIENT_SECRET: z.string(),
@@ -36,6 +37,7 @@ export const env = createEnv({
     NODE_ENV: process.env.NODE_ENV,
     NEXT_PUBLIC_POSTHOG_KEY: process.env.NEXT_PUBLIC_POSTHOG_KEY,
     NEXT_PUBLIC_POSTHOG_HOST: process.env.NEXT_PUBLIC_POSTHOG_HOST,
+    CLERK_WEBHOOK_SECRET: process.env.CLERK_WEBHOOK_SECRET,
     // Temporarily disabled Discord auth functionality
     // DISCORD_CLIENT_ID: process.env.DISCORD_CLIENT_ID,
     // DISCORD_CLIENT_SECRET: process.env.DISCORD_CLIENT_SECRET,
