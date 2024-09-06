@@ -8,28 +8,46 @@ import { ArrowRightCircleIcon } from "@heroicons/react/24/solid";
 import { useSocketIO } from "@/components/UseSocketIO";
 import { useWebSocket, SocketHook } from "@/components/UseWebsocket";
 import { VideoPlayer } from "@/components/VideoPlayer";
+import { useAuth, useClerk } from "@clerk/nextjs";
 
 const socket: SocketHook =
   process.env.NEXT_PUBLIC_BACKEND_ENV === "node" ? useSocketIO : useWebSocket;
 
 export default function LandingPageBody() {
+  const posthog = usePostHog();
   const [text, setText] = useState("");
   const [loading, setLoading] = useState(false);
 
   // const { sendMessage, socket: WebSocket } = socket("ws://localhost:8000/ws");
   const { sendMessage, socket } = useSocketIO("ws://localhost:8000/ws");
 
-  const posthog = usePostHog();
+  const { openSignIn } = useClerk();
+  const { isSignedIn } = useAuth();
 
   const handleSubmit = useCallback(() => {
     if (text.length > 0) {
+      // If not signed in, check if the user has submitted a prompt before
+      if (!isSignedIn) {
+        const submittedFirstPrompt = localStorage.getItem(
+          "submittedFirstPrompt",
+        );
+        // If the user has not submitted a prompt before, allow them to submit 1 prompt
+        // Otherwise, open the sign in modal
+        if (!submittedFirstPrompt) {
+          localStorage.setItem("submittedFirstPrompt", "true");
+        } else {
+          openSignIn();
+          return;
+        }
+      }
+
       setLoading(true);
       sendMessage(text);
       posthog.capture("Landing page prompt submitted", {
         prompt: text,
       });
     }
-  }, [text, sendMessage, posthog]);
+  }, [text, isSignedIn, openSignIn, setLoading, sendMessage, posthog]);
 
   return (
     <div className="flex h-[100dvh] w-screen flex-col items-center justify-center overflow-hidden p-2 text-white">
