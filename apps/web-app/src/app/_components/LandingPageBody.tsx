@@ -66,7 +66,11 @@ export default function LandingPageBody() {
         } else {
           const promptsSubmittedInt = parseInt(promptsSubmitted);
           if (promptsSubmittedInt >= ANONYMOUS_PROMPT_SUBMISSION_LIMIT) {
-            openSignIn();
+            openSignIn({
+              redirectUrl: "/",
+              forceRedirectUrl: "/",
+              signUpForceRedirectUrl: "/",
+            });
             // setBookCallDialogOpen(true);
             return;
           }
