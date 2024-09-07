@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useEffect, useRef, useCallback } from "react";
 
 export type SocketHook = (url: string) => {
   sendMessage: (message: string) => void;
@@ -6,9 +6,6 @@ export type SocketHook = (url: string) => {
 };
 
 export function useWebSocket(url: string) {
-  const [data, setData] = useState<{ imageSrc: string | null }>({
-    imageSrc: null,
-  });
   const wsRef = useRef<WebSocket | null>(null);
 
   const connectWebSocket = useCallback(() => {
@@ -17,13 +14,6 @@ export function useWebSocket(url: string) {
     wsRef.current.onmessage = async (event: MessageEvent) => {
       if (typeof event.data === "string") {
         console.log("socket message", event.data);
-        if (event.data === "EOF") {
-          setData({ imageSrc: null });
-        } else {
-          setData({
-            imageSrc: event.data,
-          });
-        }
       } else {
         console.error("Received non-string data from WebSocket");
       }
