@@ -4,7 +4,6 @@ import subprocess
 import threading
 import time
 import numpy as np
-from fastapi import WebSocket
 from multiprocessing import Queue
 from services.regex_utils import has_unclosed_parenthesis, has_unclosed_bracket, has_indented_statement, extract_indented_statement, replace_svg_mobjects
 from services.async_utils import run_cor
@@ -175,16 +174,14 @@ class ManimGenerator:
 
 
     def check_for_playlist(self, run_started_time, output_dir, ffmpeg_process):
-        async def emit_ready_message(websocket):
-            await websocket.send_json({
-                "type": "hls_ready", 
-                "playlistUrl": f"{BASE_URL}/{output_dir}/playlist.m3u8"
-            })
         
-        def read_stream(stream):
-            for line in iter(stream.readline, b''):
-                line = line.decode().strip()
-                print(f"FFmpeg {stream.name}: {line}", flush=True)
+        # FOR DEBUGGING
+        # def read_stream(stream):
+        #     for line in iter(stream.readline, b''):
+        #         line = line.decode().strip()
+        #         print(f"FFmpeg {stream.name}: {line}", flush=True)
+        # threading.Thread(target=read_stream, args=(ffmpeg_process.stderr,), daemon=True).start()
+        # threading.Thread(target=read_stream, args=(ffmpeg_process.stdout,), daemon=True).start()
 
         def running_loop():
             hls_ready = False
@@ -196,8 +193,6 @@ class ManimGenerator:
                     hls_ready = True
                 time.sleep(0.01)
                     
-        # threading.Thread(target=read_stream, args=(ffmpeg_process.stderr,), daemon=True).start()
-        # threading.Thread(target=read_stream, args=(ffmpeg_process.stdout,), daemon=True).start()
         threading.Thread(target=running_loop, daemon=True).start()
 
 
@@ -227,11 +222,8 @@ class ManimGenerator:
             self.cleanup()
 
         except Exception as e:
+            # TODO: send error to hls?
             print(f"Error in generator.run: {e}")
-            run_cor(self.websocket.send_json({
-                "type": "error",
-                "error": str(e)
-            }))
             self.cleanup()
     
 
