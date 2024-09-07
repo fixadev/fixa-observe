@@ -25,23 +25,21 @@ export default function ExpandTransition({
 
   return (
     <>
-      <AnimatePresence>
-        <motion.div
-          className="overflow-hidden"
-          initial="closed"
-          animate="open"
-          exit="closed"
-          variants={variants}
-          transition={{ duration: 0.3, ease: "easeInOut" }}
+      <motion.div
+        className="overflow-hidden"
+        initial="closed"
+        animate="open"
+        exit="closed"
+        variants={variants}
+        transition={{ duration: 0.3, ease: "easeInOut" }}
+      >
+        <div
+          ref={contentRef}
+          className={measuring ? "h-0 overflow-hidden" : ""}
         >
-          <div
-            ref={contentRef}
-            className={measuring ? "h-0 overflow-hidden" : ""}
-          >
-            {children}
-          </div>
-        </motion.div>
-      </AnimatePresence>
+          {children}
+        </div>
+      </motion.div>
     </>
   );
 }

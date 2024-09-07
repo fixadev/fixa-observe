@@ -115,11 +115,13 @@ export default function LandingPageBody() {
                   </div>
                 </div>
               ))}
-              {socket && showVideo && (
-                <ExpandTransition buffer={100}>
-                  <VideoPlayer className="mb-4 w-full" socket={socket} />
-                </ExpandTransition>
-              )}
+              <AnimatePresence>
+                {socket && showVideo && (
+                  <ExpandTransition buffer={100}>
+                    <VideoPlayer className="mb-4 w-full" socket={socket} />
+                  </ExpandTransition>
+                )}
+              </AnimatePresence>
             </div>
             <LandingPageTextField
               className="mb-2"
