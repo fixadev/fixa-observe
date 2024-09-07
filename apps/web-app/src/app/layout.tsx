@@ -1,6 +1,7 @@
 import "~/styles/globals.css";
 
 import { ThemeProvider } from "@/components/ThemeProvider";
+import { Toaster } from "@/components/ui/toaster";
 import { type Metadata } from "next";
 import { TRPCReactProvider } from "~/trpc/react";
 import { ibmPlexSans } from "./fonts";
@@ -69,6 +70,7 @@ export default function RootLayout({
                   </div>
 
                   <div className="mt-16">{children}</div>
+                  <Toaster />
                 </ChildrenWrapper>
               </TRPCReactProvider>
             </ThemeProvider>

@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import Hls from "hls.js";
+import { useToast } from "~/hooks/use-toast";
 
 export function VideoPlayer({
   socket,
@@ -10,6 +11,7 @@ export function VideoPlayer({
 }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const hlsRef = useRef<Hls | null>(null);
+  const { toast } = useToast();
 
   useEffect(() => {
     const handleHLSReady = (playlistUrl: string) => {
@@ -53,13 +55,19 @@ export function VideoPlayer({
       if (typeof event.data === "string") {
         const data = JSON.parse(event.data) as {
           type: string;
-          playlistUrl: string;
+          message: string;
         };
         if (data.type === "hls_ready") {
-          console.log("HLS ready", data.playlistUrl);
-          handleHLSReady(data.playlistUrl);
+          console.log("HLS ready", data.message);
+          handleHLSReady(data.message);
         } else if (data.type === "error") {
+          console.error("Error", data.message);
           // TODO: display error toast
+          toast({
+            title: "Error creating video.",
+            description:
+              "There was a problem with your request. Please try again.",
+          });
         } else {
           console.error("Unknown message type", data);
         }
