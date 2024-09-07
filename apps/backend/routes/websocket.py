@@ -36,12 +36,12 @@ manager = ConnectionManager()
 
 @router.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
-    generator = ManimGenerator(websocket)
     request_num = 0
     connection_id = await manager.connect(websocket)
     generator_thread = None
     try:
         while True:
+            generator = ManimGenerator(websocket)
             prompt = await websocket.receive_text()
             # Ensure previous animation is stopped and resources are cleaned up
             connection_string = str(connection_id)
