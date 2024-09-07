@@ -23,6 +23,7 @@ class ManimGenerator:
         self.frame_queue = Queue()
         self.frame_width = 960
         self.frame_height = 540
+        self.frame_rate = 30
 
         self.system_prompt = """You are an AI teacher. 
     
@@ -49,7 +50,7 @@ class ManimGenerator:
         # 13. DO NOT USE LIST COMPREHENSIONS SUCH AS [Circle(radius=d, color=WHITE, stroke_opacity=0.5).shift(LEFT * 5) for d in planet_distances]. EVER. DO NOT EVEN THINK ABOUT IT.
         #
 
-        self.frame_rate = 30
+        
 
     def run_scene(self):
         print('INFO: Instantiate BlankScene at', time.time() - self.start_time)
@@ -136,22 +137,27 @@ class ManimGenerator:
         output_dir_str = str(output_dir)
         os.makedirs(output_dir, exist_ok=True)
         ffmpeg_command = [
+            # '/usr/local/bin/ffmpeg',
             'ffmpeg',
             '-y',
+            # '-hwaccel', 'cuda',
             '-f', 'rawvideo',
             '-vcodec', 'rawvideo',
             '-pix_fmt', 'rgba',
+            '-r', str(self.frame_rate),
             '-s', f'{self.frame_width}x{self.frame_height}',
             '-i', '-',
             '-vf', 'vflip',
             '-c:v', 'libx264',
+            # '-c:v', 'h264_nvenc',
+            # '-preset', 'p1',  
             '-preset', 'ultrafast',
             '-tune', 'zerolatency',
             '-bufsize', '1M',
             '-maxrate', '2M',
             '-g', '30',
             '-f', 'hls',
-            '-hls_init_time', '0.5',
+            '-hls_init_time', '0.2',
             '-hls_time', '1',
             # '-hls_list_size', '5',
             # '-hls_flags', 'delete_segments+append_list',
@@ -168,26 +174,30 @@ class ManimGenerator:
         return ffmpeg_process
 
 
-    def log_ffmpeg_output(self, process, run_started_time, output_dir):
+    def check_for_playlist(self, run_started_time, output_dir, ffmpeg_process):
         async def emit_ready_message(websocket):
             await websocket.send_json({
                 "type": "hls_ready", 
                 "playlistUrl": f"{BASE_URL}/{output_dir}/playlist.m3u8"
             })
-            
+        
         def read_stream(stream):
-            hls_ready = False
             for line in iter(stream.readline, b''):
                 line = line.decode().strip()
-                # print(f"FFmpeg {stream.name}: {line}", flush=True)
-                if "Opening" in line and not hls_ready:
-                    hls_ready = True
-                    print(f'INFO: First HLS segment ready at {time.time() - run_started_time} seconds', flush=True)
-                    # executes async function in event loop
+                print(f"FFmpeg {stream.name}: {line}", flush=True)
+
+        def running_loop():
+            hls_ready = False
+            while not hls_ready:
+                if os.path.exists(os.path.join(output_dir, "playlist.m3u8")):
+                    print(f'INFO: HLS Playlist ready at {time.time() - run_started_time} seconds', flush=True)
                     run_cor(emit_ready_message(self.websocket))
+                    hls_ready = True
+                time.sleep(0.01)
                     
-        threading.Thread(target=read_stream, args=(process.stderr,), daemon=True).start()
-        threading.Thread(target=read_stream, args=(process.stdout,), daemon=True).start()
+        # threading.Thread(target=read_stream, args=(ffmpeg_process.stderr,), daemon=True).start()
+        # threading.Thread(target=read_stream, args=(ffmpeg_process.stdout,), daemon=True).start()
+        threading.Thread(target=running_loop, daemon=True).start()
 
 
     def run(self, text, output_dir: str):
@@ -202,7 +212,7 @@ class ManimGenerator:
 
             print(f"INFO: starting ffmpeg in {time.time() - run_started_time} seconds", flush=True)
             self.ffmpeg_process = self.convert_to_hls(output_dir)
-            self.log_ffmpeg_output(self.ffmpeg_process, run_started_time, output_dir)
+            self.check_for_playlist(run_started_time, output_dir, self.ffmpeg_process)
             send_frames_thread.start()
 
             print(f"INFO: running scene in {time.time() - run_started_time} seconds", flush=True)
