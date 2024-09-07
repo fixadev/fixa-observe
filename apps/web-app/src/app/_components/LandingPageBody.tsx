@@ -140,15 +140,15 @@ export default function LandingPageBody() {
       setGenerationsLeft(generationsLeft - 1);
     }
   }, [
-    state,
     text,
     isSignedIn,
-    openSignIn,
-    posthog,
-    generate,
     generationsLeft,
-    setGenerationsLeft,
+    callGenerate,
+    posthog,
     chatHistory,
+    state,
+    generate,
+    openSignIn,
   ]);
 
   const [bookCallDialogOpen, setBookCallDialogOpen] = useState(false);
