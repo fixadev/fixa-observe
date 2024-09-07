@@ -14,6 +14,7 @@ import { cn } from "~/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "~/components/ui/button";
 import ExpandTransition from "~/components/ExpandTransition";
+import { api } from "~/trpc/react";
 
 export default function LandingPageBody() {
   const [state, setState] = useState<"initial" | "chat">("initial");
@@ -24,6 +25,15 @@ export default function LandingPageBody() {
   const { sendMessage, socket } = useWebSocket("ws://localhost:8000/ws");
 
   const chatHistoryRef = useRef<HTMLDivElement>(null);
+
+  const { data: profile } = api.user.getProfile.useQuery();
+  const { mutate: generate } = api.user.generate.useMutation();
+  const [generationsLeft, setGenerationsLeft] = useState(0);
+  useEffect(() => {
+    if (profile) {
+      setGenerationsLeft(profile.generationsLeft);
+    }
+  }, [profile]);
 
   // Function to scroll to bottom of chat history
   const scrollToBottom = () => {
@@ -63,6 +73,11 @@ export default function LandingPageBody() {
             (promptsSubmittedInt + 1).toString(),
           );
         }
+      } else if (isSignedIn && generationsLeft <= 0) {
+        setTimeout(() => {
+          setBookCallDialogOpen(true);
+        });
+        return;
       }
 
       sendMessage(text);
@@ -85,8 +100,21 @@ export default function LandingPageBody() {
           scrollToBottom();
         }, 310);
       }, 1000);
+
+      generate();
+      setGenerationsLeft(generationsLeft - 1);
     }
-  }, [state, text, isSignedIn, openSignIn, sendMessage, posthog]);
+  }, [
+    state,
+    text,
+    isSignedIn,
+    openSignIn,
+    sendMessage,
+    posthog,
+    generate,
+    generationsLeft,
+    setGenerationsLeft,
+  ]);
 
   const [bookCallDialogOpen, setBookCallDialogOpen] = useState(false);
   const [showVideo, setShowVideo] = useState(false);
@@ -149,14 +177,17 @@ export default function LandingPageBody() {
             </div>
             <LandingPageTextField
               className="mb-2"
+              autoFocus
               placeholder="ask pixa anything"
               text={text}
               onChange={setText}
               onSubmit={handleSubmit}
             />
-            <div className="text-muted-foreground">
-              you have 15 animation generations left.
-            </div>
+            {isSignedIn && (
+              <div className="text-muted-foreground">
+                you have {generationsLeft} animation generations left.
+              </div>
+            )}
           </div>
         )}
       </div>
@@ -191,6 +222,7 @@ const LandingPageTextField = ({
   onChange,
   onSubmit,
 
+  autoFocus,
   className,
   placeholder,
 }: {
@@ -198,6 +230,7 @@ const LandingPageTextField = ({
   onChange: (text: string) => void;
   onSubmit: () => void;
 
+  autoFocus?: boolean;
   className?: string;
   placeholder?: string;
 }) => {
@@ -226,6 +259,7 @@ const LandingPageTextField = ({
           value={text}
           onChange={(e) => onChange(e.target.value)}
           type="text"
+          autoFocus={autoFocus}
           className="w-full rounded-lg border-none bg-neutral-800 py-7 pl-4 pr-12 text-lg text-white"
           onKeyDown={(e) => {
             if (e.key === "Enter") {
