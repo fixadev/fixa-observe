@@ -195,8 +195,8 @@ class ManimGenerator:
                     hls_ready = True
                 time.sleep(0.01)
                     
-        threading.Thread(target=read_stream, args=(ffmpeg_process.stderr,), daemon=True).start()
-        threading.Thread(target=read_stream, args=(ffmpeg_process.stdout,), daemon=True).start()
+        # threading.Thread(target=read_stream, args=(ffmpeg_process.stderr,), daemon=True).start()
+        # threading.Thread(target=read_stream, args=(ffmpeg_process.stdout,), daemon=True).start()
         threading.Thread(target=running_loop, daemon=True).start()
 
 
