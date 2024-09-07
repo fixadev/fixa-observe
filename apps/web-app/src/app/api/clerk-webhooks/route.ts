@@ -1,6 +1,6 @@
 import { Webhook } from "svix";
 import { headers } from "next/headers";
-import { WebhookEvent } from "@clerk/nextjs/server";
+import { type WebhookEvent } from "@clerk/nextjs/server";
 import { env } from "~/env";
 import { db } from "~/server/db";
 import { addSubscriber } from "~/server/listmonk";
@@ -29,6 +29,7 @@ export async function POST(req: Request) {
   }
 
   // Get the body
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   const payload = await req.json();
   const body = JSON.stringify(payload);
 

@@ -44,7 +44,7 @@ export default function BookCallDialog({
       .then(() => {
         setState("success");
       })
-      .catch((e) => {
+      .catch(() => {
         setState("initial");
       });
   };
@@ -54,12 +54,12 @@ export default function BookCallDialog({
       {state !== "success" && (
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>you've run out of free generations!</DialogTitle>
+            <DialogTitle>you&apos;ve run out of free generations!</DialogTitle>
           </DialogHeader>
           <DialogDescription>
-            thank you for your interest in pixa! we're currently experiencing
-            high demand. tell us a bit about what you plan on using pixa for and
-            we'll get back to you within 24 hours.
+            thank you for your interest in pixa! we&apos;re currently
+            experiencing high demand. tell us a bit about what you plan on using
+            pixa for and we&apos;ll get back to you within 24 hours.
           </DialogDescription>
           <Textarea
             placeholder="i plan on using pixa to..."
@@ -83,8 +83,8 @@ export default function BookCallDialog({
             <DialogTitle>request submitted!</DialogTitle>
           </DialogHeader>
           <DialogDescription>
-            we'll reach out via email within 24 hours. if we don't, feel free to
-            spam us at{" "}
+            we&apos;ll reach out via email within 24 hours. if we don&apos;t,
+            feel free to spam us at{" "}
             <a className="underline" href="mailto:contact@pixa.dev">
               contact@pixa.dev
             </a>

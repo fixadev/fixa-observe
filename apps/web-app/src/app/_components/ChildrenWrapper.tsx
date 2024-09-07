@@ -26,7 +26,7 @@ export default function ChildrenWrapper({
         posthog.reset();
       }
     }
-  }, [isLoaded, isSignedIn, user]);
+  }, [isLoaded, isSignedIn, user, posthog]);
 
   return <>{children}</>;
 }

@@ -11,8 +11,7 @@ import { useAuth, useClerk } from "@clerk/nextjs";
 import { ANONYMOUS_PROMPT_SUBMISSION_LIMIT } from "~/lib/constants";
 import BookCallDialog from "./BookCallDialog";
 import { cn } from "~/lib/utils";
-import { motion, AnimatePresence } from "framer-motion";
-import { Button } from "~/components/ui/button";
+import { AnimatePresence } from "framer-motion";
 import ExpandTransition from "~/components/ExpandTransition";
 import { api } from "~/trpc/react";
 
@@ -117,6 +116,7 @@ export default function LandingPageBody() {
     generate,
     generationsLeft,
     setGenerationsLeft,
+    chatHistory,
   ]);
 
   const [bookCallDialogOpen, setBookCallDialogOpen] = useState(false);

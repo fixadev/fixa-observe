@@ -1,5 +1,4 @@
-import { User } from "@prisma/client";
-import axios, { AxiosError } from "axios";
+import axios from "axios";
 import { env } from "~/env";
 
 export async function addSubscriber(
@@ -8,7 +7,7 @@ export async function addSubscriber(
   lastName?: string | null,
 ) {
   try {
-    const response = await axios.post(
+    await axios.post(
       `${env.LISTMONK_URL}/api/subscribers`,
       {
         email,
@@ -28,7 +27,6 @@ export async function addSubscriber(
         },
       },
     );
-    return response.data;
   } catch (error) {
     if (axios.isAxiosError(error)) {
       console.error("Axios error:", error.response?.data || error.message);
@@ -50,7 +48,7 @@ export async function sendEmail(
   template: keyof typeof transactionalTemplates,
 ) {
   try {
-    const response = await axios.post(
+    await axios.post(
       `${env.LISTMONK_URL}/api/tx`,
       {
         subscriber_email: email,
@@ -63,7 +61,6 @@ export async function sendEmail(
         },
       },
     );
-    return response.data;
   } catch (error) {
     if (axios.isAxiosError(error)) {
       console.error("Axios error:", error.response?.data || error.message);
