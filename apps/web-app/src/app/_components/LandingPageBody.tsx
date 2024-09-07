@@ -28,14 +28,17 @@ export default function LandingPageBody() {
   // Function to scroll to bottom of chat history
   const scrollToBottom = () => {
     if (chatHistoryRef.current) {
-      chatHistoryRef.current.scrollTop = chatHistoryRef.current.scrollHeight;
+      chatHistoryRef.current.scrollTo({
+        top: chatHistoryRef.current.scrollHeight,
+        behavior: "smooth",
+      });
     }
   };
 
   // Scroll to bottom on mount and when chat history changes
   useEffect(() => {
     scrollToBottom();
-  }, [socket, chatHistory]);
+  }, [chatHistory, chatHistoryRef.current?.scrollHeight]);
 
   const { openSignIn } = useClerk();
   const { isSignedIn } = useAuth();
@@ -73,15 +76,21 @@ export default function LandingPageBody() {
         setState("chat");
       }
 
+      setJustSubmitted(true);
       setShowVideo(false);
       setTimeout(() => {
+        setJustSubmitted(false);
         setShowVideo(true);
+        setTimeout(() => {
+          scrollToBottom();
+        }, 310);
       }, 1000);
     }
   }, [state, text, isSignedIn, openSignIn, sendMessage, posthog]);
 
   const [bookCallDialogOpen, setBookCallDialogOpen] = useState(false);
   const [showVideo, setShowVideo] = useState(false);
+  const [justSubmitted, setJustSubmitted] = useState(false);
 
   return (
     <>
@@ -105,16 +114,22 @@ export default function LandingPageBody() {
               ref={chatHistoryRef}
               className="-mx-4 mb-4 overflow-y-auto px-4"
             >
-              {chatHistory.map((text, i) => (
-                <div
-                  key={i}
-                  className="mb-2 flex w-full flex-col items-end gap-0.5"
-                >
-                  <div className="inline-block rounded-lg bg-neutral-700 px-4 py-3 text-base text-white">
-                    {text}
+              {chatHistory.map((text, i) => {
+                // Do not render the message that was just submitted, instead render it below the video player
+                if (i === chatHistory.length - 1 && justSubmitted) return null;
+                return (
+                  <div
+                    key={i}
+                    className="mb-2 flex w-full flex-col items-end gap-0.5"
+                  >
+                    <div className="inline-block rounded-lg bg-neutral-700 px-4 py-3 text-base text-white">
+                      {text}
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
+
+              {/* The video player */}
               <AnimatePresence>
                 {socket && showVideo && (
                   <ExpandTransition buffer={100}>
@@ -122,6 +137,15 @@ export default function LandingPageBody() {
                   </ExpandTransition>
                 )}
               </AnimatePresence>
+
+              {/* The message that was just submitted */}
+              {justSubmitted && (
+                <div className="mb-2 flex w-full flex-col items-end gap-0.5">
+                  <div className="inline-block rounded-lg bg-neutral-700 px-4 py-3 text-base text-white">
+                    {chatHistory[chatHistory.length - 1]}
+                  </div>
+                </div>
+              )}
             </div>
             <LandingPageTextField
               className="mb-2"
@@ -181,7 +205,6 @@ const LandingPageTextField = ({
 
   const handleSubmit = () => {
     onSubmit();
-    inputRef.current?.blur();
   };
 
   const placeholders = [
