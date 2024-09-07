@@ -5,7 +5,6 @@ import AnimatedPlaceholder from "@/components/AnimatedPlaceholder";
 import { ibmPlexMono } from "~/app/fonts";
 import { usePostHog } from "posthog-js/react";
 import { ArrowRightCircleIcon } from "@heroicons/react/24/solid";
-import { useWebSocket } from "@/components/UseWebsocket";
 import { VideoPlayer } from "@/components/VideoPlayer";
 import { useAuth, useClerk } from "@clerk/nextjs";
 import { ANONYMOUS_PROMPT_SUBMISSION_LIMIT } from "~/lib/constants";
@@ -18,10 +17,7 @@ import { api } from "~/trpc/react";
 export default function LandingPageBody() {
   const [state, setState] = useState<"initial" | "chat">("initial");
   const [chatHistory, setChatHistory] = useState<string[]>([]);
-
-  const { sendMessage, socket } = useWebSocket(
-    process.env.NEXT_PUBLIC_WS_URL ?? "ws://localhost:8000/ws",
-  );
+  const [hlsPlaylistUrl, setHlsPlaylistUrl] = useState<string | null>(null);
 
   const posthog = usePostHog();
   const [text, setText] = useState("");
@@ -47,6 +43,37 @@ export default function LandingPageBody() {
     }
   };
 
+  const callGenerate = useCallback(async () => {
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/generate`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ prompt: text }),
+        },
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = (await response.json()) as { hls_playlist_url: string };
+
+      if (!data.hls_playlist_url) {
+        throw new Error("No HLS playlist URL in the response");
+      }
+      console.log("setting hls playlist url", data.hls_playlist_url);
+      setHlsPlaylistUrl(data.hls_playlist_url.toString().trim());
+    } catch (error) {
+      console.error("Error calling generate API:", error);
+      // You might want to set an error state here or show a toast notification
+      // For example: setError("Failed to generate video. Please try again.");
+    }
+  }, [text]);
+
   // Scroll to bottom on mount and when chat history changes
   useEffect(() => {
     scrollToBottom();
@@ -54,7 +81,7 @@ export default function LandingPageBody() {
 
   const { openSignIn } = useClerk();
   const { isSignedIn } = useAuth();
-  const handleSubmit = useCallback(() => {
+  const handleSubmit = useCallback(async () => {
     if (text.length > 0) {
       // If not signed in, check if the user has submitted a prompt before
       if (!isSignedIn) {
@@ -86,7 +113,9 @@ export default function LandingPageBody() {
         return;
       }
 
-      sendMessage(text);
+      // call API
+      await callGenerate();
+
       posthog.capture("Landing page prompt submitted", {
         prompt: text,
       });
@@ -111,16 +140,15 @@ export default function LandingPageBody() {
       setGenerationsLeft(generationsLeft - 1);
     }
   }, [
-    state,
     text,
     isSignedIn,
-    openSignIn,
-    sendMessage,
-    posthog,
-    generate,
     generationsLeft,
-    setGenerationsLeft,
+    callGenerate,
+    posthog,
     chatHistory,
+    state,
+    generate,
+    openSignIn,
   ]);
 
   const [bookCallDialogOpen, setBookCallDialogOpen] = useState(false);
@@ -166,9 +194,12 @@ export default function LandingPageBody() {
 
               {/* The video player */}
               <AnimatePresence>
-                {socket && showVideo && (
+                {showVideo && (
                   <ExpandTransition buffer={100}>
-                    <VideoPlayer className="mb-4 w-full" socket={socket} />
+                    <VideoPlayer
+                      className="mb-4 w-full"
+                      hls_playlist_url={hlsPlaylistUrl}
+                    />
                   </ExpandTransition>
                 )}
               </AnimatePresence>

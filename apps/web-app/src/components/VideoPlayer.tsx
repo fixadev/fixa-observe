@@ -1,88 +1,64 @@
 import { useEffect, useRef } from "react";
 import Hls from "hls.js";
-import { useToast } from "~/hooks/use-toast";
 
 export function VideoPlayer({
-  socket,
+  hls_playlist_url,
   className,
 }: {
-  socket: WebSocket;
+  hls_playlist_url: string | null;
   className?: string;
 }) {
   const videoRef = useRef<HTMLVideoElement>(null);
-  const hlsRef = useRef<Hls | null>(null);
-  const { toast } = useToast();
 
   useEffect(() => {
-    const handleHLSReady = (playlistUrl: string) => {
-      if (Hls.isSupported()) {
-        if (!hlsRef.current) {
-          hlsRef.current = new Hls();
-        }
-        if (videoRef.current && hlsRef.current) {
-          hlsRef.current.loadSource(playlistUrl);
-          hlsRef.current.attachMedia(videoRef.current);
-          hlsRef.current.on(Hls.Events.MANIFEST_PARSED, () => {
-            void videoRef.current?.play();
-          });
-          hlsRef.current.on(Hls.Events.ERROR, (event, data) => {
-            console.error("HLS error", event, data);
-            // Stop reading from HLS stream on HLS fatal error
-            if (data.fatal) {
-              if (videoRef.current) {
-                videoRef.current.pause();
-              }
-              if (hlsRef.current) {
-                hlsRef.current.stopLoad();
-                hlsRef.current.destroy();
-              }
-            }
-          });
-        }
-      } else if (
-        videoRef.current?.canPlayType("application/vnd.apple.mpegurl")
-      ) {
-        // For browsers that natively support HLS (like Safari)
-        if (videoRef.current) {
-          videoRef.current.src = playlistUrl;
-          void videoRef.current.play();
-        }
-      }
-    };
+    // console.log("[VideoPlayer] useEffect triggered");
+    // console.log("[VideoPlayer] hls_playlist_url:", hls_playlist_url);
+    if (!hls_playlist_url) {
+      console.log(
+        "[VideoPlayer] No hls_playlist_url provided, exiting useEffect",
+      );
+      return;
+    }
 
-    const handleMessage = (event: MessageEvent) => {
-      console.log("message", event);
-      if (typeof event.data === "string") {
-        const data = JSON.parse(event.data) as {
-          type: string;
-          playlistUrl: string;
-        };
-        if (data.type === "hls_ready") {
-          console.log("HLS ready", data.playlistUrl);
-          handleHLSReady(data.playlistUrl);
-        } else if (data.type === "error") {
-          console.error("Error creating video");
-          // TODO: display error toast
-          toast({
-            title: "Error creating video.",
-            description:
-              "There was a problem with your request. Please try again.",
-          });
-        } else {
-          console.error("Unknown message type", data);
+    if (Hls.isSupported()) {
+      const hls = new Hls();
+      // hls.on(Hls.Events.MEDIA_ATTACHED, function () {
+      //   console.log("video and hls.js are now bound together !");
+      // });
+      hls.on(Hls.Events.MANIFEST_PARSED, function () {
+        // console.log(
+        //   "manifest loaded, found " + data.levels.length + " quality level",
+        // );
+        void videoRef.current!.play();
+      });
+      hls.on(Hls.Events.ERROR, function (event, data) {
+        if (data.fatal) {
+          switch (data.type) {
+            case Hls.ErrorTypes.MEDIA_ERROR:
+              console.log("fatal media error encountered, try to recover");
+              hls.recoverMediaError();
+              break;
+            case Hls.ErrorTypes.NETWORK_ERROR:
+              console.error("fatal network error encountered", data);
+              // All retries and media options have been exhausted.
+              // Immediately trying to restart loading could cause loop loading.
+              // Consider modifying loading policies to best fit your asset and network
+              // conditions (manifestLoadPolicy, playlistLoadPolicy, fragLoadPolicy).
+              break;
+            default:
+              // cannot recover
+              hls.destroy();
+              break;
+          }
         }
-      }
-    };
+      });
 
-    socket.addEventListener("message", handleMessage);
+      // console.log("LOADING ", hls_playlist_url);
+      hls.loadSource(hls_playlist_url);
+      hls.attachMedia(videoRef.current!);
+    }
+  }, [hls_playlist_url]);
 
-    return () => {
-      socket.removeEventListener("message", handleMessage);
-      if (hlsRef.current) {
-        hlsRef.current.destroy();
-      }
-    };
-  }, [socket]);
-
+  // console.log("[VideoPlayer] Rendering video element");
   return <video ref={videoRef} controls className={className} />;
 }

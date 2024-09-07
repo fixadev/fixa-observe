@@ -46,7 +46,6 @@
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "server-only": "^0.0.1",
-    "socket.io-client": "^4.7.5",
     "superjson": "^2.2.1",
     "svix": "^1.32.0",
     "tailwind-merge": "^2.5.2",
