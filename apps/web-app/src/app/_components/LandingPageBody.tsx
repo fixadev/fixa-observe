@@ -44,17 +44,16 @@ export default function LandingPageBody() {
   };
 
   const callGenerate = useCallback(async () => {
+    const endpoint = `${process.env.NEXT_PUBLIC_BACKEND_URL}/generate`;
+    console.log("calling generate with", endpoint);
     try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/generate`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ prompt: text }),
+      const response = await fetch(endpoint, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
         },
-      );
+        body: JSON.stringify({ prompt: text }),
+      });
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
