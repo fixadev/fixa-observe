@@ -14,10 +14,10 @@ from config import BASE_URL
 
 
 class ManimGenerator:
-    def __init__(self, websocket: WebSocket):
+    def __init__(self, output_queue):
         self.start_time = time.time()
         self.commands = []
-        self.websocket = websocket
+        self.output_queue = output_queue
         self.stop_commands = []
         self.running = False
         self.frame_queue = Queue()
@@ -191,7 +191,8 @@ class ManimGenerator:
             while not hls_ready:
                 if os.path.exists(os.path.join(output_dir, "playlist.m3u8")):
                     print(f'INFO: HLS Playlist ready at {time.time() - run_started_time} seconds', flush=True)
-                    run_cor(emit_ready_message(self.websocket))
+                    # run_cor(emit_ready_message(self.websocket))
+                    self.output_queue.put(f"{BASE_URL}/{output_dir}/playlist.m3u8")
                     hls_ready = True
                 time.sleep(0.01)
                     
