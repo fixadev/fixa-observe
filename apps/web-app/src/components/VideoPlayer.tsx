@@ -32,6 +32,7 @@ export function VideoPlayer({
               }
               if (hlsRef.current) {
                 hlsRef.current.stopLoad();
+                hlsRef.current.destroy();
               }
             }
           });
