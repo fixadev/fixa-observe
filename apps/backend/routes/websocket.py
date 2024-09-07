@@ -39,6 +39,7 @@ async def websocket_endpoint(websocket: WebSocket):
     generator = ManimGenerator(websocket)
     request_num = 0
     connection_id = await manager.connect(websocket)
+    generator_thread = None
     try:
         while True:
             prompt = await websocket.receive_text()
@@ -50,16 +51,16 @@ async def websocket_endpoint(websocket: WebSocket):
             
     except WebSocketDisconnect:
         manager.disconnect(websocket)
-        if generator.running:
-            generator.cleanup()
+        if generator_thread:
+            generator_thread.kill()
         if os.path.exists(f"public/hls/{connection_id}"):
             shutil.rmtree(f"public/hls/{connection_id}")
         logger.info("WebSocket disconnected")
 
     except Exception as e:
         logger.error(f"WebSocket error: {e}")
-        if generator.running:
-            generator.cleanup()
+        if generator_thread:
+            generator_thread.kill()
     finally:
         logger.info("WebSocket connection closed")
         if os.path.exists(f"public/hls/{connection_id}"):
