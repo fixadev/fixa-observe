@@ -12,6 +12,9 @@ export const env = createEnv({
       .enum(["development", "test", "production"])
       .default("development"),
     CLERK_WEBHOOK_SECRET: z.string(),
+    LISTMONK_USERNAME: z.string(),
+    LISTMONK_PASSWORD: z.string(),
+    LISTMONK_URL: z.string().url(),
     // Temporarily disabled Discord auth functionality
     // DISCORD_CLIENT_ID: z.string(),
     // DISCORD_CLIENT_SECRET: z.string(),
@@ -38,6 +41,9 @@ export const env = createEnv({
     NEXT_PUBLIC_POSTHOG_KEY: process.env.NEXT_PUBLIC_POSTHOG_KEY,
     NEXT_PUBLIC_POSTHOG_HOST: process.env.NEXT_PUBLIC_POSTHOG_HOST,
     CLERK_WEBHOOK_SECRET: process.env.CLERK_WEBHOOK_SECRET,
+    LISTMONK_USERNAME: process.env.LISTMONK_USERNAME,
+    LISTMONK_PASSWORD: process.env.LISTMONK_PASSWORD,
+    LISTMONK_URL: process.env.LISTMONK_URL,
     // Temporarily disabled Discord auth functionality
     // DISCORD_CLIENT_ID: process.env.DISCORD_CLIENT_ID,
     // DISCORD_CLIENT_SECRET: process.env.DISCORD_CLIENT_SECRET,
