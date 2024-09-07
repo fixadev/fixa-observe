@@ -11,8 +11,8 @@ export function VideoPlayer({
   const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
-    console.log("[VideoPlayer] useEffect triggered");
-    console.log("[VideoPlayer] hls_playlist_url:", hls_playlist_url);
+    // console.log("[VideoPlayer] useEffect triggered");
+    // console.log("[VideoPlayer] hls_playlist_url:", hls_playlist_url);
     if (!hls_playlist_url) {
       console.log(
         "[VideoPlayer] No hls_playlist_url provided, exiting useEffect",
@@ -22,13 +22,13 @@ export function VideoPlayer({
 
     if (Hls.isSupported()) {
       const hls = new Hls();
-      hls.on(Hls.Events.MEDIA_ATTACHED, function () {
-        console.log("video and hls.js are now bound together !");
-      });
-      hls.on(Hls.Events.MANIFEST_PARSED, function (event, data) {
-        console.log(
-          "manifest loaded, found " + data.levels.length + " quality level",
-        );
+      // hls.on(Hls.Events.MEDIA_ATTACHED, function () {
+      //   console.log("video and hls.js are now bound together !");
+      // });
+      hls.on(Hls.Events.MANIFEST_PARSED, function () {
+        // console.log(
+        //   "manifest loaded, found " + data.levels.length + " quality level",
+        // );
         void videoRef.current!.play();
       });
       hls.on(Hls.Events.ERROR, function (event, data) {
@@ -53,12 +53,12 @@ export function VideoPlayer({
         }
       });
 
-      console.log("LOADING ", hls_playlist_url);
+      // console.log("LOADING ", hls_playlist_url);
       hls.loadSource(hls_playlist_url);
       hls.attachMedia(videoRef.current!);
     }
   }, [hls_playlist_url]);
 
-  console.log("[VideoPlayer] Rendering video element");
+  // console.log("[VideoPlayer] Rendering video element");
   return <video ref={videoRef} controls className={className} />;
 }
