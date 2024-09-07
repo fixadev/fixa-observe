@@ -21,6 +21,8 @@ class ManimGenerator:
         self.stop_commands = []
         self.running = False
         self.frame_queue = Queue()
+        self.frame_width = 960
+        self.frame_height = 540
 
         self.system_prompt = """You are an AI teacher. 
     
@@ -51,14 +53,14 @@ class ManimGenerator:
 
     def run_scene(self):
         print('INFO: Instantiate BlankScene at', time.time() - self.start_time)
-        scene = BlankScene(self.frame_queue, self.commands, dimensions=(1920/2, 1080/2), frame_rate=self.frame_rate, start_time=self.start_time, debug_mode=False)
+        scene = BlankScene(self.frame_queue, self.commands, dimensions=(self.frame_width, self.frame_height), frame_rate=self.frame_rate, start_time=self.start_time, debug_mode=False)
         print('INFO: BlankScene instantiated at', time.time() - self.start_time)
         scene.render()
         print('INFO: EVERYTHING completed at', time.time() - self.start_time)
 
-    def generate(self, text):
+    def generate(self, text, start_time):
         first_byte_received = False
-        start_time = time.time()
+        first_command_ready = False
         print("INFO: making anthropic call", flush=True)
         with anthropic_client.messages.stream(
             model="claude-3-5-sonnet-20240620",
@@ -96,6 +98,9 @@ class ManimGenerator:
                         # cur_chunk = replace_list_comprehensions(cur_chunk)
                         cur_chunk = replace_svg_mobjects(cur_chunk)
                         self.commands.append(cur_chunk)
+                        if not first_command_ready:
+                            first_command_ready = True
+                            print(f"INFO: first command ready at {time.time() - start_time} seconds", flush=True)
                         cur_chunk = chunks[-1]
                     else:
                         cur_chunk += chunk
@@ -108,23 +113,22 @@ class ManimGenerator:
         # time.sleep(5)
         self.commands.append("")
 
-    def send_frames_to_ffmpeg(self):
+    def send_frames_to_ffmpeg(self, start_time):
+        first_frame = True
         while self.running or not self.frame_queue.empty():
             try:
                 if not self.frame_queue.empty():
                     frame = self.frame_queue.get_nowait()
-                    rgb_image = frame.convert('RGB')
-                    numpy_image = np.array(rgb_image)
-                    rgb24_frame = np.ascontiguousarray(numpy_image, dtype=np.uint8)
-                    if self.ffmpeg_process is None:
-                        print("INFO: ffmpeg_process is None", flush=True)
-                    self.ffmpeg_process.stdin.write(rgb24_frame.tobytes())
+                    if first_frame:
+                        first_frame = False
+                        print(f"INFO: first frame written to ffmpeg at {time.time() - start_time} seconds", flush=True)
+                    self.ffmpeg_process.stdin.write(frame)
                     self.ffmpeg_process.stdin.flush()
                 else:
                     time.sleep(1/self.frame_rate)
-                    # print("self.frame_queue empty", flush=True)
+                    # print("INFO: self.frame_queue empty", flush=True)
             except Exception as e:
-                print(f"Error in send_frames_to_stdout: {e}", file=sys.stderr)
+                print(f"Error in send_frames_to_ffmpeg: {e}", file=sys.stderr)
                 break
         self.ffmpeg_process.stdin.close()
 
@@ -136,9 +140,10 @@ class ManimGenerator:
             '-y',
             '-f', 'rawvideo',
             '-vcodec', 'rawvideo',
-            '-pix_fmt', 'rgb24',
-            '-s', '960x540',
+            '-pix_fmt', 'rgba',
+            '-s', f'{self.frame_width}x{self.frame_height}',
             '-i', '-',
+            '-vf', 'vflip',
             '-c:v', 'libx264',
             '-preset', 'ultrafast',
             '-tune', 'zerolatency',
@@ -174,10 +179,10 @@ class ManimGenerator:
             hls_ready = False
             for line in iter(stream.readline, b''):
                 line = line.decode().strip()
-                print(f"FFmpeg {stream.name}: {line}", flush=True)
+                # print(f"FFmpeg {stream.name}: {line}", flush=True)
                 if "Opening" in line and not hls_ready:
                     hls_ready = True
-                    print(f'SENDING HLS READY in {time.time() - run_started_time} seconds', flush=True)
+                    print(f'INFO: First HLS segment ready at {time.time() - run_started_time} seconds', flush=True)
                     # executes async function in event loop
                     run_cor(emit_ready_message(self.websocket))
                     
@@ -191,8 +196,8 @@ class ManimGenerator:
         try:
             self.running = True
 
-            generate_thread = threading.Thread(target=self.generate, args=(text,), daemon=True)
-            send_frames_thread = threading.Thread(target=self.send_frames_to_ffmpeg, daemon=True)
+            generate_thread = threading.Thread(target=self.generate, args=(text, run_started_time), daemon=True)
+            send_frames_thread = threading.Thread(target=self.send_frames_to_ffmpeg, args=(run_started_time,), daemon=True)
             generate_thread.start()
 
             print(f"INFO: starting ffmpeg in {time.time() - run_started_time} seconds", flush=True)
@@ -216,6 +221,7 @@ class ManimGenerator:
                 "type": "error",
                 "error": str(e)
             }))
+            self.cleanup()
     
 
     def cleanup(self):

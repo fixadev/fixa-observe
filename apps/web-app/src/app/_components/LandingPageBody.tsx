@@ -1,11 +1,11 @@
 "use client";
-import React, { useCallback, useState, useRef, useEffect } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Input } from "@/components/ui/input";
 import AnimatedPlaceholder from "@/components/AnimatedPlaceholder";
 import { ibmPlexMono } from "~/app/fonts";
 import { usePostHog } from "posthog-js/react";
 import { ArrowRightCircleIcon } from "@heroicons/react/24/solid";
-import { useWebSocket, SocketHook } from "@/components/UseWebsocket";
+import { useWebSocket } from "@/components/UseWebsocket";
 import { VideoPlayer } from "@/components/VideoPlayer";
 import { useAuth, useClerk } from "@clerk/nextjs";
 import { ANONYMOUS_PROMPT_SUBMISSION_LIMIT } from "~/lib/constants";
@@ -20,9 +20,12 @@ export default function LandingPageBody() {
   const [state, setState] = useState<"initial" | "chat">("initial");
   const [chatHistory, setChatHistory] = useState<string[]>([]);
 
+  const { sendMessage, socket } = useWebSocket(
+    process.env.NEXT_PUBLIC_WS_URL ?? "ws://localhost:8000/ws",
+  );
+
   const posthog = usePostHog();
   const [text, setText] = useState("");
-  const { sendMessage, socket } = useWebSocket("ws://localhost:8000/ws");
 
   const chatHistoryRef = useRef<HTMLDivElement>(null);
 

@@ -49,7 +49,7 @@ jupyter_client==8.6.2
 jupyter_core==5.7.2
 jupyterlab_pygments==0.3.0
 lazy-object-proxy==1.10.0
-manim @ git+https://github.com/pixa-dev/pixanim.git@8ee6b715dcb9305c529b8ba0c7ea74e262d9751d
+manim @ git+https://github.com/pixa-dev/pixanim.git@ae1a00790d81cd95a67c522fcec62193e34471cb
 ManimPango==0.5.0
 mapbox_earcut==1.0.2
 markdown-it-py==3.0.0
@@ -93,9 +93,6 @@ Pygments==2.18.0
 pyht==0.0.28
 pylint==2.17.4
 PyMsgBox==1.0.9
-pyobjc-core==10.3.1
-pyobjc-framework-Cocoa==10.3.1
-pyobjc-framework-Quartz==10.3.1
 pyperclip==1.9.0
 PyRect==0.2.0
 pyrr==0.10.3
@@ -137,4 +134,5 @@ wcwidth==0.2.13
 webencodings==0.5.1
 websockets==10.4
 wrapt==1.16.0
+xvfbwrapper==0.2.9
 yarg==0.1.9
