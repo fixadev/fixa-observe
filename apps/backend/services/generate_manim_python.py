@@ -151,7 +151,7 @@ class ManimGenerator:
             '-maxrate', '2M',
             '-g', '30',
             '-f', 'hls',
-            '-hls_init_time', '0.2',
+            '-hls_init_time', '0.5',
             '-hls_time', '1',
             # '-hls_list_size', '5',
             # '-hls_flags', 'delete_segments+append_list',
