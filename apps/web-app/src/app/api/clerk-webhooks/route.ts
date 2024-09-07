@@ -6,6 +6,7 @@ import { db } from "~/server/db";
 import { addSubscriber } from "~/server/listmonk";
 
 export async function POST(req: Request) {
+  console.log("Clerk webhook received", req);
   // You can find this in the Clerk Dashboard -> Webhooks -> choose the endpoint
   const WEBHOOK_SECRET = env.CLERK_WEBHOOK_SECRET;
 
@@ -67,7 +68,11 @@ export async function POST(req: Request) {
         return new Response("User has no email", { status: 400 });
       }
       await upsertUser(clerkId, email, first_name, last_name);
-      await addSubscriber(email, first_name, last_name);
+      try {
+        await addSubscriber(email, first_name, last_name);
+      } catch (e) {
+        console.error("Error adding subscriber", e);
+      }
       break;
     }
     case "user.updated": {
