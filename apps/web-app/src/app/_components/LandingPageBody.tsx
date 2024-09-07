@@ -109,10 +109,10 @@ export default function LandingPageBody() {
         )}
 
         {state === "chat" && (
-          <div className="flex h-full w-full max-w-screen-lg flex-col justify-end px-4">
+          <div className="flex h-full w-full max-w-screen-lg flex-col justify-end px-2 sm:px-4">
             <div
               ref={chatHistoryRef}
-              className="-mx-4 mb-4 overflow-y-auto px-4"
+              className="-mx-2 mb-4 overflow-y-auto px-2 sm:-mx-4 sm:px-4"
             >
               {chatHistory.map((text, i) => {
                 // Do not render the message that was just submitted, instead render it below the video player
