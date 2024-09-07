@@ -3,6 +3,7 @@ import { headers } from "next/headers";
 import { WebhookEvent } from "@clerk/nextjs/server";
 import { env } from "~/env";
 import { db } from "~/server/db";
+import { addSubscriber } from "~/server/listmonk";
 
 export async function POST(req: Request) {
   // You can find this in the Clerk Dashboard -> Webhooks -> choose the endpoint
@@ -65,6 +66,7 @@ export async function POST(req: Request) {
         return new Response("User has no email", { status: 400 });
       }
       await upsertUser(clerkId, email, first_name, last_name);
+      await addSubscriber(email, first_name, last_name);
       break;
     }
     case "user.updated": {
