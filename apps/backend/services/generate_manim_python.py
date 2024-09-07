@@ -158,7 +158,7 @@ class ManimGenerator:
             '-g', '30',
             '-f', 'hls',
             '-hls_init_time', '0.2',
-            '-hls_time', '.5',
+            '-hls_time', '0.5',
             # '-hls_list_size', '5',
             # '-hls_flags', 'delete_segments+append_list',
             '-hls_segment_type', 'mpegts',

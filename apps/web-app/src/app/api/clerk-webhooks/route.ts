@@ -67,7 +67,11 @@ export async function POST(req: Request) {
         return new Response("User has no email", { status: 400 });
       }
       await upsertUser(clerkId, email, first_name, last_name);
-      await addSubscriber(email, first_name, last_name);
+      try {
+        await addSubscriber(email, first_name, last_name);
+      } catch (e) {
+        console.error("Error adding subscriber", e);
+      }
       break;
     }
     case "user.updated": {
