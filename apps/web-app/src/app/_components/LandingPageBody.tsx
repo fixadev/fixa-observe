@@ -11,6 +11,9 @@ import { useAuth, useClerk } from "@clerk/nextjs";
 import { ANONYMOUS_PROMPT_SUBMISSION_LIMIT } from "~/lib/constants";
 import BookCallDialog from "./BookCallDialog";
 import { cn } from "~/lib/utils";
+import { motion, AnimatePresence } from "framer-motion";
+import { Button } from "~/components/ui/button";
+import ExpandTransition from "~/components/ExpandTransition";
 
 export default function LandingPageBody() {
   const [state, setState] = useState<"initial" | "chat">("initial");
@@ -69,10 +72,16 @@ export default function LandingPageBody() {
       if (state === "initial") {
         setState("chat");
       }
+
+      setShowVideo(false);
+      setTimeout(() => {
+        setShowVideo(true);
+      }, 1000);
     }
   }, [state, text, isSignedIn, openSignIn, sendMessage, posthog]);
 
   const [bookCallDialogOpen, setBookCallDialogOpen] = useState(false);
+  const [showVideo, setShowVideo] = useState(false);
 
   return (
     <>
@@ -106,8 +115,10 @@ export default function LandingPageBody() {
                   </div>
                 </div>
               ))}
-              {socket && (
-                <VideoPlayer className="mb-4 w-full" socket={socket} />
+              {socket && showVideo && (
+                <ExpandTransition buffer={100}>
+                  <VideoPlayer className="mb-4 w-full" socket={socket} />
+                </ExpandTransition>
               )}
             </div>
             <LandingPageTextField

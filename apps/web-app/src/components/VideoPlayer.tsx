@@ -6,7 +6,7 @@ export function VideoPlayer({
   className,
 }: {
   socket: WebSocket;
-  className: string;
+  className?: string;
 }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const hlsRef = useRef<Hls | null>(null);
