@@ -93,9 +93,6 @@ Pygments==2.18.0
 pyht==0.0.28
 pylint==2.17.4
 PyMsgBox==1.0.9
-pyobjc-core==10.3.1
-pyobjc-framework-Cocoa==10.3.1
-pyobjc-framework-Quartz==10.3.1
 pyperclip==1.9.0
 PyRect==0.2.0
 pyrr==0.10.3

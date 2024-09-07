@@ -52,7 +52,7 @@ async def websocket_endpoint(websocket: WebSocket):
     except WebSocketDisconnect:
         manager.disconnect(websocket)
         if generator_thread:
-            generator_thread.kill()
+            generator_thread.join()
         if os.path.exists(f"public/hls/{connection_id}"):
             shutil.rmtree(f"public/hls/{connection_id}")
         logger.info("WebSocket disconnected")
@@ -60,7 +60,7 @@ async def websocket_endpoint(websocket: WebSocket):
     except Exception as e:
         logger.error(f"WebSocket error: {e}")
         if generator_thread:
-            generator_thread.kill()
+            generator_thread.join()
     finally:
         logger.info("WebSocket connection closed")
         if os.path.exists(f"public/hls/{connection_id}"):
