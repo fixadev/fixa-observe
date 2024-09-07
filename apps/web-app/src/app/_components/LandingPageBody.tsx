@@ -64,7 +64,6 @@ export default function LandingPageBody() {
       if (!data.hls_playlist_url) {
         throw new Error("No HLS playlist URL in the response");
       }
-      console.log("setting hls playlist url", data.hls_playlist_url);
       setHlsPlaylistUrl(data.hls_playlist_url.toString().trim());
     } catch (error) {
       console.error("Error calling generate API:", error);
@@ -245,7 +244,7 @@ const LandingPageHeader = () => {
           ibmPlexMono.className,
         ].join(" ")}
       >
-        pixa.dev: the real-time AI text to video api
+        pixa.dev: the real-time AI text to animation api
       </div>
       <h1 className="font-md mb-8 text-center text-3xl sm:text-5xl">
         bring any concept to life.
