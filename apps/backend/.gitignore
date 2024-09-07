@@ -32,3 +32,8 @@ Thumbs.db
 
 FRAMES
 services/media
+
+log.txt
+log2.txt
+
+public/hls

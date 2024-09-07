@@ -1,11 +1,9 @@
-import SplashPage from "@/components/SplashPage";
-import Logo from "@/components/Logo";
+import LandingPageBody from "@/app/_components/LandingPageBody";
 
 export default async function Home() {
   return (
     <div className="bg-neutral-900">
-      <Logo />
-      <SplashPage />
+      <LandingPageBody />
     </div>
   );
 }

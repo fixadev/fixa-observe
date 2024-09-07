@@ -1,53 +1,66 @@
+from queue import Queue
 from manim import *
 from manim.opengl import *
 from manim.renderer.opengl_renderer import OpenGLRenderer
+import math
+import numpy as np
+import time
+
+config.renderer = "opengl"
+config.write_to_movie = False
+# config.background_color = "#ffffff"
 
 class BlankScene(Scene):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, frame_queue, commands, dimensions=(1920/4, 1080/4), frame_rate=60, start_time=time.time(), debug_mode=False, *args, **kwargs):
+        config.pixel_width = math.floor(dimensions[0])
+        config.pixel_height = math.floor(dimensions[1])
+        config.frame_rate = frame_rate
+        config.progress_bar = "none"
+
+        super().__init__(frame_queue, debug_mode=debug_mode, *args, **kwargs)
+
         assert isinstance(self.renderer, OpenGLRenderer), "This scene only works with the OpenGL renderer"
-        self.pixel_shape = self.renderer.get_pixel_shape()
+        self.commands = commands
+        self.start_time = start_time
 
     def construct(self):
-        self.interactive_embed()
+        self.interactive_embed(self.commands, self.start_time)
 
 class TestScene(Scene):
+    def __init__(self, *args, **kwargs):
+        config.frame_rate = 60
+        super().__init__(Queue(), *args, **kwargs)
+
     def construct(self):
-        # Create the sun
-        sun = Circle(radius=0.5, fill_opacity=1, color=YELLOW)
-        self.play(Create(sun))
-
-        # Create planets with different sizes and colors
-        planets = [
-            Circle(radius=0.1, fill_opacity=1, color=BLUE),        # Mercury
-            Circle(radius=0.15, fill_opacity=1, color=ORANGE),     # Venus
-            Circle(radius=0.2, fill_opacity=1, color=GREEN),       # Earth
-            Circle(radius=0.18, fill_opacity=1, color=RED),        # Mars
-            Circle(radius=0.4, fill_opacity=1, color=LIGHT_BROWN), # Jupiter
-            Circle(radius=0.35, fill_opacity=1, color=GOLD),       # Saturn
-            Circle(radius=0.3, fill_opacity=1, color=BLUE_C),      # Uranus
-            Circle(radius=0.28, fill_opacity=1, color=BLUE_E)      # Neptune
-        ]
-
-        # Create orbits and position planets
-        orbits = []
-        for i, planet in enumerate(planets):
-            orbit_radius = (i + 2) * 0.8
-            orbit = Circle(radius=orbit_radius, color=WHITE).move_to(sun.get_center())
-            orbits.append(orbit)
-            planet.move_to(sun.get_center() + RIGHT * orbit_radius)
-            self.play(Create(orbit), Create(planet), run_time=0.5)
-
-        # Animate planet rotation
-        rotations = [
-            Rotate(planet, angle=TAU, about_point=sun.get_center(), rate_func=linear, run_time=20/(i+1))
-            for i, planet in enumerate(planets)
-        ]
-        self.play(*rotations, run_time=20)
-
-        # Fade out all objects
-        self.play(
-            FadeOut(sun),
-            *[FadeOut(planet) for planet in planets],
-            *[FadeOut(orbit) for orbit in orbits]
-        )
+        start = time.time()
+        # Text explanation
+        title = Text("How Babies Are Made", color=BLUE).scale(1.2).shift(UP * 3)
+        self.play(Write(title))
+        # Sperm and egg
+        sperm = Triangle(color=WHITE, fill_opacity=1).scale(0.2).shift(LEFT * 4)
+        egg = Circle(color=PINK, fill_opacity=1).scale(0.5).shift(RIGHT * 4)
+        self.play(FadeIn(sperm), FadeIn(egg))
+        # Sperm moves to egg
+        self.play(sperm.animate.move_to(egg.get_center()))
+        # Fertilization
+        fertilized_egg = Circle(color=YELLOW, fill_opacity=1).scale(0.6).move_to(egg.get_center())
+        self.play(Transform(egg, fertilized_egg), FadeOut(sperm))
+        # Cell division
+        cells = VGroup(*[Circle(color=YELLOW, fill_opacity=1).scale(0.2) for _ in range(4)])
+        cells.arrange_in_grid(rows=2, cols=2, buff=0.1)
+        self.play(Transform(fertilized_egg, cells))
+        # More cell division
+        more_cells = VGroup(*[Circle(color=YELLOW, fill_opacity=1).scale(0.1) for _ in range(16)])
+        more_cells.arrange_in_grid(rows=4, cols=4, buff=0.05)
+        self.play(Transform(cells, more_cells))
+        # Forming embryo
+        embryo = Ellipse(width=1.5, height=2, color=RED, fill_opacity=0.8)
+        self.play(Transform(more_cells, embryo))
+        # Growing fetus
+        fetus = Circle().set_color(PINK).scale(0.5)
+        self.play(Transform(embryo, fetus))
+        # Final text
+        final_text = Text("9 months later...", color=GREEN).scale(0.8).shift(DOWN * 3)
+        self.play(Write(final_text))
+        self.play(FadeOut(title), FadeOut(fetus), FadeOut(final_text))
+        print(f"Time taken: {time.time() - start} seconds")
