@@ -83,8 +83,12 @@ export default function BookCallDialog({
             <DialogTitle>request submitted!</DialogTitle>
           </DialogHeader>
           <DialogDescription>
-            check your email ({user?.primaryEmailAddress?.emailAddress}) for
-            further instructions.
+            we'll reach out via email within 24 hours. if we don't, feel free to
+            spam us at{" "}
+            <a className="underline" href="mailto:contact@pixa.dev">
+              contact@pixa.dev
+            </a>
+            .
           </DialogDescription>
         </DialogContent>
       )}
