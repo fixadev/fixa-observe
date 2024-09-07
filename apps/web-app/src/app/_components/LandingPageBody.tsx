@@ -1,19 +1,20 @@
 "use client";
-import React, { useCallback, useState, useRef, useEffect } from "react";
+import React, { useCallback, useState } from "react";
 import { Input } from "@/components/ui/input";
 import AnimatedPlaceholder from "@/components/AnimatedPlaceholder";
 import { ibmPlexMono } from "~/app/fonts";
 import { usePostHog } from "posthog-js/react";
 import { ArrowRightCircleIcon } from "@heroicons/react/24/solid";
-import { useWebSocket, SocketHook } from "@/components/UseWebsocket";
+import { useWebSocket } from "@/components/UseWebsocket";
 import { VideoPlayer } from "@/components/VideoPlayer";
 
 export default function LandingPageBody() {
   const [text, setText] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // const { sendMessage, socket: WebSocket } = socket("ws://localhost:8000/ws");
-  const { sendMessage, socket } = useWebSocket("ws://localhost:8000/ws");
+  const { sendMessage, socket } = useWebSocket(
+    process.env.NEXT_PUBLIC_WS_URL ?? "ws://localhost:8000/ws",
+  );
 
   const posthog = usePostHog();
 
