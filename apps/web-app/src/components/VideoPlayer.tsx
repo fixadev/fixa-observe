@@ -55,13 +55,13 @@ export function VideoPlayer({
       if (typeof event.data === "string") {
         const data = JSON.parse(event.data) as {
           type: string;
-          message: string;
+          playlistUrl: string;
         };
         if (data.type === "hls_ready") {
-          console.log("HLS ready", data.message);
-          handleHLSReady(data.message);
+          console.log("HLS ready", data.playlistUrl);
+          handleHLSReady(data.playlistUrl);
         } else if (data.type === "error") {
-          console.error("Error", data.message);
+          console.error("Error creating video");
           // TODO: display error toast
           toast({
             title: "Error creating video.",
