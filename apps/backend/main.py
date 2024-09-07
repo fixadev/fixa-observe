@@ -15,7 +15,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(websocket_router)
 app.include_router(generate_router)
 
 # Mount the static files directory
