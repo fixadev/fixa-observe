@@ -157,11 +157,10 @@ class ManimGenerator:
     def convert_to_hls(self, output_dir):
         output_dir_str = str(output_dir)
         os.makedirs(output_dir, exist_ok=True)
+
         ffmpeg_command = [
-            # '/usr/local/bin/ffmpeg',
             'ffmpeg',
             '-y',
-            # '-hwaccel', 'cuda',
             '-f', 'rawvideo',
             '-vcodec', 'rawvideo',
             '-pix_fmt', 'rgb24',
@@ -170,8 +169,6 @@ class ManimGenerator:
             '-i', '-',
             '-vf', 'vflip',
             '-c:v', 'libx264',
-            # '-c:v', 'h264_nvenc',
-            # '-preset', 'p1',  
             '-preset', 'ultrafast',
             '-tune', 'zerolatency',
             '-bufsize', '1M',
@@ -180,8 +177,8 @@ class ManimGenerator:
             '-f', 'hls',
             '-hls_init_time', '0.5',
             '-hls_time', '0.5',
-            # '-hls_list_size', '5',
-            # '-hls_flags', 'delete_segments+append_list',
+            # '-hls_list_size', '0',
+            # '-hls_playlist_type', 'event', 
             '-hls_segment_type', 'mpegts',
             '-hls_segment_filename', os.path.join(output_dir_str, 'stream%03d.ts'),
             os.path.join(output_dir_str, 'playlist.m3u8')

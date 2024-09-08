@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import Hls from "hls.js";
-
+import { isIOS } from "../lib/platform";
 export function VideoPlayer({
   hls_playlist_url,
   className,
@@ -66,5 +66,14 @@ export function VideoPlayer({
   }, [hls_playlist_url]);
 
   // console.log("[VideoPlayer] Rendering video element");
-  return <video ref={videoRef} controls className={className} />;
+  return isIOS() ? (
+    <video
+      src={hls_playlist_url ?? ""}
+      autoPlay
+      controls
+      className={className}
+    />
+  ) : (
+    <video ref={videoRef} controls className={className} />
+  );
 }
