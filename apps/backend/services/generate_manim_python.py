@@ -29,6 +29,9 @@ class ManimGenerator:
         Generate Manim code that generates a 10-15 second animation that directly illustrates the user prompt.
         Do not output any other text than the Manim code.
         Do not import manim or any other libraries.
+        Do not include ANY comments (i.e. lines that start with #) 
+        Do not include unnecessary newlines in the code.
+        ALWAYS start your code with a self.play() call.
         
         Follow these guidelines for the Manim code:
         1. Only generate the content of the construct() method, but do not include the first line "def construct(self):".
@@ -41,8 +44,7 @@ class ManimGenerator:
         9. DO NOT reference any external static assets -- including images, SVGs, videos, or audio files.
         10. Use shapes, text, and animations that can be generated purely with manim code.
         11. Ensure that the animation aligns perfectly with the text response. 
-        12. Do not include ANY comments or any unnecessary newlines in the code.
-        13. Do not use any LIGHT color variants such as LIGHT_BLUE, LIGHT_GREEN, LIGHT_RED, etc. And never use BROWN.
+        12. Do not use any LIGHT color variants such as LIGHT_BLUE, LIGHT_GREEN, LIGHT_RED, etc. And never use BROWN.
         """
         #
         # 14. DO NOT USE FOR LOOPS. EVER. DO NOT EVEN THINK ABOUT IT.
@@ -114,6 +116,30 @@ class ManimGenerator:
         self.commands.append("")
 
     def send_frames_to_ffmpeg(self, start_time):
+        for_loop = False
+        num_black_frames = int(self.frame_rate * 1) + 1
+
+        # Generate a single black frame
+        black_frame = np.zeros((self.frame_height, self.frame_width, 4), dtype=np.uint8)
+        black_frame[:,:,3] = 255  # Set alpha channel to 255 (fully opaque)
+        if for_loop: 
+            black_frame_bytes = black_frame.tobytes()
+
+            # Send 1 second of black frames to ffmpeg
+            for _ in range(num_black_frames):
+                self.ffmpeg_process.stdin.write(black_frame_bytes)
+                self.ffmpeg_process.stdin.flush()
+        else:
+            # Create 1 second of black frames (frame_rate frames)
+            black_frames = np.tile(black_frame, (num_black_frames, 1, 1, 1))
+            black_frames_bytes = black_frames.tobytes()
+
+            # Send 1 second of black frames to ffmpeg at once
+            self.ffmpeg_process.stdin.write(black_frames_bytes)
+            self.ffmpeg_process.stdin.flush()
+
+        print("INFO: sent 1 second of black frames to ffmpeg", time.time() - start_time, flush=True)
+
         first_frame = True
         while self.running or not self.frame_queue.empty():
             try:
@@ -121,7 +147,7 @@ class ManimGenerator:
                     frame = self.frame_queue.get_nowait()
                     if first_frame:
                         first_frame = False
-                        print(f"INFO: first frame written to ffmpeg at {time.time() - start_time} seconds", flush=True)
+                        # print(f"INFO: first frame written to ffmpeg at {time.time() - start_time} seconds", flush=True)
                     self.ffmpeg_process.stdin.write(frame)
                     self.ffmpeg_process.stdin.flush()
                 else:
@@ -156,7 +182,7 @@ class ManimGenerator:
             '-maxrate', '2M',
             '-g', '30',
             '-f', 'hls',
-            '-hls_init_time', '0.2',
+            '-hls_init_time', '0.5',
             '-hls_time', '0.5',
             # '-hls_list_size', '5',
             # '-hls_flags', 'delete_segments+append_list',
@@ -213,10 +239,10 @@ class ManimGenerator:
 
             print(f"INFO: starting ffmpeg in {time.time() - self.start_time} seconds", flush=True)
             self.ffmpeg_process = self.convert_to_hls(output_dir)
-            self.check_for_playlist(output_dir, self.ffmpeg_process)
-
             send_frames_thread = threading.Thread(target=self.send_frames_to_ffmpeg, args=(self.start_time,), daemon=True)
             send_frames_thread.start()
+
+            self.check_for_playlist(output_dir, self.ffmpeg_process)
 
             run_scene_thread.join()
             print('scene done', flush=True)
