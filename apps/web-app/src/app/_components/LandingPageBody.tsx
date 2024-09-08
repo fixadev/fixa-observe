@@ -13,6 +13,7 @@ import { cn } from "~/lib/utils";
 import { AnimatePresence } from "framer-motion";
 import ExpandTransition from "~/components/ExpandTransition";
 import { api } from "~/trpc/react";
+import axios from "axios";
 
 export default function LandingPageBody() {
   const [state, setState] = useState<"initial" | "chat">("initial");
@@ -52,6 +53,21 @@ export default function LandingPageBody() {
     }
   };
 
+  const [isBackendDown, setIsBackendDown] = useState(false);
+  const checkIsBackendDown = async () => {
+    await axios
+      .get(`${process.env.NEXT_PUBLIC_BACKEND_URL}`, { timeout: 1500 })
+      .then(() => {
+        setIsBackendDown(false);
+      })
+      .catch(() => {
+        setIsBackendDown(true);
+      });
+  };
+  useEffect(() => {
+    void checkIsBackendDown();
+  }, []);
+
   const callGenerate = useCallback(async () => {
     const endpoint = `${process.env.NEXT_PUBLIC_BACKEND_URL}/generate`;
     console.log("calling generate with", endpoint);
@@ -88,6 +104,11 @@ export default function LandingPageBody() {
 
   const handleSubmit = useCallback(async () => {
     if (text.length > 0) {
+      if (isBackendDown) {
+        setBookCallDialogOpen(true);
+        return;
+      }
+
       // If not signed in, check if the user has submitted a prompt before
       if (!isSignedIn) {
         const promptsSubmitted = localStorage.getItem("promptsSubmitted");
@@ -157,6 +178,7 @@ export default function LandingPageBody() {
     callGenerate,
     openSignIn,
     generate,
+    isBackendDown,
   ]);
 
   const [bookCallDialogOpen, setBookCallDialogOpen] = useState(false);
@@ -238,6 +260,11 @@ export default function LandingPageBody() {
         )}
       </div>
       <BookCallDialog
+        title={
+          isBackendDown
+            ? "we're currently experiencing high traffic."
+            : undefined
+        }
         open={bookCallDialogOpen}
         onOpenChange={setBookCallDialogOpen}
       />
