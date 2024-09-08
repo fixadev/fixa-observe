@@ -35,10 +35,10 @@ export function VideoPlayer({
         if (data.fatal) {
           switch (data.type) {
             case Hls.ErrorTypes.MEDIA_ERROR:
-              console.log(
-                "fatal media error encountered, try to recover",
-                data,
-              );
+              // console.log(
+              //   "fatal media error encountered, try to recover",
+              //   data,
+              // );
               hls.recoverMediaError();
               break;
             case Hls.ErrorTypes.NETWORK_ERROR:
