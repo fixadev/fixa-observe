@@ -117,8 +117,7 @@ class ManimGenerator:
         num_black_frames = int(self.frame_rate * 1) + 1
 
         # Generate a single black frame
-        black_frame = np.zeros((self.frame_height, self.frame_width, 4), dtype=np.uint8)
-        black_frame[:,:,3] = 255  # Set alpha channel to 255 (fully opaque)
+        black_frame = np.zeros((self.frame_height, self.frame_width, 3), dtype=np.uint8)
         if for_loop: 
             black_frame_bytes = black_frame.tobytes()
 
@@ -128,7 +127,7 @@ class ManimGenerator:
                 self.ffmpeg_process.stdin.flush()
         else:
             # Create 1 second of black frames (frame_rate frames)
-            black_frames = np.tile(black_frame, (num_black_frames, 1, 1, 1))
+            black_frames = np.tile(black_frame, (num_black_frames, 1, 1))
             black_frames_bytes = black_frames.tobytes()
 
             # Send 1 second of black frames to ffmpeg at once
@@ -165,7 +164,7 @@ class ManimGenerator:
             # '-hwaccel', 'cuda',
             '-f', 'rawvideo',
             '-vcodec', 'rawvideo',
-            '-pix_fmt', 'rgba',
+            '-pix_fmt', 'rgb24',
             '-r', str(self.frame_rate),
             '-s', f'{self.frame_width}x{self.frame_height}',
             '-i', '-',
