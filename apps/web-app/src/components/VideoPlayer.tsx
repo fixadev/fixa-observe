@@ -14,9 +14,9 @@ export function VideoPlayer({
     // console.log("[VideoPlayer] useEffect triggered");
     // console.log("[VideoPlayer] hls_playlist_url:", hls_playlist_url);
     if (!hls_playlist_url) {
-      console.log(
-        "[VideoPlayer] No hls_playlist_url provided, exiting useEffect",
-      );
+      // console.log(
+      //   "[VideoPlayer] No hls_playlist_url provided, exiting useEffect",
+      // );
       return;
     }
 
@@ -35,7 +35,10 @@ export function VideoPlayer({
         if (data.fatal) {
           switch (data.type) {
             case Hls.ErrorTypes.MEDIA_ERROR:
-              console.log("fatal media error encountered, try to recover");
+              console.log(
+                "fatal media error encountered, try to recover",
+                data,
+              );
               hls.recoverMediaError();
               break;
             case Hls.ErrorTypes.NETWORK_ERROR:
