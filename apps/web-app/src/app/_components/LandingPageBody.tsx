@@ -262,7 +262,7 @@ export default function LandingPageBody() {
       <BookCallDialog
         title={
           isBackendDown
-            ? "we're currently experiencing high traffic."
+            ? "we're currently experiencing high traffic :\\"
             : undefined
         }
         open={bookCallDialogOpen}
