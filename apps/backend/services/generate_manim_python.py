@@ -179,7 +179,10 @@ class ManimGenerator:
         # def read_stream(stream):
         #     for line in iter(stream.readline, b''):
         #         line = line.decode().strip()
-        #         print(f"FFmpeg {stream.name}: {line}", flush=True)
+        #         if os.path.exists(os.path.join(output_dir, "playlist.m3u8")):
+        #             print(f'INFO: HLS Playlist ready', flush=True)
+        #         else:
+        #             print(f"FFmpeg {stream.name}: {line}", flush=True)
         # threading.Thread(target=read_stream, args=(ffmpeg_process.stderr,), daemon=True).start()
         # threading.Thread(target=read_stream, args=(ffmpeg_process.stdout,), daemon=True).start()
 
