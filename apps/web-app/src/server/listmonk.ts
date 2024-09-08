@@ -38,20 +38,21 @@ export async function addSubscriber(
 }
 
 const transactionalTemplates = {
-  welcome: 1,
-  resetPassword: 2,
-  verifyEmail: 3,
+  // welcome: 1,
+  // resetPassword: 2,
+  // verifyEmail: 3,
+  serverIsDown: 4,
 };
 
 export async function sendEmail(
-  email: string,
+  emails: string[],
   template: keyof typeof transactionalTemplates,
 ) {
   try {
     await axios.post(
       `${env.LISTMONK_URL}/api/tx`,
       {
-        subscriber_email: email,
+        subscriber_emails: emails,
         template_id: transactionalTemplates[template],
       },
       {
