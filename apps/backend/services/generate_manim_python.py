@@ -179,7 +179,10 @@ class ManimGenerator:
         # def read_stream(stream):
         #     for line in iter(stream.readline, b''):
         #         line = line.decode().strip()
-        #         print(f"FFmpeg {stream.name}: {line}", flush=True)
+        #         if os.path.exists(os.path.join(output_dir, "playlist.m3u8")):
+        #             print(f'INFO: HLS Playlist ready', flush=True)
+        #         else:
+        #             print(f"FFmpeg {stream.name}: {line}", flush=True)
         # threading.Thread(target=read_stream, args=(ffmpeg_process.stderr,), daemon=True).start()
         # threading.Thread(target=read_stream, args=(ffmpeg_process.stdout,), daemon=True).start()
 
@@ -188,7 +191,7 @@ class ManimGenerator:
             while not hls_ready:
                 if os.path.exists(os.path.join(output_dir, "playlist.m3u8")):
                     print(f'INFO: HLS Playlist ready at {time.time() - self.start_time} seconds', flush=True)
-                    # run_cor(emit_ready_message(self.websocket))
+                        # run_cor(emit_ready_message(self.websocket))
                     self.output_queue.put(f"{BASE_URL}/{output_dir}/playlist.m3u8")
                     hls_ready = True
                 time.sleep(0.01)
@@ -201,17 +204,21 @@ class ManimGenerator:
         try:
             self.running = True
 
+            print(f"INFO: running scene in {time.time() - self.start_time} seconds", flush=True)
+            run_scene_thread = threading.Thread(target=self.run_scene, daemon=True)
+            run_scene_thread.start()
+
             generate_thread = threading.Thread(target=self.generate, args=(text, self.start_time), daemon=True)
-            send_frames_thread = threading.Thread(target=self.send_frames_to_ffmpeg, args=(self.start_time,), daemon=True)
             generate_thread.start()
 
             print(f"INFO: starting ffmpeg in {time.time() - self.start_time} seconds", flush=True)
             self.ffmpeg_process = self.convert_to_hls(output_dir)
             self.check_for_playlist(output_dir, self.ffmpeg_process)
+
+            send_frames_thread = threading.Thread(target=self.send_frames_to_ffmpeg, args=(self.start_time,), daemon=True)
             send_frames_thread.start()
 
-            print(f"INFO: running scene in {time.time() - self.start_time} seconds", flush=True)
-            self.run_scene()
+            run_scene_thread.join()
             print('scene done', flush=True)
             self.running = False
 
@@ -242,5 +249,5 @@ if __name__ == "__main__":
         # print("No prompt provided")
         prompt = "how are babies made?"
     
-    generator = ManimGenerator()
-    generator.run(prompt)
+    generator = ManimGenerator(Queue())
+    generator.run(prompt, "public/hls/test")
