@@ -1,5 +1,5 @@
 import { useUser } from "@clerk/nextjs";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Button } from "~/components/ui/button";
 import {
   Dialog,
@@ -9,12 +9,15 @@ import {
   DialogHeader,
   DialogTitle,
 } from "~/components/ui/dialog";
+import { Input } from "~/components/ui/input";
 import { Textarea } from "~/components/ui/textarea";
 
 export default function BookCallDialog({
+  title = "you've run out of free generations!",
   open,
   onOpenChange,
 }: {
+  title?: string;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
@@ -23,6 +26,11 @@ export default function BookCallDialog({
     "initial",
   );
   const [usageDescription, setUsageDescription] = useState<string>("");
+
+  const [email, setEmail] = useState<string>("");
+  useEffect(() => {
+    setEmail(user?.primaryEmailAddress?.emailAddress ?? "");
+  }, [user]);
 
   const handleSubmit = () => {
     setState("loading");
@@ -34,9 +42,7 @@ export default function BookCallDialog({
           "Content-Type": "application/x-www-form-urlencoded",
         },
         body: new URLSearchParams({
-          email:
-            user?.primaryEmailAddress?.emailAddress ??
-            "ERROR: NO EMAIL ADDRESS",
+          email,
           usageDescription,
         }).toString(),
       },
@@ -49,18 +55,28 @@ export default function BookCallDialog({
       });
   };
 
+  const isFormValid = useMemo(() => {
+    return email && usageDescription;
+  }, [email, usageDescription]);
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       {state !== "success" && (
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>you&apos;ve run out of free generations!</DialogTitle>
+            <DialogTitle>{title}</DialogTitle>
           </DialogHeader>
           <DialogDescription>
             thank you for your interest in pixa! we&apos;re currently
             experiencing high demand. tell us a bit about what you plan on using
             pixa for and we&apos;ll get back to you within 24 hours.
           </DialogDescription>
+          <Input
+            type="email"
+            placeholder="enter your email..."
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
           <Textarea
             placeholder="i plan on using pixa to..."
             value={usageDescription}
@@ -68,7 +84,7 @@ export default function BookCallDialog({
           />
           <DialogFooter>
             <Button
-              disabled={state === "loading"}
+              disabled={state === "loading" || !isFormValid}
               type="submit"
               onClick={handleSubmit}
             >
