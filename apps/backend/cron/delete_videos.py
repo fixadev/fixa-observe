@@ -12,4 +12,4 @@ def cleanup_old_files(directory, max_age_seconds=60):
                 shutil.rmtree(dir_full_path)
 
 if __name__ == "__main__":
-    cleanup_old_files("./public/hls")
+    cleanup_old_files("/home/ubuntu/apps/pixa.dev/apps/backend/public/hls")
