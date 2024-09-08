@@ -18,20 +18,29 @@ export default function LandingPageBody() {
   const [state, setState] = useState<"initial" | "chat">("initial");
   const [chatHistory, setChatHistory] = useState<string[]>([]);
   const [hlsPlaylistUrl, setHlsPlaylistUrl] = useState<string | null>(null);
+  const { openSignIn } = useClerk();
+  const { isSignedIn } = useAuth();
 
   const posthog = usePostHog();
   const [text, setText] = useState("");
 
   const chatHistoryRef = useRef<HTMLDivElement>(null);
 
-  const { data: profile } = api.user.getProfile.useQuery();
-  const { mutate: generate } = api.user.generate.useMutation();
+  const { data: user, refetch: refetchUser } = api.user.getProfile.useQuery();
+  const { mutateAsync: generate } = api.user.generate.useMutation({
+    onSuccess: () => {
+      void refetchUser();
+    },
+  });
   const [generationsLeft, setGenerationsLeft] = useState(0);
   useEffect(() => {
-    if (profile) {
-      setGenerationsLeft(profile.generationsLeft);
+    void refetchUser();
+  }, [isSignedIn, refetchUser]);
+  useEffect(() => {
+    if (user) {
+      setGenerationsLeft(user.generationsLeft);
     }
-  }, [profile]);
+  }, [user]);
 
   // Function to scroll to bottom of chat history
   const scrollToBottom = () => {
@@ -79,8 +88,6 @@ export default function LandingPageBody() {
     scrollToBottom();
   }, [chatHistory, chatHistoryRef.current?.scrollHeight]);
 
-  const { openSignIn } = useClerk();
-  const { isSignedIn } = useAuth();
   const handleSubmit = useCallback(async () => {
     if (text.length > 0) {
       // If not signed in, check if the user has submitted a prompt before
@@ -106,15 +113,12 @@ export default function LandingPageBody() {
             (promptsSubmittedInt + 1).toString(),
           );
         }
-      } else if (isSignedIn && generationsLeft <= 0) {
+      } else if (isSignedIn && user && user.generationsLeft <= 0) {
         setTimeout(() => {
           setBookCallDialogOpen(true);
         });
         return;
       }
-
-      // call API
-      await callGenerate();
 
       posthog.capture("Landing page prompt submitted", {
         prompt: text,
@@ -136,19 +140,25 @@ export default function LandingPageBody() {
         }, 310);
       }, 1000);
 
-      generate();
-      setGenerationsLeft(generationsLeft - 1);
+      // Decrease generations left
+      if (isSignedIn && user) {
+        setGenerationsLeft((old) => old - 1);
+        void generate();
+      }
+
+      // call API
+      await callGenerate();
     }
   }, [
     text,
     isSignedIn,
-    generationsLeft,
-    callGenerate,
+    user,
     posthog,
     chatHistory,
     state,
-    generate,
+    callGenerate,
     openSignIn,
+    generate,
   ]);
 
   const [bookCallDialogOpen, setBookCallDialogOpen] = useState(false);

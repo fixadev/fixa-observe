@@ -1,7 +1,11 @@
-import { createTRPCRouter, protectedProcedure } from "../trpc";
+import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 
 export const userRouter = createTRPCRouter({
-  getProfile: protectedProcedure.query(({ ctx }) => {
+  getProfile: publicProcedure.query(({ ctx }) => {
+    if (!ctx.auth.userId) {
+      return null;
+    }
+
     return ctx.db.user.findFirst({
       where: {
         clerkId: ctx.auth.userId,
