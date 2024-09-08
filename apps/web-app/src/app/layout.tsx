@@ -18,6 +18,7 @@ import Logo from "@/components/Logo";
 import ChildrenWrapper from "./_components/ChildrenWrapper";
 import { Button } from "~/components/ui/button";
 import { RequestApiAccessBtn } from "./_components/RequestApiAccessBtn";
+import TopBar from "./_components/TopBar";
 
 export const metadata: Metadata = {
   title: "pixa.dev",
@@ -57,28 +58,7 @@ export default function RootLayout({
             >
               <TRPCReactProvider>
                 <ChildrenWrapper>
-                  <div className="fixed left-0 top-0 flex h-16 w-full items-center justify-between bg-neutral-900 p-4">
-                    <Logo />
-                    <div className="flex items-center gap-1 sm:gap-4">
-                      <a href="mailto:contact@pixa.dev">
-                        <Button variant="ghost">contact us</Button>
-                      </a>
-                      <RequestApiAccessBtn />
-                      <SignedIn>
-                        <UserButton />
-                      </SignedIn>
-                      <SignedOut>
-                        <SignInButton
-                          mode="modal"
-                          forceRedirectUrl="/"
-                          signUpForceRedirectUrl="/"
-                        >
-                          <Button variant="ghost">sign in</Button>
-                        </SignInButton>
-                      </SignedOut>
-                    </div>
-                  </div>
-
+                  <TopBar />
                   <div className="mt-16">{children}</div>
                   <Toaster />
                 </ChildrenWrapper>
