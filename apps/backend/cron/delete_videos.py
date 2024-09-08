@@ -1,12 +1,15 @@
 import os
 import time
-from pathlib import Path
+import shutil
 
 def cleanup_old_files(directory, max_age_seconds=60):
     now = time.time()
-    for file in Path(directory).glob('*'):
-        if file.is_file() and (now - file.stat().st_mtime) > max_age_seconds:
-            os.remove(file)
+    for dirpath, dirnames, filenames in os.walk(directory):
+        for dirname in dirnames:
+            dir_full_path = os.path.join(dirpath, dirname)
+            dir_age = now - os.path.getmtime(dir_full_path)
+            if dir_age > max_age_seconds:
+                shutil.rmtree(dir_full_path)
 
 if __name__ == "__main__":
-    cleanup_old_files("/public/hls")
+    cleanup_old_files("./public/hls")
