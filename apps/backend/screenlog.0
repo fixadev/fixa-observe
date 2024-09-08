@@ -1,0 +1,26 @@
+2024-09-08 21:59:49,387 - uvicorn.error - INFO - Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
+2024-09-08 21:59:49,387 - uvicorn.error - INFO - Started parent process [6190]
+2024-09-08 21:59:49,543 - asyncio - DEBUG - Using selector: EpollSelector
+2024-09-08 21:59:49,543 - asyncio - DEBUG - Using selector: EpollSelector
+2024-09-08 21:59:50,145 - httpx - DEBUG - load_ssl_context verify=True cert=None trust_env=True http2=False
+2024-09-08 21:59:50,147 - httpx - DEBUG - load_verify_locations cafile='/usr/lib/ssl/certs/ca-certificates.crt'
+2024-09-08 21:59:50,155 - httpx - DEBUG - load_ssl_context verify=True cert=None trust_env=True http2=False
+2024-09-08 21:59:50,156 - httpx - DEBUG - load_verify_locations cafile='/usr/lib/ssl/certs/ca-certificates.crt'
+2024-09-08 21:59:50,161 - httpx - DEBUG - load_ssl_context verify=True cert=None trust_env=True http2=False
+2024-09-08 21:59:50,162 - httpx - DEBUG - load_verify_locations cafile='/usr/lib/ssl/certs/ca-certificates.crt'
+2024-09-08 21:59:50,164 - httpx - DEBUG - load_ssl_context verify=True cert=None trust_env=True http2=False
+2024-09-08 21:59:50,164 - httpx - DEBUG - load_verify_locations cafile='/usr/lib/ssl/certs/ca-certificates.crt'
+2024-09-08 21:59:50,171 - httpx - DEBUG - load_ssl_context verify=True cert=None trust_env=True http2=False
+2024-09-08 21:59:50,172 - httpx - DEBUG - load_verify_locations cafile='/usr/lib/ssl/certs/ca-certificates.crt'
+2024-09-08 21:59:50,172 - httpx - DEBUG - load_ssl_context verify=True cert=None trust_env=True http2=False
+2024-09-08 21:59:50,173 - httpx - DEBUG - load_verify_locations cafile='/usr/lib/ssl/certs/ca-certificates.crt'
+2024-09-08 21:59:50,179 - httpx - DEBUG - load_ssl_context verify=True cert=None trust_env=True http2=False
+2024-09-08 21:59:50,180 - httpx - DEBUG - load_verify_locations cafile='/usr/lib/ssl/certs/ca-certificates.crt'
+2024-09-08 21:59:50,188 - httpx - DEBUG - load_ssl_context verify=True cert=None trust_env=True http2=False
+2024-09-08 21:59:50,188 - httpx - DEBUG - load_verify_locations cafile='/usr/lib/ssl/certs/ca-certificates.crt'
+2024-09-08 21:59:50,862 - uvicorn.error - INFO - Started server process [6193]
+2024-09-08 21:59:50,862 - uvicorn.error - INFO - Waiting for application startup.
+2024-09-08 21:59:50,862 - uvicorn.error - INFO - Application startup complete.
+2024-09-08 21:59:50,912 - uvicorn.error - INFO - Started server process [6192]
+2024-09-08 21:59:50,912 - uvicorn.error - INFO - Waiting for application startup.
+2024-09-08 21:59:50,913 - uvicorn.error - INFO - Application startup complete.
