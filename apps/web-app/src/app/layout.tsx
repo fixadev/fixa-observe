@@ -16,6 +16,9 @@ import {
 import { dark } from "@clerk/themes";
 import Logo from "@/components/Logo";
 import ChildrenWrapper from "./_components/ChildrenWrapper";
+import { Button } from "~/components/ui/button";
+import { RequestApiAccessBtn } from "./_components/RequestApiAccessBtn";
+import TopBar from "./_components/TopBar";
 
 export const metadata: Metadata = {
   title: "pixa.dev",
@@ -55,20 +58,7 @@ export default function RootLayout({
             >
               <TRPCReactProvider>
                 <ChildrenWrapper>
-                  <div className="fixed left-0 top-0 flex h-16 w-full items-center justify-between bg-neutral-900 p-4">
-                    <Logo />
-                    <SignedIn>
-                      <UserButton />
-                    </SignedIn>
-                    <SignedOut>
-                      <SignInButton
-                        mode="modal"
-                        forceRedirectUrl="/"
-                        signUpForceRedirectUrl="/"
-                      />
-                    </SignedOut>
-                  </div>
-
+                  <TopBar />
                   <div className="mt-16">{children}</div>
                   <Toaster />
                 </ChildrenWrapper>
