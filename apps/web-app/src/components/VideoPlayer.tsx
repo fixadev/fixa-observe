@@ -59,6 +59,9 @@ export function VideoPlayer({
       // console.log("LOADING ", hls_playlist_url);
       hls.loadSource(hls_playlist_url);
       hls.attachMedia(videoRef.current!);
+    } else if (videoRef.current?.canPlayType("application/vnd.apple.mpegurl")) {
+      videoRef.current.src = hls_playlist_url;
+      void videoRef.current.play();
     }
   }, [hls_playlist_url]);
 
