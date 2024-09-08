@@ -2,4 +2,4 @@
 export PYTHONPATH=$PYTHONPATH:$(pwd)
 
 echo "Starting FastAPI backend"
-uvicorn main:app --port 8000 --workers 1
+uvicorn main:app --port 8000 --reload
