@@ -69,7 +69,7 @@ export default function LandingPageBody() {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      const data = await response.json();
+      const data = (await response.json()) as { hls_playlist_url: string };
 
       if (!data.hls_playlist_url) {
         throw new Error("No HLS playlist URL in the response");
