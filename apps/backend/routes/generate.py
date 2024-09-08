@@ -4,8 +4,6 @@ from services.generate_manim_python import ManimGenerator
 import threading
 import uuid
 import queue
-import os
-import shutil
 
 
 logger = logging.getLogger(__name__)
@@ -21,6 +19,7 @@ async def generate(request: Request, background_tasks: BackgroundTasks):
     prompt = data.get("prompt")
     output_queue = queue.Queue()
     generator = ManimGenerator(output_queue)
+    
     generator_thread = threading.Thread(target=generator.run, args=(prompt, f"public/hls/{uuid.uuid4()}"))
     generator_thread.start()
 
