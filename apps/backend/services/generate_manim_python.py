@@ -6,7 +6,7 @@ import time
 import numpy as np
 from multiprocessing import Queue
 from services.regex_utils import has_unclosed_parenthesis, has_unclosed_bracket, has_indented_statement, extract_indented_statement, replace_svg_mobjects
-from services.async_utils import run_cor
+from utils.monitoring import increment_subprocess_count, decrement_subprocess_count
 from services.llm_clients import anthropic_client
 from services.scenes import BlankScene
 from config import BASE_URL
@@ -183,6 +183,7 @@ class ManimGenerator:
             '-hls_segment_filename', os.path.join(output_dir_str, 'stream%03d.ts'),
             os.path.join(output_dir_str, 'playlist.m3u8')
         ]
+        increment_subprocess_count()
         ffmpeg_process = subprocess.Popen(
             ffmpeg_command,
             stdin=subprocess.PIPE,
@@ -244,8 +245,8 @@ class ManimGenerator:
             generate_thread.join()
             send_frames_thread.join()
             self.ffmpeg_process.wait()
+            decrement_subprocess_count()
             self.cleanup()
-
         except Exception as e:
             # TODO: send error to hls?
             print(f"Error in generator.run: {e}")
