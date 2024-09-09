@@ -1,9 +1,9 @@
+import queue
 import logging
+import threading
 from fastapi import APIRouter, Request, BackgroundTasks
 from services.generate_manim_python import ManimGenerator
-import threading
-import uuid
-import queue
+from routes.helpers import validate_and_organize_params
 
 thread_count_lock = threading.Lock()
 active_threads = 0
@@ -36,18 +36,18 @@ router = APIRouter()
 async def generate(request: Request, background_tasks: BackgroundTasks):
     try:
         data = await request.json()
-        prompt = data.get("prompt")
-        output_queue = queue.Queue()
-        generator = ManimGenerator(output_queue)
-        
-        generator_thread = threading.Thread(target=generator.run, args=(prompt, f"public/hls/{uuid.uuid4()}"))
+        config_params, generation_params = validate_and_organize_params(data)
+
+        generator = ManimGenerator(config_params)
+        generator_thread = threading.Thread(target=generator.run, args=(generation_params,))
         generator_thread.start()
 
         background_tasks.add_task(background_task, generator_thread)
         
+        output_queue = config_params['output_queue']
         while generator_thread.is_alive():
             try:
-                hls_playlist_url = output_queue.get(timeout=0.1)  
+                hls_playlist_url = output_queue.get(timeout=0.05)  
                 return {"hls_playlist_url": hls_playlist_url}
             except queue.Empty:
                 pass
