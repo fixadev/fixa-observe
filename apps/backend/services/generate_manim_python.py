@@ -233,31 +233,32 @@ class ManimGenerator:
             self.running = True
 
             print(f"INFO: running scene in {time.time() - self.start_time} seconds", flush=True)
-            run_scene_thread = threading.Thread(target=self.run_scene)
-            run_scene_thread.start()
+            self.run_scene_thread = threading.Thread(target=self.run_scene)
+            self.run_scene_thread.start()
 
-            generate_thread = threading.Thread(target=self.generate, args=(text, self.start_time))
-            generate_thread.start()
+            self.generate_thread = threading.Thread(target=self.generate, args=(text, self.start_time))
+            self.generate_thread.start()
 
             print(f"INFO: starting ffmpeg in {time.time() - self.start_time} seconds", flush=True)
             self.ffmpeg_process = self.convert_to_hls(output_dir)
             
-            send_frames_thread = threading.Thread(target=self.send_frames_to_ffmpeg, args=(self.start_time,))
-            send_frames_thread.start()
+            self.send_frames_thread = threading.Thread(target=self.send_frames_to_ffmpeg, args=(self.start_time,))
+            self.send_frames_thread.start()
 
-            check_for_playlist_thread = threading.Thread(target=self.check_for_playlist, args=(output_dir, self.ffmpeg_process))
-            check_for_playlist_thread.start()
+            self.check_for_playlist_thread = threading.Thread(target=self.check_for_playlist, args=(output_dir, self.ffmpeg_process))
+            self.check_for_playlist_thread.start()
 
-            run_scene_thread.join()
+            self.run_scene_thread.join()
             print('scene done', flush=True)
             self.running = False
 
-            generate_thread.join()
-            send_frames_thread.join()
-            check_for_playlist_thread.join()
+            self.generate_thread.join()
+            self.send_frames_thread.join()
+            self.check_for_playlist_thread.join()
             self.ffmpeg_process.wait()
             decrement_subprocess_count()
             self.cleanup()
+
         except Exception as e:
             # TODO: send error to hls?
             print(f"Error in generator.run: {e}")
@@ -265,10 +266,26 @@ class ManimGenerator:
     
 
     def cleanup(self):
+        while not self.frame_queue.empty():
+           try:
+               self.frame_queue.get_nowait()
+           except queue.Empty:
+               break
+        if self.generate_thread is not None:
+            self.generate_thread.join()
+        if self.run_scene_thread is not None:
+            self.run_scene_thread.join()
+        if self.send_frames_thread is not None:
+            self.send_frames_thread.join()
+        if self.check_for_playlist_thread is not None:
+            self.check_for_playlist_thread.join()
         if self.ffmpeg_process is not None:
             self.ffmpeg_process.stdin.close()
-            self.ffmpeg_process.wait()
-        print("Generator cleaned up")
+            self.ffmpeg_process.terminate()
+            self.ffmpeg_process.wait(timeout=5)
+            if self.ffmpeg_process.poll() is None:
+                self.ffmpeg_process.kill()
+        print("INFO: Generator cleaned up")
 
 if __name__ == "__main__":
     print("INFO:Starting python script")
