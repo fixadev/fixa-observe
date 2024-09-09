@@ -1,29 +1,31 @@
-import sys
 import os
-import subprocess
-import threading
+import sys
 import time
+import queue
+import threading
+import subprocess
 import numpy as np
-from multiprocessing import Queue
-from services.regex_utils import has_unclosed_parenthesis, has_unclosed_bracket, has_indented_statement, extract_indented_statement, replace_svg_mobjects
-from utils.monitoring import increment_subprocess_count, decrement_subprocess_count
-from services.llm_clients import anthropic_client
-from services.scenes import BlankScene
 from config import BASE_URL
+from multiprocessing import Queue
+from services.scenes import BlankScene
+from services.llm_clients import anthropic_client
+from utils.monitoring import increment_subprocess_count, decrement_subprocess_count
+from services.regex_utils import has_unclosed_parenthesis, has_unclosed_bracket, has_indented_statement, extract_indented_statement, replace_svg_mobjects
 
 
 class ManimGenerator:
-    def __init__(self, output_queue):
-        self.start_time = time.time()
+    def __init__(self, config_params: tuple[queue.Queue, str, int, int, int]):
+        
+        self.frame_rate = config_params['fps']
+        self.frame_width = config_params['width']
+        self.frame_height = config_params['height']
+        self.background_color = 'BLACK' if config_params['theme'] == 'dark' else 'WHITE'
+
         self.commands = []
-        self.output_queue = output_queue
-        self.stop_commands = []
         self.running = False
         self.frame_queue = Queue()
-        self.frame_width = 960
-        self.frame_height = 540
-        self.frame_rate = 30
-
+        self.start_time = time.time()
+        self.output_queue = config_params['output_queue']
         self.system_prompt = """You are an AI teacher. 
     
         Generate Manim code that generates a 10-15 second animation that directly illustrates the user prompt.
@@ -55,7 +57,7 @@ class ManimGenerator:
 
     def run_scene(self):
         print('INFO: Instantiate BlankScene at', time.time() - self.start_time)
-        scene = BlankScene(self.frame_queue, self.commands, dimensions=(self.frame_width, self.frame_height), frame_rate=self.frame_rate, start_time=self.start_time, debug_mode=False)
+        scene = BlankScene(self.frame_queue, self.commands, dimensions=(self.frame_width, self.frame_height), frame_rate=self.frame_rate, start_time=self.start_time, debug_mode=False, background_color=self.background_color)
         print('INFO: BlankScene instantiated at', time.time() - self.start_time)
         scene.render()
         print('INFO: EVERYTHING completed at', time.time() - self.start_time)
@@ -114,24 +116,28 @@ class ManimGenerator:
 
     def send_frames_to_ffmpeg(self, start_time):
         for_loop = False
-        num_black_frames = int(self.frame_rate * 1) + 1
+        num_blank_frames = int(self.frame_rate * 1) + 1
 
         # Generate a single black frame
         black_frame = np.zeros((self.frame_height, self.frame_width, 3), dtype=np.uint8)
+        white_frame = np.ones((self.frame_height, self.frame_width, 3), dtype=np.uint8) * 255
+
+        blank_frame = black_frame if self.background_color == 'BLACK' else white_frame
+
         if for_loop: 
-            black_frame_bytes = black_frame.tobytes()
+            blank_frame_bytes = blank_frame.tobytes()
 
             # Send 1 second of black frames to ffmpeg
-            for _ in range(num_black_frames):
-                self.ffmpeg_process.stdin.write(black_frame_bytes)
+            for _ in range(num_blank_frames):
+                self.ffmpeg_process.stdin.write(blank_frame_bytes)
                 self.ffmpeg_process.stdin.flush()
         else:
             # Create 1 second of black frames (frame_rate frames)
-            black_frames = np.tile(black_frame, (num_black_frames, 1, 1))
-            black_frames_bytes = black_frames.tobytes()
+            blank_frames = np.tile(blank_frame, (num_blank_frames, 1, 1))
+            blank_frames_bytes = blank_frames.tobytes()
 
             # Send 1 second of black frames to ffmpeg at once
-            self.ffmpeg_process.stdin.write(black_frames_bytes)
+            self.ffmpeg_process.stdin.write(blank_frames_bytes)
             self.ffmpeg_process.stdin.flush()
 
         print("INFO: sent 1 second of black frames to ffmpeg", time.time() - start_time, flush=True)
@@ -219,7 +225,9 @@ class ManimGenerator:
         threading.Thread(target=running_loop, daemon=True).start()
 
 
-    def run(self, text, output_dir: str): 
+    def run(self, input_params: dict): 
+        text = input_params['prompt']
+        output_dir = input_params['output_path']
         print(f"INFO: running generator in {time.time() - self.start_time} seconds", flush=True)
         try:
             self.running = True
