@@ -35,5 +35,6 @@ services/media
 
 log.txt
 log2.txt
+screenlog.0
 
 public/hls
