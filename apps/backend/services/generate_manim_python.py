@@ -7,6 +7,7 @@ import subprocess
 import numpy as np
 from config import BASE_URL
 from multiprocessing import Queue
+from memory_profiler import profile
 from services.scenes import BlankScene
 from services.llm_clients import anthropic_client
 from utils.monitoring import increment_subprocess_count, decrement_subprocess_count
@@ -14,7 +15,7 @@ from services.regex_utils import has_unclosed_parenthesis, has_unclosed_bracket,
 
 
 class ManimGenerator:
-    def __init__(self, config_params: tuple[queue.Queue, str, int, int, int]):
+    def __init__(self, config_params: dict):
         
         self.frame_rate = config_params['fps']
         self.frame_width = config_params['width']
@@ -54,7 +55,7 @@ class ManimGenerator:
         #
 
         
-
+    @profile
     def run_scene(self):
         print('INFO: Instantiate BlankScene at', time.time() - self.start_time)
         scene = BlankScene(self.frame_queue, self.commands, dimensions=(self.frame_width, self.frame_height), frame_rate=self.frame_rate, start_time=self.start_time, debug_mode=False, background_color=self.background_color)
@@ -225,6 +226,7 @@ class ManimGenerator:
             time.sleep(0.01)
 
 
+    @profile
     def run(self, input_params: dict): 
         text = input_params['prompt']
         output_dir = input_params['output_path']
@@ -296,6 +298,9 @@ if __name__ == "__main__":
     else:
         # print("No prompt provided")
         prompt = "how are babies made?"
+
+    config_params = {'fps': 30, 'width': 960, 'height': 540, 'theme': 'dark', 'output_queue': queue.Queue()}
+    input_params = {'prompt': prompt, 'output_path': "public/hls/test"}
     
-    generator = ManimGenerator(Queue())
-    generator.run(prompt, "public/hls/test")
+    generator = ManimGenerator(config_params)
+    generator.run(input_params)
