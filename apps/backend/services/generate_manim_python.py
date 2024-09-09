@@ -6,13 +6,11 @@ import threading
 import subprocess
 import numpy as np
 from config import BASE_URL
-from multiprocessing import Queue
-from memory_profiler import profile
+from queue import Queue
 from services.scenes import BlankScene
 from services.llm_clients import anthropic_client
 from utils.monitoring import increment_subprocess_count, decrement_subprocess_count
 from services.regex_utils import has_unclosed_parenthesis, has_unclosed_bracket, has_indented_statement, extract_indented_statement, replace_svg_mobjects
-
 
 class ManimGenerator:
     def __init__(self, config_params: dict):
@@ -54,7 +52,6 @@ class ManimGenerator:
         # 10. Use shapes, text, and animations that can be generated purely with manim code.
         # 7. Do not ever use wait()
 
-    @profile
     def run_scene(self):
         print('INFO: Instantiate BlankScene at', time.time() - self.start_time)
         scene = BlankScene(self.frame_queue, self.commands, dimensions=(self.frame_width, self.frame_height), frame_rate=self.frame_rate, start_time=self.start_time, debug_mode=False, background_color=self.background_color)
@@ -225,7 +222,6 @@ class ManimGenerator:
             time.sleep(0.01)
 
 
-    @profile
     def run(self, input_params: dict): 
         text = input_params['prompt']
         output_dir = input_params['output_path']
@@ -298,7 +294,7 @@ if __name__ == "__main__":
         # print("No prompt provided")
         prompt = "how are babies made?"
 
-    config_params = {'fps': 30, 'width': 960, 'height': 540, 'theme': 'dark', 'output_queue': queue.Queue()}
+    config_params = {'fps': 30, 'width': 960, 'height': 540, 'theme': 'dark', 'output_queue': Queue()}
     input_params = {'prompt': prompt, 'output_path': "public/hls/test"}
     
     generator = ManimGenerator(config_params)
