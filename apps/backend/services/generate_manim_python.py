@@ -49,15 +49,12 @@ class ManimGenerator:
         # 6. Use FadeOut() or similar animations to remove objects no longer needed.
 
         
-<<<<<<< HEAD
         # 12. Do not use any LIGHT color variants such as LIGHT_BLUE, LIGHT_GREEN, LIGHT_RED, etc. And never use BROWN.
         # 11. Ensure that the animation aligns perfectly with the text response. 
         # 10. Use shapes, text, and animations that can be generated purely with manim code.
         # 7. Do not ever use wait()
 
-=======
     @profile
->>>>>>> 579dfc1b0ff951012c2fb1bc4afbbfa78c498bfb
     def run_scene(self):
         print('INFO: Instantiate BlankScene at', time.time() - self.start_time)
         scene = BlankScene(self.frame_queue, self.commands, dimensions=(self.frame_width, self.frame_height), frame_rate=self.frame_rate, start_time=self.start_time, debug_mode=False, background_color=self.background_color)
