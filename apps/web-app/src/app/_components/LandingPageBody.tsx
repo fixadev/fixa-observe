@@ -27,6 +27,10 @@ export default function LandingPageBody() {
 
   const chatHistoryRef = useRef<HTMLDivElement>(null);
 
+  const { mutateAsync: sendServerIsDownEmail } =
+    api.email.sendServerIsDownEmail.useMutation();
+  const { mutateAsync: serverBackUp } = api.email.serverBackUp.useMutation();
+
   const { data: user, refetch: refetchUser } = api.user.getProfile.useQuery();
   const { mutateAsync: generate } = api.user.generate.useMutation({
     onSuccess: () => {
@@ -54,19 +58,23 @@ export default function LandingPageBody() {
   };
 
   const [isBackendDown, setIsBackendDown] = useState(false);
-  const checkIsBackendDown = async () => {
-    await axios
-      .get(`${process.env.NEXT_PUBLIC_BACKEND_URL}`, { timeout: 1500 })
-      .then(() => {
-        setIsBackendDown(false);
-      })
-      .catch(() => {
-        setIsBackendDown(true);
-      });
-  };
   useEffect(() => {
+    if (!sendServerIsDownEmail) return;
+
+    const checkIsBackendDown = async () => {
+      await axios
+        .get(`${process.env.NEXT_PUBLIC_BACKEND_URL}`, { timeout: 1500 })
+        .then(() => {
+          void serverBackUp();
+          setIsBackendDown(false);
+        })
+        .catch(() => {
+          void sendServerIsDownEmail();
+          setIsBackendDown(true);
+        });
+    };
     void checkIsBackendDown();
-  }, []);
+  }, [sendServerIsDownEmail, serverBackUp]);
 
   const callGenerate = useCallback(async () => {
     const endpoint = `${process.env.NEXT_PUBLIC_BACKEND_URL}/generate`;

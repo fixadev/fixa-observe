@@ -9,6 +9,7 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "~/components/ui/drawer";
+import { Bars3Icon } from "@heroicons/react/24/solid";
 
 export default function TopBar() {
   return (
@@ -17,7 +18,7 @@ export default function TopBar() {
       {/* mobile menu */}
       <Drawer>
         <DrawerTrigger className="sm:hidden">
-          <Button variant="ghost">menu</Button>
+          <Bars3Icon className="size-6 text-neutral-400 hover:cursor-pointer hover:text-neutral-200" />
         </DrawerTrigger>
         <DrawerContent>
           <DrawerHeader>
