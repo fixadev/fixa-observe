@@ -56,7 +56,3 @@ async def generate(request: Request, background_tasks: BackgroundTasks):
     except Exception as e:
         logger.error(f"Error generating video: {e}")
         return {"error": str(e)}
-
-
-
-
