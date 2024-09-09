@@ -6,13 +6,11 @@ import threading
 import subprocess
 import numpy as np
 from config import BASE_URL
-from multiprocessing import Queue
-from memory_profiler import profile
+from queue import Queue
 from services.scenes import BlankScene
 from services.llm_clients import anthropic_client
 from utils.monitoring import increment_subprocess_count, decrement_subprocess_count
 from services.regex_utils import has_unclosed_parenthesis, has_unclosed_bracket, has_indented_statement, extract_indented_statement, replace_svg_mobjects
-
 
 class ManimGenerator:
     def __init__(self, config_params: dict):
@@ -38,24 +36,22 @@ class ManimGenerator:
         
         Follow these guidelines for the Manim code:
         1. Only generate the content of the construct() method, but do not include the first line "def construct(self):".
-        2. You are using the OpenGL renderer. Never use the .to_edge() method. Instead use the .shift() method.
-        3. Use self.play() for each animation step to ensure proper sequencing.
-        4. Clear or transform previous content before introducing new elements.
-        6. Use FadeOut() or similar animations to remove objects no longer needed.
-        7. Do not ever use wait()
-        8. DO NOT ever use SVGMobject 
         9. DO NOT reference any external static assets -- including images, SVGs, videos, or audio files.
-        10. Use shapes, text, and animations that can be generated purely with manim code.
-        11. Ensure that the animation aligns perfectly with the text response. 
-        12. Do not use any LIGHT color variants such as LIGHT_BLUE, LIGHT_GREEN, LIGHT_RED, etc. And never use BROWN.
         """
-        #
+        # 2. You are using the OpenGL renderer. Never use the .to_edge() method. Instead use the .shift() method.
+        # 3. Use self.play() for each animation step to ensure proper sequencing.
+        # 4. Clear or transform previous content before introducing new elements.
         # 14. DO NOT USE FOR LOOPS. EVER. DO NOT EVEN THINK ABOUT IT.
         # 13. DO NOT USE LIST COMPREHENSIONS SUCH AS [Circle(radius=d, color=WHITE, stroke_opacity=0.5).shift(LEFT * 5) for d in planet_distances]. EVER. DO NOT EVEN THINK ABOUT IT.
-        #
+        # 
+        # 6. Use FadeOut() or similar animations to remove objects no longer needed.
 
         
-    @profile
+        # 12. Do not use any LIGHT color variants such as LIGHT_BLUE, LIGHT_GREEN, LIGHT_RED, etc. And never use BROWN.
+        # 11. Ensure that the animation aligns perfectly with the text response. 
+        # 10. Use shapes, text, and animations that can be generated purely with manim code.
+        # 7. Do not ever use wait()
+
     def run_scene(self):
         print('INFO: Instantiate BlankScene at', time.time() - self.start_time)
         scene = BlankScene(self.frame_queue, self.commands, dimensions=(self.frame_width, self.frame_height), frame_rate=self.frame_rate, start_time=self.start_time, debug_mode=False, background_color=self.background_color)
@@ -226,7 +222,6 @@ class ManimGenerator:
             time.sleep(0.01)
 
 
-    @profile
     def run(self, input_params: dict): 
         text = input_params['prompt']
         output_dir = input_params['output_path']
@@ -299,7 +294,7 @@ if __name__ == "__main__":
         # print("No prompt provided")
         prompt = "how are babies made?"
 
-    config_params = {'fps': 30, 'width': 960, 'height': 540, 'theme': 'dark', 'output_queue': queue.Queue()}
+    config_params = {'fps': 30, 'width': 960, 'height': 540, 'theme': 'dark', 'output_queue': Queue()}
     input_params = {'prompt': prompt, 'output_path': "public/hls/test"}
     
     generator = ManimGenerator(config_params)
