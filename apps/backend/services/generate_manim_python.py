@@ -10,7 +10,8 @@ from queue import Queue
 from services.scenes import BlankScene
 from services.llm_clients import anthropic_client
 from utils.monitoring import increment_subprocess_count, decrement_subprocess_count
-from services.regex_utils import has_unclosed_parenthesis, has_unclosed_bracket, has_indented_statement, extract_indented_statement, replace_svg_mobjects
+from services.regex_utils import has_unclosed_parenthesis, has_unclosed_bracket, has_indented_statement, extract_indented_statement, replace_svg_mobjects, replace_invalid_colors
+
 
 class ManimGenerator:
     def __init__(self, config_params: dict):
@@ -20,9 +21,12 @@ class ManimGenerator:
         self.frame_height = config_params['height']
         self.background_color = 'BLACK' if config_params['theme'] == 'dark' else 'WHITE'
 
+        self.black_frame = np.zeros((self.frame_height, self.frame_width, 4), dtype=np.uint8)
+        self.black_frame[:, :, 3] = 255
+        self.white_frame = np.ones((self.frame_height, self.frame_width, 4), dtype=np.uint8) * 255
+
         self.commands = []
         self.running = False
-        self.frame_queue = Queue()
         self.start_time = time.time()
         self.output_queue = config_params['output_queue']
         self.system_prompt = """You are an AI teacher. 
@@ -53,7 +57,7 @@ class ManimGenerator:
 
     def run_scene(self):
         print('INFO: Instantiate BlankScene at', time.time() - self.start_time)
-        scene = BlankScene(self.frame_queue, self.commands, dimensions=(self.frame_width, self.frame_height), frame_rate=self.frame_rate, start_time=self.start_time, debug_mode=False, background_color=self.background_color)
+        scene = BlankScene(self.commands, self.ffmpeg_process, dimensions=(self.frame_width, self.frame_height), frame_rate=self.frame_rate, start_time=self.start_time, debug_mode=False, background_color=self.background_color)
         print('INFO: BlankScene instantiated at', time.time() - self.start_time)
         scene.render()
         print('INFO: EVERYTHING completed at', time.time() - self.start_time)
@@ -95,6 +99,7 @@ class ManimGenerator:
 
                         continue
                     # cur_chunk = replace_list_comprehensions(cur_chunk)
+                    cur_chunk = replace_invalid_colors(cur_chunk)
                     cur_chunk = replace_svg_mobjects(cur_chunk)
                     self.commands.append(cur_chunk)
                     if not first_command_ready:
@@ -110,52 +115,6 @@ class ManimGenerator:
         # time.sleep(5)
         self.commands.append("")
 
-    def send_frames_to_ffmpeg(self, start_time):
-        for_loop = False
-        num_blank_frames = int(self.frame_rate * 1) + 1
-
-        # Generate a single black frame
-        black_frame = np.zeros((self.frame_height, self.frame_width, 3), dtype=np.uint8)
-        white_frame = np.ones((self.frame_height, self.frame_width, 3), dtype=np.uint8) * 255
-
-        blank_frame = black_frame if self.background_color == 'BLACK' else white_frame
-
-        if for_loop: 
-            blank_frame_bytes = blank_frame.tobytes()
-
-            # Send 1 second of black frames to ffmpeg
-            for _ in range(num_blank_frames):
-                self.ffmpeg_process.stdin.write(blank_frame_bytes)
-                self.ffmpeg_process.stdin.flush()
-        else:
-            # Create 1 second of black frames (frame_rate frames)
-            blank_frames = np.tile(blank_frame, (num_blank_frames, 1, 1))
-            blank_frames_bytes = blank_frames.tobytes()
-
-            # Send 1 second of black frames to ffmpeg at once
-            self.ffmpeg_process.stdin.write(blank_frames_bytes)
-            self.ffmpeg_process.stdin.flush()
-
-        print("INFO: sent 1 second of black frames to ffmpeg", time.time() - start_time, flush=True)
-
-        first_frame = True
-        while self.running or not self.frame_queue.empty():
-            try:
-                if not self.frame_queue.empty():
-                    frame = self.frame_queue.get_nowait()
-                    if first_frame:
-                        first_frame = False
-                        # print(f"INFO: first frame written to ffmpeg at {time.time() - start_time} seconds", flush=True)
-                    self.ffmpeg_process.stdin.write(frame)
-                    self.ffmpeg_process.stdin.flush()
-                else:
-                    time.sleep(1/self.frame_rate)
-                    # print("INFO: self.frame_queue empty", flush=True)
-            except Exception as e:
-                print(f"Error in send_frames_to_ffmpeg: {e}", file=sys.stderr)
-                break
-        self.ffmpeg_process.stdin.close()
-
     def convert_to_hls(self, output_dir):
         output_dir_str = str(output_dir)
         os.makedirs(output_dir, exist_ok=True)
@@ -165,11 +124,11 @@ class ManimGenerator:
             '-y',
             '-f', 'rawvideo',
             '-vcodec', 'rawvideo',
-            '-pix_fmt', 'rgb24',
+            '-pix_fmt', 'rgba',
             '-r', str(self.frame_rate),
             '-s', f'{self.frame_width}x{self.frame_height}',
             '-i', '-',
-            '-vf', 'vflip',
+            # '-vf', 'vflip',
             '-c:v', 'libx264',
             '-preset', 'ultrafast',
             '-tune', 'zerolatency',
@@ -179,7 +138,7 @@ class ManimGenerator:
             '-f', 'hls',
             '-hls_init_time', '0.5',
             '-hls_time', '0.5',
-            # '-hls_list_size', '0',
+            '-hls_list_size', '0',
             # '-hls_playlist_type', 'event', 
             '-hls_segment_type', 'mpegts',
             '-hls_segment_filename', os.path.join(output_dir_str, 'stream%03d.ts'),
@@ -208,6 +167,23 @@ class ManimGenerator:
         # threading.Thread(target=read_stream, args=(ffmpeg_process.stderr,)).start()
         # threading.Thread(target=read_stream, args=(ffmpeg_process.stdout,)).start()
 
+    def send_blank_frames(self):
+        num_blank_frames = int(self.frame_rate * 1) + 1
+
+        # Generate a single black frame
+
+        blank_frame = self.black_frame if self.background_color == 'BLACK' else self.white_frame
+
+        # Create 1 second of black frames (frame_rate frames)
+        blank_frames = np.tile(blank_frame, (num_blank_frames, 1, 1, 1))
+        blank_frames_bytes = blank_frames.tobytes()
+
+        # Send 1 second of black frames to ffmpeg at once
+        self.ffmpeg_process.stdin.write(blank_frames_bytes)
+        self.ffmpeg_process.stdin.flush()
+
+        print("INFO: sent 1 second of black frames to ffmpeg", time.time() - self.start_time, flush=True)
+
 
     def check_for_playlist(self, output_dir, ffmpeg_process):
         hls_ready = False
@@ -228,6 +204,12 @@ class ManimGenerator:
         try:
             self.running = True
 
+            print(f"INFO: starting ffmpeg in {time.time() - self.start_time} seconds", flush=True)
+            self.ffmpeg_process = self.convert_to_hls(output_dir)
+            
+            self.send_blank_frames_thread = threading.Thread(target=self.send_blank_frames)
+            self.send_blank_frames_thread.start()
+
             print(f"INFO: running scene in {time.time() - self.start_time} seconds", flush=True)
             self.run_scene_thread = threading.Thread(target=self.run_scene)
             self.run_scene_thread.start()
@@ -235,21 +217,16 @@ class ManimGenerator:
             self.generate_thread = threading.Thread(target=self.generate, args=(text, self.start_time))
             self.generate_thread.start()
 
-            print(f"INFO: starting ffmpeg in {time.time() - self.start_time} seconds", flush=True)
-            self.ffmpeg_process = self.convert_to_hls(output_dir)
-            
-            self.send_frames_thread = threading.Thread(target=self.send_frames_to_ffmpeg, args=(self.start_time,))
-            self.send_frames_thread.start()
-
             self.check_for_playlist_thread = threading.Thread(target=self.check_for_playlist, args=(output_dir, self.ffmpeg_process))
             self.check_for_playlist_thread.start()
 
             self.run_scene_thread.join()
             print('scene done', flush=True)
             self.running = False
+            self.ffmpeg_process.stdin.close()
 
+            self.send_blank_frames_thread.join()
             self.generate_thread.join()
-            self.send_frames_thread.join()
             self.check_for_playlist_thread.join()
             self.ffmpeg_process.wait()
             decrement_subprocess_count()
@@ -262,17 +239,10 @@ class ManimGenerator:
     
 
     def cleanup(self):
-        while not self.frame_queue.empty():
-           try:
-               self.frame_queue.get_nowait()
-           except queue.Empty:
-               break
         if self.generate_thread is not None:
             self.generate_thread.join()
         if self.run_scene_thread is not None:
             self.run_scene_thread.join()
-        if self.send_frames_thread is not None:
-            self.send_frames_thread.join()
         if self.check_for_playlist_thread is not None:
             self.check_for_playlist_thread.join()
         if self.ffmpeg_process is not None:
@@ -295,6 +265,13 @@ if __name__ == "__main__":
 
     config_params = {'fps': 30, 'width': 960, 'height': 540, 'theme': 'dark', 'output_queue': Queue()}
     input_params = {'prompt': prompt, 'output_path': "public/hls/test"}
-    
+
     generator = ManimGenerator(config_params)
     generator.run(input_params)
+    
+    # for i in range(10):
+    #     generator = ManimGenerator(config_params)
+    #     generator.run(input_params)
+    #     # generator.run(input_params)
+    #     print(f'DONE GENERATING {i}')
+    #     time.sleep(1)
