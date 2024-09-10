@@ -35,13 +35,12 @@ class ManimGenerator:
         Do not output any other text than the Manim code.
         Do not import manim or any other libraries.
         Do not include ANY comments (i.e. lines that start with #) 
-        Do not include unnecessary newlines in the code.
         ALWAYS start your code with a self.play() call.
         
         Follow these guidelines for the Manim code:
         1. Only generate the content of the construct() method, but do not include the first line "def construct(self):".
-        4. Clear or transform previous content before introducing new elements using FadeOut() or similar animations.
-        9. DO NOT reference any external static assets -- including images, SVGs, videos, or audio files.
+        2. Remove elements using the FadeOut() method before creating new elements.
+        3. DO NOT reference any external static assets -- including images, SVGs, videos, or audio files.
         """
 
 
@@ -225,6 +224,7 @@ class ManimGenerator:
             self.run_scene_thread.join()
             print('scene done', flush=True)
             self.running = False
+            time.sleep(2)
             self.ffmpeg_process.stdin.close()
 
             self.send_blank_frames_thread.join()
