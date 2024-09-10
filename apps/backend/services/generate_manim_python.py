@@ -36,17 +36,16 @@ class ManimGenerator:
         
         Follow these guidelines for the Manim code:
         1. Only generate the content of the construct() method, but do not include the first line "def construct(self):".
+        4. Clear or transform previous content before introducing new elements using FadeOut() or similar animations.
         9. DO NOT reference any external static assets -- including images, SVGs, videos, or audio files.
         """
+
+
         # 2. You are using the OpenGL renderer. Never use the .to_edge() method. Instead use the .shift() method.
         # 3. Use self.play() for each animation step to ensure proper sequencing.
-        # 4. Clear or transform previous content before introducing new elements.
         # 14. DO NOT USE FOR LOOPS. EVER. DO NOT EVEN THINK ABOUT IT.
         # 13. DO NOT USE LIST COMPREHENSIONS SUCH AS [Circle(radius=d, color=WHITE, stroke_opacity=0.5).shift(LEFT * 5) for d in planet_distances]. EVER. DO NOT EVEN THINK ABOUT IT.
-        # 
         # 6. Use FadeOut() or similar animations to remove objects no longer needed.
-
-        
         # 12. Do not use any LIGHT color variants such as LIGHT_BLUE, LIGHT_GREEN, LIGHT_RED, etc. And never use BROWN.
         # 11. Ensure that the animation aligns perfectly with the text response. 
         # 10. Use shapes, text, and animations that can be generated purely with manim code.
