@@ -10,7 +10,7 @@ config.write_to_movie = False
 config.disable_caching = True
 
 class BlankScene(Scene):
-    def __init__(self, commands, ffmpeg_process, renderer="cairo", dimensions=(1920/4, 1080/4), frame_rate=60, start_time=time.time(), debug_mode=False, background_color='BLACK', *args, **kwargs):
+    def __init__(self, commands, ffmpeg_process, renderer="opengl", dimensions=(1920/4, 1080/4), frame_rate=60, start_time=time.time(), debug_mode=False, background_color='BLACK', *args, **kwargs):
         config.renderer = renderer
         config.pixel_width = math.floor(dimensions[0])
         config.pixel_height = math.floor(dimensions[1])
