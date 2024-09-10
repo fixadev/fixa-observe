@@ -60,6 +60,12 @@ def replace_svg_mobjects(code):
     pattern = r"SVGMobject\(.*?\)"
     return re.sub(pattern, "Circle()", code)
 
+def replace_invalid_colors(code):
+    pattern = r"LIGHT_"
+    return re.sub(pattern, "", code)
+
+
+
 code2 = "planets = [Circle(radius=d, color=WHITE) for d in planet_distances]"
 code3 = """rotations = [\n Rotating(planets[i], radians=2*PI, about_point=sun.get_center(), rate_func=linear, run_time=10/(i+1))\n for i in range(8)\n]"""
 code4 = """self.play(\n*[Rotate(p, angle=TAU, about_point=ORIGIN, rate_func=linear, run_time=10/i) for i, p in enumerate(planets, start=1)], run_time=10)"""
