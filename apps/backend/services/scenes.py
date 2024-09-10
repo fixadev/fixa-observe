@@ -1,4 +1,3 @@
-from memory_profiler import profile
 from queue import Queue
 from manim import *
 from manim.opengl import *
@@ -24,7 +23,6 @@ class BlankScene(Scene):
         self.commands = commands
         self.start_time = start_time
 
-    @profile
     def construct(self):
         self.interactive_embed(self.commands, self.start_time)
 
