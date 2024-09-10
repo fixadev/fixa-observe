@@ -10,7 +10,7 @@ from queue import Queue
 from services.scenes import BlankScene
 from services.llm_clients import anthropic_client
 from utils.monitoring import increment_subprocess_count, decrement_subprocess_count
-from services.regex_utils import has_unclosed_parenthesis, has_unclosed_bracket, has_indented_statement, extract_indented_statement, replace_svg_mobjects
+from services.regex_utils import has_unclosed_parenthesis, has_unclosed_bracket, has_indented_statement, extract_indented_statement, replace_svg_mobjects, replace_invalid_colors
 
 
 class ManimGenerator:
@@ -99,6 +99,7 @@ class ManimGenerator:
 
                         continue
                     # cur_chunk = replace_list_comprehensions(cur_chunk)
+                    cur_chunk = replace_invalid_colors(cur_chunk)
                     cur_chunk = replace_svg_mobjects(cur_chunk)
                     self.commands.append(cur_chunk)
                     if not first_command_ready:
