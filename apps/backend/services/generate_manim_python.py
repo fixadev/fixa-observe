@@ -74,42 +74,44 @@ class ManimGenerator:
                 {"role": "user", "content": text}
             ],
         ) as stream:
-            cur_chunk = ""
-            for chunk in stream.text_stream:
-                if not first_byte_received:
-                    first_byte_received = True
-                    end_time = time.time()
-                    print(f"INFO: first chunk received from anthropic at {end_time - start_time} seconds", flush=True)
+            with open("log.txt", "w") as log_file:
+                cur_chunk = ""
+                for chunk in stream.text_stream:
+                    log_file.write(chunk)
+                    if not first_byte_received:
+                        first_byte_received = True
+                        end_time = time.time()
+                        print(f"INFO: first chunk received from anthropic at {end_time - start_time} seconds", flush=True)
 
-                if '\n' in chunk:
-                    chunks = chunk.split('\n')
-                    cur_chunk += '\n'.join(chunks[:-1]) + '\n'
-                    if has_unclosed_parenthesis(cur_chunk) or has_unclosed_bracket(cur_chunk) or has_indented_statement(cur_chunk):
-                        cur_chunk += chunks[-1]
+                    if '\n' in chunk:
+                        chunks = chunk.split('\n')
+                        cur_chunk += '\n'.join(chunks[:-1]) + '\n'
+                        if has_unclosed_parenthesis(cur_chunk) or has_unclosed_bracket(cur_chunk) or has_indented_statement(cur_chunk):
+                            cur_chunk += chunks[-1]
 
-                        # Determine whether to add indented statement
-                        if has_indented_statement(cur_chunk):
-                            extracted = extract_indented_statement(cur_chunk)
-                            if len(extracted) > 2:
-                                # Add the all the text execept for last two elements because 
-                                # regex selector selects first character of the last line,
-                                # i.e. "self.play()" becomes ["s", "elf.play()"]
-                                self.commands.append(''.join(extracted[:-2]))
-                                cur_chunk = ''.join(extracted[-2:])
+                            # Determine whether to add indented statement
+                            if has_indented_statement(cur_chunk):
+                                extracted = extract_indented_statement(cur_chunk)
+                                if len(extracted) > 2:
+                                    # Add the all the text execept for last two elements because 
+                                    # regex selector selects first character of the last line,
+                                    # i.e. "self.play()" becomes ["s", "elf.play()"]
+                                    self.commands.append(''.join(extracted[:-2]))
+                                    cur_chunk = ''.join(extracted[-2:])
 
-                        continue
-                    # cur_chunk = replace_list_comprehensions(cur_chunk)
-                    cur_chunk = replace_invalid_colors(cur_chunk)
-                    cur_chunk = replace_svg_mobjects(cur_chunk)
-                    self.commands.append(cur_chunk)
-                    if not first_command_ready:
-                        first_command_ready = True
-                        print(f"INFO: first command ready at {time.time() - start_time} seconds", flush=True)
-                    cur_chunk = chunks[-1]
-                else:
-                    cur_chunk += chunk
-                
-            self.commands.append(cur_chunk)
+                            continue
+                        # cur_chunk = replace_list_comprehensions(cur_chunk)
+                        cur_chunk = replace_invalid_colors(cur_chunk)
+                        cur_chunk = replace_svg_mobjects(cur_chunk)
+                        self.commands.append(cur_chunk)
+                        if not first_command_ready:
+                            first_command_ready = True
+                            print(f"INFO: first command ready at {time.time() - start_time} seconds", flush=True)
+                        cur_chunk = chunks[-1]
+                    else:
+                        cur_chunk += chunk
+                    
+                self.commands.append(cur_chunk)
 
         # self.commands.append("\nself.wait(5)\n")
         # time.sleep(5)
