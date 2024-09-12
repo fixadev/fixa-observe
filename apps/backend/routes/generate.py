@@ -1,3 +1,4 @@
+import json
 import queue
 import logging
 import subprocess
@@ -43,14 +44,10 @@ async def generate(request: Request, background_tasks: BackgroundTasks):
         try:
             command = [
                 "python", "services/generate_manim_python.py", 
-                "--prompt", generation_params['prompt'], 
-                "--output_path", generation_params['output_path'], 
-                "--fps", str(config_params['fps']), 
-                "--width", str(config_params['width']), 
-                "--height", str(config_params['height']), 
-                "--theme", config_params['theme']
+                "--config_params", json.dumps(config_params),
+                "--input_params", json.dumps(generation_params),
             ]
-            print('command', command)
+            # print('command', command)
             subprocess.Popen(command)
             playlist_url = f"{BASE_URL}/{generation_params['output_path']}/playlist.m3u8"
             return {"hls_playlist_url": playlist_url}

@@ -33,10 +33,10 @@ def validate_and_organize_params(data) -> tuple[dict, dict]:
         raise ValueError("Height must be greater than 0 and less than 1080")
     
     output_path = f"public/hls/{uuid.uuid4()}"
-    output_queue = queue.Queue()
+    # output_queue = queue.Queue()
     
     config_params = {
-        'output_queue': output_queue,
+        # 'output_queue': output_queue,
         'theme': theme,
         'fps': fps,
         'width': width,

@@ -259,16 +259,12 @@ class ManimGenerator:
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser("generate_manim_python")
-    parser.add_argument('--prompt', type=str, required=False, default="how are babies made?")
-    parser.add_argument('--output_path', type=str, required=False, default="public/hls/test")
-    parser.add_argument('--fps', type=int, required=False, default=30)
-    parser.add_argument('--width', type=int, required=False, default=960)
-    parser.add_argument('--height', type=int, required=False, default=540)
-    parser.add_argument('--theme', type=str, required=False, default='dark')
+    parser.add_argument('--config_params', type=str, required=False, default="{'fps': 30, 'width': 960, 'height': 540, 'theme': 'dark'}")
+    parser.add_argument('--input_params', type=str, required=False, default="{'prompt': 'how are babies made?', 'output_path': 'public/hls/test'}")
     args = parser.parse_args()
 
-    config_params = {'fps': args.fps, 'width': args.width, 'height': args.height, 'theme': args.theme }
-    input_params = {'prompt': args.prompt, 'output_path': args.output_path}
+    config_params = json.loads(args.config_params)
+    input_params = json.loads(args.input_params)
 
     generator = ManimGenerator(config_params)
     generator.run(input_params)
