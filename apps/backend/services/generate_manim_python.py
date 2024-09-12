@@ -21,6 +21,7 @@ class ManimGenerator:
         self.frame_rate = config_params['fps']
         self.frame_width = config_params['width']
         self.frame_height = config_params['height']
+        self.renderer = config_params['renderer']
         self.background_color = 'BLACK' if config_params['theme'] == 'dark' else 'WHITE'
 
         self.black_frame = np.zeros((self.frame_height, self.frame_width, 4), dtype=np.uint8)
@@ -58,7 +59,7 @@ class ManimGenerator:
 
     def run_scene(self):
         print('INFO: Instantiate BlankScene at', time.time() - self.start_time)
-        scene = BlankScene(self.commands, self.ffmpeg_process, dimensions=(self.frame_width, self.frame_height), frame_rate=self.frame_rate, start_time=self.start_time, debug_mode=False, background_color=self.background_color)
+        scene = BlankScene(self.commands, self.ffmpeg_process, self.renderer, dimensions=(self.frame_width, self.frame_height), frame_rate=self.frame_rate, start_time=self.start_time, debug_mode=False, background_color=self.background_color)
         print('INFO: BlankScene instantiated at', time.time() - self.start_time)
         scene.render()
         print('INFO: EVERYTHING completed at', time.time() - self.start_time)

@@ -31,6 +31,12 @@ def validate_and_organize_params(data) -> tuple[dict, dict]:
         raise ValueError("Height must be an integer")
     if height < 1 or height > 1080:
         raise ValueError("Height must be greater than 0 and less than 1080")
+
+    renderer = data.get('renderer', 'opengl')
+    if not isinstance(renderer, str):
+        raise ValueError("Renderer must be a string")
+    if not (renderer == 'opengl' or renderer == 'cairo'):
+        raise ValueError("Renderer must be either 'opengl' or 'cairo'")
     
     output_path = f"public/hls/{uuid.uuid4()}"
     # output_queue = queue.Queue()
@@ -40,7 +46,8 @@ def validate_and_organize_params(data) -> tuple[dict, dict]:
         'theme': theme,
         'fps': fps,
         'width': width,
-        'height': height
+        'height': height,
+        'renderer': renderer
     }
     generation_params = {
         'prompt': prompt,
