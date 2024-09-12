@@ -42,18 +42,27 @@ async def generate(request: Request, background_tasks: BackgroundTasks):
         config_params, generation_params = validate_and_organize_params(data)
 
         try:
-            command = [
-                "python", "services/generate_manim_python.py", 
-                "--config_params", json.dumps(config_params),
-                "--input_params", json.dumps(generation_params),
-            ]
-            # print('command', command)
-            subprocess.Popen(command)
-            playlist_url = f"{BASE_URL}/{generation_params['output_path']}/playlist.m3u8"
-            return {"hls_playlist_url": playlist_url}
+            if config_params['renderer'] == 'opengl':
+                # Start subprocess if renderer is opengl
+                command = [
+                    "python", "services/generate_manim_python.py", 
+                    "--config_params", json.dumps(config_params),
+                    "--input_params", json.dumps(generation_params),
+                ]
+                # print('############### COMMAND ###############', command)
+                subprocess.Popen(command)
+            else:
+                # Otherwise, just render in a thread
+                generator = ManimGenerator(config_params)
+                generator_thread = threading.Thread(target=generator.run, args=(generation_params,))
+                generator_thread.start()
+                background_tasks.add_task(background_task, generator_thread)
         except Exception as e:
             logger.error(f"Error generating video: {e}")
             return {"error": str(e)}
+
+        playlist_url = f"{BASE_URL}/{generation_params['output_path']}/playlist.m3u8"
+        return {"hls_playlist_url": playlist_url}
 
 
         # generator = ManimGenerator(config_params)
