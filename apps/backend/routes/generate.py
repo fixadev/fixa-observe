@@ -1,7 +1,9 @@
 import queue
 import logging
+import subprocess
 import threading
 from fastapi import APIRouter, Request, BackgroundTasks
+from config import BASE_URL
 from services.generate_manim_python import ManimGenerator
 from routes.helpers import validate_and_organize_params
 
@@ -38,20 +40,40 @@ async def generate(request: Request, background_tasks: BackgroundTasks):
         data = await request.json()
         config_params, generation_params = validate_and_organize_params(data)
 
-        generator = ManimGenerator(config_params)
-        generator_thread = threading.Thread(target=generator.run, args=(generation_params,))
-        generator_thread.start()
+        try:
+            command = [
+                "python", "services/generate_manim_python.py", 
+                "--prompt", generation_params['prompt'], 
+                "--output_path", generation_params['output_path'], 
+                "--fps", str(config_params['fps']), 
+                "--width", str(config_params['width']), 
+                "--height", str(config_params['height']), 
+                "--theme", config_params['theme']
+            ]
+            print('command', command)
+            subprocess.Popen(command)
+            playlist_url = f"{BASE_URL}/{generation_params['output_path']}/playlist.m3u8"
+            return {"hls_playlist_url": playlist_url}
+        except Exception as e:
+            logger.error(f"Error generating video: {e}")
+            return {"error": str(e)}
 
-        background_tasks.add_task(background_task, generator_thread)
+
+        # generator = ManimGenerator(config_params)
+        # generator_thread = threading.Thread(target=generator.run, args=(generation_params,))
+        # generator_thread.start()
+
+        # background_tasks.add_task(background_task, generator_thread)
         
-        output_queue = config_params['output_queue']
-        while generator_thread.is_alive():
-            try:
-                hls_playlist_url = output_queue.get(timeout=0.05)  
-                return {"hls_playlist_url": hls_playlist_url}
-            except queue.Empty:
-                pass
-        return {"error": "Error generating video"}
+        # output_queue = config_params['output_queue']
+        # while generator_thread.is_alive():
+        #     try:
+        #         hls_playlist_url = output_queue.get(timeout=0.05)  
+        #         return {"hls_playlist_url": hls_playlist_url}
+        #     except queue.Empty:
+        #         pass
+
+        # return {"error": "Error generating video"}
     
     except Exception as e:
         logger.error(f"Error generating video: {e}")

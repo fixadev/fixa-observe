@@ -1,3 +1,5 @@
+import json
+import argparse
 import os
 import sys
 import time
@@ -28,7 +30,7 @@ class ManimGenerator:
         self.commands = []
         self.running = False
         self.start_time = time.time()
-        self.output_queue = config_params['output_queue']
+        # self.output_queue = config_params['output_queue']
         self.system_prompt = """You are an AI teacher. 
     
         Generate Manim code that generates a 10-15 second animation that directly illustrates the user prompt.
@@ -192,7 +194,7 @@ class ManimGenerator:
             if os.path.exists(os.path.join(output_dir, "playlist.m3u8")):
                 print(f'INFO: HLS Playlist ready at {time.time() - self.start_time} seconds', flush=True)
                     # run_cor(emit_ready_message(self.websocket))
-                self.output_queue.put(f"{BASE_URL}/{output_dir}/playlist.m3u8")
+                # self.output_queue.put(f"{BASE_URL}/{output_dir}/playlist.m3u8")
                 hls_ready = True
                 break
             time.sleep(0.01)
@@ -256,24 +258,17 @@ class ManimGenerator:
         print("INFO: Generator cleaned up")
 
 if __name__ == "__main__":
-    print("INFO:Starting python script")
-    
-    if len(sys.argv) > 1:
-        # print('prompt provided', sys.argv[1])
-        prompt = sys.argv[1]
-    else:
-        # print("No prompt provided")
-        prompt = "how are babies made?"
+    parser = argparse.ArgumentParser("generate_manim_python")
+    parser.add_argument('--prompt', type=str, required=False, default="how are babies made?")
+    parser.add_argument('--output_path', type=str, required=False, default="public/hls/test")
+    parser.add_argument('--fps', type=int, required=False, default=30)
+    parser.add_argument('--width', type=int, required=False, default=960)
+    parser.add_argument('--height', type=int, required=False, default=540)
+    parser.add_argument('--theme', type=str, required=False, default='dark')
+    args = parser.parse_args()
 
-    config_params = {'fps': 30, 'width': 960, 'height': 540, 'theme': 'dark', 'output_queue': Queue()}
-    input_params = {'prompt': prompt, 'output_path': "public/hls/test"}
+    config_params = {'fps': args.fps, 'width': args.width, 'height': args.height, 'theme': args.theme }
+    input_params = {'prompt': args.prompt, 'output_path': args.output_path}
 
     generator = ManimGenerator(config_params)
     generator.run(input_params)
-    
-    # for i in range(10):
-    #     generator = ManimGenerator(config_params)
-    #     generator.run(input_params)
-    #     # generator.run(input_params)
-    #     print(f'DONE GENERATING {i}')
-    #     time.sleep(1)

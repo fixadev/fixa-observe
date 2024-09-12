@@ -42,11 +42,17 @@ export function VideoPlayer({
               hls.recoverMediaError();
               break;
             case Hls.ErrorTypes.NETWORK_ERROR:
-              console.error("fatal network error encountered", data);
+              // console.error("fatal network error encountered", data);
+
               // All retries and media options have been exhausted.
               // Immediately trying to restart loading could cause loop loading.
               // Consider modifying loading policies to best fit your asset and network
               // conditions (manifestLoadPolicy, playlistLoadPolicy, fragLoadPolicy).
+              // Implement a retry mechanism with a 100ms timeout
+              setTimeout(() => {
+                // console.log("Retrying to load the source after network error");
+                hls.loadSource(hls_playlist_url);
+              }, 100);
               break;
             default:
               // cannot recover
