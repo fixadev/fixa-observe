@@ -323,8 +323,8 @@ class ManimGenerator:
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser("generate_manim_python")
-    parser.add_argument('--config_params', type=str, required=False, default="{'fps': 30, 'width': 960, 'height': 540, 'theme': 'dark'}")
-    parser.add_argument('--input_params', type=str, required=False, default="{'prompt': 'how are babies made?', 'output_path': 'public/hls/test'}")
+    parser.add_argument('--config_params', type=str, required=False, default='{"renderer": "opengl", "fps": 30, "width": 960, "height": 540, "theme": "dark"}')
+    parser.add_argument('--input_params', type=str, required=False, default='{"prompt": "how are babies made?", "output_path": "public/hls/test"}')
     args = parser.parse_args()
 
     config_params = json.loads(args.config_params)
