@@ -1,0 +1,14 @@
+self.play(Create(Axes()))
+
+rectangle = Rectangle(width=0.1, height=1, fill_opacity=0.5, color=BLUE)
+rectangles = VGroup(*[rectangle.copy().next_to(Rectangle(width=0.1, height=0), RIGHT, buff=0) for _ in range(10)])
+rectangles.arrange(RIGHT, buff=0).move_to(ORIGIN)
+
+function = FunctionGraph(lambda x: x**2, x_range=[0, 1])
+
+self.play(Create(function))
+self.play(Create(rectangles))
+
+text = Text("Riemann Sum").to_edge(UP)
+self.play(Write(text))
+

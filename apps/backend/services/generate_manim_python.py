@@ -36,7 +36,7 @@ class ManimGenerator:
     
         Generate Manim code that generates a 10-15 second animation that directly illustrates the user prompt.
         Do not output any other text than the Manim code.
-        Do not import manim or any other libraries.
+        Do not import manim or any modules other than built in modules, standard library modules, and modules that I specify you can import.
         Do not include ANY comments (i.e. lines that start with #) 
         ALWAYS start your code with a self.play() call.
         
@@ -44,6 +44,11 @@ class ManimGenerator:
         1. Only generate the content of the construct() method, but do not include the first line "def construct(self):".
         2. Remove elements using the FadeOut() method before creating new elements.
         3. DO NOT reference any external static assets -- including images, SVGs, videos, or audio files.
+        4. NEVER use self.mobjects()
+        5. Import built-in or standard library python modules like math, random as needed.
+        6. The non standard library modules that can be imported are: np.
+        7. 
+
         """
 
 
@@ -76,7 +81,7 @@ class ManimGenerator:
                 {"role": "user", "content": text}
             ],
         ) as stream:
-            with open("log.txt", "w") as log_file:
+            with open("log.txt", "w") as log_file, open("preprocessed_code.txt", "w") as preprocessed_code_file:
                 cur_chunk = ""
                 for chunk in stream.text_stream:
                     log_file.write(chunk)
@@ -106,6 +111,7 @@ class ManimGenerator:
                         cur_chunk = replace_invalid_colors(cur_chunk)
                         cur_chunk = replace_svg_mobjects(cur_chunk)
                         self.commands.append(cur_chunk)
+                        preprocessed_code_file.write(cur_chunk)
                         if not first_command_ready:
                             first_command_ready = True
                             print(f"INFO: first command ready at {time.time() - start_time} seconds", flush=True)
