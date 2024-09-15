@@ -38,7 +38,7 @@ class ManimGenerator:
         Do not output any other text than the Manim code.
         Do not import manim or any modules other than built in modules, standard library modules, and modules that I specify you can import.
         Do not include ANY comments (i.e. lines that start with #) 
-        ALWAYS start your code with a self.play() call.
+        
         
         Follow these guidelines for the Manim code:
         1. Only generate the content of the construct() method, but do not include the first line "def construct(self):".
@@ -47,10 +47,66 @@ class ManimGenerator:
         4. NEVER use self.mobjects()
         5. Import built-in or standard library python modules like math, random as needed.
         6. The non standard library modules that can be imported are: np.
-        7. 
+        7. When instantiating a graph, ensure that the lambda function that is passed to the ParametricFunction cannot return a value greater than the size of the axis minus 1. So if the size of the axis is 10, then the lambda function should not return a value greater than 9.
+        8. When writing labels, ALWAYS escape the $ symbol with a backslash.
+        9. Again, never import manim.
+        10. Use self.play as early as possible to get the animation started. But don't fail to assign any mobjects to a variable that can be used later in the code. i.e. when creating axes, you should do this: 
+            
+            axes = Axes(
+                x_range=[0, 10, 1],
+                y_range=[0, 100000, 10000],
+                axis_config={"include_tip": False},
+            )
+            self.play(Create(axes))
 
+            DO NOT do this:
+
+            self.play(Create(Axes(x_range=[0, 10, 1], y_range=[0, 100000, 10000], axis_config={"include_tip": False})))
+
+        11. When creating lambda functions to plot exponential functions, use intercepts rather than coefficients for the starting point. i.e. if you have a exponential function that starts at 1000 and goes to 100000 
+    
+            instead of 
+
+            lambda x: 1000 * np.exp(x)
+
+            do this:
+
+            lambda x: 10 * np.exp(x) + 1000
+
+        12. rate_func=exponential is not a valid parameter for the animate method. Instead, use rate_func=rush_into.
+        13. When adding text to a scene, ensure the text does not get cut off by the edge of the frame.
+        14. When creating a TangentLine(), ensure the alpha parameter is included.
+        15. When creating Axes, ensure that you set the y range to accomodate the function you will be plotting:
+
+            so DO NOT do this: 
+
+            axes = Axes(
+                x_range=[-1, 5],
+                y_range=[-1, 5],
+                axis_config={"include_tip": False},
+            )
+            self.play(Create(axes))
+
+            func = lambda x: x**2
+            graph = axes.plot(func, color=BLUE)
+
+            because when x is 5, the y value is 25, which is greater than the y maximum of 5.
+
+            instead, do this:
+
+            axes = Axes(
+                x_range=[-1, 5],
+                y_range=[-1, 30],
+                axis_config={"include_tip": False},
+            )
+
+            func = lambda x: x**2
+            graph = axes.plot(func, color=BLUE)
+            
         """
 
+
+        # ALWAYS start your code with a self.play() call.
 
         # 2. You are using the OpenGL renderer. Never use the .to_edge() method. Instead use the .shift() method.
         # 3. Use self.play() for each animation step to ensure proper sequencing.
@@ -103,6 +159,7 @@ class ManimGenerator:
                                     # Add the all the text execept for last two elements because 
                                     # regex selector selects first character of the last line,
                                     # i.e. "self.play()" becomes ["s", "elf.play()"]
+                                    preprocessed_code_file.write(''.join(extracted[:-2]))
                                     self.commands.append(''.join(extracted[:-2]))
                                     cur_chunk = ''.join(extracted[-2:])
 
