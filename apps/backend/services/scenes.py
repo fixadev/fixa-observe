@@ -37,107 +37,33 @@ class BlankScene(Scene):
 
 class TestScene(Scene):
     def __init__(self, *args, **kwargs):
+        config.write_to_movie = True
+        config.format = "mp4"
         config.frame_rate = 60
-        config.renderer = "opengl"
+        config.renderer = "cairo"
         config.pixel_width = math.floor(1920 / 4)
         config.pixel_height = math.floor(1080 / 4)
         super().__init__(ffmpeg_process=None, debug_mode=True, *args, **kwargs)
 
     def construct(self):
-        import numpy as np
-
-        title = Text("Understanding Riemann Sums").scale(0.8).to_edge(UP)
-        self.play(Write(title))
-        self.wait(1)
-
-        print('height is', self.camera.get_height())
-
-        self.play(
-            self.camera.animate.set_height(10)
-        )
-
-        explanation = Text("Riemann sums help us estimate\nthe area under a curve").scale(0.6).to_edge(LEFT)
-        self.play(Write(explanation))
-        self.wait(2)
-
         axes = Axes(
-            x_range=[0, 5],
-            y_range=[0, 25],
+            x_range=[0, 9, 1],
+            y_range=[0, 2, 1],
             axis_config={"include_tip": False},
         )
         self.play(Create(axes))
-        self.wait(1)
-
-        print('height is', self.camera.get_height())
-
-        self.play(
-            self.camera.animate.set_height(8)
-        )
-
-        func = lambda x: x**2
-        graph = axes.plot(func, color=BLUE)
-        self.play(Create(graph))
-        self.wait(1)
-
-        area_text = Text("We want to find this area").scale(0.4).next_to(axes, DOWN)
-        self.play(Write(area_text))
-        self.wait(1)
-
-        rectangles = axes.get_riemann_rectangles(
-            graph,
-            x_range=[0, 5],
-            dx=1,
-            stroke_width=0.1,
-            stroke_color=WHITE,
-        )
-        self.play(Create(rectangles))
-        self.wait(1)
-
-        sum_text = Text("We can approximate it with rectangles").scale(0.4).next_to(area_text, DOWN)
-        self.play(Write(sum_text))
-        self.wait(1)
-
-        self.play(FadeOut(area_text), FadeOut(sum_text))
-        self.wait(1)
-
-        width_arrow = Arrow(start=axes.c2p(0, 0), end=axes.c2p(1, 0), color=RED)
-        width_label = Text("Width (dx)").scale(0.3).next_to(width_arrow, DOWN)
-        self.play(Create(width_arrow), Write(width_label))
-        self.wait(1)
-
-        height_arrow = Arrow(start=axes.c2p(1, 0), end=axes.c2p(1, func(1)), color=GREEN)
-        height_label = Text("Height (f(x))").scale(0.3).next_to(height_arrow, RIGHT)
-        self.play(Create(height_arrow), Write(height_label))
-        self.wait(1)
-
-        formula = MathTex(r"\text{Area} \approx \sum_{i=1}^n f(x_i) \cdot \Delta x").scale(0.8).next_to(axes, DOWN)
-        self.play(Write(formula))
+        egg = Circle(radius=0.5, color=PINK).move_to(axes.c2p(2, 1))
+        sperm = Triangle(color=BLUE).scale(0.2).move_to(axes.c2p(0, 1))
+        self.play(Create(egg), Create(sperm))
+        self.play(sperm.animate.move_to(axes.c2p(2, 1)))
+        combined = Circle(radius=0.6, color=PURPLE).move_to(axes.c2p(2, 1))
+        self.play(Transform(egg, combined), FadeOut(sperm))
+        growing_cell = combined.copy()
+        self.play(growing_cell.animate.scale(1.5))
+        cells = VGroup(*[Circle(radius=0.2, color=PURPLE) for _ in range(8)])
+        cells.arrange_in_grid(rows=2, cols=4, buff=0.1).move_to(axes.c2p(5, 1))
+        self.play(Transform(growing_cell, cells))
+        baby = Circle(radius=0.7, color=YELLOW).move_to(axes.c2p(8, 1))
+        self.play(Transform(cells, baby))
         self.wait(2)
-
-    
-        # print('formula.is_in_frame()', self.camera.is_in_frame(formula))
-        # print('formula is off screen', formula.is_off_screen)
-
-        self.play(FadeOut(width_arrow), FadeOut(width_label), FadeOut(height_arrow), FadeOut(height_label))
-        self.wait(1)
-
-        more_rectangles = axes.get_riemann_rectangles(
-            graph,
-            x_range=[0, 5],
-            dx=0.2,
-            stroke_width=0.1,
-            stroke_color=WHITE,
-        )
-        self.play(Transform(rectangles, more_rectangles))
-        self.wait(1)
-
-        better_approx = Text("More rectangles = Better approximation").scale(0.4).next_to(formula, DOWN)
-        self.play(Write(better_approx))
-        self.wait(2)
-
-        final_text = Text("As we use infinitely many rectangles,\nwe get the exact area!").scale(0.6).to_edge(DOWN)
-        self.play(Write(final_text))
-        self.wait(2)
-
-        self.play(FadeOut(*self.mobjects))
-        self.wait(1)
+        self.play(FadeOut(axes), FadeOut(baby))
