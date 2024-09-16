@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import Hls from "hls.js";
 import { isIOS } from "../lib/platform";
+import { HLS_TIMEOUT } from "~/lib/constants";
 export function VideoPlayer({
   hls_playlist_url,
   className,
@@ -9,6 +10,7 @@ export function VideoPlayer({
   className?: string;
 }) {
   const videoRef = useRef<HTMLVideoElement>(null);
+  const startTime = useRef(new Date().getTime());
 
   useEffect(() => {
     // console.log("[VideoPlayer] useEffect triggered");
@@ -19,6 +21,8 @@ export function VideoPlayer({
       // );
       return;
     }
+
+    startTime.current = new Date().getTime();
 
     if (Hls.isSupported()) {
       const hls = new Hls();
@@ -49,10 +53,14 @@ export function VideoPlayer({
               // Consider modifying loading policies to best fit your asset and network
               // conditions (manifestLoadPolicy, playlistLoadPolicy, fragLoadPolicy).
               // Implement a retry mechanism with a 100ms timeout
-              setTimeout(() => {
-                // console.log("Retrying to load the source after network error");
-                hls.loadSource(hls_playlist_url);
-              }, 100);
+              if (new Date().getTime() - startTime.current < HLS_TIMEOUT) {
+                setTimeout(() => {
+                  // console.log("Retrying to load the source after network error");
+                  hls.loadSource(hls_playlist_url);
+                }, 100);
+              } else {
+                hls.destroy();
+              }
               break;
             default:
               // cannot recover
