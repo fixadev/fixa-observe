@@ -35,6 +35,8 @@ class BlankScene(MovingCameraScene):
 
 class TestScene(MovingCameraScene):
     def __init__(self, *args, **kwargs):
+        config.write_to_movie = True
+        config.format = "mp4"
         config.frame_rate = 60
         config.renderer = "cairo"
         config.pixel_width = math.floor(1920 / 4)
@@ -67,8 +69,8 @@ class TestScene(MovingCameraScene):
         self.wait(2)
 
         axes = Axes(
-            x_range=[0, 5],
-            y_range=[0, 25],
+            x_range=[0, 9, 1],
+            y_range=[0, 2, 1],
             axis_config={"include_tip": False},
         )
         self.play(Create(axes))
@@ -113,31 +115,4 @@ class TestScene(MovingCameraScene):
         formula = MathTex(r"\text{Area} \approx \sum_{i=1}^n f(x_i) \cdot \Delta x").scale(0.8).next_to(axes, DOWN)
         self.play(Write(formula))
         self.wait(2)
-
-    
-        # print('formula.is_in_frame()', self.camera.is_in_frame(formula))
-        # print('formula is off screen', formula.is_off_screen)
-
-        self.play(FadeOut(width_arrow), FadeOut(width_label), FadeOut(height_arrow), FadeOut(height_label))
-        self.wait(1)
-
-        more_rectangles = axes.get_riemann_rectangles(
-            graph,
-            x_range=[0, 5],
-            dx=0.2,
-            stroke_width=0.1,
-            stroke_color=WHITE,
-        )
-        self.play(Transform(rectangles, more_rectangles))
-        self.wait(1)
-
-        better_approx = Text("More rectangles = Better approximation").scale(0.4).next_to(formula, DOWN)
-        self.play(Write(better_approx))
-        self.wait(2)
-
-        final_text = Text("As we use infinitely many rectangles,\nwe get the exact area!").scale(0.6).to_edge(DOWN)
-        self.play(Write(final_text))
-        self.wait(2)
-
-        self.play(FadeOut(*self.mobjects))
-        self.wait(1)
+        self.play(FadeOut(axes), FadeOut(baby))
