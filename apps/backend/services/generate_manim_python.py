@@ -35,6 +35,7 @@ class ManimGenerator:
         self.system_prompt = f"""You are an AI teacher. 
     
         Generate Manim code that generates a 10-15 second animation that directly illustrates the user prompt.
+        ALWAYS generate manim code and nothing else -- even if the user prompt is vague or incomplete.
         Assume you're teaching a five year old. Be very slow and simple.
         Begin with a high level overview of what you're going to do.
         Then dig into the details of how you're going to do it.
