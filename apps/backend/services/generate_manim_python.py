@@ -132,6 +132,8 @@ class ManimGenerator:
         18. Before displaying new text, always fade out the previous text.
         19. NEVER set the background color using self.camera.set_background_color. Assume the background color is %s
         20. NEVER use Heart() this shape doesn't exist
+        21. NEVER use the ThoughtBubble class - it does not exist.
+        22. To ensure that text is never displayed on top of other elements, move the text to an edge of the screen if you just displayed elements in the middle of the screen.
         """ % self.background_color
 
 
