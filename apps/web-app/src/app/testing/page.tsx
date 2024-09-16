@@ -4,6 +4,8 @@ import { VideoPlayer } from "~/components/VideoPlayer";
 
 export default function TestingPage() {
   const [HLSUrls, setHLSUrls] = useState<Array<string> | null>(null);
+  const [renderer, setRenderer] = useState<string>("opengl");
+  const [numPrompts, setNumPrompts] = useState<number>(1);
 
   const prompts = [
     "how does a webserver work",
@@ -54,14 +56,15 @@ export default function TestingPage() {
 
   const runTest = async () => {
     const endpoint = `${process.env.NEXT_PUBLIC_BACKEND_URL}/generate`;
+    console.log(endpoint);
     const responses = await Promise.all(
-      prompts.map(async (prompt) => {
+      prompts.slice(0, numPrompts).map(async (prompt) => {
         const response = await fetch(endpoint, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ prompt: prompt }),
+          body: JSON.stringify({ prompt: prompt, renderer: renderer }),
         });
 
         if (!response.ok) {
@@ -86,12 +89,33 @@ export default function TestingPage() {
 
   return (
     <div className="flex h-screen flex-col items-center justify-center">
-      <button
-        onClick={runTest}
-        className="rounded-md bg-blue-500 p-2 text-white"
-      >
-        Run Test
-      </button>
+      <div className="flex flex-row gap-4">
+        <button
+          onClick={runTest}
+          className="rounded-md bg-blue-500 p-2 text-white"
+        >
+          Run Test
+        </button>
+        <select
+          value={renderer}
+          onChange={(e) => setRenderer(e.target.value)}
+          className="rounded-md bg-blue-500 p-2 text-white"
+        >
+          <option value="opengl">OpenGL</option>
+          <option value="cairo">Cairo</option>
+        </select>
+        <select
+          value={numPrompts}
+          onChange={(e) => setNumPrompts(Number(e.target.value))}
+          className="rounded-md bg-blue-500 p-2 text-white"
+        >
+          {[...Array(30)].map((_, i) => (
+            <option key={i + 1} value={i + 1}>
+              {i + 1}
+            </option>
+          ))}
+        </select>
+      </div>
       <div className="grid h-4/5 w-full grid-cols-4 gap-4 overflow-auto">
         {HLSUrls?.map((url) => (
           <div key={url} className="aspect-video">
