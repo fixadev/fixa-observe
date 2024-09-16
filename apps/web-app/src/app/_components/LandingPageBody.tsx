@@ -12,11 +12,11 @@ import { AnimatePresence } from "framer-motion";
 import ExpandTransition from "~/components/ExpandTransition";
 import { api } from "~/trpc/react";
 import axios from "axios";
+import { type ChatMessage } from "~/lib/types";
 
 export default function LandingPageBody() {
   const [state, setState] = useState<"initial" | "chat">("initial");
-  const [chatHistory, setChatHistory] = useState<string[]>([]);
-  const [hlsPlaylistUrl, setHlsPlaylistUrl] = useState<string | null>(null);
+  const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
   // const { openSignIn } = useClerk();
   // const { isSignedIn } = useAuth();
 
@@ -95,7 +95,7 @@ export default function LandingPageBody() {
       if (!data.hls_playlist_url) {
         throw new Error("No HLS playlist URL in the response");
       }
-      setHlsPlaylistUrl(data.hls_playlist_url.toString().trim());
+      return data.hls_playlist_url.toString().trim();
     } catch (error) {
       console.error("Error calling generate API:", error);
       // You might want to set an error state here or show a toast notification
@@ -105,7 +105,9 @@ export default function LandingPageBody() {
 
   // Scroll to bottom on mount and when chat history changes
   useEffect(() => {
-    scrollToBottom();
+    setTimeout(() => {
+      scrollToBottom();
+    });
   }, [chatHistory, chatHistoryRef.current?.scrollHeight]);
 
   const handleSubmit = useCallback(async () => {
@@ -151,22 +153,12 @@ export default function LandingPageBody() {
       posthog.capture("Landing page prompt submitted", {
         prompt: text,
       });
-      setChatHistory([...chatHistory, text]);
+      setChatHistory((old) => [...old, { type: "message", message: text }]);
       setText("");
 
       if (state === "initial") {
         setState("chat");
       }
-
-      setJustSubmitted(true);
-      setShowVideo(false);
-      setTimeout(() => {
-        setJustSubmitted(false);
-        setShowVideo(true);
-        setTimeout(() => {
-          scrollToBottom();
-        }, 310);
-      }, 1000);
 
       // Decrease generations left
       // if (isSignedIn && user) {
@@ -175,13 +167,17 @@ export default function LandingPageBody() {
       // }
 
       // call API
-      await callGenerate();
+      const url = await callGenerate();
+      if (url) {
+        setChatHistory((old) => [...old, { type: "video", videoUrl: url }]);
+      }
+      setTimeout(() => {
+        scrollToBottom();
+      }, 300);
     }
-  }, [text, posthog, chatHistory, state, callGenerate, isBackendDown]);
+  }, [text, posthog, state, callGenerate, isBackendDown]);
 
   const [bookCallDialogOpen, setBookCallDialogOpen] = useState(false);
-  const [showVideo, setShowVideo] = useState(false);
-  const [justSubmitted, setJustSubmitted] = useState(false);
 
   return (
     <>
@@ -205,41 +201,39 @@ export default function LandingPageBody() {
               ref={chatHistoryRef}
               className="-mx-2 mb-4 overflow-y-auto px-2 sm:-mx-4 sm:px-4"
             >
-              {chatHistory.map((text, i) => {
-                // Do not render the message that was just submitted, instead render it below the video player
-                if (i === chatHistory.length - 1 && justSubmitted) return null;
-                return (
-                  <div
-                    key={i}
-                    className="mb-2 flex w-full flex-col items-end gap-0.5"
-                  >
-                    <div className="inline-block rounded-lg bg-neutral-700 px-4 py-3 text-base text-white">
-                      {text}
+              {chatHistory.map((item: ChatMessage, i: number) => {
+                if (item.type === "message") {
+                  if (item.message === undefined) {
+                    console.error("Message is undefined for item:", item);
+                    return null;
+                  }
+                  return (
+                    <div
+                      key={i}
+                      className="mb-2 flex w-full flex-col items-end gap-0.5"
+                    >
+                      <div className="inline-block rounded-lg bg-neutral-700 px-4 py-3 text-base text-white">
+                        {item.message}
+                      </div>
                     </div>
-                  </div>
-                );
+                  );
+                } else if (item.type === "video") {
+                  if (item.videoUrl === undefined) {
+                    console.error("Video URL is undefined for item:", item);
+                    return null;
+                  }
+                  return (
+                    <AnimatePresence key={i}>
+                      <ExpandTransition buffer={100}>
+                        <VideoPlayer
+                          className="mb-4 w-full"
+                          hls_playlist_url={item.videoUrl}
+                        />
+                      </ExpandTransition>
+                    </AnimatePresence>
+                  );
+                }
               })}
-
-              {/* The video player */}
-              <AnimatePresence>
-                {showVideo && (
-                  <ExpandTransition buffer={100}>
-                    <VideoPlayer
-                      className="mb-4 w-full"
-                      hls_playlist_url={hlsPlaylistUrl}
-                    />
-                  </ExpandTransition>
-                )}
-              </AnimatePresence>
-
-              {/* The message that was just submitted */}
-              {justSubmitted && (
-                <div className="mb-2 flex w-full flex-col items-end gap-0.5">
-                  <div className="inline-block rounded-lg bg-neutral-700 px-4 py-3 text-base text-white">
-                    {chatHistory[chatHistory.length - 1]}
-                  </div>
-                </div>
-              )}
             </div>
             <LandingPageTextField
               className="mb-2"
@@ -249,7 +243,7 @@ export default function LandingPageBody() {
               onChange={setText}
               onSubmit={handleSubmit}
             />
-            <div className="mb-6 text-muted-foreground">
+            <div className="mb-6 rounded-lg bg-muted p-4 text-muted-foreground">
               generated something cool? submit it us at{" "}
               <a
                 className="font-medium underline"

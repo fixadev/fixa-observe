@@ -37,3 +37,4 @@ yarn-error.log*
 .DS_Store
 *.pem
 .venv/
+apps/backend/preprocessed_code.txt
