@@ -1,7 +1,5 @@
 from queue import Queue
 from manim import *
-from manim.opengl import *
-from manim.renderer.opengl_renderer import OpenGLRenderer
 import math
 import numpy as np
 import time
@@ -9,7 +7,7 @@ import time
 config.write_to_movie = False
 config.disable_caching = True
 
-class BlankScene(Scene):
+class BlankScene(MovingCameraScene):
     def __init__(self, commands, ffmpeg_process, renderer, dimensions=(1920/4, 1080/4), frame_rate=60, start_time=time.time(), debug_mode=False, background_color='BLACK', *args, **kwargs):
         config.renderer = renderer
         config.pixel_width = math.floor(dimensions[0])
@@ -17,7 +15,7 @@ class BlankScene(Scene):
         config.frame_rate = frame_rate
         config.progress_bar = "none"
         config.background_color = background_color
-        super().__init__(ffmpeg_process, debug_mode=debug_mode, *args, **kwargs)
+        super().__init__(ffmpeg_process=ffmpeg_process, debug_mode=debug_mode, *args, **kwargs)
 
         # assert isinstance(self.renderer, OpenGLRenderer), "This scene only works with the OpenGL renderer"
         self.commands = commands
@@ -35,10 +33,10 @@ class BlankScene(Scene):
         # fertilized_egg = Circle(color=YELLOW, fill_opacity=1).scale(0.6).move_to(egg.get_center())
         # self.play(Transform(egg, fertilized_egg), FadeOut(sperm))
 
-class TestScene(Scene):
+class TestScene(MovingCameraScene):
     def __init__(self, *args, **kwargs):
         config.frame_rate = 60
-        config.renderer = "opengl"
+        config.renderer = "cairo"
         config.pixel_width = math.floor(1920 / 4)
         config.pixel_height = math.floor(1080 / 4)
         super().__init__(ffmpeg_process=None, debug_mode=True, *args, **kwargs)
@@ -50,11 +48,19 @@ class TestScene(Scene):
         self.play(Write(title))
         self.wait(1)
 
-        print('height is', self.camera.get_height())
+        self.camera.frame.save_state()
+
+        print('height is', self.camera.frame_height)
 
         self.play(
-            self.camera.animate.set_height(10)
+            self.camera.frame.animate.set_height(10)
         )
+
+        print('height is', self.camera.frame_height)
+
+        # self.play(
+        #     self.camera.resize_frame_shape()
+        # )
 
         explanation = Text("Riemann sums help us estimate\nthe area under a curve").scale(0.6).to_edge(LEFT)
         self.play(Write(explanation))
@@ -67,12 +73,6 @@ class TestScene(Scene):
         )
         self.play(Create(axes))
         self.wait(1)
-
-        print('height is', self.camera.get_height())
-
-        self.play(
-            self.camera.animate.set_height(8)
-        )
 
         func = lambda x: x**2
         graph = axes.plot(func, color=BLUE)

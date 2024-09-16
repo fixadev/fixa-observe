@@ -89,7 +89,7 @@ class ManimGenerator:
         13. When adding text or mobjects to the edge of a scene using the .to_edge() method, use:
 
             self.play(
-                self.camera.animate.set_height(10)
+                self.camera.frame.animate.set_height(10)
             )
 
             to zoom out to fit the text or mobjects.
@@ -97,7 +97,7 @@ class ManimGenerator:
             to zoom back in to the original view, use:
 
             self.play(
-                self.camera.animate.set_height(8)
+                self.camera.frame.animate.set_height(8)
             )
 
         14. When creating a TangentLine(), ensure the alpha parameter is included.
@@ -134,12 +134,15 @@ class ManimGenerator:
         20. NEVER use Heart() this shape doesn't exist
         21. NEVER use the ThoughtBubble class - it does not exist.
         22. To ensure that text is never displayed on top of other elements, move the text to an edge of the screen if you just displayed elements in the middle of the screen.
+        23. Ensure you fade out elements before introducing new elements using the FadeOut() method.
         """ % self.background_color
 
 
         # 16. Use the self.wait(1) method between each command to allow the viewer to see the result.
 
         # ALWAYS start your code with a self.play() call.
+
+        # 1. For OpenGL -- modify height with: self.camera.animate.set_height(10)
 
         # 2. You are using the OpenGL renderer. Never use the .to_edge() method. Instead use the .shift() method.
         # 3. Use self.play() for each animation step to ensure proper sequencing.
