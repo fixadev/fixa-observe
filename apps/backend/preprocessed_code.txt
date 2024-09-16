@@ -1,68 +1,112 @@
-axes = Axes(
-    x_range=[0, 5],
-    y_range=[0, 25],
-    axis_config={"include_tip": False},
-)
-self.play(Create(axes))
+# Camera setup
+self.camera.background_color = "#E6E6FA"  # Light lavender background
 
-function = lambda x: x**2
-graph = axes.plot(function, color=BLUE)
-self.play(Create(graph))
-
-title = Text("Riemann Sums").scale(0.8).to_edge(UP)
+# Title
+title = Text("How are babies made?", font_size=40, color=BLUE)
 self.play(Write(title))
+self.play(title.animate.to_edge(UP))
 
-explanation = Text("Riemann sums help us estimate\nthe area under a curve").scale(0.6).next_to(title, DOWN)
-self.play(Write(explanation))
+# Create a mommy and daddy stick figure
+mommy = VGroup(
+    Circle(radius=0.2, fill_opacity=1, color=PINK),  # Head
+    Line(start=np.array([0, -0.2, 0]), end=np.array([0, -1, 0]), color=PINK),  # Body
+    Line(start=np.array([0, -0.5, 0]), end=np.array([-0.3, -0.8, 0]), color=PINK),  # Left arm
+    Line(start=np.array([0, -0.5, 0]), end=np.array([0.3, -0.8, 0]), color=PINK),  # Right arm
+    Line(start=np.array([0, -1, 0]), end=np.array([-0.2, -1.5, 0]), color=PINK),  # Left leg
+    Line(start=np.array([0, -1, 0]), end=np.array([0.2, -1.5, 0]), color=PINK),  # Right leg
+)
+
+daddy = VGroup(
+    Circle(radius=0.2, fill_opacity=1, color=BLUE),  # Head
+    Line(start=np.array([0, -0.2, 0]), end=np.array([0, -1, 0]), color=BLUE),  # Body
+    Line(start=np.array([0, -0.5, 0]), end=np.array([-0.3, -0.8, 0]), color=BLUE),  # Left arm
+    Line(start=np.array([0, -0.5, 0]), end=np.array([0.3, -0.8, 0]), color=BLUE),  # Right arm
+    Line(start=np.array([0, -1, 0]), end=np.array([-0.2, -1.5, 0]), color=BLUE),  # Left leg
+    Line(start=np.array([0, -1, 0]), end=np.array([0.2, -1.5, 0]), color=BLUE),  # Right leg
+)
+
+mommy.shift(LEFT * 2)
+daddy.shift(RIGHT * 2)
+
+self.play(Create(mommy), Create(daddy))
+
+# Show love
+heart = Heart(color=RED)
+heart.move_to(np.array([0, 1, 0]))
+self.play(GrowFromCenter(heart))
+
+# Explanation text
+explain1 = Text("When a mommy and daddy love each other very much...", font_size=24, color=BLACK)
+explain1.next_to(title, DOWN)
+self.play(Write(explain1))
 
 self.wait(2)
 
-self.play(FadeOut(explanation))
+# Remove previous text and heart
+self.play(FadeOut(explain1), FadeOut(heart))
 
-rectangles = VGroup()
-n_rectangles = 5
-dx = 5 / n_rectangles
+# Show seed and egg
+seed = Circle(radius=0.1, fill_opacity=1, color=BLUE)
+egg = Circle(radius=0.15, fill_opacity=1, color=PINK)
 
-for i in range(n_rectangles):
-    x = i * dx
-    y = function(x)
-    rect = Rectangle(
-        width=dx,
-        height=y,
-        fill_opacity=0.5,
-        fill_color=RED,
-        stroke_color=WHITE
-    ).next_to(axes.c2p(x, 0), UP, buff=0)
-    rectangles.add(rect)
+seed.next_to(daddy, LEFT)
+egg.next_to(mommy, RIGHT)
 
-self.play(Create(rectangles))
+self.play(GrowFromCenter(seed), GrowFromCenter(egg))
 
-sum_text = Text("Sum of rectangle areas\napproximates area under curve").scale(0.6).next_to(title, DOWN)
-self.play(Write(sum_text))
+explain2 = Text("The daddy gives a tiny seed, and the mommy has a tiny egg.", font_size=24, color=BLACK)
+explain2.next_to(title, DOWN)
+self.play(Write(explain2))
 
 self.wait(2)
 
-self.play(FadeOut(sum_text))
+# Move seed and egg to center
+self.play(seed.animate.move_to(ORIGIN), egg.animate.move_to(ORIGIN))
 
-more_rectangles = VGroup()
-n_more_rectangles = 20
-dx_more = 5 / n_more_rectangles
+# Combine seed and egg
+combined = Circle(radius=0.2, fill_opacity=1, color=PURPLE)
+combined.move_to(ORIGIN)
 
-for i in range(n_more_rectangles):
-    x = i * dx_more
-    y = function(x)
-    rect = Rectangle(
-        width=dx_more,
-        height=y,
-        fill_opacity=0.5,
-        fill_color=GREEN,
-        stroke_color=WHITE
-    ).next_to(axes.c2p(x, 0), UP, buff=0)
-    more_rectangles.add(rect)
+self.play(Transform(seed, combined), Transform(egg, combined))
 
-self.play(Transform(rectangles, more_rectangles))
+self.play(FadeOut(explain2))
 
-final_text = Text("More rectangles = Better approximation").scale(0.6).next_to(title, DOWN)
+explain3 = Text("The seed and egg come together to start a baby!", font_size=24, color=BLACK)
+explain3.next_to(title, DOWN)
+self.play(Write(explain3))
+
+self.wait(2)
+
+# Show baby growing
+baby = VGroup(
+    Circle(radius=0.15, fill_opacity=1, color=PURPLE),  # Head
+    Line(start=np.array([0, -0.15, 0]), end=np.array([0, -0.5, 0]), color=PURPLE),  # Body
+    Line(start=np.array([0, -0.3, 0]), end=np.array([-0.2, -0.4, 0]), color=PURPLE),  # Left arm
+    Line(start=np.array([0, -0.3, 0]), end=np.array([0.2, -0.4, 0]), color=PURPLE),  # Right arm
+    Line(start=np.array([0, -0.5, 0]), end=np.array([-0.1, -0.7, 0]), color=PURPLE),  # Left leg
+    Line(start=np.array([0, -0.5, 0]), end=np.array([0.1, -0.7, 0]), color=PURPLE),  # Right leg
+)
+
+baby.move_to(ORIGIN)
+baby.scale(0.1)
+
+self.play(Transform(combined, baby))
+self.play(baby.animate.scale(5))
+
+self.play(FadeOut(explain3))
+
+explain4 = Text("The baby grows in the mommy's tummy for 9 months.", font_size=24, color=BLACK)
+explain4.next_to(title, DOWN)
+self.play(Write(explain4))
+
+self.wait(2)
+
+# Final scene
+self.play(FadeOut(explain4), FadeOut(title))
+
+final_text = Text("And that's how babies are made!", font_size=36, color=BLUE)
+final_text.move_to(ORIGIN + UP)
+
 self.play(Write(final_text))
 
 self.wait(2)
