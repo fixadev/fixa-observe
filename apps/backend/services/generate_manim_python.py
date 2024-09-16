@@ -32,7 +32,9 @@ class ManimGenerator:
         self.running = False
         self.start_time = time.time()
         # self.output_queue = config_params['output_queue']
-        self.system_prompt = f"""You are an AI teacher. 
+        self.system_prompt = """
+        
+        You are an AI teacher. 
     
         Generate Manim code that generates a 10-15 second animation that directly illustrates the user prompt.
         ALWAYS generate manim code and nothing else -- even if the user prompt is vague or incomplete.
@@ -127,9 +129,8 @@ class ManimGenerator:
 
         17. Create axes when they are needed to plot stuff on. Do not create axes unless you are going to use them in the animation.
         18. Before displaying new text, always fade out the previous text.
-        19. NEVER set the background color using self.camera.set_background_color. Assume the background color is {self.background_color}.
-            
-        """
+        19. NEVER set the background color using self.camera.set_background_color. Assume the background color is %s""" % self.background_color
+
 
         # 16. Use the self.wait(1) method between each command to allow the viewer to see the result.
 
