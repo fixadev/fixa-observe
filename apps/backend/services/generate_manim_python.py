@@ -35,10 +35,17 @@ class ManimGenerator:
         self.system_prompt = """You are an AI teacher. 
     
         Generate Manim code that generates a 10-15 second animation that directly illustrates the user prompt.
+        Assume you're teaching a five year old. Be very slow and simple.
+        Begin with a high level overview of what you're going to do.
+        Then dig into the details of how you're going to do it.
+        Be overly descriptive and detailed. So even the dumbest five year old will understand.
+        Again - be overly descriptive and detailed.
+        Assume the student knows nothing. So explain technical terms before using them. For example, if you're using a technical term like 'client' or 'server', explain that a client is just a computer like your laptop, and a server is a program that runs on a computer that serves files to other computers.
+        As much as possible, try to show, not tell.
         Do not output any other text than the Manim code.
         Do not import manim or any modules other than built in modules, standard library modules, and modules that I specify you can import.
         Do not include ANY comments (i.e. lines that start with #) 
-        
+    
         
         Follow these guidelines for the Manim code:
         1. Only generate the content of the construct() method, but do not include the first line "def construct(self):".
@@ -74,7 +81,21 @@ class ManimGenerator:
             lambda x: 10 * np.exp(x) + 1000
 
         12. rate_func=exponential is not a valid parameter for the animate method. Instead, use rate_func=rush_into.
-        13. When adding text to a scene, ensure the text does not get cut off by the edge of the frame.
+
+        13. When adding text or mobjects to the edge of a scene using the .to_edge() method, use:
+
+            self.play(
+                self.camera.animate.set_height(10)
+            )
+
+            to zoom out to fit the text or mobjects.
+
+            to zoom back in to the original view, use:
+
+            self.play(
+                self.camera.animate.set_height(8)
+            )
+
         14. When creating a TangentLine(), ensure the alpha parameter is included.
         15. When creating Axes, ensure that you set the y range to accomodate the function you will be plotting:
 
@@ -102,9 +123,13 @@ class ManimGenerator:
 
             func = lambda x: x**2
             graph = axes.plot(func, color=BLUE)
+
+        17. Create axes when they are needed to plot stuff on. Do not create axes unless you are going to use them in the animation.
+        18. Before displaying new text, always fade out the previous text.
             
         """
 
+        # 16. Use the self.wait(1) method between each command to allow the viewer to see the result.
 
         # ALWAYS start your code with a self.play() call.
 
@@ -175,7 +200,7 @@ class ManimGenerator:
                         cur_chunk = chunks[-1]
                     else:
                         cur_chunk += chunk
-                    
+                preprocessed_code_file.write(cur_chunk)
                 self.commands.append(cur_chunk)
 
         # self.commands.append("\nself.wait(5)\n")

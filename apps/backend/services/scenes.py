@@ -39,43 +39,105 @@ class TestScene(Scene):
     def __init__(self, *args, **kwargs):
         config.frame_rate = 60
         config.renderer = "opengl"
+        config.pixel_width = math.floor(1920 / 4)
+        config.pixel_height = math.floor(1080 / 4)
         super().__init__(ffmpeg_process=None, debug_mode=True, *args, **kwargs)
 
     def construct(self):
         import numpy as np
 
+        title = Text("Understanding Riemann Sums").scale(0.8).to_edge(UP)
+        self.play(Write(title))
+        self.wait(1)
+
+        print('height is', self.camera.get_height())
+
+        self.play(
+            self.camera.animate.set_height(10)
+        )
+
+        explanation = Text("Riemann sums help us estimate\nthe area under a curve").scale(0.6).to_edge(LEFT)
+        self.play(Write(explanation))
+        self.wait(2)
+
         axes = Axes(
-            x_range=[0, 10, 1],
-            y_range=[0, 100, 10],
+            x_range=[0, 5],
+            y_range=[0, 25],
             axis_config={"include_tip": False},
         )
         self.play(Create(axes))
+        self.wait(1)
 
-        title = Text("Balance Sheet", font_size=36).to_edge(UP)
-        self.play(Write(title))
+        print('height is', self.camera.get_height())
 
-        assets = Text("Assets", color=GREEN).shift(LEFT * 3 + UP * 2)
-        liabilities = Text("Liabilities", color=RED).shift(RIGHT * 3 + UP * 2)
-        equity = Text("Equity", color=BLUE).shift(RIGHT * 3 + DOWN * 2)
+        self.play(
+            self.camera.animate.set_height(8)
+        )
 
-        self.play(Write(assets), Write(liabilities), Write(equity))
+        func = lambda x: x**2
+        graph = axes.plot(func, color=BLUE)
+        self.play(Create(graph))
+        self.wait(1)
 
-        asset_bar = Square(side_length=2, fill_opacity=0.8, color=GREEN).shift(LEFT * 3)
-        liability_bar = Square(side_length=2, fill_opacity=0.8, color=RED).shift(RIGHT * 3 + UP)
-        equity_bar = Square(side_length=2, fill_opacity=0.8, color=BLUE).shift(RIGHT * 3 + DOWN)
+        area_text = Text("We want to find this area").scale(0.4).next_to(axes, DOWN)
+        self.play(Write(area_text))
+        self.wait(1)
 
-        self.play(GrowFromEdge(asset_bar, DOWN), GrowFromEdge(liability_bar, DOWN), GrowFromEdge(equity_bar, DOWN))
+        rectangles = axes.get_riemann_rectangles(
+            graph,
+            x_range=[0, 5],
+            dx=1,
+            stroke_width=0.1,
+            stroke_color=WHITE,
+        )
+        self.play(Create(rectangles))
+        self.wait(1)
 
-        equation = MathTex("Assets = Liabilities + Equity").shift(DOWN * 3)
-        self.play(Write(equation))
+        sum_text = Text("We can approximate it with rectangles").scale(0.4).next_to(area_text, DOWN)
+        self.play(Write(sum_text))
+        self.wait(1)
 
-        arrow1 = Arrow(start=asset_bar.get_right(), end=liability_bar.get_left(), color=YELLOW)
-        arrow2 = Arrow(start=asset_bar.get_right(), end=equity_bar.get_left(), color=YELLOW)
+        self.play(FadeOut(area_text), FadeOut(sum_text))
+        self.wait(1)
 
-        self.play(Create(arrow1), Create(arrow2))
+        width_arrow = Arrow(start=axes.c2p(0, 0), end=axes.c2p(1, 0), color=RED)
+        width_label = Text("Width (dx)").scale(0.3).next_to(width_arrow, DOWN)
+        self.play(Create(width_arrow), Write(width_label))
+        self.wait(1)
 
-        balance_text = Text("Balance", color=YELLOW, font_size=24).next_to(arrow1, RIGHT)
-        self.play(Write(balance_text))
+        height_arrow = Arrow(start=axes.c2p(1, 0), end=axes.c2p(1, func(1)), color=GREEN)
+        height_label = Text("Height (f(x))").scale(0.3).next_to(height_arrow, RIGHT)
+        self.play(Create(height_arrow), Write(height_label))
+        self.wait(1)
 
+        formula = MathTex(r"\text{Area} \approx \sum_{i=1}^n f(x_i) \cdot \Delta x").scale(0.8).next_to(axes, DOWN)
+        self.play(Write(formula))
         self.wait(2)
 
+    
+        # print('formula.is_in_frame()', self.camera.is_in_frame(formula))
+        # print('formula is off screen', formula.is_off_screen)
+
+        self.play(FadeOut(width_arrow), FadeOut(width_label), FadeOut(height_arrow), FadeOut(height_label))
+        self.wait(1)
+
+        more_rectangles = axes.get_riemann_rectangles(
+            graph,
+            x_range=[0, 5],
+            dx=0.2,
+            stroke_width=0.1,
+            stroke_color=WHITE,
+        )
+        self.play(Transform(rectangles, more_rectangles))
+        self.wait(1)
+
+        better_approx = Text("More rectangles = Better approximation").scale(0.4).next_to(formula, DOWN)
+        self.play(Write(better_approx))
+        self.wait(2)
+
+        final_text = Text("As we use infinitely many rectangles,\nwe get the exact area!").scale(0.6).to_edge(DOWN)
+        self.play(Write(final_text))
+        self.wait(2)
+
+        self.play(FadeOut(*self.mobjects))
+        self.wait(1)

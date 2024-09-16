@@ -1,58 +1,68 @@
-# Constants and setup
-number_line = NumberLine(
-    x_range=[0, 120, 10],
-    length=10,
-    include_numbers=True,
-    label_direction=DOWN
+axes = Axes(
+    x_range=[0, 5],
+    y_range=[0, 25],
+    axis_config={"include_tip": False},
 )
-number_line.to_edge(UP, buff=1)
+self.play(Create(axes))
 
-# Create initial division problem
-dividend = Text("96").scale(1.5)
-divisor = Text("8").scale(1.5)
-division_symbol = Text("÷").scale(1.5)
+function = lambda x: x**2
+graph = axes.plot(function, color=BLUE)
+self.play(Create(graph))
 
-division_problem = VGroup(dividend, division_symbol, divisor).arrange(RIGHT, buff=0.5)
-division_problem.next_to(number_line, DOWN, buff=1)
+title = Text("Riemann Sums").scale(0.8).to_edge(UP)
+self.play(Write(title))
 
-self.play(Create(number_line), Write(division_problem))
+explanation = Text("Riemann sums help us estimate\nthe area under a curve").scale(0.6).next_to(title, DOWN)
+self.play(Write(explanation))
 
-# Step 1: Divide 9 by 8
-step1 = Text("Step 1: 9 ÷ 8 = 1 remainder 1").scale(0.8)
-step1.next_to(division_problem, DOWN, buff=0.5)
-self.play(Write(step1))
+self.wait(2)
 
-# Highlight 9 on number line
-highlight_9 = Rectangle(height=0.5, width=0.5, color=YELLOW)
-highlight_9.move_to(number_line.number_to_point(90))
-self.play(Create(highlight_9))
+self.play(FadeOut(explanation))
 
-# Show division process
-arrow1 = Arrow(start=number_line.number_to_point(90), end=number_line.number_to_point(10), color=RED)
-self.play(Create(arrow1))
+rectangles = VGroup()
+n_rectangles = 5
+dx = 5 / n_rectangles
 
-# Step 2: Bring down 6
-step2 = Text("Step 2: Bring down 6").scale(0.8)
-step2.next_to(step1, DOWN, buff=0.5)
-self.play(Write(step2))
+for i in range(n_rectangles):
+    x = i * dx
+    y = function(x)
+    rect = Rectangle(
+        width=dx,
+        height=y,
+        fill_opacity=0.5,
+        fill_color=RED,
+        stroke_color=WHITE
+    ).next_to(axes.c2p(x, 0), UP, buff=0)
+    rectangles.add(rect)
 
-# Highlight 16 on number line
-highlight_16 = Rectangle(height=0.5, width=0.5, color=YELLOW)
-highlight_16.move_to(number_line.number_to_point(16))
-self.play(FadeOut(highlight_9), Create(highlight_16))
+self.play(Create(rectangles))
 
-# Step 3: Divide 16 by 8
-step3 = Text("Step 3: 16 ÷ 8 = 2 remainder 0").scale(0.8)
-step3.next_to(step2, DOWN, buff=0.5)
-self.play(Write(step3))
+sum_text = Text("Sum of rectangle areas\napproximates area under curve").scale(0.6).next_to(title, DOWN)
+self.play(Write(sum_text))
 
-# Show final division process
-arrow2 = Arrow(start=number_line.number_to_point(16), end=number_line.number_to_point(0), color=RED)
-self.play(Create(arrow2))
+self.wait(2)
 
-# Display final result
-result = Text("Result: 96 ÷ 8 = 12").scale(1.2)
-result.next_to(step3, DOWN, buff=1)
-self.play(Write(result))
+self.play(FadeOut(sum_text))
 
-# Clean up
+more_rectangles = VGroup()
+n_more_rectangles = 20
+dx_more = 5 / n_more_rectangles
+
+for i in range(n_more_rectangles):
+    x = i * dx_more
+    y = function(x)
+    rect = Rectangle(
+        width=dx_more,
+        height=y,
+        fill_opacity=0.5,
+        fill_color=GREEN,
+        stroke_color=WHITE
+    ).next_to(axes.c2p(x, 0), UP, buff=0)
+    more_rectangles.add(rect)
+
+self.play(Transform(rectangles, more_rectangles))
+
+final_text = Text("More rectangles = Better approximation").scale(0.6).next_to(title, DOWN)
+self.play(Write(final_text))
+
+self.wait(2)

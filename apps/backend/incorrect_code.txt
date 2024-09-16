@@ -1,0 +1,84 @@
+axes = Axes(
+    x_range=[0, 5],
+    y_range=[0, 30],
+    axis_config={"include_tip": False},
+)
+self.play(Create(axes))
+
+function = lambda x: x**2
+curve = axes.plot(function, color=BLUE)
+self.play(Create(curve))
+
+area_text = Text("Area under the curve").scale(0.7).to_edge(UP)
+self.play(Write(area_text))
+self.play(
+    self.camera.animate.set_height(10)
+)
+
+rectangles = VGroup()
+n_rectangles = 5
+dx = 5 / n_rectangles
+
+for i in range(n_rectangles):
+    x = i * dx
+    rect = Rectangle(
+        width=dx,
+        height=function(x),
+        fill_opacity=0.5,
+        fill_color=RED,
+        stroke_width=1
+    ).next_to(axes.c2p(x, 0), UP, buff=0)
+    rectangles.add(rect)
+
+self.play(Create(rectangles))
+
+riemann_text = Text("Riemann sum").scale(0.7).next_to(area_text, DOWN)
+self.play(Write(riemann_text))
+
+self.play(FadeOut(area_text), FadeOut(riemann_text))
+
+explanation = Text("Riemann sums approximate the area").scale(0.6).to_edge(UP)
+self.play(Write(explanation))
+
+self.play(FadeOut(explanation))
+
+more_rectangles = VGroup()
+n_more_rectangles = 20
+dx_more = 5 / n_more_rectangles
+
+for i in range(n_more_rectangles):
+    x = i * dx_more
+    rect = Rectangle(
+        width=dx_more,
+        height=function(x),
+        fill_opacity=0.5,
+        fill_color=GREEN,
+        stroke_width=0.5
+    ).next_to(axes.c2p(x, 0), UP, buff=0)
+    more_rectangles.add(rect)
+
+self.play(Transform(rectangles, more_rectangles))
+
+better_approximation = Text("More rectangles = Better approximation").scale(0.6).to_edge(UP)
+self.play(Write(better_approximation))
+
+self.play(FadeOut(better_approximation))
+
+limit_text = Text("As number of rectangles approaches infinity...").scale(0.6).to_edge(UP)
+self.play(Write(limit_text))
+
+self.play(FadeOut(limit_text))
+
+exact_area = Text("...we get the exact area!").scale(0.6).to_edge(UP)
+self.play(Write(exact_area))
+
+self.play(FadeOut(exact_area), FadeOut(rectangles), FadeOut(curve), FadeOut(axes))
+
+final_text = Text("This is the idea behind integration!").scale(0.7)
+self.play(Write(final_text))
+
+self.play(FadeOut(final_text))
+
+self.play(
+    self.camera.animate.set_height(8)
+)
