@@ -32,7 +32,7 @@ class ManimGenerator:
         self.running = False
         self.start_time = time.time()
         # self.output_queue = config_params['output_queue']
-        self.system_prompt = """You are an AI teacher. 
+        self.system_prompt = f"""You are an AI teacher. 
     
         Generate Manim code that generates a 10-15 second animation that directly illustrates the user prompt.
         Assume you're teaching a five year old. Be very slow and simple.
@@ -126,6 +126,7 @@ class ManimGenerator:
 
         17. Create axes when they are needed to plot stuff on. Do not create axes unless you are going to use them in the animation.
         18. Before displaying new text, always fade out the previous text.
+        19. NEVER set the background color using self.camera.set_background_color. Assume the background color is {self.background_color}.
             
         """
 
@@ -150,7 +151,7 @@ class ManimGenerator:
         scene.render()
         print('INFO: EVERYTHING completed at', time.time() - self.start_time)
 
-    def generate(self, text, start_time):
+    def generate(self, text, start_time, output_dir):
         first_byte_received = False
         first_command_ready = False
         print("INFO: making anthropic call", flush=True)
@@ -162,7 +163,8 @@ class ManimGenerator:
                 {"role": "user", "content": text}
             ],
         ) as stream:
-            with open("log.txt", "w") as log_file, open("preprocessed_code.txt", "w") as preprocessed_code_file:
+            os.makedirs(output_dir, exist_ok=True)
+            with open(os.path.join(output_dir, "log.txt"), "w") as log_file, open(os.path.join(output_dir, "preprocessed_code.txt"), "w") as preprocessed_code_file:
                 cur_chunk = ""
                 for chunk in stream.text_stream:
                     log_file.write(chunk)
@@ -306,7 +308,7 @@ class ManimGenerator:
             self.run_scene_thread = threading.Thread(target=self.run_scene)
             self.run_scene_thread.start()
 
-            self.generate_thread = threading.Thread(target=self.generate, args=(text, self.start_time))
+            self.generate_thread = threading.Thread(target=self.generate, args=(text, self.start_time, output_dir))
             self.generate_thread.start()
 
             self.check_for_playlist_thread = threading.Thread(target=self.check_for_playlist, args=(output_dir, self.ffmpeg_process))
