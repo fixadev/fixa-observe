@@ -49,7 +49,7 @@ jupyter_client==8.6.2
 jupyter_core==5.7.2
 jupyterlab_pygments==0.3.0
 lazy-object-proxy==1.10.0
-manim @ git+https://github.com/pixa-dev/pixanim.git@f1da90210db5b01363460929da3d44164d97ec3a
+manim @ git+https://github.com/pixa-dev/pixanim.git
 ManimPango==0.5.0
 mapbox_earcut==1.0.2
 markdown-it-py==3.0.0
