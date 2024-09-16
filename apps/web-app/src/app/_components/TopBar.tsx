@@ -47,10 +47,13 @@ export default function TopBar() {
 
       {/* desktop menu */}
       <div className="hidden items-center gap-1 sm:flex sm:gap-4">
-        <a href="mailto:contact@pixa.dev">
-          <Button variant="ghost">contact us</Button>
+        <a href="https://forms.gle/vu921rkvr5Xpkraz8" target="_blank">
+          <Button variant="ghost">give feedback</Button>
         </a>
         <RequestApiAccessBtn />
+        <a href="mailto:contact@pixa.dev" target="_blank">
+          <Button variant="ghost">contact us</Button>
+        </a>
         <SignedIn>
           <UserButton />
         </SignedIn>
