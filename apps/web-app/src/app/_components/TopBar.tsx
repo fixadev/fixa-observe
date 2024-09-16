@@ -1,7 +1,6 @@
 import Logo from "~/components/Logo";
 import { Button } from "~/components/ui/button";
 import { RequestApiAccessBtn } from "./RequestApiAccessBtn";
-import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/nextjs";
 import {
   Drawer,
   DrawerContent,
@@ -26,10 +25,17 @@ export default function TopBar() {
           </DrawerHeader>
           <div className="mb-4 flex flex-col gap-2">
             <Button variant="ghost">
-              <a href="mailto:contact@pixa.dev">contact us</a>
+              <a href="https://forms.gle/vu921rkvr5Xpkraz8" target="_blank">
+                give feedback
+              </a>
             </Button>
             <RequestApiAccessBtn />
-            <SignedIn>
+            <Button variant="ghost">
+              <a href="mailto:contact@pixa.dev" target="_blank">
+                contact us
+              </a>
+            </Button>
+            {/* <SignedIn>
               <UserButton />
             </SignedIn>
             <SignedOut>
@@ -40,7 +46,7 @@ export default function TopBar() {
               >
                 <Button variant="ghost">sign in</Button>
               </SignInButton>
-            </SignedOut>
+            </SignedOut> */}
           </div>
         </DrawerContent>
       </Drawer>
@@ -54,7 +60,7 @@ export default function TopBar() {
         <a href="mailto:contact@pixa.dev" target="_blank">
           <Button variant="ghost">contact us</Button>
         </a>
-        <SignedIn>
+        {/* <SignedIn>
           <UserButton />
         </SignedIn>
         <SignedOut>
@@ -65,7 +71,7 @@ export default function TopBar() {
           >
             <Button variant="ghost">sign in</Button>
           </SignInButton>
-        </SignedOut>
+        </SignedOut> */}
       </div>
     </div>
   );

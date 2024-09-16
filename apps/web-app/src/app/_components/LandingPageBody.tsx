@@ -6,8 +6,6 @@ import { ibmPlexMono } from "~/app/fonts";
 import { usePostHog } from "posthog-js/react";
 import { ArrowRightCircleIcon } from "@heroicons/react/24/solid";
 import { VideoPlayer } from "@/components/VideoPlayer";
-import { useAuth, useClerk } from "@clerk/nextjs";
-import { ANONYMOUS_PROMPT_SUBMISSION_LIMIT } from "~/lib/constants";
 import BookCallDialog from "./BookCallDialog";
 import { cn } from "~/lib/utils";
 import { AnimatePresence } from "framer-motion";
@@ -19,8 +17,8 @@ export default function LandingPageBody() {
   const [state, setState] = useState<"initial" | "chat">("initial");
   const [chatHistory, setChatHistory] = useState<string[]>([]);
   const [hlsPlaylistUrl, setHlsPlaylistUrl] = useState<string | null>(null);
-  const { openSignIn } = useClerk();
-  const { isSignedIn } = useAuth();
+  // const { openSignIn } = useClerk();
+  // const { isSignedIn } = useAuth();
 
   const posthog = usePostHog();
   const [text, setText] = useState("");
@@ -31,21 +29,21 @@ export default function LandingPageBody() {
     api.email.sendServerIsDownEmail.useMutation();
   const { mutateAsync: serverBackUp } = api.email.serverBackUp.useMutation();
 
-  const { data: user, refetch: refetchUser } = api.user.getProfile.useQuery();
-  const { mutateAsync: generate } = api.user.generate.useMutation({
-    onSuccess: () => {
-      void refetchUser();
-    },
-  });
-  const [generationsLeft, setGenerationsLeft] = useState(0);
-  useEffect(() => {
-    void refetchUser();
-  }, [isSignedIn, refetchUser]);
-  useEffect(() => {
-    if (user) {
-      setGenerationsLeft(user.generationsLeft);
-    }
-  }, [user]);
+  // const { data: user, refetch: refetchUser } = api.user.getProfile.useQuery();
+  // const { mutateAsync: generate } = api.user.generate.useMutation({
+  //   onSuccess: () => {
+  //     void refetchUser();
+  //   },
+  // });
+  // const [generationsLeft, setGenerationsLeft] = useState(0);
+  // useEffect(() => {
+  //   void refetchUser();
+  // }, [isSignedIn, refetchUser]);
+  // useEffect(() => {
+  //   if (user) {
+  //     setGenerationsLeft(user.generationsLeft);
+  //   }
+  // }, [user]);
 
   // Function to scroll to bottom of chat history
   const scrollToBottom = () => {
@@ -117,35 +115,38 @@ export default function LandingPageBody() {
         return;
       }
 
-      // If not signed in, check if the user has submitted a prompt before
-      if (!isSignedIn) {
-        const promptsSubmitted = localStorage.getItem("promptsSubmitted");
-        // If the user has not submitted a prompt before, allow them to submit 1 prompt
-        // Otherwise, open the sign in modal
-        if (!promptsSubmitted) {
-          localStorage.setItem("promptsSubmitted", "1");
-        } else {
-          const promptsSubmittedInt = parseInt(promptsSubmitted);
-          if (promptsSubmittedInt >= ANONYMOUS_PROMPT_SUBMISSION_LIMIT) {
-            openSignIn({
-              redirectUrl: "/",
-              forceRedirectUrl: "/",
-              signUpForceRedirectUrl: "/",
-            });
-            // setBookCallDialogOpen(true);
-            return;
-          }
-          localStorage.setItem(
-            "promptsSubmitted",
-            (promptsSubmittedInt + 1).toString(),
-          );
-        }
-      } else if (isSignedIn && user && user.generationsLeft <= 0) {
-        setTimeout(() => {
-          setBookCallDialogOpen(true);
-        });
-        return;
-      }
+      // [TEMPORARILY DISABLED]
+      // if (false) {
+      //   // If not signed in, check if the user has submitted a prompt before
+      //   if (!isSignedIn) {
+      //     const promptsSubmitted = localStorage.getItem("promptsSubmitted");
+      //     // If the user has not submitted a prompt before, allow them to submit 1 prompt
+      //     // Otherwise, open the sign in modal
+      //     if (!promptsSubmitted) {
+      //       localStorage.setItem("promptsSubmitted", "1");
+      //     } else {
+      //       const promptsSubmittedInt = parseInt(promptsSubmitted);
+      //       if (promptsSubmittedInt >= ANONYMOUS_PROMPT_SUBMISSION_LIMIT) {
+      //         openSignIn({
+      //           redirectUrl: "/",
+      //           forceRedirectUrl: "/",
+      //           signUpForceRedirectUrl: "/",
+      //         });
+      //         // setBookCallDialogOpen(true);
+      //         return;
+      //       }
+      //       localStorage.setItem(
+      //         "promptsSubmitted",
+      //         (promptsSubmittedInt + 1).toString(),
+      //       );
+      //     }
+      //   } else if (isSignedIn && user && user.generationsLeft <= 0) {
+      //     setTimeout(() => {
+      //       setBookCallDialogOpen(true);
+      //     });
+      //     return;
+      //   }
+      // }
 
       posthog.capture("Landing page prompt submitted", {
         prompt: text,
@@ -168,26 +169,15 @@ export default function LandingPageBody() {
       }, 1000);
 
       // Decrease generations left
-      if (isSignedIn && user) {
-        setGenerationsLeft((old) => old - 1);
-        void generate();
-      }
+      // if (isSignedIn && user) {
+      //   setGenerationsLeft((old) => old - 1);
+      //   void generate();
+      // }
 
       // call API
       await callGenerate();
     }
-  }, [
-    text,
-    isSignedIn,
-    user,
-    posthog,
-    chatHistory,
-    state,
-    callGenerate,
-    openSignIn,
-    generate,
-    isBackendDown,
-  ]);
+  }, [text, posthog, chatHistory, state, callGenerate, isBackendDown]);
 
   const [bookCallDialogOpen, setBookCallDialogOpen] = useState(false);
   const [showVideo, setShowVideo] = useState(false);
@@ -259,11 +249,24 @@ export default function LandingPageBody() {
               onChange={setText}
               onSubmit={handleSubmit}
             />
-            {isSignedIn && (
+            <div className="mb-6 text-muted-foreground">
+              generated something cool? submit it us at{" "}
+              <a
+                className="font-medium underline"
+                href="mailto:contact@pixa.dev?subject=super%20cool%20pixa%20video&body=here's%20the%20super%20cool%20video%20i%20generated%20with%20pixa:%0A%0A[please%20attach%20a%20screen%20recording]"
+                target="_blank"
+              >
+                contact@pixa.dev
+              </a>
+              . person with the coolest video gets{" "}
+              <span className="font-medium">$100</span> (we&apos;re not
+              kidding).
+            </div>
+            {/* {isSignedIn && (
               <div className="text-muted-foreground">
                 you have {generationsLeft} animation generations left.
               </div>
-            )}
+            )} */}
           </div>
         )}
       </div>
