@@ -8,3 +8,5 @@ conda create -n prod-env python=3.11
 conda activate prod-env
 conda install -c conda-forge manim
 pip install -r requirements.txt
+
+export LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libffi.so.7

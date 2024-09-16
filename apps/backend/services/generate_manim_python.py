@@ -22,6 +22,7 @@ class ManimGenerator:
         self.frame_width = config_params['width']
         self.frame_height = config_params['height']
         self.renderer = config_params['renderer']
+        self.use_hardcoded_scene = config_params['use_hardcoded_scene'] if 'use_hardcoded_scene' in config_params else False
         self.background_color = 'BLACK' if config_params['theme'] == 'dark' else 'WHITE'
 
         self.black_frame = np.zeros((self.frame_height, self.frame_width, 4), dtype=np.uint8)
@@ -129,7 +130,9 @@ class ManimGenerator:
 
         17. Create axes when they are needed to plot stuff on. Do not create axes unless you are going to use them in the animation.
         18. Before displaying new text, always fade out the previous text.
-        19. NEVER set the background color using self.camera.set_background_color. Assume the background color is %s""" % self.background_color
+        19. NEVER set the background color using self.camera.set_background_color. Assume the background color is %s
+        20. NEVER use Heart() this shape doesn't exist
+        """ % self.background_color
 
 
         # 16. Use the self.wait(1) method between each command to allow the viewer to see the result.
@@ -151,65 +154,73 @@ class ManimGenerator:
         scene = BlankScene(self.commands, self.ffmpeg_process, self.renderer, dimensions=(self.frame_width, self.frame_height), frame_rate=self.frame_rate, start_time=self.start_time, debug_mode=False, background_color=self.background_color)
         print('INFO: BlankScene instantiated at', time.time() - self.start_time)
         scene.render()
-        print('INFO: EVERYTHING completed at', time.time() - self.start_time)
+        print('INFO: ###################################################### EVERYTHING completed at', time.time() - self.start_time)
 
     def generate(self, text, start_time, output_dir):
+        if not self.use_hardcoded_scene:
+            print("INFO: making anthropic call", flush=True)
+            with anthropic_client.messages.stream(
+                model="claude-3-5-sonnet-20240620",
+                max_tokens=4000,
+                system=self.system_prompt,
+                messages=[
+                    {"role": "user", "content": text}
+                ],
+            ) as stream:
+                self.parse_commands(stream.text_stream, start_time, output_dir)
+                self.commands.append('')
+        else:
+            with open('./services/hardcoded_scene.txt', 'r') as file:
+                self.parse_commands(file.readlines(), start_time, output_dir)
+
+            time.sleep(10)
+            self.commands.append('')
+
+    def parse_commands(self, stream, start_time, output_dir):
         first_byte_received = False
         first_command_ready = False
-        print("INFO: making anthropic call", flush=True)
-        with anthropic_client.messages.stream(
-            model="claude-3-5-sonnet-20240620",
-            max_tokens=4000,
-            system=self.system_prompt,
-            messages=[
-                {"role": "user", "content": text}
-            ],
-        ) as stream:
-            os.makedirs(output_dir, exist_ok=True)
-            with open(os.path.join(output_dir, "log.txt"), "w") as log_file, open(os.path.join(output_dir, "preprocessed_code.txt"), "w") as preprocessed_code_file:
-                cur_chunk = ""
-                for chunk in stream.text_stream:
-                    log_file.write(chunk)
-                    if not first_byte_received:
-                        first_byte_received = True
-                        end_time = time.time()
-                        print(f"INFO: first chunk received from anthropic at {end_time - start_time} seconds", flush=True)
 
-                    if '\n' in chunk:
-                        chunks = chunk.split('\n')
-                        cur_chunk += '\n'.join(chunks[:-1]) + '\n'
-                        if has_unclosed_parenthesis(cur_chunk) or has_unclosed_bracket(cur_chunk) or has_indented_statement(cur_chunk):
-                            cur_chunk += chunks[-1]
+        os.makedirs(output_dir, exist_ok=True)
+        with open(os.path.join(output_dir, "log.txt"), "w") as log_file, open(os.path.join(output_dir, "preprocessed_code.txt"), "w") as preprocessed_code_file:
+            cur_chunk = ""
+            for chunk in stream:
+                log_file.write(chunk)
+                if not first_byte_received:
+                    first_byte_received = True
+                    end_time = time.time()
+                    print(f"INFO: first chunk received from anthropic at {end_time - start_time} seconds", flush=True)
 
-                            # Determine whether to add indented statement
-                            if has_indented_statement(cur_chunk):
-                                extracted = extract_indented_statement(cur_chunk)
-                                if len(extracted) > 2:
-                                    # Add the all the text execept for last two elements because 
-                                    # regex selector selects first character of the last line,
-                                    # i.e. "self.play()" becomes ["s", "elf.play()"]
-                                    preprocessed_code_file.write(''.join(extracted[:-2]))
-                                    self.commands.append(''.join(extracted[:-2]))
-                                    cur_chunk = ''.join(extracted[-2:])
+                if '\n' in chunk:
+                    chunks = chunk.split('\n')
+                    cur_chunk += '\n'.join(chunks[:-1]) + '\n'
+                    if has_unclosed_parenthesis(cur_chunk) or has_unclosed_bracket(cur_chunk) or has_indented_statement(cur_chunk):
+                        cur_chunk += chunks[-1]
 
-                            continue
-                        # cur_chunk = replace_list_comprehensions(cur_chunk)
-                        cur_chunk = replace_invalid_colors(cur_chunk)
-                        cur_chunk = replace_svg_mobjects(cur_chunk)
-                        self.commands.append(cur_chunk)
-                        preprocessed_code_file.write(cur_chunk)
-                        if not first_command_ready:
-                            first_command_ready = True
-                            print(f"INFO: first command ready at {time.time() - start_time} seconds", flush=True)
-                        cur_chunk = chunks[-1]
-                    else:
-                        cur_chunk += chunk
-                preprocessed_code_file.write(cur_chunk)
-                self.commands.append(cur_chunk)
+                        # Determine whether to add indented statement
+                        if has_indented_statement(cur_chunk):
+                            extracted = extract_indented_statement(cur_chunk)
+                            if len(extracted) > 2:
+                                # Add the all the text execept for last two elements because 
+                                # regex selector selects first character of the last line,
+                                # i.e. "self.play()" becomes ["s", "elf.play()"]
+                                preprocessed_code_file.write(''.join(extracted[:-2]))
+                                self.commands.append(''.join(extracted[:-2]))
+                                cur_chunk = ''.join(extracted[-2:])
 
-        # self.commands.append("\nself.wait(5)\n")
-        # time.sleep(5)
-        self.commands.append("")
+                        continue
+                    # cur_chunk = replace_list_comprehensions(cur_chunk)
+                    cur_chunk = replace_invalid_colors(cur_chunk)
+                    cur_chunk = replace_svg_mobjects(cur_chunk)
+                    self.commands.append(cur_chunk)
+                    preprocessed_code_file.write(cur_chunk)
+                    if not first_command_ready:
+                        first_command_ready = True
+                        print(f"INFO: first command ready at {time.time() - start_time} seconds", flush=True)
+                    cur_chunk = chunks[-1]
+                else:
+                    cur_chunk += chunk
+            preprocessed_code_file.write(cur_chunk)
+            self.commands.append(cur_chunk)
 
     def convert_to_hls(self, output_dir):
         output_dir_str = str(output_dir)
@@ -352,7 +363,7 @@ class ManimGenerator:
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser("generate_manim_python")
-    parser.add_argument('--config_params', type=str, required=False, default='{"renderer": "opengl", "fps": 30, "width": 960, "height": 540, "theme": "dark"}')
+    parser.add_argument('--config_params', type=str, required=False, default='{"renderer": "cairo", "fps": 30, "width": 960, "height": 540, "theme": "dark"}')
     parser.add_argument('--input_params', type=str, required=False, default='{"prompt": "how are babies made?", "output_path": "public/hls/test"}')
     args = parser.parse_args()
 
@@ -361,3 +372,20 @@ if __name__ == "__main__":
 
     generator = ManimGenerator(config_params)
     generator.run(input_params)
+
+    # def run_generator(thread_id):
+    #     print(f"Starting thread {thread_id}")
+    #     generator = ManimGenerator(config_params)
+    #     generator.run(input_params)
+    #     print(f"Thread {thread_id} completed")
+
+    # threads = []
+    # for i in range(1):
+    #     thread = threading.Thread(target=run_generator, args=(i,))
+    #     threads.append(thread)
+    #     thread.start()
+
+    # for thread in threads:
+    #     thread.join()
+
+    # print("All threads completed")
