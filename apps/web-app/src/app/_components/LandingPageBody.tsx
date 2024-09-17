@@ -13,6 +13,7 @@ import ExpandTransition from "~/components/ExpandTransition";
 import { api } from "~/trpc/react";
 import axios from "axios";
 import { type ChatMessage } from "~/lib/types";
+import Spinner from "~/components/Spinner";
 
 export default function LandingPageBody() {
   const [state, setState] = useState<"initial" | "chat">("initial");
@@ -73,6 +74,31 @@ export default function LandingPageBody() {
     };
     void checkIsBackendDown();
   }, [sendServerIsDownEmail, serverBackUp]);
+
+  const [isServerFull, setIsServerFull] = useState(false);
+  const checkIsServerFull = useCallback(async () => {
+    try {
+      const res: { data: { status: "OK" | "FULL" } } = await axios.get(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/status`,
+      );
+      if (res.data.status === "FULL") {
+        setIsServerFull(true);
+
+        // check again in 1 second
+        setTimeout(() => {
+          void checkIsServerFull();
+        }, 1000);
+
+        return true;
+      } else {
+        setIsServerFull(false);
+        return false;
+      }
+    } catch (error) {
+      console.error("Error checking server status:", error);
+      return false;
+    }
+  }, []);
 
   const callGenerate = useCallback(async () => {
     const endpoint = `${process.env.NEXT_PUBLIC_BACKEND_URL}/generate`;
@@ -166,6 +192,11 @@ export default function LandingPageBody() {
       //   void generate();
       // }
 
+      const isFull = await checkIsServerFull();
+      if (isFull) {
+        return;
+      }
+
       // call API
       const url = await callGenerate();
       if (url) {
@@ -175,7 +206,7 @@ export default function LandingPageBody() {
         scrollToBottom();
       }, 300);
     }
-  }, [text, posthog, state, callGenerate, isBackendDown]);
+  }, [text, isBackendDown, posthog, state, checkIsServerFull, callGenerate]);
 
   const [bookCallDialogOpen, setBookCallDialogOpen] = useState(false);
 
@@ -238,23 +269,34 @@ export default function LandingPageBody() {
             <LandingPageTextField
               className="mb-2"
               autoFocus
+              disabled={isServerFull}
               placeholder="ask pixa anything"
               text={text}
               onChange={setText}
               onSubmit={handleSubmit}
             />
-            <div className="mb-6 rounded-lg bg-muted p-4 text-muted-foreground">
-              generated something cool? submit it us at{" "}
-              <a
-                className="font-medium underline"
-                href="mailto:contact@pixa.dev?subject=super%20cool%20pixa%20video&body=here's%20the%20super%20cool%20video%20i%20generated%20with%20pixa:%0A%0A[please%20attach%20a%20screen%20recording]"
-                target="_blank"
-              >
-                contact@pixa.dev
-              </a>
-              . person with the coolest video gets{" "}
-              <span className="font-medium">$100</span> (we&apos;re not
-              kidding).
+            <div className="mb-6 rounded-lg text-muted-foreground">
+              {isServerFull ? (
+                <div className="flex items-center gap-3">
+                  <Spinner />
+                  too many people using pixa rn :0. textbox will be enabled once
+                  there is capacity !
+                </div>
+              ) : (
+                <>
+                  generated something cool? submit it us at{" "}
+                  <a
+                    className="font-medium underline"
+                    href="mailto:contact@pixa.dev?subject=super%20cool%20pixa%20video&body=here's%20the%20super%20cool%20video%20i%20generated%20with%20pixa:%0A%0A[please%20attach%20a%20screen%20recording]"
+                    target="_blank"
+                  >
+                    contact@pixa.dev
+                  </a>
+                  . person with the coolest video gets{" "}
+                  <span className="font-medium">$100</span> (we&apos;re not
+                  kidding).
+                </>
+              )}
             </div>
             {/* {isSignedIn && (
               <div className="text-muted-foreground">
@@ -301,6 +343,7 @@ const LandingPageTextField = ({
   onSubmit,
 
   autoFocus,
+  disabled,
   className,
   placeholder,
 }: {
@@ -309,6 +352,7 @@ const LandingPageTextField = ({
   onSubmit: () => void;
 
   autoFocus?: boolean;
+  disabled?: boolean;
   className?: string;
   placeholder?: string;
 }) => {
@@ -333,6 +377,7 @@ const LandingPageTextField = ({
         )}
         <Input
           ref={inputRef}
+          disabled={disabled}
           placeholder={placeholder}
           value={text}
           onChange={(e) => onChange(e.target.value)}
@@ -346,10 +391,11 @@ const LandingPageTextField = ({
           }}
         />
         <button
-          className="absolute right-2 top-1/2 size-10 -translate-y-1/2"
+          className="absolute right-2 top-1/2 size-10 -translate-y-1/2 text-neutral-400 enabled:hover:cursor-pointer enabled:hover:text-neutral-200 disabled:cursor-not-allowed disabled:opacity-50"
+          disabled={disabled}
           onClick={handleSubmit}
         >
-          <ArrowRightCircleIcon className="text-neutral-400 hover:cursor-pointer hover:text-neutral-200" />
+          <ArrowRightCircleIcon />
         </button>
       </div>
     </div>
