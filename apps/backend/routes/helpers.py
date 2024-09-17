@@ -1,5 +1,4 @@
 import uuid
-import queue
 import config
 
 def validate_and_organize_params(data) -> tuple[dict, dict]:
