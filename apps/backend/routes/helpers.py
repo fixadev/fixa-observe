@@ -1,5 +1,6 @@
 import uuid
 import queue
+import config
 
 def validate_and_organize_params(data) -> tuple[dict, dict]:
     prompt = data.get('prompt')
@@ -32,7 +33,7 @@ def validate_and_organize_params(data) -> tuple[dict, dict]:
     if height < 1 or height > 1080:
         raise ValueError("Height must be greater than 0 and less than 1080")
 
-    renderer = data.get('renderer', 'opengl')
+    renderer = data.get('renderer', config.DEFAULT_RENDERER)
     if not isinstance(renderer, str):
         raise ValueError("Renderer must be a string")
     if not (renderer == 'opengl' or renderer == 'cairo'):
