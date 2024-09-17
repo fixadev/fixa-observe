@@ -240,8 +240,14 @@ class ManimGenerator:
             '-r', str(self.frame_rate),
             '-s', f'{self.frame_width}x{self.frame_height}',
             '-i', '-',
+            '-pix_fmt', 'yuv420p',
             # '-vf', 'vflip',
             '-c:v', 'libx264',
+
+            '-profile:v', 'baseline',
+            '-level:v', '3.0',
+            '-threads', '0',
+
             '-preset', 'ultrafast',
             '-tune', 'zerolatency',
             '-bufsize', '1M',
@@ -263,21 +269,16 @@ class ManimGenerator:
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE
         )
-        return ffmpeg_process
 
-
-    # def check_for_playlist(self, output_dir, ffmpeg_process):
-        
         # FOR DEBUGGING
         # def read_stream(stream):
         #     for line in iter(stream.readline, b''):
         #         line = line.decode().strip()
-        #         if os.path.exists(os.path.join(output_dir, "playlist.m3u8")):
-        #             print(f'INFO: HLS Playlist ready', flush=True)
-        #         else:
-        #             print(f"FFmpeg {stream.name}: {line}", flush=True)
+        #         print(f"FFmpeg {stream.name}: {line}", flush=True)
         # threading.Thread(target=read_stream, args=(ffmpeg_process.stderr,)).start()
         # threading.Thread(target=read_stream, args=(ffmpeg_process.stdout,)).start()
+
+        return ffmpeg_process
 
     def send_blank_frames(self):
         num_blank_frames = int(self.frame_rate * 1) + 1
