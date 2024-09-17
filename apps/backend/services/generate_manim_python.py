@@ -255,6 +255,7 @@ class ManimGenerator:
             '-hls_segment_type', 'mpegts',
             '-hls_segment_filename', os.path.join(output_dir_str, 'stream%03d.ts'),
             os.path.join(output_dir_str, 'playlist.m3u8'),
+            '-pix_fmt', 'yuv420p',
             '-f', 'mp4',
             os.path.join(output_dir_str, 'video.mp4')
         ]
