@@ -63,24 +63,15 @@ async def generate(request: Request, background_tasks: BackgroundTasks):
 
         playlist_url = f"{BASE_URL}/{generation_params['output_path']}/playlist.m3u8"
         return {"hls_playlist_url": playlist_url}
-
-
-        # generator = ManimGenerator(config_params)
-        # generator_thread = threading.Thread(target=generator.run, args=(generation_params,))
-        # generator_thread.start()
-
-        # background_tasks.add_task(background_task, generator_thread)
-        
-        # output_queue = config_params['output_queue']
-        # while generator_thread.is_alive():
-        #     try:
-        #         hls_playlist_url = output_queue.get(timeout=0.05)  
-        #         return {"hls_playlist_url": hls_playlist_url}
-        #     except queue.Empty:
-        #         pass
-
-        # return {"error": "Error generating video"}
     
     except Exception as e:
         logger.error(f"Error generating video: {e}")
         return {"error": str(e)}
+    
+@router.get("/status")
+async def get_status(request: Request, background_tasks: BackgroundTasks):
+    if len(background_tasks.tasks) < 30:
+        return {"status": "OK"}
+    else:
+        return {"status": "FULL"}
+   
