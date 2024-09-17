@@ -33,7 +33,6 @@ export function VideoPlayer({
       hls.on(Hls.Events.MANIFEST_PARSED, function () {
         void videoRef.current!.play();
         videoRef.current!.addEventListener("ended", () => {
-          console.log("video ended");
           const videoUrl = hlsPlaylistUrl?.replace(
             "playlist.m3u8",
             "video.mp4",
@@ -67,7 +66,6 @@ export function VideoPlayer({
       videoRef.current.src = hlsPlaylistUrl;
       void videoRef.current.play();
       videoRef.current.addEventListener("ended", () => {
-        console.log("video ended");
         const videoUrl = hlsPlaylistUrl?.replace("playlist.m3u8", "video.mp4");
         setDownloadLink(videoUrl);
         scrollToBottom();
