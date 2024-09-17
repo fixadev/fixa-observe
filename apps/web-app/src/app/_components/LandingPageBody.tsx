@@ -47,14 +47,14 @@ export default function LandingPageBody() {
   // }, [user]);
 
   // Function to scroll to bottom of chat history
-  const scrollToBottom = () => {
+  const scrollToBottom = useCallback(() => {
     if (chatHistoryRef.current) {
       chatHistoryRef.current.scrollTo({
         top: chatHistoryRef.current.scrollHeight,
         behavior: "smooth",
       });
     }
-  };
+  }, []);
 
   const [isBackendDown, setIsBackendDown] = useState(false);
   useEffect(() => {
@@ -259,6 +259,7 @@ export default function LandingPageBody() {
                         <VideoPlayer
                           className="mb-4 w-full"
                           hls_playlist_url={item.videoUrl}
+                          scrollToBottom={scrollToBottom}
                         />
                       </ExpandTransition>
                     </AnimatePresence>

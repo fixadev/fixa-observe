@@ -254,7 +254,9 @@ class ManimGenerator:
             # '-hls_playlist_type', 'event', 
             '-hls_segment_type', 'mpegts',
             '-hls_segment_filename', os.path.join(output_dir_str, 'stream%03d.ts'),
-            os.path.join(output_dir_str, 'playlist.m3u8')
+            os.path.join(output_dir_str, 'playlist.m3u8'),
+            '-f', 'mp4',
+            os.path.join(output_dir_str, 'video.mp4')
         ]
         increment_subprocess_count()
         ffmpeg_process = subprocess.Popen(
