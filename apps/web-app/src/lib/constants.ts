@@ -1,2 +1,2 @@
 export const ANONYMOUS_PROMPT_SUBMISSION_LIMIT = 3;
-export const HLS_TIMEOUT = 5000;
+export const HLS_TIMEOUT = 10000;
