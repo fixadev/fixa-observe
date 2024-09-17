@@ -1,9 +1,10 @@
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Hls from "hls.js";
-import { isIOS } from "../lib/platform";
+import { isIOS, isSafari } from "../lib/platform";
 import { HLS_TIMEOUT } from "~/lib/constants";
+
 export function VideoPlayer({
-  hls_playlist_url,
+  hls_playlist_url: hlsPlaylistUrl,
   className,
 }: {
   hls_playlist_url: string | null;
@@ -11,56 +12,34 @@ export function VideoPlayer({
 }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const startTime = useRef(new Date().getTime());
+  const [isLoading, setIsLoading] = useState(false);
 
-  useEffect(() => {
-    // console.log("[VideoPlayer] useEffect triggered");
-    // console.log("[VideoPlayer] hls_playlist_url:", hls_playlist_url);
-    if (!hls_playlist_url) {
-      // console.log(
-      //   "[VideoPlayer] No hls_playlist_url provided, exiting useEffect",
-      // );
+  const loadVideo = useCallback(() => {
+    if (!hlsPlaylistUrl) {
       return;
     }
 
-    startTime.current = new Date().getTime();
-
     if (Hls.isSupported()) {
       const hls = new Hls();
-      // hls.on(Hls.Events.MEDIA_ATTACHED, function () {
-      //   console.log("video and hls.js are now bound together !");
-      // });
+      hls.loadSource(hlsPlaylistUrl);
+      hls.attachMedia(videoRef.current!);
+
       hls.on(Hls.Events.MANIFEST_PARSED, function () {
-        // console.log(
-        //   "manifest loaded, found " + data.levels.length + " quality level",
-        // );
         void videoRef.current!.play();
       });
       hls.on(Hls.Events.ERROR, function (event, data) {
         if (data.fatal) {
           switch (data.type) {
             case Hls.ErrorTypes.MEDIA_ERROR:
-              // console.log(
-              //   "fatal media error encountered, try to recover",
-              //   data,
-              // );
+              console.log(
+                "fatal media error encountered, try to recover",
+                data,
+              );
               hls.recoverMediaError();
               break;
             case Hls.ErrorTypes.NETWORK_ERROR:
-              // console.error("fatal network error encountered", data);
-
-              // All retries and media options have been exhausted.
-              // Immediately trying to restart loading could cause loop loading.
-              // Consider modifying loading policies to best fit your asset and network
-              // conditions (manifestLoadPolicy, playlistLoadPolicy, fragLoadPolicy).
-              // Implement a retry mechanism with a 100ms timeout
-              if (new Date().getTime() - startTime.current < HLS_TIMEOUT) {
-                setTimeout(() => {
-                  // console.log("Retrying to load the source after network error");
-                  hls.loadSource(hls_playlist_url);
-                }, 100);
-              } else {
-                hls.destroy();
-              }
+              console.error("fatal network error encountered", data);
+              hls.destroy();
               break;
             default:
               // cannot recover
@@ -69,20 +48,42 @@ export function VideoPlayer({
           }
         }
       });
-
-      // console.log("LOADING ", hls_playlist_url);
-      hls.loadSource(hls_playlist_url);
-      hls.attachMedia(videoRef.current!);
     } else if (videoRef.current?.canPlayType("application/vnd.apple.mpegurl")) {
-      videoRef.current.src = hls_playlist_url;
+      videoRef.current.src = hlsPlaylistUrl;
       void videoRef.current.play();
     }
-  }, [hls_playlist_url]);
+  }, [hlsPlaylistUrl]);
+
+  const checkIfPlaylistExists = useCallback(async () => {
+    if (!hlsPlaylistUrl) {
+      return;
+    }
+
+    setIsLoading(true);
+
+    const exists = await fetch(hlsPlaylistUrl)
+      .then((response) => response.ok)
+      .catch(() => false);
+
+    if (!exists) {
+      if (new Date().getTime() - startTime.current < HLS_TIMEOUT) {
+        setTimeout(() => void checkIfPlaylistExists(), 100);
+      }
+    } else {
+      setIsLoading(false);
+      loadVideo();
+    }
+  }, [hlsPlaylistUrl, loadVideo]);
+
+  useEffect(() => {
+    startTime.current = new Date().getTime();
+    void checkIfPlaylistExists();
+  }, [checkIfPlaylistExists]);
 
   // console.log("[VideoPlayer] Rendering video element");
-  return isIOS() ? (
+  return isIOS() || isSafari() ? (
     <video
-      src={hls_playlist_url ?? ""}
+      src={isLoading ? "" : (hlsPlaylistUrl ?? "")}
       autoPlay
       controls
       className={className}
