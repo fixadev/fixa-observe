@@ -6,18 +6,9 @@ import { type Metadata } from "next";
 import { TRPCReactProvider } from "~/trpc/react";
 import { ibmPlexSans } from "./fonts";
 import { CSPostHogProvider } from "./providers";
-import {
-  ClerkProvider,
-  SignInButton,
-  SignedIn,
-  SignedOut,
-  UserButton,
-} from "@clerk/nextjs";
+import { ClerkProvider } from "@clerk/nextjs";
 import { dark } from "@clerk/themes";
-import Logo from "@/components/Logo";
 import ChildrenWrapper from "./_components/ChildrenWrapper";
-import { Button } from "~/components/ui/button";
-import { RequestApiAccessBtn } from "./_components/RequestApiAccessBtn";
 import TopBar from "./_components/TopBar";
 
 export const metadata: Metadata = {

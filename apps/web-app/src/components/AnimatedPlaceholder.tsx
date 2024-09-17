@@ -13,7 +13,7 @@ export default function AnimatedPlaceholder({
       setIndex((state) => (state + 1) % placeholders.length);
     }, 4000); // Change text every 4 seconds
     return () => clearInterval(timer);
-  }, []);
+  }, [placeholders.length]);
 
   const transitions = useTransition(index, {
     from: { opacity: 0, transform: "translate3d(0,100%,0)" },

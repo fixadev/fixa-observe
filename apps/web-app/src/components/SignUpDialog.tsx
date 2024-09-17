@@ -14,6 +14,7 @@ import { Input } from "@/components/ui/input";
 import { ArrowRightCircleIcon } from "@heroicons/react/24/solid";
 import { Label } from "./ui/label";
 import { usePostHog } from "posthog-js/react";
+import Image from "next/image";
 
 export function SignUpDialog({
   open,
@@ -26,7 +27,7 @@ export function SignUpDialog({
   const [stage, setStage] = useState<"initial" | "loading" | "success">(
     "initial",
   );
-  const [error, setError] = useState<boolean>(false);
+  // const [error, setError] = useState<boolean>(false);
   const posthog = usePostHog();
 
   const isValidEmail = (email: string): boolean => {
@@ -37,7 +38,7 @@ export function SignUpDialog({
   const handleSubmit = () => {
     if (stage === "loading") return;
     if (!isValidEmail(email)) {
-      setError(true);
+      // setError(true);
       return;
     }
     setStage("loading");
@@ -76,7 +77,7 @@ export function SignUpDialog({
             </DialogHeader>
 
             <div className="flex flex-col items-center">
-              <img src="/cat_typing.gif" className="w-4/5" />
+              <Image alt="cat typing" src="/cat_typing.gif" className="w-4/5" />
               <div className="mt-1 text-center text-sm text-neutral-400">
                 real-time footage of us trying to launch this
               </div>
