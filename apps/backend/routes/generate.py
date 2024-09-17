@@ -70,7 +70,8 @@ async def generate(request: Request, background_tasks: BackgroundTasks):
     
 @router.get("/status")
 async def get_status(request: Request, background_tasks: BackgroundTasks):
-    if len(background_tasks.tasks) < 30:
+    print('################ active_threads ################', active_threads)
+    if active_threads < 30:
         return {"status": "OK"}
     else:
         return {"status": "FULL"}
