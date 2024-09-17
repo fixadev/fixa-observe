@@ -109,7 +109,7 @@ export default function TestingPage() {
           onChange={(e) => setNumPrompts(Number(e.target.value))}
           className="rounded-md bg-blue-500 p-2 text-white"
         >
-          {[...Array(30)].map((_, i) => (
+          {Array.from({ length: 30 }, (_, i) => (
             <option key={i + 1} value={i + 1}>
               {i + 1}
             </option>
