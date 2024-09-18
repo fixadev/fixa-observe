@@ -47,14 +47,14 @@ export default function LandingPageBody() {
   // }, [user]);
 
   // Function to scroll to bottom of chat history
-  const scrollToBottom = () => {
+  const scrollToBottom = useCallback(() => {
     if (chatHistoryRef.current) {
       chatHistoryRef.current.scrollTo({
         top: chatHistoryRef.current.scrollHeight,
         behavior: "smooth",
       });
     }
-  };
+  }, []);
 
   const [isBackendDown, setIsBackendDown] = useState(false);
   useEffect(() => {
@@ -134,7 +134,7 @@ export default function LandingPageBody() {
     setTimeout(() => {
       scrollToBottom();
     });
-  }, [chatHistory, chatHistoryRef.current?.scrollHeight]);
+  }, [chatHistory, chatHistoryRef.current?.scrollHeight, scrollToBottom]);
 
   const handleSubmit = useCallback(async () => {
     if (text.length > 0) {
@@ -206,7 +206,15 @@ export default function LandingPageBody() {
         scrollToBottom();
       }, 300);
     }
-  }, [text, isBackendDown, posthog, state, checkIsServerFull, callGenerate]);
+  }, [
+    text,
+    isBackendDown,
+    posthog,
+    state,
+    checkIsServerFull,
+    callGenerate,
+    scrollToBottom,
+  ]);
 
   const [bookCallDialogOpen, setBookCallDialogOpen] = useState(false);
 
@@ -257,8 +265,10 @@ export default function LandingPageBody() {
                     <AnimatePresence key={i}>
                       <ExpandTransition buffer={100}>
                         <VideoPlayer
+                          prompt={chatHistory[i - 1]?.message ?? ""}
                           className="mb-4 w-full"
                           hls_playlist_url={item.videoUrl}
+                          scrollToBottom={scrollToBottom}
                         />
                       </ExpandTransition>
                     </AnimatePresence>

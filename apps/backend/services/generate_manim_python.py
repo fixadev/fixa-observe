@@ -132,7 +132,7 @@ class ManimGenerator:
         18. Before displaying new text, always fade out the previous text.
         19. NEVER set the background color using self.camera.set_background_color. Assume the background color is %s
         20. NEVER use Heart() this shape doesn't exist
-        21. NEVER use the ThoughtBubble class - it does not exist.
+        21. NEVER use the Bubble or ThoughtBubble class - they do not exist.
         22. To ensure that text is never displayed on top of other elements, move the text to an edge of the screen if you just displayed elements in the middle of the screen.
         23. Ensure you fade out elements before introducing new elements using the FadeOut() method.
         """ % self.background_color
@@ -260,7 +260,10 @@ class ManimGenerator:
             # '-hls_playlist_type', 'event', 
             '-hls_segment_type', 'mpegts',
             '-hls_segment_filename', os.path.join(output_dir_str, 'stream%03d.ts'),
-            os.path.join(output_dir_str, 'playlist.m3u8')
+            os.path.join(output_dir_str, 'playlist.m3u8'),
+            '-pix_fmt', 'yuv420p',
+            '-f', 'mp4',
+            os.path.join(output_dir_str, 'video.mp4')
         ]
         increment_subprocess_count()
         ffmpeg_process = subprocess.Popen(
