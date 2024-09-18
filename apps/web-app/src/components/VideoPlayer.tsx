@@ -41,7 +41,7 @@ export function VideoPlayer({
             "video.mp4",
           );
           setDownloadLink(videoUrl);
-          scrollToBottom();
+          scrollToBottom?.();
         });
       });
       hls.on(Hls.Events.ERROR, function (event, data) {
@@ -72,7 +72,7 @@ export function VideoPlayer({
         // console.log("ENDED VIDEO");
         const videoUrl = hlsPlaylistUrl?.replace("playlist.m3u8", "video.mp4");
         setDownloadLink(videoUrl);
-        scrollToBottom();
+        scrollToBottom?.();
       });
     }
   }, [hlsPlaylistUrl, scrollToBottom]);
