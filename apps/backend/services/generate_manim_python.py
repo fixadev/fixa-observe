@@ -297,9 +297,6 @@ class ManimGenerator:
 
         print("INFO: sent 1 second of black frames to ffmpeg", time.time() - self.start_time, flush=True)
 
-
-    def check_for_playlist(self, output_dir, ffmpeg_process):
-        hls_ready = False
     def run(self, input_params: dict): 
         text = input_params['prompt']
         output_dir = input_params['output_path']
