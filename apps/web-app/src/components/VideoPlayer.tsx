@@ -11,12 +11,11 @@ export function VideoPlayer({
   className,
   scrollToBottom,
 }: {
-  prompt: string | null;
+  prompt?: string | null;
   hls_playlist_url: string | null;
   className?: string;
-  scrollToBottom: () => void;
+  scrollToBottom?: () => void;
 }) {
-  console.log("RENDERING VIDEO PLAYER");
   const videoRef = useRef<HTMLVideoElement>(null);
   const startTime = useRef(new Date().getTime());
   const [downloadLink, setDownloadLink] = useState<string | null>(null);
@@ -36,13 +35,13 @@ export function VideoPlayer({
       hls.on(Hls.Events.MANIFEST_PARSED, function () {
         void videoRef.current!.play();
         videoRef.current!.addEventListener("ended", () => {
-          console.log("ENDED VIDEO");
+          // console.log("ENDED VIDEO");
           const videoUrl = hlsPlaylistUrl?.replace(
             "playlist.m3u8",
             "video.mp4",
           );
           setDownloadLink(videoUrl);
-          scrollToBottom();
+          scrollToBottom?.();
         });
       });
       hls.on(Hls.Events.ERROR, function (event, data) {
@@ -70,10 +69,10 @@ export function VideoPlayer({
       videoRef.current.src = hlsPlaylistUrl;
       void videoRef.current.play();
       videoRef.current.addEventListener("ended", () => {
-        console.log("ENDED VIDEO");
+        // console.log("ENDED VIDEO");
         const videoUrl = hlsPlaylistUrl?.replace("playlist.m3u8", "video.mp4");
         setDownloadLink(videoUrl);
-        scrollToBottom();
+        scrollToBottom?.();
       });
     }
   }, [hlsPlaylistUrl, scrollToBottom]);
