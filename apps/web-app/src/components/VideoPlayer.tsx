@@ -6,10 +6,12 @@ import { isIOS, isSafari } from "../lib/platform";
 import { HLS_TIMEOUT } from "~/lib/constants";
 
 export function VideoPlayer({
+  prompt,
   hls_playlist_url: hlsPlaylistUrl,
   className,
   scrollToBottom,
 }: {
+  prompt: string | null;
   hls_playlist_url: string | null;
   className?: string;
   scrollToBottom: () => void;
@@ -114,7 +116,8 @@ export function VideoPlayer({
           const url = window.URL.createObjectURL(new Blob([blob]));
           const link = document.createElement("a");
           link.href = url;
-          link.setAttribute("download", `video.mp4`);
+          const cleanedPrompt = prompt?.replace(/\s+/g, "-").toLowerCase();
+          link.setAttribute("download", `pixa-video-${cleanedPrompt}.mp4`);
           document.body.appendChild(link);
           link.click();
           link.parentNode?.removeChild(link);
