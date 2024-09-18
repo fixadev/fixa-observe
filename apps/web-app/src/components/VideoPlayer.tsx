@@ -35,8 +35,7 @@ export function VideoPlayer({
                 "fatal media error encountered, try to recover",
                 data,
               );
-              hls.destroy();
-              // hls.recoverMediaError();
+              hls.recoverMediaError();
               break;
             case Hls.ErrorTypes.NETWORK_ERROR:
               console.error("fatal network error encountered", data);
