@@ -300,16 +300,6 @@ class ManimGenerator:
 
     def check_for_playlist(self, output_dir, ffmpeg_process):
         hls_ready = False
-        while not hls_ready:
-            if os.path.exists(os.path.join(output_dir, "playlist.m3u8")):
-                print(f'INFO: HLS Playlist ready at {time.time() - self.start_time} seconds', flush=True)
-                    # run_cor(emit_ready_message(self.websocket))
-                # self.output_queue.put(f"{BASE_URL}/{output_dir}/playlist.m3u8")
-                hls_ready = True
-                break
-            time.sleep(0.01)
-
-
     def run(self, input_params: dict): 
         text = input_params['prompt']
         output_dir = input_params['output_path']
@@ -330,9 +320,6 @@ class ManimGenerator:
             self.generate_thread = threading.Thread(target=self.generate, args=(text, self.start_time, output_dir))
             self.generate_thread.start()
 
-            self.check_for_playlist_thread = threading.Thread(target=self.check_for_playlist, args=(output_dir, self.ffmpeg_process))
-            self.check_for_playlist_thread.start()
-
             self.run_scene_thread.join()
             print('scene done', flush=True)
             self.running = False
@@ -341,7 +328,6 @@ class ManimGenerator:
 
             self.send_blank_frames_thread.join()
             self.generate_thread.join()
-            self.check_for_playlist_thread.join()
             self.ffmpeg_process.wait()
             decrement_subprocess_count()
             self.cleanup()
@@ -357,8 +343,6 @@ class ManimGenerator:
             self.generate_thread.join()
         if self.run_scene_thread is not None:
             self.run_scene_thread.join()
-        if self.check_for_playlist_thread is not None:
-            self.check_for_playlist_thread.join()
         if self.ffmpeg_process is not None:
             self.ffmpeg_process.stdin.close()
             self.ffmpeg_process.terminate()
