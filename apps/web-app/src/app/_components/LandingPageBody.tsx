@@ -257,7 +257,7 @@ export default function LandingPageBody() {
                     <AnimatePresence key={i}>
                       <ExpandTransition buffer={100}>
                         <VideoPlayer
-                          prompt={chatHistory[i - 1]?.message}
+                          prompt={chatHistory[i - 1]?.message ?? ""}
                           className="mb-4 w-full"
                           hls_playlist_url={item.videoUrl}
                           scrollToBottom={scrollToBottom}
