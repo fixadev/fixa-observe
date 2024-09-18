@@ -11,10 +11,10 @@ export function VideoPlayer({
   className,
   scrollToBottom,
 }: {
-  prompt: string | null;
+  prompt?: string | null;
   hls_playlist_url: string | null;
   className?: string;
-  scrollToBottom: () => void;
+  scrollToBottom?: () => void;
 }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const startTime = useRef(new Date().getTime());
