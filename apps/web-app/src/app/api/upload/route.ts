@@ -1,8 +1,9 @@
+import { VertexAI, type Part } from '@google-cloud/vertexai';
 import { type NextRequest, NextResponse } from 'next/server';
 import { Storage } from '@google-cloud/storage';
-import { VertexAI, type Part } from '@google-cloud/vertexai';
 import { v4 as uuidv4 } from 'uuid';
-
+import { db } from "~/server/db";
+import { type Conversation } from "@prisma/client";
 // const storage = new Storage({
 //   projectId: process.env.GOOGLE_CLOUD_PROJECT_ID,
 //   credentials: {
@@ -49,9 +50,9 @@ export async function POST(request: NextRequest) {
       blobStream.on('finish', () => {
         void (async () => {
           try {
-            const fileUri = `gs://${bucket.name}/${fileName}`
-            const result = await analyzeAudio(fileUri);
-            resolve(NextResponse.json({ fileUri, result }, { status: 200 }));
+            
+            const result = await analyzeAudio(projectId, bucket.name, fileName, transcript);
+            resolve(NextResponse.json({ result }, { status: 200 }));
           } catch (error) {
             console.error('Error analyzing audio:', error);
             resolve(NextResponse.json({ error: 'Audio analysis failed' }, { status: 500 }));
@@ -69,7 +70,11 @@ export async function POST(request: NextRequest) {
 }
 
 
-async function analyzeAudio(publicUrl: string) {
+async function analyzeAudio(projectId: string, bucket: string, fileName: string, transcript: string) {
+
+  const fileUri = `gs://${bucket}/${fileName}`
+  const fileUrl = `https://storage.googleapis.com/${bucket}/${fileName}`
+
   const vertexai = new VertexAI({
     project: 'pixa-website',
   });
@@ -88,14 +93,14 @@ async function analyzeAudio(publicUrl: string) {
 
       Return a json with two properties.
 
-      desired outcome (1-4)
-      actual outcome (1-4)
-      prob_success: Certainty that the actual outcome matched the desired outcome (0-100%) 
+      desiredOutcome (1-4)
+      actualOutcome (1-4)
+      probSuccess: Certainty that the actual outcome matched the desired outcome (0-100%) 
   `
 
   const filePart: Part = {
     fileData: {
-      fileUri: publicUrl,
+      fileUri: fileUri,
       mimeType: 'audio/wav',
     }
   }
@@ -108,8 +113,55 @@ async function analyzeAudio(publicUrl: string) {
   }
 
   const response = await model.generateContent(request);
-  const result = response.response
-  console.log(result)
-  return result
+  const result = response?.response?.candidates?.[0]?.content?.parts?.[0]?.text
+  const cleanedResult = result?.replaceAll('```json\n', '').replaceAll('\n```', '').trim()
+
+  if (cleanedResult) {
+    console.log(cleanedResult)
+    const { desiredOutcome, actualOutcome, probSuccess } = JSON.parse(cleanedResult) as { desiredOutcome: string, actualOutcome: string, probSuccess: string }
+    if (desiredOutcome !== undefined && actualOutcome !== undefined && probSuccess !== undefined) {
+      await insertConversation({
+        id: uuidv4(),
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        projectId,
+        transcript,
+        audioUrl: fileUrl,
+        analysis: cleanedResult,
+        desiredOutcome: Number(desiredOutcome),
+        actualOutcome: Number(actualOutcome),
+        probSuccess: Number(probSuccess)
+      })
+    }
+    else {
+      console.log('error parsing LLM result', cleanedResult)
+    }
+    return result
+  } else {
+    throw new Error('No result')
+  }
 }
+
+// TODO: move these to a service
+const insertConversation = async (conversation: Conversation) => {
+  try {
+    const result = await db.conversation.create({
+      data: {
+        projectId: conversation.projectId,
+        transcript: conversation.transcript,
+        audioUrl: conversation.audioUrl,
+        analysis: conversation.analysis,
+        desiredOutcome: conversation.desiredOutcome,
+        actualOutcome: conversation.actualOutcome,
+        probSuccess: conversation.probSuccess,
+      },
+    })
+    console.log('Conversation created:', result)
+    return result
+  } catch (error) {
+    console.error('Error inserting conversation:', error);
+    throw error;
+  }
+};
+
 
