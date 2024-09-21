@@ -9,11 +9,11 @@ import { CSPostHogProvider } from "./providers";
 import { ClerkProvider } from "@clerk/nextjs";
 import { dark } from "@clerk/themes";
 import ChildrenWrapper from "./_components/ChildrenWrapper";
-import TopBar from "./_components/TopBar";
+import NavWrapper from "./_components/NavWrapper";
 
 export const metadata: Metadata = {
   title: "pixa.dev",
-  description: "the real-time AI text to video api",
+  description: "voice agent observability, monitoring, and analytics",
   icons: [{ rel: "icon", url: "/favicon.ico" }],
 };
 
@@ -49,8 +49,7 @@ export default function RootLayout({
             >
               <TRPCReactProvider>
                 <ChildrenWrapper>
-                  <TopBar />
-                  <div className="mt-16">{children}</div>
+                  <NavWrapper>{children}</NavWrapper>
                   <Toaster />
                 </ChildrenWrapper>
               </TRPCReactProvider>
