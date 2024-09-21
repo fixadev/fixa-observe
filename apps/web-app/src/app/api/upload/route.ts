@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { type NextRequest, NextResponse } from 'next/server';
 import { Storage } from '@google-cloud/storage';
 import { VertexAI, type Part } from '@google-cloud/vertexai';
 import { v4 as uuidv4 } from 'uuid';
@@ -19,9 +19,15 @@ export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData();
     const file = formData.get('file') as File;
+    const transcript = formData.get('transcript') as string;
+    const projectId = formData.get('projectId') as string;
 
     if (!file) {
       return NextResponse.json({ error: 'No file uploaded' }, { status: 400 });
+    }
+
+    if (!projectId) {
+      return NextResponse.json({ error: 'No projectId uploaded' }, { status: 400 });
     }
 
     if (!file.type.startsWith('audio/')) {
@@ -36,6 +42,7 @@ export async function POST(request: NextRequest) {
 
     return new Promise((resolve, reject) => {
       blobStream.on('error', (err) => {
+        console.error('Error uploading file:', err);
         reject(NextResponse.json({ error: 'Error uploading file' }, { status: 500 }));
       });
 
