@@ -1,3 +1,5 @@
+import PageHeader from "~/components/PageHeader";
+
 export default function QuickstartPage() {
-  return <div>Quickstart</div>;
+  return <PageHeader title="quickstart" />;
 }

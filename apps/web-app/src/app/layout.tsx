@@ -32,8 +32,8 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${ibmPlexSans.className} dark`}
-      style={{ colorScheme: "dark" }}
+      className={`${ibmPlexSans.className} light`}
+      style={{ colorScheme: "light" }}
     >
       <CSPostHogProvider>
         <ClerkProvider

@@ -6,3 +6,8 @@ export type Conversation = {
   transcriptUrl: string;
   createdAt: Date;
 };
+
+export type Outcome = {
+  name: string;
+  description: string;
+};
