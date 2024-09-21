@@ -1,3 +1,10 @@
+import ConversationTable from "./_components/ConversationTable";
+
 export default function DashboardPage() {
-  return <div>Dashboard</div>;
+  return (
+    <div>
+      <div>Dashboard</div>
+      <ConversationTable />
+    </div>
+  );
 }
