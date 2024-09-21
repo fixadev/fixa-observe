@@ -10,7 +10,7 @@ export default function Outcome({ outcome }: { outcome: Outcome }) {
       <Input
         id="name"
         autoComplete="off"
-        value={outcome.name}
+        defaultValue={outcome.name}
         placeholder="on_call_booked"
         className="w-full flex-auto"
       />
@@ -18,7 +18,7 @@ export default function Outcome({ outcome }: { outcome: Outcome }) {
       <Textarea
         id="description"
         autoComplete="off"
-        value={outcome.description}
+        defaultValue={outcome.description}
         placeholder="call was booked with user :)"
         className="min-h-[unset] w-full flex-auto"
       />
