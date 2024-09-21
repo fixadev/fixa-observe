@@ -1,10 +1,14 @@
 "use client";
 
 import PageHeader from "~/components/PageHeader";
-// import CodeBlock from "~/components/CodeBlock";
 import { CopyBlock, dracula } from "react-code-blocks";
 
-const code = `npm install @prisma/client`;
+const code = `curl -X POST https://api.pixa.dev/something -H "Authorization: Basic <api_key>" -H "Content-Type: application/json" -d '
+{
+  "name": "John Doe",
+  "email": "john.doe@example.com"
+}
+'`;
 
 export default function QuickstartPage() {
   return (
@@ -14,7 +18,7 @@ export default function QuickstartPage() {
         text={code}
         language="bash"
         showLineNumbers={true}
-        wrapLongLines={true}
+        // wrapLongLines={true}
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         theme={dracula}
       />
