@@ -40,12 +40,11 @@ export async function POST(request: NextRequest) {
       });
 
       blobStream.on('finish', () => {
-        const publicUrl = `https://storage.googleapis.com/${bucket.name}/${fileName}`;
         void (async () => {
           try {
             const fileUri = `gs://${bucket.name}/${fileName}`
             const result = await analyzeAudio(fileUri);
-            resolve(NextResponse.json({ url: publicUrl, result }, { status: 200 }));
+            resolve(NextResponse.json({ fileUri, result }, { status: 200 }));
           } catch (error) {
             console.error('Error analyzing audio:', error);
             resolve(NextResponse.json({ error: 'Audio analysis failed' }, { status: 500 }));
