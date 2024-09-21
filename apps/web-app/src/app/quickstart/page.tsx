@@ -1,27 +1,17 @@
-"use client";
-
 import PageHeader from "~/components/PageHeader";
-import { CopyBlock, dracula } from "react-code-blocks";
+import CodeBlock from "~/components/CodeBlock";
 
 const code = `curl -X POST https://api.pixa.dev/something -H "Authorization: Basic <api_key>" -H "Content-Type: application/json" -d '
 {
   "name": "John Doe",
   "email": "john.doe@example.com"
-}
-'`;
+}'`;
 
 export default function QuickstartPage() {
   return (
-    <div>
+    <div className="w-full max-w-2xl self-center">
       <PageHeader title="quickstart" />
-      <CopyBlock
-        text={code}
-        language="bash"
-        showLineNumbers={true}
-        // wrapLongLines={true}
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-        theme={dracula}
-      />
+      <CodeBlock code={code} />
     </div>
   );
 }
