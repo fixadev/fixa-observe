@@ -106,5 +106,11 @@ async function getConversations(): Promise<Conversation[]> {
 export default async function DashboardPage() {
   const conversations = await getConversations();
 
-  return <DataTable data={conversations} columns={columns} />;
+  return (
+    <DataTable
+      data={conversations}
+      columns={columns}
+      initialSorting={[{ id: "createdAt", desc: true }]}
+    />
+  );
 }

@@ -6,7 +6,6 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
@@ -50,15 +49,21 @@ export function DataTableColumnHeader<TData, TValue>({
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="start">
-          <DropdownMenuItem onClick={() => column.toggleSorting(false)}>
+          <DropdownMenuItem
+            className="cursor-pointer"
+            onClick={() => column.toggleSorting(false)}
+          >
             <ChevronUpIcon className="mr-2 h-3.5 w-3.5 text-muted-foreground/70" />
-            Asc
+            asc
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => column.toggleSorting(true)}>
+          <DropdownMenuItem
+            className="cursor-pointer"
+            onClick={() => column.toggleSorting(true)}
+          >
             <ChevronDownIcon className="mr-2 h-3.5 w-3.5 text-muted-foreground/70" />
-            Desc
+            desc
           </DropdownMenuItem>
-          <DropdownMenuSeparator />
+          {/* <DropdownMenuSeparator /> */}
           {/* <DropdownMenuItem onClick={() => column.toggleVisibility(false)}>
             <EyeSlashIcon className="mr-2 h-3.5 w-3.5 text-muted-foreground/70" />
             Hide
