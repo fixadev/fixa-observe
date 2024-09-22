@@ -13,16 +13,4 @@ export const userRouter = createTRPCRouter({
     });
   }),
 
-  generate: protectedProcedure.mutation(({ ctx }) => {
-    return ctx.db.user.update({
-      where: {
-        clerkId: ctx.auth.userId,
-      },
-      data: {
-        generationsLeft: {
-          decrement: 1,
-        },
-      },
-    });
-  }),
 });
