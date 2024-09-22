@@ -1,6 +1,5 @@
 import { z } from "zod";
 
-
 export type OutcomeInput = z.infer<typeof outcomeInput>;
 export const outcomeInput = z.object({
   name: z.string(),
@@ -13,6 +12,3 @@ export const createProjectInput = z.object({
   projectName: z.string(),
   outcomes: z.array(outcomeInput),
 });
-
-
-
