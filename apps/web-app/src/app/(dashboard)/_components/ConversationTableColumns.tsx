@@ -45,33 +45,33 @@ export const columns: ColumnDef<Conversation>[] = [
         <DataTableColumnHeader
           column={column}
           title="id"
-          enableMultiSort={true}
+          // enableMultiSort={true}
         />
       );
     },
   },
   {
-    accessorKey: "outcome",
-    header: ({ column }) => {
-      return (
-        <DataTableColumnHeader
-          column={column}
-          title="outcome"
-          enableMultiSort={true}
-        />
-      );
-    },
+    accessorKey: "desiredOutcome",
+    header: "desired outcome",
   },
   {
-    accessorKey: "successProbability",
+    accessorKey: "actualOutcome",
+    header: "actual outcome",
+  },
+  {
+    accessorKey: "probSuccess",
     header: ({ column }) => {
       return (
         <DataTableColumnHeader
           column={column}
           title="success probability"
-          enableMultiSort={true}
+          // enableMultiSort={true}
         />
       );
+    },
+    cell: ({ row }) => {
+      const probSuccess = row.original.probSuccess;
+      return <span>{probSuccess}%</span>;
     },
   },
   {
@@ -89,7 +89,7 @@ export const columns: ColumnDef<Conversation>[] = [
         <DataTableColumnHeader
           column={column}
           title="created at"
-          enableMultiSort={true}
+          // enableMultiSort={true}
         />
       );
     },
