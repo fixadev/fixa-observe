@@ -62,3 +62,12 @@ export const getProjectsByUser = async (
 
   return user?.projects ?? [];
 };
+
+export const deleteProject = async (projectId: string, db: PrismaClient) => {
+  await db.conversation.deleteMany({
+    where: { projectId: projectId },
+  });
+  await db.project.delete({
+    where: { id: projectId },
+  });
+};

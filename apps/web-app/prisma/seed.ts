@@ -1,6 +1,7 @@
+import { deleteProject } from "~/app/shared/services/projects";
 import { db } from "~/server/db";
 
-async function main() {
+async function createTestProject() {
   const project = await db.project.create({
     data: {
       ownerId: "66ef79bb9eb80cb66e6fdd42",
@@ -20,11 +21,7 @@ async function main() {
     {
       transcript: "Hello, this is a positive call transcript.",
       audioUrl: "https://example.com/positive-call.wav",
-      analysis: JSON.stringify({
-        desiredOutcome: 0,
-        actualOutcome: 0,
-        probSuccess: 90,
-      }),
+      analysis: "",
       desiredOutcome: 0,
       actualOutcome: 0,
       probSuccess: 90,
@@ -33,11 +30,7 @@ async function main() {
     {
       transcript: "This is a neutral call transcript.",
       audioUrl: "https://example.com/neutral-call.wav",
-      analysis: JSON.stringify({
-        desiredOutcome: 0,
-        actualOutcome: 1,
-        probSuccess: 50,
-      }),
+      analysis: "",
       desiredOutcome: 0,
       actualOutcome: 1,
       probSuccess: 50,
@@ -46,11 +39,7 @@ async function main() {
     {
       transcript: "Unfortunately, this is a negative call transcript.",
       audioUrl: "https://example.com/negative-call.wav",
-      analysis: JSON.stringify({
-        desiredOutcome: 0,
-        actualOutcome: 2,
-        probSuccess: 10,
-      }),
+      analysis: "",
       desiredOutcome: 0,
       actualOutcome: 2,
       probSuccess: 10,
@@ -70,7 +59,11 @@ async function main() {
   console.log("Seed data inserted successfully.");
 }
 
-main()
+async function deleteTestProject() {
+  await deleteProject("66ef87e7f5c7f001b94e1c9d", db);
+}
+
+deleteTestProject()
   .catch((e) => {
     console.error(e);
     process.exit(1);
