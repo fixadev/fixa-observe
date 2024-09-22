@@ -37,13 +37,6 @@ export default function NavWrapper({
   const { selectedProject, setSelectedProject, projects, isLoading } =
     useProject();
 
-  useEffect(() => {
-    if (projects) {
-      console.log("PROJECTS", projects);
-      console.log("SELECTED PROJECT", selectedProject);
-    }
-  }, [projects, selectedProject, setSelectedProject]);
-
   return (
     <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
       <div className="hidden border-r bg-muted/40 md:block">
