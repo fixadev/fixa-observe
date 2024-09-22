@@ -73,7 +73,8 @@ export async function POST(req: Request) {
       }
       const user = await upsertUser(clerkId, email, first_name, last_name);
       await createProject(
-        { ownerId: user.id, projectName: "default project", outcomes: [] },
+        { projectName: "default project", outcomes: [] },
+        user.id,
         db,
       );
       try {

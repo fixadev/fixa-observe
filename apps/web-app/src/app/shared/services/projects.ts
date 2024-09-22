@@ -4,12 +4,13 @@ import { type OutcomeInput } from "~/lib/types/project";
 
 export const createProject = async (
   input: CreateProjectInput,
+  userId: string,
   db: PrismaClient,
 ) => {
-  const { ownerId, projectName, outcomes } = input;
+  const { projectName, outcomes } = input;
   const project = await db.project.create({
     data: {
-      ownerId,
+      ownerId: userId,
       name: projectName,
       possibleOutcomes: {
         create: outcomes,
@@ -23,10 +24,11 @@ export const updateProject = async (
   projectId: string,
   projectName: string,
   outcomes: OutcomeInput[],
+  userId: string,
   db: PrismaClient,
 ) => {
   const project = await db.project.update({
-    where: { id: projectId },
+    where: { id: projectId, ownerId: userId },
     data: { name: projectName, possibleOutcomes: { create: outcomes } },
   });
   return project;
@@ -38,4 +40,25 @@ export const getProject = async (projectId: string, db: PrismaClient) => {
     include: { possibleOutcomes: true, conversations: true },
   });
   return project;
+};
+
+export const getProjectsByUser = async (
+  userId: string | null,
+  db: PrismaClient,
+) => {
+  const user = await db.user.findUnique({
+    where: {
+      clerkId: userId ?? "",
+    },
+    include: {
+      projects: {
+        select: {
+          id: true,
+          name: true,
+        },
+      },
+    },
+  });
+
+  return user?.projects ?? [];
 };

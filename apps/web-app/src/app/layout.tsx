@@ -9,7 +9,7 @@ import { CSPostHogProvider } from "./providers";
 import { ClerkProvider } from "@clerk/nextjs";
 // import { dark } from "@clerk/themes";
 import ChildrenWrapper from "./_components/ChildrenWrapper";
-
+import { ProjectProvider } from "./contexts/projectContext";
 export const metadata: Metadata = {
   title: "pixa.dev",
   description: "voice agent observability, monitoring, and analytics",
@@ -47,10 +47,12 @@ export default function RootLayout({
               disableTransitionOnChange
             >
               <TRPCReactProvider>
-                <ChildrenWrapper>
-                  {children}
-                  <Toaster />
-                </ChildrenWrapper>
+                <ProjectProvider>
+                  <ChildrenWrapper>
+                    {children}
+                    <Toaster />
+                  </ChildrenWrapper>
+                </ProjectProvider>
               </TRPCReactProvider>
             </ThemeProvider>
           </body>

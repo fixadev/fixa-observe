@@ -14,11 +14,12 @@ datasource db {
 }
 
 model User {
-  id              String  @id @default(auto()) @map("_id") @db.ObjectId
-  clerkId         String  @unique
-  email           String  @unique
-  firstName       String?
-  lastName        String?
+  id        String    @id @default(auto()) @map("_id") @db.ObjectId
+  clerkId   String    @unique
+  email     String    @unique
+  firstName String?
+  lastName  String?
+  projects  Project[]
 }
 
 model ServerIsDownEmail {
@@ -28,6 +29,7 @@ model ServerIsDownEmail {
 
 model Project {
   id               String         @id @default(auto()) @map("_id") @db.ObjectId
+  owner            User           @relation(fields: [ownerId], references: [id])
   ownerId          String         @db.ObjectId
   createdAt        DateTime       @default(now())
   updatedAt        DateTime       @updatedAt
