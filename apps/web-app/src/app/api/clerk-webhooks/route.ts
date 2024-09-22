@@ -4,6 +4,11 @@ import { type WebhookEvent } from "@clerk/nextjs/server";
 import { env } from "~/env";
 import { db } from "~/server/db";
 import { addSubscriber } from "~/server/listmonk";
+import { createProject } from "~/app/shared/services/createProject";
+
+export async function GET() {
+  return new Response("ok", { status: 200 });
+}
 
 export async function POST(req: Request) {
   // You can find this in the Clerk Dashboard -> Webhooks -> choose the endpoint
@@ -66,7 +71,11 @@ export async function POST(req: Request) {
       if (!email) {
         return new Response("User has no email", { status: 400 });
       }
-      await upsertUser(clerkId, email, first_name, last_name);
+      const user = await upsertUser(clerkId, email, first_name, last_name);
+      await createProject(
+        { ownerId: user.id, projectName: "default project", outcomes: [] },
+        db,
+      );
       try {
         await addSubscriber(email, first_name, last_name);
       } catch (e) {
@@ -98,7 +107,7 @@ const upsertUser = async (
   firstName: string | null,
   lastName: string | null,
 ) => {
-  await db.user.upsert({
+  return await db.user.upsert({
     where: { clerkId },
     update: { email, firstName, lastName },
     create: { clerkId, email, firstName, lastName },

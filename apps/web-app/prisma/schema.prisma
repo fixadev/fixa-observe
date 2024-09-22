@@ -19,7 +19,6 @@ model User {
   email           String  @unique
   firstName       String?
   lastName        String?
-  generationsLeft Int     @default(15)
 }
 
 model ServerIsDownEmail {
@@ -29,7 +28,7 @@ model ServerIsDownEmail {
 
 model Project {
   id               String         @id @default(auto()) @map("_id") @db.ObjectId
-  userId           String
+  ownerId          String         @db.ObjectId
   createdAt        DateTime       @default(now())
   updatedAt        DateTime       @updatedAt
   name             String

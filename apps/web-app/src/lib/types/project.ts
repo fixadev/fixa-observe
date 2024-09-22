@@ -8,7 +8,7 @@ export const outcomeInput = z.object({
 
 export type CreateProjectInput = z.infer<typeof createProjectInput>;
 export const createProjectInput = z.object({
-  userId: z.string(),
+  ownerId: z.string(),
   projectName: z.string(),
   outcomes: z.array(outcomeInput),
 });
