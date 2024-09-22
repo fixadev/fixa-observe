@@ -5,14 +5,22 @@ import { columns } from "./ConversationTableColumns";
 import { api } from "~/trpc/react";
 import { useCallback, useMemo, useState } from "react";
 import { type SortingState } from "@tanstack/react-table";
+import { useProject } from "~/app/contexts/projectContext";
+import { skipToken } from "@tanstack/react-query";
 
 export default function ConversationTable() {
   const initialSorting = useMemo(() => [{ id: "createdAt", desc: true }], []);
   const [sorting, setSorting] = useState<SortingState>(initialSorting);
+  const { selectedProject } = useProject();
 
-  const { data: project } = api.project.getProject.useQuery({
-    projectId: "66efa899a85842502e89634c",
-  });
+  const { data: project } = api.project.getProject.useQuery(
+    selectedProject?.id
+      ? {
+          projectId: selectedProject.id,
+        }
+      : skipToken,
+  );
+
   const outcomes = useMemo(() => {
     const obj: Record<string, string> = {};
     for (const outcome of project?.possibleOutcomes ?? []) {
