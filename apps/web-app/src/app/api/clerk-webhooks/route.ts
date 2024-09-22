@@ -1,6 +1,6 @@
 import { Webhook } from "svix";
 import { headers } from "next/headers";
-import { type WebhookEvent } from "@clerk/nextjs/server";
+import { clerkClient, type WebhookEvent } from "@clerk/nextjs/server";
 import { env } from "~/env";
 import { db } from "~/server/db";
 import { addSubscriber } from "~/server/listmonk";
@@ -71,12 +71,21 @@ export async function POST(req: Request) {
       if (!email) {
         return new Response("User has no email", { status: 400 });
       }
+
       const user = await upsertUser(clerkId, email, first_name, last_name);
+
+      await clerkClient.users.updateUserMetadata(clerkId, {
+        publicMetadata: {
+          userId: user.id,
+        },
+      });
+
       await createProject(
         { projectName: "default project", outcomes: [] },
         user.id,
         db,
       );
+
       try {
         await addSubscriber(email, first_name, last_name);
       } catch (e) {

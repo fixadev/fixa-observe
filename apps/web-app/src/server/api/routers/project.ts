@@ -12,7 +12,7 @@ export const projectRouter = createTRPCRouter({
   createProject: protectedProcedure
     .input(createProjectInput)
     .mutation(async ({ ctx, input }) => {
-      return await createProject(input, ctx.auth.userId, ctx.db);
+      return await createProject(input, ctx.userId, ctx.db);
     }),
 
   getProject: protectedProcedure
@@ -22,8 +22,7 @@ export const projectRouter = createTRPCRouter({
     }),
 
   getProjectsByUser: protectedProcedure.query(async ({ ctx }) => {
-    console.log("GETTING PROJECTS BY USER", ctx.auth.userId);
-    return await getProjectsByUser(ctx.auth.userId, ctx.db);
+    return await getProjectsByUser(ctx.userId, ctx.db);
   }),
 
   updateProject: protectedProcedure
@@ -33,7 +32,7 @@ export const projectRouter = createTRPCRouter({
         input.projectId,
         input.projectName,
         input.outcomes,
-        ctx.auth.userId,
+        ctx.userId,
         ctx.db,
       );
     }),

@@ -1,6 +1,7 @@
+import { deleteProject } from "~/app/shared/services/projects";
 import { db } from "~/server/db";
 
-async function main() {
+async function createTestProject() {
   const project = await db.project.create({
     data: {
       ownerId: "66ef79bb9eb80cb66e6fdd42",
@@ -13,6 +14,9 @@ async function main() {
         ],
       },
     },
+    include: {
+      possibleOutcomes: true,
+    },
   });
 
   // Create mock conversations
@@ -20,39 +24,27 @@ async function main() {
     {
       transcript: "Hello, this is a positive call transcript.",
       audioUrl: "https://example.com/positive-call.wav",
-      analysis: JSON.stringify({
-        desiredOutcome: 0,
-        actualOutcome: 0,
-        probSuccess: 90,
-      }),
-      desiredOutcome: 0,
-      actualOutcome: 0,
+      analysis: "",
+      desiredOutcomeId: project.possibleOutcomes[0]!.id,
+      actualOutcomeId: project.possibleOutcomes[0]!.id,
       probSuccess: 90,
       createdAt: new Date(new Date().setDate(new Date().getDate() - 1)),
     },
     {
       transcript: "This is a neutral call transcript.",
       audioUrl: "https://example.com/neutral-call.wav",
-      analysis: JSON.stringify({
-        desiredOutcome: 0,
-        actualOutcome: 1,
-        probSuccess: 50,
-      }),
-      desiredOutcome: 0,
-      actualOutcome: 1,
+      analysis: "",
+      desiredOutcomeId: project.possibleOutcomes[0]!.id,
+      actualOutcomeId: project.possibleOutcomes[1]!.id,
       probSuccess: 50,
       createdAt: new Date(new Date().setDate(new Date().getDate() - 2)),
     },
     {
       transcript: "Unfortunately, this is a negative call transcript.",
       audioUrl: "https://example.com/negative-call.wav",
-      analysis: JSON.stringify({
-        desiredOutcome: 0,
-        actualOutcome: 2,
-        probSuccess: 10,
-      }),
-      desiredOutcome: 0,
-      actualOutcome: 2,
+      analysis: "",
+      desiredOutcomeId: project.possibleOutcomes[0]!.id,
+      actualOutcomeId: project.possibleOutcomes[2]!.id,
       probSuccess: 10,
       createdAt: new Date(new Date().setDate(new Date().getDate() - 3)),
     },
@@ -68,9 +60,14 @@ async function main() {
   }
 
   console.log("Seed data inserted successfully.");
+  return project;
 }
 
-main()
+async function deleteTestProject() {
+  await deleteProject("66efa71ae58c59c136ee46ae", db);
+}
+
+createTestProject()
   .catch((e) => {
     console.error(e);
     process.exit(1);

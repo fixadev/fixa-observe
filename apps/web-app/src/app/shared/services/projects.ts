@@ -39,7 +39,7 @@ export const updateProject = async (
 export const getProject = async (projectId: string, db: PrismaClient) => {
   const project = await db.project.findUnique({
     where: { id: projectId },
-    include: { possibleOutcomes: true, conversations: true },
+    include: { possibleOutcomes: true, conversations: false },
   });
   return project;
 };
@@ -63,4 +63,19 @@ export const getProjectsByUser = async (
   });
 
   return user?.projects ?? [];
+};
+
+export const deleteProject = async (projectId: string, db: PrismaClient) => {
+  const queries = [
+    db.outcome.deleteMany({
+      where: { projectId: projectId },
+    }),
+    db.conversation.deleteMany({
+      where: { projectId: projectId },
+    }),
+    db.project.delete({
+      where: { id: projectId },
+    }),
+  ];
+  await db.$transaction(queries);
 };

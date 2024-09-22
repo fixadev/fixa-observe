@@ -19,7 +19,7 @@ model User {
   email     String    @unique
   firstName String?
   lastName  String?
-  projects  Project[]
+  projects  Project[] 
 }
 
 model ServerIsDownEmail {
