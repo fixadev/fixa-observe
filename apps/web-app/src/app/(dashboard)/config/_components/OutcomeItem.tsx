@@ -20,6 +20,7 @@ export default function Outcome({
       <Label htmlFor="name">name</Label>
       <Input
         id="name"
+        name="name"
         autoComplete="off"
         defaultValue={outcome.name}
         placeholder="on_call_booked"
@@ -29,6 +30,7 @@ export default function Outcome({
       <Label htmlFor="description">description</Label>
       <Textarea
         id="description"
+        name="description"
         autoComplete="off"
         defaultValue={outcome.description}
         placeholder="call was booked with user :)"

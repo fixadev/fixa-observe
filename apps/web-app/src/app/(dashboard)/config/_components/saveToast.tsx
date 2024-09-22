@@ -1,3 +1,4 @@
+import { InformationCircleIcon } from "@heroicons/react/24/outline";
 import { Button } from "~/components/ui/button";
 
 export function PersistentToast({
@@ -8,8 +9,12 @@ export function PersistentToast({
   discardChanges: () => void;
 }) {
   return (
-    <div className="absolute bottom-0 flex flex-row gap-2 rounded-lg border-[2px] border-gray-200 px-4 py-2">
-      <Button variant="destructive" onClick={discardChanges}></Button>
+    <div className="absolute bottom-2 left-1/2 flex -translate-x-1/2 flex-row items-center gap-2 rounded-xl border-[2px] border-gray-200 px-4 py-2">
+      <InformationCircleIcon className="size-5 text-gray-500" />
+      <p className="mr-6 text-sm text-gray-500">Unsaved changes</p>
+      <Button variant="destructive" onClick={discardChanges}>
+        Reset
+      </Button>
       <Button variant="default" onClick={saveChanges}>
         Save
       </Button>

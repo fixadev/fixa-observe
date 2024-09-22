@@ -8,34 +8,39 @@ import PageHeader from "~/components/PageHeader";
 import { PersistentToast } from "./_components/saveToast";
 import { api } from "~/trpc/react";
 import { useProject } from "~/app/contexts/projectContext";
-
+import { v4 as uuidv4 } from "uuid";
 export default function ConfigPage() {
-  const { projectIds } = useProject();
+  const { selectedProjectId } = useProject();
   const [localOutcomes, setLocalOutcomes] = useState<Outcome[]>([]);
   const {
     data: project,
     isLoading,
     refetch: refetchProject,
   } = api.project.getProject.useQuery({
-    projectId: projectIds?.[0]?.id ?? "",
+    projectId: selectedProjectId ?? "",
   });
 
   useEffect(() => {
-    if (project && project.possibleOutcomes) {
+    console.log("PROJECT DETAILS ARE", project);
+    if (
+      project &&
+      project.possibleOutcomes &&
+      project.possibleOutcomes.length > 0
+    ) {
       setLocalOutcomes(project.possibleOutcomes);
     } else {
       setLocalOutcomes([
         {
-          id: "",
+          id: uuidv4(),
           createdAt: new Date(),
           updatedAt: new Date(),
           name: "",
           description: "",
-          projectId: null,
+          projectId: selectedProjectId ?? "",
         },
       ]);
     }
-  }, [project]);
+  }, [project, selectedProjectId]);
 
   const handleInput = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
@@ -43,10 +48,12 @@ export default function ConfigPage() {
   ) => {
     const value = e.target.value;
     const name = e.target.name;
+    console.log("HANDLING INPUT", index, name, value);
     setLocalOutcomes((prev) => {
       const newOutcomes = prev.map((outcome, i) =>
         i === index ? { ...outcome, [name]: value } : outcome,
       );
+      console.log("NEW OUTCOMES", newOutcomes);
       return newOutcomes;
     });
   };
@@ -54,16 +61,27 @@ export default function ConfigPage() {
   const { mutate: updateProject } = api.project.updateProject.useMutation();
 
   const saveChanges = async () => {
-    if (!projectIds?.[0]?.id || !project?.name) {
+    if (!selectedProjectId || !project?.name) {
       console.error("No project ID or name found");
       return;
     }
+    console.log("SAVING OUTCOMES", localOutcomes);
     updateProject({
-      projectId: projectIds[0].id,
+      projectId: selectedProjectId,
       projectName: project?.name,
       outcomes: localOutcomes,
     });
     await refetchProject();
+  };
+
+  const checkIfOutcomesChanged = () => {
+    return (
+      JSON.stringify(localOutcomes) !==
+        JSON.stringify(project?.possibleOutcomes) &&
+      localOutcomes.some(
+        (outcome) => outcome.name !== "" || outcome.description !== "",
+      )
+    );
   };
 
   return (
@@ -72,7 +90,7 @@ export default function ConfigPage() {
       <div className="flex flex-col items-start gap-2">
         {localOutcomes.map((outcome, index) => (
           <OutcomeItem
-            key={outcome.id}
+            key={index}
             index={index}
             handleInput={handleInput}
             outcome={outcome}
@@ -84,12 +102,12 @@ export default function ConfigPage() {
             setLocalOutcomes([
               ...localOutcomes,
               {
-                id: "",
+                id: uuidv4(),
                 createdAt: new Date(),
                 updatedAt: new Date(),
                 name: "",
                 description: "",
-                projectId: null,
+                projectId: selectedProjectId ?? "",
               },
             ])
           }
@@ -97,10 +115,13 @@ export default function ConfigPage() {
           + add outcome
         </Button>
       </div>
-      {JSON.stringify(localOutcomes) !==
-        JSON.stringify(project?.possibleOutcomes) && (
+      {checkIfOutcomesChanged() && (
         <PersistentToast
-          saveChanges={saveChanges}
+          saveChanges={() => {
+            saveChanges().catch((error) => {
+              console.error("Error saving changes", error);
+            });
+          }}
           discardChanges={() => {
             setLocalOutcomes(project?.possibleOutcomes ?? []);
           }}
