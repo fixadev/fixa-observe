@@ -1,6 +1,7 @@
 "use client";
 
 import { EllipsisHorizontalIcon } from "@heroicons/react/24/outline";
+import { type Conversation } from "@prisma/client";
 import { type ColumnDef } from "@tanstack/react-table";
 import { DataTableColumnHeader } from "~/components/DataTableColumnHeader";
 import { Button } from "~/components/ui/button";
@@ -13,7 +14,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
-import { type Conversation } from "~/lib/types";
 
 export const columns: ColumnDef<Conversation>[] = [
   {
@@ -41,20 +41,36 @@ export const columns: ColumnDef<Conversation>[] = [
   {
     accessorKey: "id",
     header: ({ column }) => {
-      return <DataTableColumnHeader column={column} title="id" />;
+      return (
+        <DataTableColumnHeader
+          column={column}
+          title="id"
+          enableMultiSort={true}
+        />
+      );
     },
   },
   {
     accessorKey: "outcome",
     header: ({ column }) => {
-      return <DataTableColumnHeader column={column} title="outcome" />;
+      return (
+        <DataTableColumnHeader
+          column={column}
+          title="outcome"
+          enableMultiSort={true}
+        />
+      );
     },
   },
   {
     accessorKey: "successProbability",
     header: ({ column }) => {
       return (
-        <DataTableColumnHeader column={column} title="success probability" />
+        <DataTableColumnHeader
+          column={column}
+          title="success probability"
+          enableMultiSort={true}
+        />
       );
     },
   },
@@ -69,7 +85,13 @@ export const columns: ColumnDef<Conversation>[] = [
   {
     accessorKey: "createdAt",
     header: ({ column }) => {
-      return <DataTableColumnHeader column={column} title="created at" />;
+      return (
+        <DataTableColumnHeader
+          column={column}
+          title="created at"
+          enableMultiSort={true}
+        />
+      );
     },
     cell: ({ row }) => {
       const createdAt = row.original.createdAt;

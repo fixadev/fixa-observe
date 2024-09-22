@@ -18,12 +18,14 @@ interface DataTableColumnHeaderProps<TData, TValue>
   extends React.HTMLAttributes<HTMLDivElement> {
   column: Column<TData, TValue>;
   title: string;
+  enableMultiSort?: boolean;
 }
 
 export function DataTableColumnHeader<TData, TValue>({
   column,
   title,
   className,
+  enableMultiSort = false,
 }: DataTableColumnHeaderProps<TData, TValue>) {
   if (!column.getCanSort()) {
     return <div className={cn(className)}>{title}</div>;
@@ -51,14 +53,14 @@ export function DataTableColumnHeader<TData, TValue>({
         <DropdownMenuContent align="start">
           <DropdownMenuItem
             className="cursor-pointer"
-            onClick={() => column.toggleSorting(false)}
+            onClick={() => column.toggleSorting(false, enableMultiSort)}
           >
             <ChevronUpIcon className="mr-2 h-3.5 w-3.5 text-muted-foreground/70" />
             asc
           </DropdownMenuItem>
           <DropdownMenuItem
             className="cursor-pointer"
-            onClick={() => column.toggleSorting(true)}
+            onClick={() => column.toggleSorting(true, enableMultiSort)}
           >
             <ChevronDownIcon className="mr-2 h-3.5 w-3.5 text-muted-foreground/70" />
             desc

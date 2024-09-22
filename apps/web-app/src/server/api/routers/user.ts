@@ -1,4 +1,4 @@
-import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
+import { createTRPCRouter, publicProcedure } from "../trpc";
 
 export const userRouter = createTRPCRouter({
   getProfile: publicProcedure.query(({ ctx }) => {
@@ -12,5 +12,4 @@ export const userRouter = createTRPCRouter({
       },
     });
   }),
-
 });
