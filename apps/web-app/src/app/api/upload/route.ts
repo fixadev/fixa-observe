@@ -4,7 +4,7 @@ import { Storage } from "@google-cloud/storage";
 import { v4 as uuidv4 } from "uuid";
 import { db } from "~/server/db";
 import { type Conversation } from "@prisma/client";
-import { getProject } from "~/app/shared/services/getProject";
+import { getProject } from "~/app/shared/services/projects";
 
 // const storage = new Storage({
 //   projectId: process.env.GOOGLE_CLOUD_PROJECT_ID,
@@ -107,7 +107,7 @@ async function analyzeAudio(
       model: "gemini-1.5-pro-001",
     });
 
-    const project = await getProject(projectId);
+    const project = await getProject(projectId, db);
 
     if (!project) {
       throw new Error("Project not found");

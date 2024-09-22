@@ -12,10 +12,12 @@ export default function ConversationTable() {
 
   const { data: conversations, refetch: refetchConversations } =
     api.conversations.getConversations.useQuery({
-      projectId: "66ef79bb9eb80cb66e6fdd43",
+      projectId: "66ef87e7f5c7f001b94e1c9d",
       limit: 10,
       sorting: sorting,
     });
+
+  console.log(conversations);
 
   const refetch = useCallback(
     (sorting: SortingState) => {
