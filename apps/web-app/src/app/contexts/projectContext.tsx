@@ -1,3 +1,5 @@
+"use client";
+
 import React, { createContext, useContext } from "react";
 import { api } from "~/trpc/react";
 interface ProjectContextType {

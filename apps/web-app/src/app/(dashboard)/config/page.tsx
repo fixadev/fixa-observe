@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { type Outcome } from "@prisma/client";
 import OutcomeItem from "./_components/OutcomeItem";
 import { Button } from "~/components/ui/button";
@@ -12,9 +12,19 @@ import { useProject } from "~/app/contexts/projectContext";
 export default function ConfigPage() {
   const { projectIds } = useProject();
   const [localOutcomes, setLocalOutcomes] = useState<Outcome[]>([]);
-  const { data: dbOutcomes, isLoading } = api.project.getProject.useQuery({
+  const {
+    data: project,
+    isLoading,
+    refetch: refetchProject,
+  } = api.project.getProject.useQuery({
     projectId: projectIds?.[0]?.id ?? "",
   });
+
+  useEffect(() => {
+    if (project) {
+      setLocalOutcomes(project.possibleOutcomes);
+    }
+  }, [project]);
 
   const handleInput = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
@@ -28,6 +38,21 @@ export default function ConfigPage() {
       );
       return newOutcomes;
     });
+  };
+
+  const { mutate: updateProject } = api.project.updateProject.useMutation();
+
+  const saveChanges = async () => {
+    if (!projectIds?.[0]?.id || !project?.name) {
+      console.error("No project ID or name found");
+      return;
+    }
+    updateProject({
+      projectId: projectIds[0].id,
+      projectName: project?.name,
+      outcomes: localOutcomes,
+    });
+    await refetchProject();
   };
 
   return (
@@ -75,6 +100,15 @@ export default function ConfigPage() {
           + add outcome
         </Button>
       </div>
+      {JSON.stringify(localOutcomes) !==
+        JSON.stringify(project?.possibleOutcomes) && (
+        <PersistentToast
+          saveChanges={saveChanges}
+          discardChanges={() => {
+            setLocalOutcomes(project?.possibleOutcomes ?? []);
+          }}
+        />
+      )}
     </div>
   );
 }

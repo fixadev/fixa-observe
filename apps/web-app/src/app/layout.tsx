@@ -35,28 +35,28 @@ export default function RootLayout({
       style={{ colorScheme: "light" }}
     >
       <CSPostHogProvider>
-        <ProjectProvider>
-          <ClerkProvider
-          // appearance={{ baseTheme: dark }}
-          // localization={localization}
-          >
-            <body>
-              <ThemeProvider
-                attribute="class"
-                defaultTheme="light"
-                enableSystem
-                disableTransitionOnChange
-              >
-                <TRPCReactProvider>
+        <ClerkProvider
+        // appearance={{ baseTheme: dark }}
+        // localization={localization}
+        >
+          <body>
+            <ThemeProvider
+              attribute="class"
+              defaultTheme="light"
+              enableSystem
+              disableTransitionOnChange
+            >
+              <TRPCReactProvider>
+                <ProjectProvider>
                   <ChildrenWrapper>
                     {children}
                     <Toaster />
                   </ChildrenWrapper>
-                </TRPCReactProvider>
-              </ThemeProvider>
-            </body>
-          </ClerkProvider>
-        </ProjectProvider>
+                </ProjectProvider>
+              </TRPCReactProvider>
+            </ThemeProvider>
+          </body>
+        </ClerkProvider>
       </CSPostHogProvider>
     </html>
   );
