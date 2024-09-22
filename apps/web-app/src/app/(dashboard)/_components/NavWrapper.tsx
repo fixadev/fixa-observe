@@ -58,7 +58,14 @@ export default function NavWrapper({
               <div className="py-2">
                 {selectedProject?.id && (
                   <Select
-                    onValueChange={(value) => console.log(value)}
+                    onValueChange={(value) => {
+                      const project = projects?.find(
+                        (project) => project.id === value,
+                      );
+                      if (project) {
+                        setSelectedProject(project);
+                      }
+                    }}
                     defaultValue={selectedProject?.id}
                     disabled={isLoading}
                   >
@@ -71,7 +78,6 @@ export default function NavWrapper({
                           className="cursor-pointer"
                           value={project.id}
                           key={project.id}
-                          onClick={() => setSelectedProject(project)}
                         >
                           {project.name}
                         </SelectItem>
