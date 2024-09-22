@@ -25,16 +25,10 @@ export const ProjectProvider: React.FC<{ children: React.ReactNode }> = ({
   } = api.project.getProjectsByUser.useQuery();
 
   useEffect(() => {
-    console.log("PROJECTS", projects);
     if (projects?.[0]) {
-      console.log("SETTING SELECTED PROJECT", projects[0]);
       setSelectedProject(projects[0]);
     }
   }, [projects]);
-
-  useEffect(() => {
-    console.log("SELECTED PROJECT", selectedProject);
-  }, [selectedProject]);
 
   return (
     <ProjectContext.Provider
