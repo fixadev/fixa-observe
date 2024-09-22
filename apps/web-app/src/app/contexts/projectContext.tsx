@@ -3,9 +3,9 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { api } from "~/trpc/react";
 interface ProjectContextType {
-  selectedProjectId: string | undefined;
-  setSelectedProjectId: (id: string) => void;
-  projectIds: { id: string; name: string }[] | undefined;
+  selectedProject: { id: string; name: string } | undefined;
+  setSelectedProject: (project: { id: string; name: string }) => void;
+  projects: { id: string; name: string }[] | undefined;
   isLoading: boolean;
   refetchProjects: () => void;
 }
@@ -15,27 +15,28 @@ const ProjectContext = createContext<ProjectContextType | undefined>(undefined);
 export const ProjectProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const [selectedProjectId, setSelectedProjectId] = useState<
-    string | undefined
+  const [selectedProject, setSelectedProject] = useState<
+    { id: string; name: string } | undefined
   >(undefined);
   const {
-    data: projectIds,
+    data: projects,
     isLoading,
     refetch: refetchProjects,
   } = api.project.getProjectsByUser.useQuery();
 
   useEffect(() => {
-    if (projectIds?.[0]?.id) {
-      setSelectedProjectId(projectIds[0].id);
+    if (projects?.[0]) {
+      console.log("SETTING SELECTED PROJECT", projects[0]);
+      setSelectedProject(projects[0]);
     }
-  }, [projectIds]);
+  }, [projects]);
 
   return (
     <ProjectContext.Provider
       value={{
-        selectedProjectId,
-        setSelectedProjectId,
-        projectIds,
+        selectedProject,
+        setSelectedProject,
+        projects,
         isLoading,
         refetchProjects: () => {
           void refetchProjects();

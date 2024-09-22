@@ -5,22 +5,22 @@ import { type OutcomeInput } from "~/lib/types/project";
 import OutcomeItem from "./_components/OutcomeItem";
 import { Button } from "~/components/ui/button";
 import PageHeader from "~/components/PageHeader";
-import { PersistentToast } from "./_components/saveToast";
+import { UnsavedChangesToast } from "./_components/saveToast";
 import { api } from "~/trpc/react";
 import { useProject } from "~/app/contexts/projectContext";
 import { skipToken } from "@tanstack/react-query";
 
 export default function ConfigPage() {
-  const { selectedProjectId } = useProject();
+  const { selectedProject } = useProject();
   const [localOutcomes, setLocalOutcomes] = useState<OutcomeInput[]>([]);
   const {
     data: project,
     isLoading,
     refetch: refetchProject,
   } = api.project.getProject.useQuery(
-    selectedProjectId
+    selectedProject?.id
       ? {
-          projectId: selectedProjectId,
+          projectId: selectedProject.id,
         }
       : skipToken,
   );
@@ -40,7 +40,7 @@ export default function ConfigPage() {
         },
       ]);
     }
-  }, [project, selectedProjectId]);
+  }, [project, selectedProject?.id]);
 
   const handleInput = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
@@ -70,12 +70,12 @@ export default function ConfigPage() {
   });
 
   const saveChanges = async () => {
-    if (!selectedProjectId || !project?.name) {
+    if (!selectedProject?.id || !project?.name) {
       console.error("No project ID or name found");
       return;
     }
     updateProject({
-      projectId: selectedProjectId,
+      projectId: selectedProject.id,
       projectName: project?.name,
       outcomes: localOutcomes,
     });
@@ -94,7 +94,7 @@ export default function ConfigPage() {
   return (
     <div className="w-full max-w-2xl self-center">
       <PageHeader title="outcomes" />
-      <div className="flex flex-col items-start gap-2">
+      <div className="mb-20 flex flex-col items-start gap-2">
         {localOutcomes.map((outcome, index) => (
           <OutcomeItem
             key={index}
@@ -120,7 +120,7 @@ export default function ConfigPage() {
         </Button>
       </div>
       {checkIfOutcomesChanged() && (
-        <PersistentToast
+        <UnsavedChangesToast
           saveChanges={() => {
             saveChanges().catch((error) => {
               console.error("Error saving changes", error);

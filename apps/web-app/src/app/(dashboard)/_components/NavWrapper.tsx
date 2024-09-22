@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect } from "react";
 import { usePathname } from "next/navigation";
-
+import { useProject } from "~/app/contexts/projectContext";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import {
@@ -33,6 +34,16 @@ export default function NavWrapper({
 }) {
   const pathname = usePathname();
 
+  const { selectedProject, setSelectedProject, projects, isLoading } =
+    useProject();
+
+  useEffect(() => {
+    if (projects) {
+      console.log("PROJECTS", projects);
+      console.log("SELECTED PROJECT", selectedProject);
+    }
+  }, [projects, selectedProject, setSelectedProject]);
+
   return (
     <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
       <div className="hidden border-r bg-muted/40 md:block">
@@ -45,22 +56,29 @@ export default function NavWrapper({
           <div className="flex-1">
             <nav className="grid items-start px-2 text-sm font-medium lg:px-4">
               <div className="py-2">
-                <Select
-                  onValueChange={(value) => console.log(value)}
-                  defaultValue={"default_project"}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="project" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem
-                      className="cursor-pointer"
-                      value="default_project"
-                    >
-                      default project
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
+                {selectedProject?.id && (
+                  <Select
+                    onValueChange={(value) => console.log(value)}
+                    defaultValue={selectedProject?.id}
+                    disabled={isLoading}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="project" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {projects?.map((project) => (
+                        <SelectItem
+                          className="cursor-pointer"
+                          value={project.id}
+                          key={project.id}
+                          onClick={() => setSelectedProject(project)}
+                        >
+                          {project.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
               </div>
 
               {navItems.map((item) => (
