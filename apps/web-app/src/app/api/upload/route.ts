@@ -115,18 +115,21 @@ async function analyzeAudio(
 
     const possibleOutcomes = project.possibleOutcomes;
 
+
     const prompt = `
         Analyze this recording of a phone call.
 
         There are ${possibleOutcomes.length} possible outcomes for a call
-        ${possibleOutcomes.map((outcome, index) => `${index + 1}. ${outcome.name}`).join("\n")}
+        ${possibleOutcomes.map((outcome, index) => `${index}. ${outcome.name}`).join("\n")}
 
         Return a json with three properties.
 
-        desiredOutcome (1-${possibleOutcomes.length})
-        actualOutcome (1-${possibleOutcomes.length})
+        desiredOutcome: (0-${possibleOutcomes.length - 1})
+        actualOutcome: (0-${possibleOutcomes.length - 1})
         probSuccess: Certainty that the actual outcome matched the desired outcome (0-100%) 
     `;
+
+
 
     const filePart: Part = {
       fileData: {
@@ -155,15 +158,23 @@ async function analyzeAudio(
       const { desiredOutcome, actualOutcome, probSuccess } = JSON.parse(
         cleanedResult,
       ) as {
-        desiredOutcome: string;
-        actualOutcome: string;
-        probSuccess: string;
+        desiredOutcome: number;
+        actualOutcome: number;
+        probSuccess: number;
       };
       if (
         desiredOutcome !== undefined &&
         actualOutcome !== undefined &&
         probSuccess !== undefined
       ) {
+
+        const desiredOutcomeId = possibleOutcomes[desiredOutcome]?.id;
+        const actualOutcomeId = possibleOutcomes[actualOutcome]?.id;
+
+        if (!desiredOutcomeId || !actualOutcomeId) {
+          throw new Error("Outcome not found");
+        }
+
         await insertConversation({
           id: uuidv4(),
           createdAt: new Date(),
@@ -172,9 +183,9 @@ async function analyzeAudio(
           transcript,
           audioUrl: fileUrl,
           analysis: cleanedResult,
-          desiredOutcome: Number(desiredOutcome),
-          actualOutcome: Number(actualOutcome),
-          probSuccess: Number(probSuccess),
+          desiredOutcomeId: desiredOutcomeId,
+          actualOutcomeId: actualOutcomeId,
+          probSuccess: probSuccess,
         });
       } else {
         console.log("error parsing LLM result", cleanedResult);
@@ -198,8 +209,8 @@ const insertConversation = async (conversation: Conversation) => {
         transcript: conversation.transcript,
         audioUrl: conversation.audioUrl,
         analysis: conversation.analysis,
-        desiredOutcome: conversation.desiredOutcome,
-        actualOutcome: conversation.actualOutcome,
+        desiredOutcomeId: conversation.desiredOutcomeId,
+        actualOutcomeId: conversation.actualOutcomeId,
         probSuccess: conversation.probSuccess,
       },
     });
