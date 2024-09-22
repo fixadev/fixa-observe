@@ -27,9 +27,18 @@ export const updateProject = async (
   userId: string,
   db: PrismaClient,
 ) => {
+
+  const existingOutcomes = outcomes.filter((o) => o.id);
+  const newOutcomes = outcomes.filter((o) => !o.id);
+
   const project = await db.project.update({
     where: { id: projectId, ownerId: userId },
-    data: { name: projectName, possibleOutcomes: { create: outcomes } },
+    data: {
+    possibleOutcomes: {
+      set: existingOutcomes.map(o => ({ id: o.id })),
+      create: newOutcomes
+    }
+  }
   });
   return project;
 };
@@ -48,7 +57,7 @@ export const getProjectsByUser = async (
 ) => {
   const user = await db.user.findUnique({
     where: {
-      clerkId: userId ?? "",
+      id: userId ?? "",
     },
     include: {
       projects: {

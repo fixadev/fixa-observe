@@ -1,41 +1,46 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { type Outcome } from "@prisma/client";
+import { type OutcomeInput } from "~/lib/types/project";
 import OutcomeItem from "./_components/OutcomeItem";
 import { Button } from "~/components/ui/button";
 import PageHeader from "~/components/PageHeader";
 import { PersistentToast } from "./_components/saveToast";
 import { api } from "~/trpc/react";
 import { useProject } from "~/app/contexts/projectContext";
+import { skipToken } from "@tanstack/react-query";
 
 export default function ConfigPage() {
-  const { projectIds } = useProject();
-  const [localOutcomes, setLocalOutcomes] = useState<Outcome[]>([]);
+  const { selectedProjectId } = useProject();
+  const [localOutcomes, setLocalOutcomes] = useState<OutcomeInput[]>([]);
   const {
     data: project,
     isLoading,
     refetch: refetchProject,
-  } = api.project.getProject.useQuery({
-    projectId: projectIds?.[0]?.id ?? "",
-  });
+  } = api.project.getProject.useQuery(
+    selectedProjectId
+      ? {
+          projectId: selectedProjectId,
+        }
+      : skipToken,
+  );
 
   useEffect(() => {
-    if (project && project.possibleOutcomes) {
+    if (
+      project &&
+      project.possibleOutcomes &&
+      project.possibleOutcomes.length > 0
+    ) {
       setLocalOutcomes(project.possibleOutcomes);
     } else {
       setLocalOutcomes([
         {
-          id: "",
-          createdAt: new Date(),
-          updatedAt: new Date(),
           name: "",
           description: "",
-          projectId: null,
         },
       ]);
     }
-  }, [project]);
+  }, [project, selectedProjectId]);
 
   const handleInput = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
@@ -51,19 +56,39 @@ export default function ConfigPage() {
     });
   };
 
-  const { mutate: updateProject } = api.project.updateProject.useMutation();
+  const handleDelete = (index: number) => {
+    setLocalOutcomes((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const { mutate: updateProject } = api.project.updateProject.useMutation({
+    onSuccess: async () => {
+      await refetchProject();
+    },
+    onError: (error) => {
+      console.error("Error updating project", error);
+    },
+  });
 
   const saveChanges = async () => {
-    if (!projectIds?.[0]?.id || !project?.name) {
+    if (!selectedProjectId || !project?.name) {
       console.error("No project ID or name found");
       return;
     }
     updateProject({
-      projectId: projectIds[0].id,
+      projectId: selectedProjectId,
       projectName: project?.name,
       outcomes: localOutcomes,
     });
-    await refetchProject();
+  };
+
+  const checkIfOutcomesChanged = () => {
+    return (
+      JSON.stringify(localOutcomes) !==
+        JSON.stringify(project?.possibleOutcomes) &&
+      localOutcomes.some(
+        (outcome) => outcome.name !== "" || outcome.description !== "",
+      )
+    );
   };
 
   return (
@@ -72,9 +97,10 @@ export default function ConfigPage() {
       <div className="flex flex-col items-start gap-2">
         {localOutcomes.map((outcome, index) => (
           <OutcomeItem
-            key={outcome.id}
+            key={index}
             index={index}
             handleInput={handleInput}
+            handleDelete={handleDelete}
             outcome={outcome}
           />
         ))}
@@ -84,12 +110,8 @@ export default function ConfigPage() {
             setLocalOutcomes([
               ...localOutcomes,
               {
-                id: "",
-                createdAt: new Date(),
-                updatedAt: new Date(),
                 name: "",
                 description: "",
-                projectId: null,
               },
             ])
           }
@@ -97,10 +119,13 @@ export default function ConfigPage() {
           + add outcome
         </Button>
       </div>
-      {JSON.stringify(localOutcomes) !==
-        JSON.stringify(project?.possibleOutcomes) && (
+      {checkIfOutcomesChanged() && (
         <PersistentToast
-          saveChanges={saveChanges}
+          saveChanges={() => {
+            saveChanges().catch((error) => {
+              console.error("Error saving changes", error);
+            });
+          }}
           discardChanges={() => {
             setLocalOutcomes(project?.possibleOutcomes ?? []);
           }}
