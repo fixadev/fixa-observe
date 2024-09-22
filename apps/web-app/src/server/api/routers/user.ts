@@ -1,4 +1,4 @@
-import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
+import { createTRPCRouter, publicProcedure } from "../trpc";
 
 export const userRouter = createTRPCRouter({
   getProfile: publicProcedure.query(({ ctx }) => {
@@ -9,19 +9,6 @@ export const userRouter = createTRPCRouter({
     return ctx.db.user.findFirst({
       where: {
         clerkId: ctx.auth.userId,
-      },
-    });
-  }),
-
-  generate: protectedProcedure.mutation(({ ctx }) => {
-    return ctx.db.user.update({
-      where: {
-        clerkId: ctx.auth.userId,
-      },
-      data: {
-        generationsLeft: {
-          decrement: 1,
-        },
       },
     });
   }),

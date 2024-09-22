@@ -9,7 +9,6 @@ import {
   getCoreRowModel,
   getFilteredRowModel,
   getPaginationRowModel,
-  getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
 
@@ -21,18 +20,20 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { DataTablePagination } from "./DataTablePagination";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
+  refetch: (sorting: SortingState) => void;
   initialSorting?: SortingState;
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
+  refetch,
   initialSorting,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = useState<SortingState>(initialSorting ?? []);
@@ -40,13 +41,21 @@ export function DataTable<TData, TValue>({
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = useState({});
 
+  useEffect(() => {
+    refetch(sorting);
+    console.log(sorting);
+  }, [refetch, sorting]);
+
   const table = useReactTable({
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
+
     onSortingChange: setSorting,
-    getSortedRowModel: getSortedRowModel(),
+    // getSortedRowModel: getSortedRowModel(),
+    manualSorting: true,
+
     onColumnFiltersChange: setColumnFilters,
     getFilteredRowModel: getFilteredRowModel(),
     onColumnVisibilityChange: setColumnVisibility,
