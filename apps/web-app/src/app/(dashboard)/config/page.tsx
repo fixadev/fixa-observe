@@ -1,24 +1,29 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { type Outcome } from "@prisma/client";
+import { type OutcomeInput } from "~/lib/types/project";
 import OutcomeItem from "./_components/OutcomeItem";
 import { Button } from "~/components/ui/button";
 import PageHeader from "~/components/PageHeader";
 import { PersistentToast } from "./_components/saveToast";
 import { api } from "~/trpc/react";
 import { useProject } from "~/app/contexts/projectContext";
-import { v4 as uuidv4 } from "uuid";
+import { skipToken } from "@tanstack/react-query";
+
 export default function ConfigPage() {
   const { selectedProjectId } = useProject();
-  const [localOutcomes, setLocalOutcomes] = useState<Outcome[]>([]);
+  const [localOutcomes, setLocalOutcomes] = useState<OutcomeInput[]>([]);
   const {
     data: project,
     isLoading,
     refetch: refetchProject,
-  } = api.project.getProject.useQuery({
-    projectId: selectedProjectId ?? "",
-  });
+  } = api.project.getProject.useQuery(
+    selectedProjectId
+      ? {
+          projectId: selectedProjectId,
+        }
+      : skipToken,
+  );
 
   useEffect(() => {
     console.log("PROJECT DETAILS ARE", project);
@@ -31,12 +36,8 @@ export default function ConfigPage() {
     } else {
       setLocalOutcomes([
         {
-          id: uuidv4(),
-          createdAt: new Date(),
-          updatedAt: new Date(),
           name: "",
           description: "",
-          projectId: selectedProjectId ?? "",
         },
       ]);
     }
@@ -58,7 +59,18 @@ export default function ConfigPage() {
     });
   };
 
-  const { mutate: updateProject } = api.project.updateProject.useMutation();
+  const handleDelete = (index: number) => {
+    setLocalOutcomes((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const { mutate: updateProject } = api.project.updateProject.useMutation({
+    onSuccess: async () => {
+      await refetchProject();
+    },
+    onError: (error) => {
+      console.error("Error updating project", error);
+    },
+  });
 
   const saveChanges = async () => {
     if (!selectedProjectId || !project?.name) {
@@ -71,7 +83,6 @@ export default function ConfigPage() {
       projectName: project?.name,
       outcomes: localOutcomes,
     });
-    await refetchProject();
   };
 
   const checkIfOutcomesChanged = () => {
@@ -93,6 +104,7 @@ export default function ConfigPage() {
             key={index}
             index={index}
             handleInput={handleInput}
+            handleDelete={handleDelete}
             outcome={outcome}
           />
         ))}
@@ -102,12 +114,8 @@ export default function ConfigPage() {
             setLocalOutcomes([
               ...localOutcomes,
               {
-                id: uuidv4(),
-                createdAt: new Date(),
-                updatedAt: new Date(),
                 name: "",
                 description: "",
-                projectId: selectedProjectId ?? "",
               },
             ])
           }
