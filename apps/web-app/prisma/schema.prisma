@@ -49,15 +49,15 @@ model Outcome {
 }
 
 model Conversation {
-  id             String   @id @default(auto()) @map("_id") @db.ObjectId
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-  transcript     String
-  audioUrl       String
-  analysis       String
-  desiredOutcome Int
-  actualOutcome  Int
-  probSuccess    Int
-  Project        Project? @relation(fields: [projectId], references: [id])
-  projectId      String?  @db.ObjectId
+  id               String   @id @default(auto()) @map("_id") @db.ObjectId
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  transcript       String
+  audioUrl         String
+  analysis         String
+  desiredOutcomeId String?  @db.ObjectId
+  actualOutcomeId  String?  @db.ObjectId
+  probSuccess      Int
+  Project          Project? @relation(fields: [projectId], references: [id])
+  projectId        String?  @db.ObjectId
 }
