@@ -4,6 +4,7 @@ import { Storage } from '@google-cloud/storage';
 import { v4 as uuidv4 } from 'uuid';
 import { db } from "~/server/db";
 import { type Conversation } from "@prisma/client";
+import { getProject } from "~/app/shared/services/getProject";
 // const storage = new Storage({
 //   projectId: process.env.GOOGLE_CLOUD_PROJECT_ID,
 //   credentials: {
@@ -72,73 +73,84 @@ export async function POST(request: NextRequest) {
 
 async function analyzeAudio(projectId: string, bucket: string, fileName: string, transcript: string) {
 
-  const fileUri = `gs://${bucket}/${fileName}`
-  const fileUrl = `https://storage.googleapis.com/${bucket}/${fileName}`
+  try {
+    const fileUri = `gs://${bucket}/${fileName}`
+    const fileUrl = `https://storage.googleapis.com/${bucket}/${fileName}`
 
-  const vertexai = new VertexAI({
-    project: 'pixa-website',
-  });
-  const model = vertexai.getGenerativeModel({
-    model: 'gemini-1.5-pro-001',
-  });
+    const vertexai = new VertexAI({
+      project: 'pixa-website',
+    });
+    const model = vertexai.getGenerativeModel({
+      model: 'gemini-1.5-pro-001',
+    });
 
-  const prompt = `
-      Analyze this recording of a phone call.
+    const project = await getProject(projectId)
 
-      There are 4 possible outcomes for a call
-      An appointment is scheduled
-      An appointment is canceled
-      An appointment is rescheduled
-      Nothing happens 
-
-      Return a json with two properties.
-
-      desiredOutcome (1-4)
-      actualOutcome (1-4)
-      probSuccess: Certainty that the actual outcome matched the desired outcome (0-100%) 
-  `
-
-  const filePart: Part = {
-    fileData: {
-      fileUri: fileUri,
-      mimeType: 'audio/wav',
+    if (!project) {
+      throw new Error('Project not found')
     }
-  }
-  const textPart: Part = {
-    text: prompt,
-  }
 
-  const request = {
-    contents: [{role: 'user', parts: [filePart, textPart]}],
-  }
+    const possibleOutcomes = project.possibleOutcomes
 
-  const response = await model.generateContent(request);
-  const result = response?.response?.candidates?.[0]?.content?.parts?.[0]?.text
-  const cleanedResult = result?.replaceAll('```json\n', '').replaceAll('\n```', '').trim()
+    const prompt = `
+        Analyze this recording of a phone call.
 
-  if (cleanedResult) {
-    console.log(cleanedResult)
-    const { desiredOutcome, actualOutcome, probSuccess } = JSON.parse(cleanedResult) as { desiredOutcome: string, actualOutcome: string, probSuccess: string }
-    if (desiredOutcome !== undefined && actualOutcome !== undefined && probSuccess !== undefined) {
-      await insertConversation({
-        id: uuidv4(),
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        projectId,
-        transcript,
-        audioUrl: fileUrl,
-        analysis: cleanedResult,
-        desiredOutcome: Number(desiredOutcome),
-        actualOutcome: Number(actualOutcome),
-        probSuccess: Number(probSuccess)
-      })
+        There are ${possibleOutcomes.length} possible outcomes for a call
+        ${possibleOutcomes.map((outcome, index) => `${index + 1}. ${outcome.name}`).join('\n')}
+
+        Return a json with three properties.
+
+        desiredOutcome (1-${possibleOutcomes.length})
+        actualOutcome (1-${possibleOutcomes.length})
+        probSuccess: Certainty that the actual outcome matched the desired outcome (0-100%) 
+    `
+
+    const filePart: Part = {
+      fileData: {
+        fileUri: fileUri,
+        mimeType: 'audio/wav',
+      }
     }
-    else {
-      console.log('error parsing LLM result', cleanedResult)
+    const textPart: Part = {
+      text: prompt,
     }
-    return result
-  } else {
-    throw new Error('No result')
+
+    const request = {
+      contents: [{role: 'user', parts: [filePart, textPart]}],
+    }
+
+    const response = await model.generateContent(request);
+    const result = response?.response?.candidates?.[0]?.content?.parts?.[0]?.text
+    const cleanedResult = result?.replaceAll('```json\n', '').replaceAll('\n```', '').trim()
+
+    if (cleanedResult) {
+      console.log(cleanedResult)
+      const { desiredOutcome, actualOutcome, probSuccess } = JSON.parse(cleanedResult) as { desiredOutcome: string, actualOutcome: string, probSuccess: string }
+      if (desiredOutcome !== undefined && actualOutcome !== undefined && probSuccess !== undefined) {
+        await insertConversation({
+          id: uuidv4(),
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          projectId,
+          transcript,
+          audioUrl: fileUrl,
+          analysis: cleanedResult,
+          desiredOutcome: Number(desiredOutcome),
+          actualOutcome: Number(actualOutcome),
+          probSuccess: Number(probSuccess)
+        })
+      }
+      else {
+        console.log('error parsing LLM result', cleanedResult)
+      }
+      return result
+    } else {
+      throw new Error('No result')
+    }
+
+  } catch (error) {
+    console.error('Error analyzing audio:', error);
+    throw error;
   }
 }
 
@@ -163,5 +175,7 @@ const insertConversation = async (conversation: Conversation) => {
     throw error;
   }
 };
+
+
 
 

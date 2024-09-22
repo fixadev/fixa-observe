@@ -29,16 +29,15 @@ export const projectRouter = createTRPCRouter({
     return project;
   }),
 
-  updateOutcomes: publicProcedure.input(z.object({ projectId: z.string(), outcomes: z.array(outcomeInput) })).mutation(async ({ ctx, input }) => {
-    const { projectId, outcomes } = input;
+  updateProject: publicProcedure.input(z.object({ projectId: z.string(), projectName: z.string(), outcomes: z.array(outcomeInput) })).mutation(async ({ ctx, input }) => {
+    const { projectId, projectName, outcomes } = input;
 
     const project = await ctx.db.project.update({
       where: { id: projectId },
-      data: { possibleOutcomes: { create: outcomes } },
+      data: { name: projectName, possibleOutcomes: { create: outcomes } },
     });
 
     return project;
   }),
-
  
 });
