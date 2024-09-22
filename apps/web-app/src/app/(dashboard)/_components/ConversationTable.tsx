@@ -10,25 +10,36 @@ export default function ConversationTable() {
   const initialSorting = useMemo(() => [{ id: "createdAt", desc: true }], []);
   const [sorting, setSorting] = useState<SortingState>(initialSorting);
 
-  const { data: conversations, refetch: refetchConversations } =
+  const { data: project } = api.project.getProject.useQuery({
+    projectId: "66efa899a85842502e89634c",
+  });
+  const outcomes = useMemo(() => {
+    const obj: Record<string, string> = {};
+    for (const outcome of project?.possibleOutcomes ?? []) {
+      obj[outcome.id] = outcome.name;
+    }
+    return obj;
+  }, [project]);
+
+  const { data: rawConversations, refetch: refetchConversations } =
     api.conversations.getConversations.useQuery({
-      projectId: "66ef87e7f5c7f001b94e1c9d",
+      // projectId: "66efa899a85842502e89634c",
+      projectId: project?.id,
       limit: 10,
       sorting: sorting,
     });
-
-  console.log(conversations);
+  const conversations = useMemo(() => {
+    return rawConversations?.map((conversation) => ({
+      ...conversation,
+      desiredOutcome: outcomes[conversation.desiredOutcomeId ?? ""],
+      actualOutcome: outcomes[conversation.actualOutcomeId ?? ""],
+    }));
+  }, [outcomes, rawConversations]);
 
   const refetch = useCallback(
     (sorting: SortingState) => {
       setSorting(sorting);
       void refetchConversations();
-      // void refetchConversations();
-      // {
-      // projectId: "66ef79bb9eb80cb66e6fdd43",
-      // limit: 10,
-      // sorting: sorting as { id: string; desc: boolean }[],
-      // }
     },
     [refetchConversations],
   );

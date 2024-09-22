@@ -43,7 +43,7 @@ export function DataTable<TData, TValue>({
 
   useEffect(() => {
     refetch(sorting);
-    console.log(sorting);
+    // console.log(JSON.stringify(sorting, null, 2));
   }, [refetch, sorting]);
 
   const table = useReactTable({
