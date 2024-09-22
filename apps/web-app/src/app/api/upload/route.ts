@@ -1,10 +1,11 @@
-import { VertexAI, type Part } from '@google-cloud/vertexai';
 import { type NextRequest, NextResponse } from 'next/server';
+import { VertexAI, type Part } from '@google-cloud/vertexai';
 import { Storage } from '@google-cloud/storage';
 import { v4 as uuidv4 } from 'uuid';
 import { db } from "~/server/db";
 import { type Conversation } from "@prisma/client";
 import { getProject } from "~/app/shared/services/getProject";
+
 // const storage = new Storage({
 //   projectId: process.env.GOOGLE_CLOUD_PROJECT_ID,
 //   credentials: {
@@ -83,6 +84,7 @@ async function analyzeAudio(projectId: string, bucket: string, fileName: string,
     const model = vertexai.getGenerativeModel({
       model: 'gemini-1.5-pro-001',
     });
+
 
     const project = await getProject(projectId)
 
@@ -176,6 +178,42 @@ const insertConversation = async (conversation: Conversation) => {
   }
 };
 
+
+
+const createMockProject = async () => {
+  try {
+    const result = await db.project.create({
+      data: {
+        userId: 'mock-user-id',
+        name: 'Mock Project',
+        possibleOutcomes: {
+          create: [
+            {
+              name: 'Positive Outcome',
+              description: 'The project succeeds beyond expectations'
+            },
+            {
+              name: 'Neutral Outcome',
+              description: 'The project meets basic requirements'
+            },
+            {
+              name: 'Negative Outcome',
+              description: 'The project fails to meet its objectives'
+            }
+          ]
+        }
+      },
+      include: {
+        possibleOutcomes: true
+      }
+    });
+    console.log('Mock project created:', result);
+    return result;
+  } catch (error) {
+    console.error('Error creating mock project:', error);
+    throw error;
+  }
+};
 
 
 
