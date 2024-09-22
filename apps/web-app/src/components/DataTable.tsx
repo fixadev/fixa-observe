@@ -3,12 +3,12 @@
 import {
   type ColumnDef,
   type ColumnFiltersState,
+  type PaginationState,
   type SortingState,
   type VisibilityState,
   flexRender,
   getCoreRowModel,
   getFilteredRowModel,
-  getPaginationRowModel,
   useReactTable,
 } from "@tanstack/react-table";
 
@@ -26,8 +26,13 @@ import { DataTablePagination } from "./DataTablePagination";
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
-  refetch: (sorting: SortingState) => void;
+  refetch: (sorting: SortingState, pagination: PaginationState) => void;
   initialSorting?: SortingState;
+  initialPagination?: {
+    pageIndex: number;
+    pageSize: number;
+  };
+  rowCount?: number;
 }
 
 export function DataTable<TData, TValue>({
@@ -35,22 +40,34 @@ export function DataTable<TData, TValue>({
   data,
   refetch,
   initialSorting,
+  initialPagination,
+  rowCount,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = useState<SortingState>(initialSorting ?? []);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = useState({});
+  const [pagination, setPagination] = useState<PaginationState>(
+    initialPagination ?? {
+      pageIndex: 0,
+      pageSize: 10,
+    },
+  );
 
   useEffect(() => {
-    refetch(sorting);
+    refetch(sorting, pagination);
     // console.log(JSON.stringify(sorting, null, 2));
-  }, [refetch, sorting]);
+  }, [refetch, sorting, pagination]);
 
   const table = useReactTable({
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
+
+    onPaginationChange: setPagination,
+    // getPaginationRowModel: getPaginationRowModel(),
+    manualPagination: true,
+    rowCount,
 
     onSortingChange: setSorting,
     // getSortedRowModel: getSortedRowModel(),
@@ -65,6 +82,7 @@ export function DataTable<TData, TValue>({
       columnFilters,
       columnVisibility,
       rowSelection,
+      pagination,
     },
   });
 

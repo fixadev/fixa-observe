@@ -7,22 +7,36 @@ export const conversationsRouter = createTRPCRouter({
       z.object({
         projectId: z.string().optional(),
         sorting: z.array(z.object({ id: z.string(), desc: z.boolean() })),
-        limit: z.number(),
+        pageSize: z.number(),
+        pageIndex: z.number(),
       }),
     )
     .query(async ({ ctx, input }) => {
-      const { projectId, limit, sorting } = input;
+      const { projectId, pageSize, pageIndex, sorting } = input;
       if (!projectId) {
-        return [];
+        return {
+          conversations: [],
+          count: 0,
+        };
       }
+
+      const orderBy = sorting.map(({ id, desc }) => ({
+        [id]: desc ? "desc" : "asc",
+      }));
+
+      const count = await ctx.db.conversation.count({
+        where: { projectId },
+      });
 
       const conversations = await ctx.db.conversation.findMany({
         where: { projectId },
-        orderBy: sorting.map(({ id, desc }) => ({
-          [id]: desc ? "desc" : "asc",
-        })),
-        take: limit,
+        orderBy,
+        take: pageSize,
+        skip: pageIndex * pageSize,
       });
-      return conversations;
+      return {
+        conversations,
+        count,
+      };
     }),
 });
