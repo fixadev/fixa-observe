@@ -50,7 +50,7 @@ export const getProjectsByUser = async (
 ) => {
   const user = await db.user.findUnique({
     where: {
-      clerkId: userId ?? "",
+      id: userId ?? "",
     },
     include: {
       projects: {
