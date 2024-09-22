@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { createTRPCRouter, publicProcedure } from "../trpc";
-import { createProjectInput, outcomeInput, updateProjectInput } from "~/lib/types/project";
+import { createProjectInput, updateProjectInput } from "~/lib/types/project";
 import { createProject } from "~/app/shared/services/createProject";
 import { getProject } from "~/app/shared/services/getProject";
 import { updateProject } from "~/app/shared/services/updateProject";
