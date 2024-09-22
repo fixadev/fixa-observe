@@ -26,7 +26,6 @@ export default function ConfigPage() {
   );
 
   useEffect(() => {
-    console.log("PROJECT DETAILS ARE", project);
     if (
       project &&
       project.possibleOutcomes &&
@@ -49,12 +48,10 @@ export default function ConfigPage() {
   ) => {
     const value = e.target.value;
     const name = e.target.name;
-    console.log("HANDLING INPUT", index, name, value);
     setLocalOutcomes((prev) => {
       const newOutcomes = prev.map((outcome, i) =>
         i === index ? { ...outcome, [name]: value } : outcome,
       );
-      console.log("NEW OUTCOMES", newOutcomes);
       return newOutcomes;
     });
   };
@@ -77,7 +74,6 @@ export default function ConfigPage() {
       console.error("No project ID or name found");
       return;
     }
-    console.log("SAVING OUTCOMES", localOutcomes);
     updateProject({
       projectId: selectedProjectId,
       projectName: project?.name,
