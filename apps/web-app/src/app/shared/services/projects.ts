@@ -37,7 +37,7 @@ export const updateProject = async (
 export const getProject = async (projectId: string, db: PrismaClient) => {
   const project = await db.project.findUnique({
     where: { id: projectId },
-    include: { possibleOutcomes: true, conversations: true },
+    include: { possibleOutcomes: true, conversations: false },
   });
   return project;
 };
