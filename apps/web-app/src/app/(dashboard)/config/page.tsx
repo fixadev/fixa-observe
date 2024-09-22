@@ -21,8 +21,19 @@ export default function ConfigPage() {
   });
 
   useEffect(() => {
-    if (project) {
+    if (project && project.possibleOutcomes) {
       setLocalOutcomes(project.possibleOutcomes);
+    } else {
+      setLocalOutcomes([
+        {
+          id: "",
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          name: "",
+          description: "",
+          projectId: null,
+        },
+      ]);
     }
   }, [project]);
 
@@ -59,20 +70,6 @@ export default function ConfigPage() {
     <div className="w-full max-w-2xl self-center">
       <PageHeader title="outcomes" />
       <div className="flex flex-col items-start gap-2">
-        {localOutcomes.length === 0 && (
-          <OutcomeItem
-            index={0}
-            handleInput={handleInput}
-            outcome={{
-              id: "",
-              createdAt: new Date(),
-              updatedAt: new Date(),
-              name: "",
-              description: "",
-              projectId: null,
-            }}
-          />
-        )}
         {localOutcomes.map((outcome, index) => (
           <OutcomeItem
             key={outcome.id}

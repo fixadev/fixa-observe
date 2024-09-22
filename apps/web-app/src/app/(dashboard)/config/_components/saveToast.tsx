@@ -8,7 +8,7 @@ export function PersistentToast({
   discardChanges: () => void;
 }) {
   return (
-    <div className="flex flex-row gap-2 p-4">
+    <div className="absolute bottom-0 flex flex-row gap-2 rounded-lg border-[2px] border-gray-200 px-4 py-2">
       <Button variant="destructive" onClick={discardChanges}></Button>
       <Button variant="default" onClick={saveChanges}>
         Save
