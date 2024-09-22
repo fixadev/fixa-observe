@@ -11,6 +11,7 @@ import {
   HomeIcon,
   RocketLaunchIcon,
 } from "@heroicons/react/24/outline";
+import { UserButton } from "@clerk/nextjs";
 
 const navItems = [
   { href: "/", icon: HomeIcon, label: "dashboard" },
@@ -92,6 +93,9 @@ export default function NavWrapper({
               </nav>
             </SheetContent>
           </Sheet>
+          <div className="ml-auto">
+            <UserButton />
+          </div>
         </header>
         <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
           {children}
