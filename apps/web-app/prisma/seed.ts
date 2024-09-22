@@ -14,6 +14,9 @@ async function createTestProject() {
         ],
       },
     },
+    include: {
+      possibleOutcomes: true,
+    },
   });
 
   // Create mock conversations
@@ -22,8 +25,8 @@ async function createTestProject() {
       transcript: "Hello, this is a positive call transcript.",
       audioUrl: "https://example.com/positive-call.wav",
       analysis: "",
-      desiredOutcome: 0,
-      actualOutcome: 0,
+      desiredOutcomeId: project.possibleOutcomes[0]!.id,
+      actualOutcomeId: project.possibleOutcomes[0]!.id,
       probSuccess: 90,
       createdAt: new Date(new Date().setDate(new Date().getDate() - 1)),
     },
@@ -31,8 +34,8 @@ async function createTestProject() {
       transcript: "This is a neutral call transcript.",
       audioUrl: "https://example.com/neutral-call.wav",
       analysis: "",
-      desiredOutcome: 0,
-      actualOutcome: 1,
+      desiredOutcomeId: project.possibleOutcomes[0]!.id,
+      actualOutcomeId: project.possibleOutcomes[1]!.id,
       probSuccess: 50,
       createdAt: new Date(new Date().setDate(new Date().getDate() - 2)),
     },
@@ -40,8 +43,8 @@ async function createTestProject() {
       transcript: "Unfortunately, this is a negative call transcript.",
       audioUrl: "https://example.com/negative-call.wav",
       analysis: "",
-      desiredOutcome: 0,
-      actualOutcome: 2,
+      desiredOutcomeId: project.possibleOutcomes[0]!.id,
+      actualOutcomeId: project.possibleOutcomes[2]!.id,
       probSuccess: 10,
       createdAt: new Date(new Date().setDate(new Date().getDate() - 3)),
     },
@@ -57,13 +60,14 @@ async function createTestProject() {
   }
 
   console.log("Seed data inserted successfully.");
+  return project;
 }
 
 async function deleteTestProject() {
-  await deleteProject("66ef87e7f5c7f001b94e1c9d", db);
+  await deleteProject("66efa71ae58c59c136ee46ae", db);
 }
 
-deleteTestProject()
+createTestProject()
   .catch((e) => {
     console.error(e);
     process.exit(1);

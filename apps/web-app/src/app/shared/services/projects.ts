@@ -64,10 +64,16 @@ export const getProjectsByUser = async (
 };
 
 export const deleteProject = async (projectId: string, db: PrismaClient) => {
-  await db.conversation.deleteMany({
-    where: { projectId: projectId },
-  });
-  await db.project.delete({
-    where: { id: projectId },
-  });
+  const queries = [
+    db.outcome.deleteMany({
+      where: { projectId: projectId },
+    }),
+    db.conversation.deleteMany({
+      where: { projectId: projectId },
+    }),
+    db.project.delete({
+      where: { id: projectId },
+    }),
+  ];
+  await db.$transaction(queries);
 };
