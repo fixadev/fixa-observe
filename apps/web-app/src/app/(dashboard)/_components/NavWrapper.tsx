@@ -11,6 +11,14 @@ import {
   HomeIcon,
   RocketLaunchIcon,
 } from "@heroicons/react/24/outline";
+import { UserButton } from "@clerk/nextjs";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "~/components/ui/select";
 
 const navItems = [
   { href: "/", icon: HomeIcon, label: "dashboard" },
@@ -36,6 +44,25 @@ export default function NavWrapper({
           </div>
           <div className="flex-1">
             <nav className="grid items-start px-2 text-sm font-medium lg:px-4">
+              <div className="py-2">
+                <Select
+                  onValueChange={(value) => console.log(value)}
+                  defaultValue={"default_project"}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="project" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem
+                      className="cursor-pointer"
+                      value="default_project"
+                    >
+                      default project
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
               {navItems.map((item) => (
                 <Link
                   key={item.href}
@@ -92,6 +119,9 @@ export default function NavWrapper({
               </nav>
             </SheetContent>
           </Sheet>
+          <div className="ml-auto">
+            <UserButton />
+          </div>
         </header>
         <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
           {children}
