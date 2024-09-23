@@ -3,12 +3,12 @@
 import {
   type ColumnDef,
   type ColumnFiltersState,
+  type PaginationState,
   type SortingState,
   type VisibilityState,
   flexRender,
   getCoreRowModel,
   getFilteredRowModel,
-  getPaginationRowModel,
   useReactTable,
 } from "@tanstack/react-table";
 
@@ -26,31 +26,53 @@ import { DataTablePagination } from "./DataTablePagination";
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
-  refetch: (sorting: SortingState) => void;
   initialSorting?: SortingState;
+  onSortingChange?: (sorting: SortingState) => void;
+  initialPagination?: {
+    pageIndex: number;
+    pageSize: number;
+  };
+  onPaginationChange?: (pagination: PaginationState) => void;
+  rowCount?: number;
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
-  refetch,
   initialSorting,
+  onSortingChange,
+  initialPagination,
+  onPaginationChange,
+  rowCount,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = useState<SortingState>(initialSorting ?? []);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = useState({});
+  const [pagination, setPagination] = useState<PaginationState>(
+    initialPagination ?? {
+      pageIndex: 0,
+      pageSize: 10,
+    },
+  );
 
   useEffect(() => {
-    refetch(sorting);
-    // console.log(JSON.stringify(sorting, null, 2));
-  }, [refetch, sorting]);
+    onSortingChange?.(sorting);
+  }, [onSortingChange, sorting]);
+
+  useEffect(() => {
+    onPaginationChange?.(pagination);
+  }, [onPaginationChange, pagination]);
 
   const table = useReactTable({
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
+
+    onPaginationChange: setPagination,
+    // getPaginationRowModel: getPaginationRowModel(),
+    manualPagination: true,
+    rowCount,
 
     onSortingChange: setSorting,
     // getSortedRowModel: getSortedRowModel(),
@@ -65,6 +87,7 @@ export function DataTable<TData, TValue>({
       columnFilters,
       columnVisibility,
       rowSelection,
+      pagination,
     },
   });
 
