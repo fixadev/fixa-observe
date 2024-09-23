@@ -2,14 +2,14 @@
   "name": "backend",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
-  "db:generate": "prisma migrate dev",
-  "db:migrate": "prisma migrate deploy",
-  "db:push": "prisma db push",
-  "db:studio": "prisma studio",
-  "db:seed": "NODE_ENV=development prisma db seed",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "nodemon main.ts",
+    "db:generate": "prisma migrate dev",
+    "db:migrate": "prisma migrate deploy",
+    "db:push": "prisma db push",
+    "db:studio": "prisma studio",
+    "db:seed": "NODE_ENV=development prisma db seed"
   },
   "keywords": [],
   "author": "",
@@ -32,6 +32,7 @@
     "cors": "^2.8.5",
     "express": "^4.21.0",
     "multer": "1.4.5-lts.1",
+    "nodemon": "^3.1.7",
     "uuid": "^10.0.0"
   }
 }

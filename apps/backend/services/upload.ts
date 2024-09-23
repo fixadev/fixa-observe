@@ -1,4 +1,3 @@
-import express from 'express';
 import { VertexAI, type Part } from "@google-cloud/vertexai";
 import { Storage } from "@google-cloud/storage";
 import { v4 as uuidv4 } from "uuid";
@@ -10,11 +9,11 @@ const storage = new Storage();
 
 const bucket = storage.bucket(process.env.GOOGLE_CLOUD_BUCKET_NAME ?? "");
 
-export async function uploadFileAndAnalyze(file: File, transcript: string, projectId: string) {
+export async function uploadFileAndAnalyze(file: Express.Multer.File, transcript: string, projectId: string) {
   try {
 
-    const buffer = await file.arrayBuffer();
-    const fileName = `${uuidv4()}-${file.name.replace(/\s/g, "-")}`;
+    const buffer = file.buffer;
+    const fileName = `${uuidv4()}-${file.originalname.replace(/\s/g, "-")}`;
 
     const blob = bucket.file(fileName);
     const blobStream = blob.createWriteStream();
