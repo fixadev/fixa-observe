@@ -221,38 +221,3 @@ const insertConversation = async (conversation: Conversation) => {
     throw error;
   }
 };
-
-const createMockProject = async () => {
-  try {
-    const result = await db.project.create({
-      data: {
-        ownerId: "mock-user-id",
-        name: "Mock Project",
-        possibleOutcomes: {
-          create: [
-            {
-              name: "Positive Outcome",
-              description: "The project succeeds beyond expectations",
-            },
-            {
-              name: "Neutral Outcome",
-              description: "The project meets basic requirements",
-            },
-            {
-              name: "Negative Outcome",
-              description: "The project fails to meet its objectives",
-            },
-          ],
-        },
-      },
-      include: {
-        possibleOutcomes: true,
-      },
-    });
-    console.log("Mock project created:", result);
-    return result;
-  } catch (error) {
-    console.error("Error creating mock project:", error);
-    throw error;
-  }
-};
