@@ -35,6 +35,11 @@ export const updateProject = async (
     data: {
       name: projectName,
       possibleOutcomes: {
+        deleteMany: {
+          id: { 
+            notIn: existingOutcomes.map(o => o.id).filter((id): id is string => id !== null && id !== undefined)
+          },
+        },
         update: existingOutcomes.map(outcome => ({
           where: { id: outcome.id },
           data: { name: outcome.name, description: outcome.description },
