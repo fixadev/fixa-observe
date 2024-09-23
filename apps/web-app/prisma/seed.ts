@@ -1,4 +1,4 @@
-import { deleteProject } from "~/app/shared/services/projects";
+import { deleteProject } from "@repo/project-domain/services/project";
 import { db } from "~/server/db";
 
 async function createTestProject() {

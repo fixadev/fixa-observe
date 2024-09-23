@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { type OutcomeInput } from "~/lib/types/project";
+import { type OutcomeInput } from "@repo/project-domain/types/project";
 import OutcomeItem from "./_components/OutcomeItem";
 import { Button } from "~/components/ui/button";
 import PageHeader from "~/components/PageHeader";

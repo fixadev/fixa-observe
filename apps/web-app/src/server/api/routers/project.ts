@@ -1,12 +1,12 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
-import { createProjectInput, updateProjectInput } from "~/lib/types/project";
+import { createProjectInput, updateProjectInput } from "@repo/project-domain/types/project";
 import {
   getProject,
   createProject,
   updateProject,
   getProjectsByUser,
-} from "~/app/shared/services/projects";
+} from "@repo/project-domain/services/project";
 
 export const projectRouter = createTRPCRouter({
   createProject: protectedProcedure
