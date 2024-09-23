@@ -10,6 +10,9 @@ import { skipToken } from "@tanstack/react-query";
 import { Button } from "~/components/ui/button";
 import { ArrowPathIcon } from "@heroicons/react/24/outline";
 import { cn } from "~/lib/utils";
+import { Slider } from "~/components/ui/slider";
+import { Label } from "~/components/ui/label";
+import { Input } from "~/components/ui/input";
 
 export default function ConversationTable() {
   const initialSorting = useMemo(() => [{ id: "createdAt", desc: true }], []);
@@ -69,7 +72,6 @@ export default function ConversationTable() {
   const refresh = useCallback(() => {
     setRefreshing(true);
     void refetchConversations().finally(() => {
-      console.log("refreshed");
       setRefreshing(false);
     });
   }, [refetchConversations]);
@@ -85,28 +87,21 @@ export default function ConversationTable() {
     };
   }, [refresh, refreshing]);
 
+  const [failureTolerance, setFailureTolerance] = useState(70);
+
   return (
     <div>
-      <div className="mb-2 flex items-center gap-2">
-        <Button
-          variant="outline"
-          onClick={refresh}
-          disabled={refreshing || isLoadingConversations}
-        >
-          <ArrowPathIcon
-            className={cn(
-              "mr-2 h-4 w-4",
-              (refreshing || isLoadingConversations) && "animate-spin",
-            )}
-          />{" "}
-          {refreshing || isLoadingConversations ? "Refreshing..." : "Refresh"}
-        </Button>
-        {!(refreshing || isLoadingConversations) && (
-          <span className="text-sm text-muted-foreground">
-            last refreshed at {lastRefreshedAt.toLocaleString()}
-          </span>
-        )}
-      </div>
+      <FailureToleranceSlider
+        defaultValue={failureTolerance}
+        onCommit={setFailureTolerance}
+      />
+      <RefreshButton
+        onRefresh={refresh}
+        refreshing={refreshing}
+        isLoading={isLoadingConversations}
+        lastRefreshedAt={lastRefreshedAt}
+      />
+
       <DataTable
         data={conversations}
         columns={columns}
@@ -116,6 +111,97 @@ export default function ConversationTable() {
         onSortingChange={setSorting}
         onPaginationChange={setPagination}
       />
+    </div>
+  );
+}
+
+export function RefreshButton({
+  onRefresh,
+  refreshing,
+  isLoading,
+  lastRefreshedAt,
+}: {
+  onRefresh: () => void;
+  refreshing: boolean;
+  isLoading: boolean;
+  lastRefreshedAt: Date;
+}) {
+  return (
+    <div className="mb-2 flex items-center gap-2">
+      <Button
+        variant="outline"
+        onClick={onRefresh}
+        disabled={refreshing || isLoading}
+      >
+        <ArrowPathIcon
+          className={cn(
+            "mr-2 h-4 w-4",
+            (refreshing || isLoading) && "animate-spin",
+          )}
+        />{" "}
+        {refreshing || isLoading ? "refreshing..." : "refresh"}
+      </Button>
+      {!(refreshing || isLoading) && (
+        <span className="text-sm text-muted-foreground">
+          last refreshed at {lastRefreshedAt.toLocaleString()}
+        </span>
+      )}
+    </div>
+  );
+}
+
+function FailureToleranceSlider({
+  defaultValue = 70,
+  onCommit,
+}: {
+  defaultValue?: number;
+  onCommit?: (value: number) => void;
+}) {
+  const [value, setValue] = useState(defaultValue);
+
+  return (
+    <div className="flex flex-col gap-2">
+      <div className="flex flex-col">
+        <Label className="text-md" htmlFor="failure-tolerance">
+          failure tolerance
+        </Label>
+        <div className="text-sm text-muted-foreground">
+          success probability below this amount will be flagged as a failure
+        </div>
+      </div>
+      <div className="flex items-center gap-4">
+        <Slider
+          value={[value]}
+          onValueChange={(value) => {
+            setValue(value[0] ?? 0);
+          }}
+          onValueCommit={(value) => {
+            onCommit?.(value[0] ?? 0);
+          }}
+          min={0}
+          max={100}
+          step={1}
+          className="max-w-96"
+        />
+        <div className="flex items-center gap-2">
+          <Input
+            id="failure-tolerance"
+            className="w-20"
+            type="number"
+            value={value}
+            min={0}
+            max={100}
+            step={1}
+            onChange={(e) => {
+              setValue(parseInt(e.target.value, 10));
+            }}
+            onBlur={() => {
+              onCommit?.(value);
+            }}
+          />
+          <span>%</span>
+        </div>
+      </div>
     </div>
   );
 }
