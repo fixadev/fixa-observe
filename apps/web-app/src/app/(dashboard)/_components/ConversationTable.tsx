@@ -42,6 +42,7 @@ export default function ConversationTable() {
     return obj;
   }, [project]);
 
+  const [failureThreshold, setFailureThreshold] = useState(70);
   const {
     data: conversationsData,
     refetch: refetchConversations,
@@ -51,6 +52,7 @@ export default function ConversationTable() {
     sorting: sorting,
     pageSize: pagination.pageSize,
     pageIndex: pagination.pageIndex,
+    failureThreshold: failureThreshold,
   });
   const conversations = useMemo(() => {
     return (
@@ -87,14 +89,12 @@ export default function ConversationTable() {
     };
   }, [refresh, refreshing]);
 
-  const [failureTolerance, setFailureTolerance] = useState(70);
-
   return (
     <div>
       <div className="mb-8 flex items-center justify-between gap-2">
-        <FailureToleranceSlider
-          defaultValue={failureTolerance}
-          onCommit={setFailureTolerance}
+        <FailureThresholdSlider
+          defaultValue={failureThreshold}
+          onCommit={setFailureThreshold}
         />
         <RefreshButton
           onRefresh={refresh}
@@ -155,7 +155,7 @@ export function RefreshButton({
   );
 }
 
-function FailureToleranceSlider({
+function FailureThresholdSlider({
   defaultValue = 70,
   onCommit,
 }: {
@@ -167,8 +167,8 @@ function FailureToleranceSlider({
   return (
     <div className="flex flex-col gap-2">
       <div className="flex flex-col">
-        <Label className="text-md" htmlFor="failure-tolerance">
-          failure tolerance
+        <Label className="text-md" htmlFor="failure-threshold">
+          failure threshold
         </Label>
         <div className="text-sm text-muted-foreground">
           success probability below this amount will be flagged as a failure
@@ -190,7 +190,7 @@ function FailureToleranceSlider({
         />
         <div className="flex items-center gap-2">
           <Input
-            id="failure-tolerance"
+            id="failure-threshold"
             className="w-20"
             type="number"
             value={value}

@@ -9,6 +9,7 @@ export const conversationsRouter = createTRPCRouter({
         sorting: z.array(z.object({ id: z.string(), desc: z.boolean() })),
         pageSize: z.number(),
         pageIndex: z.number(),
+        failureThreshold: z.number().optional(),
       }),
     )
     .query(async ({ ctx, input }) => {
@@ -20,16 +21,20 @@ export const conversationsRouter = createTRPCRouter({
         };
       }
 
+      const where: Record<string, unknown> = { projectId };
+      if (input.failureThreshold) {
+        where.probSuccess = { lt: input.failureThreshold };
+      }
       const orderBy = sorting.map(({ id, desc }) => ({
         [id]: desc ? "desc" : "asc",
       }));
 
       const count = await ctx.db.conversation.count({
-        where: { projectId },
+        where,
       });
 
       const conversations = await ctx.db.conversation.findMany({
-        where: { projectId },
+        where,
         orderBy,
         take: pageSize,
         skip: pageIndex * pageSize,
