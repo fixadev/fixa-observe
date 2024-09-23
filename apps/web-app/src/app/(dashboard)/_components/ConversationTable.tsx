@@ -91,16 +91,18 @@ export default function ConversationTable() {
 
   return (
     <div>
-      <FailureToleranceSlider
-        defaultValue={failureTolerance}
-        onCommit={setFailureTolerance}
-      />
-      <RefreshButton
-        onRefresh={refresh}
-        refreshing={refreshing}
-        isLoading={isLoadingConversations}
-        lastRefreshedAt={lastRefreshedAt}
-      />
+      <div className="mb-8 flex items-center justify-between gap-2">
+        <FailureToleranceSlider
+          defaultValue={failureTolerance}
+          onCommit={setFailureTolerance}
+        />
+        <RefreshButton
+          onRefresh={refresh}
+          refreshing={refreshing}
+          isLoading={isLoadingConversations}
+          lastRefreshedAt={lastRefreshedAt}
+        />
+      </div>
 
       <DataTable
         data={conversations}
@@ -127,11 +129,12 @@ export function RefreshButton({
   lastRefreshedAt: Date;
 }) {
   return (
-    <div className="mb-2 flex items-center gap-2">
+    <div className="mb-2 flex flex-col items-end gap-1">
       <Button
         variant="outline"
         onClick={onRefresh}
         disabled={refreshing || isLoading}
+        className="w-fit"
       >
         <ArrowPathIcon
           className={cn(
@@ -141,11 +144,13 @@ export function RefreshButton({
         />{" "}
         {refreshing || isLoading ? "refreshing..." : "refresh"}
       </Button>
-      {!(refreshing || isLoading) && (
-        <span className="text-sm text-muted-foreground">
-          last refreshed at {lastRefreshedAt.toLocaleString()}
-        </span>
-      )}
+      <div className="h-5">
+        {!(refreshing || isLoading) && (
+          <span className="text-sm text-muted-foreground">
+            last refreshed at {lastRefreshedAt.toLocaleString()}
+          </span>
+        )}
+      </div>
     </div>
   );
 }
