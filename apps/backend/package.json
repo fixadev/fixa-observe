@@ -1,0 +1,38 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "nodemon main.ts",
+    "db:generate": "prisma migrate dev",
+    "db:migrate": "prisma migrate deploy",
+    "db:push": "prisma db push",
+    "db:studio": "prisma studio",
+    "db:seed": "NODE_ENV=development prisma db seed"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.21",
+    "@types/node": "^22.5.5",
+    "@types/uuid": "^10.0.0",
+    "prisma": "^5.19.1",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.6.2"
+  },
+  "dependencies": {
+    "@google-cloud/storage": "^7.13.0",
+    "@google-cloud/vertexai": "^1.7.0",
+    "@prisma/client": "^5.19.1",
+    "@repo/project-domain": "workspace:*",
+    "@types/multer": "^1.4.12",
+    "cors": "^2.8.5",
+    "express": "^4.21.0",
+    "multer": "1.4.5-lts.1",
+    "nodemon": "^3.1.7",
+    "uuid": "^10.0.0"
+  }
+}

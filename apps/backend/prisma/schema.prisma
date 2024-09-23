@@ -1,0 +1,63 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String    @id @default(auto()) @map("_id") @db.ObjectId
+  clerkId   String    @unique
+  email     String    @unique
+  firstName String?
+  lastName  String?
+  projects  Project[]
+}
+
+model ServerIsDownEmail {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  createdAt DateTime @default(now())
+}
+
+model Project {
+  id               String         @id @default(auto()) @map("_id") @db.ObjectId
+  owner            User           @relation(fields: [ownerId], references: [id])
+  ownerId          String         @db.ObjectId
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+  name             String
+  possibleOutcomes Outcome[]
+  conversations    Conversation[]
+}
+
+model Outcome {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  name        String
+  description String
+  Project     Project? @relation(fields: [projectId], references: [id])
+  projectId   String?  @db.ObjectId
+}
+
+model Conversation {
+  id               String   @id @default(auto()) @map("_id") @db.ObjectId
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  transcript       String
+  audioUrl         String
+  analysis         String
+  desiredOutcomeId String?  @db.ObjectId
+  actualOutcomeId  String?  @db.ObjectId
+  probSuccess      Int
+  Project          Project? @relation(fields: [projectId], references: [id])
+  projectId        String?  @db.ObjectId
+}

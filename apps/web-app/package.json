@@ -35,6 +35,7 @@
     "@radix-ui/react-toast": "^1.2.1",
     "@react-email/code-block": "^0.0.9",
     "@react-spring/web": "^9.7.4",
+    "@repo/project-domain": "workspace:*",
     "@t3-oss/env-nextjs": "^0.10.1",
     "@tanstack/react-query": "^5.50.0",
     "@tanstack/react-table": "^8.20.5",

@@ -1,6 +1,6 @@
 import { type PrismaClient } from "@prisma/client";
-import { type CreateProjectInput } from "~/lib/types/project";
-import { type OutcomeInput } from "~/lib/types/project";
+import { type CreateProjectInput } from "../types/project";
+import { type OutcomeInput } from "../types/project";
 
 export const createProject = async (
   input: CreateProjectInput,
@@ -27,18 +27,30 @@ export const updateProject = async (
   userId: string,
   db: PrismaClient,
 ) => {
-
-  const existingOutcomes = outcomes.filter((o) => o.id);
-  const newOutcomes = outcomes.filter((o) => !o.id);
+  const existingOutcomes = outcomes.filter(o => o.id);
+  const newOutcomes = outcomes.filter(o => !o.id);
 
   const project = await db.project.update({
     where: { id: projectId, ownerId: userId },
     data: {
-    possibleOutcomes: {
-      set: existingOutcomes.map(o => ({ id: o.id })),
-      create: newOutcomes
-    }
-  }
+      name: projectName,
+      possibleOutcomes: {
+        deleteMany: {
+          id: { 
+            notIn: existingOutcomes.map(o => o.id).filter((id): id is string => id !== null && id !== undefined)
+          },
+        },
+        update: existingOutcomes.map(outcome => ({
+          where: { id: outcome.id },
+          data: { name: outcome.name, description: outcome.description },
+        })),
+        create: newOutcomes.map(outcome => ({
+          name: outcome.name,
+          description: outcome.description,
+        })),
+      },
+    },
+    include: { possibleOutcomes: true },
   });
   return project;
 };

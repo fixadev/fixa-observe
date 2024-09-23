@@ -4,7 +4,7 @@ import { clerkClient, type WebhookEvent } from "@clerk/nextjs/server";
 import { env } from "~/env";
 import { db } from "~/server/db";
 import { addSubscriber } from "~/server/listmonk";
-import { createProject } from "~/app/shared/services/projects";
+import { createProject } from "@repo/project-domain/services/project";
 
 export async function GET() {
   return new Response("ok", { status: 200 });
