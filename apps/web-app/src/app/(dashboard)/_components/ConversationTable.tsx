@@ -3,7 +3,7 @@
 import { DataTable } from "~/components/DataTable";
 import { columns } from "./ConversationTableColumns";
 import { api } from "~/trpc/react";
-import { useCallback, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { type PaginationState, type SortingState } from "@tanstack/react-table";
 import { useProject } from "~/app/contexts/projectContext";
 import { skipToken } from "@tanstack/react-query";
@@ -21,7 +21,6 @@ export default function ConversationTable() {
   const [pagination, setPagination] =
     useState<PaginationState>(initialPagination);
   const { selectedProject } = useProject();
-
   const { data: project } = api.project.getProject.useQuery(
     selectedProject?.id
       ? {
@@ -29,7 +28,6 @@ export default function ConversationTable() {
         }
       : skipToken,
   );
-
   const outcomes = useMemo(() => {
     const obj: Record<string, string> = {};
     for (const outcome of project?.possibleOutcomes ?? []) {
@@ -38,7 +36,7 @@ export default function ConversationTable() {
     return obj;
   }, [project]);
 
-  const { data: conversationsData } =
+  const { data: conversationsData, refetch: refetchConversations } =
     api.conversations.getConversations.useQuery({
       projectId: project?.id,
       sorting: sorting,
@@ -55,13 +53,15 @@ export default function ConversationTable() {
     );
   }, [outcomes, conversationsData]);
 
-  const refetch = useCallback(
-    (sorting: SortingState, pagination: PaginationState) => {
-      setSorting(sorting);
-      setPagination(pagination);
-    },
-    [],
-  );
+  useEffect(() => {
+    const interval = setInterval(() => {
+      void refetchConversations();
+    }, 60 * 1000);
+
+    return () => {
+      clearInterval(interval);
+    };
+  }, [refetchConversations]);
 
   return (
     <DataTable
@@ -70,7 +70,8 @@ export default function ConversationTable() {
       initialSorting={initialSorting}
       initialPagination={initialPagination}
       rowCount={conversationsData?.count}
-      refetch={refetch}
+      onSortingChange={setSorting}
+      onPaginationChange={setPagination}
     />
   );
 }

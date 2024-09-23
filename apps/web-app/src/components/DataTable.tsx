@@ -26,21 +26,23 @@ import { DataTablePagination } from "./DataTablePagination";
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
-  refetch: (sorting: SortingState, pagination: PaginationState) => void;
   initialSorting?: SortingState;
+  onSortingChange?: (sorting: SortingState) => void;
   initialPagination?: {
     pageIndex: number;
     pageSize: number;
   };
+  onPaginationChange?: (pagination: PaginationState) => void;
   rowCount?: number;
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
-  refetch,
   initialSorting,
+  onSortingChange,
   initialPagination,
+  onPaginationChange,
   rowCount,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = useState<SortingState>(initialSorting ?? []);
@@ -55,9 +57,12 @@ export function DataTable<TData, TValue>({
   );
 
   useEffect(() => {
-    refetch(sorting, pagination);
-    // console.log(JSON.stringify(sorting, null, 2));
-  }, [refetch, sorting, pagination]);
+    onSortingChange?.(sorting);
+  }, [onSortingChange, sorting]);
+
+  useEffect(() => {
+    onPaginationChange?.(pagination);
+  }, [onPaginationChange, pagination]);
 
   const table = useReactTable({
     data,
