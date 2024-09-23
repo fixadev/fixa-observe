@@ -27,18 +27,25 @@ export const updateProject = async (
   userId: string,
   db: PrismaClient,
 ) => {
-
-  const existingOutcomes = outcomes.filter((o) => o.id);
-  const newOutcomes = outcomes.filter((o) => !o.id);
+  const existingOutcomes = outcomes.filter(o => o.id);
+  const newOutcomes = outcomes.filter(o => !o.id);
 
   const project = await db.project.update({
     where: { id: projectId, ownerId: userId },
     data: {
-    possibleOutcomes: {
-      set: existingOutcomes.map(o => ({ id: o.id })),
-      create: newOutcomes
-    }
-  }
+      name: projectName,
+      possibleOutcomes: {
+        update: existingOutcomes.map(outcome => ({
+          where: { id: outcome.id },
+          data: { name: outcome.name, description: outcome.description },
+        })),
+        create: newOutcomes.map(outcome => ({
+          name: outcome.name,
+          description: outcome.description,
+        })),
+      },
+    },
+    include: { possibleOutcomes: true },
   });
   return project;
 };

@@ -26,6 +26,7 @@ export default function ConfigPage() {
   );
 
   useEffect(() => {
+    console.log("Project", project);
     if (
       project &&
       project.possibleOutcomes &&

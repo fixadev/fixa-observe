@@ -28,6 +28,7 @@ export const projectRouter = createTRPCRouter({
   updateProject: protectedProcedure
     .input(updateProjectInput)
     .mutation(async ({ ctx, input }) => {
+      console.log("Updating project with input", input);
       return await updateProject(
         input.projectId,
         input.projectName,
