@@ -1,5 +1,5 @@
 import { VertexAI, type Part } from "@google-cloud/vertexai";
-import { Storage, type File } from "@google-cloud/storage";
+import { Storage } from "@google-cloud/storage";
 import { v4 as uuidv4 } from "uuid";
 import db from "./db";
 import { type Conversation } from "@prisma/client";
@@ -21,7 +21,6 @@ export async function analyzeConversation(file: Express.Multer.File, transcript:
 }
 
 function uploadFile(file: Express.Multer.File): Promise<{fileName: string}> {
-
   const fileName = `${uuidv4()}-${file.originalname.replace(/\s/g, "-")}`;
   const blob = bucket.file(fileName);
   const buffer = file.buffer;

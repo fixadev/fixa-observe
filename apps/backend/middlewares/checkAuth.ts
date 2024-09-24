@@ -12,6 +12,10 @@ export function authenticateRequest(req: express.Request, res: express.Response,
     }
 
     const userId = getUserIdFromApiKey(token, db);
+    if (!userId) {
+        return res.status(401).json({ error: "Unauthorized" });
+    }
+
     res.locals.userId = userId;
     next();
 }

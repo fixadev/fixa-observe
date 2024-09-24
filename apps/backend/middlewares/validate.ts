@@ -20,12 +20,14 @@ export async function validateParams(req: express.Request, res: express.Response
         return res.status(400).json({ error: "Project ID is required" });
     }
 
+    if (projectId.length !== 24) {
+        return res.status(400).json({ error: "Invalid project ID: must be exactly 24 characters" });
+    }
+
     const project = await validateUserOwnsProject(projectId, userId, db);
 
-    console.log("PROJECT", project);
-
     if (!project) {
-        return res.status(404).json({ error: `Project not found for user: ${userId}` });
+        return res.status(404).json({ error: `Project with ID: ${projectId} not found for user: ${userId}` });
     }
 
     next();
