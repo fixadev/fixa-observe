@@ -7,7 +7,7 @@ const port = process.env.PORT || 8000;
 const app = express();
 app.use(express.json());
 app.use(cors());
-app.use(uploadRouter);
+app.use('/v1', uploadRouter);
 
 app.get('/', (req: express.Request, res: express.Response) => {
   res.send('heLlO fRom piXa 🤪!');
