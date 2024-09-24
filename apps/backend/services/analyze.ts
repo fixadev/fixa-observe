@@ -8,7 +8,7 @@ import { getProject } from "@repo/project-domain/services/project";
 const storage = new Storage();
 const bucket = storage.bucket(process.env.GOOGLE_CLOUD_BUCKET_NAME ?? "");
 
-export async function analyzeConversation(file: Express.Multer.File, transcript: string, projectId: string) {
+export async function analyzeConversation(file: Express.Multer.File, projectId: string, transcript?: string) {
   try {
     const { fileName } = await uploadFile(file);
     const result = await analyzeAudio(projectId, bucket.name, fileName, transcript);
@@ -47,7 +47,7 @@ export async function analyzeAudio(
     projectId: string,
     bucket: string,
     fileName: string,
-    transcript: string,
+    transcript?: string,
   ) {
     try {
       const fileUri = `gs://${bucket}/${fileName}`;
@@ -134,7 +134,7 @@ export async function analyzeAudio(
             createdAt: new Date(),
             updatedAt: new Date(),
             projectId,
-            transcript,
+            transcript: transcript ?? "",
             audioUrl: fileUrl,
             analysis: analysis,
             desiredOutcomeId: desiredOutcomeId,
