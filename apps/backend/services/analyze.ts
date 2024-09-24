@@ -1,52 +1,47 @@
 import { VertexAI, type Part } from "@google-cloud/vertexai";
-import { Storage } from "@google-cloud/storage";
+import { Storage, type File } from "@google-cloud/storage";
 import { v4 as uuidv4 } from "uuid";
 import db from "./db";
 import { type Conversation } from "@prisma/client";
 import { getProject } from "@repo/project-domain/services/project";
 
 const storage = new Storage();
-
 const bucket = storage.bucket(process.env.GOOGLE_CLOUD_BUCKET_NAME ?? "");
 
 export async function analyzeConversation(file: Express.Multer.File, transcript: string, projectId: string) {
   try {
+    const { fileName } = await uploadFile(file);
+    const result = await analyzeAudio(projectId, bucket.name, fileName, transcript);
+    console.log("Audio analysis result:", result);
+    return result;
+  } catch (error) {
+    console.error("Error in analyzeConversation:", error);
+    throw error; 
+  }
+}
 
-    const buffer = file.buffer;
-    const fileName = `${uuidv4()}-${file.originalname.replace(/\s/g, "-")}`;
+function uploadFile(file: Express.Multer.File): Promise<{fileName: string}> {
 
-    const blob = bucket.file(fileName);
+  const fileName = `${uuidv4()}-${file.originalname.replace(/\s/g, "-")}`;
+  const blob = bucket.file(fileName);
+  const buffer = file.buffer;
+
+  return new Promise((resolve, reject) => {
     const blobStream = blob.createWriteStream();
 
-    return new Promise((resolve, reject) => {
-      blobStream.on("error", (err: any) => {
-        console.error("Error uploading file:", err);
-      });
-
-      blobStream.on("finish", () => {
-        void (async () => {
-          try {
-            const result = await analyzeAudio(
-              projectId,
-              bucket.name,
-              fileName,
-              transcript,
-            );
-            console.log("Audio analysis result:", result);
-          } catch (error) {
-            console.error("Error analyzing audio:", error);
-            resolve(
-              console.error("Error analyzing audio:", error),
-            );
-          }
-        })();
-      });
-
-      blobStream.end(Buffer.from(buffer));
+    blobStream.on("error", (err: any) => {
+      console.error("Error uploading file:", err);
+      reject(err);
     });
-  } catch (error) {
-    console.error("Error in file upload:", error);
-  }
+
+    blobStream.on("finish", () => resolve(
+      {
+        fileName
+      }
+    ));
+
+    blobStream.end(buffer);
+  });
 }
 
 export async function analyzeAudio(
@@ -88,9 +83,7 @@ export async function analyzeAudio(
           probSuccess: Certainty that the actual outcome matched the desired outcome (0-100%) 
           analysis: A summary of the conversation, including the desired outcome, actual outcome, and the cause of the outcome.
       `;
-  
-  
-  
+   
       const filePart: Part = {
         fileData: {
           fileUri: fileUri,
