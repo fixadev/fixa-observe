@@ -13,8 +13,11 @@ import { cn } from "~/lib/utils";
 import { Slider } from "~/components/ui/slider";
 import { Label } from "~/components/ui/label";
 import { Input } from "~/components/ui/input";
+// import { Conversation } from "@prisma/client";
+import FailureChart, { type FailureChartPeriod } from "./FailureChart";
 
 export default function ConversationTable() {
+  // Define variables
   const initialSorting = useMemo(() => [{ id: "createdAt", desc: true }], []);
   const [sorting, setSorting] = useState<SortingState>(initialSorting);
   const initialPagination = useMemo(
@@ -26,6 +29,7 @@ export default function ConversationTable() {
   );
   const [pagination, setPagination] =
     useState<PaginationState>(initialPagination);
+  const [lastRefreshedAt, setLastRefreshedAt] = useState(new Date());
   const { selectedProject } = useProject();
   const { data: project } = api.project.getProject.useQuery(
     selectedProject?.id
@@ -41,8 +45,36 @@ export default function ConversationTable() {
     }
     return obj;
   }, [project]);
-
   const [failureThreshold, setFailureThreshold] = useState(70);
+
+  // Chart data
+  const [chartPeriod, setChartPeriod] = useState<FailureChartPeriod>("1h");
+  const chartMinDate = useMemo(() => {
+    const now = lastRefreshedAt;
+    const periods: Record<FailureChartPeriod, number> = {
+      "1h": 1,
+      "24h": 24,
+      "7d": 7 * 24,
+      "30d": 30 * 24,
+    };
+    const minDate = new Date(
+      now.getTime() - periods[chartPeriod] * 60 * 60 * 1000,
+    );
+    return minDate;
+  }, [chartPeriod, lastRefreshedAt]);
+  const chartMaxDate = useMemo(() => {
+    return lastRefreshedAt;
+  }, [lastRefreshedAt]);
+  const { data: chartConversations } =
+    api.conversations.getConversations.useQuery({
+      projectId: project?.id,
+      sorting: [{ id: "createdAt", desc: false }],
+      failureThreshold: failureThreshold,
+      minDate: chartMinDate.toISOString(),
+      maxDate: chartMaxDate.toISOString(),
+    });
+
+  // Table data
   const {
     data: conversationsData,
     refetch: refetchConversations,
@@ -63,13 +95,8 @@ export default function ConversationTable() {
       })) ?? []
     );
   }, [outcomes, conversationsData]);
-  const [lastRefreshedAt, setLastRefreshedAt] = useState(new Date());
-  useEffect(() => {
-    if (conversationsData) {
-      setLastRefreshedAt(new Date());
-    }
-  }, [conversationsData]);
 
+  // Refresh stuff
   const [refreshing, setRefreshing] = useState(false);
   const refresh = useCallback(() => {
     setRefreshing(true);
@@ -88,6 +115,11 @@ export default function ConversationTable() {
       clearInterval(interval);
     };
   }, [refresh, refreshing]);
+  useEffect(() => {
+    if (conversationsData) {
+      setLastRefreshedAt(new Date());
+    }
+  }, [conversationsData]);
 
   return (
     <div>
@@ -103,7 +135,15 @@ export default function ConversationTable() {
           lastRefreshedAt={lastRefreshedAt}
         />
       </div>
-
+      {/* <FailureGraph conversations={conversations} /> */}
+      <div className="mb-8">
+        <FailureChart
+          conversations={chartConversations?.conversations}
+          chartPeriod={chartPeriod}
+          chartMinDate={chartMinDate}
+          chartMaxDate={chartMaxDate}
+        />
+      </div>
       <DataTable
         data={conversations}
         columns={columns}
@@ -117,7 +157,16 @@ export default function ConversationTable() {
   );
 }
 
-export function RefreshButton({
+// function FailureGraph({
+//   conversations,
+// }: {
+//   conversations: Conversation[];
+// }) {
+
+//   return <div>FailureGraph</div>;
+// }
+
+function RefreshButton({
   onRefresh,
   refreshing,
   isLoading,
