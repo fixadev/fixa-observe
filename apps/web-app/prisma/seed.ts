@@ -1,4 +1,4 @@
-import { deleteProject } from "@repo/project-domain/services/project";
+// import { deleteProject } from "@repo/project-domain/services/project";
 import { db } from "~/server/db";
 
 async function createTestProject() {
@@ -82,10 +82,16 @@ async function populateConversations() {
     "The customer seemed satisfied with our offer.",
     "We couldn't reach an agreement during this call.",
   ];
+  const mockAnalysis = [
+    "The customer seemed satisfied with our offer.",
+    "We couldn't reach an agreement during this call.",
+  ];
 
   for (let i = 0; i < 50; i++) {
     const randomTranscript =
       mockTranscripts[Math.floor(Math.random() * mockTranscripts.length)];
+    const randomAnalysis =
+      mockAnalysis[Math.floor(Math.random() * mockAnalysis.length)];
     const randomOutcome =
       project.possibleOutcomes[
         Math.floor(Math.random() * project.possibleOutcomes.length)
@@ -97,16 +103,14 @@ async function populateConversations() {
       data: {
         projectId: project.id,
         transcript: randomTranscript ?? "",
-        audioUrl: `https://example.com/call-${i + 1}.wav`,
-        analysis: "",
+        audioUrl: `https://storage.cloud.google.com/pixa-audio/74f802af-b31d-44a3-8537-779678f088fc-Schedule-fail.m4a`,
+        analysis: randomAnalysis ?? "",
         desiredOutcomeId: desiredOutcome!.id,
         actualOutcomeId: randomOutcome!.id,
         probSuccess,
         createdAt: new Date(
-          new Date().setDate(
-            new Date().getDate() - Math.floor(Math.random() * 30),
-          ),
-        ), // Random date within the last 30 days
+          Date.now() - Math.floor(Math.random() * 60 * 60 * 1000),
+        ), // Random date within the last hour
       },
     });
   }
