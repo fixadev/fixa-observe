@@ -9,7 +9,7 @@ const storage = new Storage();
 
 const bucket = storage.bucket(process.env.GOOGLE_CLOUD_BUCKET_NAME ?? "");
 
-export async function uploadFileAndAnalyze(file: Express.Multer.File, transcript: string, projectId: string) {
+export async function analyzeConversation(file: Express.Multer.File, transcript: string, projectId: string) {
   try {
 
     const buffer = file.buffer;
@@ -57,7 +57,7 @@ export async function analyzeAudio(
   ) {
     try {
       const fileUri = `gs://${bucket}/${fileName}`;
-      const fileUrl = `https://storage.googleapis.com/${bucket}/${fileName}`;
+      const fileUrl = `https://storage.cloud.google.com/${bucket}/${fileName}`;
   
       const vertexai = new VertexAI({
         project: "pixa-website",
@@ -86,6 +86,7 @@ export async function analyzeAudio(
           desiredOutcome: (0-${possibleOutcomes.length - 1})
           actualOutcome: (0-${possibleOutcomes.length - 1})
           probSuccess: Certainty that the actual outcome matched the desired outcome (0-100%) 
+          analysis: A summary of the conversation, including the desired outcome, actual outcome, and the cause of the outcome.
       `;
   
   
@@ -114,17 +115,19 @@ export async function analyzeAudio(
   
       if (cleanedResult) {
         console.log(cleanedResult);
-        const { desiredOutcome, actualOutcome, probSuccess } = JSON.parse(
+        const { desiredOutcome, actualOutcome, probSuccess, analysis } = JSON.parse(
           cleanedResult,
         ) as {
           desiredOutcome: number;
           actualOutcome: number;
           probSuccess: number;
+          analysis: string;
         };
         if (
           desiredOutcome !== undefined &&
           actualOutcome !== undefined &&
-          probSuccess !== undefined
+          probSuccess !== undefined &&
+          analysis !== undefined
         ) {
   
           const desiredOutcomeId = possibleOutcomes[desiredOutcome]?.id;
@@ -141,7 +144,7 @@ export async function analyzeAudio(
             projectId,
             transcript,
             audioUrl: fileUrl,
-            analysis: cleanedResult,
+            analysis: analysis,
             desiredOutcomeId: desiredOutcomeId,
             actualOutcomeId: actualOutcomeId,
             probSuccess: probSuccess,
