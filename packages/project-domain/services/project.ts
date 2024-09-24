@@ -63,6 +63,14 @@ export const getProject = async (projectId: string, db: PrismaClient) => {
   return project;
 };
 
+export const validateUserOwnsProject = async (projectId: string, userId: string, db: PrismaClient) => {
+  const project = await db.project.findUnique({
+    where: { id: projectId, ownerId: userId },
+    include: { possibleOutcomes: true, conversations: false },
+  });
+  return project;
+};
+
 export const getProjectsByUser = async (
   userId: string | null,
   db: PrismaClient,
