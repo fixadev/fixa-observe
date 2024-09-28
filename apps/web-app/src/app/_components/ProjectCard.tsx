@@ -1,4 +1,9 @@
-import { Card, CardDescription, CardHeader, CardTitle } from "./ui/card";
+import {
+  Card,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "~/components/ui/card";
 import Link from "next/link";
 
 export default function ProjectCard({ id }: { id: string }) {

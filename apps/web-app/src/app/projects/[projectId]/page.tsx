@@ -1,5 +1,5 @@
 import PageHeader from "~/components/PageHeader";
-import SurveyCard from "~/components/SurveyCard";
+import SurveyCard from "./_components/SurveyCard";
 import { Button } from "~/components/ui/button";
 import {
   Dialog,

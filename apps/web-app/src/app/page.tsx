@@ -1,5 +1,5 @@
 import { currentUser } from "@clerk/nextjs/server";
-import ProjectCard from "~/components/ProjectCard";
+import ProjectCard from "./_components/ProjectCard";
 import { Button } from "~/components/ui/button";
 import {
   Dialog,
