@@ -29,6 +29,7 @@ export const updateProject = async (
   return project;
 };
 
+
 export const getProject = async (projectId: string, db: PrismaClient) => {
   const project = await db.project.findUnique({
     where: { id: projectId },
