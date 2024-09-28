@@ -23,12 +23,23 @@ model User {
 }
 
 model Project {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  owner     User     @relation(fields: [ownerId], references: [id])
+  ownerId   String   @db.ObjectId
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  name      String
+  surveys   Survey[]
+}
+
+model Survey {
   id          String   @id @default(auto()) @map("_id") @db.ObjectId
-  owner       User     @relation(fields: [ownerId], references: [id])
   ownerId     String   @db.ObjectId
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   name        String
+  projectId   String   @db.ObjectId
+  project     Project  @relation(fields: [projectId], references: [id])
   buildingIds String[]
 }
 

@@ -1,12 +1,12 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
-import { createProjectInput, updateProjectInput } from "@repo/project-domain/types/project";
+import { createProjectInput, updateProjectInput } from "~/lib/project";
 import {
   getProject,
   createProject,
   updateProject,
   getProjectsByUser,
-} from "@repo/project-domain/services/project";
+} from "~/server/services/project";
 
 export const projectRouter = createTRPCRouter({
   createProject: protectedProcedure
@@ -32,7 +32,6 @@ export const projectRouter = createTRPCRouter({
       return await updateProject(
         input.projectId,
         input.projectName,
-        input.outcomes,
         ctx.userId,
         ctx.db,
       );
