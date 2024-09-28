@@ -34,11 +34,12 @@ export const createOrUpdateBuildings = async (
         })),
     });
 
-    return {
+    console.log({
         created: createdBuildings.count,
         updated: updatedBuildings.count,
-    };
+    });
 
+    return [...buildingsToCreate, ...buildingsToUpdate].map(building => building.id).filter(id => id !== undefined);
 };
 
 export const getBuildingDetails = async (buildingId: string, userId: string, db: PrismaClient) => {

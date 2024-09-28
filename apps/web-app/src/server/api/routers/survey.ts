@@ -12,8 +12,8 @@ export const surveyRouter = createTRPCRouter({
   }),
 
   addBuildingsToSurvey: protectedProcedure.input(z.object({ surveyId: z.string(), buildings: importBuildingsInput })).mutation(async ({ ctx, input }) => {
-    await createOrUpdateBuildings(input.buildings, ctx.userId, ctx.db);
-    return await addBuildingsToSurvey(input.surveyId, input.buildings.map(building => building.id), ctx.userId, ctx.db);
+    const buildingIds = await createOrUpdateBuildings(input.buildings, ctx.userId, ctx.db);
+    return await addBuildingsToSurvey(input.surveyId, buildingIds, ctx.userId, ctx.db);
   }),
 
   getProjectSurveys: protectedProcedure.input(z.object({ projectId: z.string() })).mutation(async ({ ctx, input }) => {
