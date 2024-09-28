@@ -3,6 +3,7 @@ import { Button } from "~/components/ui/button";
 import { Table, TableBody, TableRow, TableCell } from "~/components/ui/table";
 import SpaceCard from "./_components/SpaceCard";
 import AttachmentCard from "./_components/AttachmentCard";
+import Link from "next/link";
 
 export default function BuildingPage({
   params,
@@ -18,7 +19,11 @@ export default function BuildingPage({
             Palo Alto, CA 94301
           </div>
         </div>
-        <Button variant="outline">Edit building details</Button>
+        <Link
+          href={`/projects/${params.projectId}/surveys/${params.surveyId}/buildings/${params.buildingId}/edit-details`}
+        >
+          <Button>Edit building details</Button>
+        </Link>
       </div>
       <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
         <div className="flex flex-col gap-8">
@@ -63,7 +68,11 @@ export default function BuildingPage({
           <div>
             <div className="mb-4 flex items-center justify-between">
               <div className="text-lg font-medium">Spaces</div>
-              <Button variant="outline">Add / edit spaces</Button>
+              <Link
+                href={`/projects/${params.projectId}/surveys/${params.surveyId}/buildings/${params.buildingId}/edit-spaces`}
+              >
+                <Button variant="outline">Add / edit spaces</Button>
+              </Link>
             </div>
             <div className="flex flex-col gap-2">
               <SpaceCard />

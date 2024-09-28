@@ -10,6 +10,7 @@ import { ClerkProvider } from "@clerk/nextjs";
 // import { dark } from "@clerk/themes";
 import ChildrenWrapper from "./_components/ChildrenWrapper";
 import { ProjectProvider } from "./contexts/projectContext";
+import TopBar from "./_components/TopBar";
 export const metadata: Metadata = {
   title: "Pixa",
   description:
@@ -50,7 +51,8 @@ export default function RootLayout({
               <TRPCReactProvider>
                 <ProjectProvider>
                   <ChildrenWrapper>
-                    <div className="container mx-auto pt-20">{children}</div>
+                    <TopBar />
+                    <div className="container mx-auto pt-32">{children}</div>
                     <Toaster />
                   </ChildrenWrapper>
                 </ProjectProvider>
