@@ -11,8 +11,9 @@ import { ClerkProvider } from "@clerk/nextjs";
 import ChildrenWrapper from "./_components/ChildrenWrapper";
 import { ProjectProvider } from "./contexts/projectContext";
 export const metadata: Metadata = {
-  title: "pixa.dev",
-  description: "voice agent observability, monitoring, and analytics",
+  title: "Pixa",
+  description:
+    "Quickly create commercial real estate surveys and export as PDF",
   icons: [{ rel: "icon", url: "/favicon.ico" }],
 };
 
@@ -49,7 +50,7 @@ export default function RootLayout({
               <TRPCReactProvider>
                 <ProjectProvider>
                   <ChildrenWrapper>
-                    {children}
+                    <div className="container mx-auto pt-20">{children}</div>
                     <Toaster />
                   </ChildrenWrapper>
                 </ProjectProvider>
