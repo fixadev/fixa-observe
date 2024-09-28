@@ -38,6 +38,6 @@
     "**/*.cjs",
     "**/*.js",
     ".next/types/**/*.ts"
-  ],
+, "../../packages/project-domain/services/project.ts"  ],
   "exclude": ["node_modules"]
 }

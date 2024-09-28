@@ -1,7 +1,9 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { createSurveyInput, surveySchema } from "~/lib/survey";
-import { createSurvey, getProjectSurveys, getSurveyDetails, updateSurvey, deleteSurvey } from "~/server/services/survey";
+import { createSurvey, getProjectSurveys, getSurveyDetails, updateSurvey, deleteSurvey, addBuildingsToSurvey } from "~/server/services/survey";
+import { createOrUpdateBuildings } from "~/server/services/buildings";
+import { importBuildingsInput } from "~/lib/building";
 
 
 export const surveyRouter = createTRPCRouter({
@@ -9,8 +11,9 @@ export const surveyRouter = createTRPCRouter({
     return await createSurvey(input, ctx.userId, ctx.db);
   }),
 
-  addBuildingsToSurvey: protectedProcedure.input(z.object({ surveyId: z.string(), buildingIds: z.array(z.string()) })).mutation(async ({ ctx, input }) => {
-    return await addBuildingsToSurvey(input.surveyId, input.buildingIds, ctx.userId, ctx.db);
+  addBuildingsToSurvey: protectedProcedure.input(z.object({ surveyId: z.string(), buildings: importBuildingsInput })).mutation(async ({ ctx, input }) => {
+    await createOrUpdateBuildings(input.buildings, ctx.userId, ctx.db);
+    return await addBuildingsToSurvey(input.surveyId, input.buildings.map(building => building.id), ctx.userId, ctx.db);
   }),
 
   getProjectSurveys: protectedProcedure.input(z.object({ projectId: z.string() })).mutation(async ({ ctx, input }) => {

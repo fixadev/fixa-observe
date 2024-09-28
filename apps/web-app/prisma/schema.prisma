@@ -15,12 +15,13 @@ datasource db {
 }
 
 model User {
-  id        String    @id @default(auto()) @map("_id") @db.ObjectId
-  clerkId   String    @unique
-  email     String    @unique
+  id        String     @id @default(auto()) @map("_id") @db.ObjectId
+  clerkId   String     @unique
+  email     String     @unique
   firstName String?
   lastName  String?
   projects  Project[]
+  buildings Building[]
 }
 
 model Project {
@@ -49,7 +50,10 @@ model Building {
   id                 String   @id @default(auto()) @map("_id") @db.ObjectId
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
+  ownerId            String   @db.ObjectId
+  owner              User     @relation(fields: [ownerId], references: [id])
   name               String
+  photoUrls          String[]
   location           String
   description        String
   squareFootage      Int

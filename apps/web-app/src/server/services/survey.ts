@@ -46,6 +46,19 @@ export const updateSurvey = async (
     return result;
 };
 
+export const addBuildingsToSurvey = async (
+    surveyId: string,
+    buildingIds: string[],
+    userId: string,
+    db: PrismaClient,
+) => {
+    const survey = await db.survey.update({
+        where: { id: surveyId, ownerId: userId },
+        data: { buildingIds }
+    });
+    return survey;
+};
+
 export const deleteSurvey = async (
     surveyId: string,
     userId: string,
