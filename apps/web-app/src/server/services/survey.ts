@@ -1,5 +1,6 @@
 import { type Survey, type PrismaClient } from "@prisma/client";
 import { type CreateSurveyInput } from "~/lib/survey";
+
 export const getProjectSurveys = async (
     projectId: string,
     userId: string,
@@ -34,13 +35,12 @@ export const createSurvey = async (
 };
 
 export const updateSurvey = async (
-    surveyId: string,
     survey: Survey,
     userId: string,
     db: PrismaClient,
 ) => {
     const result = await db.survey.update({
-      where: { id: surveyId, ownerId: userId },
+      where: { id: survey.id, ownerId: userId },
       data: survey
     });
     return result;
