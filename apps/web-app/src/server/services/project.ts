@@ -11,6 +11,8 @@ export const createProject = async (
     data: {
       ownerId: userId,
       name: projectName,
+      // TODO: Add description
+      description: "",
     },
   });
   return project;
@@ -33,6 +35,14 @@ export const updateProject = async (
 export const getProject = async (projectId: string, db: PrismaClient) => {
   const project = await db.project.findUnique({
     where: { id: projectId },
+    include: {
+      surveys: {
+        select: {
+          id: true,
+          name: true,
+        },
+      },
+    },
   });
   return project;
 };
@@ -59,6 +69,7 @@ export const getProjectsByUser = async (
         select: {
           id: true,
           name: true,
+          description: true
         },
       },
     },

@@ -9,15 +9,17 @@ import Link from "next/link";
 export default function SurveyCard({
   projectId,
   surveyId,
+  surveyName,
 }: {
   projectId: string;
   surveyId: string;
+  surveyName: string;
 }) {
   return (
     <Link href={`/projects/${projectId}/surveys/${surveyId}`}>
       <Card>
         <CardHeader>
-          <CardTitle>Palo Alto Survey</CardTitle>
+          <CardTitle>{surveyName}</CardTitle>
           <CardDescription>Last updated 12 hours ago</CardDescription>
         </CardHeader>
       </Card>

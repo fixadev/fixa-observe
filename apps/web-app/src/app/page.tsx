@@ -20,6 +20,7 @@ import { api } from "~/trpc/react";
 export default function Home() {
   const { user } = useUser();
   const [projectName, setProjectName] = useState("");
+
   const { data: projects, error } = api.project.getProjects.useQuery();
   const { mutate: createProject } = api.project.createProject.useMutation({
     onSuccess: () => {
@@ -27,9 +28,10 @@ export default function Home() {
     },
   });
 
-  useEffect(() => {
-    console.log(projects);
-  }, [projects]);
+  const handleCreateProject = () => {
+    createProject({ projectName });
+    setProjectName("");
+  };
 
   return (
     <div className="flex flex-col gap-8">
@@ -60,6 +62,7 @@ export default function Home() {
                     id="project-name"
                     placeholder="Palo Alto project"
                     autoComplete="off"
+                    value={projectName}
                     onChange={(e) => {
                       setProjectName(e.target.value);
                     }}
@@ -68,9 +71,7 @@ export default function Home() {
               </div>
               <DialogFooter>
                 <DialogClose asChild>
-                  <Button onClick={() => createProject({ projectName })}>
-                    Create
-                  </Button>
+                  <Button onClick={handleCreateProject}>Create</Button>
                 </DialogClose>
               </DialogFooter>
             </DialogContent>
