@@ -4,7 +4,6 @@ import { clerkClient, type WebhookEvent } from "@clerk/nextjs/server";
 import { env } from "~/env";
 import { db } from "~/server/db";
 import { addSubscriber } from "~/server/listmonk";
-import { createProject } from "@repo/project-domain/services/project";
 
 export async function GET() {
   return new Response("ok", { status: 200 });
@@ -80,11 +79,11 @@ export async function POST(req: Request) {
         },
       });
 
-      await createProject(
-        { projectName: "default project", outcomes: [] },
-        user.id,
-        db,
-      );
+      // await createProject(
+      //   { projectName: "default project", outcomes: [] },
+      //   user.id,
+      //   db,
+      // );
 
       try {
         await addSubscriber(email, first_name, last_name);
