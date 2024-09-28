@@ -1,11 +1,9 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
-import { importBuildingsInput } from "~/lib/building";
-import { createOrUpdateBuildings, getBuildingDetails, updateBuildingDetails, addPhotosToBuilding } from "~/server/services/buildings";
-import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
-import { v4 as uuidv4 } from 'uuid';
+import { buildingSchema, importBuildingsInput } from "~/lib/building";
+import { createOrUpdateBuildings, getBuildingDetails, updateBuildingDetails, addPhotoUrlsToBuilding, addAttachmentToBuilding } from "~/server/services/buildings";
+import { uploadFileToS3 } from "~/server/utils/s3utils";
 
-const s3Client = new S3Client({ region: process.env.AWS_BUCKET_REGION });
 
 export const buildingsRouter = createTRPCRouter({
 
@@ -17,34 +15,33 @@ export const buildingsRouter = createTRPCRouter({
         return await getBuildingDetails(input.id, ctx.userId, ctx.db);
     }),
 
+    updateBuildingDetails: protectedProcedure.input(buildingSchema).mutation(async ({ ctx, input }) => {
+        return await updateBuildingDetails(input, ctx.userId, ctx.db);
+    }),
+
     addPhotosToBuilding: protectedProcedure.input(
         z.object({
             id: z.string(),
             photos: z.instanceof(FileList).transform(async (fileList) => {
                 const files = Array.from(fileList);
-                return Promise.all(files.map(async (file) => {
-                    const fileExtension = file.name.split('.').pop();
-                    const fileName = `${uuidv4()}.${fileExtension}`;
-                    const params = {
-                        Bucket: process.env.AWS_BUCKET_NAME,
-                        Key: fileName,
-                        Body: file,
-                        ContentType: file.type
-                    };
-
-                    try {
-                        await s3Client.send(new PutObjectCommand(params));
-                        return `https://${process.env.AWS_BUCKET_NAME}.s3.amazonaws.com/${fileName}`;
-                    } catch (error) {
-                        console.error("Error uploading file to S3:", error);
-                        throw new Error("Failed to upload file");
-                    }
-                }));
+                return Promise.all(files.map(uploadFileToS3));
             }),
         })
     ).mutation(async ({ ctx, input }) => {
-        const photoUrls = input.photos;
-        return await addPhotosToBuilding(input.id, photoUrls, ctx.userId, ctx.db);
+        const photoUrls = input.photos.map(({ url }) => url);
+        return await addPhotoUrlsToBuilding(input.id, photoUrls, ctx.userId, ctx.db);
+    }),
+
+    addAttachmentToBuilding: protectedProcedure.input(
+        z.object({
+            id: z.string(),
+            attachment: z.instanceof(File),
+            title: z.string(),
+            type: z.string(),
+        })
+    ).mutation(async ({ ctx, input }) => {
+        const { url: attachmentUrl, type } = await uploadFileToS3(input.attachment);
+        return await addAttachmentToBuilding(input.id, attachmentUrl, type, input.title, ctx.userId, ctx.db);
     }),
     
     

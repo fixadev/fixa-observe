@@ -14,6 +14,8 @@ export const createOrUpdateBuildings = async (
         },
     });
 
+
+    // Filter out buildings that already exist in the db -- TODO: find some cleaner way to do this
     const buildingsToCreate = input.filter(building => !existingBuildings.some(existing => existing.name === building.name));
     const buildingsToUpdate = input.filter(building => existingBuildings.some(existing => existing.name === building.name));
 
@@ -66,7 +68,8 @@ export const updateBuildingDetails = async (building: Building, userId: string, 
     return response;
 };
 
-export const addPhotosToBuilding = async (buildingId: string, photoUrls: string[], userId: string, db: PrismaClient) => {
+export const addPhotoUrlsToBuilding = async (buildingId: string, photoUrls: string[], userId: string, db: PrismaClient) => {
+    
     const response = await db.building.update({
         where: {
             id: buildingId,
@@ -74,6 +77,25 @@ export const addPhotosToBuilding = async (buildingId: string, photoUrls: string[
         },
         data: {
             photoUrls,
+        },
+    });
+    return response;
+};
+
+export const addAttachmentToBuilding = async (buildingId: string, attachmentUrl: string, attachmentType: string, attachmentTitle: string, userId: string, db: PrismaClient) => {
+    const response = await db.building.update({
+        where: {
+            id: buildingId,
+            ownerId: userId,
+        },
+        data: {
+            attachments: {
+                create: [{
+                    url: attachmentUrl,
+                    title: attachmentTitle,
+                    type: attachmentType,
+                }],
+            },
         },
     });
     return response;
