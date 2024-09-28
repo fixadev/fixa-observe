@@ -1,4 +1,4 @@
-import { type Building, type PrismaClient } from "@prisma/client";
+import { type Space, type Building, type PrismaClient } from "@prisma/client";
 import { type ImportBuildingsInput } from "~/lib/building";
 
 
@@ -13,8 +13,6 @@ export const createOrUpdateBuildings = async (
             ownerId: userId,
         },
     });
-
-
     // Filter out buildings that already exist in the db -- TODO: find some cleaner way to do this
     const buildingsToCreate = input.filter(building => !existingBuildings.some(existing => existing.name === building.name));
     const buildingsToUpdate = input.filter(building => existingBuildings.some(existing => existing.name === building.name));
@@ -69,17 +67,42 @@ export const updateBuildingDetails = async (building: Building, userId: string, 
 };
 
 export const addPhotoUrlsToBuilding = async (buildingId: string, photoUrls: string[], userId: string, db: PrismaClient) => {
-    
-    const response = await db.building.update({
+    return db.building.update({
         where: {
             id: buildingId,
             ownerId: userId,
         },
         data: {
-            photoUrls,
+            photoUrls: {
+                push: photoUrls,
+            },
         },
     });
-    return response;
+};
+
+
+export const deletePhotoUrlFromBuilding = async (buildingId: string, photoUrl: string, userId: string, db: PrismaClient) => {
+    const building = await db.building.findUnique({
+        where: {
+            id: buildingId,
+            ownerId: userId,
+        },
+    });
+
+    if (!building) {
+        throw new Error("Building not found");
+    }
+    return db.building.update({
+        where: {
+            id: buildingId,
+            ownerId: userId,
+        },
+        data: {
+            photoUrls: {
+                set: building.photoUrls.filter(url => url !== photoUrl),
+            },
+        },
+    });
 };
 
 export const addAttachmentToBuilding = async (buildingId: string, attachmentUrl: string, attachmentType: string, attachmentTitle: string, userId: string, db: PrismaClient) => {
@@ -100,4 +123,106 @@ export const addAttachmentToBuilding = async (buildingId: string, attachmentUrl:
     });
     return response;
 };
+
+
+export const deleteAttachmentFromBuilding = async (buildingId: string, attachmentId: string, userId: string, db: PrismaClient) => {
+    const building = await db.building.findUnique({
+        where: {
+            id: buildingId,
+            ownerId: userId,
+        },
+    });
+
+    if (!building) {
+        throw new Error("Building not found");
+    }
+
+    return db.building.update({
+        where: {
+            id: buildingId,
+            ownerId: userId,
+        },
+        data: {
+            attachments: {
+                delete: {
+                    id: attachmentId,
+                },
+            },
+        },
+    });
+};
+
+
+export const deleteBuilding = async (buildingId: string, userId: string, db: PrismaClient) => {
+    const building = await db.building.findUnique({
+        where: {
+            id: buildingId,
+            ownerId: userId,
+        },
+    }); 
+
+    if (!building) {
+        throw new Error("Building not found");
+    }
+
+    return db.building.delete({
+        where: {
+            id: buildingId,
+            ownerId: userId,        
+        },
+    });
+};
+
+
+export const createSpace = async (buildingId: string, space: Space, userId: string, db: PrismaClient) => {
+    return db.building.update({
+        where: {
+            id: buildingId,
+            ownerId: userId,
+        },
+        data: {
+            spaces: {   
+                create: {
+                    ...space
+                },
+            },
+        },
+    });
+};
+
+export const updateSpace = async (buildingId: string, space: Space, userId: string, db: PrismaClient) => {
+    return db.building.update({
+        where: {
+            id: buildingId,
+            ownerId: userId,
+        },
+        data: {
+            spaces: {   
+                update: [{
+                    where: { id: space.id },
+                    data: {
+                        ...space,
+                    },
+                }],
+            },
+        },
+    });
+};
+
+
+export const deleteSpace = async (buildingId: string, spaceId: string, userId: string, db: PrismaClient) => {
+    return db.building.update({
+        where: {
+            id: buildingId,
+            ownerId: userId,
+        },
+        data: {
+            spaces: {
+                delete: {
+                    id: spaceId,
+                },
+            },
+        },
+    });
+};  
 
