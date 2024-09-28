@@ -1,3 +1,9 @@
+import Link from "next/link";
+
 export default function Logo() {
-  return <div className="text-xl font-medium sm:text-2xl">pixa.dev</div>;
+  return (
+    <Link href="/" className="text-xl font-medium sm:text-2xl">
+      pixa.dev
+    </Link>
+  );
 }

@@ -7,7 +7,6 @@ import {
   TableRow,
   TableCell,
   TableHeader,
-  TableHead,
 } from "~/components/ui/table";
 
 export default function EditSpacesPage({
