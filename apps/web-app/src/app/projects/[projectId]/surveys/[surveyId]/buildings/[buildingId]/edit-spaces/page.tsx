@@ -1,13 +1,7 @@
 import Link from "next/link";
 import PageHeader from "~/components/PageHeader";
 import { Button } from "~/components/ui/button";
-import {
-  Table,
-  TableBody,
-  TableRow,
-  TableCell,
-  TableHeader,
-} from "~/components/ui/table";
+import SpacesTable from "./_components/SpacesTable";
 
 export default function EditSpacesPage({
   params,
@@ -27,30 +21,7 @@ export default function EditSpacesPage({
           <Button>Save</Button>
         </div>
       </div>
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableCell></TableCell>
-            <TableCell>Suite 101</TableCell>
-            <TableCell>Suite 102</TableCell>
-            <TableCell>Suite 103</TableCell>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          <TableRow>
-            <TableCell className="font-medium">Floors</TableCell>
-            <TableCell>3</TableCell>
-            <TableCell>3</TableCell>
-            <TableCell>3</TableCell>
-          </TableRow>
-          <TableRow>
-            <TableCell className="font-medium">Amenities</TableCell>
-            <TableCell>Parking, Elevator, Conference Room</TableCell>
-            <TableCell>Parking, Elevator, Conference Room</TableCell>
-            <TableCell>Parking, Elevator, Conference Room</TableCell>
-          </TableRow>
-        </TableBody>
-      </Table>
+      <SpacesTable />
     </div>
   );
 }
