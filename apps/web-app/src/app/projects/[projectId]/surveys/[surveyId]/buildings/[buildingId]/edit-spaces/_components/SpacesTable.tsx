@@ -161,10 +161,12 @@ const testCustomProperties: CustomProperty[] = [
 const DraggableHeader = ({
   space,
   renameSpace,
+  deleteSpace,
   draggingRow,
 }: {
   space: Space;
   renameSpace: (name: string) => void;
+  deleteSpace: () => void;
   draggingRow: boolean;
 }) => {
   const [isEditing, setIsEditing] = useState(false);
@@ -217,7 +219,7 @@ const DraggableHeader = ({
           </Button>
         )}
         <div className="invisible flex text-muted-foreground group-hover:visible">
-          <Button size="icon" variant="ghost">
+          <Button size="icon" variant="ghost" onClick={deleteSpace}>
             <TrashIcon className="size-4" />
           </Button>
         </div>
@@ -237,12 +239,14 @@ const DraggableRow = ({
   spaces,
   property,
   renameProperty,
+  deleteProperty,
   draggingRow,
   setDraggingRow,
 }: {
   spaces: Space[];
   property: CustomProperty;
   renameProperty: (label: string) => void;
+  deleteProperty: () => void;
   draggingRow: boolean;
   setDraggingRow: (draggingRow: boolean) => void;
 }) => {
@@ -312,7 +316,7 @@ const DraggableRow = ({
             )}
           </div>
           <div className="invisible flex text-muted-foreground group-hover:visible">
-            <Button size="icon" variant="ghost">
+            <Button size="icon" variant="ghost" onClick={deleteProperty}>
               <TrashIcon className="size-4" />
             </Button>
           </div>
@@ -432,6 +436,26 @@ export default function SpacesTable() {
     });
   }, []);
 
+  const deleteSpace = useCallback((id: string) => {
+    setSpaces((data) => {
+      const index = data.findIndex((space) => space.id === id);
+      if (index === -1) return data;
+      const newData = [...data];
+      newData.splice(index, 1);
+      return newData;
+    });
+  }, []);
+
+  const deleteProperty = useCallback((id: string) => {
+    setPropertiesOrder((data) => {
+      const index = data.findIndex((property) => property.id === id);
+      if (index === -1) return data;
+      const newData = [...data];
+      newData.splice(index, 1);
+      return newData;
+    });
+  }, []);
+
   return (
     <div>
       <DndContext
@@ -459,6 +483,7 @@ export default function SpacesTable() {
                     key={space.id}
                     space={space}
                     renameSpace={(name) => renameSpace(space.id, name)}
+                    deleteSpace={() => deleteSpace(space.id)}
                     draggingRow={draggingRow}
                   ></DraggableHeader>
                 ))}
@@ -488,6 +513,7 @@ export default function SpacesTable() {
                     renameProperty={(label) =>
                       renameProperty(property.id, label)
                     }
+                    deleteProperty={() => deleteProperty(property.id)}
                     draggingRow={draggingRow}
                     setDraggingRow={setDraggingRow}
                   />
