@@ -1,6 +1,6 @@
 "use client";
 
-import { type CSSProperties, useMemo, useState } from "react";
+import { type CSSProperties, useCallback, useMemo, useState } from "react";
 import {
   Table,
   TableHeader,
@@ -342,6 +342,7 @@ export default function SpacesTable() {
   const [spaces, setSpaces] = useState<Space[]>(testSpaces);
   const [propertiesOrder, setPropertiesOrder] =
     useState<CustomProperty[]>(testCustomProperties);
+  const [draggingRow, setDraggingRow] = useState<boolean>(false);
 
   const colIds = useMemo(() => spaces.map((space) => space.id), [spaces]);
   const rowIds = useMemo(
@@ -349,31 +350,41 @@ export default function SpacesTable() {
     [propertiesOrder],
   );
 
-  const addField = () => {
+  const addField = useCallback(() => {
     setPropertiesOrder((data) => [
       ...data,
       { id: crypto.randomUUID(), name: "new", label: "New field" },
     ]);
-  };
+  }, []);
 
-  const handleDragEnd = (event: DragEndEvent) => {
-    const { active, over } = event;
-    if (active && over && active.id !== over.id) {
-      if (draggingRow) {
-        setPropertiesOrder((data) => {
-          const oldIndex = rowIds.findIndex((id) => id === active.id);
-          const newIndex = rowIds.findIndex((id) => id === over.id);
-          return arrayMove(data, oldIndex, newIndex);
-        });
-      } else {
-        setSpaces((data) => {
-          const oldIndex = colIds.findIndex((id) => id === active.id);
-          const newIndex = colIds.findIndex((id) => id === over.id);
-          return arrayMove(data, oldIndex, newIndex);
-        });
+  const addSpace = useCallback(() => {
+    setSpaces((data) => [
+      ...data,
+      { id: crypto.randomUUID(), name: "New space", customProperties: {} },
+    ]);
+  }, []);
+
+  const handleDragEnd = useCallback(
+    (event: DragEndEvent) => {
+      const { active, over } = event;
+      if (active && over && active.id !== over.id) {
+        if (draggingRow) {
+          setPropertiesOrder((data) => {
+            const oldIndex = rowIds.findIndex((id) => id === active.id);
+            const newIndex = rowIds.findIndex((id) => id === over.id);
+            return arrayMove(data, oldIndex, newIndex);
+          });
+        } else {
+          setSpaces((data) => {
+            const oldIndex = colIds.findIndex((id) => id === active.id);
+            const newIndex = colIds.findIndex((id) => id === over.id);
+            return arrayMove(data, oldIndex, newIndex);
+          });
+        }
       }
-    }
-  };
+    },
+    [draggingRow, rowIds, colIds],
+  );
 
   const sensors = useSensors(
     useSensor(MouseSensor, {}),
@@ -381,7 +392,6 @@ export default function SpacesTable() {
     useSensor(KeyboardSensor, {}),
   );
 
-  const [draggingRow, setDraggingRow] = useState<boolean>(false);
   return (
     <div>
       <DndContext
@@ -413,7 +423,7 @@ export default function SpacesTable() {
                 ))}
               </SortableContext>
               <TableCell className="justify-center-background sticky right-0 z-20 flex bg-background">
-                <Button size="icon" variant="ghost">
+                <Button size="icon" variant="ghost" onClick={addSpace}>
                   <PlusIcon className="size-4" />
                 </Button>
               </TableCell>
