@@ -12,7 +12,6 @@ export const createProject = async (
       ownerId: userId,
       name: projectName,
       // TODO: Add description
-      description: "",
     },
   });
   return project;
@@ -68,8 +67,7 @@ export const getProjectsByUser = async (
       projects: {
         select: {
           id: true,
-          name: true,
-          description: true
+          name: true
         },
       },
     },

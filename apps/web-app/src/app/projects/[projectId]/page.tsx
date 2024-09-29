@@ -30,21 +30,21 @@ export default function ProjectPage({
       projectId: params.projectId,
     });
 
-  useEffect(() => {
-    console.log(project);
-  }, [project]);
+  const { mutate: createSurvey } = api.survey.createSurvey.useMutation({
+    onSuccess: () => {
+      void refetchProject();
+      setNewSurveyName("");
+    },
+  });
 
-  const { mutate: createSurvey } = api.survey.createSurvey.useMutation();
-
+  // TODO: figure out how to add to state immediately
   const handleCreateSurvey = () => {
     createSurvey({ surveyName: newSurveyName, projectId: params.projectId });
-    void refetchProject();
-    setNewSurveyName("");
   };
 
   return (
     <div className="flex flex-col gap-8">
-      <PageHeader title="Project Name" />
+      <PageHeader title={project?.name ?? ""} />
       <div>
         <div className="mb-4 flex items-center justify-between">
           <div className="text-lg font-medium">Surveys</div>

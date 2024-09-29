@@ -9,11 +9,11 @@ import Link from "next/link";
 export default function ProjectCard({
   id,
   name,
-  description,
+  description = "",
 }: {
   id: string;
   name: string;
-  description: string;
+  description?: string;
 }) {
   return (
     <Link href={`/projects/${id}`}>

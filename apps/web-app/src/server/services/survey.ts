@@ -12,13 +12,16 @@ export const getProjectSurveys = async (
     return surveys;
 };
 
-export const getSurveyDetails = async (
+export const getSurvey = async (
     surveyId: string,
     userId: string,
     db: PrismaClient,
 ) => {
     const survey = await db.survey.findUnique({
-      where: { id: surveyId, ownerId: userId }
+      where: { id: surveyId, ownerId: userId },
+      include: {
+        buildings: true,
+      },
     });
     return survey;
 };

@@ -9,7 +9,6 @@ import { CSPostHogProvider } from "./providers";
 import { ClerkProvider } from "@clerk/nextjs";
 // import { dark } from "@clerk/themes";
 import ChildrenWrapper from "./_components/ChildrenWrapper";
-import { ProjectProvider } from "./contexts/projectContext";
 import TopBar from "./_components/TopBar";
 export const metadata: Metadata = {
   title: "Pixa",
@@ -49,13 +48,11 @@ export default function RootLayout({
               disableTransitionOnChange
             >
               <TRPCReactProvider>
-                <ProjectProvider>
-                  <ChildrenWrapper>
-                    <TopBar />
-                    <div className="container mx-auto pt-32">{children}</div>
-                    <Toaster />
-                  </ChildrenWrapper>
-                </ProjectProvider>
+                <ChildrenWrapper>
+                  <TopBar />
+                  <div className="container mx-auto pt-32">{children}</div>
+                  <Toaster />
+                </ChildrenWrapper>
               </TRPCReactProvider>
             </ThemeProvider>
           </body>

@@ -21,17 +21,31 @@ export default function Home() {
   const { user } = useUser();
   const [projectName, setProjectName] = useState("");
 
-  const { data: projects, error } = api.project.getProjects.useQuery();
-  const { mutate: createProject } = api.project.createProject.useMutation({
-    onSuccess: () => {
-      console.log("Project created");
-    },
-  });
+  const {
+    data: projects,
+    refetch: refetchProjects,
+    error: projectsError,
+  } = api.project.getProjects.useQuery();
+  const { mutate: createProject, error: createProjectError } =
+    api.project.createProject.useMutation({
+      onSuccess: () => {
+        console.log("Project created");
+        void refetchProjects();
+        setProjectName("");
+      },
+    });
 
   const handleCreateProject = () => {
     createProject({ projectName });
-    setProjectName("");
   };
+
+  useEffect(() => {
+    console.log("projectsError", projectsError);
+  }, [projectsError]);
+
+  useEffect(() => {
+    console.log("createProjectError", createProjectError);
+  }, [createProjectError]);
 
   return (
     <div className="flex flex-col gap-8">
@@ -79,12 +93,7 @@ export default function Home() {
         </div>
         <div className="flex flex-col gap-2">
           {projects?.map((project) => (
-            <ProjectCard
-              key={project.id}
-              id={project.id}
-              name={project.name}
-              description={project.description}
-            />
+            <ProjectCard key={project.id} id={project.id} name={project.name} />
           ))}
         </div>
       </div>
