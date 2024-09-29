@@ -343,18 +343,45 @@ export default function SpacesTable() {
 
   const [draggingRow, setDraggingRow] = useState<boolean>(false);
   return (
-    <DndContext
-      collisionDetection={closestCenter}
-      modifiers={[
-        draggingRow ? restrictToVerticalAxis : restrictToHorizontalAxis,
-      ]}
-      onDragEnd={handleDragEnd}
-      sensors={sensors}
-    >
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableCell className="sticky left-0 z-20 bg-background"></TableCell>
+    <div>
+      <DndContext
+        collisionDetection={closestCenter}
+        modifiers={[
+          draggingRow ? restrictToVerticalAxis : restrictToHorizontalAxis,
+        ]}
+        onDragEnd={handleDragEnd}
+        sensors={sensors}
+      >
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableCell className="sticky left-0 z-20 bg-background"></TableCell>
+              <SortableContext
+                items={draggingRow ? rowIds : colIds}
+                strategy={
+                  draggingRow
+                    ? verticalListSortingStrategy
+                    : horizontalListSortingStrategy
+                }
+              >
+                {spaces.map((space) => (
+                  <DraggableHeader
+                    key={space.id}
+                    id={space.id}
+                    draggingRow={draggingRow}
+                  >
+                    {space.name}
+                  </DraggableHeader>
+                ))}
+              </SortableContext>
+              <TableCell className="justify-center-background sticky right-0 z-20 flex bg-background">
+                <Button size="icon" variant="ghost">
+                  <PlusIcon className="size-4" />
+                </Button>
+              </TableCell>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
             <SortableContext
               items={draggingRow ? rowIds : colIds}
               strategy={
@@ -363,60 +390,38 @@ export default function SpacesTable() {
                   : horizontalListSortingStrategy
               }
             >
-              {spaces.map((space) => (
-                <DraggableHeader
-                  key={space.id}
-                  id={space.id}
-                  draggingRow={draggingRow}
-                >
-                  {space.name}
-                </DraggableHeader>
-              ))}
+              {propertiesOrder.map((property) => {
+                return (
+                  <DraggableRow
+                    key={property.id}
+                    spaces={spaces}
+                    property={property}
+                    draggingRow={draggingRow}
+                    setDraggingRow={setDraggingRow}
+                  />
+                );
+                // return (
+                //   <TableRow key={property.name}>
+                //     <TableCell className="font-medium">
+                //       {property.label}
+                //     </TableCell>
+                //     {spaces.map((space, i) => {
+                //       return (
+                //         <TableCell key={i}>
+                //           {space.customProperties[property.name]}
+                //         </TableCell>
+                //       );
+                //     })}
+                //   </TableRow>
+                // );
+              })}
             </SortableContext>
-            <TableCell className="flex justify-center">
-              <Button size="icon" variant="ghost">
-                <PlusIcon className="size-4" />
-              </Button>
-            </TableCell>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          <SortableContext
-            items={draggingRow ? rowIds : colIds}
-            strategy={
-              draggingRow
-                ? verticalListSortingStrategy
-                : horizontalListSortingStrategy
-            }
-          >
-            {propertiesOrder.map((property) => {
-              return (
-                <DraggableRow
-                  key={property.id}
-                  spaces={spaces}
-                  property={property}
-                  draggingRow={draggingRow}
-                  setDraggingRow={setDraggingRow}
-                />
-              );
-              // return (
-              //   <TableRow key={property.name}>
-              //     <TableCell className="font-medium">
-              //       {property.label}
-              //     </TableCell>
-              //     {spaces.map((space, i) => {
-              //       return (
-              //         <TableCell key={i}>
-              //           {space.customProperties[property.name]}
-              //         </TableCell>
-              //       );
-              //     })}
-              //   </TableRow>
-              // );
-            })}
-          </SortableContext>
-        </TableBody>
-      </Table>
-    </DndContext>
+          </TableBody>
+        </Table>
+        <Button variant="ghost" className="mt-2">
+          + Add field
+        </Button>
+      </DndContext>
+    </div>
   );
 }
