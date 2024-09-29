@@ -31,6 +31,7 @@ import {
 } from "@dnd-kit/modifiers";
 import { CSS } from "@dnd-kit/utilities";
 import { DragHandleDots2Icon } from "@radix-ui/react-icons";
+import { Input } from "~/components/ui/input";
 
 export type Space = {
   id: string;
@@ -142,25 +143,26 @@ const DraggableRow = ({
   return (
     <TableRow ref={setNodeRef} style={style}>
       <TableCell
-        className="flex items-center gap-2 font-medium"
-        onMouseEnter={(e) => {
+        onMouseEnter={() => {
           setDraggingRow(true);
         }}
-        onMouseLeave={(e) => {
+        onMouseLeave={() => {
           setDraggingRow(false);
         }}
       >
-        <DragHandleDots2Icon
-          className="size-4"
-          {...attributes}
-          {...listeners}
-        />
-        {property.label}
+        <div className="flex items-center gap-2 font-medium">
+          <DragHandleDots2Icon
+            className="size-4"
+            {...attributes}
+            {...listeners}
+          />
+          {property.label}
+        </div>
       </TableCell>
       {spaces.map((space, i) => {
         return (
           <DraggableCell key={i} id={space.id} draggingRow={draggingRow}>
-            {space.customProperties[property.name]}
+            <Input defaultValue={space.customProperties[property.name]} />
           </DraggableCell>
         );
       })}
@@ -177,14 +179,7 @@ const DraggableCell = ({
   draggingRow: boolean;
   children: React.ReactNode;
 }) => {
-  const {
-    transform,
-    transition,
-    setNodeRef,
-    isDragging,
-    attributes,
-    listeners,
-  } = useSortable({
+  const { transform, transition, setNodeRef, isDragging } = useSortable({
     id: !draggingRow ? id : "",
   });
 
@@ -197,7 +192,7 @@ const DraggableCell = ({
   };
 
   return (
-    <TableCell ref={setNodeRef} style={style} {...attributes} {...listeners}>
+    <TableCell ref={setNodeRef} style={style}>
       {children}
     </TableCell>
   );
