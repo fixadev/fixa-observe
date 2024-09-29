@@ -71,10 +71,91 @@ const testSpaces: Space[] = [
       amenities: "Private Bathroom, Balcony, Storage Unit",
     },
   },
+  {
+    id: "4",
+    name: "Suite 104",
+    customProperties: {
+      floors: "4",
+      amenities: "High-speed Internet, Open Floor Plan, Meeting Rooms",
+    },
+  },
+  {
+    id: "5",
+    name: "Suite 105",
+    customProperties: {
+      floors: "2",
+      amenities: "24/7 Security, Lounge Area, Bike Storage",
+    },
+  },
+  {
+    id: "6",
+    name: "Suite 106",
+    customProperties: {
+      floors: "3",
+      amenities: "Fitness Center, Cafeteria, Outdoor Workspace",
+    },
+  },
+  {
+    id: "7",
+    name: "Suite 107",
+    customProperties: {
+      floors: "5",
+      amenities: "Executive Lounge, Helipad, Private Elevator",
+    },
+  },
+  {
+    id: "8",
+    name: "Suite 108",
+    customProperties: {
+      floors: "1",
+      amenities: "Soundproof Rooms, Recording Studio, Green Screen Room",
+    },
+  },
+  {
+    id: "9",
+    name: "Suite 109",
+    customProperties: {
+      floors: "2",
+      amenities: "Coworking Space, Nap Pods, Meditation Room",
+    },
+  },
+  {
+    id: "10",
+    name: "Suite 110",
+    customProperties: {
+      floors: "3",
+      amenities: "Indoor Garden, Aquarium, Art Gallery",
+    },
+  },
+  {
+    id: "11",
+    name: "Suite 111",
+    customProperties: {
+      floors: "4",
+      amenities: "Virtual Reality Lab, 3D Printing Room, Innovation Hub",
+    },
+  },
+  {
+    id: "12",
+    name: "Suite 112",
+    customProperties: {
+      floors: "2",
+      amenities:
+        "Rooftop Solar Panels, Electric Vehicle Charging, Recycling Center",
+    },
+  },
+  {
+    id: "13",
+    name: "Suite 113",
+    customProperties: {
+      floors: "1",
+      amenities: "Pet-friendly Office, Dog Park, Grooming Station",
+    },
+  },
 ];
 const testCustomProperties: CustomProperty[] = [
-  { id: "1", name: "floors", label: "Floors" },
-  { id: "2", name: "amenities", label: "Amenities" },
+  { id: "-1", name: "floors", label: "Floors" },
+  { id: "-2", name: "amenities", label: "Amenities" },
 ];
 
 const DraggableHeader = ({
@@ -167,6 +248,7 @@ const DraggableRow = ({
   return (
     <TableRow ref={setNodeRef} style={style}>
       <TableCell
+        className="sticky left-0 z-20 bg-background"
         onMouseEnter={() => {
           setDraggingRow(true);
         }}
@@ -190,6 +272,7 @@ const DraggableRow = ({
           </DraggableCell>
         );
       })}
+      <TableCell></TableCell>
     </TableRow>
   );
 };
@@ -216,7 +299,7 @@ const DraggableCell = ({
   };
 
   return (
-    <TableCell ref={setNodeRef} style={style}>
+    <TableCell ref={setNodeRef} style={style} className="min-w-64">
       {children}
     </TableCell>
   );
@@ -271,7 +354,7 @@ export default function SpacesTable() {
       <Table>
         <TableHeader>
           <TableRow>
-            <TableCell></TableCell>
+            <TableCell className="sticky left-0 z-20 bg-background"></TableCell>
             <SortableContext
               items={draggingRow ? rowIds : colIds}
               strategy={
