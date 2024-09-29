@@ -1,6 +1,12 @@
 "use client";
 
-import { type CSSProperties, useCallback, useMemo, useState } from "react";
+import {
+  type CSSProperties,
+  useCallback,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import {
   Table,
   TableHeader,
@@ -39,11 +45,13 @@ export type Space = {
   id: string;
   name: string;
   customProperties: Record<string, string>;
+  isNew?: boolean;
 };
 export type CustomProperty = {
   id: string;
   name: string;
   label: string;
+  isNew?: boolean;
 };
 
 const testSpaces: Space[] = [
@@ -169,7 +177,7 @@ const DraggableHeader = ({
   deleteSpace: () => void;
   draggingRow: boolean;
 }) => {
-  const [isEditing, setIsEditing] = useState(false);
+  const [isEditing, setIsEditing] = useState(space.isNew ?? false);
 
   const {
     transform,
@@ -212,6 +220,7 @@ const DraggableHeader = ({
               renameSpace(e.target.value);
             }}
             autoFocus
+            onFocus={(e) => e.target.select()}
           />
         ) : (
           <Button variant="ghost" onClick={() => setIsEditing(true)}>
@@ -250,7 +259,7 @@ const DraggableRow = ({
   draggingRow: boolean;
   setDraggingRow: (draggingRow: boolean) => void;
 }) => {
-  const [isEditing, setIsEditing] = useState(false);
+  const [isEditing, setIsEditing] = useState(property.isNew ?? false);
 
   const {
     transform,
@@ -270,8 +279,6 @@ const DraggableRow = ({
     zIndex: isDragging ? 1 : 0,
     position: "relative",
   };
-
-  // console.log(attributes, listeners);
 
   return (
     <TableRow ref={setNodeRef} style={style}>
@@ -304,10 +311,8 @@ const DraggableRow = ({
                 onChange={(e) => {
                   renameProperty(e.target.value);
                 }}
+                onFocus={(e) => e.target.select()}
                 autoFocus
-                // onChange={(e) => {
-                //   setProperty({ ...property, label: e.target.value });
-                // }}
               />
             ) : (
               <Button variant="ghost" onClick={() => setIsEditing(true)}>
@@ -374,20 +379,6 @@ export default function SpacesTable() {
     [propertiesOrder],
   );
 
-  const addField = useCallback(() => {
-    setPropertiesOrder((data) => [
-      ...data,
-      { id: crypto.randomUUID(), name: "new", label: "New field" },
-    ]);
-  }, []);
-
-  const addSpace = useCallback(() => {
-    setSpaces((data) => [
-      ...data,
-      { id: crypto.randomUUID(), name: "New space", customProperties: {} },
-    ]);
-  }, []);
-
   const handleDragEnd = useCallback(
     (event: DragEndEvent) => {
       const { active, over } = event;
@@ -416,6 +407,23 @@ export default function SpacesTable() {
     useSensor(KeyboardSensor, {}),
   );
 
+  const addSpace = useCallback(() => {
+    setSpaces((data) => [
+      ...data,
+      {
+        id: crypto.randomUUID(),
+        name: "New space",
+        customProperties: {},
+        isNew: true,
+      },
+    ]);
+    setTimeout(() => {
+      tableRef.current?.scrollTo({
+        top: tableRef.current.scrollWidth,
+      });
+    });
+  }, []);
+
   const renameSpace = useCallback((id: string, name: string) => {
     setSpaces((data) => {
       const index = data.findIndex((space) => space.id === id);
@@ -424,6 +432,13 @@ export default function SpacesTable() {
       newData[index]!.name = name;
       return newData;
     });
+  }, []);
+
+  const addProperty = useCallback(() => {
+    setPropertiesOrder((data) => [
+      ...data,
+      { id: crypto.randomUUID(), name: "new", label: "New field", isNew: true },
+    ]);
   }, []);
 
   const renameProperty = useCallback((id: string, label: string) => {
@@ -456,6 +471,8 @@ export default function SpacesTable() {
     });
   }, []);
 
+  const tableRef = useRef<HTMLTableElement>(null);
+
   return (
     <div>
       <DndContext
@@ -466,7 +483,7 @@ export default function SpacesTable() {
         onDragEnd={handleDragEnd}
         sensors={sensors}
       >
-        <Table>
+        <Table ref={tableRef}>
           <TableHeader>
             <TableRow>
               <TableCell className="sticky left-0 z-20 bg-background"></TableCell>
@@ -522,7 +539,7 @@ export default function SpacesTable() {
             </SortableContext>
           </TableBody>
         </Table>
-        <Button variant="ghost" className="mt-2" onClick={addField}>
+        <Button variant="ghost" className="mt-2" onClick={addProperty}>
           + Add field
         </Button>
       </DndContext>
