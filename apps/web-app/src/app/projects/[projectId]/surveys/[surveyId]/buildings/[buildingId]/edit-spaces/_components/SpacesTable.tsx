@@ -245,6 +245,8 @@ const DraggableRow = ({
     position: "relative",
   };
 
+  // console.log(attributes, listeners);
+
   return (
     <TableRow ref={setNodeRef} style={style}>
       <TableCell
@@ -261,13 +263,14 @@ const DraggableRow = ({
             className="size-4"
             {...attributes}
             {...listeners}
+            style={{ touchAction: "none" }}
           />
           {property.label}
         </div>
       </TableCell>
-      {spaces.map((space, i) => {
+      {spaces.map((space) => {
         return (
-          <DraggableCell key={i} id={space.id} draggingRow={draggingRow}>
+          <DraggableCell key={space.id} id={space.id} draggingRow={draggingRow}>
             <Input defaultValue={space.customProperties[property.name]} />
           </DraggableCell>
         );
@@ -315,6 +318,13 @@ export default function SpacesTable() {
     () => propertiesOrder.map((property) => property.id),
     [propertiesOrder],
   );
+
+  const addField = () => {
+    setPropertiesOrder((data) => [
+      ...data,
+      { id: crypto.randomUUID(), name: "new", label: "New field" },
+    ]);
+  };
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
@@ -400,25 +410,11 @@ export default function SpacesTable() {
                     setDraggingRow={setDraggingRow}
                   />
                 );
-                // return (
-                //   <TableRow key={property.name}>
-                //     <TableCell className="font-medium">
-                //       {property.label}
-                //     </TableCell>
-                //     {spaces.map((space, i) => {
-                //       return (
-                //         <TableCell key={i}>
-                //           {space.customProperties[property.name]}
-                //         </TableCell>
-                //       );
-                //     })}
-                //   </TableRow>
-                // );
               })}
             </SortableContext>
           </TableBody>
         </Table>
-        <Button variant="ghost" className="mt-2">
+        <Button variant="ghost" className="mt-2" onClick={addField}>
           + Add field
         </Button>
       </DndContext>
