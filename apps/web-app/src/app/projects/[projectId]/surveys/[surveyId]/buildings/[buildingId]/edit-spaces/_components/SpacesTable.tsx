@@ -159,14 +159,14 @@ const testCustomProperties: CustomProperty[] = [
 ];
 
 const DraggableHeader = ({
-  id,
+  space,
   draggingRow,
-  children,
 }: {
-  id: string;
+  space: Space;
   draggingRow: boolean;
-  children: React.ReactNode;
 }) => {
+  const [isEditing, setIsEditing] = useState(false);
+
   const {
     transform,
     transition,
@@ -175,7 +175,7 @@ const DraggableHeader = ({
     attributes,
     listeners,
   } = useSortable({
-    id: !draggingRow ? id : "",
+    id: !draggingRow ? space.id : "",
   });
 
   const style: CSSProperties = {
@@ -194,15 +194,23 @@ const DraggableHeader = ({
       // {...listeners}
       className="group relative"
     >
-      <div className="flex items-center gap-2">
-        {children}
-        <Button
-          size="icon"
-          variant="ghost"
-          className="invisible bottom-0 top-0 group-hover:visible"
-        >
-          <TrashIcon className="size-4 -translate-y-px" />
-        </Button>
+      <div className="flex items-center justify-between gap-2">
+        {isEditing ? (
+          <Input
+            defaultValue={space.name}
+            onBlur={() => setIsEditing(false)}
+            autoFocus
+          />
+        ) : (
+          <Button variant="ghost" onClick={() => setIsEditing(true)}>
+            {space.name}
+          </Button>
+        )}
+        <div className="invisible flex text-muted-foreground group-hover:visible">
+          <Button size="icon" variant="ghost">
+            <TrashIcon className="size-4" />
+          </Button>
+        </div>
       </div>
       <div className="invisible absolute left-0 right-0 top-0 z-10 w-full group-hover:visible">
         <DragHandleDots2Icon
@@ -226,6 +234,8 @@ const DraggableRow = ({
   draggingRow: boolean;
   setDraggingRow: (draggingRow: boolean) => void;
 }) => {
+  const [isEditing, setIsEditing] = useState(false);
+
   const {
     transform,
     transition,
@@ -250,7 +260,7 @@ const DraggableRow = ({
   return (
     <TableRow ref={setNodeRef} style={style}>
       <TableCell
-        className="sticky left-0 z-20 bg-background"
+        className="group sticky left-0 z-20 bg-background"
         onMouseEnter={() => {
           setDraggingRow(true);
         }}
@@ -258,14 +268,34 @@ const DraggableRow = ({
           setDraggingRow(false);
         }}
       >
-        <div className="flex items-center gap-2 font-medium">
-          <DragHandleDots2Icon
-            className="size-4"
-            {...attributes}
-            {...listeners}
-            style={{ touchAction: "none" }}
-          />
-          {property.label}
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2 font-medium">
+            <DragHandleDots2Icon
+              className="size-4"
+              {...attributes}
+              {...listeners}
+              style={{ touchAction: "none" }}
+            />
+            {isEditing ? (
+              <Input
+                defaultValue={property.label}
+                onBlur={() => setIsEditing(false)}
+                autoFocus
+                // onChange={(e) => {
+                //   setProperty({ ...property, label: e.target.value });
+                // }}
+              />
+            ) : (
+              <Button variant="ghost" onClick={() => setIsEditing(true)}>
+                {property.label}
+              </Button>
+            )}
+          </div>
+          <div className="invisible flex text-muted-foreground group-hover:visible">
+            <Button size="icon" variant="ghost">
+              <TrashIcon className="size-4" />
+            </Button>
+          </div>
         </div>
       </TableCell>
       {spaces.map((space) => {
@@ -377,11 +407,9 @@ export default function SpacesTable() {
                 {spaces.map((space) => (
                   <DraggableHeader
                     key={space.id}
-                    id={space.id}
+                    space={space}
                     draggingRow={draggingRow}
-                  >
-                    {space.name}
-                  </DraggableHeader>
+                  ></DraggableHeader>
                 ))}
               </SortableContext>
               <TableCell className="justify-center-background sticky right-0 z-20 flex bg-background">
