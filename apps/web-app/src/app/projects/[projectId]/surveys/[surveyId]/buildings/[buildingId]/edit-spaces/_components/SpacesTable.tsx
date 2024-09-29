@@ -160,9 +160,11 @@ const testCustomProperties: CustomProperty[] = [
 
 const DraggableHeader = ({
   space,
+  renameSpace,
   draggingRow,
 }: {
   space: Space;
+  renameSpace: (name: string) => void;
   draggingRow: boolean;
 }) => {
   const [isEditing, setIsEditing] = useState(false);
@@ -198,7 +200,15 @@ const DraggableHeader = ({
         {isEditing ? (
           <Input
             defaultValue={space.name}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                setIsEditing(false);
+              }
+            }}
             onBlur={() => setIsEditing(false)}
+            onChange={(e) => {
+              renameSpace(e.target.value);
+            }}
             autoFocus
           />
         ) : (
@@ -226,11 +236,13 @@ const DraggableHeader = ({
 const DraggableRow = ({
   spaces,
   property,
+  renameProperty,
   draggingRow,
   setDraggingRow,
 }: {
   spaces: Space[];
   property: CustomProperty;
+  renameProperty: (label: string) => void;
   draggingRow: boolean;
   setDraggingRow: (draggingRow: boolean) => void;
 }) => {
@@ -279,7 +291,15 @@ const DraggableRow = ({
             {isEditing ? (
               <Input
                 defaultValue={property.label}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    setIsEditing(false);
+                  }
+                }}
                 onBlur={() => setIsEditing(false)}
+                onChange={(e) => {
+                  renameProperty(e.target.value);
+                }}
                 autoFocus
                 // onChange={(e) => {
                 //   setProperty({ ...property, label: e.target.value });
@@ -392,6 +412,26 @@ export default function SpacesTable() {
     useSensor(KeyboardSensor, {}),
   );
 
+  const renameSpace = useCallback((id: string, name: string) => {
+    setSpaces((data) => {
+      const index = data.findIndex((space) => space.id === id);
+      if (index === -1) return data;
+      const newData = [...data];
+      newData[index]!.name = name;
+      return newData;
+    });
+  }, []);
+
+  const renameProperty = useCallback((id: string, label: string) => {
+    setPropertiesOrder((data) => {
+      const index = data.findIndex((property) => property.id === id);
+      if (index === -1) return data;
+      const newData = [...data];
+      newData[index]!.label = label;
+      return newData;
+    });
+  }, []);
+
   return (
     <div>
       <DndContext
@@ -418,6 +458,7 @@ export default function SpacesTable() {
                   <DraggableHeader
                     key={space.id}
                     space={space}
+                    renameSpace={(name) => renameSpace(space.id, name)}
                     draggingRow={draggingRow}
                   ></DraggableHeader>
                 ))}
@@ -444,6 +485,9 @@ export default function SpacesTable() {
                     key={property.id}
                     spaces={spaces}
                     property={property}
+                    renameProperty={(label) =>
+                      renameProperty(property.id, label)
+                    }
                     draggingRow={draggingRow}
                     setDraggingRow={setDraggingRow}
                   />
