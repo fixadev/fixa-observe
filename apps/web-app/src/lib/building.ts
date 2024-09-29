@@ -23,26 +23,19 @@ export const attachmentSchema = z.object({
 } satisfies { [K in keyof Attachment]: z.ZodType<Attachment[K]> });
 
 
+export type AttributesSchema = z.infer<typeof attributesSchema>;
+export const attributesSchema = z.record(z.string(), z.string());
 export const buildingSchema = z.object({
     id: z.string(),
     createdAt: z.date(),
     updatedAt: z.date(),
     ownerId: z.string(),
-    name: z.string(),
-    photoUrls: z.array(z.string()),
     address: z.string(),
-    zipCode: z.string(),
-    description: z.string(),
-    sqFt: z.number().int(),
-    yearBuilt: z.number().int(),
-    propertyType: z.string(),
-    occupancyRate: z.number(),
-    annualRevenue: z.number(),
-    energyRating: z.string(),
-    pricePerSqft: z.number().int(),
-    customProperties: z.record(z.string(), z.string()),
+    photoUrls: z.array(z.string()),
     attachmentIds: z.array(z.string()),
     surveyIds: z.array(z.string()),
+    spaceIds: z.array(z.string()),
+    attributes: attributesSchema,
 } satisfies { [K in keyof Building]: z.ZodType<Building[K]> });
 
 
@@ -50,7 +43,6 @@ export const photoUploadSchema = z.object({
     buildingId: z.string(),
     photos: z.array(zfd.file()),
 });
-
 
 export type CreateBuildingInput = z.infer<typeof createBuildingSchema>;
 export const createBuildingSchema = buildingSchema.omit({ id: true });

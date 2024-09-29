@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { buildingSchema, importBuildingsInput, photoUploadSchema } from "~/lib/building";
-import { createOrUpdateBuildings, getBuildingDetails, updateBuildingDetails, addPhotoUrlsToBuilding, addAttachmentToBuilding } from "~/server/services/buildings";
+import { createOrUpdateBuildings, getBuildingDetails, updateBuildingDetails, addPhotoUrlsToBuilding, addAttachmentToBuilding, getAttributes } from "~/server/services/buildings";
 import { uploadFileToS3 } from "~/server/utils/s3utils";
 
 export const buildingRouter = createTRPCRouter({
@@ -37,6 +37,9 @@ export const buildingRouter = createTRPCRouter({
         const attachment = await uploadFileToS3(input.attachment);
         return await addAttachmentToBuilding(input.buildingId, attachment.url, attachment.type, input.title, ctx.userId, ctx.db);
     }),
-    
+
+    getAttributes: protectedProcedure.query(async ({ ctx }) => {
+        return await getAttributes(ctx.userId, ctx.db);
+    }),
 });
 

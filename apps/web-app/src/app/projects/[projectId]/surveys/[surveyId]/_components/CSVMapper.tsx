@@ -47,17 +47,11 @@ export function CSVMapper({
     "Energy Rating",
   ];
 
-  function makeCamelCase(str: string) {
-    return str.replace(/([-_][a-z])/gi, ($1) => {
-      return $1.toUpperCase().replace("-", "").replace("_", "");
-    });
-  }
-
   const handleHeaderChange = (originalHeader: string, newHeader: string) => {
     setMappedHeaders((prev) => ({
       ...prev,
       [originalHeader]: {
-        target: makeCamelCase(newHeader),
+        target: newHeader,
         isCustomProperty: !predefinedHeaders.includes(newHeader),
       },
     }));

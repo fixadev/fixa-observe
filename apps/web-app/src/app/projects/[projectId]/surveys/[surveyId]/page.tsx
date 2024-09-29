@@ -40,6 +40,24 @@ export default function SurveyPage({
       },
     });
 
+  function makeCamelCase(str: string) {
+    // console.log("MAKING CAMEL CASE", str);
+    return str
+      .replace(/(?:^\w|[A-Z]|\b\w|\s+)/g, function (match, index) {
+        if (+match === 0) return ""; // or if (/\s+/.test(match)) for white spaces
+        return index === 0 ? match.toLowerCase() : match.toUpperCase();
+      })
+      .replace(/\s+/g, "");
+  }
+
+  function convertPercentageToFloat(value: string) {
+    return Number(value.replace("%", "")) / 100;
+  }
+
+  function convertCurrencyToFloat(value: string) {
+    return Number(value.replace("$", ""));
+  }
+
   const submitMapping = (mappedHeaders: HeaderMappingSchema) => {
     const updatedData: ImportBuildingsInput = csvData.map((row) => {
       const mappedRow = Object.keys(row).reduce<
@@ -48,9 +66,9 @@ export default function SurveyPage({
         const header = mappedHeaders[key];
         if (header?.isCustomProperty) {
           acc.customProperties = acc.customProperties ?? {};
-          acc.customProperties[header.target] = String(row[key]);
+          acc.customProperties[makeCamelCase(header.target)] = String(row[key]);
         } else {
-          acc[header?.target ?? key] = row[key];
+          acc[makeCamelCase(header?.target ?? key)] = row[key];
         }
         return acc;
       }, {});
@@ -61,17 +79,23 @@ export default function SurveyPage({
         updatedAt: mappedRow.updatedAt ?? new Date(),
         ownerId: mappedRow.ownerId ?? "",
         name: mappedRow.name ?? "",
+        description: mappedRow.description ?? "",
         photoUrls: mappedRow.photoUrls ?? [],
+        sqFt: mappedRow.sqFt ? Number(mappedRow.sqFt) : 0,
+        pricePerSqft: mappedRow.pricePerSqft
+          ? convertCurrencyToFloat(mappedRow.pricePerSqft)
+          : 0,
         address: mappedRow.address ?? "",
         zipCode: mappedRow.zipCode ?? "",
-        description: mappedRow.description ?? "",
-        sqFt: mappedRow.sqFt ?? "",
-        yearBuilt: mappedRow.yearBuilt ? mappedRow.yearBuilt : "",
+        yearBuilt: mappedRow.yearBuilt ? Number(mappedRow.yearBuilt) : 0,
         propertyType: mappedRow.propertyType ?? "",
-        occupancyRate: mappedRow.occupancyRate ?? "",
-        annualRevenue: mappedRow.annualRevenue ?? "",
+        occupancyRate: mappedRow.occupancyRate
+          ? convertPercentageToFloat(mappedRow.occupancyRate)
+          : 0,
+        annualRevenue: mappedRow.annualRevenue
+          ? convertCurrencyToFloat(mappedRow.annualRevenue)
+          : 0,
         energyRating: mappedRow.energyRating ?? "",
-        pricePerSqft: mappedRow.pricePerSqft ?? "",
         customProperties: mappedRow.customProperties ?? {},
         attachmentIds: mappedRow.attachmentIds ?? [],
         surveyIds: mappedRow.surveyIds ?? [],
@@ -80,7 +104,7 @@ export default function SurveyPage({
 
     console.log("updatedData", updatedData);
     console.log("COMMENTED OUT SUBMIT");
-    // uploadBuildings(updatedData);
+    uploadBuildings(updatedData);
   };
 
   return (

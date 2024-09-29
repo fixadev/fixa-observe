@@ -14,8 +14,8 @@ export const createOrUpdateBuildings = async (
         },
     });
     // Filter out buildings that already exist in the db -- TODO: find some cleaner way to do this
-    const buildingsToCreate = input.filter(building => !existingBuildings.some(existing => existing.name === building.name));
-    const buildingsToUpdate = input.filter(building => existingBuildings.some(existing => existing.name === building.name));
+    const buildingsToCreate = input.filter(building => !existingBuildings.some(existing => existing.address === building.address));
+    const buildingsToUpdate = input.filter(building => existingBuildings.some(existing => existing.address === building.address));
 
     const createdBuildings = await db.building.createMany({
         data: buildingsToCreate.map(building => ({
@@ -37,8 +37,8 @@ export const createOrUpdateBuildings = async (
     const allBuildings = await db.building.findMany({
         where: {
             ownerId: userId,
-            name: {
-                in: [...buildingsToCreate.map(building => building.name), ...buildingsToUpdate.map(building => building.name)],
+            address: {
+                in: [...buildingsToCreate.map(building => building.address), ...buildingsToUpdate.map(building => building.address)],
             },
         },
     });
@@ -235,4 +235,16 @@ export const deleteSpace = async (buildingId: string, spaceId: string, userId: s
         },
     });
 };  
+
+
+export const getAttributes = async (userId: string, db: PrismaClient) => {
+    return db.attribute.findMany({
+        where: {
+            OR: [
+                { ownerId: userId },
+                { ownerId: undefined }
+            ],
+        },
+    });
+};
 

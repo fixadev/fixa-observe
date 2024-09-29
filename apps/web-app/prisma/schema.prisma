@@ -15,13 +15,14 @@ datasource db {
 }
 
 model User {
-  id        String     @id @default(auto()) @map("_id") @db.ObjectId
-  clerkId   String     @unique
-  email     String     @unique
+  id        String      @id @default(auto()) @map("_id") @db.ObjectId
+  clerkId   String      @unique
+  email     String      @unique
   firstName String?
   lastName  String?
   projects  Project[]
   buildings Building[]
+  Attribute Attribute[]
 }
 
 model Project {
@@ -48,30 +49,30 @@ model Survey {
 }
 
 model Building {
-  id               String       @id @default(auto()) @map("_id") @db.ObjectId
-  createdAt        DateTime     @default(now())
-  updatedAt        DateTime     @updatedAt
-  owner            User         @relation(fields: [ownerId], references: [id])
-  ownerId          String       @db.ObjectId
-  spaces           Space[]
-  spaceIds         String[]     @db.ObjectId
-  attachments      Attachment[]
-  attachmentIds    String[]     @db.ObjectId
-  surveys          Survey[]     @relation(fields: [surveyIds], references: [id])
-  surveyIds        String[]     @db.ObjectId
-  name             String?
-  photoUrls        String[]
-  address          String?
-  zipCode          String?
-  description      String?
-  sqFt             String?
-  yearBuilt        String?
-  propertyType     String?
-  occupancyRate    Float?
-  annualRevenue    Float?
-  energyRating     String?
-  pricePerSqft     String?
-  customProperties Json?
+  id            String       @id @default(auto()) @map("_id") @db.ObjectId
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  owner         User         @relation(fields: [ownerId], references: [id])
+  ownerId       String       @db.ObjectId
+  address       String
+  spaces        Space[]
+  spaceIds      String[]     @db.ObjectId
+  attachments   Attachment[]
+  attachmentIds String[]     @db.ObjectId
+  surveys       Survey[]     @relation(fields: [surveyIds], references: [id])
+  surveyIds     String[]     @db.ObjectId
+  photoUrls     String[]
+  attributes    Json?
+}
+
+model Attribute {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  label     String
+  type      String
+  owner     User     @relation(fields: [ownerId], references: [id])
+  ownerId   String   @db.ObjectId
 }
 
 model Space {
@@ -90,6 +91,6 @@ model Attachment {
   url        String
   title      String
   type       String
-  Building   Building? @relation(fields: [buildingId], references: [id])
+  building   Building? @relation(fields: [buildingId], references: [id])
   buildingId String?   @db.ObjectId
 }
