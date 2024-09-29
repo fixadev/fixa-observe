@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Button } from "~/components/ui/button";
+import { type Building } from "@prisma/client";
 import {
   Table,
   TableHeader,
@@ -7,13 +8,6 @@ import {
   TableHead,
   TableCell,
 } from "~/components/ui/table";
-
-export type Building = {
-  id: string;
-  address: string;
-  buildingSize: string;
-  pricePerSqft: string;
-};
 
 export default function BuildingsTable({
   buildings,
@@ -37,8 +31,8 @@ export default function BuildingsTable({
           {buildings.map((building) => (
             <TableRow key={building.id}>
               <TableCell>{building.address}</TableCell>
-              <TableCell>{building.buildingSize}</TableCell>
-              <TableCell>{building.pricePerSqft}</TableCell>
+              <TableCell>{building.sqFt} sqft.</TableCell>
+              <TableCell>${building.pricePerSqft} / sqft.</TableCell>
               <TableCell>
                 <Link
                   href={`/projects/${projectId}/surveys/${surveyId}/buildings/${building.id}`}

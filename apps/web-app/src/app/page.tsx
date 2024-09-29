@@ -19,17 +19,43 @@ import { api } from "~/trpc/react";
 
 export default function Home() {
   const { user } = useUser();
+  const [projects, setProjects] = useState<Array<{ id: string; name: string }>>(
+    [],
+  );
   const [projectName, setProjectName] = useState("");
-  const { data: projects, error } = api.project.getProjects.useQuery();
-  const { mutate: createProject } = api.project.createProject.useMutation({
-    onSuccess: () => {
-      console.log("Project created");
-    },
-  });
+
+  const {
+    data: projectsData,
+    refetch: refetchProjects,
+    error: projectsError,
+  } = api.project.getProjects.useQuery();
+  const { mutate: createProject, error: createProjectError } =
+    api.project.createProject.useMutation({
+      onSuccess: () => {
+        console.log("Project created");
+        void refetchProjects();
+        setProjectName("");
+      },
+    });
 
   useEffect(() => {
-    console.log(projects);
-  }, [projects]);
+    if (projectsData) {
+      setProjects(projectsData);
+    }
+  }, [projectsData]);
+
+  const handleCreateProject = () => {
+    createProject({ projectName });
+    setProjects([...projects, { id: "1", name: projectName }]);
+  };
+
+  useEffect(() => {
+    console.log("projectsError", projectsError);
+  }, [projectsError]);
+
+  useEffect(() => {
+    console.log("createProjectError", createProjectError);
+  }, [createProjectError]);
 
   return (
     <div className="flex flex-col gap-8">
@@ -60,6 +86,7 @@ export default function Home() {
                     id="project-name"
                     placeholder="Palo Alto project"
                     autoComplete="off"
+                    value={projectName}
                     onChange={(e) => {
                       setProjectName(e.target.value);
                     }}
@@ -68,9 +95,7 @@ export default function Home() {
               </div>
               <DialogFooter>
                 <DialogClose asChild>
-                  <Button onClick={() => createProject({ projectName })}>
-                    Create
-                  </Button>
+                  <Button onClick={handleCreateProject}>Create</Button>
                 </DialogClose>
               </DialogFooter>
             </DialogContent>
@@ -78,12 +103,7 @@ export default function Home() {
         </div>
         <div className="flex flex-col gap-2">
           {projects?.map((project) => (
-            <ProjectCard
-              key={project.id}
-              id={project.id}
-              name={project.name}
-              description={project.description}
-            />
+            <ProjectCard key={project.id} id={project.id} name={project.name} />
           ))}
         </div>
       </div>
