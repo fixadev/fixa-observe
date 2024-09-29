@@ -34,12 +34,21 @@ export const createOrUpdateBuildings = async (
         })),
     });
 
+    const allBuildings = await db.building.findMany({
+        where: {
+            ownerId: userId,
+            name: {
+                in: [...buildingsToCreate.map(building => building.name), ...buildingsToUpdate.map(building => building.name)],
+            },
+        },
+    });
+
     console.log({
         created: createdBuildings.count,
         updated: updatedBuildings.count,
     });
 
-    return [...buildingsToCreate, ...buildingsToUpdate].map(building => building.id).filter(id => id !== undefined);
+    return [...allBuildings].map(building => building.id).filter(id => id !== undefined);
 };
 
 export const getBuildingDetails = async (buildingId: string, userId: string, db: PrismaClient) => {

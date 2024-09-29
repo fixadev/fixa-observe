@@ -1,11 +1,10 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
-import { buildingSchema, importBuildingsInput } from "~/lib/building";
+import { buildingSchema, importBuildingsInput, photoUploadSchema } from "~/lib/building";
 import { createOrUpdateBuildings, getBuildingDetails, updateBuildingDetails, addPhotoUrlsToBuilding, addAttachmentToBuilding } from "~/server/services/buildings";
 import { uploadFileToS3 } from "~/server/utils/s3utils";
 
-
-export const buildingsRouter = createTRPCRouter({
+export const buildingRouter = createTRPCRouter({
 
     createOrUpdateBuildings: protectedProcedure.input(importBuildingsInput).mutation(async ({ ctx, input }) => {
         return await createOrUpdateBuildings(input, ctx.userId, ctx.db);
@@ -20,16 +19,11 @@ export const buildingsRouter = createTRPCRouter({
     }),
 
     addPhotosToBuilding: protectedProcedure.input(
-        z.object({
-            id: z.string(),
-            photos: z.instanceof(FileList).transform(async (fileList) => {
-                const files = Array.from(fileList);
-                return Promise.all(files.map(uploadFileToS3));
-            }),
-        })
+        photoUploadSchema
     ).mutation(async ({ ctx, input }) => {
-        const photoUrls = input.photos.map(({ url }) => url);
-        return await addPhotoUrlsToBuilding(input.id, photoUrls, ctx.userId, ctx.db);
+        const photos = await Promise.all(input.photos.map(uploadFileToS3));
+        const photoUrls = photos.map(({ url }) => url);
+        return await addPhotoUrlsToBuilding(input.buildingId, photoUrls, ctx.userId, ctx.db);
     }),
 
     addAttachmentToBuilding: protectedProcedure.input(
@@ -43,7 +37,6 @@ export const buildingsRouter = createTRPCRouter({
         const attachment = await uploadFileToS3(input.attachment);
         return await addAttachmentToBuilding(input.buildingId, attachment.url, attachment.type, input.title, ctx.userId, ctx.db);
     }),
-    
     
 });
 

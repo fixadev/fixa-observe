@@ -51,27 +51,35 @@ model Building {
   id               String       @id @default(auto()) @map("_id") @db.ObjectId
   createdAt        DateTime     @default(now())
   updatedAt        DateTime     @updatedAt
-  ownerId          String       @db.ObjectId
   owner            User         @relation(fields: [ownerId], references: [id])
-  name             String
-  photoUrls        String[]
-  address          String
-  description      String
-  sqFt             Int
-  pricePerSqft     Int
+  ownerId          String       @db.ObjectId
   spaces           Space[]
+  spaceIds         String[]     @db.ObjectId
   attachments      Attachment[]
-  customProperties Json?
+  attachmentIds    String[]     @db.ObjectId
   surveys          Survey[]     @relation(fields: [surveyIds], references: [id])
   surveyIds        String[]     @db.ObjectId
+  name             String?
+  photoUrls        String[]
+  address          String?
+  zipCode          String?
+  description      String?
+  sqFt             String?
+  yearBuilt        String?
+  propertyType     String?
+  occupancyRate    Float?
+  annualRevenue    Float?
+  energyRating     String?
+  pricePerSqft     String?
+  customProperties Json?
 }
 
 model Space {
-  id               String    @id @default(auto()) @map("_id") @db.ObjectId
-  createdAt        DateTime  @default(now())
-  updatedAt        DateTime  @updatedAt
-  buildingId       String?   @db.ObjectId
-  building         Building? @relation(fields: [buildingId], references: [id])
+  id               String   @id @default(auto()) @map("_id") @db.ObjectId
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  buildingId       String   @db.ObjectId
+  building         Building @relation(fields: [buildingId], references: [id])
   customProperties Json?
 }
 
