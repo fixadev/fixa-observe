@@ -24,7 +24,7 @@ export const spaceSchema = z.object({
 } satisfies { [K in keyof Space]: z.ZodType<Space[K]> });
 
 
-export type Attachment = z.infer<typeof attachmentSchema>;
+export type AttachmentSchema = z.infer<typeof attachmentSchema>;
 export const attachmentSchema = z.object({
     id: z.string(),
     createdAt: z.date(),

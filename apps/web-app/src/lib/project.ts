@@ -11,8 +11,7 @@ export const outcomeInput = z.object({
 
 export type CreateProjectInput = z.infer<typeof createProjectInput>;
 export const createProjectInput = z.object({
-  projectName: z.string(),
-  outcomes: z.array(outcomeInput),
+  projectName: z.string()
 });
 
 export type UpdateProjectInput = z.infer<typeof updateProjectInput>;

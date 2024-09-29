@@ -1,4 +1,5 @@
-import { currentUser } from "@clerk/nextjs/server";
+"use client";
+import { useEffect, useState } from "react";
 import ProjectCard from "./_components/ProjectCard";
 import { Button } from "~/components/ui/button";
 import {
@@ -8,13 +9,27 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DialogClose,
 } from "~/components/ui/dialog";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import UserImage from "~/components/UserImage";
+import { useUser } from "@clerk/nextjs";
+import { api } from "~/trpc/react";
 
-export default async function Home() {
-  const user = await currentUser();
+export default function Home() {
+  const { user } = useUser();
+  const [projectName, setProjectName] = useState("");
+  const { data: projects, error } = api.project.getProjects.useQuery();
+  const { mutate: createProject } = api.project.createProject.useMutation({
+    onSuccess: () => {
+      console.log("Project created");
+    },
+  });
+
+  useEffect(() => {
+    console.log(projects);
+  }, [projects]);
 
   return (
     <div className="flex flex-col gap-8">
@@ -45,19 +60,31 @@ export default async function Home() {
                     id="project-name"
                     placeholder="Palo Alto project"
                     autoComplete="off"
+                    onChange={(e) => {
+                      setProjectName(e.target.value);
+                    }}
                   />
                 </div>
               </div>
               <DialogFooter>
-                <Button>Create</Button>
+                <DialogClose asChild>
+                  <Button onClick={() => createProject({ projectName })}>
+                    Create
+                  </Button>
+                </DialogClose>
               </DialogFooter>
             </DialogContent>
           </Dialog>
         </div>
         <div className="flex flex-col gap-2">
-          <ProjectCard id="1" />
-          <ProjectCard id="2" />
-          <ProjectCard id="3" />
+          {projects?.map((project) => (
+            <ProjectCard
+              key={project.id}
+              id={project.id}
+              name={project.name}
+              description={project.description}
+            />
+          ))}
         </div>
       </div>
     </div>

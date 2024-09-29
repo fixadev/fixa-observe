@@ -34,14 +34,14 @@ export const buildingsRouter = createTRPCRouter({
 
     addAttachmentToBuilding: protectedProcedure.input(
         z.object({
-            id: z.string(),
+            buildingId: z.string(),
             attachment: z.instanceof(File),
             title: z.string(),
             type: z.string(),
         })
     ).mutation(async ({ ctx, input }) => {
-        const { url: attachmentUrl, type } = await uploadFileToS3(input.attachment);
-        return await addAttachmentToBuilding(input.id, attachmentUrl, type, input.title, ctx.userId, ctx.db);
+        const attachment = await uploadFileToS3(input.attachment);
+        return await addAttachmentToBuilding(input.buildingId, attachment.url, attachment.type, input.title, ctx.userId, ctx.db);
     }),
     
     

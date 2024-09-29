@@ -1,7 +1,9 @@
-import { currentUser } from "@clerk/nextjs/server";
+"use client";
+
+import { useUser } from "@clerk/nextjs";
 import Image from "next/image";
 
-export default async function UserImage({
+export default function UserImage({
   imageUrl,
   width = 50,
   height = 50,
@@ -10,9 +12,10 @@ export default async function UserImage({
   width?: number;
   height?: number;
 }) {
+  const { user } = useUser();
+
   let _imageUrl = imageUrl;
   if (!_imageUrl) {
-    const user = await currentUser();
     if (!user) {
       return null;
     }
