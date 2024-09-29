@@ -32,6 +32,8 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 import { DragHandleDots2Icon } from "@radix-ui/react-icons";
 import { Input } from "~/components/ui/input";
+import { Button } from "~/components/ui/button";
+import { PlusIcon, TrashIcon } from "@heroicons/react/24/solid";
 
 export type Space = {
   id: string;
@@ -104,8 +106,30 @@ const DraggableHeader = ({
   };
 
   return (
-    <TableCell ref={setNodeRef} style={style} {...attributes} {...listeners}>
-      {children}
+    <TableCell
+      ref={setNodeRef}
+      style={style}
+      // {...attributes}
+      // {...listeners}
+      className="group relative"
+    >
+      <div className="flex items-center gap-2">
+        {children}
+        <Button
+          size="icon"
+          variant="ghost"
+          className="invisible bottom-0 top-0 group-hover:visible"
+        >
+          <TrashIcon className="size-4 -translate-y-px" />
+        </Button>
+      </div>
+      <div className="invisible absolute left-0 right-0 top-0 z-10 w-full group-hover:visible">
+        <DragHandleDots2Icon
+          {...attributes}
+          {...listeners}
+          className="mx-auto size-4 rotate-90"
+        />
+      </div>
     </TableCell>
   );
 };
@@ -266,6 +290,11 @@ export default function SpacesTable() {
                 </DraggableHeader>
               ))}
             </SortableContext>
+            <TableCell className="flex justify-center">
+              <Button size="icon" variant="ghost">
+                <PlusIcon className="size-4" />
+              </Button>
+            </TableCell>
           </TableRow>
         </TableHeader>
         <TableBody>
