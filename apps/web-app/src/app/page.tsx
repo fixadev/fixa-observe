@@ -19,10 +19,13 @@ import { api } from "~/trpc/react";
 
 export default function Home() {
   const { user } = useUser();
+  const [projects, setProjects] = useState<Array<{ id: string; name: string }>>(
+    [],
+  );
   const [projectName, setProjectName] = useState("");
 
   const {
-    data: projects,
+    data: projectsData,
     refetch: refetchProjects,
     error: projectsError,
   } = api.project.getProjects.useQuery();
@@ -35,8 +38,15 @@ export default function Home() {
       },
     });
 
+  useEffect(() => {
+    if (projectsData) {
+      setProjects(projectsData);
+    }
+  }, [projectsData]);
+
   const handleCreateProject = () => {
     createProject({ projectName });
+    setProjects([...projects, { id: "1", name: projectName }]);
   };
 
   useEffect(() => {

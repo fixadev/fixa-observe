@@ -24,11 +24,20 @@ export default function ProjectPage({
   params: { projectId: string };
 }) {
   const [newSurveyName, setNewSurveyName] = useState("");
+  const [surveys, setSurveys] = useState<Array<{ id: string; name: string }>>(
+    [],
+  );
 
   const { data: project, refetch: refetchProject } =
     api.project.getProject.useQuery({
       projectId: params.projectId,
     });
+
+  useEffect(() => {
+    if (project?.surveys) {
+      setSurveys(project.surveys);
+    }
+  }, [project]);
 
   const { mutate: createSurvey } = api.survey.createSurvey.useMutation({
     onSuccess: () => {
@@ -37,9 +46,9 @@ export default function ProjectPage({
     },
   });
 
-  // TODO: figure out how to add to state immediately
   const handleCreateSurvey = () => {
     createSurvey({ surveyName: newSurveyName, projectId: params.projectId });
+    setSurveys([...surveys, { id: "1", name: newSurveyName }]);
   };
 
   return (
@@ -77,7 +86,7 @@ export default function ProjectPage({
           </Dialog>
         </div>
         <div className="flex flex-col gap-2">
-          {project?.surveys?.map((survey) => (
+          {surveys?.map((survey) => (
             <SurveyCard
               key={survey.id}
               projectId={params.projectId}
