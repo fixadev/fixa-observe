@@ -10,6 +10,8 @@ export default function BuildingPage({
 }: {
   params: { projectId: string; surveyId: string; buildingId: string };
 }) {
+  const address = "301 Main St, Palo Alto, CA 94301";
+
   return (
     <div>
       <div className="mb-8 flex items-center justify-between">
@@ -31,8 +33,19 @@ export default function BuildingPage({
             <div className="mx-auto aspect-square w-full max-w-xl rounded-md bg-gray-100 p-4">
               <div className="text-lg font-medium">image of building</div>
             </div>
-            <div className="mx-auto w-full max-w-xl rounded-md bg-gray-100 p-4">
-              <div className="text-lg font-medium">location info</div>
+            <div className="mx-auto w-full max-w-xl rounded-md">
+              <iframe
+                width="100%"
+                height="200"
+                className="rounded-md"
+                style={{ border: 0 }}
+                loading="lazy"
+                allowFullScreen
+                referrerPolicy="no-referrer-when-downgrade"
+                src={`https://www.google.com/maps/embed/v1/place?key=AIzaSyD53tLz4htKqRBnNh6OH0Rkij07uFYHnKA&q=${encodeURIComponent(
+                  address,
+                )}`}
+              ></iframe>
             </div>
           </div>
           <div className="flex flex-col gap-4">
