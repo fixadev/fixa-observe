@@ -4,6 +4,14 @@ import { Table, TableBody, TableRow, TableCell } from "~/components/ui/table";
 import SpaceCard from "./_components/SpaceCard";
 import AttachmentCard from "./_components/AttachmentCard";
 import Link from "next/link";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "~/components/ui/dialog";
+import UploadAttachmentButton from "./_components/UploadAtachmentButton";
 
 export default function BuildingPage({
   params,
@@ -96,7 +104,7 @@ export default function BuildingPage({
           <div>
             <div className="mb-4 flex items-center justify-between">
               <div className="text-lg font-medium">Attachments</div>
-              <Button variant="outline">Add an attachment</Button>
+              <UploadAttachmentButton />
             </div>
             <div className="flex flex-col gap-2">
               <AttachmentCard />
