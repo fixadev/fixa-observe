@@ -4,14 +4,7 @@ import { Table, TableBody, TableRow, TableCell } from "~/components/ui/table";
 import SpaceCard from "./_components/SpaceCard";
 import AttachmentCard from "./_components/AttachmentCard";
 import Link from "next/link";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "~/components/ui/dialog";
-import UploadAttachmentButton from "./_components/UploadAtachmentButton";
+import UploadAttachmentButton from "./_components/UploadAttachmentButton";
 
 export default function BuildingPage({
   params,
