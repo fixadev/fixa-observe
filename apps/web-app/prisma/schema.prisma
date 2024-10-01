@@ -71,8 +71,8 @@ model Attribute {
   updatedAt DateTime @updatedAt
   label     String
   type      String
-  owner     User     @relation(fields: [ownerId], references: [id])
-  ownerId   String   @db.ObjectId
+  owner     User?    @relation(fields: [ownerId], references: [id])
+  ownerId   String?  @db.ObjectId
 }
 
 model Space {

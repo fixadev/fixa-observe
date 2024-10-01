@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Table,
   TableBody,
@@ -19,6 +19,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "~/components/ui/button";
 import { type HeaderMappingSchema } from "~/lib/building";
+import { api } from "~/trpc/react";
 
 export function CSVMapper({
   csvData,
@@ -30,29 +31,41 @@ export function CSVMapper({
   const [headers, setHeaders] = useState<string[]>(
     Object.keys(csvData[0] ?? {}),
   );
+
+  const { data: attributes, error: attributesError } =
+    api.building.getAttributes.useQuery();
+
   const [mappedHeaders, setMappedHeaders] = useState<HeaderMappingSchema>({});
 
-  const predefinedHeaders = [
-    "Building ID",
-    "Name",
-    "Address",
-    "City",
-    "State",
-    "Zip Code",
-    "Square Footage",
-    "Year Built",
-    "Property Type",
-    "Occupancy Rate",
-    "Annual Revenue",
-    "Energy Rating",
-  ];
+  useEffect(() => {
+    console.log("attributes", attributes);
+    const initialMapping = headers.reduce<HeaderMappingSchema>(
+      (acc, header) => {
+        acc[header] = {
+          target:
+            header === "Address"
+              ? "address"
+              : (attributes?.find(
+                  (attribute: { label: string }) => attribute.label === header,
+                )?.id ?? ""),
+          isCustom: false,
+        };
+        return acc;
+      },
+      {},
+    );
+    setMappedHeaders(initialMapping);
+  }, [attributes, headers]);
 
   const handleHeaderChange = (originalHeader: string, newHeader: string) => {
     setMappedHeaders((prev) => ({
       ...prev,
       [originalHeader]: {
         target: newHeader,
-        isCustomProperty: !predefinedHeaders.includes(newHeader),
+        isCustom: !attributes
+          ?.map((attribute) => attribute.id)
+          .concat(["address"])
+          .includes(newHeader),
       },
     }));
   };
@@ -69,27 +82,36 @@ export function CSVMapper({
                   value={mappedHeaders[header]?.target ?? ""}
                 >
                   <SelectTrigger className="w-full">
-                    <SelectValue placeholder={header} />
+                    <SelectValue
+                      defaultValue={
+                        attributes?.find(
+                          (attribute) => attribute.label === header,
+                        )?.id ?? ""
+                      }
+                      placeholder={
+                        attributes?.find(
+                          (attribute) => attribute.label === header,
+                        )?.label ?? "Select attribute"
+                      }
+                    />
                   </SelectTrigger>
                   <SelectContent>
-                    {predefinedHeaders.map((predefinedHeader) => (
-                      <SelectItem
-                        key={predefinedHeader}
-                        value={predefinedHeader}
-                      >
-                        {predefinedHeader}
+                    <SelectItem value="address">Address</SelectItem>
+                    {attributes?.map((attribute) => (
+                      <SelectItem key={attribute.id} value={attribute.id}>
+                        {attribute.label}
                       </SelectItem>
                     ))}
-                    <SelectItem value="custom">Custom</SelectItem>
+                    {/* <SelectItem value="custom">Custom</SelectItem> */}
                   </SelectContent>
                 </Select>
-                {mappedHeaders[header]?.target === "custom" && (
+                {/* {mappedHeaders[header]?.target === "custom" && (
                   <Input
                     placeholder="Enter custom header"
                     onChange={(e) => handleHeaderChange(header, e.target.value)}
                     className="mt-2"
                   />
-                )}
+                )} */}
               </TableHead>
             ))}
           </TableRow>
@@ -107,7 +129,7 @@ export function CSVMapper({
       <Button
         className="mt-4 self-end"
         onClick={() => {
-          console.log("SUBMIT");
+          console.log("SUBMITTING HEADERS IN CSV MAPPER", mappedHeaders);
           submitHandler(mappedHeaders);
         }}
       >
