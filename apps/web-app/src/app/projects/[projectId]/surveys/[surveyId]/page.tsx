@@ -7,9 +7,8 @@ import BuildingsTable from "./_components/BuildingsTable";
 import { UploadModal } from "./_components/UploadModal";
 import { CSVUploader } from "./_components/CSVUploader";
 import {
-  type ImportBuildingsInput,
   type HeaderMappingSchema,
-  CreateBuildingSchema,
+  type CreateBuildingSchema,
 } from "~/lib/building";
 export default function SurveyPage({
   params,
@@ -60,10 +59,7 @@ export default function SurveyPage({
   }
 
   const submitMapping = (mappedHeaders: HeaderMappingSchema) => {
-    console.log("MAPPED HEADERS IN FUNCTION", mappedHeaders);
-    console.log("csvData", csvData);
     const updatedData: Array<CreateBuildingSchema> = csvData.map((row) => {
-      console.log("row", row);
       const mappedRow = Object.keys(row).reduce<CreateBuildingSchema>(
         (acc, key) => {
           const header = mappedHeaders[key];
@@ -72,9 +68,7 @@ export default function SurveyPage({
             acc.attributes = acc.attributes ?? {};
             acc.attributes[header.target] = row[key] ?? "";
           } else if (header?.target === "address") {
-            acc[header.target] = row[key];
-          } else {
-            // console.log("header had no target");
+            acc.address = row[key] ?? "";
           }
           return acc;
         },
@@ -93,9 +87,6 @@ export default function SurveyPage({
         attributes: mappedRow.attributes ?? {},
       } as CreateBuildingSchema;
     });
-
-    console.log("updatedData", updatedData);
-    console.log("COMMENTED OUT SUBMIT");
     uploadBuildings(updatedData);
   };
 
