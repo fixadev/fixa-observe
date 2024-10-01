@@ -4,12 +4,15 @@ import { Table, TableBody, TableRow, TableCell } from "~/components/ui/table";
 import SpaceCard from "./_components/SpaceCard";
 import AttachmentCard from "./_components/AttachmentCard";
 import Link from "next/link";
+import UploadAttachmentButton from "./_components/UploadAttachmentButton";
 
 export default function BuildingPage({
   params,
 }: {
   params: { projectId: string; surveyId: string; buildingId: string };
 }) {
+  const address = "301 Main St, Palo Alto, CA 94301";
+
   return (
     <div>
       <div className="mb-8 flex items-center justify-between">
@@ -31,8 +34,19 @@ export default function BuildingPage({
             <div className="mx-auto aspect-square w-full max-w-xl rounded-md bg-gray-100 p-4">
               <div className="text-lg font-medium">image of building</div>
             </div>
-            <div className="mx-auto w-full max-w-xl rounded-md bg-gray-100 p-4">
-              <div className="text-lg font-medium">location info</div>
+            <div className="mx-auto w-full max-w-xl rounded-md">
+              <iframe
+                width="100%"
+                height="200"
+                className="rounded-md"
+                style={{ border: 0 }}
+                loading="lazy"
+                allowFullScreen
+                referrerPolicy="no-referrer-when-downgrade"
+                src={`https://www.google.com/maps/embed/v1/place?key=AIzaSyD53tLz4htKqRBnNh6OH0Rkij07uFYHnKA&q=${encodeURIComponent(
+                  address,
+                )}`}
+              ></iframe>
             </div>
           </div>
           <div className="flex flex-col gap-4">
@@ -83,7 +97,7 @@ export default function BuildingPage({
           <div>
             <div className="mb-4 flex items-center justify-between">
               <div className="text-lg font-medium">Attachments</div>
-              <Button variant="outline">Add an attachment</Button>
+              <UploadAttachmentButton />
             </div>
             <div className="flex flex-col gap-2">
               <AttachmentCard />
