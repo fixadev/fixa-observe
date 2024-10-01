@@ -38,7 +38,6 @@ export function CSVMapper({
   const [mappedHeaders, setMappedHeaders] = useState<HeaderMappingSchema>({});
 
   useEffect(() => {
-    console.log("attributes", attributes);
     const initialMapping = headers.reduce<HeaderMappingSchema>(
       (acc, header) => {
         acc[header] = {
@@ -129,7 +128,6 @@ export function CSVMapper({
       <Button
         className="mt-4 self-end"
         onClick={() => {
-          console.log("SUBMITTING HEADERS IN CSV MAPPER", mappedHeaders);
           submitHandler(mappedHeaders);
         }}
       >

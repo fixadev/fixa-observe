@@ -28,7 +28,6 @@ export const createOrUpdateBuildings = async (
 
     let createdCount = 0;
     if (buildingsToCreate.length > 0) {
-        console.log("buildingsToCreate", buildingsToCreate);
         const createdBuildings = await db.building.createMany({
             data: buildingsToCreate,
     });
@@ -37,7 +36,6 @@ export const createOrUpdateBuildings = async (
 
     let updatedCount = 0;
     if (buildingsToUpdate.length > 0) {
-        console.log("buildingsToUpdate", buildingsToUpdate);
         for (const building of buildingsToUpdate) {
             await db.building.update({
                 where: {
