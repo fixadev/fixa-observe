@@ -9,6 +9,7 @@ import { CSVUploader } from "./_components/CSVUploader";
 import {
   type ImportBuildingsInput,
   type HeaderMappingSchema,
+  CreateBuildingSchema,
 } from "~/lib/building";
 export default function SurveyPage({
   params,
@@ -59,47 +60,38 @@ export default function SurveyPage({
   }
 
   const submitMapping = (mappedHeaders: HeaderMappingSchema) => {
-    const updatedData: ImportBuildingsInput = csvData.map((row) => {
-      const mappedRow = Object.keys(row).reduce<
-        Partial<ImportBuildingsInput[number]>
-      >((acc, key) => {
-        const header = mappedHeaders[key];
-        if (header?.isCustomProperty) {
-          acc.customProperties = acc.customProperties ?? {};
-          acc.customProperties[makeCamelCase(header.target)] = String(row[key]);
-        } else {
-          acc[makeCamelCase(header?.target ?? key)] = row[key];
-        }
-        return acc;
-      }, {});
+    console.log("MAPPED HEADERS IN FUNCTION", mappedHeaders);
+    console.log("csvData", csvData);
+    const updatedData: Array<CreateBuildingSchema> = csvData.map((row) => {
+      console.log("row", row);
+      const mappedRow = Object.keys(row).reduce<CreateBuildingSchema>(
+        (acc, key) => {
+          const header = mappedHeaders[key];
+          // console.log("header", header);
+          if (header?.target && header.target !== "address") {
+            acc.attributes = acc.attributes ?? {};
+            acc.attributes[header.target] = row[key] ?? "";
+          } else if (header?.target === "address") {
+            acc[header.target] = row[key];
+          } else {
+            // console.log("header had no target");
+          }
+          return acc;
+        },
+        {} as CreateBuildingSchema,
+      );
 
       return {
         ...mappedRow,
         createdAt: mappedRow.createdAt ?? new Date(),
         updatedAt: mappedRow.updatedAt ?? new Date(),
-        ownerId: mappedRow.ownerId ?? "",
-        name: mappedRow.name ?? "",
-        description: mappedRow.description ?? "",
-        photoUrls: mappedRow.photoUrls ?? [],
-        sqFt: mappedRow.sqFt ? Number(mappedRow.sqFt) : 0,
-        pricePerSqft: mappedRow.pricePerSqft
-          ? convertCurrencyToFloat(mappedRow.pricePerSqft)
-          : 0,
         address: mappedRow.address ?? "",
-        zipCode: mappedRow.zipCode ?? "",
-        yearBuilt: mappedRow.yearBuilt ? Number(mappedRow.yearBuilt) : 0,
-        propertyType: mappedRow.propertyType ?? "",
-        occupancyRate: mappedRow.occupancyRate
-          ? convertPercentageToFloat(mappedRow.occupancyRate)
-          : 0,
-        annualRevenue: mappedRow.annualRevenue
-          ? convertCurrencyToFloat(mappedRow.annualRevenue)
-          : 0,
-        energyRating: mappedRow.energyRating ?? "",
-        customProperties: mappedRow.customProperties ?? {},
-        attachmentIds: mappedRow.attachmentIds ?? [],
-        surveyIds: mappedRow.surveyIds ?? [],
-      } as ImportBuildingsInput[number];
+        photoUrls: [],
+        attachmentIds: [],
+        surveyIds: [],
+        spaceIds: [],
+        attributes: mappedRow.attributes ?? {},
+      } as CreateBuildingSchema;
     });
 
     console.log("updatedData", updatedData);

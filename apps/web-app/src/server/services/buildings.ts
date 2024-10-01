@@ -14,25 +14,43 @@ export const createOrUpdateBuildings = async (
         },
     });
     // Filter out buildings that already exist in the db -- TODO: find some cleaner way to do this
-    const buildingsToCreate = input.filter(building => !existingBuildings.some(existing => existing.address === building.address));
-    const buildingsToUpdate = input.filter(building => existingBuildings.some(existing => existing.address === building.address));
+    const buildingsToCreate = input.filter(building => !existingBuildings.some(existing => existing.address === building.address)).map(building => ({
+        ...building,
+        ownerId: userId,
+    }));
 
-    const createdBuildings = await db.building.createMany({
-        data: buildingsToCreate.map(building => ({
-            ...building,
-            ownerId: userId,    
-        })),
-    });
+    const buildingsToUpdate = input.filter(building => existingBuildings.some(existing => existing.address === building.address)).map(building => ({
+        ...building,
+        ownerId: userId,
+        id: existingBuildings.find(existing => existing.address === building.address)?.id,
+    }));
 
-    const updatedBuildings = await db.building.updateMany({
-        where: {
-            ownerId: userId,
-        },
-        data: buildingsToUpdate.map(building => ({
-            ...building,
-            ownerId: userId,
-        })),
+
+    let createdCount = 0;
+    if (buildingsToCreate.length > 0) {
+        console.log("buildingsToCreate", buildingsToCreate);
+        const createdBuildings = await db.building.createMany({
+            data: buildingsToCreate,
     });
+    createdCount = createdBuildings.count;
+    }
+
+    let updatedCount = 0;
+    if (buildingsToUpdate.length > 0) {
+        console.log("buildingsToUpdate", buildingsToUpdate);
+        for (const building of buildingsToUpdate) {
+            await db.building.update({
+                where: {
+                    id: building.id,
+                },
+                data: {
+                    address: building.address,
+                    attributes: building.attributes,
+                },
+            });
+            updatedCount++;
+        }
+    }
 
     const allBuildings = await db.building.findMany({
         where: {
@@ -44,8 +62,8 @@ export const createOrUpdateBuildings = async (
     });
 
     console.log({
-        created: createdBuildings.count,
-        updated: updatedBuildings.count,
+        created: createdCount,
+        updated: updatedCount,
     });
 
     return [...allBuildings].map(building => building.id).filter(id => id !== undefined);
@@ -242,7 +260,7 @@ export const getAttributes = async (userId: string, db: PrismaClient) => {
         where: {
             OR: [
                 { ownerId: userId },
-                { ownerId: undefined }
+                { ownerId: null },
             ],
         },
     });
