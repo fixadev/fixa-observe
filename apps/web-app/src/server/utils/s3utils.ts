@@ -7,10 +7,11 @@ export const uploadFileToS3 = async (
 ): Promise<{ url: string; type: string }> => {
   const fileExtension = file.name.split(".").pop();
   const fileName = `${uuidv4()}.${fileExtension}`;
+  const arrayBuffer = Buffer.from(await file.arrayBuffer());
   const params = {
     Bucket: process.env.AWS_BUCKET_NAME,
     Key: fileName,
-    Body: file,
+    Body: arrayBuffer,
     ContentType: file.type,
   };
 
