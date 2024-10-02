@@ -10,6 +10,7 @@ import {
   type HeaderMappingSchema,
   type CreateBuildingSchema,
 } from "~/lib/building";
+import { BreadcrumbsFromPath } from "~/components/ui/BreadcrumbsFromPath";
 export default function SurveyPage({
   params,
 }: {
@@ -92,11 +93,31 @@ export default function SurveyPage({
     uploadBuildings({ buildings: updatedData, surveyId: params.surveyId });
   };
 
+  const { data: project } = api.project.getProject.useQuery({
+    projectId: params.projectId,
+  });
+
   return (
     <div className="flex flex-col gap-8">
-      <div className="flex items-center justify-between">
-        <PageHeader title={survey?.name ?? ""} />
-        <Button variant="outline">Export PDF</Button>
+      <div>
+        <BreadcrumbsFromPath
+          className="mb-4"
+          pathSegments={[
+            { value: "Projects", href: `/` },
+            {
+              value: project?.name ?? "",
+              href: `/projects/${params.projectId}`,
+            },
+            {
+              value: survey?.name ?? "",
+              href: `/projects/${params.projectId}/surveys/${params.surveyId}`,
+            },
+          ]}
+        />
+        <div className="flex items-center justify-between">
+          <PageHeader title={survey?.name ?? ""} />
+          <Button variant="outline">Export PDF</Button>
+        </div>
       </div>
       <div>
         <div className="mb-4 flex items-center justify-between">
