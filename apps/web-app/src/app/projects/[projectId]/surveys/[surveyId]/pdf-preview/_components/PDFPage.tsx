@@ -87,9 +87,11 @@ const styles = StyleSheet.create({
 });
 
 export function PDFPage({
+  pageNumber,
   buildings,
   attributes,
 }: {
+  pageNumber: number;
   buildings: Building[];
   attributes: Attribute[];
 }) {
@@ -124,7 +126,9 @@ export function PDFPage({
         {buildings.map((building, index) => (
           <View key={building.id} style={styles.tableRow}>
             <View key={index} style={styles.leftCol}>
-              <Text style={styles.leftCell}>{index}</Text>
+              <Text style={styles.leftCell}>
+                {(pageNumber - 1) * 7 + index + 1}
+              </Text>
             </View>
             <View style={styles.tableCol}>
               <Image

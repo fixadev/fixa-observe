@@ -55,6 +55,7 @@ export const addBuildingsToSurvey = async (
     userId: string,
     db: PrismaClient,
 ) => {
+    console.log("buildingIds", buildingIds);
     const survey = await db.survey.update({
         where: { id: surveyId, ownerId: userId },
         data: { buildingIds }

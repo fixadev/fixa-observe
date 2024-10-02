@@ -26,6 +26,7 @@ export default function PDFPreviewPage({
   return (
     <PDFViewer style={{ width: "100%", height: "90vh" }}>
       <PDFContent
+        surveyName={survey?.name ?? null}
         buildings={parsedBuildings ?? null}
         attributes={attributes ?? null}
       />

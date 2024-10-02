@@ -78,17 +78,13 @@ export const buildingRouter = createTRPCRouter({
 
 async function uploadAttributes() {
   const attributes = [
-    { label: "Building ID", type: "string" },
-    { label: "Name", type: "string" },
-    { label: "City", type: "string" },
-    { label: "State", type: "string" },
-    { label: "Zip Code", type: "string" },
-    { label: "Square Footage", type: "number" },
-    { label: "Year Built", type: "number" },
-    { label: "Property Type", type: "string" },
-    { label: "Occupancy Rate", type: "number" },
-    { label: "Annual Revenue", type: "number" },
-    { label: "Energy Rating", type: "string" },
+    { label: "Address", type: "string" },
+    { label: "Size (SF)", type: "string" },
+    { label: "Divisibility (SF)", type: "string" },
+    { label: "NNN Asking Rate (SF/Mo)", type: "string" },
+    { label: "Opex (SF/Mo)", type: "string" },
+    { label: "Direct/Sublease", type: "string" },
+    { label: "Comments", type: "string" },
   ];
 
   for (const attribute of attributes) {
@@ -101,4 +97,4 @@ async function uploadAttributes() {
     });
   }
 }
-// void uploadAttributes();
+void uploadAttributes();
