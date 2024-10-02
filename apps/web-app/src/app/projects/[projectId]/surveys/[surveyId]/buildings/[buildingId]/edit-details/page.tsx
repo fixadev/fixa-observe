@@ -17,10 +17,10 @@ export default function EditDetailsPage({
 }: {
   params: { projectId: string; surveyId: string; buildingId: string };
 }) {
+  // TODO: consider moving all this state up one level to parent so we don't have to duplicate this logic to delete attachements
   const [buildingState, setBuildingState] = useState<BuildingSchema | null>(
     null,
   );
-
   const { data: building } = api.building.getBuilding.useQuery({
     id: params.buildingId,
   });
