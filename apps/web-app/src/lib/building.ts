@@ -40,7 +40,7 @@ export const buildingSchema = z.object({
 
 export const photoUploadSchema = z.object({
   buildingId: z.string(),
-  photos: z.array(zfd.file()),
+  photos: z.array(z.string()),
 });
 
 export type CreateBuildingSchema = z.infer<typeof createBuildingSchema>;

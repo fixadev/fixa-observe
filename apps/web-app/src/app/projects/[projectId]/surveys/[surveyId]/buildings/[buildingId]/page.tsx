@@ -97,7 +97,7 @@ export default function BuildingPage({
           <div>
             <div className="mb-4 flex items-center justify-between">
               <div className="text-lg font-medium">Attachments</div>
-              <UploadAttachmentButton />
+              <UploadAttachmentButton buildingId={params.buildingId} />
             </div>
             <div className="flex flex-col gap-2">
               <AttachmentCard />
