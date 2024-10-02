@@ -62,7 +62,7 @@ export default function BuildingPage({
             href: `/projects/${params.projectId}/surveys/${params.surveyId}`,
           },
           {
-            value: building?.attributes?.["name"] ?? "",
+            value: building?.address ?? "",
             href: `/projects/${params.projectId}/surveys/${params.surveyId}/buildings/${params.buildingId}`,
           },
         ]}
