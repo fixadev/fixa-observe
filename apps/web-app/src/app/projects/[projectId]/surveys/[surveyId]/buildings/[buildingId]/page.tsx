@@ -14,6 +14,8 @@ import { type BuildingSchema } from "~/lib/building";
 import { BreadcrumbsFromPath } from "~/components/ui/BreadcrumbsFromPath";
 import { useMemo } from "react";
 import { PhotoIcon } from "@heroicons/react/24/solid";
+import { Skeleton } from "~/components/ui/skeleton";
+import { cn } from "~/lib/utils";
 
 export default function BuildingPage({
   params,
@@ -90,6 +92,7 @@ export default function BuildingPage({
   }, [building, attributes]);
 
   const [attachmentsUploading, setAttachmentsUploading] = useState<File[]>([]);
+  const [mapLoaded, setMapLoaded] = useState(false);
 
   // TODO: make below less ridiculous
   return (
@@ -150,7 +153,7 @@ export default function BuildingPage({
                 )}
               </div>
             </UploadFileButton>
-            <div className="mx-auto h-[200px] w-full max-w-xl rounded-md">
+            <div className="relative mx-auto h-[200px] w-full max-w-xl rounded-md">
               {fullAddress && (
                 <iframe
                   width="100%"
@@ -160,10 +163,20 @@ export default function BuildingPage({
                   loading="lazy"
                   allowFullScreen
                   referrerPolicy="no-referrer-when-downgrade"
+                  onLoad={() => {
+                    setMapLoaded(true);
+                  }}
                   src={`https://www.google.com/maps/embed/v1/place?key=AIzaSyD53tLz4htKqRBnNh6OH0Rkij07uFYHnKA&q=${encodeURIComponent(
                     fullAddress,
                   )}`}
                 ></iframe>
+              )}
+              {!mapLoaded && (
+                <Skeleton
+                  className={cn(
+                    "absolute left-0 top-0 h-full w-full rounded-md",
+                  )}
+                />
               )}
             </div>
           </div>
