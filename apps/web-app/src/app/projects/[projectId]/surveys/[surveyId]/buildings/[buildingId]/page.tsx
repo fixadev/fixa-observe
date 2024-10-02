@@ -9,6 +9,8 @@ import Link from "next/link";
 import { UploadFileButton } from "./_components/UploadAttachmentButton";
 import Image from "next/image";
 import { api } from "~/trpc/react";
+import { useEffect, useState } from "react";
+import { type BuildingSchema } from "~/lib/building";
 import { BreadcrumbsFromPath } from "~/components/ui/BreadcrumbsFromPath";
 import { useMemo } from "react";
 
@@ -17,6 +19,9 @@ export default function BuildingPage({
 }: {
   params: { projectId: string; surveyId: string; buildingId: string };
 }) {
+  const [buildingState, setBuildingState] = useState<BuildingSchema | null>(
+    null,
+  );
   const { data: building, refetch: refetchBuilding } =
     api.building.getBuilding.useQuery({
       id: params.buildingId,
@@ -28,7 +33,22 @@ export default function BuildingPage({
   const { data: survey } = api.survey.getSurvey.useQuery({
     surveyId: params.surveyId,
   });
+  useEffect(() => {
+    if (building) {
+      setBuildingState({
+        ...building,
+        attributes: building.attributes as Record<string, string | null>,
+      });
+    }
+  }, [building]);
+
   const { data: attributes } = api.building.getAttributes.useQuery();
+  const { mutate: updateBuilding } = api.building.updateBuilding.useMutation();
+
+  const handleSave = () => {
+    if (!buildingState) return;
+    updateBuilding(buildingState);
+  };
 
   const fullAddress = useMemo(() => {
     if (!building || !attributes) return "";
@@ -188,12 +208,18 @@ export default function BuildingPage({
               <UploadFileButton
                 buildingId={params.buildingId}
                 fileType="attachment"
-                onUploaded={refetchBuilding}
+                onUploaded={() => {
+                  void refetchBuilding();
+                }}
               />
             </div>
             <div className="flex flex-col gap-2">
               {building?.attachments.map((attachment) => (
-                <AttachmentCard key={attachment.id} attachment={attachment} />
+                <AttachmentCard
+                  key={attachment.id}
+                  attachment={attachment}
+                  setBuildingState={setBuildingState}
+                />
               ))}
             </div>
           </div>
