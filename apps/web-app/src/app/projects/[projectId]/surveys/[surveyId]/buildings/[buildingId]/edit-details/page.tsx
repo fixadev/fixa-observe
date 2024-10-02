@@ -1,3 +1,4 @@
+"use client";
 import PageHeader from "~/components/PageHeader";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
@@ -6,12 +7,40 @@ import { Textarea } from "~/components/ui/textarea";
 import PhotoItem from "./_components/PhotoItem";
 import { Table, TableBody, TableRow, TableCell } from "~/components/ui/table";
 import Link from "next/link";
+import { UploadFileButton } from "../_components/UploadAttachmentButton";
+import { useEffect, useState } from "react";
+import { api } from "~/trpc/react";
+import { type BuildingSchema } from "~/lib/building";
 
 export default function EditDetailsPage({
   params,
 }: {
   params: { projectId: string; surveyId: string; buildingId: string };
 }) {
+  const [buildingState, setBuildingState] = useState<BuildingSchema | null>(
+    null,
+  );
+
+  const { data: building } = api.building.getBuilding.useQuery({
+    id: params.buildingId,
+  });
+
+  useEffect(() => {
+    if (building) {
+      setBuildingState({
+        ...building,
+        attributes: building.attributes as Record<string, string | null>,
+      });
+    }
+  }, [building]);
+
+  const { mutate: updateBuilding } = api.building.updateBuilding.useMutation();
+
+  const handleSave = () => {
+    if (!buildingState) return;
+    updateBuilding(buildingState);
+  };
+
   return (
     <div className="flex flex-col gap-8">
       <div className="flex justify-between">
@@ -22,39 +51,76 @@ export default function EditDetailsPage({
           >
             <Button variant="outline">Cancel</Button>
           </Link>
-          <Button>Save</Button>
+          <Button onClick={handleSave}>Save</Button>
         </div>
       </div>
       <div className="flex flex-col gap-4">
         <div className="flex flex-col gap-2">
           <Label>Address</Label>
-          <Input />
+          <Input
+            value={buildingState?.address}
+            onChange={(e) => {
+              setBuildingState((prev) => {
+                if (!prev) return prev;
+                return { ...prev, address: e.target.value };
+              });
+            }}
+          />
         </div>
         <div className="flex flex-col gap-2">
           <Label>Description</Label>
-          <Textarea />
+          <Textarea
+            value={buildingState?.attributes.description ?? ""}
+            onChange={(e) => {
+              setBuildingState((prev) => {
+                if (!prev) return prev;
+                return {
+                  ...prev,
+                  attributes: {
+                    ...prev.attributes,
+                    description: e.target.value,
+                  },
+                };
+              });
+            }}
+          />
         </div>
         <div className="flex flex-col gap-2">
           <div className="flex items-center justify-between">
             <Label>Photos</Label>
-            <Button variant="outline">Add photos</Button>
+            <UploadFileButton
+              buildingId={params.buildingId}
+              fileType="image"
+              onUploaded={(data) => {
+                // TODO: add image to state immediately
+                setBuildingState((prev) => {
+                  if (!prev) return prev;
+                  return {
+                    ...prev,
+                    photoUrls: [...prev.photoUrls, ...(data ?? [])],
+                  };
+                });
+              }}
+            />
           </div>
           <div className="flex gap-2">
-            <PhotoItem
-              src="https://picsum.photos/1600/900"
-              width={200}
-              height={200}
-            />
-            <PhotoItem
-              src="https://picsum.photos/1600/900"
-              width={200}
-              height={200}
-            />
-            <PhotoItem
-              src="https://picsum.photos/1600/900"
-              width={200}
-              height={200}
-            />
+            {buildingState?.photoUrls.map((photo) => (
+              <PhotoItem
+                key={photo}
+                src={photo}
+                width={200}
+                height={200}
+                onDelete={() => {
+                  setBuildingState((prev) => {
+                    if (!prev) return prev;
+                    return {
+                      ...prev,
+                      photoUrls: prev.photoUrls.filter((p) => p !== photo),
+                    };
+                  });
+                }}
+              />
+            ))}
           </div>
         </div>
         <div className="flex flex-col gap-2">

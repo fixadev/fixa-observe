@@ -93,7 +93,7 @@ export const updateBuildingDetails = async (building: Building, userId: string, 
 };
 
 export const addPhotoUrlsToBuilding = async (buildingId: string, photoUrls: string[], userId: string, db: PrismaClient) => {
-    return db.building.update({
+    await db.building.update({
         where: {
             id: buildingId,
             ownerId: userId,
@@ -104,6 +104,7 @@ export const addPhotoUrlsToBuilding = async (buildingId: string, photoUrls: stri
             },
         },
     });
+    return photoUrls;
 };
 
 

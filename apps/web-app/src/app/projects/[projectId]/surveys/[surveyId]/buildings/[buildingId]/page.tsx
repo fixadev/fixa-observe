@@ -15,19 +15,33 @@ export default function BuildingPage({
 }: {
   params: { projectId: string; surveyId: string; buildingId: string };
 }) {
-  const address = "301 Main St, Palo Alto, CA 94301";
   const { data: building, refetch: refetchBuilding } =
     api.building.getBuilding.useQuery({
       id: params.buildingId,
     });
 
+  const { data: attributes } = api.building.getAttributes.useQuery();
+
+  // TODO: make below less ridiculous
   return (
     <div>
       <div className="mb-8 flex items-center justify-between">
         <div className="flex flex-col gap-2">
-          <PageHeader title="301 Main St" />
+          <PageHeader title={building?.address ?? ""} />
           <div className="text-base text-muted-foreground">
-            Palo Alto, CA 94301
+            {(building?.attributes as Record<string, string>)?.[
+              attributes?.find((attribute) => attribute.label === "City")?.id ??
+                ""
+            ] ?? ""}
+            ,{" "}
+            {(building?.attributes as Record<string, string>)?.[
+              attributes?.find((attribute) => attribute.label === "State")
+                ?.id ?? ""
+            ] ?? ""}{" "}
+            {(building?.attributes as Record<string, string>)?.[
+              attributes?.find((attribute) => attribute.label === "Zip Code")
+                ?.id ?? ""
+            ] ?? ""}
           </div>
         </div>
         <Link
@@ -70,7 +84,7 @@ export default function BuildingPage({
                 allowFullScreen
                 referrerPolicy="no-referrer-when-downgrade"
                 src={`https://www.google.com/maps/embed/v1/place?key=AIzaSyD53tLz4htKqRBnNh6OH0Rkij07uFYHnKA&q=${encodeURIComponent(
-                  address,
+                  building?.address ?? "",
                 )}`}
               ></iframe>
             </div>

@@ -10,6 +10,7 @@ import {
   addPhotoUrlsToBuilding,
   addAttachmentToBuilding,
   getAttributes,
+  deletePhotoUrlFromBuilding,
 } from "~/server/services/buildings";
 import { db } from "~/server/db";
 
@@ -20,7 +21,7 @@ export const buildingRouter = createTRPCRouter({
       return await getBuildingDetails(input.id, ctx.userId, ctx.db);
     }),
 
-  updateBuildingDetails: protectedProcedure
+  updateBuilding: protectedProcedure
     .input(buildingSchema)
     .mutation(async ({ ctx, input }) => {
       return await updateBuildingDetails(input, ctx.userId, ctx.db);
@@ -57,6 +58,17 @@ export const buildingRouter = createTRPCRouter({
         input.attachmentUrl,
         input.type,
         input.title,
+        ctx.userId,
+        ctx.db,
+      );
+    }),
+
+  deletePhoto: protectedProcedure
+    .input(z.object({ buildingId: z.string(), photoId: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      return await deletePhotoUrlFromBuilding(
+        input.buildingId,
+        input.photoId,
         ctx.userId,
         ctx.db,
       );
