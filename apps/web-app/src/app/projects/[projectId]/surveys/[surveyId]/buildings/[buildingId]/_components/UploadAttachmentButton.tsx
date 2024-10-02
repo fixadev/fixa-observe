@@ -10,11 +10,17 @@ export function UploadFileButton({
   fileType = "attachment",
   onStartUpload,
   onUploaded,
+
+  children,
+  className,
 }: {
   buildingId: string;
   fileType: "attachment" | "image";
   onStartUpload?: (file: File) => void;
   onUploaded?: (data?: string[]) => void;
+
+  children?: React.ReactNode;
+  className?: string;
 }) {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const { mutate: uploadAttachment } =
@@ -62,10 +68,16 @@ export function UploadFileButton({
   };
 
   return (
-    <>
-      <Button variant="outline" onClick={handleButtonClick}>
-        Upload {fileType === "attachment" ? "attachment" : "image"}
-      </Button>
+    <div className={className}>
+      {children ? (
+        <div className="cursor-pointer" onClick={handleButtonClick}>
+          {children}
+        </div>
+      ) : (
+        <Button variant="outline" onClick={handleButtonClick}>
+          Upload {fileType === "attachment" ? "attachment" : "image"}
+        </Button>
+      )}
       <input
         ref={fileInputRef}
         type="file"
@@ -73,6 +85,6 @@ export function UploadFileButton({
         className="hidden"
         onChange={onFileChangeHandler}
       />
-    </>
+    </div>
   );
 }

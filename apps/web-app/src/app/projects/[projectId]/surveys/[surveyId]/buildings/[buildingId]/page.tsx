@@ -13,6 +13,7 @@ import { useEffect, useState } from "react";
 import { type BuildingSchema } from "~/lib/building";
 import { BreadcrumbsFromPath } from "~/components/ui/BreadcrumbsFromPath";
 import { useMemo } from "react";
+import { PhotoIcon } from "@heroicons/react/24/solid";
 
 export default function BuildingPage({
   params,
@@ -122,28 +123,33 @@ export default function BuildingPage({
       <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
         <div className="flex flex-col gap-8">
           <div className="flex flex-col gap-2">
-            <div className="mx-auto aspect-square w-full max-w-xl rounded-md bg-gray-100">
-              {building?.photoUrls && building.photoUrls.length > 0 ? (
-                <Image
-                  src={building.photoUrls[0] ?? ""}
-                  alt="image of building"
-                  width={800}
-                  height={800}
-                  className="aspect-square rounded-md object-cover"
-                />
-              ) : (
-                <div className="m-4 flex items-center justify-center">
-                  <UploadFileButton
-                    buildingId={params.buildingId}
-                    fileType="image"
-                    onUploaded={() => {
-                      // TODO: Add image to state immediately
-                      void refetchBuilding();
-                    }}
+            <UploadFileButton
+              className="mx-auto w-full max-w-xl"
+              buildingId={params.buildingId}
+              fileType="image"
+              onUploaded={() => {
+                void refetchBuilding();
+              }}
+            >
+              <div className="aspect-square w-full rounded-md bg-gray-100 hover:opacity-80">
+                {building?.photoUrls && building.photoUrls.length > 0 ? (
+                  <Image
+                    src={building?.photoUrls[0] ?? ""}
+                    alt="image of building"
+                    width={800}
+                    height={800}
+                    className="aspect-square rounded-md object-cover"
                   />
-                </div>
-              )}
-            </div>
+                ) : (
+                  <div className="m-4 flex h-full flex-col items-center justify-center">
+                    <PhotoIcon className="size-10 text-gray-500" />
+                    <div className="text-sm text-gray-500">
+                      Click to upload a photo
+                    </div>
+                  </div>
+                )}
+              </div>
+            </UploadFileButton>
             <div className="mx-auto h-[200px] w-full max-w-xl rounded-md">
               {fullAddress && (
                 <iframe
@@ -220,18 +226,7 @@ export default function BuildingPage({
                   key={attachment.id}
                   attachment={attachment}
                   onDelete={() => {
-                    // console.log(attachment.id);
-                    // setBuildingState((prev) => {
-                    //   if (!prev) return prev;
-                    //   return {
-                    //     ...prev,
-                    //     attachments: prev.attachments.filter(
-                    //       (a) => a.id !== attachment.id,
-                    //     ),
-                    //   };
-                    // });
-                    // console.log(buildingState?.attachments);
-                    // void handleSave();
+                    // TODO: Implement
                   }}
                 />
               ))}
