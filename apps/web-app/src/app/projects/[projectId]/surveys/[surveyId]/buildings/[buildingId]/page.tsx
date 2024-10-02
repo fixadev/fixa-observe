@@ -39,6 +39,7 @@ export default function BuildingPage({
         ...building,
         attributes: building.attributes as Record<string, string | null>,
       });
+      setAttachmentsUploading([]);
     }
   }, [building]);
 
@@ -87,9 +88,11 @@ export default function BuildingPage({
     return `${city}, ${state} ${zipCode}`;
   }, [building, attributes]);
 
+  const [attachmentsUploading, setAttachmentsUploading] = useState<File[]>([]);
+
   // TODO: make below less ridiculous
   return (
-    <div>
+    <div className="mb-16">
       <BreadcrumbsFromPath
         className="mb-4"
         pathSegments={[
@@ -100,7 +103,7 @@ export default function BuildingPage({
             href: `/projects/${params.projectId}/surveys/${params.surveyId}`,
           },
           {
-            value: building?.name ?? building?.address ?? "",
+            value: building?.address ?? "",
             href: `/projects/${params.projectId}/surveys/${params.surveyId}/buildings/${params.buildingId}`,
           },
         ]}
@@ -163,13 +166,7 @@ export default function BuildingPage({
               <div className="text-lg font-medium">Description</div>
               <div className="text-sm text-muted-foreground">
                 This is a description of what the building is. It is a very cool
-                building. Lorem ipsum dolor sit amet, consectetur adipiscing
-                elit. Nulla facilisi. Nulla facilisi. Nulla facilisi. Nulla
-                facilisi. Nulla facilisi. Nulla facilisi. Nulla facilisi. Nulla
-                facilisi. Nulla facilisi. Nulla facilisi. Nulla facilisi. Nulla
-                facilisi. Nulla facilisi. Nulla facilisi. Nulla facilisi. Nulla
-                facilisi. Nulla facilisi. Nulla facilisi. Nulla facilisi. Nulla
-                facilisi. Nulla
+                building. It is probably cooler than you.
               </div>
             </div>
             <Table>
@@ -209,6 +206,9 @@ export default function BuildingPage({
               <UploadFileButton
                 buildingId={params.buildingId}
                 fileType="attachment"
+                onStartUpload={(file) => {
+                  setAttachmentsUploading((prev) => [...prev, file]);
+                }}
                 onUploaded={() => {
                   void refetchBuilding();
                 }}
@@ -219,7 +219,35 @@ export default function BuildingPage({
                 <AttachmentCard
                   key={attachment.id}
                   attachment={attachment}
-                  setBuildingState={setBuildingState}
+                  onDelete={() => {
+                    // console.log(attachment.id);
+                    // setBuildingState((prev) => {
+                    //   if (!prev) return prev;
+                    //   return {
+                    //     ...prev,
+                    //     attachments: prev.attachments.filter(
+                    //       (a) => a.id !== attachment.id,
+                    //     ),
+                    //   };
+                    // });
+                    // console.log(buildingState?.attachments);
+                    // void handleSave();
+                  }}
+                />
+              ))}
+              {attachmentsUploading.map((file) => (
+                <AttachmentCard
+                  key={file.name}
+                  attachment={{
+                    id: file.name,
+                    createdAt: new Date(),
+                    updatedAt: new Date(),
+                    type: file.type,
+                    buildingId: params.buildingId,
+                    title: file.name,
+                    url: "",
+                  }}
+                  isUploading
                 />
               ))}
             </div>

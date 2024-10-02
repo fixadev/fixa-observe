@@ -8,10 +8,12 @@ import { api } from "~/trpc/react";
 export function UploadFileButton({
   buildingId,
   fileType = "attachment",
+  onStartUpload,
   onUploaded,
 }: {
   buildingId: string;
   fileType: "attachment" | "image";
+  onStartUpload?: (file: File) => void;
   onUploaded?: (data?: string[]) => void;
 }) {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -38,6 +40,8 @@ export function UploadFileButton({
   ) => {
     const file = event.target.files?.[0];
     if (!file) return;
+
+    onStartUpload?.(file);
     const formData = new FormData();
     formData.append("file", file);
     const result = await axios.post("/upload", formData);

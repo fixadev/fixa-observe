@@ -4,20 +4,27 @@ import Image from "next/image";
 import { PaperClipIcon, TrashIcon } from "@heroicons/react/24/solid";
 import { Button } from "~/components/ui/button";
 import { type BuildingSchema } from "~/lib/building";
+import Spinner from "~/components/Spinner";
 
 export default function AttachmentCard({
   attachment,
-  setBuildingState,
+  isUploading = false,
+  onDelete,
 }: {
   attachment: Attachment;
-  setBuildingState: React.Dispatch<React.SetStateAction<BuildingSchema | null>>;
+  isUploading?: boolean;
+  onDelete?: () => void;
 }) {
   return (
     <Card className="group flex items-center justify-between">
       <div className="flex items-center gap-4">
-        {attachment.type === "image/jpeg" ||
-        attachment.type === "image/png" ||
-        attachment.type === "image/jpg" ? (
+        {isUploading ? (
+          <div className="flex h-20 w-20 items-center justify-center rounded-l-xl bg-gray-100">
+            <Spinner className="size-5 text-gray-500" />
+          </div>
+        ) : attachment.type === "image/jpeg" ||
+          attachment.type === "image/png" ||
+          attachment.type === "image/jpg" ? (
           <Image
             src={attachment.url}
             alt={attachment.title}
@@ -34,24 +41,18 @@ export default function AttachmentCard({
           <CardTitle>{attachment.title}</CardTitle>
         </CardHeader>
       </div>
-      <Button
-        variant="ghost"
-        size="icon"
-        className="invisible mr-4 group-hover:visible"
-        onClick={() => {
-          setBuildingState((prev) => {
-            if (!prev) return prev;
-            return {
-              ...prev,
-              attachmentIds: prev.attachmentIds.filter(
-                (a) => a !== attachment.id,
-              ),
-            };
-          });
-        }}
-      >
-        <TrashIcon className="size-4" />
-      </Button>
+      {!isUploading && (
+        <Button
+          variant="ghost"
+          size="icon"
+          className="invisible mr-4 group-hover:visible"
+          onClick={() => {
+            onDelete?.();
+          }}
+        >
+          <TrashIcon className="size-4" />
+        </Button>
+      )}
     </Card>
   );
 }
