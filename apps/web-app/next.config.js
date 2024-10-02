@@ -25,6 +25,7 @@ const config = {
   // This is required to support PostHog trailing slash API requests
   skipTrailingSlashRedirect: true,
   images: {
+    domains: ["pixa-real-estate.s3.amazonaws.com"],
     remotePatterns: [
       {
         protocol: "https",

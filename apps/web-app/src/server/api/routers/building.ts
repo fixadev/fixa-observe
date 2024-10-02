@@ -1,31 +1,20 @@
 import { z } from "zod";
-import { zfd } from "zod-form-data";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 import {
   buildingSchema,
-  importBuildingsInput,
   photoUploadSchema,
 } from "~/lib/building";
 import {
-  createOrUpdateBuildings,
   getBuildingDetails,
   updateBuildingDetails,
   addPhotoUrlsToBuilding,
   addAttachmentToBuilding,
   getAttributes,
 } from "~/server/services/buildings";
-import { uploadFileToS3 } from "~/server/utils/s3utils";
 import { db } from "~/server/db";
 
 export const buildingRouter = createTRPCRouter({
-  // createOrUpdateBuildings: protectedProcedure
-  //   .input(importBuildingsInput)
-  //   .mutation(async ({ ctx, input }) => {
-  //     console.log("userId", ctx.userId);
-  //     return await createOrUpdateBuildings(input, ctx.userId, ctx.db);
-  //   }),
-
-  getBuildingDetails: protectedProcedure
+  getBuilding: protectedProcedure
     .input(z.object({ id: z.string() }))
     .query(async ({ ctx, input }) => {
       return await getBuildingDetails(input.id, ctx.userId, ctx.db);

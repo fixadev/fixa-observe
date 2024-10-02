@@ -5,14 +5,29 @@ import { useRef } from "react";
 import { Button } from "~/components/ui/button";
 import { api } from "~/trpc/react";
 
-export default function UploadAttachmentButton({
+export function UploadFileButton({
   buildingId,
+  fileType = "attachment",
+  onUploaded,
 }: {
   buildingId: string;
+  fileType: "attachment" | "image";
+  onUploaded?: () => void;
 }) {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const { mutate: uploadAttachment } =
-    api.building.addAttachmentToBuilding.useMutation();
+    api.building.addAttachmentToBuilding.useMutation({
+      onSuccess: () => {
+        onUploaded?.();
+      },
+    });
+
+  const { mutate: addPhotosToBuilding } =
+    api.building.addPhotosToBuilding.useMutation({
+      onSuccess: () => {
+        onUploaded?.();
+      },
+    });
 
   const handleButtonClick = () => {
     fileInputRef.current?.click();
@@ -27,18 +42,25 @@ export default function UploadAttachmentButton({
     formData.append("file", file);
     const result = await axios.post("/upload", formData);
     const data = result.data as { url: string; type: string };
-    uploadAttachment({
-      buildingId,
-      attachmentUrl: data.url,
-      title: file.name,
-      type: data.type,
-    });
+    if (fileType === "attachment") {
+      uploadAttachment({
+        buildingId,
+        attachmentUrl: data.url,
+        title: file.name,
+        type: data.type,
+      });
+    } else if (fileType === "image") {
+      addPhotosToBuilding({
+        buildingId,
+        photos: [data.url],
+      });
+    }
   };
 
   return (
     <>
       <Button variant="outline" onClick={handleButtonClick}>
-        Add an attachment
+        Upload {fileType === "attachment" ? "attachment" : "image"}
       </Button>
       <input
         ref={fileInputRef}
