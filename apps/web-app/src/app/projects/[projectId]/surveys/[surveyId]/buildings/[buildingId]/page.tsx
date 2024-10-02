@@ -140,12 +140,13 @@ export default function BuildingPage({
               <UploadFileButton
                 buildingId={params.buildingId}
                 fileType="attachment"
+                onUploaded={refetchBuilding}
               />
             </div>
             <div className="flex flex-col gap-2">
-              <AttachmentCard />
-              <AttachmentCard />
-              <AttachmentCard />
+              {building?.attachments.map((attachment) => (
+                <AttachmentCard key={attachment.id} attachment={attachment} />
+              ))}
             </div>
           </div>
         </div>
