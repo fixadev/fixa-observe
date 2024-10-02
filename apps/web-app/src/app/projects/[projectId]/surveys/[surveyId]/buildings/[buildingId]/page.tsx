@@ -1,3 +1,5 @@
+"use client";
+
 import PageHeader from "~/components/PageHeader";
 import { Button } from "~/components/ui/button";
 import { Table, TableBody, TableRow, TableCell } from "~/components/ui/table";
@@ -5,12 +7,17 @@ import SpaceCard from "./_components/SpaceCard";
 import AttachmentCard from "./_components/AttachmentCard";
 import Link from "next/link";
 import UploadAttachmentButton from "./_components/UploadAttachmentButton";
+import { api } from "~/trpc/react";
 
 export default function BuildingPage({
   params,
 }: {
   params: { projectId: string; surveyId: string; buildingId: string };
 }) {
+  const { data: building, refetch } = api.building.getBuildingDetails.useQuery({
+    id: params.buildingId,
+  });
+
   const address = "301 Main St, Palo Alto, CA 94301";
 
   return (
@@ -97,12 +104,15 @@ export default function BuildingPage({
           <div>
             <div className="mb-4 flex items-center justify-between">
               <div className="text-lg font-medium">Attachments</div>
-              <UploadAttachmentButton buildingId={params.buildingId} />
+              <UploadAttachmentButton
+                buildingId={params.buildingId}
+                onUpload={refetch}
+              />
             </div>
             <div className="flex flex-col gap-2">
-              <AttachmentCard />
-              <AttachmentCard />
-              <AttachmentCard />
+              {building?.attachments.map((attachment) => (
+                <AttachmentCard key={attachment.id} attachment={attachment} />
+              ))}
             </div>
           </div>
         </div>

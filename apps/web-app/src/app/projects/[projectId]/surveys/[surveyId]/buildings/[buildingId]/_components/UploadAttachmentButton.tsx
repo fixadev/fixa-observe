@@ -7,8 +7,10 @@ import { api } from "~/trpc/react";
 
 export default function UploadAttachmentButton({
   buildingId,
+  onUpload,
 }: {
   buildingId: string;
+  onUpload: () => void;
 }) {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const { mutate: uploadAttachment } =
@@ -33,6 +35,7 @@ export default function UploadAttachmentButton({
       title: file.name,
       type: data.type,
     });
+    onUpload();
   };
 
   return (

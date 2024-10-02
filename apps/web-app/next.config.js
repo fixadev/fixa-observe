@@ -34,6 +34,10 @@ const config = {
         protocol: "https",
         hostname: "picsum.photos",
       },
+      {
+        protocol: "https",
+        hostname: "pixa-real-estate.s3.amazonaws.com",
+      },
     ],
   },
 };

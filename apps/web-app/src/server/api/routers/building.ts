@@ -14,7 +14,6 @@ import {
   addAttachmentToBuilding,
   getAttributes,
 } from "~/server/services/buildings";
-import { uploadFileToS3 } from "~/server/utils/s3utils";
 import { db } from "~/server/db";
 
 export const buildingRouter = createTRPCRouter({
