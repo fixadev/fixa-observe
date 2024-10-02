@@ -1,4 +1,8 @@
-import { PutObjectCommand } from "@aws-sdk/client-s3";
+import {
+  ObjectCannedACL,
+  PutObjectCommand,
+  type PutObjectCommandInput,
+} from "@aws-sdk/client-s3";
 import { v4 as uuidv4 } from "uuid";
 import { s3Client } from "~/server/config/s3client";
 
@@ -8,11 +12,12 @@ export const uploadFileToS3 = async (
   const fileExtension = file.name.split(".").pop();
   const fileName = `${uuidv4()}.${fileExtension}`;
   const arrayBuffer = Buffer.from(await file.arrayBuffer());
-  const params = {
+  const params: PutObjectCommandInput = {
     Bucket: process.env.AWS_BUCKET_NAME,
     Key: fileName,
     Body: arrayBuffer,
     ContentType: file.type,
+    ACL: ObjectCannedACL.public_read,
   };
 
   try {

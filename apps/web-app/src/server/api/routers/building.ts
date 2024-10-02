@@ -40,11 +40,9 @@ export const buildingRouter = createTRPCRouter({
   addPhotosToBuilding: protectedProcedure
     .input(photoUploadSchema)
     .mutation(async ({ ctx, input }) => {
-      const photos = await Promise.all(input.photos.map(uploadFileToS3));
-      const photoUrls = photos.map(({ url }) => url);
       return await addPhotoUrlsToBuilding(
         input.buildingId,
-        photoUrls,
+        input.photos,
         ctx.userId,
         ctx.db,
       );
