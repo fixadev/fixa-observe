@@ -119,16 +119,17 @@ export default function BuildingPage({
       <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
         <div className="flex flex-col gap-8">
           <div className="flex flex-col gap-2">
-            <div className="mx-auto aspect-square w-full max-w-xl rounded-md bg-gray-100 p-4">
+            <div className="mx-auto aspect-square w-full max-w-xl rounded-md bg-gray-100">
               {building?.photoUrls && building.photoUrls.length > 0 ? (
                 <Image
                   src={building.photoUrls[0] ?? ""}
                   alt="image of building"
-                  width={600}
-                  height={400}
+                  width={800}
+                  height={800}
+                  className="aspect-square rounded-md object-cover"
                 />
               ) : (
-                <div className="flex items-center justify-center">
+                <div className="m-4 flex items-center justify-center">
                   <UploadFileButton
                     buildingId={params.buildingId}
                     fileType="image"
