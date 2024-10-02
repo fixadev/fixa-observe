@@ -11,6 +11,7 @@ import {
   type CreateBuildingSchema,
 } from "~/lib/building";
 import { BreadcrumbsFromPath } from "~/components/ui/BreadcrumbsFromPath";
+import Link from "next/link";
 export default function SurveyPage({
   params,
 }: {
@@ -116,7 +117,11 @@ export default function SurveyPage({
         />
         <div className="flex items-center justify-between">
           <PageHeader title={survey?.name ?? ""} />
-          <Button variant="outline">Export PDF</Button>
+          <Link
+            href={`/projects/${params.projectId}/surveys/${params.surveyId}/pdf-preview`}
+          >
+            <Button variant="outline">Export PDF</Button>
+          </Link>
         </div>
       </div>
       <div>
