@@ -22,8 +22,9 @@ export const attachmentSchema = z.object({
 } satisfies { [K in keyof Attachment]: z.ZodType<Attachment[K]> });
 
 export type AttributesSchema = z.infer<typeof attributesSchema>;
-export const attributesSchema = z.record(z.string(), z.string());
+export const attributesSchema = z.record(z.string(), z.string().nullable());
 
+export type BuildingSchema = z.infer<typeof buildingSchema>;
 export const buildingSchema = z.object({
   id: z.string(),
   createdAt: z.date(),
@@ -49,7 +50,13 @@ export const createBuildingSchema = buildingSchema.omit({
 });
 
 export type ImportBuildingsInput = z.infer<typeof importBuildingsInput>;
-export const importBuildingsInput = z.array(createBuildingSchema);
+export const importBuildingsInput = z.object({
+  buildings: z.array(createBuildingSchema),
+  surveyId: z.string(),
+});
+
+export type ImportBuildingsArray = z.infer<typeof importBuildingsArray>;
+export const importBuildingsArray = z.array(createBuildingSchema);
 
 export type HeaderMappingSchema = z.infer<typeof headerMappingSchema>;
 export const headerMappingSchema = z.record(

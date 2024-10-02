@@ -1,9 +1,9 @@
 import { type Space, type Building, type PrismaClient } from "@prisma/client";
-import { type ImportBuildingsInput } from "~/lib/building";
+import { type ImportBuildingsArray, } from "~/lib/building";
 
 
 export const createOrUpdateBuildings = async (
-  input: ImportBuildingsInput,
+  input: ImportBuildingsArray,
   userId: string,
   db: PrismaClient,
 ) => {

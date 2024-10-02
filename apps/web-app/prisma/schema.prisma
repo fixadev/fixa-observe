@@ -36,16 +36,15 @@ model Project {
 }
 
 model Survey {
-  id               String     @id @default(auto()) @map("_id") @db.ObjectId
-  ownerId          String     @db.ObjectId
-  createdAt        DateTime   @default(now())
-  updatedAt        DateTime   @updatedAt
-  name             String
-  projectId        String     @db.ObjectId
-  project          Project    @relation(fields: [projectId], references: [id])
-  buildings        Building[] @relation(fields: [buildingIds], references: [id])
-  buildingIds      String[]   @db.ObjectId
-  customProperties Json?
+  id          String     @id @default(auto()) @map("_id") @db.ObjectId
+  ownerId     String     @db.ObjectId
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  name        String
+  projectId   String     @db.ObjectId
+  project     Project    @relation(fields: [projectId], references: [id])
+  buildings   Building[] @relation(fields: [buildingIds], references: [id])
+  buildingIds String[]   @db.ObjectId
 }
 
 model Building {
@@ -62,7 +61,7 @@ model Building {
   surveys       Survey[]     @relation(fields: [surveyIds], references: [id])
   surveyIds     String[]     @db.ObjectId
   photoUrls     String[]
-  attributes    Json?
+  attributes    Json?        @db.Json
 }
 
 model Attribute {

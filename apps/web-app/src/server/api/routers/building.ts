@@ -18,12 +18,12 @@ import { uploadFileToS3 } from "~/server/utils/s3utils";
 import { db } from "~/server/db";
 
 export const buildingRouter = createTRPCRouter({
-  createOrUpdateBuildings: protectedProcedure
-    .input(importBuildingsInput)
-    .mutation(async ({ ctx, input }) => {
-      console.log("userId", ctx.userId);
-      return await createOrUpdateBuildings(input, ctx.userId, ctx.db);
-    }),
+  // createOrUpdateBuildings: protectedProcedure
+  //   .input(importBuildingsInput)
+  //   .mutation(async ({ ctx, input }) => {
+  //     console.log("userId", ctx.userId);
+  //     return await createOrUpdateBuildings(input, ctx.userId, ctx.db);
+  //   }),
 
   getBuildingDetails: protectedProcedure
     .input(z.object({ id: z.string() }))

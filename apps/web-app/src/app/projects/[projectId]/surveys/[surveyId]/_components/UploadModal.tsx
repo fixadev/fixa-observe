@@ -23,7 +23,7 @@ export function UploadModal({
   submitHandler: (mappedHeaders: HeaderMappingSchema) => void;
 }) {
   return (
-    <Dialog open={open}>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent className="max-h-[90vh] max-w-[90vw]">
         <DialogHeader>
           <DialogTitle>Building Import</DialogTitle>
