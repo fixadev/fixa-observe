@@ -10,6 +10,7 @@ import { UploadFileButton } from "./_components/UploadAttachmentButton";
 import Image from "next/image";
 import { api } from "~/trpc/react";
 import { BreadcrumbsFromPath } from "~/components/ui/BreadcrumbsFromPath";
+import { useMemo } from "react";
 
 export default function BuildingPage({
   params,
@@ -29,6 +30,43 @@ export default function BuildingPage({
   });
   const { data: attributes } = api.building.getAttributes.useQuery();
 
+  const fullAddress = useMemo(() => {
+    if (!building || !attributes) return "";
+    const buildingAttributes = building.attributes as Record<string, string>;
+    const city =
+      buildingAttributes[
+        attributes.find((attribute) => attribute.label === "City")?.id ?? ""
+      ];
+    const state =
+      buildingAttributes[
+        attributes.find((attribute) => attribute.label === "State")?.id ?? ""
+      ];
+    const zipCode =
+      buildingAttributes[
+        attributes.find((attribute) => attribute.label === "Zip Code")?.id ?? ""
+      ];
+
+    return `${building.address}, ${city}, ${state} ${zipCode}`;
+  }, [building, attributes]);
+
+  const cityStateZip = useMemo(() => {
+    if (!building || !attributes) return "";
+    const buildingAttributes = building.attributes as Record<string, string>;
+    const city =
+      buildingAttributes[
+        attributes.find((attribute) => attribute.label === "City")?.id ?? ""
+      ];
+    const state =
+      buildingAttributes[
+        attributes.find((attribute) => attribute.label === "State")?.id ?? ""
+      ];
+    const zipCode =
+      buildingAttributes[
+        attributes.find((attribute) => attribute.label === "Zip Code")?.id ?? ""
+      ];
+    return `${city}, ${state} ${zipCode}`;
+  }, [building, attributes]);
+
   // TODO: make below less ridiculous
   return (
     <div>
@@ -42,7 +80,7 @@ export default function BuildingPage({
             href: `/projects/${params.projectId}/surveys/${params.surveyId}`,
           },
           {
-            value: building?.name ?? "",
+            value: building?.name ?? building?.address ?? "",
             href: `/projects/${params.projectId}/surveys/${params.surveyId}/buildings/${params.buildingId}`,
           },
         ]}
@@ -50,21 +88,7 @@ export default function BuildingPage({
       <div className="mb-8 flex items-center justify-between">
         <div className="flex flex-col gap-2">
           <PageHeader title={building?.address ?? ""} />
-          <div className="text-base text-muted-foreground">
-            {(building?.attributes as Record<string, string>)?.[
-              attributes?.find((attribute) => attribute.label === "City")?.id ??
-                ""
-            ] ?? ""}
-            ,{" "}
-            {(building?.attributes as Record<string, string>)?.[
-              attributes?.find((attribute) => attribute.label === "State")
-                ?.id ?? ""
-            ] ?? ""}{" "}
-            {(building?.attributes as Record<string, string>)?.[
-              attributes?.find((attribute) => attribute.label === "Zip Code")
-                ?.id ?? ""
-            ] ?? ""}
-          </div>
+          <div className="text-base text-muted-foreground">{cityStateZip}</div>
         </div>
         <Link
           href={`/projects/${params.projectId}/surveys/${params.surveyId}/buildings/${params.buildingId}/edit-details`}
@@ -96,19 +120,21 @@ export default function BuildingPage({
                 </div>
               )}
             </div>
-            <div className="mx-auto w-full max-w-xl rounded-md">
-              <iframe
-                width="100%"
-                height="200"
-                className="rounded-md"
-                style={{ border: 0 }}
-                loading="lazy"
-                allowFullScreen
-                referrerPolicy="no-referrer-when-downgrade"
-                src={`https://www.google.com/maps/embed/v1/place?key=AIzaSyD53tLz4htKqRBnNh6OH0Rkij07uFYHnKA&q=${encodeURIComponent(
-                  building?.address ?? "",
-                )}`}
-              ></iframe>
+            <div className="mx-auto h-[200px] w-full max-w-xl rounded-md">
+              {fullAddress && (
+                <iframe
+                  width="100%"
+                  height="200"
+                  className="rounded-md"
+                  style={{ border: 0 }}
+                  loading="lazy"
+                  allowFullScreen
+                  referrerPolicy="no-referrer-when-downgrade"
+                  src={`https://www.google.com/maps/embed/v1/place?key=AIzaSyD53tLz4htKqRBnNh6OH0Rkij07uFYHnKA&q=${encodeURIComponent(
+                    fullAddress,
+                  )}`}
+                ></iframe>
+              )}
             </div>
           </div>
           <div className="flex flex-col gap-4">
