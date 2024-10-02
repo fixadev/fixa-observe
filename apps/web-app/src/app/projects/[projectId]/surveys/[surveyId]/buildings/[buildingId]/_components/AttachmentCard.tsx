@@ -3,11 +3,14 @@ import { Card, CardHeader, CardTitle } from "~/components/ui/card";
 import Image from "next/image";
 import { PaperClipIcon, TrashIcon } from "@heroicons/react/24/solid";
 import { Button } from "~/components/ui/button";
+import { type BuildingSchema } from "~/lib/building";
 
 export default function AttachmentCard({
   attachment,
+  setBuildingState,
 }: {
   attachment: Attachment;
+  setBuildingState: React.Dispatch<React.SetStateAction<BuildingSchema | null>>;
 }) {
   return (
     <Card className="group flex items-center justify-between">
@@ -35,6 +38,17 @@ export default function AttachmentCard({
         variant="ghost"
         size="icon"
         className="invisible mr-4 group-hover:visible"
+        onClick={() => {
+          setBuildingState((prev) => {
+            if (!prev) return prev;
+            return {
+              ...prev,
+              attachmentIds: prev.attachmentIds.filter(
+                (a) => a !== attachment.id,
+              ),
+            };
+          });
+        }}
       >
         <TrashIcon className="size-4" />
       </Button>

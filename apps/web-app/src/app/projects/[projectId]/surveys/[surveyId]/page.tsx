@@ -21,6 +21,7 @@ export default function SurveyPage({
   const {
     data: survey,
     isLoading,
+    refetch: refetchSurvey,
     error,
   } = api.survey.getSurvey.useQuery({
     surveyId: params.surveyId,
@@ -35,6 +36,7 @@ export default function SurveyPage({
     api.survey.addBuildingsToSurvey.useMutation({
       onSuccess: () => {
         setIsMappingOpen(false);
+        void refetchSurvey();
       },
       onError: (error) => {
         console.log("error", error);
