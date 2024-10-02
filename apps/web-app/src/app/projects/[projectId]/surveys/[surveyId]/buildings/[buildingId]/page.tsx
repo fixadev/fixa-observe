@@ -12,6 +12,7 @@ import { api } from "~/trpc/react";
 import { useEffect, useState } from "react";
 import { type BuildingSchema } from "~/lib/building";
 import { BreadcrumbsFromPath } from "~/components/ui/BreadcrumbsFromPath";
+import { useMemo } from "react";
 
 export default function BuildingPage({
   params,
@@ -49,6 +50,43 @@ export default function BuildingPage({
     updateBuilding(buildingState);
   };
 
+  const fullAddress = useMemo(() => {
+    if (!building || !attributes) return "";
+    const buildingAttributes = building.attributes as Record<string, string>;
+    const city =
+      buildingAttributes[
+        attributes.find((attribute) => attribute.label === "City")?.id ?? ""
+      ];
+    const state =
+      buildingAttributes[
+        attributes.find((attribute) => attribute.label === "State")?.id ?? ""
+      ];
+    const zipCode =
+      buildingAttributes[
+        attributes.find((attribute) => attribute.label === "Zip Code")?.id ?? ""
+      ];
+
+    return `${building.address}, ${city}, ${state} ${zipCode}`;
+  }, [building, attributes]);
+
+  const cityStateZip = useMemo(() => {
+    if (!building || !attributes) return "";
+    const buildingAttributes = building.attributes as Record<string, string>;
+    const city =
+      buildingAttributes[
+        attributes.find((attribute) => attribute.label === "City")?.id ?? ""
+      ];
+    const state =
+      buildingAttributes[
+        attributes.find((attribute) => attribute.label === "State")?.id ?? ""
+      ];
+    const zipCode =
+      buildingAttributes[
+        attributes.find((attribute) => attribute.label === "Zip Code")?.id ?? ""
+      ];
+    return `${city}, ${state} ${zipCode}`;
+  }, [building, attributes]);
+
   // TODO: make below less ridiculous
   return (
     <div>
@@ -62,7 +100,7 @@ export default function BuildingPage({
             href: `/projects/${params.projectId}/surveys/${params.surveyId}`,
           },
           {
-            value: building?.address ?? "",
+            value: building?.name ?? building?.address ?? "",
             href: `/projects/${params.projectId}/surveys/${params.surveyId}/buildings/${params.buildingId}`,
           },
         ]}
@@ -70,21 +108,7 @@ export default function BuildingPage({
       <div className="mb-8 flex items-center justify-between">
         <div className="flex flex-col gap-2">
           <PageHeader title={building?.address ?? ""} />
-          <div className="text-base text-muted-foreground">
-            {(building?.attributes as Record<string, string>)?.[
-              attributes?.find((attribute) => attribute.label === "City")?.id ??
-                ""
-            ] ?? ""}
-            ,{" "}
-            {(building?.attributes as Record<string, string>)?.[
-              attributes?.find((attribute) => attribute.label === "State")
-                ?.id ?? ""
-            ] ?? ""}{" "}
-            {(building?.attributes as Record<string, string>)?.[
-              attributes?.find((attribute) => attribute.label === "Zip Code")
-                ?.id ?? ""
-            ] ?? ""}
-          </div>
+          <div className="text-base text-muted-foreground">{cityStateZip}</div>
         </div>
         <Link
           href={`/projects/${params.projectId}/surveys/${params.surveyId}/buildings/${params.buildingId}/edit-details`}
@@ -95,16 +119,17 @@ export default function BuildingPage({
       <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
         <div className="flex flex-col gap-8">
           <div className="flex flex-col gap-2">
-            <div className="mx-auto aspect-square w-full max-w-xl rounded-md bg-gray-100 p-4">
+            <div className="mx-auto aspect-square w-full max-w-xl rounded-md bg-gray-100">
               {building?.photoUrls && building.photoUrls.length > 0 ? (
                 <Image
                   src={building.photoUrls[0] ?? ""}
                   alt="image of building"
-                  width={600}
-                  height={400}
+                  width={800}
+                  height={800}
+                  className="aspect-square rounded-md object-cover"
                 />
               ) : (
-                <div className="flex items-center justify-center">
+                <div className="m-4 flex items-center justify-center">
                   <UploadFileButton
                     buildingId={params.buildingId}
                     fileType="image"
@@ -116,19 +141,21 @@ export default function BuildingPage({
                 </div>
               )}
             </div>
-            <div className="mx-auto w-full max-w-xl rounded-md">
-              <iframe
-                width="100%"
-                height="200"
-                className="rounded-md"
-                style={{ border: 0 }}
-                loading="lazy"
-                allowFullScreen
-                referrerPolicy="no-referrer-when-downgrade"
-                src={`https://www.google.com/maps/embed/v1/place?key=AIzaSyD53tLz4htKqRBnNh6OH0Rkij07uFYHnKA&q=${encodeURIComponent(
-                  building?.address ?? "",
-                )}`}
-              ></iframe>
+            <div className="mx-auto h-[200px] w-full max-w-xl rounded-md">
+              {fullAddress && (
+                <iframe
+                  width="100%"
+                  height="200"
+                  className="rounded-md"
+                  style={{ border: 0 }}
+                  loading="lazy"
+                  allowFullScreen
+                  referrerPolicy="no-referrer-when-downgrade"
+                  src={`https://www.google.com/maps/embed/v1/place?key=AIzaSyD53tLz4htKqRBnNh6OH0Rkij07uFYHnKA&q=${encodeURIComponent(
+                    fullAddress,
+                  )}`}
+                ></iframe>
+              )}
             </div>
           </div>
           <div className="flex flex-col gap-4">

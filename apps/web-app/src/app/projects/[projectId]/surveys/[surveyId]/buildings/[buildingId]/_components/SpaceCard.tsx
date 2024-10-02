@@ -13,15 +13,11 @@ export default function SpaceCard() {
       <CardHeader>
         <CardTitle>Big room</CardTitle>
         <CardDescription>
-          This room is really big... just like something else... if you know
-          what I mean 😏
+          This room is really big and can fit a lot of stuff. It&apos;s a really
+          big room. Ideal for a lot of things.
         </CardDescription>
       </CardHeader>
       <CardContent>
-        {/* <div className="flex items-center justify-between">
-          <div className="text-sm text-muted-foreground">Square Feet</div>
-          <div className="text-sm font-medium">10,000</div>
-        </div> */}
         <Table>
           <TableBody>
             <TableRow>
