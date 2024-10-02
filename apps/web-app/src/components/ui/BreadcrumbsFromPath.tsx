@@ -6,6 +6,7 @@ import {
   BreadcrumbList,
   BreadcrumbSeparator,
 } from "./breadcrumb";
+import React from "react";
 
 export function BreadcrumbsFromPath({
   pathSegments,
@@ -18,14 +19,14 @@ export function BreadcrumbsFromPath({
     <Breadcrumb className={className}>
       <BreadcrumbList>
         {pathSegments.map((segment, i) => (
-          <>
-            <BreadcrumbItem key={segment.value}>
+          <React.Fragment key={segment.href}>
+            <BreadcrumbItem>
               <BreadcrumbLink asChild>
                 <Link href={segment.href}>{segment.value}</Link>
               </BreadcrumbLink>
             </BreadcrumbItem>
             {i < pathSegments.length - 1 && <BreadcrumbSeparator />}
-          </>
+          </React.Fragment>
         ))}
       </BreadcrumbList>
     </Breadcrumb>

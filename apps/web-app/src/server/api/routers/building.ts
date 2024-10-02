@@ -1,9 +1,6 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
-import {
-  buildingSchema,
-  photoUploadSchema,
-} from "~/lib/building";
+import { buildingSchema, photoUploadSchema } from "~/lib/building";
 import {
   getBuildingDetails,
   updateBuildingDetails,
