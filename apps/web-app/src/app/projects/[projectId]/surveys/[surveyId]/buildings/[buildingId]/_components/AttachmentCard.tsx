@@ -3,7 +3,6 @@ import { Card, CardHeader, CardTitle } from "~/components/ui/card";
 import Image from "next/image";
 import { PaperClipIcon, TrashIcon } from "@heroicons/react/24/solid";
 import { Button } from "~/components/ui/button";
-import { type BuildingSchema } from "~/lib/building";
 import Spinner from "~/components/Spinner";
 
 export default function AttachmentCard({

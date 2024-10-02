@@ -25,7 +25,7 @@ export function UploadFileButton({
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const { mutate: uploadAttachment } =
     api.building.addAttachmentToBuilding.useMutation({
-      onSuccess: (data) => {
+      onSuccess: (_) => {
         onUploaded?.();
       },
     });
