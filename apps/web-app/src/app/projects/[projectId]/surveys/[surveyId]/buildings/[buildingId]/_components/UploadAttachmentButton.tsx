@@ -12,20 +12,20 @@ export function UploadFileButton({
 }: {
   buildingId: string;
   fileType: "attachment" | "image";
-  onUploaded?: () => void;
+  onUploaded?: (data?: string[]) => void;
 }) {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const { mutate: uploadAttachment } =
     api.building.addAttachmentToBuilding.useMutation({
-      onSuccess: () => {
+      onSuccess: (data) => {
         onUploaded?.();
       },
     });
 
   const { mutate: addPhotosToBuilding } =
     api.building.addPhotosToBuilding.useMutation({
-      onSuccess: () => {
-        onUploaded?.();
+      onSuccess: (data) => {
+        onUploaded?.(data);
       },
     });
 

@@ -33,6 +33,7 @@ export default function BuildingsTable({
       <Table>
         <TableHeader>
           <TableRow>
+            <TableHead>Address</TableHead>
             {populatedAttributes?.map((attribute) => (
               <TableHead key={attribute.id}>{attribute.label}</TableHead>
             ))}
@@ -48,6 +49,7 @@ export default function BuildingsTable({
                 );
               }}
             >
+              <TableCell>{building.address}</TableCell>
               {populatedAttributes?.map((attribute) => (
                 <TableCell key={attribute.id}>
                   {building.attributes[attribute.id]}

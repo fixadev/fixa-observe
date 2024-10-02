@@ -121,23 +121,19 @@ export const updateBuildingDetails = async (
   return response;
 };
 
-export const addPhotoUrlsToBuilding = async (
-  buildingId: string,
-  photoUrls: string[],
-  userId: string,
-  db: PrismaClient,
-) => {
-  return db.building.update({
-    where: {
-      id: buildingId,
-      ownerId: userId,
-    },
-    data: {
-      photoUrls: {
-        push: photoUrls,
-      },
-    },
-  });
+export const addPhotoUrlsToBuilding = async (buildingId: string, photoUrls: string[], userId: string, db: PrismaClient) => {
+    await db.building.update({
+        where: {
+            id: buildingId,
+            ownerId: userId,
+        },
+        data: {
+            photoUrls: {
+                push: photoUrls,
+            },
+        },
+    });
+    return photoUrls;
 };
 
 export const deletePhotoUrlFromBuilding = async (
