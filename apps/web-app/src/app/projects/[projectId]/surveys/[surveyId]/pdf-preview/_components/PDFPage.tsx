@@ -93,6 +93,7 @@ export function PDFPage({
   buildings: Building[];
   attributes: Attribute[];
 }) {
+  console.log(buildings);
   return (
     <Page size="A4" orientation="landscape" style={styles.page}>
       <View style={styles.header}>
@@ -129,7 +130,7 @@ export function PDFPage({
               <Image
                 style={styles.image}
                 src={
-                  // building.photoUrls[0] ??
+                  building.photoUrls[0] ??
                   "https://m.foolcdn.com/media/dubs/images/GettyImages-695968212.width-880.jpg"
                 }
                 alt="Photo"
