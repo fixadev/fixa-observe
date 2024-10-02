@@ -13,7 +13,7 @@ export function PDFContent({
     return (
       <Document>
         <Page size="A4" orientation="landscape">
-          <Text>No buildings or attributes</Text>
+          <Text>Loading...</Text>
         </Page>
       </Document>
     );
