@@ -27,13 +27,14 @@ export default function SurveyPage({
   });
 
   useEffect(() => {
+    console.log("survey", survey);
     console.log(error);
-  }, [error]);
+  }, [error, survey]);
 
   const { mutate: uploadBuildings } =
-    api.building.createOrUpdateBuildings.useMutation({
+    api.survey.addBuildingsToSurvey.useMutation({
       onSuccess: () => {
-        console.log("success");
+        setIsMappingOpen(false);
       },
       onError: (error) => {
         console.log("error", error);
@@ -63,7 +64,6 @@ export default function SurveyPage({
       const mappedRow = Object.keys(row).reduce<CreateBuildingSchema>(
         (acc, key) => {
           const header = mappedHeaders[key];
-          // console.log("header", header);
           if (header?.target && header.target !== "address") {
             acc.attributes = acc.attributes ?? {};
             acc.attributes[header.target] = row[key] ?? "";
@@ -87,7 +87,7 @@ export default function SurveyPage({
         attributes: mappedRow.attributes ?? {},
       } as CreateBuildingSchema;
     });
-    uploadBuildings(updatedData);
+    uploadBuildings({ buildings: updatedData, surveyId: params.surveyId });
   };
 
   return (
@@ -114,7 +114,12 @@ export default function SurveyPage({
           </div>
         </div>
         <BuildingsTable
-          buildings={survey?.buildings ?? []}
+          buildings={
+            survey?.buildings.map((building) => ({
+              ...building,
+              attributes: building.attributes as Record<string, string | null>,
+            })) ?? []
+          }
           projectId={params.projectId}
           surveyId={params.surveyId}
         />

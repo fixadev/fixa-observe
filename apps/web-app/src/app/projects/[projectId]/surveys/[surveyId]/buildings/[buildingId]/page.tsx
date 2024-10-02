@@ -6,7 +6,8 @@ import { Table, TableBody, TableRow, TableCell } from "~/components/ui/table";
 import SpaceCard from "./_components/SpaceCard";
 import AttachmentCard from "./_components/AttachmentCard";
 import Link from "next/link";
-import UploadAttachmentButton from "./_components/UploadAttachmentButton";
+import { UploadFileButton } from "./_components/UploadAttachmentButton";
+import Image from "next/image";
 import { api } from "~/trpc/react";
 
 export default function BuildingPage({
@@ -14,11 +15,11 @@ export default function BuildingPage({
 }: {
   params: { projectId: string; surveyId: string; buildingId: string };
 }) {
-  const { data: building, refetch } = api.building.getBuildingDetails.useQuery({
-    id: params.buildingId,
-  });
-
   const address = "301 Main St, Palo Alto, CA 94301";
+  const { data: building, refetch: refetchBuilding } =
+    api.building.getBuilding.useQuery({
+      id: params.buildingId,
+    });
 
   return (
     <div>
@@ -39,7 +40,25 @@ export default function BuildingPage({
         <div className="flex flex-col gap-8">
           <div className="flex flex-col gap-2">
             <div className="mx-auto aspect-square w-full max-w-xl rounded-md bg-gray-100 p-4">
-              <div className="text-lg font-medium">image of building</div>
+              {building?.photoUrls && building.photoUrls.length > 0 ? (
+                <Image
+                  src={building.photoUrls[0] ?? ""}
+                  alt="image of building"
+                  width={600}
+                  height={400}
+                />
+              ) : (
+                <div className="flex items-center justify-center">
+                  <UploadFileButton
+                    buildingId={params.buildingId}
+                    fileType="image"
+                    onUploaded={() => {
+                      // TODO: Add image to state immediately
+                      void refetchBuilding();
+                    }}
+                  />
+                </div>
+              )}
             </div>
             <div className="mx-auto w-full max-w-xl rounded-md">
               <iframe
@@ -104,9 +123,10 @@ export default function BuildingPage({
           <div>
             <div className="mb-4 flex items-center justify-between">
               <div className="text-lg font-medium">Attachments</div>
-              <UploadAttachmentButton
+              <UploadFileButton
                 buildingId={params.buildingId}
-                onUpload={refetch}
+                fileType="attachment"
+                onUploaded={refetchBuilding}
               />
             </div>
             <div className="flex flex-col gap-2">

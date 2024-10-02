@@ -25,6 +25,7 @@ export const CSVUploader: React.FC<Props> = ({ dataHandler, openMapping }) => {
       header: true,
       complete: function (results: ParseResult<Record<string, string>>) {
         dataHandler(results.data);
+        console.log("opening mapping");
         openMapping();
       },
       error: function (error: unknown) {
@@ -47,7 +48,7 @@ export const CSVUploader: React.FC<Props> = ({ dataHandler, openMapping }) => {
     <div className="flex flex-col items-center justify-center gap-3">
       <Button onClick={handleButtonClick}>Choose File (csv, xls, etc.)</Button>
       <input
-        ref={fileInputRef && fileInputRef}
+        ref={fileInputRef}
         type="file"
         id="csvFileSelector"
         className="hidden"

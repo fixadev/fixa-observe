@@ -1,6 +1,7 @@
-import Link from "next/link";
+"use client";
+import { useRouter } from "next/navigation";
+
 import { Button } from "~/components/ui/button";
-import { type Building } from "@prisma/client";
 import {
   Table,
   TableHeader,
@@ -8,37 +9,52 @@ import {
   TableHead,
   TableCell,
 } from "~/components/ui/table";
+import { type BuildingSchema } from "~/lib/building";
+import { api } from "~/trpc/react";
 
 export default function BuildingsTable({
   buildings,
   projectId,
   surveyId,
 }: {
-  buildings: Building[];
+  buildings: BuildingSchema[];
   projectId: string;
   surveyId: string;
 }) {
+  const router = useRouter();
+  const { data: attributes } = api.building.getAttributes.useQuery();
+
+  const populatedAttributes = attributes?.filter((attribute) =>
+    buildings.some((building) => building.attributes[attribute.id]),
+  );
+
   return (
     <div>
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Address</TableHead>
-            <TableHead>Building size</TableHead>
-            <TableHead>Price / sqft</TableHead>
+            {populatedAttributes?.map((attribute) => (
+              <TableHead key={attribute.id}>{attribute.label}</TableHead>
+            ))}
             <TableHead />
           </TableRow>
           {buildings.map((building) => (
-            <TableRow key={building.id}>
-              <TableCell>{building.address}</TableCell>
-              <TableCell>{building.sqFt} sqft.</TableCell>
-              <TableCell>${building.pricePerSqft} / sqft.</TableCell>
+            <TableRow
+              className="cursor-pointer"
+              key={building.id}
+              onClick={() => {
+                router.push(
+                  `/projects/${projectId}/surveys/${surveyId}/buildings/${building.id}`,
+                );
+              }}
+            >
+              {populatedAttributes?.map((attribute) => (
+                <TableCell key={attribute.id}>
+                  {building.attributes[attribute.id]}
+                </TableCell>
+              ))}
               <TableCell>
-                <Link
-                  href={`/projects/${projectId}/surveys/${surveyId}/buildings/${building.id}`}
-                >
-                  <Button variant="ghost">Edit</Button>
-                </Link>
+                <Button variant="ghost"></Button>
               </TableCell>
             </TableRow>
           ))}

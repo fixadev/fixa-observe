@@ -17,6 +17,5 @@ export const surveySchema = z.object({
     ownerId: z.string(),
     createdAt: z.date(),
     updatedAt: z.date(),
-    customProperties: z.record(z.string(), z.any()),
   } satisfies { [K in keyof Survey]: z.ZodType<Survey[K]> });
 
