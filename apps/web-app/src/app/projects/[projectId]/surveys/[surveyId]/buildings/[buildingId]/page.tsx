@@ -54,42 +54,44 @@ export default function BuildingPage({
     updateBuilding(buildingState);
   };
 
-  const fullAddress = useMemo(() => {
-    if (!building || !attributes) return "";
+  const buildingAttributes = useMemo(() => {
+    if (!building || !attributes) return [];
     const buildingAttributes = building.attributes as Record<string, string>;
+    return attributes.map((attribute) => ({
+      id: attribute.id,
+      label: attribute.label,
+      value: buildingAttributes[attribute.id],
+    }));
+  }, [building, attributes]);
+
+  const fullAddress = useMemo(() => {
+    if (!building || !buildingAttributes) return "";
     const city =
-      buildingAttributes[
-        attributes.find((attribute) => attribute.label === "City")?.id ?? ""
-      ];
+      buildingAttributes.find((attribute) => attribute.label === "City")
+        ?.value ?? "";
     const state =
-      buildingAttributes[
-        attributes.find((attribute) => attribute.label === "State")?.id ?? ""
-      ];
+      buildingAttributes.find((attribute) => attribute.label === "State")
+        ?.value ?? "";
     const zipCode =
-      buildingAttributes[
-        attributes.find((attribute) => attribute.label === "Zip Code")?.id ?? ""
-      ];
+      buildingAttributes.find((attribute) => attribute.label === "Zip Code")
+        ?.value ?? "";
 
     return `${building.address}, ${city}, ${state} ${zipCode}`;
-  }, [building, attributes]);
+  }, [building, buildingAttributes]);
 
   const cityStateZip = useMemo(() => {
-    if (!building || !attributes) return "";
-    const buildingAttributes = building.attributes as Record<string, string>;
+    if (!building || !buildingAttributes) return "";
     const city =
-      buildingAttributes[
-        attributes.find((attribute) => attribute.label === "City")?.id ?? ""
-      ];
+      buildingAttributes.find((attribute) => attribute.label === "City")
+        ?.value ?? "";
     const state =
-      buildingAttributes[
-        attributes.find((attribute) => attribute.label === "State")?.id ?? ""
-      ];
+      buildingAttributes.find((attribute) => attribute.label === "State")
+        ?.value ?? "";
     const zipCode =
-      buildingAttributes[
-        attributes.find((attribute) => attribute.label === "Zip Code")?.id ?? ""
-      ];
+      buildingAttributes.find((attribute) => attribute.label === "Zip Code")
+        ?.value ?? "";
     return `${city}, ${state} ${zipCode}`;
-  }, [building, attributes]);
+  }, [building, buildingAttributes]);
 
   const [attachmentsUploading, setAttachmentsUploading] = useState<File[]>([]);
   const [mapLoaded, setMapLoaded] = useState(false);
@@ -190,14 +192,14 @@ export default function BuildingPage({
             </div>
             <Table>
               <TableBody>
-                <TableRow>
-                  <TableCell className="font-medium">Floors</TableCell>
-                  <TableCell>3</TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell className="font-medium">Amenities</TableCell>
-                  <TableCell>Parking, Elevator, Conference Room</TableCell>
-                </TableRow>
+                {buildingAttributes.map((attribute) => (
+                  <TableRow key={attribute.id}>
+                    <TableCell className="font-medium">
+                      {attribute.label}
+                    </TableCell>
+                    <TableCell>{attribute.value}</TableCell>
+                  </TableRow>
+                ))}
               </TableBody>
             </Table>
           </div>
