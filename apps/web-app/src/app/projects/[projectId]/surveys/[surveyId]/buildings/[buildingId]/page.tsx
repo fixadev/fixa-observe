@@ -9,6 +9,7 @@ import Link from "next/link";
 import { UploadFileButton } from "./_components/UploadAttachmentButton";
 import Image from "next/image";
 import { api } from "~/trpc/react";
+import { BreadcrumbsFromPath } from "~/components/ui/BreadcrumbsFromPath";
 
 export default function BuildingPage({
   params,
@@ -21,8 +22,30 @@ export default function BuildingPage({
       id: params.buildingId,
     });
 
+  const { data: project } = api.project.getProject.useQuery({
+    projectId: params.projectId,
+  });
+  const { data: survey } = api.survey.getSurvey.useQuery({
+    surveyId: params.surveyId,
+  });
+
   return (
     <div>
+      <BreadcrumbsFromPath
+        className="mb-4"
+        pathSegments={[
+          { value: "Projects", href: `/` },
+          { value: project?.name ?? "", href: `/projects/${params.projectId}` },
+          {
+            value: survey?.name ?? "",
+            href: `/projects/${params.projectId}/surveys/${params.surveyId}`,
+          },
+          {
+            value: building?.name ?? "",
+            href: `/projects/${params.projectId}/surveys/${params.surveyId}/buildings/${params.buildingId}`,
+          },
+        ]}
+      />
       <div className="mb-8 flex items-center justify-between">
         <div className="flex flex-col gap-2">
           <PageHeader title="301 Main St" />

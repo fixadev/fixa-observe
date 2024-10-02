@@ -17,6 +17,7 @@ import { Label } from "~/components/ui/label";
 
 import { api } from "~/trpc/react";
 import { useEffect, useState } from "react";
+import { BreadcrumbsFromPath } from "~/components/ui/BreadcrumbsFromPath";
 
 export default function ProjectPage({
   params,
@@ -53,7 +54,19 @@ export default function ProjectPage({
 
   return (
     <div className="flex flex-col gap-8">
-      <PageHeader title={project?.name ?? ""} />
+      <div>
+        <BreadcrumbsFromPath
+          className="mb-4"
+          pathSegments={[
+            { value: "Projects", href: `/` },
+            {
+              value: project?.name ?? "",
+              href: `/projects/${params.projectId}`,
+            },
+          ]}
+        />
+        <PageHeader title={project?.name ?? ""} />
+      </div>
       <div>
         <div className="mb-4 flex items-center justify-between">
           <div className="text-lg font-medium">Surveys</div>
