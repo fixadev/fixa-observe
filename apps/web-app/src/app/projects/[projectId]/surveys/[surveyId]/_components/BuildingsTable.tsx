@@ -1,4 +1,6 @@
-import Link from "next/link";
+"use client";
+import { useRouter } from "next/navigation";
+
 import { Button } from "~/components/ui/button";
 import {
   Table,
@@ -19,6 +21,7 @@ export default function BuildingsTable({
   projectId: string;
   surveyId: string;
 }) {
+  const router = useRouter();
   const { data: attributes } = api.building.getAttributes.useQuery();
 
   const populatedAttributes = attributes?.filter((attribute) =>
@@ -36,18 +39,22 @@ export default function BuildingsTable({
             <TableHead />
           </TableRow>
           {buildings.map((building) => (
-            <TableRow key={building.id}>
+            <TableRow
+              className="cursor-pointer"
+              key={building.id}
+              onClick={() => {
+                router.push(
+                  `/projects/${projectId}/surveys/${surveyId}/buildings/${building.id}`,
+                );
+              }}
+            >
               {populatedAttributes?.map((attribute) => (
                 <TableCell key={attribute.id}>
                   {building.attributes[attribute.id]}
                 </TableCell>
               ))}
               <TableCell>
-                <Link
-                  href={`/projects/${projectId}/surveys/${surveyId}/buildings/${building.id}`}
-                >
-                  <Button variant="ghost">Edit</Button>
-                </Link>
+                <Button variant="ghost"></Button>
               </TableCell>
             </TableRow>
           ))}
