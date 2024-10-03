@@ -54,8 +54,6 @@ model Building {
   owner         User         @relation(fields: [ownerId], references: [id])
   ownerId       String       @db.ObjectId
   address       String
-  spaces        Space[]
-  spaceIds      String[]     @db.ObjectId
   attachments   Attachment[]
   attachmentIds String[]     @db.ObjectId
   surveys       Survey[]     @relation(fields: [surveyIds], references: [id])
@@ -72,15 +70,6 @@ model Attribute {
   type      String
   owner     User?    @relation(fields: [ownerId], references: [id])
   ownerId   String?  @db.ObjectId
-}
-
-model Space {
-  id               String   @id @default(auto()) @map("_id") @db.ObjectId
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
-  buildingId       String   @db.ObjectId
-  building         Building @relation(fields: [buildingId], references: [id])
-  customProperties Json?
 }
 
 model Attachment {
