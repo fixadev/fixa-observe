@@ -12,6 +12,9 @@ import {
 } from "@heroicons/react/24/outline";
 import { UserButton } from "@clerk/nextjs";
 import { ChevronLeftIcon } from "@heroicons/react/24/solid";
+import { useCallback } from "react";
+import { removeTrailingSlash } from "~/lib/utils";
+import { api } from "~/trpc/react";
 
 const navItems = [
   { href: "/", icon: HomeIcon, label: "Properties" },
@@ -27,6 +30,22 @@ export default function SurveyLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+
+  const isCurrentPath = useCallback(
+    (path: string) => {
+      return (
+        removeTrailingSlash(pathname) ===
+        removeTrailingSlash(
+          `/projects/${params.projectId}/surveys/${params.surveyId}${path}`,
+        )
+      );
+    },
+    [pathname, params.projectId, params.surveyId],
+  );
+
+  const { data: survey } = api.survey.getSurvey.useQuery({
+    surveyId: params.surveyId,
+  });
 
   return (
     <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
@@ -48,8 +67,7 @@ export default function SurveyLayout({
                   key={item.href}
                   href={`/projects/${params.projectId}/surveys/${params.surveyId}${item.href}`}
                   className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary ${
-                    pathname ===
-                    `/projects/${params.projectId}/surveys/${params.surveyId}${item.href}`
+                    isCurrentPath(item.href)
                       ? "bg-muted text-primary"
                       : "text-muted-foreground"
                   }`}
@@ -100,7 +118,8 @@ export default function SurveyLayout({
               </nav>
             </SheetContent>
           </Sheet>
-          <div className="ml-auto">
+          <div className="flex flex-1 items-center justify-between">
+            <span className="text-sm font-medium">{survey?.name}</span>
             <UserButton />
           </div>
         </header>
