@@ -1,76 +1,77 @@
 import { type Survey, type PrismaClient } from "@prisma/client";
 import { type CreateSurveyInput } from "~/lib/survey";
 
-export const getProjectSurveys = async (
-    projectId: string,
-    userId: string,
-    db: PrismaClient,
-) => {
-    const surveys = await db.survey.findMany({
-      where: { projectId: projectId, ownerId: userId },
-    });
-    return surveys;
-};
+export const surveyService = ({
+  db,
+}: {
+  db: PrismaClient;
+}) => {
+  return {
+    getProjectSurveys: async (
+      projectId: string,
+      userId: string,
+    ) => {
+      const surveys = await db.survey.findMany({
+        where: { projectId: projectId, ownerId: userId },
+      });
+      return surveys;
+    },
 
-export const getSurvey = async (
-    surveyId: string,
-    userId: string,
-    db: PrismaClient,
-) => {
-    const survey = await db.survey.findUnique({
-      where: { id: surveyId, ownerId: userId },
-      include: {
-        buildings: true,
-      },
-    });
-    return survey;
-};
+    getSurvey: async (
+      surveyId: string,
+      userId: string,
+    ) => {
+      const survey = await db.survey.findUnique({
+        where: { id: surveyId, ownerId: userId },
+        include: {
+          buildings: true,
+        },
+      });
+      return survey;
+    },
 
-export const createSurvey = async (
-    input: CreateSurveyInput,
-    userId: string,
-    db: PrismaClient,
-) => {
-    const survey = await db.survey.create({
-      data: { name: input.surveyName, projectId: input.projectId, ownerId: userId }
-    });
-    return survey;
-};
+    createSurvey: async (
+      input: CreateSurveyInput,
+      userId: string,
+    ) => {
+      const survey = await db.survey.create({
+        data: { name: input.surveyName, projectId: input.projectId, ownerId: userId }
+      });
+      return survey;
+    },
 
-export const updateSurvey = async (
-    survey: Survey,
-    userId: string,
-    db: PrismaClient,
-) => {
-    const result = await db.survey.update({
-      where: { id: survey.id, ownerId: userId },
-      data: survey
-    });
-    return result;
-};
+    updateSurvey: async (
+      survey: Survey,
+      userId: string,
+    ) => {
+      const result = await db.survey.update({
+        where: { id: survey.id, ownerId: userId },
+        data: survey
+      });
+      return result;
+    },
 
-export const addBuildingsToSurvey = async (
-    surveyId: string,
-    buildingIds: string[],
-    userId: string,
-    db: PrismaClient,
-) => {
-    console.log("buildingIds", buildingIds);
-    const survey = await db.survey.update({
+    addBuildingsToSurvey: async (
+      surveyId: string,
+      buildingIds: string[],
+      userId: string,
+    ) => {
+      console.log("buildingIds", buildingIds);
+      const survey = await db.survey.update({
         where: { id: surveyId, ownerId: userId },
         data: { buildingIds }
-    });
-    return survey;
-};
+      });
+      return survey;
+    },
 
-export const deleteSurvey = async (
-    surveyId: string,
-    userId: string,
-    db: PrismaClient,
-) => {
-    const survey = await db.survey.delete({
-      where: { id: surveyId, ownerId: userId }
-    });
-    return survey;
+    deleteSurvey: async (
+      surveyId: string,
+      userId: string,
+    ) => {
+      const survey = await db.survey.delete({
+        where: { id: surveyId, ownerId: userId }
+      });
+      return survey;
+    },
+  };
 };
-
