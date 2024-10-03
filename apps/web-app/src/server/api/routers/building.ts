@@ -1,80 +1,67 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { buildingSchema, photoUploadSchema } from "~/lib/building";
-import {
-  getBuildingDetails,
-  updateBuildingDetails,
-  addPhotoUrlsToBuilding,
-  addAttachmentToBuilding,
-  getAttributes,
-  deletePhotoUrlFromBuilding,
-} from "~/server/services/buildings";
+import { buildingService } from "~/server/services/buildings";
 import { db } from "~/server/db";
+
+const buildingServiceInstance = buildingService({ db });
 
 export const buildingRouter = createTRPCRouter({
   getBuilding: protectedProcedure
     .input(z.object({ id: z.string() }))
     .query(async ({ ctx, input }) => {
-      return await getBuildingDetails(input.id, ctx.userId, ctx.db);
+      return await buildingServiceInstance.getBuilding(input.id, ctx.userId);
     }),
 
   updateBuilding: protectedProcedure
     .input(buildingSchema)
     .mutation(async ({ ctx, input }) => {
-      return await updateBuildingDetails(input, ctx.userId, ctx.db);
+      return await buildingServiceInstance.updateBuilding(input, ctx.userId);
     }),
 
-  addPhotosToBuilding: protectedProcedure
+  addOrReplaceBuildingPhoto: protectedProcedure
     .input(photoUploadSchema)
     .mutation(async ({ ctx, input }) => {
-      return await addPhotoUrlsToBuilding(
+      return await buildingServiceInstance.addOrReplaceBuildingPhoto(
         input.buildingId,
-        input.photos,
+        input.photoUrl,
         ctx.userId,
-        ctx.db,
       );
     }),
 
-  addAttachmentToBuilding: protectedProcedure
+  addBrochureToBuilding: protectedProcedure
     .input(
       z.object({
         buildingId: z.string(),
-        attachmentUrl: z.string(),
-        title: z.string(),
-        type: z.string(),
+        brochureUrl: z.string(),
+        brochureTitle: z.string(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      //   console.log(
-      //     "####################### addAttachmentToBuilding!!!, input",
-      //     input,
-      //   );
-      //   const attachment = await uploadFileToS3(input.attachment);
-      return await addAttachmentToBuilding(
+      return await buildingServiceInstance.addBrochure(
         input.buildingId,
-        input.attachmentUrl,
-        input.type,
-        input.title,
+        input.brochureUrl,
+        input.brochureTitle,
         ctx.userId,
-        ctx.db,
       );
     }),
 
   deletePhoto: protectedProcedure
     .input(z.object({ buildingId: z.string(), photoId: z.string() }))
     .mutation(async ({ ctx, input }) => {
-      return await deletePhotoUrlFromBuilding(
+      return await buildingServiceInstance.deletePhotoUrlFromBuilding(
         input.buildingId,
-        input.photoId,
         ctx.userId,
-        ctx.db,
       );
     }),
 
   getAttributes: protectedProcedure.query(async ({ ctx }) => {
-    return await getAttributes(ctx.userId, ctx.db);
+    return await buildingServiceInstance.getAttributes(ctx.userId);
   }),
 });
+
+
+
 
 async function uploadAttributes() {
   const attributes = [
