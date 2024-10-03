@@ -34,9 +34,9 @@ export const projectService = ({
       return project;
     },
 
-    getProject: async (projectId: string) => {
+    getProject: async (projectId: string, userId: string) => {
       const project = await db.project.findUnique({
-        where: { id: projectId },
+        where: { id: projectId, ownerId: userId },
         include: {
           surveys: {
             select: {

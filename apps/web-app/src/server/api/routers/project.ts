@@ -16,7 +16,7 @@ export const projectRouter = createTRPCRouter({
   getProject: protectedProcedure
     .input(z.object({ projectId: z.string() }))
     .query(async ({ ctx, input }) => {
-      return await projectServiceInstance.getProject(input.projectId);
+      return await projectServiceInstance.getProject(input.projectId, ctx.userId);
     }),
 
   getProjects: protectedProcedure.query(async ({ ctx }) => {
