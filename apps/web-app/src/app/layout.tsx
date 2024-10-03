@@ -10,7 +10,7 @@ import { ClerkProvider } from "@clerk/nextjs";
 // import { dark } from "@clerk/themes";
 import ChildrenWrapper from "./_components/ChildrenWrapper";
 export const metadata: Metadata = {
-  title: "Pixa",
+  title: "Titan",
   description:
     "Quickly create commercial real estate surveys and export as PDF",
   icons: [{ rel: "icon", url: "/favicon.ico" }],
