@@ -7,7 +7,6 @@ export const brochureSchema = z.object({
   createdAt: z.date(),
   updatedAt: z.date(),
   url: z.string(),
-  type: z.string(),
   title: z.string(),
   buildingId: z.string(),
 } satisfies { [K in keyof Brochure]: z.ZodType<Brochure[K]> });
@@ -23,7 +22,7 @@ export const buildingSchema = z.object({
   ownerId: z.string(),
   address: z.string(),
   photoUrl: z.string().nullable(),
-  attachmentIds: z.array(z.string()),
+  brochureIds: z.array(z.string()),
   surveyIds: z.array(z.string()),
   attributes: attributesSchema,
 } satisfies { [K in keyof Building]: z.ZodType<Building[K]> });
