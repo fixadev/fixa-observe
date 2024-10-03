@@ -2,26 +2,28 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-// import { useProject } from "~/app/contexts/projectContext";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import {
   Bars3Icon,
-  Cog6ToothIcon,
+  DocumentTextIcon,
+  EnvelopeIcon,
   HomeIcon,
-  RocketLaunchIcon,
 } from "@heroicons/react/24/outline";
 import { UserButton } from "@clerk/nextjs";
+import { ChevronLeftIcon } from "@heroicons/react/24/solid";
 
 const navItems = [
-  { href: "/", icon: HomeIcon, label: "dashboard" },
-  { href: "/config", icon: Cog6ToothIcon, label: "configuration" },
-  { href: "/quickstart", icon: RocketLaunchIcon, label: "quickstart" },
+  { href: "/", icon: HomeIcon, label: "Properties" },
+  { href: "/emails", icon: EnvelopeIcon, label: "Emails" },
+  { href: "/brochures", icon: DocumentTextIcon, label: "Brochures" },
 ];
 
 export default function SurveyLayout({
   children,
+  params,
 }: {
+  params: { projectId: string; surveyId: string };
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
@@ -31,8 +33,12 @@ export default function SurveyLayout({
       <div className="hidden border-r bg-muted/40 md:block">
         <div className="flex h-full max-h-screen flex-col gap-2">
           <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
-            <Link href="/" className="flex items-center gap-2 font-semibold">
-              <span>Titan</span>
+            <Link
+              href={`/projects/${params.projectId}`}
+              className="flex items-center gap-2 font-medium"
+            >
+              <ChevronLeftIcon className="size-5" />
+              <span>Back to surveys</span>
             </Link>
           </div>
           <div className="flex-1">
@@ -40,9 +46,10 @@ export default function SurveyLayout({
               {navItems.map((item) => (
                 <Link
                   key={item.href}
-                  href={item.href}
+                  href={`/projects/${params.projectId}/surveys/${params.surveyId}${item.href}`}
                   className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary ${
-                    pathname === item.href
+                    pathname ===
+                    `/projects/${params.projectId}/surveys/${params.surveyId}${item.href}`
                       ? "bg-muted text-primary"
                       : "text-muted-foreground"
                   }`}
