@@ -155,13 +155,7 @@ const DraggableHeader = ({
   };
 
   return (
-    <TableCell
-      ref={setNodeRef}
-      style={style}
-      // {...attributes}
-      // {...listeners}
-      className="group relative"
-    >
+    <TableCell ref={setNodeRef} style={style} className="group relative">
       <div className="flex items-center justify-between gap-2">
         {isEditing ? (
           <Input
@@ -307,11 +301,11 @@ export default function PropertiesTable() {
     useState<Attribute[]>(testAttributesOrder);
   const [draggingRow, setDraggingRow] = useState<boolean>(false);
 
-  const colIds = useMemo(
+  const rowIds = useMemo(
     () => properties.map((property) => property.id),
     [properties],
   );
-  const rowIds = useMemo(
+  const colIds = useMemo(
     () => attributesOrder.map((attribute) => attribute.id),
     [attributesOrder],
   );
@@ -321,13 +315,13 @@ export default function PropertiesTable() {
       const { active, over } = event;
       if (active && over && active.id !== over.id) {
         if (draggingRow) {
-          setAttributesOrder((data) => {
+          setProperties((data) => {
             const oldIndex = rowIds.findIndex((id) => id === active.id);
             const newIndex = rowIds.findIndex((id) => id === over.id);
             return arrayMove(data, oldIndex, newIndex);
           });
         } else {
-          setProperties((data) => {
+          setAttributesOrder((data) => {
             const oldIndex = colIds.findIndex((id) => id === active.id);
             const newIndex = colIds.findIndex((id) => id === over.id);
             return arrayMove(data, oldIndex, newIndex);
