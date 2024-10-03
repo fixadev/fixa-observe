@@ -17,7 +17,7 @@ import { Label } from "~/components/ui/label";
 
 import { api } from "~/trpc/react";
 import { useEffect, useState } from "react";
-import { BreadcrumbsFromPath } from "~/components/ui/BreadcrumbsFromPath";
+import { BreadcrumbsFromPath } from "~/components/BreadcrumbsFromPath";
 
 export default function ProjectPage({
   params,
