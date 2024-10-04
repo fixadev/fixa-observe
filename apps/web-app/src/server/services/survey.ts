@@ -1,5 +1,7 @@
-import { type Survey, type PrismaClient } from "@prisma/client";
+import { type PrismaClient } from "@prisma/client";
 import { type CreateSurveyInput } from "~/lib/survey";
+import { type SurveySchema } from "~/lib/survey";
+
 
 export const surveyService = ({
   db,
@@ -27,6 +29,7 @@ export const surveyService = ({
           properties: true,
         },
       });
+      console.log("survey", survey);
       return survey;
     },
 
@@ -35,18 +38,18 @@ export const surveyService = ({
       userId: string,
     ) => {
       const survey = await db.survey.create({
-        data: { name: input.surveyName, projectId: input.projectId, ownerId: userId }
+        data: { name: input.surveyName, projectId: input.projectId, ownerId: userId  }
       });
       return survey;
     },
 
     updateSurvey: async (
-      survey: Survey,
+      surveyData: SurveySchema,
       userId: string,
     ) => {
       const result = await db.survey.update({
-        where: { id: survey.id, ownerId: userId },
-        data: survey
+        where: { id: surveyData.id, ownerId: userId },
+        data: { ...surveyData }
       });
       return result;
     },
@@ -59,7 +62,7 @@ export const surveyService = ({
       console.log("propertyIds", propertyIds);
       const survey = await db.survey.update({
         where: { id: surveyId, ownerId: userId },
-        data: { propertyIds }
+        data: { properties: { connect: propertyIds.map(id => ({ id })) } }
       });
       return survey;
     },

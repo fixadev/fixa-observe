@@ -9,6 +9,10 @@ generator client {
   previewFeatures = ["multiSchema"]
 }
 
+generator zod {
+  provider = "zod-prisma-types"
+}
+
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
@@ -36,14 +40,15 @@ model Project {
 }
 
 model Survey {
-  id         String     @id @default(uuid())
-  ownerId    String
-  createdAt  DateTime   @default(now())
-  updatedAt  DateTime   @updatedAt
-  name       String
-  projectId  String
-  project    Project    @relation(fields: [projectId], references: [id])
-  properties Property[]
+  id              String      @id @default(uuid())
+  ownerId         String
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  name            String
+  projectId       String
+  project         Project     @relation(fields: [projectId], references: [id])
+  properties      Property[]
+  attributesOrder Attribute[]
 }
 
 model Property {
@@ -68,6 +73,8 @@ model Attribute {
   type      String
   owner     User?    @relation(fields: [ownerId], references: [id])
   ownerId   String?
+  Survey    Survey?  @relation(fields: [surveyId], references: [id])
+  surveyId  String?
 }
 
 model Brochure {

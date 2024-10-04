@@ -4,12 +4,56 @@ import { useRef } from "react";
 import { Button } from "~/components/ui/button";
 import { usePDFJS } from "./usePDFjs";
 import type PDFJS from "pdfjs-dist";
+import { type Property } from "posthog-js";
+import { type Attribute } from "@prisma/client";
+import { type CreatePropertySchema } from "~/lib/property";
 const acceptablePDFFileTypes = "application/pdf";
 
-export const PDFUploader = () => {
+export const PDFUploader = ({
+  setProperties,
+  attributesOrder,
+  setAttributesOrder,
+}: {
+  setProperties: (data: Property[]) => void;
+  attributesOrder: Attribute[];
+  setAttributesOrder: (data: Attribute[]) => void;
+}) => {
   const pdfjs = usePDFJS((pdfjs) => {
     console.log("PDFJS loaded", pdfjs);
   });
+
+  const labelToAttributeId = (label: string): string => {
+    if (!label) {
+      console.error("Label is undefined");
+      throw new Error("Label is undefined");
+    }
+    const attributeId = attributesOrder.find(
+      (attribute) => attribute.label === label,
+    )?.id;
+    if (!attributeId) {
+      console.error(`Attribute ${label} not found`);
+      throw new Error(`Attribute ${label} not found`);
+    }
+    return attributeId;
+  };
+
+  const labelToAttribute = (label: string): Attribute | undefined => {
+    const attributeId = labelToAttributeId(label);
+    if (!attributeId) {
+      return undefined;
+    }
+    return attributesOrder.find((attribute) => attribute.id === attributeId);
+  };
+
+  const defaultAttributeOrder = [
+    "Address",
+    "Size (SF)",
+    "Divisibility (SF)",
+    "NNN Asking Rate (SF/Mo)",
+    "Opex (SF/Mo)",
+    "Direct/Sublease",
+    "Comments",
+  ];
 
   const onFileChangeHandler = async (
     event: React.ChangeEvent<HTMLInputElement>,
@@ -17,8 +61,36 @@ export const PDFUploader = () => {
     const file = event.target.files?.[0];
     if (file && pdfjs) {
       const parsedPDF = await parsePDF(file, pdfjs);
-      const buildings = processPDF(parsedPDF);
-      console.log("buildings", buildings);
+      const properties = processPDF(parsedPDF);
+      const propertiesWithAttributes: Array<CreatePropertySchema> =
+        properties.map((property) => {
+          return {
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            address: property.address,
+            photoUrl: null,
+            brochures: [],
+            attributes: {
+              [labelToAttributeId("Address")]: property.address,
+              [labelToAttributeId("Size (SF)")]: property.propertySize,
+              [labelToAttributeId("Divisibility (SF)")]:
+                `${property.minDivisible} - ${property.maxDivisible}`,
+              [labelToAttributeId("NNN Asking Rate (SF/Mo)")]:
+                property.leaseRate,
+              [labelToAttributeId("Opex (SF/Mo)")]: property.expenses,
+              [labelToAttributeId("Direct/Sublease")]: property.leaseType,
+              // [labelToAttributeId("Comments")]: property.comments,
+            },
+          };
+        });
+
+      console.log("propertiesWithAttributes", propertiesWithAttributes);
+      setProperties(propertiesWithAttributes);
+      // setAttributesOrder(
+      //   defaultAttributeOrder
+      //     .map((label) => labelToAttribute(label))
+      //     .filter((attribute) => attribute !== undefined),
+      // );
     }
   };
 
