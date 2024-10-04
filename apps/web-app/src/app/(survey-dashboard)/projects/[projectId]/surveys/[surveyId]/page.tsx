@@ -7,9 +7,6 @@ export default function SurveyPage({}: {
 }) {
   return (
     <div className="mx-auto flex w-full max-w-screen-xl flex-col">
-      <div className="flex flex-row justify-end gap-4">
-        <PDFUploader />
-      </div>
       <PropertiesTable />
     </div>
   );

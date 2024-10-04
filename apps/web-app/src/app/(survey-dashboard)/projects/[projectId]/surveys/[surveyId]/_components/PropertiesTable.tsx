@@ -40,6 +40,7 @@ import { DragHandleDots2Icon } from "@radix-ui/react-icons";
 import { Input } from "~/components/ui/input";
 import { Button } from "~/components/ui/button";
 import { PlusIcon, TrashIcon } from "@heroicons/react/24/solid";
+import { PDFUploader } from "./NDXOutputUploader";
 
 export type Property = {
   id: string;
@@ -395,6 +396,9 @@ export default function PropertiesTable() {
 
   return (
     <div>
+      <div className="flex flex-row justify-end gap-4">
+        <PDFUploader />
+      </div>
       <DndContext
         collisionDetection={closestCenter}
         modifiers={[

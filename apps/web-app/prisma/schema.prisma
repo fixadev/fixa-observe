@@ -15,14 +15,14 @@ datasource db {
 }
 
 model User {
-  id        String      @id @default(auto()) @map("_id") @db.ObjectId
-  clerkId   String      @unique
-  email     String      @unique
-  firstName String?
-  lastName  String?
-  projects  Project[]
-  buildings Building[]
-  Attribute Attribute[]
+  id         String      @id @default(auto()) @map("_id") @db.ObjectId
+  clerkId    String      @unique
+  email      String      @unique
+  firstName  String?
+  lastName   String?
+  projects   Project[]
+  properties Property[]
+  Attribute  Attribute[]
 }
 
 model Project {
@@ -43,11 +43,11 @@ model Survey {
   name        String
   projectId   String     @db.ObjectId
   project     Project    @relation(fields: [projectId], references: [id])
-  buildings   Building[] @relation(fields: [buildingIds], references: [id])
-  buildingIds String[]   @db.ObjectId
+  properties  Property[] @relation(fields: [propertyIds], references: [id])
+  propertyIds String[]   @db.ObjectId
 }
 
-model Building {
+model Property {
   id          String     @id @default(auto()) @map("_id") @db.ObjectId
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
@@ -78,6 +78,6 @@ model Brochure {
   updatedAt  DateTime  @updatedAt
   url        String
   title      String
-  building   Building? @relation(fields: [buildingId], references: [id])
-  buildingId String?   @db.ObjectId
+  property   Property? @relation(fields: [propertyId], references: [id])
+  propertyId String?   @db.ObjectId
 }
