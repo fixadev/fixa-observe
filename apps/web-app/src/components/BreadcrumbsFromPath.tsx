@@ -5,7 +5,7 @@ import {
   BreadcrumbLink,
   BreadcrumbList,
   BreadcrumbSeparator,
-} from "./breadcrumb";
+} from "./ui/breadcrumb";
 import React from "react";
 
 export function BreadcrumbsFromPath({
