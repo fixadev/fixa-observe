@@ -52,13 +52,13 @@ Mark`,
 };
 
 export default function EmailCard({
-  email,
+  email = testEmail,
   unread = false,
   expanded = false,
   onClick,
   className,
 }: {
-  email: Email;
+  email?: Email;
   unread?: boolean;
   expanded?: boolean;
   expandable?: boolean;
