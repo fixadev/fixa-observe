@@ -7,7 +7,7 @@ export default function SurveyPage({}: {
 }) {
   return (
     <div className="mx-auto flex w-full max-w-screen-xl flex-col">
-      <PropertiesTable />
+      <PropertiesTable surveyId={params.surveyId} />
     </div>
   );
 }

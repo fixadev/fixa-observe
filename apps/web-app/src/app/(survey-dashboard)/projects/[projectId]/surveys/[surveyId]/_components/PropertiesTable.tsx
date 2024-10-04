@@ -3,6 +3,7 @@
 import {
   type CSSProperties,
   useCallback,
+  useEffect,
   useMemo,
   useRef,
   useState,
@@ -41,6 +42,7 @@ import { Input } from "~/components/ui/input";
 import { Button } from "~/components/ui/button";
 import { PlusIcon, TrashIcon } from "@heroicons/react/24/solid";
 import { PDFUploader } from "./NDXOutputUploader";
+import { api } from "~/trpc/react";
 
 export type Property = {
   id: string;
@@ -296,11 +298,22 @@ const DraggableCell = ({
   );
 };
 
-export default function PropertiesTable() {
+export default function PropertiesTable({ surveyId }: { surveyId: string }) {
   const [properties, setProperties] = useState<Property[]>(testProperties);
   const [attributesOrder, setAttributesOrder] =
     useState<Attribute[]>(testAttributesOrder);
   const [draggingRow, setDraggingRow] = useState<boolean>(false);
+
+  const { data: surveyData, isLoading: surveyLoading } =
+    api.survey.getSurvey.useQuery({
+      surveyId,
+    });
+  useEffect(() => {
+    if (surveyData?.properties) {
+      setProperties(surveyData.properties);
+      setAttributesOrder(surveyData.attributesOrder);
+    }
+  }, [surveyData]);
 
   const rowIds = useMemo(
     () => properties.map((property) => property.id),
