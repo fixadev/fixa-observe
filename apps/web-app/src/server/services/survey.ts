@@ -1,5 +1,8 @@
-import { type Survey, type PrismaClient } from "@prisma/client";
+import { type z } from "zod";
+import { type PrismaClient } from "@prisma/client";
 import { type CreateSurveyInput } from "~/lib/survey";
+import { type SurveySchema } from "~/lib/survey";
+
 
 export const surveyService = ({
   db,
@@ -42,12 +45,12 @@ export const surveyService = ({
     },
 
     updateSurvey: async (
-      surveyData: Partial<Survey>,
+      surveyData: SurveySchema,
       userId: string,
     ) => {
       const result = await db.survey.update({
         where: { id: surveyData.id, ownerId: userId },
-        data: surveyData
+        data: { ...surveyData }
       });
       return result;
     },

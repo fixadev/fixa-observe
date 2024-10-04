@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
-import { createSurveyInput, surveySchema } from "~/lib/survey";
+import { createSurveyInput } from "~/lib/survey";
+import { SurveySchema } from "../../../../prisma/generated/zod";
 import { importPropertiesInput } from "~/lib/property";
 import { surveyService } from "~/server/services/survey";
 import { propertyService } from "~/server/services/property";
@@ -27,7 +28,7 @@ export const surveyRouter = createTRPCRouter({
     return await surveyServiceInstance.getSurvey(input.surveyId, ctx.userId);
   }),
 
-  updateSurvey: protectedProcedure.input(surveySchema).mutation(async ({ ctx, input }) => {
+  updateSurvey: protectedProcedure.input(SurveySchema).mutation(async ({ ctx, input }) => {
     return await surveyServiceInstance.updateSurvey(input, ctx.userId);
   }),
   

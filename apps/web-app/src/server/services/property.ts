@@ -65,6 +65,7 @@ export const propertyService = ({
         data: {
           ...property,
           ownerId: userId,
+          attributes: property.attributes ?? {},
         },
       });
       return response;
