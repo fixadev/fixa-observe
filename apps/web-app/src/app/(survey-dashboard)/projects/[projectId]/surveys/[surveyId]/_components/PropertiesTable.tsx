@@ -309,7 +309,9 @@ export default function PropertiesTable({ surveyId }: { surveyId: string }) {
       surveyId,
     });
   useEffect(() => {
+    console.log("surveyData", surveyData);
     if (surveyData?.properties) {
+      console.log("surveyData", surveyData);
       setProperties(surveyData.properties);
       setAttributesOrder(surveyData.attributesOrder);
     }

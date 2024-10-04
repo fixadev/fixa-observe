@@ -10,25 +10,25 @@ generator client {
 }
 
 datasource db {
-  provider = "mongodb"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
 model User {
-  id         String      @id @default(auto()) @map("_id") @db.ObjectId
+  id         String      @id @default(uuid())
   clerkId    String      @unique
   email      String      @unique
   firstName  String?
   lastName   String?
   projects   Project[]
   properties Property[]
-  Attribute  Attribute[]
+  attributes Attribute[]
 }
 
 model Project {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  id        String   @id @default(uuid())
   owner     User     @relation(fields: [ownerId], references: [id])
-  ownerId   String   @db.ObjectId
+  ownerId   String
   name      String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -36,48 +36,46 @@ model Project {
 }
 
 model Survey {
-  id          String     @id @default(auto()) @map("_id") @db.ObjectId
-  ownerId     String     @db.ObjectId
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
-  name        String
-  projectId   String     @db.ObjectId
-  project     Project    @relation(fields: [projectId], references: [id])
-  properties  Property[] @relation(fields: [propertyIds], references: [id])
-  propertyIds String[]   @db.ObjectId
+  id         String     @id @default(uuid())
+  ownerId    String
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+  name       String
+  projectId  String
+  project    Project    @relation(fields: [projectId], references: [id])
+  properties Property[]
 }
 
 model Property {
-  id          String     @id @default(auto()) @map("_id") @db.ObjectId
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
-  owner       User       @relation(fields: [ownerId], references: [id])
-  ownerId     String     @db.ObjectId
-  address     String
-  brochures   Brochure[]
-  brochureIds String[]   @db.ObjectId
-  surveys     Survey[]   @relation(fields: [surveyIds], references: [id])
-  surveyIds   String[]   @db.ObjectId
-  photoUrl    String?
-  attributes  Json?      @db.Json
+  id         String     @id @default(uuid())
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+  owner      User       @relation(fields: [ownerId], references: [id])
+  ownerId    String
+  address    String
+  brochures  Brochure[]
+  photoUrl   String?
+  attributes Json?
+  survey     Survey     @relation(fields: [surveyId], references: [id])
+  surveyId   String
 }
 
 model Attribute {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  id        String   @id @default(uuid())
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   label     String
   type      String
   owner     User?    @relation(fields: [ownerId], references: [id])
-  ownerId   String?  @db.ObjectId
+  ownerId   String?
 }
 
 model Brochure {
-  id         String    @id @default(auto()) @map("_id") @db.ObjectId
-  createdAt  DateTime  @default(now())
-  updatedAt  DateTime  @updatedAt
+  id         String   @id @default(uuid())
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
   url        String
   title      String
-  property   Property? @relation(fields: [propertyId], references: [id])
-  propertyId String?   @db.ObjectId
+  property   Property @relation(fields: [propertyId], references: [id])
+  propertyId String
 }

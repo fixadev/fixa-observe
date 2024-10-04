@@ -1,8 +1,8 @@
-import { Button } from "~/components/ui/button";
-import { PDFUploader } from "./_components/NDXOutputUploader";
 import PropertiesTable from "./_components/PropertiesTable";
 
-export default function SurveyPage({}: {
+export default function SurveyPage({
+  params,
+}: {
   params: { projectId: string; surveyId: string };
 }) {
   return (
