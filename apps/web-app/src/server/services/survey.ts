@@ -1,4 +1,4 @@
-import { type PrismaClient } from "@prisma/client";
+import { type Attribute, type PrismaClient } from "@prisma/client";
 import { type CreateSurveyInput } from "~/lib/survey";
 import { type SurveySchema } from "~/lib/survey";
 
@@ -26,11 +26,29 @@ export const surveyService = ({
       const survey = await db.survey.findUnique({
         where: { id: surveyId, ownerId: userId },
         include: {
-          properties: true,
+          properties: true
         },
       });
       console.log("survey", survey);
       return survey;
+    },
+
+    getAttributes: async (userId: string) => {
+      return db.attribute.findMany({
+        where: {
+          OR: [{ ownerId: userId }, { ownerId: null }],
+        },
+      });
+    },
+
+    getSurveyAttributes: async (
+      surveyId: string
+    ) => {
+      const attributes = await db.attributesOnSurveys.findMany({
+        where: { surveyId },
+        include: { attribute: true }
+      });
+      return attributes.sort((a, b) => a.attributeIndex - b.attributeIndex).map((attr) => attr.attribute);
     },
 
     createSurvey: async (
@@ -51,6 +69,40 @@ export const surveyService = ({
         where: { id: surveyData.id, ownerId: userId },
         data: { ...surveyData }
       });
+      return result;
+    },
+
+    updateAttributesOrder: async (
+      surveyId: string,
+      attributes: Attribute[],
+      userId: string,
+    ) => { 
+
+      await db.survey.update({
+        where: { id: surveyId, ownerId: userId },
+        data: {
+          attributes: {
+            deleteMany: {}
+          }
+        }
+      });
+
+      const attributesOnSurveys = attributes.map((attribute, index) => ({
+        attributeId: attribute.id,
+        attributeIndex: index
+      }));
+
+      const result = await db.survey.update({
+        where: { id: surveyId, ownerId: userId },
+        data: {
+          attributes: {
+            createMany: {
+              data: attributesOnSurveys
+            }
+          }
+        }
+      });
+
       return result;
     },
 

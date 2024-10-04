@@ -189,12 +189,5 @@ export const propertyService = ({
       });
     },
 
-    getAttributes: async (userId: string) => {
-      return db.attribute.findMany({
-        where: {
-          OR: [{ ownerId: userId }, { ownerId: null }],
-        },
-      });
-    },
   };
 };

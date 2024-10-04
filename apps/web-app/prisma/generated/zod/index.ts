@@ -62,9 +62,11 @@ export const ProjectScalarFieldEnumSchema = z.enum(['id','ownerId','name','creat
 
 export const SurveyScalarFieldEnumSchema = z.enum(['id','ownerId','createdAt','updatedAt','name','projectId']);
 
-export const PropertyScalarFieldEnumSchema = z.enum(['id','createdAt','updatedAt','ownerId','address','photoUrl','attributes','surveyId']);
+export const AttributeScalarFieldEnumSchema = z.enum(['id','createdAt','updatedAt','label','type','ownerId']);
 
-export const AttributeScalarFieldEnumSchema = z.enum(['id','createdAt','updatedAt','label','type','ownerId','surveyId']);
+export const AttributesOnSurveysScalarFieldEnumSchema = z.enum(['id','createdAt','updatedAt','attributeId','attributeIndex','surveyId']);
+
+export const PropertyScalarFieldEnumSchema = z.enum(['id','createdAt','updatedAt','ownerId','address','photoUrl','attributes','surveyId']);
 
 export const BrochureScalarFieldEnumSchema = z.enum(['id','createdAt','updatedAt','url','title','propertyId']);
 
@@ -86,7 +88,7 @@ export const JsonNullValueFilterSchema = z.enum(['DbNull','JsonNull','AnyNull',]
 /////////////////////////////////////////
 
 export const UserSchema = z.object({
-  id: z.string(),
+  id: z.string().uuid(),
   clerkId: z.string(),
   email: z.string(),
   firstName: z.string().nullable(),
@@ -100,7 +102,7 @@ export type User = z.infer<typeof UserSchema>
 /////////////////////////////////////////
 
 export const ProjectSchema = z.object({
-  id: z.string(),
+  id: z.string().uuid(),
   ownerId: z.string(),
   name: z.string(),
   createdAt: z.coerce.date(),
@@ -114,7 +116,7 @@ export type Project = z.infer<typeof ProjectSchema>
 /////////////////////////////////////////
 
 export const SurveySchema = z.object({
-  id: z.string(),
+  id: z.string().uuid(),
   ownerId: z.string(),
   createdAt: z.coerce.date(),
   updatedAt: z.coerce.date(),
@@ -125,11 +127,41 @@ export const SurveySchema = z.object({
 export type Survey = z.infer<typeof SurveySchema>
 
 /////////////////////////////////////////
+// ATTRIBUTE SCHEMA
+/////////////////////////////////////////
+
+export const AttributeSchema = z.object({
+  id: z.string().uuid(),
+  createdAt: z.coerce.date(),
+  updatedAt: z.coerce.date(),
+  label: z.string(),
+  type: z.string(),
+  ownerId: z.string().nullable(),
+})
+
+export type Attribute = z.infer<typeof AttributeSchema>
+
+/////////////////////////////////////////
+// ATTRIBUTES ON SURVEYS SCHEMA
+/////////////////////////////////////////
+
+export const AttributesOnSurveysSchema = z.object({
+  id: z.string().uuid(),
+  createdAt: z.coerce.date(),
+  updatedAt: z.coerce.date(),
+  attributeId: z.string(),
+  attributeIndex: z.number().int(),
+  surveyId: z.string(),
+})
+
+export type AttributesOnSurveys = z.infer<typeof AttributesOnSurveysSchema>
+
+/////////////////////////////////////////
 // PROPERTY SCHEMA
 /////////////////////////////////////////
 
 export const PropertySchema = z.object({
-  id: z.string(),
+  id: z.string().uuid(),
   createdAt: z.coerce.date(),
   updatedAt: z.coerce.date(),
   ownerId: z.string(),
@@ -142,27 +174,11 @@ export const PropertySchema = z.object({
 export type Property = z.infer<typeof PropertySchema>
 
 /////////////////////////////////////////
-// ATTRIBUTE SCHEMA
-/////////////////////////////////////////
-
-export const AttributeSchema = z.object({
-  id: z.string(),
-  createdAt: z.coerce.date(),
-  updatedAt: z.coerce.date(),
-  label: z.string(),
-  type: z.string(),
-  ownerId: z.string().nullable(),
-  surveyId: z.string().nullable(),
-})
-
-export type Attribute = z.infer<typeof AttributeSchema>
-
-/////////////////////////////////////////
 // BROCHURE SCHEMA
 /////////////////////////////////////////
 
 export const BrochureSchema = z.object({
-  id: z.string(),
+  id: z.string().uuid(),
   createdAt: z.coerce.date(),
   updatedAt: z.coerce.date(),
   url: z.string(),
@@ -252,7 +268,7 @@ export const ProjectSelectSchema: z.ZodType<Prisma.ProjectSelect> = z.object({
 export const SurveyIncludeSchema: z.ZodType<Prisma.SurveyInclude> = z.object({
   project: z.union([z.boolean(),z.lazy(() => ProjectArgsSchema)]).optional(),
   properties: z.union([z.boolean(),z.lazy(() => PropertyFindManyArgsSchema)]).optional(),
-  attributesOrder: z.union([z.boolean(),z.lazy(() => AttributeFindManyArgsSchema)]).optional(),
+  attributes: z.union([z.boolean(),z.lazy(() => AttributesOnSurveysFindManyArgsSchema)]).optional(),
   _count: z.union([z.boolean(),z.lazy(() => SurveyCountOutputTypeArgsSchema)]).optional(),
 }).strict()
 
@@ -267,7 +283,7 @@ export const SurveyCountOutputTypeArgsSchema: z.ZodType<Prisma.SurveyCountOutput
 
 export const SurveyCountOutputTypeSelectSchema: z.ZodType<Prisma.SurveyCountOutputTypeSelect> = z.object({
   properties: z.boolean().optional(),
-  attributesOrder: z.boolean().optional(),
+  attributes: z.boolean().optional(),
 }).strict();
 
 export const SurveySelectSchema: z.ZodType<Prisma.SurveySelect> = z.object({
@@ -279,8 +295,66 @@ export const SurveySelectSchema: z.ZodType<Prisma.SurveySelect> = z.object({
   projectId: z.boolean().optional(),
   project: z.union([z.boolean(),z.lazy(() => ProjectArgsSchema)]).optional(),
   properties: z.union([z.boolean(),z.lazy(() => PropertyFindManyArgsSchema)]).optional(),
-  attributesOrder: z.union([z.boolean(),z.lazy(() => AttributeFindManyArgsSchema)]).optional(),
+  attributes: z.union([z.boolean(),z.lazy(() => AttributesOnSurveysFindManyArgsSchema)]).optional(),
   _count: z.union([z.boolean(),z.lazy(() => SurveyCountOutputTypeArgsSchema)]).optional(),
+}).strict()
+
+// ATTRIBUTE
+//------------------------------------------------------
+
+export const AttributeIncludeSchema: z.ZodType<Prisma.AttributeInclude> = z.object({
+  owner: z.union([z.boolean(),z.lazy(() => UserArgsSchema)]).optional(),
+  surveys: z.union([z.boolean(),z.lazy(() => AttributesOnSurveysFindManyArgsSchema)]).optional(),
+  _count: z.union([z.boolean(),z.lazy(() => AttributeCountOutputTypeArgsSchema)]).optional(),
+}).strict()
+
+export const AttributeArgsSchema: z.ZodType<Prisma.AttributeDefaultArgs> = z.object({
+  select: z.lazy(() => AttributeSelectSchema).optional(),
+  include: z.lazy(() => AttributeIncludeSchema).optional(),
+}).strict();
+
+export const AttributeCountOutputTypeArgsSchema: z.ZodType<Prisma.AttributeCountOutputTypeDefaultArgs> = z.object({
+  select: z.lazy(() => AttributeCountOutputTypeSelectSchema).nullish(),
+}).strict();
+
+export const AttributeCountOutputTypeSelectSchema: z.ZodType<Prisma.AttributeCountOutputTypeSelect> = z.object({
+  surveys: z.boolean().optional(),
+}).strict();
+
+export const AttributeSelectSchema: z.ZodType<Prisma.AttributeSelect> = z.object({
+  id: z.boolean().optional(),
+  createdAt: z.boolean().optional(),
+  updatedAt: z.boolean().optional(),
+  label: z.boolean().optional(),
+  type: z.boolean().optional(),
+  ownerId: z.boolean().optional(),
+  owner: z.union([z.boolean(),z.lazy(() => UserArgsSchema)]).optional(),
+  surveys: z.union([z.boolean(),z.lazy(() => AttributesOnSurveysFindManyArgsSchema)]).optional(),
+  _count: z.union([z.boolean(),z.lazy(() => AttributeCountOutputTypeArgsSchema)]).optional(),
+}).strict()
+
+// ATTRIBUTES ON SURVEYS
+//------------------------------------------------------
+
+export const AttributesOnSurveysIncludeSchema: z.ZodType<Prisma.AttributesOnSurveysInclude> = z.object({
+  attribute: z.union([z.boolean(),z.lazy(() => AttributeArgsSchema)]).optional(),
+  survey: z.union([z.boolean(),z.lazy(() => SurveyArgsSchema)]).optional(),
+}).strict()
+
+export const AttributesOnSurveysArgsSchema: z.ZodType<Prisma.AttributesOnSurveysDefaultArgs> = z.object({
+  select: z.lazy(() => AttributesOnSurveysSelectSchema).optional(),
+  include: z.lazy(() => AttributesOnSurveysIncludeSchema).optional(),
+}).strict();
+
+export const AttributesOnSurveysSelectSchema: z.ZodType<Prisma.AttributesOnSurveysSelect> = z.object({
+  id: z.boolean().optional(),
+  createdAt: z.boolean().optional(),
+  updatedAt: z.boolean().optional(),
+  attributeId: z.boolean().optional(),
+  attributeIndex: z.boolean().optional(),
+  surveyId: z.boolean().optional(),
+  attribute: z.union([z.boolean(),z.lazy(() => AttributeArgsSchema)]).optional(),
+  survey: z.union([z.boolean(),z.lazy(() => SurveyArgsSchema)]).optional(),
 }).strict()
 
 // PROPERTY
@@ -319,31 +393,6 @@ export const PropertySelectSchema: z.ZodType<Prisma.PropertySelect> = z.object({
   brochures: z.union([z.boolean(),z.lazy(() => BrochureFindManyArgsSchema)]).optional(),
   survey: z.union([z.boolean(),z.lazy(() => SurveyArgsSchema)]).optional(),
   _count: z.union([z.boolean(),z.lazy(() => PropertyCountOutputTypeArgsSchema)]).optional(),
-}).strict()
-
-// ATTRIBUTE
-//------------------------------------------------------
-
-export const AttributeIncludeSchema: z.ZodType<Prisma.AttributeInclude> = z.object({
-  owner: z.union([z.boolean(),z.lazy(() => UserArgsSchema)]).optional(),
-  Survey: z.union([z.boolean(),z.lazy(() => SurveyArgsSchema)]).optional(),
-}).strict()
-
-export const AttributeArgsSchema: z.ZodType<Prisma.AttributeDefaultArgs> = z.object({
-  select: z.lazy(() => AttributeSelectSchema).optional(),
-  include: z.lazy(() => AttributeIncludeSchema).optional(),
-}).strict();
-
-export const AttributeSelectSchema: z.ZodType<Prisma.AttributeSelect> = z.object({
-  id: z.boolean().optional(),
-  createdAt: z.boolean().optional(),
-  updatedAt: z.boolean().optional(),
-  label: z.boolean().optional(),
-  type: z.boolean().optional(),
-  ownerId: z.boolean().optional(),
-  surveyId: z.boolean().optional(),
-  owner: z.union([z.boolean(),z.lazy(() => UserArgsSchema)]).optional(),
-  Survey: z.union([z.boolean(),z.lazy(() => SurveyArgsSchema)]).optional(),
 }).strict()
 
 // BROCHURE
@@ -400,20 +449,20 @@ export const UserOrderByWithRelationInputSchema: z.ZodType<Prisma.UserOrderByWit
 
 export const UserWhereUniqueInputSchema: z.ZodType<Prisma.UserWhereUniqueInput> = z.union([
   z.object({
-    id: z.string(),
+    id: z.string().uuid(),
     clerkId: z.string(),
     email: z.string()
   }),
   z.object({
-    id: z.string(),
+    id: z.string().uuid(),
     clerkId: z.string(),
   }),
   z.object({
-    id: z.string(),
+    id: z.string().uuid(),
     email: z.string(),
   }),
   z.object({
-    id: z.string(),
+    id: z.string().uuid(),
   }),
   z.object({
     clerkId: z.string(),
@@ -427,7 +476,7 @@ export const UserWhereUniqueInputSchema: z.ZodType<Prisma.UserWhereUniqueInput> 
   }),
 ])
 .and(z.object({
-  id: z.string().optional(),
+  id: z.string().uuid().optional(),
   clerkId: z.string().optional(),
   email: z.string().optional(),
   AND: z.union([ z.lazy(() => UserWhereInputSchema),z.lazy(() => UserWhereInputSchema).array() ]).optional(),
@@ -486,10 +535,10 @@ export const ProjectOrderByWithRelationInputSchema: z.ZodType<Prisma.ProjectOrde
 }).strict();
 
 export const ProjectWhereUniqueInputSchema: z.ZodType<Prisma.ProjectWhereUniqueInput> = z.object({
-  id: z.string()
+  id: z.string().uuid()
 })
 .and(z.object({
-  id: z.string().optional(),
+  id: z.string().uuid().optional(),
   AND: z.union([ z.lazy(() => ProjectWhereInputSchema),z.lazy(() => ProjectWhereInputSchema).array() ]).optional(),
   OR: z.lazy(() => ProjectWhereInputSchema).array().optional(),
   NOT: z.union([ z.lazy(() => ProjectWhereInputSchema),z.lazy(() => ProjectWhereInputSchema).array() ]).optional(),
@@ -535,7 +584,7 @@ export const SurveyWhereInputSchema: z.ZodType<Prisma.SurveyWhereInput> = z.obje
   projectId: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   project: z.union([ z.lazy(() => ProjectRelationFilterSchema),z.lazy(() => ProjectWhereInputSchema) ]).optional(),
   properties: z.lazy(() => PropertyListRelationFilterSchema).optional(),
-  attributesOrder: z.lazy(() => AttributeListRelationFilterSchema).optional()
+  attributes: z.lazy(() => AttributesOnSurveysListRelationFilterSchema).optional()
 }).strict();
 
 export const SurveyOrderByWithRelationInputSchema: z.ZodType<Prisma.SurveyOrderByWithRelationInput> = z.object({
@@ -547,14 +596,14 @@ export const SurveyOrderByWithRelationInputSchema: z.ZodType<Prisma.SurveyOrderB
   projectId: z.lazy(() => SortOrderSchema).optional(),
   project: z.lazy(() => ProjectOrderByWithRelationInputSchema).optional(),
   properties: z.lazy(() => PropertyOrderByRelationAggregateInputSchema).optional(),
-  attributesOrder: z.lazy(() => AttributeOrderByRelationAggregateInputSchema).optional()
+  attributes: z.lazy(() => AttributesOnSurveysOrderByRelationAggregateInputSchema).optional()
 }).strict();
 
 export const SurveyWhereUniqueInputSchema: z.ZodType<Prisma.SurveyWhereUniqueInput> = z.object({
-  id: z.string()
+  id: z.string().uuid()
 })
 .and(z.object({
-  id: z.string().optional(),
+  id: z.string().uuid().optional(),
   AND: z.union([ z.lazy(() => SurveyWhereInputSchema),z.lazy(() => SurveyWhereInputSchema).array() ]).optional(),
   OR: z.lazy(() => SurveyWhereInputSchema).array().optional(),
   NOT: z.union([ z.lazy(() => SurveyWhereInputSchema),z.lazy(() => SurveyWhereInputSchema).array() ]).optional(),
@@ -565,7 +614,7 @@ export const SurveyWhereUniqueInputSchema: z.ZodType<Prisma.SurveyWhereUniqueInp
   projectId: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   project: z.union([ z.lazy(() => ProjectRelationFilterSchema),z.lazy(() => ProjectWhereInputSchema) ]).optional(),
   properties: z.lazy(() => PropertyListRelationFilterSchema).optional(),
-  attributesOrder: z.lazy(() => AttributeListRelationFilterSchema).optional()
+  attributes: z.lazy(() => AttributesOnSurveysListRelationFilterSchema).optional()
 }).strict());
 
 export const SurveyOrderByWithAggregationInputSchema: z.ZodType<Prisma.SurveyOrderByWithAggregationInput> = z.object({
@@ -590,6 +639,140 @@ export const SurveyScalarWhereWithAggregatesInputSchema: z.ZodType<Prisma.Survey
   updatedAt: z.union([ z.lazy(() => DateTimeWithAggregatesFilterSchema),z.coerce.date() ]).optional(),
   name: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
   projectId: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
+}).strict();
+
+export const AttributeWhereInputSchema: z.ZodType<Prisma.AttributeWhereInput> = z.object({
+  AND: z.union([ z.lazy(() => AttributeWhereInputSchema),z.lazy(() => AttributeWhereInputSchema).array() ]).optional(),
+  OR: z.lazy(() => AttributeWhereInputSchema).array().optional(),
+  NOT: z.union([ z.lazy(() => AttributeWhereInputSchema),z.lazy(() => AttributeWhereInputSchema).array() ]).optional(),
+  id: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
+  createdAt: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
+  updatedAt: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
+  label: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
+  type: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
+  ownerId: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
+  owner: z.union([ z.lazy(() => UserNullableRelationFilterSchema),z.lazy(() => UserWhereInputSchema) ]).optional().nullable(),
+  surveys: z.lazy(() => AttributesOnSurveysListRelationFilterSchema).optional()
+}).strict();
+
+export const AttributeOrderByWithRelationInputSchema: z.ZodType<Prisma.AttributeOrderByWithRelationInput> = z.object({
+  id: z.lazy(() => SortOrderSchema).optional(),
+  createdAt: z.lazy(() => SortOrderSchema).optional(),
+  updatedAt: z.lazy(() => SortOrderSchema).optional(),
+  label: z.lazy(() => SortOrderSchema).optional(),
+  type: z.lazy(() => SortOrderSchema).optional(),
+  ownerId: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
+  owner: z.lazy(() => UserOrderByWithRelationInputSchema).optional(),
+  surveys: z.lazy(() => AttributesOnSurveysOrderByRelationAggregateInputSchema).optional()
+}).strict();
+
+export const AttributeWhereUniqueInputSchema: z.ZodType<Prisma.AttributeWhereUniqueInput> = z.object({
+  id: z.string().uuid()
+})
+.and(z.object({
+  id: z.string().uuid().optional(),
+  AND: z.union([ z.lazy(() => AttributeWhereInputSchema),z.lazy(() => AttributeWhereInputSchema).array() ]).optional(),
+  OR: z.lazy(() => AttributeWhereInputSchema).array().optional(),
+  NOT: z.union([ z.lazy(() => AttributeWhereInputSchema),z.lazy(() => AttributeWhereInputSchema).array() ]).optional(),
+  createdAt: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
+  updatedAt: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
+  label: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
+  type: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
+  ownerId: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
+  owner: z.union([ z.lazy(() => UserNullableRelationFilterSchema),z.lazy(() => UserWhereInputSchema) ]).optional().nullable(),
+  surveys: z.lazy(() => AttributesOnSurveysListRelationFilterSchema).optional()
+}).strict());
+
+export const AttributeOrderByWithAggregationInputSchema: z.ZodType<Prisma.AttributeOrderByWithAggregationInput> = z.object({
+  id: z.lazy(() => SortOrderSchema).optional(),
+  createdAt: z.lazy(() => SortOrderSchema).optional(),
+  updatedAt: z.lazy(() => SortOrderSchema).optional(),
+  label: z.lazy(() => SortOrderSchema).optional(),
+  type: z.lazy(() => SortOrderSchema).optional(),
+  ownerId: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
+  _count: z.lazy(() => AttributeCountOrderByAggregateInputSchema).optional(),
+  _max: z.lazy(() => AttributeMaxOrderByAggregateInputSchema).optional(),
+  _min: z.lazy(() => AttributeMinOrderByAggregateInputSchema).optional()
+}).strict();
+
+export const AttributeScalarWhereWithAggregatesInputSchema: z.ZodType<Prisma.AttributeScalarWhereWithAggregatesInput> = z.object({
+  AND: z.union([ z.lazy(() => AttributeScalarWhereWithAggregatesInputSchema),z.lazy(() => AttributeScalarWhereWithAggregatesInputSchema).array() ]).optional(),
+  OR: z.lazy(() => AttributeScalarWhereWithAggregatesInputSchema).array().optional(),
+  NOT: z.union([ z.lazy(() => AttributeScalarWhereWithAggregatesInputSchema),z.lazy(() => AttributeScalarWhereWithAggregatesInputSchema).array() ]).optional(),
+  id: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
+  createdAt: z.union([ z.lazy(() => DateTimeWithAggregatesFilterSchema),z.coerce.date() ]).optional(),
+  updatedAt: z.union([ z.lazy(() => DateTimeWithAggregatesFilterSchema),z.coerce.date() ]).optional(),
+  label: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
+  type: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
+  ownerId: z.union([ z.lazy(() => StringNullableWithAggregatesFilterSchema),z.string() ]).optional().nullable(),
+}).strict();
+
+export const AttributesOnSurveysWhereInputSchema: z.ZodType<Prisma.AttributesOnSurveysWhereInput> = z.object({
+  AND: z.union([ z.lazy(() => AttributesOnSurveysWhereInputSchema),z.lazy(() => AttributesOnSurveysWhereInputSchema).array() ]).optional(),
+  OR: z.lazy(() => AttributesOnSurveysWhereInputSchema).array().optional(),
+  NOT: z.union([ z.lazy(() => AttributesOnSurveysWhereInputSchema),z.lazy(() => AttributesOnSurveysWhereInputSchema).array() ]).optional(),
+  id: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
+  createdAt: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
+  updatedAt: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
+  attributeId: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
+  attributeIndex: z.union([ z.lazy(() => IntFilterSchema),z.number() ]).optional(),
+  surveyId: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
+  attribute: z.union([ z.lazy(() => AttributeRelationFilterSchema),z.lazy(() => AttributeWhereInputSchema) ]).optional(),
+  survey: z.union([ z.lazy(() => SurveyRelationFilterSchema),z.lazy(() => SurveyWhereInputSchema) ]).optional(),
+}).strict();
+
+export const AttributesOnSurveysOrderByWithRelationInputSchema: z.ZodType<Prisma.AttributesOnSurveysOrderByWithRelationInput> = z.object({
+  id: z.lazy(() => SortOrderSchema).optional(),
+  createdAt: z.lazy(() => SortOrderSchema).optional(),
+  updatedAt: z.lazy(() => SortOrderSchema).optional(),
+  attributeId: z.lazy(() => SortOrderSchema).optional(),
+  attributeIndex: z.lazy(() => SortOrderSchema).optional(),
+  surveyId: z.lazy(() => SortOrderSchema).optional(),
+  attribute: z.lazy(() => AttributeOrderByWithRelationInputSchema).optional(),
+  survey: z.lazy(() => SurveyOrderByWithRelationInputSchema).optional()
+}).strict();
+
+export const AttributesOnSurveysWhereUniqueInputSchema: z.ZodType<Prisma.AttributesOnSurveysWhereUniqueInput> = z.object({
+  id: z.string().uuid()
+})
+.and(z.object({
+  id: z.string().uuid().optional(),
+  AND: z.union([ z.lazy(() => AttributesOnSurveysWhereInputSchema),z.lazy(() => AttributesOnSurveysWhereInputSchema).array() ]).optional(),
+  OR: z.lazy(() => AttributesOnSurveysWhereInputSchema).array().optional(),
+  NOT: z.union([ z.lazy(() => AttributesOnSurveysWhereInputSchema),z.lazy(() => AttributesOnSurveysWhereInputSchema).array() ]).optional(),
+  createdAt: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
+  updatedAt: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
+  attributeId: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
+  attributeIndex: z.union([ z.lazy(() => IntFilterSchema),z.number().int() ]).optional(),
+  surveyId: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
+  attribute: z.union([ z.lazy(() => AttributeRelationFilterSchema),z.lazy(() => AttributeWhereInputSchema) ]).optional(),
+  survey: z.union([ z.lazy(() => SurveyRelationFilterSchema),z.lazy(() => SurveyWhereInputSchema) ]).optional(),
+}).strict());
+
+export const AttributesOnSurveysOrderByWithAggregationInputSchema: z.ZodType<Prisma.AttributesOnSurveysOrderByWithAggregationInput> = z.object({
+  id: z.lazy(() => SortOrderSchema).optional(),
+  createdAt: z.lazy(() => SortOrderSchema).optional(),
+  updatedAt: z.lazy(() => SortOrderSchema).optional(),
+  attributeId: z.lazy(() => SortOrderSchema).optional(),
+  attributeIndex: z.lazy(() => SortOrderSchema).optional(),
+  surveyId: z.lazy(() => SortOrderSchema).optional(),
+  _count: z.lazy(() => AttributesOnSurveysCountOrderByAggregateInputSchema).optional(),
+  _avg: z.lazy(() => AttributesOnSurveysAvgOrderByAggregateInputSchema).optional(),
+  _max: z.lazy(() => AttributesOnSurveysMaxOrderByAggregateInputSchema).optional(),
+  _min: z.lazy(() => AttributesOnSurveysMinOrderByAggregateInputSchema).optional(),
+  _sum: z.lazy(() => AttributesOnSurveysSumOrderByAggregateInputSchema).optional()
+}).strict();
+
+export const AttributesOnSurveysScalarWhereWithAggregatesInputSchema: z.ZodType<Prisma.AttributesOnSurveysScalarWhereWithAggregatesInput> = z.object({
+  AND: z.union([ z.lazy(() => AttributesOnSurveysScalarWhereWithAggregatesInputSchema),z.lazy(() => AttributesOnSurveysScalarWhereWithAggregatesInputSchema).array() ]).optional(),
+  OR: z.lazy(() => AttributesOnSurveysScalarWhereWithAggregatesInputSchema).array().optional(),
+  NOT: z.union([ z.lazy(() => AttributesOnSurveysScalarWhereWithAggregatesInputSchema),z.lazy(() => AttributesOnSurveysScalarWhereWithAggregatesInputSchema).array() ]).optional(),
+  id: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
+  createdAt: z.union([ z.lazy(() => DateTimeWithAggregatesFilterSchema),z.coerce.date() ]).optional(),
+  updatedAt: z.union([ z.lazy(() => DateTimeWithAggregatesFilterSchema),z.coerce.date() ]).optional(),
+  attributeId: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
+  attributeIndex: z.union([ z.lazy(() => IntWithAggregatesFilterSchema),z.number() ]).optional(),
+  surveyId: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
 }).strict();
 
 export const PropertyWhereInputSchema: z.ZodType<Prisma.PropertyWhereInput> = z.object({
@@ -624,10 +807,10 @@ export const PropertyOrderByWithRelationInputSchema: z.ZodType<Prisma.PropertyOr
 }).strict();
 
 export const PropertyWhereUniqueInputSchema: z.ZodType<Prisma.PropertyWhereUniqueInput> = z.object({
-  id: z.string()
+  id: z.string().uuid()
 })
 .and(z.object({
-  id: z.string().optional(),
+  id: z.string().uuid().optional(),
   AND: z.union([ z.lazy(() => PropertyWhereInputSchema),z.lazy(() => PropertyWhereInputSchema).array() ]).optional(),
   OR: z.lazy(() => PropertyWhereInputSchema).array().optional(),
   NOT: z.union([ z.lazy(() => PropertyWhereInputSchema),z.lazy(() => PropertyWhereInputSchema).array() ]).optional(),
@@ -671,77 +854,6 @@ export const PropertyScalarWhereWithAggregatesInputSchema: z.ZodType<Prisma.Prop
   surveyId: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
 }).strict();
 
-export const AttributeWhereInputSchema: z.ZodType<Prisma.AttributeWhereInput> = z.object({
-  AND: z.union([ z.lazy(() => AttributeWhereInputSchema),z.lazy(() => AttributeWhereInputSchema).array() ]).optional(),
-  OR: z.lazy(() => AttributeWhereInputSchema).array().optional(),
-  NOT: z.union([ z.lazy(() => AttributeWhereInputSchema),z.lazy(() => AttributeWhereInputSchema).array() ]).optional(),
-  id: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
-  createdAt: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
-  updatedAt: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
-  label: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
-  type: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
-  ownerId: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
-  surveyId: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
-  owner: z.union([ z.lazy(() => UserNullableRelationFilterSchema),z.lazy(() => UserWhereInputSchema) ]).optional().nullable(),
-  Survey: z.union([ z.lazy(() => SurveyNullableRelationFilterSchema),z.lazy(() => SurveyWhereInputSchema) ]).optional().nullable(),
-}).strict();
-
-export const AttributeOrderByWithRelationInputSchema: z.ZodType<Prisma.AttributeOrderByWithRelationInput> = z.object({
-  id: z.lazy(() => SortOrderSchema).optional(),
-  createdAt: z.lazy(() => SortOrderSchema).optional(),
-  updatedAt: z.lazy(() => SortOrderSchema).optional(),
-  label: z.lazy(() => SortOrderSchema).optional(),
-  type: z.lazy(() => SortOrderSchema).optional(),
-  ownerId: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
-  surveyId: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
-  owner: z.lazy(() => UserOrderByWithRelationInputSchema).optional(),
-  Survey: z.lazy(() => SurveyOrderByWithRelationInputSchema).optional()
-}).strict();
-
-export const AttributeWhereUniqueInputSchema: z.ZodType<Prisma.AttributeWhereUniqueInput> = z.object({
-  id: z.string()
-})
-.and(z.object({
-  id: z.string().optional(),
-  AND: z.union([ z.lazy(() => AttributeWhereInputSchema),z.lazy(() => AttributeWhereInputSchema).array() ]).optional(),
-  OR: z.lazy(() => AttributeWhereInputSchema).array().optional(),
-  NOT: z.union([ z.lazy(() => AttributeWhereInputSchema),z.lazy(() => AttributeWhereInputSchema).array() ]).optional(),
-  createdAt: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
-  updatedAt: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
-  label: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
-  type: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
-  ownerId: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
-  surveyId: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
-  owner: z.union([ z.lazy(() => UserNullableRelationFilterSchema),z.lazy(() => UserWhereInputSchema) ]).optional().nullable(),
-  Survey: z.union([ z.lazy(() => SurveyNullableRelationFilterSchema),z.lazy(() => SurveyWhereInputSchema) ]).optional().nullable(),
-}).strict());
-
-export const AttributeOrderByWithAggregationInputSchema: z.ZodType<Prisma.AttributeOrderByWithAggregationInput> = z.object({
-  id: z.lazy(() => SortOrderSchema).optional(),
-  createdAt: z.lazy(() => SortOrderSchema).optional(),
-  updatedAt: z.lazy(() => SortOrderSchema).optional(),
-  label: z.lazy(() => SortOrderSchema).optional(),
-  type: z.lazy(() => SortOrderSchema).optional(),
-  ownerId: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
-  surveyId: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
-  _count: z.lazy(() => AttributeCountOrderByAggregateInputSchema).optional(),
-  _max: z.lazy(() => AttributeMaxOrderByAggregateInputSchema).optional(),
-  _min: z.lazy(() => AttributeMinOrderByAggregateInputSchema).optional()
-}).strict();
-
-export const AttributeScalarWhereWithAggregatesInputSchema: z.ZodType<Prisma.AttributeScalarWhereWithAggregatesInput> = z.object({
-  AND: z.union([ z.lazy(() => AttributeScalarWhereWithAggregatesInputSchema),z.lazy(() => AttributeScalarWhereWithAggregatesInputSchema).array() ]).optional(),
-  OR: z.lazy(() => AttributeScalarWhereWithAggregatesInputSchema).array().optional(),
-  NOT: z.union([ z.lazy(() => AttributeScalarWhereWithAggregatesInputSchema),z.lazy(() => AttributeScalarWhereWithAggregatesInputSchema).array() ]).optional(),
-  id: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
-  createdAt: z.union([ z.lazy(() => DateTimeWithAggregatesFilterSchema),z.coerce.date() ]).optional(),
-  updatedAt: z.union([ z.lazy(() => DateTimeWithAggregatesFilterSchema),z.coerce.date() ]).optional(),
-  label: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
-  type: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
-  ownerId: z.union([ z.lazy(() => StringNullableWithAggregatesFilterSchema),z.string() ]).optional().nullable(),
-  surveyId: z.union([ z.lazy(() => StringNullableWithAggregatesFilterSchema),z.string() ]).optional().nullable(),
-}).strict();
-
 export const BrochureWhereInputSchema: z.ZodType<Prisma.BrochureWhereInput> = z.object({
   AND: z.union([ z.lazy(() => BrochureWhereInputSchema),z.lazy(() => BrochureWhereInputSchema).array() ]).optional(),
   OR: z.lazy(() => BrochureWhereInputSchema).array().optional(),
@@ -766,10 +878,10 @@ export const BrochureOrderByWithRelationInputSchema: z.ZodType<Prisma.BrochureOr
 }).strict();
 
 export const BrochureWhereUniqueInputSchema: z.ZodType<Prisma.BrochureWhereUniqueInput> = z.object({
-  id: z.string()
+  id: z.string().uuid()
 })
 .and(z.object({
-  id: z.string().optional(),
+  id: z.string().uuid().optional(),
   AND: z.union([ z.lazy(() => BrochureWhereInputSchema),z.lazy(() => BrochureWhereInputSchema).array() ]).optional(),
   OR: z.lazy(() => BrochureWhereInputSchema).array().optional(),
   NOT: z.union([ z.lazy(() => BrochureWhereInputSchema),z.lazy(() => BrochureWhereInputSchema).array() ]).optional(),
@@ -806,7 +918,7 @@ export const BrochureScalarWhereWithAggregatesInputSchema: z.ZodType<Prisma.Broc
 }).strict();
 
 export const UserCreateInputSchema: z.ZodType<Prisma.UserCreateInput> = z.object({
-  id: z.string().optional(),
+  id: z.string().uuid().optional(),
   clerkId: z.string(),
   email: z.string(),
   firstName: z.string().optional().nullable(),
@@ -817,7 +929,7 @@ export const UserCreateInputSchema: z.ZodType<Prisma.UserCreateInput> = z.object
 }).strict();
 
 export const UserUncheckedCreateInputSchema: z.ZodType<Prisma.UserUncheckedCreateInput> = z.object({
-  id: z.string().optional(),
+  id: z.string().uuid().optional(),
   clerkId: z.string(),
   email: z.string(),
   firstName: z.string().optional().nullable(),
@@ -828,7 +940,7 @@ export const UserUncheckedCreateInputSchema: z.ZodType<Prisma.UserUncheckedCreat
 }).strict();
 
 export const UserUpdateInputSchema: z.ZodType<Prisma.UserUpdateInput> = z.object({
-  id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  id: z.union([ z.string().uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   clerkId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   email: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   firstName: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
@@ -839,7 +951,7 @@ export const UserUpdateInputSchema: z.ZodType<Prisma.UserUpdateInput> = z.object
 }).strict();
 
 export const UserUncheckedUpdateInputSchema: z.ZodType<Prisma.UserUncheckedUpdateInput> = z.object({
-  id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  id: z.union([ z.string().uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   clerkId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   email: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   firstName: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
@@ -850,7 +962,7 @@ export const UserUncheckedUpdateInputSchema: z.ZodType<Prisma.UserUncheckedUpdat
 }).strict();
 
 export const UserCreateManyInputSchema: z.ZodType<Prisma.UserCreateManyInput> = z.object({
-  id: z.string().optional(),
+  id: z.string().uuid().optional(),
   clerkId: z.string(),
   email: z.string(),
   firstName: z.string().optional().nullable(),
@@ -858,7 +970,7 @@ export const UserCreateManyInputSchema: z.ZodType<Prisma.UserCreateManyInput> = 
 }).strict();
 
 export const UserUpdateManyMutationInputSchema: z.ZodType<Prisma.UserUpdateManyMutationInput> = z.object({
-  id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  id: z.union([ z.string().uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   clerkId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   email: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   firstName: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
@@ -866,7 +978,7 @@ export const UserUpdateManyMutationInputSchema: z.ZodType<Prisma.UserUpdateManyM
 }).strict();
 
 export const UserUncheckedUpdateManyInputSchema: z.ZodType<Prisma.UserUncheckedUpdateManyInput> = z.object({
-  id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  id: z.union([ z.string().uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   clerkId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   email: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   firstName: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
@@ -874,7 +986,7 @@ export const UserUncheckedUpdateManyInputSchema: z.ZodType<Prisma.UserUncheckedU
 }).strict();
 
 export const ProjectCreateInputSchema: z.ZodType<Prisma.ProjectCreateInput> = z.object({
-  id: z.string().optional(),
+  id: z.string().uuid().optional(),
   name: z.string(),
   createdAt: z.coerce.date().optional(),
   updatedAt: z.coerce.date().optional(),
@@ -883,7 +995,7 @@ export const ProjectCreateInputSchema: z.ZodType<Prisma.ProjectCreateInput> = z.
 }).strict();
 
 export const ProjectUncheckedCreateInputSchema: z.ZodType<Prisma.ProjectUncheckedCreateInput> = z.object({
-  id: z.string().optional(),
+  id: z.string().uuid().optional(),
   ownerId: z.string(),
   name: z.string(),
   createdAt: z.coerce.date().optional(),
@@ -892,7 +1004,7 @@ export const ProjectUncheckedCreateInputSchema: z.ZodType<Prisma.ProjectUnchecke
 }).strict();
 
 export const ProjectUpdateInputSchema: z.ZodType<Prisma.ProjectUpdateInput> = z.object({
-  id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  id: z.union([ z.string().uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
@@ -901,7 +1013,7 @@ export const ProjectUpdateInputSchema: z.ZodType<Prisma.ProjectUpdateInput> = z.
 }).strict();
 
 export const ProjectUncheckedUpdateInputSchema: z.ZodType<Prisma.ProjectUncheckedUpdateInput> = z.object({
-  id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  id: z.union([ z.string().uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   ownerId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
@@ -910,7 +1022,7 @@ export const ProjectUncheckedUpdateInputSchema: z.ZodType<Prisma.ProjectUnchecke
 }).strict();
 
 export const ProjectCreateManyInputSchema: z.ZodType<Prisma.ProjectCreateManyInput> = z.object({
-  id: z.string().optional(),
+  id: z.string().uuid().optional(),
   ownerId: z.string(),
   name: z.string(),
   createdAt: z.coerce.date().optional(),
@@ -918,14 +1030,14 @@ export const ProjectCreateManyInputSchema: z.ZodType<Prisma.ProjectCreateManyInp
 }).strict();
 
 export const ProjectUpdateManyMutationInputSchema: z.ZodType<Prisma.ProjectUpdateManyMutationInput> = z.object({
-  id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  id: z.union([ z.string().uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
 }).strict();
 
 export const ProjectUncheckedUpdateManyInputSchema: z.ZodType<Prisma.ProjectUncheckedUpdateManyInput> = z.object({
-  id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  id: z.union([ z.string().uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   ownerId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
@@ -933,51 +1045,51 @@ export const ProjectUncheckedUpdateManyInputSchema: z.ZodType<Prisma.ProjectUnch
 }).strict();
 
 export const SurveyCreateInputSchema: z.ZodType<Prisma.SurveyCreateInput> = z.object({
-  id: z.string().optional(),
+  id: z.string().uuid().optional(),
   ownerId: z.string(),
   createdAt: z.coerce.date().optional(),
   updatedAt: z.coerce.date().optional(),
   name: z.string(),
   project: z.lazy(() => ProjectCreateNestedOneWithoutSurveysInputSchema),
   properties: z.lazy(() => PropertyCreateNestedManyWithoutSurveyInputSchema).optional(),
-  attributesOrder: z.lazy(() => AttributeCreateNestedManyWithoutSurveyInputSchema).optional()
+  attributes: z.lazy(() => AttributesOnSurveysCreateNestedManyWithoutSurveyInputSchema).optional()
 }).strict();
 
 export const SurveyUncheckedCreateInputSchema: z.ZodType<Prisma.SurveyUncheckedCreateInput> = z.object({
-  id: z.string().optional(),
+  id: z.string().uuid().optional(),
   ownerId: z.string(),
   createdAt: z.coerce.date().optional(),
   updatedAt: z.coerce.date().optional(),
   name: z.string(),
   projectId: z.string(),
   properties: z.lazy(() => PropertyUncheckedCreateNestedManyWithoutSurveyInputSchema).optional(),
-  attributesOrder: z.lazy(() => AttributeUncheckedCreateNestedManyWithoutSurveyInputSchema).optional()
+  attributes: z.lazy(() => AttributesOnSurveysUncheckedCreateNestedManyWithoutSurveyInputSchema).optional()
 }).strict();
 
 export const SurveyUpdateInputSchema: z.ZodType<Prisma.SurveyUpdateInput> = z.object({
-  id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  id: z.union([ z.string().uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   ownerId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   project: z.lazy(() => ProjectUpdateOneRequiredWithoutSurveysNestedInputSchema).optional(),
   properties: z.lazy(() => PropertyUpdateManyWithoutSurveyNestedInputSchema).optional(),
-  attributesOrder: z.lazy(() => AttributeUpdateManyWithoutSurveyNestedInputSchema).optional()
+  attributes: z.lazy(() => AttributesOnSurveysUpdateManyWithoutSurveyNestedInputSchema).optional()
 }).strict();
 
 export const SurveyUncheckedUpdateInputSchema: z.ZodType<Prisma.SurveyUncheckedUpdateInput> = z.object({
-  id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  id: z.union([ z.string().uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   ownerId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   projectId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   properties: z.lazy(() => PropertyUncheckedUpdateManyWithoutSurveyNestedInputSchema).optional(),
-  attributesOrder: z.lazy(() => AttributeUncheckedUpdateManyWithoutSurveyNestedInputSchema).optional()
+  attributes: z.lazy(() => AttributesOnSurveysUncheckedUpdateManyWithoutSurveyNestedInputSchema).optional()
 }).strict();
 
 export const SurveyCreateManyInputSchema: z.ZodType<Prisma.SurveyCreateManyInput> = z.object({
-  id: z.string().optional(),
+  id: z.string().uuid().optional(),
   ownerId: z.string(),
   createdAt: z.coerce.date().optional(),
   updatedAt: z.coerce.date().optional(),
@@ -986,7 +1098,7 @@ export const SurveyCreateManyInputSchema: z.ZodType<Prisma.SurveyCreateManyInput
 }).strict();
 
 export const SurveyUpdateManyMutationInputSchema: z.ZodType<Prisma.SurveyUpdateManyMutationInput> = z.object({
-  id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  id: z.union([ z.string().uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   ownerId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
@@ -994,7 +1106,7 @@ export const SurveyUpdateManyMutationInputSchema: z.ZodType<Prisma.SurveyUpdateM
 }).strict();
 
 export const SurveyUncheckedUpdateManyInputSchema: z.ZodType<Prisma.SurveyUncheckedUpdateManyInput> = z.object({
-  id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  id: z.union([ z.string().uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   ownerId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
@@ -1002,8 +1114,135 @@ export const SurveyUncheckedUpdateManyInputSchema: z.ZodType<Prisma.SurveyUnchec
   projectId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
 }).strict();
 
+export const AttributeCreateInputSchema: z.ZodType<Prisma.AttributeCreateInput> = z.object({
+  id: z.string().uuid().optional(),
+  createdAt: z.coerce.date().optional(),
+  updatedAt: z.coerce.date().optional(),
+  label: z.string(),
+  type: z.string(),
+  owner: z.lazy(() => UserCreateNestedOneWithoutAttributesInputSchema).optional(),
+  surveys: z.lazy(() => AttributesOnSurveysCreateNestedManyWithoutAttributeInputSchema).optional()
+}).strict();
+
+export const AttributeUncheckedCreateInputSchema: z.ZodType<Prisma.AttributeUncheckedCreateInput> = z.object({
+  id: z.string().uuid().optional(),
+  createdAt: z.coerce.date().optional(),
+  updatedAt: z.coerce.date().optional(),
+  label: z.string(),
+  type: z.string(),
+  ownerId: z.string().optional().nullable(),
+  surveys: z.lazy(() => AttributesOnSurveysUncheckedCreateNestedManyWithoutAttributeInputSchema).optional()
+}).strict();
+
+export const AttributeUpdateInputSchema: z.ZodType<Prisma.AttributeUpdateInput> = z.object({
+  id: z.union([ z.string().uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  label: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  type: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  owner: z.lazy(() => UserUpdateOneWithoutAttributesNestedInputSchema).optional(),
+  surveys: z.lazy(() => AttributesOnSurveysUpdateManyWithoutAttributeNestedInputSchema).optional()
+}).strict();
+
+export const AttributeUncheckedUpdateInputSchema: z.ZodType<Prisma.AttributeUncheckedUpdateInput> = z.object({
+  id: z.union([ z.string().uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  label: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  type: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  ownerId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  surveys: z.lazy(() => AttributesOnSurveysUncheckedUpdateManyWithoutAttributeNestedInputSchema).optional()
+}).strict();
+
+export const AttributeCreateManyInputSchema: z.ZodType<Prisma.AttributeCreateManyInput> = z.object({
+  id: z.string().uuid().optional(),
+  createdAt: z.coerce.date().optional(),
+  updatedAt: z.coerce.date().optional(),
+  label: z.string(),
+  type: z.string(),
+  ownerId: z.string().optional().nullable()
+}).strict();
+
+export const AttributeUpdateManyMutationInputSchema: z.ZodType<Prisma.AttributeUpdateManyMutationInput> = z.object({
+  id: z.union([ z.string().uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  label: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  type: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+}).strict();
+
+export const AttributeUncheckedUpdateManyInputSchema: z.ZodType<Prisma.AttributeUncheckedUpdateManyInput> = z.object({
+  id: z.union([ z.string().uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  label: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  type: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  ownerId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+}).strict();
+
+export const AttributesOnSurveysCreateInputSchema: z.ZodType<Prisma.AttributesOnSurveysCreateInput> = z.object({
+  id: z.string().uuid().optional(),
+  createdAt: z.coerce.date().optional(),
+  updatedAt: z.coerce.date().optional(),
+  attributeIndex: z.number().int(),
+  attribute: z.lazy(() => AttributeCreateNestedOneWithoutSurveysInputSchema),
+  survey: z.lazy(() => SurveyCreateNestedOneWithoutAttributesInputSchema)
+}).strict();
+
+export const AttributesOnSurveysUncheckedCreateInputSchema: z.ZodType<Prisma.AttributesOnSurveysUncheckedCreateInput> = z.object({
+  id: z.string().uuid().optional(),
+  createdAt: z.coerce.date().optional(),
+  updatedAt: z.coerce.date().optional(),
+  attributeId: z.string(),
+  attributeIndex: z.number().int(),
+  surveyId: z.string()
+}).strict();
+
+export const AttributesOnSurveysUpdateInputSchema: z.ZodType<Prisma.AttributesOnSurveysUpdateInput> = z.object({
+  id: z.union([ z.string().uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  attributeIndex: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
+  attribute: z.lazy(() => AttributeUpdateOneRequiredWithoutSurveysNestedInputSchema).optional(),
+  survey: z.lazy(() => SurveyUpdateOneRequiredWithoutAttributesNestedInputSchema).optional()
+}).strict();
+
+export const AttributesOnSurveysUncheckedUpdateInputSchema: z.ZodType<Prisma.AttributesOnSurveysUncheckedUpdateInput> = z.object({
+  id: z.union([ z.string().uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  attributeId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  attributeIndex: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
+  surveyId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+}).strict();
+
+export const AttributesOnSurveysCreateManyInputSchema: z.ZodType<Prisma.AttributesOnSurveysCreateManyInput> = z.object({
+  id: z.string().uuid().optional(),
+  createdAt: z.coerce.date().optional(),
+  updatedAt: z.coerce.date().optional(),
+  attributeId: z.string(),
+  attributeIndex: z.number().int(),
+  surveyId: z.string()
+}).strict();
+
+export const AttributesOnSurveysUpdateManyMutationInputSchema: z.ZodType<Prisma.AttributesOnSurveysUpdateManyMutationInput> = z.object({
+  id: z.union([ z.string().uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  attributeIndex: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
+}).strict();
+
+export const AttributesOnSurveysUncheckedUpdateManyInputSchema: z.ZodType<Prisma.AttributesOnSurveysUncheckedUpdateManyInput> = z.object({
+  id: z.union([ z.string().uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  attributeId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  attributeIndex: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
+  surveyId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+}).strict();
+
 export const PropertyCreateInputSchema: z.ZodType<Prisma.PropertyCreateInput> = z.object({
-  id: z.string().optional(),
+  id: z.string().uuid().optional(),
   createdAt: z.coerce.date().optional(),
   updatedAt: z.coerce.date().optional(),
   address: z.string(),
@@ -1015,7 +1254,7 @@ export const PropertyCreateInputSchema: z.ZodType<Prisma.PropertyCreateInput> = 
 }).strict();
 
 export const PropertyUncheckedCreateInputSchema: z.ZodType<Prisma.PropertyUncheckedCreateInput> = z.object({
-  id: z.string().optional(),
+  id: z.string().uuid().optional(),
   createdAt: z.coerce.date().optional(),
   updatedAt: z.coerce.date().optional(),
   ownerId: z.string(),
@@ -1027,7 +1266,7 @@ export const PropertyUncheckedCreateInputSchema: z.ZodType<Prisma.PropertyUnchec
 }).strict();
 
 export const PropertyUpdateInputSchema: z.ZodType<Prisma.PropertyUpdateInput> = z.object({
-  id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  id: z.union([ z.string().uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   address: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
@@ -1039,7 +1278,7 @@ export const PropertyUpdateInputSchema: z.ZodType<Prisma.PropertyUpdateInput> = 
 }).strict();
 
 export const PropertyUncheckedUpdateInputSchema: z.ZodType<Prisma.PropertyUncheckedUpdateInput> = z.object({
-  id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  id: z.union([ z.string().uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   ownerId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
@@ -1051,7 +1290,7 @@ export const PropertyUncheckedUpdateInputSchema: z.ZodType<Prisma.PropertyUnchec
 }).strict();
 
 export const PropertyCreateManyInputSchema: z.ZodType<Prisma.PropertyCreateManyInput> = z.object({
-  id: z.string().optional(),
+  id: z.string().uuid().optional(),
   createdAt: z.coerce.date().optional(),
   updatedAt: z.coerce.date().optional(),
   ownerId: z.string(),
@@ -1062,7 +1301,7 @@ export const PropertyCreateManyInputSchema: z.ZodType<Prisma.PropertyCreateManyI
 }).strict();
 
 export const PropertyUpdateManyMutationInputSchema: z.ZodType<Prisma.PropertyUpdateManyMutationInput> = z.object({
-  id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  id: z.union([ z.string().uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   address: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
@@ -1071,7 +1310,7 @@ export const PropertyUpdateManyMutationInputSchema: z.ZodType<Prisma.PropertyUpd
 }).strict();
 
 export const PropertyUncheckedUpdateManyInputSchema: z.ZodType<Prisma.PropertyUncheckedUpdateManyInput> = z.object({
-  id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  id: z.union([ z.string().uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   ownerId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
@@ -1081,76 +1320,8 @@ export const PropertyUncheckedUpdateManyInputSchema: z.ZodType<Prisma.PropertyUn
   surveyId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
 }).strict();
 
-export const AttributeCreateInputSchema: z.ZodType<Prisma.AttributeCreateInput> = z.object({
-  id: z.string().optional(),
-  createdAt: z.coerce.date().optional(),
-  updatedAt: z.coerce.date().optional(),
-  label: z.string(),
-  type: z.string(),
-  owner: z.lazy(() => UserCreateNestedOneWithoutAttributesInputSchema).optional(),
-  Survey: z.lazy(() => SurveyCreateNestedOneWithoutAttributesOrderInputSchema).optional()
-}).strict();
-
-export const AttributeUncheckedCreateInputSchema: z.ZodType<Prisma.AttributeUncheckedCreateInput> = z.object({
-  id: z.string().optional(),
-  createdAt: z.coerce.date().optional(),
-  updatedAt: z.coerce.date().optional(),
-  label: z.string(),
-  type: z.string(),
-  ownerId: z.string().optional().nullable(),
-  surveyId: z.string().optional().nullable()
-}).strict();
-
-export const AttributeUpdateInputSchema: z.ZodType<Prisma.AttributeUpdateInput> = z.object({
-  id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  label: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  type: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  owner: z.lazy(() => UserUpdateOneWithoutAttributesNestedInputSchema).optional(),
-  Survey: z.lazy(() => SurveyUpdateOneWithoutAttributesOrderNestedInputSchema).optional()
-}).strict();
-
-export const AttributeUncheckedUpdateInputSchema: z.ZodType<Prisma.AttributeUncheckedUpdateInput> = z.object({
-  id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  label: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  type: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  ownerId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  surveyId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-}).strict();
-
-export const AttributeCreateManyInputSchema: z.ZodType<Prisma.AttributeCreateManyInput> = z.object({
-  id: z.string().optional(),
-  createdAt: z.coerce.date().optional(),
-  updatedAt: z.coerce.date().optional(),
-  label: z.string(),
-  type: z.string(),
-  ownerId: z.string().optional().nullable(),
-  surveyId: z.string().optional().nullable()
-}).strict();
-
-export const AttributeUpdateManyMutationInputSchema: z.ZodType<Prisma.AttributeUpdateManyMutationInput> = z.object({
-  id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  label: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  type: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-}).strict();
-
-export const AttributeUncheckedUpdateManyInputSchema: z.ZodType<Prisma.AttributeUncheckedUpdateManyInput> = z.object({
-  id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  label: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  type: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  ownerId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  surveyId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-}).strict();
-
 export const BrochureCreateInputSchema: z.ZodType<Prisma.BrochureCreateInput> = z.object({
-  id: z.string().optional(),
+  id: z.string().uuid().optional(),
   createdAt: z.coerce.date().optional(),
   updatedAt: z.coerce.date().optional(),
   url: z.string(),
@@ -1159,7 +1330,7 @@ export const BrochureCreateInputSchema: z.ZodType<Prisma.BrochureCreateInput> = 
 }).strict();
 
 export const BrochureUncheckedCreateInputSchema: z.ZodType<Prisma.BrochureUncheckedCreateInput> = z.object({
-  id: z.string().optional(),
+  id: z.string().uuid().optional(),
   createdAt: z.coerce.date().optional(),
   updatedAt: z.coerce.date().optional(),
   url: z.string(),
@@ -1168,7 +1339,7 @@ export const BrochureUncheckedCreateInputSchema: z.ZodType<Prisma.BrochureUnchec
 }).strict();
 
 export const BrochureUpdateInputSchema: z.ZodType<Prisma.BrochureUpdateInput> = z.object({
-  id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  id: z.union([ z.string().uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   url: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
@@ -1177,7 +1348,7 @@ export const BrochureUpdateInputSchema: z.ZodType<Prisma.BrochureUpdateInput> = 
 }).strict();
 
 export const BrochureUncheckedUpdateInputSchema: z.ZodType<Prisma.BrochureUncheckedUpdateInput> = z.object({
-  id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  id: z.union([ z.string().uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   url: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
@@ -1186,7 +1357,7 @@ export const BrochureUncheckedUpdateInputSchema: z.ZodType<Prisma.BrochureUnchec
 }).strict();
 
 export const BrochureCreateManyInputSchema: z.ZodType<Prisma.BrochureCreateManyInput> = z.object({
-  id: z.string().optional(),
+  id: z.string().uuid().optional(),
   createdAt: z.coerce.date().optional(),
   updatedAt: z.coerce.date().optional(),
   url: z.string(),
@@ -1195,7 +1366,7 @@ export const BrochureCreateManyInputSchema: z.ZodType<Prisma.BrochureCreateManyI
 }).strict();
 
 export const BrochureUpdateManyMutationInputSchema: z.ZodType<Prisma.BrochureUpdateManyMutationInput> = z.object({
-  id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  id: z.union([ z.string().uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   url: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
@@ -1203,7 +1374,7 @@ export const BrochureUpdateManyMutationInputSchema: z.ZodType<Prisma.BrochureUpd
 }).strict();
 
 export const BrochureUncheckedUpdateManyInputSchema: z.ZodType<Prisma.BrochureUncheckedUpdateManyInput> = z.object({
-  id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  id: z.union([ z.string().uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   url: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
@@ -1405,6 +1576,16 @@ export const ProjectRelationFilterSchema: z.ZodType<Prisma.ProjectRelationFilter
   isNot: z.lazy(() => ProjectWhereInputSchema).optional()
 }).strict();
 
+export const AttributesOnSurveysListRelationFilterSchema: z.ZodType<Prisma.AttributesOnSurveysListRelationFilter> = z.object({
+  every: z.lazy(() => AttributesOnSurveysWhereInputSchema).optional(),
+  some: z.lazy(() => AttributesOnSurveysWhereInputSchema).optional(),
+  none: z.lazy(() => AttributesOnSurveysWhereInputSchema).optional()
+}).strict();
+
+export const AttributesOnSurveysOrderByRelationAggregateInputSchema: z.ZodType<Prisma.AttributesOnSurveysOrderByRelationAggregateInput> = z.object({
+  _count: z.lazy(() => SortOrderSchema).optional()
+}).strict();
+
 export const SurveyCountOrderByAggregateInputSchema: z.ZodType<Prisma.SurveyCountOrderByAggregateInput> = z.object({
   id: z.lazy(() => SortOrderSchema).optional(),
   ownerId: z.lazy(() => SortOrderSchema).optional(),
@@ -1432,6 +1613,110 @@ export const SurveyMinOrderByAggregateInputSchema: z.ZodType<Prisma.SurveyMinOrd
   projectId: z.lazy(() => SortOrderSchema).optional()
 }).strict();
 
+export const UserNullableRelationFilterSchema: z.ZodType<Prisma.UserNullableRelationFilter> = z.object({
+  is: z.lazy(() => UserWhereInputSchema).optional().nullable(),
+  isNot: z.lazy(() => UserWhereInputSchema).optional().nullable()
+}).strict();
+
+export const AttributeCountOrderByAggregateInputSchema: z.ZodType<Prisma.AttributeCountOrderByAggregateInput> = z.object({
+  id: z.lazy(() => SortOrderSchema).optional(),
+  createdAt: z.lazy(() => SortOrderSchema).optional(),
+  updatedAt: z.lazy(() => SortOrderSchema).optional(),
+  label: z.lazy(() => SortOrderSchema).optional(),
+  type: z.lazy(() => SortOrderSchema).optional(),
+  ownerId: z.lazy(() => SortOrderSchema).optional()
+}).strict();
+
+export const AttributeMaxOrderByAggregateInputSchema: z.ZodType<Prisma.AttributeMaxOrderByAggregateInput> = z.object({
+  id: z.lazy(() => SortOrderSchema).optional(),
+  createdAt: z.lazy(() => SortOrderSchema).optional(),
+  updatedAt: z.lazy(() => SortOrderSchema).optional(),
+  label: z.lazy(() => SortOrderSchema).optional(),
+  type: z.lazy(() => SortOrderSchema).optional(),
+  ownerId: z.lazy(() => SortOrderSchema).optional()
+}).strict();
+
+export const AttributeMinOrderByAggregateInputSchema: z.ZodType<Prisma.AttributeMinOrderByAggregateInput> = z.object({
+  id: z.lazy(() => SortOrderSchema).optional(),
+  createdAt: z.lazy(() => SortOrderSchema).optional(),
+  updatedAt: z.lazy(() => SortOrderSchema).optional(),
+  label: z.lazy(() => SortOrderSchema).optional(),
+  type: z.lazy(() => SortOrderSchema).optional(),
+  ownerId: z.lazy(() => SortOrderSchema).optional()
+}).strict();
+
+export const IntFilterSchema: z.ZodType<Prisma.IntFilter> = z.object({
+  equals: z.number().optional(),
+  in: z.number().array().optional(),
+  notIn: z.number().array().optional(),
+  lt: z.number().optional(),
+  lte: z.number().optional(),
+  gt: z.number().optional(),
+  gte: z.number().optional(),
+  not: z.union([ z.number(),z.lazy(() => NestedIntFilterSchema) ]).optional(),
+}).strict();
+
+export const AttributeRelationFilterSchema: z.ZodType<Prisma.AttributeRelationFilter> = z.object({
+  is: z.lazy(() => AttributeWhereInputSchema).optional(),
+  isNot: z.lazy(() => AttributeWhereInputSchema).optional()
+}).strict();
+
+export const SurveyRelationFilterSchema: z.ZodType<Prisma.SurveyRelationFilter> = z.object({
+  is: z.lazy(() => SurveyWhereInputSchema).optional(),
+  isNot: z.lazy(() => SurveyWhereInputSchema).optional()
+}).strict();
+
+export const AttributesOnSurveysCountOrderByAggregateInputSchema: z.ZodType<Prisma.AttributesOnSurveysCountOrderByAggregateInput> = z.object({
+  id: z.lazy(() => SortOrderSchema).optional(),
+  createdAt: z.lazy(() => SortOrderSchema).optional(),
+  updatedAt: z.lazy(() => SortOrderSchema).optional(),
+  attributeId: z.lazy(() => SortOrderSchema).optional(),
+  attributeIndex: z.lazy(() => SortOrderSchema).optional(),
+  surveyId: z.lazy(() => SortOrderSchema).optional()
+}).strict();
+
+export const AttributesOnSurveysAvgOrderByAggregateInputSchema: z.ZodType<Prisma.AttributesOnSurveysAvgOrderByAggregateInput> = z.object({
+  attributeIndex: z.lazy(() => SortOrderSchema).optional()
+}).strict();
+
+export const AttributesOnSurveysMaxOrderByAggregateInputSchema: z.ZodType<Prisma.AttributesOnSurveysMaxOrderByAggregateInput> = z.object({
+  id: z.lazy(() => SortOrderSchema).optional(),
+  createdAt: z.lazy(() => SortOrderSchema).optional(),
+  updatedAt: z.lazy(() => SortOrderSchema).optional(),
+  attributeId: z.lazy(() => SortOrderSchema).optional(),
+  attributeIndex: z.lazy(() => SortOrderSchema).optional(),
+  surveyId: z.lazy(() => SortOrderSchema).optional()
+}).strict();
+
+export const AttributesOnSurveysMinOrderByAggregateInputSchema: z.ZodType<Prisma.AttributesOnSurveysMinOrderByAggregateInput> = z.object({
+  id: z.lazy(() => SortOrderSchema).optional(),
+  createdAt: z.lazy(() => SortOrderSchema).optional(),
+  updatedAt: z.lazy(() => SortOrderSchema).optional(),
+  attributeId: z.lazy(() => SortOrderSchema).optional(),
+  attributeIndex: z.lazy(() => SortOrderSchema).optional(),
+  surveyId: z.lazy(() => SortOrderSchema).optional()
+}).strict();
+
+export const AttributesOnSurveysSumOrderByAggregateInputSchema: z.ZodType<Prisma.AttributesOnSurveysSumOrderByAggregateInput> = z.object({
+  attributeIndex: z.lazy(() => SortOrderSchema).optional()
+}).strict();
+
+export const IntWithAggregatesFilterSchema: z.ZodType<Prisma.IntWithAggregatesFilter> = z.object({
+  equals: z.number().optional(),
+  in: z.number().array().optional(),
+  notIn: z.number().array().optional(),
+  lt: z.number().optional(),
+  lte: z.number().optional(),
+  gt: z.number().optional(),
+  gte: z.number().optional(),
+  not: z.union([ z.number(),z.lazy(() => NestedIntWithAggregatesFilterSchema) ]).optional(),
+  _count: z.lazy(() => NestedIntFilterSchema).optional(),
+  _avg: z.lazy(() => NestedFloatFilterSchema).optional(),
+  _sum: z.lazy(() => NestedIntFilterSchema).optional(),
+  _min: z.lazy(() => NestedIntFilterSchema).optional(),
+  _max: z.lazy(() => NestedIntFilterSchema).optional()
+}).strict();
+
 export const JsonNullableFilterSchema: z.ZodType<Prisma.JsonNullableFilter> = z.object({
   equals: InputJsonValueSchema.optional(),
   path: z.string().array().optional(),
@@ -1452,11 +1737,6 @@ export const BrochureListRelationFilterSchema: z.ZodType<Prisma.BrochureListRela
   every: z.lazy(() => BrochureWhereInputSchema).optional(),
   some: z.lazy(() => BrochureWhereInputSchema).optional(),
   none: z.lazy(() => BrochureWhereInputSchema).optional()
-}).strict();
-
-export const SurveyRelationFilterSchema: z.ZodType<Prisma.SurveyRelationFilter> = z.object({
-  is: z.lazy(() => SurveyWhereInputSchema).optional(),
-  isNot: z.lazy(() => SurveyWhereInputSchema).optional()
 }).strict();
 
 export const BrochureOrderByRelationAggregateInputSchema: z.ZodType<Prisma.BrochureOrderByRelationAggregateInput> = z.object({
@@ -1511,46 +1791,6 @@ export const JsonNullableWithAggregatesFilterSchema: z.ZodType<Prisma.JsonNullab
   _count: z.lazy(() => NestedIntNullableFilterSchema).optional(),
   _min: z.lazy(() => NestedJsonNullableFilterSchema).optional(),
   _max: z.lazy(() => NestedJsonNullableFilterSchema).optional()
-}).strict();
-
-export const UserNullableRelationFilterSchema: z.ZodType<Prisma.UserNullableRelationFilter> = z.object({
-  is: z.lazy(() => UserWhereInputSchema).optional().nullable(),
-  isNot: z.lazy(() => UserWhereInputSchema).optional().nullable()
-}).strict();
-
-export const SurveyNullableRelationFilterSchema: z.ZodType<Prisma.SurveyNullableRelationFilter> = z.object({
-  is: z.lazy(() => SurveyWhereInputSchema).optional().nullable(),
-  isNot: z.lazy(() => SurveyWhereInputSchema).optional().nullable()
-}).strict();
-
-export const AttributeCountOrderByAggregateInputSchema: z.ZodType<Prisma.AttributeCountOrderByAggregateInput> = z.object({
-  id: z.lazy(() => SortOrderSchema).optional(),
-  createdAt: z.lazy(() => SortOrderSchema).optional(),
-  updatedAt: z.lazy(() => SortOrderSchema).optional(),
-  label: z.lazy(() => SortOrderSchema).optional(),
-  type: z.lazy(() => SortOrderSchema).optional(),
-  ownerId: z.lazy(() => SortOrderSchema).optional(),
-  surveyId: z.lazy(() => SortOrderSchema).optional()
-}).strict();
-
-export const AttributeMaxOrderByAggregateInputSchema: z.ZodType<Prisma.AttributeMaxOrderByAggregateInput> = z.object({
-  id: z.lazy(() => SortOrderSchema).optional(),
-  createdAt: z.lazy(() => SortOrderSchema).optional(),
-  updatedAt: z.lazy(() => SortOrderSchema).optional(),
-  label: z.lazy(() => SortOrderSchema).optional(),
-  type: z.lazy(() => SortOrderSchema).optional(),
-  ownerId: z.lazy(() => SortOrderSchema).optional(),
-  surveyId: z.lazy(() => SortOrderSchema).optional()
-}).strict();
-
-export const AttributeMinOrderByAggregateInputSchema: z.ZodType<Prisma.AttributeMinOrderByAggregateInput> = z.object({
-  id: z.lazy(() => SortOrderSchema).optional(),
-  createdAt: z.lazy(() => SortOrderSchema).optional(),
-  updatedAt: z.lazy(() => SortOrderSchema).optional(),
-  label: z.lazy(() => SortOrderSchema).optional(),
-  type: z.lazy(() => SortOrderSchema).optional(),
-  ownerId: z.lazy(() => SortOrderSchema).optional(),
-  surveyId: z.lazy(() => SortOrderSchema).optional()
 }).strict();
 
 export const PropertyRelationFilterSchema: z.ZodType<Prisma.PropertyRelationFilter> = z.object({
@@ -1792,11 +2032,11 @@ export const PropertyCreateNestedManyWithoutSurveyInputSchema: z.ZodType<Prisma.
   connect: z.union([ z.lazy(() => PropertyWhereUniqueInputSchema),z.lazy(() => PropertyWhereUniqueInputSchema).array() ]).optional(),
 }).strict();
 
-export const AttributeCreateNestedManyWithoutSurveyInputSchema: z.ZodType<Prisma.AttributeCreateNestedManyWithoutSurveyInput> = z.object({
-  create: z.union([ z.lazy(() => AttributeCreateWithoutSurveyInputSchema),z.lazy(() => AttributeCreateWithoutSurveyInputSchema).array(),z.lazy(() => AttributeUncheckedCreateWithoutSurveyInputSchema),z.lazy(() => AttributeUncheckedCreateWithoutSurveyInputSchema).array() ]).optional(),
-  connectOrCreate: z.union([ z.lazy(() => AttributeCreateOrConnectWithoutSurveyInputSchema),z.lazy(() => AttributeCreateOrConnectWithoutSurveyInputSchema).array() ]).optional(),
-  createMany: z.lazy(() => AttributeCreateManySurveyInputEnvelopeSchema).optional(),
-  connect: z.union([ z.lazy(() => AttributeWhereUniqueInputSchema),z.lazy(() => AttributeWhereUniqueInputSchema).array() ]).optional(),
+export const AttributesOnSurveysCreateNestedManyWithoutSurveyInputSchema: z.ZodType<Prisma.AttributesOnSurveysCreateNestedManyWithoutSurveyInput> = z.object({
+  create: z.union([ z.lazy(() => AttributesOnSurveysCreateWithoutSurveyInputSchema),z.lazy(() => AttributesOnSurveysCreateWithoutSurveyInputSchema).array(),z.lazy(() => AttributesOnSurveysUncheckedCreateWithoutSurveyInputSchema),z.lazy(() => AttributesOnSurveysUncheckedCreateWithoutSurveyInputSchema).array() ]).optional(),
+  connectOrCreate: z.union([ z.lazy(() => AttributesOnSurveysCreateOrConnectWithoutSurveyInputSchema),z.lazy(() => AttributesOnSurveysCreateOrConnectWithoutSurveyInputSchema).array() ]).optional(),
+  createMany: z.lazy(() => AttributesOnSurveysCreateManySurveyInputEnvelopeSchema).optional(),
+  connect: z.union([ z.lazy(() => AttributesOnSurveysWhereUniqueInputSchema),z.lazy(() => AttributesOnSurveysWhereUniqueInputSchema).array() ]).optional(),
 }).strict();
 
 export const PropertyUncheckedCreateNestedManyWithoutSurveyInputSchema: z.ZodType<Prisma.PropertyUncheckedCreateNestedManyWithoutSurveyInput> = z.object({
@@ -1806,11 +2046,11 @@ export const PropertyUncheckedCreateNestedManyWithoutSurveyInputSchema: z.ZodTyp
   connect: z.union([ z.lazy(() => PropertyWhereUniqueInputSchema),z.lazy(() => PropertyWhereUniqueInputSchema).array() ]).optional(),
 }).strict();
 
-export const AttributeUncheckedCreateNestedManyWithoutSurveyInputSchema: z.ZodType<Prisma.AttributeUncheckedCreateNestedManyWithoutSurveyInput> = z.object({
-  create: z.union([ z.lazy(() => AttributeCreateWithoutSurveyInputSchema),z.lazy(() => AttributeCreateWithoutSurveyInputSchema).array(),z.lazy(() => AttributeUncheckedCreateWithoutSurveyInputSchema),z.lazy(() => AttributeUncheckedCreateWithoutSurveyInputSchema).array() ]).optional(),
-  connectOrCreate: z.union([ z.lazy(() => AttributeCreateOrConnectWithoutSurveyInputSchema),z.lazy(() => AttributeCreateOrConnectWithoutSurveyInputSchema).array() ]).optional(),
-  createMany: z.lazy(() => AttributeCreateManySurveyInputEnvelopeSchema).optional(),
-  connect: z.union([ z.lazy(() => AttributeWhereUniqueInputSchema),z.lazy(() => AttributeWhereUniqueInputSchema).array() ]).optional(),
+export const AttributesOnSurveysUncheckedCreateNestedManyWithoutSurveyInputSchema: z.ZodType<Prisma.AttributesOnSurveysUncheckedCreateNestedManyWithoutSurveyInput> = z.object({
+  create: z.union([ z.lazy(() => AttributesOnSurveysCreateWithoutSurveyInputSchema),z.lazy(() => AttributesOnSurveysCreateWithoutSurveyInputSchema).array(),z.lazy(() => AttributesOnSurveysUncheckedCreateWithoutSurveyInputSchema),z.lazy(() => AttributesOnSurveysUncheckedCreateWithoutSurveyInputSchema).array() ]).optional(),
+  connectOrCreate: z.union([ z.lazy(() => AttributesOnSurveysCreateOrConnectWithoutSurveyInputSchema),z.lazy(() => AttributesOnSurveysCreateOrConnectWithoutSurveyInputSchema).array() ]).optional(),
+  createMany: z.lazy(() => AttributesOnSurveysCreateManySurveyInputEnvelopeSchema).optional(),
+  connect: z.union([ z.lazy(() => AttributesOnSurveysWhereUniqueInputSchema),z.lazy(() => AttributesOnSurveysWhereUniqueInputSchema).array() ]).optional(),
 }).strict();
 
 export const ProjectUpdateOneRequiredWithoutSurveysNestedInputSchema: z.ZodType<Prisma.ProjectUpdateOneRequiredWithoutSurveysNestedInput> = z.object({
@@ -1835,18 +2075,18 @@ export const PropertyUpdateManyWithoutSurveyNestedInputSchema: z.ZodType<Prisma.
   deleteMany: z.union([ z.lazy(() => PropertyScalarWhereInputSchema),z.lazy(() => PropertyScalarWhereInputSchema).array() ]).optional(),
 }).strict();
 
-export const AttributeUpdateManyWithoutSurveyNestedInputSchema: z.ZodType<Prisma.AttributeUpdateManyWithoutSurveyNestedInput> = z.object({
-  create: z.union([ z.lazy(() => AttributeCreateWithoutSurveyInputSchema),z.lazy(() => AttributeCreateWithoutSurveyInputSchema).array(),z.lazy(() => AttributeUncheckedCreateWithoutSurveyInputSchema),z.lazy(() => AttributeUncheckedCreateWithoutSurveyInputSchema).array() ]).optional(),
-  connectOrCreate: z.union([ z.lazy(() => AttributeCreateOrConnectWithoutSurveyInputSchema),z.lazy(() => AttributeCreateOrConnectWithoutSurveyInputSchema).array() ]).optional(),
-  upsert: z.union([ z.lazy(() => AttributeUpsertWithWhereUniqueWithoutSurveyInputSchema),z.lazy(() => AttributeUpsertWithWhereUniqueWithoutSurveyInputSchema).array() ]).optional(),
-  createMany: z.lazy(() => AttributeCreateManySurveyInputEnvelopeSchema).optional(),
-  set: z.union([ z.lazy(() => AttributeWhereUniqueInputSchema),z.lazy(() => AttributeWhereUniqueInputSchema).array() ]).optional(),
-  disconnect: z.union([ z.lazy(() => AttributeWhereUniqueInputSchema),z.lazy(() => AttributeWhereUniqueInputSchema).array() ]).optional(),
-  delete: z.union([ z.lazy(() => AttributeWhereUniqueInputSchema),z.lazy(() => AttributeWhereUniqueInputSchema).array() ]).optional(),
-  connect: z.union([ z.lazy(() => AttributeWhereUniqueInputSchema),z.lazy(() => AttributeWhereUniqueInputSchema).array() ]).optional(),
-  update: z.union([ z.lazy(() => AttributeUpdateWithWhereUniqueWithoutSurveyInputSchema),z.lazy(() => AttributeUpdateWithWhereUniqueWithoutSurveyInputSchema).array() ]).optional(),
-  updateMany: z.union([ z.lazy(() => AttributeUpdateManyWithWhereWithoutSurveyInputSchema),z.lazy(() => AttributeUpdateManyWithWhereWithoutSurveyInputSchema).array() ]).optional(),
-  deleteMany: z.union([ z.lazy(() => AttributeScalarWhereInputSchema),z.lazy(() => AttributeScalarWhereInputSchema).array() ]).optional(),
+export const AttributesOnSurveysUpdateManyWithoutSurveyNestedInputSchema: z.ZodType<Prisma.AttributesOnSurveysUpdateManyWithoutSurveyNestedInput> = z.object({
+  create: z.union([ z.lazy(() => AttributesOnSurveysCreateWithoutSurveyInputSchema),z.lazy(() => AttributesOnSurveysCreateWithoutSurveyInputSchema).array(),z.lazy(() => AttributesOnSurveysUncheckedCreateWithoutSurveyInputSchema),z.lazy(() => AttributesOnSurveysUncheckedCreateWithoutSurveyInputSchema).array() ]).optional(),
+  connectOrCreate: z.union([ z.lazy(() => AttributesOnSurveysCreateOrConnectWithoutSurveyInputSchema),z.lazy(() => AttributesOnSurveysCreateOrConnectWithoutSurveyInputSchema).array() ]).optional(),
+  upsert: z.union([ z.lazy(() => AttributesOnSurveysUpsertWithWhereUniqueWithoutSurveyInputSchema),z.lazy(() => AttributesOnSurveysUpsertWithWhereUniqueWithoutSurveyInputSchema).array() ]).optional(),
+  createMany: z.lazy(() => AttributesOnSurveysCreateManySurveyInputEnvelopeSchema).optional(),
+  set: z.union([ z.lazy(() => AttributesOnSurveysWhereUniqueInputSchema),z.lazy(() => AttributesOnSurveysWhereUniqueInputSchema).array() ]).optional(),
+  disconnect: z.union([ z.lazy(() => AttributesOnSurveysWhereUniqueInputSchema),z.lazy(() => AttributesOnSurveysWhereUniqueInputSchema).array() ]).optional(),
+  delete: z.union([ z.lazy(() => AttributesOnSurveysWhereUniqueInputSchema),z.lazy(() => AttributesOnSurveysWhereUniqueInputSchema).array() ]).optional(),
+  connect: z.union([ z.lazy(() => AttributesOnSurveysWhereUniqueInputSchema),z.lazy(() => AttributesOnSurveysWhereUniqueInputSchema).array() ]).optional(),
+  update: z.union([ z.lazy(() => AttributesOnSurveysUpdateWithWhereUniqueWithoutSurveyInputSchema),z.lazy(() => AttributesOnSurveysUpdateWithWhereUniqueWithoutSurveyInputSchema).array() ]).optional(),
+  updateMany: z.union([ z.lazy(() => AttributesOnSurveysUpdateManyWithWhereWithoutSurveyInputSchema),z.lazy(() => AttributesOnSurveysUpdateManyWithWhereWithoutSurveyInputSchema).array() ]).optional(),
+  deleteMany: z.union([ z.lazy(() => AttributesOnSurveysScalarWhereInputSchema),z.lazy(() => AttributesOnSurveysScalarWhereInputSchema).array() ]).optional(),
 }).strict();
 
 export const PropertyUncheckedUpdateManyWithoutSurveyNestedInputSchema: z.ZodType<Prisma.PropertyUncheckedUpdateManyWithoutSurveyNestedInput> = z.object({
@@ -1863,18 +2103,112 @@ export const PropertyUncheckedUpdateManyWithoutSurveyNestedInputSchema: z.ZodTyp
   deleteMany: z.union([ z.lazy(() => PropertyScalarWhereInputSchema),z.lazy(() => PropertyScalarWhereInputSchema).array() ]).optional(),
 }).strict();
 
-export const AttributeUncheckedUpdateManyWithoutSurveyNestedInputSchema: z.ZodType<Prisma.AttributeUncheckedUpdateManyWithoutSurveyNestedInput> = z.object({
-  create: z.union([ z.lazy(() => AttributeCreateWithoutSurveyInputSchema),z.lazy(() => AttributeCreateWithoutSurveyInputSchema).array(),z.lazy(() => AttributeUncheckedCreateWithoutSurveyInputSchema),z.lazy(() => AttributeUncheckedCreateWithoutSurveyInputSchema).array() ]).optional(),
-  connectOrCreate: z.union([ z.lazy(() => AttributeCreateOrConnectWithoutSurveyInputSchema),z.lazy(() => AttributeCreateOrConnectWithoutSurveyInputSchema).array() ]).optional(),
-  upsert: z.union([ z.lazy(() => AttributeUpsertWithWhereUniqueWithoutSurveyInputSchema),z.lazy(() => AttributeUpsertWithWhereUniqueWithoutSurveyInputSchema).array() ]).optional(),
-  createMany: z.lazy(() => AttributeCreateManySurveyInputEnvelopeSchema).optional(),
-  set: z.union([ z.lazy(() => AttributeWhereUniqueInputSchema),z.lazy(() => AttributeWhereUniqueInputSchema).array() ]).optional(),
-  disconnect: z.union([ z.lazy(() => AttributeWhereUniqueInputSchema),z.lazy(() => AttributeWhereUniqueInputSchema).array() ]).optional(),
-  delete: z.union([ z.lazy(() => AttributeWhereUniqueInputSchema),z.lazy(() => AttributeWhereUniqueInputSchema).array() ]).optional(),
-  connect: z.union([ z.lazy(() => AttributeWhereUniqueInputSchema),z.lazy(() => AttributeWhereUniqueInputSchema).array() ]).optional(),
-  update: z.union([ z.lazy(() => AttributeUpdateWithWhereUniqueWithoutSurveyInputSchema),z.lazy(() => AttributeUpdateWithWhereUniqueWithoutSurveyInputSchema).array() ]).optional(),
-  updateMany: z.union([ z.lazy(() => AttributeUpdateManyWithWhereWithoutSurveyInputSchema),z.lazy(() => AttributeUpdateManyWithWhereWithoutSurveyInputSchema).array() ]).optional(),
-  deleteMany: z.union([ z.lazy(() => AttributeScalarWhereInputSchema),z.lazy(() => AttributeScalarWhereInputSchema).array() ]).optional(),
+export const AttributesOnSurveysUncheckedUpdateManyWithoutSurveyNestedInputSchema: z.ZodType<Prisma.AttributesOnSurveysUncheckedUpdateManyWithoutSurveyNestedInput> = z.object({
+  create: z.union([ z.lazy(() => AttributesOnSurveysCreateWithoutSurveyInputSchema),z.lazy(() => AttributesOnSurveysCreateWithoutSurveyInputSchema).array(),z.lazy(() => AttributesOnSurveysUncheckedCreateWithoutSurveyInputSchema),z.lazy(() => AttributesOnSurveysUncheckedCreateWithoutSurveyInputSchema).array() ]).optional(),
+  connectOrCreate: z.union([ z.lazy(() => AttributesOnSurveysCreateOrConnectWithoutSurveyInputSchema),z.lazy(() => AttributesOnSurveysCreateOrConnectWithoutSurveyInputSchema).array() ]).optional(),
+  upsert: z.union([ z.lazy(() => AttributesOnSurveysUpsertWithWhereUniqueWithoutSurveyInputSchema),z.lazy(() => AttributesOnSurveysUpsertWithWhereUniqueWithoutSurveyInputSchema).array() ]).optional(),
+  createMany: z.lazy(() => AttributesOnSurveysCreateManySurveyInputEnvelopeSchema).optional(),
+  set: z.union([ z.lazy(() => AttributesOnSurveysWhereUniqueInputSchema),z.lazy(() => AttributesOnSurveysWhereUniqueInputSchema).array() ]).optional(),
+  disconnect: z.union([ z.lazy(() => AttributesOnSurveysWhereUniqueInputSchema),z.lazy(() => AttributesOnSurveysWhereUniqueInputSchema).array() ]).optional(),
+  delete: z.union([ z.lazy(() => AttributesOnSurveysWhereUniqueInputSchema),z.lazy(() => AttributesOnSurveysWhereUniqueInputSchema).array() ]).optional(),
+  connect: z.union([ z.lazy(() => AttributesOnSurveysWhereUniqueInputSchema),z.lazy(() => AttributesOnSurveysWhereUniqueInputSchema).array() ]).optional(),
+  update: z.union([ z.lazy(() => AttributesOnSurveysUpdateWithWhereUniqueWithoutSurveyInputSchema),z.lazy(() => AttributesOnSurveysUpdateWithWhereUniqueWithoutSurveyInputSchema).array() ]).optional(),
+  updateMany: z.union([ z.lazy(() => AttributesOnSurveysUpdateManyWithWhereWithoutSurveyInputSchema),z.lazy(() => AttributesOnSurveysUpdateManyWithWhereWithoutSurveyInputSchema).array() ]).optional(),
+  deleteMany: z.union([ z.lazy(() => AttributesOnSurveysScalarWhereInputSchema),z.lazy(() => AttributesOnSurveysScalarWhereInputSchema).array() ]).optional(),
+}).strict();
+
+export const UserCreateNestedOneWithoutAttributesInputSchema: z.ZodType<Prisma.UserCreateNestedOneWithoutAttributesInput> = z.object({
+  create: z.union([ z.lazy(() => UserCreateWithoutAttributesInputSchema),z.lazy(() => UserUncheckedCreateWithoutAttributesInputSchema) ]).optional(),
+  connectOrCreate: z.lazy(() => UserCreateOrConnectWithoutAttributesInputSchema).optional(),
+  connect: z.lazy(() => UserWhereUniqueInputSchema).optional()
+}).strict();
+
+export const AttributesOnSurveysCreateNestedManyWithoutAttributeInputSchema: z.ZodType<Prisma.AttributesOnSurveysCreateNestedManyWithoutAttributeInput> = z.object({
+  create: z.union([ z.lazy(() => AttributesOnSurveysCreateWithoutAttributeInputSchema),z.lazy(() => AttributesOnSurveysCreateWithoutAttributeInputSchema).array(),z.lazy(() => AttributesOnSurveysUncheckedCreateWithoutAttributeInputSchema),z.lazy(() => AttributesOnSurveysUncheckedCreateWithoutAttributeInputSchema).array() ]).optional(),
+  connectOrCreate: z.union([ z.lazy(() => AttributesOnSurveysCreateOrConnectWithoutAttributeInputSchema),z.lazy(() => AttributesOnSurveysCreateOrConnectWithoutAttributeInputSchema).array() ]).optional(),
+  createMany: z.lazy(() => AttributesOnSurveysCreateManyAttributeInputEnvelopeSchema).optional(),
+  connect: z.union([ z.lazy(() => AttributesOnSurveysWhereUniqueInputSchema),z.lazy(() => AttributesOnSurveysWhereUniqueInputSchema).array() ]).optional(),
+}).strict();
+
+export const AttributesOnSurveysUncheckedCreateNestedManyWithoutAttributeInputSchema: z.ZodType<Prisma.AttributesOnSurveysUncheckedCreateNestedManyWithoutAttributeInput> = z.object({
+  create: z.union([ z.lazy(() => AttributesOnSurveysCreateWithoutAttributeInputSchema),z.lazy(() => AttributesOnSurveysCreateWithoutAttributeInputSchema).array(),z.lazy(() => AttributesOnSurveysUncheckedCreateWithoutAttributeInputSchema),z.lazy(() => AttributesOnSurveysUncheckedCreateWithoutAttributeInputSchema).array() ]).optional(),
+  connectOrCreate: z.union([ z.lazy(() => AttributesOnSurveysCreateOrConnectWithoutAttributeInputSchema),z.lazy(() => AttributesOnSurveysCreateOrConnectWithoutAttributeInputSchema).array() ]).optional(),
+  createMany: z.lazy(() => AttributesOnSurveysCreateManyAttributeInputEnvelopeSchema).optional(),
+  connect: z.union([ z.lazy(() => AttributesOnSurveysWhereUniqueInputSchema),z.lazy(() => AttributesOnSurveysWhereUniqueInputSchema).array() ]).optional(),
+}).strict();
+
+export const UserUpdateOneWithoutAttributesNestedInputSchema: z.ZodType<Prisma.UserUpdateOneWithoutAttributesNestedInput> = z.object({
+  create: z.union([ z.lazy(() => UserCreateWithoutAttributesInputSchema),z.lazy(() => UserUncheckedCreateWithoutAttributesInputSchema) ]).optional(),
+  connectOrCreate: z.lazy(() => UserCreateOrConnectWithoutAttributesInputSchema).optional(),
+  upsert: z.lazy(() => UserUpsertWithoutAttributesInputSchema).optional(),
+  disconnect: z.union([ z.boolean(),z.lazy(() => UserWhereInputSchema) ]).optional(),
+  delete: z.union([ z.boolean(),z.lazy(() => UserWhereInputSchema) ]).optional(),
+  connect: z.lazy(() => UserWhereUniqueInputSchema).optional(),
+  update: z.union([ z.lazy(() => UserUpdateToOneWithWhereWithoutAttributesInputSchema),z.lazy(() => UserUpdateWithoutAttributesInputSchema),z.lazy(() => UserUncheckedUpdateWithoutAttributesInputSchema) ]).optional(),
+}).strict();
+
+export const AttributesOnSurveysUpdateManyWithoutAttributeNestedInputSchema: z.ZodType<Prisma.AttributesOnSurveysUpdateManyWithoutAttributeNestedInput> = z.object({
+  create: z.union([ z.lazy(() => AttributesOnSurveysCreateWithoutAttributeInputSchema),z.lazy(() => AttributesOnSurveysCreateWithoutAttributeInputSchema).array(),z.lazy(() => AttributesOnSurveysUncheckedCreateWithoutAttributeInputSchema),z.lazy(() => AttributesOnSurveysUncheckedCreateWithoutAttributeInputSchema).array() ]).optional(),
+  connectOrCreate: z.union([ z.lazy(() => AttributesOnSurveysCreateOrConnectWithoutAttributeInputSchema),z.lazy(() => AttributesOnSurveysCreateOrConnectWithoutAttributeInputSchema).array() ]).optional(),
+  upsert: z.union([ z.lazy(() => AttributesOnSurveysUpsertWithWhereUniqueWithoutAttributeInputSchema),z.lazy(() => AttributesOnSurveysUpsertWithWhereUniqueWithoutAttributeInputSchema).array() ]).optional(),
+  createMany: z.lazy(() => AttributesOnSurveysCreateManyAttributeInputEnvelopeSchema).optional(),
+  set: z.union([ z.lazy(() => AttributesOnSurveysWhereUniqueInputSchema),z.lazy(() => AttributesOnSurveysWhereUniqueInputSchema).array() ]).optional(),
+  disconnect: z.union([ z.lazy(() => AttributesOnSurveysWhereUniqueInputSchema),z.lazy(() => AttributesOnSurveysWhereUniqueInputSchema).array() ]).optional(),
+  delete: z.union([ z.lazy(() => AttributesOnSurveysWhereUniqueInputSchema),z.lazy(() => AttributesOnSurveysWhereUniqueInputSchema).array() ]).optional(),
+  connect: z.union([ z.lazy(() => AttributesOnSurveysWhereUniqueInputSchema),z.lazy(() => AttributesOnSurveysWhereUniqueInputSchema).array() ]).optional(),
+  update: z.union([ z.lazy(() => AttributesOnSurveysUpdateWithWhereUniqueWithoutAttributeInputSchema),z.lazy(() => AttributesOnSurveysUpdateWithWhereUniqueWithoutAttributeInputSchema).array() ]).optional(),
+  updateMany: z.union([ z.lazy(() => AttributesOnSurveysUpdateManyWithWhereWithoutAttributeInputSchema),z.lazy(() => AttributesOnSurveysUpdateManyWithWhereWithoutAttributeInputSchema).array() ]).optional(),
+  deleteMany: z.union([ z.lazy(() => AttributesOnSurveysScalarWhereInputSchema),z.lazy(() => AttributesOnSurveysScalarWhereInputSchema).array() ]).optional(),
+}).strict();
+
+export const AttributesOnSurveysUncheckedUpdateManyWithoutAttributeNestedInputSchema: z.ZodType<Prisma.AttributesOnSurveysUncheckedUpdateManyWithoutAttributeNestedInput> = z.object({
+  create: z.union([ z.lazy(() => AttributesOnSurveysCreateWithoutAttributeInputSchema),z.lazy(() => AttributesOnSurveysCreateWithoutAttributeInputSchema).array(),z.lazy(() => AttributesOnSurveysUncheckedCreateWithoutAttributeInputSchema),z.lazy(() => AttributesOnSurveysUncheckedCreateWithoutAttributeInputSchema).array() ]).optional(),
+  connectOrCreate: z.union([ z.lazy(() => AttributesOnSurveysCreateOrConnectWithoutAttributeInputSchema),z.lazy(() => AttributesOnSurveysCreateOrConnectWithoutAttributeInputSchema).array() ]).optional(),
+  upsert: z.union([ z.lazy(() => AttributesOnSurveysUpsertWithWhereUniqueWithoutAttributeInputSchema),z.lazy(() => AttributesOnSurveysUpsertWithWhereUniqueWithoutAttributeInputSchema).array() ]).optional(),
+  createMany: z.lazy(() => AttributesOnSurveysCreateManyAttributeInputEnvelopeSchema).optional(),
+  set: z.union([ z.lazy(() => AttributesOnSurveysWhereUniqueInputSchema),z.lazy(() => AttributesOnSurveysWhereUniqueInputSchema).array() ]).optional(),
+  disconnect: z.union([ z.lazy(() => AttributesOnSurveysWhereUniqueInputSchema),z.lazy(() => AttributesOnSurveysWhereUniqueInputSchema).array() ]).optional(),
+  delete: z.union([ z.lazy(() => AttributesOnSurveysWhereUniqueInputSchema),z.lazy(() => AttributesOnSurveysWhereUniqueInputSchema).array() ]).optional(),
+  connect: z.union([ z.lazy(() => AttributesOnSurveysWhereUniqueInputSchema),z.lazy(() => AttributesOnSurveysWhereUniqueInputSchema).array() ]).optional(),
+  update: z.union([ z.lazy(() => AttributesOnSurveysUpdateWithWhereUniqueWithoutAttributeInputSchema),z.lazy(() => AttributesOnSurveysUpdateWithWhereUniqueWithoutAttributeInputSchema).array() ]).optional(),
+  updateMany: z.union([ z.lazy(() => AttributesOnSurveysUpdateManyWithWhereWithoutAttributeInputSchema),z.lazy(() => AttributesOnSurveysUpdateManyWithWhereWithoutAttributeInputSchema).array() ]).optional(),
+  deleteMany: z.union([ z.lazy(() => AttributesOnSurveysScalarWhereInputSchema),z.lazy(() => AttributesOnSurveysScalarWhereInputSchema).array() ]).optional(),
+}).strict();
+
+export const AttributeCreateNestedOneWithoutSurveysInputSchema: z.ZodType<Prisma.AttributeCreateNestedOneWithoutSurveysInput> = z.object({
+  create: z.union([ z.lazy(() => AttributeCreateWithoutSurveysInputSchema),z.lazy(() => AttributeUncheckedCreateWithoutSurveysInputSchema) ]).optional(),
+  connectOrCreate: z.lazy(() => AttributeCreateOrConnectWithoutSurveysInputSchema).optional(),
+  connect: z.lazy(() => AttributeWhereUniqueInputSchema).optional()
+}).strict();
+
+export const SurveyCreateNestedOneWithoutAttributesInputSchema: z.ZodType<Prisma.SurveyCreateNestedOneWithoutAttributesInput> = z.object({
+  create: z.union([ z.lazy(() => SurveyCreateWithoutAttributesInputSchema),z.lazy(() => SurveyUncheckedCreateWithoutAttributesInputSchema) ]).optional(),
+  connectOrCreate: z.lazy(() => SurveyCreateOrConnectWithoutAttributesInputSchema).optional(),
+  connect: z.lazy(() => SurveyWhereUniqueInputSchema).optional()
+}).strict();
+
+export const IntFieldUpdateOperationsInputSchema: z.ZodType<Prisma.IntFieldUpdateOperationsInput> = z.object({
+  set: z.number().optional(),
+  increment: z.number().optional(),
+  decrement: z.number().optional(),
+  multiply: z.number().optional(),
+  divide: z.number().optional()
+}).strict();
+
+export const AttributeUpdateOneRequiredWithoutSurveysNestedInputSchema: z.ZodType<Prisma.AttributeUpdateOneRequiredWithoutSurveysNestedInput> = z.object({
+  create: z.union([ z.lazy(() => AttributeCreateWithoutSurveysInputSchema),z.lazy(() => AttributeUncheckedCreateWithoutSurveysInputSchema) ]).optional(),
+  connectOrCreate: z.lazy(() => AttributeCreateOrConnectWithoutSurveysInputSchema).optional(),
+  upsert: z.lazy(() => AttributeUpsertWithoutSurveysInputSchema).optional(),
+  connect: z.lazy(() => AttributeWhereUniqueInputSchema).optional(),
+  update: z.union([ z.lazy(() => AttributeUpdateToOneWithWhereWithoutSurveysInputSchema),z.lazy(() => AttributeUpdateWithoutSurveysInputSchema),z.lazy(() => AttributeUncheckedUpdateWithoutSurveysInputSchema) ]).optional(),
+}).strict();
+
+export const SurveyUpdateOneRequiredWithoutAttributesNestedInputSchema: z.ZodType<Prisma.SurveyUpdateOneRequiredWithoutAttributesNestedInput> = z.object({
+  create: z.union([ z.lazy(() => SurveyCreateWithoutAttributesInputSchema),z.lazy(() => SurveyUncheckedCreateWithoutAttributesInputSchema) ]).optional(),
+  connectOrCreate: z.lazy(() => SurveyCreateOrConnectWithoutAttributesInputSchema).optional(),
+  upsert: z.lazy(() => SurveyUpsertWithoutAttributesInputSchema).optional(),
+  connect: z.lazy(() => SurveyWhereUniqueInputSchema).optional(),
+  update: z.union([ z.lazy(() => SurveyUpdateToOneWithWhereWithoutAttributesInputSchema),z.lazy(() => SurveyUpdateWithoutAttributesInputSchema),z.lazy(() => SurveyUncheckedUpdateWithoutAttributesInputSchema) ]).optional(),
 }).strict();
 
 export const UserCreateNestedOneWithoutPropertiesInputSchema: z.ZodType<Prisma.UserCreateNestedOneWithoutPropertiesInput> = z.object({
@@ -1945,38 +2279,6 @@ export const BrochureUncheckedUpdateManyWithoutPropertyNestedInputSchema: z.ZodT
   update: z.union([ z.lazy(() => BrochureUpdateWithWhereUniqueWithoutPropertyInputSchema),z.lazy(() => BrochureUpdateWithWhereUniqueWithoutPropertyInputSchema).array() ]).optional(),
   updateMany: z.union([ z.lazy(() => BrochureUpdateManyWithWhereWithoutPropertyInputSchema),z.lazy(() => BrochureUpdateManyWithWhereWithoutPropertyInputSchema).array() ]).optional(),
   deleteMany: z.union([ z.lazy(() => BrochureScalarWhereInputSchema),z.lazy(() => BrochureScalarWhereInputSchema).array() ]).optional(),
-}).strict();
-
-export const UserCreateNestedOneWithoutAttributesInputSchema: z.ZodType<Prisma.UserCreateNestedOneWithoutAttributesInput> = z.object({
-  create: z.union([ z.lazy(() => UserCreateWithoutAttributesInputSchema),z.lazy(() => UserUncheckedCreateWithoutAttributesInputSchema) ]).optional(),
-  connectOrCreate: z.lazy(() => UserCreateOrConnectWithoutAttributesInputSchema).optional(),
-  connect: z.lazy(() => UserWhereUniqueInputSchema).optional()
-}).strict();
-
-export const SurveyCreateNestedOneWithoutAttributesOrderInputSchema: z.ZodType<Prisma.SurveyCreateNestedOneWithoutAttributesOrderInput> = z.object({
-  create: z.union([ z.lazy(() => SurveyCreateWithoutAttributesOrderInputSchema),z.lazy(() => SurveyUncheckedCreateWithoutAttributesOrderInputSchema) ]).optional(),
-  connectOrCreate: z.lazy(() => SurveyCreateOrConnectWithoutAttributesOrderInputSchema).optional(),
-  connect: z.lazy(() => SurveyWhereUniqueInputSchema).optional()
-}).strict();
-
-export const UserUpdateOneWithoutAttributesNestedInputSchema: z.ZodType<Prisma.UserUpdateOneWithoutAttributesNestedInput> = z.object({
-  create: z.union([ z.lazy(() => UserCreateWithoutAttributesInputSchema),z.lazy(() => UserUncheckedCreateWithoutAttributesInputSchema) ]).optional(),
-  connectOrCreate: z.lazy(() => UserCreateOrConnectWithoutAttributesInputSchema).optional(),
-  upsert: z.lazy(() => UserUpsertWithoutAttributesInputSchema).optional(),
-  disconnect: z.union([ z.boolean(),z.lazy(() => UserWhereInputSchema) ]).optional(),
-  delete: z.union([ z.boolean(),z.lazy(() => UserWhereInputSchema) ]).optional(),
-  connect: z.lazy(() => UserWhereUniqueInputSchema).optional(),
-  update: z.union([ z.lazy(() => UserUpdateToOneWithWhereWithoutAttributesInputSchema),z.lazy(() => UserUpdateWithoutAttributesInputSchema),z.lazy(() => UserUncheckedUpdateWithoutAttributesInputSchema) ]).optional(),
-}).strict();
-
-export const SurveyUpdateOneWithoutAttributesOrderNestedInputSchema: z.ZodType<Prisma.SurveyUpdateOneWithoutAttributesOrderNestedInput> = z.object({
-  create: z.union([ z.lazy(() => SurveyCreateWithoutAttributesOrderInputSchema),z.lazy(() => SurveyUncheckedCreateWithoutAttributesOrderInputSchema) ]).optional(),
-  connectOrCreate: z.lazy(() => SurveyCreateOrConnectWithoutAttributesOrderInputSchema).optional(),
-  upsert: z.lazy(() => SurveyUpsertWithoutAttributesOrderInputSchema).optional(),
-  disconnect: z.union([ z.boolean(),z.lazy(() => SurveyWhereInputSchema) ]).optional(),
-  delete: z.union([ z.boolean(),z.lazy(() => SurveyWhereInputSchema) ]).optional(),
-  connect: z.lazy(() => SurveyWhereUniqueInputSchema).optional(),
-  update: z.union([ z.lazy(() => SurveyUpdateToOneWithWhereWithoutAttributesOrderInputSchema),z.lazy(() => SurveyUpdateWithoutAttributesOrderInputSchema),z.lazy(() => SurveyUncheckedUpdateWithoutAttributesOrderInputSchema) ]).optional(),
 }).strict();
 
 export const PropertyCreateNestedOneWithoutBrochuresInputSchema: z.ZodType<Prisma.PropertyCreateNestedOneWithoutBrochuresInput> = z.object({
@@ -2102,6 +2404,33 @@ export const NestedDateTimeWithAggregatesFilterSchema: z.ZodType<Prisma.NestedDa
   _max: z.lazy(() => NestedDateTimeFilterSchema).optional()
 }).strict();
 
+export const NestedIntWithAggregatesFilterSchema: z.ZodType<Prisma.NestedIntWithAggregatesFilter> = z.object({
+  equals: z.number().optional(),
+  in: z.number().array().optional(),
+  notIn: z.number().array().optional(),
+  lt: z.number().optional(),
+  lte: z.number().optional(),
+  gt: z.number().optional(),
+  gte: z.number().optional(),
+  not: z.union([ z.number(),z.lazy(() => NestedIntWithAggregatesFilterSchema) ]).optional(),
+  _count: z.lazy(() => NestedIntFilterSchema).optional(),
+  _avg: z.lazy(() => NestedFloatFilterSchema).optional(),
+  _sum: z.lazy(() => NestedIntFilterSchema).optional(),
+  _min: z.lazy(() => NestedIntFilterSchema).optional(),
+  _max: z.lazy(() => NestedIntFilterSchema).optional()
+}).strict();
+
+export const NestedFloatFilterSchema: z.ZodType<Prisma.NestedFloatFilter> = z.object({
+  equals: z.number().optional(),
+  in: z.number().array().optional(),
+  notIn: z.number().array().optional(),
+  lt: z.number().optional(),
+  lte: z.number().optional(),
+  gt: z.number().optional(),
+  gte: z.number().optional(),
+  not: z.union([ z.number(),z.lazy(() => NestedFloatFilterSchema) ]).optional(),
+}).strict();
+
 export const NestedJsonNullableFilterSchema: z.ZodType<Prisma.NestedJsonNullableFilter> = z.object({
   equals: InputJsonValueSchema.optional(),
   path: z.string().array().optional(),
@@ -2119,7 +2448,7 @@ export const NestedJsonNullableFilterSchema: z.ZodType<Prisma.NestedJsonNullable
 }).strict();
 
 export const ProjectCreateWithoutOwnerInputSchema: z.ZodType<Prisma.ProjectCreateWithoutOwnerInput> = z.object({
-  id: z.string().optional(),
+  id: z.string().uuid().optional(),
   name: z.string(),
   createdAt: z.coerce.date().optional(),
   updatedAt: z.coerce.date().optional(),
@@ -2127,7 +2456,7 @@ export const ProjectCreateWithoutOwnerInputSchema: z.ZodType<Prisma.ProjectCreat
 }).strict();
 
 export const ProjectUncheckedCreateWithoutOwnerInputSchema: z.ZodType<Prisma.ProjectUncheckedCreateWithoutOwnerInput> = z.object({
-  id: z.string().optional(),
+  id: z.string().uuid().optional(),
   name: z.string(),
   createdAt: z.coerce.date().optional(),
   updatedAt: z.coerce.date().optional(),
@@ -2145,7 +2474,7 @@ export const ProjectCreateManyOwnerInputEnvelopeSchema: z.ZodType<Prisma.Project
 }).strict();
 
 export const PropertyCreateWithoutOwnerInputSchema: z.ZodType<Prisma.PropertyCreateWithoutOwnerInput> = z.object({
-  id: z.string().optional(),
+  id: z.string().uuid().optional(),
   createdAt: z.coerce.date().optional(),
   updatedAt: z.coerce.date().optional(),
   address: z.string(),
@@ -2156,7 +2485,7 @@ export const PropertyCreateWithoutOwnerInputSchema: z.ZodType<Prisma.PropertyCre
 }).strict();
 
 export const PropertyUncheckedCreateWithoutOwnerInputSchema: z.ZodType<Prisma.PropertyUncheckedCreateWithoutOwnerInput> = z.object({
-  id: z.string().optional(),
+  id: z.string().uuid().optional(),
   createdAt: z.coerce.date().optional(),
   updatedAt: z.coerce.date().optional(),
   address: z.string(),
@@ -2177,21 +2506,21 @@ export const PropertyCreateManyOwnerInputEnvelopeSchema: z.ZodType<Prisma.Proper
 }).strict();
 
 export const AttributeCreateWithoutOwnerInputSchema: z.ZodType<Prisma.AttributeCreateWithoutOwnerInput> = z.object({
-  id: z.string().optional(),
+  id: z.string().uuid().optional(),
   createdAt: z.coerce.date().optional(),
   updatedAt: z.coerce.date().optional(),
   label: z.string(),
   type: z.string(),
-  Survey: z.lazy(() => SurveyCreateNestedOneWithoutAttributesOrderInputSchema).optional()
+  surveys: z.lazy(() => AttributesOnSurveysCreateNestedManyWithoutAttributeInputSchema).optional()
 }).strict();
 
 export const AttributeUncheckedCreateWithoutOwnerInputSchema: z.ZodType<Prisma.AttributeUncheckedCreateWithoutOwnerInput> = z.object({
-  id: z.string().optional(),
+  id: z.string().uuid().optional(),
   createdAt: z.coerce.date().optional(),
   updatedAt: z.coerce.date().optional(),
   label: z.string(),
   type: z.string(),
-  surveyId: z.string().optional().nullable()
+  surveys: z.lazy(() => AttributesOnSurveysUncheckedCreateNestedManyWithoutAttributeInputSchema).optional()
 }).strict();
 
 export const AttributeCreateOrConnectWithoutOwnerInputSchema: z.ZodType<Prisma.AttributeCreateOrConnectWithoutOwnerInput> = z.object({
@@ -2287,11 +2616,10 @@ export const AttributeScalarWhereInputSchema: z.ZodType<Prisma.AttributeScalarWh
   label: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   type: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   ownerId: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
-  surveyId: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
 }).strict();
 
 export const UserCreateWithoutProjectsInputSchema: z.ZodType<Prisma.UserCreateWithoutProjectsInput> = z.object({
-  id: z.string().optional(),
+  id: z.string().uuid().optional(),
   clerkId: z.string(),
   email: z.string(),
   firstName: z.string().optional().nullable(),
@@ -2301,7 +2629,7 @@ export const UserCreateWithoutProjectsInputSchema: z.ZodType<Prisma.UserCreateWi
 }).strict();
 
 export const UserUncheckedCreateWithoutProjectsInputSchema: z.ZodType<Prisma.UserUncheckedCreateWithoutProjectsInput> = z.object({
-  id: z.string().optional(),
+  id: z.string().uuid().optional(),
   clerkId: z.string(),
   email: z.string(),
   firstName: z.string().optional().nullable(),
@@ -2316,23 +2644,23 @@ export const UserCreateOrConnectWithoutProjectsInputSchema: z.ZodType<Prisma.Use
 }).strict();
 
 export const SurveyCreateWithoutProjectInputSchema: z.ZodType<Prisma.SurveyCreateWithoutProjectInput> = z.object({
-  id: z.string().optional(),
+  id: z.string().uuid().optional(),
   ownerId: z.string(),
   createdAt: z.coerce.date().optional(),
   updatedAt: z.coerce.date().optional(),
   name: z.string(),
   properties: z.lazy(() => PropertyCreateNestedManyWithoutSurveyInputSchema).optional(),
-  attributesOrder: z.lazy(() => AttributeCreateNestedManyWithoutSurveyInputSchema).optional()
+  attributes: z.lazy(() => AttributesOnSurveysCreateNestedManyWithoutSurveyInputSchema).optional()
 }).strict();
 
 export const SurveyUncheckedCreateWithoutProjectInputSchema: z.ZodType<Prisma.SurveyUncheckedCreateWithoutProjectInput> = z.object({
-  id: z.string().optional(),
+  id: z.string().uuid().optional(),
   ownerId: z.string(),
   createdAt: z.coerce.date().optional(),
   updatedAt: z.coerce.date().optional(),
   name: z.string(),
   properties: z.lazy(() => PropertyUncheckedCreateNestedManyWithoutSurveyInputSchema).optional(),
-  attributesOrder: z.lazy(() => AttributeUncheckedCreateNestedManyWithoutSurveyInputSchema).optional()
+  attributes: z.lazy(() => AttributesOnSurveysUncheckedCreateNestedManyWithoutSurveyInputSchema).optional()
 }).strict();
 
 export const SurveyCreateOrConnectWithoutProjectInputSchema: z.ZodType<Prisma.SurveyCreateOrConnectWithoutProjectInput> = z.object({
@@ -2357,7 +2685,7 @@ export const UserUpdateToOneWithWhereWithoutProjectsInputSchema: z.ZodType<Prism
 }).strict();
 
 export const UserUpdateWithoutProjectsInputSchema: z.ZodType<Prisma.UserUpdateWithoutProjectsInput> = z.object({
-  id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  id: z.union([ z.string().uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   clerkId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   email: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   firstName: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
@@ -2367,7 +2695,7 @@ export const UserUpdateWithoutProjectsInputSchema: z.ZodType<Prisma.UserUpdateWi
 }).strict();
 
 export const UserUncheckedUpdateWithoutProjectsInputSchema: z.ZodType<Prisma.UserUncheckedUpdateWithoutProjectsInput> = z.object({
-  id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  id: z.union([ z.string().uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   clerkId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   email: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   firstName: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
@@ -2405,7 +2733,7 @@ export const SurveyScalarWhereInputSchema: z.ZodType<Prisma.SurveyScalarWhereInp
 }).strict();
 
 export const ProjectCreateWithoutSurveysInputSchema: z.ZodType<Prisma.ProjectCreateWithoutSurveysInput> = z.object({
-  id: z.string().optional(),
+  id: z.string().uuid().optional(),
   name: z.string(),
   createdAt: z.coerce.date().optional(),
   updatedAt: z.coerce.date().optional(),
@@ -2413,7 +2741,7 @@ export const ProjectCreateWithoutSurveysInputSchema: z.ZodType<Prisma.ProjectCre
 }).strict();
 
 export const ProjectUncheckedCreateWithoutSurveysInputSchema: z.ZodType<Prisma.ProjectUncheckedCreateWithoutSurveysInput> = z.object({
-  id: z.string().optional(),
+  id: z.string().uuid().optional(),
   ownerId: z.string(),
   name: z.string(),
   createdAt: z.coerce.date().optional(),
@@ -2426,7 +2754,7 @@ export const ProjectCreateOrConnectWithoutSurveysInputSchema: z.ZodType<Prisma.P
 }).strict();
 
 export const PropertyCreateWithoutSurveyInputSchema: z.ZodType<Prisma.PropertyCreateWithoutSurveyInput> = z.object({
-  id: z.string().optional(),
+  id: z.string().uuid().optional(),
   createdAt: z.coerce.date().optional(),
   updatedAt: z.coerce.date().optional(),
   address: z.string(),
@@ -2437,7 +2765,7 @@ export const PropertyCreateWithoutSurveyInputSchema: z.ZodType<Prisma.PropertyCr
 }).strict();
 
 export const PropertyUncheckedCreateWithoutSurveyInputSchema: z.ZodType<Prisma.PropertyUncheckedCreateWithoutSurveyInput> = z.object({
-  id: z.string().optional(),
+  id: z.string().uuid().optional(),
   createdAt: z.coerce.date().optional(),
   updatedAt: z.coerce.date().optional(),
   ownerId: z.string(),
@@ -2457,31 +2785,29 @@ export const PropertyCreateManySurveyInputEnvelopeSchema: z.ZodType<Prisma.Prope
   skipDuplicates: z.boolean().optional()
 }).strict();
 
-export const AttributeCreateWithoutSurveyInputSchema: z.ZodType<Prisma.AttributeCreateWithoutSurveyInput> = z.object({
-  id: z.string().optional(),
+export const AttributesOnSurveysCreateWithoutSurveyInputSchema: z.ZodType<Prisma.AttributesOnSurveysCreateWithoutSurveyInput> = z.object({
+  id: z.string().uuid().optional(),
   createdAt: z.coerce.date().optional(),
   updatedAt: z.coerce.date().optional(),
-  label: z.string(),
-  type: z.string(),
-  owner: z.lazy(() => UserCreateNestedOneWithoutAttributesInputSchema).optional()
+  attributeIndex: z.number().int(),
+  attribute: z.lazy(() => AttributeCreateNestedOneWithoutSurveysInputSchema)
 }).strict();
 
-export const AttributeUncheckedCreateWithoutSurveyInputSchema: z.ZodType<Prisma.AttributeUncheckedCreateWithoutSurveyInput> = z.object({
-  id: z.string().optional(),
+export const AttributesOnSurveysUncheckedCreateWithoutSurveyInputSchema: z.ZodType<Prisma.AttributesOnSurveysUncheckedCreateWithoutSurveyInput> = z.object({
+  id: z.string().uuid().optional(),
   createdAt: z.coerce.date().optional(),
   updatedAt: z.coerce.date().optional(),
-  label: z.string(),
-  type: z.string(),
-  ownerId: z.string().optional().nullable()
+  attributeId: z.string(),
+  attributeIndex: z.number().int()
 }).strict();
 
-export const AttributeCreateOrConnectWithoutSurveyInputSchema: z.ZodType<Prisma.AttributeCreateOrConnectWithoutSurveyInput> = z.object({
-  where: z.lazy(() => AttributeWhereUniqueInputSchema),
-  create: z.union([ z.lazy(() => AttributeCreateWithoutSurveyInputSchema),z.lazy(() => AttributeUncheckedCreateWithoutSurveyInputSchema) ]),
+export const AttributesOnSurveysCreateOrConnectWithoutSurveyInputSchema: z.ZodType<Prisma.AttributesOnSurveysCreateOrConnectWithoutSurveyInput> = z.object({
+  where: z.lazy(() => AttributesOnSurveysWhereUniqueInputSchema),
+  create: z.union([ z.lazy(() => AttributesOnSurveysCreateWithoutSurveyInputSchema),z.lazy(() => AttributesOnSurveysUncheckedCreateWithoutSurveyInputSchema) ]),
 }).strict();
 
-export const AttributeCreateManySurveyInputEnvelopeSchema: z.ZodType<Prisma.AttributeCreateManySurveyInputEnvelope> = z.object({
-  data: z.union([ z.lazy(() => AttributeCreateManySurveyInputSchema),z.lazy(() => AttributeCreateManySurveyInputSchema).array() ]),
+export const AttributesOnSurveysCreateManySurveyInputEnvelopeSchema: z.ZodType<Prisma.AttributesOnSurveysCreateManySurveyInputEnvelope> = z.object({
+  data: z.union([ z.lazy(() => AttributesOnSurveysCreateManySurveyInputSchema),z.lazy(() => AttributesOnSurveysCreateManySurveyInputSchema).array() ]),
   skipDuplicates: z.boolean().optional()
 }).strict();
 
@@ -2497,7 +2823,7 @@ export const ProjectUpdateToOneWithWhereWithoutSurveysInputSchema: z.ZodType<Pri
 }).strict();
 
 export const ProjectUpdateWithoutSurveysInputSchema: z.ZodType<Prisma.ProjectUpdateWithoutSurveysInput> = z.object({
-  id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  id: z.union([ z.string().uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
@@ -2505,7 +2831,7 @@ export const ProjectUpdateWithoutSurveysInputSchema: z.ZodType<Prisma.ProjectUpd
 }).strict();
 
 export const ProjectUncheckedUpdateWithoutSurveysInputSchema: z.ZodType<Prisma.ProjectUncheckedUpdateWithoutSurveysInput> = z.object({
-  id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  id: z.union([ z.string().uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   ownerId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
@@ -2528,24 +2854,242 @@ export const PropertyUpdateManyWithWhereWithoutSurveyInputSchema: z.ZodType<Pris
   data: z.union([ z.lazy(() => PropertyUpdateManyMutationInputSchema),z.lazy(() => PropertyUncheckedUpdateManyWithoutSurveyInputSchema) ]),
 }).strict();
 
-export const AttributeUpsertWithWhereUniqueWithoutSurveyInputSchema: z.ZodType<Prisma.AttributeUpsertWithWhereUniqueWithoutSurveyInput> = z.object({
-  where: z.lazy(() => AttributeWhereUniqueInputSchema),
-  update: z.union([ z.lazy(() => AttributeUpdateWithoutSurveyInputSchema),z.lazy(() => AttributeUncheckedUpdateWithoutSurveyInputSchema) ]),
-  create: z.union([ z.lazy(() => AttributeCreateWithoutSurveyInputSchema),z.lazy(() => AttributeUncheckedCreateWithoutSurveyInputSchema) ]),
+export const AttributesOnSurveysUpsertWithWhereUniqueWithoutSurveyInputSchema: z.ZodType<Prisma.AttributesOnSurveysUpsertWithWhereUniqueWithoutSurveyInput> = z.object({
+  where: z.lazy(() => AttributesOnSurveysWhereUniqueInputSchema),
+  update: z.union([ z.lazy(() => AttributesOnSurveysUpdateWithoutSurveyInputSchema),z.lazy(() => AttributesOnSurveysUncheckedUpdateWithoutSurveyInputSchema) ]),
+  create: z.union([ z.lazy(() => AttributesOnSurveysCreateWithoutSurveyInputSchema),z.lazy(() => AttributesOnSurveysUncheckedCreateWithoutSurveyInputSchema) ]),
 }).strict();
 
-export const AttributeUpdateWithWhereUniqueWithoutSurveyInputSchema: z.ZodType<Prisma.AttributeUpdateWithWhereUniqueWithoutSurveyInput> = z.object({
-  where: z.lazy(() => AttributeWhereUniqueInputSchema),
-  data: z.union([ z.lazy(() => AttributeUpdateWithoutSurveyInputSchema),z.lazy(() => AttributeUncheckedUpdateWithoutSurveyInputSchema) ]),
+export const AttributesOnSurveysUpdateWithWhereUniqueWithoutSurveyInputSchema: z.ZodType<Prisma.AttributesOnSurveysUpdateWithWhereUniqueWithoutSurveyInput> = z.object({
+  where: z.lazy(() => AttributesOnSurveysWhereUniqueInputSchema),
+  data: z.union([ z.lazy(() => AttributesOnSurveysUpdateWithoutSurveyInputSchema),z.lazy(() => AttributesOnSurveysUncheckedUpdateWithoutSurveyInputSchema) ]),
 }).strict();
 
-export const AttributeUpdateManyWithWhereWithoutSurveyInputSchema: z.ZodType<Prisma.AttributeUpdateManyWithWhereWithoutSurveyInput> = z.object({
-  where: z.lazy(() => AttributeScalarWhereInputSchema),
-  data: z.union([ z.lazy(() => AttributeUpdateManyMutationInputSchema),z.lazy(() => AttributeUncheckedUpdateManyWithoutSurveyInputSchema) ]),
+export const AttributesOnSurveysUpdateManyWithWhereWithoutSurveyInputSchema: z.ZodType<Prisma.AttributesOnSurveysUpdateManyWithWhereWithoutSurveyInput> = z.object({
+  where: z.lazy(() => AttributesOnSurveysScalarWhereInputSchema),
+  data: z.union([ z.lazy(() => AttributesOnSurveysUpdateManyMutationInputSchema),z.lazy(() => AttributesOnSurveysUncheckedUpdateManyWithoutSurveyInputSchema) ]),
+}).strict();
+
+export const AttributesOnSurveysScalarWhereInputSchema: z.ZodType<Prisma.AttributesOnSurveysScalarWhereInput> = z.object({
+  AND: z.union([ z.lazy(() => AttributesOnSurveysScalarWhereInputSchema),z.lazy(() => AttributesOnSurveysScalarWhereInputSchema).array() ]).optional(),
+  OR: z.lazy(() => AttributesOnSurveysScalarWhereInputSchema).array().optional(),
+  NOT: z.union([ z.lazy(() => AttributesOnSurveysScalarWhereInputSchema),z.lazy(() => AttributesOnSurveysScalarWhereInputSchema).array() ]).optional(),
+  id: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
+  createdAt: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
+  updatedAt: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
+  attributeId: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
+  attributeIndex: z.union([ z.lazy(() => IntFilterSchema),z.number() ]).optional(),
+  surveyId: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
+}).strict();
+
+export const UserCreateWithoutAttributesInputSchema: z.ZodType<Prisma.UserCreateWithoutAttributesInput> = z.object({
+  id: z.string().uuid().optional(),
+  clerkId: z.string(),
+  email: z.string(),
+  firstName: z.string().optional().nullable(),
+  lastName: z.string().optional().nullable(),
+  projects: z.lazy(() => ProjectCreateNestedManyWithoutOwnerInputSchema).optional(),
+  properties: z.lazy(() => PropertyCreateNestedManyWithoutOwnerInputSchema).optional()
+}).strict();
+
+export const UserUncheckedCreateWithoutAttributesInputSchema: z.ZodType<Prisma.UserUncheckedCreateWithoutAttributesInput> = z.object({
+  id: z.string().uuid().optional(),
+  clerkId: z.string(),
+  email: z.string(),
+  firstName: z.string().optional().nullable(),
+  lastName: z.string().optional().nullable(),
+  projects: z.lazy(() => ProjectUncheckedCreateNestedManyWithoutOwnerInputSchema).optional(),
+  properties: z.lazy(() => PropertyUncheckedCreateNestedManyWithoutOwnerInputSchema).optional()
+}).strict();
+
+export const UserCreateOrConnectWithoutAttributesInputSchema: z.ZodType<Prisma.UserCreateOrConnectWithoutAttributesInput> = z.object({
+  where: z.lazy(() => UserWhereUniqueInputSchema),
+  create: z.union([ z.lazy(() => UserCreateWithoutAttributesInputSchema),z.lazy(() => UserUncheckedCreateWithoutAttributesInputSchema) ]),
+}).strict();
+
+export const AttributesOnSurveysCreateWithoutAttributeInputSchema: z.ZodType<Prisma.AttributesOnSurveysCreateWithoutAttributeInput> = z.object({
+  id: z.string().uuid().optional(),
+  createdAt: z.coerce.date().optional(),
+  updatedAt: z.coerce.date().optional(),
+  attributeIndex: z.number().int(),
+  survey: z.lazy(() => SurveyCreateNestedOneWithoutAttributesInputSchema)
+}).strict();
+
+export const AttributesOnSurveysUncheckedCreateWithoutAttributeInputSchema: z.ZodType<Prisma.AttributesOnSurveysUncheckedCreateWithoutAttributeInput> = z.object({
+  id: z.string().uuid().optional(),
+  createdAt: z.coerce.date().optional(),
+  updatedAt: z.coerce.date().optional(),
+  attributeIndex: z.number().int(),
+  surveyId: z.string()
+}).strict();
+
+export const AttributesOnSurveysCreateOrConnectWithoutAttributeInputSchema: z.ZodType<Prisma.AttributesOnSurveysCreateOrConnectWithoutAttributeInput> = z.object({
+  where: z.lazy(() => AttributesOnSurveysWhereUniqueInputSchema),
+  create: z.union([ z.lazy(() => AttributesOnSurveysCreateWithoutAttributeInputSchema),z.lazy(() => AttributesOnSurveysUncheckedCreateWithoutAttributeInputSchema) ]),
+}).strict();
+
+export const AttributesOnSurveysCreateManyAttributeInputEnvelopeSchema: z.ZodType<Prisma.AttributesOnSurveysCreateManyAttributeInputEnvelope> = z.object({
+  data: z.union([ z.lazy(() => AttributesOnSurveysCreateManyAttributeInputSchema),z.lazy(() => AttributesOnSurveysCreateManyAttributeInputSchema).array() ]),
+  skipDuplicates: z.boolean().optional()
+}).strict();
+
+export const UserUpsertWithoutAttributesInputSchema: z.ZodType<Prisma.UserUpsertWithoutAttributesInput> = z.object({
+  update: z.union([ z.lazy(() => UserUpdateWithoutAttributesInputSchema),z.lazy(() => UserUncheckedUpdateWithoutAttributesInputSchema) ]),
+  create: z.union([ z.lazy(() => UserCreateWithoutAttributesInputSchema),z.lazy(() => UserUncheckedCreateWithoutAttributesInputSchema) ]),
+  where: z.lazy(() => UserWhereInputSchema).optional()
+}).strict();
+
+export const UserUpdateToOneWithWhereWithoutAttributesInputSchema: z.ZodType<Prisma.UserUpdateToOneWithWhereWithoutAttributesInput> = z.object({
+  where: z.lazy(() => UserWhereInputSchema).optional(),
+  data: z.union([ z.lazy(() => UserUpdateWithoutAttributesInputSchema),z.lazy(() => UserUncheckedUpdateWithoutAttributesInputSchema) ]),
+}).strict();
+
+export const UserUpdateWithoutAttributesInputSchema: z.ZodType<Prisma.UserUpdateWithoutAttributesInput> = z.object({
+  id: z.union([ z.string().uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  clerkId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  email: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  firstName: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  lastName: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  projects: z.lazy(() => ProjectUpdateManyWithoutOwnerNestedInputSchema).optional(),
+  properties: z.lazy(() => PropertyUpdateManyWithoutOwnerNestedInputSchema).optional()
+}).strict();
+
+export const UserUncheckedUpdateWithoutAttributesInputSchema: z.ZodType<Prisma.UserUncheckedUpdateWithoutAttributesInput> = z.object({
+  id: z.union([ z.string().uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  clerkId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  email: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  firstName: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  lastName: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  projects: z.lazy(() => ProjectUncheckedUpdateManyWithoutOwnerNestedInputSchema).optional(),
+  properties: z.lazy(() => PropertyUncheckedUpdateManyWithoutOwnerNestedInputSchema).optional()
+}).strict();
+
+export const AttributesOnSurveysUpsertWithWhereUniqueWithoutAttributeInputSchema: z.ZodType<Prisma.AttributesOnSurveysUpsertWithWhereUniqueWithoutAttributeInput> = z.object({
+  where: z.lazy(() => AttributesOnSurveysWhereUniqueInputSchema),
+  update: z.union([ z.lazy(() => AttributesOnSurveysUpdateWithoutAttributeInputSchema),z.lazy(() => AttributesOnSurveysUncheckedUpdateWithoutAttributeInputSchema) ]),
+  create: z.union([ z.lazy(() => AttributesOnSurveysCreateWithoutAttributeInputSchema),z.lazy(() => AttributesOnSurveysUncheckedCreateWithoutAttributeInputSchema) ]),
+}).strict();
+
+export const AttributesOnSurveysUpdateWithWhereUniqueWithoutAttributeInputSchema: z.ZodType<Prisma.AttributesOnSurveysUpdateWithWhereUniqueWithoutAttributeInput> = z.object({
+  where: z.lazy(() => AttributesOnSurveysWhereUniqueInputSchema),
+  data: z.union([ z.lazy(() => AttributesOnSurveysUpdateWithoutAttributeInputSchema),z.lazy(() => AttributesOnSurveysUncheckedUpdateWithoutAttributeInputSchema) ]),
+}).strict();
+
+export const AttributesOnSurveysUpdateManyWithWhereWithoutAttributeInputSchema: z.ZodType<Prisma.AttributesOnSurveysUpdateManyWithWhereWithoutAttributeInput> = z.object({
+  where: z.lazy(() => AttributesOnSurveysScalarWhereInputSchema),
+  data: z.union([ z.lazy(() => AttributesOnSurveysUpdateManyMutationInputSchema),z.lazy(() => AttributesOnSurveysUncheckedUpdateManyWithoutAttributeInputSchema) ]),
+}).strict();
+
+export const AttributeCreateWithoutSurveysInputSchema: z.ZodType<Prisma.AttributeCreateWithoutSurveysInput> = z.object({
+  id: z.string().uuid().optional(),
+  createdAt: z.coerce.date().optional(),
+  updatedAt: z.coerce.date().optional(),
+  label: z.string(),
+  type: z.string(),
+  owner: z.lazy(() => UserCreateNestedOneWithoutAttributesInputSchema).optional()
+}).strict();
+
+export const AttributeUncheckedCreateWithoutSurveysInputSchema: z.ZodType<Prisma.AttributeUncheckedCreateWithoutSurveysInput> = z.object({
+  id: z.string().uuid().optional(),
+  createdAt: z.coerce.date().optional(),
+  updatedAt: z.coerce.date().optional(),
+  label: z.string(),
+  type: z.string(),
+  ownerId: z.string().optional().nullable()
+}).strict();
+
+export const AttributeCreateOrConnectWithoutSurveysInputSchema: z.ZodType<Prisma.AttributeCreateOrConnectWithoutSurveysInput> = z.object({
+  where: z.lazy(() => AttributeWhereUniqueInputSchema),
+  create: z.union([ z.lazy(() => AttributeCreateWithoutSurveysInputSchema),z.lazy(() => AttributeUncheckedCreateWithoutSurveysInputSchema) ]),
+}).strict();
+
+export const SurveyCreateWithoutAttributesInputSchema: z.ZodType<Prisma.SurveyCreateWithoutAttributesInput> = z.object({
+  id: z.string().uuid().optional(),
+  ownerId: z.string(),
+  createdAt: z.coerce.date().optional(),
+  updatedAt: z.coerce.date().optional(),
+  name: z.string(),
+  project: z.lazy(() => ProjectCreateNestedOneWithoutSurveysInputSchema),
+  properties: z.lazy(() => PropertyCreateNestedManyWithoutSurveyInputSchema).optional()
+}).strict();
+
+export const SurveyUncheckedCreateWithoutAttributesInputSchema: z.ZodType<Prisma.SurveyUncheckedCreateWithoutAttributesInput> = z.object({
+  id: z.string().uuid().optional(),
+  ownerId: z.string(),
+  createdAt: z.coerce.date().optional(),
+  updatedAt: z.coerce.date().optional(),
+  name: z.string(),
+  projectId: z.string(),
+  properties: z.lazy(() => PropertyUncheckedCreateNestedManyWithoutSurveyInputSchema).optional()
+}).strict();
+
+export const SurveyCreateOrConnectWithoutAttributesInputSchema: z.ZodType<Prisma.SurveyCreateOrConnectWithoutAttributesInput> = z.object({
+  where: z.lazy(() => SurveyWhereUniqueInputSchema),
+  create: z.union([ z.lazy(() => SurveyCreateWithoutAttributesInputSchema),z.lazy(() => SurveyUncheckedCreateWithoutAttributesInputSchema) ]),
+}).strict();
+
+export const AttributeUpsertWithoutSurveysInputSchema: z.ZodType<Prisma.AttributeUpsertWithoutSurveysInput> = z.object({
+  update: z.union([ z.lazy(() => AttributeUpdateWithoutSurveysInputSchema),z.lazy(() => AttributeUncheckedUpdateWithoutSurveysInputSchema) ]),
+  create: z.union([ z.lazy(() => AttributeCreateWithoutSurveysInputSchema),z.lazy(() => AttributeUncheckedCreateWithoutSurveysInputSchema) ]),
+  where: z.lazy(() => AttributeWhereInputSchema).optional()
+}).strict();
+
+export const AttributeUpdateToOneWithWhereWithoutSurveysInputSchema: z.ZodType<Prisma.AttributeUpdateToOneWithWhereWithoutSurveysInput> = z.object({
+  where: z.lazy(() => AttributeWhereInputSchema).optional(),
+  data: z.union([ z.lazy(() => AttributeUpdateWithoutSurveysInputSchema),z.lazy(() => AttributeUncheckedUpdateWithoutSurveysInputSchema) ]),
+}).strict();
+
+export const AttributeUpdateWithoutSurveysInputSchema: z.ZodType<Prisma.AttributeUpdateWithoutSurveysInput> = z.object({
+  id: z.union([ z.string().uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  label: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  type: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  owner: z.lazy(() => UserUpdateOneWithoutAttributesNestedInputSchema).optional()
+}).strict();
+
+export const AttributeUncheckedUpdateWithoutSurveysInputSchema: z.ZodType<Prisma.AttributeUncheckedUpdateWithoutSurveysInput> = z.object({
+  id: z.union([ z.string().uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  label: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  type: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  ownerId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+}).strict();
+
+export const SurveyUpsertWithoutAttributesInputSchema: z.ZodType<Prisma.SurveyUpsertWithoutAttributesInput> = z.object({
+  update: z.union([ z.lazy(() => SurveyUpdateWithoutAttributesInputSchema),z.lazy(() => SurveyUncheckedUpdateWithoutAttributesInputSchema) ]),
+  create: z.union([ z.lazy(() => SurveyCreateWithoutAttributesInputSchema),z.lazy(() => SurveyUncheckedCreateWithoutAttributesInputSchema) ]),
+  where: z.lazy(() => SurveyWhereInputSchema).optional()
+}).strict();
+
+export const SurveyUpdateToOneWithWhereWithoutAttributesInputSchema: z.ZodType<Prisma.SurveyUpdateToOneWithWhereWithoutAttributesInput> = z.object({
+  where: z.lazy(() => SurveyWhereInputSchema).optional(),
+  data: z.union([ z.lazy(() => SurveyUpdateWithoutAttributesInputSchema),z.lazy(() => SurveyUncheckedUpdateWithoutAttributesInputSchema) ]),
+}).strict();
+
+export const SurveyUpdateWithoutAttributesInputSchema: z.ZodType<Prisma.SurveyUpdateWithoutAttributesInput> = z.object({
+  id: z.union([ z.string().uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  ownerId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  project: z.lazy(() => ProjectUpdateOneRequiredWithoutSurveysNestedInputSchema).optional(),
+  properties: z.lazy(() => PropertyUpdateManyWithoutSurveyNestedInputSchema).optional()
+}).strict();
+
+export const SurveyUncheckedUpdateWithoutAttributesInputSchema: z.ZodType<Prisma.SurveyUncheckedUpdateWithoutAttributesInput> = z.object({
+  id: z.union([ z.string().uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  ownerId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  projectId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  properties: z.lazy(() => PropertyUncheckedUpdateManyWithoutSurveyNestedInputSchema).optional()
 }).strict();
 
 export const UserCreateWithoutPropertiesInputSchema: z.ZodType<Prisma.UserCreateWithoutPropertiesInput> = z.object({
-  id: z.string().optional(),
+  id: z.string().uuid().optional(),
   clerkId: z.string(),
   email: z.string(),
   firstName: z.string().optional().nullable(),
@@ -2555,7 +3099,7 @@ export const UserCreateWithoutPropertiesInputSchema: z.ZodType<Prisma.UserCreate
 }).strict();
 
 export const UserUncheckedCreateWithoutPropertiesInputSchema: z.ZodType<Prisma.UserUncheckedCreateWithoutPropertiesInput> = z.object({
-  id: z.string().optional(),
+  id: z.string().uuid().optional(),
   clerkId: z.string(),
   email: z.string(),
   firstName: z.string().optional().nullable(),
@@ -2570,7 +3114,7 @@ export const UserCreateOrConnectWithoutPropertiesInputSchema: z.ZodType<Prisma.U
 }).strict();
 
 export const BrochureCreateWithoutPropertyInputSchema: z.ZodType<Prisma.BrochureCreateWithoutPropertyInput> = z.object({
-  id: z.string().optional(),
+  id: z.string().uuid().optional(),
   createdAt: z.coerce.date().optional(),
   updatedAt: z.coerce.date().optional(),
   url: z.string(),
@@ -2578,7 +3122,7 @@ export const BrochureCreateWithoutPropertyInputSchema: z.ZodType<Prisma.Brochure
 }).strict();
 
 export const BrochureUncheckedCreateWithoutPropertyInputSchema: z.ZodType<Prisma.BrochureUncheckedCreateWithoutPropertyInput> = z.object({
-  id: z.string().optional(),
+  id: z.string().uuid().optional(),
   createdAt: z.coerce.date().optional(),
   updatedAt: z.coerce.date().optional(),
   url: z.string(),
@@ -2596,23 +3140,23 @@ export const BrochureCreateManyPropertyInputEnvelopeSchema: z.ZodType<Prisma.Bro
 }).strict();
 
 export const SurveyCreateWithoutPropertiesInputSchema: z.ZodType<Prisma.SurveyCreateWithoutPropertiesInput> = z.object({
-  id: z.string().optional(),
+  id: z.string().uuid().optional(),
   ownerId: z.string(),
   createdAt: z.coerce.date().optional(),
   updatedAt: z.coerce.date().optional(),
   name: z.string(),
   project: z.lazy(() => ProjectCreateNestedOneWithoutSurveysInputSchema),
-  attributesOrder: z.lazy(() => AttributeCreateNestedManyWithoutSurveyInputSchema).optional()
+  attributes: z.lazy(() => AttributesOnSurveysCreateNestedManyWithoutSurveyInputSchema).optional()
 }).strict();
 
 export const SurveyUncheckedCreateWithoutPropertiesInputSchema: z.ZodType<Prisma.SurveyUncheckedCreateWithoutPropertiesInput> = z.object({
-  id: z.string().optional(),
+  id: z.string().uuid().optional(),
   ownerId: z.string(),
   createdAt: z.coerce.date().optional(),
   updatedAt: z.coerce.date().optional(),
   name: z.string(),
   projectId: z.string(),
-  attributesOrder: z.lazy(() => AttributeUncheckedCreateNestedManyWithoutSurveyInputSchema).optional()
+  attributes: z.lazy(() => AttributesOnSurveysUncheckedCreateNestedManyWithoutSurveyInputSchema).optional()
 }).strict();
 
 export const SurveyCreateOrConnectWithoutPropertiesInputSchema: z.ZodType<Prisma.SurveyCreateOrConnectWithoutPropertiesInput> = z.object({
@@ -2632,7 +3176,7 @@ export const UserUpdateToOneWithWhereWithoutPropertiesInputSchema: z.ZodType<Pri
 }).strict();
 
 export const UserUpdateWithoutPropertiesInputSchema: z.ZodType<Prisma.UserUpdateWithoutPropertiesInput> = z.object({
-  id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  id: z.union([ z.string().uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   clerkId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   email: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   firstName: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
@@ -2642,7 +3186,7 @@ export const UserUpdateWithoutPropertiesInputSchema: z.ZodType<Prisma.UserUpdate
 }).strict();
 
 export const UserUncheckedUpdateWithoutPropertiesInputSchema: z.ZodType<Prisma.UserUncheckedUpdateWithoutPropertiesInput> = z.object({
-  id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  id: z.union([ z.string().uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   clerkId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   email: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   firstName: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
@@ -2691,139 +3235,27 @@ export const SurveyUpdateToOneWithWhereWithoutPropertiesInputSchema: z.ZodType<P
 }).strict();
 
 export const SurveyUpdateWithoutPropertiesInputSchema: z.ZodType<Prisma.SurveyUpdateWithoutPropertiesInput> = z.object({
-  id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  id: z.union([ z.string().uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   ownerId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   project: z.lazy(() => ProjectUpdateOneRequiredWithoutSurveysNestedInputSchema).optional(),
-  attributesOrder: z.lazy(() => AttributeUpdateManyWithoutSurveyNestedInputSchema).optional()
+  attributes: z.lazy(() => AttributesOnSurveysUpdateManyWithoutSurveyNestedInputSchema).optional()
 }).strict();
 
 export const SurveyUncheckedUpdateWithoutPropertiesInputSchema: z.ZodType<Prisma.SurveyUncheckedUpdateWithoutPropertiesInput> = z.object({
-  id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  id: z.union([ z.string().uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   ownerId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   projectId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  attributesOrder: z.lazy(() => AttributeUncheckedUpdateManyWithoutSurveyNestedInputSchema).optional()
-}).strict();
-
-export const UserCreateWithoutAttributesInputSchema: z.ZodType<Prisma.UserCreateWithoutAttributesInput> = z.object({
-  id: z.string().optional(),
-  clerkId: z.string(),
-  email: z.string(),
-  firstName: z.string().optional().nullable(),
-  lastName: z.string().optional().nullable(),
-  projects: z.lazy(() => ProjectCreateNestedManyWithoutOwnerInputSchema).optional(),
-  properties: z.lazy(() => PropertyCreateNestedManyWithoutOwnerInputSchema).optional()
-}).strict();
-
-export const UserUncheckedCreateWithoutAttributesInputSchema: z.ZodType<Prisma.UserUncheckedCreateWithoutAttributesInput> = z.object({
-  id: z.string().optional(),
-  clerkId: z.string(),
-  email: z.string(),
-  firstName: z.string().optional().nullable(),
-  lastName: z.string().optional().nullable(),
-  projects: z.lazy(() => ProjectUncheckedCreateNestedManyWithoutOwnerInputSchema).optional(),
-  properties: z.lazy(() => PropertyUncheckedCreateNestedManyWithoutOwnerInputSchema).optional()
-}).strict();
-
-export const UserCreateOrConnectWithoutAttributesInputSchema: z.ZodType<Prisma.UserCreateOrConnectWithoutAttributesInput> = z.object({
-  where: z.lazy(() => UserWhereUniqueInputSchema),
-  create: z.union([ z.lazy(() => UserCreateWithoutAttributesInputSchema),z.lazy(() => UserUncheckedCreateWithoutAttributesInputSchema) ]),
-}).strict();
-
-export const SurveyCreateWithoutAttributesOrderInputSchema: z.ZodType<Prisma.SurveyCreateWithoutAttributesOrderInput> = z.object({
-  id: z.string().optional(),
-  ownerId: z.string(),
-  createdAt: z.coerce.date().optional(),
-  updatedAt: z.coerce.date().optional(),
-  name: z.string(),
-  project: z.lazy(() => ProjectCreateNestedOneWithoutSurveysInputSchema),
-  properties: z.lazy(() => PropertyCreateNestedManyWithoutSurveyInputSchema).optional()
-}).strict();
-
-export const SurveyUncheckedCreateWithoutAttributesOrderInputSchema: z.ZodType<Prisma.SurveyUncheckedCreateWithoutAttributesOrderInput> = z.object({
-  id: z.string().optional(),
-  ownerId: z.string(),
-  createdAt: z.coerce.date().optional(),
-  updatedAt: z.coerce.date().optional(),
-  name: z.string(),
-  projectId: z.string(),
-  properties: z.lazy(() => PropertyUncheckedCreateNestedManyWithoutSurveyInputSchema).optional()
-}).strict();
-
-export const SurveyCreateOrConnectWithoutAttributesOrderInputSchema: z.ZodType<Prisma.SurveyCreateOrConnectWithoutAttributesOrderInput> = z.object({
-  where: z.lazy(() => SurveyWhereUniqueInputSchema),
-  create: z.union([ z.lazy(() => SurveyCreateWithoutAttributesOrderInputSchema),z.lazy(() => SurveyUncheckedCreateWithoutAttributesOrderInputSchema) ]),
-}).strict();
-
-export const UserUpsertWithoutAttributesInputSchema: z.ZodType<Prisma.UserUpsertWithoutAttributesInput> = z.object({
-  update: z.union([ z.lazy(() => UserUpdateWithoutAttributesInputSchema),z.lazy(() => UserUncheckedUpdateWithoutAttributesInputSchema) ]),
-  create: z.union([ z.lazy(() => UserCreateWithoutAttributesInputSchema),z.lazy(() => UserUncheckedCreateWithoutAttributesInputSchema) ]),
-  where: z.lazy(() => UserWhereInputSchema).optional()
-}).strict();
-
-export const UserUpdateToOneWithWhereWithoutAttributesInputSchema: z.ZodType<Prisma.UserUpdateToOneWithWhereWithoutAttributesInput> = z.object({
-  where: z.lazy(() => UserWhereInputSchema).optional(),
-  data: z.union([ z.lazy(() => UserUpdateWithoutAttributesInputSchema),z.lazy(() => UserUncheckedUpdateWithoutAttributesInputSchema) ]),
-}).strict();
-
-export const UserUpdateWithoutAttributesInputSchema: z.ZodType<Prisma.UserUpdateWithoutAttributesInput> = z.object({
-  id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  clerkId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  email: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  firstName: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  lastName: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  projects: z.lazy(() => ProjectUpdateManyWithoutOwnerNestedInputSchema).optional(),
-  properties: z.lazy(() => PropertyUpdateManyWithoutOwnerNestedInputSchema).optional()
-}).strict();
-
-export const UserUncheckedUpdateWithoutAttributesInputSchema: z.ZodType<Prisma.UserUncheckedUpdateWithoutAttributesInput> = z.object({
-  id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  clerkId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  email: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  firstName: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  lastName: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  projects: z.lazy(() => ProjectUncheckedUpdateManyWithoutOwnerNestedInputSchema).optional(),
-  properties: z.lazy(() => PropertyUncheckedUpdateManyWithoutOwnerNestedInputSchema).optional()
-}).strict();
-
-export const SurveyUpsertWithoutAttributesOrderInputSchema: z.ZodType<Prisma.SurveyUpsertWithoutAttributesOrderInput> = z.object({
-  update: z.union([ z.lazy(() => SurveyUpdateWithoutAttributesOrderInputSchema),z.lazy(() => SurveyUncheckedUpdateWithoutAttributesOrderInputSchema) ]),
-  create: z.union([ z.lazy(() => SurveyCreateWithoutAttributesOrderInputSchema),z.lazy(() => SurveyUncheckedCreateWithoutAttributesOrderInputSchema) ]),
-  where: z.lazy(() => SurveyWhereInputSchema).optional()
-}).strict();
-
-export const SurveyUpdateToOneWithWhereWithoutAttributesOrderInputSchema: z.ZodType<Prisma.SurveyUpdateToOneWithWhereWithoutAttributesOrderInput> = z.object({
-  where: z.lazy(() => SurveyWhereInputSchema).optional(),
-  data: z.union([ z.lazy(() => SurveyUpdateWithoutAttributesOrderInputSchema),z.lazy(() => SurveyUncheckedUpdateWithoutAttributesOrderInputSchema) ]),
-}).strict();
-
-export const SurveyUpdateWithoutAttributesOrderInputSchema: z.ZodType<Prisma.SurveyUpdateWithoutAttributesOrderInput> = z.object({
-  id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  ownerId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  project: z.lazy(() => ProjectUpdateOneRequiredWithoutSurveysNestedInputSchema).optional(),
-  properties: z.lazy(() => PropertyUpdateManyWithoutSurveyNestedInputSchema).optional()
-}).strict();
-
-export const SurveyUncheckedUpdateWithoutAttributesOrderInputSchema: z.ZodType<Prisma.SurveyUncheckedUpdateWithoutAttributesOrderInput> = z.object({
-  id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  ownerId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  projectId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  properties: z.lazy(() => PropertyUncheckedUpdateManyWithoutSurveyNestedInputSchema).optional()
+  attributes: z.lazy(() => AttributesOnSurveysUncheckedUpdateManyWithoutSurveyNestedInputSchema).optional()
 }).strict();
 
 export const PropertyCreateWithoutBrochuresInputSchema: z.ZodType<Prisma.PropertyCreateWithoutBrochuresInput> = z.object({
-  id: z.string().optional(),
+  id: z.string().uuid().optional(),
   createdAt: z.coerce.date().optional(),
   updatedAt: z.coerce.date().optional(),
   address: z.string(),
@@ -2834,7 +3266,7 @@ export const PropertyCreateWithoutBrochuresInputSchema: z.ZodType<Prisma.Propert
 }).strict();
 
 export const PropertyUncheckedCreateWithoutBrochuresInputSchema: z.ZodType<Prisma.PropertyUncheckedCreateWithoutBrochuresInput> = z.object({
-  id: z.string().optional(),
+  id: z.string().uuid().optional(),
   createdAt: z.coerce.date().optional(),
   updatedAt: z.coerce.date().optional(),
   ownerId: z.string(),
@@ -2861,7 +3293,7 @@ export const PropertyUpdateToOneWithWhereWithoutBrochuresInputSchema: z.ZodType<
 }).strict();
 
 export const PropertyUpdateWithoutBrochuresInputSchema: z.ZodType<Prisma.PropertyUpdateWithoutBrochuresInput> = z.object({
-  id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  id: z.union([ z.string().uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   address: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
@@ -2872,7 +3304,7 @@ export const PropertyUpdateWithoutBrochuresInputSchema: z.ZodType<Prisma.Propert
 }).strict();
 
 export const PropertyUncheckedUpdateWithoutBrochuresInputSchema: z.ZodType<Prisma.PropertyUncheckedUpdateWithoutBrochuresInput> = z.object({
-  id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  id: z.union([ z.string().uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   ownerId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
@@ -2883,14 +3315,14 @@ export const PropertyUncheckedUpdateWithoutBrochuresInputSchema: z.ZodType<Prism
 }).strict();
 
 export const ProjectCreateManyOwnerInputSchema: z.ZodType<Prisma.ProjectCreateManyOwnerInput> = z.object({
-  id: z.string().optional(),
+  id: z.string().uuid().optional(),
   name: z.string(),
   createdAt: z.coerce.date().optional(),
   updatedAt: z.coerce.date().optional()
 }).strict();
 
 export const PropertyCreateManyOwnerInputSchema: z.ZodType<Prisma.PropertyCreateManyOwnerInput> = z.object({
-  id: z.string().optional(),
+  id: z.string().uuid().optional(),
   createdAt: z.coerce.date().optional(),
   updatedAt: z.coerce.date().optional(),
   address: z.string(),
@@ -2900,16 +3332,15 @@ export const PropertyCreateManyOwnerInputSchema: z.ZodType<Prisma.PropertyCreate
 }).strict();
 
 export const AttributeCreateManyOwnerInputSchema: z.ZodType<Prisma.AttributeCreateManyOwnerInput> = z.object({
-  id: z.string().optional(),
+  id: z.string().uuid().optional(),
   createdAt: z.coerce.date().optional(),
   updatedAt: z.coerce.date().optional(),
   label: z.string(),
-  type: z.string(),
-  surveyId: z.string().optional().nullable()
+  type: z.string()
 }).strict();
 
 export const ProjectUpdateWithoutOwnerInputSchema: z.ZodType<Prisma.ProjectUpdateWithoutOwnerInput> = z.object({
-  id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  id: z.union([ z.string().uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
@@ -2917,7 +3348,7 @@ export const ProjectUpdateWithoutOwnerInputSchema: z.ZodType<Prisma.ProjectUpdat
 }).strict();
 
 export const ProjectUncheckedUpdateWithoutOwnerInputSchema: z.ZodType<Prisma.ProjectUncheckedUpdateWithoutOwnerInput> = z.object({
-  id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  id: z.union([ z.string().uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
@@ -2925,14 +3356,14 @@ export const ProjectUncheckedUpdateWithoutOwnerInputSchema: z.ZodType<Prisma.Pro
 }).strict();
 
 export const ProjectUncheckedUpdateManyWithoutOwnerInputSchema: z.ZodType<Prisma.ProjectUncheckedUpdateManyWithoutOwnerInput> = z.object({
-  id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  id: z.union([ z.string().uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
 }).strict();
 
 export const PropertyUpdateWithoutOwnerInputSchema: z.ZodType<Prisma.PropertyUpdateWithoutOwnerInput> = z.object({
-  id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  id: z.union([ z.string().uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   address: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
@@ -2943,7 +3374,7 @@ export const PropertyUpdateWithoutOwnerInputSchema: z.ZodType<Prisma.PropertyUpd
 }).strict();
 
 export const PropertyUncheckedUpdateWithoutOwnerInputSchema: z.ZodType<Prisma.PropertyUncheckedUpdateWithoutOwnerInput> = z.object({
-  id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  id: z.union([ z.string().uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   address: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
@@ -2954,7 +3385,7 @@ export const PropertyUncheckedUpdateWithoutOwnerInputSchema: z.ZodType<Prisma.Pr
 }).strict();
 
 export const PropertyUncheckedUpdateManyWithoutOwnerInputSchema: z.ZodType<Prisma.PropertyUncheckedUpdateManyWithoutOwnerInput> = z.object({
-  id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  id: z.union([ z.string().uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   address: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
@@ -2964,34 +3395,33 @@ export const PropertyUncheckedUpdateManyWithoutOwnerInputSchema: z.ZodType<Prism
 }).strict();
 
 export const AttributeUpdateWithoutOwnerInputSchema: z.ZodType<Prisma.AttributeUpdateWithoutOwnerInput> = z.object({
-  id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  id: z.union([ z.string().uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   label: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   type: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  Survey: z.lazy(() => SurveyUpdateOneWithoutAttributesOrderNestedInputSchema).optional()
+  surveys: z.lazy(() => AttributesOnSurveysUpdateManyWithoutAttributeNestedInputSchema).optional()
 }).strict();
 
 export const AttributeUncheckedUpdateWithoutOwnerInputSchema: z.ZodType<Prisma.AttributeUncheckedUpdateWithoutOwnerInput> = z.object({
-  id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  id: z.union([ z.string().uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   label: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   type: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  surveyId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  surveys: z.lazy(() => AttributesOnSurveysUncheckedUpdateManyWithoutAttributeNestedInputSchema).optional()
 }).strict();
 
 export const AttributeUncheckedUpdateManyWithoutOwnerInputSchema: z.ZodType<Prisma.AttributeUncheckedUpdateManyWithoutOwnerInput> = z.object({
-  id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  id: z.union([ z.string().uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   label: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   type: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  surveyId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
 }).strict();
 
 export const SurveyCreateManyProjectInputSchema: z.ZodType<Prisma.SurveyCreateManyProjectInput> = z.object({
-  id: z.string().optional(),
+  id: z.string().uuid().optional(),
   ownerId: z.string(),
   createdAt: z.coerce.date().optional(),
   updatedAt: z.coerce.date().optional(),
@@ -2999,27 +3429,27 @@ export const SurveyCreateManyProjectInputSchema: z.ZodType<Prisma.SurveyCreateMa
 }).strict();
 
 export const SurveyUpdateWithoutProjectInputSchema: z.ZodType<Prisma.SurveyUpdateWithoutProjectInput> = z.object({
-  id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  id: z.union([ z.string().uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   ownerId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   properties: z.lazy(() => PropertyUpdateManyWithoutSurveyNestedInputSchema).optional(),
-  attributesOrder: z.lazy(() => AttributeUpdateManyWithoutSurveyNestedInputSchema).optional()
+  attributes: z.lazy(() => AttributesOnSurveysUpdateManyWithoutSurveyNestedInputSchema).optional()
 }).strict();
 
 export const SurveyUncheckedUpdateWithoutProjectInputSchema: z.ZodType<Prisma.SurveyUncheckedUpdateWithoutProjectInput> = z.object({
-  id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  id: z.union([ z.string().uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   ownerId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   properties: z.lazy(() => PropertyUncheckedUpdateManyWithoutSurveyNestedInputSchema).optional(),
-  attributesOrder: z.lazy(() => AttributeUncheckedUpdateManyWithoutSurveyNestedInputSchema).optional()
+  attributes: z.lazy(() => AttributesOnSurveysUncheckedUpdateManyWithoutSurveyNestedInputSchema).optional()
 }).strict();
 
 export const SurveyUncheckedUpdateManyWithoutProjectInputSchema: z.ZodType<Prisma.SurveyUncheckedUpdateManyWithoutProjectInput> = z.object({
-  id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  id: z.union([ z.string().uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   ownerId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
@@ -3027,7 +3457,7 @@ export const SurveyUncheckedUpdateManyWithoutProjectInputSchema: z.ZodType<Prism
 }).strict();
 
 export const PropertyCreateManySurveyInputSchema: z.ZodType<Prisma.PropertyCreateManySurveyInput> = z.object({
-  id: z.string().optional(),
+  id: z.string().uuid().optional(),
   createdAt: z.coerce.date().optional(),
   updatedAt: z.coerce.date().optional(),
   ownerId: z.string(),
@@ -3036,17 +3466,16 @@ export const PropertyCreateManySurveyInputSchema: z.ZodType<Prisma.PropertyCreat
   attributes: z.union([ z.lazy(() => NullableJsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
 }).strict();
 
-export const AttributeCreateManySurveyInputSchema: z.ZodType<Prisma.AttributeCreateManySurveyInput> = z.object({
-  id: z.string().optional(),
+export const AttributesOnSurveysCreateManySurveyInputSchema: z.ZodType<Prisma.AttributesOnSurveysCreateManySurveyInput> = z.object({
+  id: z.string().uuid().optional(),
   createdAt: z.coerce.date().optional(),
   updatedAt: z.coerce.date().optional(),
-  label: z.string(),
-  type: z.string(),
-  ownerId: z.string().optional().nullable()
+  attributeId: z.string(),
+  attributeIndex: z.number().int()
 }).strict();
 
 export const PropertyUpdateWithoutSurveyInputSchema: z.ZodType<Prisma.PropertyUpdateWithoutSurveyInput> = z.object({
-  id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  id: z.union([ z.string().uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   address: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
@@ -3057,7 +3486,7 @@ export const PropertyUpdateWithoutSurveyInputSchema: z.ZodType<Prisma.PropertyUp
 }).strict();
 
 export const PropertyUncheckedUpdateWithoutSurveyInputSchema: z.ZodType<Prisma.PropertyUncheckedUpdateWithoutSurveyInput> = z.object({
-  id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  id: z.union([ z.string().uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   ownerId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
@@ -3068,7 +3497,7 @@ export const PropertyUncheckedUpdateWithoutSurveyInputSchema: z.ZodType<Prisma.P
 }).strict();
 
 export const PropertyUncheckedUpdateManyWithoutSurveyInputSchema: z.ZodType<Prisma.PropertyUncheckedUpdateManyWithoutSurveyInput> = z.object({
-  id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  id: z.union([ z.string().uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   ownerId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
@@ -3077,35 +3506,64 @@ export const PropertyUncheckedUpdateManyWithoutSurveyInputSchema: z.ZodType<Pris
   attributes: z.union([ z.lazy(() => NullableJsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
 }).strict();
 
-export const AttributeUpdateWithoutSurveyInputSchema: z.ZodType<Prisma.AttributeUpdateWithoutSurveyInput> = z.object({
-  id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+export const AttributesOnSurveysUpdateWithoutSurveyInputSchema: z.ZodType<Prisma.AttributesOnSurveysUpdateWithoutSurveyInput> = z.object({
+  id: z.union([ z.string().uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  label: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  type: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  owner: z.lazy(() => UserUpdateOneWithoutAttributesNestedInputSchema).optional()
+  attributeIndex: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
+  attribute: z.lazy(() => AttributeUpdateOneRequiredWithoutSurveysNestedInputSchema).optional()
 }).strict();
 
-export const AttributeUncheckedUpdateWithoutSurveyInputSchema: z.ZodType<Prisma.AttributeUncheckedUpdateWithoutSurveyInput> = z.object({
-  id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+export const AttributesOnSurveysUncheckedUpdateWithoutSurveyInputSchema: z.ZodType<Prisma.AttributesOnSurveysUncheckedUpdateWithoutSurveyInput> = z.object({
+  id: z.union([ z.string().uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  label: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  type: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  ownerId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  attributeId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  attributeIndex: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
 }).strict();
 
-export const AttributeUncheckedUpdateManyWithoutSurveyInputSchema: z.ZodType<Prisma.AttributeUncheckedUpdateManyWithoutSurveyInput> = z.object({
-  id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+export const AttributesOnSurveysUncheckedUpdateManyWithoutSurveyInputSchema: z.ZodType<Prisma.AttributesOnSurveysUncheckedUpdateManyWithoutSurveyInput> = z.object({
+  id: z.union([ z.string().uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  label: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  type: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  ownerId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  attributeId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  attributeIndex: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
+}).strict();
+
+export const AttributesOnSurveysCreateManyAttributeInputSchema: z.ZodType<Prisma.AttributesOnSurveysCreateManyAttributeInput> = z.object({
+  id: z.string().uuid().optional(),
+  createdAt: z.coerce.date().optional(),
+  updatedAt: z.coerce.date().optional(),
+  attributeIndex: z.number().int(),
+  surveyId: z.string()
+}).strict();
+
+export const AttributesOnSurveysUpdateWithoutAttributeInputSchema: z.ZodType<Prisma.AttributesOnSurveysUpdateWithoutAttributeInput> = z.object({
+  id: z.union([ z.string().uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  attributeIndex: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
+  survey: z.lazy(() => SurveyUpdateOneRequiredWithoutAttributesNestedInputSchema).optional()
+}).strict();
+
+export const AttributesOnSurveysUncheckedUpdateWithoutAttributeInputSchema: z.ZodType<Prisma.AttributesOnSurveysUncheckedUpdateWithoutAttributeInput> = z.object({
+  id: z.union([ z.string().uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  attributeIndex: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
+  surveyId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+}).strict();
+
+export const AttributesOnSurveysUncheckedUpdateManyWithoutAttributeInputSchema: z.ZodType<Prisma.AttributesOnSurveysUncheckedUpdateManyWithoutAttributeInput> = z.object({
+  id: z.union([ z.string().uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  attributeIndex: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
+  surveyId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
 }).strict();
 
 export const BrochureCreateManyPropertyInputSchema: z.ZodType<Prisma.BrochureCreateManyPropertyInput> = z.object({
-  id: z.string().optional(),
+  id: z.string().uuid().optional(),
   createdAt: z.coerce.date().optional(),
   updatedAt: z.coerce.date().optional(),
   url: z.string(),
@@ -3113,7 +3571,7 @@ export const BrochureCreateManyPropertyInputSchema: z.ZodType<Prisma.BrochureCre
 }).strict();
 
 export const BrochureUpdateWithoutPropertyInputSchema: z.ZodType<Prisma.BrochureUpdateWithoutPropertyInput> = z.object({
-  id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  id: z.union([ z.string().uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   url: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
@@ -3121,7 +3579,7 @@ export const BrochureUpdateWithoutPropertyInputSchema: z.ZodType<Prisma.Brochure
 }).strict();
 
 export const BrochureUncheckedUpdateWithoutPropertyInputSchema: z.ZodType<Prisma.BrochureUncheckedUpdateWithoutPropertyInput> = z.object({
-  id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  id: z.union([ z.string().uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   url: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
@@ -3129,7 +3587,7 @@ export const BrochureUncheckedUpdateWithoutPropertyInputSchema: z.ZodType<Prisma
 }).strict();
 
 export const BrochureUncheckedUpdateManyWithoutPropertyInputSchema: z.ZodType<Prisma.BrochureUncheckedUpdateManyWithoutPropertyInput> = z.object({
-  id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  id: z.union([ z.string().uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   url: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
@@ -3326,68 +3784,6 @@ export const SurveyFindUniqueOrThrowArgsSchema: z.ZodType<Prisma.SurveyFindUniqu
   where: SurveyWhereUniqueInputSchema,
 }).strict() ;
 
-export const PropertyFindFirstArgsSchema: z.ZodType<Prisma.PropertyFindFirstArgs> = z.object({
-  select: PropertySelectSchema.optional(),
-  include: PropertyIncludeSchema.optional(),
-  where: PropertyWhereInputSchema.optional(),
-  orderBy: z.union([ PropertyOrderByWithRelationInputSchema.array(),PropertyOrderByWithRelationInputSchema ]).optional(),
-  cursor: PropertyWhereUniqueInputSchema.optional(),
-  take: z.number().optional(),
-  skip: z.number().optional(),
-  distinct: z.union([ PropertyScalarFieldEnumSchema,PropertyScalarFieldEnumSchema.array() ]).optional(),
-}).strict() ;
-
-export const PropertyFindFirstOrThrowArgsSchema: z.ZodType<Prisma.PropertyFindFirstOrThrowArgs> = z.object({
-  select: PropertySelectSchema.optional(),
-  include: PropertyIncludeSchema.optional(),
-  where: PropertyWhereInputSchema.optional(),
-  orderBy: z.union([ PropertyOrderByWithRelationInputSchema.array(),PropertyOrderByWithRelationInputSchema ]).optional(),
-  cursor: PropertyWhereUniqueInputSchema.optional(),
-  take: z.number().optional(),
-  skip: z.number().optional(),
-  distinct: z.union([ PropertyScalarFieldEnumSchema,PropertyScalarFieldEnumSchema.array() ]).optional(),
-}).strict() ;
-
-export const PropertyFindManyArgsSchema: z.ZodType<Prisma.PropertyFindManyArgs> = z.object({
-  select: PropertySelectSchema.optional(),
-  include: PropertyIncludeSchema.optional(),
-  where: PropertyWhereInputSchema.optional(),
-  orderBy: z.union([ PropertyOrderByWithRelationInputSchema.array(),PropertyOrderByWithRelationInputSchema ]).optional(),
-  cursor: PropertyWhereUniqueInputSchema.optional(),
-  take: z.number().optional(),
-  skip: z.number().optional(),
-  distinct: z.union([ PropertyScalarFieldEnumSchema,PropertyScalarFieldEnumSchema.array() ]).optional(),
-}).strict() ;
-
-export const PropertyAggregateArgsSchema: z.ZodType<Prisma.PropertyAggregateArgs> = z.object({
-  where: PropertyWhereInputSchema.optional(),
-  orderBy: z.union([ PropertyOrderByWithRelationInputSchema.array(),PropertyOrderByWithRelationInputSchema ]).optional(),
-  cursor: PropertyWhereUniqueInputSchema.optional(),
-  take: z.number().optional(),
-  skip: z.number().optional(),
-}).strict() ;
-
-export const PropertyGroupByArgsSchema: z.ZodType<Prisma.PropertyGroupByArgs> = z.object({
-  where: PropertyWhereInputSchema.optional(),
-  orderBy: z.union([ PropertyOrderByWithAggregationInputSchema.array(),PropertyOrderByWithAggregationInputSchema ]).optional(),
-  by: PropertyScalarFieldEnumSchema.array(),
-  having: PropertyScalarWhereWithAggregatesInputSchema.optional(),
-  take: z.number().optional(),
-  skip: z.number().optional(),
-}).strict() ;
-
-export const PropertyFindUniqueArgsSchema: z.ZodType<Prisma.PropertyFindUniqueArgs> = z.object({
-  select: PropertySelectSchema.optional(),
-  include: PropertyIncludeSchema.optional(),
-  where: PropertyWhereUniqueInputSchema,
-}).strict() ;
-
-export const PropertyFindUniqueOrThrowArgsSchema: z.ZodType<Prisma.PropertyFindUniqueOrThrowArgs> = z.object({
-  select: PropertySelectSchema.optional(),
-  include: PropertyIncludeSchema.optional(),
-  where: PropertyWhereUniqueInputSchema,
-}).strict() ;
-
 export const AttributeFindFirstArgsSchema: z.ZodType<Prisma.AttributeFindFirstArgs> = z.object({
   select: AttributeSelectSchema.optional(),
   include: AttributeIncludeSchema.optional(),
@@ -3448,6 +3844,130 @@ export const AttributeFindUniqueOrThrowArgsSchema: z.ZodType<Prisma.AttributeFin
   select: AttributeSelectSchema.optional(),
   include: AttributeIncludeSchema.optional(),
   where: AttributeWhereUniqueInputSchema,
+}).strict() ;
+
+export const AttributesOnSurveysFindFirstArgsSchema: z.ZodType<Prisma.AttributesOnSurveysFindFirstArgs> = z.object({
+  select: AttributesOnSurveysSelectSchema.optional(),
+  include: AttributesOnSurveysIncludeSchema.optional(),
+  where: AttributesOnSurveysWhereInputSchema.optional(),
+  orderBy: z.union([ AttributesOnSurveysOrderByWithRelationInputSchema.array(),AttributesOnSurveysOrderByWithRelationInputSchema ]).optional(),
+  cursor: AttributesOnSurveysWhereUniqueInputSchema.optional(),
+  take: z.number().optional(),
+  skip: z.number().optional(),
+  distinct: z.union([ AttributesOnSurveysScalarFieldEnumSchema,AttributesOnSurveysScalarFieldEnumSchema.array() ]).optional(),
+}).strict() ;
+
+export const AttributesOnSurveysFindFirstOrThrowArgsSchema: z.ZodType<Prisma.AttributesOnSurveysFindFirstOrThrowArgs> = z.object({
+  select: AttributesOnSurveysSelectSchema.optional(),
+  include: AttributesOnSurveysIncludeSchema.optional(),
+  where: AttributesOnSurveysWhereInputSchema.optional(),
+  orderBy: z.union([ AttributesOnSurveysOrderByWithRelationInputSchema.array(),AttributesOnSurveysOrderByWithRelationInputSchema ]).optional(),
+  cursor: AttributesOnSurveysWhereUniqueInputSchema.optional(),
+  take: z.number().optional(),
+  skip: z.number().optional(),
+  distinct: z.union([ AttributesOnSurveysScalarFieldEnumSchema,AttributesOnSurveysScalarFieldEnumSchema.array() ]).optional(),
+}).strict() ;
+
+export const AttributesOnSurveysFindManyArgsSchema: z.ZodType<Prisma.AttributesOnSurveysFindManyArgs> = z.object({
+  select: AttributesOnSurveysSelectSchema.optional(),
+  include: AttributesOnSurveysIncludeSchema.optional(),
+  where: AttributesOnSurveysWhereInputSchema.optional(),
+  orderBy: z.union([ AttributesOnSurveysOrderByWithRelationInputSchema.array(),AttributesOnSurveysOrderByWithRelationInputSchema ]).optional(),
+  cursor: AttributesOnSurveysWhereUniqueInputSchema.optional(),
+  take: z.number().optional(),
+  skip: z.number().optional(),
+  distinct: z.union([ AttributesOnSurveysScalarFieldEnumSchema,AttributesOnSurveysScalarFieldEnumSchema.array() ]).optional(),
+}).strict() ;
+
+export const AttributesOnSurveysAggregateArgsSchema: z.ZodType<Prisma.AttributesOnSurveysAggregateArgs> = z.object({
+  where: AttributesOnSurveysWhereInputSchema.optional(),
+  orderBy: z.union([ AttributesOnSurveysOrderByWithRelationInputSchema.array(),AttributesOnSurveysOrderByWithRelationInputSchema ]).optional(),
+  cursor: AttributesOnSurveysWhereUniqueInputSchema.optional(),
+  take: z.number().optional(),
+  skip: z.number().optional(),
+}).strict() ;
+
+export const AttributesOnSurveysGroupByArgsSchema: z.ZodType<Prisma.AttributesOnSurveysGroupByArgs> = z.object({
+  where: AttributesOnSurveysWhereInputSchema.optional(),
+  orderBy: z.union([ AttributesOnSurveysOrderByWithAggregationInputSchema.array(),AttributesOnSurveysOrderByWithAggregationInputSchema ]).optional(),
+  by: AttributesOnSurveysScalarFieldEnumSchema.array(),
+  having: AttributesOnSurveysScalarWhereWithAggregatesInputSchema.optional(),
+  take: z.number().optional(),
+  skip: z.number().optional(),
+}).strict() ;
+
+export const AttributesOnSurveysFindUniqueArgsSchema: z.ZodType<Prisma.AttributesOnSurveysFindUniqueArgs> = z.object({
+  select: AttributesOnSurveysSelectSchema.optional(),
+  include: AttributesOnSurveysIncludeSchema.optional(),
+  where: AttributesOnSurveysWhereUniqueInputSchema,
+}).strict() ;
+
+export const AttributesOnSurveysFindUniqueOrThrowArgsSchema: z.ZodType<Prisma.AttributesOnSurveysFindUniqueOrThrowArgs> = z.object({
+  select: AttributesOnSurveysSelectSchema.optional(),
+  include: AttributesOnSurveysIncludeSchema.optional(),
+  where: AttributesOnSurveysWhereUniqueInputSchema,
+}).strict() ;
+
+export const PropertyFindFirstArgsSchema: z.ZodType<Prisma.PropertyFindFirstArgs> = z.object({
+  select: PropertySelectSchema.optional(),
+  include: PropertyIncludeSchema.optional(),
+  where: PropertyWhereInputSchema.optional(),
+  orderBy: z.union([ PropertyOrderByWithRelationInputSchema.array(),PropertyOrderByWithRelationInputSchema ]).optional(),
+  cursor: PropertyWhereUniqueInputSchema.optional(),
+  take: z.number().optional(),
+  skip: z.number().optional(),
+  distinct: z.union([ PropertyScalarFieldEnumSchema,PropertyScalarFieldEnumSchema.array() ]).optional(),
+}).strict() ;
+
+export const PropertyFindFirstOrThrowArgsSchema: z.ZodType<Prisma.PropertyFindFirstOrThrowArgs> = z.object({
+  select: PropertySelectSchema.optional(),
+  include: PropertyIncludeSchema.optional(),
+  where: PropertyWhereInputSchema.optional(),
+  orderBy: z.union([ PropertyOrderByWithRelationInputSchema.array(),PropertyOrderByWithRelationInputSchema ]).optional(),
+  cursor: PropertyWhereUniqueInputSchema.optional(),
+  take: z.number().optional(),
+  skip: z.number().optional(),
+  distinct: z.union([ PropertyScalarFieldEnumSchema,PropertyScalarFieldEnumSchema.array() ]).optional(),
+}).strict() ;
+
+export const PropertyFindManyArgsSchema: z.ZodType<Prisma.PropertyFindManyArgs> = z.object({
+  select: PropertySelectSchema.optional(),
+  include: PropertyIncludeSchema.optional(),
+  where: PropertyWhereInputSchema.optional(),
+  orderBy: z.union([ PropertyOrderByWithRelationInputSchema.array(),PropertyOrderByWithRelationInputSchema ]).optional(),
+  cursor: PropertyWhereUniqueInputSchema.optional(),
+  take: z.number().optional(),
+  skip: z.number().optional(),
+  distinct: z.union([ PropertyScalarFieldEnumSchema,PropertyScalarFieldEnumSchema.array() ]).optional(),
+}).strict() ;
+
+export const PropertyAggregateArgsSchema: z.ZodType<Prisma.PropertyAggregateArgs> = z.object({
+  where: PropertyWhereInputSchema.optional(),
+  orderBy: z.union([ PropertyOrderByWithRelationInputSchema.array(),PropertyOrderByWithRelationInputSchema ]).optional(),
+  cursor: PropertyWhereUniqueInputSchema.optional(),
+  take: z.number().optional(),
+  skip: z.number().optional(),
+}).strict() ;
+
+export const PropertyGroupByArgsSchema: z.ZodType<Prisma.PropertyGroupByArgs> = z.object({
+  where: PropertyWhereInputSchema.optional(),
+  orderBy: z.union([ PropertyOrderByWithAggregationInputSchema.array(),PropertyOrderByWithAggregationInputSchema ]).optional(),
+  by: PropertyScalarFieldEnumSchema.array(),
+  having: PropertyScalarWhereWithAggregatesInputSchema.optional(),
+  take: z.number().optional(),
+  skip: z.number().optional(),
+}).strict() ;
+
+export const PropertyFindUniqueArgsSchema: z.ZodType<Prisma.PropertyFindUniqueArgs> = z.object({
+  select: PropertySelectSchema.optional(),
+  include: PropertyIncludeSchema.optional(),
+  where: PropertyWhereUniqueInputSchema,
+}).strict() ;
+
+export const PropertyFindUniqueOrThrowArgsSchema: z.ZodType<Prisma.PropertyFindUniqueOrThrowArgs> = z.object({
+  select: PropertySelectSchema.optional(),
+  include: PropertyIncludeSchema.optional(),
+  where: PropertyWhereUniqueInputSchema,
 }).strict() ;
 
 export const BrochureFindFirstArgsSchema: z.ZodType<Prisma.BrochureFindFirstArgs> = z.object({
@@ -3531,11 +4051,6 @@ export const UserCreateManyArgsSchema: z.ZodType<Prisma.UserCreateManyArgs> = z.
   skipDuplicates: z.boolean().optional(),
 }).strict() ;
 
-export const UserCreateManyAndReturnArgsSchema: z.ZodType<Prisma.UserCreateManyAndReturnArgs> = z.object({
-  data: z.union([ UserCreateManyInputSchema,UserCreateManyInputSchema.array() ]),
-  skipDuplicates: z.boolean().optional(),
-}).strict() ;
-
 export const UserDeleteArgsSchema: z.ZodType<Prisma.UserDeleteArgs> = z.object({
   select: UserSelectSchema.optional(),
   include: UserIncludeSchema.optional(),
@@ -3573,11 +4088,6 @@ export const ProjectUpsertArgsSchema: z.ZodType<Prisma.ProjectUpsertArgs> = z.ob
 }).strict() ;
 
 export const ProjectCreateManyArgsSchema: z.ZodType<Prisma.ProjectCreateManyArgs> = z.object({
-  data: z.union([ ProjectCreateManyInputSchema,ProjectCreateManyInputSchema.array() ]),
-  skipDuplicates: z.boolean().optional(),
-}).strict() ;
-
-export const ProjectCreateManyAndReturnArgsSchema: z.ZodType<Prisma.ProjectCreateManyAndReturnArgs> = z.object({
   data: z.union([ ProjectCreateManyInputSchema,ProjectCreateManyInputSchema.array() ]),
   skipDuplicates: z.boolean().optional(),
 }).strict() ;
@@ -3623,11 +4133,6 @@ export const SurveyCreateManyArgsSchema: z.ZodType<Prisma.SurveyCreateManyArgs> 
   skipDuplicates: z.boolean().optional(),
 }).strict() ;
 
-export const SurveyCreateManyAndReturnArgsSchema: z.ZodType<Prisma.SurveyCreateManyAndReturnArgs> = z.object({
-  data: z.union([ SurveyCreateManyInputSchema,SurveyCreateManyInputSchema.array() ]),
-  skipDuplicates: z.boolean().optional(),
-}).strict() ;
-
 export const SurveyDeleteArgsSchema: z.ZodType<Prisma.SurveyDeleteArgs> = z.object({
   select: SurveySelectSchema.optional(),
   include: SurveyIncludeSchema.optional(),
@@ -3650,52 +4155,6 @@ export const SurveyDeleteManyArgsSchema: z.ZodType<Prisma.SurveyDeleteManyArgs> 
   where: SurveyWhereInputSchema.optional(),
 }).strict() ;
 
-export const PropertyCreateArgsSchema: z.ZodType<Prisma.PropertyCreateArgs> = z.object({
-  select: PropertySelectSchema.optional(),
-  include: PropertyIncludeSchema.optional(),
-  data: z.union([ PropertyCreateInputSchema,PropertyUncheckedCreateInputSchema ]),
-}).strict() ;
-
-export const PropertyUpsertArgsSchema: z.ZodType<Prisma.PropertyUpsertArgs> = z.object({
-  select: PropertySelectSchema.optional(),
-  include: PropertyIncludeSchema.optional(),
-  where: PropertyWhereUniqueInputSchema,
-  create: z.union([ PropertyCreateInputSchema,PropertyUncheckedCreateInputSchema ]),
-  update: z.union([ PropertyUpdateInputSchema,PropertyUncheckedUpdateInputSchema ]),
-}).strict() ;
-
-export const PropertyCreateManyArgsSchema: z.ZodType<Prisma.PropertyCreateManyArgs> = z.object({
-  data: z.union([ PropertyCreateManyInputSchema,PropertyCreateManyInputSchema.array() ]),
-  skipDuplicates: z.boolean().optional(),
-}).strict() ;
-
-export const PropertyCreateManyAndReturnArgsSchema: z.ZodType<Prisma.PropertyCreateManyAndReturnArgs> = z.object({
-  data: z.union([ PropertyCreateManyInputSchema,PropertyCreateManyInputSchema.array() ]),
-  skipDuplicates: z.boolean().optional(),
-}).strict() ;
-
-export const PropertyDeleteArgsSchema: z.ZodType<Prisma.PropertyDeleteArgs> = z.object({
-  select: PropertySelectSchema.optional(),
-  include: PropertyIncludeSchema.optional(),
-  where: PropertyWhereUniqueInputSchema,
-}).strict() ;
-
-export const PropertyUpdateArgsSchema: z.ZodType<Prisma.PropertyUpdateArgs> = z.object({
-  select: PropertySelectSchema.optional(),
-  include: PropertyIncludeSchema.optional(),
-  data: z.union([ PropertyUpdateInputSchema,PropertyUncheckedUpdateInputSchema ]),
-  where: PropertyWhereUniqueInputSchema,
-}).strict() ;
-
-export const PropertyUpdateManyArgsSchema: z.ZodType<Prisma.PropertyUpdateManyArgs> = z.object({
-  data: z.union([ PropertyUpdateManyMutationInputSchema,PropertyUncheckedUpdateManyInputSchema ]),
-  where: PropertyWhereInputSchema.optional(),
-}).strict() ;
-
-export const PropertyDeleteManyArgsSchema: z.ZodType<Prisma.PropertyDeleteManyArgs> = z.object({
-  where: PropertyWhereInputSchema.optional(),
-}).strict() ;
-
 export const AttributeCreateArgsSchema: z.ZodType<Prisma.AttributeCreateArgs> = z.object({
   select: AttributeSelectSchema.optional(),
   include: AttributeIncludeSchema.optional(),
@@ -3711,11 +4170,6 @@ export const AttributeUpsertArgsSchema: z.ZodType<Prisma.AttributeUpsertArgs> = 
 }).strict() ;
 
 export const AttributeCreateManyArgsSchema: z.ZodType<Prisma.AttributeCreateManyArgs> = z.object({
-  data: z.union([ AttributeCreateManyInputSchema,AttributeCreateManyInputSchema.array() ]),
-  skipDuplicates: z.boolean().optional(),
-}).strict() ;
-
-export const AttributeCreateManyAndReturnArgsSchema: z.ZodType<Prisma.AttributeCreateManyAndReturnArgs> = z.object({
   data: z.union([ AttributeCreateManyInputSchema,AttributeCreateManyInputSchema.array() ]),
   skipDuplicates: z.boolean().optional(),
 }).strict() ;
@@ -3742,6 +4196,88 @@ export const AttributeDeleteManyArgsSchema: z.ZodType<Prisma.AttributeDeleteMany
   where: AttributeWhereInputSchema.optional(),
 }).strict() ;
 
+export const AttributesOnSurveysCreateArgsSchema: z.ZodType<Prisma.AttributesOnSurveysCreateArgs> = z.object({
+  select: AttributesOnSurveysSelectSchema.optional(),
+  include: AttributesOnSurveysIncludeSchema.optional(),
+  data: z.union([ AttributesOnSurveysCreateInputSchema,AttributesOnSurveysUncheckedCreateInputSchema ]),
+}).strict() ;
+
+export const AttributesOnSurveysUpsertArgsSchema: z.ZodType<Prisma.AttributesOnSurveysUpsertArgs> = z.object({
+  select: AttributesOnSurveysSelectSchema.optional(),
+  include: AttributesOnSurveysIncludeSchema.optional(),
+  where: AttributesOnSurveysWhereUniqueInputSchema,
+  create: z.union([ AttributesOnSurveysCreateInputSchema,AttributesOnSurveysUncheckedCreateInputSchema ]),
+  update: z.union([ AttributesOnSurveysUpdateInputSchema,AttributesOnSurveysUncheckedUpdateInputSchema ]),
+}).strict() ;
+
+export const AttributesOnSurveysCreateManyArgsSchema: z.ZodType<Prisma.AttributesOnSurveysCreateManyArgs> = z.object({
+  data: z.union([ AttributesOnSurveysCreateManyInputSchema,AttributesOnSurveysCreateManyInputSchema.array() ]),
+  skipDuplicates: z.boolean().optional(),
+}).strict() ;
+
+export const AttributesOnSurveysDeleteArgsSchema: z.ZodType<Prisma.AttributesOnSurveysDeleteArgs> = z.object({
+  select: AttributesOnSurveysSelectSchema.optional(),
+  include: AttributesOnSurveysIncludeSchema.optional(),
+  where: AttributesOnSurveysWhereUniqueInputSchema,
+}).strict() ;
+
+export const AttributesOnSurveysUpdateArgsSchema: z.ZodType<Prisma.AttributesOnSurveysUpdateArgs> = z.object({
+  select: AttributesOnSurveysSelectSchema.optional(),
+  include: AttributesOnSurveysIncludeSchema.optional(),
+  data: z.union([ AttributesOnSurveysUpdateInputSchema,AttributesOnSurveysUncheckedUpdateInputSchema ]),
+  where: AttributesOnSurveysWhereUniqueInputSchema,
+}).strict() ;
+
+export const AttributesOnSurveysUpdateManyArgsSchema: z.ZodType<Prisma.AttributesOnSurveysUpdateManyArgs> = z.object({
+  data: z.union([ AttributesOnSurveysUpdateManyMutationInputSchema,AttributesOnSurveysUncheckedUpdateManyInputSchema ]),
+  where: AttributesOnSurveysWhereInputSchema.optional(),
+}).strict() ;
+
+export const AttributesOnSurveysDeleteManyArgsSchema: z.ZodType<Prisma.AttributesOnSurveysDeleteManyArgs> = z.object({
+  where: AttributesOnSurveysWhereInputSchema.optional(),
+}).strict() ;
+
+export const PropertyCreateArgsSchema: z.ZodType<Prisma.PropertyCreateArgs> = z.object({
+  select: PropertySelectSchema.optional(),
+  include: PropertyIncludeSchema.optional(),
+  data: z.union([ PropertyCreateInputSchema,PropertyUncheckedCreateInputSchema ]),
+}).strict() ;
+
+export const PropertyUpsertArgsSchema: z.ZodType<Prisma.PropertyUpsertArgs> = z.object({
+  select: PropertySelectSchema.optional(),
+  include: PropertyIncludeSchema.optional(),
+  where: PropertyWhereUniqueInputSchema,
+  create: z.union([ PropertyCreateInputSchema,PropertyUncheckedCreateInputSchema ]),
+  update: z.union([ PropertyUpdateInputSchema,PropertyUncheckedUpdateInputSchema ]),
+}).strict() ;
+
+export const PropertyCreateManyArgsSchema: z.ZodType<Prisma.PropertyCreateManyArgs> = z.object({
+  data: z.union([ PropertyCreateManyInputSchema,PropertyCreateManyInputSchema.array() ]),
+  skipDuplicates: z.boolean().optional(),
+}).strict() ;
+
+export const PropertyDeleteArgsSchema: z.ZodType<Prisma.PropertyDeleteArgs> = z.object({
+  select: PropertySelectSchema.optional(),
+  include: PropertyIncludeSchema.optional(),
+  where: PropertyWhereUniqueInputSchema,
+}).strict() ;
+
+export const PropertyUpdateArgsSchema: z.ZodType<Prisma.PropertyUpdateArgs> = z.object({
+  select: PropertySelectSchema.optional(),
+  include: PropertyIncludeSchema.optional(),
+  data: z.union([ PropertyUpdateInputSchema,PropertyUncheckedUpdateInputSchema ]),
+  where: PropertyWhereUniqueInputSchema,
+}).strict() ;
+
+export const PropertyUpdateManyArgsSchema: z.ZodType<Prisma.PropertyUpdateManyArgs> = z.object({
+  data: z.union([ PropertyUpdateManyMutationInputSchema,PropertyUncheckedUpdateManyInputSchema ]),
+  where: PropertyWhereInputSchema.optional(),
+}).strict() ;
+
+export const PropertyDeleteManyArgsSchema: z.ZodType<Prisma.PropertyDeleteManyArgs> = z.object({
+  where: PropertyWhereInputSchema.optional(),
+}).strict() ;
+
 export const BrochureCreateArgsSchema: z.ZodType<Prisma.BrochureCreateArgs> = z.object({
   select: BrochureSelectSchema.optional(),
   include: BrochureIncludeSchema.optional(),
@@ -3757,11 +4293,6 @@ export const BrochureUpsertArgsSchema: z.ZodType<Prisma.BrochureUpsertArgs> = z.
 }).strict() ;
 
 export const BrochureCreateManyArgsSchema: z.ZodType<Prisma.BrochureCreateManyArgs> = z.object({
-  data: z.union([ BrochureCreateManyInputSchema,BrochureCreateManyInputSchema.array() ]),
-  skipDuplicates: z.boolean().optional(),
-}).strict() ;
-
-export const BrochureCreateManyAndReturnArgsSchema: z.ZodType<Prisma.BrochureCreateManyAndReturnArgs> = z.object({
   data: z.union([ BrochureCreateManyInputSchema,BrochureCreateManyInputSchema.array() ]),
   skipDuplicates: z.boolean().optional(),
 }).strict() ;
