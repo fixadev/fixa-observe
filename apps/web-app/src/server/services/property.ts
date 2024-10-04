@@ -1,48 +1,48 @@
-import { type Building, type PrismaClient } from "@prisma/client";
-import { type ImportBuildingsArray, } from "~/lib/building";
+import { type Property, type PrismaClient } from "@prisma/client";
+import { type ImportPropertiesArray, } from "~/lib/property";
 
-export const buildingService = ({
+export const propertyService = ({
   db,
 }: {
   db: PrismaClient;
 }) => {
   return {
-    createBuildings: async (
-      input: ImportBuildingsArray,
+    createProperties: async (
+      input: ImportPropertiesArray,
       userId: string,
     ) => {
-      const buildingsToCreate = input.map((building) => ({
-        ...building,
+      const propertiesToCreate = input.map((property) => ({
+        ...property,
         ownerId: userId,
       }));
 
-      const createdBuildings = await db.building.createMany({
-        data: buildingsToCreate,
+      const createdProperties = await db.property.createMany({
+        data: propertiesToCreate,
       });
 
-      const allBuildings = await db.building.findMany({
+      const allProperties = await db.property.findMany({
         where: {
           ownerId: userId,
           address: {
-            in: buildingsToCreate.map((building) => building.address),
+            in: propertiesToCreate.map((property) => property.address),
           },
         },
       });
 
       console.log({
-        created: createdBuildings.count,
+        created: createdProperties.count,
       });
 
-      return allBuildings.map((building) => building.id);
+      return allProperties.map((property) => property.id);
     },
 
-    getBuilding: async (
-      buildingId: string,
+    getProperty: async (
+      propertyId: string,
       userId: string,
     ) => {
-      const building = await db.building.findUnique({
+      const property = await db.property.findUnique({
         where: {
-          id: buildingId,
+          id: propertyId,
           ownerId: userId,
         },
         include: {
@@ -50,30 +50,30 @@ export const buildingService = ({
         },
       });
 
-      return building;
+      return property;
     },
 
-    updateBuilding: async (
-      building: Building,
+    updateProperty: async (
+      property: Property,
       userId: string,
     ) => {
-      const response = await db.building.update({
+      const response = await db.property.update({
         where: {
-          id: building.id,
+          id: property.id,
           ownerId: userId,
         },
         data: {
-          ...building,
+          ...property,
           ownerId: userId,
         },
       });
       return response;
     },
 
-    addOrReplaceBuildingPhoto: async (buildingId: string, photoUrl: string, userId: string) => {
-      await db.building.update({
+    addOrReplacePropertyPhoto: async (propertyId: string, photoUrl: string, userId: string) => {
+      await db.property.update({
         where: {
-          id: buildingId,
+          id: propertyId,
           ownerId: userId,
         },
         data: {
@@ -83,24 +83,24 @@ export const buildingService = ({
       return photoUrl;
     },
 
-    deletePhotoUrlFromBuilding: async (
-      buildingId: string,
+    deletePhotoUrlFromProperty: async (
+      propertyId: string,
       userId: string,
     ) => {
-      const building = await db.building.findUnique({
+      const property = await db.property.findUnique({
         where: {
-          id: buildingId,
+          id: propertyId,
           ownerId: userId,
         },
       });
 
-      if (!building) {
-        throw new Error("Building not found");
+      if (!property) {
+        throw new Error("Property not found");
       }
 
-      return db.building.update({
+      return db.property.update({
         where: {
-          id: buildingId,
+          id: propertyId,
           ownerId: userId,
         },
         data: {
@@ -110,14 +110,14 @@ export const buildingService = ({
     },
 
     addBrochure: async (
-      buildingId: string,
+      propertyId: string,
       brochureUrl: string,
       brochureTitle: string,
       userId: string,
     ) => {
-      const response = await db.building.update({
+      const response = await db.property.update({
         where: {
-          id: buildingId,
+          id: propertyId,
           ownerId: userId,
         },
         data: {
@@ -135,24 +135,24 @@ export const buildingService = ({
     },
 
     deleteBrochure: async (
-      buildingId: string,
+      propertyId: string,
       brochureId: string,
       userId: string,
     ) => {
-      const building = await db.building.findUnique({
+      const property = await db.property.findUnique({
         where: {
-          id: buildingId,
+          id: propertyId,
           ownerId: userId,
         },
       });
 
-      if (!building) {
-        throw new Error("Building not found");
+      if (!property) {
+        throw new Error("Property not found");
       }
 
-      return db.building.update({
+      return db.property.update({
         where: {
-          id: buildingId,
+          id: propertyId,
           ownerId: userId,
         },
         data: {
@@ -165,24 +165,24 @@ export const buildingService = ({
       });
     },
 
-    deleteBuilding: async (
-      buildingId: string,
+    deleteProperty: async (
+      propertyId: string,
       userId: string,
     ) => {
-      const building = await db.building.findUnique({
+      const property = await db.property.findUnique({
         where: {
-          id: buildingId,
+          id: propertyId,
           ownerId: userId,
         },
       });
 
-      if (!building) {
-        throw new Error("Building not found");
+      if (!property) {
+        throw new Error("Property not found");
       }
 
-      return db.building.delete({
+      return db.property.delete({
         where: {
-          id: buildingId,
+          id: propertyId,
           ownerId: userId,
         },
       });

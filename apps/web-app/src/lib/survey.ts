@@ -13,7 +13,7 @@ export const surveySchema = z.object({
     id: z.string(),
     name: z.string(),
     projectId: z.string(),
-    buildingIds: z.array(z.string()),
+    propertyIds: z.array(z.string()),
     ownerId: z.string(),
     createdAt: z.date(),
     updatedAt: z.date(),

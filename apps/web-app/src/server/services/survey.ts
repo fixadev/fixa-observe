@@ -24,7 +24,7 @@ export const surveyService = ({
       const survey = await db.survey.findUnique({
         where: { id: surveyId, ownerId: userId },
         include: {
-          buildings: true,
+          properties: true,
         },
       });
       return survey;
@@ -51,15 +51,15 @@ export const surveyService = ({
       return result;
     },
 
-    addBuildingsToSurvey: async (
+    addPropertiesToSurvey: async (
       surveyId: string,
-      buildingIds: string[],
+      propertyIds: string[],
       userId: string,
     ) => {
-      console.log("buildingIds", buildingIds);
+      console.log("propertyIds", propertyIds);
       const survey = await db.survey.update({
         where: { id: surveyId, ownerId: userId },
-        data: { buildingIds }
+        data: { propertyIds }
       });
       return survey;
     },
