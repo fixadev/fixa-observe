@@ -2,7 +2,7 @@ import { Separator } from "~/components/ui/separator";
 import { Card, CardHeader, CardTitle, CardContent } from "~/components/ui/card";
 import { Table, TableRow, TableCell } from "~/components/ui/table";
 import BuildingFacade from "./BuildingFacade";
-import EmailCard from "./EmailCard";
+import { EmailCardWithDialog } from "./EmailCard";
 import { CheckCircleIcon } from "@heroicons/react/24/solid";
 
 export default function Completed() {
@@ -20,7 +20,7 @@ function EmailSection() {
     <div className="flex items-start gap-8 overflow-hidden">
       <BuildingFacade />
       <div className="flex flex-col gap-2 overflow-hidden">
-        <EmailCard />
+        <EmailCardWithDialog />
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">

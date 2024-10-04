@@ -1,8 +1,9 @@
 import { Separator } from "~/components/ui/separator";
-import EmailCard from "./EmailCard";
+import { EmailCardWithDialog } from "./EmailCard";
 import BuildingFacade from "./BuildingFacade";
 import { Card, CardHeader, CardTitle, CardContent } from "~/components/ui/card";
 import { Table, TableCell, TableRow } from "~/components/ui/table";
+import { XCircleIcon } from "@heroicons/react/24/solid";
 
 export default function FollowUp() {
   return (
@@ -19,10 +20,13 @@ function EmailSection() {
     <div className="flex items-start gap-8 overflow-hidden">
       <BuildingFacade />
       <div className="flex flex-col gap-2 overflow-hidden">
-        <EmailCard />
+        <EmailCardWithDialog />
         <Card>
           <CardHeader>
-            <CardTitle>Incomplete data</CardTitle>
+            <CardTitle className="flex items-center gap-2">
+              <div>Incomplete data</div>
+              <XCircleIcon className="size-5 text-red-500" />
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <Table className="max-w-[300px]">

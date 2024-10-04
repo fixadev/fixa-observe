@@ -1,5 +1,5 @@
 import { Separator } from "~/components/ui/separator";
-import EmailCard from "./EmailCard";
+import { EmailCardWithDialog } from "./EmailCard";
 import BuildingFacade from "./BuildingFacade";
 
 export default function Pending() {
@@ -18,7 +18,7 @@ function EmailSection() {
   return (
     <div className="flex items-start gap-8 overflow-hidden">
       <BuildingFacade />
-      <EmailCard />
+      <EmailCardWithDialog />
     </div>
   );
 }
