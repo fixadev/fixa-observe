@@ -43,87 +43,14 @@ import { Button } from "~/components/ui/button";
 import { PlusIcon, TrashIcon } from "@heroicons/react/24/solid";
 import { PDFUploader } from "./NDXOutputUploader";
 import { api } from "~/trpc/react";
+import { type PropertySchema, type AttributeSchema } from "~/lib/property";
 
-export type Property = {
-  id: string;
-  attributes: Record<string, string>;
+export type Property = PropertySchema & {
   isNew?: boolean;
 };
-export type Attribute = {
-  id: string;
-  label: string;
+export type Attribute = AttributeSchema & {
   isNew?: boolean;
 };
-
-const attributes = {
-  floors: { id: "-1", label: "Floors" },
-  amenities: { id: "-2", label: "Amenities" },
-};
-const testAttributesOrder: Attribute[] = [
-  attributes.floors,
-  attributes.amenities,
-];
-
-const testProperties: Property[] = [
-  {
-    id: "1",
-    attributes: {
-      [attributes.floors.id]: "3",
-      [attributes.amenities.id]: "Parking, Elevator, Conference Room",
-    },
-  },
-  {
-    id: "2",
-    attributes: {
-      [attributes.floors.id]: "2",
-      [attributes.amenities.id]: "Kitchen, Gym, Rooftop Terrace",
-    },
-  },
-  {
-    id: "3",
-    attributes: {
-      [attributes.floors.id]: "1",
-      [attributes.amenities.id]: "Private Bathroom, Balcony, Storage Unit",
-    },
-  },
-  {
-    id: "4",
-    attributes: {
-      [attributes.floors.id]: "4",
-      [attributes.amenities.id]:
-        "High-speed Internet, Open Floor Plan, Meeting Rooms",
-    },
-  },
-  {
-    id: "5",
-    attributes: {
-      [attributes.floors.id]: "2",
-      [attributes.amenities.id]: "24/7 Security, Lounge Area, Bike Storage",
-    },
-  },
-  {
-    id: "6",
-    attributes: {
-      [attributes.floors.id]: "3",
-      [attributes.amenities.id]: "Fitness Center, Cafeteria, Outdoor Workspace",
-    },
-  },
-  {
-    id: "7",
-    attributes: {
-      [attributes.floors.id]: "5",
-      [attributes.amenities.id]: "Executive Lounge, Helipad, Private Elevator",
-    },
-  },
-  {
-    id: "8",
-    attributes: {
-      [attributes.floors.id]: "1",
-      [attributes.amenities.id]:
-        "Soundproof Rooms, Recording Studio, Green Screen Room",
-    },
-  },
-];
 
 const DraggableHeader = ({
   attribute,
@@ -253,7 +180,7 @@ const DraggableRow = ({
             id={attribute.id}
             draggingRow={draggingRow}
           >
-            <Input defaultValue={property.attributes[attribute.id]} />
+            <Input defaultValue={property.attributes[attribute.id] ?? ""} />
           </DraggableCell>
         );
       })}
@@ -299,30 +226,116 @@ const DraggableCell = ({
 };
 
 export default function PropertiesTable({ surveyId }: { surveyId: string }) {
-  const [properties, setProperties] = useState<Property[]>(testProperties);
-  const [attributesOrder, setAttributesOrder] =
-    useState<Attribute[]>(testAttributesOrder);
+  const [properties, setPropertiesState] = useState<Property[]>([]);
+  const [attributesOrder, setAttributesOrderState] = useState<Attribute[]>([]);
   const [draggingRow, setDraggingRow] = useState<boolean>(false);
+  const { mutate: updateSurvey } = api.survey.updateSurvey.useMutation();
+  const { mutate: createProperties } =
+    api.survey.addPropertiesToSurvey.useMutation();
 
-  const { data: surveyData, isLoading: surveyLoading } =
-    api.survey.getSurvey.useQuery({
-      surveyId,
-    });
+  // state setter wrapper to update db as well
+  const setProperties = async (
+    newPropertiesOrCallback:
+      | Property[]
+      | ((prevProperties: Property[]) => Property[]),
+  ) => {
+    if (!surveyData) return;
+
+    let newProperties: Property[];
+    if (typeof newPropertiesOrCallback === "function") {
+      newProperties = newPropertiesOrCallback(properties);
+    } else {
+      newProperties = newPropertiesOrCallback;
+    }
+
+    try {
+      const existingPropertyIds = new Set(properties.map((prop) => prop.id));
+      const propertiesWithSurveyId = newProperties.map((prop) => ({
+        ...prop,
+        surveyId: surveyId,
+      }));
+
+      const newPropertiesToAdd = propertiesWithSurveyId.filter(
+        (prop) => !existingPropertyIds.has(prop.id),
+      );
+      const existingPropertiesToUpdate = propertiesWithSurveyId.filter((prop) =>
+        existingPropertyIds.has(prop.id),
+      );
+
+      if (newPropertiesToAdd.length > 0) {
+        void createProperties({
+          properties: newPropertiesToAdd,
+          surveyId: surveyId,
+        });
+      }
+
+      if (existingPropertiesToUpdate.length > 0) {
+        void updateSurvey({
+          ...surveyData,
+          attributesOrder,
+          properties: existingPropertiesToUpdate,
+        });
+      }
+
+      setPropertiesState(propertiesWithSurveyId); // Update state
+    } catch (error) {
+      console.error("Failed to update properties:", error);
+      // Handle error (e.g., show error message to user)
+    }
+  };
+
+  // state setter wrapper to update db as well
+  const setAttributesOrder = async (
+    newOrderOrCallback: Attribute[] | ((prevOrder: Attribute[]) => Attribute[]),
+  ) => {
+    if (!surveyData) return;
+    let newOrder: Attribute[];
+    if (typeof newOrderOrCallback === "function") {
+      newOrder = newOrderOrCallback(attributesOrder);
+    } else {
+      newOrder = newOrderOrCallback;
+    }
+
+    try {
+      void updateSurvey({
+        ...surveyData,
+        attributesOrder: newOrder,
+        properties: properties,
+      });
+      setAttributesOrderState(newOrder);
+    } catch (error) {
+      console.error("Failed to update attributes order:", error);
+    }
+  };
+
+  const { data: surveyData } = api.survey.getSurvey.useQuery({
+    surveyId,
+  });
   useEffect(() => {
     console.log("surveyData", surveyData);
     if (surveyData?.properties) {
-      console.log("surveyData", surveyData);
-      setProperties(surveyData.properties);
-      setAttributesOrder(surveyData.attributesOrder);
+      setPropertiesState(
+        surveyData.properties.map((property) => ({
+          ...property,
+          attributes: property.attributes as Record<string, string | null>,
+        })),
+      );
     }
   }, [surveyData]);
+
+  const { data: attributesData } = api.property.getAttributes.useQuery();
+  useEffect(() => {
+    if (attributesData) {
+      setAttributesOrderState(attributesData);
+    }
+  }, [attributesData]);
 
   const rowIds = useMemo(
     () => properties.map((property) => property.id),
     [properties],
   );
   const colIds = useMemo(
-    () => attributesOrder.map((attribute) => attribute.id),
+    () => attributesOrder?.map((attribute) => attribute.id),
     [attributesOrder],
   );
 
@@ -331,13 +344,13 @@ export default function PropertiesTable({ surveyId }: { surveyId: string }) {
       const { active, over } = event;
       if (active && over && active.id !== over.id) {
         if (draggingRow) {
-          setProperties((data) => {
+          void setProperties((data) => {
             const oldIndex = rowIds.findIndex((id) => id === active.id);
             const newIndex = rowIds.findIndex((id) => id === over.id);
             return arrayMove(data, oldIndex, newIndex);
           });
         } else {
-          setAttributesOrder((data) => {
+          void setAttributesOrder((data) => {
             const oldIndex = colIds.findIndex((id) => id === active.id);
             const newIndex = colIds.findIndex((id) => id === over.id);
             return arrayMove(data, oldIndex, newIndex);
@@ -355,7 +368,7 @@ export default function PropertiesTable({ surveyId }: { surveyId: string }) {
   );
 
   const addProperty = useCallback(() => {
-    setProperties((data) => [
+    void setProperties((data) => [
       ...data,
       {
         id: crypto.randomUUID(),
@@ -371,14 +384,14 @@ export default function PropertiesTable({ surveyId }: { surveyId: string }) {
   }, []);
 
   const addAttribute = useCallback(() => {
-    setAttributesOrder((data) => [
+    void setAttributesOrder((data) => [
       ...data,
       { id: crypto.randomUUID(), label: "New field", isNew: true },
     ]);
   }, []);
 
   const renameAttribute = useCallback((id: string, label: string) => {
-    setAttributesOrder((data) => {
+    void setAttributesOrder((data) => {
       const index = data.findIndex((attribute) => attribute.id === id);
       if (index === -1) return data;
       const newData = [...data];
@@ -388,7 +401,7 @@ export default function PropertiesTable({ surveyId }: { surveyId: string }) {
   }, []);
 
   const deleteProperty = useCallback((id: string) => {
-    setProperties((data) => {
+    void setProperties((data) => {
       const index = data.findIndex((property) => property.id === id);
       if (index === -1) return data;
       const newData = [...data];
@@ -398,7 +411,7 @@ export default function PropertiesTable({ surveyId }: { surveyId: string }) {
   }, []);
 
   const deleteAttribute = useCallback((id: string) => {
-    setAttributesOrder((data) => {
+    void setAttributesOrder((data) => {
       const index = data.findIndex((attribute) => attribute.id === id);
       if (index === -1) return data;
       const newData = [...data];
@@ -412,7 +425,11 @@ export default function PropertiesTable({ surveyId }: { surveyId: string }) {
   return (
     <div>
       <div className="flex flex-row justify-end gap-4">
-        <PDFUploader />
+        <PDFUploader
+          setProperties={setProperties}
+          attributesOrder={attributesOrder}
+          setAttributesOrder={setAttributesOrder}
+        />
       </div>
       <DndContext
         collisionDetection={closestCenter}
@@ -478,7 +495,7 @@ export default function PropertiesTable({ surveyId }: { surveyId: string }) {
           </TableBody>
         </Table>
         <Button variant="ghost" className="mt-2" onClick={addProperty}>
-          + Add field
+          + Add property
         </Button>
       </DndContext>
     </div>
