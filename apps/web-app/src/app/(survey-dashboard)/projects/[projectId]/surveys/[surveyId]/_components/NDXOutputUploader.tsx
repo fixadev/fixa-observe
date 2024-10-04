@@ -52,7 +52,7 @@ async function parsePDF(file: File, pdfjsLib: typeof PDFJS) {
   try {
     // Load the PDF document
     const doc = await pdfjsLib.getDocument({ data }).promise;
-    const numPages: number = doc.numPages;
+    const numPages = doc.numPages;
     console.log(`Number of pages: ${numPages}`);
 
     // Iterate through each page
@@ -91,26 +91,30 @@ async function parsePDF(file: File, pdfjsLib: typeof PDFJS) {
       }
 
       // TODO: Extract images
-      // const operatorList = await page.getOperatorList();
-      // for (let i = 0; i < operatorList.fnArray.length; i++) {
-      //   const op = operatorList.fnArray[i];
+      // const ops = await page.getOperatorList();
+      // const imageNames = ops.fnArray.reduce((acc, curr, i) => {
       //   if (
-      //     op === pdfjsLib.OPS.paintImageXObject ||
-      //     op === pdfjsLib.OPS.paintJpegXObject
+      //     [
+      //       pdfjsLib.OPS.paintImageXObject,
+      //       pdfjsLib.OPS.paintJpegXObject,
+      //     ].includes(curr)
       //   ) {
-      //     const imageIndex = operatorList.argsArray[i][0];
-      //     try {
-      //       const img = await page.objs.get(imageIndex);
-      //       if (img?.src) {
-      //         parsedPDF.push(`[IMAGE: ${img.src}]`);
-      //         console.log(`[IMAGE: ${img.src}]`);
-      //       }
-      //     } catch (error) {
-      //       console.warn(`Failed to load image ${imageIndex}:`, error);
-      //       parsedPDF.push(`[IMAGE: Unable to load ${imageIndex}]`);
-      //     }
+      //     // console.log(ops.argsArray[i])
+      //     acc.push(ops.argsArray[i][0]);
       //   }
-      // }
+      //   return acc;
+      // }, []);
+
+      // const rawImages = imageNames.map((name) => {
+      //   return [
+      //     name,
+      //     name.startsWith("g_")
+      //       ? page.commonObjs.get(name)
+      //       : page.objs.get(name),
+      //   ];
+      // });
+
+      // console.log("rawImages", rawImages);
 
       console.log("\n--- End of Page ---\n");
     }
