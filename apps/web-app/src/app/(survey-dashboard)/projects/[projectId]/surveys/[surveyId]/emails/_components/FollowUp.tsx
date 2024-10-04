@@ -11,6 +11,10 @@ export default function FollowUp() {
       <EmailSection />
       <Separator />
       <EmailSection />
+      <Separator />
+      <EmailSection />
+      <Separator />
+      <EmailSection />
     </div>
   );
 }
