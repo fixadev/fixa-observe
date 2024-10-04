@@ -20,17 +20,17 @@ export default function EmailsPage() {
           <div className="flex w-full max-w-3xl flex-col gap-2 overflow-y-auto p-2">
             <Button
               variant="ghost"
-              className="flex items-center justify-between"
+              className="flex w-full items-center justify-between"
             >
               Unsent <ChevronDownIcon className="size-4" />
             </Button>
-            <EmailCard className="shrink-0" />
-            <EmailCard className="shrink-0" />
-            <EmailCard className="shrink-0" />
-            <EmailCard className="shrink-0" />
+            <EmailCard draft className="shrink-0" />
+            <EmailCard draft className="shrink-0" />
+            <EmailCard draft className="shrink-0" />
+            <EmailCard draft className="shrink-0" />
             <Button
               variant="ghost"
-              className="flex items-center justify-between"
+              className="flex w-full items-center justify-between"
             >
               Pending <ChevronDownIcon className="size-4" />
             </Button>
@@ -54,6 +54,30 @@ export default function EmailsPage() {
             >
               Completed <ChevronDownIcon className="size-4" />
             </Button>
+            <EmailCard className="shrink-0" />
+            <EmailCard className="shrink-0" />
+            <EmailCard className="shrink-0" />
+            <EmailCard className="shrink-0" />
+            <EmailCard className="shrink-0" />
+            <EmailCard className="shrink-0" />
+            <EmailCard className="shrink-0" />
+            <EmailCard className="shrink-0" />
+            <EmailCard className="shrink-0" />
+            <EmailCard className="shrink-0" />
+            <EmailCard className="shrink-0" />
+            <EmailCard className="shrink-0" />
+            <EmailCard className="shrink-0" />
+            <EmailCard className="shrink-0" />
+            <EmailCard className="shrink-0" />
+            <EmailCard className="shrink-0" />
+            <EmailCard className="shrink-0" />
+            <EmailCard className="shrink-0" />
+            <EmailCard className="shrink-0" />
+            <EmailCard className="shrink-0" />
+            <EmailCard className="shrink-0" />
+            <EmailCard className="shrink-0" />
+            <EmailCard className="shrink-0" />
+            <EmailCard className="shrink-0" />
             <EmailCard className="shrink-0" />
             <EmailCard className="shrink-0" />
             <EmailCard className="shrink-0" />
