@@ -37,7 +37,8 @@
     "**/*.tsx",
     "**/*.cjs",
     "**/*.js",
-    ".next/types/**/*.ts"
-, "../../packages/project-domain/services/project.ts"  ],
+    ".next/types/**/*.ts",
+    "src/lib/pdfjs-dist.d.ts"
+  ],
   "exclude": ["node_modules"]
 }
