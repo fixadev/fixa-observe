@@ -2,6 +2,7 @@
 
 import { CheckCircleIcon } from "@heroicons/react/24/solid";
 import { formatDistanceToNow } from "date-fns";
+import { type Property } from "prisma/generated/zod";
 import { useState } from "react";
 import { AutosizeTextarea } from "~/components/ui/autosize-textarea";
 import { Avatar, AvatarImage, AvatarFallback } from "~/components/ui/avatar";
@@ -25,9 +26,14 @@ export type Email = {
     photoUrl: string;
     email: string;
   };
+  property: Property;
+  draft?: boolean;
+  unread?: boolean;
+  completed?: boolean;
+  warning?: string;
 };
 
-const testEmail = {
+export const testEmail: Email = {
   id: 1,
   createdAt: new Date(),
   subject: "123 Main St",
@@ -52,25 +58,31 @@ Thank you for your time and assistance. I look forward to hearing back from you 
 
 Best regards,
 Mark`,
+  property: {
+    // Add a basic property object to match the Property type
+    id: "1",
+    address: "123 Main St, Palo Alto, CA 94301",
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    ownerId: "1",
+    photoUrl: null,
+    surveyId: "1",
+    attributes: {},
+  },
+  draft: false,
+  unread: false,
+  completed: false,
+  warning: "",
 };
 
 export default function EmailCard({
   email = testEmail,
-  draft = false,
-  unread = false,
-  completed = false,
-  warning = "",
   expanded = false,
   onClick,
   className,
 }: {
   email?: Email;
-  draft?: boolean;
-  unread?: boolean;
-  completed?: boolean;
-  warning?: string;
   expanded?: boolean;
-  expandable?: boolean;
   onClick?: (e: React.MouseEvent<HTMLDivElement>) => void;
   className?: string;
 }) {
@@ -78,6 +90,7 @@ export default function EmailCard({
     <div
       className={cn(
         "overflow-hidden rounded-md border border-input shadow-sm",
+        email.completed ? "opacity-50" : "",
         className,
       )}
     >
@@ -90,10 +103,10 @@ export default function EmailCard({
         <div
           className={cn([
             "-my-4 -ml-4 w-1.5 self-stretch rounded-l-md bg-blue-500 py-4",
-            unread ? "visible" : "invisible",
+            email.unread ? "visible" : "invisible",
           ])}
         ></div>
-        {!draft && (
+        {!email.draft && (
           <Avatar className="mt-1">
             <AvatarImage src={email.sender.photoUrl} />
             <AvatarFallback>
@@ -106,20 +119,24 @@ export default function EmailCard({
         )}
         <div className="flex-1 space-y-1 overflow-hidden">
           <div className="flex items-center justify-between">
-            {draft ? (
+            {email.draft ? (
               <div className="text-sm">
                 <span className="text-destructive">[Draft]</span>{" "}
                 {email.sender.email}
               </div>
             ) : (
-              <div className="text-base font-medium">{email.sender.name}</div>
+              <div
+                className={cn("text-base", email.unread ? "font-medium" : "")}
+              >
+                {email.sender.name}
+              </div>
             )}
-            {!draft &&
-              (completed ? (
+            {!email.draft &&
+              (email.completed ? (
                 <CheckCircleIcon className="size-5 text-green-500" />
-              ) : warning ? (
+              ) : email.warning ? (
                 <div className="rounded-full bg-orange-100 px-2 py-1 text-xs">
-                  {warning}
+                  {email.warning}
                 </div>
               ) : (
                 <div className="text-xs text-muted-foreground">
@@ -129,12 +146,14 @@ export default function EmailCard({
                 </div>
               ))}
           </div>
-          <div className="text-sm">{email.subject}</div>
+          <div className={cn("text-sm", email.unread ? "font-medium" : "")}>
+            {email.subject}
+          </div>
           {!expanded && (
             <div
               className={cn(
                 "overflow-hidden truncate text-sm text-muted-foreground",
-                draft ? "italic" : "",
+                email.draft ? "italic" : "",
               )}
             >
               {email.content}
@@ -155,10 +174,10 @@ export default function EmailCard({
   );
 }
 
-export function EmailCardWithDialog({ unread = false }: { unread?: boolean }) {
+export function EmailCardWithDialog({ email = testEmail }: { email?: Email }) {
   return (
     <EmailDialog>
-      <EmailCard email={testEmail} unread={unread} />
+      <EmailCard email={email} />
     </EmailDialog>
   );
 }
