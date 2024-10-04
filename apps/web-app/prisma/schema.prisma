@@ -40,15 +40,37 @@ model Project {
 }
 
 model Survey {
-  id              String      @id @default(uuid())
-  ownerId         String
-  createdAt       DateTime    @default(now())
-  updatedAt       DateTime    @updatedAt
-  name            String
-  projectId       String
-  project         Project     @relation(fields: [projectId], references: [id])
-  properties      Property[]
-  attributesOrder Attribute[]
+  id         String                @id @default(uuid())
+  ownerId    String
+  createdAt  DateTime              @default(now())
+  updatedAt  DateTime              @updatedAt
+  name       String
+  projectId  String
+  project    Project               @relation(fields: [projectId], references: [id])
+  properties Property[]
+  attributes AttributesOnSurveys[]
+}
+
+model Attribute {
+  id        String                @id @default(uuid())
+  createdAt DateTime              @default(now())
+  updatedAt DateTime              @updatedAt
+  label     String
+  type      String
+  owner     User?                 @relation(fields: [ownerId], references: [id])
+  ownerId   String?
+  surveys   AttributesOnSurveys[]
+}
+
+model AttributesOnSurveys {
+  id             String    @id @default(uuid())
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  attribute      Attribute @relation(fields: [attributeId], references: [id])
+  attributeId    String
+  attributeIndex Int
+  survey         Survey    @relation(fields: [surveyId], references: [id])
+  surveyId       String
 }
 
 model Property {
@@ -57,24 +79,11 @@ model Property {
   updatedAt  DateTime   @updatedAt
   owner      User       @relation(fields: [ownerId], references: [id])
   ownerId    String
-  address    String
   brochures  Brochure[]
   photoUrl   String?
   attributes Json?
   survey     Survey     @relation(fields: [surveyId], references: [id])
   surveyId   String
-}
-
-model Attribute {
-  id        String   @id @default(uuid())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  label     String
-  type      String
-  owner     User?    @relation(fields: [ownerId], references: [id])
-  ownerId   String?
-  Survey    Survey?  @relation(fields: [surveyId], references: [id])
-  surveyId  String?
 }
 
 model Brochure {

@@ -1,4 +1,4 @@
-import PropertiesTable from "./_components/PropertiesTable";
+import { PropertiesTable } from "./_components/PropertiesTable";
 
 export default function SurveyPage({
   params,
