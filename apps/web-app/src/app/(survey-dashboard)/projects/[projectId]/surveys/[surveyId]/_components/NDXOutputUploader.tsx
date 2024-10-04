@@ -17,7 +17,6 @@ export const PDFUploader = () => {
     const file = event.target.files?.[0];
     if (file && pdfjs) {
       const parsedPDF = await parsePDF(file, pdfjs);
-      console.log("parsedPDF", parsedPDF);
       const buildings = processPDF(parsedPDF);
       console.log("buildings", buildings);
     }
