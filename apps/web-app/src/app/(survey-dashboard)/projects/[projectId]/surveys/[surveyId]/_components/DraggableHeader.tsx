@@ -67,7 +67,12 @@ export const DraggableHeader = ({
           </Button>
         )}
         <div className="invisible flex text-muted-foreground group-hover:visible">
-          <Button size="icon" variant="ghost" onClick={deleteAttribute}>
+          <Button
+            size="icon"
+            variant="ghost"
+            disabled={attribute.id === "address"}
+            onClick={deleteAttribute}
+          >
             <TrashIcon className="size-4" />
           </Button>
         </div>
