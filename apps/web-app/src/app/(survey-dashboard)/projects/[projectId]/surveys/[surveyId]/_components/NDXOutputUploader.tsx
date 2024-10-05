@@ -4,19 +4,30 @@ import { useRef } from "react";
 import { Button } from "~/components/ui/button";
 import { usePDFJS } from "./usePDFjs";
 import type PDFJS from "pdfjs-dist";
-import { type Property } from "posthog-js";
+import { type Property } from "./PropertiesTable";
 import { type Attribute } from "@prisma/client";
 import { type CreatePropertySchema } from "~/lib/property";
 const acceptablePDFFileTypes = "application/pdf";
 
 export const PDFUploader = ({
+  surveyId,
+  existingProperties,
   setProperties,
   attributesOrder,
-  setAttributesOrder,
 }: {
-  setProperties: (data: Property[]) => void;
+  surveyId: string;
+  existingProperties: Property[];
+  setProperties: (
+    data: Property[],
+    action: "add" | "update" | "delete" | "order",
+    propertyId?: string,
+  ) => void;
   attributesOrder: Attribute[];
-  setAttributesOrder: (data: Attribute[]) => void;
+  setAttributesOrder: (
+    data: Attribute[],
+    action: "order" | "add" | "update" | "delete",
+    attributeId?: string,
+  ) => void;
 }) => {
   const pdfjs = usePDFJS((pdfjs) => {
     console.log("PDFJS loaded", pdfjs);
@@ -45,31 +56,23 @@ export const PDFUploader = ({
     return attributesOrder.find((attribute) => attribute.id === attributeId);
   };
 
-  const defaultAttributeOrder = [
-    "Address",
-    "Size (SF)",
-    "Divisibility (SF)",
-    "NNN Asking Rate (SF/Mo)",
-    "Opex (SF/Mo)",
-    "Direct/Sublease",
-    "Comments",
-  ];
-
   const onFileChangeHandler = async (
     event: React.ChangeEvent<HTMLInputElement>,
   ) => {
     const file = event.target.files?.[0];
     if (file && pdfjs) {
       const parsedPDF = await parsePDF(file, pdfjs);
+      const currentPropertiesEndIndex = existingProperties.length;
       const properties = processPDF(parsedPDF);
       const propertiesWithAttributes: Array<CreatePropertySchema> =
-        properties.map((property) => {
+        properties.map((property, index) => {
           return {
             createdAt: new Date(),
             updatedAt: new Date(),
-            address: property.address,
             photoUrl: null,
             brochures: [],
+            displayIndex: currentPropertiesEndIndex + index + 1,
+            surveyId: surveyId,
             attributes: {
               [labelToAttributeId("Address")]: property.address,
               [labelToAttributeId("Size (SF)")]: property.propertySize,
@@ -85,7 +88,7 @@ export const PDFUploader = ({
         });
 
       console.log("propertiesWithAttributes", propertiesWithAttributes);
-      setProperties(propertiesWithAttributes);
+      setProperties(propertiesWithAttributes, "add");
       // setAttributesOrder(
       //   defaultAttributeOrder
       //     .map((label) => labelToAttribute(label))

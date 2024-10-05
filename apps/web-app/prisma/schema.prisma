@@ -74,16 +74,17 @@ model AttributesOnSurveys {
 }
 
 model Property {
-  id         String     @id @default(uuid())
-  createdAt  DateTime   @default(now())
-  updatedAt  DateTime   @updatedAt
-  owner      User       @relation(fields: [ownerId], references: [id])
-  ownerId    String
-  brochures  Brochure[]
-  photoUrl   String?
-  attributes Json?
-  survey     Survey     @relation(fields: [surveyId], references: [id])
-  surveyId   String
+  id           String     @id @default(uuid())
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  owner        User       @relation(fields: [ownerId], references: [id])
+  ownerId      String
+  brochures    Brochure[]
+  photoUrl     String?
+  attributes   Json?
+  displayIndex Int
+  survey       Survey     @relation(fields: [surveyId], references: [id])
+  surveyId     String
 }
 
 model Brochure {

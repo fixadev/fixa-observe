@@ -1,6 +1,5 @@
 import { z } from "zod";
-import { type Property } from "@prisma/client";
-import { AttributeSchema, BrochureSchema, type PropertySchema } from "../../prisma/generated/zod";
+import { AttributeSchema, BrochureSchema, PropertySchema } from "../../prisma/generated/zod";
 
 export type BrochureSchema = z.infer<typeof BrochureSchema>;
 export const brochureSchema = BrochureSchema;
@@ -12,16 +11,7 @@ export type AttributesObjectSchema = z.infer<typeof attributesObjectSchema>;
 export const attributesObjectSchema = z.record(z.string(), z.string().nullable());
 
 export type PropertySchema = z.infer<typeof propertySchema>;
-export const propertySchema = z.object({
-  id: z.string(),
-  createdAt: z.date(),
-  updatedAt: z.date(),
-  ownerId: z.string(),
-  address: z.string(),
-  photoUrl: z.string().nullable(),
-  surveyId: z.string(),
-  attributes: attributesObjectSchema,
-} satisfies { [K in keyof Property]: z.ZodType<Property[K]> });
+export const propertySchema = PropertySchema;
 
 
 export const photoUploadSchema = z.object({

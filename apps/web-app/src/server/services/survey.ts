@@ -1,4 +1,5 @@
 import { type Attribute, type PrismaClient } from "@prisma/client";
+import { type PropertySchema } from "~/lib/property";
 import { type CreateSurveyInput } from "~/lib/survey";
 import { type SurveySchema } from "~/lib/survey";
 
@@ -26,7 +27,11 @@ export const surveyService = ({
       const survey = await db.survey.findUnique({
         where: { id: surveyId, ownerId: userId },
         include: {
-          properties: true
+          properties: {
+            // orderBy: {
+            //   displayIndex: "asc"
+            // }
+          }
         },
       });
       console.log("survey", survey);
@@ -70,6 +75,87 @@ export const surveyService = ({
         data: { ...surveyData }
       });
       return result;
+    },
+
+    createAttributes: async (
+      surveyId: string,
+      attributes: Attribute[],
+      userId: string,
+    ) => {
+      const result = await db.attribute.createMany({
+        data: attributes.map((attribute) => ({ ...attribute, ownerId: userId }))
+      });
+
+      return result;
+    },
+
+    addAttributes: async (
+      surveyId: string,
+      attributes: Attribute[],
+      userId: string,
+    ) => {
+
+      const existingAttributes = await db.attribute.findMany({
+        where: {
+          id: { in: attributes.map(attr => attr.id) }
+        }
+      });
+      const attributesToCreate = attributes.filter((attribute) => !existingAttributes.some((existing) => existing.id === attribute.id)).map((attribute) => ({ ...attribute, ownerId: userId}));
+
+      const newAttributes = await db.attribute.createMany({
+        data: attributesToCreate
+      });
+
+      console.log("attributesToCreate", attributesToCreate);
+
+      const result = await db.survey.update({
+        where: { id: surveyId, ownerId: userId },
+        data: {
+          attributes: {
+            createMany: {
+              data: attributesToCreate.map((attribute) => ({
+                attributeId: attribute.id,
+                attributeIndex: attributes.findIndex((attr) => attr.id === attribute.id) 
+              }))
+            }
+          }
+        }
+      });
+      return result;
+    },
+
+    updateAttributes: async (
+      attributes: Attribute[],
+      idToUpdate: string | undefined,
+      userId: string,
+    ) => {
+      if (!idToUpdate) {
+        return null;
+      }
+      const attributeToUpdate = attributes.find((attribute) => attribute.id === idToUpdate);
+
+      const result = await db.attribute.update({
+        where: { id: idToUpdate, ownerId: userId },
+        data: { 
+          ...attributeToUpdate
+        }
+      });
+      return result;
+    },
+
+    deleteAttribute: async (
+      surveyId: string,
+      idToDelete: string | undefined,
+    ) => {
+      if (!idToDelete) {
+        return null;
+      }
+      await db.attributesOnSurveys.deleteMany({
+        where: {
+          surveyId,
+          attributeId: idToDelete
+        }
+      });
     },
 
     updateAttributesOrder: async (
@@ -117,6 +203,18 @@ export const surveyService = ({
         data: { properties: { connect: propertyIds.map(id => ({ id })) } }
       });
       return survey;
+    },
+
+    updatePropertiesOrder: async (
+      surveyId: string,
+      properties: PropertySchema[],
+      userId: string,
+    ) => {
+      const propertiesWithOrder = properties.map((property, index) => ({ ...property, displayIndex: index }));
+      return await db.survey.update({
+        where: { id: surveyId, ownerId: userId },
+        data: { properties: { connect: propertiesWithOrder.map(property => ({ id: property.id })) } }
+      });
     },
 
     deleteSurvey: async (
