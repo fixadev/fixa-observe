@@ -19,5 +19,6 @@ export type EmailThread = {
   draft?: boolean;
   unread?: boolean;
   completed?: boolean;
-  warning?: string;
+  moreInfoNeeded?: boolean;
+  parsedAttributes?: Record<string, string>;
 };
