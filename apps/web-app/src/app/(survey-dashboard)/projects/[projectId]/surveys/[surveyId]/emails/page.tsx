@@ -2,11 +2,7 @@
 
 import EmailCard from "./_components/EmailCard";
 import { Button } from "~/components/ui/button";
-import {
-  ChevronDownIcon,
-  ChevronRightIcon,
-  ChevronUpIcon,
-} from "@heroicons/react/24/outline";
+import { ChevronDownIcon, ChevronUpIcon } from "@heroicons/react/24/outline";
 import PropertyCard from "~/components/PropertyCard";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
@@ -14,7 +10,6 @@ import { Textarea } from "~/components/ui/textarea";
 import { useMemo, useState } from "react";
 import { cn } from "~/lib/utils";
 import { type EmailThread, type Email } from "~/lib/types";
-import { Separator } from "~/components/ui/separator";
 
 const testEmail: Email = {
   id: "1",
@@ -164,9 +159,9 @@ export default function EmailsPage() {
           </>
         ))}
       </div>
-      <div>
+      <div className="overflow-x-hidden">
         {selectedThread ? (
-          <EmailDetails email={selectedThread} />
+          <EmailDetails emailThread={selectedThread} />
         ) : (
           <div className="flex h-full items-center justify-center">
             <p className="text-muted-foreground">
@@ -179,17 +174,47 @@ export default function EmailsPage() {
   );
 }
 
-function EmailDetails({ email }: { email: EmailThread }) {
-  if (email.draft) {
-    return <UnsentEmail email={email} />;
+function EmailDetails({ emailThread }: { emailThread: EmailThread }) {
+  if (emailThread.draft) {
+    return (
+      <UnsentEmailDetails key={emailThread.id} emailThread={emailThread} />
+    );
   }
-  return null;
+  return <EmailThreadDetails key={emailThread.id} emailThread={emailThread} />;
 }
 
-function UnsentEmail({ email }: { email: EmailThread }) {
+function EmailThreadDetails({ emailThread }: { emailThread: EmailThread }) {
+  const [expanded, setExpanded] = useState<boolean[]>(
+    // Set the last email to be expanded
+    emailThread.emails.map((_, i) => i === emailThread.emails.length - 1),
+  );
+
+  return (
+    <div className="flex h-full flex-col gap-2 overflow-x-hidden p-2 pb-8">
+      <PropertyCard property={emailThread.property} />
+      {emailThread.emails.map((email, i) => (
+        <EmailCard
+          key={email.id}
+          email={email}
+          className="shrink-0"
+          expanded={expanded[i]}
+          onClick={() =>
+            setExpanded((prev) => {
+              const newExpanded = [...prev];
+              newExpanded[i] = !newExpanded[i];
+              return newExpanded;
+            })
+          }
+        />
+      ))}
+    </div>
+  );
+}
+
+function UnsentEmailDetails({ emailThread }: { emailThread: EmailThread }) {
   return (
     <div className="flex h-full flex-col gap-2 p-2 pb-8">
-      <PropertyCard property={email.property} />
+      <PropertyCard property={emailThread.property} />
       <div className="mt-4 grid grid-cols-[auto_1fr] items-center gap-2">
         <Label htmlFor="to">To:</Label>
         <Input
@@ -197,7 +222,7 @@ function UnsentEmail({ email }: { email: EmailThread }) {
           id="to"
           className="flex-grow"
           placeholder="mark@example.com"
-          defaultValue={email.emails[0]!.sender.email}
+          defaultValue={emailThread.emails[0]!.sender.email}
           autoComplete="email"
         />
         <Label htmlFor="subject">Subject:</Label>
@@ -205,14 +230,14 @@ function UnsentEmail({ email }: { email: EmailThread }) {
           type="text"
           id="subject"
           className="flex-grow"
-          defaultValue={email.subject}
+          defaultValue={emailThread.subject}
           placeholder="Property inquiry"
         />
       </div>
       <Textarea
         className="flex-1"
         placeholder="Write your email here..."
-        defaultValue={email.emails[0]!.content}
+        defaultValue={emailThread.emails[0]!.content}
       />
       <div className="mt-2 flex justify-between">
         <Button>Send</Button>
