@@ -6,7 +6,7 @@ import { usePDFJS } from "./usePDFjs";
 import type PDFJS from "pdfjs-dist";
 import { type Property } from "./PropertiesTable";
 import { type Attribute } from "@prisma/client";
-import { type CreatePropertySchema } from "~/lib/property";
+import { type PropertySchema, type CreatePropertySchema } from "~/lib/property";
 const acceptablePDFFileTypes = "application/pdf";
 
 export const PDFUploader = ({
@@ -18,7 +18,7 @@ export const PDFUploader = ({
   surveyId: string;
   existingProperties: Property[];
   setProperties: (
-    data: Property[],
+    data: Array<PropertySchema | (CreatePropertySchema & { isNew?: boolean })>,
     action: "add" | "update" | "delete" | "order",
     propertyId?: string,
   ) => void;

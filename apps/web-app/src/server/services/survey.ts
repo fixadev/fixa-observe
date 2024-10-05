@@ -28,9 +28,9 @@ export const surveyService = ({
         where: { id: surveyId, ownerId: userId },
         include: {
           properties: {
-            // orderBy: {
-            //   displayIndex: "asc"
-            // }
+            orderBy: {
+              displayIndex: "asc"
+            }
           }
         },
       });
@@ -89,6 +89,7 @@ export const surveyService = ({
       return result;
     },
 
+    // TODO: simplify this
     addAttributes: async (
       surveyId: string,
       attributes: Attribute[],
@@ -102,11 +103,9 @@ export const surveyService = ({
       });
       const attributesToCreate = attributes.filter((attribute) => !existingAttributes.some((existing) => existing.id === attribute.id)).map((attribute) => ({ ...attribute, ownerId: userId}));
 
-      const newAttributes = await db.attribute.createMany({
+      await db.attribute.createMany({
         data: attributesToCreate
       });
-
-      console.log("attributesToCreate", attributesToCreate);
 
       const result = await db.survey.update({
         where: { id: surveyId, ownerId: userId },
@@ -210,11 +209,34 @@ export const surveyService = ({
       properties: PropertySchema[],
       userId: string,
     ) => {
-      const propertiesWithOrder = properties.map((property, index) => ({ ...property, displayIndex: index }));
-      return await db.survey.update({
+      await db.survey.update({
         where: { id: surveyId, ownerId: userId },
-        data: { properties: { connect: propertiesWithOrder.map(property => ({ id: property.id })) } }
+        data: {
+          properties: {
+            deleteMany: {}
+          }
+        }
       });
+      const propertiesWithOrder = properties.map((property, index) => {
+        const { surveyId, ...rest } = property;
+        return {
+          ...rest,
+          displayIndex: index,
+          attributes: property.attributes ?? {}
+        };
+      });
+      
+      const result = await db.survey.update({
+        where: { id: surveyId, ownerId: userId },
+        data: {
+          properties: {
+            createMany: {
+              data: propertiesWithOrder
+            }
+          }
+        }
+      });
+      return result;
     },
 
     deleteSurvey: async (
