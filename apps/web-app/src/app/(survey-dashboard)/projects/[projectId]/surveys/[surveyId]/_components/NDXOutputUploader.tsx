@@ -98,7 +98,7 @@ export const PDFUploader = ({
             },
           };
         });
-
+      console.log("PARSED PDF", parsedPDF);
       console.log("propertiesWithAttributes", propertiesWithAttributes);
 
       setProperties(propertiesWithAttributes, "add");
@@ -168,7 +168,7 @@ async function parsePDF(file: File, pdfjsLib: typeof PDFJS) {
         });
 
         if (link && "url" in link) {
-          line += ` [LINK: ${link.url}]`;
+          line += ` [FLYER LINK: ${link.url}]`;
         }
         // console.log(line);
         if (line && typeof line === "string" && line.trim().length > 0) {
@@ -265,7 +265,7 @@ function processPDF(parsedPDF: string[] | undefined) {
       } else if (
         line?.includes("Lease Type:") &&
         !currentBuilding.leaseType &&
-        (nextLine?.includes("Direct") ?? nextLine?.includes("Sublease"))
+        (nextLine?.includes("Direct") || nextLine?.includes("Sublease"))
       ) {
         currentBuilding.leaseType = nextLine?.trim() ?? "";
         i += 1;
@@ -295,25 +295,36 @@ function processPDF(parsedPDF: string[] | undefined) {
         }
         i += 1;
       } else if (line?.includes("Comments:")) {
+        const removeBulletPointOrDash = (text: string): string => {
+          return " - " + text.replace(/^\s*[•\-]\s*/, "").trim();
+        };
         const comments: string[] = [];
+        comments.push(
+          removeBulletPointOrDash(line.split("Comments:")[1]?.trim() ?? ""),
+        );
         let index = i + 1;
         while (index < parsedPDF.length) {
           const curr = parsedPDF[index];
           const next = parsedPDF[index + 1];
           if (
-            curr &&
-            numberPeriodRegex.test(curr) &&
-            next &&
-            zipcodeRegex.test(next)
+            (curr &&
+              numberPeriodRegex.test(curr) &&
+              next &&
+              // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
+              zipcodeRegex.test(next)) ||
+            // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
+            curr?.includes("Newmark Research Report") ||
+            curr?.includes("FLYER LINK")
           ) {
             break; // End of comments section
           }
+          console.log("PUSHING LINE", curr);
           if (curr) {
-            comments.push(curr.trim());
+            comments.push(removeBulletPointOrDash(curr.trim()));
           }
           index++;
         }
-        currentBuilding.comments = comments.join(" ");
+        currentBuilding.comments = comments.join("\n");
         i = index - 1; // Update the outer loop index
       }
     }
