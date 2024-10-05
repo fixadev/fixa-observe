@@ -94,12 +94,13 @@ export const PDFUploader = ({
                 property.leaseRate,
               [labelToAttributeId("Opex (SF/Mo)")]: property.expenses,
               [labelToAttributeId("Direct/Sublease")]: property.leaseType,
-              // [labelToAttributeId("Comments")]: property.comments,
+              [labelToAttributeId("Comments")]: property.comments,
             },
           };
         });
 
       console.log("propertiesWithAttributes", propertiesWithAttributes);
+
       setProperties(propertiesWithAttributes, "add");
       // setAttributesOrder(
       //   defaultAttributeOrder
@@ -215,84 +216,113 @@ function processPDF(parsedPDF: string[] | undefined) {
     console.error("No PDF parsed");
     return [];
   }
-  const buildings = [];
-  let currentBuilding: Record<string, string> = {};
+  try {
+    const buildings = [];
+    let currentBuilding: Record<string, string> = {};
 
-  for (let i = 0; i < parsedPDF.length; i++) {
-    const line = parsedPDF[i];
-    const nextLine = parsedPDF[i + 1];
+    for (let i = 0; i < parsedPDF.length; i++) {
+      const line = parsedPDF[i];
+      const nextLine = parsedPDF[i + 1];
 
-    const numberPeriodRegex = /^\d+\.\s?/;
-    const zipcodeRegex = /\b\d{5}\b$/;
-    // check for new property
-    if (
-      line &&
-      numberPeriodRegex.test(line) &&
-      nextLine &&
-      zipcodeRegex.test(nextLine)
-    ) {
-      console.log("new property");
-      if (Object.keys(currentBuilding).length > 0) {
-        buildings.push(currentBuilding);
-      }
-      // add address
-      currentBuilding = { address: nextLine?.trim() ?? "" };
-      i += 1;
-    } else if (line?.includes("Property Size:")) {
-      currentBuilding.propertySize = nextLine?.trim() ?? "";
-      i += 1;
-    } else if (line?.includes("Min Divisible:")) {
-      if (nextLine?.includes("rsf")) {
+      const numberPeriodRegex = /^\d+\.\s?/;
+      const zipcodeRegex = /\b\d{5}\b$/;
+
+      // check for new property
+      if (
+        line &&
+        numberPeriodRegex.test(line) &&
+        nextLine &&
+        zipcodeRegex.test(nextLine)
+      ) {
+        console.log("new property");
+        if (Object.keys(currentBuilding).length > 0) {
+          buildings.push(currentBuilding);
+        }
+        // add address
+        currentBuilding = { address: nextLine?.trim() ?? "" };
+        i += 1;
+      } else if (
+        line?.includes("Property Size:") &&
+        !currentBuilding.propertySize &&
+        nextLine?.includes("rsf")
+      ) {
+        currentBuilding.propertySize = nextLine?.trim() ?? "";
+        i += 1;
+      } else if (
+        line?.includes("Min Divisible:") &&
+        !currentBuilding.minDivisible &&
+        nextLine?.includes("rsf")
+      ) {
         currentBuilding.minDivisible = nextLine?.trim() ?? "";
         i += 1;
-      } else {
-        currentBuilding.minDivisible = "n/a";
-        i += 1;
-      }
-    } else if (line?.includes("Max Divisible:")) {
-      if (nextLine?.includes("rsf")) {
+      } else if (
+        line?.includes("Max Divisible:") &&
+        !currentBuilding.maxDivisible &&
+        nextLine?.includes("rsf")
+      ) {
         currentBuilding.maxDivisible = nextLine?.trim() ?? "";
         i += 1;
-      } else {
-        currentBuilding.maxDivisible = "n/a";
+      } else if (
+        line?.includes("Lease Type:") &&
+        !currentBuilding.leaseType &&
+        (nextLine?.includes("Direct") ?? nextLine?.includes("Sublease"))
+      ) {
+        currentBuilding.leaseType = nextLine?.trim() ?? "";
         i += 1;
-      }
-    } else if (line?.includes("Lease Type:")) {
-      currentBuilding.leaseType = nextLine?.trim() ?? "";
-      i += 1;
-    } else if (line?.includes("Lease Rate:")) {
-      if (nextLine?.includes("$")) {
+      } else if (
+        line?.includes("Lease Rate:") &&
+        !currentBuilding.leaseRate &&
+        nextLine?.includes("$")
+      ) {
         currentBuilding.leaseRate = nextLine?.trim() ?? "";
         i += 1;
-      } else {
-        currentBuilding.leaseRate = "n/a";
-        i += 1;
-      }
-    } else if (line?.includes("Expenses:")) {
-      if (nextLine?.includes("$")) {
+      } else if (
+        line?.includes("Expenses:") &&
+        !currentBuilding.expenses &&
+        nextLine?.includes("$")
+      ) {
         currentBuilding.expenses = nextLine?.trim() ?? "";
         i += 1;
-      } else {
-        currentBuilding.expenses = "n/a";
+      } else if (line?.includes("Avail Date:")) {
+        currentBuilding.availDate = nextLine?.trim() ?? "";
         i += 1;
+      } else if (line?.includes("View Flyer")) {
+        const linkMatch = line.match(/\[LINK:\s*(.*?)\]/);
+        if (linkMatch) {
+          currentBuilding.flyerLink = linkMatch[1]?.trim() ?? "";
+        } else {
+          currentBuilding.flyerLink = "";
+        }
+        i += 1;
+      } else if (line?.includes("Comments:")) {
+        const comments: string[] = [];
+        let index = i + 1;
+        while (index < parsedPDF.length) {
+          const curr = parsedPDF[index];
+          const next = parsedPDF[index + 1];
+          if (
+            curr &&
+            numberPeriodRegex.test(curr) &&
+            next &&
+            zipcodeRegex.test(next)
+          ) {
+            break; // End of comments section
+          }
+          if (curr) {
+            comments.push(curr.trim());
+          }
+          index++;
+        }
+        currentBuilding.comments = comments.join(" ");
+        i = index - 1; // Update the outer loop index
       }
-    } else if (line?.includes("Avail Date:")) {
-      // add avail date
-      currentBuilding.availDate = nextLine?.trim() ?? "";
-      i += 1;
-    } else if (line?.includes("View Flyer")) {
-      // add flyer link
-      const linkMatch = line.match(/\[LINK:\s*(.*?)\]/);
-      if (linkMatch) {
-        currentBuilding.flyerLink = linkMatch[1]?.trim() ?? "";
-      } else {
-        currentBuilding.flyerLink = "";
-      }
-      i += 1;
     }
+    if (Object.keys(currentBuilding).length > 0) {
+      buildings.push(currentBuilding);
+    }
+    return buildings;
+  } catch (error) {
+    console.error("Error processing PDF:", error);
+    return [];
   }
-  if (Object.keys(currentBuilding).length > 0) {
-    buildings.push(currentBuilding);
-  }
-  return buildings;
 }
