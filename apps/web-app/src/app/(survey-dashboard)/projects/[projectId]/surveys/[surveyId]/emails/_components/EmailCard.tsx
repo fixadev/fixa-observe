@@ -2,7 +2,6 @@
 
 import { CheckCircleIcon } from "@heroicons/react/24/solid";
 import { formatDistanceToNow } from "date-fns";
-import { type Property } from "prisma/generated/zod";
 import { useState } from "react";
 import { AutosizeTextarea } from "~/components/ui/autosize-textarea";
 import { Avatar, AvatarImage, AvatarFallback } from "~/components/ui/avatar";
@@ -14,29 +13,12 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "~/components/ui/dialog";
+import { type EmailThread, type Email } from "~/lib/types";
 import { cn } from "~/lib/utils";
 
-export type Email = {
-  id: number;
-  subject: string;
-  content: string;
-  createdAt: Date;
-  sender: {
-    name: string;
-    photoUrl: string;
-    email: string;
-  };
-  property: Property;
-  draft?: boolean;
-  unread?: boolean;
-  completed?: boolean;
-  warning?: string;
-};
-
 export const testEmail: Email = {
-  id: 1,
+  id: "1",
   createdAt: new Date(),
-  subject: "123 Main St",
   sender: {
     name: "Mark",
     photoUrl: "https://github.com/shadcn.png",
@@ -58,30 +40,25 @@ Thank you for your time and assistance. I look forward to hearing back from you 
 
 Best regards,
 Mark`,
-  property: {
-    // Add a basic property object to match the Property type
-    id: "1",
-    address: "123 Main St, Palo Alto, CA 94301",
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    ownerId: "1",
-    photoUrl: null,
-    surveyId: "1",
-    attributes: {},
-  },
-  draft: false,
-  unread: false,
-  completed: false,
-  warning: "",
 };
 
 export default function EmailCard({
   email = testEmail,
+  subject = "123 Main St",
+  draft = false,
+  unread = false,
+  completed = false,
+  warning = "",
   expanded = false,
   onClick,
   className,
 }: {
   email?: Email;
+  subject?: string;
+  draft?: boolean;
+  unread?: boolean;
+  completed?: boolean;
+  warning?: string;
   expanded?: boolean;
   onClick?: (e: React.MouseEvent<HTMLDivElement>) => void;
   className?: string;
@@ -90,7 +67,7 @@ export default function EmailCard({
     <div
       className={cn(
         "overflow-hidden rounded-md border border-input shadow-sm",
-        email.completed ? "opacity-50" : "",
+        completed ? "opacity-50" : "",
         className,
       )}
     >
@@ -103,10 +80,10 @@ export default function EmailCard({
         <div
           className={cn([
             "-my-4 -ml-4 w-1.5 self-stretch rounded-l-md bg-blue-500 py-4",
-            email.unread ? "visible" : "invisible",
+            unread ? "visible" : "invisible",
           ])}
         ></div>
-        {!email.draft && (
+        {!draft && (
           <Avatar className="mt-1">
             <AvatarImage src={email.sender.photoUrl} />
             <AvatarFallback>
@@ -119,24 +96,22 @@ export default function EmailCard({
         )}
         <div className="flex-1 space-y-1 overflow-hidden">
           <div className="flex items-center justify-between">
-            {email.draft ? (
+            {draft ? (
               <div className="text-sm">
                 <span className="text-destructive">[Draft]</span>{" "}
                 {email.sender.email}
               </div>
             ) : (
-              <div
-                className={cn("text-base", email.unread ? "font-medium" : "")}
-              >
+              <div className={cn("text-base", unread ? "font-medium" : "")}>
                 {email.sender.name}
               </div>
             )}
-            {!email.draft &&
-              (email.completed ? (
+            {!draft &&
+              (completed ? (
                 <CheckCircleIcon className="size-5 text-green-500" />
-              ) : email.warning ? (
+              ) : warning ? (
                 <div className="rounded-full bg-orange-100 px-2 py-1 text-xs">
-                  {email.warning}
+                  {warning}
                 </div>
               ) : (
                 <div className="text-xs text-muted-foreground">
@@ -146,14 +121,14 @@ export default function EmailCard({
                 </div>
               ))}
           </div>
-          <div className={cn("text-sm", email.unread ? "font-medium" : "")}>
-            {email.subject}
+          <div className={cn("text-sm", unread ? "font-medium" : "")}>
+            {subject}
           </div>
           {!expanded && (
             <div
               className={cn(
                 "overflow-hidden truncate text-sm text-muted-foreground",
-                email.draft ? "italic" : "",
+                draft ? "italic" : "",
               )}
             >
               {email.content}
@@ -184,9 +159,9 @@ export function EmailCardWithDialog({ email = testEmail }: { email?: Email }) {
 
 export function EmailDialog({ children }: { children: React.ReactNode }) {
   const [emails, setEmails] = useState<(Email & { expanded: boolean })[]>([
-    { ...testEmail, id: 1, expanded: false },
-    { ...testEmail, id: 2, expanded: false },
-    { ...testEmail, id: 3, expanded: true },
+    { ...testEmail, id: "1", expanded: false },
+    { ...testEmail, id: "2", expanded: false },
+    { ...testEmail, id: "3", expanded: true },
   ]);
 
   return (

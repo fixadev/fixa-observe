@@ -1,21 +1,24 @@
+"use client";
+
 import {
   ResizableHandle,
   ResizablePanel,
   ResizablePanelGroup,
 } from "~/components/ui/resizable";
-import EmailCard, { type Email } from "./_components/EmailCard";
+import EmailCard from "./_components/EmailCard";
 import { Button } from "~/components/ui/button";
 import { ChevronDownIcon } from "@heroicons/react/24/outline";
-import PropertyCard, { testProperty } from "~/components/PropertyCard";
+import PropertyCard from "~/components/PropertyCard";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { Textarea } from "~/components/ui/textarea";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
+import { cn } from "~/lib/utils";
+import { type EmailThread, type Email } from "~/lib/types";
 
 const testEmail: Email = {
-  id: 1,
+  id: "1",
   createdAt: new Date(),
-  subject: "123 Main St",
   sender: {
     name: "Mark",
     photoUrl: "https://github.com/shadcn.png",
@@ -37,8 +40,13 @@ Thank you for your time and assistance. I look forward to hearing back from you 
 
 Best regards,
 Mark`,
+};
+
+const testEmailThread: EmailThread = {
+  id: "1",
+  emails: [testEmail, testEmail, testEmail],
+  subject: "123 Main St",
   property: {
-    // Add a basic property object to match the Property type
     id: "1",
     address: "123 Main St, Palo Alto, CA 94301",
     createdAt: new Date(),
@@ -54,18 +62,18 @@ Mark`,
   warning: "",
 };
 
-const emails: Email[] = [
-  { ...testEmail, draft: true },
-  { ...testEmail, draft: true },
-  { ...testEmail, draft: true },
-  { ...testEmail },
-  { ...testEmail },
-  { ...testEmail, unread: true, warning: "More info needed" },
-  { ...testEmail, warning: "Sent more than 1 day ago" },
-  { ...testEmail, completed: true },
-  { ...testEmail, completed: true },
-  { ...testEmail, completed: true },
-  { ...testEmail, completed: true },
+const emails: EmailThread[] = [
+  { ...testEmailThread, id: "1", draft: true },
+  { ...testEmailThread, id: "2", draft: true },
+  { ...testEmailThread, id: "3", draft: true },
+  { ...testEmailThread, id: "4" },
+  { ...testEmailThread, id: "5" },
+  { ...testEmailThread, id: "6", unread: true, warning: "More info needed" },
+  { ...testEmailThread, id: "7", warning: "Sent more than 1 day ago" },
+  { ...testEmailThread, id: "8", completed: true },
+  { ...testEmailThread, id: "9", completed: true },
+  { ...testEmailThread, id: "10", completed: true },
+  { ...testEmailThread, id: "11", completed: true },
 ];
 
 export default function EmailsPage() {
@@ -81,13 +89,30 @@ export default function EmailsPage() {
       ];
     }, []);
 
-  // console.log({
-  //   emails,
-  //   unsentEmails,
-  //   pendingEmails,
-  //   needsFollowUpEmails,
-  //   completedEmails,
-  // });
+  const categories = useMemo(() => {
+    return [
+      {
+        name: "Unsent",
+        emails: unsentEmails,
+      },
+      {
+        name: "Pending",
+        emails: pendingEmails,
+      },
+      {
+        name: "Needs follow-up",
+        emails: needsFollowUpEmails,
+      },
+      {
+        name: "Completed",
+        emails: completedEmails,
+      },
+    ];
+  }, [unsentEmails, pendingEmails, needsFollowUpEmails, completedEmails]);
+
+  const [selectedThread, setSelectedThread] = useState<EmailThread | null>(
+    null,
+  );
 
   return (
     <div className="size-full">
@@ -99,57 +124,60 @@ export default function EmailsPage() {
           className="flex"
         >
           <div className="flex w-full max-w-3xl flex-col gap-2 overflow-y-auto p-2">
-            <Button
-              variant="ghost"
-              className="flex w-full items-center justify-between"
-            >
-              Unsent <ChevronDownIcon className="size-4" />
-            </Button>
-            {unsentEmails?.map((email) => (
-              <EmailCard key={email.id} email={email} className="shrink-0" />
-            ))}
-            <Button
-              variant="ghost"
-              className="flex w-full items-center justify-between"
-            >
-              Pending <ChevronDownIcon className="size-4" />
-            </Button>
-            {pendingEmails?.map((email) => (
-              <EmailCard key={email.id} email={email} className="shrink-0" />
-            ))}
-            <Button
-              variant="ghost"
-              className="flex items-center justify-between"
-            >
-              Needs follow-up <ChevronDownIcon className="size-4" />
-            </Button>
-            {needsFollowUpEmails?.map((email) => (
-              <EmailCard key={email.id} email={email} className="shrink-0" />
-            ))}
-            <Button
-              variant="ghost"
-              className="flex items-center justify-between"
-            >
-              Completed <ChevronDownIcon className="size-4" />
-            </Button>
-            {completedEmails?.map((email) => (
-              <EmailCard key={email.id} email={email} className="shrink-0" />
+            {categories.map((category) => (
+              <>
+                <Button
+                  variant="ghost"
+                  className="flex w-full items-center justify-between"
+                >
+                  {category.name} <ChevronDownIcon className="size-4" />
+                </Button>
+                {category.emails?.map((thread) => (
+                  <EmailCard
+                    key={thread.id}
+                    email={thread.emails[thread.emails.length - 1]}
+                    draft={thread.draft}
+                    unread={thread.unread}
+                    completed={thread.completed}
+                    warning={thread.warning}
+                    className={cn("shrink-0", {
+                      "bg-muted": thread.id === selectedThread?.id,
+                    })}
+                    onClick={() => setSelectedThread(thread)}
+                  />
+                ))}
+              </>
             ))}
           </div>
         </ResizablePanel>
         <ResizableHandle />
         <ResizablePanel defaultSize={75} minSize={50}>
-          <UnsentEmail />
+          {selectedThread ? (
+            <EmailDetails email={selectedThread} />
+          ) : (
+            <div className="flex h-full items-center justify-center">
+              <p className="text-muted-foreground">
+                Select an email to view details
+              </p>
+            </div>
+          )}
         </ResizablePanel>
       </ResizablePanelGroup>
     </div>
   );
 }
 
-function UnsentEmail() {
+function EmailDetails({ email }: { email: EmailThread }) {
+  if (email.draft) {
+    return <UnsentEmail email={email} />;
+  }
+  return null;
+}
+
+function UnsentEmail({ email }: { email: EmailThread }) {
   return (
     <div className="flex h-full flex-col gap-2 p-2 pb-8">
-      <PropertyCard property={testProperty} />
+      <PropertyCard property={email.property} />
       <div className="mt-4 grid grid-cols-[auto_1fr] items-center gap-2">
         <Label htmlFor="to">To:</Label>
         <Input
@@ -157,6 +185,7 @@ function UnsentEmail() {
           id="to"
           className="flex-grow"
           placeholder="mark@example.com"
+          defaultValue={email.emails[0]!.sender.email}
           autoComplete="email"
         />
         <Label htmlFor="subject">Subject:</Label>
@@ -164,10 +193,15 @@ function UnsentEmail() {
           type="text"
           id="subject"
           className="flex-grow"
+          defaultValue={email.subject}
           placeholder="Property inquiry"
         />
       </div>
-      <Textarea className="flex-1" placeholder="Write your email here..." />
+      <Textarea
+        className="flex-1"
+        placeholder="Write your email here..."
+        defaultValue={email.emails[0]!.content}
+      />
       <div className="mt-2 flex justify-between">
         <Button>Send</Button>
         <Button variant="outline">Edit template</Button>
@@ -176,6 +210,6 @@ function UnsentEmail() {
   );
 }
 
-function EmailTemplateEditor() {
-  return <div>Email template editor</div>;
-}
+// function EmailTemplateEditor() {
+//   return <div>Email template editor</div>;
+// }

@@ -1,13 +1,23 @@
-export type Conversation = {
+import { type Property } from "prisma/generated/zod";
+
+export type Email = {
   id: string;
-  outcome: string;
-  successProbability: number;
-  audioFileUrl: string;
-  transcriptUrl: string;
   createdAt: Date;
+  sender: {
+    name: string;
+    photoUrl: string;
+    email: string;
+  };
+  content: string;
 };
 
-export type Outcome = {
-  name: string;
-  description: string;
+export type EmailThread = {
+  id: string;
+  emails: Email[];
+  subject: string;
+  property: Property;
+  draft?: boolean;
+  unread?: boolean;
+  completed?: boolean;
+  warning?: string;
 };
