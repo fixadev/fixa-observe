@@ -117,54 +117,44 @@ export default function EmailsPage() {
   );
 
   return (
-    <div className="size-full">
-      <ResizablePanelGroup direction="horizontal" className="h-full">
-        <ResizablePanel
-          defaultSize={25}
-          minSize={25}
-          maxSize={35}
-          className="flex"
-        >
-          <div className="flex w-full max-w-3xl flex-col gap-2 overflow-y-auto p-2">
-            {categories.map((category) => (
-              <>
-                <Button
-                  variant="ghost"
-                  className="flex w-full items-center justify-between"
-                >
-                  {category.name} <ChevronDownIcon className="size-4" />
-                </Button>
-                {category.emails?.map((thread) => (
-                  <EmailCard
-                    key={thread.id}
-                    email={thread.emails[thread.emails.length - 1]}
-                    draft={thread.draft}
-                    unread={thread.unread}
-                    completed={thread.completed}
-                    warning={thread.warning}
-                    className={cn("shrink-0", {
-                      "bg-muted": thread.id === selectedThread?.id,
-                    })}
-                    onClick={() => setSelectedThread(thread)}
-                  />
-                ))}
-              </>
+    <div className="grid size-full grid-cols-[400px_1fr]">
+      <div className="flex w-full max-w-3xl flex-col gap-2 overflow-y-auto p-2">
+        {categories.map((category) => (
+          <>
+            <Button
+              variant="ghost"
+              className="flex w-full items-center justify-between"
+            >
+              {category.name} <ChevronDownIcon className="size-4" />
+            </Button>
+            {category.emails?.map((thread) => (
+              <EmailCard
+                key={thread.id}
+                email={thread.emails[thread.emails.length - 1]}
+                draft={thread.draft}
+                unread={thread.unread}
+                completed={thread.completed}
+                warning={thread.warning}
+                className={cn("shrink-0", {
+                  "bg-muted": thread.id === selectedThread?.id,
+                })}
+                onClick={() => setSelectedThread(thread)}
+              />
             ))}
+          </>
+        ))}
+      </div>
+      <div>
+        {selectedThread ? (
+          <EmailDetails email={selectedThread} />
+        ) : (
+          <div className="flex h-full items-center justify-center">
+            <p className="text-muted-foreground">
+              Select an email to view details
+            </p>
           </div>
-        </ResizablePanel>
-        <ResizableHandle />
-        <ResizablePanel defaultSize={75} minSize={50}>
-          {selectedThread ? (
-            <EmailDetails email={selectedThread} />
-          ) : (
-            <div className="flex h-full items-center justify-center">
-              <p className="text-muted-foreground">
-                Select an email to view details
-              </p>
-            </div>
-          )}
-        </ResizablePanel>
-      </ResizablePanelGroup>
+        )}
+      </div>
     </div>
   );
 }
