@@ -9,6 +9,18 @@ import { type Attribute } from "@prisma/client";
 import { type PropertySchema, type CreatePropertySchema } from "~/lib/property";
 const acceptablePDFFileTypes = "application/pdf";
 
+interface Annotation {
+  subtype: string;
+}
+interface TextItem {
+  str: string;
+  transform: number[];
+}
+interface Link {
+  rect: number[];
+  url: string;
+}
+
 export const PDFUploader = ({
   surveyId,
   existingProperties,
@@ -138,13 +150,13 @@ async function parsePDF(file: File, pdfjsLib: typeof PDFJS) {
       const annotations = await page.getAnnotations();
 
       const textItems = content.items;
-      const links = annotations.filter((a) => a.subtype === "Link");
+      const links = annotations.filter((a: Annotation) => a.subtype === "Link");
 
-      for (const textItem of textItems) {
+      for (const textItem of textItems as Array<TextItem>) {
         let line = textItem.str;
 
         // Check if there's a link at this position
-        const link = links.find((link: any) => {
+        const link: Link | undefined = links.find((link: Link) => {
           const [x, y] = [textItem.transform[4], textItem.transform[5]];
           return (
             x >= link.rect[0] &&
