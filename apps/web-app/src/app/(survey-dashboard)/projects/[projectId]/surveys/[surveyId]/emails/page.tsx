@@ -48,13 +48,15 @@ const testEmailThread: EmailThread = {
   subject: "123 Main St",
   property: {
     id: "1",
-    address: "123 Main St, Palo Alto, CA 94301",
+    attributes: {
+      address: "123 Main St, Palo Alto, CA 94301",
+    },
     createdAt: new Date(),
     updatedAt: new Date(),
     ownerId: "1",
     photoUrl: null,
     surveyId: "1",
-    attributes: {},
+    displayIndex: 0,
   },
   draft: false,
   unread: false,

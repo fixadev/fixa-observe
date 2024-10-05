@@ -4,13 +4,15 @@ import { cn } from "~/lib/utils";
 export const testProperty: Property = {
   // Add a basic property object to match the Property type
   id: "1",
-  address: "123 Main St, Palo Alto, CA 94301",
+  displayIndex: 0,
   createdAt: new Date(),
   updatedAt: new Date(),
   ownerId: "1",
   photoUrl: null,
   surveyId: "1",
-  attributes: {},
+  attributes: {
+    address: "123 Main St, Palo Alto, CA 94301",
+  },
 };
 
 export default function PropertyCard({
@@ -21,8 +23,9 @@ export default function PropertyCard({
   className?: string;
 }) {
   // const photoUrl = property.photoUrl;
-  const streetAddress = property.address.split(",")[0];
-  const cityStateZip = property.address.split(",").slice(1).join(", ");
+  const attributes = property.attributes as Record<string, string>;
+  const streetAddress = attributes?.address?.split(",")[0];
+  const cityStateZip = attributes?.address?.split(",").slice(1).join(", ");
 
   return (
     <div
