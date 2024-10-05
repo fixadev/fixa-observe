@@ -7,9 +7,11 @@ import PropertyCard from "~/components/PropertyCard";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { Textarea } from "~/components/ui/textarea";
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { cn } from "~/lib/utils";
 import { type EmailThread, type Email } from "~/lib/types";
+import { Separator } from "~/components/ui/separator";
+import { formatDistanceToNow } from "date-fns";
 
 const testEmail: Email = {
   id: "1",
@@ -56,7 +58,6 @@ const testEmailThread: EmailThread = {
   draft: false,
   unread: false,
   completed: false,
-  warning: "",
 };
 
 const emails: EmailThread[] = [
@@ -65,8 +66,19 @@ const emails: EmailThread[] = [
   { ...testEmailThread, id: "3", draft: true },
   { ...testEmailThread, id: "4" },
   { ...testEmailThread, id: "5" },
-  { ...testEmailThread, id: "6", unread: true, warning: "More info needed" },
-  { ...testEmailThread, id: "7", warning: "Sent more than 1 day ago" },
+  { ...testEmailThread, id: "6", unread: true, moreInfoNeeded: true },
+  {
+    ...testEmailThread,
+    id: "7",
+    emails: [
+      testEmail,
+      {
+        ...testEmail,
+        createdAt: new Date(new Date().setDate(new Date().getDate() - 1)),
+        // createdAt: new Date(new Date().setHours(new Date().getHours() - 1)),
+      },
+    ],
+  },
   { ...testEmailThread, id: "8", completed: true },
   { ...testEmailThread, id: "9", completed: true },
   { ...testEmailThread, id: "10", completed: true },
@@ -74,17 +86,57 @@ const emails: EmailThread[] = [
 ];
 
 export default function EmailsPage() {
-  const [unsentEmails, pendingEmails, needsFollowUpEmails, completedEmails] =
-    useMemo(() => {
-      return [
-        emails.filter((email) => email.draft),
-        emails.filter(
-          (email) => !email.draft && !email.warning && !email.completed,
-        ),
-        emails.filter((email) => email.warning),
-        emails.filter((email) => email.completed),
-      ];
-    }, []);
+  const emailIsOld = useCallback(
+    (email: EmailThread) =>
+      // Email is older than 1 day
+      email.emails[email.emails.length - 1]!.createdAt.getTime() <
+      new Date().getTime() - 1000 * 60 * 60 * 24 * 1,
+    [],
+  );
+
+  const unsentEmails = useMemo(() => emails.filter((email) => email.draft), []);
+  const completedEmails = useMemo(
+    () => emails.filter((email) => email.completed),
+    [],
+  );
+  const needsFollowUpEmails = useMemo(
+    () =>
+      emails.filter(
+        (email) =>
+          !email.draft &&
+          !email.completed &&
+          // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
+          (email.moreInfoNeeded || emailIsOld(email)),
+      ),
+    [emailIsOld],
+  );
+  const needsFollowUpSet = useMemo(
+    () => new Set(needsFollowUpEmails.map((email) => email.id)),
+    [needsFollowUpEmails],
+  );
+  const pendingEmails = useMemo(() => {
+    return emails.filter(
+      (email) =>
+        !email.draft && !needsFollowUpSet.has(email.id) && !email.completed,
+    );
+  }, [needsFollowUpSet]);
+
+  const getWarning = useCallback(
+    (email: EmailThread) => {
+      if (!needsFollowUpSet.has(email.id)) {
+        return undefined;
+      }
+      return email.moreInfoNeeded
+        ? "More info needed"
+        : `Sent ${formatDistanceToNow(
+            new Date(email.emails[email.emails.length - 1]!.createdAt),
+            {
+              addSuffix: true,
+            },
+          ).toLowerCase()}`;
+    },
+    [needsFollowUpSet],
+  );
 
   const [categories, setCategories] = useState([
     {
@@ -147,7 +199,7 @@ export default function EmailsPage() {
                     draft={thread.draft}
                     unread={thread.unread}
                     completed={thread.completed}
-                    warning={thread.warning}
+                    warning={getWarning(thread)}
                     className={cn("shrink-0", {
                       "bg-muted": thread.id === selectedThread?.id,
                     })}
@@ -191,7 +243,6 @@ function EmailThreadDetails({ emailThread }: { emailThread: EmailThread }) {
 
   return (
     <div className="flex h-full flex-col gap-2 overflow-x-hidden p-2 pb-8">
-      <PropertyCard property={emailThread.property} />
       {emailThread.emails.map((email, i) => (
         <EmailCard
           key={email.id}
@@ -207,6 +258,11 @@ function EmailThreadDetails({ emailThread }: { emailThread: EmailThread }) {
           }
         />
       ))}
+      <div className="flex-1" />
+      <Separator className="-mx-2 w-[calc(100%+1rem)]" />
+      <PropertyCard property={emailThread.property} />
+      <Textarea className="h-40 shrink-0" placeholder="Write a reply..." />
+      <Button className="self-start">Send</Button>
     </div>
   );
 }
@@ -214,7 +270,6 @@ function EmailThreadDetails({ emailThread }: { emailThread: EmailThread }) {
 function UnsentEmailDetails({ emailThread }: { emailThread: EmailThread }) {
   return (
     <div className="flex h-full flex-col gap-2 p-2 pb-8">
-      <PropertyCard property={emailThread.property} />
       <div className="mt-4 grid grid-cols-[auto_1fr] items-center gap-2">
         <Label htmlFor="to">To:</Label>
         <Input
@@ -234,6 +289,7 @@ function UnsentEmailDetails({ emailThread }: { emailThread: EmailThread }) {
           placeholder="Property inquiry"
         />
       </div>
+      <PropertyCard property={emailThread.property} />
       <Textarea
         className="flex-1"
         placeholder="Write your email here..."
