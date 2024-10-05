@@ -13,7 +13,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "~/components/ui/dialog";
-import { type EmailThread, type Email } from "~/lib/types";
+import { type Email } from "~/lib/types";
 import { cn } from "~/lib/utils";
 
 export const testEmail: Email = {

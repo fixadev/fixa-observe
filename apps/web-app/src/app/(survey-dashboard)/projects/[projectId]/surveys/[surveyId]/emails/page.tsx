@@ -1,13 +1,12 @@
 "use client";
 
-import {
-  ResizableHandle,
-  ResizablePanel,
-  ResizablePanelGroup,
-} from "~/components/ui/resizable";
 import EmailCard from "./_components/EmailCard";
 import { Button } from "~/components/ui/button";
-import { ChevronDownIcon } from "@heroicons/react/24/outline";
+import {
+  ChevronDownIcon,
+  ChevronRightIcon,
+  ChevronUpIcon,
+} from "@heroicons/react/24/outline";
 import PropertyCard from "~/components/PropertyCard";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
@@ -15,6 +14,7 @@ import { Textarea } from "~/components/ui/textarea";
 import { useMemo, useState } from "react";
 import { cn } from "~/lib/utils";
 import { type EmailThread, type Email } from "~/lib/types";
+import { Separator } from "~/components/ui/separator";
 
 const testEmail: Email = {
   id: "1",
@@ -48,13 +48,15 @@ const testEmailThread: EmailThread = {
   subject: "123 Main St",
   property: {
     id: "1",
-    address: "123 Main St, Palo Alto, CA 94301",
+    attributes: {
+      address: "123 Main St, Palo Alto, CA 94301",
+    },
     createdAt: new Date(),
     updatedAt: new Date(),
     ownerId: "1",
     photoUrl: null,
     surveyId: "1",
-    attributes: {},
+    displayIndex: 0,
   },
   draft: false,
   unread: false,
@@ -89,49 +91,60 @@ export default function EmailsPage() {
       ];
     }, []);
 
-  const categories = useMemo(() => {
-    return [
-      {
-        name: "Unsent",
-        emails: unsentEmails,
-      },
-      {
-        name: "Pending",
-        emails: pendingEmails,
-      },
-      {
-        name: "Needs follow-up",
-        emails: needsFollowUpEmails,
-      },
-      {
-        name: "Completed",
-        emails: completedEmails,
-      },
-    ];
-  }, [unsentEmails, pendingEmails, needsFollowUpEmails, completedEmails]);
+  const [categories, setCategories] = useState([
+    {
+      name: "Unsent",
+      emails: unsentEmails,
+      expanded: true,
+    },
+    {
+      name: "Pending",
+      emails: pendingEmails,
+      expanded: false,
+    },
+    {
+      name: "Needs follow-up",
+      emails: needsFollowUpEmails,
+      expanded: false,
+    },
+    {
+      name: "Completed",
+      emails: completedEmails,
+      expanded: false,
+    },
+  ]);
 
   const [selectedThread, setSelectedThread] = useState<EmailThread | null>(
     null,
   );
 
   return (
-    <div className="size-full">
-      <ResizablePanelGroup direction="horizontal" className="h-full">
-        <ResizablePanel
-          defaultSize={25}
-          minSize={25}
-          maxSize={35}
-          className="flex"
-        >
-          <div className="flex w-full max-w-3xl flex-col gap-2 overflow-y-auto p-2">
-            {categories.map((category) => (
+    <div className="grid size-full grid-cols-[400px_1fr]">
+      <div className="flex w-full max-w-3xl flex-col gap-2 overflow-y-auto border-r p-2">
+        {categories.map((category) => (
+          <>
+            <Button
+              variant="ghost"
+              className="flex w-full items-center justify-between"
+              onClick={() =>
+                setCategories((prev) =>
+                  prev.map((c) =>
+                    c.name === category.name
+                      ? { ...c, expanded: !c.expanded }
+                      : c,
+                  ),
+                )
+              }
+            >
+              {category.name}
+              {category.expanded ? (
+                <ChevronUpIcon className="size-4" />
+              ) : (
+                <ChevronDownIcon className="size-4" />
+              )}
+            </Button>
+            {category.expanded && (
               <>
-                <Button
-                  variant="ghost"
-                  className="flex w-full items-center justify-between"
-                >
-                  {category.name} <ChevronDownIcon className="size-4" />
-                </Button>
                 {category.emails?.map((thread) => (
                   <EmailCard
                     key={thread.id}
@@ -147,22 +160,21 @@ export default function EmailsPage() {
                   />
                 ))}
               </>
-            ))}
+            )}
+          </>
+        ))}
+      </div>
+      <div>
+        {selectedThread ? (
+          <EmailDetails email={selectedThread} />
+        ) : (
+          <div className="flex h-full items-center justify-center">
+            <p className="text-muted-foreground">
+              Select an email to view details
+            </p>
           </div>
-        </ResizablePanel>
-        <ResizableHandle />
-        <ResizablePanel defaultSize={75} minSize={50}>
-          {selectedThread ? (
-            <EmailDetails email={selectedThread} />
-          ) : (
-            <div className="flex h-full items-center justify-center">
-              <p className="text-muted-foreground">
-                Select an email to view details
-              </p>
-            </div>
-          )}
-        </ResizablePanel>
-      </ResizablePanelGroup>
+        )}
+      </div>
     </div>
   );
 }
