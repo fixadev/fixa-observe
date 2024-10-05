@@ -11,6 +11,7 @@ import { DragHandleDots2Icon } from "@radix-ui/react-icons";
 import { type Attribute, type Property } from "./PropertiesTable";
 import { DraggableCell } from "./DraggableCell";
 import { TableRow } from "@/components/ui/table";
+import { Textarea } from "~/components/ui/textarea";
 
 export const DraggableRow = ({
   property,
@@ -70,19 +71,34 @@ export const DraggableRow = ({
             id={attribute.id}
             draggingRow={draggingRow}
           >
-            <Input
-              defaultValue={property.attributes?.[attribute.id] ?? ""}
-              onChange={(e) => {
-                console.log("EVENT", e.target.value);
-                updateProperty({
-                  ...property,
-                  attributes: {
-                    ...property.attributes,
-                    [attribute.id]: e.target.value,
-                  },
-                });
-              }}
-            />
+            {" "}
+            {attribute.id === "comments" ? (
+              <Textarea
+                defaultValue={property.attributes?.comments ?? ""}
+                onChange={(e) => {
+                  updateProperty({
+                    ...property,
+                    attributes: {
+                      ...property.attributes,
+                      [attribute.id]: e.target.value,
+                    },
+                  });
+                }}
+              />
+            ) : (
+              <Input
+                defaultValue={property.attributes?.[attribute.id] ?? ""}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                  updateProperty({
+                    ...property,
+                    attributes: {
+                      ...property.attributes,
+                      [attribute.id]: e.target.value,
+                    },
+                  });
+                }}
+              />
+            )}
           </DraggableCell>
         );
       })}
