@@ -1,13 +1,12 @@
 "use client";
 
-import {
-  ResizableHandle,
-  ResizablePanel,
-  ResizablePanelGroup,
-} from "~/components/ui/resizable";
 import EmailCard from "./_components/EmailCard";
 import { Button } from "~/components/ui/button";
-import { ChevronDownIcon } from "@heroicons/react/24/outline";
+import {
+  ChevronDownIcon,
+  ChevronRightIcon,
+  ChevronUpIcon,
+} from "@heroicons/react/24/outline";
 import PropertyCard from "~/components/PropertyCard";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
@@ -15,6 +14,7 @@ import { Textarea } from "~/components/ui/textarea";
 import { useMemo, useState } from "react";
 import { cn } from "~/lib/utils";
 import { type EmailThread, type Email } from "~/lib/types";
+import { Separator } from "~/components/ui/separator";
 
 const testEmail: Email = {
   id: "1",
@@ -91,26 +91,28 @@ export default function EmailsPage() {
       ];
     }, []);
 
-  const categories = useMemo(() => {
-    return [
-      {
-        name: "Unsent",
-        emails: unsentEmails,
-      },
-      {
-        name: "Pending",
-        emails: pendingEmails,
-      },
-      {
-        name: "Needs follow-up",
-        emails: needsFollowUpEmails,
-      },
-      {
-        name: "Completed",
-        emails: completedEmails,
-      },
-    ];
-  }, [unsentEmails, pendingEmails, needsFollowUpEmails, completedEmails]);
+  const [categories, setCategories] = useState([
+    {
+      name: "Unsent",
+      emails: unsentEmails,
+      expanded: true,
+    },
+    {
+      name: "Pending",
+      emails: pendingEmails,
+      expanded: false,
+    },
+    {
+      name: "Needs follow-up",
+      emails: needsFollowUpEmails,
+      expanded: false,
+    },
+    {
+      name: "Completed",
+      emails: completedEmails,
+      expanded: false,
+    },
+  ]);
 
   const [selectedThread, setSelectedThread] = useState<EmailThread | null>(
     null,
@@ -118,29 +120,47 @@ export default function EmailsPage() {
 
   return (
     <div className="grid size-full grid-cols-[400px_1fr]">
-      <div className="flex w-full max-w-3xl flex-col gap-2 overflow-y-auto p-2">
+      <div className="flex w-full max-w-3xl flex-col gap-2 overflow-y-auto border-r p-2">
         {categories.map((category) => (
           <>
             <Button
               variant="ghost"
               className="flex w-full items-center justify-between"
+              onClick={() =>
+                setCategories((prev) =>
+                  prev.map((c) =>
+                    c.name === category.name
+                      ? { ...c, expanded: !c.expanded }
+                      : c,
+                  ),
+                )
+              }
             >
-              {category.name} <ChevronDownIcon className="size-4" />
+              {category.name}
+              {category.expanded ? (
+                <ChevronUpIcon className="size-4" />
+              ) : (
+                <ChevronDownIcon className="size-4" />
+              )}
             </Button>
-            {category.emails?.map((thread) => (
-              <EmailCard
-                key={thread.id}
-                email={thread.emails[thread.emails.length - 1]}
-                draft={thread.draft}
-                unread={thread.unread}
-                completed={thread.completed}
-                warning={thread.warning}
-                className={cn("shrink-0", {
-                  "bg-muted": thread.id === selectedThread?.id,
-                })}
-                onClick={() => setSelectedThread(thread)}
-              />
-            ))}
+            {category.expanded && (
+              <>
+                {category.emails?.map((thread) => (
+                  <EmailCard
+                    key={thread.id}
+                    email={thread.emails[thread.emails.length - 1]}
+                    draft={thread.draft}
+                    unread={thread.unread}
+                    completed={thread.completed}
+                    warning={thread.warning}
+                    className={cn("shrink-0", {
+                      "bg-muted": thread.id === selectedThread?.id,
+                    })}
+                    onClick={() => setSelectedThread(thread)}
+                  />
+                ))}
+              </>
+            )}
           </>
         ))}
       </div>
