@@ -11,8 +11,11 @@ export type AttributesObjectSchema = z.infer<typeof attributesObjectSchema>;
 export const attributesObjectSchema = z.record(z.string(), z.string().nullable());
 
 export type PropertySchema = z.infer<typeof propertySchema>;
-export const propertySchema = PropertySchema;
-
+export const propertySchema = PropertySchema.omit({
+  attributes: true,
+}).extend({
+  attributes: attributesObjectSchema,
+});
 
 export const photoUploadSchema = z.object({
   propertyId: z.string(),
