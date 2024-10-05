@@ -18,12 +18,14 @@ export const DraggableRow = ({
   deleteProperty,
   draggingRow,
   setDraggingRow,
+  updateProperty,
 }: {
   property: Property;
   attributes: Attribute[];
   draggingRow: boolean;
   deleteProperty: (id: string) => void;
   setDraggingRow: (draggingRow: boolean) => void;
+  updateProperty: (property: Property) => void;
 }) => {
   const {
     transform,
@@ -68,7 +70,19 @@ export const DraggableRow = ({
             id={attribute.id}
             draggingRow={draggingRow}
           >
-            <Input defaultValue={property.attributes[attribute.id] ?? ""} />
+            <Input
+              defaultValue={property.attributes?.[attribute.id] ?? ""}
+              onChange={(e) => {
+                console.log("EVENT", e.target.value);
+                updateProperty({
+                  ...property,
+                  attributes: {
+                    ...property.attributes,
+                    [attribute.id]: e.target.value,
+                  },
+                });
+              }}
+            />
           </DraggableCell>
         );
       })}

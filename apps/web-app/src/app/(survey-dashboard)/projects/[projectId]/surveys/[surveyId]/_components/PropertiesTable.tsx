@@ -32,7 +32,11 @@ import { Button } from "~/components/ui/button";
 import { PlusIcon } from "@heroicons/react/24/solid";
 import { PDFUploader } from "./NDXOutputUploader";
 import { api } from "~/trpc/react";
-import { type PropertySchema, type AttributeSchema } from "~/lib/property";
+import {
+  type PropertySchema,
+  type AttributeSchema,
+  type CreatePropertySchema,
+} from "~/lib/property";
 import { DraggableHeader } from "./DraggableHeader";
 import { DraggableRow } from "./DraggableRow";
 
@@ -48,9 +52,10 @@ export function PropertiesTable({ surveyId }: { surveyId: string }) {
   const [attributesOrder, setAttributesOrderState] = useState<Attribute[]>([]);
   const [draggingRow, setDraggingRow] = useState<boolean>(false);
 
-  const { data: surveyData } = api.survey.getSurvey.useQuery({
-    surveyId,
-  });
+  const { data: surveyData, refetch: refetchSurvey } =
+    api.survey.getSurvey.useQuery({
+      surveyId,
+    });
   useEffect(() => {
     console.log("surveyData", surveyData);
     if (surveyData?.properties) {
@@ -76,79 +81,65 @@ export function PropertiesTable({ surveyId }: { surveyId: string }) {
       );
     }
   }, [attributes]);
-  const { mutate: updateSurvey } = api.survey.updateSurvey.useMutation();
-  const { mutate: createProperties } =
-    api.survey.addPropertiesToSurvey.useMutation();
 
-  const { mutate: updateAttributesOnSurvey } =
-    api.survey.updateSurveyAttributes.useMutation();
+  const { mutate: updateAttributes } = api.survey.updateAttributes.useMutation({
+    onSuccess: () => {
+      void refetchSurvey();
+    },
+  });
+  const { mutate: updateProperties } = api.survey.updateProperties.useMutation({
+    onSuccess: () => {
+      void refetchSurvey();
+    },
+  });
 
   // state setter wrapper to update db as well
   const setProperties = useCallback(
     async (
       newPropertiesOrCallback:
-        | Property[]
-        | ((prevProperties: Property[]) => Property[]),
+        | Array<PropertySchema | (CreatePropertySchema & { isNew?: boolean })>
+        | ((
+            prevProperties: Array<
+              PropertySchema | (CreatePropertySchema & { isNew?: boolean })
+            >,
+          ) => Array<
+            PropertySchema | (CreatePropertySchema & { isNew?: boolean })
+          >),
+      action: "order" | "add" | "update" | "delete",
+      propertyId?: string,
     ) => {
       if (!surveyData) return;
-
-      let newProperties: Property[];
+      let updatedProperties: Property[];
       if (typeof newPropertiesOrCallback === "function") {
-        newProperties = newPropertiesOrCallback(properties);
+        updatedProperties = newPropertiesOrCallback(properties);
       } else {
-        newProperties = newPropertiesOrCallback;
+        updatedProperties = newPropertiesOrCallback;
       }
+      console.log("UPDATING PROPERTIES IN FRONT END", updatedProperties);
 
       try {
-        const existingPropertyIds = new Set(properties.map((prop) => prop.id));
-        const propertiesWithSurveyId = newProperties.map((prop) => ({
-          ...prop,
-          surveyId: surveyId,
-        }));
-
-        const newPropertiesToAdd = propertiesWithSurveyId.filter(
-          (prop) => !existingPropertyIds.has(prop.id),
-        );
-        const existingPropertiesToUpdate = propertiesWithSurveyId.filter(
-          (prop) => existingPropertyIds.has(prop.id),
-        );
-
-        if (newPropertiesToAdd.length > 0) {
-          void createProperties({
-            properties: newPropertiesToAdd,
-            surveyId: surveyId,
-          });
-        }
-
-        if (existingPropertiesToUpdate.length > 0) {
-          void updateSurvey({
-            ...surveyData,
-            properties: existingPropertiesToUpdate,
-          });
-        }
-
-        setPropertiesState(propertiesWithSurveyId); // Update state
+        void updateProperties({
+          surveyId,
+          properties: updatedProperties,
+          action,
+          propertyId,
+        });
+        setPropertiesState(updatedProperties); // Update state
       } catch (error) {
         console.error("Failed to update properties:", error);
-        // Handle error (e.g., show error message to user)
       }
     },
-    [
-      surveyData,
-      properties,
-      surveyId,
-      createProperties,
-      updateSurvey,
-      setPropertiesState,
-    ],
+    [surveyData, properties, surveyId, updateProperties, setPropertiesState],
   );
 
   // state setter wrapper to update db as well
-  const setAttributesOrder = useCallback(
+  const modifyAttributes = useCallback(
     async (
       newOrderOrCallback:
         | Attribute[]
         | ((prevOrder: Attribute[]) => Attribute[]),
+      action: "order" | "add" | "update" | "delete",
+      attributeId?: string,
     ) => {
       if (!surveyData) return;
       let newOrder: Attribute[];
@@ -157,11 +148,12 @@ export function PropertiesTable({ surveyId }: { surveyId: string }) {
       } else {
         newOrder = newOrderOrCallback;
       }
-
       try {
-        void updateAttributesOnSurvey({
+        void updateAttributes({
           surveyId,
           attributes: newOrder,
+          action,
+          attributeId,
         });
         setAttributesOrderState(newOrder);
       } catch (error) {
@@ -172,7 +164,7 @@ export function PropertiesTable({ surveyId }: { surveyId: string }) {
       surveyData,
       attributesOrder,
       surveyId,
-      updateAttributesOnSurvey,
+      updateAttributes,
       setAttributesOrderState,
     ],
   );
@@ -195,17 +187,17 @@ export function PropertiesTable({ surveyId }: { surveyId: string }) {
             const oldIndex = rowIds.findIndex((id) => id === active.id);
             const newIndex = rowIds.findIndex((id) => id === over.id);
             return arrayMove(data, oldIndex, newIndex);
-          });
+          }, "order");
         } else {
-          void setAttributesOrder((data) => {
+          void modifyAttributes((data) => {
             const oldIndex = colIds.findIndex((id) => id === active.id);
             const newIndex = colIds.findIndex((id) => id === over.id);
             return arrayMove(data, oldIndex, newIndex);
-          });
+          }, "order");
         }
       }
     },
-    [draggingRow, rowIds, colIds, setProperties, setAttributesOrder],
+    [draggingRow, rowIds, colIds, setProperties, modifyAttributes],
   );
 
   const sensors = useSensors(
@@ -214,81 +206,117 @@ export function PropertiesTable({ surveyId }: { surveyId: string }) {
     useSensor(KeyboardSensor, {}),
   );
 
+  const addAttribute = useCallback(() => {
+    void modifyAttributes(
+      (data) => [
+        ...data,
+        {
+          id: crypto.randomUUID(),
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          type: "string",
+          label: "New field",
+          ownerId: "",
+          projectId: "",
+          isNew: true,
+        },
+      ],
+      "add",
+    );
+  }, [modifyAttributes]);
+
+  const renameAttribute = useCallback(
+    (id: string, label: string) => {
+      void modifyAttributes(
+        (data) => {
+          const index = data.findIndex((attribute) => attribute.id === id);
+          if (index === -1) return data;
+          const newData = [...data];
+          newData[index]!.label = label;
+          return newData;
+        },
+        "update",
+        id,
+      );
+    },
+    [modifyAttributes],
+  );
+
+  const deleteAttribute = useCallback(
+    (id: string) => {
+      void modifyAttributes(
+        (data) => {
+          const index = data.findIndex((attribute) => attribute.id === id);
+          if (index === -1) return data;
+          const newData = [...data];
+          newData.splice(index, 1);
+          return newData;
+        },
+        "delete",
+        id,
+      );
+    },
+    [modifyAttributes],
+  );
+
   const addProperty = useCallback(() => {
     console.log("adding property");
-    void setProperties((data) => [
-      ...data,
-      {
-        id: crypto.randomUUID(),
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        ownerId: "",
-        address: "",
-        photoUrl: null,
-        attributes: {},
-        surveyId: surveyId,
-        isNew: true,
-      },
-    ]);
+    void setProperties(
+      (data) => [
+        ...data,
+        {
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          address: "",
+          photoUrl: null,
+          displayIndex: properties.length,
+          attributes: {},
+          surveyId: surveyId,
+          isNew: true,
+        },
+      ],
+      "add",
+    );
     setTimeout(() => {
       tableRef.current?.scrollTo({
         top: tableRef.current.scrollWidth,
       });
     });
-  }, [setProperties, surveyId]);
+  }, [setProperties, surveyId, properties]);
 
-  const addAttribute = useCallback(() => {
-    void setAttributesOrder((data) => [
-      ...data,
-      {
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        type: "string",
-        label: "New field",
-        ownerId: "",
-        projectId: "",
-        isNew: true,
-      },
-    ]);
-  }, [setAttributesOrder]);
-
-  const renameAttribute = useCallback(
-    (id: string, label: string) => {
-      void setAttributesOrder((data) => {
-        const index = data.findIndex((attribute) => attribute.id === id);
-        if (index === -1) return data;
-        const newData = [...data];
-        newData[index]!.label = label;
-        return newData;
-      });
-    },
-    [setAttributesOrder],
-  );
-
-  const deleteProperty = useCallback(
-    (id: string) => {
-      void setProperties((data) => {
-        const index = data.findIndex((property) => property.id === id);
-        if (index === -1) return data;
-        const newData = [...data];
-        newData.splice(index, 1);
-        return newData;
-      });
+  const updateProperty = useCallback(
+    (property: Property) => {
+      void setProperties(
+        (data) => {
+          const index = data.findIndex((prop) => prop.id === property.id);
+          if (index === -1) return data;
+          const newData = [...data];
+          newData[index] = property;
+          return newData;
+        },
+        "update",
+        property.id,
+      );
     },
     [setProperties],
   );
 
-  const deleteAttribute = useCallback(
+  const deleteProperty = useCallback(
     (id: string) => {
-      void setAttributesOrder((data) => {
-        const index = data.findIndex((attribute) => attribute.id === id);
-        if (index === -1) return data;
-        const newData = [...data];
-        newData.splice(index, 1);
-        return newData;
-      });
+      console.log("IN DELETE PROPERTY", id);
+      void setProperties(
+        (data) => {
+          const index = data.findIndex((property) => property.id === id);
+          if (index === -1) return data;
+          const newData = [...data];
+          newData.splice(index, 1);
+          return newData;
+        },
+        "delete",
+        id,
+      );
     },
-    [setAttributesOrder],
+    [setProperties],
   );
 
   const tableRef = useRef<HTMLTableElement>(null);
@@ -297,9 +325,11 @@ export function PropertiesTable({ surveyId }: { surveyId: string }) {
     <div>
       <div className="flex flex-row justify-end gap-4">
         <PDFUploader
+          surveyId={surveyId}
+          existingProperties={properties}
           setProperties={setProperties}
+          setAttributesOrder={modifyAttributes}
           attributesOrder={attributesOrder}
-          setAttributesOrder={setAttributesOrder}
         />
       </div>
       <DndContext
@@ -359,6 +389,7 @@ export function PropertiesTable({ surveyId }: { surveyId: string }) {
                     deleteProperty={() => deleteProperty(property.id)}
                     draggingRow={draggingRow}
                     setDraggingRow={setDraggingRow}
+                    updateProperty={updateProperty}
                   />
                 );
               })}
