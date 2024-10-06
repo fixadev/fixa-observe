@@ -31,7 +31,7 @@ export const createTRPCContext = async (opts: { headers: Headers }) => {
 
   return {
     db,
-    userId: (user?.publicMetadata.userId as string) ?? null,
+    user,
     ...opts,
   };
 };
@@ -121,13 +121,13 @@ export const publicProcedure = t.procedure.use(timingMiddleware);
 export const protectedProcedure = t.procedure
   .use(timingMiddleware)
   .use(({ ctx, next }) => {
-    if (!ctx.userId) {
+    if (!ctx.user) {
       throw new TRPCError({ code: "UNAUTHORIZED" });
     }
     return next({
       ctx: {
         // infers the `currentUser` as non-nullable
-        userId: ctx.userId,
+        user: ctx.user,
       },
     });
   });

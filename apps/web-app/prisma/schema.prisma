@@ -20,8 +20,7 @@ datasource db {
 }
 
 model User {
-  id         String      @id @default(uuid())
-  clerkId    String      @unique
+  id         String      @id // Should be the clerkId
   email      String      @unique
   firstName  String?
   lastName   String?
@@ -32,7 +31,7 @@ model User {
 
 model Project {
   id        String   @id @default(uuid())
-  owner     User     @relation(fields: [ownerId], references: [id])
+  owner     User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   ownerId   String
   name      String
   createdAt DateTime @default(now())
@@ -47,7 +46,7 @@ model Survey {
   updatedAt  DateTime              @updatedAt
   name       String
   projectId  String
-  project    Project               @relation(fields: [projectId], references: [id])
+  project    Project               @relation(fields: [projectId], references: [id], onDelete: Cascade)
   properties Property[]
   attributes AttributesOnSurveys[]
 }
@@ -58,7 +57,7 @@ model Attribute {
   updatedAt DateTime              @updatedAt
   label     String
   type      String
-  owner     User?                 @relation(fields: [ownerId], references: [id])
+  owner     User?                 @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   ownerId   String?
   surveys   AttributesOnSurveys[]
 }
@@ -67,10 +66,10 @@ model AttributesOnSurveys {
   id             String    @id @default(uuid())
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
-  attribute      Attribute @relation(fields: [attributeId], references: [id])
+  attribute      Attribute @relation(fields: [attributeId], references: [id], onDelete: Cascade)
   attributeId    String
   attributeIndex Int
-  survey         Survey    @relation(fields: [surveyId], references: [id])
+  survey         Survey    @relation(fields: [surveyId], references: [id], onDelete: Cascade)
   surveyId       String
 }
 
@@ -78,13 +77,13 @@ model Property {
   id           String       @id @default(uuid())
   createdAt    DateTime     @default(now())
   updatedAt    DateTime     @updatedAt
-  owner        User         @relation(fields: [ownerId], references: [id])
+  owner        User         @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   ownerId      String
   brochures    Brochure[]
   photoUrl     String?
   attributes   Json?
   displayIndex Int
-  survey       Survey       @relation(fields: [surveyId], references: [id])
+  survey       Survey       @relation(fields: [surveyId], references: [id], onDelete: Cascade)
   surveyId     String
   emailThread  EmailThread[]
 }
@@ -96,7 +95,7 @@ model Brochure {
   url        String
   title      String
   approved   Boolean  @default(false)
-  property   Property @relation(fields: [propertyId], references: [id])
+  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
   propertyId String
 }
 
@@ -115,7 +114,7 @@ model Email {
   body          String
   webLink       String
 
-  emailThread   EmailThread @relation(fields: [emailThreadId], references: [id])
+  emailThread   EmailThread @relation(fields: [emailThreadId], references: [id], onDelete: Cascade)
   emailThreadId String
 }
 
@@ -126,7 +125,7 @@ model EmailThread {
 
   emails           Email[]
 
-  property         Property? @relation(fields: [propertyId], references: [id])
+  property         Property? @relation(fields: [propertyId], references: [id], onDelete: Cascade)
   propertyId       String?   
 
   draft            Boolean  @default(false)
