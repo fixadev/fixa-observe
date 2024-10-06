@@ -1,7 +1,6 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { createSurveyInput, surveySchema } from "~/lib/survey";
-import { SurveySchema } from "../../../../prisma/generated/zod";
 import { attributeSchema, createPropertySchema, importPropertiesInput, propertySchema } from "~/lib/property";
 import { surveyService } from "~/server/services/survey";
 import { propertyService } from "~/server/services/property";
@@ -14,7 +13,6 @@ export const surveyRouter = createTRPCRouter({
   createSurvey: protectedProcedure.input(createSurveyInput).mutation(async ({ ctx, input }) => {
     return await surveyServiceInstance.createSurvey(input, ctx.userId);
   }),
-
   
   getProjectSurveys: protectedProcedure.input(z.object({ projectId: z.string() })).query(async ({ ctx, input }) => {
     return await surveyServiceInstance.getProjectSurveys(input.projectId, ctx.userId);
@@ -33,6 +31,7 @@ export const surveyRouter = createTRPCRouter({
     return attributes
   }),
   
+  // TODO: refactor this into 4 routes -- and update frontend to use the separate routes
   updateAttributes: protectedProcedure.input(z.object({ surveyId: z.string(), attributes: z.array(attributeSchema), action: z.enum(["order", "add", "update", "delete"]), attributeId: z.string().optional() })).mutation(async ({ ctx, input }) => {
     if (input.action === "order") {
       return await surveyServiceInstance.updateAttributesOrder(input.surveyId, input.attributes, ctx.userId);
@@ -54,6 +53,8 @@ export const surveyRouter = createTRPCRouter({
     return await surveyServiceInstance.updateSurvey(input, ctx.userId);
   }),
 
+  
+  // TODO: refactor this into 4 routes -- and update frontend to use the separate routes
   updateProperties: protectedProcedure.input(
     z.discriminatedUnion('action', [
       z.object({

@@ -139,6 +139,40 @@ export const propertyService = ({
       return response;
     },
 
+    getBrochure: async (
+      brochureId: string,
+      userId: string,
+    ) => {
+      const brochure = await db.brochure.findUnique({
+        where: {
+          id: brochureId,
+          property: {
+            ownerId: userId,
+          },
+        },
+      });
+      return brochure;
+    },
+
+    updateBrochure: async (
+      brochure: BrochureSchema,
+      userId: string,
+    ) => {
+      const response = await db.brochure.update({
+        where: {
+          id: brochure.id,
+          property: {
+            ownerId: userId,
+          },
+        },
+        data: {
+          ...brochure,
+        },
+      });
+      return response;
+    },
+    
+
     deleteBrochure: async (
       propertyId: string,
       brochureId: string,

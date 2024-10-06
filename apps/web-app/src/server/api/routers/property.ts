@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
-import { propertySchema, photoUploadSchema } from "~/lib/property";
+import { propertySchema, photoUploadSchema, brochureSchema } from "~/lib/property";
 import { propertyService } from "~/server/services/property";
 import { db } from "~/server/db";
 
@@ -55,7 +55,16 @@ export const propertyRouter = createTRPCRouter({
       );
     }),
 
-  getAttributes: protectedProcedure.query(async ({ ctx }) => {
-    return await propertyServiceInstance.getAttributes(ctx.userId);
+  getBrochure: protectedProcedure
+    .input(z.object({ brochureId: z.string() }))
+    .query(async ({ ctx, input }) => {
+      return await propertyServiceInstance.getBrochure(input.brochureId, ctx.userId);
   }),
+
+  updateBrochure: protectedProcedure
+    .input(brochureSchema)
+    .mutation(async ({ ctx, input }) => {
+      return await propertyServiceInstance.updateBrochure(input, ctx.userId);
+    }),
+    
 });
