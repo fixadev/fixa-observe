@@ -101,7 +101,7 @@ model Brochure {
 }
 
 model Email {
-  id            String      @id @default(uuid())
+  id            String      @id // Should be the email id in Outlook
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
 
@@ -111,6 +111,7 @@ model Email {
   recipientName String
   recipientEmail String
 
+  subject       String      @default("")
   body          String
   webLink       String
 
@@ -123,11 +124,10 @@ model EmailThread {
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
 
-  subject          String
   emails           Email[]
 
-  property         Property @relation(fields: [propertyId], references: [id])
-  propertyId       String   
+  property         Property? @relation(fields: [propertyId], references: [id])
+  propertyId       String?   
 
   draft            Boolean  @default(false)
   unread           Boolean  @default(false)
