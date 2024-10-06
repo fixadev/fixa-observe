@@ -98,7 +98,7 @@ function UnsentEmailDetails({
           type="text"
           id="subject"
           className="flex-grow"
-          defaultValue={emailThread.subject}
+          defaultValue={emailThread.emails[0]!.subject}
           placeholder="Property inquiry"
         />
       </div>

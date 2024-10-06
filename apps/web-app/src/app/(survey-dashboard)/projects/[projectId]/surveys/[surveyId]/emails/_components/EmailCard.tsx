@@ -6,7 +6,6 @@ import { cn } from "~/lib/utils";
 
 export default function EmailCard({
   email,
-  subject = "123 Main St",
   draft = false,
   unread = false,
   completed = false,
@@ -16,7 +15,6 @@ export default function EmailCard({
   className,
 }: {
   email: Email;
-  subject?: string;
   draft?: boolean;
   unread?: boolean;
   completed?: boolean;
@@ -83,7 +81,7 @@ export default function EmailCard({
               ))}
           </div>
           <div className={cn("text-sm", unread ? "font-medium" : "")}>
-            {subject}
+            {email.subject}
           </div>
           {!expanded && (
             <div

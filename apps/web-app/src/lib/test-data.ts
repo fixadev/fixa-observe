@@ -9,6 +9,7 @@ export const TEST_EMAIL: Email = {
   senderEmail: "mark@example.com",
   recipientName: "Colin",
   recipientEmail: "colin@example.com",
+  subject: "123 Main St",
   body: `Dear Colin,
 
 I hope this email finds you well. I'm reaching out regarding the property at 123 Main St. that I recently came across in my search for potential investments. I'm very interested in this property and would appreciate if you could provide me with some additional information:
@@ -33,7 +34,6 @@ export const TEST_EMAIL_THREAD: EmailThreadWithEmailsAndProperty = {
   id: "thread-1",
   createdAt: new Date(),
   updatedAt: new Date(),
-  subject: "123 Main St",
   emails: [
     { ...TEST_EMAIL, id: "1" },
     { ...TEST_EMAIL, id: "2" },
