@@ -28,6 +28,7 @@
     "@google-cloud/storage": "^7.13.0",
     "@google-cloud/vertexai": "^1.7.0",
     "@heroicons/react": "^2.1.5",
+    "@pdftron/webviewer": "^10.12.0",
     "@prisma/client": "^5.19.1",
     "@radix-ui/react-alert-dialog": "^1.1.1",
     "@radix-ui/react-avatar": "^1.1.1",

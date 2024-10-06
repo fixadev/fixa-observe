@@ -7,7 +7,11 @@ import { usePDFJS } from "./usePDFjs";
 import type PDFJS from "pdfjs-dist";
 import { type Property } from "./PropertiesTable";
 import { type Attribute } from "@prisma/client";
-import { type PropertySchema, type CreatePropertySchema } from "~/lib/property";
+import {
+  type PropertySchema,
+  type CreatePropertySchema,
+  type BrochureSchema,
+} from "~/lib/property";
 const acceptablePDFFileTypes = "application/pdf";
 
 interface Annotation {
@@ -79,11 +83,12 @@ export const PDFUploader = ({
       const properties = processPDF(parsedPDF);
       const propertiesWithAttributes: Array<CreatePropertySchema> =
         properties.map((property, index) => {
+          // const brochure: BrochureSchema = {};
           return {
             createdAt: new Date(),
             updatedAt: new Date(),
             photoUrl: null,
-            brochures: [property.brochureLink],
+            brochures: [],
             displayIndex: currentPropertiesEndIndex + index + 1,
             surveyId: surveyId,
             attributes: {

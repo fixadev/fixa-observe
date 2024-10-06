@@ -93,6 +93,15 @@ model Brochure {
   updatedAt  DateTime @updatedAt
   url        String
   title      String
+  approved   Boolean  @default(false)
   property   Property @relation(fields: [propertyId], references: [id])
   propertyId String
+}
+
+model Email {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  email     String
+  projectId String
 }

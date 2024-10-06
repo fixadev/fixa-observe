@@ -56,6 +56,9 @@ importers:
       '@heroicons/react':
         specifier: ^2.1.5
         version: 2.1.5(react@18.3.1)
+      '@pdftron/webviewer':
+        specifier: ^10.12.0
+        version: 10.12.0
       '@prisma/client':
         specifier: ^5.19.1
         version: 5.19.1(prisma@5.19.1)
@@ -894,6 +897,9 @@ packages:
 
   '@panva/hkdf@1.2.1':
     resolution: {integrity: sha512-6oclG6Y3PiDFcoyk8srjLfVKyMfVCKJ27JwNPViuXziFpmdz+MZnZN/aKY0JGXgYuO/VghU0jcOAZgWXZ1Dmrw==}
+
+  '@pdftron/webviewer@10.12.0':
+    resolution: {integrity: sha512-7MRnPS7ulg61AhCMQMCcauXfqiXEF4HZS4CvmQFn3DwbdjTn3jrT7KTAapz3WsWQPeZU21c7gTOr0Bvc5xFRYQ==}
 
   '@pkgjs/parseargs@0.11.0':
     resolution: {integrity: sha512-+1VkjdD0QBLPodGrJUeqarH8VAIvQODIbwh9XpP5Syisf7YoQgsJKPNFoqqLQlu+VQ/tVSshMR6loPMn8U+dPg==}
@@ -6254,6 +6260,8 @@ snapshots:
       fastq: 1.15.0
 
   '@panva/hkdf@1.2.1': {}
+
+  '@pdftron/webviewer@10.12.0': {}
 
   '@pkgjs/parseargs@0.11.0':
     optional: true

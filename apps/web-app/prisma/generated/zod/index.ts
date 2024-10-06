@@ -68,7 +68,7 @@ export const AttributesOnSurveysScalarFieldEnumSchema = z.enum(['id','createdAt'
 
 export const PropertyScalarFieldEnumSchema = z.enum(['id','createdAt','updatedAt','ownerId','photoUrl','attributes','displayIndex','surveyId']);
 
-export const BrochureScalarFieldEnumSchema = z.enum(['id','createdAt','updatedAt','url','title','propertyId']);
+export const BrochureScalarFieldEnumSchema = z.enum(['id','createdAt','updatedAt','url','title','approved','propertyId']);
 
 export const SortOrderSchema = z.enum(['asc','desc']);
 
@@ -183,6 +183,7 @@ export const BrochureSchema = z.object({
   updatedAt: z.coerce.date(),
   url: z.string(),
   title: z.string(),
+  approved: z.boolean(),
   propertyId: z.string(),
 })
 
@@ -413,6 +414,7 @@ export const BrochureSelectSchema: z.ZodType<Prisma.BrochureSelect> = z.object({
   updatedAt: z.boolean().optional(),
   url: z.boolean().optional(),
   title: z.boolean().optional(),
+  approved: z.boolean().optional(),
   propertyId: z.boolean().optional(),
   property: z.union([z.boolean(),z.lazy(() => PropertyArgsSchema)]).optional(),
 }).strict()
@@ -865,6 +867,7 @@ export const BrochureWhereInputSchema: z.ZodType<Prisma.BrochureWhereInput> = z.
   updatedAt: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
   url: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   title: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
+  approved: z.union([ z.lazy(() => BoolFilterSchema),z.boolean() ]).optional(),
   propertyId: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   property: z.union([ z.lazy(() => PropertyRelationFilterSchema),z.lazy(() => PropertyWhereInputSchema) ]).optional(),
 }).strict();
@@ -875,6 +878,7 @@ export const BrochureOrderByWithRelationInputSchema: z.ZodType<Prisma.BrochureOr
   updatedAt: z.lazy(() => SortOrderSchema).optional(),
   url: z.lazy(() => SortOrderSchema).optional(),
   title: z.lazy(() => SortOrderSchema).optional(),
+  approved: z.lazy(() => SortOrderSchema).optional(),
   propertyId: z.lazy(() => SortOrderSchema).optional(),
   property: z.lazy(() => PropertyOrderByWithRelationInputSchema).optional()
 }).strict();
@@ -891,6 +895,7 @@ export const BrochureWhereUniqueInputSchema: z.ZodType<Prisma.BrochureWhereUniqu
   updatedAt: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
   url: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   title: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
+  approved: z.union([ z.lazy(() => BoolFilterSchema),z.boolean() ]).optional(),
   propertyId: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   property: z.union([ z.lazy(() => PropertyRelationFilterSchema),z.lazy(() => PropertyWhereInputSchema) ]).optional(),
 }).strict());
@@ -901,6 +906,7 @@ export const BrochureOrderByWithAggregationInputSchema: z.ZodType<Prisma.Brochur
   updatedAt: z.lazy(() => SortOrderSchema).optional(),
   url: z.lazy(() => SortOrderSchema).optional(),
   title: z.lazy(() => SortOrderSchema).optional(),
+  approved: z.lazy(() => SortOrderSchema).optional(),
   propertyId: z.lazy(() => SortOrderSchema).optional(),
   _count: z.lazy(() => BrochureCountOrderByAggregateInputSchema).optional(),
   _max: z.lazy(() => BrochureMaxOrderByAggregateInputSchema).optional(),
@@ -916,6 +922,7 @@ export const BrochureScalarWhereWithAggregatesInputSchema: z.ZodType<Prisma.Broc
   updatedAt: z.union([ z.lazy(() => DateTimeWithAggregatesFilterSchema),z.coerce.date() ]).optional(),
   url: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
   title: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
+  approved: z.union([ z.lazy(() => BoolWithAggregatesFilterSchema),z.boolean() ]).optional(),
   propertyId: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
 }).strict();
 
@@ -1328,6 +1335,7 @@ export const BrochureCreateInputSchema: z.ZodType<Prisma.BrochureCreateInput> = 
   updatedAt: z.coerce.date().optional(),
   url: z.string(),
   title: z.string(),
+  approved: z.boolean().optional(),
   property: z.lazy(() => PropertyCreateNestedOneWithoutBrochuresInputSchema)
 }).strict();
 
@@ -1337,6 +1345,7 @@ export const BrochureUncheckedCreateInputSchema: z.ZodType<Prisma.BrochureUnchec
   updatedAt: z.coerce.date().optional(),
   url: z.string(),
   title: z.string(),
+  approved: z.boolean().optional(),
   propertyId: z.string()
 }).strict();
 
@@ -1346,6 +1355,7 @@ export const BrochureUpdateInputSchema: z.ZodType<Prisma.BrochureUpdateInput> = 
   updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   url: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   title: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  approved: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   property: z.lazy(() => PropertyUpdateOneRequiredWithoutBrochuresNestedInputSchema).optional()
 }).strict();
 
@@ -1355,6 +1365,7 @@ export const BrochureUncheckedUpdateInputSchema: z.ZodType<Prisma.BrochureUnchec
   updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   url: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   title: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  approved: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   propertyId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
 }).strict();
 
@@ -1364,6 +1375,7 @@ export const BrochureCreateManyInputSchema: z.ZodType<Prisma.BrochureCreateManyI
   updatedAt: z.coerce.date().optional(),
   url: z.string(),
   title: z.string(),
+  approved: z.boolean().optional(),
   propertyId: z.string()
 }).strict();
 
@@ -1373,6 +1385,7 @@ export const BrochureUpdateManyMutationInputSchema: z.ZodType<Prisma.BrochureUpd
   updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   url: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   title: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  approved: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
 }).strict();
 
 export const BrochureUncheckedUpdateManyInputSchema: z.ZodType<Prisma.BrochureUncheckedUpdateManyInput> = z.object({
@@ -1381,6 +1394,7 @@ export const BrochureUncheckedUpdateManyInputSchema: z.ZodType<Prisma.BrochureUn
   updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   url: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   title: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  approved: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   propertyId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
 }).strict();
 
@@ -1803,6 +1817,11 @@ export const JsonNullableWithAggregatesFilterSchema: z.ZodType<Prisma.JsonNullab
   _max: z.lazy(() => NestedJsonNullableFilterSchema).optional()
 }).strict();
 
+export const BoolFilterSchema: z.ZodType<Prisma.BoolFilter> = z.object({
+  equals: z.boolean().optional(),
+  not: z.union([ z.boolean(),z.lazy(() => NestedBoolFilterSchema) ]).optional(),
+}).strict();
+
 export const PropertyRelationFilterSchema: z.ZodType<Prisma.PropertyRelationFilter> = z.object({
   is: z.lazy(() => PropertyWhereInputSchema).optional(),
   isNot: z.lazy(() => PropertyWhereInputSchema).optional()
@@ -1814,6 +1833,7 @@ export const BrochureCountOrderByAggregateInputSchema: z.ZodType<Prisma.Brochure
   updatedAt: z.lazy(() => SortOrderSchema).optional(),
   url: z.lazy(() => SortOrderSchema).optional(),
   title: z.lazy(() => SortOrderSchema).optional(),
+  approved: z.lazy(() => SortOrderSchema).optional(),
   propertyId: z.lazy(() => SortOrderSchema).optional()
 }).strict();
 
@@ -1823,6 +1843,7 @@ export const BrochureMaxOrderByAggregateInputSchema: z.ZodType<Prisma.BrochureMa
   updatedAt: z.lazy(() => SortOrderSchema).optional(),
   url: z.lazy(() => SortOrderSchema).optional(),
   title: z.lazy(() => SortOrderSchema).optional(),
+  approved: z.lazy(() => SortOrderSchema).optional(),
   propertyId: z.lazy(() => SortOrderSchema).optional()
 }).strict();
 
@@ -1832,7 +1853,16 @@ export const BrochureMinOrderByAggregateInputSchema: z.ZodType<Prisma.BrochureMi
   updatedAt: z.lazy(() => SortOrderSchema).optional(),
   url: z.lazy(() => SortOrderSchema).optional(),
   title: z.lazy(() => SortOrderSchema).optional(),
+  approved: z.lazy(() => SortOrderSchema).optional(),
   propertyId: z.lazy(() => SortOrderSchema).optional()
+}).strict();
+
+export const BoolWithAggregatesFilterSchema: z.ZodType<Prisma.BoolWithAggregatesFilter> = z.object({
+  equals: z.boolean().optional(),
+  not: z.union([ z.boolean(),z.lazy(() => NestedBoolWithAggregatesFilterSchema) ]).optional(),
+  _count: z.lazy(() => NestedIntFilterSchema).optional(),
+  _min: z.lazy(() => NestedBoolFilterSchema).optional(),
+  _max: z.lazy(() => NestedBoolFilterSchema).optional()
 }).strict();
 
 export const ProjectCreateNestedManyWithoutOwnerInputSchema: z.ZodType<Prisma.ProjectCreateNestedManyWithoutOwnerInput> = z.object({
@@ -2297,6 +2327,10 @@ export const PropertyCreateNestedOneWithoutBrochuresInputSchema: z.ZodType<Prism
   connect: z.lazy(() => PropertyWhereUniqueInputSchema).optional()
 }).strict();
 
+export const BoolFieldUpdateOperationsInputSchema: z.ZodType<Prisma.BoolFieldUpdateOperationsInput> = z.object({
+  set: z.boolean().optional()
+}).strict();
+
 export const PropertyUpdateOneRequiredWithoutBrochuresNestedInputSchema: z.ZodType<Prisma.PropertyUpdateOneRequiredWithoutBrochuresNestedInput> = z.object({
   create: z.union([ z.lazy(() => PropertyCreateWithoutBrochuresInputSchema),z.lazy(() => PropertyUncheckedCreateWithoutBrochuresInputSchema) ]).optional(),
   connectOrCreate: z.lazy(() => PropertyCreateOrConnectWithoutBrochuresInputSchema).optional(),
@@ -2455,6 +2489,19 @@ export const NestedJsonNullableFilterSchema: z.ZodType<Prisma.NestedJsonNullable
   gt: InputJsonValueSchema.optional(),
   gte: InputJsonValueSchema.optional(),
   not: InputJsonValueSchema.optional()
+}).strict();
+
+export const NestedBoolFilterSchema: z.ZodType<Prisma.NestedBoolFilter> = z.object({
+  equals: z.boolean().optional(),
+  not: z.union([ z.boolean(),z.lazy(() => NestedBoolFilterSchema) ]).optional(),
+}).strict();
+
+export const NestedBoolWithAggregatesFilterSchema: z.ZodType<Prisma.NestedBoolWithAggregatesFilter> = z.object({
+  equals: z.boolean().optional(),
+  not: z.union([ z.boolean(),z.lazy(() => NestedBoolWithAggregatesFilterSchema) ]).optional(),
+  _count: z.lazy(() => NestedIntFilterSchema).optional(),
+  _min: z.lazy(() => NestedBoolFilterSchema).optional(),
+  _max: z.lazy(() => NestedBoolFilterSchema).optional()
 }).strict();
 
 export const ProjectCreateWithoutOwnerInputSchema: z.ZodType<Prisma.ProjectCreateWithoutOwnerInput> = z.object({
@@ -3128,7 +3175,8 @@ export const BrochureCreateWithoutPropertyInputSchema: z.ZodType<Prisma.Brochure
   createdAt: z.coerce.date().optional(),
   updatedAt: z.coerce.date().optional(),
   url: z.string(),
-  title: z.string()
+  title: z.string(),
+  approved: z.boolean().optional()
 }).strict();
 
 export const BrochureUncheckedCreateWithoutPropertyInputSchema: z.ZodType<Prisma.BrochureUncheckedCreateWithoutPropertyInput> = z.object({
@@ -3136,7 +3184,8 @@ export const BrochureUncheckedCreateWithoutPropertyInputSchema: z.ZodType<Prisma
   createdAt: z.coerce.date().optional(),
   updatedAt: z.coerce.date().optional(),
   url: z.string(),
-  title: z.string()
+  title: z.string(),
+  approved: z.boolean().optional()
 }).strict();
 
 export const BrochureCreateOrConnectWithoutPropertyInputSchema: z.ZodType<Prisma.BrochureCreateOrConnectWithoutPropertyInput> = z.object({
@@ -3230,6 +3279,7 @@ export const BrochureScalarWhereInputSchema: z.ZodType<Prisma.BrochureScalarWher
   updatedAt: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
   url: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   title: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
+  approved: z.union([ z.lazy(() => BoolFilterSchema),z.boolean() ]).optional(),
   propertyId: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
 }).strict();
 
@@ -3577,7 +3627,8 @@ export const BrochureCreateManyPropertyInputSchema: z.ZodType<Prisma.BrochureCre
   createdAt: z.coerce.date().optional(),
   updatedAt: z.coerce.date().optional(),
   url: z.string(),
-  title: z.string()
+  title: z.string(),
+  approved: z.boolean().optional()
 }).strict();
 
 export const BrochureUpdateWithoutPropertyInputSchema: z.ZodType<Prisma.BrochureUpdateWithoutPropertyInput> = z.object({
@@ -3586,6 +3637,7 @@ export const BrochureUpdateWithoutPropertyInputSchema: z.ZodType<Prisma.Brochure
   updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   url: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   title: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  approved: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
 }).strict();
 
 export const BrochureUncheckedUpdateWithoutPropertyInputSchema: z.ZodType<Prisma.BrochureUncheckedUpdateWithoutPropertyInput> = z.object({
@@ -3594,6 +3646,7 @@ export const BrochureUncheckedUpdateWithoutPropertyInputSchema: z.ZodType<Prisma
   updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   url: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   title: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  approved: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
 }).strict();
 
 export const BrochureUncheckedUpdateManyWithoutPropertyInputSchema: z.ZodType<Prisma.BrochureUncheckedUpdateManyWithoutPropertyInput> = z.object({
@@ -3602,6 +3655,7 @@ export const BrochureUncheckedUpdateManyWithoutPropertyInputSchema: z.ZodType<Pr
   updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   url: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   title: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  approved: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
 }).strict();
 
 /////////////////////////////////////////
