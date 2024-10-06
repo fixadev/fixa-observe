@@ -104,9 +104,13 @@ model Email {
   id            String      @id @default(uuid())
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
-  sender        Json        @db.JsonB
+
+  senderName    String
+  senderEmail   String
+
   body          String
   webLink       String
+
   emailThread   EmailThread @relation(fields: [emailThreadId], references: [id])
   emailThreadId String
 }
@@ -115,10 +119,13 @@ model EmailThread {
   id               String   @id // Should be the conversationId in Outlook
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
+
   subject          String
   emails           Email[]
+
   property         Property @relation(fields: [propertyId], references: [id])
   propertyId       String   @unique
+
   draft            Boolean  @default(false)
   unread           Boolean  @default(false)
   completed        Boolean  @default(false)
