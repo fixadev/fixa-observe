@@ -30,7 +30,7 @@ import {
 } from "@dnd-kit/modifiers";
 import { Button } from "~/components/ui/button";
 import { PlusIcon } from "@heroicons/react/24/solid";
-import { PDFUploader } from "./NDXOutputUploader";
+import { NDXOutputUploader } from "./NDXOutputUploader";
 import { api } from "~/trpc/react";
 import {
   type PropertySchema,
@@ -272,6 +272,7 @@ export function PropertiesTable({ surveyId }: { surveyId: string }) {
           displayIndex: properties.length,
           attributes: {},
           surveyId: surveyId,
+          brochures: [],
           isNew: true,
         },
       ],
@@ -324,7 +325,7 @@ export function PropertiesTable({ surveyId }: { surveyId: string }) {
   return (
     <div>
       <div className="flex flex-row justify-end gap-4">
-        <PDFUploader
+        <NDXOutputUploader
           surveyId={surveyId}
           existingProperties={properties}
           setProperties={setProperties}
