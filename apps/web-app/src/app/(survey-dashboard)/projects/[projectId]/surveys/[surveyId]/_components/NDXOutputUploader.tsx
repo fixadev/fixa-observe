@@ -81,8 +81,6 @@ export const NDXOutputUploader = ({
       const parsedPDF = await parsePDF(file, pdfjs);
       const currentPropertiesEndIndex = existingProperties.length;
       const properties = processPDF(parsedPDF);
-
-      console.log("PROPERTIES", properties);
       const propertiesWithAttributes: Array<CreatePropertySchema> =
         properties.map((property, index) => {
           return {
@@ -114,7 +112,7 @@ export const NDXOutputUploader = ({
             },
           };
         });
-      console.log("propertiesWithAttributes", propertiesWithAttributes);
+      // console.log("propertiesWithAttributes", propertiesWithAttributes);
 
       setProperties(propertiesWithAttributes, "add");
       // setAttributesOrder(
@@ -333,7 +331,7 @@ function processPDF(parsedPDF: string[] | undefined) {
           ) {
             break; // End of comments section
           }
-          console.log("PUSHING LINE", curr);
+          // console.log("PUSHING LINE", curr);
           if (curr) {
             comments.push(removeBulletPointOrDash(curr.trim()));
           }
