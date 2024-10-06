@@ -16,9 +16,11 @@ import { Label } from "~/components/ui/label";
 import UserImage from "~/components/UserImage";
 import { useUser } from "@clerk/nextjs";
 import { api } from "~/trpc/react";
+import { useRouter } from "next/navigation";
 
 export default function Home() {
   const { user } = useUser();
+  const router = useRouter();
   const [projects, setProjects] = useState<Array<{ id: string; name: string }>>(
     [],
   );
@@ -31,10 +33,10 @@ export default function Home() {
   } = api.project.getProjects.useQuery();
   const { mutate: createProject, error: createProjectError } =
     api.project.createProject.useMutation({
-      onSuccess: () => {
+      onSuccess: (data) => {
         console.log("Project created");
-        void refetchProjects();
         setProjectName("");
+        router.push(`/projects/${data.id}`);
       },
     });
 

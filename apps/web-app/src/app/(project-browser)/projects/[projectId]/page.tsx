@@ -14,7 +14,7 @@ import {
 } from "~/components/ui/dialog";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
-
+import { useRouter } from "next/navigation";
 import { api } from "~/trpc/react";
 import { useEffect, useState } from "react";
 import { BreadcrumbsFromPath } from "~/components/BreadcrumbsFromPath";
@@ -24,6 +24,7 @@ export default function ProjectPage({
 }: {
   params: { projectId: string };
 }) {
+  const router = useRouter();
   const [newSurveyName, setNewSurveyName] = useState("");
   const [surveys, setSurveys] = useState<Array<{ id: string; name: string }>>(
     [],
@@ -41,9 +42,9 @@ export default function ProjectPage({
   }, [project]);
 
   const { mutate: createSurvey } = api.survey.createSurvey.useMutation({
-    onSuccess: () => {
-      void refetchProject();
+    onSuccess: (data) => {
       setNewSurveyName("");
+      router.push(`/projects/${params.projectId}/surveys/${data.id}`);
     },
   });
 

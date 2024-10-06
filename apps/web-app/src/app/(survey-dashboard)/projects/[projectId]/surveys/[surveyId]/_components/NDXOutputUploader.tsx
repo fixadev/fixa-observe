@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/prefer-nullish-coalescing */
 "use client";
 import type React from "react";
 import { useRef } from "react";
@@ -82,7 +83,7 @@ export const PDFUploader = ({
             createdAt: new Date(),
             updatedAt: new Date(),
             photoUrl: null,
-            brochures: [],
+            brochures: [property.brochureLink],
             displayIndex: currentPropertiesEndIndex + index + 1,
             surveyId: surveyId,
             attributes: {
@@ -168,7 +169,7 @@ async function parsePDF(file: File, pdfjsLib: typeof PDFJS) {
         });
 
         if (link && "url" in link) {
-          line += ` [FLYER LINK: ${link.url}]`;
+          line += ` [BROCHURE LINK: ${link.url}]`;
         }
         // console.log(line);
         if (line && typeof line === "string" && line.trim().length > 0) {
@@ -286,12 +287,12 @@ function processPDF(parsedPDF: string[] | undefined) {
       } else if (line?.includes("Avail Date:")) {
         currentBuilding.availDate = nextLine?.trim() ?? "";
         i += 1;
-      } else if (line?.includes("View Flyer")) {
-        const linkMatch = line.match(/\[LINK:\s*(.*?)\]/);
+      } else if (line?.includes("BROCHURE LINK:")) {
+        const linkMatch = line.match(/\[BROCHURE LINK:\s*(.*?)\]/);
         if (linkMatch) {
-          currentBuilding.flyerLink = linkMatch[1]?.trim() ?? "";
+          currentBuilding.brochureLink = linkMatch[1]?.trim() ?? "";
         } else {
-          currentBuilding.flyerLink = "";
+          currentBuilding.brochureLink = "";
         }
         i += 1;
       } else if (line?.includes("Comments:")) {
@@ -314,7 +315,7 @@ function processPDF(parsedPDF: string[] | undefined) {
               zipcodeRegex.test(next)) ||
             // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
             curr?.includes("Newmark Research Report") ||
-            curr?.includes("FLYER LINK")
+            curr?.includes("BROCHURE LINK")
           ) {
             break; // End of comments section
           }

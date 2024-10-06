@@ -142,7 +142,7 @@ export const surveyService = ({
       return result;
     },
 
-    deleteAttribute: async (
+  deleteAttribute: async (
       surveyId: string,
       idToDelete: string | undefined,
     ) => {
