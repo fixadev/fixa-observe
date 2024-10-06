@@ -1,6 +1,6 @@
 import { Webhook } from "svix";
 import { headers } from "next/headers";
-import { clerkClient, type WebhookEvent } from "@clerk/nextjs/server";
+import { type WebhookEvent } from "@clerk/nextjs/server";
 import { env } from "~/env";
 import { db } from "~/server/db";
 import { addSubscriber } from "~/server/listmonk";
@@ -59,9 +59,9 @@ export async function POST(req: Request) {
   // Do something with the payload
   // For this guide, you simply log the payload to the console
   const eventType = evt.type;
-  const clerkId = evt.data.id;
-  if (!clerkId) {
-    return new Response("User has no clerkId", { status: 400 });
+  const userId = evt.data.id;
+  if (!userId) {
+    return new Response("Clerk user has no id", { status: 400 });
   }
   switch (eventType) {
     case "user.created": {
@@ -71,24 +71,12 @@ export async function POST(req: Request) {
         return new Response("User has no email", { status: 400 });
       }
 
-      const user = await upsertUser(clerkId, email, first_name, last_name);
-
-      await clerkClient.users.updateUserMetadata(clerkId, {
-        publicMetadata: {
-          userId: user.id,
-        },
-      });
-
-      // await createProject(
-      //   { projectName: "default project", outcomes: [] },
-      //   user.id,
-      //   db,
-      // );
+      await upsertUser(userId, email, first_name, last_name);
 
       try {
         await addSubscriber(email, first_name, last_name);
       } catch (e) {
-        console.error("Error adding subscriber", e);
+        // console.error("Error adding subscriber", e);
       }
       break;
     }
@@ -98,11 +86,11 @@ export async function POST(req: Request) {
       if (!email) {
         return new Response("User has no email", { status: 400 });
       }
-      await upsertUser(clerkId, email, first_name, last_name);
+      await upsertUser(userId, email, first_name, last_name);
       break;
     }
     case "user.deleted": {
-      await deleteUser(clerkId);
+      await deleteUser(userId);
       break;
     }
   }
@@ -111,20 +99,20 @@ export async function POST(req: Request) {
 }
 
 const upsertUser = async (
-  clerkId: string,
+  userId: string,
   email: string,
   firstName: string | null,
   lastName: string | null,
 ) => {
   return await db.user.upsert({
-    where: { clerkId },
+    where: { id: userId },
     update: { email, firstName, lastName },
-    create: { clerkId, email, firstName, lastName },
+    create: { id: userId, email, firstName, lastName },
   });
 };
 
-const deleteUser = async (clerkId: string) => {
+const deleteUser = async (userId: string) => {
   await db.user.delete({
-    where: { clerkId },
+    where: { id: userId },
   });
 };

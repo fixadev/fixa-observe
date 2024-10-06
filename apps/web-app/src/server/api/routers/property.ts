@@ -10,13 +10,13 @@ export const propertyRouter = createTRPCRouter({
   getProperty: protectedProcedure
     .input(z.object({ id: z.string() }))
     .query(async ({ ctx, input }) => {
-      return await propertyServiceInstance.getProperty(input.id, ctx.userId);
+      return await propertyServiceInstance.getProperty(input.id, ctx.user.id);
     }),
 
   updateProperty: protectedProcedure
     .input(propertySchema)
     .mutation(async ({ ctx, input }) => {
-      return await propertyServiceInstance.updateProperty(input, ctx.userId);
+      return await propertyServiceInstance.updateProperty(input, ctx.user.id);
     }),
 
   addOrReplacePropertyPhoto: protectedProcedure
@@ -25,7 +25,7 @@ export const propertyRouter = createTRPCRouter({
       return await propertyServiceInstance.addOrReplacePropertyPhoto(
         input.propertyId,
         input.photoUrl,
-        ctx.userId,
+        ctx.user.id,
       );
     }),
 
@@ -42,7 +42,7 @@ export const propertyRouter = createTRPCRouter({
         input.propertyId,
         input.brochureUrl,
         input.brochureTitle,
-        ctx.userId,
+        ctx.user.id,
       );
     }),
 
@@ -51,20 +51,20 @@ export const propertyRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       return await propertyServiceInstance.deletePhotoUrlFromProperty(
         input.propertyId,
-        ctx.userId,
+        ctx.user.id,
       );
     }),
 
   getBrochure: protectedProcedure
     .input(z.object({ brochureId: z.string() }))
     .query(async ({ ctx, input }) => {
-      return await propertyServiceInstance.getBrochure(input.brochureId, ctx.userId);
+      return await propertyServiceInstance.getBrochure(input.brochureId, ctx.user.id);
   }),
 
   updateBrochure: protectedProcedure
     .input(brochureSchema)
     .mutation(async ({ ctx, input }) => {
-      return await propertyServiceInstance.updateBrochure(input, ctx.userId);
+      return await propertyServiceInstance.updateBrochure(input, ctx.user.id);
     }),
     
 });

@@ -1,6 +1,7 @@
 import { type PrismaClient } from "@prisma/client";
 import axios from "axios";
 import { env } from "~/env";
+import { db } from "../db";
 
 const outlookApiUrl = "https://graph.microsoft.com/v1.0";
 const clerkApiUrl = "https://api.clerk.com/v1";
@@ -27,6 +28,7 @@ export const outlookService = ({ db }: { db: PrismaClient }) => {
       return emailThread;
     },
 
+    // Sends an email
     sendEmail: async ({
       clerkId,
 
@@ -67,7 +69,7 @@ export const outlookService = ({ db }: { db: PrismaClient }) => {
         {
           headers: {
             Authorization: `Bearer ${accessToken}`,
-            Prefer: `IdType="ImmutableId"`,
+            Prefer: `IdType="ImmutableId", outlook.body-content-type="text"`,
           },
         },
       );
@@ -80,7 +82,7 @@ export const outlookService = ({ db }: { db: PrismaClient }) => {
         {
           headers: {
             Authorization: `Bearer ${accessToken}`,
-            Prefer: `IdType="ImmutableId"`,
+            Prefer: `IdType="ImmutableId", outlook.body-content-type="text"`,
           },
         },
       );
@@ -90,19 +92,139 @@ export const outlookService = ({ db }: { db: PrismaClient }) => {
         data: {
           id: conversationId,
           propertyId,
-          subject,
         },
       });
 
       // Save email to database
       await db.email.create({
         data: {
+          id,
           emailThreadId: conversationId,
           senderName,
           senderEmail,
           recipientName: to,
           recipientEmail: to,
+          subject,
           body,
+          webLink,
+        },
+      });
+    },
+
+    // Replies to the given email
+    replyToEmail: async ({
+      clerkId,
+      emailId,
+      body,
+    }: {
+      clerkId: string;
+      emailId: string;
+      body: string;
+    }) => {
+      const accessToken = await getAccessToken(clerkId);
+
+      // Get last email in thread
+      // const emailThread = await db.emailThread.findUnique({
+      //   where: { id: emailThreadId },
+      //   include: { emails: true },
+      // });
+      // if (!emailThread) {
+      //   throw new Error("Email thread not found");
+      // }
+      // if (emailThread.emails.length === 0) {
+      //   throw new Error("No emails found in thread");
+      // }
+      // const lastEmail = emailThread.emails[emailThread.emails.length - 1]!;
+
+      // Reply to last email in thread
+      await axios.post(
+        `${outlookApiUrl}/me/messages/${emailId}/replyAll`,
+        {
+          comment: body,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            Prefer: `IdType="ImmutableId", outlook.body-content-type="text"`,
+          },
+        },
+      );
+    },
+
+    // Gets an email with the given ID and adds it to the database
+    addEmailToDb: async ({
+      clerkId,
+      emailId,
+    }: {
+      clerkId: string;
+      emailId: string;
+    }) => {
+      const accessToken = await getAccessToken(clerkId);
+
+      // Get email details
+      const response = await axios.get<{
+        id: string;
+        subject: string;
+        receivedDateTime: string;
+        conversationId: string;
+        webLink: string;
+        sender: {
+          emailAddress: {
+            name: string;
+            address: string;
+          };
+        };
+        toRecipients: {
+          emailAddress: {
+            name: string;
+            address: string;
+          };
+        }[];
+        uniqueBody: {
+          content: string;
+        };
+      }>(
+        `${outlookApiUrl}/me/messages/${emailId}?$select=subject,sender,toRecipients,receivedDateTime,uniqueBody,conversationId,webLink`,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            Prefer: `IdType="ImmutableId", outlook.body-content-type="text"`,
+          },
+        },
+      );
+
+      const {
+        subject,
+        sender,
+        toRecipients,
+        receivedDateTime,
+        uniqueBody,
+        conversationId,
+        webLink,
+      } = response.data;
+
+      await db.emailThread.upsert({
+        where: { id: conversationId },
+        update: { unread: true },
+        create: { id: conversationId, unread: true },
+      });
+
+      // Create email
+      await db.email.create({
+        data: {
+          id: emailId,
+          createdAt: new Date(receivedDateTime),
+          emailThreadId: conversationId,
+
+          senderName: sender.emailAddress.name,
+          senderEmail: sender.emailAddress.address,
+          // TODO: Make recipient an array
+          recipientName: toRecipients[0]!.emailAddress.name,
+          recipientEmail: toRecipients[0]!.emailAddress.address,
+
+          subject,
+          body: uniqueBody.content,
+
           webLink,
         },
       });
@@ -124,4 +246,27 @@ export const outlookService = ({ db }: { db: PrismaClient }) => {
 //   });
 // }
 
+// function testReplyToEmail() {
+//   const outlookServiceInstance = outlookService({ db });
+
+//   void outlookServiceInstance.replyToEmail({
+//     clerkId: "user_2n3BwIeVxJF5zPpoREHCcDQOSTj",
+//     emailId:
+//       "AAkALgAAAAAAHYQDEapmEc2byACqAC-EWg0ANjYmu1uDX0i8cnt0kXghsgAAAXV3kgAA",
+//     body: "this is so incredibly ugly. like wtf is this",
+//   });
+// }
+
+// function testAddEmailToDb() {
+//   const outlookServiceInstance = outlookService({ db });
+
+//   void outlookServiceInstance.addEmailToDb({
+//     clerkId: "user_2n3BwIeVxJF5zPpoREHCcDQOSTj",
+//     emailId:
+//       "AAkALgAAAAAAHYQDEapmEc2byACqAC-EWg0ANjYmu1uDX0i8cnt0kXghsgAAAXV3fQAA",
+//   });
+// }
+
 // testOutlook();
+// testReplyToEmail();
+// testAddEmailToDb();
