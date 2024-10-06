@@ -16,6 +16,8 @@ const testEmail: Email = {
   updatedAt: new Date(),
   senderName: "Mark",
   senderEmail: "mark@example.com",
+  recipientName: "Colin",
+  recipientEmail: "colin@example.com",
   body: `Dear Colin,
 
 I hope this email finds you well. I'm reaching out regarding the property at 123 Main St. that I recently came across in my search for potential investments. I'm very interested in this property and would appreciate if you could provide me with some additional information:

@@ -128,7 +128,8 @@ function ParsedAttributes({
 
   return (
     <>
-      <div className="flex-1" />
+      {/* <div className="flex-1" /> */}
+      <div className="w-10" />
       <Separator orientation="vertical" />
       <div className="flex flex-col items-start gap-2 pr-4">
         <div className="flex items-center gap-1 px-2 pt-2 text-sm font-medium">
