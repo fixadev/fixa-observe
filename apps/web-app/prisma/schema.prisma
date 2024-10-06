@@ -86,7 +86,7 @@ model Property {
   displayIndex Int
   survey       Survey       @relation(fields: [surveyId], references: [id])
   surveyId     String
-  emailThread  EmailThread?
+  emailThread  EmailThread[]
 }
 
 model Brochure {
@@ -127,7 +127,7 @@ model EmailThread {
   emails           Email[]
 
   property         Property @relation(fields: [propertyId], references: [id])
-  propertyId       String   @unique
+  propertyId       String   
 
   draft            Boolean  @default(false)
   unread           Boolean  @default(false)

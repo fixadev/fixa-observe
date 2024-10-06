@@ -13,6 +13,7 @@ import {
   TableHead,
   TableRow,
   TableCell,
+  TableBody,
 } from "~/components/ui/table";
 import { type EmailThreadWithEmailsAndProperty } from "~/lib/types";
 
@@ -142,17 +143,21 @@ function ParsedAttributes({
         </div>
         <Table className="max-w-[300px] text-xs">
           <TableHeader>
-            {Object.keys(parsedAttributes ?? {}).map((attribute) => (
-              <TableHead key={attribute} className="h-[unset]">
-                {attribute}
-              </TableHead>
-            ))}
+            <TableRow className="border-none">
+              {Object.keys(parsedAttributes ?? {}).map((attribute, i) => (
+                <TableHead key={i} className="h-[unset]">
+                  {attribute}
+                </TableHead>
+              ))}
+            </TableRow>
           </TableHeader>
-          <TableRow className="border-none">
-            {Object.values(parsedAttributes ?? {}).map((attribute, i) => (
-              <TableCell key={i}>{attribute}</TableCell>
-            ))}
-          </TableRow>
+          <TableBody>
+            <TableRow className="border-none">
+              {Object.values(parsedAttributes ?? {}).map((attribute, i) => (
+                <TableCell key={i}>{attribute}</TableCell>
+              ))}
+            </TableRow>
+          </TableBody>
         </Table>
       </div>
     </>
