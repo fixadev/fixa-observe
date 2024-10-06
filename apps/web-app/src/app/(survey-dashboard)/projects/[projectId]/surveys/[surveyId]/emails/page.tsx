@@ -12,7 +12,7 @@ import { cn } from "~/lib/utils";
 import { type EmailThread, type Email } from "~/lib/types";
 import { Separator } from "~/components/ui/separator";
 import { formatDistanceToNow } from "date-fns";
-import { XCircleIcon } from "@heroicons/react/24/solid";
+import { CheckCircleIcon, XCircleIcon } from "@heroicons/react/24/solid";
 import {
   Table,
   TableCell,
@@ -96,10 +96,46 @@ const emails: EmailThread[] = [
       },
     ],
   },
-  { ...testEmailThread, id: "8", completed: true },
-  { ...testEmailThread, id: "9", completed: true },
-  { ...testEmailThread, id: "10", completed: true },
-  { ...testEmailThread, id: "11", completed: true },
+  {
+    ...testEmailThread,
+    id: "8",
+    completed: true,
+    parsedAttributes: {
+      price: "$10.00 / SF",
+      available: "yes",
+      size: "5,000 SF",
+    },
+  },
+  {
+    ...testEmailThread,
+    id: "9",
+    completed: true,
+    parsedAttributes: {
+      price: "$12.50 / NNN",
+      available: "yes",
+      size: "3,500 SF",
+    },
+  },
+  {
+    ...testEmailThread,
+    id: "10",
+    completed: true,
+    parsedAttributes: {
+      price: "$15.00 / MG",
+      available: "no",
+      size: "2,000 SF",
+    },
+  },
+  {
+    ...testEmailThread,
+    id: "11",
+    completed: true,
+    parsedAttributes: {
+      price: "$8.75 / SF",
+      available: "yes",
+      size: "10,000 SF",
+    },
+  },
 ];
 
 export default function EmailsPage() {
@@ -280,38 +316,10 @@ function EmailThreadDetails({ emailThread }: { emailThread: EmailThread }) {
       <PropertyCard
         property={emailThread.property}
         rightContent={
-          <>
-            {emailThread.moreInfoNeeded && (
-              <>
-                <div className="flex-1" />
-                <Separator orientation="vertical" />
-                <div className="flex flex-col items-start gap-2 pr-4">
-                  <div className="flex items-center gap-1 px-2 pt-2 text-sm font-medium">
-                    Incomplete data
-                    <XCircleIcon className="size-5 text-destructive" />
-                  </div>
-                  <Table className="max-w-[300px] text-xs">
-                    <TableHeader>
-                      {Object.keys(emailThread.parsedAttributes ?? {}).map(
-                        (attribute) => (
-                          <TableHead key={attribute} className="h-[unset]">
-                            {attribute}
-                          </TableHead>
-                        ),
-                      )}
-                    </TableHeader>
-                    <TableRow className="border-none">
-                      {Object.values(emailThread.parsedAttributes ?? {}).map(
-                        (attribute, i) => (
-                          <TableCell key={i}>{attribute}</TableCell>
-                        ),
-                      )}
-                    </TableRow>
-                  </Table>
-                </div>
-              </>
-            )}
-          </>
+          <ParsedAttributes
+            parsedAttributes={emailThread.parsedAttributes}
+            completed={emailThread.completed}
+          />
         }
       />
       <Textarea className="h-40 shrink-0" placeholder="Write a reply..." />
@@ -353,6 +361,49 @@ function UnsentEmailDetails({ emailThread }: { emailThread: EmailThread }) {
         <Button variant="outline">Edit template</Button>
       </div>
     </div>
+  );
+}
+
+function ParsedAttributes({
+  parsedAttributes,
+  completed,
+}: {
+  parsedAttributes?: Record<string, string>;
+  completed?: boolean;
+}) {
+  if (!parsedAttributes) {
+    return null;
+  }
+
+  return (
+    <>
+      <div className="flex-1" />
+      <Separator orientation="vertical" />
+      <div className="flex flex-col items-start gap-2 pr-4">
+        <div className="flex items-center gap-1 px-2 pt-2 text-sm font-medium">
+          {completed ? "Property details confirmed" : "More info needed"}
+          {completed ? (
+            <CheckCircleIcon className="size-5 text-green-500" />
+          ) : (
+            <XCircleIcon className="size-5 text-destructive" />
+          )}
+        </div>
+        <Table className="max-w-[300px] text-xs">
+          <TableHeader>
+            {Object.keys(parsedAttributes ?? {}).map((attribute) => (
+              <TableHead key={attribute} className="h-[unset]">
+                {attribute}
+              </TableHead>
+            ))}
+          </TableHeader>
+          <TableRow className="border-none">
+            {Object.values(parsedAttributes ?? {}).map((attribute, i) => (
+              <TableCell key={i}>{attribute}</TableCell>
+            ))}
+          </TableRow>
+        </Table>
+      </div>
+    </>
   );
 }
 
