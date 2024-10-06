@@ -125,8 +125,8 @@ model EmailThread {
 
   emails           Email[]
 
-  property         Property? @relation(fields: [propertyId], references: [id], onDelete: Cascade)
-  propertyId       String?   
+  property         Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  propertyId       String   
 
   draft            Boolean  @default(false)
   unread           Boolean  @default(false)

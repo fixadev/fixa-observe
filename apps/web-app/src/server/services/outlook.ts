@@ -203,10 +203,10 @@ export const outlookService = ({ db }: { db: PrismaClient }) => {
         webLink,
       } = response.data;
 
-      await db.emailThread.upsert({
+      // Update email thread
+      await db.emailThread.update({
         where: { id: conversationId },
-        update: { unread: true },
-        create: { id: conversationId, unread: true },
+        data: { unread: true },
       });
 
       // Create email
@@ -236,7 +236,7 @@ export const outlookService = ({ db }: { db: PrismaClient }) => {
 //   const outlookServiceInstance = outlookService({ db });
 
 //   void outlookServiceInstance.sendEmail({
-//     userId: "user_2n3BwIeVxJF5zPpoREHCcDQOSTj",
+//     userId: "user_2n5FpA1zkaQHLb8OHSMdwEEJt8i",
 //     senderName: "Jonathan Liu",
 //     senderEmail: "jonytf@outlook.com",
 //     to: "liu.z.jonathan@gmail.com",
@@ -250,7 +250,7 @@ export const outlookService = ({ db }: { db: PrismaClient }) => {
 //   const outlookServiceInstance = outlookService({ db });
 
 //   void outlookServiceInstance.replyToEmail({
-//     userId: "user_2n3BwIeVxJF5zPpoREHCcDQOSTj",
+//     userId: "user_2n5FpA1zkaQHLb8OHSMdwEEJt8i",
 //     emailId:
 //       "AAkALgAAAAAAHYQDEapmEc2byACqAC-EWg0ANjYmu1uDX0i8cnt0kXghsgAAAXV3kgAA",
 //     body: "this is so incredibly ugly. like wtf is this",
@@ -261,9 +261,9 @@ export const outlookService = ({ db }: { db: PrismaClient }) => {
 //   const outlookServiceInstance = outlookService({ db });
 
 //   void outlookServiceInstance.addEmailToDb({
-//     userId: "user_2n3BwIeVxJF5zPpoREHCcDQOSTj",
+//     userId: "user_2n5FpA1zkaQHLb8OHSMdwEEJt8i",
 //     emailId:
-//       "AAkALgAAAAAAHYQDEapmEc2byACqAC-EWg0ANjYmu1uDX0i8cnt0kXghsgAAAXV3fQAA",
+//       "AAkALgAAAAAAHYQDEapmEc2byACqAC-EWg0ANjYmu1uDX0i8cnt0kXghsgAAAXV7sAAA",
 //   });
 // }
 
