@@ -26,6 +26,8 @@ export type CreatePropertySchema = z.infer<typeof createPropertySchema>;
 export const createPropertySchema = propertySchema.omit({
   id: true,
   ownerId: true,
+}).extend({
+  brochures: z.array(brochureSchema.omit({ id: true, propertyId: true })),
 });
 
 export type ImportPropertiesInput = z.infer<typeof importPropertiesInput>;

@@ -26,7 +26,7 @@ interface Link {
   url: string;
 }
 
-export const PDFUploader = ({
+export const NDXOutputUploader = ({
   surveyId,
   existingProperties,
   setProperties,
@@ -81,30 +81,39 @@ export const PDFUploader = ({
       const parsedPDF = await parsePDF(file, pdfjs);
       const currentPropertiesEndIndex = existingProperties.length;
       const properties = processPDF(parsedPDF);
+
+      console.log("PROPERTIES", properties);
       const propertiesWithAttributes: Array<CreatePropertySchema> =
         properties.map((property, index) => {
-          // const brochure: BrochureSchema = {};
           return {
             createdAt: new Date(),
             updatedAt: new Date(),
-            photoUrl: null,
-            brochures: [],
+            photoUrl: "",
+            brochures: property.brochureLink
+              ? [
+                  {
+                    createdAt: new Date(),
+                    updatedAt: new Date(),
+                    url: property.brochureLink,
+                    title: "",
+                    approved: false,
+                  },
+                ]
+              : [],
             displayIndex: currentPropertiesEndIndex + index + 1,
             surveyId: surveyId,
             attributes: {
-              [labelToAttributeId("Address")]: property.address,
-              [labelToAttributeId("Size (SF)")]: property.propertySize,
-              [labelToAttributeId("Divisibility (SF)")]:
-                `${property.minDivisible} - ${property.maxDivisible}`,
-              [labelToAttributeId("NNN Asking Rate (SF/Mo)")]:
-                property.leaseRate,
-              [labelToAttributeId("Opex (SF/Mo)")]: property.expenses,
-              [labelToAttributeId("Direct/Sublease")]: property.leaseType,
-              [labelToAttributeId("Comments")]: property.comments,
+              address: property.address ?? "",
+              size: property.propertySize ?? "",
+              divisibility:
+                `${property.minDivisible} - ${property.maxDivisible}` ?? "",
+              askingRate: property.leaseRate ?? "",
+              opEx: property.expenses ?? "",
+              directSublease: property.leaseType ?? "",
+              comments: property.comments ?? "",
             },
           };
         });
-      console.log("PARSED PDF", parsedPDF);
       console.log("propertiesWithAttributes", propertiesWithAttributes);
 
       setProperties(propertiesWithAttributes, "add");

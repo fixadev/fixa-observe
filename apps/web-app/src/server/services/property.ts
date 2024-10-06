@@ -1,5 +1,5 @@
 import { type Property, type PrismaClient } from "@prisma/client";
-import { type CreatePropertySchema } from "~/lib/property";
+import { type BrochureSchema, type CreatePropertySchema } from "~/lib/property";
 
 export const propertyService = ({
   db,
@@ -11,7 +11,9 @@ export const propertyService = ({
       input: CreatePropertySchema[],
       userId: string,
     ) => {
-      const propertiesToCreate = input.map((property) => ({
+
+      const brochures = input.map(property => property.brochures[0] ?? []);
+      const propertiesToCreate = input.map(({ brochures, ...property }) => ({
         ...property,
         ownerId: userId,
         attributes: property.attributes ?? {},
@@ -20,7 +22,21 @@ export const propertyService = ({
       const createdProperties = await db.property.createManyAndReturn({
         data: propertiesToCreate,
       });
-      
+
+      for (const [index, property] of createdProperties.entries()) {
+        const brochure = brochures[index];
+        if (property && brochure && !Array.isArray(brochure) && 
+            typeof brochure.url === 'string' && typeof brochure.title === 'string') {
+          await db.brochure.create({ 
+            data: {
+              ...brochure,
+              propertyId: property.id,
+              url: brochure.url,
+              title: brochure.title,
+            },
+          }); 
+        }
+      }
       return createdProperties.map((property) => property.id);
     },
 
