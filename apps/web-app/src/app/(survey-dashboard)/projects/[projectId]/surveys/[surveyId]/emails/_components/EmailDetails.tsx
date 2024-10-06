@@ -5,7 +5,6 @@ import PropertyCard from "~/components/PropertyCard";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Textarea } from "~/components/ui/textarea";
-import { type EmailThread } from "~/lib/types";
 import EmailCard from "./EmailCard";
 import { CheckCircleIcon, XCircleIcon } from "@heroicons/react/24/solid";
 import {
@@ -15,11 +14,12 @@ import {
   TableRow,
   TableCell,
 } from "~/components/ui/table";
+import { type EmailThreadWithEmailsAndProperty } from "~/lib/types";
 
 export default function EmailDetails({
   emailThread,
 }: {
-  emailThread: EmailThread;
+  emailThread: EmailThreadWithEmailsAndProperty;
 }) {
   if (emailThread.draft) {
     return (
@@ -29,7 +29,11 @@ export default function EmailDetails({
   return <EmailThreadDetails key={emailThread.id} emailThread={emailThread} />;
 }
 
-function EmailThreadDetails({ emailThread }: { emailThread: EmailThread }) {
+function EmailThreadDetails({
+  emailThread,
+}: {
+  emailThread: EmailThreadWithEmailsAndProperty;
+}) {
   const [expanded, setExpanded] = useState<boolean[]>(
     // Set the last email to be expanded
     emailThread.emails.map((_, i) => i === emailThread.emails.length - 1),
@@ -58,7 +62,9 @@ function EmailThreadDetails({ emailThread }: { emailThread: EmailThread }) {
         property={emailThread.property}
         rightContent={
           <ParsedAttributes
-            parsedAttributes={emailThread.parsedAttributes}
+            parsedAttributes={
+              emailThread.parsedAttributes as Record<string, string>
+            }
             completed={emailThread.completed}
           />
         }
@@ -69,7 +75,11 @@ function EmailThreadDetails({ emailThread }: { emailThread: EmailThread }) {
   );
 }
 
-function UnsentEmailDetails({ emailThread }: { emailThread: EmailThread }) {
+function UnsentEmailDetails({
+  emailThread,
+}: {
+  emailThread: EmailThreadWithEmailsAndProperty;
+}) {
   return (
     <div className="flex h-full flex-col gap-2 p-2 pb-8">
       <div className="mt-4 grid grid-cols-[auto_1fr] items-center gap-2">
@@ -79,7 +89,7 @@ function UnsentEmailDetails({ emailThread }: { emailThread: EmailThread }) {
           id="to"
           className="flex-grow"
           placeholder="mark@example.com"
-          defaultValue={emailThread.emails[0]!.sender.email}
+          defaultValue={emailThread.emails[0]!.senderEmail}
           autoComplete="email"
         />
         <Label htmlFor="subject">Subject:</Label>
@@ -95,7 +105,7 @@ function UnsentEmailDetails({ emailThread }: { emailThread: EmailThread }) {
       <Textarea
         className="flex-1"
         placeholder="Write your email here..."
-        defaultValue={emailThread.emails[0]!.content}
+        defaultValue={emailThread.emails[0]!.body}
       />
       <div className="mt-2 flex justify-between">
         <Button>Send</Button>

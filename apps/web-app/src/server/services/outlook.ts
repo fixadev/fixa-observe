@@ -14,6 +14,14 @@ export const outlookService = ({ db }: { db: PrismaClient }) => {
   };
 
   return {
+    getEmailThread: async (emailThreadId: string) => {
+      const emailThread = await db.emailThread.findUnique({
+        where: { id: emailThreadId },
+        include: { emails: true, property: true },
+      });
+      return emailThread;
+    },
+
     sendEmail: async (
       clerkId: string,
       to: string,
