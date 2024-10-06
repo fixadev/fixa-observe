@@ -12,6 +12,14 @@ import { cn } from "~/lib/utils";
 import { type EmailThread, type Email } from "~/lib/types";
 import { Separator } from "~/components/ui/separator";
 import { formatDistanceToNow } from "date-fns";
+import { XCircleIcon } from "@heroicons/react/24/solid";
+import {
+  Table,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "~/components/ui/table";
 
 const testEmail: Email = {
   id: "1",
@@ -66,7 +74,16 @@ const emails: EmailThread[] = [
   { ...testEmailThread, id: "3", draft: true },
   { ...testEmailThread, id: "4" },
   { ...testEmailThread, id: "5" },
-  { ...testEmailThread, id: "6", unread: true, moreInfoNeeded: true },
+  {
+    ...testEmailThread,
+    id: "6",
+    unread: true,
+    moreInfoNeeded: true,
+    parsedAttributes: {
+      price: "$12.50 / NNN",
+      available: "???",
+    },
+  },
   {
     ...testEmailThread,
     id: "7",
@@ -260,7 +277,43 @@ function EmailThreadDetails({ emailThread }: { emailThread: EmailThread }) {
       ))}
       <div className="flex-1" />
       <Separator className="-mx-2 w-[calc(100%+1rem)]" />
-      <PropertyCard property={emailThread.property} />
+      <PropertyCard
+        property={emailThread.property}
+        rightContent={
+          <>
+            {emailThread.moreInfoNeeded && (
+              <>
+                <div className="flex-1" />
+                <Separator orientation="vertical" />
+                <div className="flex flex-col items-start gap-2 pr-4">
+                  <div className="flex items-center gap-1 px-2 pt-2 text-sm font-medium">
+                    Incomplete data
+                    <XCircleIcon className="size-5 text-destructive" />
+                  </div>
+                  <Table className="max-w-[300px] text-xs">
+                    <TableHeader>
+                      {Object.keys(emailThread.parsedAttributes ?? {}).map(
+                        (attribute) => (
+                          <TableHead key={attribute} className="h-[unset]">
+                            {attribute}
+                          </TableHead>
+                        ),
+                      )}
+                    </TableHeader>
+                    <TableRow className="border-none">
+                      {Object.values(emailThread.parsedAttributes ?? {}).map(
+                        (attribute, i) => (
+                          <TableCell key={i}>{attribute}</TableCell>
+                        ),
+                      )}
+                    </TableRow>
+                  </Table>
+                </div>
+              </>
+            )}
+          </>
+        }
+      />
       <Textarea className="h-40 shrink-0" placeholder="Write a reply..." />
       <Button className="self-start">Send</Button>
     </div>
