@@ -3,15 +3,11 @@
 import EmailCard from "./_components/EmailCard";
 import { Button } from "~/components/ui/button";
 import { ChevronDownIcon, ChevronUpIcon } from "@heroicons/react/24/outline";
-import PropertyCard from "~/components/PropertyCard";
-import { Input } from "~/components/ui/input";
-import { Label } from "~/components/ui/label";
-import { Textarea } from "~/components/ui/textarea";
 import { useCallback, useMemo, useState } from "react";
 import { cn } from "~/lib/utils";
 import { type EmailThread, type Email } from "~/lib/types";
-import { Separator } from "~/components/ui/separator";
 import { formatDistanceToNow } from "date-fns";
+import EmailDetails from "./_components/EmailDetails";
 
 const testEmail: Email = {
   id: "1",
@@ -66,7 +62,16 @@ const emails: EmailThread[] = [
   { ...testEmailThread, id: "3", draft: true },
   { ...testEmailThread, id: "4" },
   { ...testEmailThread, id: "5" },
-  { ...testEmailThread, id: "6", unread: true, moreInfoNeeded: true },
+  {
+    ...testEmailThread,
+    id: "6",
+    unread: true,
+    moreInfoNeeded: true,
+    parsedAttributes: {
+      price: "$12.50 / NNN",
+      available: "???",
+    },
+  },
   {
     ...testEmailThread,
     id: "7",
@@ -79,10 +84,46 @@ const emails: EmailThread[] = [
       },
     ],
   },
-  { ...testEmailThread, id: "8", completed: true },
-  { ...testEmailThread, id: "9", completed: true },
-  { ...testEmailThread, id: "10", completed: true },
-  { ...testEmailThread, id: "11", completed: true },
+  {
+    ...testEmailThread,
+    id: "8",
+    completed: true,
+    parsedAttributes: {
+      price: "$10.00 / SF",
+      available: "yes",
+      size: "5,000 SF",
+    },
+  },
+  {
+    ...testEmailThread,
+    id: "9",
+    completed: true,
+    parsedAttributes: {
+      price: "$12.50 / NNN",
+      available: "yes",
+      size: "3,500 SF",
+    },
+  },
+  {
+    ...testEmailThread,
+    id: "10",
+    completed: true,
+    parsedAttributes: {
+      price: "$15.00 / MG",
+      available: "no",
+      size: "2,000 SF",
+    },
+  },
+  {
+    ...testEmailThread,
+    id: "11",
+    completed: true,
+    parsedAttributes: {
+      price: "$8.75 / SF",
+      available: "yes",
+      size: "10,000 SF",
+    },
+  },
 ];
 
 export default function EmailsPage() {
@@ -221,83 +262,6 @@ export default function EmailsPage() {
             </p>
           </div>
         )}
-      </div>
-    </div>
-  );
-}
-
-function EmailDetails({ emailThread }: { emailThread: EmailThread }) {
-  if (emailThread.draft) {
-    return (
-      <UnsentEmailDetails key={emailThread.id} emailThread={emailThread} />
-    );
-  }
-  return <EmailThreadDetails key={emailThread.id} emailThread={emailThread} />;
-}
-
-function EmailThreadDetails({ emailThread }: { emailThread: EmailThread }) {
-  const [expanded, setExpanded] = useState<boolean[]>(
-    // Set the last email to be expanded
-    emailThread.emails.map((_, i) => i === emailThread.emails.length - 1),
-  );
-
-  return (
-    <div className="flex h-full flex-col gap-2 overflow-x-hidden p-2 pb-8">
-      {emailThread.emails.map((email, i) => (
-        <EmailCard
-          key={email.id}
-          email={email}
-          className="shrink-0"
-          expanded={expanded[i]}
-          onClick={() =>
-            setExpanded((prev) => {
-              const newExpanded = [...prev];
-              newExpanded[i] = !newExpanded[i];
-              return newExpanded;
-            })
-          }
-        />
-      ))}
-      <div className="flex-1" />
-      <Separator className="-mx-2 w-[calc(100%+1rem)]" />
-      <PropertyCard property={emailThread.property} />
-      <Textarea className="h-40 shrink-0" placeholder="Write a reply..." />
-      <Button className="self-start">Send</Button>
-    </div>
-  );
-}
-
-function UnsentEmailDetails({ emailThread }: { emailThread: EmailThread }) {
-  return (
-    <div className="flex h-full flex-col gap-2 p-2 pb-8">
-      <div className="mt-4 grid grid-cols-[auto_1fr] items-center gap-2">
-        <Label htmlFor="to">To:</Label>
-        <Input
-          type="text"
-          id="to"
-          className="flex-grow"
-          placeholder="mark@example.com"
-          defaultValue={emailThread.emails[0]!.sender.email}
-          autoComplete="email"
-        />
-        <Label htmlFor="subject">Subject:</Label>
-        <Input
-          type="text"
-          id="subject"
-          className="flex-grow"
-          defaultValue={emailThread.subject}
-          placeholder="Property inquiry"
-        />
-      </div>
-      <PropertyCard property={emailThread.property} />
-      <Textarea
-        className="flex-1"
-        placeholder="Write your email here..."
-        defaultValue={emailThread.emails[0]!.content}
-      />
-      <div className="mt-2 flex justify-between">
-        <Button>Send</Button>
-        <Button variant="outline">Edit template</Button>
       </div>
     </div>
   );

@@ -18,9 +18,11 @@ export const testProperty: Property = {
 export default function PropertyCard({
   property,
   className,
+  rightContent,
 }: {
   property: Property;
   className?: string;
+  rightContent?: React.ReactNode;
 }) {
   // const photoUrl = property.photoUrl;
   const attributes = property.attributes as Record<string, string>;
@@ -34,13 +36,14 @@ export default function PropertyCard({
         className,
       )}
     >
-      <div className="size-24 rounded-l-md bg-gray-500">
+      <div className="aspect-square h-full min-h-24 min-w-24 rounded-l-md bg-gray-500">
         {/* <Image src={photoUrl} alt={streetAddress} /> */}
       </div>
       <div className="flex flex-col">
         <div className="text-lg font-medium">{streetAddress}</div>
         <div className="text-sm text-muted-foreground">{cityStateZip}</div>
       </div>
+      {rightContent}
     </div>
   );
 }
