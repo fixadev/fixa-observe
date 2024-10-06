@@ -10,13 +10,9 @@ export default function BrochuresPage({
     surveyId: params.surveyId,
   });
   return (
-    <div className="flex flex-col gap-4 p-6">
+    <div className="flex h-full flex-col gap-4 overflow-y-auto p-6">
       {survey?.properties.map((property) => {
-        return (
-          <div key={property.id}>
-            <BrochureCard propertyId={property.id} />
-          </div>
-        );
+        return <BrochureCard key={property.id} propertyId={property.id} />;
       })}
     </div>
   );

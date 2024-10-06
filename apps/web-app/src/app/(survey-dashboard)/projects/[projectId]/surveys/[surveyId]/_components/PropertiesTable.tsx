@@ -62,8 +62,9 @@ export function PropertiesTable({ surveyId }: { surveyId: string }) {
       setPropertiesState(
         surveyData.properties.map((property) => ({
           ...property,
-          attributes: property.attributes as Record<string, string | null>,
+          attributes: property.attributes as Record<string, string>,
           isNew: false,
+          brochures: property.brochures,
         })),
       );
     }
@@ -93,7 +94,7 @@ export function PropertiesTable({ surveyId }: { surveyId: string }) {
     },
   });
 
-  // state setter wrapper to update db as well
+  // TODO: refactor this into the separate functions
   const setProperties = useCallback(
     async (
       newPropertiesOrCallback:
@@ -304,7 +305,6 @@ export function PropertiesTable({ surveyId }: { surveyId: string }) {
 
   const deleteProperty = useCallback(
     (id: string) => {
-      console.log("IN DELETE PROPERTY", id);
       void setProperties(
         (data) => {
           const index = data.findIndex((property) => property.id === id);

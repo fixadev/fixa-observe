@@ -28,6 +28,9 @@ export const surveyService = ({
         where: { id: surveyId, ownerId: userId },
         include: {
           properties: {
+            include: {
+              brochures: true
+            },
             orderBy: {
               displayIndex: "asc"
             }

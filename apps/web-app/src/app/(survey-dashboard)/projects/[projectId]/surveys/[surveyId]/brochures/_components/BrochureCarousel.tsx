@@ -1,5 +1,5 @@
 "use client";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import {
   Carousel,
   CarouselContent,
@@ -8,55 +8,42 @@ import {
   CarouselNext,
 } from "~/components/ui/carousel";
 import { type BrochureSchema } from "~/lib/property";
-import { usePDFJS } from "../../_components/usePDFjs";
-import { type PDFDocumentProxy } from "pdfjs-dist";
+import { Document, Page, pdfjs } from "react-pdf";
 
 export function BrochureCarousel({ brochure }: { brochure: BrochureSchema }) {
-  const [pdf, setPdf] = useState<PDFDocumentProxy | null>(null);
   const [numPages, setNumPages] = useState<number>(0);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
 
   const pdfUrl = `/api/cors-proxy?url=${encodeURIComponent(brochure.url)}`;
 
-  usePDFJS(
-    async (pdfjs) => {
-      const loadedPdf = await pdfjs.getDocument(pdfUrl).promise;
-      setPdf(loadedPdf);
-      setNumPages(loadedPdf.numPages);
-    },
-    [brochure.url],
-  );
+  pdfjs.GlobalWorkerOptions.workerSrc = "/pdf.worker.min.mjs";
 
-  const renderPage = async (pageNum: number) => {
-    if (!pdf || !canvasRef.current) return;
-
-    const page = await pdf.getPage(pageNum);
-    const scale = 1.5;
-    const viewport = page.getViewport({ scale });
-    const canvas = canvasRef.current;
-    const context = canvas.getContext("2d");
-    canvas.height = viewport.height;
-    canvas.width = viewport.width;
-    await page.render({ canvasContext: context!, viewport }).promise;
-  };
+  function onDocumentLoadSuccess({ numPages }: { numPages: number }) {
+    setNumPages(numPages);
+  }
 
   return (
-    <div className="h-[300px] w-[300px]">
-      <Carousel>
-        <CarouselContent>
-          {Array.from({ length: numPages }, (_, index) => (
-            <CarouselItem key={`page_${index + 1}`}>
-              <canvas
-                ref={canvasRef}
-                className="h-full w-full"
-                onLoad={() => renderPage(index + 1)}
-              />
-            </CarouselItem>
-          ))}
-        </CarouselContent>
-        <CarouselPrevious />
-        <CarouselNext />
-      </Carousel>
+    <div className="h-full w-3/4 items-center justify-center">
+      <Document file={pdfUrl} onLoadSuccess={onDocumentLoadSuccess}>
+        <Carousel>
+          <CarouselContent>
+            {Array.from(new Array(numPages), (el, index) => (
+              <CarouselItem
+                key={`page_${index + 1}`}
+                className="flex h-[600px] flex-col items-center justify-center"
+              >
+                <Page
+                  className="max-h-full w-auto object-contain"
+                  pageNumber={index + 1}
+                  renderTextLayer={false}
+                  renderAnnotationLayer={false}
+                />
+              </CarouselItem>
+            ))}
+          </CarouselContent>
+          <CarouselPrevious />
+          <CarouselNext />
+        </Carousel>
+      </Document>
     </div>
   );
 }
