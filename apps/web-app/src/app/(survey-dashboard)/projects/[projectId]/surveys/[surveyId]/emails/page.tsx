@@ -5,19 +5,20 @@ import { Button } from "~/components/ui/button";
 import { ChevronDownIcon, ChevronUpIcon } from "@heroicons/react/24/outline";
 import { useCallback, useMemo, useState } from "react";
 import { cn } from "~/lib/utils";
-import { type EmailThread, type Email } from "~/lib/types";
 import { formatDistanceToNow } from "date-fns";
 import EmailDetails from "./_components/EmailDetails";
+import type { Email } from "prisma/generated/zod";
+import type { EmailThreadWithEmailsAndProperty } from "~/lib/types";
 
 const testEmail: Email = {
   id: "1",
   createdAt: new Date(),
-  sender: {
-    name: "Mark",
-    photoUrl: "https://github.com/shadcn.png",
-    email: "mark@example.com",
-  },
-  content: `Dear Colin,
+  updatedAt: new Date(),
+  senderName: "Mark",
+  senderEmail: "mark@example.com",
+  recipientName: "Colin",
+  recipientEmail: "colin@example.com",
+  body: `Dear Colin,
 
 I hope this email finds you well. I'm reaching out regarding the property at 123 Main St. that I recently came across in my search for potential investments. I'm very interested in this property and would appreciate if you could provide me with some additional information:
 
@@ -33,14 +34,19 @@ Thank you for your time and assistance. I look forward to hearing back from you 
 
 Best regards,
 Mark`,
+  webLink: "",
+  emailThreadId: "thread-1",
 };
 
-const testEmailThread: EmailThread = {
-  id: "1",
-  emails: [testEmail, testEmail, testEmail],
+const testEmailThread: EmailThreadWithEmailsAndProperty = {
+  id: "thread-1",
+  createdAt: new Date(),
+  updatedAt: new Date(),
   subject: "123 Main St",
+  emails: [testEmail, testEmail, testEmail],
+  propertyId: "property-1",
   property: {
-    id: "1",
+    id: "property-1",
     attributes: {
       address: "123 Main St, Palo Alto, CA 94301",
     },
@@ -54,9 +60,11 @@ const testEmailThread: EmailThread = {
   draft: false,
   unread: false,
   completed: false,
+  moreInfoNeeded: false,
+  parsedAttributes: null,
 };
 
-const emails: EmailThread[] = [
+const emails: EmailThreadWithEmailsAndProperty[] = [
   { ...testEmailThread, id: "1", draft: true },
   { ...testEmailThread, id: "2", draft: true },
   { ...testEmailThread, id: "3", draft: true },
@@ -128,7 +136,7 @@ const emails: EmailThread[] = [
 
 export default function EmailsPage() {
   const emailIsOld = useCallback(
-    (email: EmailThread) =>
+    (email: EmailThreadWithEmailsAndProperty) =>
       // Email is older than 1 day
       email.emails[email.emails.length - 1]!.createdAt.getTime() <
       new Date().getTime() - 1000 * 60 * 60 * 24 * 1,
@@ -163,7 +171,7 @@ export default function EmailsPage() {
   }, [needsFollowUpSet]);
 
   const getWarning = useCallback(
-    (email: EmailThread) => {
+    (email: EmailThreadWithEmailsAndProperty) => {
       if (!needsFollowUpSet.has(email.id)) {
         return undefined;
       }
@@ -202,9 +210,8 @@ export default function EmailsPage() {
     },
   ]);
 
-  const [selectedThread, setSelectedThread] = useState<EmailThread | null>(
-    null,
-  );
+  const [selectedThread, setSelectedThread] =
+    useState<EmailThreadWithEmailsAndProperty | null>(null);
 
   return (
     <div className="grid size-full grid-cols-[400px_1fr]">
@@ -236,7 +243,7 @@ export default function EmailsPage() {
                 {category.emails?.map((thread) => (
                   <EmailCard
                     key={thread.id}
-                    email={thread.emails[thread.emails.length - 1]}
+                    email={thread.emails[thread.emails.length - 1]!}
                     draft={thread.draft}
                     unread={thread.unread}
                     completed={thread.completed}

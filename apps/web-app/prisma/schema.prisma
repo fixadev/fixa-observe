@@ -108,6 +108,9 @@ model Email {
   senderName    String
   senderEmail   String
 
+  recipientName String
+  recipientEmail String
+
   body          String
   webLink       String
 

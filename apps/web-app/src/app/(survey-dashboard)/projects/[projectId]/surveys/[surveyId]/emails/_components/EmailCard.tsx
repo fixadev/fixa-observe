@@ -1,49 +1,11 @@
-"use client";
-
 import { CheckCircleIcon } from "@heroicons/react/24/solid";
 import { formatDistanceToNow } from "date-fns";
-import { useState } from "react";
-import { AutosizeTextarea } from "~/components/ui/autosize-textarea";
-import { Avatar, AvatarImage, AvatarFallback } from "~/components/ui/avatar";
-import { Button } from "~/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "~/components/ui/dialog";
-import { type Email } from "~/lib/types";
+import { type Email } from "prisma/generated/zod";
+import { Avatar, AvatarFallback } from "~/components/ui/avatar";
 import { cn } from "~/lib/utils";
 
-export const testEmail: Email = {
-  id: "1",
-  createdAt: new Date(),
-  sender: {
-    name: "Mark",
-    photoUrl: "https://github.com/shadcn.png",
-    email: "mark@example.com",
-  },
-  content: `Dear Colin,
-
-I hope this email finds you well. I'm reaching out regarding the property at 123 Main St. that I recently came across in my search for potential investments. I'm very interested in this property and would appreciate if you could provide me with some additional information:
-
-1. What is the current asking price for the property?
-2. Is the property still available on the market?
-3. Could you share any recent updates or renovations that have been made to the property?
-4. Are there any known issues or repairs that might be needed?
-5. What are the annual property taxes and any HOA fees, if applicable?
-
-Additionally, I was wondering if it would be possible to schedule a viewing of the property sometime next week. I'm particularly available on Tuesday afternoon or Thursday morning if either of those times work for you.
-
-Thank you for your time and assistance. I look forward to hearing back from you soon.
-
-Best regards,
-Mark`,
-};
-
 export default function EmailCard({
-  email = testEmail,
+  email,
   subject = "123 Main St",
   draft = false,
   unread = false,
@@ -53,7 +15,7 @@ export default function EmailCard({
   onClick,
   className,
 }: {
-  email?: Email;
+  email: Email;
   subject?: string;
   draft?: boolean;
   unread?: boolean;
@@ -85,9 +47,8 @@ export default function EmailCard({
         ></div>
         {!draft && (
           <Avatar className="mt-1">
-            <AvatarImage src={email.sender.photoUrl} />
             <AvatarFallback>
-              {email.sender.name
+              {email.senderName
                 .split(" ")
                 .map((name) => name[0])
                 .join("")}
@@ -99,11 +60,11 @@ export default function EmailCard({
             {draft ? (
               <div className="text-sm">
                 <span className="text-destructive">[Draft]</span>{" "}
-                {email.sender.email}
+                {email.senderEmail}
               </div>
             ) : (
               <div className={cn("text-base", unread ? "font-medium" : "")}>
-                {email.sender.name}
+                {email.senderName}
               </div>
             )}
             {!draft &&
@@ -131,14 +92,14 @@ export default function EmailCard({
                 draft ? "italic" : "",
               )}
             >
-              {email.content}
+              {email.body}
             </div>
           )}
         </div>
       </div>
       {expanded && (
         <div className="p-4 pl-6">
-          {email.content.split("\n").map((line, index) => (
+          {email.body.split("\n").map((line, index) => (
             <p key={index} className="min-h-5 text-sm">
               {line}
             </p>
@@ -146,59 +107,5 @@ export default function EmailCard({
         </div>
       )}
     </div>
-  );
-}
-
-export function EmailCardWithDialog({ email = testEmail }: { email?: Email }) {
-  return (
-    <EmailDialog>
-      <EmailCard email={email} />
-    </EmailDialog>
-  );
-}
-
-export function EmailDialog({ children }: { children: React.ReactNode }) {
-  const [emails, setEmails] = useState<(Email & { expanded: boolean })[]>([
-    { ...testEmail, id: "1", expanded: false },
-    { ...testEmail, id: "2", expanded: false },
-    { ...testEmail, id: "3", expanded: true },
-  ]);
-
-  return (
-    <Dialog>
-      <DialogTrigger asChild>{children}</DialogTrigger>
-      <DialogContent className="max-w-4xl">
-        <DialogHeader>
-          <DialogTitle>Email thread</DialogTitle>
-        </DialogHeader>
-        <div className="-mx-2 flex h-[80vh] flex-col gap-2 overflow-y-auto px-2">
-          {emails.map((email) => (
-            <EmailCard
-              key={email.id}
-              className="shrink-0"
-              email={email}
-              expanded={email.expanded}
-              onClick={() => {
-                setEmails(
-                  emails.map((e) =>
-                    e.id === email.id ? { ...e, expanded: !e.expanded } : e,
-                  ),
-                );
-              }}
-            />
-          ))}
-          <div className="my-2">
-            <AutosizeTextarea
-              minHeight={100}
-              className="mb-2"
-              placeholder="Write a reply..."
-            />
-            <div className="flex gap-2">
-              <Button>Send</Button>
-            </div>
-          </div>
-        </div>
-      </DialogContent>
-    </Dialog>
   );
 }
