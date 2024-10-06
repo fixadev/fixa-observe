@@ -75,17 +75,18 @@ model AttributesOnSurveys {
 }
 
 model Property {
-  id           String     @id @default(uuid())
-  createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @updatedAt
-  owner        User       @relation(fields: [ownerId], references: [id])
+  id           String       @id @default(uuid())
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  owner        User         @relation(fields: [ownerId], references: [id])
   ownerId      String
   brochures    Brochure[]
   photoUrl     String?
   attributes   Json?
   displayIndex Int
-  survey       Survey     @relation(fields: [surveyId], references: [id])
+  survey       Survey       @relation(fields: [surveyId], references: [id])
   surveyId     String
+  emailThread  EmailThread?
 }
 
 model Brochure {
@@ -97,4 +98,30 @@ model Brochure {
   approved   Boolean  @default(false)
   property   Property @relation(fields: [propertyId], references: [id])
   propertyId String
+}
+
+model Email {
+  id            String      @id @default(uuid())
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  sender        Json        @db.JsonB
+  body          String
+  webLink       String
+  emailThread   EmailThread @relation(fields: [emailThreadId], references: [id])
+  emailThreadId String
+}
+
+model EmailThread {
+  id               String   @id // Should be the conversationId in Outlook
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  subject          String
+  emails           Email[]
+  property         Property @relation(fields: [propertyId], references: [id])
+  propertyId       String   @unique
+  draft            Boolean  @default(false)
+  unread           Boolean  @default(false)
+  completed        Boolean  @default(false)
+  moreInfoNeeded   Boolean  @default(false)
+  parsedAttributes Json?    @db.JsonB
 }
