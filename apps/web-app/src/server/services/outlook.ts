@@ -7,9 +7,9 @@ const outlookApiUrl = "https://graph.microsoft.com/v1.0";
 const clerkApiUrl = "https://api.clerk.com/v1";
 
 export const outlookService = ({ db }: { db: PrismaClient }) => {
-  const getAccessToken = async (clerkId: string) => {
+  const getAccessToken = async (userId: string) => {
     const response = await axios.get<{ token: string; scopes: string[] }[]>(
-      `${clerkApiUrl}/users/${clerkId}/oauth_access_tokens/oauth_microsoft`,
+      `${clerkApiUrl}/users/${userId}/oauth_access_tokens/oauth_microsoft`,
       {
         headers: {
           Authorization: `Bearer ${env.CLERK_SECRET_KEY}`,
@@ -30,7 +30,7 @@ export const outlookService = ({ db }: { db: PrismaClient }) => {
 
     // Sends an email
     sendEmail: async ({
-      clerkId,
+      userId,
 
       senderName,
       senderEmail,
@@ -41,7 +41,7 @@ export const outlookService = ({ db }: { db: PrismaClient }) => {
 
       propertyId,
     }: {
-      clerkId: string;
+      userId: string;
       senderName: string;
       senderEmail: string;
       to: string;
@@ -49,7 +49,7 @@ export const outlookService = ({ db }: { db: PrismaClient }) => {
       body: string;
       propertyId: string;
     }) => {
-      const accessToken = await getAccessToken(clerkId);
+      const accessToken = await getAccessToken(userId);
 
       // Create draft email
       const response = await axios.post<{
@@ -113,15 +113,15 @@ export const outlookService = ({ db }: { db: PrismaClient }) => {
 
     // Replies to the given email
     replyToEmail: async ({
-      clerkId,
+      userId,
       emailId,
       body,
     }: {
-      clerkId: string;
+      userId: string;
       emailId: string;
       body: string;
     }) => {
-      const accessToken = await getAccessToken(clerkId);
+      const accessToken = await getAccessToken(userId);
 
       // Get last email in thread
       // const emailThread = await db.emailThread.findUnique({
@@ -153,13 +153,13 @@ export const outlookService = ({ db }: { db: PrismaClient }) => {
 
     // Gets an email with the given ID and adds it to the database
     addEmailToDb: async ({
-      clerkId,
+      userId,
       emailId,
     }: {
-      clerkId: string;
+      userId: string;
       emailId: string;
     }) => {
-      const accessToken = await getAccessToken(clerkId);
+      const accessToken = await getAccessToken(userId);
 
       // Get email details
       const response = await axios.get<{
@@ -236,7 +236,7 @@ export const outlookService = ({ db }: { db: PrismaClient }) => {
 //   const outlookServiceInstance = outlookService({ db });
 
 //   void outlookServiceInstance.sendEmail({
-//     clerkId: "user_2n3BwIeVxJF5zPpoREHCcDQOSTj",
+//     userId: "user_2n3BwIeVxJF5zPpoREHCcDQOSTj",
 //     senderName: "Jonathan Liu",
 //     senderEmail: "jonytf@outlook.com",
 //     to: "liu.z.jonathan@gmail.com",
@@ -250,7 +250,7 @@ export const outlookService = ({ db }: { db: PrismaClient }) => {
 //   const outlookServiceInstance = outlookService({ db });
 
 //   void outlookServiceInstance.replyToEmail({
-//     clerkId: "user_2n3BwIeVxJF5zPpoREHCcDQOSTj",
+//     userId: "user_2n3BwIeVxJF5zPpoREHCcDQOSTj",
 //     emailId:
 //       "AAkALgAAAAAAHYQDEapmEc2byACqAC-EWg0ANjYmu1uDX0i8cnt0kXghsgAAAXV3kgAA",
 //     body: "this is so incredibly ugly. like wtf is this",
@@ -261,7 +261,7 @@ export const outlookService = ({ db }: { db: PrismaClient }) => {
 //   const outlookServiceInstance = outlookService({ db });
 
 //   void outlookServiceInstance.addEmailToDb({
-//     clerkId: "user_2n3BwIeVxJF5zPpoREHCcDQOSTj",
+//     userId: "user_2n3BwIeVxJF5zPpoREHCcDQOSTj",
 //     emailId:
 //       "AAkALgAAAAAAHYQDEapmEc2byACqAC-EWg0ANjYmu1uDX0i8cnt0kXghsgAAAXV3fQAA",
 //   });
