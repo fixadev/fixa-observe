@@ -77,9 +77,21 @@ CREATE TABLE "Brochure" (
     "updatedAt" TIMESTAMP(3) NOT NULL,
     "url" TEXT NOT NULL,
     "title" TEXT NOT NULL,
+    "approved" BOOLEAN NOT NULL DEFAULT false,
     "propertyId" TEXT NOT NULL,
 
     CONSTRAINT "Brochure_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "Email" (
+    "id" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "email" TEXT NOT NULL,
+    "projectId" TEXT NOT NULL,
+
+    CONSTRAINT "Email_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateIndex

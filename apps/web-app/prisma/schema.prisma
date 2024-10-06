@@ -6,7 +6,7 @@
 
 generator client {
   provider        = "prisma-client-js"
-  previewFeatures = ["multiSchema"]
+  // previewFeatures = ["multiSchema"]
 }
 
 generator zod {
@@ -14,8 +14,9 @@ generator zod {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 model User {
@@ -96,12 +97,4 @@ model Brochure {
   approved   Boolean  @default(false)
   property   Property @relation(fields: [propertyId], references: [id])
   propertyId String
-}
-
-model Email {
-  id        String   @id @default(uuid())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  email     String
-  projectId String
 }
