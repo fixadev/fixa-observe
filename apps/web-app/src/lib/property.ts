@@ -8,13 +8,21 @@ export type AttributeSchema = z.infer<typeof AttributeSchema>;
 export const attributeSchema = AttributeSchema;
 
 export type AttributesObjectSchema = z.infer<typeof attributesObjectSchema>;
-export const attributesObjectSchema = z.record(z.string(), z.string().nullable());
+export const attributesObjectSchema = z.record(z.string(), z.string());
 
 export type PropertySchema = z.infer<typeof propertySchema>;
 export const propertySchema = PropertySchema.omit({
   attributes: true,
 }).extend({
   attributes: attributesObjectSchema,
+  brochures: z.array(brochureSchema),
+});
+
+export type PropertyWithBrochures = z.infer<typeof propertyWithBrochuresSchema>;
+export const propertyWithBrochuresSchema = PropertySchema.omit({
+  attributes: true,
+}).extend({
+  brochures: z.array(brochureSchema),
 });
 
 export const photoUploadSchema = z.object({

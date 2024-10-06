@@ -7,11 +7,7 @@ import { usePDFJS } from "./usePDFjs";
 import type PDFJS from "pdfjs-dist";
 import { type Property } from "./PropertiesTable";
 import { type Attribute } from "@prisma/client";
-import {
-  type PropertySchema,
-  type CreatePropertySchema,
-  type BrochureSchema,
-} from "~/lib/property";
+import { type PropertySchema, type CreatePropertySchema } from "~/lib/property";
 const acceptablePDFFileTypes = "application/pdf";
 
 interface Annotation {
@@ -150,16 +146,13 @@ async function parsePDF(file: File, pdfjsLib: typeof PDFJS) {
   const parsedPDF = [];
 
   try {
-    // Load the PDF document
     const doc = await pdfjsLib.getDocument({ data }).promise;
     const numPages = doc.numPages;
     console.log(`Number of pages: ${numPages}`);
 
-    // Iterate through each page
     for (let i = 1; i <= numPages; i++) {
       const page = await doc.getPage(i);
 
-      // Extract text and links
       const content = await page.getTextContent();
       const annotations = await page.getAnnotations();
 

@@ -6,9 +6,10 @@ export default function PDFEditor({}: {
   brochureUrl: string;
   propertyId: string;
 }) {
-  const viewer = useRef<WebViewerInstance | null>(null);
+  const viewer = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    if (!viewer.current) return;
     WebViewer(
       {
         path: "/webviewer",
@@ -22,7 +23,7 @@ export default function PDFEditor({}: {
       .then((instance: WebViewerInstance) => {
         const { documentViewer, annotationManager } = instance.Core;
         instance.UI.enableFeatures([instance.UI.Feature.ContentEdit]);
-        instance.UI.setToolbarGroup(instance.UI.ToolbarGroup.EDIT_TEXT);
+        instance.UI.setToolbarGroup(instance.UI.ToolbarGroup.EDIT);
         // Add header button that will get file data on click
         instance.UI.setHeaderItems((header) => {
           header.push({
