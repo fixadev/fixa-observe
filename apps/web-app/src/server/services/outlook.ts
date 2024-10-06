@@ -1,6 +1,7 @@
 import { type PrismaClient } from "@prisma/client";
 import axios from "axios";
 import { env } from "~/env";
+// import { db } from "../db";
 
 const outlookApiUrl = "https://graph.microsoft.com/v1.0";
 const clerkApiUrl = "https://api.clerk.com/v1";
@@ -107,6 +108,50 @@ export const outlookService = ({ db }: { db: PrismaClient }) => {
         },
       });
     },
+
+    replyToEmail: async ({
+      clerkId,
+      lastEmailId, // The ID of the last email in the thread
+      body,
+    }: {
+      clerkId: string;
+      lastEmailId: string;
+      body: string;
+    }) => {
+      const accessToken = await getAccessToken(clerkId);
+
+      // Get last email in thread
+      // const emailThread = await db.emailThread.findUnique({
+      //   where: { id: emailThreadId },
+      //   include: { emails: true },
+      // });
+      // if (!emailThread) {
+      //   throw new Error("Email thread not found");
+      // }
+      // if (emailThread.emails.length === 0) {
+      //   throw new Error("No emails found in thread");
+      // }
+      // const lastEmail = emailThread.emails[emailThread.emails.length - 1]!;
+
+      // Reply to last email in thread
+      await axios.post(
+        `${outlookApiUrl}/me/messages/${lastEmailId}/replyAll`,
+        {
+          message: {
+            body: {
+              contentType: "Text",
+              content: body,
+            },
+          },
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            Prefer: `IdType="ImmutableId"`,
+          },
+        },
+      );
+    },
   };
 };
 
@@ -124,4 +169,16 @@ export const outlookService = ({ db }: { db: PrismaClient }) => {
 //   });
 // }
 
+// function testReplyToEmail() {
+//   const outlookServiceInstance = outlookService({ db });
+
+//   void outlookServiceInstance.replyToEmail({
+//     clerkId: "user_2n3BwIeVxJF5zPpoREHCcDQOSTj",
+//     lastEmailId:
+//       "AAkALgAAAAAAHYQDEapmEc2byACqAC-EWg0ANjYmu1uDX0i8cnt0kXghsgAAAXV1iQAA",
+//     body: "This is a test reply",
+//   });
+// }
+
 // testOutlook();
+// testReplyToEmail();
