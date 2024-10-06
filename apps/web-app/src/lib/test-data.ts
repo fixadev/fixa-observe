@@ -6,7 +6,7 @@ export const TEST_EMAIL: Email = {
   createdAt: new Date(),
   updatedAt: new Date(),
   senderName: "Mark",
-  senderEmail: "mark@example.com",
+  senderEmail: "jonytf@outlook.com",
   recipientName: "Colin",
   recipientEmail: "colin@example.com",
   subject: "123 Main St",
