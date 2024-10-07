@@ -1,11 +1,7 @@
-import OpenAI from "openai";
 import { z } from 'zod';
-import { zodResponseFormat } from "openai/helpers/zod";
-import { env } from "~/env";
+import { zodResponseFormat } from "openai/helpers/zod"
+import { openai } from "./OpenAIClient";
 
-const openai = new OpenAI({
-    apiKey: env.OPENAI_KEY,
-});
 
 const Address = z.object({
   streetAddress: z.string(),
