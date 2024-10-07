@@ -68,7 +68,7 @@ export const propertyService = ({ db }: { db: PrismaClient }) => {
       return response;
     },
 
-    addOrReplacePropertyPhoto: async (
+    setPropertyPhoto: async (
       propertyId: string,
       photoUrl: string,
       userId: string,
@@ -85,7 +85,7 @@ export const propertyService = ({ db }: { db: PrismaClient }) => {
       return photoUrl;
     },
 
-    deletePhotoUrlFromProperty: async (propertyId: string, userId: string) => {
+    deletePropertyPhoto: async (propertyId: string, userId: string) => {
       const property = await db.property.findUnique({
         where: {
           id: propertyId,

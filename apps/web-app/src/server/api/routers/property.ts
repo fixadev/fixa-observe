@@ -28,12 +28,21 @@ export const propertyRouter = createTRPCRouter({
       return await propertyServiceInstance.updateProperty(input, ctx.user.id);
     }),
 
-  addOrReplacePropertyPhoto: protectedProcedure
+  setPropertyPhoto: protectedProcedure
     .input(photoUploadSchema)
     .mutation(async ({ ctx, input }) => {
-      return await propertyServiceInstance.addOrReplacePropertyPhoto(
+      return await propertyServiceInstance.setPropertyPhoto(
         input.propertyId,
         input.photoUrl,
+        ctx.user.id,
+      );
+    }),
+
+  deletePropertyPhoto: protectedProcedure
+    .input(z.object({ propertyId: z.string(), photoId: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      return await propertyServiceInstance.deletePropertyPhoto(
+        input.propertyId,
         ctx.user.id,
       );
     }),
@@ -49,15 +58,6 @@ export const propertyRouter = createTRPCRouter({
       return await propertyServiceInstance.createBrochure(
         input.propertyId,
         input.brochure,
-        ctx.user.id,
-      );
-    }),
-
-  deletePhoto: protectedProcedure
-    .input(z.object({ propertyId: z.string(), photoId: z.string() }))
-    .mutation(async ({ ctx, input }) => {
-      return await propertyServiceInstance.deletePhotoUrlFromProperty(
-        input.propertyId,
         ctx.user.id,
       );
     }),
