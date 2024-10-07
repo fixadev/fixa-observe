@@ -1,18 +1,10 @@
 import { type Property, type PrismaClient } from "@prisma/client";
 import { type BrochureSchema, type CreatePropertySchema } from "~/lib/property";
 
-export const propertyService = ({
-  db,
-}: {
-  db: PrismaClient;
-}) => {
+export const propertyService = ({ db }: { db: PrismaClient }) => {
   return {
-    createProperties: async (
-      input: CreatePropertySchema[],
-      userId: string,
-    ) => {
-
-      const brochures = input.map(property => property.brochures[0] ?? []);
+    createProperties: async (input: CreatePropertySchema[], userId: string) => {
+      const brochures = input.map((property) => property.brochures[0] ?? []);
       const propertiesToCreate = input.map(({ brochures, ...property }) => ({
         ...property,
         ownerId: userId,
@@ -25,25 +17,27 @@ export const propertyService = ({
 
       for (const [index, property] of createdProperties.entries()) {
         const brochure = brochures[index];
-        if (property && brochure && !Array.isArray(brochure) && 
-            typeof brochure.url === 'string' && typeof brochure.title === 'string') {
-          await db.brochure.create({ 
+        if (
+          property &&
+          brochure &&
+          !Array.isArray(brochure) &&
+          typeof brochure.url === "string" &&
+          typeof brochure.title === "string"
+        ) {
+          await db.brochure.create({
             data: {
               ...brochure,
               propertyId: property.id,
               url: brochure.url,
               title: brochure.title,
             },
-          }); 
+          });
         }
       }
       return createdProperties.map((property) => property.id);
     },
 
-    getProperty: async (
-      propertyId: string,
-      userId: string,
-    ) => {
+    getProperty: async (propertyId: string, userId: string) => {
       const property = await db.property.findUnique({
         where: {
           id: propertyId,
@@ -51,16 +45,14 @@ export const propertyService = ({
         },
         include: {
           brochures: true,
+          emailThreads: true,
         },
       });
 
       return property;
     },
 
-    updateProperty: async (
-      property: Property,
-      userId: string,
-    ) => {
+    updateProperty: async (property: Property, userId: string) => {
       const response = await db.property.update({
         where: {
           id: property.id,
@@ -75,7 +67,11 @@ export const propertyService = ({
       return response;
     },
 
-    addOrReplacePropertyPhoto: async (propertyId: string, photoUrl: string, userId: string) => {
+    addOrReplacePropertyPhoto: async (
+      propertyId: string,
+      photoUrl: string,
+      userId: string,
+    ) => {
       await db.property.update({
         where: {
           id: propertyId,
@@ -88,10 +84,7 @@ export const propertyService = ({
       return photoUrl;
     },
 
-    deletePhotoUrlFromProperty: async (
-      propertyId: string,
-      userId: string,
-    ) => {
+    deletePhotoUrlFromProperty: async (propertyId: string, userId: string) => {
       const property = await db.property.findUnique({
         where: {
           id: propertyId,
@@ -126,19 +119,14 @@ export const propertyService = ({
         },
         data: {
           brochures: {
-            set: [
-              brochure,
-            ],
+            set: [brochure],
           },
         },
       });
       return response;
     },
 
-    getBrochure: async (
-      brochureId: string,
-      userId: string,
-    ) => {
+    getBrochure: async (brochureId: string, userId: string) => {
       const brochure = await db.brochure.findUnique({
         where: {
           id: brochureId,
@@ -150,10 +138,7 @@ export const propertyService = ({
       return brochure;
     },
 
-    updateBrochure: async (
-      brochure: BrochureSchema,
-      userId: string,
-    ) => {
+    updateBrochure: async (brochure: BrochureSchema, userId: string) => {
       const response = await db.brochure.update({
         where: {
           id: brochure.id,
@@ -167,7 +152,6 @@ export const propertyService = ({
       });
       return response;
     },
-    
 
     deleteBrochure: async (
       propertyId: string,
@@ -200,10 +184,7 @@ export const propertyService = ({
       });
     },
 
-    deleteProperty: async (
-      propertyId: string,
-      userId: string,
-    ) => {
+    deleteProperty: async (propertyId: string, userId: string) => {
       const property = await db.property.findUnique({
         where: {
           id: propertyId,
@@ -224,6 +205,5 @@ export const propertyService = ({
         },
       });
     },
-
   };
 };

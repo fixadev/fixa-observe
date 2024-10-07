@@ -3,15 +3,23 @@
 import EmailCard from "./_components/EmailCard";
 import { Button } from "~/components/ui/button";
 import { ChevronDownIcon, ChevronUpIcon } from "@heroicons/react/24/outline";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { cn } from "~/lib/utils";
 import { formatDistanceToNow } from "date-fns";
 import EmailDetails, { EmailTemplateDialog } from "./_components/EmailDetails";
 import type { EmailThreadWithEmailsAndProperty } from "~/lib/types";
-import { TEST_EMAIL_THREADS } from "~/lib/test-data";
 import React from "react";
+import { api } from "~/trpc/react";
 
-export default function EmailsPage() {
+export default function EmailsPage({
+  params,
+}: {
+  params: { projectId: string; surveyId: string };
+}) {
+  const { data: survey } = api.survey.getSurvey.useQuery({
+    surveyId: params.surveyId,
+  });
+
   const emailIsOld = useCallback(
     (email: EmailThreadWithEmailsAndProperty) =>
       // Email is older than 1 day
@@ -20,37 +28,44 @@ export default function EmailsPage() {
     [],
   );
 
-  // const [ emailThreads, setEmailThreads ] = useState([]);
+  const [emailThreads, setEmailThreads] = useState<
+    EmailThreadWithEmailsAndProperty[]
+  >([]);
+  useEffect(() => {
+    // if (survey) {
+    //   setEmailThreads(survey.properties[0]!.emailThreads);
+    // }
+  }, [survey]);
 
   const unsentEmails = useMemo(
-    () => TEST_EMAIL_THREADS.filter((email) => email.draft),
-    [],
+    () => emailThreads.filter((email) => email.draft),
+    [emailThreads],
   );
   const completedEmails = useMemo(
-    () => TEST_EMAIL_THREADS.filter((email) => email.completed),
-    [],
+    () => emailThreads.filter((email) => email.completed),
+    [emailThreads],
   );
   const needsFollowUpEmails = useMemo(
     () =>
-      TEST_EMAIL_THREADS.filter(
+      emailThreads.filter(
         (email) =>
           !email.draft &&
           !email.completed &&
           // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
           (email.moreInfoNeeded || emailIsOld(email)),
       ),
-    [emailIsOld],
+    [emailThreads, emailIsOld],
   );
   const needsFollowUpSet = useMemo(
     () => new Set(needsFollowUpEmails.map((email) => email.id)),
     [needsFollowUpEmails],
   );
   const pendingEmails = useMemo(() => {
-    return TEST_EMAIL_THREADS.filter(
+    return emailThreads.filter(
       (email) =>
         !email.draft && !needsFollowUpSet.has(email.id) && !email.completed,
     );
-  }, [needsFollowUpSet]);
+  }, [emailThreads, needsFollowUpSet]);
 
   const getWarning = useCallback(
     (email: EmailThreadWithEmailsAndProperty) => {

@@ -3,38 +3,28 @@ import { type PropertySchema } from "~/lib/property";
 import { type CreateSurveyInput } from "~/lib/survey";
 import { type SurveySchema } from "~/lib/survey";
 
-
-export const surveyService = ({
-  db,
-}: {
-  db: PrismaClient;
-}) => {
+export const surveyService = ({ db }: { db: PrismaClient }) => {
   return {
-    getProjectSurveys: async (
-      projectId: string,
-      userId: string,
-    ) => {
+    getProjectSurveys: async (projectId: string, userId: string) => {
       const surveys = await db.survey.findMany({
         where: { projectId: projectId, ownerId: userId },
       });
       return surveys;
     },
 
-    getSurvey: async (
-      surveyId: string,
-      userId: string,
-    ) => {
+    getSurvey: async (surveyId: string, userId: string) => {
       const survey = await db.survey.findUnique({
         where: { id: surveyId, ownerId: userId },
         include: {
           properties: {
             include: {
-              brochures: true
+              brochures: true,
+              emailThreads: true,
             },
             orderBy: {
-              displayIndex: "asc"
-            }
-          }
+              displayIndex: "asc",
+            },
+          },
         },
       });
       console.log("survey", survey);
@@ -49,33 +39,31 @@ export const surveyService = ({
       });
     },
 
-    getSurveyAttributes: async (
-      surveyId: string
-    ) => {
+    getSurveyAttributes: async (surveyId: string) => {
       const attributes = await db.attributesOnSurveys.findMany({
         where: { surveyId },
-        include: { attribute: true }
+        include: { attribute: true },
       });
-      return attributes.sort((a, b) => a.attributeIndex - b.attributeIndex).map((attr) => attr.attribute);
+      return attributes
+        .sort((a, b) => a.attributeIndex - b.attributeIndex)
+        .map((attr) => attr.attribute);
     },
 
-    createSurvey: async (
-      input: CreateSurveyInput,
-      userId: string,
-    ) => {
+    createSurvey: async (input: CreateSurveyInput, userId: string) => {
       const survey = await db.survey.create({
-        data: { name: input.surveyName, projectId: input.projectId, ownerId: userId  }
+        data: {
+          name: input.surveyName,
+          projectId: input.projectId,
+          ownerId: userId,
+        },
       });
       return survey;
     },
 
-    updateSurvey: async (
-      surveyData: SurveySchema,
-      userId: string,
-    ) => {
+    updateSurvey: async (surveyData: SurveySchema, userId: string) => {
       const result = await db.survey.update({
         where: { id: surveyData.id, ownerId: userId },
-        data: { ...surveyData }
+        data: { ...surveyData },
       });
       return result;
     },
@@ -86,7 +74,10 @@ export const surveyService = ({
       userId: string,
     ) => {
       const result = await db.attribute.createMany({
-        data: attributes.map((attribute) => ({ ...attribute, ownerId: userId }))
+        data: attributes.map((attribute) => ({
+          ...attribute,
+          ownerId: userId,
+        })),
       });
 
       return result;
@@ -98,16 +89,22 @@ export const surveyService = ({
       attributes: Attribute[],
       userId: string,
     ) => {
-
       const existingAttributes = await db.attribute.findMany({
         where: {
-          id: { in: attributes.map(attr => attr.id) }
-        }
+          id: { in: attributes.map((attr) => attr.id) },
+        },
       });
-      const attributesToCreate = attributes.filter((attribute) => !existingAttributes.some((existing) => existing.id === attribute.id)).map((attribute) => ({ ...attribute, ownerId: userId}));
+      const attributesToCreate = attributes
+        .filter(
+          (attribute) =>
+            !existingAttributes.some(
+              (existing) => existing.id === attribute.id,
+            ),
+        )
+        .map((attribute) => ({ ...attribute, ownerId: userId }));
 
       await db.attribute.createMany({
-        data: attributesToCreate
+        data: attributesToCreate,
       });
 
       const result = await db.survey.update({
@@ -117,11 +114,13 @@ export const surveyService = ({
             createMany: {
               data: attributesToCreate.map((attribute) => ({
                 attributeId: attribute.id,
-                attributeIndex: attributes.findIndex((attr) => attr.id === attribute.id) 
-              }))
-            }
-          }
-        }
+                attributeIndex: attributes.findIndex(
+                  (attr) => attr.id === attribute.id,
+                ),
+              })),
+            },
+          },
+        },
       });
       return result;
     },
@@ -134,18 +133,20 @@ export const surveyService = ({
       if (!idToUpdate) {
         return null;
       }
-      const attributeToUpdate = attributes.find((attribute) => attribute.id === idToUpdate);
+      const attributeToUpdate = attributes.find(
+        (attribute) => attribute.id === idToUpdate,
+      );
 
       const result = await db.attribute.update({
         where: { id: idToUpdate, ownerId: userId },
-        data: { 
-          ...attributeToUpdate
-        }
+        data: {
+          ...attributeToUpdate,
+        },
       });
       return result;
     },
 
-  deleteAttribute: async (
+    deleteAttribute: async (
       surveyId: string,
       idToDelete: string | undefined,
     ) => {
@@ -155,8 +156,8 @@ export const surveyService = ({
       await db.attributesOnSurveys.deleteMany({
         where: {
           surveyId,
-          attributeId: idToDelete
-        }
+          attributeId: idToDelete,
+        },
       });
     },
 
@@ -164,20 +165,19 @@ export const surveyService = ({
       surveyId: string,
       attributes: Attribute[],
       userId: string,
-    ) => { 
-
+    ) => {
       await db.survey.update({
         where: { id: surveyId, ownerId: userId },
         data: {
           attributes: {
-            deleteMany: {}
-          }
-        }
+            deleteMany: {},
+          },
+        },
       });
 
       const attributesOnSurveys = attributes.map((attribute, index) => ({
         attributeId: attribute.id,
-        attributeIndex: index
+        attributeIndex: index,
       }));
 
       const result = await db.survey.update({
@@ -185,10 +185,10 @@ export const surveyService = ({
         data: {
           attributes: {
             createMany: {
-              data: attributesOnSurveys
-            }
-          }
-        }
+              data: attributesOnSurveys,
+            },
+          },
+        },
       });
 
       return result;
@@ -202,7 +202,7 @@ export const surveyService = ({
       console.log("propertyIds", propertyIds);
       const survey = await db.survey.update({
         where: { id: surveyId, ownerId: userId },
-        data: { properties: { connect: propertyIds.map(id => ({ id })) } }
+        data: { properties: { connect: propertyIds.map((id) => ({ id })) } },
       });
       return survey;
     },
@@ -216,41 +216,37 @@ export const surveyService = ({
         where: { id: surveyId, ownerId: userId },
         data: {
           properties: {
-            deleteMany: {}
-          }
-        }
+            deleteMany: {},
+          },
+        },
       });
       const propertiesWithOrder = properties.map((property, index) => {
         const { surveyId, ...rest } = property;
         return {
           ...rest,
           displayIndex: index,
-          attributes: property.attributes ?? {}
+          attributes: property.attributes ?? {},
         };
       });
-      
+
       const result = await db.survey.update({
         where: { id: surveyId, ownerId: userId },
         data: {
           properties: {
             createMany: {
-              data: propertiesWithOrder
-            }
-          }
-        }
+              data: propertiesWithOrder,
+            },
+          },
+        },
       });
       return result;
     },
 
-    deleteSurvey: async (
-      surveyId: string,
-      userId: string,
-    ) => {
+    deleteSurvey: async (surveyId: string, userId: string) => {
       const survey = await db.survey.delete({
-        where: { id: surveyId, ownerId: userId }
+        where: { id: surveyId, ownerId: userId },
       });
       return survey;
     },
-
   };
 };
