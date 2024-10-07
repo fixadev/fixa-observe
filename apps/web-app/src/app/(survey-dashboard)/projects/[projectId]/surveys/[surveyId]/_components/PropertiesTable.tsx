@@ -57,7 +57,6 @@ export function PropertiesTable({ surveyId }: { surveyId: string }) {
       surveyId,
     });
   useEffect(() => {
-    console.log("surveyData", surveyData);
     if (surveyData?.properties) {
       setPropertiesState(
         surveyData.properties.map((property) => ({
@@ -76,7 +75,6 @@ export function PropertiesTable({ surveyId }: { surveyId: string }) {
 
   useEffect(() => {
     if (attributes) {
-      console.log("attributes", attributes);
       setAttributesOrderState(
         attributes.map((attr) => ({ ...attr, isNew: false })),
       );

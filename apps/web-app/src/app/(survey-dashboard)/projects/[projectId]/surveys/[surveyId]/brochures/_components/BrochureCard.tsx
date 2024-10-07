@@ -166,15 +166,9 @@ function BrochureSidebar({
           </Button>
         </>
       ) : (
-        <FileInput
-          className="w-full"
-          triggerElement={
-            <Button className="w-full" variant={"outline"}>
-              Upload brochure
-            </Button>
-          }
-          handleFilesChange={handleUpload}
-        />
+        <div className="flex w-full flex-col p-2 font-medium">
+          <p>{property.attributes.address.split(",")[0]}</p>
+        </div>
       )}
     </div>
   );
