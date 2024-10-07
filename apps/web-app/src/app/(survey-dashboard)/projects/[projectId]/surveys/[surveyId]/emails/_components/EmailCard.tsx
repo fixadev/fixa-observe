@@ -1,3 +1,6 @@
+"use client";
+
+import { useUser } from "@clerk/nextjs";
 import { CheckCircleIcon } from "@heroicons/react/24/solid";
 import { formatDistanceToNow } from "date-fns";
 import { type Email } from "prisma/generated/zod";
@@ -6,7 +9,6 @@ import { cn } from "~/lib/utils";
 
 export default function EmailCard({
   email,
-  subject = "123 Main St",
   draft = false,
   unread = false,
   completed = false,
@@ -16,7 +18,6 @@ export default function EmailCard({
   className,
 }: {
   email: Email;
-  subject?: string;
   draft?: boolean;
   unread?: boolean;
   completed?: boolean;
@@ -25,6 +26,9 @@ export default function EmailCard({
   onClick?: (e: React.MouseEvent<HTMLDivElement>) => void;
   className?: string;
 }) {
+  const { isLoaded, user } = useUser();
+  if (!isLoaded || !user) return null;
+
   return (
     <div
       className={cn(
@@ -60,11 +64,13 @@ export default function EmailCard({
             {draft ? (
               <div className="text-sm">
                 <span className="text-destructive">[Draft]</span>{" "}
-                {email.senderEmail}
+                {email.recipientEmail}
               </div>
             ) : (
               <div className={cn("text-base", unread ? "font-medium" : "")}>
-                {email.senderName}
+                {user.primaryEmailAddress?.emailAddress === email.senderEmail
+                  ? "You"
+                  : email.senderName}
               </div>
             )}
             {!draft &&
@@ -83,7 +89,7 @@ export default function EmailCard({
               ))}
           </div>
           <div className={cn("text-sm", unread ? "font-medium" : "")}>
-            {subject}
+            {email.subject}
           </div>
           {!expanded && (
             <div

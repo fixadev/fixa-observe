@@ -90,7 +90,7 @@ function UnsentEmailDetails({
           id="to"
           className="flex-grow"
           placeholder="mark@example.com"
-          defaultValue={emailThread.emails[0]!.senderEmail}
+          defaultValue={emailThread.emails[0]!.recipientEmail}
           autoComplete="email"
         />
         <Label htmlFor="subject">Subject:</Label>
@@ -98,7 +98,7 @@ function UnsentEmailDetails({
           type="text"
           id="subject"
           className="flex-grow"
-          defaultValue={emailThread.subject}
+          defaultValue={emailThread.emails[0]!.subject}
           placeholder="Property inquiry"
         />
       </div>
