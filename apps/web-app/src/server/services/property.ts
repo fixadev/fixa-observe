@@ -1,5 +1,5 @@
-import { type Property, type PrismaClient, type Contact } from "@prisma/client";
-import { type ContactWithoutPropertyId, type BrochureSchema, type CreatePropertySchema, type BrochureWithoutPropertyId } from "~/lib/property";
+import { type Property, type PrismaClient } from "@prisma/client";
+import { type BrochureSchema, type CreatePropertySchema, type BrochureWithoutPropertyId } from "~/lib/property";
 import { extractContactInfo } from "../utils/extractContactInfo";
 import { formatAddresses } from "../utils/formatAddresses";
 
