@@ -1,12 +1,12 @@
 import { type PrismaClient } from "@prisma/client";
 import axios from "axios";
 import { env } from "~/env";
-import { db } from "../db";
+// import { db } from "../db";
 
 const outlookApiUrl = "https://graph.microsoft.com/v1.0";
 const clerkApiUrl = "https://api.clerk.com/v1";
 
-export const outlookService = ({ db }: { db: PrismaClient }) => {
+export const emailService = ({ db }: { db: PrismaClient }) => {
   const getAccessToken = async (userId: string) => {
     const response = await axios.get<{ token: string; scopes: string[] }[]>(
       `${clerkApiUrl}/users/${userId}/oauth_access_tokens/oauth_microsoft`,
@@ -229,13 +229,48 @@ export const outlookService = ({ db }: { db: PrismaClient }) => {
         },
       });
     },
+
+    getEmailTemplate: async ({ userId }: { userId: string }) => {
+      const emailTemplate = await db.emailTemplate.findUnique({
+        where: { userId },
+      });
+      return emailTemplate;
+    },
+
+    // Updates the email template for the given user
+    updateEmailTemplate: async ({
+      userId,
+      infoToVerify,
+      subject,
+      body,
+    }: {
+      userId: string;
+      infoToVerify: string[];
+      subject: string;
+      body: string;
+    }) => {
+      await db.emailTemplate.upsert({
+        where: { userId },
+        update: {
+          infoToVerify,
+          subject,
+          body,
+        },
+        create: {
+          userId,
+          infoToVerify,
+          subject,
+          body,
+        },
+      });
+    },
   };
 };
 
-// function testOutlook() {
-//   const outlookServiceInstance = outlookService({ db });
+// function testSend() {
+//   const emailServiceInstance = emailService({ db });
 
-//   void outlookServiceInstance.sendEmail({
+//   void emailServiceInstance.sendEmail({
 //     userId: "user_2n5FpA1zkaQHLb8OHSMdwEEJt8i",
 //     senderName: "Jonathan Liu",
 //     senderEmail: "jonytf@outlook.com",
@@ -247,9 +282,9 @@ export const outlookService = ({ db }: { db: PrismaClient }) => {
 // }
 
 // function testReplyToEmail() {
-//   const outlookServiceInstance = outlookService({ db });
+//   const emailServiceInstance = emailService({ db });
 
-//   void outlookServiceInstance.replyToEmail({
+//   void emailServiceInstance.replyToEmail({
 //     userId: "user_2n5FpA1zkaQHLb8OHSMdwEEJt8i",
 //     emailId:
 //       "AAkALgAAAAAAHYQDEapmEc2byACqAC-EWg0ANjYmu1uDX0i8cnt0kXghsgAAAXV3kgAA",
@@ -258,15 +293,15 @@ export const outlookService = ({ db }: { db: PrismaClient }) => {
 // }
 
 // function testAddEmailToDb() {
-//   const outlookServiceInstance = outlookService({ db });
+//   const emailServiceInstance = emailService({ db });
 
-//   void outlookServiceInstance.addEmailToDb({
+//   void emailServiceInstance.addEmailToDb({
 //     userId: "user_2n5FpA1zkaQHLb8OHSMdwEEJt8i",
 //     emailId:
 //       "AAkALgAAAAAAHYQDEapmEc2byACqAC-EWg0ANjYmu1uDX0i8cnt0kXghsgAAAXV7sAAA",
 //   });
 // }
 
-// testOutlook();
+// testSend();
 // testReplyToEmail();
 // testAddEmailToDb();

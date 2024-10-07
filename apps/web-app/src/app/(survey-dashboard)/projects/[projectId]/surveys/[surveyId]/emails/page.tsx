@@ -6,7 +6,7 @@ import { ChevronDownIcon, ChevronUpIcon } from "@heroicons/react/24/outline";
 import { useCallback, useMemo, useState } from "react";
 import { cn } from "~/lib/utils";
 import { formatDistanceToNow } from "date-fns";
-import EmailDetails from "./_components/EmailDetails";
+import EmailDetails, { EmailTemplateDialog } from "./_components/EmailDetails";
 import type { EmailThreadWithEmailsAndProperty } from "~/lib/types";
 import { TEST_EMAIL_THREADS } from "~/lib/test-data";
 import React from "react";
@@ -19,6 +19,8 @@ export default function EmailsPage() {
       new Date().getTime() - 1000 * 60 * 60 * 24 * 1,
     [],
   );
+
+  // const [ emailThreads, setEmailThreads ] = useState([]);
 
   const unsentEmails = useMemo(
     () => TEST_EMAIL_THREADS.filter((email) => email.draft),
@@ -93,64 +95,75 @@ export default function EmailsPage() {
   const [selectedThread, setSelectedThread] =
     useState<EmailThreadWithEmailsAndProperty | null>(null);
 
+  const [templateDialog, setTemplateDialog] = useState(false);
+
   return (
-    <div className="grid size-full grid-cols-[400px_1fr]">
-      <div className="flex w-full max-w-3xl flex-col gap-2 overflow-y-auto border-r p-2">
-        {categories.map((category) => (
-          <React.Fragment key={category.name}>
-            <Button
-              variant="ghost"
-              className="flex w-full items-center justify-between"
-              onClick={() =>
-                setCategories((prev) =>
-                  prev.map((c) =>
-                    c.name === category.name
-                      ? { ...c, expanded: !c.expanded }
-                      : c,
-                  ),
-                )
-              }
-            >
-              {category.name}
-              {category.expanded ? (
-                <ChevronUpIcon className="size-4" />
-              ) : (
-                <ChevronDownIcon className="size-4" />
+    <>
+      <div className="grid size-full grid-cols-[400px_1fr]">
+        <div className="flex w-full max-w-3xl flex-col gap-2 overflow-y-auto border-r p-2">
+          {categories.map((category) => (
+            <React.Fragment key={category.name}>
+              <Button
+                variant="ghost"
+                className="flex w-full items-center justify-between"
+                onClick={() =>
+                  setCategories((prev) =>
+                    prev.map((c) =>
+                      c.name === category.name
+                        ? { ...c, expanded: !c.expanded }
+                        : c,
+                    ),
+                  )
+                }
+              >
+                {category.name}
+                {category.expanded ? (
+                  <ChevronUpIcon className="size-4" />
+                ) : (
+                  <ChevronDownIcon className="size-4" />
+                )}
+              </Button>
+              {category.expanded && (
+                <>
+                  {category.emails?.map((thread) => (
+                    <EmailCard
+                      key={thread.id}
+                      email={thread.emails[thread.emails.length - 1]!}
+                      draft={thread.draft}
+                      unread={thread.unread}
+                      completed={thread.completed}
+                      warning={getWarning(thread)}
+                      className={cn("shrink-0", {
+                        "bg-muted": thread.id === selectedThread?.id,
+                      })}
+                      onClick={() => setSelectedThread(thread)}
+                    />
+                  ))}
+                </>
               )}
-            </Button>
-            {category.expanded && (
-              <>
-                {category.emails?.map((thread) => (
-                  <EmailCard
-                    key={thread.id}
-                    email={thread.emails[thread.emails.length - 1]!}
-                    draft={thread.draft}
-                    unread={thread.unread}
-                    completed={thread.completed}
-                    warning={getWarning(thread)}
-                    className={cn("shrink-0", {
-                      "bg-muted": thread.id === selectedThread?.id,
-                    })}
-                    onClick={() => setSelectedThread(thread)}
-                  />
-                ))}
-              </>
-            )}
-          </React.Fragment>
-        ))}
+            </React.Fragment>
+          ))}
+        </div>
+        <div className="overflow-x-hidden">
+          {selectedThread ? (
+            <EmailDetails
+              emailThread={selectedThread}
+              onOpenTemplateDialog={() => setTemplateDialog(true)}
+            />
+          ) : (
+            <div className="flex h-full items-center justify-center">
+              <p className="text-muted-foreground">
+                Select an email to view details
+              </p>
+            </div>
+          )}
+        </div>
       </div>
-      <div className="overflow-x-hidden">
-        {selectedThread ? (
-          <EmailDetails emailThread={selectedThread} />
-        ) : (
-          <div className="flex h-full items-center justify-center">
-            <p className="text-muted-foreground">
-              Select an email to view details
-            </p>
-          </div>
-        )}
-      </div>
-    </div>
+      <EmailTemplateDialog
+        open={templateDialog}
+        onOpenChange={setTemplateDialog}
+      />
+    </>
   );
 }
 
