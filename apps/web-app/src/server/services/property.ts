@@ -1,4 +1,4 @@
-import { type Property, type PrismaClient } from "@prisma/client";
+import { type Property, type PrismaClient, type Contact } from "@prisma/client";
 import { type BrochureSchema, type CreatePropertySchema } from "~/lib/property";
 import { extractContactInfo } from "../utils/extractContactInfo";
 
@@ -124,6 +124,16 @@ export const propertyService = ({
       console.log("creating brochure in property service", brochure);
 
       const contactInfo = await extractContactInfo(brochure.url);
+      const contacts: Contact[] = [];
+      if (contactInfo) {
+        const createdContacts = await db.contact.createManyAndReturn({
+          data: contactInfo?.map((contact) => ({
+            ...contact,
+            propertyId: propertyId,
+          })),
+        });
+        contacts.push(...createdContacts);  
+      }
 
       const createdBrochure = await db.brochure.create({
         data: {
@@ -144,9 +154,12 @@ export const propertyService = ({
             set: [
               createdBrochure,
             ],
+            },
+            contacts: {
+              set: contacts,
+            },
           },
-        },
-      });
+        });
       return response;
     },
 

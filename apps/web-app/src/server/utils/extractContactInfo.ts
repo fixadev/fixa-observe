@@ -1,23 +1,22 @@
-import Anthropic from '@anthropic-ai/sdk';
+import OpenAI from "openai";
 import { z } from 'zod';
-import { type ContactSchema } from '../../lib/property';
-import * as PDFJS from 'pdfjs-dist/types/src/pdf';
-import { parsePDFWithoutLinks } from '~/app/shared/pdfParsing';
+import { zodResponseFormat } from "openai/helpers/zod";
+import { parsePDFWithoutLinks } from './parsePDF';
+import { env } from "~/env";
 
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_KEY,
+const openai = new OpenAI({
+    apiKey: env.OPENAI_KEY,
 });
 
-
 const Contact = z.object({
-  id: z.string(),
-  createdAt: z.coerce.date(),
-  updatedAt: z.coerce.date(),
   firstName: z.string(),
   lastName: z.string(),
   email: z.string(),
   phone: z.string().nullable(),
-  propertyId: z.string(),
+})
+
+const ContactsObject = z.object({
+  contacts: z.array(Contact),
 })
 
 export async function extractContactInfo(brochureUrl: string) {
@@ -31,32 +30,37 @@ export async function extractContactInfo(brochureUrl: string) {
 
   console.log('PARSED PDF', parsedPDF);
 
-  if (!parsedPDF) {
+  if (parsedPDF.length === 0) {
     throw new Error('No text found in PDF');
   }
 
   const systemPrompt = `
   You are an AI assistant that extracts contact information from a given brochure.
   The brochure contains information about a property for sale or rent.
-  You will be given a URL to the brochure and a description of the property.
-  You will need to extract the contact information from the brochure.
+  You will be given text scraped from the brochure.
+  You will need to extract the contact information of the brokers listed in the brochure.
   The contact information will be in the form of a JSON object with the following properties:
   - firstName: string
   - lastName: string
   - email: string
   - phone: string | null
 
-  Return the JSON object.
+  Return an array of the JSON objects.
   `
 
-  const msg = await anthropic.messages.create({
-    model: "claude-3-5-sonnet-20240620",
-    max_tokens: 1024,
-    system: systemPrompt,
-    messages: [{ role: "user", content: parsedPDF }],
+  const completion = await openai.beta.chat.completions.parse({
+    model: "gpt-4o-2024-08-06",
+    messages: [
+      { role: "system", content: systemPrompt },
+      { role: "user", content: parsedPDF },
+    ],
+    response_format: zodResponseFormat(ContactsObject, "contacts"),
   });
-  console.log('ANTHROPIC RESPONSE', msg);
+  
+  const contactsObject = completion.choices[0]?.message.parsed;
 
-  return msg.content;
+  console.log('CONTACTS FROM OPENAI', contactsObject);
+
+  return contactsObject?.contacts;
 
 }

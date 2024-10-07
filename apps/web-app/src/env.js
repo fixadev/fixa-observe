@@ -19,6 +19,7 @@ export const env = createEnv({
     LISTMONK_URL: z.string().url(),
     LISTMONK_LIST_ID: z.number(),
     ANTHROPIC_KEY: z.string(),
+    OPENAI_KEY: z.string(),
     // Temporarily disabled Discord auth functionality
     // DISCORD_CLIENT_ID: z.string(),
     // DISCORD_CLIENT_SECRET: z.string(),
@@ -58,6 +59,7 @@ export const env = createEnv({
     LISTMONK_URL: process.env.LISTMONK_URL,
     LISTMONK_LIST_ID: parseInt(process.env.LISTMONK_LIST_ID ?? "0"),
     ANTHROPIC_KEY: process.env.ANTHROPIC_KEY,
+    OPENAI_KEY: process.env.OPENAI_KEY,
     // Temporarily disabled Discord auth functionality
     // DISCORD_CLIENT_ID: process.env.DISCORD_CLIENT_ID,
     // DISCORD_CLIENT_SECRET: process.env.DISCORD_CLIENT_SECRET,
