@@ -4,6 +4,7 @@ import {
   propertySchema,
   photoUploadSchema,
   brochureSchema,
+  brochureWithoutPropertyIdSchema,
 } from "~/lib/property";
 import { propertyService } from "~/server/services/property";
 import { db } from "~/server/db";
@@ -41,7 +42,7 @@ export const propertyRouter = createTRPCRouter({
     .input(
       z.object({
         propertyId: z.string(),
-        brochure: brochureSchema,
+        brochure: brochureWithoutPropertyIdSchema,
       }),
     )
     .mutation(async ({ ctx, input }) => {

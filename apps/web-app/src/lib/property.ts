@@ -1,9 +1,18 @@
 import { z } from "zod";
 import { AttributeSchema, BrochureSchema, PropertySchema, ContactSchema } from "../../prisma/generated/zod";
 
+export type ContactWithoutPropertyId = z.infer<typeof contactWithoutPropertyIdSchema>;
+export const contactWithoutPropertyIdSchema = ContactSchema.omit({
+  propertyId: true,
+});
+
 export type ContactSchema = z.infer<typeof contactSchema>;
 export const contactSchema = ContactSchema;
 
+export type BrochureWithoutPropertyId = z.infer<typeof brochureWithoutPropertyIdSchema>;
+export const brochureWithoutPropertyIdSchema = BrochureSchema.omit({
+  propertyId: true,
+});
 export type BrochureSchema = z.infer<typeof BrochureSchema>;
 export const brochureSchema = BrochureSchema;
 
