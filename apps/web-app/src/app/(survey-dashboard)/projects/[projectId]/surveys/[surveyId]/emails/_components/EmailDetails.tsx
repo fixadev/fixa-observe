@@ -27,6 +27,10 @@ import { useUser } from "@clerk/nextjs";
 import { AutosizeTextarea } from "~/components/ui/autosize-textarea";
 import { api } from "~/trpc/react";
 import Spinner from "~/components/Spinner";
+import {
+  DEFAULT_EMAIL_TEMPLATE_BODY,
+  DEFAULT_EMAIL_TEMPLATE_SUBJECT,
+} from "~/lib/constants";
 
 export default function EmailDetails({
   emailThread,
@@ -204,10 +208,9 @@ export function EmailTemplateDialog({
   const { mutateAsync: updateEmailTemplate, isPending: isUpdatePending } =
     api.email.updateEmailTemplate.useMutation();
 
-  const defaultSubject = useMemo(() => "{{address}} inquiry", []);
+  const defaultSubject = useMemo(() => DEFAULT_EMAIL_TEMPLATE_SUBJECT, []);
   const defaultBody = useMemo(
-    () =>
-      `Hi {{name}},\n\nChecking in about what the NNN ask is at {{address}} and if the property is still available.\n\nBest,\n${user?.fullName}`,
+    () => DEFAULT_EMAIL_TEMPLATE_BODY(user?.fullName ?? ""),
     [user],
   );
   const defaultInfoToVerify = useMemo(

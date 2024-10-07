@@ -4,21 +4,31 @@ import EmailCard from "./_components/EmailCard";
 import { Button } from "~/components/ui/button";
 import { ChevronDownIcon, ChevronUpIcon } from "@heroicons/react/24/outline";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { cn } from "~/lib/utils";
+import { cn, replaceTemplateVariables } from "~/lib/utils";
 import { formatDistanceToNow } from "date-fns";
 import EmailDetails, { EmailTemplateDialog } from "./_components/EmailDetails";
 import type { EmailThreadWithEmailsAndProperty } from "~/lib/types";
 import React from "react";
 import { api } from "~/trpc/react";
+import {
+  DEFAULT_EMAIL_TEMPLATE_BODY,
+  DEFAULT_EMAIL_TEMPLATE_SUBJECT,
+  REPLACEMENT_VARIABLES,
+} from "~/lib/constants";
+import { useUser } from "@clerk/nextjs";
+import { type Email, type Property } from "prisma/generated/zod";
+import { Badge } from "~/components/ui/badge";
 
 export default function EmailsPage({
   params,
 }: {
   params: { projectId: string; surveyId: string };
 }) {
+  const { user } = useUser();
   const { data: survey } = api.survey.getSurvey.useQuery({
     surveyId: params.surveyId,
   });
+  const { data: emailTemplate } = api.email.getEmailTemplate.useQuery();
 
   const emailIsOld = useCallback(
     (email: EmailThreadWithEmailsAndProperty) =>
@@ -31,16 +41,79 @@ export default function EmailsPage({
   const [emailThreads, setEmailThreads] = useState<
     EmailThreadWithEmailsAndProperty[]
   >([]);
-  useEffect(() => {
-    // if (survey) {
-    //   setEmailThreads(survey.properties[0]!.emailThreads);
-    // }
-  }, [survey]);
+  const generateDraftEmailThread = useCallback(
+    (property: Property) => {
+      const senderName = user?.fullName ?? "";
+      const senderEmail = user?.primaryEmailAddress?.emailAddress ?? "";
+      const recipientName = "Oliver Braly";
+      const recipientEmail = "oliverbraly@gmail.com";
 
-  const unsentEmails = useMemo(
-    () => emailThreads.filter((email) => email.draft),
-    [emailThreads],
+      const attributes = property.attributes as Record<string, string>;
+      const replacements = {
+        [REPLACEMENT_VARIABLES.name]: recipientName.split(" ")[0] ?? "",
+        [REPLACEMENT_VARIABLES.address]:
+          attributes.address?.split(",")[0] ?? "",
+      };
+      const subject = replaceTemplateVariables(
+        emailTemplate?.subject ?? DEFAULT_EMAIL_TEMPLATE_SUBJECT,
+        replacements,
+      );
+      const body = replaceTemplateVariables(
+        emailTemplate?.body ??
+          DEFAULT_EMAIL_TEMPLATE_BODY(user?.fullName ?? ""),
+        replacements,
+      );
+
+      const email: Email = {
+        id: property.id + "-draft-0",
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        subject,
+        body,
+        senderName,
+        senderEmail,
+        recipientName,
+        recipientEmail,
+        webLink: "",
+        emailThreadId: property.id + "-draft",
+      };
+
+      return {
+        id: property.id + "-draft",
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        propertyId: property.id,
+        property,
+        emails: [email],
+        draft: true,
+        unread: false,
+        completed: false,
+        moreInfoNeeded: false,
+        parsedAttributes: null,
+      };
+    },
+    [emailTemplate, user],
   );
+  useEffect(() => {
+    if (survey && user) {
+      const threads = [];
+      for (const property of survey.properties) {
+        if (property.emailThreads.length === 0) {
+          // Add draft thread
+          threads.push(generateDraftEmailThread(property));
+        } else {
+          for (const thread of property.emailThreads) {
+            threads.push({ ...thread, property });
+          }
+        }
+      }
+      setEmailThreads(threads);
+    }
+  }, [generateDraftEmailThread, survey, user]);
+
+  const unsentEmails = useMemo(() => {
+    return emailThreads.filter((email) => email.draft);
+  }, [emailThreads]);
   const completedEmails = useMemo(
     () => emailThreads.filter((email) => email.completed),
     [emailThreads],
@@ -84,28 +157,30 @@ export default function EmailsPage({
     [needsFollowUpSet],
   );
 
-  const [categories, setCategories] = useState([
-    {
-      name: "Unsent",
-      emails: unsentEmails,
-      expanded: true,
-    },
-    {
-      name: "Pending",
-      emails: pendingEmails,
-      expanded: false,
-    },
-    {
-      name: "Needs follow-up",
-      emails: needsFollowUpEmails,
-      expanded: false,
-    },
-    {
-      name: "Completed",
-      emails: completedEmails,
-      expanded: false,
-    },
-  ]);
+  const categories = useMemo(
+    () => [
+      {
+        name: "Unsent",
+        emails: unsentEmails,
+      },
+      {
+        name: "Pending",
+        emails: pendingEmails,
+      },
+      {
+        name: "Needs follow-up",
+        emails: needsFollowUpEmails,
+      },
+      {
+        name: "Completed",
+        emails: completedEmails,
+      },
+    ],
+    [unsentEmails, pendingEmails, needsFollowUpEmails, completedEmails],
+  );
+  const [categoriesExpanded, setCategoriesExpanded] = useState<boolean[]>(
+    Array(categories.length).fill(false),
+  );
 
   const [selectedThread, setSelectedThread] =
     useState<EmailThreadWithEmailsAndProperty | null>(null);
@@ -116,29 +191,33 @@ export default function EmailsPage({
     <>
       <div className="grid size-full grid-cols-[400px_1fr]">
         <div className="flex w-full max-w-3xl flex-col gap-2 overflow-y-auto border-r p-2">
-          {categories.map((category) => (
+          {categories.map((category, index) => (
             <React.Fragment key={category.name}>
               <Button
                 variant="ghost"
                 className="flex w-full items-center justify-between"
+                disabled={category.emails.length === 0}
                 onClick={() =>
-                  setCategories((prev) =>
-                    prev.map((c) =>
-                      c.name === category.name
-                        ? { ...c, expanded: !c.expanded }
-                        : c,
-                    ),
-                  )
+                  setCategoriesExpanded((prev) => {
+                    const newExpanded = [...prev];
+                    newExpanded[index] = !newExpanded[index];
+                    return newExpanded;
+                  })
                 }
               >
-                {category.name}
-                {category.expanded ? (
+                <div className="flex items-center gap-2">
+                  {category.name}
+                  {category.emails.length > 0 && (
+                    <Badge variant="outline">{category.emails.length}</Badge>
+                  )}
+                </div>
+                {categoriesExpanded[index] ? (
                   <ChevronUpIcon className="size-4" />
                 ) : (
                   <ChevronDownIcon className="size-4" />
                 )}
               </Button>
-              {category.expanded && (
+              {categoriesExpanded[index] && (
                 <>
                   {category.emails?.map((thread) => (
                     <EmailCard
