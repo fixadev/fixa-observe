@@ -29,19 +29,17 @@ export const propertyRouter = createTRPCRouter({
       );
     }),
 
-  addBrochureToProperty: protectedProcedure
+  createBrochure: protectedProcedure
     .input(
       z.object({
         propertyId: z.string(),
-        brochureUrl: z.string(),
-        brochureTitle: z.string(),
+        brochure: brochureSchema,
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      return await propertyServiceInstance.addBrochure(
+      return await propertyServiceInstance.createBrochure(
         input.propertyId,
-        input.brochureUrl,
-        input.brochureTitle,
+        input.brochure,
         ctx.user.id,
       );
     }),

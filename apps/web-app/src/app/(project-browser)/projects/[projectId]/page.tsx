@@ -18,6 +18,7 @@ import { useRouter } from "next/navigation";
 import { api } from "~/trpc/react";
 import { useEffect, useState } from "react";
 import { BreadcrumbsFromPath } from "~/components/BreadcrumbsFromPath";
+import Spinner from "~/components/Spinner";
 
 export default function ProjectPage({
   params,
@@ -26,6 +27,7 @@ export default function ProjectPage({
 }) {
   const router = useRouter();
   const [newSurveyName, setNewSurveyName] = useState("");
+  const [creatingSurvey, setCreatingSurvey] = useState(false);
   const [surveys, setSurveys] = useState<Array<{ id: string; name: string }>>(
     [],
   );
@@ -49,6 +51,7 @@ export default function ProjectPage({
   });
 
   const handleCreateSurvey = () => {
+    setCreatingSurvey(true);
     createSurvey({ surveyName: newSurveyName, projectId: params.projectId });
     setSurveys([...surveys, { id: "1", name: newSurveyName }]);
   };
@@ -82,19 +85,30 @@ export default function ProjectPage({
               <div className="flex flex-col gap-2 py-4">
                 <div className="flex flex-col gap-2">
                   <Label htmlFor="survey-name">Survey name</Label>
-                  <Input
-                    id="survey-name"
-                    value={newSurveyName}
-                    onChange={(e) => setNewSurveyName(e.target.value)}
-                    placeholder="Palo Alto survey"
-                    autoComplete="off"
-                  />
+                  {creatingSurvey ? (
+                    <div className="flex items-center gap-2">
+                      Creating survey...
+                      <Spinner />
+                    </div>
+                  ) : (
+                    <Input
+                      id="survey-name"
+                      value={newSurveyName}
+                      onChange={(e) => setNewSurveyName(e.target.value)}
+                      placeholder="Palo Alto survey"
+                      autoComplete="off"
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          handleCreateSurvey();
+                        }
+                      }}
+                    />
+                  )}
                 </div>
               </div>
               <DialogFooter>
-                <DialogClose asChild>
-                  <Button onClick={handleCreateSurvey}>Create</Button>
-                </DialogClose>
+                <Button onClick={handleCreateSurvey}>Create</Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>

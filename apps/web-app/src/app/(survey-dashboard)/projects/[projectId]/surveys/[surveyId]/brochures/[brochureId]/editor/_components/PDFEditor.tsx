@@ -47,6 +47,7 @@ export function PDFEditor({ brochureId }: { brochureId: string }) {
               console.log("PDF Blob: ", blob);
 
               const formData = new FormData();
+              // TODO: add title to file
               formData.append("file", blob, "annotated.pdf");
 
               const response = await fetch("/api/upload", {

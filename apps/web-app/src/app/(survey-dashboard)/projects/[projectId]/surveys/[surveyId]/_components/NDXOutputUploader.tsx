@@ -1,8 +1,6 @@
 /* eslint-disable @typescript-eslint/prefer-nullish-coalescing */
 "use client";
 import type React from "react";
-import { useRef } from "react";
-import { Button } from "~/components/ui/button";
 import { usePDFJS } from "./usePDFjs";
 import type PDFJS from "pdfjs-dist";
 import { type Property } from "./PropertiesTable";
@@ -12,7 +10,8 @@ import {
   type TextContent,
   type TextItem,
 } from "pdfjs-dist/types/src/display/api";
-const acceptablePDFFileTypes = "application/pdf";
+import { PDFInput } from "./PDFInput";
+import { Button } from "~/components/ui/button";
 
 export const NDXOutputUploader = ({
   surveyId,
@@ -61,10 +60,8 @@ export const NDXOutputUploader = ({
     return attributesOrder.find((attribute) => attribute.id === attributeId);
   };
 
-  const onFileChangeHandler = async (
-    event: React.ChangeEvent<HTMLInputElement>,
-  ) => {
-    const file = event.target.files?.[0];
+  const onFilesChangeHandler = async (files: FileList) => {
+    const file = files[0];
     if (file && pdfjs) {
       const parsedPDF = await parsePDF(file, pdfjs);
       const currentPropertiesEndIndex = existingProperties.length;
@@ -111,21 +108,11 @@ export const NDXOutputUploader = ({
     }
   };
 
-  const fileInputRef = useRef<HTMLInputElement | null>(null);
-  const handleButtonClick = () => {
-    fileInputRef.current?.click();
-  };
-
   return (
     <div className="flex flex-col items-center justify-center gap-3">
-      <Button onClick={handleButtonClick}>Upload NDX PDF</Button>
-      <input
-        ref={fileInputRef}
-        type="file"
-        id="csvFileSelector"
-        className="hidden"
-        accept={acceptablePDFFileTypes}
-        onChange={onFileChangeHandler}
+      <PDFInput
+        triggerElement={<Button>Upload NDX PDF</Button>}
+        handleFilesChange={onFilesChangeHandler}
       />
     </div>
   );
