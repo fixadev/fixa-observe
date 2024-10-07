@@ -117,20 +117,27 @@ export const DraggableRow = ({
         draggingRow={draggingRow}
         className="min-w-36"
       >
-        {photo ? (
-          <Image src={photo} alt="Property photo" width={100} height={120} />
-        ) : photoUploading ? (
+        {photoUploading ? (
           <div className="flex h-[100px] w-[120px] items-center justify-center">
             <Spinner className="size-5 text-gray-500" />
           </div>
         ) : (
           <FileInput
             accept="image/*"
-            className="h-[100px] w-[120px] rounded-md bg-gray-100 hover:cursor-pointer hover:bg-gray-200"
+            className="h-[100px] w-[120px] rounded-md hover:cursor-pointer"
             triggerElement={
-              <div className="flex size-full items-center justify-center">
-                <ImagePlusIcon className="size-8 text-gray-500" />
-              </div>
+              photo ? (
+                <Image
+                  src={photo}
+                  alt="Property photo"
+                  fill
+                  className="rounded-md object-cover p-2 pr-4"
+                />
+              ) : (
+                <div className="flex size-full items-center justify-center rounded-md bg-gray-100 hover:bg-gray-200">
+                  <ImagePlusIcon className="size-8 text-gray-500" />
+                </div>
+              )
             }
             handleFilesChange={handleUpload}
           />
