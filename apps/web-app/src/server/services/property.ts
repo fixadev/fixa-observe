@@ -208,8 +208,6 @@ export const propertyService = ({ db }: { db: PrismaClient }) => {
         throw new Error("Property not found");
       }
 
-      console.log("DELETE PROPERTY", propertyId);
-
       return db.property.delete({
         where: {
           id: propertyId,

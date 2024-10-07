@@ -16,11 +16,13 @@ export const DraggableHeader = ({
   renameAttribute,
   deleteAttribute,
   draggingRow,
+  disabled = false,
 }: {
   attribute: Attribute;
   renameAttribute: (name: string) => void;
   deleteAttribute: () => void;
   draggingRow: boolean;
+  disabled?: boolean;
 }) => {
   const [isEditing, setIsEditing] = useState(attribute.isNew ?? false);
 
@@ -48,6 +50,7 @@ export const DraggableHeader = ({
       <div className="flex items-center justify-between gap-2">
         {isEditing ? (
           <Input
+            disabled={disabled}
             defaultValue={attribute.label}
             onKeyDown={(e) => {
               if (e.key === "Enter") {
@@ -70,7 +73,7 @@ export const DraggableHeader = ({
           <Button
             size="icon"
             variant="ghost"
-            disabled={attribute.id === "address"}
+            disabled={disabled || attribute.id === "address"}
             onClick={deleteAttribute}
           >
             <TrashIcon className="size-4" />

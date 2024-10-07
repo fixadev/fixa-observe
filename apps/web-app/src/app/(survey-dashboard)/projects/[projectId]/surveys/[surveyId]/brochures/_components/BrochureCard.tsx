@@ -5,7 +5,7 @@ import { api } from "~/trpc/react";
 import { BrochureCarousel } from "./BrochureCarousel";
 import { useRouter } from "next/navigation";
 import { FilePlusIcon } from "lucide-react";
-import { PDFInput } from "../../_components/PDFInput";
+import { FileInput } from "../../../../../../../_components/FileInput";
 
 export function BrochureCard({ propertyId }: { propertyId: string }) {
   const { data: propertyData, refetch: refetchProperty } =
@@ -82,7 +82,7 @@ function UnapprovedBrochureCard({
         {brochure ? (
           <BrochureCarousel brochure={brochure} />
         ) : (
-          <PDFInput
+          <FileInput
             className="h-full w-full"
             triggerElement={
               <div className="flex h-full w-full flex-col items-center justify-center gap-4 rounded-lg bg-gray-100 p-6 text-center hover:cursor-pointer hover:bg-gray-200">
@@ -152,7 +152,7 @@ function BrochureSidebar({
           >
             Edit brochure
           </Button>
-          <PDFInput
+          <FileInput
             className="w-full"
             triggerElement={
               <Button className="w-full" variant={"outline"}>
@@ -166,7 +166,7 @@ function BrochureSidebar({
           </Button>
         </>
       ) : (
-        <PDFInput
+        <FileInput
           className="w-full"
           triggerElement={
             <Button className="w-full" variant={"outline"}>

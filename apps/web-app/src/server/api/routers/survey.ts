@@ -20,6 +20,7 @@ export const surveyRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       return await surveyServiceInstance.createSurvey(input, ctx.user.id);
     }),
+
   getProjectSurveys: protectedProcedure
     .input(z.object({ projectId: z.string() }))
     .query(async ({ ctx, input }) => {
@@ -105,7 +106,6 @@ export const surveyRouter = createTRPCRouter({
       return await surveyServiceInstance.updateSurvey(input, ctx.user.id);
     }),
 
-  
   // TODO: refactor this into 4 routes -- and update frontend to use the separate routes
   updateProperties: protectedProcedure
     .input(
@@ -137,7 +137,7 @@ export const surveyRouter = createTRPCRouter({
           ctx.user.id,
         );
       } else if (input.action === "add") {
-        console.log("PROPERTIES BEFORE FILTER", input.properties);
+        // console.log("PROPERTIES BEFORE FILTER", input.properties);
         const propertiesToCreate = input.properties
           .filter(
             (property) => typeof property === "object" && !("id" in property),
@@ -146,7 +146,7 @@ export const surveyRouter = createTRPCRouter({
             ...property,
             ownerId: ctx.user.id,
           }));
-        console.log("PROPERTIES TO CREATE", propertiesToCreate);
+        // console.log("PROPERTIES TO CREATE", propertiesToCreate);
         const propertyIds = await propertyServiceInstance.createProperties(
           propertiesToCreate,
           ctx.user.id,
@@ -157,7 +157,7 @@ export const surveyRouter = createTRPCRouter({
           ctx.user.id,
         );
       } else if (input.action === "update") {
-        console.log("UPDATING PROPERTY", input.propertyId);
+        // console.log("UPDATING PROPERTY", input.propertyId);
         const propertyToUpdate = input.properties.find(
           (property) => property.id === input.propertyId,
         );

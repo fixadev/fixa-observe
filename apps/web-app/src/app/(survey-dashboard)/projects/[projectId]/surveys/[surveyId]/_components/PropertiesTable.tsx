@@ -353,6 +353,22 @@ export function PropertiesTable({ surveyId }: { surveyId: string }) {
                     : horizontalListSortingStrategy
                 }
               >
+                <DraggableHeader
+                  key={crypto.randomUUID()}
+                  attribute={{
+                    id: crypto.randomUUID(),
+                    createdAt: new Date(),
+                    updatedAt: new Date(),
+                    type: "string",
+                    label: "Photo",
+                    ownerId: "",
+                    isNew: true,
+                  }}
+                  renameAttribute={(name) => {}}
+                  deleteAttribute={() => {}}
+                  draggingRow={draggingRow}
+                  disabled={true}
+                />
                 {attributesOrder.map((attribute) => (
                   <DraggableHeader
                     key={attribute.id}
@@ -384,6 +400,7 @@ export function PropertiesTable({ surveyId }: { surveyId: string }) {
               {properties.map((property) => {
                 return (
                   <DraggableRow
+                    photoUrl={property.photoUrl ?? ""}
                     key={property.id}
                     property={property}
                     attributes={attributesOrder}

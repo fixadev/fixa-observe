@@ -6,14 +6,19 @@ import { type CSSProperties } from "react";
 import { Button } from "@/components/ui/button";
 import { TableCell } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
-import { TrashIcon } from "lucide-react";
+import { ImagePlusIcon, TrashIcon } from "lucide-react";
 import { DragHandleDots2Icon } from "@radix-ui/react-icons";
 import { type Attribute, type Property } from "./PropertiesTable";
 import { DraggableCell } from "./DraggableCell";
 import { TableRow } from "@/components/ui/table";
 import { Textarea } from "~/components/ui/textarea";
+import Image from "next/image";
+import { FileInput } from "~/app/_components/FileInput";
+// import { PhotoIcon, PlusIcon } from "@heroicons/react/24/outline";
+import { PhotoIcon } from "@heroicons/react/24/solid";
 
 export const DraggableRow = ({
+  photoUrl,
   property,
   attributes,
   deleteProperty,
@@ -21,6 +26,7 @@ export const DraggableRow = ({
   setDraggingRow,
   updateProperty,
 }: {
+  photoUrl: string;
   property: Property;
   attributes: Attribute[];
   draggingRow: boolean;
@@ -47,6 +53,20 @@ export const DraggableRow = ({
     position: "relative",
   };
 
+  const handleUpload = (files: FileList) => {
+    console.log(files);
+  };
+
+  const attributesToMinWidth = {
+    comments: "min-w-72",
+    address: "min-w-64",
+    size: "min-w-32",
+    askingRate: "min-w-54",
+    divisibility: "min-w-48",
+    opex: "min-w-32",
+    directSubleases: "min-w-32",
+  };
+
   return (
     <TableRow ref={setNodeRef} style={style}>
       <TableCell
@@ -64,6 +84,26 @@ export const DraggableRow = ({
           {...listeners}
         />
       </TableCell>
+      <DraggableCell
+        key={crypto.randomUUID()}
+        id={crypto.randomUUID()}
+        draggingRow={draggingRow}
+        className="min-w-36"
+      >
+        {photoUrl ? (
+          <Image src={photoUrl} alt="Property photo" width={100} height={100} />
+        ) : (
+          <FileInput
+            className="h-[100px] w-[120px] rounded-md bg-gray-100 hover:cursor-pointer hover:bg-gray-200"
+            triggerElement={
+              <div className="flex size-full items-center justify-center">
+                <ImagePlusIcon className="size-8 text-gray-500" />
+              </div>
+            }
+            handleFilesChange={handleUpload}
+          />
+        )}
+      </DraggableCell>
       {attributes.map((attribute) => {
         return (
           <DraggableCell
@@ -75,6 +115,7 @@ export const DraggableRow = ({
             {attribute.id === "comments" ? (
               <Textarea
                 defaultValue={property.attributes?.comments ?? ""}
+                className="min-h-[90px]"
                 onChange={(e) => {
                   updateProperty({
                     ...property,
