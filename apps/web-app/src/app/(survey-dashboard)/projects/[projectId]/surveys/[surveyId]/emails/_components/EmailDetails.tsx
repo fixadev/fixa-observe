@@ -34,27 +34,47 @@ import {
 
 export default function EmailDetails({
   emailThread,
+  isSending,
   onOpenTemplateDialog,
+  onSend,
+  onReset,
 }: {
   emailThread: EmailThreadWithEmailsAndProperty;
+  isSending: boolean;
   onOpenTemplateDialog: () => void;
+  onSend: () => void;
+  onReset: () => void;
 }) {
   if (emailThread.draft) {
     return (
       <UnsentEmailDetails
         key={emailThread.id}
         emailThread={emailThread}
+        isSending={isSending}
         onOpenTemplateDialog={onOpenTemplateDialog}
+        onSend={onSend}
+        onReset={onReset}
       />
     );
   }
-  return <EmailThreadDetails key={emailThread.id} emailThread={emailThread} />;
+  return (
+    <EmailThreadDetails
+      key={emailThread.id}
+      emailThread={emailThread}
+      isSending={isSending}
+      onSend={onSend}
+    />
+  );
 }
 
 function EmailThreadDetails({
   emailThread,
+  isSending,
+  onSend,
 }: {
   emailThread: EmailThreadWithEmailsAndProperty;
+  isSending: boolean;
+  onSend: () => void;
 }) {
   const [expanded, setExpanded] = useState<boolean[]>(
     // Set the last email to be expanded
@@ -92,17 +112,25 @@ function EmailThreadDetails({
         }
       />
       <Textarea className="h-40 shrink-0" placeholder="Write a reply..." />
-      <Button className="self-start">Send</Button>
+      <Button className="self-start" onClick={onSend} disabled={isSending}>
+        {isSending ? <Spinner /> : "Send"}
+      </Button>
     </div>
   );
 }
 
 function UnsentEmailDetails({
   emailThread,
+  isSending,
   onOpenTemplateDialog,
+  onReset,
+  onSend,
 }: {
   emailThread: EmailThreadWithEmailsAndProperty;
+  isSending: boolean;
   onOpenTemplateDialog: () => void;
+  onReset: () => void;
+  onSend: () => void;
 }) {
   return (
     <div className="flex h-full flex-col gap-2 p-2 pb-8">
@@ -132,7 +160,14 @@ function UnsentEmailDetails({
         defaultValue={emailThread.emails[0]!.body}
       />
       <div className="mt-2 flex justify-between">
-        <Button>Send</Button>
+        <div className="flex gap-2">
+          <Button onClick={onSend} disabled={isSending}>
+            {isSending ? <Spinner /> : "Send"}
+          </Button>
+          <Button variant="outline" onClick={onReset}>
+            Reset
+          </Button>
+        </div>
         <Button variant="outline" onClick={onOpenTemplateDialog}>
           Edit template
         </Button>

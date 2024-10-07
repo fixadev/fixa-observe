@@ -187,6 +187,26 @@ export default function EmailsPage({
 
   const [templateDialog, setTemplateDialog] = useState(false);
 
+  const { mutateAsync: sendEmail, isPending: isSendingEmail } =
+    api.email.sendEmail.useMutation();
+  const handleSend = useCallback(
+    async (emailThread: EmailThreadWithEmailsAndProperty) => {
+      console.log("send", emailThread);
+      if (emailThread.draft) {
+        const email = emailThread.emails[emailThread.emails.length - 1]!;
+        await sendEmail({
+          to: email.recipientEmail,
+          subject: email.subject,
+          body: email.body,
+          propertyId: emailThread.propertyId,
+        });
+      } else {
+        // TODO: Reply to email
+      }
+    },
+    [sendEmail],
+  );
+
   return (
     <>
       <div className="grid size-full grid-cols-[400px_1fr]">
@@ -242,7 +262,12 @@ export default function EmailsPage({
           {selectedThread ? (
             <EmailDetails
               emailThread={selectedThread}
+              isSending={isSendingEmail}
               onOpenTemplateDialog={() => setTemplateDialog(true)}
+              onSend={() => handleSend(selectedThread)}
+              onReset={() => {
+                console.log("reset");
+              }}
             />
           ) : (
             <div className="flex h-full items-center justify-center">

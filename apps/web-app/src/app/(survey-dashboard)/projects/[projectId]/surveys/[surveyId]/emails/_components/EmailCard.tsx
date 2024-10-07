@@ -95,7 +95,6 @@ export default function EmailCard({
             <div
               className={cn(
                 "overflow-hidden truncate text-sm text-muted-foreground",
-                draft ? "italic" : "",
               )}
             >
               {email.body}
