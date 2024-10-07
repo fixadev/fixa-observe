@@ -56,7 +56,7 @@ export type InputJsonValueType = z.infer<typeof InputJsonValueSchema>;
 
 export const TransactionIsolationLevelSchema = z.enum(['ReadUncommitted','ReadCommitted','RepeatableRead','Serializable']);
 
-export const UserScalarFieldEnumSchema = z.enum(['id','email','firstName','lastName']);
+export const UserScalarFieldEnumSchema = z.enum(['id','email','firstName','lastName','emailSubscriptionId','emailSubscriptionExpiresAt']);
 
 export const ProjectScalarFieldEnumSchema = z.enum(['id','ownerId','name','createdAt','updatedAt']);
 
@@ -100,6 +100,8 @@ export const UserSchema = z.object({
   email: z.string(),
   firstName: z.string().nullable(),
   lastName: z.string().nullable(),
+  emailSubscriptionId: z.string().nullable(),
+  emailSubscriptionExpiresAt: z.coerce.date().nullable(),
 })
 
 export type User = z.infer<typeof UserSchema>
@@ -302,6 +304,8 @@ export const UserSelectSchema: z.ZodType<Prisma.UserSelect> = z.object({
   email: z.boolean().optional(),
   firstName: z.boolean().optional(),
   lastName: z.boolean().optional(),
+  emailSubscriptionId: z.boolean().optional(),
+  emailSubscriptionExpiresAt: z.boolean().optional(),
   projects: z.union([z.boolean(),z.lazy(() => ProjectFindManyArgsSchema)]).optional(),
   properties: z.union([z.boolean(),z.lazy(() => PropertyFindManyArgsSchema)]).optional(),
   attributes: z.union([z.boolean(),z.lazy(() => AttributeFindManyArgsSchema)]).optional(),
@@ -628,6 +632,8 @@ export const UserWhereInputSchema: z.ZodType<Prisma.UserWhereInput> = z.object({
   email: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   firstName: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
   lastName: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
+  emailSubscriptionId: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
+  emailSubscriptionExpiresAt: z.union([ z.lazy(() => DateTimeNullableFilterSchema),z.coerce.date() ]).optional().nullable(),
   projects: z.lazy(() => ProjectListRelationFilterSchema).optional(),
   properties: z.lazy(() => PropertyListRelationFilterSchema).optional(),
   attributes: z.lazy(() => AttributeListRelationFilterSchema).optional(),
@@ -639,6 +645,8 @@ export const UserOrderByWithRelationInputSchema: z.ZodType<Prisma.UserOrderByWit
   email: z.lazy(() => SortOrderSchema).optional(),
   firstName: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
   lastName: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
+  emailSubscriptionId: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
+  emailSubscriptionExpiresAt: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
   projects: z.lazy(() => ProjectOrderByRelationAggregateInputSchema).optional(),
   properties: z.lazy(() => PropertyOrderByRelationAggregateInputSchema).optional(),
   attributes: z.lazy(() => AttributeOrderByRelationAggregateInputSchema).optional(),
@@ -665,6 +673,8 @@ export const UserWhereUniqueInputSchema: z.ZodType<Prisma.UserWhereUniqueInput> 
   NOT: z.union([ z.lazy(() => UserWhereInputSchema),z.lazy(() => UserWhereInputSchema).array() ]).optional(),
   firstName: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
   lastName: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
+  emailSubscriptionId: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
+  emailSubscriptionExpiresAt: z.union([ z.lazy(() => DateTimeNullableFilterSchema),z.coerce.date() ]).optional().nullable(),
   projects: z.lazy(() => ProjectListRelationFilterSchema).optional(),
   properties: z.lazy(() => PropertyListRelationFilterSchema).optional(),
   attributes: z.lazy(() => AttributeListRelationFilterSchema).optional(),
@@ -676,6 +686,8 @@ export const UserOrderByWithAggregationInputSchema: z.ZodType<Prisma.UserOrderBy
   email: z.lazy(() => SortOrderSchema).optional(),
   firstName: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
   lastName: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
+  emailSubscriptionId: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
+  emailSubscriptionExpiresAt: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
   _count: z.lazy(() => UserCountOrderByAggregateInputSchema).optional(),
   _max: z.lazy(() => UserMaxOrderByAggregateInputSchema).optional(),
   _min: z.lazy(() => UserMinOrderByAggregateInputSchema).optional()
@@ -689,6 +701,8 @@ export const UserScalarWhereWithAggregatesInputSchema: z.ZodType<Prisma.UserScal
   email: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
   firstName: z.union([ z.lazy(() => StringNullableWithAggregatesFilterSchema),z.string() ]).optional().nullable(),
   lastName: z.union([ z.lazy(() => StringNullableWithAggregatesFilterSchema),z.string() ]).optional().nullable(),
+  emailSubscriptionId: z.union([ z.lazy(() => StringNullableWithAggregatesFilterSchema),z.string() ]).optional().nullable(),
+  emailSubscriptionExpiresAt: z.union([ z.lazy(() => DateTimeNullableWithAggregatesFilterSchema),z.coerce.date() ]).optional().nullable(),
 }).strict();
 
 export const ProjectWhereInputSchema: z.ZodType<Prisma.ProjectWhereInput> = z.object({
@@ -1434,6 +1448,8 @@ export const UserCreateInputSchema: z.ZodType<Prisma.UserCreateInput> = z.object
   email: z.string(),
   firstName: z.string().optional().nullable(),
   lastName: z.string().optional().nullable(),
+  emailSubscriptionId: z.string().optional().nullable(),
+  emailSubscriptionExpiresAt: z.coerce.date().optional().nullable(),
   projects: z.lazy(() => ProjectCreateNestedManyWithoutOwnerInputSchema).optional(),
   properties: z.lazy(() => PropertyCreateNestedManyWithoutOwnerInputSchema).optional(),
   attributes: z.lazy(() => AttributeCreateNestedManyWithoutOwnerInputSchema).optional(),
@@ -1445,6 +1461,8 @@ export const UserUncheckedCreateInputSchema: z.ZodType<Prisma.UserUncheckedCreat
   email: z.string(),
   firstName: z.string().optional().nullable(),
   lastName: z.string().optional().nullable(),
+  emailSubscriptionId: z.string().optional().nullable(),
+  emailSubscriptionExpiresAt: z.coerce.date().optional().nullable(),
   projects: z.lazy(() => ProjectUncheckedCreateNestedManyWithoutOwnerInputSchema).optional(),
   properties: z.lazy(() => PropertyUncheckedCreateNestedManyWithoutOwnerInputSchema).optional(),
   attributes: z.lazy(() => AttributeUncheckedCreateNestedManyWithoutOwnerInputSchema).optional(),
@@ -1456,6 +1474,8 @@ export const UserUpdateInputSchema: z.ZodType<Prisma.UserUpdateInput> = z.object
   email: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   firstName: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   lastName: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  emailSubscriptionId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  emailSubscriptionExpiresAt: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   projects: z.lazy(() => ProjectUpdateManyWithoutOwnerNestedInputSchema).optional(),
   properties: z.lazy(() => PropertyUpdateManyWithoutOwnerNestedInputSchema).optional(),
   attributes: z.lazy(() => AttributeUpdateManyWithoutOwnerNestedInputSchema).optional(),
@@ -1467,6 +1487,8 @@ export const UserUncheckedUpdateInputSchema: z.ZodType<Prisma.UserUncheckedUpdat
   email: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   firstName: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   lastName: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  emailSubscriptionId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  emailSubscriptionExpiresAt: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   projects: z.lazy(() => ProjectUncheckedUpdateManyWithoutOwnerNestedInputSchema).optional(),
   properties: z.lazy(() => PropertyUncheckedUpdateManyWithoutOwnerNestedInputSchema).optional(),
   attributes: z.lazy(() => AttributeUncheckedUpdateManyWithoutOwnerNestedInputSchema).optional(),
@@ -1477,7 +1499,9 @@ export const UserCreateManyInputSchema: z.ZodType<Prisma.UserCreateManyInput> = 
   id: z.string(),
   email: z.string(),
   firstName: z.string().optional().nullable(),
-  lastName: z.string().optional().nullable()
+  lastName: z.string().optional().nullable(),
+  emailSubscriptionId: z.string().optional().nullable(),
+  emailSubscriptionExpiresAt: z.coerce.date().optional().nullable()
 }).strict();
 
 export const UserUpdateManyMutationInputSchema: z.ZodType<Prisma.UserUpdateManyMutationInput> = z.object({
@@ -1485,6 +1509,8 @@ export const UserUpdateManyMutationInputSchema: z.ZodType<Prisma.UserUpdateManyM
   email: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   firstName: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   lastName: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  emailSubscriptionId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  emailSubscriptionExpiresAt: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
 }).strict();
 
 export const UserUncheckedUpdateManyInputSchema: z.ZodType<Prisma.UserUncheckedUpdateManyInput> = z.object({
@@ -1492,6 +1518,8 @@ export const UserUncheckedUpdateManyInputSchema: z.ZodType<Prisma.UserUncheckedU
   email: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   firstName: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   lastName: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  emailSubscriptionId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  emailSubscriptionExpiresAt: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
 }).strict();
 
 export const ProjectCreateInputSchema: z.ZodType<Prisma.ProjectCreateInput> = z.object({
@@ -2265,6 +2293,17 @@ export const StringNullableFilterSchema: z.ZodType<Prisma.StringNullableFilter> 
   not: z.union([ z.string(),z.lazy(() => NestedStringNullableFilterSchema) ]).optional().nullable(),
 }).strict();
 
+export const DateTimeNullableFilterSchema: z.ZodType<Prisma.DateTimeNullableFilter> = z.object({
+  equals: z.coerce.date().optional().nullable(),
+  in: z.coerce.date().array().optional().nullable(),
+  notIn: z.coerce.date().array().optional().nullable(),
+  lt: z.coerce.date().optional(),
+  lte: z.coerce.date().optional(),
+  gt: z.coerce.date().optional(),
+  gte: z.coerce.date().optional(),
+  not: z.union([ z.coerce.date(),z.lazy(() => NestedDateTimeNullableFilterSchema) ]).optional().nullable(),
+}).strict();
+
 export const ProjectListRelationFilterSchema: z.ZodType<Prisma.ProjectListRelationFilter> = z.object({
   every: z.lazy(() => ProjectWhereInputSchema).optional(),
   some: z.lazy(() => ProjectWhereInputSchema).optional(),
@@ -2309,21 +2348,27 @@ export const UserCountOrderByAggregateInputSchema: z.ZodType<Prisma.UserCountOrd
   id: z.lazy(() => SortOrderSchema).optional(),
   email: z.lazy(() => SortOrderSchema).optional(),
   firstName: z.lazy(() => SortOrderSchema).optional(),
-  lastName: z.lazy(() => SortOrderSchema).optional()
+  lastName: z.lazy(() => SortOrderSchema).optional(),
+  emailSubscriptionId: z.lazy(() => SortOrderSchema).optional(),
+  emailSubscriptionExpiresAt: z.lazy(() => SortOrderSchema).optional()
 }).strict();
 
 export const UserMaxOrderByAggregateInputSchema: z.ZodType<Prisma.UserMaxOrderByAggregateInput> = z.object({
   id: z.lazy(() => SortOrderSchema).optional(),
   email: z.lazy(() => SortOrderSchema).optional(),
   firstName: z.lazy(() => SortOrderSchema).optional(),
-  lastName: z.lazy(() => SortOrderSchema).optional()
+  lastName: z.lazy(() => SortOrderSchema).optional(),
+  emailSubscriptionId: z.lazy(() => SortOrderSchema).optional(),
+  emailSubscriptionExpiresAt: z.lazy(() => SortOrderSchema).optional()
 }).strict();
 
 export const UserMinOrderByAggregateInputSchema: z.ZodType<Prisma.UserMinOrderByAggregateInput> = z.object({
   id: z.lazy(() => SortOrderSchema).optional(),
   email: z.lazy(() => SortOrderSchema).optional(),
   firstName: z.lazy(() => SortOrderSchema).optional(),
-  lastName: z.lazy(() => SortOrderSchema).optional()
+  lastName: z.lazy(() => SortOrderSchema).optional(),
+  emailSubscriptionId: z.lazy(() => SortOrderSchema).optional(),
+  emailSubscriptionExpiresAt: z.lazy(() => SortOrderSchema).optional()
 }).strict();
 
 export const StringWithAggregatesFilterSchema: z.ZodType<Prisma.StringWithAggregatesFilter> = z.object({
@@ -2360,6 +2405,20 @@ export const StringNullableWithAggregatesFilterSchema: z.ZodType<Prisma.StringNu
   _count: z.lazy(() => NestedIntNullableFilterSchema).optional(),
   _min: z.lazy(() => NestedStringNullableFilterSchema).optional(),
   _max: z.lazy(() => NestedStringNullableFilterSchema).optional()
+}).strict();
+
+export const DateTimeNullableWithAggregatesFilterSchema: z.ZodType<Prisma.DateTimeNullableWithAggregatesFilter> = z.object({
+  equals: z.coerce.date().optional().nullable(),
+  in: z.coerce.date().array().optional().nullable(),
+  notIn: z.coerce.date().array().optional().nullable(),
+  lt: z.coerce.date().optional(),
+  lte: z.coerce.date().optional(),
+  gt: z.coerce.date().optional(),
+  gte: z.coerce.date().optional(),
+  not: z.union([ z.coerce.date(),z.lazy(() => NestedDateTimeNullableWithAggregatesFilterSchema) ]).optional().nullable(),
+  _count: z.lazy(() => NestedIntNullableFilterSchema).optional(),
+  _min: z.lazy(() => NestedDateTimeNullableFilterSchema).optional(),
+  _max: z.lazy(() => NestedDateTimeNullableFilterSchema).optional()
 }).strict();
 
 export const DateTimeFilterSchema: z.ZodType<Prisma.DateTimeFilter> = z.object({
@@ -2944,6 +3003,10 @@ export const StringFieldUpdateOperationsInputSchema: z.ZodType<Prisma.StringFiel
 
 export const NullableStringFieldUpdateOperationsInputSchema: z.ZodType<Prisma.NullableStringFieldUpdateOperationsInput> = z.object({
   set: z.string().optional().nullable()
+}).strict();
+
+export const NullableDateTimeFieldUpdateOperationsInputSchema: z.ZodType<Prisma.NullableDateTimeFieldUpdateOperationsInput> = z.object({
+  set: z.coerce.date().optional().nullable()
 }).strict();
 
 export const ProjectUpdateManyWithoutOwnerNestedInputSchema: z.ZodType<Prisma.ProjectUpdateManyWithoutOwnerNestedInput> = z.object({
@@ -3609,6 +3672,17 @@ export const NestedStringNullableFilterSchema: z.ZodType<Prisma.NestedStringNull
   not: z.union([ z.string(),z.lazy(() => NestedStringNullableFilterSchema) ]).optional().nullable(),
 }).strict();
 
+export const NestedDateTimeNullableFilterSchema: z.ZodType<Prisma.NestedDateTimeNullableFilter> = z.object({
+  equals: z.coerce.date().optional().nullable(),
+  in: z.coerce.date().array().optional().nullable(),
+  notIn: z.coerce.date().array().optional().nullable(),
+  lt: z.coerce.date().optional(),
+  lte: z.coerce.date().optional(),
+  gt: z.coerce.date().optional(),
+  gte: z.coerce.date().optional(),
+  not: z.union([ z.coerce.date(),z.lazy(() => NestedDateTimeNullableFilterSchema) ]).optional().nullable(),
+}).strict();
+
 export const NestedStringWithAggregatesFilterSchema: z.ZodType<Prisma.NestedStringWithAggregatesFilter> = z.object({
   equals: z.string().optional(),
   in: z.string().array().optional(),
@@ -3663,6 +3737,20 @@ export const NestedIntNullableFilterSchema: z.ZodType<Prisma.NestedIntNullableFi
   gt: z.number().optional(),
   gte: z.number().optional(),
   not: z.union([ z.number(),z.lazy(() => NestedIntNullableFilterSchema) ]).optional().nullable(),
+}).strict();
+
+export const NestedDateTimeNullableWithAggregatesFilterSchema: z.ZodType<Prisma.NestedDateTimeNullableWithAggregatesFilter> = z.object({
+  equals: z.coerce.date().optional().nullable(),
+  in: z.coerce.date().array().optional().nullable(),
+  notIn: z.coerce.date().array().optional().nullable(),
+  lt: z.coerce.date().optional(),
+  lte: z.coerce.date().optional(),
+  gt: z.coerce.date().optional(),
+  gte: z.coerce.date().optional(),
+  not: z.union([ z.coerce.date(),z.lazy(() => NestedDateTimeNullableWithAggregatesFilterSchema) ]).optional().nullable(),
+  _count: z.lazy(() => NestedIntNullableFilterSchema).optional(),
+  _min: z.lazy(() => NestedDateTimeNullableFilterSchema).optional(),
+  _max: z.lazy(() => NestedDateTimeNullableFilterSchema).optional()
 }).strict();
 
 export const NestedDateTimeFilterSchema: z.ZodType<Prisma.NestedDateTimeFilter> = z.object({
@@ -3978,6 +4066,8 @@ export const UserCreateWithoutProjectsInputSchema: z.ZodType<Prisma.UserCreateWi
   email: z.string(),
   firstName: z.string().optional().nullable(),
   lastName: z.string().optional().nullable(),
+  emailSubscriptionId: z.string().optional().nullable(),
+  emailSubscriptionExpiresAt: z.coerce.date().optional().nullable(),
   properties: z.lazy(() => PropertyCreateNestedManyWithoutOwnerInputSchema).optional(),
   attributes: z.lazy(() => AttributeCreateNestedManyWithoutOwnerInputSchema).optional(),
   emailTemplate: z.lazy(() => EmailTemplateCreateNestedOneWithoutUserInputSchema).optional()
@@ -3988,6 +4078,8 @@ export const UserUncheckedCreateWithoutProjectsInputSchema: z.ZodType<Prisma.Use
   email: z.string(),
   firstName: z.string().optional().nullable(),
   lastName: z.string().optional().nullable(),
+  emailSubscriptionId: z.string().optional().nullable(),
+  emailSubscriptionExpiresAt: z.coerce.date().optional().nullable(),
   properties: z.lazy(() => PropertyUncheckedCreateNestedManyWithoutOwnerInputSchema).optional(),
   attributes: z.lazy(() => AttributeUncheckedCreateNestedManyWithoutOwnerInputSchema).optional(),
   emailTemplate: z.lazy(() => EmailTemplateUncheckedCreateNestedOneWithoutUserInputSchema).optional()
@@ -4044,6 +4136,8 @@ export const UserUpdateWithoutProjectsInputSchema: z.ZodType<Prisma.UserUpdateWi
   email: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   firstName: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   lastName: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  emailSubscriptionId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  emailSubscriptionExpiresAt: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   properties: z.lazy(() => PropertyUpdateManyWithoutOwnerNestedInputSchema).optional(),
   attributes: z.lazy(() => AttributeUpdateManyWithoutOwnerNestedInputSchema).optional(),
   emailTemplate: z.lazy(() => EmailTemplateUpdateOneWithoutUserNestedInputSchema).optional()
@@ -4054,6 +4148,8 @@ export const UserUncheckedUpdateWithoutProjectsInputSchema: z.ZodType<Prisma.Use
   email: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   firstName: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   lastName: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  emailSubscriptionId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  emailSubscriptionExpiresAt: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   properties: z.lazy(() => PropertyUncheckedUpdateManyWithoutOwnerNestedInputSchema).optional(),
   attributes: z.lazy(() => AttributeUncheckedUpdateManyWithoutOwnerNestedInputSchema).optional(),
   emailTemplate: z.lazy(() => EmailTemplateUncheckedUpdateOneWithoutUserNestedInputSchema).optional()
@@ -4246,6 +4342,8 @@ export const UserCreateWithoutAttributesInputSchema: z.ZodType<Prisma.UserCreate
   email: z.string(),
   firstName: z.string().optional().nullable(),
   lastName: z.string().optional().nullable(),
+  emailSubscriptionId: z.string().optional().nullable(),
+  emailSubscriptionExpiresAt: z.coerce.date().optional().nullable(),
   projects: z.lazy(() => ProjectCreateNestedManyWithoutOwnerInputSchema).optional(),
   properties: z.lazy(() => PropertyCreateNestedManyWithoutOwnerInputSchema).optional(),
   emailTemplate: z.lazy(() => EmailTemplateCreateNestedOneWithoutUserInputSchema).optional()
@@ -4256,6 +4354,8 @@ export const UserUncheckedCreateWithoutAttributesInputSchema: z.ZodType<Prisma.U
   email: z.string(),
   firstName: z.string().optional().nullable(),
   lastName: z.string().optional().nullable(),
+  emailSubscriptionId: z.string().optional().nullable(),
+  emailSubscriptionExpiresAt: z.coerce.date().optional().nullable(),
   projects: z.lazy(() => ProjectUncheckedCreateNestedManyWithoutOwnerInputSchema).optional(),
   properties: z.lazy(() => PropertyUncheckedCreateNestedManyWithoutOwnerInputSchema).optional(),
   emailTemplate: z.lazy(() => EmailTemplateUncheckedCreateNestedOneWithoutUserInputSchema).optional()
@@ -4308,6 +4408,8 @@ export const UserUpdateWithoutAttributesInputSchema: z.ZodType<Prisma.UserUpdate
   email: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   firstName: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   lastName: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  emailSubscriptionId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  emailSubscriptionExpiresAt: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   projects: z.lazy(() => ProjectUpdateManyWithoutOwnerNestedInputSchema).optional(),
   properties: z.lazy(() => PropertyUpdateManyWithoutOwnerNestedInputSchema).optional(),
   emailTemplate: z.lazy(() => EmailTemplateUpdateOneWithoutUserNestedInputSchema).optional()
@@ -4318,6 +4420,8 @@ export const UserUncheckedUpdateWithoutAttributesInputSchema: z.ZodType<Prisma.U
   email: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   firstName: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   lastName: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  emailSubscriptionId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  emailSubscriptionExpiresAt: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   projects: z.lazy(() => ProjectUncheckedUpdateManyWithoutOwnerNestedInputSchema).optional(),
   properties: z.lazy(() => PropertyUncheckedUpdateManyWithoutOwnerNestedInputSchema).optional(),
   emailTemplate: z.lazy(() => EmailTemplateUncheckedUpdateOneWithoutUserNestedInputSchema).optional()
@@ -4452,6 +4556,8 @@ export const UserCreateWithoutPropertiesInputSchema: z.ZodType<Prisma.UserCreate
   email: z.string(),
   firstName: z.string().optional().nullable(),
   lastName: z.string().optional().nullable(),
+  emailSubscriptionId: z.string().optional().nullable(),
+  emailSubscriptionExpiresAt: z.coerce.date().optional().nullable(),
   projects: z.lazy(() => ProjectCreateNestedManyWithoutOwnerInputSchema).optional(),
   attributes: z.lazy(() => AttributeCreateNestedManyWithoutOwnerInputSchema).optional(),
   emailTemplate: z.lazy(() => EmailTemplateCreateNestedOneWithoutUserInputSchema).optional()
@@ -4462,6 +4568,8 @@ export const UserUncheckedCreateWithoutPropertiesInputSchema: z.ZodType<Prisma.U
   email: z.string(),
   firstName: z.string().optional().nullable(),
   lastName: z.string().optional().nullable(),
+  emailSubscriptionId: z.string().optional().nullable(),
+  emailSubscriptionExpiresAt: z.coerce.date().optional().nullable(),
   projects: z.lazy(() => ProjectUncheckedCreateNestedManyWithoutOwnerInputSchema).optional(),
   attributes: z.lazy(() => AttributeUncheckedCreateNestedManyWithoutOwnerInputSchema).optional(),
   emailTemplate: z.lazy(() => EmailTemplateUncheckedCreateNestedOneWithoutUserInputSchema).optional()
@@ -4605,6 +4713,8 @@ export const UserUpdateWithoutPropertiesInputSchema: z.ZodType<Prisma.UserUpdate
   email: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   firstName: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   lastName: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  emailSubscriptionId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  emailSubscriptionExpiresAt: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   projects: z.lazy(() => ProjectUpdateManyWithoutOwnerNestedInputSchema).optional(),
   attributes: z.lazy(() => AttributeUpdateManyWithoutOwnerNestedInputSchema).optional(),
   emailTemplate: z.lazy(() => EmailTemplateUpdateOneWithoutUserNestedInputSchema).optional()
@@ -4615,6 +4725,8 @@ export const UserUncheckedUpdateWithoutPropertiesInputSchema: z.ZodType<Prisma.U
   email: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   firstName: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   lastName: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  emailSubscriptionId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  emailSubscriptionExpiresAt: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   projects: z.lazy(() => ProjectUncheckedUpdateManyWithoutOwnerNestedInputSchema).optional(),
   attributes: z.lazy(() => AttributeUncheckedUpdateManyWithoutOwnerNestedInputSchema).optional(),
   emailTemplate: z.lazy(() => EmailTemplateUncheckedUpdateOneWithoutUserNestedInputSchema).optional()
@@ -5083,6 +5195,8 @@ export const UserCreateWithoutEmailTemplateInputSchema: z.ZodType<Prisma.UserCre
   email: z.string(),
   firstName: z.string().optional().nullable(),
   lastName: z.string().optional().nullable(),
+  emailSubscriptionId: z.string().optional().nullable(),
+  emailSubscriptionExpiresAt: z.coerce.date().optional().nullable(),
   projects: z.lazy(() => ProjectCreateNestedManyWithoutOwnerInputSchema).optional(),
   properties: z.lazy(() => PropertyCreateNestedManyWithoutOwnerInputSchema).optional(),
   attributes: z.lazy(() => AttributeCreateNestedManyWithoutOwnerInputSchema).optional()
@@ -5093,6 +5207,8 @@ export const UserUncheckedCreateWithoutEmailTemplateInputSchema: z.ZodType<Prism
   email: z.string(),
   firstName: z.string().optional().nullable(),
   lastName: z.string().optional().nullable(),
+  emailSubscriptionId: z.string().optional().nullable(),
+  emailSubscriptionExpiresAt: z.coerce.date().optional().nullable(),
   projects: z.lazy(() => ProjectUncheckedCreateNestedManyWithoutOwnerInputSchema).optional(),
   properties: z.lazy(() => PropertyUncheckedCreateNestedManyWithoutOwnerInputSchema).optional(),
   attributes: z.lazy(() => AttributeUncheckedCreateNestedManyWithoutOwnerInputSchema).optional()
@@ -5119,6 +5235,8 @@ export const UserUpdateWithoutEmailTemplateInputSchema: z.ZodType<Prisma.UserUpd
   email: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   firstName: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   lastName: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  emailSubscriptionId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  emailSubscriptionExpiresAt: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   projects: z.lazy(() => ProjectUpdateManyWithoutOwnerNestedInputSchema).optional(),
   properties: z.lazy(() => PropertyUpdateManyWithoutOwnerNestedInputSchema).optional(),
   attributes: z.lazy(() => AttributeUpdateManyWithoutOwnerNestedInputSchema).optional()
@@ -5129,6 +5247,8 @@ export const UserUncheckedUpdateWithoutEmailTemplateInputSchema: z.ZodType<Prism
   email: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   firstName: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   lastName: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  emailSubscriptionId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  emailSubscriptionExpiresAt: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   projects: z.lazy(() => ProjectUncheckedUpdateManyWithoutOwnerNestedInputSchema).optional(),
   properties: z.lazy(() => PropertyUncheckedUpdateManyWithoutOwnerNestedInputSchema).optional(),
   attributes: z.lazy(() => AttributeUncheckedUpdateManyWithoutOwnerNestedInputSchema).optional()
