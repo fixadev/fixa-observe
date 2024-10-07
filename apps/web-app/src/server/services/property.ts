@@ -114,10 +114,9 @@ export const propertyService = ({
       });
     },
 
-    addBrochure: async (
+    createBrochure: async (
       propertyId: string,
-      brochureUrl: string,
-      brochureTitle: string,
+      brochure: BrochureSchema,
       userId: string,
     ) => {
       const response = await db.property.update({
@@ -127,11 +126,8 @@ export const propertyService = ({
         },
         data: {
           brochures: {
-            create: [
-              {
-                url: brochureUrl,
-                title: brochureTitle,
-              },
+            set: [
+              brochure,
             ],
           },
         },
