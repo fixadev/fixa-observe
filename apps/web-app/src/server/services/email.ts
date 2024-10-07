@@ -210,14 +210,15 @@ export const emailService = ({ db }: { db: PrismaClient }) => {
         data: { unread: true },
       });
 
-
-      // COMPLEX VERSION
-
       // Extract updated attributes
       const attributesToUpdate = await extractAttributes(uniqueBody.content);
       const propertyToUpdate = await db.property.findUnique({
         where: { id: emailThread.propertyId },
       });
+
+      if (!propertyToUpdate) {
+        throw new Error("Property not found");
+      }
 
       // update property attributes
       for (const attributeId of Object.keys(attributesToUpdate)) {
@@ -232,24 +233,6 @@ export const emailService = ({ db }: { db: PrismaClient }) => {
         },
       });
 
-
-      // SIMPLE VERSION (MAY NOT WORK)
-
-      // const attributesToUpdate = await extractAttributes(uniqueBody.content);
-
-      // await db.property.update({
-      //   where: { id: emailThread.propertyId },
-      //   data: {
-      //     attributes: {
-      //       update: Object.entries(attributesToUpdate).map(([key, value]) => ({
-      //         path: [key],
-      //         value: value,
-      //       })),
-      //     },
-      //   },
-      // });
-
-      
 
       // Create email
       await db.email.create({
@@ -347,3 +330,43 @@ export const emailService = ({ db }: { db: PrismaClient }) => {
 // testSend();
 // testReplyToEmail();
 // testAddEmailToDb();
+
+
+
+// async function testEmailParsing(propertyId: string, emailText: string) {
+//     const attributesToUpdate = await extractAttributes(emailText);
+//     console.log('Attributes to update', attributesToUpdate)
+//     const propertyToUpdate = await db.property.findUnique({
+//       where: { id: propertyId },
+//     });
+
+//     if (!propertyToUpdate) {
+//       throw new Error("Property not found");
+//     }
+
+//     // update property attributes
+//     for (const attributeId of Object.keys(attributesToUpdate)) {
+//       if (propertyToUpdate?.attributes && typeof propertyToUpdate.attributes === 'object') {
+//         (propertyToUpdate.attributes as Record<string, string | undefined>)[attributeId] = attributesToUpdate[attributeId];
+//       }
+//     }
+//     await db.property.update({
+//       where: { id: propertyId },
+//       data: {
+//         attributes: propertyToUpdate?.attributes ?? {},
+//       },
+//     });
+// }
+
+
+// const email = `Hi Colin, the place is available starting from November 10th. 
+//   the rent is $5.50 NNN
+//   the opex is $0.50
+
+//   Best,
+
+//   Andrew`
+
+// const propertyId = 'f71b6745-b42b-43be-9af0-9546f88cd85d'
+
+// void testEmailParsing(propertyId, email)
