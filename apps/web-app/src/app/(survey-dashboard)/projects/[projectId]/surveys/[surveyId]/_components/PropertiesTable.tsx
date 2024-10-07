@@ -39,6 +39,7 @@ import {
 } from "~/lib/property";
 import { DraggableHeader } from "./DraggableHeader";
 import { DraggableRow } from "./DraggableRow";
+import { useRouter } from "next/navigation";
 
 export type Property = PropertySchema & {
   isNew?: boolean;
@@ -51,7 +52,7 @@ export function PropertiesTable({ surveyId }: { surveyId: string }) {
   const [properties, setPropertiesState] = useState<Property[]>([]);
   const [attributesOrder, setAttributesOrderState] = useState<Attribute[]>([]);
   const [draggingRow, setDraggingRow] = useState<boolean>(false);
-
+  const router = useRouter();
   const { data: surveyData, refetch: refetchSurvey } =
     api.survey.getSurvey.useQuery({
       surveyId,
@@ -330,6 +331,9 @@ export function PropertiesTable({ surveyId }: { surveyId: string }) {
           setAttributesOrder={modifyAttributes}
           attributesOrder={attributesOrder}
         />
+        <Button variant="outline" onClick={() => router.push(`./pdf-preview`)}>
+          Export Survey PDF
+        </Button>
       </div>
       <DndContext
         collisionDetection={closestCenter}

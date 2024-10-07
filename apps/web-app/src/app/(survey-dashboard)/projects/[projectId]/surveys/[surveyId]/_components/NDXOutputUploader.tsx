@@ -108,7 +108,7 @@ export const NDXOutputUploader = ({
   return (
     <div className="flex flex-col items-center justify-center gap-3">
       <FileInput
-        triggerElement={<Button>Upload NDX PDF</Button>}
+        triggerElement={<Button variant="default">Upload NDX PDF</Button>}
         handleFilesChange={onFilesChangeHandler}
       />
     </div>
