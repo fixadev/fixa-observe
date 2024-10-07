@@ -67,7 +67,6 @@ function UnapprovedBrochureCard({
         approved: false,
         createdAt: new Date(),
         updatedAt: new Date(),
-        propertyId: property.id,
         id: crypto.randomUUID(),
       },
     });

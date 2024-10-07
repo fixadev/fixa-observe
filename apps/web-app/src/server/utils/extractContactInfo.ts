@@ -28,8 +28,6 @@ export async function extractContactInfo(brochureUrl: string) {
 
   const parsedPDF = await parsePDFWithoutLinks(pdfFile);
 
-  console.log('PARSED PDF', parsedPDF);
-
   if (parsedPDF.length === 0) {
     throw new Error('No text found in PDF');
   }
@@ -43,7 +41,7 @@ export async function extractContactInfo(brochureUrl: string) {
   - firstName: string
   - lastName: string
   - email: string
-  - phone: string | null
+  - phone: string | null (format 123-456-7890)
 
   Return an array of the JSON objects.
   `
@@ -58,8 +56,6 @@ export async function extractContactInfo(brochureUrl: string) {
   });
   
   const contactsObject = completion.choices[0]?.message.parsed;
-
-  console.log('CONTACTS FROM OPENAI', contactsObject);
 
   return contactsObject?.contacts;
 
