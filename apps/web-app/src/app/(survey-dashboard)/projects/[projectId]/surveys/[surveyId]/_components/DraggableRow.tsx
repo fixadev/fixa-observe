@@ -85,8 +85,8 @@ export const DraggableRow = ({
         />
       </TableCell>
       <DraggableCell
-        key={crypto.randomUUID()}
-        id={crypto.randomUUID()}
+        key={"photoUrlCell"}
+        id={"photoUrlCell"}
         draggingRow={draggingRow}
         className="min-w-36"
       >

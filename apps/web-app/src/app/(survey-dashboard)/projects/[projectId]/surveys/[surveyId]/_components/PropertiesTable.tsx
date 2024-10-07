@@ -143,6 +143,7 @@ export function PropertiesTable({ surveyId }: { surveyId: string }) {
     ) => {
       if (!surveyData) return;
       let newOrder: Attribute[];
+      console.log("NEW ORDER OR CALLBACK", newOrderOrCallback);
       if (typeof newOrderOrCallback === "function") {
         newOrder = newOrderOrCallback(attributesOrder);
       } else {
@@ -356,9 +357,9 @@ export function PropertiesTable({ surveyId }: { surveyId: string }) {
                 }
               >
                 <DraggableHeader
-                  key={crypto.randomUUID()}
+                  key={"photoHeader"}
                   attribute={{
-                    id: crypto.randomUUID(),
+                    id: "photoUrl",
                     createdAt: new Date(),
                     updatedAt: new Date(),
                     type: "string",
