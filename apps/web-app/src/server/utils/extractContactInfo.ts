@@ -43,7 +43,7 @@ export async function extractContactInfo(brochureUrl: string) {
   - firstName: string
   - lastName: string
   - email: string
-  - phone: string | null
+  - phone: string | null (format 123-456-7890)
 
   Return an array of the JSON objects.
   `

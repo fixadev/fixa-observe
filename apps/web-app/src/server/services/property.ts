@@ -114,9 +114,7 @@ export const propertyService = ({ db }: { db: PrismaClient }) => {
       userId: string,
     ) => {
       console.log("creating brochure in property service", brochure);
-
       const contactInfo = await extractContactInfo(brochure.url);
- 
       const response = await db.property.update({
         where: {
           id: propertyId,
