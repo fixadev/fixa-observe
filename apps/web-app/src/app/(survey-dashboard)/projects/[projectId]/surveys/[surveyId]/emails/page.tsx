@@ -25,9 +25,10 @@ export default function EmailsPage({
   params: { projectId: string; surveyId: string };
 }) {
   const { user } = useUser();
-  const { data: survey } = api.survey.getSurvey.useQuery({
-    surveyId: params.surveyId,
-  });
+  const { data: survey, refetch: refetchSurvey } =
+    api.survey.getSurvey.useQuery({
+      surveyId: params.surveyId,
+    });
   const { data: emailTemplate } = api.email.getEmailTemplate.useQuery();
 
   const emailIsOld = useCallback(
@@ -200,11 +201,30 @@ export default function EmailsPage({
           body: email.body,
           propertyId: emailThread.propertyId,
         });
+        setEmailThreads((prev) => {
+          const newThreads = [...prev];
+          const threadIndex = newThreads.findIndex(
+            (thread) => thread.id === emailThread.id,
+          );
+          if (threadIndex !== -1) {
+            newThreads[threadIndex]!.draft = false;
+          }
+          return newThreads;
+        });
+        if (unsentEmails.length > 0) {
+          const nextUnsentEmail = unsentEmails.find(
+            (thread) => thread.id !== emailThread.id,
+          );
+          setSelectedThread(nextUnsentEmail ?? null);
+        } else {
+          setSelectedThread(null);
+        }
+        void refetchSurvey();
       } else {
         // TODO: Reply to email
       }
     },
-    [sendEmail],
+    [sendEmail, unsentEmails, refetchSurvey],
   );
 
   return (
