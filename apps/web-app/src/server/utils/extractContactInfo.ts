@@ -1,12 +1,7 @@
-import OpenAI from "openai";
 import { z } from 'zod';
 import { zodResponseFormat } from "openai/helpers/zod";
 import { parsePDFWithoutLinks } from './parsePDF';
-import { env } from "~/env";
-
-const openai = new OpenAI({
-    apiKey: env.OPENAI_KEY,
-});
+import { openai } from './OpenAIClient';
 
 const Contact = z.object({
   firstName: z.string(),

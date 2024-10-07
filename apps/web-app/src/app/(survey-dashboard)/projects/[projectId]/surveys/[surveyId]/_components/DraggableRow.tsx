@@ -2,7 +2,7 @@
 
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { type CSSProperties } from "react";
+import { useState, type CSSProperties } from "react";
 import { Button } from "@/components/ui/button";
 import { TableCell } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
@@ -14,8 +14,8 @@ import { TableRow } from "@/components/ui/table";
 import { Textarea } from "~/components/ui/textarea";
 import Image from "next/image";
 import { FileInput } from "~/app/_components/FileInput";
-// import { PhotoIcon, PlusIcon } from "@heroicons/react/24/outline";
-import { PhotoIcon } from "@heroicons/react/24/solid";
+import { api } from "~/trpc/react";
+import Spinner from "~/components/Spinner";
 
 export const DraggableRow = ({
   photoUrl,
@@ -53,8 +53,35 @@ export const DraggableRow = ({
     position: "relative",
   };
 
-  const handleUpload = (files: FileList) => {
-    console.log(files);
+  const [photo, setPhoto] = useState<string | null>(photoUrl);
+  const [photoUploading, setPhotoUploading] = useState<boolean>(false);
+
+  const { mutate: addPhoto } = api.property.setPropertyPhoto.useMutation({
+    onSuccess: (data) => {
+      setPhoto(data);
+      setPhotoUploading(false);
+    },
+  });
+
+  const handleUpload = async (files: FileList) => {
+    setPhotoUploading(true);
+    const file = files[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append("file", file, crypto.randomUUID());
+    const response = await fetch("/api/upload", {
+      method: "POST",
+      body: formData,
+    });
+
+    const uploadedFile: { url: string; type: string } =
+      (await response.json()) as { url: string; type: string };
+
+    addPhoto({
+      propertyId: property.id,
+      photoUrl: uploadedFile.url,
+    });
   };
 
   const attributesToMinWidth = {
@@ -90,15 +117,27 @@ export const DraggableRow = ({
         draggingRow={draggingRow}
         className="min-w-36"
       >
-        {photoUrl ? (
-          <Image src={photoUrl} alt="Property photo" width={100} height={100} />
+        {photoUploading ? (
+          <div className="flex h-[100px] w-[120px] items-center justify-center">
+            <Spinner className="size-5 text-gray-500" />
+          </div>
         ) : (
           <FileInput
-            className="h-[100px] w-[120px] rounded-md bg-gray-100 hover:cursor-pointer hover:bg-gray-200"
+            accept="image/*"
+            className="h-[100px] w-[120px] rounded-md hover:cursor-pointer"
             triggerElement={
-              <div className="flex size-full items-center justify-center">
-                <ImagePlusIcon className="size-8 text-gray-500" />
-              </div>
+              photo ? (
+                <Image
+                  src={photo}
+                  alt="Property photo"
+                  fill
+                  className="rounded-md object-cover p-2 pr-4"
+                />
+              ) : (
+                <div className="flex size-full items-center justify-center rounded-md bg-gray-100 hover:bg-gray-200">
+                  <ImagePlusIcon className="size-8 text-gray-500" />
+                </div>
+              )
             }
             handleFilesChange={handleUpload}
           />
