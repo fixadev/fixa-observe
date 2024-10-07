@@ -1,5 +1,6 @@
 import { type Property, type PrismaClient } from "@prisma/client";
 import { type BrochureSchema, type CreatePropertySchema } from "~/lib/property";
+import { extractContactInfo } from "../utils/extractContactInfo";
 
 export const propertyService = ({
   db,
@@ -119,6 +120,20 @@ export const propertyService = ({
       brochure: BrochureSchema,
       userId: string,
     ) => {
+
+      console.log("creating brochure in property service", brochure);
+
+      const contactInfo = await extractContactInfo(brochure.url);
+
+      const createdBrochure = await db.brochure.create({
+        data: {
+          ...brochure,
+          propertyId: propertyId,
+          approved: false,
+        },
+      });
+
+      console.log("created brochure in property service", createdBrochure);
       const response = await db.property.update({
         where: {
           id: propertyId,
@@ -127,7 +142,7 @@ export const propertyService = ({
         data: {
           brochures: {
             set: [
-              brochure,
+              createdBrochure,
             ],
           },
         },

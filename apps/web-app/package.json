@@ -16,6 +16,7 @@
     "start": "next start"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.28.0",
     "@auth/prisma-adapter": "^1.6.0",
     "@aws-sdk/client-s3": "^3.658.1",
     "@aws-sdk/s3-presigned-post": "^3.658.1",

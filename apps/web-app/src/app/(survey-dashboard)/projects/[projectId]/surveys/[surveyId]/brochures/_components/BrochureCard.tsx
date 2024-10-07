@@ -8,9 +8,10 @@ import { FilePlusIcon } from "lucide-react";
 import { PDFInput } from "../../_components/PDFInput";
 
 export function BrochureCard({ propertyId }: { propertyId: string }) {
-  const { data: propertyData } = api.property.getProperty.useQuery({
-    id: propertyId,
-  });
+  const { data: propertyData, refetch: refetchProperty } =
+    api.property.getProperty.useQuery({
+      id: propertyId,
+    });
   if (!propertyData) {
     return null;
   }
@@ -18,25 +19,38 @@ export function BrochureCard({ propertyId }: { propertyId: string }) {
   return brochure?.approved ? (
     <ApprovedBrochureCard property={propertyData} />
   ) : (
-    <UnapprovedBrochureCard property={propertyData} />
+    <UnapprovedBrochureCard
+      refetchProperty={refetchProperty}
+      property={propertyData}
+    />
   );
 }
 
 function UnapprovedBrochureCard({
   property,
+  refetchProperty,
 }: {
   property: PropertyWithBrochures;
+  refetchProperty: () => void;
 }) {
-  const router = useRouter();
   const brochure = property.brochures[0];
 
-  const { mutate: createBrochure } = api.property.createBrochure.useMutation();
+  const { mutate: createBrochure } = api.property.createBrochure.useMutation({
+    onSuccess: (data) => {
+      console.log("Brochure created", data);
+      void refetchProperty();
+    },
+  });
 
   const handleCreateBrochure = async (files: FileList) => {
     const file = files[0];
+    if (!file) {
+      console.error("No file selected");
+      return;
+    }
+
     const formData = new FormData();
     formData.append("file", file, file.name);
-
     const response = await fetch("/api/upload", {
       method: "POST",
       body: formData,
@@ -49,7 +63,12 @@ function UnapprovedBrochureCard({
       propertyId: property.id,
       brochure: {
         url: uploadedFile.url,
-        title: "Test",
+        title: file.name,
+        approved: false,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        propertyId: property.id,
+        id: crypto.randomUUID(),
       },
     });
   };
