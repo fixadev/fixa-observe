@@ -1,6 +1,7 @@
 import { type PrismaClient } from "@prisma/client";
 import axios from "axios";
 import { env } from "~/env";
+import { extractAttributes } from "../utils/extractAttributes";
 // import { db } from "../db";
 
 const outlookApiUrl = "https://graph.microsoft.com/v1.0";
@@ -204,10 +205,51 @@ export const emailService = ({ db }: { db: PrismaClient }) => {
       } = response.data;
 
       // Update email thread
-      await db.emailThread.update({
+      const emailThread = await db.emailThread.update({
         where: { id: conversationId },
         data: { unread: true },
       });
+
+
+      // COMPLEX VERSION
+
+      // Extract updated attributes
+      const attributesToUpdate = await extractAttributes(uniqueBody.content);
+      const propertyToUpdate = await db.property.findUnique({
+        where: { id: emailThread.propertyId },
+      });
+
+      // update property attributes
+      for (const attributeId of Object.keys(attributesToUpdate)) {
+        if (propertyToUpdate?.attributes && typeof propertyToUpdate.attributes === 'object') {
+          (propertyToUpdate.attributes as Record<string, string | undefined>)[attributeId] = attributesToUpdate[attributeId];
+        }
+      }
+      await db.property.update({
+        where: { id: emailThread.propertyId },
+        data: {
+          attributes: propertyToUpdate?.attributes ?? {},
+        },
+      });
+
+
+      // SIMPLE VERSION (MAY NOT WORK)
+
+      // const attributesToUpdate = await extractAttributes(uniqueBody.content);
+
+      // await db.property.update({
+      //   where: { id: emailThread.propertyId },
+      //   data: {
+      //     attributes: {
+      //       update: Object.entries(attributesToUpdate).map(([key, value]) => ({
+      //         path: [key],
+      //         value: value,
+      //       })),
+      //     },
+      //   },
+      // });
+
+      
 
       // Create email
       await db.email.create({
