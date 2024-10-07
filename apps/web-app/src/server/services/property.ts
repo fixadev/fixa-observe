@@ -61,13 +61,14 @@ export const propertyService = ({ db }: { db: PrismaClient }) => {
     },
 
     updateProperty: async (property: Property, userId: string) => {
+      const { brochures, ...propertyData } = property;
       const response = await db.property.update({
         where: {
           id: property.id,
           ownerId: userId,
         },
         data: {
-          ...property,
+          ...propertyData,
           ownerId: userId,
           attributes: property.attributes ?? {},
         },

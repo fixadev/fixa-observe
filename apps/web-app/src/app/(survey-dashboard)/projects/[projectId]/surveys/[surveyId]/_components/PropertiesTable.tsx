@@ -39,6 +39,7 @@ import {
 } from "~/lib/property";
 import { DraggableHeader } from "./DraggableHeader";
 import { DraggableRow } from "./DraggableRow";
+import { useRouter } from "next/navigation";
 
 export type Property = PropertySchema & {
   isNew?: boolean;
@@ -51,7 +52,7 @@ export function PropertiesTable({ surveyId }: { surveyId: string }) {
   const [properties, setPropertiesState] = useState<Property[]>([]);
   const [attributesOrder, setAttributesOrderState] = useState<Attribute[]>([]);
   const [draggingRow, setDraggingRow] = useState<boolean>(false);
-
+  const router = useRouter();
   const { data: surveyData, refetch: refetchSurvey } =
     api.survey.getSurvey.useQuery({
       surveyId,
@@ -142,6 +143,7 @@ export function PropertiesTable({ surveyId }: { surveyId: string }) {
     ) => {
       if (!surveyData) return;
       let newOrder: Attribute[];
+      console.log("NEW ORDER OR CALLBACK", newOrderOrCallback);
       if (typeof newOrderOrCallback === "function") {
         newOrder = newOrderOrCallback(attributesOrder);
       } else {
@@ -330,6 +332,16 @@ export function PropertiesTable({ surveyId }: { surveyId: string }) {
           setAttributesOrder={modifyAttributes}
           attributesOrder={attributesOrder}
         />
+        <Button
+          variant="outline"
+          onClick={() =>
+            router.push(
+              `/projects/${surveyData?.projectId}/surveys/${surveyId}/pdf-preview`,
+            )
+          }
+        >
+          Export Survey PDF
+        </Button>
       </div>
       <DndContext
         collisionDetection={closestCenter}
@@ -352,9 +364,9 @@ export function PropertiesTable({ surveyId }: { surveyId: string }) {
                 }
               >
                 <DraggableHeader
-                  key={crypto.randomUUID()}
+                  key={"photoHeader"}
                   attribute={{
-                    id: crypto.randomUUID(),
+                    id: "photoUrl",
                     createdAt: new Date(),
                     updatedAt: new Date(),
                     type: "string",

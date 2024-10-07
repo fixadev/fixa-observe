@@ -99,6 +99,7 @@ export function processPDF(parsedPDF: string[] | undefined) {
     return [];
   }
   try {
+    console.log("parsedPDF", parsedPDF);
     const buildings = [];
     let currentBuilding: Record<string, string> = {};
 
@@ -116,7 +117,7 @@ export function processPDF(parsedPDF: string[] | undefined) {
         nextLine &&
         zipcodeRegex.test(nextLine)
       ) {
-        console.log("new property");
+        console.log("new property", line, nextLine);
         if (Object.keys(currentBuilding).length > 0) {
           buildings.push(currentBuilding);
         }
@@ -207,7 +208,7 @@ export function processPDF(parsedPDF: string[] | undefined) {
           index++;
         }
         currentBuilding.comments = comments.join("\n");
-        i = index - 1; // Update the outer loop index
+        i = index - 1; 
       }
     }
     if (Object.keys(currentBuilding).length > 0) {
