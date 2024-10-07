@@ -93,7 +93,9 @@ const styles = StyleSheet.create({
 const getWidth = (attribute: AttributeSchema) => {
   if (attribute.id === "address") {
     return "14%";
-  } else if (attribute.id === "size" || attribute.id === "divisibility") {
+  } else if (attribute.id === "size") {
+    return "8%";
+  } else if (attribute.id === "divisibility") {
     return "10%";
   } else if (attribute.id === "askingRate" || attribute.id === "opex") {
     return "10%";

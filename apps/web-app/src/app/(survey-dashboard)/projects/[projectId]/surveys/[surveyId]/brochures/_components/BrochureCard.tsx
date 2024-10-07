@@ -148,7 +148,11 @@ function BrochureSidebar({
         <>
           <Button
             variant={"outline"}
-            onClick={() => router.push(`./brochures/${brochure?.id}/editor`)}
+            onClick={() =>
+              router.push(
+                `/projects/${property.id}/surveys/${property.surveyId}/brochures/${brochure?.id}/editor`,
+              )
+            }
           >
             Edit brochure
           </Button>

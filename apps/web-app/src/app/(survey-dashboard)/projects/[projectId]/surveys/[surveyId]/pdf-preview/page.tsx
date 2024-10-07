@@ -24,13 +24,12 @@ export default function PDFPreviewPage({
   });
 
   return (
-    // <PDFViewer style={{ width: "100%", height: "90vh" }}>
-    //   <PDFContent
-    //     surveyName={survey?.name ?? null}
-    //     properties={parsedProperties ?? null}
-    //     attributes={attributes ?? null}
-    //   />
-    // </PDFViewer>
-    <div></div>
+    <PDFViewer style={{ width: "100%", height: "90vh" }}>
+      <PDFContent
+        surveyName={survey?.name ?? null}
+        properties={parsedProperties ?? null}
+        attributes={attributes ?? null}
+      />
+    </PDFViewer>
   );
 }

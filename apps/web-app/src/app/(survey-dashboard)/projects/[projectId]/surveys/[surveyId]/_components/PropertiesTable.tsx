@@ -332,7 +332,14 @@ export function PropertiesTable({ surveyId }: { surveyId: string }) {
           setAttributesOrder={modifyAttributes}
           attributesOrder={attributesOrder}
         />
-        <Button variant="outline" onClick={() => router.push(`./pdf-preview`)}>
+        <Button
+          variant="outline"
+          onClick={() =>
+            router.push(
+              `/projects/${surveyData?.projectId}/surveys/${surveyId}/pdf-preview`,
+            )
+          }
+        >
           Export Survey PDF
         </Button>
       </div>
