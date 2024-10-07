@@ -1,4 +1,4 @@
-import { type PrismaClient } from "@prisma/client";
+import { Prisma, type PrismaClient } from "@prisma/client";
 import axios from "axios";
 import { env } from "~/env";
 // import { db } from "../db";
@@ -183,8 +183,9 @@ export const emailService = ({ db }: { db: PrismaClient }) => {
         uniqueBody: {
           content: string;
         };
+        isDraft: boolean;
       }>(
-        `${outlookApiUrl}/me/messages/${emailId}?$select=subject,sender,toRecipients,receivedDateTime,uniqueBody,conversationId,webLink`,
+        `${outlookApiUrl}/me/messages/${emailId}?$select=subject,sender,toRecipients,receivedDateTime,uniqueBody,conversationId,webLink,isDraft`,
         {
           headers: {
             Authorization: `Bearer ${accessToken}`,
@@ -201,13 +202,34 @@ export const emailService = ({ db }: { db: PrismaClient }) => {
         uniqueBody,
         conversationId,
         webLink,
+        isDraft,
       } = response.data;
 
+      if (isDraft) {
+        console.log(`Email with id ${emailId} is a draft. Skipping update.`);
+        return; // Exit the function if the email is a draft
+      }
+
       // Update email thread
-      await db.emailThread.update({
-        where: { id: conversationId },
-        data: { unread: true },
-      });
+      try {
+        await db.emailThread.update({
+          where: { id: conversationId },
+          data: { unread: true },
+        });
+      } catch (error) {
+        // Check if the error is due to the record not existing
+        if (
+          error instanceof Prisma.PrismaClientKnownRequestError &&
+          error.code === "P2025"
+        ) {
+          console.log(
+            `Email thread with id ${conversationId} not found. Skipping update.`,
+          );
+          return; // Exit the function if the email thread doesn't exist
+        }
+        // If it's a different error, rethrow it
+        throw error;
+      }
 
       // Create email
       await db.email.create({
@@ -228,6 +250,51 @@ export const emailService = ({ db }: { db: PrismaClient }) => {
           webLink,
         },
       });
+    },
+
+    subscribeToEmails: async ({ userId }: { userId: string }) => {
+      const accessToken = await getAccessToken(userId);
+
+      const payload = {
+        changeType: "created",
+        notificationUrl: `${env.NEXT_PUBLIC_API_URL}/api/microsoft-webhook`,
+        resource: "me/messages",
+        expirationDateTime: new Date(Date.now() + 1000 * 60 * 60 * 24),
+      };
+      const response = await axios.post<{ id: string }>(
+        `${outlookApiUrl}/subscriptions`,
+        payload,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            Prefer: 'IdType="ImmutableId"',
+          },
+        },
+      );
+
+      await db.user.update({
+        where: { id: userId },
+        data: {
+          emailSubscriptionId: response.data.id,
+          emailSubscriptionExpiresAt: payload.expirationDateTime,
+        },
+      });
+
+      // TODO: Create task to renew email subscription (google cloud tasks or something)
+    },
+
+    getUserIdFromSubscriptionId: async ({
+      subscriptionId,
+    }: {
+      subscriptionId: string;
+    }) => {
+      const user = await db.user.findFirst({
+        where: { emailSubscriptionId: subscriptionId },
+      });
+      if (!user) {
+        throw new Error("User not found");
+      }
+      return user.id;
     },
 
     getEmailTemplate: async ({ userId }: { userId: string }) => {

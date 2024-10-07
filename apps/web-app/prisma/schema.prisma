@@ -20,14 +20,18 @@ datasource db {
 }
 
 model User {
-  id            String         @id // Should be the clerkId
-  email         String         @unique
-  firstName     String?
-  lastName      String?
-  projects      Project[]
-  properties    Property[]
-  attributes    Attribute[]
-  emailTemplate EmailTemplate?
+  id                                  String         @id // Should be the clerkId
+  email                               String         @unique
+  firstName                           String?
+  lastName                            String?
+
+  emailSubscriptionId                 String?
+  emailSubscriptionExpiresAt          DateTime?
+
+  projects                            Project[]
+  properties                          Property[]
+  attributes                          Attribute[]
+  emailTemplate                       EmailTemplate?
 }
 
 model Project {
