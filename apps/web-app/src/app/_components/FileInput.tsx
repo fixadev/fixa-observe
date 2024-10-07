@@ -1,19 +1,20 @@
 import { cloneElement, type ReactElement, useRef } from "react";
 
-export const PDFInput = ({
+export const FileInput = ({
   triggerElement,
   className,
+  accept = "application/pdf",
   handleFilesChange,
 }: {
   triggerElement: ReactElement;
   className?: string;
+  accept?: string;
   handleFilesChange: (files: FileList) => void;
 }) => {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const handleButtonClick = () => {
     fileInputRef.current?.click();
   };
-  const acceptablePDFFileTypes = "application/pdf";
 
   const onFilesChangeHandler = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -35,7 +36,7 @@ export const PDFInput = ({
         type="file"
         id="pdfFileSelector"
         className="hidden"
-        accept={acceptablePDFFileTypes}
+        accept={accept}
         onChange={onFilesChangeHandler}
       />
     </div>

@@ -30,8 +30,7 @@ export const surveyService = ({ db }: { db: PrismaClient }) => {
             },
           },
         },
-      });
-      console.log("survey", survey);
+      }); 
       return survey;
     },
 

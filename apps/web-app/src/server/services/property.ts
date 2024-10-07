@@ -1,15 +1,22 @@
-import { type Property, type PrismaClient, type Contact } from "@prisma/client";
-import { type ContactWithoutPropertyId, type BrochureSchema, type CreatePropertySchema, type BrochureWithoutPropertyId } from "~/lib/property";
+import { type Property, type PrismaClient } from "@prisma/client";
+import { type BrochureSchema, type CreatePropertySchema, type BrochureWithoutPropertyId } from "~/lib/property";
 import { extractContactInfo } from "../utils/extractContactInfo";
+import { formatAddresses } from "../utils/formatAddresses";
 
 export const propertyService = ({ db }: { db: PrismaClient }) => {
   return {
     createProperties: async (input: CreatePropertySchema[], userId: string) => {
+      
+      const formattedAddresses = await formatAddresses(input.map((property) => property.attributes.address ?? ""));
       const brochures = input.map((property) => property.brochures[0] ?? []);
-      const propertiesToCreate = input.map(({ brochures, ...property }) => ({
+      
+      const propertiesToCreate = input.map(({ brochures, ...property }, index) => ({
         ...property,
         ownerId: userId,
-        attributes: property.attributes ?? {},
+        attributes: {
+          ...property.attributes,
+          address: formattedAddresses ? formattedAddresses[index] : "",
+        } ?? {},
       }));
 
       const createdProperties = await db.property.createManyAndReturn({
@@ -207,8 +214,6 @@ export const propertyService = ({ db }: { db: PrismaClient }) => {
       if (!property) {
         throw new Error("Property not found");
       }
-
-      console.log("DELETE PROPERTY", propertyId);
 
       return db.property.delete({
         where: {

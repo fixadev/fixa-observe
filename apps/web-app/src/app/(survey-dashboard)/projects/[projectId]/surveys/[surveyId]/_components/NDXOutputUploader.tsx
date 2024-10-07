@@ -7,7 +7,7 @@ import { type Property } from "./PropertiesTable";
 import { type Attribute } from "@prisma/client";
 import { type PropertySchema, type CreatePropertySchema } from "~/lib/property";
 
-import { PDFInput } from "./PDFInput";
+import { FileInput } from "../../../../../../_components/FileInput";
 import { Button } from "~/components/ui/button";
 
 export const NDXOutputUploader = ({
@@ -107,7 +107,7 @@ export const NDXOutputUploader = ({
 
   return (
     <div className="flex flex-col items-center justify-center gap-3">
-      <PDFInput
+      <FileInput
         triggerElement={<Button>Upload NDX PDF</Button>}
         handleFilesChange={onFilesChangeHandler}
       />
