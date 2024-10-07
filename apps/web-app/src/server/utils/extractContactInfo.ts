@@ -1,8 +1,8 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { z } from 'zod';
 import { type ContactSchema } from '../../lib/property';
-import { pdfjs } from 'react-pdf';
-import { parsePDF } from '~/app/(survey-dashboard)/projects/[projectId]/surveys/[surveyId]/_components/NDXOutputUploader';
+import * as PDFJS from 'pdfjs-dist/types/src/pdf';
+import { parsePDFWithoutLinks } from '~/app/shared/pdfParsing';
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_KEY,
@@ -22,17 +22,16 @@ const Contact = z.object({
 
 export async function extractContactInfo(brochureUrl: string) {
 
-  pdfjs.GlobalWorkerOptions.workerSrc = "/pdf.worker.min.mjs";
-
   const response = await fetch(brochureUrl);
   const file = await response.arrayBuffer();
   const fileBlob = new Blob([file], { type: 'application/pdf' });
   const pdfFile = new File([fileBlob], 'document.pdf', { type: 'application/pdf' });
 
-  const parsedPDF = await parsePDF(pdfFile, pdfjs);
-  const text = parsedPDF?.join('\n');
+  const parsedPDF = await parsePDFWithoutLinks(pdfFile);
 
-  if (!text) {
+  console.log('PARSED PDF', parsedPDF);
+
+  if (!parsedPDF) {
     throw new Error('No text found in PDF');
   }
 
@@ -54,7 +53,7 @@ export async function extractContactInfo(brochureUrl: string) {
     model: "claude-3-5-sonnet-20240620",
     max_tokens: 1024,
     system: systemPrompt,
-    messages: [{ role: "user", content: text }],
+    messages: [{ role: "user", content: parsedPDF }],
   });
   console.log('ANTHROPIC RESPONSE', msg);
 

@@ -1,4 +1,8 @@
 import type PDFJS from "pdfjs-dist";
+import pdf from "pdf-parse";
+import PDFParser from "pdf2json"; 
+
+
 import {
     type TextContent,
     type TextItem,
@@ -89,6 +93,44 @@ export async function parsePDF(file: File, pdfjsLib: typeof PDFJS) {
       console.error("Error parsing PDF:", error);
     }
   }
+
+
+
+export async function parsePDFWithoutLinks(file: File) {
+
+  const dataBuffer = await file.arrayBuffer()
+  const data = await pdf(dataBuffer)
+ 
+  // number of pages
+  console.log(data.numpages);
+  // number of rendered pages
+  console.log(data.numrender);
+  // PDF info
+  console.log(data.info);
+  // PDF metadata
+  console.log(data.metadata); 
+  // PDF.js version
+  // check https://mozilla.github.io/pdf.js/getting_started/
+  console.log(data.version);
+  // PDF text
+  console.log(data.text); 
+        
+
+
+
+  // const dataBuffer = await file.arrayBuffer();
+  // const pdfParser = new PDFParser();
+  // pdfParser.on("pdfParser_dataError", (errData) =>
+  // console.error(errData.parserError)
+  // );
+  // pdfParser.on("pdfParser_dataReady", (pdfData) => {
+  //   const parsedPDF = pdfData.Pages.map((page) => page.Texts.map((text) => text.R.map((r) => r.T).join(' '))).join('\n');
+  //   return parsedPDF
+  // }); 
+  // pdfParser.parseBuffer(Buffer.from(dataBuffer));
+
+  return false
+}
 
 
 
