@@ -45,7 +45,7 @@ export const propertyRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      return await propertyServiceInstance.createBrochure(
+      return await propertyServiceInstance.addBrochure(
         input.propertyId,
         input.brochure,
         ctx.user.id,

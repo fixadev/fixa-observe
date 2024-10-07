@@ -1,0 +1,66 @@
+import OpenAI from "openai";
+import { z } from 'zod';
+import { zodResponseFormat } from "openai/helpers/zod";
+import { parsePDFWithoutLinks } from './parsePDF';
+import { env } from "~/env";
+
+const openai = new OpenAI({
+    apiKey: env.OPENAI_KEY,
+});
+
+const Contact = z.object({
+  firstName: z.string(),
+  lastName: z.string(),
+  email: z.string(),
+  phone: z.string().nullable(),
+})
+
+const ContactsObject = z.object({
+  contacts: z.array(Contact),
+})
+
+export async function extractContactInfo(brochureUrl: string) {
+
+  const response = await fetch(brochureUrl);
+  const file = await response.arrayBuffer();
+  const fileBlob = new Blob([file], { type: 'application/pdf' });
+  const pdfFile = new File([fileBlob], 'document.pdf', { type: 'application/pdf' });
+
+  const parsedPDF = await parsePDFWithoutLinks(pdfFile);
+
+  console.log('PARSED PDF', parsedPDF);
+
+  if (parsedPDF.length === 0) {
+    throw new Error('No text found in PDF');
+  }
+
+  const systemPrompt = `
+  You are an AI assistant that extracts contact information from a given brochure.
+  The brochure contains information about a property for sale or rent.
+  You will be given text scraped from the brochure.
+  You will need to extract the contact information of the brokers listed in the brochure.
+  The contact information will be in the form of a JSON object with the following properties:
+  - firstName: string
+  - lastName: string
+  - email: string
+  - phone: string | null
+
+  Return an array of the JSON objects.
+  `
+
+  const completion = await openai.beta.chat.completions.parse({
+    model: "gpt-4o-2024-08-06",
+    messages: [
+      { role: "system", content: systemPrompt },
+      { role: "user", content: parsedPDF },
+    ],
+    response_format: zodResponseFormat(ContactsObject, "contacts"),
+  });
+  
+  const contactsObject = completion.choices[0]?.message.parsed;
+
+  console.log('CONTACTS FROM OPENAI', contactsObject);
+
+  return contactsObject?.contacts;
+
+}
