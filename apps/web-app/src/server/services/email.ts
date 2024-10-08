@@ -2,10 +2,13 @@ import { Prisma, type PrismaClient } from "@prisma/client";
 import axios from "axios";
 import { env } from "~/env";
 import { extractAttributes } from "../utils/extractAttributes";
+import { taskService } from "./task";
 // import { db } from "../db";
 
 const outlookApiUrl = "https://graph.microsoft.com/v1.0";
 const clerkApiUrl = "https://api.clerk.com/v1";
+
+const taskServiceInstance = taskService();
 
 export const emailService = ({ db }: { db: PrismaClient }) => {
   const getAccessToken = async (userId: string) => {
@@ -296,7 +299,7 @@ export const emailService = ({ db }: { db: PrismaClient }) => {
       });
     },
 
-    subscribeToEmails: async ({ userId }: { userId: string }) => {
+    createEmailSubscription: async ({ userId }: { userId: string }) => {
       const accessToken = await getAccessToken(userId);
 
       const payload = {
@@ -324,7 +327,49 @@ export const emailService = ({ db }: { db: PrismaClient }) => {
         },
       });
 
-      // TODO: Create task to renew email subscription (google cloud tasks or something)
+      // Create task to renew email subscription
+      await taskServiceInstance.createTask(payload.expirationDateTime, {
+        httpMethod: "POST",
+        url: `${env.NEXT_PUBLIC_API_URL}/api/renew-email-subscription`,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: btoa(
+          JSON.stringify({
+            userId,
+          }),
+        ),
+      });
+    },
+
+    deleteEmailSubscription: async ({ userId }: { userId: string }) => {
+      const accessToken = await getAccessToken(userId);
+      const user = await db.user.findUnique({
+        where: { id: userId },
+      });
+      if (!user) {
+        throw new Error("User not found");
+      }
+      if (!user.emailSubscriptionId) {
+        throw new Error("User does not have an email subscription");
+      }
+
+      await axios.delete(
+        `${outlookApiUrl}/subscriptions/${user.emailSubscriptionId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        },
+      );
+
+      await db.user.update({
+        where: { id: userId },
+        data: {
+          emailSubscriptionId: null,
+          emailSubscriptionExpiresAt: null,
+        },
+      });
     },
 
     getUserIdFromSubscriptionId: async ({
