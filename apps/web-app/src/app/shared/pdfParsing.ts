@@ -66,6 +66,11 @@ export async function parsePDF(file: File, pdfjsLib: typeof PDFJS) {
   }
 
 
+function trimAndRemoveNonNumeric(text: string): string {
+  return text.trim().replace(/[^\d$\.]/g, '');
+}
+
+
 
 export function processPDF(parsedPDF: string[] | undefined) {
   if (!parsedPDF) {
@@ -103,21 +108,21 @@ export function processPDF(parsedPDF: string[] | undefined) {
         !currentBuilding.propertySize &&
         nextLine?.includes("rsf")
       ) {
-        currentBuilding.propertySize = nextLine?.trim() ?? "";
+        currentBuilding.propertySize = trimAndRemoveNonNumeric(nextLine) ?? "";
         i += 1;
       } else if (
         line?.includes("Min Divisible:") &&
         !currentBuilding.minDivisible &&
         nextLine?.includes("rsf")
       ) {
-        currentBuilding.minDivisible = nextLine?.trim() ?? "";
+        currentBuilding.minDivisible = trimAndRemoveNonNumeric(nextLine) ?? "";
         i += 1;
       } else if (
         line?.includes("Max Divisible:") &&
         !currentBuilding.maxDivisible &&
         nextLine?.includes("rsf")
       ) {
-        currentBuilding.maxDivisible = nextLine?.trim() ?? "";
+        currentBuilding.maxDivisible = trimAndRemoveNonNumeric(nextLine) ?? "";
         i += 1;
       } else if (
         line?.includes("Lease Type:") &&
@@ -131,7 +136,7 @@ export function processPDF(parsedPDF: string[] | undefined) {
         !currentBuilding.leaseRate &&
         nextLine?.includes("$")
       ) {
-        currentBuilding.leaseRate = nextLine?.trim() ?? "";
+        currentBuilding.leaseRate = trimAndRemoveNonNumeric(nextLine) ?? "";
         i += 1;
       } else if (
         line?.includes("Expenses:") &&

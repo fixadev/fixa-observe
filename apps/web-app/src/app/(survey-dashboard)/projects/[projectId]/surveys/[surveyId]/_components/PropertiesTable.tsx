@@ -324,7 +324,7 @@ export function PropertiesTable({ surveyId }: { surveyId: string }) {
 
   return (
     <div>
-      <div className="flex flex-row justify-end gap-4">
+      <div className="mb-6 flex flex-row justify-end gap-4">
         <NDXOutputUploader
           surveyId={surveyId}
           existingProperties={properties}
@@ -372,7 +372,7 @@ export function PropertiesTable({ surveyId }: { surveyId: string }) {
                     type: "string",
                     label: "Photo",
                     ownerId: "",
-                    isNew: true,
+                    isNew: false,
                   }}
                   renameAttribute={(name) => {}}
                   deleteAttribute={() => {}}
