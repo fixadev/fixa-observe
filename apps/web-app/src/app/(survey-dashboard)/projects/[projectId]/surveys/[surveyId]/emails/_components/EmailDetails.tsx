@@ -46,7 +46,7 @@ export default function EmailDetails({
   isSending: boolean;
   onUpdateEmailThread: (emailThread: EmailThreadWithEmailsAndProperty) => void;
   onOpenTemplateDialog: () => void;
-  onSend: () => void;
+  onSend: (body?: string) => Promise<void>;
   onReset: () => void;
 }) {
   if (emailThread.draft) {
@@ -82,7 +82,7 @@ function EmailThreadDetails({
   emailThread: EmailThreadWithEmailsAndProperty;
   isSending: boolean;
   onUpdateEmailThread: (emailThread: EmailThreadWithEmailsAndProperty) => void;
-  onSend: () => void;
+  onSend: (body?: string) => Promise<void>;
 }) {
   // Update read status of email thread
   const { mutateAsync: updateEmailThread } =
@@ -129,6 +129,16 @@ function EmailThreadDetails({
     );
   }, [emailThread.emails]);
 
+  const [replyBody, setReplyBody] = useState<string>("");
+
+  const handleSend = useCallback(async () => {
+    if (isSending) {
+      return;
+    }
+    await onSend(replyBody);
+    setReplyBody("");
+  }, [onSend, replyBody, isSending]);
+
   return (
     <div className="flex h-full flex-col gap-2 overflow-x-hidden p-2 pb-8">
       {emailThread.emails.map((email) => (
@@ -158,8 +168,20 @@ function EmailThreadDetails({
           />
         }
       />
-      <Textarea className="h-40 shrink-0" placeholder="Write a reply..." />
-      <Button className="self-start" onClick={onSend} disabled={isSending}>
+      <Textarea
+        className="h-40 shrink-0"
+        placeholder="Write a reply..."
+        value={replyBody}
+        onChange={(e) => setReplyBody(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
+            e.preventDefault();
+            void handleSend();
+          }
+        }}
+        disabled={isSending}
+      />
+      <Button className="self-start" onClick={handleSend} disabled={isSending}>
         {isSending ? <Spinner /> : "Send"}
       </Button>
     </div>
@@ -199,10 +221,11 @@ function UnsentEmailDetails({
           type="text"
           id="to"
           className="flex-grow"
-          placeholder="mark@example.com"
+          placeholder="kermit@thefrog.com"
           value={emailThread.emails[0]!.recipientEmail}
           onChange={(e) => updateField("recipientEmail", e.target.value)}
           autoComplete="email"
+          disabled={isSending}
         />
         <Label htmlFor="subject">Subject:</Label>
         <Input
@@ -211,7 +234,8 @@ function UnsentEmailDetails({
           className="flex-grow"
           value={emailThread.emails[0]!.subject}
           onChange={(e) => updateField("subject", e.target.value)}
-          placeholder="Property inquiry"
+          placeholder="Questions about the property"
+          disabled={isSending}
         />
       </div>
       <PropertyCard property={emailThread.property} />
@@ -220,6 +244,13 @@ function UnsentEmailDetails({
         placeholder="Write your email here..."
         value={emailThread.emails[0]!.body}
         onChange={(e) => updateField("body", e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
+            e.preventDefault();
+            onSend();
+          }
+        }}
+        disabled={isSending}
       />
       <div className="mt-2 flex justify-between">
         <div className="flex gap-2">
