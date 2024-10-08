@@ -2,13 +2,14 @@ import { Document } from "@react-pdf/renderer";
 import { type Property, type Attribute } from "@prisma/client";
 import { PDFPage } from "./PDFPage";
 import Spinner from "~/components/Spinner";
+import { type PropertySchema } from "~/lib/property";
 
 export function PDFContent({
   properties,
   attributes,
   surveyName,
 }: {
-  properties: Property[] | null;
+  properties: PropertySchema[] | null;
   attributes: Attribute[] | null;
   surveyName: string | null;
 }) {

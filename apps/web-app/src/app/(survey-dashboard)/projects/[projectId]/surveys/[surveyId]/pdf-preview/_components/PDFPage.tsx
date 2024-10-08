@@ -1,4 +1,4 @@
-import { Page, Text, View, StyleSheet, Image } from "@react-pdf/renderer";
+import { Page, Text, View, StyleSheet, Image, Link } from "@react-pdf/renderer";
 import { type AttributeSchema, type PropertySchema } from "~/lib/property";
 
 const styles = StyleSheet.create({
@@ -55,19 +55,20 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     backgroundColor: "#046bb6",
     color: "#FFFFFF",
+    textAlign: "center",
   },
   tableCell: {
     margin: "auto",
     maxHeight: "30px",
     alignItems: "center",
     justifyContent: "center",
-    marginTop: 15,
-    marginBottom: 15,
+    textAlign: "center",
     fontSize: 10,
   },
   leftCell: {
     alignItems: "center",
     justifyContent: "center",
+    alignText: "center",
     marginTop: 5,
     width: "2%",
     fontSize: 10,
@@ -79,6 +80,8 @@ const styles = StyleSheet.create({
     textAlign: "center",
     alignItems: "center",
     justifyContent: "center",
+    alignSelf: "center",
+    alignContent: "center",
     marginTop: 15,
     marginBottom: 15,
     fontSize: 10,
@@ -97,7 +100,7 @@ const getWidth = (attribute: AttributeSchema) => {
     return "8%";
   } else if (attribute.id === "divisibility") {
     return "10%";
-  } else if (attribute.id === "askingRate" || attribute.id === "opex") {
+  } else if (attribute.id === "askingRate" || attribute.id === "opEx") {
     return "10%";
   } else if (attribute.id === "comments") {
     return "20%";
@@ -117,6 +120,14 @@ export function PDFPage({
 }) {
   console.log("properties", properties);
   console.log("attributes", attributes);
+
+  function formatAddress(address: string | undefined) {
+    if (!address) {
+      return "";
+    }
+    const [street, city, state, zip] = address.split(",");
+    return `${street}, \n ${city}`;
+  }
 
   return (
     <Page size="A4" orientation="landscape" style={styles.page}>
@@ -156,23 +167,38 @@ export function PDFPage({
               </Text>
             </View>
             <View style={styles.tableCol}>
-              {/* <Image
+              <Image
                 style={styles.image}
                 src={
                   property.photoUrl ??
                   "https://m.foolcdn.com/media/dubs/images/GettyImages-695968212.width-880.jpg"
                 }
                 alt="Photo"
-              /> */}
+              />
             </View>
             {attributes.map((attribute) => (
               <View
                 key={attribute.id}
                 style={{ ...styles.tableCol, width: getWidth(attribute) }}
               >
-                <Text style={styles.tableCell}>
-                  {property.attributes?.[attribute.id]}
-                </Text>
+                {attribute.id === "address" ? (
+                  <Link
+                    src={property.brochures[0]?.url ?? ""}
+                    style={styles.tableCell}
+                  >
+                    {formatAddress(property.attributes.address)}
+                  </Link>
+                ) : (
+                  <Text
+                    style={{
+                      ...styles.tableCell,
+                      marginHorizontal: attribute.id === "comments" ? 10 : 5,
+                      textOverflow: "string",
+                    }}
+                  >
+                    {property.attributes?.[attribute.id]}
+                  </Text>
+                )}
               </View>
             ))}
           </View>

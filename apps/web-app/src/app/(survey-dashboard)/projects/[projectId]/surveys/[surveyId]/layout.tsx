@@ -53,11 +53,19 @@ export default function SurveyLayout({
         <div className="flex h-full max-h-screen flex-col gap-2">
           <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
             <Link
-              href={`/projects/${params.projectId}`}
+              href={
+                pathname.endsWith("pdf-preview")
+                  ? `/projects/${params.projectId}/surveys/${params.surveyId}`
+                  : `/projects/${params.projectId}`
+              }
               className="flex items-center gap-2 font-medium"
             >
               <ChevronLeftIcon className="size-5" />
-              <span>Back to surveys</span>
+              <span>
+                {pathname.endsWith("pdf-preview")
+                  ? "Back to survey"
+                  : "Back to surveys"}
+              </span>
             </Link>
           </div>
           <div className="flex-1">
