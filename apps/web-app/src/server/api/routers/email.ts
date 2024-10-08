@@ -50,7 +50,13 @@ export const emailRouter = createTRPCRouter({
       });
     }),
 
-  // getUser: publicProcedure.query(async ({ ctx }) => {
-  //   return ctx.prisma.user.findUnique({ where: { id: ctx.session.user.id } });
-  // }),
+  updateEmailThread: protectedProcedure
+    .input(z.object({ emailThreadId: z.string(), unread: z.boolean() }))
+    .mutation(async ({ ctx, input }) => {
+      return await emailServiceInstance.updateEmailThread({
+        userId: ctx.user.id,
+        emailThreadId: input.emailThreadId,
+        unread: input.unread,
+      });
+    }),
 });

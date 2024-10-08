@@ -66,6 +66,7 @@ export default function EmailDetails({
       key={emailThread.id}
       emailThread={emailThread}
       isSending={isSending}
+      onUpdateEmailThread={onUpdateEmailThread}
       onSend={onSend}
     />
   );
@@ -74,12 +75,32 @@ export default function EmailDetails({
 function EmailThreadDetails({
   emailThread,
   isSending,
+  onUpdateEmailThread,
   onSend,
 }: {
   emailThread: EmailThreadWithEmailsAndProperty;
   isSending: boolean;
+  onUpdateEmailThread: (emailThread: EmailThreadWithEmailsAndProperty) => void;
   onSend: () => void;
 }) {
+  // Update read status of email thread
+  const { mutateAsync: updateEmailThread } =
+    api.email.updateEmailThread.useMutation();
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      onUpdateEmailThread({
+        ...emailThread,
+        unread: false,
+      });
+      void updateEmailThread({
+        emailThreadId: emailThread.id,
+        unread: false,
+      });
+    }, 1000);
+
+    return () => clearTimeout(timeout);
+  }, [emailThread, onUpdateEmailThread, updateEmailThread]);
+
   const [expanded, setExpanded] = useState<boolean[]>(
     // Set the last email to be expanded
     emailThread.emails.map((_, i) => i === emailThread.emails.length - 1),

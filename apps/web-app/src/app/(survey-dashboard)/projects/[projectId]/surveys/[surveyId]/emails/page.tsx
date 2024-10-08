@@ -321,6 +321,7 @@ export default function EmailsPage({
             <EmailDetails
               emailThread={emailThreadsById.get(selectedThreadId)!}
               onUpdateEmailThread={(updatedEmailThread) => {
+                // TODO: Make this more efficient
                 setEmailThreads((prev) => {
                   const newThreads = [...prev];
                   const threadIndex = newThreads.findIndex(

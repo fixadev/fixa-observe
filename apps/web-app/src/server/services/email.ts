@@ -420,6 +420,20 @@ export const emailService = ({ db }: { db: PrismaClient }) => {
         },
       });
     },
+
+    updateEmailThread: async ({
+      emailThreadId,
+      unread,
+    }: {
+      userId: string;
+      emailThreadId: string;
+      unread: boolean;
+    }) => {
+      await db.emailThread.update({
+        where: { id: emailThreadId },
+        data: { unread },
+      });
+    },
   };
 };
 
