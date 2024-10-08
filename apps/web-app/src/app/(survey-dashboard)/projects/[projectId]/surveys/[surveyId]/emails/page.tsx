@@ -271,6 +271,7 @@ export default function EmailsPage({
             emailId: emailThread.emails[emailThread.emails.length - 1]!.id,
             body: body ?? "",
           });
+          void refetchSurvey();
           setEmailThreads((prev) => {
             const newThreads = [...prev];
             const threadIndex = newThreads.findIndex(

@@ -146,7 +146,7 @@ function EmailThreadDetails({
           key={email.id}
           email={email}
           className="shrink-0"
-          expanded={expanded[email.id]}
+          expanded={expanded[email.id] ?? true}
           onClick={() =>
             setExpanded((prev) => {
               const newExpanded = { ...prev };

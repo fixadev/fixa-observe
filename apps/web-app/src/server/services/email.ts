@@ -3,6 +3,7 @@ import axios from "axios";
 import { env } from "~/env";
 import { extractAttributes } from "../utils/extractAttributes";
 import { taskService } from "./task";
+import { JSDOM } from "jsdom";
 // import { db } from "../db";
 
 const outlookApiUrl = "https://graph.microsoft.com/v1.0";
@@ -127,32 +128,106 @@ export const emailService = ({ db }: { db: PrismaClient }) => {
     }) => {
       const accessToken = await getAccessToken(userId);
 
-      // Get last email in thread
-      // const emailThread = await db.emailThread.findUnique({
-      //   where: { id: emailThreadId },
-      //   include: { emails: true },
-      // });
-      // if (!emailThread) {
-      //   throw new Error("Email thread not found");
-      // }
-      // if (emailThread.emails.length === 0) {
-      //   throw new Error("No emails found in thread");
-      // }
-      // const lastEmail = emailThread.emails[emailThread.emails.length - 1]!;
-
-      // Reply to last email in thread
-      await axios.post(
-        `${outlookApiUrl}/me/messages/${emailId}/replyAll`,
+      const response = await axios.post<{
+        id: string;
+        conversationId: string;
+        webLink: string;
+        body: {
+          content: string;
+        };
+        sender: {
+          emailAddress: {
+            name: string;
+            address: string;
+          };
+        };
+        toRecipients: {
+          emailAddress: {
+            name: string;
+            address: string;
+          };
+        }[];
+        subject: string;
+      }>(
+        `${outlookApiUrl}/me/messages/${emailId}/createReplyAll`,
+        {},
         {
-          comment: body,
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            Prefer: `IdType="ImmutableId"`,
+          },
+        },
+      );
+      const {
+        id,
+        conversationId,
+        webLink,
+        body: draftBody,
+        subject,
+        sender,
+        toRecipients,
+      } = response.data;
+
+      // Parse the draftBody.content as HTML using jsdom
+      const dom = new JSDOM(draftBody.content);
+      const doc = dom.window.document;
+
+      // Find the <body> tag
+      const bodyTag = doc.querySelector("body");
+
+      if (bodyTag) {
+        // Insert "body" at the beginning of the <body> tag
+        bodyTag.insertAdjacentHTML(
+          "afterbegin",
+          body.split("\n").join("<br>") + "<br>",
+        );
+
+        // Update draftBody.content with the modified HTML
+        draftBody.content = doc.documentElement.outerHTML;
+      }
+
+      await axios.patch(
+        `${outlookApiUrl}/me/messages/${id}`,
+        {
+          body: {
+            contentType: "html",
+            content: draftBody.content,
+          },
         },
         {
           headers: {
             Authorization: `Bearer ${accessToken}`,
-            Prefer: `IdType="ImmutableId", outlook.body-content-type="text"`,
+            Prefer: `IdType="ImmutableId"`,
           },
         },
       );
+
+      // Send email
+      await axios.post(
+        `${outlookApiUrl}/me/messages/${id}/send`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            Prefer: `IdType="ImmutableId"`,
+          },
+        },
+      );
+
+      // Save email to database
+      await db.email.create({
+        data: {
+          id,
+          emailThreadId: conversationId,
+          senderName: sender.emailAddress.name,
+          senderEmail: sender.emailAddress.address,
+          recipientName: toRecipients[0]!.emailAddress.name,
+          recipientEmail: toRecipients[0]!.emailAddress.address,
+          subject,
+          body: body,
+          webLink,
+        },
+      });
     },
 
     // Gets an email with the given ID and adds it to the database
