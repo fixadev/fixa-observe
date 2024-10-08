@@ -2,7 +2,11 @@
 
 import EmailCard from "./_components/EmailCard";
 import { Button } from "~/components/ui/button";
-import { ChevronDownIcon, ChevronUpIcon } from "@heroicons/react/24/outline";
+import {
+  ArrowPathIcon,
+  ChevronDownIcon,
+  ChevronUpIcon,
+} from "@heroicons/react/24/outline";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   cn,
@@ -22,6 +26,8 @@ import {
 import { useUser } from "@clerk/nextjs";
 import { type Email, type Property } from "prisma/generated/zod";
 import { Badge } from "~/components/ui/badge";
+import { RefreshButton } from "./_components/RefreshButton";
+import { Separator } from "~/components/ui/separator";
 
 export default function EmailsPage({
   params,
@@ -29,10 +35,14 @@ export default function EmailsPage({
   params: { projectId: string; surveyId: string };
 }) {
   const { user } = useUser();
-  const { data: survey, refetch: refetchSurvey } =
-    api.survey.getSurvey.useQuery({
-      surveyId: params.surveyId,
-    });
+  const {
+    data: survey,
+    refetch: refetchSurvey,
+    isLoading: isLoadingSurvey,
+    isRefetching: isRefetchingSurvey,
+  } = api.survey.getSurvey.useQuery({
+    surveyId: params.surveyId,
+  });
   const { data: emailTemplate } = api.email.getEmailTemplate.useQuery();
 
   const emailIsIncomplete = useCallback(
@@ -265,56 +275,79 @@ export default function EmailsPage({
     [emailThreadsById, sendEmail, unsentEmails, refetchSurvey],
   );
 
+  const [lastRefreshedAt, setLastRefreshedAt] = useState(new Date());
+  const handleRefresh = useCallback(() => {
+    void refetchSurvey();
+    setLastRefreshedAt(new Date());
+  }, [refetchSurvey]);
+
   return (
     <>
       <div className="grid size-full grid-cols-[400px_1fr]">
-        <div className="flex w-full max-w-3xl flex-col gap-2 overflow-y-auto border-r p-2">
-          {categories.map((category, index) => (
-            <React.Fragment key={category.name}>
-              <Button
-                variant="ghost"
-                className="flex w-full items-center justify-between"
-                disabled={category.emails.length === 0}
-                onClick={() =>
-                  setCategoriesExpanded((prev) => {
-                    const newExpanded = [...prev];
-                    newExpanded[index] = !newExpanded[index];
-                    return newExpanded;
-                  })
-                }
-              >
-                <div className="flex items-center gap-2">
-                  {category.name}
-                  {category.emails.length > 0 && (
-                    <Badge variant="outline">{category.emails.length}</Badge>
+        <div className="flex w-full max-w-3xl flex-col overflow-y-hidden border-r">
+          <div className="p-2">
+            <RefreshButton
+              onRefresh={handleRefresh}
+              refreshing={isLoadingSurvey || isRefetchingSurvey}
+              lastRefreshedAt={lastRefreshedAt}
+            />
+          </div>
+          <Separator />
+          <div className="flex w-full flex-col gap-2 overflow-y-auto p-2 pt-4">
+            {/* {[...Array(20)].map((_, index) => (
+              <div
+                key={index}
+                className="h-10 w-full shrink-0 bg-gray-100"
+                aria-hidden="true"
+              />
+            ))} */}
+            {categories.map((category, index) => (
+              <React.Fragment key={category.name}>
+                <Button
+                  variant="ghost"
+                  className="flex w-full items-center justify-between"
+                  disabled={category.emails.length === 0}
+                  onClick={() =>
+                    setCategoriesExpanded((prev) => {
+                      const newExpanded = [...prev];
+                      newExpanded[index] = !newExpanded[index];
+                      return newExpanded;
+                    })
+                  }
+                >
+                  <div className="flex items-center gap-2">
+                    {category.name}
+                    {category.emails.length > 0 && (
+                      <Badge variant="outline">{category.emails.length}</Badge>
+                    )}
+                  </div>
+                  {categoriesExpanded[index] ? (
+                    <ChevronUpIcon className="size-4" />
+                  ) : (
+                    <ChevronDownIcon className="size-4" />
                   )}
-                </div>
-                {categoriesExpanded[index] ? (
-                  <ChevronUpIcon className="size-4" />
-                ) : (
-                  <ChevronDownIcon className="size-4" />
+                </Button>
+                {categoriesExpanded[index] && (
+                  <>
+                    {category.emails?.map((thread) => (
+                      <EmailCard
+                        key={thread.id}
+                        email={thread.emails[thread.emails.length - 1]!}
+                        draft={thread.draft}
+                        unread={thread.unread}
+                        completed={completedEmailsSet.has(thread.id)}
+                        warning={getWarning(thread)}
+                        className={cn("shrink-0", {
+                          "bg-muted": thread.id === selectedThreadId,
+                        })}
+                        onClick={() => setSelectedThreadId(thread.id)}
+                      />
+                    ))}
+                  </>
                 )}
-              </Button>
-              {categoriesExpanded[index] && (
-                <>
-                  {category.emails?.map((thread) => (
-                    <EmailCard
-                      key={thread.id}
-                      email={thread.emails[thread.emails.length - 1]!}
-                      draft={thread.draft}
-                      unread={thread.unread}
-                      completed={completedEmailsSet.has(thread.id)}
-                      warning={getWarning(thread)}
-                      className={cn("shrink-0", {
-                        "bg-muted": thread.id === selectedThreadId,
-                      })}
-                      onClick={() => setSelectedThreadId(thread.id)}
-                    />
-                  ))}
-                </>
-              )}
-            </React.Fragment>
-          ))}
+              </React.Fragment>
+            ))}
+          </div>
         </div>
         <div className="overflow-x-hidden">
           {selectedThreadId ? (
