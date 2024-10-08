@@ -1,14 +1,22 @@
 "use client";
 import { api } from "~/trpc/react";
 import { BrochureCard } from "./_components/BrochureCard";
+import Spinner from "~/components/Spinner";
 export default function BrochuresPage({
   params,
 }: {
   params: { projectId: string; surveyId: string };
 }) {
-  const { data: survey } = api.survey.getSurvey.useQuery({
+  const { data: survey, isLoading } = api.survey.getSurvey.useQuery({
     surveyId: params.surveyId,
   });
+  if (isLoading) {
+    return (
+      <div className="flex h-full w-full flex-col items-center justify-center">
+        <Spinner className="h-10 w-10 text-gray-500" />
+      </div>
+    );
+  }
   return (
     <div className="flex h-full flex-col gap-10 overflow-y-auto p-6">
       {survey?.properties && survey?.properties.length > 0 ? (

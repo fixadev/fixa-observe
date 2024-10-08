@@ -403,7 +403,6 @@ export const emailService = ({ db }: { db: PrismaClient }) => {
 // testAddEmailToDb();
 
 
-
 // async function testEmailParsing(propertyId: string, emailText: string) {
 //     const attributesToUpdate = await extractAttributes(emailText);
 //     console.log('Attributes to update', attributesToUpdate)
