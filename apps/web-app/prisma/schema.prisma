@@ -136,8 +136,6 @@ model EmailThread {
 
   draft            Boolean @default(false)
   unread           Boolean @default(false)
-  completed        Boolean @default(false)
-  moreInfoNeeded   Boolean @default(false)
   parsedAttributes Json?   @db.JsonB
 }
 

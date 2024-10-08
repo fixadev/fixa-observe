@@ -31,16 +31,20 @@ import {
   DEFAULT_EMAIL_TEMPLATE_BODY,
   DEFAULT_EMAIL_TEMPLATE_SUBJECT,
 } from "~/lib/constants";
+import { isParsedAttributesComplete } from "~/lib/utils";
+import { type Email } from "prisma/generated/zod";
 
 export default function EmailDetails({
   emailThread,
   isSending,
+  onUpdateEmailThread,
   onOpenTemplateDialog,
   onSend,
   onReset,
 }: {
   emailThread: EmailThreadWithEmailsAndProperty;
   isSending: boolean;
+  onUpdateEmailThread: (emailThread: EmailThreadWithEmailsAndProperty) => void;
   onOpenTemplateDialog: () => void;
   onSend: () => void;
   onReset: () => void;
@@ -51,6 +55,7 @@ export default function EmailDetails({
         key={emailThread.id}
         emailThread={emailThread}
         isSending={isSending}
+        onUpdateEmailThread={onUpdateEmailThread}
         onOpenTemplateDialog={onOpenTemplateDialog}
         onSend={onSend}
         onReset={onReset}
@@ -62,6 +67,7 @@ export default function EmailDetails({
       key={emailThread.id}
       emailThread={emailThread}
       isSending={isSending}
+      onUpdateEmailThread={onUpdateEmailThread}
       onSend={onSend}
     />
   );
@@ -70,12 +76,36 @@ export default function EmailDetails({
 function EmailThreadDetails({
   emailThread,
   isSending,
+  onUpdateEmailThread,
   onSend,
 }: {
   emailThread: EmailThreadWithEmailsAndProperty;
   isSending: boolean;
+  onUpdateEmailThread: (emailThread: EmailThreadWithEmailsAndProperty) => void;
   onSend: () => void;
 }) {
+  // Update read status of email thread
+  const { mutateAsync: updateEmailThread } =
+    api.email.updateEmailThread.useMutation();
+  useEffect(() => {
+    if (!emailThread.unread) {
+      return;
+    }
+
+    const timeout = setTimeout(() => {
+      onUpdateEmailThread({
+        ...emailThread,
+        unread: false,
+      });
+      void updateEmailThread({
+        emailThreadId: emailThread.id,
+        unread: false,
+      });
+    }, 1000);
+
+    return () => clearTimeout(timeout);
+  }, [emailThread, onUpdateEmailThread, updateEmailThread]);
+
   const [expanded, setExpanded] = useState<boolean[]>(
     // Set the last email to be expanded
     emailThread.emails.map((_, i) => i === emailThread.emails.length - 1),
@@ -107,7 +137,6 @@ function EmailThreadDetails({
             parsedAttributes={
               emailThread.parsedAttributes as Record<string, string>
             }
-            completed={emailThread.completed}
           />
         }
       />
@@ -122,16 +151,28 @@ function EmailThreadDetails({
 function UnsentEmailDetails({
   emailThread,
   isSending,
+  onUpdateEmailThread,
   onOpenTemplateDialog,
   onReset,
   onSend,
 }: {
   emailThread: EmailThreadWithEmailsAndProperty;
   isSending: boolean;
+  onUpdateEmailThread: (emailThread: EmailThreadWithEmailsAndProperty) => void;
   onOpenTemplateDialog: () => void;
   onReset: () => void;
   onSend: () => void;
 }) {
+  const updateField = useCallback(
+    (field: keyof Email, value: string) => {
+      onUpdateEmailThread({
+        ...emailThread,
+        emails: [{ ...emailThread.emails[0]!, [field]: value }],
+      });
+    },
+    [emailThread, onUpdateEmailThread],
+  );
+
   return (
     <div className="flex h-full flex-col gap-2 p-2 pb-8">
       <div className="mt-4 grid grid-cols-[auto_1fr] items-center gap-2">
@@ -141,7 +182,8 @@ function UnsentEmailDetails({
           id="to"
           className="flex-grow"
           placeholder="mark@example.com"
-          defaultValue={emailThread.emails[0]!.recipientEmail}
+          value={emailThread.emails[0]!.recipientEmail}
+          onChange={(e) => updateField("recipientEmail", e.target.value)}
           autoComplete="email"
         />
         <Label htmlFor="subject">Subject:</Label>
@@ -149,7 +191,8 @@ function UnsentEmailDetails({
           type="text"
           id="subject"
           className="flex-grow"
-          defaultValue={emailThread.emails[0]!.subject}
+          value={emailThread.emails[0]!.subject}
+          onChange={(e) => updateField("subject", e.target.value)}
           placeholder="Property inquiry"
         />
       </div>
@@ -157,7 +200,8 @@ function UnsentEmailDetails({
       <Textarea
         className="flex-1"
         placeholder="Write your email here..."
-        defaultValue={emailThread.emails[0]!.body}
+        value={emailThread.emails[0]!.body}
+        onChange={(e) => updateField("body", e.target.value)}
       />
       <div className="mt-2 flex justify-between">
         <div className="flex gap-2">
@@ -178,14 +222,14 @@ function UnsentEmailDetails({
 
 function ParsedAttributes({
   parsedAttributes,
-  completed,
 }: {
   parsedAttributes?: Record<string, string>;
-  completed?: boolean;
 }) {
   if (!parsedAttributes) {
     return null;
   }
+
+  const completed = isParsedAttributesComplete(parsedAttributes);
 
   return (
     <>

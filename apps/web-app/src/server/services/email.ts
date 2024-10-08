@@ -1,11 +1,14 @@
-import { Prisma, type PrismaClient } from "@prisma/client";
+import { type PrismaClient } from "@prisma/client";
 import axios from "axios";
 import { env } from "~/env";
 import { extractAttributes } from "../utils/extractAttributes";
+import { taskService } from "./task";
 // import { db } from "../db";
 
 const outlookApiUrl = "https://graph.microsoft.com/v1.0";
 const clerkApiUrl = "https://api.clerk.com/v1";
+
+const taskServiceInstance = taskService();
 
 export const emailService = ({ db }: { db: PrismaClient }) => {
   const getAccessToken = async (userId: string) => {
@@ -211,54 +214,27 @@ export const emailService = ({ db }: { db: PrismaClient }) => {
         return; // Exit the function if the email is a draft
       }
 
-      // Update email thread
-      const emailThread = await db.emailThread.update({
+      // Check if email thread exists
+      const emailThread = await db.emailThread.findUnique({
         where: { id: conversationId },
-        data: { unread: true },
       });
-      try {
-        await db.emailThread.update({
-          where: { id: conversationId },
-          data: { unread: true },
-        });
-      } catch (error) {
-        // Check if the error is due to the record not existing
-        if (
-          error instanceof Prisma.PrismaClientKnownRequestError &&
-          error.code === "P2025"
-        ) {
-          console.log(
-            `Email thread with id ${conversationId} not found. Skipping update.`,
-          );
-          return; // Exit the function if the email thread doesn't exist
-        }
-        // If it's a different error, rethrow it
-        throw error;
+      if (!emailThread) {
+        console.log(
+          `Email thread with id ${conversationId} not found. Skipping update.`,
+        );
+        return;
       }
 
-      // Extract updated attributes
-      const attributesToUpdate = await extractAttributes(uniqueBody.content);
-      const propertyToUpdate = await db.property.findUnique({
-        where: { id: emailThread.propertyId },
+      // Check if email already exists
+      const existingEmail = await db.email.findUnique({
+        where: { id: emailId },
       });
-
-      if (!propertyToUpdate) {
-        throw new Error("Property not found");
+      if (existingEmail) {
+        console.log(
+          `Email with id ${emailId} already exists. Skipping creation.`,
+        );
+        return;
       }
-
-      // update property attributes
-      for (const attributeId of Object.keys(attributesToUpdate)) {
-        if (propertyToUpdate?.attributes && typeof propertyToUpdate.attributes === 'object') {
-          (propertyToUpdate.attributes as Record<string, string | undefined>)[attributeId] = attributesToUpdate[attributeId];
-        }
-      }
-      await db.property.update({
-        where: { id: emailThread.propertyId },
-        data: {
-          attributes: propertyToUpdate?.attributes ?? {},
-        },
-      });
-
 
       // Create email
       const email = {
@@ -277,14 +253,65 @@ export const emailService = ({ db }: { db: PrismaClient }) => {
 
         webLink,
       };
-      await db.email.upsert({
-        where: { id: emailId },
-        update: email,
-        create: email,
+      await db.email.create({
+        data: email,
       });
+
+      // Mark email thread as unread
+      await db.emailThread.update({
+        where: { id: conversationId },
+        data: { unread: true },
+      });
+
+      // Get user
+      const user = await db.user.findUnique({
+        where: { id: userId },
+      });
+      if (!user) {
+        throw new Error("User not found");
+      }
+
+      // Only extract attributes if the email is NOT from the user's email address
+      if (user.email !== sender.emailAddress.address) {
+        // Extract updated attributes
+        const attributesToUpdate = await extractAttributes(uniqueBody.content);
+        const propertyToUpdate = await db.property.findUnique({
+          where: { id: emailThread.propertyId },
+        });
+
+        if (!propertyToUpdate) {
+          throw new Error("Property not found");
+        }
+
+        // update property attributes
+        for (const attributeId of Object.keys(attributesToUpdate)) {
+          if (
+            propertyToUpdate?.attributes &&
+            typeof propertyToUpdate.attributes === "object"
+          ) {
+            (propertyToUpdate.attributes as Record<string, string | undefined>)[
+              attributeId
+            ] = attributesToUpdate[attributeId];
+          }
+        }
+        await db.property.update({
+          where: { id: emailThread.propertyId },
+          data: {
+            attributes: propertyToUpdate?.attributes ?? {},
+          },
+        });
+
+        // Update email thread with attributes
+        await db.emailThread.update({
+          where: { id: conversationId },
+          data: {
+            parsedAttributes: attributesToUpdate,
+          },
+        });
+      }
     },
 
-    subscribeToEmails: async ({ userId }: { userId: string }) => {
+    createEmailSubscription: async ({ userId }: { userId: string }) => {
       const accessToken = await getAccessToken(userId);
 
       const payload = {
@@ -312,7 +339,49 @@ export const emailService = ({ db }: { db: PrismaClient }) => {
         },
       });
 
-      // TODO: Create task to renew email subscription (google cloud tasks or something)
+      // Create task to renew email subscription
+      await taskServiceInstance.createTask(payload.expirationDateTime, {
+        httpMethod: "POST",
+        url: `${env.NEXT_PUBLIC_API_URL}/api/renew-email-subscription`,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: btoa(
+          JSON.stringify({
+            userId,
+          }),
+        ),
+      });
+    },
+
+    deleteEmailSubscription: async ({ userId }: { userId: string }) => {
+      const accessToken = await getAccessToken(userId);
+      const user = await db.user.findUnique({
+        where: { id: userId },
+      });
+      if (!user) {
+        throw new Error("User not found");
+      }
+      if (!user.emailSubscriptionId) {
+        throw new Error("User does not have an email subscription");
+      }
+
+      await axios.delete(
+        `${outlookApiUrl}/subscriptions/${user.emailSubscriptionId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        },
+      );
+
+      await db.user.update({
+        where: { id: userId },
+        data: {
+          emailSubscriptionId: null,
+          emailSubscriptionExpiresAt: null,
+        },
+      });
     },
 
     getUserIdFromSubscriptionId: async ({
@@ -363,6 +432,20 @@ export const emailService = ({ db }: { db: PrismaClient }) => {
         },
       });
     },
+
+    updateEmailThread: async ({
+      emailThreadId,
+      unread,
+    }: {
+      userId: string;
+      emailThreadId: string;
+      unread: boolean;
+    }) => {
+      await db.emailThread.update({
+        where: { id: emailThreadId },
+        data: { unread },
+      });
+    },
   };
 };
 
@@ -405,7 +488,6 @@ export const emailService = ({ db }: { db: PrismaClient }) => {
 // testReplyToEmail();
 // testAddEmailToDb();
 
-
 // async function testEmailParsing(propertyId: string, emailText: string) {
 //     const attributesToUpdate = await extractAttributes(emailText);
 //     console.log('Attributes to update', attributesToUpdate)
@@ -431,8 +513,7 @@ export const emailService = ({ db }: { db: PrismaClient }) => {
 //     });
 // }
 
-
-// const email = `Hi Colin, the place is available starting from November 10th. 
+// const email = `Hi Colin, the place is available starting from November 10th.
 //   the rent is $5.50 NNN
 //   the opex is $0.50
 

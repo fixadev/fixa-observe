@@ -21,7 +21,11 @@ export const surveyService = ({ db }: { db: PrismaClient }) => {
               brochures: true,
               emailThreads: {
                 include: {
-                  emails: true,
+                  emails: {
+                    orderBy: {
+                      createdAt: "asc",
+                    },
+                  },
                 },
               },
             },
@@ -30,7 +34,7 @@ export const surveyService = ({ db }: { db: PrismaClient }) => {
             },
           },
         },
-      }); 
+      });
       return survey;
     },
 

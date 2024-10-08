@@ -5,6 +5,7 @@ import { CheckCircleIcon } from "@heroicons/react/24/solid";
 import { formatDistanceToNow } from "date-fns";
 import { type Email } from "prisma/generated/zod";
 import { Avatar, AvatarFallback } from "~/components/ui/avatar";
+import { Button } from "~/components/ui/button";
 import { cn } from "~/lib/utils";
 
 export default function EmailCard({
@@ -109,6 +110,11 @@ export default function EmailCard({
               {line}
             </p>
           ))}
+          <Button variant="link" className="w-fit px-0" asChild>
+            <a href={email.webLink} target="_blank">
+              Open in Outlook
+            </a>
+          </Button>
         </div>
       )}
     </div>

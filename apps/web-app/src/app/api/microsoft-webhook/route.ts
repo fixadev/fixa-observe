@@ -40,9 +40,20 @@ export async function POST(req: NextRequest) {
     });
   }
 
-  const userId = await emailServiceInstance.getUserIdFromSubscriptionId({
-    subscriptionId: requestBody.value[0].subscriptionId,
-  });
+  let userId;
+  try {
+    // Get user id from subscription id
+    userId = await emailServiceInstance.getUserIdFromSubscriptionId({
+      subscriptionId: requestBody.value[0].subscriptionId,
+    });
+  } catch (e) {
+    // User was likely deleted, so we don't need to process this
+    return new Response("ok", {
+      status: 200,
+      headers: { "Content-Type": "text/plain" },
+    });
+  }
+
   await emailServiceInstance.addEmailToDb({
     userId,
     emailId: requestBody.value[0].resourceData.id,
