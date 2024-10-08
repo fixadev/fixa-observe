@@ -26,33 +26,41 @@ export function BrochureCarousel({ brochure }: { brochure: BrochureSchema }) {
 
   return (
     <div className="h-full w-3/4 items-center justify-center">
-      <Document file={pdfUrl} onLoadSuccess={onDocumentLoadSuccess}>
-        {loaded ? (
-          <Carousel>
-            <CarouselContent>
-              {Array.from(new Array(numPages), (el, index) => (
-                <CarouselItem
-                  key={`page_${index + 1}`}
-                  className="flex h-[600px] flex-col items-center justify-center object-contain"
-                >
-                  <Page
-                    className="max-h-full w-auto"
-                    pageNumber={index + 1}
-                    renderTextLayer={false}
-                    renderAnnotationLayer={false}
-                  />
-                </CarouselItem>
-              ))}
-            </CarouselContent>
-            <CarouselPrevious />
-            <CarouselNext />
-          </Carousel>
-        ) : (
-          <div className="flex h-[600px] flex-col items-center justify-center bg-gray-100">
-            <Spinner className="h-10 w-10 text-gray-500" />
-          </div>
-        )}
+      <Document
+        className={loaded ? "" : "hidden"}
+        file={pdfUrl}
+        onLoadSuccess={onDocumentLoadSuccess}
+      >
+        <Carousel>
+          <CarouselContent>
+            {Array.from(new Array(numPages), (el, index) => (
+              <CarouselItem
+                key={`page_${index + 1}`}
+                className="flex h-[600px] flex-col items-center justify-center object-contain"
+              >
+                <Page
+                  onLoad={() => setLoaded(true)}
+                  className="max-h-full w-auto"
+                  pageNumber={index + 1}
+                  renderTextLayer={false}
+                  renderAnnotationLayer={false}
+                />
+              </CarouselItem>
+            ))}
+          </CarouselContent>
+          <CarouselPrevious />
+          <CarouselNext />
+        </Carousel>
       </Document>
+      <div
+        className={
+          loaded
+            ? "hidden"
+            : "flex h-[600px] flex-col items-center justify-center bg-gray-100"
+        }
+      >
+        <Spinner className="h-10 w-10 text-gray-500" />
+      </div>
     </div>
   );
 }
