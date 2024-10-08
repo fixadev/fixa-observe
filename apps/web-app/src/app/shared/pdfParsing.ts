@@ -150,7 +150,6 @@ export function processPDF(parsedPDF: string[] | undefined) {
         } else {
           currentBuilding.brochureLink = "";
         }
-        i += 1;
       } else if (line?.includes("Comments:")) {
         const removeBulletPointOrDash = (text: string): string => {
           return " - " + text.replace(/^\s*[•\-]\s*/, "").trim();
@@ -175,7 +174,7 @@ export function processPDF(parsedPDF: string[] | undefined) {
           ) {
             break; // End of comments section
           }
-          // console.log("PUSHING LINE", curr);
+          
           if (curr) {
             comments.push(removeBulletPointOrDash(curr.trim()));
           }

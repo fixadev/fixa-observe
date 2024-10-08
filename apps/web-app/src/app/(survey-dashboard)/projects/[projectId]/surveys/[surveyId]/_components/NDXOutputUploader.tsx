@@ -2,11 +2,11 @@
 "use client";
 import type React from "react";
 import { usePDFJS } from "./usePDFjs";
+import axios from "axios";
 import { parsePDF, processPDF } from "~/app/shared/pdfParsing";
 import { type Property } from "./PropertiesTable";
 import { type Attribute } from "@prisma/client";
 import { type PropertySchema, type CreatePropertySchema } from "~/lib/property";
-
 import { FileInput } from "../../../../../../_components/FileInput";
 import { Button } from "~/components/ui/button";
 
@@ -57,9 +57,21 @@ export const NDXOutputUploader = ({
     return attributesOrder.find((attribute) => attribute.id === attributeId);
   };
 
+  // TODO: Move all this functionality to backend
   const onFilesChangeHandler = async (files: FileList) => {
     const file = files[0];
     if (file && pdfjs) {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const response = await axios.post("/api/extract-images", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      const s3Photourls = response.data as string[];
+
       const parsedPDF = await parsePDF(file, pdfjs);
       const currentPropertiesEndIndex = existingProperties.length;
       const properties = processPDF(parsedPDF);
@@ -68,7 +80,7 @@ export const NDXOutputUploader = ({
           return {
             createdAt: new Date(),
             updatedAt: new Date(),
-            photoUrl: "",
+            photoUrl: s3Photourls[index] ?? "",
             brochures: property.brochureLink
               ? [
                   {
