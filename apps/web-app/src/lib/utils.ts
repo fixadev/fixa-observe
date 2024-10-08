@@ -17,3 +17,9 @@ export function replaceTemplateVariables(
     return variables[p1] ?? match;
   });
 }
+
+export function isParsedAttributesComplete(
+  parsedAttributes: Record<string, string | null>,
+) {
+  return !Object.values(parsedAttributes).every((value) => value === null);
+}

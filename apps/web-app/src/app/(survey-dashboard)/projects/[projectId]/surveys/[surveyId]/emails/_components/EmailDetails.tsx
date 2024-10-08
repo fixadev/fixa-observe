@@ -31,16 +31,19 @@ import {
   DEFAULT_EMAIL_TEMPLATE_BODY,
   DEFAULT_EMAIL_TEMPLATE_SUBJECT,
 } from "~/lib/constants";
+import { isParsedAttributesComplete } from "~/lib/utils";
 
 export default function EmailDetails({
   emailThread,
   isSending,
+  onUpdateEmailThread,
   onOpenTemplateDialog,
   onSend,
   onReset,
 }: {
   emailThread: EmailThreadWithEmailsAndProperty;
   isSending: boolean;
+  onUpdateEmailThread: (emailThread: EmailThreadWithEmailsAndProperty) => void;
   onOpenTemplateDialog: () => void;
   onSend: () => void;
   onReset: () => void;
@@ -51,6 +54,7 @@ export default function EmailDetails({
         key={emailThread.id}
         emailThread={emailThread}
         isSending={isSending}
+        onUpdateEmailThread={onUpdateEmailThread}
         onOpenTemplateDialog={onOpenTemplateDialog}
         onSend={onSend}
         onReset={onReset}
@@ -107,7 +111,6 @@ function EmailThreadDetails({
             parsedAttributes={
               emailThread.parsedAttributes as Record<string, string>
             }
-            completed={emailThread.completed}
           />
         }
       />
@@ -122,12 +125,14 @@ function EmailThreadDetails({
 function UnsentEmailDetails({
   emailThread,
   isSending,
+  onUpdateEmailThread,
   onOpenTemplateDialog,
   onReset,
   onSend,
 }: {
   emailThread: EmailThreadWithEmailsAndProperty;
   isSending: boolean;
+  onUpdateEmailThread: (emailThread: EmailThreadWithEmailsAndProperty) => void;
   onOpenTemplateDialog: () => void;
   onReset: () => void;
   onSend: () => void;
@@ -178,14 +183,14 @@ function UnsentEmailDetails({
 
 function ParsedAttributes({
   parsedAttributes,
-  completed,
 }: {
   parsedAttributes?: Record<string, string>;
-  completed?: boolean;
 }) {
   if (!parsedAttributes) {
     return null;
   }
+
+  const completed = isParsedAttributesComplete(parsedAttributes);
 
   return (
     <>

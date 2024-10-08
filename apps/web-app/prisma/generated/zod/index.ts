@@ -72,7 +72,7 @@ export const BrochureScalarFieldEnumSchema = z.enum(['id','createdAt','updatedAt
 
 export const EmailScalarFieldEnumSchema = z.enum(['id','createdAt','updatedAt','senderName','senderEmail','recipientName','recipientEmail','subject','body','webLink','emailThreadId']);
 
-export const EmailThreadScalarFieldEnumSchema = z.enum(['id','createdAt','updatedAt','propertyId','draft','unread','completed','moreInfoNeeded','parsedAttributes']);
+export const EmailThreadScalarFieldEnumSchema = z.enum(['id','createdAt','updatedAt','propertyId','draft','unread','parsedAttributes']);
 
 export const ContactScalarFieldEnumSchema = z.enum(['id','createdAt','updatedAt','firstName','lastName','email','phone','propertyId']);
 
@@ -229,8 +229,6 @@ export const EmailThreadSchema = z.object({
   propertyId: z.string(),
   draft: z.boolean(),
   unread: z.boolean(),
-  completed: z.boolean(),
-  moreInfoNeeded: z.boolean(),
   parsedAttributes: JsonValueSchema.nullable(),
 })
 
@@ -564,8 +562,6 @@ export const EmailThreadSelectSchema: z.ZodType<Prisma.EmailThreadSelect> = z.ob
   propertyId: z.boolean().optional(),
   draft: z.boolean().optional(),
   unread: z.boolean().optional(),
-  completed: z.boolean().optional(),
-  moreInfoNeeded: z.boolean().optional(),
   parsedAttributes: z.boolean().optional(),
   emails: z.union([z.boolean(),z.lazy(() => EmailFindManyArgsSchema)]).optional(),
   property: z.union([z.boolean(),z.lazy(() => PropertyArgsSchema)]).optional(),
@@ -1222,8 +1218,6 @@ export const EmailThreadWhereInputSchema: z.ZodType<Prisma.EmailThreadWhereInput
   propertyId: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   draft: z.union([ z.lazy(() => BoolFilterSchema),z.boolean() ]).optional(),
   unread: z.union([ z.lazy(() => BoolFilterSchema),z.boolean() ]).optional(),
-  completed: z.union([ z.lazy(() => BoolFilterSchema),z.boolean() ]).optional(),
-  moreInfoNeeded: z.union([ z.lazy(() => BoolFilterSchema),z.boolean() ]).optional(),
   parsedAttributes: z.lazy(() => JsonNullableFilterSchema).optional(),
   emails: z.lazy(() => EmailListRelationFilterSchema).optional(),
   property: z.union([ z.lazy(() => PropertyRelationFilterSchema),z.lazy(() => PropertyWhereInputSchema) ]).optional(),
@@ -1236,8 +1230,6 @@ export const EmailThreadOrderByWithRelationInputSchema: z.ZodType<Prisma.EmailTh
   propertyId: z.lazy(() => SortOrderSchema).optional(),
   draft: z.lazy(() => SortOrderSchema).optional(),
   unread: z.lazy(() => SortOrderSchema).optional(),
-  completed: z.lazy(() => SortOrderSchema).optional(),
-  moreInfoNeeded: z.lazy(() => SortOrderSchema).optional(),
   parsedAttributes: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
   emails: z.lazy(() => EmailOrderByRelationAggregateInputSchema).optional(),
   property: z.lazy(() => PropertyOrderByWithRelationInputSchema).optional()
@@ -1256,8 +1248,6 @@ export const EmailThreadWhereUniqueInputSchema: z.ZodType<Prisma.EmailThreadWher
   propertyId: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   draft: z.union([ z.lazy(() => BoolFilterSchema),z.boolean() ]).optional(),
   unread: z.union([ z.lazy(() => BoolFilterSchema),z.boolean() ]).optional(),
-  completed: z.union([ z.lazy(() => BoolFilterSchema),z.boolean() ]).optional(),
-  moreInfoNeeded: z.union([ z.lazy(() => BoolFilterSchema),z.boolean() ]).optional(),
   parsedAttributes: z.lazy(() => JsonNullableFilterSchema).optional(),
   emails: z.lazy(() => EmailListRelationFilterSchema).optional(),
   property: z.union([ z.lazy(() => PropertyRelationFilterSchema),z.lazy(() => PropertyWhereInputSchema) ]).optional(),
@@ -1270,8 +1260,6 @@ export const EmailThreadOrderByWithAggregationInputSchema: z.ZodType<Prisma.Emai
   propertyId: z.lazy(() => SortOrderSchema).optional(),
   draft: z.lazy(() => SortOrderSchema).optional(),
   unread: z.lazy(() => SortOrderSchema).optional(),
-  completed: z.lazy(() => SortOrderSchema).optional(),
-  moreInfoNeeded: z.lazy(() => SortOrderSchema).optional(),
   parsedAttributes: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
   _count: z.lazy(() => EmailThreadCountOrderByAggregateInputSchema).optional(),
   _max: z.lazy(() => EmailThreadMaxOrderByAggregateInputSchema).optional(),
@@ -1288,8 +1276,6 @@ export const EmailThreadScalarWhereWithAggregatesInputSchema: z.ZodType<Prisma.E
   propertyId: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
   draft: z.union([ z.lazy(() => BoolWithAggregatesFilterSchema),z.boolean() ]).optional(),
   unread: z.union([ z.lazy(() => BoolWithAggregatesFilterSchema),z.boolean() ]).optional(),
-  completed: z.union([ z.lazy(() => BoolWithAggregatesFilterSchema),z.boolean() ]).optional(),
-  moreInfoNeeded: z.union([ z.lazy(() => BoolWithAggregatesFilterSchema),z.boolean() ]).optional(),
   parsedAttributes: z.lazy(() => JsonNullableWithAggregatesFilterSchema).optional()
 }).strict();
 
@@ -2037,8 +2023,6 @@ export const EmailThreadCreateInputSchema: z.ZodType<Prisma.EmailThreadCreateInp
   updatedAt: z.coerce.date().optional(),
   draft: z.boolean().optional(),
   unread: z.boolean().optional(),
-  completed: z.boolean().optional(),
-  moreInfoNeeded: z.boolean().optional(),
   parsedAttributes: z.union([ z.lazy(() => NullableJsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
   emails: z.lazy(() => EmailCreateNestedManyWithoutEmailThreadInputSchema).optional(),
   property: z.lazy(() => PropertyCreateNestedOneWithoutEmailThreadsInputSchema)
@@ -2051,8 +2035,6 @@ export const EmailThreadUncheckedCreateInputSchema: z.ZodType<Prisma.EmailThread
   propertyId: z.string(),
   draft: z.boolean().optional(),
   unread: z.boolean().optional(),
-  completed: z.boolean().optional(),
-  moreInfoNeeded: z.boolean().optional(),
   parsedAttributes: z.union([ z.lazy(() => NullableJsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
   emails: z.lazy(() => EmailUncheckedCreateNestedManyWithoutEmailThreadInputSchema).optional()
 }).strict();
@@ -2063,8 +2045,6 @@ export const EmailThreadUpdateInputSchema: z.ZodType<Prisma.EmailThreadUpdateInp
   updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   draft: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   unread: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  completed: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  moreInfoNeeded: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   parsedAttributes: z.union([ z.lazy(() => NullableJsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
   emails: z.lazy(() => EmailUpdateManyWithoutEmailThreadNestedInputSchema).optional(),
   property: z.lazy(() => PropertyUpdateOneRequiredWithoutEmailThreadsNestedInputSchema).optional()
@@ -2077,8 +2057,6 @@ export const EmailThreadUncheckedUpdateInputSchema: z.ZodType<Prisma.EmailThread
   propertyId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   draft: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   unread: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  completed: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  moreInfoNeeded: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   parsedAttributes: z.union([ z.lazy(() => NullableJsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
   emails: z.lazy(() => EmailUncheckedUpdateManyWithoutEmailThreadNestedInputSchema).optional()
 }).strict();
@@ -2090,8 +2068,6 @@ export const EmailThreadCreateManyInputSchema: z.ZodType<Prisma.EmailThreadCreat
   propertyId: z.string(),
   draft: z.boolean().optional(),
   unread: z.boolean().optional(),
-  completed: z.boolean().optional(),
-  moreInfoNeeded: z.boolean().optional(),
   parsedAttributes: z.union([ z.lazy(() => NullableJsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
 }).strict();
 
@@ -2101,8 +2077,6 @@ export const EmailThreadUpdateManyMutationInputSchema: z.ZodType<Prisma.EmailThr
   updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   draft: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   unread: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  completed: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  moreInfoNeeded: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   parsedAttributes: z.union([ z.lazy(() => NullableJsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
 }).strict();
 
@@ -2113,8 +2087,6 @@ export const EmailThreadUncheckedUpdateManyInputSchema: z.ZodType<Prisma.EmailTh
   propertyId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   draft: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   unread: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  completed: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  moreInfoNeeded: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   parsedAttributes: z.union([ z.lazy(() => NullableJsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
 }).strict();
 
@@ -2847,8 +2819,6 @@ export const EmailThreadCountOrderByAggregateInputSchema: z.ZodType<Prisma.Email
   propertyId: z.lazy(() => SortOrderSchema).optional(),
   draft: z.lazy(() => SortOrderSchema).optional(),
   unread: z.lazy(() => SortOrderSchema).optional(),
-  completed: z.lazy(() => SortOrderSchema).optional(),
-  moreInfoNeeded: z.lazy(() => SortOrderSchema).optional(),
   parsedAttributes: z.lazy(() => SortOrderSchema).optional()
 }).strict();
 
@@ -2858,9 +2828,7 @@ export const EmailThreadMaxOrderByAggregateInputSchema: z.ZodType<Prisma.EmailTh
   updatedAt: z.lazy(() => SortOrderSchema).optional(),
   propertyId: z.lazy(() => SortOrderSchema).optional(),
   draft: z.lazy(() => SortOrderSchema).optional(),
-  unread: z.lazy(() => SortOrderSchema).optional(),
-  completed: z.lazy(() => SortOrderSchema).optional(),
-  moreInfoNeeded: z.lazy(() => SortOrderSchema).optional()
+  unread: z.lazy(() => SortOrderSchema).optional()
 }).strict();
 
 export const EmailThreadMinOrderByAggregateInputSchema: z.ZodType<Prisma.EmailThreadMinOrderByAggregateInput> = z.object({
@@ -2869,9 +2837,7 @@ export const EmailThreadMinOrderByAggregateInputSchema: z.ZodType<Prisma.EmailTh
   updatedAt: z.lazy(() => SortOrderSchema).optional(),
   propertyId: z.lazy(() => SortOrderSchema).optional(),
   draft: z.lazy(() => SortOrderSchema).optional(),
-  unread: z.lazy(() => SortOrderSchema).optional(),
-  completed: z.lazy(() => SortOrderSchema).optional(),
-  moreInfoNeeded: z.lazy(() => SortOrderSchema).optional()
+  unread: z.lazy(() => SortOrderSchema).optional()
 }).strict();
 
 export const ContactCountOrderByAggregateInputSchema: z.ZodType<Prisma.ContactCountOrderByAggregateInput> = z.object({
@@ -4669,8 +4635,6 @@ export const EmailThreadCreateWithoutPropertyInputSchema: z.ZodType<Prisma.Email
   updatedAt: z.coerce.date().optional(),
   draft: z.boolean().optional(),
   unread: z.boolean().optional(),
-  completed: z.boolean().optional(),
-  moreInfoNeeded: z.boolean().optional(),
   parsedAttributes: z.union([ z.lazy(() => NullableJsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
   emails: z.lazy(() => EmailCreateNestedManyWithoutEmailThreadInputSchema).optional()
 }).strict();
@@ -4681,8 +4645,6 @@ export const EmailThreadUncheckedCreateWithoutPropertyInputSchema: z.ZodType<Pri
   updatedAt: z.coerce.date().optional(),
   draft: z.boolean().optional(),
   unread: z.boolean().optional(),
-  completed: z.boolean().optional(),
-  moreInfoNeeded: z.boolean().optional(),
   parsedAttributes: z.union([ z.lazy(() => NullableJsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
   emails: z.lazy(() => EmailUncheckedCreateNestedManyWithoutEmailThreadInputSchema).optional()
 }).strict();
@@ -4848,8 +4810,6 @@ export const EmailThreadScalarWhereInputSchema: z.ZodType<Prisma.EmailThreadScal
   propertyId: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   draft: z.union([ z.lazy(() => BoolFilterSchema),z.boolean() ]).optional(),
   unread: z.union([ z.lazy(() => BoolFilterSchema),z.boolean() ]).optional(),
-  completed: z.union([ z.lazy(() => BoolFilterSchema),z.boolean() ]).optional(),
-  moreInfoNeeded: z.union([ z.lazy(() => BoolFilterSchema),z.boolean() ]).optional(),
   parsedAttributes: z.lazy(() => JsonNullableFilterSchema).optional()
 }).strict();
 
@@ -4927,8 +4887,6 @@ export const EmailThreadCreateWithoutEmailsInputSchema: z.ZodType<Prisma.EmailTh
   updatedAt: z.coerce.date().optional(),
   draft: z.boolean().optional(),
   unread: z.boolean().optional(),
-  completed: z.boolean().optional(),
-  moreInfoNeeded: z.boolean().optional(),
   parsedAttributes: z.union([ z.lazy(() => NullableJsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
   property: z.lazy(() => PropertyCreateNestedOneWithoutEmailThreadsInputSchema)
 }).strict();
@@ -4940,8 +4898,6 @@ export const EmailThreadUncheckedCreateWithoutEmailsInputSchema: z.ZodType<Prism
   propertyId: z.string(),
   draft: z.boolean().optional(),
   unread: z.boolean().optional(),
-  completed: z.boolean().optional(),
-  moreInfoNeeded: z.boolean().optional(),
   parsedAttributes: z.union([ z.lazy(() => NullableJsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
 }).strict();
 
@@ -4967,8 +4923,6 @@ export const EmailThreadUpdateWithoutEmailsInputSchema: z.ZodType<Prisma.EmailTh
   updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   draft: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   unread: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  completed: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  moreInfoNeeded: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   parsedAttributes: z.union([ z.lazy(() => NullableJsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
   property: z.lazy(() => PropertyUpdateOneRequiredWithoutEmailThreadsNestedInputSchema).optional()
 }).strict();
@@ -4980,8 +4934,6 @@ export const EmailThreadUncheckedUpdateWithoutEmailsInputSchema: z.ZodType<Prism
   propertyId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   draft: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   unread: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  completed: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  moreInfoNeeded: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   parsedAttributes: z.union([ z.lazy(() => NullableJsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
 }).strict();
 
@@ -5535,8 +5487,6 @@ export const EmailThreadCreateManyPropertyInputSchema: z.ZodType<Prisma.EmailThr
   updatedAt: z.coerce.date().optional(),
   draft: z.boolean().optional(),
   unread: z.boolean().optional(),
-  completed: z.boolean().optional(),
-  moreInfoNeeded: z.boolean().optional(),
   parsedAttributes: z.union([ z.lazy(() => NullableJsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
 }).strict();
 
@@ -5603,8 +5553,6 @@ export const EmailThreadUpdateWithoutPropertyInputSchema: z.ZodType<Prisma.Email
   updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   draft: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   unread: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  completed: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  moreInfoNeeded: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   parsedAttributes: z.union([ z.lazy(() => NullableJsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
   emails: z.lazy(() => EmailUpdateManyWithoutEmailThreadNestedInputSchema).optional()
 }).strict();
@@ -5615,8 +5563,6 @@ export const EmailThreadUncheckedUpdateWithoutPropertyInputSchema: z.ZodType<Pri
   updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   draft: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   unread: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  completed: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  moreInfoNeeded: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   parsedAttributes: z.union([ z.lazy(() => NullableJsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
   emails: z.lazy(() => EmailUncheckedUpdateManyWithoutEmailThreadNestedInputSchema).optional()
 }).strict();
@@ -5627,8 +5573,6 @@ export const EmailThreadUncheckedUpdateManyWithoutPropertyInputSchema: z.ZodType
   updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   draft: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   unread: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  completed: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  moreInfoNeeded: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   parsedAttributes: z.union([ z.lazy(() => NullableJsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
 }).strict();
 

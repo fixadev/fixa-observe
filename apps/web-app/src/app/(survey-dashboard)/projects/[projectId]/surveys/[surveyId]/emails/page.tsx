@@ -4,7 +4,11 @@ import EmailCard from "./_components/EmailCard";
 import { Button } from "~/components/ui/button";
 import { ChevronDownIcon, ChevronUpIcon } from "@heroicons/react/24/outline";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { cn, replaceTemplateVariables } from "~/lib/utils";
+import {
+  cn,
+  isParsedAttributesComplete,
+  replaceTemplateVariables,
+} from "~/lib/utils";
 import { formatDistanceToNow } from "date-fns";
 import EmailDetails, { EmailTemplateDialog } from "./_components/EmailDetails";
 import type { EmailThreadWithEmailsAndProperty } from "~/lib/types";
@@ -42,6 +46,10 @@ export default function EmailsPage({
   const [emailThreads, setEmailThreads] = useState<
     EmailThreadWithEmailsAndProperty[]
   >([]);
+  const emailThreadsById = useMemo(
+    () => new Map(emailThreads.map((thread) => [thread.id, thread])),
+    [emailThreads],
+  );
   const generateDraftEmailThread = useCallback(
     (property: Property) => {
       const senderName = user?.fullName ?? "";
@@ -116,19 +124,34 @@ export default function EmailsPage({
     return emailThreads.filter((email) => email.draft);
   }, [emailThreads]);
   const completedEmails = useMemo(
-    () => emailThreads.filter((email) => email.completed),
+    () =>
+      emailThreads.filter(
+        (email) =>
+          email.parsedAttributes &&
+          isParsedAttributesComplete(
+            email.parsedAttributes as Record<string, string | null>,
+          ),
+      ),
     [emailThreads],
+  );
+  const completedEmailsSet = useMemo(
+    () => new Set(completedEmails.map((email) => email.id)),
+    [completedEmails],
   );
   const needsFollowUpEmails = useMemo(
     () =>
       emailThreads.filter(
         (email) =>
           !email.draft &&
-          !email.completed &&
-          // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
-          (email.moreInfoNeeded || emailIsOld(email)),
+          !completedEmailsSet.has(email.id) &&
+          ((email.parsedAttributes &&
+            isParsedAttributesComplete(
+              email.parsedAttributes as Record<string, string | null>,
+              // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
+            )) ||
+            emailIsOld(email)),
       ),
-    [emailThreads, emailIsOld],
+    [emailThreads, emailIsOld, completedEmailsSet],
   );
   const needsFollowUpSet = useMemo(
     () => new Set(needsFollowUpEmails.map((email) => email.id)),
@@ -137,9 +160,11 @@ export default function EmailsPage({
   const pendingEmails = useMemo(() => {
     return emailThreads.filter(
       (email) =>
-        !email.draft && !needsFollowUpSet.has(email.id) && !email.completed,
+        !email.draft &&
+        !needsFollowUpSet.has(email.id) &&
+        !completedEmailsSet.has(email.id),
     );
-  }, [emailThreads, needsFollowUpSet]);
+  }, [emailThreads, needsFollowUpSet, completedEmailsSet]);
 
   const getWarning = useCallback(
     (email: EmailThreadWithEmailsAndProperty) => {
@@ -191,9 +216,7 @@ export default function EmailsPage({
     api.email.sendEmail.useMutation();
   const handleSend = useCallback(
     async (emailThreadId: string) => {
-      const emailThread = emailThreads.find(
-        (thread) => thread.id === emailThreadId,
-      );
+      const emailThread = emailThreadsById.get(emailThreadId);
       if (!emailThread) {
         return;
       }
@@ -230,7 +253,7 @@ export default function EmailsPage({
         // TODO: Reply to email
       }
     },
-    [emailThreads, sendEmail, unsentEmails, refetchSurvey],
+    [emailThreadsById, sendEmail, unsentEmails, refetchSurvey],
   );
 
   return (
@@ -271,7 +294,7 @@ export default function EmailsPage({
                       email={thread.emails[thread.emails.length - 1]!}
                       draft={thread.draft}
                       unread={thread.unread}
-                      completed={thread.completed}
+                      completed={completedEmailsSet.has(thread.id)}
                       warning={getWarning(thread)}
                       className={cn("shrink-0", {
                         "bg-muted": thread.id === selectedThreadId,
@@ -287,9 +310,19 @@ export default function EmailsPage({
         <div className="overflow-x-hidden">
           {selectedThreadId ? (
             <EmailDetails
-              emailThread={
-                emailThreads.find((thread) => thread.id === selectedThreadId)!
-              }
+              emailThread={emailThreadsById.get(selectedThreadId)!}
+              onUpdateEmailThread={(updatedEmailThread) => {
+                setEmailThreads((prev) => {
+                  const newThreads = [...prev];
+                  const threadIndex = newThreads.findIndex(
+                    (thread) => thread.id === updatedEmailThread.id,
+                  );
+                  if (threadIndex !== -1) {
+                    newThreads[threadIndex] = updatedEmailThread;
+                  }
+                  return newThreads;
+                });
+              }}
               isSending={isSendingEmail}
               onOpenTemplateDialog={() => setTemplateDialog(true)}
               onSend={() => handleSend(selectedThreadId)}
