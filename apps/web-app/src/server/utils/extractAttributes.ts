@@ -15,6 +15,7 @@ export async function extractAttributes(
   You are an AI assistant that parses an email from a real estate agent who is trying to lease a property.
   You will be given a string of the email content.
   You will need to extract the price, opex, and date available for the property.
+  The current date is ${new Date().toISOString().split("T")[0]}.
   Return the information in JSON format with the following schema:
   {
     askingRate: string | null -- the asking rate per square foot in dollars - ex, $5.50

@@ -21,5 +21,5 @@ export function replaceTemplateVariables(
 export function isParsedAttributesComplete(
   parsedAttributes: Record<string, string | null>,
 ) {
-  return !Object.values(parsedAttributes).every((value) => value === null);
+  return Object.values(parsedAttributes).every((value) => value !== null);
 }
