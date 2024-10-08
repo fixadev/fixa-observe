@@ -54,8 +54,6 @@ export const TEST_EMAIL_THREAD: EmailThreadWithEmailsAndProperty = {
   },
   draft: false,
   unread: false,
-  completed: false,
-  moreInfoNeeded: false,
   parsedAttributes: null,
 };
 
@@ -69,7 +67,6 @@ export const TEST_EMAIL_THREADS: EmailThreadWithEmailsAndProperty[] = [
     ...TEST_EMAIL_THREAD,
     id: "6",
     unread: true,
-    moreInfoNeeded: true,
     parsedAttributes: {
       price: "$12.50 / NNN",
       available: "???",
@@ -91,7 +88,6 @@ export const TEST_EMAIL_THREADS: EmailThreadWithEmailsAndProperty[] = [
   {
     ...TEST_EMAIL_THREAD,
     id: "8",
-    completed: true,
     parsedAttributes: {
       price: "$10.00 / SF",
       available: "yes",
@@ -101,7 +97,6 @@ export const TEST_EMAIL_THREADS: EmailThreadWithEmailsAndProperty[] = [
   {
     ...TEST_EMAIL_THREAD,
     id: "9",
-    completed: true,
     parsedAttributes: {
       price: "$12.50 / NNN",
       available: "yes",
@@ -111,7 +106,6 @@ export const TEST_EMAIL_THREADS: EmailThreadWithEmailsAndProperty[] = [
   {
     ...TEST_EMAIL_THREAD,
     id: "10",
-    completed: true,
     parsedAttributes: {
       price: "$15.00 / MG",
       available: "no",
@@ -121,11 +115,16 @@ export const TEST_EMAIL_THREADS: EmailThreadWithEmailsAndProperty[] = [
   {
     ...TEST_EMAIL_THREAD,
     id: "11",
-    completed: true,
     parsedAttributes: {
       price: "$8.75 / SF",
       available: "yes",
       size: "10,000 SF",
     },
   },
+];
+
+export const TEST_RECIPIENTS = [
+  { name: "Jonathan Liu", email: "liu.z.jonathan@gmail.com" },
+  { name: "Oliver Braly", email: "oliverbraly@gmail.com" },
+  { name: "Kermit Frog", email: "contact@pixa.dev" },
 ];
