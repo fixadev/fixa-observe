@@ -20,6 +20,8 @@ export const env = createEnv({
     LISTMONK_LIST_ID: z.number(),
     ANTHROPIC_KEY: z.string(),
     OPENAI_KEY: z.string(),
+    ADOBE_CLIENT_ID: z.string(),
+    ADOBE_CLIENT_SECRET: z.string(),
     GCLOUD_CREDS: z.string(),
     // Temporarily disabled Discord auth functionality
     // DISCORD_CLIENT_ID: z.string(),
@@ -63,7 +65,12 @@ export const env = createEnv({
     LISTMONK_LIST_ID: parseInt(process.env.LISTMONK_LIST_ID ?? "0"),
     ANTHROPIC_KEY: process.env.ANTHROPIC_KEY,
     OPENAI_KEY: process.env.OPENAI_KEY,
+<<<<<<< HEAD
+    ADOBE_CLIENT_ID: process.env.ADOBE_CLIENT_ID,
+    ADOBE_CLIENT_SECRET: process.env.ADOBE_CLIENT_SECRET,
+=======
     GCLOUD_CREDS: process.env.GCLOUD_CREDS,
+>>>>>>> 36c22b8e39ff74bd7cfbae18b119e897c4514756
     // Temporarily disabled Discord auth functionality
     // DISCORD_CLIENT_ID: process.env.DISCORD_CLIENT_ID,
     // DISCORD_CLIENT_SECRET: process.env.DISCORD_CLIENT_SECRET,
