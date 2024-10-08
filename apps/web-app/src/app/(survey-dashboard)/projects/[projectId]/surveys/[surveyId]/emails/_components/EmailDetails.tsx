@@ -87,6 +87,10 @@ function EmailThreadDetails({
   const { mutateAsync: updateEmailThread } =
     api.email.updateEmailThread.useMutation();
   useEffect(() => {
+    if (!emailThread.unread) {
+      return;
+    }
+
     const timeout = setTimeout(() => {
       onUpdateEmailThread({
         ...emailThread,
