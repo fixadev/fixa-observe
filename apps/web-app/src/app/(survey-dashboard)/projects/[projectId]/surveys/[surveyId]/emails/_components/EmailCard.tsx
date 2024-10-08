@@ -1,7 +1,7 @@
 "use client";
 
 import { useUser } from "@clerk/nextjs";
-import { CheckCircleIcon } from "@heroicons/react/24/solid";
+import { CheckCircleIcon, XCircleIcon } from "@heroicons/react/24/solid";
 import { formatDistanceToNow } from "date-fns";
 import { type Email } from "prisma/generated/zod";
 import { Avatar, AvatarFallback } from "~/components/ui/avatar";
@@ -13,6 +13,7 @@ export default function EmailCard({
   draft = false,
   unread = false,
   completed = false,
+  notAvailable = false,
   warning = "",
   expanded = false,
   onClick,
@@ -22,6 +23,7 @@ export default function EmailCard({
   draft?: boolean;
   unread?: boolean;
   completed?: boolean;
+  notAvailable?: boolean;
   warning?: string;
   expanded?: boolean;
   onClick?: (e: React.MouseEvent<HTMLDivElement>) => void;
@@ -35,6 +37,7 @@ export default function EmailCard({
       className={cn(
         "overflow-hidden rounded-md border border-input shadow-sm",
         completed ? "opacity-50" : "",
+        notAvailable ? "opacity-50" : "",
         className,
       )}
     >
@@ -75,7 +78,9 @@ export default function EmailCard({
               </div>
             )}
             {!draft &&
-              (completed ? (
+              (notAvailable ? (
+                <XCircleIcon className="size-5 text-destructive" />
+              ) : completed ? (
                 <CheckCircleIcon className="size-5 text-green-500" />
               ) : warning ? (
                 <div className="rounded-full bg-orange-100 px-2 py-1 text-xs">

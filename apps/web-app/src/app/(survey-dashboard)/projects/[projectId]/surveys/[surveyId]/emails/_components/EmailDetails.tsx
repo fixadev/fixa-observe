@@ -31,7 +31,10 @@ import {
   DEFAULT_EMAIL_TEMPLATE_BODY,
   DEFAULT_EMAIL_TEMPLATE_SUBJECT,
 } from "~/lib/constants";
-import { isParsedAttributesComplete } from "~/lib/utils";
+import {
+  isParsedAttributesComplete,
+  isPropertyNotAvailable,
+} from "~/lib/utils";
 import { type Email } from "prisma/generated/zod";
 
 export default function EmailDetails({
@@ -279,6 +282,7 @@ function ParsedAttributes({
   }
 
   const completed = isParsedAttributesComplete(parsedAttributes);
+  const propertyNotAvailable = isPropertyNotAvailable(parsedAttributes);
 
   return (
     <>
@@ -287,8 +291,14 @@ function ParsedAttributes({
       <Separator orientation="vertical" />
       <div className="flex flex-col items-start gap-2 pr-4">
         <div className="flex items-center gap-1 px-2 pt-2 text-sm font-medium">
-          {completed ? "Property details confirmed" : "More info needed"}
-          {completed ? (
+          {propertyNotAvailable
+            ? "Property not available"
+            : completed
+              ? "Property details confirmed"
+              : "More info needed"}
+          {propertyNotAvailable ? (
+            <XCircleIcon className="size-5 text-destructive" />
+          ) : completed ? (
             <CheckCircleIcon className="size-5 text-green-500" />
           ) : (
             <XCircleIcon className="size-5 text-destructive" />

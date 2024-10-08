@@ -1,11 +1,15 @@
-import { type Property, type PrismaClient } from "@prisma/client";
-import { type BrochureSchema, type CreatePropertySchema, type BrochureWithoutPropertyId } from "~/lib/property";
+import { type PrismaClient } from "@prisma/client";
+import {
+  type BrochureSchema,
+  type CreatePropertySchema,
+  type BrochureWithoutPropertyId,
+  type PropertySchema,
+} from "~/lib/property";
 import { extractContactInfo } from "../utils/extractContactInfo";
 import { formatAddresses } from "../utils/formatAddresses";
 
 export const propertyService = ({ db }: { db: PrismaClient }) => {
-  
-  async function createBrochure (
+  async function createBrochure(
     propertyId: string,
     brochure: BrochureWithoutPropertyId,
     userId: string,
@@ -20,10 +24,12 @@ export const propertyService = ({ db }: { db: PrismaClient }) => {
       data: {
         brochures: {
           deleteMany: {},
-          create: [{
-            ...brochure,
-            approved: false,
-          }],
+          create: [
+            {
+              ...brochure,
+              approved: false,
+            },
+          ],
         },
         contacts: {
           createMany: {
@@ -35,21 +41,25 @@ export const propertyService = ({ db }: { db: PrismaClient }) => {
     return response;
   }
 
-
   return {
     createProperties: async (input: CreatePropertySchema[], userId: string) => {
-      
-      const formattedAddresses = await formatAddresses(input.map((property) => property.attributes.address ?? ""));
+      const formattedAddresses = await formatAddresses(
+        input.map((property) => property.attributes.address ?? ""),
+      );
       const brochures = input.map((property) => property.brochures[0] ?? []);
-      
-      const propertiesToCreate = input.map(({ brochures, ...property }, index) => ({
-        ...property,
-        ownerId: userId,
-        attributes: {
-          ...property.attributes,
-          address: formattedAddresses ? formattedAddresses[index] : "",
-        } ?? {},
-      }));
+
+      const propertiesToCreate = input.map(
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        ({ brochures, ...property }, index) => ({
+          ...property,
+          ownerId: userId,
+          attributes:
+            {
+              ...property.attributes,
+              address: formattedAddresses ? formattedAddresses[index] : "",
+            } ?? {},
+        }),
+      );
 
       const createdProperties = await db.property.createManyAndReturn({
         data: propertiesToCreate,
@@ -85,7 +95,8 @@ export const propertyService = ({ db }: { db: PrismaClient }) => {
       return property;
     },
 
-    updateProperty: async (property: Property, userId: string) => {
+    updateProperty: async (property: PropertySchema, userId: string) => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { brochures, ...propertyData } = property;
       const response = await db.property.update({
         where: {
@@ -142,6 +153,18 @@ export const propertyService = ({ db }: { db: PrismaClient }) => {
     },
 
     createBrochure,
+
+    getBrochure: async (brochureId: string, userId: string) => {
+      const brochure = await db.brochure.findUnique({
+        where: {
+          id: brochureId,
+          property: {
+            ownerId: userId,
+          },
+        },
+      });
+      return brochure;
+    },
 
     updateBrochure: async (brochure: BrochureSchema, userId: string) => {
       const response = await db.brochure.update({

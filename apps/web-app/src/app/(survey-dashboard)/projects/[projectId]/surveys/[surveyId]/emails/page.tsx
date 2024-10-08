@@ -7,6 +7,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   cn,
   isParsedAttributesComplete,
+  isPropertyNotAvailable,
   replaceTemplateVariables,
 } from "~/lib/utils";
 import { formatDistanceToNow } from "date-fns";
@@ -57,6 +58,17 @@ export default function EmailsPage({
       return (
         email.parsedAttributes &&
         isParsedAttributesComplete(
+          email.parsedAttributes as Record<string, string | null>,
+        )
+      );
+    },
+    [],
+  );
+  const propertyNotAvailable = useCallback(
+    (email: EmailThreadWithEmailsAndProperty) => {
+      return (
+        email.parsedAttributes &&
+        isPropertyNotAvailable(
           email.parsedAttributes as Record<string, string | null>,
         )
       );
@@ -157,16 +169,24 @@ export default function EmailsPage({
     () => new Set(completedEmails.map((email) => email.id)),
     [completedEmails],
   );
+  const notAvailableEmails = useMemo(() => {
+    return emailThreads.filter((email) => propertyNotAvailable(email));
+  }, [emailThreads, propertyNotAvailable]);
+  const notAvailableEmailsSet = useMemo(
+    () => new Set(notAvailableEmails.map((email) => email.id)),
+    [notAvailableEmails],
+  );
   const needsFollowUpEmails = useMemo(
     () =>
       emailThreads.filter(
         (email) =>
           !email.draft &&
           !completedEmailsSet.has(email.id) &&
+          !notAvailableEmailsSet.has(email.id) &&
           // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
           (emailIsIncomplete(email) || emailIsOld(email)),
       ),
-    [emailThreads, emailIsIncomplete, emailIsOld, completedEmailsSet],
+    [emailThreads, emailIsIncomplete, emailIsOld, completedEmailsSet, notAvailableEmailsSet],
   );
   const needsFollowUpSet = useMemo(
     () => new Set(needsFollowUpEmails.map((email) => email.id)),
@@ -177,9 +197,15 @@ export default function EmailsPage({
       (email) =>
         !email.draft &&
         !needsFollowUpSet.has(email.id) &&
-        !completedEmailsSet.has(email.id),
+        !completedEmailsSet.has(email.id) &&
+        !notAvailableEmailsSet.has(email.id),
     );
-  }, [emailThreads, needsFollowUpSet, completedEmailsSet]);
+  }, [
+    emailThreads,
+    needsFollowUpSet,
+    completedEmailsSet,
+    notAvailableEmailsSet,
+  ]);
 
   const getWarning = useCallback(
     (email: EmailThreadWithEmailsAndProperty) => {
@@ -216,8 +242,18 @@ export default function EmailsPage({
         name: "Completed",
         emails: completedEmails,
       },
+      {
+        name: "Not available",
+        emails: notAvailableEmails,
+      },
     ],
-    [unsentEmails, pendingEmails, needsFollowUpEmails, completedEmails],
+    [
+      unsentEmails,
+      pendingEmails,
+      needsFollowUpEmails,
+      completedEmails,
+      notAvailableEmails,
+    ],
   );
   const [categoriesExpanded, setCategoriesExpanded] = useState<boolean[]>(
     Array(categories.length).fill(false),
@@ -389,6 +425,7 @@ export default function EmailsPage({
                         draft={thread.draft}
                         unread={thread.unread}
                         completed={completedEmailsSet.has(thread.id)}
+                        notAvailable={notAvailableEmailsSet.has(thread.id)}
                         warning={getWarning(thread)}
                         className={cn("shrink-0", {
                           "bg-muted": thread.id === selectedThreadId,
