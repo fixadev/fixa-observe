@@ -24,10 +24,12 @@ export function BrochureCarousel({ brochure }: { brochure: BrochureSchema }) {
     setLoaded(true);
   }
 
+  // TODO: fix this styling
+
   return (
-    <div className="h-full w-3/4 items-center justify-center">
+    <div className="w-5/6 flex-col items-center justify-center">
       <Document
-        className={loaded ? "" : "hidden"}
+        className={loaded ? "" : "hidden" + " flex max-w-full flex-col"}
         file={pdfUrl}
         onLoadSuccess={onDocumentLoadSuccess}
       >
@@ -36,11 +38,11 @@ export function BrochureCarousel({ brochure }: { brochure: BrochureSchema }) {
             {Array.from(new Array(numPages), (el, index) => (
               <CarouselItem
                 key={`page_${index + 1}`}
-                className="flex h-[600px] flex-col items-center justify-center object-contain"
+                className="flex flex-col items-center justify-center object-contain px-6"
               >
                 <Page
                   onLoad={() => setLoaded(true)}
-                  className="max-h-full w-auto"
+                  className="flex h-[100px] max-w-full"
                   pageNumber={index + 1}
                   renderTextLayer={false}
                   renderAnnotationLayer={false}
@@ -56,7 +58,7 @@ export function BrochureCarousel({ brochure }: { brochure: BrochureSchema }) {
         className={
           loaded
             ? "hidden"
-            : "flex h-[600px] flex-col items-center justify-center bg-gray-100"
+            : "flex h-[600px] w-full flex-col items-center justify-center bg-gray-100"
         }
       >
         <Spinner className="h-10 w-10 text-gray-500" />

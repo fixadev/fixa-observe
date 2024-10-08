@@ -135,8 +135,8 @@ function BrochureSidebar({
         <Image
           src={property.photoUrl ?? ""}
           alt={"building photo"}
-          width={100}
-          height={100}
+          width={210}
+          height={120}
         />
       ) : (
         <div className="flex aspect-video w-full flex-col items-center justify-center bg-gray-200">
@@ -146,6 +146,9 @@ function BrochureSidebar({
 
       {brochure ? (
         <>
+          <div className="text-md flex w-full flex-col p-2 text-center font-medium">
+            <p>{property.attributes.address.split(",")[0]}</p>
+          </div>
           <Button
             variant={"outline"}
             onClick={() =>
@@ -170,7 +173,7 @@ function BrochureSidebar({
           </Button>
         </>
       ) : (
-        <div className="flex w-full flex-col p-2 font-medium">
+        <div className="flex w-full flex-col items-center p-2 text-center font-medium">
           <p>{property.attributes.address.split(",")[0]}</p>
         </div>
       )}
