@@ -1,6 +1,7 @@
 import { Prisma, type PrismaClient } from "@prisma/client";
 import axios from "axios";
 import { env } from "~/env";
+import { extractAttributes } from "../utils/extractAttributes";
 // import { db } from "../db";
 
 const outlookApiUrl = "https://graph.microsoft.com/v1.0";
@@ -211,6 +212,10 @@ export const emailService = ({ db }: { db: PrismaClient }) => {
       }
 
       // Update email thread
+      const emailThread = await db.emailThread.update({
+        where: { id: conversationId },
+        data: { unread: true },
+      });
       try {
         await db.emailThread.update({
           where: { id: conversationId },
@@ -230,6 +235,30 @@ export const emailService = ({ db }: { db: PrismaClient }) => {
         // If it's a different error, rethrow it
         throw error;
       }
+
+      // Extract updated attributes
+      const attributesToUpdate = await extractAttributes(uniqueBody.content);
+      const propertyToUpdate = await db.property.findUnique({
+        where: { id: emailThread.propertyId },
+      });
+
+      if (!propertyToUpdate) {
+        throw new Error("Property not found");
+      }
+
+      // update property attributes
+      for (const attributeId of Object.keys(attributesToUpdate)) {
+        if (propertyToUpdate?.attributes && typeof propertyToUpdate.attributes === 'object') {
+          (propertyToUpdate.attributes as Record<string, string | undefined>)[attributeId] = attributesToUpdate[attributeId];
+        }
+      }
+      await db.property.update({
+        where: { id: emailThread.propertyId },
+        data: {
+          attributes: propertyToUpdate?.attributes ?? {},
+        },
+      });
+
 
       // Create email
       const email = {
@@ -375,3 +404,43 @@ export const emailService = ({ db }: { db: PrismaClient }) => {
 // testSend();
 // testReplyToEmail();
 // testAddEmailToDb();
+
+
+
+// async function testEmailParsing(propertyId: string, emailText: string) {
+//     const attributesToUpdate = await extractAttributes(emailText);
+//     console.log('Attributes to update', attributesToUpdate)
+//     const propertyToUpdate = await db.property.findUnique({
+//       where: { id: propertyId },
+//     });
+
+//     if (!propertyToUpdate) {
+//       throw new Error("Property not found");
+//     }
+
+//     // update property attributes
+//     for (const attributeId of Object.keys(attributesToUpdate)) {
+//       if (propertyToUpdate?.attributes && typeof propertyToUpdate.attributes === 'object') {
+//         (propertyToUpdate.attributes as Record<string, string | undefined>)[attributeId] = attributesToUpdate[attributeId];
+//       }
+//     }
+//     await db.property.update({
+//       where: { id: propertyId },
+//       data: {
+//         attributes: propertyToUpdate?.attributes ?? {},
+//       },
+//     });
+// }
+
+
+// const email = `Hi Colin, the place is available starting from November 10th. 
+//   the rent is $5.50 NNN
+//   the opex is $0.50
+
+//   Best,
+
+//   Andrew`
+
+// const propertyId = 'f71b6745-b42b-43be-9af0-9546f88cd85d'
+
+// void testEmailParsing(propertyId, email)
