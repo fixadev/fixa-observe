@@ -1,5 +1,6 @@
 import { type Property } from "prisma/generated/zod";
 import { cn } from "~/lib/utils";
+import Image from "next/image";
 
 export const testProperty: Property = {
   // Add a basic property object to match the Property type
@@ -24,10 +25,11 @@ export default function PropertyCard({
   className?: string;
   rightContent?: React.ReactNode;
 }) {
-  // const photoUrl = property.photoUrl;
+  const photoUrl = property.photoUrl ?? "";
   const attributes = property.attributes as Record<string, string>;
-  const streetAddress = attributes?.address?.split(",")[0];
-  const cityStateZip = attributes?.address?.split(",").slice(1).join(", ");
+  const streetAddress = attributes?.address?.split(",")[0] ?? "";
+  const cityStateZip =
+    attributes?.address?.split(",").slice(1).join(", ") ?? "";
 
   return (
     <div
@@ -36,8 +38,13 @@ export default function PropertyCard({
         className,
       )}
     >
-      <div className="aspect-square h-full min-h-24 min-w-24 rounded-l-md bg-gray-500">
-        {/* <Image src={photoUrl} alt={streetAddress} /> */}
+      <div className="relative aspect-square h-full min-h-24 min-w-24 overflow-hidden rounded-l-md bg-gray-500">
+        <Image
+          src={photoUrl}
+          alt={streetAddress}
+          fill
+          className="object-cover"
+        />
       </div>
       <div className="flex flex-col">
         <div className="text-lg font-medium">{streetAddress}</div>
