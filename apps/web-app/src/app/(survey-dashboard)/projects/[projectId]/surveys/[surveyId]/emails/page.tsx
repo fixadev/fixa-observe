@@ -277,6 +277,14 @@ export default function EmailsPage({
     setLastRefreshedAt(new Date());
   }, [refetchSurvey]);
 
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      void refetchSurvey();
+    }, 60000); // 60000 milliseconds = 1 minute
+
+    return () => clearInterval(intervalId);
+  }, [refetchSurvey]);
+
   return (
     <>
       <div className="grid size-full grid-cols-[400px_1fr]">
