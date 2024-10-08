@@ -35,6 +35,28 @@ export default function EmailsPage({
     });
   const { data: emailTemplate } = api.email.getEmailTemplate.useQuery();
 
+  const emailIsIncomplete = useCallback(
+    (email: EmailThreadWithEmailsAndProperty) => {
+      return (
+        email.parsedAttributes &&
+        !isParsedAttributesComplete(
+          email.parsedAttributes as Record<string, string | null>,
+        )
+      );
+    },
+    [],
+  );
+  const emailIsComplete = useCallback(
+    (email: EmailThreadWithEmailsAndProperty) => {
+      return (
+        email.parsedAttributes &&
+        isParsedAttributesComplete(
+          email.parsedAttributes as Record<string, string | null>,
+        )
+      );
+    },
+    [],
+  );
   const emailIsOld = useCallback(
     (email: EmailThreadWithEmailsAndProperty) =>
       // Email is older than 1 day
@@ -96,8 +118,6 @@ export default function EmailsPage({
         emails: [email],
         draft: true,
         unread: false,
-        completed: false,
-        moreInfoNeeded: false,
         parsedAttributes: null,
       };
     },
@@ -124,15 +144,8 @@ export default function EmailsPage({
     return emailThreads.filter((email) => email.draft);
   }, [emailThreads]);
   const completedEmails = useMemo(
-    () =>
-      emailThreads.filter(
-        (email) =>
-          email.parsedAttributes &&
-          isParsedAttributesComplete(
-            email.parsedAttributes as Record<string, string | null>,
-          ),
-      ),
-    [emailThreads],
+    () => emailThreads.filter((email) => emailIsComplete(email)),
+    [emailIsComplete, emailThreads],
   );
   const completedEmailsSet = useMemo(
     () => new Set(completedEmails.map((email) => email.id)),
@@ -144,14 +157,10 @@ export default function EmailsPage({
         (email) =>
           !email.draft &&
           !completedEmailsSet.has(email.id) &&
-          ((email.parsedAttributes &&
-            isParsedAttributesComplete(
-              email.parsedAttributes as Record<string, string | null>,
-              // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
-            )) ||
-            emailIsOld(email)),
+          // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
+          (emailIsIncomplete(email) || emailIsOld(email)),
       ),
-    [emailThreads, emailIsOld, completedEmailsSet],
+    [emailThreads, emailIsIncomplete, emailIsOld, completedEmailsSet],
   );
   const needsFollowUpSet = useMemo(
     () => new Set(needsFollowUpEmails.map((email) => email.id)),
@@ -171,7 +180,7 @@ export default function EmailsPage({
       if (!needsFollowUpSet.has(email.id)) {
         return undefined;
       }
-      return email.moreInfoNeeded
+      return emailIsIncomplete(email)
         ? "More info needed"
         : `Sent ${formatDistanceToNow(
             new Date(email.emails[email.emails.length - 1]!.createdAt),
@@ -180,7 +189,7 @@ export default function EmailsPage({
             },
           ).toLowerCase()}`;
     },
-    [needsFollowUpSet],
+    [emailIsIncomplete, needsFollowUpSet],
   );
 
   const categories = useMemo(
