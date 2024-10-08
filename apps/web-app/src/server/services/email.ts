@@ -248,8 +248,13 @@ export const emailService = ({ db }: { db: PrismaClient }) => {
 
       // update property attributes
       for (const attributeId of Object.keys(attributesToUpdate)) {
-        if (propertyToUpdate?.attributes && typeof propertyToUpdate.attributes === 'object') {
-          (propertyToUpdate.attributes as Record<string, string | undefined>)[attributeId] = attributesToUpdate[attributeId];
+        if (
+          propertyToUpdate?.attributes &&
+          typeof propertyToUpdate.attributes === "object"
+        ) {
+          (propertyToUpdate.attributes as Record<string, string | undefined>)[
+            attributeId
+          ] = attributesToUpdate[attributeId];
         }
       }
       await db.property.update({
@@ -259,6 +264,13 @@ export const emailService = ({ db }: { db: PrismaClient }) => {
         },
       });
 
+      // Update email thread with attributes
+      await db.emailThread.update({
+        where: { id: conversationId },
+        data: {
+          parsedAttributes: attributesToUpdate,
+        },
+      });
 
       // Create email
       const email = {
@@ -405,8 +417,6 @@ export const emailService = ({ db }: { db: PrismaClient }) => {
 // testReplyToEmail();
 // testAddEmailToDb();
 
-
-
 // async function testEmailParsing(propertyId: string, emailText: string) {
 //     const attributesToUpdate = await extractAttributes(emailText);
 //     console.log('Attributes to update', attributesToUpdate)
@@ -432,8 +442,7 @@ export const emailService = ({ db }: { db: PrismaClient }) => {
 //     });
 // }
 
-
-// const email = `Hi Colin, the place is available starting from November 10th. 
+// const email = `Hi Colin, the place is available starting from November 10th.
 //   the rent is $5.50 NNN
 //   the opex is $0.50
 
