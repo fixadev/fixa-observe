@@ -65,7 +65,12 @@ export const DraggableHeader = ({
             onFocus={(e) => e.target.select()}
           />
         ) : (
-          <Button variant="ghost" onClick={() => setIsEditing(true)}>
+          <Button
+            variant="ghost"
+            className="w-full text-wrap"
+            onClick={() => setIsEditing(true)}
+            disabled={disabled}
+          >
             {attribute.label}
           </Button>
         )}

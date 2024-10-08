@@ -84,15 +84,22 @@ export const DraggableRow = ({
     });
   };
 
-  const attributesToMinWidth = {
-    comments: "min-w-72",
-    address: "min-w-64",
-    size: "min-w-32",
-    askingRate: "min-w-54",
-    divisibility: "min-w-48",
-    opex: "min-w-32",
-    directSubleases: "min-w-32",
-  };
+  function attributeToMinWidth(attribute: Attribute) {
+    const attributesToMinWidth = {
+      comments: "min-w-72",
+      address: "min-w-64",
+      size: "min-w-44",
+      askingRate: "min-w-44",
+      divisibility: "min-w-44",
+      opEx: "min-w-44",
+      directSublease: "min-w-44",
+    };
+
+    return (
+      attributesToMinWidth[attribute.id as keyof typeof attributesToMinWidth] ||
+      "min-w-44"
+    );
+  }
 
   return (
     <TableRow ref={setNodeRef} style={style}>
@@ -115,7 +122,7 @@ export const DraggableRow = ({
         key={"photoUrlCell"}
         id={"photoUrlCell"}
         draggingRow={draggingRow}
-        className="min-w-36"
+        className="min-w-36 max-w-36"
       >
         {photoUploading ? (
           <div className="flex h-[100px] w-[120px] items-center justify-center">
@@ -124,7 +131,7 @@ export const DraggableRow = ({
         ) : (
           <FileInput
             accept="image/*"
-            className="h-[100px] w-[120px] rounded-md hover:cursor-pointer"
+            className="h-[100px] w-[120px] max-w-[120px] rounded-md hover:cursor-pointer"
             triggerElement={
               photo ? (
                 <Image
@@ -149,6 +156,7 @@ export const DraggableRow = ({
             key={attribute.id}
             id={attribute.id}
             draggingRow={draggingRow}
+            className={attributeToMinWidth(attribute)}
           >
             {" "}
             {attribute.id === "comments" ? (
