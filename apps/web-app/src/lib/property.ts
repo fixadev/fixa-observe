@@ -12,6 +12,7 @@ export const contactSchema = ContactSchema;
 export type BrochureWithoutPropertyId = z.infer<typeof brochureWithoutPropertyIdSchema>;
 export const brochureWithoutPropertyIdSchema = BrochureSchema.omit({
   propertyId: true,
+  id: true,
 });
 export type BrochureSchema = z.infer<typeof BrochureSchema>;
 export const brochureSchema = BrochureSchema;

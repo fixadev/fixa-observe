@@ -4,6 +4,38 @@ import { extractContactInfo } from "../utils/extractContactInfo";
 import { formatAddresses } from "../utils/formatAddresses";
 
 export const propertyService = ({ db }: { db: PrismaClient }) => {
+  
+  async function createBrochure (
+    propertyId: string,
+    brochure: BrochureWithoutPropertyId,
+    userId: string,
+  ) {
+    console.log("creating brochure in property service", brochure);
+    const contactInfo = await extractContactInfo(brochure.url);
+    const response = await db.property.update({
+      where: {
+        id: propertyId,
+        ownerId: userId,
+      },
+      data: {
+        brochures: {
+          deleteMany: {},
+          create: [{
+            ...brochure,
+            approved: false,
+          }],
+        },
+        contacts: {
+          createMany: {
+            data: contactInfo ?? [],
+          },
+        },
+      },
+    });
+    return response;
+  }
+
+
   return {
     createProperties: async (input: CreatePropertySchema[], userId: string) => {
       
@@ -32,14 +64,7 @@ export const propertyService = ({ db }: { db: PrismaClient }) => {
           typeof brochure.url === "string" &&
           typeof brochure.title === "string"
         ) {
-          await db.brochure.create({
-            data: {
-              ...brochure,
-              propertyId: property.id,
-              url: brochure.url,
-              title: brochure.title,
-            },
-          });
+          await createBrochure(property.id, brochure, userId);
         }
       }
       return createdProperties.map((property) => property.id);
@@ -116,47 +141,7 @@ export const propertyService = ({ db }: { db: PrismaClient }) => {
       });
     },
 
-    createBrochure: async (
-      propertyId: string,
-      brochure: BrochureWithoutPropertyId,
-      userId: string,
-    ) => {
-      console.log("creating brochure in property service", brochure);
-      const contactInfo = await extractContactInfo(brochure.url);
-      const response = await db.property.update({
-        where: {
-          id: propertyId,
-          ownerId: userId,
-        },
-        data: {
-          brochures: {
-            deleteMany: {},
-            create: [{
-              ...brochure,
-              approved: false,
-            }],
-          },
-          contacts: {
-            createMany: {
-              data: contactInfo ?? [],
-            },
-          },
-        },
-      });
-      return response;
-    },
-
-    getBrochure: async (brochureId: string, userId: string) => {
-      const brochure = await db.brochure.findUnique({
-        where: {
-          id: brochureId,
-          property: {
-            ownerId: userId,
-          },
-        },
-      });
-      return brochure;
-    },
+    createBrochure,
 
     updateBrochure: async (brochure: BrochureSchema, userId: string) => {
       const response = await db.brochure.update({
