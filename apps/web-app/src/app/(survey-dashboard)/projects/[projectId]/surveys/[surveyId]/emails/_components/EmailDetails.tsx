@@ -106,23 +106,41 @@ function EmailThreadDetails({
     return () => clearTimeout(timeout);
   }, [emailThread, onUpdateEmailThread, updateEmailThread]);
 
-  const [expanded, setExpanded] = useState<boolean[]>(
+  const [expanded, setExpanded] = useState<Record<string, boolean>>(
     // Set the last email to be expanded
-    emailThread.emails.map((_, i) => i === emailThread.emails.length - 1),
+    emailThread.emails.reduce(
+      (acc, email, i) => ({
+        ...acc,
+        [email.id]: i === emailThread.emails.length - 1,
+      }),
+      {},
+    ),
   );
+
+  useEffect(() => {
+    setExpanded((prev) =>
+      emailThread.emails.reduce(
+        (acc, email, i) => ({
+          ...acc,
+          [email.id]: prev[email.id] ?? i === emailThread.emails.length - 1,
+        }),
+        {},
+      ),
+    );
+  }, [emailThread.emails]);
 
   return (
     <div className="flex h-full flex-col gap-2 overflow-x-hidden p-2 pb-8">
-      {emailThread.emails.map((email, i) => (
+      {emailThread.emails.map((email) => (
         <EmailCard
           key={email.id}
           email={email}
           className="shrink-0"
-          expanded={expanded[i]}
+          expanded={expanded[email.id]}
           onClick={() =>
             setExpanded((prev) => {
-              const newExpanded = [...prev];
-              newExpanded[i] = !newExpanded[i];
+              const newExpanded = { ...prev };
+              newExpanded[email.id] = !newExpanded[email.id];
               return newExpanded;
             })
           }
@@ -258,7 +276,7 @@ function ParsedAttributes({
           <TableBody>
             <TableRow className="border-none">
               {Object.values(parsedAttributes ?? {}).map((attribute, i) => (
-                <TableCell key={i}>{attribute}</TableCell>
+                <TableCell key={i}>{attribute ?? "???"}</TableCell>
               ))}
             </TableRow>
           </TableBody>
