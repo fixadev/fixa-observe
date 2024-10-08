@@ -287,11 +287,15 @@ export const emailService = ({ db }: { db: PrismaClient }) => {
         for (const attributeId of Object.keys(attributesToUpdate)) {
           if (
             propertyToUpdate?.attributes &&
-            typeof propertyToUpdate.attributes === "object"
+            typeof propertyToUpdate.attributes === "object" &&
+            attributesToUpdate[attributeId] !== null
           ) {
-            (propertyToUpdate.attributes as Record<string, string | undefined>)[
-              attributeId
-            ] = attributesToUpdate[attributeId];
+            (
+              propertyToUpdate.attributes as Record<
+                string,
+                string | null | undefined
+              >
+            )[attributeId] = attributesToUpdate[attributeId];
           }
         }
         await db.property.update({
