@@ -67,7 +67,7 @@ export const DraggableHeader = ({
         ) : (
           <Button
             variant="ghost"
-            className="w-full text-wrap"
+            className="w-full min-w-32 text-wrap"
             onClick={() => setIsEditing(true)}
             disabled={disabled}
           >

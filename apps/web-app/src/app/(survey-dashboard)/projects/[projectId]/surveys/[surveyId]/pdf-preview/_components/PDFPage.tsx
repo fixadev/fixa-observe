@@ -12,7 +12,9 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    margin: 20,
+    height: 35,
+    display: "flex",
+    margin: 15,
   },
   title: {
     fontSize: 20,
@@ -59,11 +61,18 @@ const styles = StyleSheet.create({
   },
   tableCell: {
     margin: "auto",
-    maxHeight: "30px",
+    // maxHeight: "30px",
     alignItems: "center",
     justifyContent: "center",
     textAlign: "center",
     fontSize: 10,
+  },
+  commentsCell: {
+    textAlign: "left",
+    fontSize: 8,
+    marginLeft: 3,
+    marginVertical: 3,
+    maxHeight: 50,
   },
   leftCell: {
     alignItems: "center",
@@ -72,8 +81,10 @@ const styles = StyleSheet.create({
     marginTop: 5,
     width: "2%",
     fontSize: 10,
+    paddingLeft: -2,
   },
   headerCell: {
+    height: 35,
     margin: "5px",
     display: "flex",
     flexDirection: "column",
@@ -82,8 +93,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignSelf: "center",
     alignContent: "center",
-    marginTop: 15,
-    marginBottom: 15,
+    marginVertical: 5,
     fontSize: 10,
   },
 
@@ -129,6 +139,13 @@ export function PDFPage({
     return `${street}, \n ${city}`;
   }
 
+  function formatAttributeLabel(label: string) {
+    if (label === "Address") {
+      return "Address \n **Click address for \n flyer/website**";
+    }
+    return label;
+  }
+
   return (
     <Page size="A4" orientation="landscape" style={styles.page}>
       <View style={styles.header}>
@@ -145,7 +162,9 @@ export function PDFPage({
             <Text style={styles.leftCell}></Text>
           </View>
           <View style={{ ...styles.tableCol, width: "10%" }}>
-            <Text style={styles.headerCell}>Photo</Text>
+            <View style={styles.headerCell}>
+              <Text>Photo</Text>
+            </View>
           </View>
           {attributes.map((attribute) => (
             <View
@@ -155,7 +174,9 @@ export function PDFPage({
                 width: getWidth(attribute),
               }}
             >
-              <Text style={styles.headerCell}>{attribute.label}</Text>
+              <View style={styles.headerCell}>
+                <Text>{formatAttributeLabel(attribute.label)}</Text>
+              </View>
             </View>
           ))}
         </View>
@@ -181,24 +202,25 @@ export function PDFPage({
                 key={attribute.id}
                 style={{ ...styles.tableCol, width: getWidth(attribute) }}
               >
-                {attribute.id === "address" ? (
-                  <Link
-                    src={property.brochures[0]?.url ?? ""}
-                    style={styles.tableCell}
-                  >
-                    {formatAddress(property.attributes.address)}
-                  </Link>
-                ) : (
-                  <Text
-                    style={{
-                      ...styles.tableCell,
-                      marginHorizontal: attribute.id === "comments" ? 10 : 5,
-                      textOverflow: "string",
-                    }}
-                  >
-                    {property.attributes?.[attribute.id]}
-                  </Text>
-                )}
+                <View
+                  style={
+                    attribute.id === "comments"
+                      ? styles.commentsCell
+                      : styles.tableCell
+                  }
+                >
+                  {attribute.id === "address" ? (
+                    property.brochures[0]?.url ? (
+                      <Link src={property.brochures[0]?.url ?? ""}>
+                        {formatAddress(property.attributes.address)}
+                      </Link>
+                    ) : (
+                      <Text>{formatAddress(property.attributes.address)}</Text>
+                    )
+                  ) : (
+                    <Text>{property.attributes?.[attribute.id]}</Text>
+                  )}
+                </View>
               </View>
             ))}
           </View>
