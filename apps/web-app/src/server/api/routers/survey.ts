@@ -82,6 +82,7 @@ export const surveyRouter = createTRPCRouter({
         return await surveyServiceInstance.deleteAttribute(
           input.surveyId,
           input.attributeId,
+          ctx.user.id,
         );
       }
     }),

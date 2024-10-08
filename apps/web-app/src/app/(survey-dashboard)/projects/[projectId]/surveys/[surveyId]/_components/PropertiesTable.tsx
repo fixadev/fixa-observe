@@ -245,6 +245,7 @@ export function PropertiesTable({ surveyId }: { surveyId: string }) {
 
   const deleteAttribute = useCallback(
     (id: string) => {
+      console.log("deleting attribute", id);
       void modifyAttributes(
         (data) => {
           const index = data.findIndex((attribute) => attribute.id === id);

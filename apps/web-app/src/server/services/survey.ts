@@ -156,16 +156,29 @@ export const surveyService = ({ db }: { db: PrismaClient }) => {
     deleteAttribute: async (
       surveyId: string,
       idToDelete: string | undefined,
+      userId: string,
     ) => {
       if (!idToDelete) {
         return null;
       }
+
       await db.attributesOnSurveys.deleteMany({
         where: {
           surveyId,
           attributeId: idToDelete,
         },
       });
+
+      const attribute = await db.attribute.findUnique({
+        where: { id: idToDelete },
+      });
+
+      if (attribute?.ownerId === userId) {
+        await db.attribute.delete({
+          where: { id: idToDelete },
+        });
+      }
+
     },
 
     updateAttributesOrder: async (
