@@ -183,15 +183,21 @@ export default function EmailsPage({
     Array(categories.length).fill(false),
   );
 
-  const [selectedThread, setSelectedThread] =
-    useState<EmailThreadWithEmailsAndProperty | null>(null);
+  const [selectedThreadId, setSelectedThreadId] = useState<string | null>(null);
 
   const [templateDialog, setTemplateDialog] = useState(false);
 
   const { mutateAsync: sendEmail, isPending: isSendingEmail } =
     api.email.sendEmail.useMutation();
   const handleSend = useCallback(
-    async (emailThread: EmailThreadWithEmailsAndProperty) => {
+    async (emailThreadId: string) => {
+      const emailThread = emailThreads.find(
+        (thread) => thread.id === emailThreadId,
+      );
+      if (!emailThread) {
+        return;
+      }
+
       console.log("send", emailThread);
       if (emailThread.draft) {
         const email = emailThread.emails[emailThread.emails.length - 1]!;
@@ -215,16 +221,16 @@ export default function EmailsPage({
           const nextUnsentEmail = unsentEmails.find(
             (thread) => thread.id !== emailThread.id,
           );
-          setSelectedThread(nextUnsentEmail ?? null);
+          setSelectedThreadId(nextUnsentEmail?.id ?? null);
         } else {
-          setSelectedThread(null);
+          setSelectedThreadId(null);
         }
         void refetchSurvey();
       } else {
         // TODO: Reply to email
       }
     },
-    [sendEmail, unsentEmails, refetchSurvey],
+    [emailThreads, sendEmail, unsentEmails, refetchSurvey],
   );
 
   return (
@@ -268,9 +274,9 @@ export default function EmailsPage({
                       completed={thread.completed}
                       warning={getWarning(thread)}
                       className={cn("shrink-0", {
-                        "bg-muted": thread.id === selectedThread?.id,
+                        "bg-muted": thread.id === selectedThreadId,
                       })}
-                      onClick={() => setSelectedThread(thread)}
+                      onClick={() => setSelectedThreadId(thread.id)}
                     />
                   ))}
                 </>
@@ -279,12 +285,14 @@ export default function EmailsPage({
           ))}
         </div>
         <div className="overflow-x-hidden">
-          {selectedThread ? (
+          {selectedThreadId ? (
             <EmailDetails
-              emailThread={selectedThread}
+              emailThread={
+                emailThreads.find((thread) => thread.id === selectedThreadId)!
+              }
               isSending={isSendingEmail}
               onOpenTemplateDialog={() => setTemplateDialog(true)}
-              onSend={() => handleSend(selectedThread)}
+              onSend={() => handleSend(selectedThreadId)}
               onReset={() => {
                 console.log("reset");
               }}

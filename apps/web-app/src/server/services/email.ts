@@ -232,23 +232,26 @@ export const emailService = ({ db }: { db: PrismaClient }) => {
       }
 
       // Create email
-      await db.email.create({
-        data: {
-          id: emailId,
-          createdAt: new Date(receivedDateTime),
-          emailThreadId: conversationId,
+      const email = {
+        id: emailId,
+        createdAt: new Date(receivedDateTime),
+        emailThreadId: conversationId,
 
-          senderName: sender.emailAddress.name,
-          senderEmail: sender.emailAddress.address,
-          // TODO: Make recipient an array
-          recipientName: toRecipients[0]!.emailAddress.name,
-          recipientEmail: toRecipients[0]!.emailAddress.address,
+        senderName: sender.emailAddress.name,
+        senderEmail: sender.emailAddress.address,
+        // TODO: Make recipient an array
+        recipientName: toRecipients[0]!.emailAddress.name,
+        recipientEmail: toRecipients[0]!.emailAddress.address,
 
-          subject,
-          body: uniqueBody.content,
+        subject,
+        body: uniqueBody.content,
 
-          webLink,
-        },
+        webLink,
+      };
+      await db.email.upsert({
+        where: { id: emailId },
+        update: email,
+        create: email,
       });
     },
 
