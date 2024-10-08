@@ -32,6 +32,7 @@ import {
   DEFAULT_EMAIL_TEMPLATE_SUBJECT,
 } from "~/lib/constants";
 import { isParsedAttributesComplete } from "~/lib/utils";
+import { type Email } from "prisma/generated/zod";
 
 export default function EmailDetails({
   emailThread,
@@ -162,6 +163,16 @@ function UnsentEmailDetails({
   onReset: () => void;
   onSend: () => void;
 }) {
+  const updateField = useCallback(
+    (field: keyof Email, value: string) => {
+      onUpdateEmailThread({
+        ...emailThread,
+        emails: [{ ...emailThread.emails[0]!, [field]: value }],
+      });
+    },
+    [emailThread, onUpdateEmailThread],
+  );
+
   return (
     <div className="flex h-full flex-col gap-2 p-2 pb-8">
       <div className="mt-4 grid grid-cols-[auto_1fr] items-center gap-2">
@@ -171,7 +182,8 @@ function UnsentEmailDetails({
           id="to"
           className="flex-grow"
           placeholder="mark@example.com"
-          defaultValue={emailThread.emails[0]!.recipientEmail}
+          value={emailThread.emails[0]!.recipientEmail}
+          onChange={(e) => updateField("recipientEmail", e.target.value)}
           autoComplete="email"
         />
         <Label htmlFor="subject">Subject:</Label>
@@ -179,7 +191,8 @@ function UnsentEmailDetails({
           type="text"
           id="subject"
           className="flex-grow"
-          defaultValue={emailThread.emails[0]!.subject}
+          value={emailThread.emails[0]!.subject}
+          onChange={(e) => updateField("subject", e.target.value)}
           placeholder="Property inquiry"
         />
       </div>
@@ -187,7 +200,8 @@ function UnsentEmailDetails({
       <Textarea
         className="flex-1"
         placeholder="Write your email here..."
-        defaultValue={emailThread.emails[0]!.body}
+        value={emailThread.emails[0]!.body}
+        onChange={(e) => updateField("body", e.target.value)}
       />
       <div className="mt-2 flex justify-between">
         <div className="flex gap-2">
