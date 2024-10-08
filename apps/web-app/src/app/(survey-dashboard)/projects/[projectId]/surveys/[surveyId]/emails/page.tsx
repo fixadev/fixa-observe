@@ -3,7 +3,7 @@
 import EmailCard from "./_components/EmailCard";
 import { Button } from "~/components/ui/button";
 import { ChevronDownIcon, ChevronUpIcon } from "@heroicons/react/24/outline";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   cn,
   isParsedAttributesComplete,
@@ -25,6 +25,7 @@ import { type Email, type Property } from "prisma/generated/zod";
 import { Badge } from "~/components/ui/badge";
 import { RefreshButton } from "./_components/RefreshButton";
 import { Separator } from "~/components/ui/separator";
+import { TEST_RECIPIENTS } from "~/lib/test-data";
 
 export default function EmailsPage({
   params,
@@ -90,12 +91,17 @@ export default function EmailsPage({
     () => new Map(emailThreads.map((thread) => [thread.id, thread])),
     [emailThreads],
   );
+  const draftsGenerated = useRef(0);
   const generateDraftEmailThread = useCallback(
     (property: Property) => {
       const senderName = user?.fullName ?? "";
       const senderEmail = user?.primaryEmailAddress?.emailAddress ?? "";
-      const recipientName = "Oliver Braly";
-      const recipientEmail = "oliverbraly@gmail.com";
+      const recipientName =
+        TEST_RECIPIENTS[draftsGenerated.current % TEST_RECIPIENTS.length]!.name;
+      const recipientEmail =
+        TEST_RECIPIENTS[draftsGenerated.current % TEST_RECIPIENTS.length]!
+          .email;
+      draftsGenerated.current++;
 
       const attributes = property.attributes as Record<string, string>;
       const replacements = {
@@ -186,7 +192,13 @@ export default function EmailsPage({
           // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
           (emailIsIncomplete(email) || emailIsOld(email)),
       ),
-    [emailThreads, emailIsIncomplete, emailIsOld, completedEmailsSet, notAvailableEmailsSet],
+    [
+      emailThreads,
+      emailIsIncomplete,
+      emailIsOld,
+      completedEmailsSet,
+      notAvailableEmailsSet,
+    ],
   );
   const needsFollowUpSet = useMemo(
     () => new Set(needsFollowUpEmails.map((email) => email.id)),
