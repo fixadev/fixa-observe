@@ -5,7 +5,7 @@ import { openai } from "./OpenAIClient";
 const EmailInfo = z.object({
   askingRate: z.string().nullable(),
   opEx: z.string().nullable(),
-  dateAvailable: z.string().nullable(),
+  available: z.union([z.literal("Yes"), z.literal("No")]).nullable(),
 });
 
 export async function extractAttributes(
@@ -20,7 +20,7 @@ export async function extractAttributes(
   {
     askingRate: string | null -- the asking rate per square foot in dollars - ex, $5.50
     opEx: string | null -- the operating expenses per square foot in dollars - ex, $0.50
-    dateAvailable: string | null -- the date the property is available in the format of "yyyy-mm-dd" - ex, "2024-11-10"
+    available: "Yes" | "No" | null -- whether the property is available for lease
   }
   `;
 

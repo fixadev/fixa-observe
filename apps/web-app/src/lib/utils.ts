@@ -23,3 +23,9 @@ export function isParsedAttributesComplete(
 ) {
   return Object.values(parsedAttributes).every((value) => value !== null);
 }
+
+export function isPropertyNotAvailable(
+  parsedAttributes: Record<string, string | null>,
+) {
+  return parsedAttributes.available === "No";
+}
