@@ -40,6 +40,7 @@ import {
 import { DraggableHeader } from "./DraggableHeader";
 import { DraggableRow } from "./DraggableRow";
 import { useRouter } from "next/navigation";
+import { ChevronLeftIcon } from "@heroicons/react/24/outline";
 
 export type Property = PropertySchema & {
   isNew?: boolean;
@@ -325,24 +326,32 @@ export function PropertiesTable({ surveyId }: { surveyId: string }) {
 
   return (
     <div>
-      <div className="mb-6 flex flex-row justify-end gap-4">
-        <NDXOutputUploader
-          surveyId={surveyId}
-          existingProperties={properties}
-          setProperties={setProperties}
-          setAttributesOrder={modifyAttributes}
-          attributesOrder={attributesOrder}
-        />
-        <Button
-          variant="outline"
-          onClick={() =>
-            router.push(
-              `/projects/${surveyData?.projectId}/surveys/${surveyId}/pdf-preview`,
-            )
-          }
-        >
-          Export Survey PDF
-        </Button>
+      <div className="mb-6 flex flex-row items-center justify-end">
+        {/* <div className="flex flex-row">
+          <Button variant={"ghost"} onClick={() => router.back()}>
+            <ChevronLeftIcon className="mr-2 h-4 w-4" />
+            Back to surveys
+          </Button>
+        </div> */}
+        <div className="flex flex-row justify-end gap-4">
+          <NDXOutputUploader
+            surveyId={surveyId}
+            existingProperties={properties}
+            setProperties={setProperties}
+            setAttributesOrder={modifyAttributes}
+            attributesOrder={attributesOrder}
+          />
+          <Button
+            variant="outline"
+            onClick={() =>
+              router.push(
+                `/projects/${surveyData?.projectId}/surveys/${surveyId}/pdf-preview`,
+              )
+            }
+          >
+            Export Survey PDF
+          </Button>
+        </div>
       </div>
       <DndContext
         collisionDetection={closestCenter}

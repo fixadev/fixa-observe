@@ -3,12 +3,24 @@ import { useEffect, useRef } from "react";
 import WebViewer from "@pdftron/webviewer";
 import { type WebViewerInstance } from "@pdftron/webviewer";
 import { api } from "~/trpc/react";
+import { Button } from "~/components/ui/button";
+import { ChevronLeftIcon } from "@heroicons/react/24/outline";
+import { useRouter } from "next/navigation";
+import { useToast } from "~/hooks/use-toast";
 
 export function PDFEditor({ brochureId }: { brochureId: string }) {
   const viewer = useRef<HTMLDivElement>(null);
-
+  const router = useRouter();
+  const { toast } = useToast();
   const { data: brochure } = api.property.getBrochure.useQuery({ brochureId });
-  const { mutate: updateBrochure } = api.property.updateBrochure.useMutation();
+  const { mutate: updateBrochure } = api.property.updateBrochure.useMutation({
+    onSuccess: () => {
+      toast({
+        title: "Changes saved!",
+        description: "Your brochure has been updated",
+      });
+    },
+  });
 
   useEffect(() => {
     if (!viewer.current || !brochure?.url) return;
@@ -33,8 +45,11 @@ export function PDFEditor({ brochureId }: { brochureId: string }) {
         instance.UI.setHeaderItems((header) => {
           header.push({
             type: "actionButton",
-            img: "...",
+            img: "/images/save.png",
             onClick: async () => {
+              toast({
+                title: "Saving changes...",
+              });
               const doc = documentViewer.getDocument();
               const xfdfString = await annotationManager.exportAnnotations();
               const data = await doc.getFileData({
@@ -43,8 +58,6 @@ export function PDFEditor({ brochureId }: { brochureId: string }) {
               });
               const arr = new Uint8Array(data);
               const blob = new Blob([arr], { type: "application/pdf" });
-
-              console.log("PDF Blob: ", blob);
 
               const formData = new FormData();
               // TODO: add title to file
@@ -66,14 +79,14 @@ export function PDFEditor({ brochureId }: { brochureId: string }) {
               }
             },
           });
-          header.push({
-            type: "actionButton",
-            img: "...",
-            onClick: async () => {
-              void documentViewer.getContentEditHistoryManager().undo();
-              console.log("Undid!");
-            },
-          });
+          // header.push({
+          //   type: "actionButton",
+          //   img: "...",
+          //   onClick: async () => {
+          //     void documentViewer.getContentEditHistoryManager().undo();
+          //     console.log("Undid!");
+          //   },
+          // });
         });
       })
       .catch((error) => {
@@ -82,7 +95,13 @@ export function PDFEditor({ brochureId }: { brochureId: string }) {
   }, [brochure?.url, updateBrochure, brochure]);
 
   return (
-    <div className="h-full">
+    <div className="h-full" style={{ backgroundColor: "#f8f9fa" }}>
+      <div className="flex flex-row items-center py-2">
+        <Button variant={"ghost"} onClick={() => router.back()}>
+          <ChevronLeftIcon className="mr-2 h-4 w-4" />
+          Back to brochures
+        </Button>
+      </div>
       <div ref={viewer} style={{ height: "95vh" }}></div>
     </div>
   );
