@@ -225,6 +225,17 @@ export const emailService = ({ db }: { db: PrismaClient }) => {
         return;
       }
 
+      // Check if email already exists
+      const existingEmail = await db.email.findUnique({
+        where: { id: emailId },
+      });
+      if (existingEmail) {
+        console.log(
+          `Email with id ${emailId} already exists. Skipping creation.`,
+        );
+        return;
+      }
+
       // Create email
       const email = {
         id: emailId,
@@ -242,21 +253,15 @@ export const emailService = ({ db }: { db: PrismaClient }) => {
 
         webLink,
       };
-      const upsertResult = await db.email.upsert({
-        where: { id: emailId },
-        update: email,
-        create: email,
+      await db.email.create({
+        data: email,
       });
 
-      // Mark email thread as unread if email was created
-      const emailWasCreated =
-        upsertResult.createdAt.getTime() === upsertResult.updatedAt.getTime();
-      if (emailWasCreated) {
-        await db.emailThread.update({
-          where: { id: conversationId },
-          data: { unread: true },
-        });
-      }
+      // Mark email thread as unread
+      await db.emailThread.update({
+        where: { id: conversationId },
+        data: { unread: true },
+      });
 
       // Get user
       const user = await db.user.findUnique({

@@ -2,11 +2,7 @@
 
 import EmailCard from "./_components/EmailCard";
 import { Button } from "~/components/ui/button";
-import {
-  ArrowPathIcon,
-  ChevronDownIcon,
-  ChevronUpIcon,
-} from "@heroicons/react/24/outline";
+import { ChevronDownIcon, ChevronUpIcon } from "@heroicons/react/24/outline";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   cn,
