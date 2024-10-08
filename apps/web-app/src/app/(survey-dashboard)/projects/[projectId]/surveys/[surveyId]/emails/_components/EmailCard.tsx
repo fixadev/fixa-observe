@@ -52,7 +52,7 @@ export default function EmailCard({
         ></div>
         {!draft && (
           <Avatar className="mt-1">
-            <AvatarFallback>
+            <AvatarFallback className="bg-gray-200">
               {email.senderName
                 .split(" ")
                 .map((name) => name[0])

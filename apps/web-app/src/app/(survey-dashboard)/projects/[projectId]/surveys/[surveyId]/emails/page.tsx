@@ -229,14 +229,15 @@ export default function EmailsPage({
 
   const { mutateAsync: sendEmail, isPending: isSendingEmail } =
     api.email.sendEmail.useMutation();
+  const { mutateAsync: replyToEmail, isPending: isReplyingToEmail } =
+    api.email.replyToEmail.useMutation();
   const handleSend = useCallback(
-    async (emailThreadId: string) => {
+    async (emailThreadId: string, body?: string) => {
       const emailThread = emailThreadsById.get(emailThreadId);
       if (!emailThread) {
         return;
       }
 
-      console.log("send", emailThread);
       if (emailThread.draft) {
         const email = emailThread.emails[emailThread.emails.length - 1]!;
         await sendEmail({
@@ -265,10 +266,57 @@ export default function EmailsPage({
         }
         void refetchSurvey();
       } else {
-        // TODO: Reply to email
+        if (!isReplyingToEmail) {
+          await replyToEmail({
+            emailId: emailThread.emails[emailThread.emails.length - 1]!.id,
+            body: body ?? "",
+          });
+          setEmailThreads((prev) => {
+            const newThreads = [...prev];
+            const threadIndex = newThreads.findIndex(
+              (thread) => thread.id === emailThread.id,
+            );
+            if (threadIndex !== -1) {
+              newThreads[threadIndex] = {
+                ...newThreads[threadIndex]!,
+                emails: [
+                  ...newThreads[threadIndex]!.emails,
+                  {
+                    id: crypto.randomUUID(),
+                    createdAt: new Date(),
+                    updatedAt: new Date(),
+                    subject:
+                      emailThread.emails[emailThread.emails.length - 1]!
+                        .subject,
+                    body: body ?? "",
+                    senderName: user?.fullName ?? "",
+                    senderEmail: user?.primaryEmailAddress?.emailAddress ?? "",
+                    emailThreadId: emailThread.id,
+                    recipientName:
+                      emailThread.emails[emailThread.emails.length - 1]!
+                        .senderName,
+                    recipientEmail:
+                      emailThread.emails[emailThread.emails.length - 1]!
+                        .senderEmail,
+                    webLink: "",
+                  },
+                ],
+              };
+            }
+            return newThreads;
+          });
+        }
       }
     },
-    [emailThreadsById, sendEmail, unsentEmails, refetchSurvey],
+    [
+      emailThreadsById,
+      sendEmail,
+      unsentEmails,
+      refetchSurvey,
+      isReplyingToEmail,
+      replyToEmail,
+      user,
+    ],
   );
 
   const [lastRefreshedAt, setLastRefreshedAt] = useState(new Date());
@@ -370,9 +418,11 @@ export default function EmailsPage({
                   return newThreads;
                 });
               }}
-              isSending={isSendingEmail}
+              isSending={isSendingEmail || isReplyingToEmail}
               onOpenTemplateDialog={() => setTemplateDialog(true)}
-              onSend={() => handleSend(selectedThreadId)}
+              onSend={async (body) => {
+                await handleSend(selectedThreadId, body);
+              }}
               onReset={() => {
                 console.log("reset");
               }}
