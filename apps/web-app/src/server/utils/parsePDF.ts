@@ -1,55 +1,37 @@
-import PDFParser from "pdf2json"; 
-import * as pdfjsLib from 'pdfjs-dist';
+import pdf from 'pdf-parse';
+import { extractContactInfo } from './extractContactInfo';
+import fs from 'fs/promises';
+import path from 'path';
 
-export async function parsePDFWithoutLinks(file: File) {
-  const dataBuffer = await file.arrayBuffer();
-  return new Promise<string>((resolve, reject) => {
-    const pdfParser = new PDFParser();
-    pdfParser.on("pdfParser_dataError", (errData) => reject(errData.parserError));
-    pdfParser.on("pdfParser_dataReady", (pdfData) => {
-      const parsedPDF = pdfData.Pages.map((page) => 
-        page.Texts.map((text) => text.R.map((r) => r.T).join(' '))
-      ).join('\n');
-      resolve(parsedPDF);
-    });
-    pdfParser.parseBuffer(Buffer.from(dataBuffer));
-  });
+interface PDFData {
+  text: string;
+  metadata: Record<string, string>;
 }
 
-
 // version 2 
-// export async function parsePDFWithoutLinks(file: File) {
-//   // Read the PDF file
-//   const data = new Uint8Array(await file.arrayBuffer());
+export async function parsePDFWithoutLinks(file: File) {
+  try {
+    const data = await file.arrayBuffer();
+    const buffer = Buffer.from(data);
+    const result: PDFData = await pdf(buffer);
+    return result.text;
+  } catch (error) {
+    console.error('Error parsing PDF:', error);
+    throw new Error('Failed to parse PDF');
+  }
+}
 
-//   try {
-//     // Load the PDF document
-//     const doc = await pdfjsLib.getDocument({data}).promise;
-//     const numPages = doc.numPages;
-//     console.log(`Number of pages: ${numPages}`);
-
-//     const textContent = [];
-//     // Iterate through each page
-//     for (let i = 1; i <= numPages; i++) {
-//       const page = await doc.getPage(i);
-      
-//       // Extract text and links
-//       const content = await page.getTextContent();
-
-//       textContent.push(content);
-//     }
-
-//     return textContent;
-//   } catch (error) {
-//     console.error('Error parsing PDF:', error);
-//   }
-// }
-// const filepath = "/Users/oliverwendell-braly/pixa/real-estate-platform/apps/web-app/src/server/utils/sample.pdf"
+// const filepath = "/Users/oliverwendell-braly/pixa/real-estate-platform/apps/web-app/src/server/utils/366cambridge.pdf"
 
 // async function test() {
-//   const file = new File([], filepath, { type: "application/pdf" });
-//   const textContent = await parsePDFWithoutLinks(file);
-//   console.log("textContent", textContent);
+//   const arrayBuffer = await fs.readFile(filepath);
+//   // Get the file name from the path
+//   const fileName = path.basename(filepath);
+//   // Create a File object
+//   const file = new File([arrayBuffer], fileName, { type: 'application/pdf' });
+//   const text = await parsePDFWithoutLinks(file);
+//   console.log('typeof text', typeof text);
+//   console.log(text);
 // }
 
 // void test();
