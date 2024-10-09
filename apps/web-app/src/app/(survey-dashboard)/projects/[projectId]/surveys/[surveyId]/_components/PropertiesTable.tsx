@@ -29,7 +29,11 @@ import {
   restrictToVerticalAxis,
 } from "@dnd-kit/modifiers";
 import { Button } from "~/components/ui/button";
-import { PlusIcon } from "@heroicons/react/24/solid";
+import {
+  ArrowDownTrayIcon,
+  EnvelopeIcon,
+  PlusIcon,
+} from "@heroicons/react/24/solid";
 import { NDXOutputUploader } from "./NDXOutputUploader";
 import { api } from "~/trpc/react";
 import {
@@ -40,8 +44,8 @@ import {
 import { DraggableHeader } from "./DraggableHeader";
 import { DraggableRow } from "./DraggableRow";
 import { useRouter } from "next/navigation";
-import { ChevronLeftIcon } from "@heroicons/react/24/outline";
 import Spinner from "~/components/Spinner";
+import Link from "next/link";
 
 export type Property = PropertySchema & {
   isNew?: boolean;
@@ -50,13 +54,18 @@ export type Attribute = AttributeSchema & {
   isNew?: boolean;
 };
 
-export function PropertiesTable({ surveyId }: { surveyId: string }) {
+export function PropertiesTable({
+  surveyId,
+  projectId,
+}: {
+  surveyId: string;
+  projectId: string;
+}) {
   const [properties, setPropertiesState] = useState<Property[]>([]);
   const [attributesOrder, setAttributesOrderState] = useState<Attribute[]>([]);
   const [draggingRow, setDraggingRow] = useState<boolean>(false);
   const [isUploadingProperties, setIsUploadingProperties] =
     useState<boolean>(false);
-  const router = useRouter();
   const { data: surveyData, refetch: refetchSurvey } =
     api.survey.getSurvey.useQuery({
       surveyId,
@@ -334,37 +343,40 @@ export function PropertiesTable({ surveyId }: { surveyId: string }) {
   return (
     <div>
       {isUploadingProperties ? (
+        // Loading state
         <div className="flex h-[90vh] w-full flex-col items-center justify-center">
           <Spinner className="flex size-12 text-gray-500" />
         </div>
-      ) : (
-        <div>
-          <div className="mb-6 flex flex-row items-center justify-end">
-            {/* <div className="flex flex-row">
-          <Button variant={"ghost"} onClick={() => router.back()}>
-            <ChevronLeftIcon className="mr-2 h-4 w-4" />
-            Back to surveys
-          </Button>
-        </div> */}
-            <div className="flex flex-row justify-end gap-4">
-              <NDXOutputUploader
-                surveyId={surveyId}
-                existingProperties={properties}
-                setProperties={setProperties}
-                setAttributesOrder={modifyAttributes}
-                attributesOrder={attributesOrder}
-              />
-              <Button
-                variant="outline"
-                onClick={() =>
-                  router.push(
-                    `/projects/${surveyData?.projectId}/surveys/${surveyId}/pdf-preview`,
-                  )
-                }
-              >
-                Export Survey PDF
-              </Button>
+      ) : properties.length === 0 ? (
+        // Empty state
+        <div className="flex h-[90vh] w-full flex-col items-center justify-center">
+          {/* <div className="rounded-md border border-input p-4 shadow-sm"> */}
+          <div className="mb-6 flex flex-col gap-1">
+            <div className="text-lg font-medium">No properties found</div>
+            <div className="text-sm text-muted-foreground">
+              Add a property to get started
             </div>
+          </div>
+          <div className="flex flex-col items-stretch gap-2">
+            <NDXOutputUploader
+              className="w-full"
+              surveyId={surveyId}
+              existingProperties={properties}
+              setProperties={setProperties}
+              setAttributesOrder={modifyAttributes}
+              attributesOrder={attributesOrder}
+            />
+            <Button variant="ghost" onClick={addProperty}>
+              Manually add properties
+            </Button>
+          </div>
+          {/* </div> */}
+        </div>
+      ) : (
+        // Table
+        <div>
+          <div className="mb-6 flex justify-start">
+            <ActionButtons surveyId={surveyId} projectId={projectId} />
           </div>
           <DndContext
             collisionDetection={closestCenter}
@@ -447,12 +459,72 @@ export function PropertiesTable({ surveyId }: { surveyId: string }) {
                 </SortableContext>
               </TableBody>
             </Table>
-            <Button variant="ghost" className="mt-2" onClick={addProperty}>
-              + Add property
-            </Button>
+            <div className="mt-2 flex items-center gap-2">
+              <Button variant="ghost" onClick={addProperty}>
+                + Add property
+              </Button>
+              <NDXOutputUploader
+                variant="ghost"
+                surveyId={surveyId}
+                existingProperties={properties}
+                setProperties={setProperties}
+                setAttributesOrder={modifyAttributes}
+                attributesOrder={attributesOrder}
+              />
+            </div>
           </DndContext>
         </div>
       )}
+    </div>
+  );
+}
+
+function ActionButtons({
+  surveyId,
+  projectId,
+}: {
+  surveyId: string;
+  projectId: string;
+}) {
+  const newUser = true;
+
+  if (newUser) {
+    return (
+      <div className="flex max-w-64 flex-col items-stretch gap-4 rounded-md border border-input p-4 shadow-sm">
+        <div className="flex flex-col gap-1">
+          <div className="font-medium">Need to verify property data?</div>
+          <div className="text-sm text-muted-foreground">
+            Draft emails to send to brokers
+          </div>
+        </div>
+        <div className="flex flex-col gap-2">
+          <Button className="w-full">
+            <EnvelopeIcon className="mr-2 size-4" />
+            Verify property data
+          </Button>
+          <Button variant="ghost" asChild className="w-full">
+            <Link
+              href={`/projects/${projectId}/surveys/${surveyId}/pdf-preview`}
+            >
+              Export survey instead
+            </Link>
+          </Button>
+        </div>
+      </div>
+    );
+  }
+  return (
+    <div className="flex max-w-48 flex-col items-stretch gap-2">
+      <Button className="w-full">
+        <EnvelopeIcon className="mr-2 size-4" />
+        Verify property data
+      </Button>
+      <Button variant="outline" asChild className="w-full">
+        <Link href={`/projects/${projectId}/surveys/${surveyId}/pdf-preview`}>
+          <ArrowDownTrayIcon className="mr-2 size-4" />
+          Export survey PDF
+        </Link>
+      </Button>
     </div>
   );
 }

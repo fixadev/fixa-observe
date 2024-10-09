@@ -9,13 +9,17 @@ import { type Attribute } from "@prisma/client";
 import { type PropertySchema, type CreatePropertySchema } from "~/lib/property";
 import { FileInput } from "../../../../../../_components/FileInput";
 import { Button } from "~/components/ui/button";
+import { ArrowUpTrayIcon } from "@heroicons/react/24/outline";
 
 export const NDXOutputUploader = ({
+  variant = "default",
   surveyId,
   existingProperties,
   setProperties,
   attributesOrder,
+  className,
 }: {
+  variant?: "default" | "ghost";
   surveyId: string;
   existingProperties: Property[];
   setProperties: (
@@ -29,6 +33,7 @@ export const NDXOutputUploader = ({
     action: "order" | "add" | "update" | "delete",
     attributeId?: string,
   ) => void;
+  className?: string;
 }) => {
   const pdfjs = usePDFJS((pdfjs) => {
     console.log("PDFJS loaded", pdfjs);
@@ -118,11 +123,15 @@ export const NDXOutputUploader = ({
   };
 
   return (
-    <div className="flex flex-col items-center justify-center gap-3">
-      <FileInput
-        triggerElement={<Button variant="default">Upload NDX PDF</Button>}
-        handleFilesChange={onFilesChangeHandler}
-      />
-    </div>
+    <FileInput
+      className={className}
+      triggerElement={
+        <Button variant={variant}>
+          <ArrowUpTrayIcon className="mr-2 size-4" />
+          Upload NDX PDF
+        </Button>
+      }
+      handleFilesChange={onFilesChangeHandler}
+    />
   );
 };
