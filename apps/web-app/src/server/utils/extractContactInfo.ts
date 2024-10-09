@@ -57,3 +57,11 @@ export async function extractContactInfo(brochureUrl: string) {
   return contactsObject?.contacts;
 
 }
+
+
+// async function test() {
+//   const contacts = await extractContactInfo('https://pixa-real-estate.s3.amazonaws.com/401+Lambert.pdf');
+//   console.log('contacts', contacts);
+// }
+
+// void test();

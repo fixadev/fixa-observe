@@ -1,4 +1,5 @@
 import pdf from 'pdf-parse';
+import { extractContactInfo } from './extractContactInfo';
 import fs from 'fs/promises';
 import path from 'path';
 

@@ -1,3 +1,3 @@
 #!/bin/bash
 
-npx tsx -r dotenv/config src/server/utils/parsePDF.ts
+npx tsx -r dotenv/config src/server/utils/extractContactInfo.ts
