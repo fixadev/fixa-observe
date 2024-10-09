@@ -41,6 +41,7 @@ import { DraggableHeader } from "./DraggableHeader";
 import { DraggableRow } from "./DraggableRow";
 import { useRouter } from "next/navigation";
 import { ChevronLeftIcon } from "@heroicons/react/24/outline";
+import Spinner from "~/components/Spinner";
 
 export type Property = PropertySchema & {
   isNew?: boolean;
@@ -53,6 +54,8 @@ export function PropertiesTable({ surveyId }: { surveyId: string }) {
   const [properties, setPropertiesState] = useState<Property[]>([]);
   const [attributesOrder, setAttributesOrderState] = useState<Attribute[]>([]);
   const [draggingRow, setDraggingRow] = useState<boolean>(false);
+  const [isUploadingProperties, setIsUploadingProperties] =
+    useState<boolean>(false);
   const router = useRouter();
   const { data: surveyData, refetch: refetchSurvey } =
     api.survey.getSurvey.useQuery({
@@ -91,6 +94,7 @@ export function PropertiesTable({ surveyId }: { surveyId: string }) {
   const { mutate: updateProperties } = api.survey.updateProperties.useMutation({
     onSuccess: () => {
       void refetchSurvey();
+      setIsUploadingProperties(false);
     },
   });
 
@@ -116,7 +120,10 @@ export function PropertiesTable({ surveyId }: { surveyId: string }) {
       } else {
         updatedProperties = newPropertiesOrCallback;
       }
-      console.log("UPDATING PROPERTIES IN FRONT END", updatedProperties);
+      // if there are no properties
+      if (properties.length === 0) {
+        setIsUploadingProperties(true);
+      }
 
       try {
         void updateProperties({
@@ -326,118 +333,126 @@ export function PropertiesTable({ surveyId }: { surveyId: string }) {
 
   return (
     <div>
-      <div className="mb-6 flex flex-row items-center justify-end">
-        {/* <div className="flex flex-row">
+      {isUploadingProperties ? (
+        <div className="flex h-[90vh] w-full flex-col items-center justify-center">
+          <Spinner className="flex size-12 text-gray-500" />
+        </div>
+      ) : (
+        <div>
+          <div className="mb-6 flex flex-row items-center justify-end">
+            {/* <div className="flex flex-row">
           <Button variant={"ghost"} onClick={() => router.back()}>
             <ChevronLeftIcon className="mr-2 h-4 w-4" />
             Back to surveys
           </Button>
         </div> */}
-        <div className="flex flex-row justify-end gap-4">
-          <NDXOutputUploader
-            surveyId={surveyId}
-            existingProperties={properties}
-            setProperties={setProperties}
-            setAttributesOrder={modifyAttributes}
-            attributesOrder={attributesOrder}
-          />
-          <Button
-            variant="outline"
-            onClick={() =>
-              router.push(
-                `/projects/${surveyData?.projectId}/surveys/${surveyId}/pdf-preview`,
-              )
-            }
-          >
-            Export Survey PDF
-          </Button>
-        </div>
-      </div>
-      <DndContext
-        collisionDetection={closestCenter}
-        modifiers={[
-          draggingRow ? restrictToVerticalAxis : restrictToHorizontalAxis,
-        ]}
-        onDragEnd={handleDragEnd}
-        sensors={sensors}
-      >
-        <Table ref={tableRef}>
-          <TableHeader>
-            <TableRow>
-              <TableCell className="w-[1%]"></TableCell>
-              <SortableContext
-                items={draggingRow ? rowIds : colIds}
-                strategy={
-                  draggingRow
-                    ? verticalListSortingStrategy
-                    : horizontalListSortingStrategy
+            <div className="flex flex-row justify-end gap-4">
+              <NDXOutputUploader
+                surveyId={surveyId}
+                existingProperties={properties}
+                setProperties={setProperties}
+                setAttributesOrder={modifyAttributes}
+                attributesOrder={attributesOrder}
+              />
+              <Button
+                variant="outline"
+                onClick={() =>
+                  router.push(
+                    `/projects/${surveyData?.projectId}/surveys/${surveyId}/pdf-preview`,
+                  )
                 }
               >
-                <DraggableHeader
-                  key={"photoHeader"}
-                  attribute={{
-                    id: "photoUrl",
-                    createdAt: new Date(),
-                    updatedAt: new Date(),
-                    type: "string",
-                    label: "Photo",
-                    ownerId: "",
-                    isNew: false,
-                  }}
-                  renameAttribute={(name) => {}}
-                  deleteAttribute={() => {}}
-                  draggingRow={draggingRow}
-                  disabled={true}
-                />
-                {attributesOrder.map((attribute) => (
-                  <DraggableHeader
-                    key={attribute.id}
-                    attribute={attribute}
-                    renameAttribute={(name) =>
-                      renameAttribute(attribute.id, name)
+                Export Survey PDF
+              </Button>
+            </div>
+          </div>
+          <DndContext
+            collisionDetection={closestCenter}
+            modifiers={[
+              draggingRow ? restrictToVerticalAxis : restrictToHorizontalAxis,
+            ]}
+            onDragEnd={handleDragEnd}
+            sensors={sensors}
+          >
+            <Table ref={tableRef}>
+              <TableHeader>
+                <TableRow>
+                  <TableCell className="w-[1%]"></TableCell>
+                  <SortableContext
+                    items={draggingRow ? rowIds : colIds}
+                    strategy={
+                      draggingRow
+                        ? verticalListSortingStrategy
+                        : horizontalListSortingStrategy
                     }
-                    deleteAttribute={() => deleteAttribute(attribute.id)}
-                    draggingRow={draggingRow}
-                  ></DraggableHeader>
-                ))}
-              </SortableContext>
-              <TableCell className="justify-center-background sticky right-0 z-20 flex bg-background">
-                <Button size="icon" variant="ghost" onClick={addAttribute}>
-                  <PlusIcon className="size-4" />
-                </Button>
-              </TableCell>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            <SortableContext
-              items={draggingRow ? rowIds : colIds}
-              strategy={
-                draggingRow
-                  ? verticalListSortingStrategy
-                  : horizontalListSortingStrategy
-              }
-            >
-              {properties.map((property) => {
-                return (
-                  <DraggableRow
-                    photoUrl={property.photoUrl ?? ""}
-                    key={property.id}
-                    property={property}
-                    attributes={attributesOrder}
-                    deleteProperty={() => deleteProperty(property.id)}
-                    draggingRow={draggingRow}
-                    setDraggingRow={setDraggingRow}
-                    updateProperty={updateProperty}
-                  />
-                );
-              })}
-            </SortableContext>
-          </TableBody>
-        </Table>
-        <Button variant="ghost" className="mt-2" onClick={addProperty}>
-          + Add property
-        </Button>
-      </DndContext>
+                  >
+                    <DraggableHeader
+                      key={"photoHeader"}
+                      attribute={{
+                        id: "photoUrl",
+                        createdAt: new Date(),
+                        updatedAt: new Date(),
+                        type: "string",
+                        label: "Photo",
+                        ownerId: "",
+                        isNew: false,
+                      }}
+                      renameAttribute={(name) => {}}
+                      deleteAttribute={() => {}}
+                      draggingRow={draggingRow}
+                      disabled={true}
+                    />
+                    {attributesOrder.map((attribute) => (
+                      <DraggableHeader
+                        key={attribute.id}
+                        attribute={attribute}
+                        renameAttribute={(name) =>
+                          renameAttribute(attribute.id, name)
+                        }
+                        deleteAttribute={() => deleteAttribute(attribute.id)}
+                        draggingRow={draggingRow}
+                      ></DraggableHeader>
+                    ))}
+                  </SortableContext>
+                  <TableCell className="justify-center-background sticky right-0 z-20 flex bg-background">
+                    <Button size="icon" variant="ghost" onClick={addAttribute}>
+                      <PlusIcon className="size-4" />
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                <SortableContext
+                  items={draggingRow ? rowIds : colIds}
+                  strategy={
+                    draggingRow
+                      ? verticalListSortingStrategy
+                      : horizontalListSortingStrategy
+                  }
+                >
+                  {properties.map((property) => {
+                    return (
+                      <DraggableRow
+                        photoUrl={property.photoUrl ?? ""}
+                        key={property.id}
+                        property={property}
+                        attributes={attributesOrder}
+                        deleteProperty={() => deleteProperty(property.id)}
+                        draggingRow={draggingRow}
+                        setDraggingRow={setDraggingRow}
+                        updateProperty={updateProperty}
+                      />
+                    );
+                  })}
+                </SortableContext>
+              </TableBody>
+            </Table>
+            <Button variant="ghost" className="mt-2" onClick={addProperty}>
+              + Add property
+            </Button>
+          </DndContext>
+        </div>
+      )}
     </div>
   );
 }
