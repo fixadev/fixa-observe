@@ -8,7 +8,11 @@ import { TableCell } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import { ImagePlusIcon, TrashIcon } from "lucide-react";
 import { DragHandleDots2Icon } from "@radix-ui/react-icons";
-import { type Attribute, type Property } from "./PropertiesTable";
+import {
+  type PropertiesTableState,
+  type Attribute,
+  type Property,
+} from "./PropertiesTable";
 import { DraggableCell } from "./DraggableCell";
 import { TableRow } from "@/components/ui/table";
 import { Textarea } from "~/components/ui/textarea";
@@ -16,6 +20,8 @@ import Image from "next/image";
 import { FileInput } from "~/app/_components/FileInput";
 import { api } from "~/trpc/react";
 import Spinner from "~/components/Spinner";
+import { Checkbox } from "~/components/ui/checkbox";
+import { Label } from "~/components/ui/label";
 
 export const DraggableRow = ({
   photoUrl,
@@ -23,6 +29,7 @@ export const DraggableRow = ({
   attributes,
   deleteProperty,
   draggingRow,
+  state,
   setDraggingRow,
   updateProperty,
 }: {
@@ -30,6 +37,7 @@ export const DraggableRow = ({
   property: Property;
   attributes: Attribute[];
   draggingRow: boolean;
+  state: PropertiesTableState;
   deleteProperty: (id: string) => void;
   setDraggingRow: (draggingRow: boolean) => void;
   updateProperty: (property: Property) => void;
@@ -158,7 +166,6 @@ export const DraggableRow = ({
             draggingRow={draggingRow}
             className={attributeToMinWidth(attribute)}
           >
-            {" "}
             {attribute.id === "comments" ? (
               <Textarea
                 defaultValue={property.attributes?.comments ?? ""}
@@ -174,18 +181,34 @@ export const DraggableRow = ({
                 }}
               />
             ) : (
-              <Input
-                defaultValue={property.attributes?.[attribute.id] ?? ""}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                  updateProperty({
-                    ...property,
-                    attributes: {
-                      ...property.attributes,
-                      [attribute.id]: e.target.value,
-                    },
-                  });
-                }}
-              />
+              <>
+                {state === "edit" ? (
+                  <Input
+                    defaultValue={property.attributes?.[attribute.id] ?? ""}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                      updateProperty({
+                        ...property,
+                        attributes: {
+                          ...property.attributes,
+                          [attribute.id]: e.target.value,
+                        },
+                      });
+                    }}
+                  />
+                ) : state === "select-fields" ? (
+                  <div className="flex items-center gap-2">
+                    <Checkbox id={`${property.id}-${attribute.id}`} />
+                    <Label
+                      htmlFor={`${property.id}-${attribute.id}`}
+                      className="font-normal"
+                    >
+                      {(property.attributes?.[attribute.id]?.length ?? 0 > 0)
+                        ? property.attributes?.[attribute.id]
+                        : "<No value>"}
+                    </Label>
+                  </div>
+                ) : null}
+              </>
             )}
           </DraggableCell>
         );

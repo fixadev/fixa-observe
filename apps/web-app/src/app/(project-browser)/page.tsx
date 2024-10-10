@@ -29,7 +29,7 @@ export default function Home() {
 
   const {
     data: projectsData,
-    refetch: refetchProjects,
+    // refetch: refetchProjects,
     error: projectsError,
   } = api.project.getProjects.useQuery();
   const { mutate: createProject, error: createProjectError } =
