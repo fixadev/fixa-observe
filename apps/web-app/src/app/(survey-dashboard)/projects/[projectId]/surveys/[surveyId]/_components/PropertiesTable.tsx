@@ -579,7 +579,7 @@ function ActionButtons({
             </Button>
             <Button variant="ghost" asChild className="w-full">
               <Link
-                href={`/projects/${projectId}/surveys/${surveyId}/pdf-preview`}
+                href={`/projects/${projectId}/surveys/${surveyId}/excel-preview`}
               >
                 Export survey instead
               </Link>
