@@ -6,7 +6,7 @@ import { formatDistanceToNow } from "date-fns";
 import { type Email } from "prisma/generated/zod";
 import { Avatar, AvatarFallback } from "~/components/ui/avatar";
 import { Button } from "~/components/ui/button";
-import { cn } from "~/lib/utils";
+import { cn, getInitials } from "~/lib/utils";
 
 export default function EmailCard({
   email,
@@ -56,10 +56,7 @@ export default function EmailCard({
         {!draft && (
           <Avatar className="mt-1">
             <AvatarFallback className="bg-gray-200">
-              {email.senderName
-                .split(" ")
-                .map((name) => name[0])
-                .join("")}
+              {getInitials(email.senderName)}
             </AvatarFallback>
           </Avatar>
         )}

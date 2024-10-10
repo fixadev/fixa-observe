@@ -13,10 +13,11 @@ import {
 } from "~/components/ui/dialog";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
-import UserImage from "~/components/UserImage";
 import { useUser } from "@clerk/nextjs";
 import { api } from "~/trpc/react";
 import { useRouter } from "next/navigation";
+import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
+import { getInitials } from "~/lib/utils";
 
 export default function Home() {
   const { user } = useUser();
@@ -61,8 +62,11 @@ export default function Home() {
 
   return (
     <div className="flex flex-col gap-8">
-      <div className="flex gap-4">
-        <UserImage imageUrl={user?.imageUrl} />
+      <div className="flex items-center gap-4">
+        <Avatar>
+          <AvatarImage src={user?.imageUrl} />
+          <AvatarFallback>{getInitials(user?.fullName ?? "")}</AvatarFallback>
+        </Avatar>
         <div>
           <div className="text-lg font-medium">{user?.fullName}</div>
           <div className="text-sm text-muted-foreground">

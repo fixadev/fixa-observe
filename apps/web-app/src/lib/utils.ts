@@ -29,3 +29,10 @@ export function isPropertyNotAvailable(
 ) {
   return parsedAttributes.available === "No";
 }
+
+export function getInitials(fullName: string) {
+  return fullName
+    .split(" ")
+    .map((name) => name[0])
+    .join("");
+}
