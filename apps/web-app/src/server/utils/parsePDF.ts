@@ -1,23 +1,17 @@
-import pdf from 'pdf-parse';
-import { extractContactInfo } from './extractContactInfo';
-import fs from 'fs/promises';
-import path from 'path';
+import pdf from "pdf-parse/lib/pdf-parse";
+// import fs from "fs/promises";
+// import path from "path";
 
-interface PDFData {
-  text: string;
-  metadata: Record<string, string>;
-}
-
-// version 2 
+// version 2
 export async function parsePDFWithoutLinks(file: File) {
   try {
     const data = await file.arrayBuffer();
     const buffer = Buffer.from(data);
-    const result: PDFData = await pdf(buffer);
+    const result = await pdf(buffer);
     return result.text;
   } catch (error) {
-    console.error('Error parsing PDF:', error);
-    throw new Error('Failed to parse PDF');
+    console.error("Error parsing PDF:", error);
+    throw new Error("Failed to parse PDF");
   }
 }
 
