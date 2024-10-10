@@ -1,4 +1,5 @@
 import { cloneElement, type ReactElement, useRef } from "react";
+import { cn } from "~/lib/utils";
 
 export const FileInput = ({
   triggerElement,
@@ -24,9 +25,12 @@ export const FileInput = ({
   };
 
   return (
-    <div className={className}>
+    <>
       {cloneElement(triggerElement, {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access
+        className: cn(triggerElement.props.className, className),
         onClick: (e: React.MouseEvent) => {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
           (triggerElement.props.onClick as React.MouseEventHandler)?.(e);
           handleButtonClick();
         },
@@ -39,6 +43,6 @@ export const FileInput = ({
         accept={accept}
         onChange={onFilesChangeHandler}
       />
-    </div>
+    </>
   );
 };
