@@ -126,9 +126,9 @@ export function PropertiesTable({
       if (!surveyData) return;
       let updatedProperties: Property[];
       if (typeof newPropertiesOrCallback === "function") {
-        updatedProperties = newPropertiesOrCallback(properties);
+        updatedProperties = newPropertiesOrCallback(properties) as Property[];
       } else {
-        updatedProperties = newPropertiesOrCallback;
+        updatedProperties = newPropertiesOrCallback as Property[];
       }
       // if there are no properties
       if (properties.length === 0) {
@@ -309,7 +309,9 @@ export function PropertiesTable({
     (property: Property) => {
       void setProperties(
         (data) => {
-          const index = data.findIndex((prop) => prop.id === property.id);
+          const index = data.findIndex(
+            (prop) => (prop as Property).id === property.id,
+          );
           if (index === -1) return data;
           const newData = [...data];
           newData[index] = property;
@@ -326,7 +328,9 @@ export function PropertiesTable({
     (id: string) => {
       void setProperties(
         (data) => {
-          const index = data.findIndex((property) => property.id === id);
+          const index = data.findIndex(
+            (property) => (property as Property).id === id,
+          );
           if (index === -1) return data;
           const newData = [...data];
           newData.splice(index, 1);
@@ -461,8 +465,8 @@ export function PropertiesTable({
                         ownerId: "",
                         isNew: false,
                       }}
-                      renameAttribute={(name) => {}}
-                      deleteAttribute={() => {}}
+                      renameAttribute={() => false}
+                      deleteAttribute={() => false}
                       draggingRow={draggingRow}
                       state={state}
                       disabled={true}
