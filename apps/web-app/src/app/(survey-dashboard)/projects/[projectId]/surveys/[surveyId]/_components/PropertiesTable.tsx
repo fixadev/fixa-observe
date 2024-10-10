@@ -43,7 +43,6 @@ import {
 } from "~/lib/property";
 import { DraggableHeader } from "./DraggableHeader";
 import { DraggableRow } from "./DraggableRow";
-import { useRouter } from "next/navigation";
 import Spinner from "~/components/Spinner";
 import Link from "next/link";
 
@@ -53,6 +52,8 @@ export type Property = PropertySchema & {
 export type Attribute = AttributeSchema & {
   isNew?: boolean;
 };
+
+export type PropertiesTableState = "edit" | "select-fields";
 
 export function PropertiesTable({
   surveyId,
@@ -338,6 +339,12 @@ export function PropertiesTable({
     [setProperties],
   );
 
+  // Verify property data
+  const [state, setState] = useState<PropertiesTableState>("edit");
+  const draftEmails = useCallback(() => {
+    console.log("drafting emails");
+  }, []);
+
   const tableRef = useRef<HTMLTableElement>(null);
 
   return (
@@ -376,7 +383,13 @@ export function PropertiesTable({
         // Table
         <div>
           <div className="mb-6 flex justify-start">
-            <ActionButtons surveyId={surveyId} projectId={projectId} />
+            <ActionButtons
+              surveyId={surveyId}
+              projectId={projectId}
+              state={state}
+              onStateChange={setState}
+              draftEmails={draftEmails}
+            />
           </div>
           <DndContext
             collisionDetection={closestCenter}
@@ -412,6 +425,7 @@ export function PropertiesTable({
                       renameAttribute={(name) => {}}
                       deleteAttribute={() => {}}
                       draggingRow={draggingRow}
+                      state={state}
                       disabled={true}
                     />
                     {attributesOrder.map((attribute) => (
@@ -423,6 +437,7 @@ export function PropertiesTable({
                         }
                         deleteAttribute={() => deleteAttribute(attribute.id)}
                         draggingRow={draggingRow}
+                        state={state}
                       ></DraggableHeader>
                     ))}
                   </SortableContext>
@@ -451,6 +466,7 @@ export function PropertiesTable({
                         attributes={attributesOrder}
                         deleteProperty={() => deleteProperty(property.id)}
                         draggingRow={draggingRow}
+                        state={state}
                         setDraggingRow={setDraggingRow}
                         updateProperty={updateProperty}
                       />
@@ -482,49 +498,87 @@ export function PropertiesTable({
 function ActionButtons({
   surveyId,
   projectId,
+  state,
+  onStateChange,
+  draftEmails,
 }: {
+  state: PropertiesTableState;
+  onStateChange: (state: PropertiesTableState) => void;
   surveyId: string;
   projectId: string;
+  draftEmails: () => void;
 }) {
   const newUser = true;
 
-  if (newUser) {
+  if (state === "edit") {
+    if (newUser) {
+      return (
+        <div className="flex max-w-64 flex-col items-stretch gap-4 rounded-md border border-input p-4 shadow-sm">
+          <div className="flex flex-col gap-1">
+            <div className="font-medium">Need to verify property data?</div>
+            <div className="text-sm text-muted-foreground">
+              Draft emails to send to brokers
+            </div>
+          </div>
+          <div className="flex flex-col gap-2">
+            <Button
+              className="w-full"
+              onClick={() => onStateChange("select-fields")}
+            >
+              <EnvelopeIcon className="mr-2 size-4" />
+              Verify property data
+            </Button>
+            <Button variant="ghost" asChild className="w-full">
+              <Link
+                href={`/projects/${projectId}/surveys/${surveyId}/pdf-preview`}
+              >
+                Export survey instead
+              </Link>
+            </Button>
+          </div>
+        </div>
+      );
+    }
+    return (
+      <div className="flex max-w-48 flex-col items-stretch gap-2">
+        <Button
+          className="w-full"
+          onClick={() => onStateChange("select-fields")}
+        >
+          <EnvelopeIcon className="mr-2 size-4" />
+          Verify property data
+        </Button>
+        <Button variant="outline" asChild className="w-full">
+          <Link href={`/projects/${projectId}/surveys/${surveyId}/pdf-preview`}>
+            <ArrowDownTrayIcon className="mr-2 size-4" />
+            Export survey PDF
+          </Link>
+        </Button>
+      </div>
+    );
+  } else if (state === "select-fields") {
     return (
       <div className="flex max-w-64 flex-col items-stretch gap-4 rounded-md border border-input p-4 shadow-sm">
         <div className="flex flex-col gap-1">
-          <div className="font-medium">Need to verify property data?</div>
-          <div className="text-sm text-muted-foreground">
-            Draft emails to send to brokers
+          <div className="text-sm">
+            Select the fields you&apos;d like your emails to verify
           </div>
         </div>
         <div className="flex flex-col gap-2">
-          <Button className="w-full">
-            <EnvelopeIcon className="mr-2 size-4" />
-            Verify property data
+          <Button className="w-full" onClick={draftEmails}>
+            {/* <EnvelopeIcon className="mr-2 size-4" /> */}
+            Draft emails
           </Button>
-          <Button variant="ghost" asChild className="w-full">
-            <Link
-              href={`/projects/${projectId}/surveys/${surveyId}/pdf-preview`}
-            >
-              Export survey instead
-            </Link>
+          <Button
+            variant="ghost"
+            className="w-full"
+            onClick={() => onStateChange("edit")}
+          >
+            Cancel
           </Button>
         </div>
       </div>
     );
   }
-  return (
-    <div className="flex max-w-48 flex-col items-stretch gap-2">
-      <Button className="w-full">
-        <EnvelopeIcon className="mr-2 size-4" />
-        Verify property data
-      </Button>
-      <Button variant="outline" asChild className="w-full">
-        <Link href={`/projects/${projectId}/surveys/${surveyId}/pdf-preview`}>
-          <ArrowDownTrayIcon className="mr-2 size-4" />
-          Export survey PDF
-        </Link>
-      </Button>
-    </div>
-  );
+  return null;
 }
