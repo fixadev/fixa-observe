@@ -12,6 +12,7 @@ import { DragHandleDots2Icon } from "@radix-ui/react-icons";
 import { type PropertiesTableState, type Attribute } from "./PropertiesTable";
 import { Label } from "~/components/ui/label";
 import { Checkbox } from "~/components/ui/checkbox";
+import { type CheckedState } from "@radix-ui/react-checkbox";
 
 export const DraggableHeader = ({
   attribute,
@@ -19,6 +20,8 @@ export const DraggableHeader = ({
   deleteAttribute,
   draggingRow,
   state,
+  checkedState = false,
+  onCheckedChange,
   disabled = false,
 }: {
   attribute: Attribute;
@@ -26,6 +29,8 @@ export const DraggableHeader = ({
   deleteAttribute: () => void;
   draggingRow: boolean;
   state: PropertiesTableState;
+  checkedState?: CheckedState;
+  onCheckedChange?: (checked: boolean) => void;
   disabled?: boolean;
 }) => {
   const [isEditing, setIsEditing] = useState(attribute.isNew ?? false);
@@ -53,10 +58,22 @@ export const DraggableHeader = ({
     <TableCell ref={setNodeRef} style={style} className="group relative">
       <div className="flex items-center justify-between gap-2">
         {state === "select-fields" ? (
-          <div className="flex w-full min-w-32 items-center gap-2">
-            <Checkbox id={attribute.id} />
-            <Label htmlFor={attribute.id}>{attribute.label}</Label>
-          </div>
+          <>
+            {attribute.id === "comments" || attribute.id === "photoUrl" ? (
+              <div className="flex w-full min-w-32 items-center gap-2">
+                <div className="text-muted-foreground">{attribute.label}</div>
+              </div>
+            ) : (
+              <div className="flex w-full min-w-32 items-center gap-2">
+                <Checkbox
+                  id={attribute.id}
+                  checked={checkedState}
+                  onCheckedChange={onCheckedChange}
+                />
+                <Label htmlFor={attribute.id}>{attribute.label}</Label>
+              </div>
+            )}
+          </>
         ) : state === "edit" ? (
           <>
             {isEditing ? (

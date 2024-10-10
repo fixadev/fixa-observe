@@ -2,7 +2,7 @@
 
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { useState, type CSSProperties } from "react";
+import { useCallback, useMemo, useState, type CSSProperties } from "react";
 import { Button } from "@/components/ui/button";
 import { TableCell } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
@@ -22,6 +22,7 @@ import { api } from "~/trpc/react";
 import Spinner from "~/components/Spinner";
 import { Checkbox } from "~/components/ui/checkbox";
 import { Label } from "~/components/ui/label";
+import { type CheckedState } from "@radix-ui/react-checkbox";
 
 export const DraggableRow = ({
   photoUrl,
@@ -32,6 +33,8 @@ export const DraggableRow = ({
   state,
   setDraggingRow,
   updateProperty,
+  selectedFields,
+  onSelectedFieldsChange,
 }: {
   photoUrl: string;
   property: Property;
@@ -41,6 +44,8 @@ export const DraggableRow = ({
   deleteProperty: (id: string) => void;
   setDraggingRow: (draggingRow: boolean) => void;
   updateProperty: (property: Property) => void;
+  selectedFields: Record<string, Set<string>>;
+  onSelectedFieldsChange: (selectedFields: Record<string, Set<string>>) => void;
 }) => {
   const {
     transform,
@@ -108,6 +113,31 @@ export const DraggableRow = ({
       "min-w-44"
     );
   }
+
+  const selectedFieldsForProperty = useMemo(
+    () => selectedFields[property.id] ?? new Set<string>(),
+    [selectedFields, property.id],
+  );
+  const handleSelectedFieldsChange = useCallback(
+    (attributeId: string, checked: CheckedState) => {
+      const newSelectedFields = new Set(selectedFieldsForProperty);
+      if (checked) {
+        newSelectedFields.add(attributeId);
+      } else {
+        newSelectedFields.delete(attributeId);
+      }
+      onSelectedFieldsChange({
+        ...selectedFields,
+        [property.id]: newSelectedFields,
+      });
+    },
+    [
+      onSelectedFieldsChange,
+      property.id,
+      selectedFields,
+      selectedFieldsForProperty,
+    ],
+  );
 
   return (
     <TableRow ref={setNodeRef} style={style}>
@@ -197,7 +227,13 @@ export const DraggableRow = ({
                   />
                 ) : state === "select-fields" ? (
                   <div className="flex items-center gap-2">
-                    <Checkbox id={`${property.id}-${attribute.id}`} />
+                    <Checkbox
+                      id={`${property.id}-${attribute.id}`}
+                      checked={selectedFieldsForProperty.has(attribute.id)}
+                      onCheckedChange={(checked) =>
+                        handleSelectedFieldsChange(attribute.id, checked)
+                      }
+                    />
                     <Label
                       htmlFor={`${property.id}-${attribute.id}`}
                       className="font-normal"

@@ -341,6 +341,45 @@ export function PropertiesTable({
 
   // Verify property data
   const [state, setState] = useState<PropertiesTableState>("edit");
+  const [selectedFields, setSelectedFields] = useState<
+    Record<string, Set<string>>
+  >({}); // Maps property id to a set of attribute ids
+
+  const getHeaderCheckedState = useCallback(
+    (attributeId: string) => {
+      let numChecked = 0;
+      for (const property of properties) {
+        if (selectedFields[property.id]?.has(attributeId)) {
+          numChecked++;
+        }
+      }
+      if (numChecked === properties.length) {
+        return true;
+      } else if (numChecked > 0) {
+        return "indeterminate";
+      }
+      return false;
+    },
+    [properties, selectedFields],
+  );
+  const handleHeaderCheckedChange = useCallback(
+    (attributeId: string, checked: boolean) => {
+      setSelectedFields((prev) => {
+        const newSelectedFields = { ...prev };
+        for (const property of properties) {
+          const newSet = newSelectedFields[property.id] ?? new Set<string>();
+          if (checked) {
+            newSet.add(attributeId);
+          } else {
+            newSet.delete(attributeId);
+          }
+          newSelectedFields[property.id] = newSet;
+        }
+        return newSelectedFields;
+      });
+    },
+    [properties],
+  );
   const draftEmails = useCallback(() => {
     console.log("drafting emails");
   }, []);
@@ -438,6 +477,10 @@ export function PropertiesTable({
                         deleteAttribute={() => deleteAttribute(attribute.id)}
                         draggingRow={draggingRow}
                         state={state}
+                        checkedState={getHeaderCheckedState(attribute.id)}
+                        onCheckedChange={(checked) =>
+                          handleHeaderCheckedChange(attribute.id, checked)
+                        }
                       ></DraggableHeader>
                     ))}
                   </SortableContext>
@@ -469,6 +512,8 @@ export function PropertiesTable({
                         state={state}
                         setDraggingRow={setDraggingRow}
                         updateProperty={updateProperty}
+                        selectedFields={selectedFields}
+                        onSelectedFieldsChange={setSelectedFields}
                       />
                     );
                   })}
