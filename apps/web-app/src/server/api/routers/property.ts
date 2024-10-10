@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { zfd } from 'zod-form-data';
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 import {
   propertySchema,
@@ -75,5 +76,14 @@ export const propertyRouter = createTRPCRouter({
     .input(brochureSchema)
     .mutation(async ({ ctx, input }) => {
       return await propertyServiceInstance.updateBrochure(input, ctx.user.id);
+    }),
+
+  testFileUpload: protectedProcedure
+    .input(zfd.formData({
+      file: zfd.file(),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      console.log('input', input);
+      return
     }),
 });
