@@ -594,7 +594,9 @@ function ActionButtons({
           Verify property data
         </Button>
         <Button variant="outline" asChild className="w-full">
-          <Link href={`/projects/${projectId}/surveys/${surveyId}/pdf-preview`}>
+          <Link
+            href={`/projects/${projectId}/surveys/${surveyId}/excel-preview`}
+          >
             <ArrowDownTrayIcon className="mr-2 size-4" />
             Export survey PDF
           </Link>
