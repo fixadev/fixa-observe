@@ -128,8 +128,6 @@ export const emailService = ({ db }: { db: PrismaClient }) => {
     }: {
       userId: string;
       emailId: string;
-      senderName: string;
-      senderEmail: string;
       to: string;
       subject: string;
       body: string;
@@ -153,6 +151,18 @@ export const emailService = ({ db }: { db: PrismaClient }) => {
           },
         },
       );
+
+      // Save email to database
+      const email = await db.email.update({
+        where: { id: emailId },
+        data: {
+          recipientName: to,
+          recipientEmail: to,
+          subject,
+          body,
+        },
+      });
+      return { email };
     },
 
     // Sends an email
@@ -562,7 +572,6 @@ export const emailService = ({ db }: { db: PrismaClient }) => {
       body,
     }: {
       userId: string;
-      infoToVerify: string[];
       subject: string;
       body: string;
     }) => {

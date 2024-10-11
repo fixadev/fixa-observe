@@ -161,6 +161,8 @@ export default function EmailsPage({
 
   const { mutateAsync: sendEmail, isPending: isSendingEmail } =
     api.email.sendEmail.useMutation();
+  const { mutateAsync: updateDraftEmail, isPending: isUpdatingDraftEmail } =
+    api.email.updateDraftEmail.useMutation();
   const { mutateAsync: replyToEmail, isPending: isReplyingToEmail } =
     api.email.replyToEmail.useMutation();
   const handleSend = useCallback(
@@ -172,10 +174,18 @@ export default function EmailsPage({
 
       if (emailIsDraft(emailThread)) {
         const email = emailThread.emails[emailThread.emails.length - 1]!;
-        // Update draft with new content
+
+        // Update draft with new content and send email
+        await updateDraftEmail({
+          emailId: email.id,
+          to: email.recipientEmail,
+          subject: email.subject,
+          body: email.body,
+        });
         await sendEmail({
           emailId: email.id,
         });
+
         setEmailThreads((prev) => {
           const newThreads = [...prev];
           const threadIndex = newThreads.findIndex(
@@ -242,6 +252,7 @@ export default function EmailsPage({
     },
     [
       emailThreadsById,
+      updateDraftEmail,
       sendEmail,
       unsentEmails,
       refetchSurvey,
@@ -352,7 +363,9 @@ export default function EmailsPage({
                   return newThreads;
                 });
               }}
-              isSending={isSendingEmail || isReplyingToEmail}
+              isSending={
+                isSendingEmail || isUpdatingDraftEmail || isReplyingToEmail
+              }
               onSend={async (body) => {
                 await handleSend(selectedThreadId, body);
               }}

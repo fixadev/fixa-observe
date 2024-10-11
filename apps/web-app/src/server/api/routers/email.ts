@@ -42,6 +42,25 @@ export const emailRouter = createTRPCRouter({
       });
     }),
 
+  updateDraftEmail: protectedProcedure
+    .input(
+      z.object({
+        emailId: z.string(),
+        to: z.string(),
+        subject: z.string(),
+        body: z.string(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      return await emailServiceInstance.updateDraftEmail({
+        userId: ctx.user.id,
+        emailId: input.emailId,
+        to: input.to,
+        subject: input.subject,
+        body: input.body,
+      });
+    }),
+
   replyToEmail: protectedProcedure
     .input(z.object({ emailId: z.string(), body: z.string() }))
     .mutation(async ({ ctx, input }) => {

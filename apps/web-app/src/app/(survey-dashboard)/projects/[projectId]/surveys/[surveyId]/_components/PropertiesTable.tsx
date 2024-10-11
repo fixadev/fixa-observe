@@ -45,7 +45,7 @@ import { DraggableHeader } from "./DraggableHeader";
 import { DraggableRow } from "./DraggableRow";
 import Spinner from "~/components/Spinner";
 import Link from "next/link";
-import { EmailTemplateDialog } from "../emails/_components/EmailDetails";
+import EmailTemplateDialog from "../_components/EmailTemplateDialog";
 import {
   DEFAULT_EMAIL_TEMPLATE_BODY,
   DEFAULT_EMAIL_TEMPLATE_SUBJECT,
@@ -54,6 +54,7 @@ import {
 import { type EmailTemplate } from "prisma/generated/zod";
 import { replaceTemplateVariables } from "~/lib/utils";
 import { useUser } from "@clerk/nextjs";
+import { useRouter } from "next/navigation";
 
 export type Property = PropertySchema & {
   isNew?: boolean;
@@ -72,6 +73,7 @@ export function PropertiesTable({
   projectId: string;
 }) {
   const { user } = useUser();
+  const router = useRouter();
   const [properties, setPropertiesState] = useState<Property[]>([]);
   const [attributesOrder, setAttributesOrderState] = useState<Attribute[]>([]);
   const [draggingRow, setDraggingRow] = useState<boolean>(false);
@@ -637,6 +639,10 @@ export function PropertiesTable({
         open={templateDialog}
         onOpenChange={setTemplateDialog}
         onSubmit={createDraftEmails}
+        onSubmitted={() => {
+          void refetchSurvey();
+          void router.push(`/projects/${projectId}/surveys/${surveyId}/emails`);
+        }}
       />
     </>
   );
