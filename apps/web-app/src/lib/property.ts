@@ -32,9 +32,7 @@ export const propertySchema = PropertySchema.omit({
 });
 
 export type PropertyWithBrochures = z.infer<typeof propertyWithBrochuresSchema>;
-export const propertyWithBrochuresSchema = PropertySchema.omit({
-  attributes: true,
-}).extend({
+export const propertyWithBrochuresSchema = PropertySchema.extend({
   brochures: z.array(brochureSchema),
 });
 

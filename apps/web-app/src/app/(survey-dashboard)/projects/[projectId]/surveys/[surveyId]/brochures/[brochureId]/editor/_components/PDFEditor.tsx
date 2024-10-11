@@ -95,14 +95,17 @@ export function PDFEditor({ brochureId }: { brochureId: string }) {
   }, [brochure?.url, updateBrochure, brochure]);
 
   return (
-    <div className="h-full" style={{ backgroundColor: "#f8f9fa" }}>
+    <div
+      className="flex h-full flex-col overflow-y-auto"
+      style={{ backgroundColor: "#f8f9fa" }}
+    >
       <div className="flex flex-row items-center py-2">
         <Button variant={"ghost"} onClick={() => router.back()}>
           <ChevronLeftIcon className="mr-2 h-4 w-4" />
           Back to brochures
         </Button>
       </div>
-      <div ref={viewer} style={{ height: "95vh" }}></div>
+      <div ref={viewer} className="flex-grow"></div>
     </div>
   );
 }

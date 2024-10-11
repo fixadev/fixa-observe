@@ -130,10 +130,6 @@ export function PropertiesTable({
       } else {
         updatedProperties = newPropertiesOrCallback as Property[];
       }
-      // if there are no properties
-      if (properties.length === 0) {
-        setIsUploadingProperties(true);
-      }
 
       try {
         void updateProperties({
@@ -413,6 +409,7 @@ export function PropertiesTable({
               surveyId={surveyId}
               existingProperties={properties}
               setProperties={setProperties}
+              setUploading={setIsUploadingProperties}
               setAttributesOrder={modifyAttributes}
               attributesOrder={attributesOrder}
             />

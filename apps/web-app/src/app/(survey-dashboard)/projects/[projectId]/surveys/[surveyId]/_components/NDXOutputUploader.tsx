@@ -16,12 +16,14 @@ export const NDXOutputUploader = ({
   surveyId,
   existingProperties,
   setProperties,
+  setUploading,
   attributesOrder,
   className,
 }: {
   variant?: "default" | "ghost";
   surveyId: string;
   existingProperties: Property[];
+  setUploading: (uploading: boolean) => void;
   setProperties: (
     data: Array<PropertySchema | (CreatePropertySchema & { isNew?: boolean })>,
     action: "add" | "update" | "delete" | "order",
@@ -66,9 +68,9 @@ export const NDXOutputUploader = ({
   const onFilesChangeHandler = async (files: FileList) => {
     const file = files[0];
     if (file && pdfjs) {
+      setUploading(true);
       const formData = new FormData();
       formData.append("file", file);
-
       const response = await axios.post("/api/extract-images", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
