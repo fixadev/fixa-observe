@@ -3,10 +3,11 @@
 import { useUser } from "@clerk/nextjs";
 import { CheckCircleIcon, XCircleIcon } from "@heroicons/react/24/solid";
 import { formatDistanceToNow } from "date-fns";
-import { type Email } from "prisma/generated/zod";
+import { type Attachment, type Email } from "prisma/generated/zod";
 import { Avatar, AvatarFallback } from "~/components/ui/avatar";
 import { Button } from "~/components/ui/button";
 import { cn, getInitials } from "~/lib/utils";
+import AttachmentCard from "./AttachmentCard";
 
 export default function EmailCard({
   email,
@@ -19,7 +20,7 @@ export default function EmailCard({
   onClick,
   className,
 }: {
-  email: Email;
+  email: Email & { attachments: Attachment[] };
   draft?: boolean;
   unread?: boolean;
   completed?: boolean;
@@ -107,6 +108,13 @@ export default function EmailCard({
       </div>
       {expanded && (
         <div className="p-4 pl-6">
+          {email.attachments.length > 0 && (
+            <div className="mb-4 flex flex-wrap gap-2">
+              {email.attachments.map((attachment) => (
+                <AttachmentCard key={attachment.id} attachment={attachment} />
+              ))}
+            </div>
+          )}
           {email.body.split("\n").map((line, index) => (
             <p key={index} className="min-h-5 text-sm">
               {line}

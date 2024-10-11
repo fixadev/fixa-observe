@@ -22,6 +22,9 @@ export const surveyService = ({ db }: { db: PrismaClient }) => {
               emailThreads: {
                 include: {
                   emails: {
+                    include: {
+                      attachments: true,
+                    },
                     orderBy: {
                       createdAt: "asc",
                     },
@@ -178,7 +181,6 @@ export const surveyService = ({ db }: { db: PrismaClient }) => {
           where: { id: idToDelete },
         });
       }
-
     },
 
     updateAttributesOrder: async (
@@ -241,6 +243,7 @@ export const surveyService = ({ db }: { db: PrismaClient }) => {
         },
       });
       const propertiesWithOrder = properties.map((property, index) => {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { surveyId, ...rest } = property;
         return {
           ...rest,
