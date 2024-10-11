@@ -24,6 +24,40 @@ export const emailService = ({ db }: { db: PrismaClient }) => {
     return response.data[0]!.token;
   };
 
+  const getFileAttachments = async ({
+    userId,
+    emailId,
+  }: {
+    userId: string;
+    emailId: string;
+  }) => {
+    const accessToken = await getAccessToken(userId);
+
+    const response = await axios.get<{
+      value: {
+        "@odata.type": string;
+        id: string;
+        name: string;
+        contentType: string;
+        size: number;
+      }[];
+    }>(
+      `${outlookApiUrl}/me/messages/${emailId}/attachments?$select=id,name,contentType,size`,
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          Prefer: 'IdType="ImmutableId"',
+        },
+      },
+    );
+
+    const fileAttachments = response.data.value.filter(
+      (attachment) =>
+        attachment["@odata.type"] === "#microsoft.graph.fileAttachment",
+    );
+    return fileAttachments;
+  };
+
   return {
     getEmailThread: async (emailThreadId: string) => {
       const emailThread = await db.emailThread.findUnique({
@@ -477,6 +511,18 @@ export const emailService = ({ db }: { db: PrismaClient }) => {
       };
       await db.email.create({
         data: email,
+      });
+
+      // Get attachments
+      const attachments = await getFileAttachments({ userId, emailId });
+      await db.attachment.createMany({
+        data: attachments.map((attachment) => ({
+          id: attachment.id,
+          name: attachment.name,
+          contentType: attachment.contentType,
+          size: attachment.size,
+          emailId,
+        })),
       });
 
       // Mark email thread as unread
