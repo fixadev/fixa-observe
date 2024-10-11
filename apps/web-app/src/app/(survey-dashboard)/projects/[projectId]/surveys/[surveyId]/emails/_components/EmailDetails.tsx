@@ -26,6 +26,7 @@ import {
   DEFAULT_EMAIL_TEMPLATE_SUBJECT,
 } from "~/lib/constants";
 import {
+  emailIsDraft,
   isParsedAttributesComplete,
   isPropertyNotAvailable,
 } from "~/lib/utils";
@@ -44,7 +45,7 @@ export default function EmailDetails({
   onSend: (body?: string) => Promise<void>;
   onReset: () => void;
 }) {
-  if (emailThread.draft) {
+  if (emailIsDraft(emailThread)) {
     return (
       <UnsentEmailDetails
         key={emailThread.id}

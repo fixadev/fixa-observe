@@ -118,6 +118,43 @@ export const emailService = ({ db }: { db: PrismaClient }) => {
       };
     },
 
+    updateDraftEmail: async ({
+      userId,
+      emailId,
+
+      to,
+      subject,
+      body,
+    }: {
+      userId: string;
+      emailId: string;
+      senderName: string;
+      senderEmail: string;
+      to: string;
+      subject: string;
+      body: string;
+    }) => {
+      const accessToken = await getAccessToken(userId);
+
+      await axios.patch(
+        `${outlookApiUrl}/me/messages/${emailId}`,
+        {
+          subject,
+          body: {
+            contentType: "Text",
+            content: body,
+          },
+          toRecipients: [{ emailAddress: { address: to } }],
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            Prefer: `IdType="ImmutableId", outlook.body-content-type="text"`,
+          },
+        },
+      );
+    },
+
     // Sends an email
     sendEmail: async ({
       userId,
