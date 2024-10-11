@@ -15,7 +15,8 @@ export function BrochureCard({ propertyId }: { propertyId: string }) {
   if (!propertyData) {
     return null;
   }
-  const brochure = propertyData.brochures[0];
+
+  const brochure = propertyData.brochures?.[0];
   return brochure?.approved ? (
     <ApprovedBrochureCard property={propertyData} />
   ) : (
@@ -67,7 +68,6 @@ function UnapprovedBrochureCard({
         approved: false,
         createdAt: new Date(),
         updatedAt: new Date(),
-        id: crypto.randomUUID(),
       },
     });
   };
@@ -130,24 +130,25 @@ function BrochureSidebar({
   };
 
   return (
-    <div className="flex w-1/6 flex-col gap-2">
-      {property.photoUrl ? (
-        <Image
-          src={property.photoUrl ?? ""}
-          alt={"building photo"}
-          width={210}
-          height={120}
-        />
-      ) : (
-        <div className="flex aspect-video w-full flex-col items-center justify-center bg-gray-200">
-          <p>No photo</p>
-        </div>
-      )}
+    <div className="relative flex w-1/6 flex-col gap-2">
+      <div className="relative aspect-[4/3] w-full">
+        {property.photoUrl ? (
+          <Image src={property.photoUrl ?? ""} alt={"building photo"} fill />
+        ) : (
+          <div className="flex aspect-video w-full flex-col items-center justify-center bg-gray-200">
+            <p>No photo</p>
+          </div>
+        )}
+      </div>
 
       {brochure ? (
         <>
           <div className="text-md flex w-full flex-col p-2 text-center font-medium">
-            <p>{property.attributes.address.split(",")[0]}</p>
+            <p>
+              {(property?.attributes as { address?: string })?.address?.split(
+                ",",
+              )[0] ?? ""}
+            </p>
           </div>
           <Button
             variant={"outline"}
@@ -174,7 +175,11 @@ function BrochureSidebar({
         </>
       ) : (
         <div className="flex w-full flex-col items-center p-2 text-center font-medium">
-          <p>{property.attributes.address.split(",")[0]}</p>
+          <p>
+            {(property?.attributes as { address?: string })?.address?.split(
+              ",",
+            )[0] ?? ""}
+          </p>
         </div>
       )}
     </div>

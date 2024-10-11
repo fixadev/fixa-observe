@@ -1,3 +1,4 @@
+/* eslint-disable jsx-a11y/alt-text */
 import { Page, Text, View, StyleSheet, Image, Link } from "@react-pdf/renderer";
 import { type AttributeSchema, type PropertySchema } from "~/lib/property";
 
@@ -152,7 +153,6 @@ export function PDFPage({
         <Image
           style={{ width: "20%" }}
           src="https://mma.prnewswire.com/media/1057994/Newmark_Group_Inc_Logo.jpg?p=facebook"
-          alt={"Logo"}
         />
         <Text style={styles.title}>Property Survey</Text>
       </View>
@@ -194,7 +194,6 @@ export function PDFPage({
                   property.photoUrl ??
                   "https://m.foolcdn.com/media/dubs/images/GettyImages-695968212.width-880.jpg"
                 }
-                alt="Photo"
               />
             </View>
             {attributes.map((attribute) => (

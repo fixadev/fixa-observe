@@ -110,15 +110,33 @@ export function PropertiesTable({
     }
   }, [attributes]);
 
+  const [pendingMutations, setPendingMutations] = useState(0);
+
   const { mutate: updateAttributes } = api.survey.updateAttributes.useMutation({
-    onSuccess: () => {
-      void refetchSurvey();
+    onMutate: () => setPendingMutations((count) => count + 1),
+    onSettled: () => {
+      setPendingMutations((count) => {
+        const newCount = count - 1;
+        if (newCount === 0) {
+          void refetchSurvey();
+          setIsUploadingProperties(false);
+        }
+        return newCount;
+      });
     },
   });
+
   const { mutate: updateProperties } = api.survey.updateProperties.useMutation({
-    onSuccess: () => {
-      void refetchSurvey();
-      setIsUploadingProperties(false);
+    onMutate: () => setPendingMutations((count) => count + 1),
+    onSettled: () => {
+      setPendingMutations((count) => {
+        const newCount = count - 1;
+        if (newCount === 0) {
+          void refetchSurvey();
+          setIsUploadingProperties(false);
+        }
+        return newCount;
+      });
     },
   });
 
@@ -143,10 +161,6 @@ export function PropertiesTable({
         updatedProperties = newPropertiesOrCallback(properties) as Property[];
       } else {
         updatedProperties = newPropertiesOrCallback as Property[];
-      }
-      // if there are no properties
-      if (properties.length === 0) {
-        setIsUploadingProperties(true);
       }
 
       try {
@@ -493,6 +507,7 @@ export function PropertiesTable({
                 setProperties={setProperties}
                 setAttributesOrder={modifyAttributes}
                 attributesOrder={attributesOrder}
+                setUploading={setIsUploadingProperties}
               />
               <Button variant="ghost" onClick={addProperty}>
                 Manually add properties
@@ -617,6 +632,7 @@ export function PropertiesTable({
                   setProperties={setProperties}
                   setAttributesOrder={modifyAttributes}
                   attributesOrder={attributesOrder}
+                  setUploading={setIsUploadingProperties}
                 />
               </div>
             </DndContext>
@@ -667,7 +683,7 @@ function ActionButtons({
             </Button>
             <Button variant="ghost" asChild className="w-full">
               <Link
-                href={`/projects/${projectId}/surveys/${surveyId}/pdf-preview`}
+                href={`/projects/${projectId}/surveys/${surveyId}/excel-preview`}
               >
                 Export survey instead
               </Link>
