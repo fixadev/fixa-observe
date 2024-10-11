@@ -85,8 +85,8 @@ export const DraggableHeader = ({
                     setIsEditing(false);
                   }
                 }}
-                onBlur={() => setIsEditing(false)}
-                onChange={(e) => {
+                onBlur={(e) => {
+                  setIsEditing(false);
                   renameAttribute(e.target.value);
                 }}
                 autoFocus
