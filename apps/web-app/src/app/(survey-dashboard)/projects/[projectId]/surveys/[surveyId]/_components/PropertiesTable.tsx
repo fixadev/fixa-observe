@@ -427,7 +427,7 @@ export function PropertiesTable({
       const replacements = {
         [REPLACEMENT_VARIABLES.name]: recipientName.split(" ")[0] ?? "",
         [REPLACEMENT_VARIABLES.address]:
-          property.attributes?.address?.split(",")[0] ?? "",
+          property.attributes?.address?.split("\n")[0] ?? "",
         [REPLACEMENT_VARIABLES.fieldsToVerify]: attributesToVerify
           .map((attributeId) => {
             const attributeLabel = attributesMap.get(attributeId)?.label;

@@ -136,7 +136,7 @@ export function PDFPage({
     if (!address) {
       return "";
     }
-    const [street, city, state, zip] = address.split(",");
+    const [street, city, state, zip] = address.split("\n");
     return `${street}, \n ${city}`;
   }
 
