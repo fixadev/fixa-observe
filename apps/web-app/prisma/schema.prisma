@@ -122,8 +122,23 @@ model Email {
 
   isDraft Boolean @default(false)
 
+  attachments Attachment[]
+
   emailThread   EmailThread @relation(fields: [emailThreadId], references: [id], onDelete: Cascade)
   emailThreadId String
+}
+
+model Attachment {
+  id        String   @id // Should be the attachment id in Outlook
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  name        String
+  contentType String
+  size        Int
+
+  email   Email @relation(fields: [emailId], references: [id], onDelete: Cascade)
+  emailId String
 }
 
 model EmailThread {

@@ -1,5 +1,5 @@
 import { Separator } from "~/components/ui/separator";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Label } from "~/components/ui/label";
 import PropertyCard from "~/components/PropertyCard";
 import { Button } from "~/components/ui/button";
@@ -210,6 +210,14 @@ function UnsentEmailDetails({
     [emailThread, onUpdateEmailThread],
   );
 
+  const isComplete = useMemo(() => {
+    return (
+      emailThread.emails[0]!.recipientEmail.length > 0 &&
+      emailThread.emails[0]!.subject.length > 0 &&
+      emailThread.emails[0]!.body.length > 0
+    );
+  }, [emailThread.emails]);
+
   return (
     <div className="flex h-full flex-col gap-2 p-2 pb-8">
       <div className="mt-4 grid grid-cols-[auto_1fr] items-center gap-2">
@@ -250,7 +258,7 @@ function UnsentEmailDetails({
         disabled={isSending}
       />
       <div className="mt-2 flex gap-2">
-        <Button onClick={onSend} disabled={isSending}>
+        <Button onClick={onSend} disabled={isSending || !isComplete}>
           {isSending ? <Spinner /> : "Send"}
         </Button>
         <AlertDialog>
