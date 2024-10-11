@@ -6,8 +6,11 @@ import { ChevronDownIcon, ChevronUpIcon } from "@heroicons/react/24/outline";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   cn,
-  isParsedAttributesComplete,
-  isPropertyNotAvailable,
+  emailIsComplete,
+  emailIsDraft,
+  emailIsIncomplete,
+  emailIsOld,
+  propertyNotAvailable,
 } from "~/lib/utils";
 import { formatDistanceToNow } from "date-fns";
 import EmailDetails from "./_components/EmailDetails";
@@ -34,52 +37,6 @@ export default function EmailsPage({
     surveyId: params.surveyId,
   });
 
-  const emailIsDraft = useCallback(
-    (email: EmailThreadWithEmailsAndProperty) =>
-      email.emails.length > 0 && email.emails[0]!.isDraft,
-    [],
-  );
-  const emailIsIncomplete = useCallback(
-    (email: EmailThreadWithEmailsAndProperty) => {
-      return (
-        email.parsedAttributes &&
-        !isParsedAttributesComplete(
-          email.parsedAttributes as Record<string, string | null>,
-        )
-      );
-    },
-    [],
-  );
-  const emailIsComplete = useCallback(
-    (email: EmailThreadWithEmailsAndProperty) => {
-      return (
-        email.parsedAttributes &&
-        isParsedAttributesComplete(
-          email.parsedAttributes as Record<string, string | null>,
-        )
-      );
-    },
-    [],
-  );
-  const propertyNotAvailable = useCallback(
-    (email: EmailThreadWithEmailsAndProperty) => {
-      return (
-        email.parsedAttributes &&
-        isPropertyNotAvailable(
-          email.parsedAttributes as Record<string, string | null>,
-        )
-      );
-    },
-    [],
-  );
-  const emailIsOld = useCallback(
-    (email: EmailThreadWithEmailsAndProperty) =>
-      // Email is older than 1 day
-      email.emails[email.emails.length - 1]!.createdAt.getTime() <
-      new Date().getTime() - 1000 * 60 * 60 * 24 * 1,
-    [],
-  );
-
   const [emailThreads, setEmailThreads] = useState<
     EmailThreadWithEmailsAndProperty[]
   >([]);
@@ -101,10 +58,10 @@ export default function EmailsPage({
 
   const unsentEmails = useMemo(() => {
     return emailThreads.filter((email) => emailIsDraft(email));
-  }, [emailIsDraft, emailThreads]);
+  }, [emailThreads]);
   const completedEmails = useMemo(
     () => emailThreads.filter((email) => emailIsComplete(email)),
-    [emailIsComplete, emailThreads],
+    [emailThreads],
   );
   const completedEmailsSet = useMemo(
     () => new Set(completedEmails.map((email) => email.id)),
@@ -112,7 +69,7 @@ export default function EmailsPage({
   );
   const notAvailableEmails = useMemo(() => {
     return emailThreads.filter((email) => propertyNotAvailable(email));
-  }, [emailThreads, propertyNotAvailable]);
+  }, [emailThreads]);
   const notAvailableEmailsSet = useMemo(
     () => new Set(notAvailableEmails.map((email) => email.id)),
     [notAvailableEmails],
@@ -127,14 +84,7 @@ export default function EmailsPage({
           // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
           (emailIsIncomplete(email) || emailIsOld(email)),
       ),
-    [
-      emailThreads,
-      emailIsDraft,
-      emailIsIncomplete,
-      emailIsOld,
-      completedEmailsSet,
-      notAvailableEmailsSet,
-    ],
+    [emailThreads, completedEmailsSet, notAvailableEmailsSet],
   );
   const needsFollowUpSet = useMemo(
     () => new Set(needsFollowUpEmails.map((email) => email.id)),
@@ -149,7 +99,6 @@ export default function EmailsPage({
         !notAvailableEmailsSet.has(email.id),
     );
   }, [
-    emailIsDraft,
     emailThreads,
     needsFollowUpSet,
     completedEmailsSet,
@@ -170,7 +119,7 @@ export default function EmailsPage({
             },
           ).toLowerCase()}`;
     },
-    [emailIsIncomplete, needsFollowUpSet],
+    [needsFollowUpSet],
   );
 
   const categories = useMemo(
@@ -221,8 +170,9 @@ export default function EmailsPage({
         return;
       }
 
-      if (emailThread.draft) {
+      if (emailIsDraft(emailThread)) {
         const email = emailThread.emails[emailThread.emails.length - 1]!;
+        // Update draft with new content
         await sendEmail({
           emailId: email.id,
         });
@@ -232,7 +182,7 @@ export default function EmailsPage({
             (thread) => thread.id === emailThread.id,
           );
           if (threadIndex !== -1) {
-            newThreads[threadIndex]!.draft = false;
+            newThreads[threadIndex]!.emails[0]!.isDraft = false;
           }
           return newThreads;
         });
@@ -297,7 +247,8 @@ export default function EmailsPage({
       refetchSurvey,
       isReplyingToEmail,
       replyToEmail,
-      user,
+      user?.fullName,
+      user?.primaryEmailAddress?.emailAddress,
     ],
   );
 
@@ -367,7 +318,7 @@ export default function EmailsPage({
                       <EmailCard
                         key={thread.id}
                         email={thread.emails[thread.emails.length - 1]!}
-                        draft={thread.draft}
+                        draft={emailIsDraft(thread)}
                         unread={thread.unread}
                         completed={completedEmailsSet.has(thread.id)}
                         notAvailable={notAvailableEmailsSet.has(thread.id)}

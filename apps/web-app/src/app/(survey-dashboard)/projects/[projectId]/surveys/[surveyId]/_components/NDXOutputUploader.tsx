@@ -17,7 +17,7 @@ export const NDXOutputUploader = ({
   existingProperties,
   setProperties,
   setUploading,
-  attributesOrder,
+  // attributesOrder,
   className,
 }: {
   variant?: "default" | "ghost";
@@ -41,28 +41,28 @@ export const NDXOutputUploader = ({
     console.log("PDFJS loaded", pdfjs);
   });
 
-  const labelToAttributeId = (label: string): string => {
-    if (!label) {
-      console.error("Label is undefined");
-      throw new Error("Label is undefined");
-    }
-    const attributeId = attributesOrder.find(
-      (attribute) => attribute.label === label,
-    )?.id;
-    if (!attributeId) {
-      console.error(`Attribute ${label} not found`);
-      throw new Error(`Attribute ${label} not found`);
-    }
-    return attributeId;
-  };
+  // const labelToAttributeId = (label: string): string => {
+  //   if (!label) {
+  //     console.error("Label is undefined");
+  //     throw new Error("Label is undefined");
+  //   }
+  //   const attributeId = attributesOrder.find(
+  //     (attribute) => attribute.label === label,
+  //   )?.id;
+  //   if (!attributeId) {
+  //     console.error(`Attribute ${label} not found`);
+  //     throw new Error(`Attribute ${label} not found`);
+  //   }
+  //   return attributeId;
+  // };
 
-  const labelToAttribute = (label: string): Attribute | undefined => {
-    const attributeId = labelToAttributeId(label);
-    if (!attributeId) {
-      return undefined;
-    }
-    return attributesOrder.find((attribute) => attribute.id === attributeId);
-  };
+  // const labelToAttribute = (label: string): Attribute | undefined => {
+  //   const attributeId = labelToAttributeId(label);
+  //   if (!attributeId) {
+  //     return undefined;
+  //   }
+  //   return attributesOrder.find((attribute) => attribute.id === attributeId);
+  // };
 
   // TODO: Move all this functionality to backend
   const onFilesChangeHandler = async (files: FileList) => {
