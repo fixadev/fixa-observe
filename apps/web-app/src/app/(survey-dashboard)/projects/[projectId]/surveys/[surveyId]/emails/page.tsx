@@ -91,81 +91,22 @@ export default function EmailsPage({
     () => new Map(emailThreads.map((thread) => [thread.id, thread])),
     [emailThreads],
   );
-  const draftsGenerated = useRef(0);
-  const generateDraftEmailThread = useCallback(
-    (property: Property) => {
-      const senderName = user?.fullName ?? "";
-      const senderEmail = user?.primaryEmailAddress?.emailAddress ?? "";
-      const recipientName =
-        TEST_RECIPIENTS[draftsGenerated.current % TEST_RECIPIENTS.length]!.name;
-      const recipientEmail =
-        TEST_RECIPIENTS[draftsGenerated.current % TEST_RECIPIENTS.length]!
-          .email;
-      draftsGenerated.current++;
-
-      const attributes = property.attributes as Record<string, string>;
-      const replacements = {
-        [REPLACEMENT_VARIABLES.name]: recipientName.split(" ")[0] ?? "",
-        [REPLACEMENT_VARIABLES.address]:
-          attributes.address?.split(",")[0] ?? "",
-      };
-      const subject = replaceTemplateVariables(
-        emailTemplate?.subject ?? DEFAULT_EMAIL_TEMPLATE_SUBJECT,
-        replacements,
-      );
-      const body = replaceTemplateVariables(
-        emailTemplate?.body ??
-          DEFAULT_EMAIL_TEMPLATE_BODY(user?.fullName ?? ""),
-        replacements,
-      );
-
-      const email: Email = {
-        id: property.id + "-draft-0",
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        subject,
-        body,
-        senderName,
-        senderEmail,
-        recipientName,
-        recipientEmail,
-        webLink: "",
-        emailThreadId: property.id + "-draft",
-      };
-
-      return {
-        id: property.id + "-draft",
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        propertyId: property.id,
-        property,
-        emails: [email],
-        draft: true,
-        unread: false,
-        parsedAttributes: null,
-      };
-    },
-    [emailTemplate, user],
-  );
   useEffect(() => {
     if (survey && user) {
       const threads = [];
       for (const property of survey.properties) {
-        if (property.emailThreads.length === 0) {
-          // Add draft thread
-          threads.push(generateDraftEmailThread(property));
-        } else {
-          for (const thread of property.emailThreads) {
-            threads.push({ ...thread, property });
-          }
+        for (const thread of property.emailThreads) {
+          threads.push({ ...thread, property });
         }
       }
       setEmailThreads(threads);
     }
-  }, [generateDraftEmailThread, survey, user]);
+  }, [survey, user]);
 
   const unsentEmails = useMemo(() => {
-    return emailThreads.filter((email) => email.draft);
+    return emailThreads.filter(
+      (email) => email.emails[email.emails.length - 1]!.isDraft,
+    );
   }, [emailThreads]);
   const completedEmails = useMemo(
     () => emailThreads.filter((email) => emailIsComplete(email)),

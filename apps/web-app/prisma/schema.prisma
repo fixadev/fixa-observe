@@ -79,19 +79,19 @@ model AttributesOnSurveys {
 }
 
 model Property {
-  id           String        @id @default(uuid())
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
-  owner        User          @relation(fields: [ownerId], references: [id], onDelete: Cascade)
-  ownerId      String
-  brochures    Brochure[]
-  photoUrl     String?
-  attributes   Json?
-  displayIndex Int
-  survey       Survey        @relation(fields: [surveyId], references: [id], onDelete: Cascade)
-  surveyId     String
-  contacts     Contact[]
-  emailThreads EmailThread[]
+  id                  String        @id @default(uuid())
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
+  owner               User          @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  ownerId             String
+  brochures           Brochure[]
+  photoUrl            String?
+  attributes          Json?
+  displayIndex        Int
+  survey              Survey       @relation(fields: [surveyId], references: [id], onDelete: Cascade)
+  surveyId            String
+  contacts            Contact[]
+  emailThreads        EmailThread[]
 }
 
 model Brochure {
@@ -119,6 +119,8 @@ model Email {
   subject String @default("")
   body    String
   webLink String
+
+  isDraft Boolean @default(false)
 
   emailThread   EmailThread @relation(fields: [emailThreadId], references: [id], onDelete: Cascade)
   emailThreadId String
@@ -159,7 +161,6 @@ model EmailTemplate {
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId String @unique
 
-  infoToVerify String[]
   subject      String
   body         String
 }
