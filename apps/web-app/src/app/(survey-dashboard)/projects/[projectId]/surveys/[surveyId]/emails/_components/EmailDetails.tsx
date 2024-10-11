@@ -35,14 +35,12 @@ export default function EmailDetails({
   emailThread,
   isSending,
   onUpdateEmailThread,
-  onOpenTemplateDialog,
   onSend,
   onReset,
 }: {
   emailThread: EmailThreadWithEmailsAndProperty;
   isSending: boolean;
   onUpdateEmailThread: (emailThread: EmailThreadWithEmailsAndProperty) => void;
-  onOpenTemplateDialog: () => void;
   onSend: (body?: string) => Promise<void>;
   onReset: () => void;
 }) {
@@ -53,7 +51,6 @@ export default function EmailDetails({
         emailThread={emailThread}
         isSending={isSending}
         onUpdateEmailThread={onUpdateEmailThread}
-        onOpenTemplateDialog={onOpenTemplateDialog}
         onSend={onSend}
         onReset={onReset}
       />
@@ -189,14 +186,12 @@ function UnsentEmailDetails({
   emailThread,
   isSending,
   onUpdateEmailThread,
-  onOpenTemplateDialog,
   onReset,
   onSend,
 }: {
   emailThread: EmailThreadWithEmailsAndProperty;
   isSending: boolean;
   onUpdateEmailThread: (emailThread: EmailThreadWithEmailsAndProperty) => void;
-  onOpenTemplateDialog: () => void;
   onReset: () => void;
   onSend: () => void;
 }) {
@@ -249,17 +244,12 @@ function UnsentEmailDetails({
         }}
         disabled={isSending}
       />
-      <div className="mt-2 flex justify-between">
-        <div className="flex gap-2">
-          <Button onClick={onSend} disabled={isSending}>
-            {isSending ? <Spinner /> : "Send"}
-          </Button>
-          <Button variant="outline" onClick={onReset}>
-            Reset
-          </Button>
-        </div>
-        <Button variant="outline" onClick={onOpenTemplateDialog}>
-          Edit template
+      <div className="mt-2 flex gap-2">
+        <Button onClick={onSend} disabled={isSending}>
+          {isSending ? <Spinner /> : "Send"}
+        </Button>
+        <Button variant="outline" onClick={onReset}>
+          Reset
         </Button>
       </div>
     </div>

@@ -3,29 +3,21 @@
 import EmailCard from "./_components/EmailCard";
 import { Button } from "~/components/ui/button";
 import { ChevronDownIcon, ChevronUpIcon } from "@heroicons/react/24/outline";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   cn,
   isParsedAttributesComplete,
   isPropertyNotAvailable,
-  replaceTemplateVariables,
 } from "~/lib/utils";
 import { formatDistanceToNow } from "date-fns";
-import EmailDetails, { EmailTemplateDialog } from "./_components/EmailDetails";
+import EmailDetails from "./_components/EmailDetails";
 import type { EmailThreadWithEmailsAndProperty } from "~/lib/types";
 import React from "react";
 import { api } from "~/trpc/react";
-import {
-  DEFAULT_EMAIL_TEMPLATE_BODY,
-  DEFAULT_EMAIL_TEMPLATE_SUBJECT,
-  REPLACEMENT_VARIABLES,
-} from "~/lib/constants";
 import { useUser } from "@clerk/nextjs";
-import { type Email, type Property } from "prisma/generated/zod";
 import { Badge } from "~/components/ui/badge";
 import { RefreshButton } from "./_components/RefreshButton";
 import { Separator } from "~/components/ui/separator";
-import { TEST_RECIPIENTS } from "~/lib/test-data";
 
 export default function EmailsPage({
   params,
@@ -41,7 +33,6 @@ export default function EmailsPage({
   } = api.survey.getSurvey.useQuery({
     surveyId: params.surveyId,
   });
-  const { data: emailTemplate } = api.email.getEmailTemplate.useQuery();
 
   const emailIsIncomplete = useCallback(
     (email: EmailThreadWithEmailsAndProperty) => {
@@ -214,8 +205,6 @@ export default function EmailsPage({
 
   const [selectedThreadId, setSelectedThreadId] = useState<string | null>(null);
 
-  const [templateDialog, setTemplateDialog] = useState(false);
-
   const { mutateAsync: sendEmail, isPending: isSendingEmail } =
     api.email.sendEmail.useMutation();
   const { mutateAsync: replyToEmail, isPending: isReplyingToEmail } =
@@ -230,10 +219,7 @@ export default function EmailsPage({
       if (emailThread.draft) {
         const email = emailThread.emails[emailThread.emails.length - 1]!;
         await sendEmail({
-          to: email.recipientEmail,
-          subject: email.subject,
-          body: email.body,
-          propertyId: emailThread.propertyId,
+          emailId: email.id,
         });
         setEmailThreads((prev) => {
           const newThreads = [...prev];
@@ -289,6 +275,7 @@ export default function EmailsPage({
                       emailThread.emails[emailThread.emails.length - 1]!
                         .senderEmail,
                     webLink: "",
+                    isDraft: false,
                   },
                 ],
               };
@@ -410,7 +397,6 @@ export default function EmailsPage({
                 });
               }}
               isSending={isSendingEmail || isReplyingToEmail}
-              onOpenTemplateDialog={() => setTemplateDialog(true)}
               onSend={async (body) => {
                 await handleSend(selectedThreadId, body);
               }}
@@ -427,10 +413,6 @@ export default function EmailsPage({
           )}
         </div>
       </div>
-      <EmailTemplateDialog
-        open={templateDialog}
-        onOpenChange={setTemplateDialog}
-      />
     </>
   );
 }
