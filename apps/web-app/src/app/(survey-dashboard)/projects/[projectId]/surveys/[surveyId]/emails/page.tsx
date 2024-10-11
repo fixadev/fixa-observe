@@ -34,6 +34,11 @@ export default function EmailsPage({
     surveyId: params.surveyId,
   });
 
+  const emailIsDraft = useCallback(
+    (email: EmailThreadWithEmailsAndProperty) =>
+      email.emails.length > 0 && email.emails[0]!.isDraft,
+    [],
+  );
   const emailIsIncomplete = useCallback(
     (email: EmailThreadWithEmailsAndProperty) => {
       return (
@@ -95,10 +100,8 @@ export default function EmailsPage({
   }, [survey, user]);
 
   const unsentEmails = useMemo(() => {
-    return emailThreads.filter(
-      (email) => email.emails[email.emails.length - 1]!.isDraft,
-    );
-  }, [emailThreads]);
+    return emailThreads.filter((email) => emailIsDraft(email));
+  }, [emailIsDraft, emailThreads]);
   const completedEmails = useMemo(
     () => emailThreads.filter((email) => emailIsComplete(email)),
     [emailIsComplete, emailThreads],
@@ -118,7 +121,7 @@ export default function EmailsPage({
     () =>
       emailThreads.filter(
         (email) =>
-          !email.draft &&
+          !emailIsDraft(email) &&
           !completedEmailsSet.has(email.id) &&
           !notAvailableEmailsSet.has(email.id) &&
           // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
@@ -126,6 +129,7 @@ export default function EmailsPage({
       ),
     [
       emailThreads,
+      emailIsDraft,
       emailIsIncomplete,
       emailIsOld,
       completedEmailsSet,
@@ -139,12 +143,13 @@ export default function EmailsPage({
   const pendingEmails = useMemo(() => {
     return emailThreads.filter(
       (email) =>
-        !email.draft &&
+        !emailIsDraft(email) &&
         !needsFollowUpSet.has(email.id) &&
         !completedEmailsSet.has(email.id) &&
         !notAvailableEmailsSet.has(email.id),
     );
   }, [
+    emailIsDraft,
     emailThreads,
     needsFollowUpSet,
     completedEmailsSet,
