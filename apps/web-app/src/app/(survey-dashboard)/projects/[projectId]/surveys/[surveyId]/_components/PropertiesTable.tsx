@@ -110,33 +110,27 @@ export function PropertiesTable({
     }
   }, [attributes]);
 
-  const [pendingMutations, setPendingMutations] = useState(0);
+  const pendingMutations = useRef(0);
 
   const { mutate: updateAttributes } = api.survey.updateAttributes.useMutation({
-    onMutate: () => setPendingMutations((count) => count + 1),
+    onMutate: () => pendingMutations.current++,
     onSettled: () => {
-      setPendingMutations((count) => {
-        const newCount = count - 1;
-        if (newCount === 0) {
-          void refetchSurvey();
-          setIsUploadingProperties(false);
-        }
-        return newCount;
-      });
+      pendingMutations.current--;
+      if (pendingMutations.current === 0) {
+        void refetchSurvey();
+        setIsUploadingProperties(false);
+      }
     },
   });
 
   const { mutate: updateProperties } = api.survey.updateProperties.useMutation({
-    onMutate: () => setPendingMutations((count) => count + 1),
+    onMutate: () => pendingMutations.current++,
     onSettled: () => {
-      setPendingMutations((count) => {
-        const newCount = count - 1;
-        if (newCount === 0) {
-          void refetchSurvey();
-          setIsUploadingProperties(false);
-        }
-        return newCount;
-      });
+      pendingMutations.current--;
+      if (pendingMutations.current === 0) {
+        void refetchSurvey();
+        setIsUploadingProperties(false);
+      }
     },
   });
 
