@@ -79,10 +79,13 @@ export function PropertiesTable({
   const [draggingRow, setDraggingRow] = useState<boolean>(false);
   const [isUploadingProperties, setIsUploadingProperties] =
     useState<boolean>(false);
-  const { data: surveyData, refetch: refetchSurvey } =
-    api.survey.getSurvey.useQuery({
-      surveyId,
-    });
+  const {
+    data: surveyData,
+    isLoading: isLoadingSurvey,
+    refetch: refetchSurvey,
+  } = api.survey.getSurvey.useQuery({
+    surveyId,
+  });
   useEffect(() => {
     if (surveyData?.properties) {
       setPropertiesState(
@@ -429,7 +432,7 @@ export function PropertiesTable({
       const replacements = {
         [REPLACEMENT_VARIABLES.name]: recipientName.split(" ")[0] ?? "",
         [REPLACEMENT_VARIABLES.address]:
-          property.attributes?.address?.split(",")[0] ?? "",
+          property.attributes?.address?.split("\n")[0] ?? "",
         [REPLACEMENT_VARIABLES.fieldsToVerify]: attributesToVerify
           .map((attributeId) => {
             const attributeLabel = attributesMap.get(attributeId)?.label;
@@ -486,31 +489,37 @@ export function PropertiesTable({
             <Spinner className="flex size-12 text-gray-500" />
           </div>
         ) : properties.length === 0 ? (
-          // Empty state
-          <div className="flex h-[90vh] w-full flex-col items-center justify-center">
-            {/* <div className="rounded-md border border-input p-4 shadow-sm"> */}
-            <div className="mb-6 flex flex-col gap-1">
-              <div className="text-lg font-medium">No properties found</div>
-              <div className="text-sm text-muted-foreground">
-                Add a property to get started
+          isLoadingSurvey ? (
+            <div className="flex h-[90vh] w-full flex-col items-center justify-center">
+              <Spinner className="flex size-12 text-gray-500" />
+            </div>
+          ) : (
+            // Empty state
+            <div className="flex h-[90vh] w-full flex-col items-center justify-center">
+              {/* <div className="rounded-md border border-input p-4 shadow-sm"> */}
+              <div className="mb-6 flex flex-col gap-1">
+                <div className="text-lg font-medium">No properties found</div>
+                <div className="text-sm text-muted-foreground">
+                  Add a property to get started
+                </div>
               </div>
+              <div className="flex flex-col items-stretch gap-2">
+                <NDXOutputUploader
+                  className="w-full"
+                  surveyId={surveyId}
+                  existingProperties={properties}
+                  setProperties={setProperties}
+                  setAttributesOrder={modifyAttributes}
+                  attributesOrder={attributesOrder}
+                  setUploading={setIsUploadingProperties}
+                />
+                <Button variant="ghost" onClick={addProperty}>
+                  Manually add properties
+                </Button>
+              </div>
+              {/* </div> */}
             </div>
-            <div className="flex flex-col items-stretch gap-2">
-              <NDXOutputUploader
-                className="w-full"
-                surveyId={surveyId}
-                existingProperties={properties}
-                setProperties={setProperties}
-                setAttributesOrder={modifyAttributes}
-                attributesOrder={attributesOrder}
-                setUploading={setIsUploadingProperties}
-              />
-              <Button variant="ghost" onClick={addProperty}>
-                Manually add properties
-              </Button>
-            </div>
-            {/* </div> */}
-          </div>
+          )
         ) : (
           // Table
           <div>

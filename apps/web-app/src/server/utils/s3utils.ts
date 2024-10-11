@@ -5,6 +5,8 @@ import {
 } from "@aws-sdk/client-s3";
 import { v4 as uuidv4 } from "uuid";
 import { s3Client } from "~/server/config/s3client";
+// import fs from "fs/promises";
+// import path from "path";
 
 export const uploadFileToS3 = async (
   file: File,
@@ -31,3 +33,19 @@ export const uploadFileToS3 = async (
     throw new Error("Failed to upload file");
   }
 };
+
+
+// const filepath = "/Users/oliverwendell-braly/pixa/real-estate-platform/apps/web-app/src/server/utils/366cambridge.pdf"
+
+// async function test() {
+//   const arrayBuffer = await fs.readFile(filepath);
+//   // Get the file name from the path
+//   const fileName = path.basename(filepath);
+//   // Create a File object
+//   const file = new File([arrayBuffer], fileName, { type: 'application/pdf' });
+//   const text = await uploadFileToS3(file);
+//   console.log('typeof text', typeof text);
+//   console.log(text);
+// }
+
+// void test();

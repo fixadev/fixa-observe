@@ -196,11 +196,11 @@ export const DraggableRow = ({
             draggingRow={draggingRow}
             className={attributeToMinWidth(attribute)}
           >
-            {attribute.id === "comments" ? (
+            {attribute.id === "comments" || attribute.id === "address" ? (
               <Textarea
-                defaultValue={property.attributes?.comments ?? ""}
-                className="min-h-[90px]"
-                onChange={(e) => {
+                defaultValue={property.attributes?.[attribute.id] ?? ""}
+                className={`min-h-[${attribute.id === "comments" ? "90" : "40"}px]`}
+                onBlur={(e) => {
                   updateProperty({
                     ...property,
                     attributes: {
@@ -215,7 +215,7 @@ export const DraggableRow = ({
                 {state === "edit" ? (
                   <Input
                     defaultValue={property.attributes?.[attribute.id] ?? ""}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                    onBlur={(e: React.ChangeEvent<HTMLInputElement>) => {
                       updateProperty({
                         ...property,
                         attributes: {

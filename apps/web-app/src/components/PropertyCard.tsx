@@ -27,9 +27,8 @@ export default function PropertyCard({
 }) {
   const photoUrl = property.photoUrl ?? "";
   const attributes = property.attributes as Record<string, string>;
-  const streetAddress = attributes?.address?.split(",")[0] ?? "";
-  const cityStateZip =
-    attributes?.address?.split(",").slice(1).join(", ") ?? "";
+  const streetAddress = attributes?.address?.split("\n")[0] ?? "";
+  const city = attributes?.address?.split("\n").slice(1) ?? "";
 
   return (
     <div
@@ -48,7 +47,7 @@ export default function PropertyCard({
       </div>
       <div className="flex flex-col">
         <div className="text-lg font-medium">{streetAddress}</div>
-        <div className="text-sm text-muted-foreground">{cityStateZip}</div>
+        <div className="text-sm text-muted-foreground">{city}</div>
       </div>
       {rightContent}
     </div>

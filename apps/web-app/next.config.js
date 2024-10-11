@@ -39,6 +39,10 @@ const config = {
         protocol: "https",
         hostname: "pixa-real-estate.s3.amazonaws.com",
       },
+      {
+        protocol: "https",
+        hostname: "newmark.s3.amazonaws.com",
+      },
     ],
   },
 };

@@ -37,6 +37,6 @@ export async function formatAddresses(addresses: string[]) {
   
   const addressesObject = completion.choices[0]?.message.parsed;
 
-  return addressesObject?.addresses.map((address) => (`${address.streetAddress}, ${address.city}, ${address.state} ${address.zip}`));
+  return addressesObject?.addresses.map((address) => (`${address.streetAddress} \n ${address.city}`));
 
 }
