@@ -165,6 +165,21 @@ export default function EmailsPage({
     api.email.updateDraftEmail.useMutation();
   const { mutateAsync: replyToEmail, isPending: isReplyingToEmail } =
     api.email.replyToEmail.useMutation();
+  const { mutateAsync: deleteEmailThread } =
+    api.email.deleteEmailThread.useMutation();
+  const goToNextUnsentEmail = useCallback(
+    (prevEmailThreadId: string) => {
+      if (unsentEmails.length > 0) {
+        const nextUnsentEmail = unsentEmails.find(
+          (thread) => thread.id !== prevEmailThreadId,
+        );
+        setSelectedThreadId(nextUnsentEmail?.id ?? null);
+      } else {
+        setSelectedThreadId(null);
+      }
+    },
+    [unsentEmails],
+  );
   const handleSend = useCallback(
     async (emailThreadId: string, body?: string) => {
       const emailThread = emailThreadsById.get(emailThreadId);
@@ -261,6 +276,16 @@ export default function EmailsPage({
       user?.fullName,
       user?.primaryEmailAddress?.emailAddress,
     ],
+  );
+  const handleDiscard = useCallback(
+    (emailThreadId: string) => {
+      setEmailThreads((prev) =>
+        prev.filter((thread) => thread.id !== emailThreadId),
+      );
+      goToNextUnsentEmail(emailThreadId);
+      void deleteEmailThread({ emailThreadId });
+    },
+    [deleteEmailThread, goToNextUnsentEmail],
   );
 
   const [lastRefreshedAt, setLastRefreshedAt] = useState(new Date());
@@ -369,8 +394,8 @@ export default function EmailsPage({
               onSend={async (body) => {
                 await handleSend(selectedThreadId, body);
               }}
-              onReset={() => {
-                console.log("reset");
+              onDiscard={() => {
+                handleDiscard(selectedThreadId);
               }}
             />
           ) : (

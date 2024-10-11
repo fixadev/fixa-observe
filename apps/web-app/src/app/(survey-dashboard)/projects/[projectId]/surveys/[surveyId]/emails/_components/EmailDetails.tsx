@@ -24,19 +24,30 @@ import {
   isPropertyNotAvailable,
 } from "~/lib/utils";
 import { type Email } from "prisma/generated/zod";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "~/components/ui/alert-dialog";
 
 export default function EmailDetails({
   emailThread,
   isSending,
   onUpdateEmailThread,
   onSend,
-  onReset,
+  onDiscard,
 }: {
   emailThread: EmailThreadWithEmailsAndProperty;
   isSending: boolean;
   onUpdateEmailThread: (emailThread: EmailThreadWithEmailsAndProperty) => void;
   onSend: (body?: string) => Promise<void>;
-  onReset: () => void;
+  onDiscard: () => void;
 }) {
   if (emailIsDraft(emailThread)) {
     return (
@@ -46,7 +57,7 @@ export default function EmailDetails({
         isSending={isSending}
         onUpdateEmailThread={onUpdateEmailThread}
         onSend={onSend}
-        onReset={onReset}
+        onDiscard={onDiscard}
       />
     );
   }
@@ -180,13 +191,13 @@ function UnsentEmailDetails({
   emailThread,
   isSending,
   onUpdateEmailThread,
-  onReset,
+  onDiscard,
   onSend,
 }: {
   emailThread: EmailThreadWithEmailsAndProperty;
   isSending: boolean;
   onUpdateEmailThread: (emailThread: EmailThreadWithEmailsAndProperty) => void;
-  onReset: () => void;
+  onDiscard: () => void;
   onSend: () => void;
 }) {
   const updateField = useCallback(
@@ -242,9 +253,23 @@ function UnsentEmailDetails({
         <Button onClick={onSend} disabled={isSending}>
           {isSending ? <Spinner /> : "Send"}
         </Button>
-        <Button variant="outline" onClick={onReset}>
-          Reset
-        </Button>
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <Button variant="outline">Discard</Button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This action cannot be undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={onDiscard}>Discard</AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </div>
   );

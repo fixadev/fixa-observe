@@ -197,6 +197,72 @@ export const emailService = ({ db }: { db: PrismaClient }) => {
       });
     },
 
+    // Deletes an email based on its id
+    deleteEmail: async ({
+      userId,
+      emailId,
+    }: {
+      userId: string;
+      emailId: string;
+    }) => {
+      const accessToken = await getAccessToken(userId);
+
+      // Delete email from Outlook
+      await axios.delete(`${outlookApiUrl}/me/messages/${emailId}`, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          Prefer: `IdType="ImmutableId"`,
+        },
+      });
+
+      // Delete email from database
+      await db.email.delete({
+        where: { id: emailId },
+      });
+    },
+
+    // Deletes an entire email thread
+    deleteEmailThread: async ({
+      userId,
+      emailThreadId,
+    }: {
+      userId: string;
+      emailThreadId: string;
+    }) => {
+      const accessToken = await getAccessToken(userId);
+
+      // Fetch all emails in the thread
+      const emailThread = await db.emailThread.findUnique({
+        where: { id: emailThreadId },
+        include: { emails: true },
+      });
+
+      if (!emailThread) {
+        throw new Error("Email thread not found");
+      }
+
+      // Delete each email in the thread
+      for (const email of emailThread.emails) {
+        // Delete email from Outlook
+        await axios.delete(`${outlookApiUrl}/me/messages/${email.id}`, {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            Prefer: `IdType="ImmutableId"`,
+          },
+        });
+
+        // Delete email from database
+        await db.email.delete({
+          where: { id: email.id },
+        });
+      }
+
+      // Delete the email thread from the database
+      await db.emailThread.delete({
+        where: { id: emailThreadId },
+      });
+    },
+
     // Replies to the given email
     replyToEmail: async ({
       userId,

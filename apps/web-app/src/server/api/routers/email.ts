@@ -61,6 +61,24 @@ export const emailRouter = createTRPCRouter({
       });
     }),
 
+  deleteEmail: protectedProcedure
+    .input(z.object({ emailId: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      return await emailServiceInstance.deleteEmail({
+        userId: ctx.user.id,
+        emailId: input.emailId,
+      });
+    }),
+
+  deleteEmailThread: protectedProcedure
+    .input(z.object({ emailThreadId: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      return await emailServiceInstance.deleteEmailThread({
+        userId: ctx.user.id,
+        emailThreadId: input.emailThreadId,
+      });
+    }),
+
   replyToEmail: protectedProcedure
     .input(z.object({ emailId: z.string(), body: z.string() }))
     .mutation(async ({ ctx, input }) => {
