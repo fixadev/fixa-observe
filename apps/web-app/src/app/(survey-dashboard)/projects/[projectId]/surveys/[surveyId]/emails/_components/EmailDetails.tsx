@@ -16,13 +16,7 @@ import {
   TableBody,
 } from "~/components/ui/table";
 import { type EmailThreadWithEmailsAndProperty } from "~/lib/types";
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "~/components/ui/dialog";
+import { Dialog, DialogContent, DialogFooter } from "~/components/ui/dialog";
 import { useUser } from "@clerk/nextjs";
 import { AutosizeTextarea } from "~/components/ui/autosize-textarea";
 import { api } from "~/trpc/react";
@@ -35,20 +29,18 @@ import {
   isParsedAttributesComplete,
   isPropertyNotAvailable,
 } from "~/lib/utils";
-import { type Email } from "prisma/generated/zod";
+import { type EmailTemplate, type Email } from "prisma/generated/zod";
 
 export default function EmailDetails({
   emailThread,
   isSending,
   onUpdateEmailThread,
-  onOpenTemplateDialog,
   onSend,
   onReset,
 }: {
   emailThread: EmailThreadWithEmailsAndProperty;
   isSending: boolean;
   onUpdateEmailThread: (emailThread: EmailThreadWithEmailsAndProperty) => void;
-  onOpenTemplateDialog: () => void;
   onSend: (body?: string) => Promise<void>;
   onReset: () => void;
 }) {
@@ -59,7 +51,6 @@ export default function EmailDetails({
         emailThread={emailThread}
         isSending={isSending}
         onUpdateEmailThread={onUpdateEmailThread}
-        onOpenTemplateDialog={onOpenTemplateDialog}
         onSend={onSend}
         onReset={onReset}
       />
@@ -195,14 +186,12 @@ function UnsentEmailDetails({
   emailThread,
   isSending,
   onUpdateEmailThread,
-  onOpenTemplateDialog,
   onReset,
   onSend,
 }: {
   emailThread: EmailThreadWithEmailsAndProperty;
   isSending: boolean;
   onUpdateEmailThread: (emailThread: EmailThreadWithEmailsAndProperty) => void;
-  onOpenTemplateDialog: () => void;
   onReset: () => void;
   onSend: () => void;
 }) {
@@ -255,17 +244,12 @@ function UnsentEmailDetails({
         }}
         disabled={isSending}
       />
-      <div className="mt-2 flex justify-between">
-        <div className="flex gap-2">
-          <Button onClick={onSend} disabled={isSending}>
-            {isSending ? <Spinner /> : "Send"}
-          </Button>
-          <Button variant="outline" onClick={onReset}>
-            Reset
-          </Button>
-        </div>
-        <Button variant="outline" onClick={onOpenTemplateDialog}>
-          Edit template
+      <div className="mt-2 flex gap-2">
+        <Button onClick={onSend} disabled={isSending}>
+          {isSending ? <Spinner /> : "Send"}
+        </Button>
+        <Button variant="outline" onClick={onReset}>
+          Reset
         </Button>
       </div>
     </div>
@@ -330,9 +314,11 @@ function ParsedAttributes({
 export function EmailTemplateDialog({
   open,
   onOpenChange,
+  onSubmit,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onSubmit: (emailTemplate: EmailTemplate) => Promise<void>;
 }) {
   const { user } = useUser();
   const {
@@ -351,46 +337,48 @@ export function EmailTemplateDialog({
     () => DEFAULT_EMAIL_TEMPLATE_BODY(user?.fullName ?? ""),
     [user],
   );
-  const defaultInfoToVerify = useMemo(
-    () => ["NNN asking rate (SF/mo)", "Availability"],
-    [],
-  );
 
   const [subject, setSubject] = useState(defaultSubject);
   const [body, setBody] = useState(defaultBody);
-  const [infoToVerify, setInfoToVerify] =
-    useState<string[]>(defaultInfoToVerify);
 
   useEffect(() => {
     if (open) {
       setSubject(emailTemplate?.subject ?? defaultSubject);
       setBody(emailTemplate?.body ?? defaultBody);
-      setInfoToVerify(emailTemplate?.infoToVerify ?? defaultInfoToVerify);
     }
-  }, [open, emailTemplate, defaultBody, defaultInfoToVerify, defaultSubject]);
+  }, [open, emailTemplate, defaultBody, defaultSubject]);
 
   const handleSave = useCallback(async () => {
-    await updateEmailTemplate({
-      subject,
-      body,
-      infoToVerify,
-    });
+    await Promise.all([
+      updateEmailTemplate({
+        subject,
+        body,
+      }),
+      onSubmit({
+        id: "",
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        userId: user?.id ?? "",
+        subject,
+        body,
+      }),
+    ]);
     void refetchEmailTemplate();
     onOpenChange(false);
   }, [
-    body,
-    infoToVerify,
-    onOpenChange,
-    subject,
     updateEmailTemplate,
+    subject,
+    body,
+    onSubmit,
+    user?.id,
     refetchEmailTemplate,
+    onOpenChange,
   ]);
 
   const handleReset = useCallback(() => {
     setSubject(defaultSubject);
     setBody(defaultBody);
-    setInfoToVerify(defaultInfoToVerify);
-  }, [defaultBody, defaultInfoToVerify, defaultSubject]);
+  }, [defaultBody, defaultSubject]);
 
   if (!user || isLoading) {
     return null;
@@ -402,27 +390,10 @@ export function EmailTemplateDialog({
         className="max-h-[80vh] overflow-y-auto"
         onOpenAutoFocus={(e) => e.preventDefault()}
       >
-        <DialogHeader>
-          <DialogTitle>Edit email template</DialogTitle>
-        </DialogHeader>
-        <div className="flex flex-col gap-6">
-          <div className="flex flex-col gap-1">
-            <div className="font-medium">Information to verify</div>
-            <div className="text-sm text-muted-foreground">
-              The AI will extract this information from the responses to your
-              emails
-            </div>
-          </div>
-          <ol className="list-decimal pl-4 text-base">
-            <li>NNN asking rate (SF/mo)</li>
-            <li>Availability</li>
-          </ol>
-        </div>
-        <Separator className="my-2" />
-        <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-6 pt-4">
           <div className="flex items-center justify-between">
             <div className="flex flex-col gap-1">
-              <div className="font-medium">Email template</div>
+              <div className="font-medium">Configure email template</div>
               <div className="text-sm text-muted-foreground">
                 You can edit individual emails later
               </div>
@@ -455,7 +426,7 @@ export function EmailTemplateDialog({
             Cancel
           </Button>
           <Button onClick={handleSave} disabled={isUpdatePending}>
-            {isUpdatePending ? <Spinner /> : "Save"}
+            {isUpdatePending ? <Spinner /> : "Create drafts"}
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -3,29 +3,21 @@
 import EmailCard from "./_components/EmailCard";
 import { Button } from "~/components/ui/button";
 import { ChevronDownIcon, ChevronUpIcon } from "@heroicons/react/24/outline";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   cn,
   isParsedAttributesComplete,
   isPropertyNotAvailable,
-  replaceTemplateVariables,
 } from "~/lib/utils";
 import { formatDistanceToNow } from "date-fns";
-import EmailDetails, { EmailTemplateDialog } from "./_components/EmailDetails";
+import EmailDetails from "./_components/EmailDetails";
 import type { EmailThreadWithEmailsAndProperty } from "~/lib/types";
 import React from "react";
 import { api } from "~/trpc/react";
-import {
-  DEFAULT_EMAIL_TEMPLATE_BODY,
-  DEFAULT_EMAIL_TEMPLATE_SUBJECT,
-  REPLACEMENT_VARIABLES,
-} from "~/lib/constants";
 import { useUser } from "@clerk/nextjs";
-import { type Email, type Property } from "prisma/generated/zod";
 import { Badge } from "~/components/ui/badge";
 import { RefreshButton } from "./_components/RefreshButton";
 import { Separator } from "~/components/ui/separator";
-import { TEST_RECIPIENTS } from "~/lib/test-data";
 
 export default function EmailsPage({
   params,
@@ -41,8 +33,12 @@ export default function EmailsPage({
   } = api.survey.getSurvey.useQuery({
     surveyId: params.surveyId,
   });
-  const { data: emailTemplate } = api.email.getEmailTemplate.useQuery();
 
+  const emailIsDraft = useCallback(
+    (email: EmailThreadWithEmailsAndProperty) =>
+      email.emails.length > 0 && email.emails[0]!.isDraft,
+    [],
+  );
   const emailIsIncomplete = useCallback(
     (email: EmailThreadWithEmailsAndProperty) => {
       return (
@@ -91,82 +87,21 @@ export default function EmailsPage({
     () => new Map(emailThreads.map((thread) => [thread.id, thread])),
     [emailThreads],
   );
-  const draftsGenerated = useRef(0);
-  const generateDraftEmailThread = useCallback(
-    (property: Property) => {
-      const senderName = user?.fullName ?? "";
-      const senderEmail = user?.primaryEmailAddress?.emailAddress ?? "";
-      const recipientName =
-        TEST_RECIPIENTS[draftsGenerated.current % TEST_RECIPIENTS.length]!.name;
-      const recipientEmail =
-        TEST_RECIPIENTS[draftsGenerated.current % TEST_RECIPIENTS.length]!
-          .email;
-      draftsGenerated.current++;
-
-      const attributes = property.attributes as Record<string, string>;
-      const replacements = {
-        [REPLACEMENT_VARIABLES.name]: recipientName.split(" ")[0] ?? "",
-        [REPLACEMENT_VARIABLES.address]:
-          attributes.address?.split(",")[0] ?? "",
-      };
-      const subject = replaceTemplateVariables(
-        emailTemplate?.subject ?? DEFAULT_EMAIL_TEMPLATE_SUBJECT,
-        replacements,
-      );
-      const body = replaceTemplateVariables(
-        emailTemplate?.body ??
-          DEFAULT_EMAIL_TEMPLATE_BODY(user?.fullName ?? ""),
-        replacements,
-      );
-
-      const email: Email = {
-        id: property.id + "-draft-0",
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        subject,
-        body,
-        senderName,
-        senderEmail,
-        recipientName,
-        recipientEmail,
-        webLink: "",
-        emailThreadId: property.id + "-draft",
-      };
-
-      return {
-        id: property.id + "-draft",
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        propertyId: property.id,
-        property,
-        emails: [email],
-        draft: true,
-        unread: false,
-        parsedAttributes: null,
-      };
-    },
-    [emailTemplate, user],
-  );
   useEffect(() => {
     if (survey && user) {
       const threads = [];
       for (const property of survey.properties) {
-        if (property.emailThreads.length === 0) {
-          // Add draft thread
-          threads.push(generateDraftEmailThread(property));
-        } else {
-          for (const thread of property.emailThreads) {
-            threads.push({ ...thread, property });
-          }
+        for (const thread of property.emailThreads) {
+          threads.push({ ...thread, property });
         }
       }
       setEmailThreads(threads);
     }
-  }, [generateDraftEmailThread, survey, user]);
+  }, [survey, user]);
 
   const unsentEmails = useMemo(() => {
-    return emailThreads.filter((email) => email.draft);
-  }, [emailThreads]);
+    return emailThreads.filter((email) => emailIsDraft(email));
+  }, [emailIsDraft, emailThreads]);
   const completedEmails = useMemo(
     () => emailThreads.filter((email) => emailIsComplete(email)),
     [emailIsComplete, emailThreads],
@@ -186,7 +121,7 @@ export default function EmailsPage({
     () =>
       emailThreads.filter(
         (email) =>
-          !email.draft &&
+          !emailIsDraft(email) &&
           !completedEmailsSet.has(email.id) &&
           !notAvailableEmailsSet.has(email.id) &&
           // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
@@ -194,6 +129,7 @@ export default function EmailsPage({
       ),
     [
       emailThreads,
+      emailIsDraft,
       emailIsIncomplete,
       emailIsOld,
       completedEmailsSet,
@@ -207,12 +143,13 @@ export default function EmailsPage({
   const pendingEmails = useMemo(() => {
     return emailThreads.filter(
       (email) =>
-        !email.draft &&
+        !emailIsDraft(email) &&
         !needsFollowUpSet.has(email.id) &&
         !completedEmailsSet.has(email.id) &&
         !notAvailableEmailsSet.has(email.id),
     );
   }, [
+    emailIsDraft,
     emailThreads,
     needsFollowUpSet,
     completedEmailsSet,
@@ -273,8 +210,6 @@ export default function EmailsPage({
 
   const [selectedThreadId, setSelectedThreadId] = useState<string | null>(null);
 
-  const [templateDialog, setTemplateDialog] = useState(false);
-
   const { mutateAsync: sendEmail, isPending: isSendingEmail } =
     api.email.sendEmail.useMutation();
   const { mutateAsync: replyToEmail, isPending: isReplyingToEmail } =
@@ -289,10 +224,7 @@ export default function EmailsPage({
       if (emailThread.draft) {
         const email = emailThread.emails[emailThread.emails.length - 1]!;
         await sendEmail({
-          to: email.recipientEmail,
-          subject: email.subject,
-          body: email.body,
-          propertyId: emailThread.propertyId,
+          emailId: email.id,
         });
         setEmailThreads((prev) => {
           const newThreads = [...prev];
@@ -348,6 +280,7 @@ export default function EmailsPage({
                       emailThread.emails[emailThread.emails.length - 1]!
                         .senderEmail,
                     webLink: "",
+                    isDraft: false,
                   },
                 ],
               };
@@ -469,7 +402,6 @@ export default function EmailsPage({
                 });
               }}
               isSending={isSendingEmail || isReplyingToEmail}
-              onOpenTemplateDialog={() => setTemplateDialog(true)}
               onSend={async (body) => {
                 await handleSend(selectedThreadId, body);
               }}
@@ -486,10 +418,6 @@ export default function EmailsPage({
           )}
         </div>
       </div>
-      <EmailTemplateDialog
-        open={templateDialog}
-        onOpenChange={setTemplateDialog}
-      />
     </>
   );
 }

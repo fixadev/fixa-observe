@@ -33,8 +33,8 @@ export const emailService = ({ db }: { db: PrismaClient }) => {
       return emailThread;
     },
 
-    // Sends an email
-    sendEmail: async ({
+    // Creates a draft email
+    createDraftEmail: async ({
       userId,
 
       senderName,
@@ -45,6 +45,7 @@ export const emailService = ({ db }: { db: PrismaClient }) => {
       body,
 
       propertyId,
+      attributesToVerify,
     }: {
       userId: string;
       senderName: string;
@@ -53,6 +54,7 @@ export const emailService = ({ db }: { db: PrismaClient }) => {
       subject: string;
       body: string;
       propertyId: string;
+      attributesToVerify: string[];
     }) => {
       const accessToken = await getAccessToken(userId);
 
@@ -80,28 +82,22 @@ export const emailService = ({ db }: { db: PrismaClient }) => {
       );
       const { id, conversationId, webLink } = response.data;
 
-      // Send email
-      await axios.post(
-        `${outlookApiUrl}/me/messages/${id}/send`,
-        {},
-        {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-            Prefer: `IdType="ImmutableId", outlook.body-content-type="text"`,
-          },
-        },
-      );
+      const parsedAttributes: Record<string, string | null> = {};
+      for (const attributeId of attributesToVerify) {
+        parsedAttributes[attributeId] = null;
+      }
 
       // Create email thread
-      await db.emailThread.create({
+      const emailThread = await db.emailThread.create({
         data: {
           id: conversationId,
           propertyId,
+          parsedAttributes,
         },
       });
 
       // Save email to database
-      await db.email.create({
+      const email = await db.email.create({
         data: {
           id,
           emailThreadId: conversationId,
@@ -112,6 +108,44 @@ export const emailService = ({ db }: { db: PrismaClient }) => {
           subject,
           body,
           webLink,
+          isDraft: true,
+        },
+      });
+
+      return {
+        email,
+        emailThread: { ...emailThread, emails: [email] },
+      };
+    },
+
+    // Sends an email
+    sendEmail: async ({
+      userId,
+      emailId,
+    }: {
+      userId: string;
+      emailId: string;
+    }) => {
+      const accessToken = await getAccessToken(userId);
+
+      // Send email
+      await axios.post(
+        `${outlookApiUrl}/me/messages/${emailId}/send`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            Prefer: `IdType="ImmutableId", outlook.body-content-type="text"`,
+          },
+        },
+      );
+
+      // Update email
+      await db.email.update({
+        where: { id: emailId },
+        data: {
+          createdAt: new Date(),
+          isDraft: false,
         },
       });
     },
@@ -487,7 +521,6 @@ export const emailService = ({ db }: { db: PrismaClient }) => {
     // Updates the email template for the given user
     updateEmailTemplate: async ({
       userId,
-      infoToVerify,
       subject,
       body,
     }: {
@@ -499,13 +532,11 @@ export const emailService = ({ db }: { db: PrismaClient }) => {
       await db.emailTemplate.upsert({
         where: { userId },
         update: {
-          infoToVerify,
           subject,
           body,
         },
         create: {
           userId,
-          infoToVerify,
           subject,
           body,
         },

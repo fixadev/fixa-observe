@@ -6,17 +6,18 @@ import { emailService } from "~/server/services/email";
 const emailServiceInstance = emailService({ db });
 
 export const emailRouter = createTRPCRouter({
-  sendEmail: protectedProcedure
+  createDraftEmail: protectedProcedure
     .input(
       z.object({
         to: z.string(),
         subject: z.string(),
         body: z.string(),
         propertyId: z.string(),
+        attributesToVerify: z.array(z.string()),
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      return await emailServiceInstance.sendEmail({
+      return await emailServiceInstance.createDraftEmail({
         userId: ctx.user.id,
         senderName: ctx.user.fullName ?? "",
         senderEmail: ctx.user.primaryEmailAddress?.emailAddress ?? "",
@@ -24,6 +25,20 @@ export const emailRouter = createTRPCRouter({
         subject: input.subject,
         body: input.body,
         propertyId: input.propertyId,
+        attributesToVerify: input.attributesToVerify,
+      });
+    }),
+
+  sendEmail: protectedProcedure
+    .input(
+      z.object({
+        emailId: z.string(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      return await emailServiceInstance.sendEmail({
+        userId: ctx.user.id,
+        emailId: input.emailId,
       });
     }),
 
@@ -46,7 +61,6 @@ export const emailRouter = createTRPCRouter({
   updateEmailTemplate: protectedProcedure
     .input(
       z.object({
-        infoToVerify: z.array(z.string()),
         subject: z.string(),
         body: z.string(),
       }),
@@ -54,7 +68,6 @@ export const emailRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       return await emailServiceInstance.updateEmailTemplate({
         userId: ctx.user.id,
-        infoToVerify: input.infoToVerify,
         subject: input.subject,
         body: input.body,
       });
