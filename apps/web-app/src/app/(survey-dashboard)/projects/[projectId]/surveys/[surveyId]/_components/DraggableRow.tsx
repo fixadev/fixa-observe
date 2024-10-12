@@ -23,7 +23,18 @@ import Spinner from "~/components/Spinner";
 import { Checkbox } from "~/components/ui/checkbox";
 import { Label } from "~/components/ui/label";
 import { type CheckedState } from "@radix-ui/react-checkbox";
-import { PencilIcon } from "@heroicons/react/24/solid";
+import {
+  CheckCircleIcon,
+  EllipsisHorizontalCircleIcon,
+  PencilIcon,
+} from "@heroicons/react/24/solid";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { cn, emailIsComplete } from "~/lib/utils";
+import Link from "next/link";
 
 export const DraggableRow = ({
   photoUrl,
@@ -140,6 +151,15 @@ export const DraggableRow = ({
     ],
   );
 
+  const { hasEmailThread, emailThreadComplete } = useMemo(() => {
+    const hasThread = property.emailThreads.length > 0;
+    return {
+      hasEmailThread: hasThread,
+      emailThreadComplete:
+        hasThread && emailIsComplete(property.emailThreads[0]!),
+    };
+  }, [property.emailThreads]);
+
   return (
     <TableRow ref={setNodeRef} style={style}>
       <TableCell
@@ -219,18 +239,46 @@ export const DraggableRow = ({
             ) : (
               <>
                 {state === "edit" ? (
-                  <Input
-                    defaultValue={property.attributes?.[attribute.id] ?? ""}
-                    onBlur={(e: React.ChangeEvent<HTMLInputElement>) => {
-                      updateProperty({
-                        ...property,
-                        attributes: {
-                          ...property.attributes,
-                          [attribute.id]: e.target.value,
-                        },
-                      });
-                    }}
-                  />
+                  <div className="relative flex items-center gap-2">
+                    <Input
+                      className={cn(hasEmailThread && "pr-9")}
+                      defaultValue={property.attributes?.[attribute.id] ?? ""}
+                      onBlur={(e: React.ChangeEvent<HTMLInputElement>) => {
+                        updateProperty({
+                          ...property,
+                          attributes: {
+                            ...property.attributes,
+                            [attribute.id]: e.target.value,
+                          },
+                        });
+                      }}
+                    />
+                    {hasEmailThread && (
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            className="absolute right-0 shrink-0"
+                            asChild
+                          >
+                            <Link href={`emails?propertyId=${property.id}`}>
+                              {emailThreadComplete ? (
+                                <CheckCircleIcon className="size-5 text-green-500" />
+                              ) : (
+                                <EllipsisHorizontalCircleIcon className="size-5 text-gray-500" />
+                              )}
+                            </Link>
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          {emailThreadComplete
+                            ? "Verified by email"
+                            : "Email sent"}
+                        </TooltipContent>
+                      </Tooltip>
+                    )}
+                  </div>
                 ) : state === "select-fields" ? (
                   <div className="flex items-center gap-2">
                     <Checkbox

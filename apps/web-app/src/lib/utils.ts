@@ -2,6 +2,7 @@ import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 import type { EmailThreadWithEmailsAndProperty } from "./types";
 import { type User } from "@clerk/nextjs/server";
+import { type EmailThread } from "prisma/generated/zod";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -58,7 +59,7 @@ export function emailIsIncomplete(
   );
 }
 
-export function emailIsComplete(emailThread: EmailThreadWithEmailsAndProperty) {
+export function emailIsComplete(emailThread: EmailThread) {
   return (
     emailThread.parsedAttributes &&
     isParsedAttributesComplete(

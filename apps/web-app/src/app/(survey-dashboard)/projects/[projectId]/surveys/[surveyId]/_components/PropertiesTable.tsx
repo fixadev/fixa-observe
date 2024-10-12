@@ -52,12 +52,21 @@ import {
   DEFAULT_EMAIL_TEMPLATE_SUBJECT,
   REPLACEMENT_VARIABLES,
 } from "~/lib/constants";
-import { type Contact, type EmailTemplate } from "prisma/generated/zod";
+import type {
+  Brochure,
+  EmailThread,
+  Contact,
+  EmailTemplate,
+  Email,
+} from "prisma/generated/zod";
 import { replaceTemplateVariables, splitAddress } from "~/lib/utils";
 import { useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
+import { useSurvey } from "~/hooks/useSurvey";
 
 export type Property = PropertySchema & {
+  brochures: Brochure[];
+  emailThreads: (EmailThread & { emails: Email[] })[];
   contacts: Contact[];
   isNew?: boolean;
 };
@@ -81,17 +90,12 @@ export function PropertiesTable({
   const [draggingRow, setDraggingRow] = useState<boolean>(false);
   const [isUploadingProperties, setIsUploadingProperties] =
     useState<boolean>(false);
-  const {
-    data: surveyData,
-    isLoading: isLoadingSurvey,
-    refetch: refetchSurvey,
-  } = api.survey.getSurvey.useQuery({
-    surveyId,
-  });
+  const { survey, isLoadingSurvey, refetchSurvey } = useSurvey();
+
   useEffect(() => {
-    if (surveyData?.properties) {
+    if (survey?.properties) {
       setPropertiesState(
-        surveyData.properties.map((property) => ({
+        survey.properties.map((property) => ({
           ...property,
           attributes: property.attributes as Record<string, string>,
           isNew: false,
@@ -99,7 +103,7 @@ export function PropertiesTable({
         })),
       );
     }
-  }, [surveyData]);
+  }, [survey]);
 
   const { data: attributes } = api.survey.getSurveyAttributes.useQuery({
     surveyId,
@@ -156,7 +160,7 @@ export function PropertiesTable({
       action: "order" | "add" | "update" | "delete",
       propertyId?: string,
     ) => {
-      if (!surveyData) return;
+      if (!survey) return;
       let updatedProperties: Property[];
       if (typeof newPropertiesOrCallback === "function") {
         updatedProperties = newPropertiesOrCallback(properties) as Property[];
@@ -176,7 +180,7 @@ export function PropertiesTable({
         console.error("Failed to update properties:", error);
       }
     },
-    [surveyData, properties, surveyId, updateProperties, setPropertiesState],
+    [survey, properties, surveyId, updateProperties, setPropertiesState],
   );
 
   // state setter wrapper to update db as well
@@ -188,7 +192,7 @@ export function PropertiesTable({
       action: "order" | "add" | "update" | "delete",
       attributeId?: string,
     ) => {
-      if (!surveyData) return;
+      if (!survey) return;
       let newOrder: Attribute[];
       console.log("NEW ORDER OR CALLBACK", newOrderOrCallback);
       if (typeof newOrderOrCallback === "function") {
@@ -209,7 +213,7 @@ export function PropertiesTable({
       }
     },
     [
-      surveyData,
+      survey,
       attributesOrder,
       surveyId,
       updateAttributes,

@@ -9,6 +9,7 @@ import { CSPostHogProvider } from "./providers";
 import { ClerkProvider } from "@clerk/nextjs";
 // import { dark } from "@clerk/themes";
 import ChildrenWrapper from "./_components/ChildrenWrapper";
+import { TooltipProvider } from "~/components/ui/tooltip";
 export const metadata: Metadata = {
   title: "Titan",
   description:
@@ -47,10 +48,12 @@ export default function RootLayout({
               disableTransitionOnChange
             >
               <TRPCReactProvider>
-                <ChildrenWrapper>
-                  {children}
-                  <Toaster />
-                </ChildrenWrapper>
+                <TooltipProvider delayDuration={100}>
+                  <ChildrenWrapper>
+                    {children}
+                    <Toaster />
+                  </ChildrenWrapper>
+                </TooltipProvider>
               </TRPCReactProvider>
             </ThemeProvider>
           </body>
