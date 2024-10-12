@@ -23,6 +23,7 @@ import Spinner from "~/components/Spinner";
 import { Checkbox } from "~/components/ui/checkbox";
 import { Label } from "~/components/ui/label";
 import { type CheckedState } from "@radix-ui/react-checkbox";
+import { PencilIcon } from "@heroicons/react/24/solid";
 
 export const DraggableRow = ({
   photoUrl,
@@ -160,26 +161,31 @@ export const DraggableRow = ({
         key={"photoUrlCell"}
         id={"photoUrlCell"}
         draggingRow={draggingRow}
-        className="min-w-36 max-w-36"
+        className="flex w-full items-center justify-center"
       >
         {photoUploading ? (
-          <div className="flex h-[100px] w-[120px] items-center justify-center">
+          <div className="flex aspect-[4/3] h-[100px] items-center justify-center">
             <Spinner className="size-5 text-gray-500" />
           </div>
         ) : (
           <FileInput
             accept="image/*"
-            className="h-[100px] w-[120px] max-w-[120px] rounded-md hover:cursor-pointer"
+            className="aspect-[4/3] h-[100px] hover:cursor-pointer"
             triggerElement={
               photo ? (
-                <Image
-                  src={photo}
-                  alt="Property photo"
-                  fill
-                  className="rounded-md object-cover p-2 pr-4"
-                />
+                <div className="relative overflow-hidden rounded-md">
+                  <Image
+                    src={photo}
+                    alt="Property photo"
+                    fill
+                    className="rounded-md object-cover"
+                  />
+                  <div className="group absolute flex size-full items-center justify-center bg-black/0 hover:bg-black/30">
+                    <PencilIcon className="size-6 text-white opacity-0 group-hover:opacity-100" />
+                  </div>
+                </div>
               ) : (
-                <div className="flex size-full items-center justify-center rounded-md bg-gray-100 hover:bg-gray-200">
+                <div className="flex items-center justify-center rounded-md bg-gray-100 hover:bg-gray-200">
                   <ImagePlusIcon className="size-8 text-gray-500" />
                 </div>
               )

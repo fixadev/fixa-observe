@@ -7,6 +7,7 @@ import {
   TableRow,
   TableCell,
   TableBody,
+  TableHead,
 } from "~/components/ui/table";
 import {
   closestCenter,
@@ -546,6 +547,7 @@ export function PropertiesTable({
                 <TableHeader>
                   <TableRow>
                     <TableCell className="w-[1%]"></TableCell>
+                    <TableHead className="text-black">Photo</TableHead>
                     <SortableContext
                       items={draggingRow ? rowIds : colIds}
                       strategy={
@@ -554,23 +556,6 @@ export function PropertiesTable({
                           : horizontalListSortingStrategy
                       }
                     >
-                      <DraggableHeader
-                        key={"photoHeader"}
-                        attribute={{
-                          id: "photoUrl",
-                          createdAt: new Date(),
-                          updatedAt: new Date(),
-                          type: "string",
-                          label: "Photo",
-                          ownerId: "",
-                          isNew: false,
-                        }}
-                        renameAttribute={() => false}
-                        deleteAttribute={() => false}
-                        draggingRow={draggingRow}
-                        state={state}
-                        disabled={true}
-                      />
                       {attributesOrder.map((attribute) => (
                         <DraggableHeader
                           key={attribute.id}
