@@ -2,7 +2,7 @@ import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 import type { EmailThreadWithEmailsAndProperty } from "./types";
 import { type User } from "@clerk/nextjs/server";
-import { type EmailThread } from "prisma/generated/zod";
+import { type Email, type EmailThread } from "prisma/generated/zod";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -40,7 +40,7 @@ export function getInitials(fullName: string) {
     .join("");
 }
 
-export function emailIsDraft(emailThread: EmailThreadWithEmailsAndProperty) {
+export function emailIsDraft(emailThread: EmailThread & { emails: Email[] }) {
   return emailThread.emails.length > 0 && emailThread.emails[0]!.isDraft;
 }
 

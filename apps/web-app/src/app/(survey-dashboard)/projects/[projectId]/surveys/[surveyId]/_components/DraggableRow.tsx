@@ -27,13 +27,14 @@ import {
   CheckCircleIcon,
   EllipsisHorizontalCircleIcon,
   PencilIcon,
+  PencilSquareIcon,
 } from "@heroicons/react/24/solid";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { cn, emailIsComplete } from "~/lib/utils";
+import { cn, emailIsDraft } from "~/lib/utils";
 import Link from "next/link";
 
 export const DraggableRow = ({
@@ -151,13 +152,20 @@ export const DraggableRow = ({
     ],
   );
 
-  const { hasEmailThread, emailThreadComplete } = useMemo(() => {
-    const hasThread = property.emailThreads.length > 0;
-    return {
-      hasEmailThread: hasThread,
-      emailThreadComplete:
-        hasThread && emailIsComplete(property.emailThreads[0]!),
-    };
+  const parsedAttributes = useMemo(() => {
+    return property.emailThreads.length > 0
+      ? (property.emailThreads[0]!.parsedAttributes as Record<
+          string,
+          string | null
+        >)
+      : {};
+  }, [property.emailThreads]);
+
+  const isEmailDraft = useMemo(() => {
+    return (
+      property.emailThreads.length > 0 &&
+      emailIsDraft(property.emailThreads[0]!)
+    );
   }, [property.emailThreads]);
 
   return (
@@ -241,7 +249,7 @@ export const DraggableRow = ({
                 {state === "edit" ? (
                   <div className="relative flex items-center gap-2">
                     <Input
-                      className={cn(hasEmailThread && "pr-9")}
+                      className={cn(attribute.id in parsedAttributes && "pr-9")}
                       defaultValue={property.attributes?.[attribute.id] ?? ""}
                       onBlur={(e: React.ChangeEvent<HTMLInputElement>) => {
                         updateProperty({
@@ -253,7 +261,7 @@ export const DraggableRow = ({
                         });
                       }}
                     />
-                    {hasEmailThread && (
+                    {attribute.id in parsedAttributes && (
                       <Tooltip>
                         <TooltipTrigger asChild>
                           <Button
@@ -263,8 +271,10 @@ export const DraggableRow = ({
                             asChild
                           >
                             <Link href={`emails?propertyId=${property.id}`}>
-                              {emailThreadComplete ? (
+                              {parsedAttributes[attribute.id] !== null ? (
                                 <CheckCircleIcon className="size-5 text-green-500" />
+                              ) : isEmailDraft ? (
+                                <PencilSquareIcon className="size-5 text-gray-500" />
                               ) : (
                                 <EllipsisHorizontalCircleIcon className="size-5 text-gray-500" />
                               )}
@@ -272,9 +282,11 @@ export const DraggableRow = ({
                           </Button>
                         </TooltipTrigger>
                         <TooltipContent>
-                          {emailThreadComplete
+                          {parsedAttributes[attribute.id] !== null
                             ? "Verified by email"
-                            : "Email sent"}
+                            : isEmailDraft
+                              ? "Email drafted"
+                              : "Email sent"}
                         </TooltipContent>
                       </Tooltip>
                     )}
