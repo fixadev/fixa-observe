@@ -740,12 +740,14 @@ export const emailService = ({ db }: { db: PrismaClient }) => {
     },
 
     dismissAttachmentInfoMessage: async ({
+      emailId,
       attachmentId,
     }: {
+      emailId: string;
       attachmentId: string;
     }) => {
       await db.attachment.update({
-        where: { id: attachmentId },
+        where: { id: attachmentId, emailId },
         data: { infoMessageDismissed: true },
       });
     },

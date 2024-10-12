@@ -113,6 +113,24 @@ export default function EmailCard({
               {email.attachments.map((attachment) => (
                 <AttachmentCard key={attachment.id} attachment={attachment} />
               ))}
+              {email.attachments.map((attachment) => (
+                <AttachmentCard key={attachment.id} attachment={attachment} />
+              ))}
+              {email.attachments.map((attachment) => (
+                <AttachmentCard key={attachment.id} attachment={attachment} />
+              ))}
+              {email.attachments.map((attachment) => (
+                <AttachmentCard key={attachment.id} attachment={attachment} />
+              ))}
+              {email.attachments.map((attachment) => (
+                <AttachmentCard key={attachment.id} attachment={attachment} />
+              ))}
+              {email.attachments.map((attachment) => (
+                <AttachmentCard key={attachment.id} attachment={attachment} />
+              ))}
+              {email.attachments.map((attachment) => (
+                <AttachmentCard key={attachment.id} attachment={attachment} />
+              ))}
             </div>
           )}
           {email.body.split("\n").map((line, index) => (

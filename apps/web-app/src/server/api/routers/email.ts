@@ -119,4 +119,23 @@ export const emailRouter = createTRPCRouter({
         unread: input.unread,
       });
     }),
+
+  getAttachmentContent: protectedProcedure
+    .input(z.object({ emailId: z.string(), attachmentId: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      return await emailServiceInstance.getAttachmentContent({
+        userId: ctx.user.id,
+        emailId: input.emailId,
+        attachmentId: input.attachmentId,
+      });
+    }),
+
+  dismissAttachmentInfoMessage: protectedProcedure
+    .input(z.object({ emailId: z.string(), attachmentId: z.string() }))
+    .mutation(async ({ input }) => {
+      return await emailServiceInstance.dismissAttachmentInfoMessage({
+        emailId: input.emailId,
+        attachmentId: input.attachmentId,
+      });
+    }),
 });
