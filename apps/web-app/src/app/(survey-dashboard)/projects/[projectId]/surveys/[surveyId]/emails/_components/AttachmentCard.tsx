@@ -16,6 +16,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
+import { useSurvey } from "~/hooks/useSurvey";
 import { base64ToArrayBuffer, downloadBase64File } from "~/lib/utils";
 import { api } from "~/trpc/react";
 
@@ -26,6 +27,8 @@ export default function AttachmentCard({
   attachment: Attachment;
   propertyId: string;
 }) {
+  const { refetchSurvey } = useSurvey();
+
   const [attachment, setAttachment] = useState<Attachment>(_attachment);
   useEffect(() => {
     setAttachment(_attachment);
@@ -63,6 +66,7 @@ export default function AttachmentCard({
         attachmentId: attachment.id,
         attachment: { infoMessageDismissed: true },
       });
+      void refetchSurvey();
     } catch (error) {
       console.error(error);
       setAttachment((prev) => ({
@@ -70,7 +74,7 @@ export default function AttachmentCard({
         infoMessageDismissed: false,
       }));
     }
-  }, [attachment.emailId, attachment.id, updateAttachment]);
+  }, [attachment.emailId, attachment.id, updateAttachment, refetchSurvey]);
 
   const replaceBrochure = useCallback(async () => {
     setAttachment((prev) => ({
@@ -118,6 +122,8 @@ export default function AttachmentCard({
         attachmentId: attachment.id,
         attachment: { brochureReplaced: true },
       });
+
+      void refetchSurvey();
     } catch (error) {
       console.error(error);
       setAttachment((prev) => ({
@@ -134,6 +140,7 @@ export default function AttachmentCard({
     createBrochure,
     propertyId,
     updateAttachment,
+    refetchSurvey,
   ]);
 
   const [isDownloading, setIsDownloading] = useState(false);
