@@ -21,25 +21,31 @@ import { useUser } from "@clerk/nextjs";
 import { Badge } from "~/components/ui/badge";
 import { RefreshButton } from "./_components/RefreshButton";
 import { Separator } from "~/components/ui/separator";
+import { useSurvey } from "~/hooks/useSurvey";
+import { useSearchParams } from "next/navigation";
 
-export default function EmailsPage({
-  params,
-}: {
-  params: { projectId: string; surveyId: string };
-}) {
-  const { user } = useUser();
-  const {
-    data: survey,
-    refetch: refetchSurvey,
-    isLoading: isLoadingSurvey,
-    isRefetching: isRefetchingSurvey,
-  } = api.survey.getSurvey.useQuery({
-    surveyId: params.surveyId,
-  });
+export default function EmailsPage() {
+  const searchParams = useSearchParams();
 
   const [emailThreads, setEmailThreads] = useState<
     EmailThreadWithEmailsAndProperty[]
   >([]);
+  const [selectedThreadId, setSelectedThreadId] = useState<string | null>(null);
+  // Select the email thread for the property in the search params
+  useEffect(() => {
+    const propertyId = searchParams.get("propertyId");
+    if (propertyId) {
+      const thread = emailThreads.find((t) => t.propertyId === propertyId);
+      if (thread) {
+        setSelectedThreadId(thread.id);
+      }
+    }
+  }, [emailThreads, searchParams]);
+
+  const { user } = useUser();
+  const { survey, refetchSurvey, isLoadingSurvey, isRefetchingSurvey } =
+    useSurvey();
+
   const emailThreadsById = useMemo(
     () => new Map(emailThreads.map((thread) => [thread.id, thread])),
     [emailThreads],
@@ -156,8 +162,6 @@ export default function EmailsPage({
   const [categoriesExpanded, setCategoriesExpanded] = useState<boolean[]>(
     Array(categories.length).fill(false),
   );
-
-  const [selectedThreadId, setSelectedThreadId] = useState<string | null>(null);
 
   const { mutateAsync: sendEmail, isPending: isSendingEmail } =
     api.email.sendEmail.useMutation();
