@@ -714,6 +714,41 @@ export const emailService = ({ db }: { db: PrismaClient }) => {
         data: { unread },
       });
     },
+
+    getAttachmentContent: async ({
+      userId,
+      emailId,
+      attachmentId,
+    }: {
+      userId: string;
+      emailId: string;
+      attachmentId: string;
+    }) => {
+      const accessToken = await getAccessToken(userId);
+
+      const response = await axios.get<{ contentBytes: string }>(
+        `${outlookApiUrl}/me/messages/${emailId}/attachments/${attachmentId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            Prefer: `IdType="ImmutableId"`,
+          },
+        },
+      );
+
+      return response.data.contentBytes;
+    },
+
+    dismissAttachmentInfoMessage: async ({
+      attachmentId,
+    }: {
+      attachmentId: string;
+    }) => {
+      await db.attachment.update({
+        where: { id: attachmentId },
+        data: { infoMessageDismissed: true },
+      });
+    },
   };
 };
 
