@@ -6,7 +6,11 @@ import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Textarea } from "~/components/ui/textarea";
 import EmailCard from "./EmailCard";
-import { CheckCircleIcon, XCircleIcon } from "@heroicons/react/24/solid";
+import {
+  CheckCircleIcon,
+  EllipsisHorizontalCircleIcon,
+  XCircleIcon,
+} from "@heroicons/react/24/solid";
 import {
   Table,
   TableHeader,
@@ -363,7 +367,7 @@ function ParsedAttributes({
           ) : completed ? (
             <CheckCircleIcon className="size-5 text-green-500" />
           ) : (
-            <XCircleIcon className="size-5 text-destructive" />
+            <EllipsisHorizontalCircleIcon className="size-5 text-gray-500" />
           )}
         </div>
         <Table className="text-xs">
