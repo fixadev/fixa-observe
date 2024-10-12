@@ -547,7 +547,7 @@ export function PropertiesTable({
                 <TableHeader>
                   <TableRow>
                     <TableCell className="w-[1%]"></TableCell>
-                    <TableHead className="text-black">Photo</TableHead>
+                    <TableHead className="w-[1%] text-black">Photo</TableHead>
                     <SortableContext
                       items={draggingRow ? rowIds : colIds}
                       strategy={
@@ -560,8 +560,10 @@ export function PropertiesTable({
                         <DraggableHeader
                           key={attribute.id}
                           attribute={attribute}
-                          renameAttribute={(name) =>
-                            renameAttribute(attribute.id, name)
+                          renameAttribute={
+                            !attribute.ownerId
+                              ? undefined
+                              : (name) => renameAttribute(attribute.id, name)
                           }
                           deleteAttribute={() => deleteAttribute(attribute.id)}
                           draggingRow={draggingRow}

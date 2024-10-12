@@ -25,7 +25,7 @@ export const DraggableHeader = ({
   disabled = false,
 }: {
   attribute: Attribute;
-  renameAttribute: (name: string) => void;
+  renameAttribute?: (name: string) => void;
   deleteAttribute: () => void;
   draggingRow: boolean;
   state: PropertiesTableState;
@@ -87,7 +87,7 @@ export const DraggableHeader = ({
                 }}
                 onBlur={(e) => {
                   setIsEditing(false);
-                  renameAttribute(e.target.value);
+                  renameAttribute?.(e.target.value);
                 }}
                 autoFocus
                 onFocus={(e) => e.target.select()}
@@ -95,9 +95,9 @@ export const DraggableHeader = ({
             ) : (
               <Button
                 variant="ghost"
-                className="w-full min-w-32 text-wrap"
+                className="w-full min-w-32 text-wrap disabled:opacity-100"
                 onClick={() => setIsEditing(true)}
-                disabled={disabled}
+                disabled={disabled || !renameAttribute}
               >
                 {attribute.label}
               </Button>
