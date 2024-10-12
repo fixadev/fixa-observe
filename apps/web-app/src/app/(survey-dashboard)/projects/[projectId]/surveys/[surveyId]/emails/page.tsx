@@ -3,7 +3,7 @@
 import EmailCard from "./_components/EmailCard";
 import { Button } from "~/components/ui/button";
 import { ChevronDownIcon, ChevronUpIcon } from "@heroicons/react/24/outline";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   cn,
   emailIsComplete,
@@ -32,16 +32,6 @@ export default function EmailsPage() {
     EmailThreadWithEmailsAndProperty[]
   >([]);
   const [selectedThreadId, setSelectedThreadId] = useState<string | null>(null);
-  // Select the email thread for the property in the search params
-  useEffect(() => {
-    const propertyId = searchParams.get("propertyId");
-    if (propertyId) {
-      const thread = emailThreads.find((t) => t.propertyId === propertyId);
-      if (thread) {
-        setSelectedThreadId(thread.id);
-      }
-    }
-  }, [emailThreads, searchParams]);
 
   const { user } = useUser();
   const { survey, refetchSurvey, isLoadingSurvey, isRefetchingSurvey } =
@@ -164,6 +154,34 @@ export default function EmailsPage() {
   const [categoriesExpanded, setCategoriesExpanded] = useState<boolean[]>(
     Array(categories.length).fill(false),
   );
+
+  // Select the email thread for the property in the search params
+  const hasSelectedPropertyFromSearchParams = useRef(false);
+  useEffect(() => {
+    if (hasSelectedPropertyFromSearchParams.current) {
+      return;
+    }
+
+    const propertyId = searchParams.get("propertyId");
+    if (propertyId) {
+      for (let i = 0; i < categories.length; i++) {
+        const category = categories[i];
+        const threadInCategory = category?.emails.find(
+          (t) => t.propertyId === propertyId,
+        );
+        if (threadInCategory) {
+          setSelectedThreadId(threadInCategory.id);
+          setCategoriesExpanded((prev) => {
+            const newExpanded = [...prev];
+            newExpanded[i] = true;
+            return newExpanded;
+          });
+          hasSelectedPropertyFromSearchParams.current = true;
+          break;
+        }
+      }
+    }
+  }, [categories, searchParams]);
 
   const { mutateAsync: sendEmail, isPending: isSendingEmail } =
     api.email.sendEmail.useMutation();
