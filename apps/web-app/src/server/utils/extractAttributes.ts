@@ -31,7 +31,7 @@ export async function extractAttributes(
   ${attributes
     .map((attribute) => `${attribute.id}: string | null -- ${attribute.label}`)
     .join("\n  ")}
-  available: "Yes" | "No" | null -- return "Yes" if the property is available for lease now or sometime in the future, otherwise return "No"
+  available: "Yes" | "No" | null -- return "Yes" if 1) the property is available for lease now or sometime in the future, or 2) if other attributes about the property are provided and the property is not explicitly marked as unavailable, otherwise return "No"
 }`,
   ].join("\n");
 

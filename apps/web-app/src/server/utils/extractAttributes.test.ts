@@ -6,7 +6,6 @@ async function test() {
   Hi,
 
   The asking rate is $5.50 per square foot, and the operating expenses are $0.50 per square foot.
-  And yes, the property is available
 
   Best,
   Jonathan
