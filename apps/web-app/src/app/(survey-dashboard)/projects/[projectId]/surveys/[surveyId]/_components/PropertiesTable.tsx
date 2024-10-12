@@ -53,7 +53,7 @@ import {
   REPLACEMENT_VARIABLES,
 } from "~/lib/constants";
 import { type Contact, type EmailTemplate } from "prisma/generated/zod";
-import { replaceTemplateVariables } from "~/lib/utils";
+import { replaceTemplateVariables, splitAddress } from "~/lib/utils";
 import { useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 
@@ -435,7 +435,7 @@ export function PropertiesTable({
       const replacements = {
         [REPLACEMENT_VARIABLES.name]: recipientFirstName,
         [REPLACEMENT_VARIABLES.address]:
-          property.attributes?.address?.split("\n")[0] ?? "",
+          splitAddress(property.attributes?.address ?? "").streetAddress ?? "",
         [REPLACEMENT_VARIABLES.fieldsToVerify]: attributesToVerify
           .map((attributeId) => {
             const attributeLabel = attributesMap.get(attributeId)?.label;
