@@ -33,9 +33,9 @@ export function BrochureCarousel({
     }>
   >([]);
 
-  useEffect(() => {
-    console.log("rectangles", rectangles);
-  }, [rectangles]);
+  // useEffect(() => {
+  //   console.log("rectangles", rectangles);
+  // }, [rectangles]);
 
   const { toast } = useToast();
 
@@ -58,6 +58,7 @@ export function BrochureCarousel({
   });
 
   function handleRemoveObjects() {
+    setRectangles([]);
     removeObjects({
       brochureId: brochure.id,
       objectsToRemoveByPage: rectangles,
