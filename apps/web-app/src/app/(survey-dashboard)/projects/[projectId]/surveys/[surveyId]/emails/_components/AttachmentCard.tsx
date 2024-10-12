@@ -76,7 +76,9 @@ export default function AttachmentCard({
     }
   }, [attachment.emailId, attachment.id, updateAttachment, refetchSurvey]);
 
+  const [isReplacingBrochure, setIsReplacingBrochure] = useState(false);
   const replaceBrochure = useCallback(async () => {
+    setIsReplacingBrochure(true);
     setAttachment((prev) => ({
       ...prev,
       brochureReplaced: true,
@@ -130,6 +132,8 @@ export default function AttachmentCard({
         ...prev,
         brochureReplaced: false,
       }));
+    } finally {
+      setIsReplacingBrochure(false);
     }
   }, [
     getAttachmentContent,
@@ -178,8 +182,12 @@ export default function AttachmentCard({
               <PaperClipIcon className="size-6" />
             )}
             {attachment.brochureReplaced && (
-              <div className="absolute -bottom-1 -right-1 rounded-full bg-white">
-                <CheckCircleIcon className="size-4 text-green-500" />
+              <div className="absolute -bottom-1 -right-1 rounded-full bg-muted">
+                {isReplacingBrochure ? (
+                  <Spinner className="m-px size-3.5" />
+                ) : (
+                  <CheckCircleIcon className="size-4 text-green-500" />
+                )}
               </div>
             )}
           </div>
@@ -202,12 +210,14 @@ export default function AttachmentCard({
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent>
-              <DropdownMenuItem
-                onClick={replaceBrochure}
-                className="cursor-pointer"
-              >
-                Replace brochure
-              </DropdownMenuItem>
+              {isPdf && (
+                <DropdownMenuItem
+                  onClick={replaceBrochure}
+                  className="cursor-pointer"
+                >
+                  Replace brochure
+                </DropdownMenuItem>
+              )}
               <DropdownMenuItem
                 onClick={downloadAttachment}
                 className="cursor-pointer"
@@ -222,27 +232,29 @@ export default function AttachmentCard({
           </div>
         )}
       </div>
-      {!attachment.infoMessageDismissed && !attachment.brochureReplaced && (
-        <div className="flex items-center gap-1 text-xs text-muted-foreground">
-          Replace brochure with this file?{" "}
-          <Button
-            onClick={replaceBrochure}
-            variant="link"
-            size="sm"
-            className="h-auto p-2"
-          >
-            Yes
-          </Button>
-          <Button
-            onClick={dismissInfoMessage}
-            variant="link"
-            size="sm"
-            className="h-auto p-2"
-          >
-            No
-          </Button>
-        </div>
-      )}
+      {!attachment.infoMessageDismissed &&
+        !attachment.brochureReplaced &&
+        isPdf && (
+          <div className="flex items-center gap-1 text-xs text-muted-foreground">
+            Replace brochure with this file?{" "}
+            <Button
+              onClick={replaceBrochure}
+              variant="link"
+              size="sm"
+              className="h-auto p-2"
+            >
+              Yes
+            </Button>
+            <Button
+              onClick={dismissInfoMessage}
+              variant="link"
+              size="sm"
+              className="h-auto p-2"
+            >
+              No
+            </Button>
+          </div>
+        )}
     </div>
   );
 }
