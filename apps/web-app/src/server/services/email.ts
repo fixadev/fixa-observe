@@ -578,10 +578,23 @@ export const emailService = ({ db }: { db: PrismaClient }) => {
         });
 
         // Update email thread with attributes
+        let parsedAttributes = emailThread.parsedAttributes as Record<
+          string,
+          string | null
+        > | null;
+        if (!parsedAttributes) {
+          parsedAttributes = attributesToUpdate;
+        } else {
+          for (const attributeId of Object.keys(attributesToUpdate)) {
+            if (attributesToUpdate[attributeId] !== null) {
+              parsedAttributes[attributeId] = attributesToUpdate[attributeId]!;
+            }
+          }
+        }
         await db.emailThread.update({
           where: { id: conversationId },
           data: {
-            parsedAttributes: attributesToUpdate,
+            parsedAttributes,
           },
         });
       }
