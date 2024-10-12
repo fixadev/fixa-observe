@@ -35,6 +35,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "~/components/ui/alert-dialog";
+import { useUser } from "@clerk/nextjs";
 
 export default function EmailDetails({
   emailThread,
@@ -162,6 +163,7 @@ function EmailThreadDetails({
         property={emailThread.property}
         rightContent={
           <ParsedAttributes
+            emailThread={emailThread}
             parsedAttributes={
               emailThread.parsedAttributes as Record<string, string>
             }
@@ -285,17 +287,41 @@ function UnsentEmailDetails({
 }
 
 function ParsedAttributes({
+  emailThread,
   parsedAttributes,
 }: {
+  emailThread: EmailThreadWithEmailsAndProperty;
   parsedAttributes?: Record<string, string>;
 }) {
-  if (!parsedAttributes) {
+  const { user } = useUser();
+
+  const shouldShow = useMemo(() => {
+    if (!parsedAttributes) {
+      return false;
+    }
+
+    // Only show if the email thread contains emails from other people
+    return emailThread.emails.some(
+      (email) => email.senderEmail !== user?.primaryEmailAddress?.emailAddress,
+    );
+  }, [
+    emailThread.emails,
+    parsedAttributes,
+    user?.primaryEmailAddress?.emailAddress,
+  ]);
+
+  const completed = useMemo(
+    () => isParsedAttributesComplete(parsedAttributes ?? {}),
+    [parsedAttributes],
+  );
+  const propertyNotAvailable = useMemo(
+    () => isPropertyNotAvailable(parsedAttributes ?? {}),
+    [parsedAttributes],
+  );
+
+  if (!shouldShow) {
     return null;
   }
-
-  const completed = isParsedAttributesComplete(parsedAttributes);
-  const propertyNotAvailable = isPropertyNotAvailable(parsedAttributes);
-
   return (
     <>
       {/* <div className="flex-1" /> */}

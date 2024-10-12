@@ -1,6 +1,7 @@
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 import type { EmailThreadWithEmailsAndProperty } from "./types";
+import { type User } from "@clerk/nextjs/server";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -44,8 +45,12 @@ export function emailIsDraft(emailThread: EmailThreadWithEmailsAndProperty) {
 
 export function emailIsIncomplete(
   emailThread: EmailThreadWithEmailsAndProperty,
+  user?: User,
 ) {
   return (
+    emailThread.emails.some(
+      (email) => email.senderEmail !== user?.primaryEmailAddress?.emailAddress,
+    ) &&
     emailThread.parsedAttributes &&
     !isParsedAttributesComplete(
       emailThread.parsedAttributes as Record<string, string | null>,

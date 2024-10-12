@@ -23,6 +23,7 @@ import { RefreshButton } from "./_components/RefreshButton";
 import { Separator } from "~/components/ui/separator";
 import { useSurvey } from "~/hooks/useSurvey";
 import { useSearchParams } from "next/navigation";
+import { type User } from "@clerk/nextjs/server";
 
 export default function EmailsPage() {
   const searchParams = useSearchParams();
@@ -88,9 +89,10 @@ export default function EmailsPage() {
           !completedEmailsSet.has(email.id) &&
           !notAvailableEmailsSet.has(email.id) &&
           // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
-          (emailIsIncomplete(email) || emailIsOld(email)),
+          (emailIsIncomplete(email, user as User | undefined) ||
+            emailIsOld(email)),
       ),
-    [emailThreads, completedEmailsSet, notAvailableEmailsSet],
+    [emailThreads, completedEmailsSet, notAvailableEmailsSet, user],
   );
   const needsFollowUpSet = useMemo(
     () => new Set(needsFollowUpEmails.map((email) => email.id)),
@@ -116,7 +118,7 @@ export default function EmailsPage() {
       if (!needsFollowUpSet.has(email.id)) {
         return undefined;
       }
-      return emailIsIncomplete(email)
+      return emailIsIncomplete(email, user as User | undefined)
         ? "More info needed"
         : `Sent ${formatDistanceToNow(
             new Date(email.emails[email.emails.length - 1]!.createdAt),
@@ -125,7 +127,7 @@ export default function EmailsPage() {
             },
           ).toLowerCase()}`;
     },
-    [needsFollowUpSet],
+    [needsFollowUpSet, user],
   );
 
   const categories = useMemo(
