@@ -3,9 +3,13 @@ import { Button } from "~/components/ui/button";
 import { type PropertyWithBrochures } from "~/lib/property";
 import { api } from "~/trpc/react";
 import { BrochureCarousel } from "./BrochureCarousel";
-import { useRouter } from "next/navigation";
 import { FilePlusIcon } from "lucide-react";
 import { FileInput } from "../../../../../../../_components/FileInput";
+import Link from "next/link";
+import { useMemo } from "react";
+import { splitAddress } from "~/lib/utils";
+import { ArrowDownTrayIcon } from "@heroicons/react/24/solid";
+import { type EmailThread } from "prisma/generated/zod";
 
 export function BrochureCard({ propertyId }: { propertyId: string }) {
   const { data: propertyData, refetch: refetchProperty } =
@@ -17,9 +21,7 @@ export function BrochureCard({ propertyId }: { propertyId: string }) {
   }
 
   const brochure = propertyData.brochures?.[0];
-  return brochure?.approved ? (
-    <ApprovedBrochureCard property={propertyData} />
-  ) : (
+  return brochure?.approved ? null : (
     <UnapprovedBrochureCard
       refetchProperty={refetchProperty}
       property={propertyData}
@@ -31,7 +33,7 @@ function UnapprovedBrochureCard({
   property,
   refetchProperty,
 }: {
-  property: PropertyWithBrochures;
+  property: PropertyWithBrochures & { emailThreads: EmailThread[] };
   refetchProperty: () => void;
 }) {
   const brochure = property.brochures[0];
@@ -103,38 +105,37 @@ function UnapprovedBrochureCard({
   );
 }
 
-function ApprovedBrochureCard({
-  property,
-}: {
-  property: PropertyWithBrochures;
-}) {
-  return <div>hello</div>;
-}
-
 function BrochureSidebar({
   property,
   handleUpload,
 }: {
-  property: PropertyWithBrochures;
+  property: PropertyWithBrochures & { emailThreads: EmailThread[] };
   handleUpload: (files: FileList) => void;
 }) {
   const brochure = property.brochures[0];
-  const router = useRouter();
-  const { mutate: updateBrochure } = api.property.updateBrochure.useMutation();
+  // const { mutate: updateBrochure } = api.property.updateBrochure.useMutation();
 
-  const handleApprove = () => {
-    if (!brochure) {
-      return;
-    }
-    updateBrochure({
-      ...brochure,
-      approved: true,
-    });
-  };
+  // const handleApprove = () => {
+  //   if (!brochure) {
+  //     return;
+  //   }
+  //   updateBrochure({
+  //     ...brochure,
+  //     approved: true,
+  //   });
+  // };
+
+  const address = useMemo(
+    () =>
+      splitAddress(
+        (property.attributes as { address?: string })?.address ?? "",
+      ),
+    [property.attributes],
+  );
 
   return (
-    <div className="relative flex w-1/6 flex-col gap-2">
-      <div className="relative aspect-[4/3] w-full">
+    <div className="relative flex w-1/6 flex-col self-start rounded-md border border-input shadow-sm">
+      <div className="relative aspect-[4/3] w-full overflow-hidden rounded-t-md">
         {property.photoUrl ? (
           <Image src={property.photoUrl ?? ""} alt={"building photo"} fill />
         ) : (
@@ -144,47 +145,40 @@ function BrochureSidebar({
         )}
       </div>
 
-      {brochure ? (
-        <>
-          <div className="text-md flex w-full flex-col p-2 text-center font-medium">
-            <p>
-              {(property?.attributes as { address?: string })?.address?.split(
-                ",",
-              )[0] ?? ""}
-            </p>
+      <div className="flex flex-col gap-4 p-2 lg:p-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <div className="font-medium">{address.streetAddress}</div>
+            <div className="text-sm text-muted-foreground">{address.city}</div>
           </div>
-          <Button
-            variant={"outline"}
-            onClick={() =>
-              router.push(
-                `/projects/${property.id}/surveys/${property.surveyId}/brochures/${brochure?.id}/editor`,
-              )
-            }
-          >
-            Edit brochure
-          </Button>
-          <FileInput
-            className="w-full"
-            triggerElement={
-              <Button className="w-full" variant={"outline"}>
-                Upload new brochure
-              </Button>
-            }
-            handleFilesChange={handleUpload}
-          />
-          <Button variant={"default"} onClick={handleApprove}>
-            Approve brochure
-          </Button>
-        </>
-      ) : (
-        <div className="flex w-full flex-col items-center p-2 text-center font-medium">
-          <p>
-            {(property?.attributes as { address?: string })?.address?.split(
-              ",",
-            )[0] ?? ""}
-          </p>
+          {brochure && (
+            <Button size="icon" variant="ghost">
+              <ArrowDownTrayIcon className="size-4" />
+            </Button>
+          )}
         </div>
-      )}
+        {/* eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing */}
+        {(brochure || property.emailThreads.length > 0) && (
+          <div className="flex flex-col gap-2">
+            {brochure && (
+              <FileInput
+                className="w-full"
+                triggerElement={
+                  <Button className="w-full">Upload new brochure</Button>
+                }
+                handleFilesChange={handleUpload}
+              />
+            )}
+            {property.emailThreads.length > 0 && (
+              <Button variant="ghost" asChild className="w-full">
+                <Link href={`emails?propertyId=${property.id}`}>
+                  Go to email
+                </Link>
+              </Button>
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

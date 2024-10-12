@@ -1,6 +1,8 @@
-import { type Property } from "prisma/generated/zod";
+import { type Brochure, type Property } from "prisma/generated/zod";
 import { cn } from "~/lib/utils";
 import Image from "next/image";
+import { Button } from "./ui/button";
+import Link from "next/link";
 
 export const testProperty: Property = {
   // Add a basic property object to match the Property type
@@ -21,7 +23,7 @@ export default function PropertyCard({
   className,
   rightContent,
 }: {
-  property: Property;
+  property: Property & { brochures: Brochure[] };
   className?: string;
   rightContent?: React.ReactNode;
 }) {
@@ -48,6 +50,13 @@ export default function PropertyCard({
       <div className="flex flex-col">
         <div className="text-lg font-medium">{streetAddress}</div>
         <div className="text-sm text-muted-foreground">{city}</div>
+        <Button variant="link" className="w-fit px-0" asChild>
+          <Link href={`brochures#${property.id}`}>
+            {property.brochures.length > 0
+              ? "View brochure"
+              : "Upload brochure"}
+          </Link>
+        </Button>
       </div>
       {rightContent}
     </div>

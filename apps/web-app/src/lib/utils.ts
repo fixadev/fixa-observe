@@ -112,3 +112,8 @@ export function downloadBase64File(
   const arrayBuffer = base64ToArrayBuffer(base64);
   saveByteArray(filename, contentType, arrayBuffer);
 }
+
+export function splitAddress(address: string) {
+  const [streetAddress, city] = address.split("\n").map((line) => line.trim());
+  return { streetAddress, city };
+}

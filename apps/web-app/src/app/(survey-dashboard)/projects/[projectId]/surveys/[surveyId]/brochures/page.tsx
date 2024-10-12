@@ -21,7 +21,11 @@ export default function BrochuresPage({
     <div className="flex h-full flex-col gap-10 overflow-y-auto p-6">
       {survey?.properties && survey?.properties.length > 0 ? (
         survey?.properties.map((property) => {
-          return <BrochureCard key={property.id} propertyId={property.id} />;
+          return (
+            <a key={property.id} id={property.id}>
+              <BrochureCard propertyId={property.id} />
+            </a>
+          );
         })
       ) : (
         <div className="items-center justify-center">
