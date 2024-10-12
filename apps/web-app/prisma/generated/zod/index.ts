@@ -72,7 +72,7 @@ export const BrochureScalarFieldEnumSchema = z.enum(['id','createdAt','updatedAt
 
 export const EmailScalarFieldEnumSchema = z.enum(['id','createdAt','updatedAt','senderName','senderEmail','recipientName','recipientEmail','subject','body','webLink','isDraft','emailThreadId']);
 
-export const AttachmentScalarFieldEnumSchema = z.enum(['id','createdAt','updatedAt','name','contentType','size','infoMessageDismissed','emailId']);
+export const AttachmentScalarFieldEnumSchema = z.enum(['id','createdAt','updatedAt','name','contentType','size','infoMessageDismissed','brochureReplaced','emailId']);
 
 export const EmailThreadScalarFieldEnumSchema = z.enum(['id','createdAt','updatedAt','propertyId','unread','parsedAttributes']);
 
@@ -233,6 +233,7 @@ export const AttachmentSchema = z.object({
   contentType: z.string(),
   size: z.number().int(),
   infoMessageDismissed: z.boolean(),
+  brochureReplaced: z.boolean(),
   emailId: z.string(),
 })
 
@@ -584,6 +585,7 @@ export const AttachmentSelectSchema: z.ZodType<Prisma.AttachmentSelect> = z.obje
   contentType: z.boolean().optional(),
   size: z.boolean().optional(),
   infoMessageDismissed: z.boolean().optional(),
+  brochureReplaced: z.boolean().optional(),
   emailId: z.boolean().optional(),
   email: z.union([z.boolean(),z.lazy(() => EmailArgsSchema)]).optional(),
 }).strict()
@@ -1280,6 +1282,7 @@ export const AttachmentWhereInputSchema: z.ZodType<Prisma.AttachmentWhereInput> 
   contentType: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   size: z.union([ z.lazy(() => IntFilterSchema),z.number() ]).optional(),
   infoMessageDismissed: z.union([ z.lazy(() => BoolFilterSchema),z.boolean() ]).optional(),
+  brochureReplaced: z.union([ z.lazy(() => BoolFilterSchema),z.boolean() ]).optional(),
   emailId: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   email: z.union([ z.lazy(() => EmailRelationFilterSchema),z.lazy(() => EmailWhereInputSchema) ]).optional(),
 }).strict();
@@ -1292,6 +1295,7 @@ export const AttachmentOrderByWithRelationInputSchema: z.ZodType<Prisma.Attachme
   contentType: z.lazy(() => SortOrderSchema).optional(),
   size: z.lazy(() => SortOrderSchema).optional(),
   infoMessageDismissed: z.lazy(() => SortOrderSchema).optional(),
+  brochureReplaced: z.lazy(() => SortOrderSchema).optional(),
   emailId: z.lazy(() => SortOrderSchema).optional(),
   email: z.lazy(() => EmailOrderByWithRelationInputSchema).optional()
 }).strict();
@@ -1310,6 +1314,7 @@ export const AttachmentWhereUniqueInputSchema: z.ZodType<Prisma.AttachmentWhereU
   contentType: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   size: z.union([ z.lazy(() => IntFilterSchema),z.number().int() ]).optional(),
   infoMessageDismissed: z.union([ z.lazy(() => BoolFilterSchema),z.boolean() ]).optional(),
+  brochureReplaced: z.union([ z.lazy(() => BoolFilterSchema),z.boolean() ]).optional(),
   emailId: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   email: z.union([ z.lazy(() => EmailRelationFilterSchema),z.lazy(() => EmailWhereInputSchema) ]).optional(),
 }).strict());
@@ -1322,6 +1327,7 @@ export const AttachmentOrderByWithAggregationInputSchema: z.ZodType<Prisma.Attac
   contentType: z.lazy(() => SortOrderSchema).optional(),
   size: z.lazy(() => SortOrderSchema).optional(),
   infoMessageDismissed: z.lazy(() => SortOrderSchema).optional(),
+  brochureReplaced: z.lazy(() => SortOrderSchema).optional(),
   emailId: z.lazy(() => SortOrderSchema).optional(),
   _count: z.lazy(() => AttachmentCountOrderByAggregateInputSchema).optional(),
   _avg: z.lazy(() => AttachmentAvgOrderByAggregateInputSchema).optional(),
@@ -1341,6 +1347,7 @@ export const AttachmentScalarWhereWithAggregatesInputSchema: z.ZodType<Prisma.At
   contentType: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
   size: z.union([ z.lazy(() => IntWithAggregatesFilterSchema),z.number() ]).optional(),
   infoMessageDismissed: z.union([ z.lazy(() => BoolWithAggregatesFilterSchema),z.boolean() ]).optional(),
+  brochureReplaced: z.union([ z.lazy(() => BoolWithAggregatesFilterSchema),z.boolean() ]).optional(),
   emailId: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
 }).strict();
 
@@ -2162,6 +2169,7 @@ export const AttachmentCreateInputSchema: z.ZodType<Prisma.AttachmentCreateInput
   contentType: z.string(),
   size: z.number().int(),
   infoMessageDismissed: z.boolean().optional(),
+  brochureReplaced: z.boolean().optional(),
   email: z.lazy(() => EmailCreateNestedOneWithoutAttachmentsInputSchema)
 }).strict();
 
@@ -2173,6 +2181,7 @@ export const AttachmentUncheckedCreateInputSchema: z.ZodType<Prisma.AttachmentUn
   contentType: z.string(),
   size: z.number().int(),
   infoMessageDismissed: z.boolean().optional(),
+  brochureReplaced: z.boolean().optional(),
   emailId: z.string()
 }).strict();
 
@@ -2184,6 +2193,7 @@ export const AttachmentUpdateInputSchema: z.ZodType<Prisma.AttachmentUpdateInput
   contentType: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   size: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   infoMessageDismissed: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
+  brochureReplaced: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   email: z.lazy(() => EmailUpdateOneRequiredWithoutAttachmentsNestedInputSchema).optional()
 }).strict();
 
@@ -2195,6 +2205,7 @@ export const AttachmentUncheckedUpdateInputSchema: z.ZodType<Prisma.AttachmentUn
   contentType: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   size: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   infoMessageDismissed: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
+  brochureReplaced: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   emailId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
 }).strict();
 
@@ -2206,6 +2217,7 @@ export const AttachmentCreateManyInputSchema: z.ZodType<Prisma.AttachmentCreateM
   contentType: z.string(),
   size: z.number().int(),
   infoMessageDismissed: z.boolean().optional(),
+  brochureReplaced: z.boolean().optional(),
   emailId: z.string()
 }).strict();
 
@@ -2217,6 +2229,7 @@ export const AttachmentUpdateManyMutationInputSchema: z.ZodType<Prisma.Attachmen
   contentType: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   size: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   infoMessageDismissed: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
+  brochureReplaced: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
 }).strict();
 
 export const AttachmentUncheckedUpdateManyInputSchema: z.ZodType<Prisma.AttachmentUncheckedUpdateManyInput> = z.object({
@@ -2227,6 +2240,7 @@ export const AttachmentUncheckedUpdateManyInputSchema: z.ZodType<Prisma.Attachme
   contentType: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   size: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   infoMessageDismissed: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
+  brochureReplaced: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   emailId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
 }).strict();
 
@@ -3027,6 +3041,7 @@ export const AttachmentCountOrderByAggregateInputSchema: z.ZodType<Prisma.Attach
   contentType: z.lazy(() => SortOrderSchema).optional(),
   size: z.lazy(() => SortOrderSchema).optional(),
   infoMessageDismissed: z.lazy(() => SortOrderSchema).optional(),
+  brochureReplaced: z.lazy(() => SortOrderSchema).optional(),
   emailId: z.lazy(() => SortOrderSchema).optional()
 }).strict();
 
@@ -3042,6 +3057,7 @@ export const AttachmentMaxOrderByAggregateInputSchema: z.ZodType<Prisma.Attachme
   contentType: z.lazy(() => SortOrderSchema).optional(),
   size: z.lazy(() => SortOrderSchema).optional(),
   infoMessageDismissed: z.lazy(() => SortOrderSchema).optional(),
+  brochureReplaced: z.lazy(() => SortOrderSchema).optional(),
   emailId: z.lazy(() => SortOrderSchema).optional()
 }).strict();
 
@@ -3053,6 +3069,7 @@ export const AttachmentMinOrderByAggregateInputSchema: z.ZodType<Prisma.Attachme
   contentType: z.lazy(() => SortOrderSchema).optional(),
   size: z.lazy(() => SortOrderSchema).optional(),
   infoMessageDismissed: z.lazy(() => SortOrderSchema).optional(),
+  brochureReplaced: z.lazy(() => SortOrderSchema).optional(),
   emailId: z.lazy(() => SortOrderSchema).optional()
 }).strict();
 
@@ -5174,7 +5191,8 @@ export const AttachmentCreateWithoutEmailInputSchema: z.ZodType<Prisma.Attachmen
   name: z.string(),
   contentType: z.string(),
   size: z.number().int(),
-  infoMessageDismissed: z.boolean().optional()
+  infoMessageDismissed: z.boolean().optional(),
+  brochureReplaced: z.boolean().optional()
 }).strict();
 
 export const AttachmentUncheckedCreateWithoutEmailInputSchema: z.ZodType<Prisma.AttachmentUncheckedCreateWithoutEmailInput> = z.object({
@@ -5184,7 +5202,8 @@ export const AttachmentUncheckedCreateWithoutEmailInputSchema: z.ZodType<Prisma.
   name: z.string(),
   contentType: z.string(),
   size: z.number().int(),
-  infoMessageDismissed: z.boolean().optional()
+  infoMessageDismissed: z.boolean().optional(),
+  brochureReplaced: z.boolean().optional()
 }).strict();
 
 export const AttachmentCreateOrConnectWithoutEmailInputSchema: z.ZodType<Prisma.AttachmentCreateOrConnectWithoutEmailInput> = z.object({
@@ -5247,6 +5266,7 @@ export const AttachmentScalarWhereInputSchema: z.ZodType<Prisma.AttachmentScalar
   contentType: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   size: z.union([ z.lazy(() => IntFilterSchema),z.number() ]).optional(),
   infoMessageDismissed: z.union([ z.lazy(() => BoolFilterSchema),z.boolean() ]).optional(),
+  brochureReplaced: z.union([ z.lazy(() => BoolFilterSchema),z.boolean() ]).optional(),
   emailId: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
 }).strict();
 
@@ -6002,7 +6022,8 @@ export const AttachmentCreateManyEmailInputSchema: z.ZodType<Prisma.AttachmentCr
   name: z.string(),
   contentType: z.string(),
   size: z.number().int(),
-  infoMessageDismissed: z.boolean().optional()
+  infoMessageDismissed: z.boolean().optional(),
+  brochureReplaced: z.boolean().optional()
 }).strict();
 
 export const AttachmentUpdateWithoutEmailInputSchema: z.ZodType<Prisma.AttachmentUpdateWithoutEmailInput> = z.object({
@@ -6013,6 +6034,7 @@ export const AttachmentUpdateWithoutEmailInputSchema: z.ZodType<Prisma.Attachmen
   contentType: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   size: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   infoMessageDismissed: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
+  brochureReplaced: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
 }).strict();
 
 export const AttachmentUncheckedUpdateWithoutEmailInputSchema: z.ZodType<Prisma.AttachmentUncheckedUpdateWithoutEmailInput> = z.object({
@@ -6023,6 +6045,7 @@ export const AttachmentUncheckedUpdateWithoutEmailInputSchema: z.ZodType<Prisma.
   contentType: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   size: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   infoMessageDismissed: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
+  brochureReplaced: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
 }).strict();
 
 export const AttachmentUncheckedUpdateManyWithoutEmailInputSchema: z.ZodType<Prisma.AttachmentUncheckedUpdateManyWithoutEmailInput> = z.object({
@@ -6033,6 +6056,7 @@ export const AttachmentUncheckedUpdateManyWithoutEmailInputSchema: z.ZodType<Pri
   contentType: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   size: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   infoMessageDismissed: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
+  brochureReplaced: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
 }).strict();
 
 export const EmailCreateManyEmailThreadInputSchema: z.ZodType<Prisma.EmailCreateManyEmailThreadInput> = z.object({

@@ -11,6 +11,7 @@ import AttachmentCard from "./AttachmentCard";
 
 export default function EmailCard({
   email,
+  propertyId,
   draft = false,
   unread = false,
   completed = false,
@@ -21,6 +22,7 @@ export default function EmailCard({
   className,
 }: {
   email: Email & { attachments: Attachment[] };
+  propertyId: string;
   draft?: boolean;
   unread?: boolean;
   completed?: boolean;
@@ -111,7 +113,11 @@ export default function EmailCard({
           {email.attachments.length > 0 && (
             <div className="mb-4 flex flex-wrap gap-2">
               {email.attachments.map((attachment) => (
-                <AttachmentCard key={attachment.id} attachment={attachment} />
+                <AttachmentCard
+                  key={attachment.id}
+                  attachment={attachment}
+                  propertyId={propertyId}
+                />
               ))}
             </div>
           )}

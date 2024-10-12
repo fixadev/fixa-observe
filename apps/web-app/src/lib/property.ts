@@ -1,7 +1,14 @@
 import { z } from "zod";
-import { AttributeSchema, BrochureSchema, PropertySchema, ContactSchema } from "../../prisma/generated/zod";
+import {
+  AttributeSchema,
+  BrochureSchema,
+  PropertySchema,
+  ContactSchema,
+} from "../../prisma/generated/zod";
 
-export type ContactWithoutPropertyId = z.infer<typeof contactWithoutPropertyIdSchema>;
+export type ContactWithoutPropertyId = z.infer<
+  typeof contactWithoutPropertyIdSchema
+>;
 export const contactWithoutPropertyIdSchema = ContactSchema.omit({
   propertyId: true,
 });
@@ -9,7 +16,9 @@ export const contactWithoutPropertyIdSchema = ContactSchema.omit({
 export type ContactSchema = z.infer<typeof contactSchema>;
 export const contactSchema = ContactSchema;
 
-export type BrochureWithoutPropertyId = z.infer<typeof brochureWithoutPropertyIdSchema>;
+export type BrochureWithoutPropertyId = z.infer<
+  typeof brochureWithoutPropertyIdSchema
+>;
 export const brochureWithoutPropertyIdSchema = BrochureSchema.omit({
   propertyId: true,
   id: true,
@@ -29,6 +38,7 @@ export const propertySchema = PropertySchema.omit({
 }).extend({
   attributes: attributesObjectSchema,
   brochures: z.array(brochureSchema),
+  // contacts: z.array(contactSchema),
 });
 
 export type PropertyWithBrochures = z.infer<typeof propertyWithBrochuresSchema>;
@@ -42,12 +52,14 @@ export const photoUploadSchema = z.object({
 });
 
 export type CreatePropertySchema = z.infer<typeof createPropertySchema>;
-export const createPropertySchema = propertySchema.omit({
-  id: true,
-  ownerId: true,
-}).extend({
-  brochures: z.array(brochureSchema.omit({ id: true, propertyId: true })),
-});
+export const createPropertySchema = propertySchema
+  .omit({
+    id: true,
+    ownerId: true,
+  })
+  .extend({
+    brochures: z.array(brochureSchema.omit({ id: true, propertyId: true })),
+  });
 
 export type ImportPropertiesInput = z.infer<typeof importPropertiesInput>;
 export const importPropertiesInput = z.object({

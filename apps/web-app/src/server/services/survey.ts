@@ -19,6 +19,7 @@ export const surveyService = ({ db }: { db: PrismaClient }) => {
           properties: {
             include: {
               brochures: true,
+              contacts: true,
               emailThreads: {
                 include: {
                   emails: {

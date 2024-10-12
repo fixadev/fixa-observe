@@ -80,3 +80,35 @@ export function emailIsOld(emailThread: EmailThreadWithEmailsAndProperty) {
     new Date().getTime() - 1000 * 60 * 60 * 24 * 1
   );
 }
+
+export function base64ToArrayBuffer(base64: string) {
+  const binaryString = window.atob(base64);
+  const binaryLen = binaryString.length;
+  const bytes = new Uint8Array(binaryLen);
+  for (let i = 0; i < binaryLen; i++) {
+    const ascii = binaryString.charCodeAt(i);
+    bytes[i] = ascii;
+  }
+  return bytes;
+}
+
+export function saveByteArray(
+  fileName: string,
+  contentType: string,
+  byteArray: Uint8Array,
+) {
+  const blob = new Blob([byteArray], { type: contentType });
+  const link = document.createElement("a");
+  link.href = window.URL.createObjectURL(blob);
+  link.download = fileName;
+  link.click();
+}
+
+export function downloadBase64File(
+  filename: string,
+  contentType: string,
+  base64: string,
+) {
+  const arrayBuffer = base64ToArrayBuffer(base64);
+  saveByteArray(filename, contentType, arrayBuffer);
+}

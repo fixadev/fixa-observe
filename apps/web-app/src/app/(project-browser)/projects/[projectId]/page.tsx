@@ -5,7 +5,6 @@ import SurveyCard from "./_components/SurveyCard";
 import { Button } from "~/components/ui/button";
 import {
   Dialog,
-  DialogClose,
   DialogContent,
   DialogFooter,
   DialogHeader,
@@ -32,10 +31,9 @@ export default function ProjectPage({
     [],
   );
 
-  const { data: project, refetch: refetchProject } =
-    api.project.getProject.useQuery({
-      projectId: params.projectId,
-    });
+  const { data: project } = api.project.getProject.useQuery({
+    projectId: params.projectId,
+  });
 
   useEffect(() => {
     if (project?.surveys) {

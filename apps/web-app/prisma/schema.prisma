@@ -137,7 +137,8 @@ model Attachment {
   contentType String
   size        Int
 
-  infoMessageDismissed Boolean @default(false) // Whether the info message about the attachment has been dismissed
+  infoMessageDismissed  Boolean @default(false) // Whether the info message about the attachment has been dismissed
+  brochureReplaced      Boolean @default(false) // Whether the brochure has been replaced by this attachment
 
   email   Email @relation(fields: [emailId], references: [id], onDelete: Cascade)
   emailId String

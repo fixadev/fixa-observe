@@ -256,6 +256,7 @@ export default function EmailsPage({
                         .senderEmail,
                     webLink: "",
                     isDraft: false,
+                    attachments: [],
                   },
                 ],
               };
@@ -354,6 +355,7 @@ export default function EmailsPage({
                       <EmailCard
                         key={thread.id}
                         email={thread.emails[thread.emails.length - 1]!}
+                        propertyId={thread.propertyId}
                         draft={emailIsDraft(thread)}
                         unread={thread.unread}
                         completed={completedEmailsSet.has(thread.id)}

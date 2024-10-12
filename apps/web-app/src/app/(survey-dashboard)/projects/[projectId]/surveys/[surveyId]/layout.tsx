@@ -14,7 +14,7 @@ import { UserButton } from "@clerk/nextjs";
 import { ChevronLeftIcon } from "@heroicons/react/24/solid";
 import { useCallback } from "react";
 import { removeTrailingSlash } from "~/lib/utils";
-import { api } from "~/trpc/react";
+import { SurveyProvider, useSurvey } from "~/hooks/useSurvey";
 
 const navItems = [
   { href: "/", icon: HomeIcon, label: "Properties" },
@@ -22,7 +22,7 @@ const navItems = [
   { href: "/brochures", icon: DocumentTextIcon, label: "Brochures" },
 ];
 
-export default function SurveyLayout({
+function SurveyLayout({
   children,
   params,
 }: {
@@ -43,9 +43,7 @@ export default function SurveyLayout({
     [pathname, params.projectId, params.surveyId],
   );
 
-  const { data: survey } = api.survey.getSurvey.useQuery({
-    surveyId: params.surveyId,
-  });
+  const { survey } = useSurvey();
 
   return (
     <div className="grid h-screen w-full md:grid-cols-[200px_1fr] lg:grid-cols-[210px_1fr]">
@@ -135,5 +133,16 @@ export default function SurveyLayout({
         <main className="flex-1 overflow-hidden">{children}</main>
       </div>
     </div>
+  );
+}
+
+export default function SurveyLayoutWrapper(props: {
+  params: { projectId: string; surveyId: string };
+  children: React.ReactNode;
+}) {
+  return (
+    <SurveyProvider>
+      <SurveyLayout {...props} />
+    </SurveyProvider>
   );
 }

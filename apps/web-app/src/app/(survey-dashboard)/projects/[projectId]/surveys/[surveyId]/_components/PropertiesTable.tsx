@@ -51,12 +51,13 @@ import {
   DEFAULT_EMAIL_TEMPLATE_SUBJECT,
   REPLACEMENT_VARIABLES,
 } from "~/lib/constants";
-import { type EmailTemplate } from "prisma/generated/zod";
+import { type Contact, type EmailTemplate } from "prisma/generated/zod";
 import { replaceTemplateVariables } from "~/lib/utils";
 import { useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 
 export type Property = PropertySchema & {
+  contacts: Contact[];
   isNew?: boolean;
 };
 export type Attribute = AttributeSchema & {
@@ -320,6 +321,7 @@ export function PropertiesTable({
           attributes: {},
           surveyId: surveyId,
           brochures: [],
+          contacts: [],
           isNew: true,
         },
       ],
@@ -426,11 +428,11 @@ export function PropertiesTable({
       attributesToVerify: string[],
     ) => {
       // TODO: get recipient name and email from property
-      const recipientName = "";
-      const recipientEmail = "";
+      const recipientFirstName = property.contacts[0]?.firstName ?? "";
+      const recipientEmail = property.contacts[0]?.email ?? "";
 
       const replacements = {
-        [REPLACEMENT_VARIABLES.name]: recipientName.split(" ")[0] ?? "",
+        [REPLACEMENT_VARIABLES.name]: recipientFirstName,
         [REPLACEMENT_VARIABLES.address]:
           property.attributes?.address?.split("\n")[0] ?? "",
         [REPLACEMENT_VARIABLES.fieldsToVerify]: attributesToVerify
