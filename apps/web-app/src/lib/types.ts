@@ -1,5 +1,6 @@
 import type {
   Attachment,
+  Brochure,
   Email,
   EmailThread,
   Property,
@@ -7,5 +8,5 @@ import type {
 
 export type EmailThreadWithEmailsAndProperty = EmailThread & {
   emails: (Email & { attachments: Attachment[] })[];
-  property: Property;
+  property: Property & { brochures: Brochure[] };
 };

@@ -41,6 +41,9 @@ importers:
       '@clerk/themes':
         specifier: ^2.1.27
         version: 2.1.27
+      '@clerk/types':
+        specifier: ^4.25.0
+        version: 4.25.0
       '@dnd-kit/core':
         specifier: ^6.1.0
         version: 6.1.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -714,6 +717,10 @@ packages:
 
   '@clerk/types@4.19.0':
     resolution: {integrity: sha512-bDN/nRUD5PFCehQ+Kjdcft0I3b9CIyCcY3OBNDSc1L6RQhlXH+J48EtaP/cbRdslb83LJiBPQ2i/gV4VgblzwA==}
+    engines: {node: '>=18.17.0'}
+
+  '@clerk/types@4.25.0':
+    resolution: {integrity: sha512-p2IyJ0q5WF1e976L1pS1J6Mb5ducfkUC31DR1EvMjPwJkrlWJdAMCPc+zqRRAePVy/JBVK2gEKbUVtJ6/jrpag==}
     engines: {node: '>=18.17.0'}
 
   '@cspotcode/source-map-support@0.8.1':
@@ -6503,6 +6510,10 @@ snapshots:
       tslib: 2.4.1
 
   '@clerk/types@4.19.0':
+    dependencies:
+      csstype: 3.1.1
+
+  '@clerk/types@4.25.0':
     dependencies:
       csstype: 3.1.1
 

@@ -35,6 +35,8 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "~/components/ui/alert-dialog";
+import { useUser } from "@clerk/nextjs";
+import { useSurvey } from "~/hooks/useSurvey";
 
 export default function EmailDetails({
   emailThread,
@@ -162,6 +164,7 @@ function EmailThreadDetails({
         property={emailThread.property}
         rightContent={
           <ParsedAttributes
+            emailThread={emailThread}
             parsedAttributes={
               emailThread.parsedAttributes as Record<string, string>
             }
@@ -285,17 +288,64 @@ function UnsentEmailDetails({
 }
 
 function ParsedAttributes({
+  emailThread,
   parsedAttributes,
 }: {
+  emailThread: EmailThreadWithEmailsAndProperty;
   parsedAttributes?: Record<string, string>;
 }) {
-  if (!parsedAttributes) {
+  const { user } = useUser();
+
+  const shouldShow = useMemo(() => {
+    if (!parsedAttributes) {
+      return false;
+    }
+
+    // Only show if the email thread contains emails from other people
+    return emailThread.emails.some(
+      (email) => email.senderEmail !== user?.primaryEmailAddress?.emailAddress,
+    );
+  }, [
+    emailThread.emails,
+    parsedAttributes,
+    user?.primaryEmailAddress?.emailAddress,
+  ]);
+
+  const completed = useMemo(
+    () => isParsedAttributesComplete(parsedAttributes ?? {}),
+    [parsedAttributes],
+  );
+  const propertyNotAvailable = useMemo(
+    () => isPropertyNotAvailable(parsedAttributes ?? {}),
+    [parsedAttributes],
+  );
+
+  const { survey } = useSurvey();
+  const { data: attributes } = api.survey.getSurveyAttributes.useQuery(
+    {
+      surveyId: survey!.id,
+    },
+    { enabled: !!survey },
+  );
+  const attributesMap = useMemo(
+    () => new Map(attributes?.map((attr) => [attr.id, attr]) ?? []),
+    [attributes],
+  );
+
+  // Move "available" to the front
+  const parsedAttributesKeys = useMemo(() => {
+    const keys = Object.keys(parsedAttributes ?? {});
+    const availableIndex = keys.indexOf("available");
+    if (availableIndex > -1) {
+      keys.splice(availableIndex, 1);
+      keys.unshift("available");
+    }
+    return keys;
+  }, [parsedAttributes]);
+
+  if (!shouldShow) {
     return null;
   }
-
-  const completed = isParsedAttributesComplete(parsedAttributes);
-  const propertyNotAvailable = isPropertyNotAvailable(parsedAttributes);
-
   return (
     <>
       {/* <div className="flex-1" /> */}
@@ -316,20 +366,23 @@ function ParsedAttributes({
             <XCircleIcon className="size-5 text-destructive" />
           )}
         </div>
-        <Table className="max-w-[300px] text-xs">
+        <Table className="text-xs">
           <TableHeader>
             <TableRow className="border-none">
-              {Object.keys(parsedAttributes ?? {}).map((attribute, i) => (
-                <TableHead key={i} className="h-[unset]">
-                  {attribute}
+              {parsedAttributesKeys.map((attributeId) => (
+                <TableHead key={attributeId} className="h-[unset]">
+                  {attributesMap.get(attributeId)?.label ??
+                    attributeId.charAt(0).toUpperCase() + attributeId.slice(1)}
                 </TableHead>
               ))}
             </TableRow>
           </TableHeader>
           <TableBody>
             <TableRow className="border-none">
-              {Object.values(parsedAttributes ?? {}).map((attribute, i) => (
-                <TableCell key={i}>{attribute ?? "???"}</TableCell>
+              {parsedAttributesKeys.map((attributeId) => (
+                <TableCell key={attributeId}>
+                  {parsedAttributes?.[attributeId] ?? "???"}
+                </TableCell>
               ))}
             </TableRow>
           </TableBody>

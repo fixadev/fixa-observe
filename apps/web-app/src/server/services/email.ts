@@ -543,7 +543,10 @@ export const emailService = ({ db }: { db: PrismaClient }) => {
       // Only extract attributes if the email is NOT from the user's email address
       if (user.email !== sender.emailAddress.address) {
         // Extract updated attributes
-        const attributesToUpdate = await extractAttributes(uniqueBody.content);
+        const attributesToUpdate = await extractAttributes(
+          uniqueBody.content,
+          Object.keys(emailThread.parsedAttributes ?? {}),
+        );
         const propertyToUpdate = await db.property.findUnique({
           where: { id: emailThread.propertyId },
         });
