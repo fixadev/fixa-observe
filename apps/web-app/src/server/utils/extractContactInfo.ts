@@ -1,30 +1,31 @@
-import { z } from 'zod';
+import { z } from "zod";
 import { zodResponseFormat } from "openai/helpers/zod";
-import { parsePDFWithoutLinks } from './parsePDF';
-import { openai } from './OpenAIClient';
+import { parsePDFWithoutLinks } from "./parsePDF";
+import { openai } from "./OpenAIClient";
 
 const Contact = z.object({
   firstName: z.string(),
   lastName: z.string(),
   email: z.string(),
   phone: z.string().nullable(),
-})
+});
 
 const ContactsObject = z.object({
   contacts: z.array(Contact),
-})
+});
 
 export async function extractContactInfo(brochureUrl: string) {
-
   const response = await fetch(brochureUrl);
   const file = await response.arrayBuffer();
-  const fileBlob = new Blob([file], { type: 'application/pdf' });
-  const pdfFile = new File([fileBlob], 'document.pdf', { type: 'application/pdf' });
+  const fileBlob = new Blob([file], { type: "application/pdf" });
+  const pdfFile = new File([fileBlob], "document.pdf", {
+    type: "application/pdf",
+  });
 
   const parsedPDF = await parsePDFWithoutLinks(pdfFile);
 
   if (parsedPDF.length === 0) {
-    throw new Error('No text found in PDF');
+    throw new Error("No text found in PDF");
   }
 
   console.log("parsedPDF", parsedPDF);
@@ -41,27 +42,33 @@ export async function extractContactInfo(brochureUrl: string) {
   - phone: string | null (format 123-456-7890)
 
   Return an array of the JSON objects.
-  `
+  `;
 
-  const completion = await openai.beta.chat.completions.parse({
-    model: "gpt-4o-2024-08-06",
-    messages: [
-      { role: "system", content: systemPrompt },
-      { role: "user", content: parsedPDF },
-    ],
-    response_format: zodResponseFormat(ContactsObject, "contacts"),
-  });
-  
+  let completion;
+  try {
+    completion = await openai.beta.chat.completions.parse({
+      model: "gpt-4o-2024-08-06",
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: parsedPDF },
+      ],
+      response_format: zodResponseFormat(ContactsObject, "contacts"),
+    });
+  } catch (error) {
+    console.error(error);
+    return [];
+  }
+
   const contactsObject = completion.choices[0]?.message.parsed;
 
   return contactsObject?.contacts;
-
 }
 
-
 // async function test() {
-//   const contacts = await extractContactInfo('https://pixa-real-estate.s3.amazonaws.com/401+Lambert.pdf');
-//   console.log('contacts', contacts);
+//   const contacts = await extractContactInfo(
+//     "https://pixa-real-estate.s3.amazonaws.com/401+Lambert.pdf",
+//   );
+//   console.log("contacts", contacts);
 // }
 
 // void test();
