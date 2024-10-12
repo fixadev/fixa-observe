@@ -7,6 +7,7 @@ import {
   TableRow,
   TableCell,
   TableBody,
+  TableHead,
 } from "~/components/ui/table";
 import {
   closestCenter,
@@ -52,7 +53,7 @@ import {
   REPLACEMENT_VARIABLES,
 } from "~/lib/constants";
 import { type Contact, type EmailTemplate } from "prisma/generated/zod";
-import { replaceTemplateVariables } from "~/lib/utils";
+import { replaceTemplateVariables, splitAddress } from "~/lib/utils";
 import { useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 
@@ -434,7 +435,7 @@ export function PropertiesTable({
       const replacements = {
         [REPLACEMENT_VARIABLES.name]: recipientFirstName,
         [REPLACEMENT_VARIABLES.address]:
-          property.attributes?.address?.split("\n")[0] ?? "",
+          splitAddress(property.attributes?.address ?? "").streetAddress ?? "",
         [REPLACEMENT_VARIABLES.fieldsToVerify]: attributesToVerify
           .map((attributeId) => {
             const attributeLabel = attributesMap.get(attributeId)?.label;
@@ -546,6 +547,7 @@ export function PropertiesTable({
                 <TableHeader>
                   <TableRow>
                     <TableCell className="w-[1%]"></TableCell>
+                    <TableHead className="w-[1%] text-black">Photo</TableHead>
                     <SortableContext
                       items={draggingRow ? rowIds : colIds}
                       strategy={
@@ -554,29 +556,14 @@ export function PropertiesTable({
                           : horizontalListSortingStrategy
                       }
                     >
-                      <DraggableHeader
-                        key={"photoHeader"}
-                        attribute={{
-                          id: "photoUrl",
-                          createdAt: new Date(),
-                          updatedAt: new Date(),
-                          type: "string",
-                          label: "Photo",
-                          ownerId: "",
-                          isNew: false,
-                        }}
-                        renameAttribute={() => false}
-                        deleteAttribute={() => false}
-                        draggingRow={draggingRow}
-                        state={state}
-                        disabled={true}
-                      />
                       {attributesOrder.map((attribute) => (
                         <DraggableHeader
                           key={attribute.id}
                           attribute={attribute}
-                          renameAttribute={(name) =>
-                            renameAttribute(attribute.id, name)
+                          renameAttribute={
+                            !attribute.ownerId
+                              ? undefined
+                              : (name) => renameAttribute(attribute.id, name)
                           }
                           deleteAttribute={() => deleteAttribute(attribute.id)}
                           draggingRow={draggingRow}
