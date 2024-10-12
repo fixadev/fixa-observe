@@ -8,7 +8,7 @@ export function ConfirmRemovePopup({
   onCancel: () => void;
 }) {
   return (
-    <div className="absolute bottom-3 right-3 flex h-[100px] w-[250px] flex-col items-center justify-center gap-2 rounded-lg border-black bg-white p-3">
+    <div className="absolute bottom-1 right-0 flex h-[100px] w-[250px] flex-col items-center justify-center gap-2 rounded-md border border-input bg-white p-3 shadow-sm">
       <p className="text-lg font-medium">Remove selected items?</p>
       <div className="flex w-full flex-row justify-end gap-2">
         <Button variant="ghost" onClick={onCancel}>

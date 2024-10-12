@@ -24,6 +24,8 @@ export function BrochureCarousel({
 }) {
   const [numPages, setNumPages] = useState<number>(0);
   const [loaded, setLoaded] = useState<boolean>(false);
+  const [isRemoving, setIsRemoving] = useState<boolean>(false);
+  const [isMouseDown, setIsMouseDown] = useState<boolean>(false);
   const [rectangles, setRectangles] = useState<
     Array<{
       pageNumber: number;
@@ -32,10 +34,6 @@ export function BrochureCarousel({
       objects: Array<{ x: number; y: number; width: number; height: number }>;
     }>
   >([]);
-
-  // useEffect(() => {
-  //   console.log("rectangles", rectangles);
-  // }, [rectangles]);
 
   const { toast } = useToast();
 
@@ -54,15 +52,17 @@ export function BrochureCarousel({
         title: "Objects removed successfully",
       });
       void refetchProperty();
+      setIsRemoving(false);
     },
   });
 
   function handleRemoveObjects() {
-    setRectangles([]);
+    setIsRemoving(true);
     removeObjects({
       brochureId: brochure.id,
       objectsToRemoveByPage: rectangles,
     });
+    setRectangles([]);
   }
 
   // TODO: fix this styling
@@ -89,17 +89,16 @@ export function BrochureCarousel({
                   renderAnnotationLayer={false}
                 >
                   <MaskGenerator
+                    isDrawing={isMouseDown}
+                    setIsDrawing={setIsMouseDown}
                     pageNumber={index}
                     rectangles={rectangles}
                     setRectangles={setRectangles}
                   />
-                  {rectangles.some((page) => page.objects.length > 0) && (
-                    <ConfirmRemovePopup
-                      onConfirm={handleRemoveObjects}
-                      onCancel={() => {
-                        setRectangles([]);
-                      }}
-                    />
+                  {isRemoving && (
+                    <div className="absolute flex h-full w-full items-center justify-center bg-white/50">
+                      <Spinner className="h-10 w-10 text-gray-500" />
+                    </div>
                   )}
                 </Page>
               </CarouselItem>
@@ -107,6 +106,16 @@ export function BrochureCarousel({
           </CarouselContent>
           <CarouselPrevious />
           <CarouselNext />
+          {rectangles.some((page) => page.objects.length > 0) &&
+            !isRemoving &&
+            !isMouseDown && (
+              <ConfirmRemovePopup
+                onConfirm={handleRemoveObjects}
+                onCancel={() => {
+                  setRectangles([]);
+                }}
+              />
+            )}
         </Carousel>
         {/* <div className="flex h-[100px] flex-row gap-2">
           {Array.from(new Array(numPages), (el, index) => (

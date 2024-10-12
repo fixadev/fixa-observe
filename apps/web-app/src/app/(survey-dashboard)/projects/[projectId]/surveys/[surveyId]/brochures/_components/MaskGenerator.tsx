@@ -7,15 +7,18 @@ type ObjectsToRemoveByPage = z.infer<
 >["objectsToRemoveByPage"];
 
 export function MaskGenerator({
+  isDrawing,
+  setIsDrawing,
   pageNumber,
   rectangles,
   setRectangles,
 }: {
+  isDrawing: boolean;
+  setIsDrawing: React.Dispatch<React.SetStateAction<boolean>>;
   pageNumber: number;
   rectangles: ObjectsToRemoveByPage;
   setRectangles: React.Dispatch<React.SetStateAction<ObjectsToRemoveByPage>>;
 }) {
-  const [isDrawing, setIsDrawing] = useState(false);
   const startPoint = useRef<{ x: number; y: number } | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerSize, setContainerSize] = useState({ width: 0, height: 0 });
@@ -36,16 +39,54 @@ export function MaskGenerator({
     return () => window.removeEventListener("resize", updateSize);
   }, []);
 
-  const handleMouseDown = useCallback((e: React.MouseEvent) => {
-    if (containerRef.current) {
-      const rect = containerRef.current.getBoundingClientRect();
-      startPoint.current = {
-        x: e.clientX - rect.left,
-        y: e.clientY - rect.top,
-      };
-      setIsDrawing(true);
-    }
-  }, []);
+  const handleMouseDown = useCallback(
+    (e: React.MouseEvent) => {
+      if (containerRef.current) {
+        const rect = containerRef.current.getBoundingClientRect();
+        startPoint.current = {
+          x: e.clientX - rect.left,
+          y: e.clientY - rect.top,
+        };
+        setIsDrawing(true);
+        setRectangles((prev) => {
+          const newObject = {
+            x: startPoint.current?.x ?? 0,
+            y: startPoint.current?.y ?? 0,
+            width: 0,
+            height: 0,
+          };
+          const pageIndex = prev.findIndex((p) => p.pageNumber === pageNumber);
+          if (pageIndex === -1) {
+            return [
+              ...prev,
+              {
+                pageNumber,
+                containerWidth: containerSize.width,
+                containerHeight: containerSize.height,
+                objects: [newObject],
+              },
+            ];
+          } else {
+            const newRectangles = [...prev];
+            newRectangles[pageIndex] = {
+              pageNumber: newRectangles[pageIndex]?.pageNumber ?? pageNumber,
+              containerWidth:
+                newRectangles[pageIndex]?.containerWidth ?? containerSize.width,
+              containerHeight:
+                newRectangles[pageIndex]?.containerHeight ??
+                containerSize.height,
+              objects: [
+                ...(newRectangles[pageIndex]?.objects ?? []),
+                newObject,
+              ],
+            };
+            return newRectangles;
+          }
+        });
+      }
+    },
+    [containerSize, pageNumber, setRectangles, setIsDrawing],
+  );
 
   const handleMouseMove = useCallback(
     (e: React.MouseEvent) => {
@@ -77,9 +118,13 @@ export function MaskGenerator({
         } else {
           const newRectangles = [...prev];
           newRectangles[pageIndex] = {
-            ...newRectangles[pageIndex],
+            pageNumber: newRectangles[pageIndex]?.pageNumber ?? pageNumber,
+            containerWidth:
+              newRectangles[pageIndex]?.containerWidth ?? containerSize.width,
+            containerHeight:
+              newRectangles[pageIndex]?.containerHeight ?? containerSize.height,
             objects: [
-              ...newRectangles[pageIndex].objects.slice(0, -1),
+              ...(newRectangles[pageIndex]?.objects.slice(0, -1) ?? []),
               newObject,
             ],
           };
@@ -110,10 +155,10 @@ export function MaskGenerator({
       }
     });
     startPoint.current = null;
-  }, [setRectangles, isDrawing, pageNumber, containerSize]);
+  }, [setRectangles, isDrawing, pageNumber, containerSize, setIsDrawing]);
 
   const currentPageRectangles =
-    rectangles.find((r) => r.pageNumber === pageNumber)?.objects || [];
+    rectangles.find((r) => r.pageNumber === pageNumber)?.objects ?? [];
 
   return (
     <div

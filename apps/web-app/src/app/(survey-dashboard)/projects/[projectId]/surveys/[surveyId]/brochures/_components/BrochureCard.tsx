@@ -134,7 +134,7 @@ function BrochureSidebar({
   );
 
   return (
-    <div className="relative flex w-1/6 flex-col self-start rounded-md border border-input shadow-sm">
+    <div className="relative flex w-[250px] flex-col self-start rounded-md border border-input shadow-sm">
       <div className="relative aspect-[4/3] w-full overflow-hidden rounded-t-md">
         {property.photoUrl ? (
           <Image src={property.photoUrl ?? ""} alt={"building photo"} fill />
