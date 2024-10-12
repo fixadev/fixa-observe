@@ -155,7 +155,7 @@ model EmailThread {
   propertyId String
 
   unread           Boolean @default(false)
-  parsedAttributes Json?   @db.JsonB
+  parsedAttributes Json    @default("{}") @db.JsonB
 }
 
 model Contact {
