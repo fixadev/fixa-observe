@@ -14,6 +14,7 @@ import { MaskGenerator } from "./MaskGenerator";
 import { ConfirmRemovePopup } from "./ConfirmRemovePopup";
 import { api } from "~/trpc/react";
 import { useToast } from "~/hooks/use-toast";
+import { TrashIcon } from "@heroicons/react/24/outline";
 
 export function BrochureCarousel({
   brochure,
@@ -34,6 +35,8 @@ export function BrochureCarousel({
       objects: Array<{ x: number; y: number; width: number; height: number }>;
     }>
   >([]);
+
+  const [deletedPages, setDeletedPages] = useState<Array<number>>([]);
 
   const { toast } = useToast();
 
@@ -76,33 +79,38 @@ export function BrochureCarousel({
       >
         <Carousel opts={{ watchDrag: false }}>
           <CarouselContent>
-            {Array.from(new Array(numPages), (el, index) => (
-              <CarouselItem
-                key={`page_${index + 1}`}
-                className="flex flex-col items-center justify-center object-contain px-6"
-              >
-                <Page
-                  onLoad={() => setLoaded(true)}
-                  className="flex h-[100px] max-w-full"
-                  pageNumber={index + 1}
-                  renderTextLayer={false}
-                  renderAnnotationLayer={false}
-                >
-                  <MaskGenerator
-                    isDrawing={isMouseDown}
-                    setIsDrawing={setIsMouseDown}
-                    pageNumber={index}
-                    rectangles={rectangles}
-                    setRectangles={setRectangles}
-                  />
-                  {isRemoving && (
-                    <div className="absolute flex h-full w-full items-center justify-center bg-white/50">
-                      <Spinner className="h-10 w-10 text-gray-500" />
-                    </div>
-                  )}
-                </Page>
-              </CarouselItem>
-            ))}
+            {Array.from(
+              new Array(numPages),
+              (el, index) =>
+                !deletedPages.includes(index) && (
+                  <CarouselItem
+                    key={`page_${index + 1}`}
+                    className="flex flex-col items-center justify-center object-contain px-6"
+                  >
+                    <Page
+                      onLoad={() => setLoaded(true)}
+                      className="flex max-w-full"
+                      height={600}
+                      pageNumber={index + 1}
+                      renderTextLayer={false}
+                      renderAnnotationLayer={false}
+                    >
+                      <MaskGenerator
+                        isDrawing={isMouseDown}
+                        setIsDrawing={setIsMouseDown}
+                        pageNumber={index}
+                        rectangles={rectangles}
+                        setRectangles={setRectangles}
+                      />
+                      {isRemoving && (
+                        <div className="absolute flex h-full w-full items-center justify-center bg-white/50">
+                          <Spinner className="h-10 w-10 text-gray-500" />
+                        </div>
+                      )}
+                    </Page>
+                  </CarouselItem>
+                ),
+            )}
           </CarouselContent>
           <CarouselPrevious />
           <CarouselNext />
@@ -117,31 +125,47 @@ export function BrochureCarousel({
               />
             )}
         </Carousel>
-        {/* <div className="flex h-[100px] flex-row gap-2">
+        <div className="mt-10 flex h-[100px] flex-row gap-2">
           {Array.from(new Array(numPages), (el, index) => (
             <Page
               key={`page_${index + 1}`}
               onLoad={() => setLoaded(true)}
-              className="flex max-h-[100px] max-w-full"
+              className="flex max-w-full"
+              height={100}
               pageNumber={index + 1}
               renderTextLayer={false}
               renderAnnotationLayer={false}
             >
-              <MaskGenerator
-                rectangles={rectangles}
-                setRectangles={setRectangles}
-              />
-              {rectangles.length > 0 && (
-                <ConfirmRemovePopup
-                  onConfirm={() => {}}
-                  onCancel={() => {
-                    setRectangles([]);
-                  }}
+              <div
+                className={`group absolute flex h-full w-full items-center justify-center ${
+                  deletedPages.includes(index)
+                    ? "bg-black/50"
+                    : "bg-transparent"
+                } hover:cursor-pointer hover:bg-black/50`}
+                onClick={() => {
+                  if (deletedPages.includes(index)) {
+                    setDeletedPages((prev) =>
+                      prev.filter((page) => page !== index),
+                    );
+                  } else {
+                    setDeletedPages((prev) => [...prev, index]);
+                  }
+                }}
+              >
+                <TrashIcon
+                  className={`h-6 w-6 text-white group-hover:opacity-100 ${
+                    deletedPages.includes(index) ? "opacity-100" : "opacity-0"
+                  }`}
                 />
-              )}
+                {/* <Switch
+                  checked={deletedPages.includes(index)}
+                  className="data-[state=checked]:bg-red-500"
+                  onCheckedChange={(checked) => {}}
+                /> */}
+              </div>
             </Page>
           ))}
-        </div> */}
+        </div>
       </Document>
       <div
         className={
