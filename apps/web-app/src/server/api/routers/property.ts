@@ -6,6 +6,7 @@ import {
   photoUploadSchema,
   brochureSchema,
   brochureWithoutPropertyIdSchema,
+  removeObjectsInput,
 } from "~/lib/property";
 import { propertyService } from "~/server/services/property";
 import { db } from "~/server/db";
@@ -85,5 +86,11 @@ export const propertyRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       console.log('input', input);
       return
+    }),
+
+  removeObjects: protectedProcedure
+    .input(removeObjectsInput)
+    .mutation(async ({ ctx, input }) => {
+      return await propertyServiceInstance.removeObjects(input);
     }),
 });

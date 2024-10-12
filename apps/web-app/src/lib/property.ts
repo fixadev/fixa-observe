@@ -68,3 +68,24 @@ export const headerMappingSchema = z.record(
 );
 
 export type HeaderMapping = z.infer<typeof headerMappingSchema>;
+
+
+export type RemoveObjectsInput = z.infer<typeof removeObjectsInput>;
+export const removeObjectsInput = z.object({
+  brochureId: z.string(),
+  objectsToRemoveByPage: z.array(
+    z.object({
+      pageNumber: z.number(),
+      containerWidth: z.number(),
+      containerHeight: z.number(),
+      objects: z.array(
+        z.object({
+          x: z.number(),
+          y: z.number(),
+          width: z.number(),
+          height: z.number(),
+        }),
+      ),
+    }),
+  ),
+});

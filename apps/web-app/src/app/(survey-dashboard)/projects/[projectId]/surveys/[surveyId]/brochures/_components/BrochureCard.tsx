@@ -80,7 +80,10 @@ function UnapprovedBrochureCard({
       />
       <div className="flex w-5/6 flex-col items-center justify-center">
         {brochure ? (
-          <BrochureCarousel brochure={brochure} />
+          <BrochureCarousel
+            brochure={brochure}
+            refetchProperty={refetchProperty}
+          />
         ) : (
           <FileInput
             className="h-full w-full"

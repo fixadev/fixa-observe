@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Carousel,
   CarouselContent,
@@ -10,10 +10,34 @@ import {
 import { type BrochureSchema } from "~/lib/property";
 import { Document, Page, pdfjs } from "react-pdf";
 import Spinner from "~/components/Spinner";
+import { MaskGenerator } from "./MaskGenerator";
+import { ConfirmRemovePopup } from "./ConfirmRemovePopup";
+import { api } from "~/trpc/react";
+import { useToast } from "~/hooks/use-toast";
 
-export function BrochureCarousel({ brochure }: { brochure: BrochureSchema }) {
+export function BrochureCarousel({
+  brochure,
+  refetchProperty,
+}: {
+  brochure: BrochureSchema;
+  refetchProperty: () => void;
+}) {
   const [numPages, setNumPages] = useState<number>(0);
   const [loaded, setLoaded] = useState<boolean>(false);
+  const [rectangles, setRectangles] = useState<
+    Array<{
+      pageNumber: number;
+      containerWidth: number;
+      containerHeight: number;
+      objects: Array<{ x: number; y: number; width: number; height: number }>;
+    }>
+  >([]);
+
+  useEffect(() => {
+    console.log("rectangles", rectangles);
+  }, [rectangles]);
+
+  const { toast } = useToast();
 
   const pdfUrl = `/api/cors-proxy?url=${encodeURIComponent(brochure.url)}`;
 
@@ -22,6 +46,22 @@ export function BrochureCarousel({ brochure }: { brochure: BrochureSchema }) {
   function onDocumentLoadSuccess({ numPages }: { numPages: number }) {
     setNumPages(numPages);
     setLoaded(true);
+  }
+
+  const { mutate: removeObjects } = api.property.removeObjects.useMutation({
+    onSuccess: () => {
+      toast({
+        title: "Objects removed successfully",
+      });
+      void refetchProperty();
+    },
+  });
+
+  function handleRemoveObjects() {
+    removeObjects({
+      brochureId: brochure.id,
+      objectsToRemoveByPage: rectangles,
+    });
   }
 
   // TODO: fix this styling
@@ -33,7 +73,7 @@ export function BrochureCarousel({ brochure }: { brochure: BrochureSchema }) {
         file={pdfUrl}
         onLoadSuccess={onDocumentLoadSuccess}
       >
-        <Carousel>
+        <Carousel opts={{ watchDrag: false }}>
           <CarouselContent>
             {Array.from(new Array(numPages), (el, index) => (
               <CarouselItem
@@ -46,13 +86,52 @@ export function BrochureCarousel({ brochure }: { brochure: BrochureSchema }) {
                   pageNumber={index + 1}
                   renderTextLayer={false}
                   renderAnnotationLayer={false}
-                />
+                >
+                  <MaskGenerator
+                    pageNumber={index}
+                    rectangles={rectangles}
+                    setRectangles={setRectangles}
+                  />
+                  {rectangles.some((page) => page.objects.length > 0) && (
+                    <ConfirmRemovePopup
+                      onConfirm={handleRemoveObjects}
+                      onCancel={() => {
+                        setRectangles([]);
+                      }}
+                    />
+                  )}
+                </Page>
               </CarouselItem>
             ))}
           </CarouselContent>
           <CarouselPrevious />
           <CarouselNext />
         </Carousel>
+        {/* <div className="flex h-[100px] flex-row gap-2">
+          {Array.from(new Array(numPages), (el, index) => (
+            <Page
+              key={`page_${index + 1}`}
+              onLoad={() => setLoaded(true)}
+              className="flex max-h-[100px] max-w-full"
+              pageNumber={index + 1}
+              renderTextLayer={false}
+              renderAnnotationLayer={false}
+            >
+              <MaskGenerator
+                rectangles={rectangles}
+                setRectangles={setRectangles}
+              />
+              {rectangles.length > 0 && (
+                <ConfirmRemovePopup
+                  onConfirm={() => {}}
+                  onCancel={() => {
+                    setRectangles([]);
+                  }}
+                />
+              )}
+            </Page>
+          ))}
+        </div> */}
       </Document>
       <div
         className={

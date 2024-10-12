@@ -1,9 +1,11 @@
 import { type PrismaClient } from "@prisma/client";
+import axios from "axios";
 import {
   type BrochureSchema,
   type CreatePropertySchema,
   type BrochureWithoutPropertyId,
   type PropertySchema,
+  type RemoveObjectsInput,
 } from "~/lib/property";
 import { extractContactInfo } from "../utils/extractContactInfo";
 import { formatAddresses } from "../utils/formatAddresses";
@@ -231,6 +233,29 @@ export const propertyService = ({ db }: { db: PrismaClient }) => {
           ownerId: userId,
         },
       });
+    },
+
+    removeObjects: async (input: RemoveObjectsInput) => {
+      try {
+        const data = await db.brochure.findUnique({
+          where: {
+            id: input.brochureId,
+          },
+        });
+        const response = await axios.post<{ success: boolean; url: string }>(
+          "http://localhost:8000/inpaint",
+          {
+            brochureUrl: data?.url,
+            objectsToRemoveByPage: input.objectsToRemoveByPage,
+        });
+        return await db.brochure.update({
+          where: { id: input.brochureId },
+          data: { url: response.data.url },
+        });
+      } catch (error) {
+        console.error('Error removing objects:', error);
+        throw error;
+      }
     },
   };
 };
