@@ -1,9 +1,11 @@
 import {
+  CheckCircleIcon,
   ChevronDownIcon,
   DocumentTextIcon,
   PaperClipIcon,
   PhotoIcon,
 } from "@heroicons/react/24/solid";
+import axios from "axios";
 import { type Attachment } from "prisma/generated/zod";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Spinner from "~/components/Spinner";
@@ -14,13 +16,15 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
-import { downloadBase64File } from "~/lib/utils";
+import { base64ToArrayBuffer, downloadBase64File } from "~/lib/utils";
 import { api } from "~/trpc/react";
 
 export default function AttachmentCard({
   attachment: _attachment,
+  propertyId,
 }: {
   attachment: Attachment;
+  propertyId: string;
 }) {
   const [attachment, setAttachment] = useState<Attachment>(_attachment);
   useEffect(() => {
@@ -41,26 +45,97 @@ export default function AttachmentCard({
     [attachment.contentType],
   );
 
-  const { mutateAsync: dismissAttachmentInfoMessage } =
-    api.email.dismissAttachmentInfoMessage.useMutation();
-  const dismissInfoMessage = useCallback(() => {
-    // Implementation for replacing brochure
+  const { mutateAsync: updateAttachment } =
+    api.email.updateAttachment.useMutation();
+  const { mutateAsync: getAttachmentContent } =
+    api.email.getAttachmentContent.useMutation();
+  const { mutateAsync: createBrochure } =
+    api.property.createBrochure.useMutation();
+
+  const dismissInfoMessage = useCallback(async () => {
     setAttachment((prev) => ({
       ...prev,
       infoMessageDismissed: true,
     }));
-    void dismissAttachmentInfoMessage({
-      emailId: attachment.emailId,
-      attachmentId: attachment.id,
-    });
-  }, [attachment.emailId, attachment.id, dismissAttachmentInfoMessage]);
-  const replaceBrochure = useCallback(() => {
-    // Implementation for replacing brochure
-    dismissInfoMessage();
-  }, [dismissInfoMessage]);
+    try {
+      await updateAttachment({
+        emailId: attachment.emailId,
+        attachmentId: attachment.id,
+        attachment: { infoMessageDismissed: true },
+      });
+    } catch (error) {
+      console.error(error);
+      setAttachment((prev) => ({
+        ...prev,
+        infoMessageDismissed: false,
+      }));
+    }
+  }, [attachment.emailId, attachment.id, updateAttachment]);
 
-  const { mutateAsync: getAttachmentContent } =
-    api.email.getAttachmentContent.useMutation();
+  const replaceBrochure = useCallback(async () => {
+    setAttachment((prev) => ({
+      ...prev,
+      brochureReplaced: true,
+    }));
+    try {
+      // Get the attachment content
+      const content = await getAttachmentContent({
+        emailId: attachment.emailId,
+        attachmentId: attachment.id,
+      });
+      const blob = new Blob([base64ToArrayBuffer(content)], {
+        type: attachment.contentType,
+      });
+
+      // Upload the file to S3
+      const formData = new FormData();
+      formData.append("file", blob, crypto.randomUUID());
+      const response = await axios.post<{ url: string; type: string }>(
+        "/api/upload",
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        },
+      );
+
+      // Create the brochure in the database
+      await createBrochure({
+        propertyId,
+        brochure: {
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          title: attachment.name,
+          url: response.data.url,
+          approved: false,
+        },
+      });
+
+      // Update brochureReplaced to true
+      await updateAttachment({
+        emailId: attachment.emailId,
+        attachmentId: attachment.id,
+        attachment: { brochureReplaced: true },
+      });
+    } catch (error) {
+      console.error(error);
+      setAttachment((prev) => ({
+        ...prev,
+        brochureReplaced: false,
+      }));
+    }
+  }, [
+    getAttachmentContent,
+    attachment.emailId,
+    attachment.id,
+    attachment.contentType,
+    attachment.name,
+    createBrochure,
+    propertyId,
+    updateAttachment,
+  ]);
+
   const [isDownloading, setIsDownloading] = useState(false);
   const downloadAttachment = useCallback(async () => {
     setIsDownloading(true);
@@ -86,14 +161,21 @@ export default function AttachmentCard({
   return (
     <div>
       <div className="flex min-w-20 items-center rounded-md border border-input">
-        <div className="flex size-14 shrink-0 items-center justify-center rounded-l-md bg-muted text-muted-foreground">
-          {isPdf ? (
-            <DocumentTextIcon className="size-6" />
-          ) : isImage ? (
-            <PhotoIcon className="size-6" />
-          ) : (
-            <PaperClipIcon className="size-6" />
-          )}
+        <div className="relative flex size-14 shrink-0 items-center justify-center rounded-l-md bg-muted text-muted-foreground">
+          <div className="relative">
+            {isPdf ? (
+              <DocumentTextIcon className="size-6" />
+            ) : isImage ? (
+              <PhotoIcon className="size-6" />
+            ) : (
+              <PaperClipIcon className="size-6" />
+            )}
+            {attachment.brochureReplaced && (
+              <div className="absolute -bottom-1 -right-1 rounded-full bg-white">
+                <CheckCircleIcon className="size-4 text-green-500" />
+              </div>
+            )}
+          </div>
         </div>
         <div className="flex-1 p-2">
           <div className="text-sm">{attachment.name}</div>
@@ -133,7 +215,7 @@ export default function AttachmentCard({
           </div>
         )}
       </div>
-      {!attachment.infoMessageDismissed && (
+      {!attachment.infoMessageDismissed && !attachment.brochureReplaced && (
         <div className="flex items-center gap-1 text-xs text-muted-foreground">
           Replace brochure with this file?{" "}
           <Button

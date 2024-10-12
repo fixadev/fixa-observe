@@ -2,6 +2,7 @@ import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { db } from "~/server/db";
 import { emailService } from "~/server/services/email";
+import { AttachmentSchema } from "prisma/generated/zod";
 
 const emailServiceInstance = emailService({ db });
 
@@ -130,12 +131,19 @@ export const emailRouter = createTRPCRouter({
       });
     }),
 
-  dismissAttachmentInfoMessage: protectedProcedure
-    .input(z.object({ emailId: z.string(), attachmentId: z.string() }))
+  updateAttachment: protectedProcedure
+    .input(
+      z.object({
+        emailId: z.string(),
+        attachmentId: z.string(),
+        attachment: AttachmentSchema.omit({ id: true }).partial(),
+      }),
+    )
     .mutation(async ({ input }) => {
-      return await emailServiceInstance.dismissAttachmentInfoMessage({
+      return await emailServiceInstance.updateAttachment({
         emailId: input.emailId,
         attachmentId: input.attachmentId,
+        attachment: input.attachment,
       });
     }),
 });

@@ -4,6 +4,7 @@ import { env } from "~/env";
 import { extractAttributes } from "../utils/extractAttributes";
 import { taskService } from "./task";
 import { JSDOM } from "jsdom";
+import { type Attachment } from "prisma/generated/zod";
 // import { db } from "../db";
 
 const outlookApiUrl = "https://graph.microsoft.com/v1.0";
@@ -739,16 +740,18 @@ export const emailService = ({ db }: { db: PrismaClient }) => {
       return response.data.contentBytes;
     },
 
-    dismissAttachmentInfoMessage: async ({
+    updateAttachment: async ({
       emailId,
       attachmentId,
+      attachment,
     }: {
       emailId: string;
       attachmentId: string;
+      attachment: Partial<Omit<Attachment, "id">>;
     }) => {
       await db.attachment.update({
         where: { id: attachmentId, emailId },
-        data: { infoMessageDismissed: true },
+        data: attachment,
       });
     },
   };

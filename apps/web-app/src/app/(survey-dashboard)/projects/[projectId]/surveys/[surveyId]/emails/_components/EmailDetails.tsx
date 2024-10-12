@@ -144,6 +144,7 @@ function EmailThreadDetails({
         <EmailCard
           key={email.id}
           email={email}
+          propertyId={emailThread.propertyId}
           className="shrink-0"
           expanded={expanded[email.id] ?? true}
           onClick={() =>

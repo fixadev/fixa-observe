@@ -51,7 +51,7 @@ function UnapprovedBrochureCard({
     }
 
     const formData = new FormData();
-    formData.append("file", file, file.name);
+    formData.append("file", file, crypto.randomUUID());
     const response = await fetch("/api/upload", {
       method: "POST",
       body: formData,
