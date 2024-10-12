@@ -5,7 +5,7 @@ import {
   PhotoIcon,
 } from "@heroicons/react/24/solid";
 import { type Attachment } from "prisma/generated/zod";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Spinner from "~/components/Spinner";
 import { Button } from "~/components/ui/button";
 import {
@@ -18,10 +18,15 @@ import { downloadBase64File } from "~/lib/utils";
 import { api } from "~/trpc/react";
 
 export default function AttachmentCard({
-  attachment,
+  attachment: _attachment,
 }: {
   attachment: Attachment;
 }) {
+  const [attachment, setAttachment] = useState<Attachment>(_attachment);
+  useEffect(() => {
+    setAttachment(_attachment);
+  }, [_attachment]);
+
   const formatBytes = useCallback((bytes: number) => {
     if (bytes < 1024) return `${bytes} B`;
     if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(2)} KB`;
@@ -36,15 +41,23 @@ export default function AttachmentCard({
     [attachment.contentType],
   );
 
-  const { mutateAsync: dismissInfoMessage } =
+  const { mutateAsync: dismissAttachmentInfoMessage } =
     api.email.dismissAttachmentInfoMessage.useMutation();
-  const replaceBrochure = useCallback(() => {
+  const dismissInfoMessage = useCallback(() => {
     // Implementation for replacing brochure
-    void dismissInfoMessage({
+    setAttachment((prev) => ({
+      ...prev,
+      infoMessageDismissed: true,
+    }));
+    void dismissAttachmentInfoMessage({
       emailId: attachment.emailId,
       attachmentId: attachment.id,
     });
-  }, [attachment.emailId, attachment.id, dismissInfoMessage]);
+  }, [attachment.emailId, attachment.id, dismissAttachmentInfoMessage]);
+  const replaceBrochure = useCallback(() => {
+    // Implementation for replacing brochure
+    dismissInfoMessage();
+  }, [dismissInfoMessage]);
 
   const { mutateAsync: getAttachmentContent } =
     api.email.getAttachmentContent.useMutation();
@@ -132,12 +145,7 @@ export default function AttachmentCard({
             Yes
           </Button>
           <Button
-            onClick={() =>
-              dismissInfoMessage({
-                emailId: attachment.emailId,
-                attachmentId: attachment.id,
-              })
-            }
+            onClick={dismissInfoMessage}
             variant="link"
             size="sm"
             className="h-auto p-2"
