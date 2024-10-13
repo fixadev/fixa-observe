@@ -133,16 +133,17 @@ export function PropertiesTable({
     },
   });
 
-  const { mutate: updateProperties } = api.survey.updateProperties.useMutation({
-    onMutate: () => pendingMutations.current++,
-    onSettled: () => {
-      pendingMutations.current--;
-      if (pendingMutations.current === 0) {
-        void refetchSurvey();
-        setIsUploadingProperties(false);
-      }
-    },
-  });
+  const { mutateAsync: updateProperties } =
+    api.survey.updateProperties.useMutation({
+      onMutate: () => pendingMutations.current++,
+      onSettled: () => {
+        pendingMutations.current--;
+        if (pendingMutations.current === 0) {
+          void refetchSurvey();
+          setIsUploadingProperties(false);
+        }
+      },
+    });
 
   // TODO: refactor this into the separate functions
   const setProperties = useCallback(
@@ -173,21 +174,23 @@ export function PropertiesTable({
         updatedProperties = newPropertiesOrCallback as typeof updatedProperties;
       }
 
+      // Update state
+      setPropertiesState(
+        updatedProperties.map((property) => ({
+          ...property,
+          emailThreads: property.emailThreads ?? [],
+          contacts: property.contacts ?? [],
+          brochures: property.brochures ?? [],
+        })),
+      );
+
       try {
-        void updateProperties({
+        await updateProperties({
           surveyId,
           properties: updatedProperties,
           action,
           propertyId,
         });
-        setPropertiesState(
-          updatedProperties.map((property) => ({
-            ...property,
-            emailThreads: property.emailThreads ?? [],
-            contacts: property.contacts ?? [],
-            brochures: property.brochures ?? [],
-          })),
-        ); // Update state
       } catch (error) {
         console.error("Failed to update properties:", error);
       }

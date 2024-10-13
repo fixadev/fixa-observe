@@ -71,10 +71,10 @@ export default function EmailTemplateDialog({
         }),
       ]);
       void refetchEmailTemplate();
-      onSubmitted?.();
     } finally {
       setIsSaving(false);
       onOpenChange(false);
+      onSubmitted?.();
     }
   }, [
     updateEmailTemplate,
