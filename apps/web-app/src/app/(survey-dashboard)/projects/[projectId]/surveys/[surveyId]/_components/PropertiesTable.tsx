@@ -99,7 +99,6 @@ export function PropertiesTable({
           ...property,
           attributes: property.attributes as Record<string, string>,
           isNew: false,
-          brochures: property.brochures,
         })),
       );
     }
@@ -161,11 +160,17 @@ export function PropertiesTable({
       propertyId?: string,
     ) => {
       if (!survey) return;
-      let updatedProperties: Property[];
+      let updatedProperties: (PropertySchema & {
+        emailThreads?: (EmailThread & { emails: Email[] })[];
+        contacts?: Contact[];
+        brochures?: Brochure[];
+      })[];
       if (typeof newPropertiesOrCallback === "function") {
-        updatedProperties = newPropertiesOrCallback(properties) as Property[];
+        updatedProperties = newPropertiesOrCallback(
+          properties,
+        ) as typeof updatedProperties;
       } else {
-        updatedProperties = newPropertiesOrCallback as Property[];
+        updatedProperties = newPropertiesOrCallback as typeof updatedProperties;
       }
 
       try {
@@ -175,12 +180,19 @@ export function PropertiesTable({
           action,
           propertyId,
         });
-        setPropertiesState(updatedProperties); // Update state
+        setPropertiesState(
+          updatedProperties.map((property) => ({
+            ...property,
+            emailThreads: property.emailThreads ?? [],
+            contacts: property.contacts ?? [],
+            brochures: property.brochures ?? [],
+          })),
+        ); // Update state
       } catch (error) {
         console.error("Failed to update properties:", error);
       }
     },
-    [survey, properties, surveyId, updateProperties, setPropertiesState],
+    [survey, properties, surveyId, updateProperties],
   );
 
   // state setter wrapper to update db as well
