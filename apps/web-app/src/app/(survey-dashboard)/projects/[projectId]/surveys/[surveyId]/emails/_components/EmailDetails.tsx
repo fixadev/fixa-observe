@@ -6,27 +6,10 @@ import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Textarea } from "~/components/ui/textarea";
 import EmailCard from "./EmailCard";
-import {
-  CheckCircleIcon,
-  EllipsisHorizontalCircleIcon,
-  XCircleIcon,
-} from "@heroicons/react/24/solid";
-import {
-  Table,
-  TableHeader,
-  TableHead,
-  TableRow,
-  TableCell,
-  TableBody,
-} from "~/components/ui/table";
 import { type EmailThreadWithEmailsAndProperty } from "~/lib/types";
 import { api } from "~/trpc/react";
 import Spinner from "~/components/Spinner";
-import {
-  emailIsDraft,
-  isParsedAttributesComplete,
-  isPropertyNotAvailable,
-} from "~/lib/utils";
+import { emailIsDraft } from "~/lib/utils";
 import { type Email } from "prisma/generated/zod";
 import {
   AlertDialog,
@@ -39,9 +22,6 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "~/components/ui/alert-dialog";
-import { useUser } from "@clerk/nextjs";
-import { useSurvey } from "~/hooks/useSurvey";
-import Link from "next/link";
 
 export default function EmailDetails({
   emailThread,
@@ -169,10 +149,7 @@ function EmailThreadDetails({
       ))}
       <div className="flex-1" />
       <Separator className="-mx-2 w-[calc(100%+1rem)]" />
-      <PropertyCard
-        property={emailThread.property}
-        rightContent={<ParsedAttributes emailThread={emailThread} />}
-      />
+      <PropertyCard emailThread={emailThread} />
       <Textarea
         className="h-40 shrink-0"
         placeholder="Write a reply..."
@@ -253,7 +230,7 @@ function UnsentEmailDetails({
           disabled={isSending}
         />
       </div>
-      <PropertyCard property={emailThread.property} />
+      <PropertyCard emailThread={emailThread} />
       <Textarea
         className="flex-1"
         placeholder="Write your email here..."
@@ -290,111 +267,5 @@ function UnsentEmailDetails({
         </AlertDialog>
       </div>
     </div>
-  );
-}
-
-function ParsedAttributes({
-  emailThread,
-}: {
-  emailThread: EmailThreadWithEmailsAndProperty;
-}) {
-  const { user } = useUser();
-
-  const parsedAttributes = useMemo(
-    () => emailThread.parsedAttributes as Record<string, string>,
-    [emailThread.parsedAttributes],
-  );
-
-  const shouldShow = useMemo(() => {
-    // Only show if the email thread contains emails from other people
-    return emailThread.emails.some(
-      (email) => email.senderEmail !== user?.primaryEmailAddress?.emailAddress,
-    );
-  }, [emailThread.emails, user?.primaryEmailAddress?.emailAddress]);
-
-  const completed = useMemo(
-    () => isParsedAttributesComplete(parsedAttributes),
-    [parsedAttributes],
-  );
-  const propertyNotAvailable = useMemo(
-    () => isPropertyNotAvailable(parsedAttributes),
-    [parsedAttributes],
-  );
-
-  const { survey } = useSurvey();
-  const { data: attributes } = api.survey.getSurveyAttributes.useQuery(
-    {
-      surveyId: survey!.id,
-    },
-    { enabled: !!survey },
-  );
-  const attributesMap = useMemo(
-    () => new Map(attributes?.map((attr) => [attr.id, attr]) ?? []),
-    [attributes],
-  );
-
-  // Move "available" to the front
-  const parsedAttributesKeys = useMemo(() => {
-    const keys = Object.keys(parsedAttributes);
-    const availableIndex = keys.indexOf("available");
-    if (availableIndex > -1) {
-      keys.splice(availableIndex, 1);
-      keys.unshift("available");
-    }
-    return keys;
-  }, [parsedAttributes]);
-
-  if (!shouldShow) {
-    return null;
-  }
-  return (
-    <>
-      <Separator orientation="vertical" />
-      <div className="flex shrink-0 flex-col items-start gap-2 pr-4">
-        <div className="flex w-full items-baseline gap-1 px-2 pt-2 text-sm font-medium">
-          <div className="flex items-center gap-1">
-            {propertyNotAvailable
-              ? "Property not available"
-              : completed
-                ? "Property details confirmed"
-                : "More info needed"}
-            {propertyNotAvailable ? (
-              <XCircleIcon className="size-5 text-destructive" />
-            ) : completed ? (
-              <CheckCircleIcon className="size-5 text-green-500" />
-            ) : (
-              <EllipsisHorizontalCircleIcon className="size-5 text-gray-500" />
-            )}
-          </div>
-          <div className="flex-1" />
-          <Button variant="outline" size="sm" asChild>
-            <Link href={`./?propertyId=${emailThread.propertyId}`}>
-              View table
-            </Link>
-          </Button>
-        </div>
-        <Table className="text-xs">
-          <TableHeader>
-            <TableRow className="border-none">
-              {parsedAttributesKeys.map((attributeId) => (
-                <TableHead key={attributeId} className="h-[unset]">
-                  {attributesMap.get(attributeId)?.label ??
-                    attributeId.charAt(0).toUpperCase() + attributeId.slice(1)}
-                </TableHead>
-              ))}
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            <TableRow className="border-none">
-              {parsedAttributesKeys.map((attributeId) => (
-                <TableCell key={attributeId}>
-                  {parsedAttributes?.[attributeId] ?? "???"}
-                </TableCell>
-              ))}
-            </TableRow>
-          </TableBody>
-        </Table>
-      </div>
-    </>
   );
 }
