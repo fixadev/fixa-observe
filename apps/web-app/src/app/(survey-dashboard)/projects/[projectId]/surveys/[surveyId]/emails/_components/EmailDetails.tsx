@@ -137,6 +137,10 @@ function EmailThreadDetails({
 
   const [replyBody, setReplyBody] = useState<string>("");
 
+  const isComplete = useMemo(() => {
+    return replyBody.length > 0;
+  }, [replyBody]);
+
   const handleSend = useCallback(async () => {
     if (isSending) {
       return;
@@ -182,7 +186,11 @@ function EmailThreadDetails({
         }}
         disabled={isSending}
       />
-      <Button className="self-start" onClick={handleSend} disabled={isSending}>
+      <Button
+        className="self-start"
+        onClick={handleSend}
+        disabled={!isComplete || isSending}
+      >
         {isSending ? <Spinner /> : "Send"}
       </Button>
     </div>
