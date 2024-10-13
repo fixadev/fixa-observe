@@ -360,7 +360,9 @@ function ParsedAttributes({
           </div>
           <div className="flex-1" />
           <Button variant="outline" size="sm" asChild>
-            <Link href={`./#${emailThread.propertyId}`}>View table</Link>
+            <Link href={`./?propertyId=${emailThread.propertyId}`}>
+              View table
+            </Link>
           </Button>
         </div>
         <Table className="text-xs">

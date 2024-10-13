@@ -43,6 +43,7 @@ import {
 } from "@/components/ui/tooltip";
 import { cn, emailIsDraft } from "~/lib/utils";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 
 export const DraggableRow = ({
   photoUrl,
@@ -193,15 +194,14 @@ export const DraggableRow = ({
     setTimeout(flash, 300);
   }, []);
   const hasFlashed = useRef(false);
+  const searchParams = useSearchParams();
   useEffect(() => {
-    if (window && window.location.hash) {
-      const propertyIdInHash = window.location.hash.replace("#", "");
-      if (propertyIdInHash === property.id && !hasFlashed.current) {
-        highlight();
-        hasFlashed.current = true;
-      }
+    const propertyIdInParams = searchParams.get("propertyId");
+    if (propertyIdInParams === property.id && !hasFlashed.current) {
+      highlight();
+      hasFlashed.current = true;
     }
-  }, [property.id, highlight]);
+  }, [property.id, highlight, searchParams]);
 
   return (
     <TableRow
@@ -210,7 +210,7 @@ export const DraggableRow = ({
         rowRef.current = el;
       }}
       style={style}
-      className={cn("relative", highlighted && "bg-black/10")}
+      className={cn("relative", highlighted && "bg-black/10 hover:bg-black/10")}
     >
       <TableCell
         onMouseEnter={() => {
