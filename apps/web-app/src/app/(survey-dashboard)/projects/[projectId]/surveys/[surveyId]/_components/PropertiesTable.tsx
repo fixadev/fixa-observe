@@ -145,6 +145,17 @@ export function PropertiesTable({
       },
     });
 
+  const { mutateAsync: updatePropertiesOrder } =
+    api.survey.updatePropertiesOrder.useMutation({
+      onMutate: () => pendingMutations.current++,
+      onSettled: () => {
+        pendingMutations.current--;
+        if (pendingMutations.current === 0) {
+          void refetchSurvey();
+        }
+      },
+    });
+
   // TODO: refactor this into the separate functions
   const setProperties = useCallback(
     async (
@@ -185,12 +196,14 @@ export function PropertiesTable({
       );
 
       try {
-        await updateProperties({
-          surveyId,
-          properties: updatedProperties,
-          action,
-          propertyId,
-        });
+        if (action !== "order") {
+          await updateProperties({
+            surveyId,
+            properties: updatedProperties,
+            action,
+            propertyId,
+          });
+        }
       } catch (error) {
         console.error("Failed to update properties:", error);
       }
@@ -250,11 +263,14 @@ export function PropertiesTable({
       const { active, over } = event;
       if (active && over && active.id !== over.id) {
         if (draggingRow) {
-          void setProperties((data) => {
-            const oldIndex = rowIds.findIndex((id) => id === active.id);
-            const newIndex = rowIds.findIndex((id) => id === over.id);
-            return arrayMove(data, oldIndex, newIndex);
-          }, "order");
+          const oldIndex = rowIds.findIndex((id) => id === active.id);
+          const newIndex = rowIds.findIndex((id) => id === over.id);
+          setPropertiesState((prev) => arrayMove(prev, oldIndex, newIndex));
+          void updatePropertiesOrder({
+            propertyIds: rowIds,
+            oldIndex,
+            newIndex,
+          });
         } else {
           void modifyAttributes((data) => {
             const oldIndex = colIds.findIndex((id) => id === active.id);
@@ -264,7 +280,7 @@ export function PropertiesTable({
         }
       }
     },
-    [draggingRow, rowIds, colIds, setProperties, modifyAttributes],
+    [draggingRow, rowIds, updatePropertiesOrder, modifyAttributes, colIds],
   );
 
   const sensors = useSensors(

@@ -1,5 +1,4 @@
 import { type Attribute, type PrismaClient } from "@prisma/client";
-import { type PropertySchema } from "~/lib/property";
 import { type CreateSurveyInput } from "~/lib/survey";
 import { type SurveySchema } from "~/lib/survey";
 
@@ -231,39 +230,29 @@ export const surveyService = ({ db }: { db: PrismaClient }) => {
     },
 
     updatePropertiesOrder: async (
-      surveyId: string,
-      properties: PropertySchema[],
-      userId: string,
+      propertyIds: string[],
+      oldIndex: number,
+      newIndex: number,
     ) => {
-      await db.survey.update({
-        where: { id: surveyId, ownerId: userId },
-        data: {
-          properties: {
-            deleteMany: {},
-          },
-        },
-      });
-      const propertiesWithOrder = properties.map((property, index) => {
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const { surveyId, ...rest } = property;
-        return {
-          ...rest,
-          displayIndex: index,
-          attributes: property.attributes ?? {},
-        };
-      });
+      const updatePromises = [];
+      const increment = oldIndex < newIndex ? -1 : 1;
+      for (let i = newIndex; i !== oldIndex; i += increment) {
+        updatePromises.push(
+          db.property.update({
+            where: { id: propertyIds[i] },
+            data: { displayIndex: i + increment },
+          }),
+        );
+      }
+      updatePromises.push(
+        db.property.update({
+          where: { id: propertyIds[oldIndex] },
+          data: { displayIndex: newIndex },
+        }),
+      );
 
-      const result = await db.survey.update({
-        where: { id: surveyId, ownerId: userId },
-        data: {
-          properties: {
-            createMany: {
-              data: propertiesWithOrder,
-            },
-          },
-        },
-      });
-      return result;
+      // Execute all updates in parallel
+      await Promise.all(updatePromises);
     },
 
     deleteSurvey: async (surveyId: string, userId: string) => {

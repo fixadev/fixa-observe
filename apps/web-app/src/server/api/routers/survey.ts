@@ -107,6 +107,22 @@ export const surveyRouter = createTRPCRouter({
       return await surveyServiceInstance.updateSurvey(input, ctx.user.id);
     }),
 
+  updatePropertiesOrder: protectedProcedure
+    .input(
+      z.object({
+        propertyIds: z.array(z.string()),
+        oldIndex: z.number(),
+        newIndex: z.number(),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      return await surveyServiceInstance.updatePropertiesOrder(
+        input.propertyIds,
+        input.oldIndex,
+        input.newIndex,
+      );
+    }),
+
   // TODO: refactor this into 4 routes -- and update frontend to use the separate routes
   updateProperties: protectedProcedure
     .input(
@@ -124,20 +140,14 @@ export const surveyRouter = createTRPCRouter({
         }),
         z.object({
           surveyId: z.string(),
-          action: z.enum(["order", "update", "delete"]),
+          action: z.enum(["update", "delete"]),
           properties: z.array(propertySchema),
           propertyId: z.string().optional(),
         }),
       ]),
     )
     .mutation(async ({ ctx, input }) => {
-      if (input.action === "order") {
-        return await surveyServiceInstance.updatePropertiesOrder(
-          input.surveyId,
-          input.properties,
-          ctx.user.id,
-        );
-      } else if (input.action === "add") {
+      if (input.action === "add") {
         // console.log("PROPERTIES BEFORE FILTER", input.properties);
         const propertiesToCreate = input.properties
           .filter(

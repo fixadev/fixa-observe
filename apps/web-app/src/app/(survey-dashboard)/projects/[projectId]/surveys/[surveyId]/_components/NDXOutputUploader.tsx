@@ -99,7 +99,7 @@ export const NDXOutputUploader = ({
                   },
                 ]
               : [],
-            displayIndex: currentPropertiesEndIndex + index + 1,
+            displayIndex: currentPropertiesEndIndex + index,
             surveyId: surveyId,
             attributes: {
               address: property.address ?? "",
