@@ -214,17 +214,6 @@ export default function EmailsPage() {
       if (emailIsDraft(emailThread)) {
         const email = emailThread.emails[emailThread.emails.length - 1]!;
 
-        // Update draft with new content and send email
-        await updateDraftEmail({
-          emailId: email.id,
-          to: email.recipientEmail,
-          subject: email.subject,
-          body: email.body,
-        });
-        await sendEmail({
-          emailId: email.id,
-        });
-
         setEmailThreads((prev) => {
           const newThreads = [...prev];
           const threadIndex = newThreads.findIndex(
@@ -243,6 +232,17 @@ export default function EmailsPage() {
         } else {
           setSelectedThreadId(null);
         }
+
+        // Update draft with new content and send email
+        await updateDraftEmail({
+          emailId: email.id,
+          to: email.recipientEmail,
+          subject: email.subject,
+          body: email.body,
+        });
+        await sendEmail({
+          emailId: email.id,
+        });
         void refetchSurvey();
       } else {
         if (!isReplyingToEmail) {
