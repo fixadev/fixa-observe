@@ -10,12 +10,14 @@ import { useMemo } from "react";
 import { splitAddress } from "~/lib/utils";
 import { ArrowDownTrayIcon } from "@heroicons/react/24/solid";
 import { type EmailThread } from "prisma/generated/zod";
+import { forwardRef } from "react";
 
 export function BrochureCard({ propertyId }: { propertyId: string }) {
   const { data: propertyData, refetch: refetchProperty } =
     api.property.getProperty.useQuery({
       id: propertyId,
     });
+
   if (!propertyData) {
     return null;
   }
@@ -29,13 +31,13 @@ export function BrochureCard({ propertyId }: { propertyId: string }) {
   );
 }
 
-function UnapprovedBrochureCard({
-  property,
-  refetchProperty,
-}: {
-  property: PropertyWithBrochures & { emailThreads: EmailThread[] };
-  refetchProperty: () => void;
-}) {
+const UnapprovedBrochureCard = forwardRef<
+  HTMLDivElement,
+  {
+    property: PropertyWithBrochures & { emailThreads: EmailThread[] };
+    refetchProperty: () => void;
+  }
+>(function UnapprovedBrochureCard({ property, refetchProperty }, ref) {
   const brochure = property.brochures[0];
 
   const { mutate: createBrochure } = api.property.createBrochure.useMutation({
@@ -75,7 +77,7 @@ function UnapprovedBrochureCard({
   };
 
   return (
-    <div className="flex flex-row gap-6">
+    <div id={property.id} ref={ref} className="flex flex-row gap-6">
       <BrochureSidebar
         property={property}
         handleUpload={handleCreateBrochure}
@@ -103,7 +105,7 @@ function UnapprovedBrochureCard({
       </div>
     </div>
   );
-}
+});
 
 function BrochureSidebar({
   property,
