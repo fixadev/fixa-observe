@@ -1,8 +1,13 @@
-import { type Brochure, type Property } from "prisma/generated/zod";
+import {
+  type Contact,
+  type Brochure,
+  type Property,
+} from "prisma/generated/zod";
 import { cn } from "~/lib/utils";
 import Image from "next/image";
 import { Button } from "./ui/button";
 import Link from "next/link";
+import { Separator } from "./ui/separator";
 
 export const testProperty: Property = {
   // Add a basic property object to match the Property type
@@ -23,7 +28,7 @@ export default function PropertyCard({
   className,
   rightContent,
 }: {
-  property: Property & { brochures: Brochure[] };
+  property: Property & { brochures: Brochure[]; contacts: Contact[] };
   className?: string;
   rightContent?: React.ReactNode;
 }) {
@@ -35,11 +40,11 @@ export default function PropertyCard({
   return (
     <div
       className={cn(
-        "flex items-center gap-4 rounded-md border border-input shadow-sm",
+        "flex items-center rounded-md border border-input shadow-sm",
         className,
       )}
     >
-      <div className="relative aspect-square h-full min-h-24 min-w-24 overflow-hidden rounded-l-md bg-gray-500">
+      <div className="relative aspect-square h-full min-h-24 min-w-24 shrink-0 overflow-hidden rounded-l-md bg-gray-500">
         <Image
           src={photoUrl}
           alt={streetAddress}
@@ -47,18 +52,40 @@ export default function PropertyCard({
           className="object-cover"
         />
       </div>
-      <div className="flex flex-col">
-        <div className="text-lg font-medium">{streetAddress}</div>
-        <div className="text-sm text-muted-foreground">{city}</div>
-        <Button variant="link" className="w-fit px-0" asChild>
-          <Link href={`brochures#${property.id}`}>
-            {property.brochures.length > 0
-              ? "View brochure"
-              : "Upload brochure"}
-          </Link>
-        </Button>
+      <div className="flex h-full flex-1 items-center gap-4 overflow-x-auto px-4">
+        <div className="flex shrink-0 flex-col pr-8">
+          <div className="text-lg font-medium">{streetAddress}</div>
+          <div className="text-sm text-muted-foreground">{city}</div>
+          <Button variant="link" className="w-fit px-0" asChild>
+            <Link href={`brochures#${property.id}`}>
+              {property.brochures.length > 0
+                ? "View brochure"
+                : "Upload brochure"}
+            </Link>
+          </Button>
+        </div>
+        {property.contacts.length > 0 && (
+          <>
+            <Separator orientation="vertical" />
+            <div className="flex shrink-0 gap-8">
+              {property.contacts.map((contact) => (
+                <div key={contact.id} className="flex flex-col gap-1">
+                  <div className="text-sm font-medium">
+                    {contact.firstName} {contact.lastName}
+                  </div>
+                  <div className="text-xs text-muted-foreground">
+                    {contact.email}
+                  </div>
+                  <div className="text-xs text-muted-foreground">
+                    {contact.phone}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
+        )}
+        {rightContent}
       </div>
-      {rightContent}
     </div>
   );
 }

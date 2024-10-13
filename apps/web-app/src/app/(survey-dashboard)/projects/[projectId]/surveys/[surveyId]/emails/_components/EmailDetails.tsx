@@ -167,14 +167,7 @@ function EmailThreadDetails({
       <Separator className="-mx-2 w-[calc(100%+1rem)]" />
       <PropertyCard
         property={emailThread.property}
-        rightContent={
-          <ParsedAttributes
-            emailThread={emailThread}
-            parsedAttributes={
-              emailThread.parsedAttributes as Record<string, string>
-            }
-          />
-        }
+        rightContent={<ParsedAttributes emailThread={emailThread} />}
       />
       <Textarea
         className="h-40 shrink-0"
@@ -294,12 +287,15 @@ function UnsentEmailDetails({
 
 function ParsedAttributes({
   emailThread,
-  parsedAttributes,
 }: {
   emailThread: EmailThreadWithEmailsAndProperty;
-  parsedAttributes: Record<string, string>;
 }) {
   const { user } = useUser();
+
+  const parsedAttributes = useMemo(
+    () => emailThread.parsedAttributes as Record<string, string>,
+    [emailThread.parsedAttributes],
+  );
 
   const shouldShow = useMemo(() => {
     // Only show if the email thread contains emails from other people
@@ -345,10 +341,8 @@ function ParsedAttributes({
   }
   return (
     <>
-      {/* <div className="flex-1" /> */}
-      <div className="w-10" />
       <Separator orientation="vertical" />
-      <div className="flex flex-col items-start gap-2 pr-4">
+      <div className="flex shrink-0 flex-col items-start gap-2 pr-4">
         <div className="flex w-full items-baseline gap-1 px-2 pt-2 text-sm font-medium">
           <div className="flex items-center gap-1">
             {propertyNotAvailable
