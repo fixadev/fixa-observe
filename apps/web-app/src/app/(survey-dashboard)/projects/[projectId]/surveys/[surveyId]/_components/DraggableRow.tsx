@@ -2,7 +2,14 @@
 
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { useCallback, useMemo, useState, type CSSProperties } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type CSSProperties,
+} from "react";
 import { Button } from "@/components/ui/button";
 import { TableCell } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
@@ -169,161 +176,199 @@ export const DraggableRow = ({
   }, [property.emailThreads]);
 
   return (
-    <TableRow ref={setNodeRef} style={style}>
-      <TableCell
-        onMouseEnter={() => {
-          setDraggingRow(true);
-        }}
-        onMouseLeave={() => {
-          setDraggingRow(false);
-        }}
-        className="w-[1%]"
-      >
-        <DragHandleDots2Icon
-          className="size-4"
-          {...dragAttributes}
-          {...listeners}
-        />
-      </TableCell>
-      <DraggableCell
-        key={"photoUrlCell"}
-        id={"photoUrlCell"}
-        draggingRow={draggingRow}
-        className="flex w-full items-center justify-center"
-      >
-        {photoUploading ? (
-          <div className="flex aspect-[4/3] h-[100px] items-center justify-center">
-            <Spinner className="size-5 text-gray-500" />
-          </div>
-        ) : (
-          <FileInput
-            accept="image/*"
-            className="aspect-[4/3] h-[100px] hover:cursor-pointer"
-            triggerElement={
-              photo ? (
-                <div className="relative overflow-hidden rounded-md">
-                  <Image
-                    src={photo}
-                    alt="Property photo"
-                    fill
-                    className="rounded-md object-cover"
-                  />
-                  <div className="group absolute flex size-full items-center justify-center bg-black/0 hover:bg-black/30">
-                    <PencilIcon className="size-6 text-white opacity-0 group-hover:opacity-100" />
-                  </div>
-                </div>
-              ) : (
-                <div className="flex items-center justify-center rounded-md bg-gray-100 hover:bg-gray-200">
-                  <ImagePlusIcon className="size-8 text-gray-500" />
-                </div>
-              )
-            }
-            handleFilesChange={handleUpload}
-          />
-        )}
-      </DraggableCell>
-      {attributes.map((attribute) => {
-        return (
-          <DraggableCell
-            key={attribute.id}
-            id={attribute.id}
-            draggingRow={draggingRow}
-            className={attributeToMinWidth(attribute)}
-          >
-            {attribute.id === "comments" || attribute.id === "address" ? (
-              <Textarea
-                defaultValue={property.attributes?.[attribute.id] ?? ""}
-                className={`min-h-[${attribute.id === "comments" ? "90" : "40"}px]`}
-                onBlur={(e) => {
-                  updateProperty({
-                    ...property,
-                    attributes: {
-                      ...property.attributes,
-                      [attribute.id]: e.target.value,
-                    },
-                  });
-                }}
-              />
-            ) : (
-              <>
-                {state === "edit" ? (
-                  <div className="relative flex items-center gap-2">
-                    <Input
-                      className={cn(attribute.id in parsedAttributes && "pr-9")}
-                      defaultValue={property.attributes?.[attribute.id] ?? ""}
-                      onBlur={(e: React.ChangeEvent<HTMLInputElement>) => {
-                        updateProperty({
-                          ...property,
-                          attributes: {
-                            ...property.attributes,
-                            [attribute.id]: e.target.value,
-                          },
-                        });
-                      }}
-                    />
-                    {attribute.id in parsedAttributes && (
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button
-                            size="icon"
-                            variant="ghost"
-                            className="absolute right-0 shrink-0"
-                            asChild
-                          >
-                            <Link href={`emails?propertyId=${property.id}`}>
-                              {parsedAttributes[attribute.id] !== null ? (
-                                <CheckCircleIcon className="size-5 text-green-500" />
-                              ) : isEmailDraft ? (
-                                <PencilSquareIcon className="size-5 text-gray-500" />
-                              ) : (
-                                <EllipsisHorizontalCircleIcon className="size-5 text-gray-500" />
-                              )}
-                            </Link>
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          {parsedAttributes[attribute.id] !== null
-                            ? "Verified by email"
-                            : isEmailDraft
-                              ? "Email drafted"
-                              : "Email sent"}
-                        </TooltipContent>
-                      </Tooltip>
-                    )}
-                  </div>
-                ) : state === "select-fields" ? (
-                  <div className="flex items-center gap-2">
-                    <Checkbox
-                      id={`${property.id}-${attribute.id}`}
-                      checked={selectedFieldsForProperty.has(attribute.id)}
-                      onCheckedChange={(checked) =>
-                        handleSelectedFieldsChange(attribute.id, checked)
-                      }
-                    />
-                    <Label
-                      htmlFor={`${property.id}-${attribute.id}`}
-                      className="font-normal"
-                    >
-                      {(property.attributes?.[attribute.id]?.length ?? 0 > 0)
-                        ? property.attributes?.[attribute.id]
-                        : "<No value>"}
-                    </Label>
-                  </div>
-                ) : null}
-              </>
-            )}
-          </DraggableCell>
-        );
-      })}
-      <TableCell>
-        <Button
-          size="icon"
-          variant="ghost"
-          onClick={() => deleteProperty(property.id)}
+    <a id={property.id}>
+      <TableRow ref={setNodeRef} style={style} className="relative">
+        <TableCell
+          onMouseEnter={() => {
+            setDraggingRow(true);
+          }}
+          onMouseLeave={() => {
+            setDraggingRow(false);
+          }}
+          className="w-[1%]"
         >
-          <TrashIcon className="size-4" />
-        </Button>
-      </TableCell>
-    </TableRow>
+          <DragHandleDots2Icon
+            className="size-4"
+            {...dragAttributes}
+            {...listeners}
+          />
+        </TableCell>
+        <DraggableCell
+          key={"photoUrlCell"}
+          id={"photoUrlCell"}
+          draggingRow={draggingRow}
+          className="flex w-full items-center justify-center"
+        >
+          {photoUploading ? (
+            <div className="flex aspect-[4/3] h-[100px] items-center justify-center">
+              <Spinner className="size-5 text-gray-500" />
+            </div>
+          ) : (
+            <FileInput
+              accept="image/*"
+              className="aspect-[4/3] h-[100px] hover:cursor-pointer"
+              triggerElement={
+                photo ? (
+                  <div className="relative overflow-hidden rounded-md">
+                    <Image
+                      src={photo}
+                      alt="Property photo"
+                      fill
+                      className="rounded-md object-cover"
+                    />
+                    <div className="group absolute flex size-full items-center justify-center bg-black/0 hover:bg-black/30">
+                      <PencilIcon className="size-6 text-white opacity-0 group-hover:opacity-100" />
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-center rounded-md bg-gray-100 hover:bg-gray-200">
+                    <ImagePlusIcon className="size-8 text-gray-500" />
+                  </div>
+                )
+              }
+              handleFilesChange={handleUpload}
+            />
+          )}
+        </DraggableCell>
+        {attributes.map((attribute) => {
+          return (
+            <DraggableCell
+              key={attribute.id}
+              id={attribute.id}
+              draggingRow={draggingRow}
+              className={attributeToMinWidth(attribute)}
+            >
+              {attribute.id === "comments" || attribute.id === "address" ? (
+                <Textarea
+                  defaultValue={property.attributes?.[attribute.id] ?? ""}
+                  className={`min-h-[${attribute.id === "comments" ? "90" : "40"}px]`}
+                  onBlur={(e) => {
+                    updateProperty({
+                      ...property,
+                      attributes: {
+                        ...property.attributes,
+                        [attribute.id]: e.target.value,
+                      },
+                    });
+                  }}
+                />
+              ) : (
+                <>
+                  {state === "edit" ? (
+                    <div className="relative flex items-center gap-2">
+                      <Input
+                        className={cn(
+                          attribute.id in parsedAttributes && "pr-9",
+                        )}
+                        defaultValue={property.attributes?.[attribute.id] ?? ""}
+                        onBlur={(e: React.ChangeEvent<HTMLInputElement>) => {
+                          updateProperty({
+                            ...property,
+                            attributes: {
+                              ...property.attributes,
+                              [attribute.id]: e.target.value,
+                            },
+                          });
+                        }}
+                      />
+                      {attribute.id in parsedAttributes && (
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              className="absolute right-0 shrink-0"
+                              asChild
+                            >
+                              <Link href={`emails?propertyId=${property.id}`}>
+                                {parsedAttributes[attribute.id] !== null ? (
+                                  <CheckCircleIcon className="size-5 text-green-500" />
+                                ) : isEmailDraft ? (
+                                  <PencilSquareIcon className="size-5 text-gray-500" />
+                                ) : (
+                                  <EllipsisHorizontalCircleIcon className="size-5 text-gray-500" />
+                                )}
+                              </Link>
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            {parsedAttributes[attribute.id] !== null
+                              ? "Verified by email"
+                              : isEmailDraft
+                                ? "Email drafted"
+                                : "Email sent"}
+                          </TooltipContent>
+                        </Tooltip>
+                      )}
+                    </div>
+                  ) : state === "select-fields" ? (
+                    <div className="flex items-center gap-2">
+                      <Checkbox
+                        id={`${property.id}-${attribute.id}`}
+                        checked={selectedFieldsForProperty.has(attribute.id)}
+                        onCheckedChange={(checked) =>
+                          handleSelectedFieldsChange(attribute.id, checked)
+                        }
+                      />
+                      <Label
+                        htmlFor={`${property.id}-${attribute.id}`}
+                        className="font-normal"
+                      >
+                        {(property.attributes?.[attribute.id]?.length ?? 0 > 0)
+                          ? property.attributes?.[attribute.id]
+                          : "<No value>"}
+                      </Label>
+                    </div>
+                  ) : null}
+                </>
+              )}
+            </DraggableCell>
+          );
+        })}
+        <TableCell>
+          <Button
+            size="icon"
+            variant="ghost"
+            onClick={() => deleteProperty(property.id)}
+          >
+            <TrashIcon className="size-4" />
+          </Button>
+        </TableCell>
+
+        <HighlightRow propertyId={property.id} />
+      </TableRow>
+    </a>
   );
 };
+
+function HighlightRow({ propertyId }: { propertyId: string }) {
+  const [highlighted, setHighlighted] = useState(false);
+  const highlight = useCallback(() => {
+    let count = 0;
+    const flash = () => {
+      setHighlighted((prev) => !prev);
+      count++;
+      if (count < 6) {
+        setTimeout(flash, 100);
+      } else {
+        setHighlighted(false);
+      }
+    };
+    setTimeout(flash, 300);
+  }, []);
+
+  const hasFlashed = useRef(false);
+  useEffect(() => {
+    if (window && window.location.hash) {
+      const propertyIdInHash = window.location.hash.replace("#", "");
+      if (propertyIdInHash === propertyId && !hasFlashed.current) {
+        highlight();
+        hasFlashed.current = true;
+      }
+    }
+  }, [propertyId, highlight]);
+
+  return highlighted ? (
+    <div className="pointer-events-none absolute left-0 top-0 size-full bg-black/10" />
+  ) : null;
+}
