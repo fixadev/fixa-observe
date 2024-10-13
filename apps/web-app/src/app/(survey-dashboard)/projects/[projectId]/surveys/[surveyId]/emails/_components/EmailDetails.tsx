@@ -41,6 +41,7 @@ import {
 } from "~/components/ui/alert-dialog";
 import { useUser } from "@clerk/nextjs";
 import { useSurvey } from "~/hooks/useSurvey";
+import Link from "next/link";
 
 export default function EmailDetails({
   emailThread,
@@ -296,31 +297,23 @@ function ParsedAttributes({
   parsedAttributes,
 }: {
   emailThread: EmailThreadWithEmailsAndProperty;
-  parsedAttributes?: Record<string, string>;
+  parsedAttributes: Record<string, string>;
 }) {
   const { user } = useUser();
 
   const shouldShow = useMemo(() => {
-    if (!parsedAttributes) {
-      return false;
-    }
-
     // Only show if the email thread contains emails from other people
     return emailThread.emails.some(
       (email) => email.senderEmail !== user?.primaryEmailAddress?.emailAddress,
     );
-  }, [
-    emailThread.emails,
-    parsedAttributes,
-    user?.primaryEmailAddress?.emailAddress,
-  ]);
+  }, [emailThread.emails, user?.primaryEmailAddress?.emailAddress]);
 
   const completed = useMemo(
-    () => isParsedAttributesComplete(parsedAttributes ?? {}),
+    () => isParsedAttributesComplete(parsedAttributes),
     [parsedAttributes],
   );
   const propertyNotAvailable = useMemo(
-    () => isPropertyNotAvailable(parsedAttributes ?? {}),
+    () => isPropertyNotAvailable(parsedAttributes),
     [parsedAttributes],
   );
 
@@ -338,7 +331,7 @@ function ParsedAttributes({
 
   // Move "available" to the front
   const parsedAttributesKeys = useMemo(() => {
-    const keys = Object.keys(parsedAttributes ?? {});
+    const keys = Object.keys(parsedAttributes);
     const availableIndex = keys.indexOf("available");
     if (availableIndex > -1) {
       keys.splice(availableIndex, 1);
@@ -356,19 +349,30 @@ function ParsedAttributes({
       <div className="w-10" />
       <Separator orientation="vertical" />
       <div className="flex flex-col items-start gap-2 pr-4">
-        <div className="flex items-center gap-1 px-2 pt-2 text-sm font-medium">
-          {propertyNotAvailable
-            ? "Property not available"
-            : completed
-              ? "Property details confirmed"
-              : "More info needed"}
-          {propertyNotAvailable ? (
-            <XCircleIcon className="size-5 text-destructive" />
-          ) : completed ? (
-            <CheckCircleIcon className="size-5 text-green-500" />
-          ) : (
-            <EllipsisHorizontalCircleIcon className="size-5 text-gray-500" />
-          )}
+        <div className="flex w-full items-baseline gap-1 px-2 pt-2 text-sm font-medium">
+          <div className="flex items-center gap-1">
+            {propertyNotAvailable
+              ? "Property not available"
+              : completed
+                ? "Property details confirmed"
+                : "More info needed"}
+            {propertyNotAvailable ? (
+              <XCircleIcon className="size-5 text-destructive" />
+            ) : completed ? (
+              <CheckCircleIcon className="size-5 text-green-500" />
+            ) : (
+              <EllipsisHorizontalCircleIcon className="size-5 text-gray-500" />
+            )}
+          </div>
+          <div className="flex-1" />
+          <Button variant="outline" size="sm" asChild>
+            <Link href={`./?propertyId=${emailThread.propertyId}`}>
+              View table
+            </Link>
+          </Button>
+          {/* <Button variant="ghost" size="icon">
+            <TableCellsIcon className="size-5 text-muted-foreground" />
+          </Button> */}
         </div>
         <Table className="text-xs">
           <TableHeader>
