@@ -2,13 +2,11 @@ import { extractAttributes } from "./extractAttributes";
 
 async function test() {
   const result = await extractAttributes(
-    `
-  Hi,
+    `No the property is not available for lease.
 
-  The asking rate is $5.50 per square foot, and the operating expenses are $0.50 per square foot.
-
-  Best,
-  Jonathan
+Best,
+Jonathan
+CTO @ pixa<https://www.linkedin.com/company/pixa-dev> (YC F24)
 `,
     ["askingRate", "opEx"],
   );
