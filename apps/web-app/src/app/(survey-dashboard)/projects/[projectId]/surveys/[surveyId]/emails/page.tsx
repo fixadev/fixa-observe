@@ -183,9 +183,9 @@ export default function EmailsPage() {
     }
   }, [categories, searchParams]);
 
-  const { mutateAsync: sendEmail, isPending: isSendingEmail } =
+  const { mutateAsync: sendEmail /*isPending: isSendingEmail*/ } =
     api.email.sendEmail.useMutation();
-  const { mutateAsync: updateDraftEmail, isPending: isUpdatingDraftEmail } =
+  const { mutateAsync: updateDraftEmail /*isPending: isUpdatingDraftEmail*/ } =
     api.email.updateDraftEmail.useMutation();
   const { mutateAsync: replyToEmail, isPending: isReplyingToEmail } =
     api.email.replyToEmail.useMutation();
@@ -204,6 +204,8 @@ export default function EmailsPage() {
     },
     [unsentEmails],
   );
+  // Number of emails currently sending
+  const emailsSending = useRef(0);
   const handleSend = useCallback(
     async (emailThreadId: string, body?: string) => {
       const emailThread = emailThreadsById.get(emailThreadId);
@@ -234,23 +236,38 @@ export default function EmailsPage() {
         }
 
         // Update draft with new content and send email
-        await updateDraftEmail({
-          emailId: email.id,
-          to: email.recipientEmail,
-          subject: email.subject,
-          body: email.body,
-        });
-        await sendEmail({
-          emailId: email.id,
-        });
-        void refetchSurvey();
+        emailsSending.current++;
+        try {
+          await updateDraftEmail({
+            emailId: email.id,
+            to: email.recipientEmail,
+            subject: email.subject,
+            body: email.body,
+          });
+          await sendEmail({
+            emailId: email.id,
+          });
+        } finally {
+          emailsSending.current--;
+        }
+        if (emailsSending.current === 0) {
+          void refetchSurvey();
+        }
       } else {
         if (!isReplyingToEmail) {
-          await replyToEmail({
-            emailId: emailThread.emails[emailThread.emails.length - 1]!.id,
-            body: body ?? "",
-          });
-          void refetchSurvey();
+          emailsSending.current++;
+          try {
+            await replyToEmail({
+              emailId: emailThread.emails[emailThread.emails.length - 1]!.id,
+              body: body ?? "",
+            });
+          } finally {
+            emailsSending.current--;
+          }
+          if (emailsSending.current === 0) {
+            void refetchSurvey();
+          }
+
           setEmailThreads((prev) => {
             const newThreads = [...prev];
             const threadIndex = newThreads.findIndex(
@@ -292,9 +309,9 @@ export default function EmailsPage() {
     },
     [
       emailThreadsById,
+      unsentEmails,
       updateDraftEmail,
       sendEmail,
-      unsentEmails,
       refetchSurvey,
       isReplyingToEmail,
       replyToEmail,
@@ -315,8 +332,10 @@ export default function EmailsPage() {
 
   const [lastRefreshedAt, setLastRefreshedAt] = useState(new Date());
   const handleRefresh = useCallback(() => {
-    void refetchSurvey();
-    setLastRefreshedAt(new Date());
+    if (emailsSending.current === 0) {
+      void refetchSurvey();
+      setLastRefreshedAt(new Date());
+    }
   }, [refetchSurvey]);
 
   useEffect(() => {
@@ -415,7 +434,7 @@ export default function EmailsPage() {
                 });
               }}
               isSending={
-                isSendingEmail || isUpdatingDraftEmail || isReplyingToEmail
+                /*isSendingEmail || isUpdatingDraftEmail ||*/ isReplyingToEmail
               }
               onSend={async (body) => {
                 await handleSend(selectedThreadId, body);
