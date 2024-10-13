@@ -54,6 +54,14 @@ export default function PropertyCard({
   const streetAddress = attributes?.address?.split("\n")[0] ?? "";
   const city = attributes?.address?.split("\n").slice(1) ?? "";
 
+  const { user } = useUser();
+  const shouldShowParsedAttributes = useMemo(() => {
+    // Only show if the email thread contains emails from other people
+    return emailThread.emails.some(
+      (email) => email.senderEmail !== user?.primaryEmailAddress?.emailAddress,
+    );
+  }, [emailThread.emails, user?.primaryEmailAddress?.emailAddress]);
+
   return (
     <div
       className={cn(
@@ -70,7 +78,7 @@ export default function PropertyCard({
         />
       </div>
       <div className="flex h-full flex-1 items-center gap-4 overflow-x-auto px-4">
-        <div className="flex shrink-0 flex-col pr-8">
+        <div className="flex shrink-0 flex-col pr-6">
           <div className="text-lg font-medium">{streetAddress}</div>
           <div className="text-sm text-muted-foreground">{city}</div>
           <Button variant="link" className="w-fit px-0" asChild>
@@ -81,6 +89,12 @@ export default function PropertyCard({
             </Link>
           </Button>
         </div>
+        <Button variant="outline" size="sm" asChild>
+          <Link href={`./?propertyId=${emailThread.propertyId}`}>
+            View table
+            {/* <TableCellsIcon className="size-4" /> */}
+          </Link>
+        </Button>
         {property.contacts.length > 0 && (
           <>
             <Separator orientation="vertical" />
@@ -101,7 +115,9 @@ export default function PropertyCard({
             </div>
           </>
         )}
-        <ParsedAttributes emailThread={emailThread} />
+        {shouldShowParsedAttributes && (
+          <ParsedAttributes emailThread={emailThread} />
+        )}
       </div>
     </div>
   );
@@ -112,19 +128,10 @@ function ParsedAttributes({
 }: {
   emailThread: EmailThreadWithEmailsAndProperty;
 }) {
-  const { user } = useUser();
-
   const parsedAttributes = useMemo(
     () => emailThread.parsedAttributes as Record<string, string>,
     [emailThread.parsedAttributes],
   );
-
-  const shouldShow = useMemo(() => {
-    // Only show if the email thread contains emails from other people
-    return emailThread.emails.some(
-      (email) => email.senderEmail !== user?.primaryEmailAddress?.emailAddress,
-    );
-  }, [emailThread.emails, user?.primaryEmailAddress?.emailAddress]);
 
   const completed = useMemo(
     () => isParsedAttributesComplete(parsedAttributes),
@@ -158,9 +165,6 @@ function ParsedAttributes({
     return keys;
   }, [parsedAttributes]);
 
-  if (!shouldShow) {
-    return null;
-  }
   return (
     <>
       <Separator orientation="vertical" />
@@ -181,7 +185,7 @@ function ParsedAttributes({
             )}
           </div>
           <div className="flex-1" />
-          <Button variant="outline" size="sm" asChild>
+          <Button variant="ghost" size="sm" asChild>
             <Link href={`./?propertyId=${emailThread.propertyId}`}>
               View table
             </Link>
