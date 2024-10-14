@@ -150,9 +150,6 @@ export function PropertiesTable({
       onMutate: () => pendingMutations.current++,
       onSettled: () => {
         pendingMutations.current--;
-        if (pendingMutations.current === 0) {
-          void refetchSurvey();
-        }
       },
     });
 

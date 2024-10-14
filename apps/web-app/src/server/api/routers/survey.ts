@@ -116,7 +116,7 @@ export const surveyRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ input }) => {
-      return await surveyServiceInstance.updatePropertiesOrder(
+      await surveyServiceInstance.updatePropertiesOrder(
         input.propertyIds,
         input.oldIndex,
         input.newIndex,
