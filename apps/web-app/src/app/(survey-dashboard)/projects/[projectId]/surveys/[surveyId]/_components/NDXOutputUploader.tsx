@@ -26,7 +26,7 @@ export const NDXOutputUploader = ({
   setUploading: (uploading: boolean) => void;
   setProperties: (
     data: Array<PropertySchema | (CreatePropertySchema & { isNew?: boolean })>,
-    action: "add" | "update" | "delete" | "order",
+    action: "add" | "update" | "delete",
     propertyId?: string,
   ) => void;
   attributesOrder: Attribute[];

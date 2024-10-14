@@ -168,7 +168,7 @@ export function PropertiesTable({
           ) => Array<
             PropertySchema | (CreatePropertySchema & { isNew?: boolean })
           >),
-      action: "order" | "add" | "update" | "delete",
+      action: "add" | "update" | "delete",
       propertyId?: string,
     ) => {
       if (!survey) return;
@@ -196,14 +196,12 @@ export function PropertiesTable({
       );
 
       try {
-        if (action !== "order") {
-          await updateProperties({
-            surveyId,
-            properties: updatedProperties,
-            action,
-            propertyId,
-          });
-        }
+        await updateProperties({
+          surveyId,
+          properties: updatedProperties,
+          action,
+          propertyId,
+        });
       } catch (error) {
         console.error("Failed to update properties:", error);
       }
