@@ -18,10 +18,10 @@ import { TrashIcon } from "@heroicons/react/24/outline";
 
 export function BrochureCarousel({
   brochure,
-  refetchSurvey,
+  refetchProperty,
 }: {
   brochure: BrochureSchema;
-  refetchSurvey: () => void;
+  refetchProperty: () => void;
 }) {
   const [numPages, setNumPages] = useState<number>(0);
   const [loaded, setLoaded] = useState<boolean>(false);
@@ -54,7 +54,7 @@ export function BrochureCarousel({
       toast({
         title: "Objects removed successfully",
       });
-      void refetchSurvey();
+      void refetchProperty();
       setIsRemoving(false);
     },
   });

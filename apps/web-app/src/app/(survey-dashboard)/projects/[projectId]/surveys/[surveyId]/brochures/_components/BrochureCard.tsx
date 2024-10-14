@@ -13,8 +13,19 @@ import { type EmailThread } from "prisma/generated/zod";
 import { useSurvey } from "~/hooks/useSurvey";
 
 export function BrochureCard({ propertyId }: { propertyId: string }) {
-  const { survey, refetchSurvey } = useSurvey();
-  const property = survey?.properties.find((p) => p.id === propertyId);
+  const { survey } = useSurvey();
+  const { data: propertyData, refetch: refetchProperty } =
+    api.property.getProperty.useQuery({
+      id: propertyId,
+    });
+
+  // Use survey property data when propertyData has not loaded yet
+  const property = useMemo(() => {
+    if (propertyData) {
+      return propertyData;
+    }
+    return survey?.properties.find((p) => p.id === propertyId);
+  }, [survey?.properties, propertyId, propertyData]);
 
   if (!property) {
     return null;
@@ -22,23 +33,26 @@ export function BrochureCard({ propertyId }: { propertyId: string }) {
 
   const brochure = property.brochures?.[0];
   return brochure?.approved ? null : (
-    <UnapprovedBrochureCard refetchSurvey={refetchSurvey} property={property} />
+    <UnapprovedBrochureCard
+      refetchProperty={refetchProperty}
+      property={property}
+    />
   );
 }
 
 function UnapprovedBrochureCard({
   property,
-  refetchSurvey: refetchSurvey,
+  refetchProperty,
 }: {
   property: PropertyWithBrochures & { emailThreads: EmailThread[] };
-  refetchSurvey: () => void;
+  refetchProperty: () => void;
 }) {
   const brochure = property.brochures[0];
 
   const { mutate: createBrochure } = api.property.createBrochure.useMutation({
     onSuccess: (data) => {
       console.log("Brochure created", data);
-      void refetchSurvey();
+      void refetchProperty();
     },
   });
 
@@ -79,7 +93,10 @@ function UnapprovedBrochureCard({
       />
       <div className="flex w-5/6 flex-col items-center justify-center">
         {brochure ? (
-          <BrochureCarousel brochure={brochure} refetchSurvey={refetchSurvey} />
+          <BrochureCarousel
+            brochure={brochure}
+            refetchProperty={refetchProperty}
+          />
         ) : (
           <FileInput
             className="h-full w-full"
