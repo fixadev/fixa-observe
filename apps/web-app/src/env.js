@@ -23,6 +23,8 @@ export const env = createEnv({
     ADOBE_CLIENT_ID: z.string(),
     ADOBE_CLIENT_SECRET: z.string(),
     GCLOUD_CREDS: z.string(),
+    SCRAPING_SERVICE_URL: z.string().url(),
+    INPAINTING_SERVICE_URL: z.string().url(),
     // Temporarily disabled Discord auth functionality
     // DISCORD_CLIENT_ID: z.string(),
     // DISCORD_CLIENT_SECRET: z.string(),
@@ -68,6 +70,8 @@ export const env = createEnv({
     ADOBE_CLIENT_ID: process.env.ADOBE_CLIENT_ID,
     ADOBE_CLIENT_SECRET: process.env.ADOBE_CLIENT_SECRET,
     GCLOUD_CREDS: process.env.GCLOUD_CREDS,
+    SCRAPING_SERVICE_URL: process.env.SCRAPING_SERVICE_URL,
+    INPAINTING_SERVICE_URL: process.env.INPAINTING_SERVICE_URL,
     // Temporarily disabled Discord auth functionality
     // DISCORD_CLIENT_ID: process.env.DISCORD_CLIENT_ID,
     // DISCORD_CLIENT_SECRET: process.env.DISCORD_CLIENT_SECRET,
