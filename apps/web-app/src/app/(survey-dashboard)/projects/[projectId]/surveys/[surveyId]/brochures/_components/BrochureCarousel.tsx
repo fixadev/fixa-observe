@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   Carousel,
   CarouselContent,
@@ -18,10 +18,10 @@ import { TrashIcon } from "@heroicons/react/24/outline";
 
 export function BrochureCarousel({
   brochure,
-  refetchProperty,
+  refetchSurvey,
 }: {
   brochure: BrochureSchema;
-  refetchProperty: () => void;
+  refetchSurvey: () => void;
 }) {
   const [numPages, setNumPages] = useState<number>(0);
   const [loaded, setLoaded] = useState<boolean>(false);
@@ -54,7 +54,7 @@ export function BrochureCarousel({
       toast({
         title: "Objects removed successfully",
       });
-      void refetchProperty();
+      void refetchSurvey();
       setIsRemoving(false);
     },
   });

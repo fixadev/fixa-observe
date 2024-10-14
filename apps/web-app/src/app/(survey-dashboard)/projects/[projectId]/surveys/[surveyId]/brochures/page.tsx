@@ -3,6 +3,7 @@ import { api } from "~/trpc/react";
 import { BrochureCard } from "./_components/BrochureCard";
 import Spinner from "~/components/Spinner";
 import Link from "next/link";
+
 export default function BrochuresPage({
   params,
 }: {
@@ -11,6 +12,7 @@ export default function BrochuresPage({
   const { data: survey, isLoading } = api.survey.getSurvey.useQuery({
     surveyId: params.surveyId,
   });
+
   if (isLoading) {
     return (
       <div className="flex h-full w-full flex-col items-center justify-center">

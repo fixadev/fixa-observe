@@ -10,40 +10,35 @@ import { useMemo } from "react";
 import { splitAddress } from "~/lib/utils";
 import { ArrowDownTrayIcon } from "@heroicons/react/24/solid";
 import { type EmailThread } from "prisma/generated/zod";
-import { forwardRef } from "react";
+import { useSurvey } from "~/hooks/useSurvey";
 
 export function BrochureCard({ propertyId }: { propertyId: string }) {
-  const { data: propertyData, refetch: refetchProperty } =
-    api.property.getProperty.useQuery({
-      id: propertyId,
-    });
+  const { survey, refetchSurvey } = useSurvey();
+  const property = survey?.properties.find((p) => p.id === propertyId);
 
-  if (!propertyData) {
+  if (!property) {
     return null;
   }
 
-  const brochure = propertyData.brochures?.[0];
+  const brochure = property.brochures?.[0];
   return brochure?.approved ? null : (
-    <UnapprovedBrochureCard
-      refetchProperty={refetchProperty}
-      property={propertyData}
-    />
+    <UnapprovedBrochureCard refetchSurvey={refetchSurvey} property={property} />
   );
 }
 
-const UnapprovedBrochureCard = forwardRef<
-  HTMLDivElement,
-  {
-    property: PropertyWithBrochures & { emailThreads: EmailThread[] };
-    refetchProperty: () => void;
-  }
->(function UnapprovedBrochureCard({ property, refetchProperty }, ref) {
+function UnapprovedBrochureCard({
+  property,
+  refetchSurvey: refetchSurvey,
+}: {
+  property: PropertyWithBrochures & { emailThreads: EmailThread[] };
+  refetchSurvey: () => void;
+}) {
   const brochure = property.brochures[0];
 
   const { mutate: createBrochure } = api.property.createBrochure.useMutation({
     onSuccess: (data) => {
       console.log("Brochure created", data);
-      void refetchProperty();
+      void refetchSurvey();
     },
   });
 
@@ -77,17 +72,14 @@ const UnapprovedBrochureCard = forwardRef<
   };
 
   return (
-    <div id={property.id} ref={ref} className="flex flex-row gap-6">
+    <div id={property.id} className="flex flex-row gap-6">
       <BrochureSidebar
         property={property}
         handleUpload={handleCreateBrochure}
       />
       <div className="flex w-5/6 flex-col items-center justify-center">
         {brochure ? (
-          <BrochureCarousel
-            brochure={brochure}
-            refetchProperty={refetchProperty}
-          />
+          <BrochureCarousel brochure={brochure} refetchSurvey={refetchSurvey} />
         ) : (
           <FileInput
             className="h-full w-full"
@@ -105,7 +97,7 @@ const UnapprovedBrochureCard = forwardRef<
       </div>
     </div>
   );
-});
+}
 
 function BrochureSidebar({
   property,
@@ -136,13 +128,14 @@ function BrochureSidebar({
   );
 
   return (
-    <div className="relative flex w-[250px] flex-col self-start rounded-md border border-input shadow-sm">
+    <div className="relative flex w-[250px] shrink-0 flex-col self-start rounded-md border border-input shadow-sm">
       <div className="relative aspect-[4/3] w-full overflow-hidden rounded-t-md">
         {property.photoUrl ? (
           <Image
             src={property.photoUrl}
             alt="building photo"
             fill
+            sizes="20vw"
             className="object-cover"
           />
         ) : (
