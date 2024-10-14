@@ -251,8 +251,8 @@ export const surveyService = ({ db }: { db: PrismaClient }) => {
         }),
       );
 
-      // Execute all updates in parallel
-      await Promise.all(updatePromises);
+      // Execute all updates in a batch transaction
+      await db.$transaction(updatePromises);
     },
 
     deleteSurvey: async (surveyId: string, userId: string) => {
