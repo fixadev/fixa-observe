@@ -107,8 +107,8 @@ export function BrochureCarousel({
                         setRectangles={setRectangles}
                       />
                       {isRemoving && (
-                        <div className="absolute flex h-full w-full items-center justify-center bg-white/50">
-                          <Spinner className="h-10 w-10 text-gray-500" />
+                        <div className="absolute flex h-full w-full items-center justify-center bg-black/50">
+                          <Spinner className="h-10 w-10 text-white" />
                         </div>
                       )}
                     </Page>
@@ -116,18 +116,8 @@ export function BrochureCarousel({
                 ),
             )}
           </CarouselContent>
-          <CarouselPrevious
-            className={cn(
-              "transition-opacity",
-              // loaded ? "opacity-100" : "opacity-0",
-            )}
-          />
-          <CarouselNext
-            className={cn(
-              "transition-opacity",
-              // loaded ? "opacity-100" : "opacity-0",
-            )}
-          />
+          <CarouselPrevious />
+          <CarouselNext />
           {rectangles.some((page) => page.objects.length > 0) &&
             !isRemoving &&
             !isMouseDown && (
