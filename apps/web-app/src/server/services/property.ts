@@ -9,6 +9,7 @@ import {
 } from "~/lib/property";
 import { extractContactInfo } from "../utils/extractContactInfo";
 import { formatAddresses } from "../utils/formatAddresses";
+import { env } from "~/env";
 
 export const propertyService = ({ db }: { db: PrismaClient }) => {
   async function createBrochure(
@@ -243,7 +244,7 @@ export const propertyService = ({ db }: { db: PrismaClient }) => {
           },
         });
         const response = await axios.post<{ success: boolean; url: string }>(
-          "http://localhost:8000/inpaint",
+          `${env.INPAINTING_SERVICE_URL}/inpaint`,
           {
             brochureUrl: data?.url,
             objectsToRemoveByPage: input.objectsToRemoveByPage,
