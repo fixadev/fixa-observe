@@ -15,6 +15,8 @@ import { ConfirmRemovePopup } from "./ConfirmRemovePopup";
 import { api } from "~/trpc/react";
 import { useToast } from "~/hooks/use-toast";
 import { TrashIcon } from "@heroicons/react/24/outline";
+import { cn } from "~/lib/utils";
+import { Skeleton } from "~/components/ui/skeleton";
 
 export function BrochureCarousel({
   brochure,
@@ -46,7 +48,9 @@ export function BrochureCarousel({
 
   function onDocumentLoadSuccess({ numPages }: { numPages: number }) {
     setNumPages(numPages);
-    setLoaded(true);
+    setTimeout(() => {
+      setLoaded(true);
+    }, 500);
   }
 
   const { mutate: removeObjects } = api.property.removeObjects.useMutation({
@@ -71,14 +75,14 @@ export function BrochureCarousel({
   // TODO: fix this styling
 
   return (
-    <div className="w-5/6 flex-col items-center justify-center">
+    <div className="relative w-5/6 flex-col">
       <Document
-        className={loaded ? "" : "hidden" + " flex max-w-full flex-col"}
+        className="flex h-[740px] max-w-full flex-col justify-center"
         file={pdfUrl}
         onLoadSuccess={onDocumentLoadSuccess}
       >
         <Carousel opts={{ watchDrag: false }}>
-          <CarouselContent>
+          <CarouselContent className="h-full">
             {Array.from(
               new Array(numPages),
               (el, index) =>
@@ -112,8 +116,18 @@ export function BrochureCarousel({
                 ),
             )}
           </CarouselContent>
-          <CarouselPrevious />
-          <CarouselNext />
+          <CarouselPrevious
+            className={cn(
+              "transition-opacity",
+              // loaded ? "opacity-100" : "opacity-0",
+            )}
+          />
+          <CarouselNext
+            className={cn(
+              "transition-opacity",
+              // loaded ? "opacity-100" : "opacity-0",
+            )}
+          />
           {rectangles.some((page) => page.objects.length > 0) &&
             !isRemoving &&
             !isMouseDown && (
@@ -168,13 +182,19 @@ export function BrochureCarousel({
         </div>
       </Document>
       <div
-        className={
-          loaded
-            ? "hidden"
-            : "flex h-[600px] w-full flex-col items-center justify-center bg-gray-100"
-        }
+        className={cn(
+          "pointer-events-none absolute left-0 top-0 flex size-full flex-col bg-white transition-opacity",
+          loaded ? "opacity-0" : "opacity-100",
+        )}
       >
-        <Spinner className="h-10 w-10 text-gray-500" />
+        <Skeleton className="h-[600px] w-full" />
+        <div className="h-10" />
+        <div className="flex flex-row gap-2">
+          {Array.from({ length: 5 }).map((_, index) => (
+            <Skeleton key={index} className="h-[100px] w-[129px]" />
+          ))}
+        </div>
+        {/* <Spinner className="h-10 w-10 text-gray-500" /> */}
       </div>
     </div>
   );

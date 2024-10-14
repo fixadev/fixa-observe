@@ -91,7 +91,7 @@ function UnapprovedBrochureCard({
         property={property}
         handleUpload={handleCreateBrochure}
       />
-      <div className="flex w-5/6 flex-col items-center justify-center">
+      <div className="flex w-5/6 flex-col items-center">
         {brochure ? (
           <BrochureCarousel
             brochure={brochure}
