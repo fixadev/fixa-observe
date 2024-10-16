@@ -110,6 +110,7 @@ export default function AttachmentCard({
       await createBrochure({
         propertyId,
         brochure: {
+          inpaintedRectangles: [],
           createdAt: new Date(),
           updatedAt: new Date(),
           title: attachment.name,
