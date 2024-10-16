@@ -41,5 +41,5 @@
     ".next/types/**/*.ts",
     "src/lib/pdfjs-dist.d.ts"
   ],
-  "exclude": ["node_modules"]
+  "exclude": ["node_modules", "public"]
 }
