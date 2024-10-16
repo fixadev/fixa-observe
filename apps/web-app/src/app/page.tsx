@@ -43,14 +43,13 @@ export default function LandingPage() {
       <TopBar />
       <div className="pb-16 pt-32 md:h-screen md:py-16 md:pl-8">
         <div className="container mx-auto h-full">
-          <div className="flex h-full items-center gap-16">
-            <div className="flex flex-col gap-8">
-              <div className="text-4xl font-medium leading-tight md:text-5xl lg:text-7xl">
-                Property surveys,
-                <br />
-                without the busywork
+          <div className="flex h-full w-full flex-col items-center gap-16 md:flex-row">
+            <div className="flex w-full max-w-[270px] flex-col gap-4 sm:max-w-[unset] sm:gap-8">
+              <div className="flex flex-col gap-1 text-center text-2xl font-medium sm:text-left sm:text-4xl md:gap-4 md:text-5xl lg:text-7xl">
+                <div>Property surveys,</div>
+                <div>without the busywork</div>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
                 <Button size="lg">Request access</Button>
                 <Button
                   size="lg"
@@ -145,25 +144,25 @@ export default function LandingPage() {
         </div>
       </div>
       <div className="dark bg-background py-16 text-foreground">
-        <div className="container mx-auto flex items-center justify-between gap-4">
-          <div className="flex flex-col gap-4">
+        <div className="container mx-auto flex flex-col items-center gap-8 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-col items-center gap-4 sm:items-start">
             <div className="flex items-center gap-2">
               <Image src="/images/logo.png" alt="Apex" width={30} height={30} />
               <div className="text-2xl font-medium">Apex</div>
             </div>
-            <div className="text-xl">
+            <div className="text-center text-xl sm:text-left">
               Property surveys, <br />
               without the busywork
             </div>
           </div>
           <div className="flex flex-col gap-4">
+            <Button>Request access</Button>
             <div className="flex gap-2">
               <Button variant="ghost">Contact</Button>
               <Button variant="ghost">
                 <LinkedInLogoIcon className="size-5" />
               </Button>
             </div>
-            <Button>Request access</Button>
           </div>
         </div>
       </div>
