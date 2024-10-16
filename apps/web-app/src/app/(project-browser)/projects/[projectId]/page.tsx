@@ -60,7 +60,7 @@ export default function ProjectPage({
         <BreadcrumbsFromPath
           className="mb-4"
           pathSegments={[
-            { value: "Projects", href: `/` },
+            { value: "Projects", href: `/projects` },
             {
               value: project?.name ?? "",
               href: `/projects/${params.projectId}`,
