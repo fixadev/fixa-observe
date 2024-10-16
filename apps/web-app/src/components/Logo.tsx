@@ -2,7 +2,6 @@ import Image from "next/image";
 import Link from "next/link";
 
 export default function Logo({ href = "/" }: { href?: string }) {
-  console.log("HREF", href);
   return (
     <Link href={href} className="flex items-center gap-2">
       <Image src="/images/logo.png" alt="Apex logo" width={32} height={32} />
