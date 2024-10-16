@@ -188,7 +188,7 @@ export default function LandingPage() {
             </Button>
             <div className="flex gap-2">
               <Button variant="ghost" asChild>
-                <Link href="mailto:contact@pixa.dev">Contact</Link>
+                <Link href="mailto:contact@apex.deal">Contact</Link>
               </Button>
               <Button variant="ghost" asChild>
                 <Link href="https://www.linkedin.com/company/apex-deal">
