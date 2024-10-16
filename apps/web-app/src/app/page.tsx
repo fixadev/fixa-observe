@@ -1,6 +1,10 @@
 import { Button } from "~/components/ui/button";
 import TopBar from "./_components/TopBar";
-import { PlayCircleIcon } from "@heroicons/react/24/solid";
+import {
+  CheckCircleIcon,
+  MinusCircleIcon,
+  PlayCircleIcon,
+} from "@heroicons/react/24/solid";
 import Image from "next/image";
 import { useMemo } from "react";
 
@@ -73,6 +77,56 @@ export default function LandingPage() {
           </div>
         </div>
       </div>
+      <div className="py-16">
+        <div className="container mx-auto flex flex-col gap-8 lg:flex-row lg:gap-4">
+          <div className="flex-1">
+            <div className="mb-4 text-3xl font-medium">On average</div>
+            <div className="mb-4">
+              It takes 4.5 hours to create a property survey
+            </div>
+            <div className="flex flex-col gap-2">
+              <ProConCard type="con">
+                <span className="font-medium">Manually</span> copy pasting
+                information from database
+              </ProConCard>
+              <ProConCard type="con">
+                <span className="font-medium">Manually</span> emailing brokers
+                for updated property data
+              </ProConCard>
+              <ProConCard type="con">
+                <span className="font-medium">Manually</span> deleting
+                information from brochures before sending to clients
+              </ProConCard>
+            </div>
+          </div>
+          <div className="flex-1">
+            <div className="mb-4 flex items-center gap-2 text-3xl font-medium">
+              With{" "}
+              <Image src="/images/logo.png" alt="Apex" width={30} height={30} />{" "}
+              Apex
+            </div>
+            <div className="mb-4">
+              It takes 15 minutes to create a property survey
+            </div>
+            <div className="flex flex-col gap-2">
+              <ProConCard type="pro">
+                <span className="font-medium">Automatic</span> PDF import
+              </ProConCard>
+              <ProConCard type="pro">
+                <span className="font-medium">One-click</span> email sending and
+                organization
+              </ProConCard>
+              <ProConCard type="pro">
+                <span className="font-medium">Super simple</span> brochure
+                editing
+              </ProConCard>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className="bg-primary py-16">
+        <div className="container mx-auto"></div>
+      </div>
     </>
   );
 }
@@ -97,6 +151,25 @@ function HowItWorksCard({ image, title, description }: HowItWorksItem) {
         <div className="text-xl font-medium">{title}</div>
         <div className="text-sm text-muted-foreground">{description}</div>
       </div>
+    </div>
+  );
+}
+
+function ProConCard({
+  children,
+  type,
+}: {
+  children: React.ReactNode;
+  type: "pro" | "con";
+}) {
+  return (
+    <div className="flex items-center gap-2 rounded-md border border-input p-4 shadow-sm">
+      {type === "pro" ? (
+        <CheckCircleIcon className="size-5 text-green-500" />
+      ) : (
+        <MinusCircleIcon className="size-5 text-red-500" />
+      )}
+      {children}
     </div>
   );
 }
