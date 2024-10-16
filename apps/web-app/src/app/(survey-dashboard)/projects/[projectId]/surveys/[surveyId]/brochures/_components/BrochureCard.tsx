@@ -76,6 +76,7 @@ function UnapprovedBrochureCard({
     createBrochure({
       propertyId: property.id,
       brochure: {
+        inpaintedRectangles: [],
         url: uploadedFile.url,
         title: file.name,
         approved: false,
