@@ -7,6 +7,7 @@ import {
 } from "@heroicons/react/24/solid";
 import Image from "next/image";
 import { useMemo } from "react";
+import { LinkedInLogoIcon } from "@radix-ui/react-icons";
 
 export default function LandingPage() {
   const howItWorksItems = useMemo(() => {
@@ -81,8 +82,12 @@ export default function LandingPage() {
         <div className="container mx-auto flex flex-col gap-8 lg:flex-row lg:gap-4">
           <div className="flex-1">
             <div className="mb-4 text-3xl font-medium">On average</div>
-            <div className="mb-4">
-              It takes 4.5 hours to create a property survey
+            <div className="mb-4 text-lg">
+              It takes{" "}
+              <span className="font-medium underline decoration-2 underline-offset-4">
+                4.5 hours
+              </span>{" "}
+              to create a property survey
             </div>
             <div className="flex flex-col gap-2">
               <ProConCard type="con">
@@ -95,7 +100,7 @@ export default function LandingPage() {
               </ProConCard>
               <ProConCard type="con">
                 <span className="font-medium">Manually</span> deleting
-                information from brochures before sending to clients
+                information from brochures
               </ProConCard>
             </div>
           </div>
@@ -105,8 +110,12 @@ export default function LandingPage() {
               <Image src="/images/logo.png" alt="Apex" width={30} height={30} />{" "}
               Apex
             </div>
-            <div className="mb-4">
-              It takes 15 minutes to create a property survey
+            <div className="mb-4 text-lg">
+              It takes{" "}
+              <span className="font-medium underline decoration-2 underline-offset-4">
+                15 minutes
+              </span>{" "}
+              to create a property survey
             </div>
             <div className="flex flex-col gap-2">
               <ProConCard type="pro">
@@ -124,8 +133,39 @@ export default function LandingPage() {
           </div>
         </div>
       </div>
-      <div className="bg-primary py-16">
-        <div className="container mx-auto"></div>
+      <div className="pb-16">
+        <div className="container mx-auto flex flex-col items-center gap-4">
+          <div className="text-center text-xl font-medium sm:text-3xl">
+            Minimize manual work.
+          </div>
+          <div className="mb-4 text-center text-xl font-medium sm:text-3xl">
+            Maximize client relationships.
+          </div>
+          <Button size="lg">Request access</Button>
+        </div>
+      </div>
+      <div className="dark bg-background py-16 text-foreground">
+        <div className="container mx-auto flex items-center justify-between gap-4">
+          <div className="flex flex-col gap-4">
+            <div className="flex items-center gap-2">
+              <Image src="/images/logo.png" alt="Apex" width={30} height={30} />
+              <div className="text-2xl font-medium">Apex</div>
+            </div>
+            <div className="text-xl">
+              Property surveys, <br />
+              without the busywork
+            </div>
+          </div>
+          <div className="flex flex-col gap-4">
+            <div className="flex gap-2">
+              <Button variant="ghost">Contact</Button>
+              <Button variant="ghost">
+                <LinkedInLogoIcon className="size-5" />
+              </Button>
+            </div>
+            <Button>Request access</Button>
+          </div>
+        </div>
       </div>
     </>
   );
@@ -165,11 +205,11 @@ function ProConCard({
   return (
     <div className="flex items-center gap-2 rounded-md border border-input p-4 shadow-sm">
       {type === "pro" ? (
-        <CheckCircleIcon className="size-5 text-green-500" />
+        <CheckCircleIcon className="size-4 shrink-0 text-green-500 sm:size-5" />
       ) : (
-        <MinusCircleIcon className="size-5 text-red-500" />
+        <MinusCircleIcon className="size-4 shrink-0 text-red-500 sm:size-5" />
       )}
-      {children}
+      <span className="text-sm sm:text-base">{children}</span>
     </div>
   );
 }
