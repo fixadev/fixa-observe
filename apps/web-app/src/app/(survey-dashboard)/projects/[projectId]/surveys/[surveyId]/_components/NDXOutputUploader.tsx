@@ -71,56 +71,59 @@ export const NDXOutputUploader = ({
       setUploading(true);
       const formData = new FormData();
       formData.append("file", file);
-      const response = await axios.post("/api/extract-images", formData, {
+      console.log("formData", formData);
+      const response = await axios.post("/api/ndx-pdf-upload", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
       });
 
-      const s3Photourls = response.data as string[];
+      console.log(response.data);
 
-      const parsedPDF = await parsePDF(file, pdfjs);
-      const currentPropertiesEndIndex = existingProperties.length;
-      const properties = processPDF(parsedPDF);
-      const propertiesWithAttributes: Array<CreatePropertySchema> =
-        properties.map((property, index) => {
-          return {
-            createdAt: new Date(),
-            updatedAt: new Date(),
-            photoUrl: s3Photourls[index] ?? "",
-            brochures: property.brochureLink
-              ? [
-                  {
-                    createdAt: new Date(),
-                    updatedAt: new Date(),
-                    url: property.brochureLink,
-                    title: "",
-                    approved: false,
-                  },
-                ]
-              : [],
-            displayIndex: currentPropertiesEndIndex + index,
-            surveyId: surveyId,
-            attributes: {
-              address: property.address ?? "",
-              size: property.propertySize ?? "",
-              divisibility:
-                `${property.minDivisible} - ${property.maxDivisible}` ?? "",
-              askingRate: property.leaseRate ?? "",
-              opEx: property.expenses ?? "",
-              directSublease: property.leaseType ?? "",
-              comments: property.comments ?? "",
-            },
-          };
-        });
-      // console.log("propertiesWithAttributes", propertiesWithAttributes);
+      // const s3Photourls = response.data as string[];
 
-      setProperties(propertiesWithAttributes, "add");
-      // setAttributesOrder(
-      //   defaultAttributeOrder
-      //     .map((label) => labelToAttribute(label))
-      //     .filter((attribute) => attribute !== undefined),
-      // );
+      // const parsedPDF = await parsePDF(file, pdfjs);
+      // const currentPropertiesEndIndex = existingProperties.length;
+      // const properties = processPDF(parsedPDF);
+      // const propertiesWithAttributes: Array<CreatePropertySchema> =
+      //   properties.map((property, index) => {
+      //     return {
+      //       createdAt: new Date(),
+      //       updatedAt: new Date(),
+      //       photoUrl: s3Photourls[index] ?? "",
+      //       brochures: property.brochureLink
+      //         ? [
+      //             {
+      //               createdAt: new Date(),
+      //               updatedAt: new Date(),
+      //               url: property.brochureLink,
+      //               title: "",
+      //               approved: false,
+      //             },
+      //           ]
+      //         : [],
+      //       displayIndex: currentPropertiesEndIndex + index,
+      //       surveyId: surveyId,
+      //       attributes: {
+      //         address: property.address ?? "",
+      //         size: property.propertySize ?? "",
+      //         divisibility:
+      //           `${property.minDivisible} - ${property.maxDivisible}` ?? "",
+      //         askingRate: property.leaseRate ?? "",
+      //         opEx: property.expenses ?? "",
+      //         directSublease: property.leaseType ?? "",
+      //         comments: property.comments ?? "",
+      //       },
+      //     };
+      //   });
+      // // console.log("propertiesWithAttributes", propertiesWithAttributes);
+
+      // setProperties(propertiesWithAttributes, "add");
+      // // setAttributesOrder(
+      // //   defaultAttributeOrder
+      // //     .map((label) => labelToAttribute(label))
+      // //     .filter((attribute) => attribute !== undefined),
+      // // );
     }
   };
 

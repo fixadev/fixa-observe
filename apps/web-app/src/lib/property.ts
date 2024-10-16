@@ -96,6 +96,7 @@ export const removeObjectsInput = z.object({
           y: z.number(),
           width: z.number(),
           height: z.number(),
+          url: z.string().optional(),
         }),
       ),
     }),
