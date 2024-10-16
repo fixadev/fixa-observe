@@ -1,12 +1,10 @@
+"use client";
+
 import { Button } from "~/components/ui/button";
 import TopBar from "./_components/TopBar";
-import {
-  CheckCircleIcon,
-  MinusCircleIcon,
-  PlayCircleIcon,
-} from "@heroicons/react/24/solid";
+import { CheckCircleIcon, MinusCircleIcon } from "@heroicons/react/24/solid";
 import Image from "next/image";
-import { useMemo } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { LinkedInLogoIcon } from "@radix-ui/react-icons";
 
 export default function LandingPage() {
@@ -38,34 +36,59 @@ export default function LandingPage() {
     ];
   }, []);
 
+  const scrollToHowItWorks = useCallback(() => {
+    const howItWorksSection = document.getElementById("how-it-works");
+    if (howItWorksSection) {
+      howItWorksSection.scrollIntoView({ behavior: "smooth" });
+    }
+  }, []);
+
+  const [requestAccessDialogOpen, setRequestAccessDialogOpen] = useState(false);
+
   return (
     <>
       <TopBar />
-      <div className="pb-16 pt-32 md:h-screen md:py-16 md:pl-8">
+      <div className="pb-16 pt-32 lg:h-screen lg:py-16 lg:pl-8">
         <div className="container mx-auto h-full">
-          <div className="flex h-full w-full flex-col items-center gap-16 md:flex-row">
-            <div className="flex w-full max-w-[270px] flex-col gap-4 sm:max-w-[unset] sm:gap-8">
-              <div className="flex flex-col gap-1 text-center text-2xl font-medium sm:text-left sm:text-4xl md:gap-4 md:text-5xl lg:text-7xl">
+          <div className="relative flex h-full w-full flex-col items-center justify-center gap-8 lg:flex-row">
+            <div className="z-20 flex max-w-[270px] flex-col items-center gap-4 sm:max-w-[unset] sm:gap-8 lg:items-start">
+              <div className="flex shrink-0 flex-col gap-1 text-center text-2xl font-medium sm:text-4xl md:gap-4 md:text-4xl lg:text-left lg:text-5xl">
                 <div>Property surveys,</div>
                 <div>without the busywork</div>
               </div>
               <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-                <Button size="lg">Request access</Button>
                 <Button
+                  size="lg"
+                  onClick={() => setRequestAccessDialogOpen(true)}
+                >
+                  Request access
+                </Button>
+                <Button size="lg" variant="ghost" onClick={scrollToHowItWorks}>
+                  How it works
+                </Button>
+                {/* <Button
                   size="lg"
                   variant="ghost"
                   className="flex items-center gap-2"
                 >
                   <PlayCircleIcon className="size-5" /> Watch video
-                </Button>
+                </Button> */}
               </div>
             </div>
-            <div>
-              {/* <div className="h-[700px]" /> */}
-              {/* <div className="size-[500px] rounded-xl bg-muted p-8"></div> */}
+            {/* <div className="absolute left-0 z-10 hidden h-full w-full bg-gradient-to-r from-white from-30% to-transparent to-50% lg:block"></div> */}
+            <div className="rounded-md border border-input shadow-sm lg:flex-1">
+              <Image
+                className="rounded-md"
+                src="/images/landing-page/hero-image.png"
+                alt="Hero image"
+                // fill
+                width={925}
+                height={760}
+              />
             </div>
           </div>
         </div>
+        <div id="how-it-works" />
       </div>
       <div className="bg-muted py-16">
         <div className="container mx-auto flex flex-col items-center">
@@ -140,7 +163,9 @@ export default function LandingPage() {
           <div className="mb-4 text-center text-xl font-medium sm:text-3xl">
             Maximize client relationships.
           </div>
-          <Button size="lg">Request access</Button>
+          <Button size="lg" onClick={() => setRequestAccessDialogOpen(true)}>
+            Request access
+          </Button>
         </div>
       </div>
       <div className="dark bg-background py-16 text-foreground">
@@ -156,7 +181,9 @@ export default function LandingPage() {
             </div>
           </div>
           <div className="flex flex-col gap-4">
-            <Button>Request access</Button>
+            <Button onClick={() => setRequestAccessDialogOpen(true)}>
+              Request access
+            </Button>
             <div className="flex gap-2">
               <Button variant="ghost">Contact</Button>
               <Button variant="ghost">

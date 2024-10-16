@@ -326,8 +326,9 @@ export default function EmailsPage() {
       );
       goToNextUnsentEmail(emailThreadId);
       void deleteEmailThread({ emailThreadId });
+      void refetchSurvey();
     },
-    [deleteEmailThread, goToNextUnsentEmail],
+    [deleteEmailThread, goToNextUnsentEmail, refetchSurvey],
   );
 
   const [lastRefreshedAt, setLastRefreshedAt] = useState(new Date());
