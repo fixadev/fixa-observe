@@ -82,23 +82,29 @@ export const headerMappingSchema = z.record(
 export type HeaderMapping = z.infer<typeof headerMappingSchema>;
 
 
-export type RemoveObjectsInput = z.infer<typeof removeObjectsInput>;
-export const removeObjectsInput = z.object({
+export type BrochureRectanglesByPage = z.infer<typeof brochureRectanglesByPage>;
+export const brochureRectanglesByPage = z.array(
+  z.object({
+    pageNumber: z.number(),
+    rectangles: z.array(
+      z.object({
+        x: z.number(),
+        y: z.number(),
+        width: z.number(),
+        height: z.number(),
+        imageUrl: z.string().optional(),
+      }),
+    ),
+  }),
+);
+
+
+export type BrochureRectangles = z.infer<typeof brochureRectangles>;
+export const brochureRectangles = z.object({
   brochureId: z.string(),
-  objectsToRemoveByPage: z.array(
-    z.object({
-      pageNumber: z.number(),
-      containerWidth: z.number(),
-      containerHeight: z.number(),
-      objects: z.array(
-        z.object({
-          x: z.number(),
-          y: z.number(),
-          width: z.number(),
-          height: z.number(),
-          url: z.string().optional(),
-        }),
-      ),
-    }),
-  ),
+  pageData: brochureRectanglesByPage,
 });
+
+
+
+

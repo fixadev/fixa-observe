@@ -1,10 +1,15 @@
-import { useState, useRef, useCallback, useEffect } from "react";
-import { type removeObjectsInput } from "@/lib/property";
+import { useRef, useCallback } from "react";
+import { type brochureRectangles } from "@/lib/property";
 import { type z } from "zod";
 
-type ObjectsToRemoveByPage = z.infer<
-  typeof removeObjectsInput
->["objectsToRemoveByPage"];
+type RectanglesToRemoveByPage = z.infer<typeof brochureRectangles>["pageData"];
+
+type PercentageRect = {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+};
 
 export function MaskGenerator({
   isDrawing,
@@ -16,40 +21,30 @@ export function MaskGenerator({
   isDrawing: boolean;
   setIsDrawing: React.Dispatch<React.SetStateAction<boolean>>;
   pageNumber: number;
-  rectangles: ObjectsToRemoveByPage;
-  setRectangles: React.Dispatch<React.SetStateAction<ObjectsToRemoveByPage>>;
+  rectangles: RectanglesToRemoveByPage;
+  setRectangles: React.Dispatch<React.SetStateAction<RectanglesToRemoveByPage>>;
 }) {
   const startPoint = useRef<{ x: number; y: number } | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const [containerSize, setContainerSize] = useState({ width: 0, height: 0 });
 
-  useEffect(() => {
-    const updateSize = () => {
-      if (containerRef.current) {
-        setContainerSize({
-          width: containerRef.current.offsetWidth,
-          height: containerRef.current.offsetHeight,
-        });
-      }
-    };
-
-    updateSize(); // Initial size calculation
-    window.addEventListener("resize", updateSize); // Update on window resize
-
-    return () => window.removeEventListener("resize", updateSize);
-  }, []);
+  const pixelToPercentage = useCallback(
+    (pixel: number, total: number): number => {
+      return pixel / total;
+    },
+    [],
+  );
 
   const handleMouseDown = useCallback(
     (e: React.MouseEvent) => {
       if (containerRef.current) {
         const rect = containerRef.current.getBoundingClientRect();
         startPoint.current = {
-          x: e.clientX - rect.left,
-          y: e.clientY - rect.top,
+          x: pixelToPercentage(e.clientX - rect.left, rect.width),
+          y: pixelToPercentage(e.clientY - rect.top, rect.height),
         };
         setIsDrawing(true);
         setRectangles((prev) => {
-          const newObject = {
+          const newObject: PercentageRect = {
             x: startPoint.current?.x ?? 0,
             y: startPoint.current?.y ?? 0,
             width: 0,
@@ -61,22 +56,15 @@ export function MaskGenerator({
               ...prev,
               {
                 pageNumber,
-                containerWidth: containerSize.width,
-                containerHeight: containerSize.height,
-                objects: [newObject],
+                rectangles: [newObject],
               },
             ];
           } else {
             const newRectangles = [...prev];
             newRectangles[pageIndex] = {
-              pageNumber: newRectangles[pageIndex]?.pageNumber ?? pageNumber,
-              containerWidth:
-                newRectangles[pageIndex]?.containerWidth ?? containerSize.width,
-              containerHeight:
-                newRectangles[pageIndex]?.containerHeight ??
-                containerSize.height,
-              objects: [
-                ...(newRectangles[pageIndex]?.objects ?? []),
+              pageNumber,
+              rectangles: [
+                ...(newRectangles[pageIndex]?.rectangles ?? []),
                 newObject,
               ],
             };
@@ -85,7 +73,7 @@ export function MaskGenerator({
         });
       }
     },
-    [containerSize, pageNumber, setRectangles, setIsDrawing],
+    [pageNumber, setRectangles, setIsDrawing, pixelToPercentage],
   );
 
   const handleMouseMove = useCallback(
@@ -93,10 +81,10 @@ export function MaskGenerator({
       if (!isDrawing || !startPoint.current || !containerRef.current) return;
 
       const rect = containerRef.current.getBoundingClientRect();
-      const endX = e.clientX - rect.left;
-      const endY = e.clientY - rect.top;
+      const endX = pixelToPercentage(e.clientX - rect.left, rect.width);
+      const endY = pixelToPercentage(e.clientY - rect.top, rect.height);
 
-      const newObject = {
+      const newObject: PercentageRect = {
         x: Math.min(startPoint.current.x, endX),
         y: Math.min(startPoint.current.y, endY),
         width: Math.abs(endX - startPoint.current.x),
@@ -110,21 +98,15 @@ export function MaskGenerator({
             ...prev,
             {
               pageNumber,
-              containerWidth: containerSize.width,
-              containerHeight: containerSize.height,
-              objects: [newObject],
+              rectangles: [newObject],
             },
           ];
         } else {
           const newRectangles = [...prev];
           newRectangles[pageIndex] = {
-            pageNumber: newRectangles[pageIndex]?.pageNumber ?? pageNumber,
-            containerWidth:
-              newRectangles[pageIndex]?.containerWidth ?? containerSize.width,
-            containerHeight:
-              newRectangles[pageIndex]?.containerHeight ?? containerSize.height,
-            objects: [
-              ...(newRectangles[pageIndex]?.objects.slice(0, -1) ?? []),
+            pageNumber,
+            rectangles: [
+              ...(newRectangles[pageIndex]?.rectangles.slice(0, -1) ?? []),
               newObject,
             ],
           };
@@ -132,33 +114,17 @@ export function MaskGenerator({
         }
       });
     },
-    [isDrawing, setRectangles, pageNumber, containerSize],
+    [isDrawing, setRectangles, pageNumber, pixelToPercentage],
   );
 
   const handleMouseUp = useCallback(() => {
     if (!isDrawing) return;
     setIsDrawing(false);
-    setRectangles((prev) => {
-      const pageIndex = prev.findIndex((p) => p.pageNumber === pageNumber);
-      if (pageIndex === -1) {
-        return [
-          ...prev,
-          {
-            pageNumber,
-            containerWidth: containerSize.width,
-            containerHeight: containerSize.height,
-            objects: [],
-          },
-        ];
-      } else {
-        return prev;
-      }
-    });
     startPoint.current = null;
-  }, [setRectangles, isDrawing, pageNumber, containerSize, setIsDrawing]);
+  }, [isDrawing, setIsDrawing]);
 
   const currentPageRectangles =
-    rectangles.find((r) => r.pageNumber === pageNumber)?.objects ?? [];
+    rectangles.find((r) => r.pageNumber === pageNumber)?.rectangles ?? [];
 
   return (
     <div
@@ -174,10 +140,10 @@ export function MaskGenerator({
           key={index}
           style={{
             position: "absolute",
-            left: `${rect.x}px`,
-            top: `${rect.y}px`,
-            width: `${rect.width}px`,
-            height: `${rect.height}px`,
+            left: `${rect.x * 100}%`,
+            top: `${rect.y * 100}%`,
+            width: `${rect.width * 100}%`,
+            height: `${rect.height * 100}%`,
             border: "2px solid red",
             backgroundColor: "rgba(255, 0, 0, 0.2)",
           }}

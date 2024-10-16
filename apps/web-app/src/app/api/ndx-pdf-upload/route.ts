@@ -18,7 +18,7 @@ export async function POST(request: Request) {
     const serverFormData = new FormData();
     serverFormData.append("file", file, file.name);
 
-    console.log("making request to scraping service");
+    console.log("================making request to scraping service=================");
 
     const response = await axios.post(
       `${env.SCRAPING_SERVICE_URL}/extract-ndx-pdf`,

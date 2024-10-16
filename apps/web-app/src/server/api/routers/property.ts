@@ -5,7 +5,7 @@ import {
   photoUploadSchema,
   brochureSchema,
   brochureWithoutPropertyIdSchema,
-  removeObjectsInput,
+  brochureRectangles,
 } from "~/lib/property";
 import { propertyService } from "~/server/services/property";
 import { db } from "~/server/db";
@@ -78,9 +78,9 @@ export const propertyRouter = createTRPCRouter({
       return await propertyServiceInstance.updateBrochure(input, ctx.user.id);
     }),
 
-  removeObjects: protectedProcedure
-    .input(removeObjectsInput)
+  inpaintRectangles: protectedProcedure
+    .input(brochureRectangles)
     .mutation(async ({ ctx, input }) => {
-      return await propertyServiceInstance.removeObjects(input);
+      return await propertyServiceInstance.inpaintRectangles(input);
     }),
 });

@@ -1,5 +1,9 @@
 "use client";
 import { useState } from "react";
+import { type z } from "zod";
+import { api } from "~/trpc/react";
+import { Document, Page, pdfjs } from "react-pdf";
+
 import {
   Carousel,
   CarouselContent,
@@ -7,16 +11,19 @@ import {
   CarouselPrevious,
   CarouselNext,
 } from "~/components/ui/carousel";
-import { type BrochureSchema } from "~/lib/property";
-import { Document, Page, pdfjs } from "react-pdf";
 import Spinner from "~/components/Spinner";
-import { MaskGenerator } from "./MaskGenerator";
-import { ConfirmRemovePopup } from "./ConfirmRemovePopup";
-import { api } from "~/trpc/react";
+import { Skeleton } from "~/components/ui/skeleton";
 import { useToast } from "~/hooks/use-toast";
 import { TrashIcon } from "@heroicons/react/24/outline";
 import { cn } from "~/lib/utils";
-import { Skeleton } from "~/components/ui/skeleton";
+
+import { type BrochureSchema, type brochureRectangles } from "~/lib/property";
+
+import { MaskGenerator } from "./MaskGenerator";
+import { RectangleRenderer } from "./RectangleRenderer";
+import { ConfirmRemovePopup } from "./ConfirmRemovePopup";
+
+type RectanglesToRemoveByPage = z.infer<typeof brochureRectangles>["pageData"];
 
 export function BrochureCarousel({
   brochure,
@@ -29,14 +36,8 @@ export function BrochureCarousel({
   const [loaded, setLoaded] = useState<boolean>(false);
   const [isRemoving, setIsRemoving] = useState<boolean>(false);
   const [isMouseDown, setIsMouseDown] = useState<boolean>(false);
-  const [rectangles, setRectangles] = useState<
-    Array<{
-      pageNumber: number;
-      containerWidth: number;
-      containerHeight: number;
-      objects: Array<{ x: number; y: number; width: number; height: number }>;
-    }>
-  >([]);
+  const [rectanglesToRemove, setRectanglesToRemove] =
+    useState<RectanglesToRemoveByPage>([]);
 
   const [deletedPages, setDeletedPages] = useState<Array<number>>([]);
 
@@ -53,23 +54,24 @@ export function BrochureCarousel({
     }, 500);
   }
 
-  const { mutate: removeObjects } = api.property.removeObjects.useMutation({
-    onSuccess: () => {
-      toast({
-        title: "Objects removed successfully",
-      });
-      void refetchProperty();
-      setIsRemoving(false);
-    },
-  });
+  const { mutate: inpaintRectangles } =
+    api.property.inpaintRectangles.useMutation({
+      onSuccess: () => {
+        toast({
+          title: "Objects removed successfully",
+        });
+        void refetchProperty();
+        setIsRemoving(false);
+      },
+    });
 
   function handleRemoveObjects() {
     setIsRemoving(true);
-    removeObjects({
+    inpaintRectangles({
       brochureId: brochure.id,
-      objectsToRemoveByPage: rectangles,
+      pageData: rectanglesToRemove,
     });
-    setRectangles([]);
+    setRectanglesToRemove([]);
   }
 
   // TODO: fix this styling
@@ -103,8 +105,12 @@ export function BrochureCarousel({
                         isDrawing={isMouseDown}
                         setIsDrawing={setIsMouseDown}
                         pageNumber={index}
-                        rectangles={rectangles}
-                        setRectangles={setRectangles}
+                        rectangles={rectanglesToRemove}
+                        setRectangles={setRectanglesToRemove}
+                      />
+                      <RectangleRenderer
+                        pageNumber={index}
+                        rectangles={brochure.inpaintedRectangles}
                       />
                       {isRemoving && (
                         <div className="absolute flex h-full w-full items-center justify-center bg-black/50">
@@ -118,13 +124,13 @@ export function BrochureCarousel({
           </CarouselContent>
           <CarouselPrevious />
           <CarouselNext />
-          {rectangles.some((page) => page.objects.length > 0) &&
+          {rectanglesToRemove.some((page) => page.rectangles.length > 0) &&
             !isRemoving &&
             !isMouseDown && (
               <ConfirmRemovePopup
                 onConfirm={handleRemoveObjects}
                 onCancel={() => {
-                  setRectangles([]);
+                  setRectanglesToRemove([]);
                 }}
               />
             )}
