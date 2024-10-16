@@ -28,6 +28,7 @@ Best regards,
 Mark`,
   webLink: "",
   emailThreadId: "thread-1",
+  isDraft: false,
 };
 
 export const TEST_EMAIL_THREAD: EmailThreadWithEmailsAndProperty = {
@@ -35,9 +36,9 @@ export const TEST_EMAIL_THREAD: EmailThreadWithEmailsAndProperty = {
   createdAt: new Date(),
   updatedAt: new Date(),
   emails: [
-    { ...TEST_EMAIL, id: "1" },
-    { ...TEST_EMAIL, id: "2" },
-    { ...TEST_EMAIL, id: "3" },
+    { ...TEST_EMAIL, id: "1", attachments: [] },
+    { ...TEST_EMAIL, id: "2", attachments: [] },
+    { ...TEST_EMAIL, id: "3", attachments: [] },
   ],
   propertyId: "property-1",
   property: {
@@ -45,6 +46,8 @@ export const TEST_EMAIL_THREAD: EmailThreadWithEmailsAndProperty = {
     attributes: {
       address: "123 Main St, Palo Alto, CA 94301",
     },
+    brochures: [],
+    contacts: [],
     createdAt: new Date(),
     updatedAt: new Date(),
     ownerId: "1",
@@ -52,15 +55,14 @@ export const TEST_EMAIL_THREAD: EmailThreadWithEmailsAndProperty = {
     surveyId: "1",
     displayIndex: 0,
   },
-  draft: false,
   unread: false,
   parsedAttributes: null,
 };
 
 export const TEST_EMAIL_THREADS: EmailThreadWithEmailsAndProperty[] = [
-  { ...TEST_EMAIL_THREAD, id: "1", draft: true },
-  { ...TEST_EMAIL_THREAD, id: "2", draft: true },
-  { ...TEST_EMAIL_THREAD, id: "3", draft: true },
+  { ...TEST_EMAIL_THREAD, id: "1" },
+  { ...TEST_EMAIL_THREAD, id: "2" },
+  { ...TEST_EMAIL_THREAD, id: "3" },
   { ...TEST_EMAIL_THREAD, id: "4" },
   { ...TEST_EMAIL_THREAD, id: "5" },
   {
@@ -76,10 +78,11 @@ export const TEST_EMAIL_THREADS: EmailThreadWithEmailsAndProperty[] = [
     ...TEST_EMAIL_THREAD,
     id: "7",
     emails: [
-      TEST_EMAIL,
+      { ...TEST_EMAIL, id: "1", attachments: [] },
       {
         ...TEST_EMAIL,
         id: "2",
+        attachments: [],
         createdAt: new Date(new Date().setDate(new Date().getDate() - 1)),
         // createdAt: new Date(new Date().setHours(new Date().getHours() - 1)),
       },
