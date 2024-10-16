@@ -16,7 +16,7 @@ export const usePDFJS = (
   }, []);
 
   // memoize the onLoad callback
-  const memoizedOnLoad = useCallback(onLoad, deps);
+  const memoizedOnLoad = useCallback(onLoad, [...deps, onLoad]);
 
   // execute the callback function whenever PDFJS loads (or a custom dependency-array updates)
   useEffect(() => {

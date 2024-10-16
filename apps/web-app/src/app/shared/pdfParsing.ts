@@ -38,14 +38,17 @@ export async function parsePDF(file: File, pdfjsLib: typeof PDFJS) {
 
         // Check if there's a link at this position
         const link: Link | undefined = links.find((link: Link) => {
-          const [x, y] = [textItem.transform[4], textItem.transform[5]];
+          const [x, y] = [
+            (textItem as TextItem).transform[4] as number,
+            (textItem as TextItem).transform[5] as number,
+          ];
           return (
-            x >= link.rect[0] &&
-            x <= link.rect[2] &&
-            y >= link.rect[1] &&
-            y <= link.rect[3]
+            x >= link.rect[0]! &&
+            x <= link.rect[2]! &&
+            y >= link.rect[1]! &&
+            y <= link.rect[3]!
           );
-        });
+        }) as Link | undefined;
 
         if (link && "url" in link) {
           line += ` [BROCHURE LINK: ${link.url}]`;
@@ -122,6 +125,7 @@ export function processPDF(parsedPDF: string[] | undefined) {
       } else if (
         line?.includes("Lease Type:") &&
         !currentBuilding.leaseType &&
+        // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
         (nextLine?.includes("Direct") || nextLine?.includes("Sublease"))
       ) {
         currentBuilding.leaseType = nextLine?.trim() ?? "";
