@@ -6,6 +6,7 @@ import { CheckCircleIcon, MinusCircleIcon } from "@heroicons/react/24/solid";
 import Image from "next/image";
 import { useCallback, useMemo, useState } from "react";
 import { LinkedInLogoIcon } from "@radix-ui/react-icons";
+import RequestAccessDialog from "./_components/RequestAccessDialog";
 
 export default function LandingPage() {
   const howItWorksItems = useMemo(() => {
@@ -193,6 +194,10 @@ export default function LandingPage() {
           </div>
         </div>
       </div>
+      <RequestAccessDialog
+        open={requestAccessDialogOpen}
+        onOpenChange={() => setRequestAccessDialogOpen(false)}
+      />
     </>
   );
 }
