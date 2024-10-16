@@ -5,7 +5,8 @@ import {
   type CreatePropertySchema,
   type BrochureWithoutPropertyId,
   type PropertySchema,
-  type RemoveObjectsInput,
+  type BrochureRectangles,
+  type BrochureRectanglesByPage,
 } from "~/lib/property";
 import { extractContactInfo } from "../utils/extractContactInfo";
 import { formatAddresses } from "../utils/formatAddresses";
@@ -32,6 +33,7 @@ export const propertyService = ({ db }: { db: PrismaClient }) => {
             {
               ...brochure,
               approved: false,
+              inpaintedRectangles: brochure.inpaintedRectangles ?? [],
             },
           ],
         },
@@ -180,6 +182,7 @@ export const propertyService = ({ db }: { db: PrismaClient }) => {
         },
         data: {
           ...brochure,
+          inpaintedRectangles: brochure.inpaintedRectangles ?? [],
         },
       });
       return response;
@@ -236,23 +239,34 @@ export const propertyService = ({ db }: { db: PrismaClient }) => {
       });
     },
 
-    removeObjects: async (input: RemoveObjectsInput) => {
+    inpaintRectangles: async (input: BrochureRectangles) => {
       try {
         const data = await db.brochure.findUnique({
           where: {
             id: input.brochureId,
           },
         });
-        const response = await axios.post<{ success: boolean; url: string }>(
+
+        const response = await axios.post<{newRectangles: BrochureRectanglesByPage }>(
           `${env.INPAINTING_SERVICE_URL}/inpaint`,
           {
             brochureUrl: data?.url,
-            objectsToRemoveByPage: input.objectsToRemoveByPage,
+            rectanglesToRemoveByPage: input.pageData,
         });
-        return await db.brochure.update({
-          where: { id: input.brochureId },
-          data: { url: response.data.url },
-        });
+
+        if (response.status === 200) {
+          const newRectangles = response.data.newRectangles;
+          console.log("newRectangles", newRectangles);
+          if (newRectangles !== undefined && newRectangles !== null) {
+          return await db.brochure.update({
+            where: { id: input.brochureId },
+            data: { inpaintedRectangles: newRectangles },
+          })
+        }
+        } else {  
+          throw new Error("Failed to inpaint rectangles");
+        }
+      
       } catch (error) {
         console.error('Error removing objects:', error);
         throw error;

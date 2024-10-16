@@ -20,18 +20,18 @@ datasource db {
 }
 
 model User {
-  id                                  String         @id // Should be the clerkId
-  email                               String         @unique
-  firstName                           String?
-  lastName                            String?
+  id        String  @id // Should be the clerkId
+  email     String  @unique
+  firstName String?
+  lastName  String?
 
-  emailSubscriptionId                 String?
-  emailSubscriptionExpiresAt          DateTime?
+  emailSubscriptionId        String?
+  emailSubscriptionExpiresAt DateTime?
 
-  projects                            Project[]
-  properties                          Property[]
-  attributes                          Attribute[]
-  emailTemplate                       EmailTemplate?
+  projects      Project[]
+  properties    Property[]
+  attributes    Attribute[]
+  emailTemplate EmailTemplate?
 }
 
 model Project {
@@ -79,30 +79,31 @@ model AttributesOnSurveys {
 }
 
 model Property {
-  id                  String        @id @default(uuid())
-  createdAt           DateTime      @default(now())
-  updatedAt           DateTime      @updatedAt
-  owner               User          @relation(fields: [ownerId], references: [id], onDelete: Cascade)
-  ownerId             String
-  brochures           Brochure[]
-  photoUrl            String?
-  attributes          Json?
-  displayIndex        Int
-  survey              Survey       @relation(fields: [surveyId], references: [id], onDelete: Cascade)
-  surveyId            String
-  contacts            Contact[]
-  emailThreads        EmailThread[]
+  id           String        @id @default(uuid())
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  owner        User          @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  ownerId      String
+  brochures    Brochure[]
+  photoUrl     String?
+  attributes   Json?
+  displayIndex Int
+  survey       Survey        @relation(fields: [surveyId], references: [id], onDelete: Cascade)
+  surveyId     String
+  contacts     Contact[]
+  emailThreads EmailThread[]
 }
 
 model Brochure {
-  id         String   @id @default(uuid())
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-  url        String
-  title      String
-  approved   Boolean  @default(false)
-  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
-  propertyId String
+  id                  String   @id @default(uuid())
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+  url                 String
+  title               String
+  approved            Boolean  @default(false)
+  property            Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  propertyId          String
+  inpaintedRectangles Json?    @db.JsonB
 }
 
 model Email {
@@ -137,10 +138,10 @@ model Attachment {
   contentType String
   size        Int
 
-  infoMessageDismissed  Boolean @default(false) // Whether the info message about the attachment has been dismissed
-  brochureReplaced      Boolean @default(false) // Whether the brochure has been replaced by this attachment
+  infoMessageDismissed Boolean @default(false) // Whether the info message about the attachment has been dismissed
+  brochureReplaced     Boolean @default(false) // Whether the brochure has been replaced by this attachment
 
-  email   Email @relation(fields: [emailId], references: [id], onDelete: Cascade)
+  email   Email  @relation(fields: [emailId], references: [id], onDelete: Cascade)
   emailId String
 }
 
@@ -178,6 +179,6 @@ model EmailTemplate {
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId String @unique
 
-  subject      String
-  body         String
+  subject String
+  body    String
 }
