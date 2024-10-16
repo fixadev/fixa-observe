@@ -87,20 +87,6 @@ export const surveyRouter = createTRPCRouter({
       }
     }),
 
-  addPropertiesToSurvey: protectedProcedure
-    .input(importPropertiesInput)
-    .mutation(async ({ ctx, input }) => {
-      const propertyIds = await propertyServiceInstance.createProperties(
-        input.properties,
-        ctx.user.id,
-      );
-      return await surveyServiceInstance.addPropertiesToSurvey(
-        input.surveyId,
-        propertyIds,
-        ctx.user.id,
-      );
-    }),
-
   updateSurvey: protectedProcedure
     .input(surveySchema)
     .mutation(async ({ ctx, input }) => {
