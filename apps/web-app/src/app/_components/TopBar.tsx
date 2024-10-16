@@ -17,7 +17,7 @@ export default function TopBar() {
           <div className="flex items-center gap-2">
             <SignedOut>
               <Button variant="ghost" asChild>
-                <SignInButton />
+                <SignInButton forceRedirectUrl="/projects" />
               </Button>
             </SignedOut>
             <SignedIn>

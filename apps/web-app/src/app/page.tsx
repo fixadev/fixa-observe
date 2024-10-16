@@ -21,7 +21,7 @@ export default function LandingPage() {
         image: "/images/landing-page/verify-data.png",
         title: "2. Verify data",
         description:
-          "Apex drafts emails for you to save you time. Property data is automatically updated as responses come in.",
+          "Apex drafts emails for you to save time. Property data is automatically updated as responses come in.",
       },
       {
         image: "/images/landing-page/edit-brochures.png",

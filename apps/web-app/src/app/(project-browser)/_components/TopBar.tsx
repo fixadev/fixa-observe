@@ -6,7 +6,7 @@ export default function TopBar() {
     <div className="fixed z-50 w-full border-b bg-background">
       <div className="container mx-auto py-4">
         <div className="flex items-center justify-between">
-          <Logo />
+          <Logo href="/projects" />
           <UserButton />
         </div>
       </div>
