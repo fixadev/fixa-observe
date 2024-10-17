@@ -1,4 +1,4 @@
-import { brochureRectanglesByPage } from "@/lib/property";
+import { brochureRectangles } from "@/lib/property";
 import { type JsonValue } from "@prisma/client/runtime/library";
 import Image from "next/image";
 
@@ -11,19 +11,19 @@ export function RectangleRenderer({
 }) {
   if (!rectangles) return null;
 
-  const parsedRectangles = brochureRectanglesByPage.safeParse(rectangles);
+  const parsedRectangles = brochureRectangles.safeParse(rectangles);
 
   if (!parsedRectangles.success) {
     console.error("Failed to parse rectangles", parsedRectangles.error);
     return null;
   }
 
-  const currentPageRectangles =
-    parsedRectangles.data.find((r) => r.pageNumber === pageNumber)
-      ?.rectangles ?? [];
+  const currentPageRectangles = parsedRectangles.data.filter(
+    (r) => r.pageNumber === pageNumber,
+  );
 
   return (
-    <div className="pointer-events-none absolute flex h-full w-full cursor-crosshair items-center justify-center bg-transparent">
+    <div className="pointer-events-none absolute z-30 flex h-full w-full cursor-crosshair items-center justify-center bg-transparent">
       {currentPageRectangles.map((rect, index) => (
         <div
           key={index}

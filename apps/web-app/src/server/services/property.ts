@@ -5,8 +5,9 @@ import {
   type CreatePropertySchema,
   type BrochureWithoutPropertyId,
   type PropertySchema,
+  type RemoveRectanglesInput,
+  brochureRectangles,
   type BrochureRectangles,
-  type BrochureRectanglesByPage,
 } from "~/lib/property";
 import { extractContactInfo } from "../utils/extractContactInfo";
 import { formatAddresses } from "../utils/formatAddresses";
@@ -239,32 +240,31 @@ export const propertyService = ({ db }: { db: PrismaClient }) => {
       });
     },
 
-    inpaintRectangles: async (input: BrochureRectangles) => {
+    inpaintRectangles: async (input: RemoveRectanglesInput) => {
       try {
         const data = await db.brochure.findUnique({
           where: {
             id: input.brochureId,
           },
         });
-
-        const response = await axios.post<{newRectangles: BrochureRectanglesByPage }>(
+        const response = await axios.post<{newRectangles: BrochureRectangles }>(
           `${env.INPAINTING_SERVICE_URL}/inpaint`,
           {
             brochureUrl: data?.url,
-            rectanglesToRemoveByPage: input.pageData,
+            rectanglesToRemove: input.rectanglesToRemove,
         });
 
-        if (response.status === 200) {
+        const oldRectangles = brochureRectangles.safeParse(data?.inpaintedRectangles).data ?? [];
+
+        if (response.status === 200 && response.data.newRectangles) {
           const newRectangles = response.data.newRectangles;
-          console.log("newRectangles", newRectangles);
-          if (newRectangles !== undefined && newRectangles !== null) {
+          const updatedRectangles = [...oldRectangles, ...newRectangles];
           return await db.brochure.update({
             where: { id: input.brochureId },
-            data: { inpaintedRectangles: newRectangles },
-          })
-        }
+            data: { inpaintedRectangles: updatedRectangles },
+          });
         } else {  
-          throw new Error("Failed to inpaint rectangles");
+          throw new Error("Request to inpaint rectangles failed" + response.statusText);
         }
       
       } catch (error) {
