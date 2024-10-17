@@ -1,6 +1,7 @@
 import { z } from "zod";
 
-const propertyAttributesSchema = z.object({
+export type ParsedPropertyCard = z.infer<typeof parsedPropertyCardSchema>;
+export const parsedPropertyCardSchema = z.object({
   address: z.string(),
   propertyType: z.string(),
   listId: z.string(),
@@ -25,17 +26,14 @@ const propertyAttributesSchema = z.object({
 })
 
 
-function parsePropertyCard(text: string) {
-
-  const propertyObj: Partial<z.infer<typeof propertyAttributesSchema>> = {}
+export function parsePropertyCard(text: string) {
+  const propertyObj: Partial<ParsedPropertyCard> = {}
   const lines = text.split("\n");
   // eslint-disable-next-line @typescript-eslint/prefer-for-of
   for (let i = 1; i < lines.length; i++) {
     let line = lines[i] ?? "";
     const nextLine = lines[i + 1] ?? "";
 
-    // get address
-    
     if (!propertyObj.address) {
       propertyObj.address = "";
       while (true) {
