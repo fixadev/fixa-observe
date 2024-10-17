@@ -7,6 +7,7 @@ import Image from "next/image";
 import { useCallback, useMemo, useState } from "react";
 import { LinkedInLogoIcon } from "@radix-ui/react-icons";
 import RequestAccessDialog from "./_components/RequestAccessDialog";
+import Link from "next/link";
 
 export default function LandingPage() {
   const howItWorksItems = useMemo(() => {
@@ -186,9 +187,13 @@ export default function LandingPage() {
               Request access
             </Button>
             <div className="flex gap-2">
-              <Button variant="ghost">Contact</Button>
-              <Button variant="ghost">
-                <LinkedInLogoIcon className="size-5" />
+              <Button variant="ghost" asChild>
+                <Link href="mailto:contact@apex.deal">Contact</Link>
+              </Button>
+              <Button variant="ghost" asChild>
+                <Link href="https://www.linkedin.com/company/apex-deal">
+                  <LinkedInLogoIcon className="size-5" />
+                </Link>
               </Button>
             </div>
           </div>
