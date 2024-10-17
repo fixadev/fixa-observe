@@ -25,6 +25,7 @@ export const env = createEnv({
     GCLOUD_CREDS: z.string(),
     SCRAPING_SERVICE_URL: z.string().url(),
     INPAINTING_SERVICE_URL: z.string().url(),
+    GOOGLE_API_KEY: z.string(),
     // Temporarily disabled Discord auth functionality
     // DISCORD_CLIENT_ID: z.string(),
     // DISCORD_CLIENT_SECRET: z.string(),
@@ -70,6 +71,7 @@ export const env = createEnv({
     GCLOUD_CREDS: process.env.GCLOUD_CREDS,
     SCRAPING_SERVICE_URL: process.env.SCRAPING_SERVICE_URL,
     INPAINTING_SERVICE_URL: process.env.INPAINTING_SERVICE_URL,
+    GOOGLE_API_KEY: process.env.GOOGLE_API_KEY,
     // Temporarily disabled Discord auth functionality
     // DISCORD_CLIENT_ID: process.env.DISCORD_CLIENT_ID,
     // DISCORD_CLIENT_SECRET: process.env.DISCORD_CLIENT_SECRET,

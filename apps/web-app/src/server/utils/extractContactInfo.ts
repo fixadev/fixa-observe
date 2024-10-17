@@ -28,7 +28,7 @@ export async function extractContactInfo(brochureUrl: string) {
     throw new Error("No text found in PDF");
   }
 
-  console.log("parsedPDF", parsedPDF);
+  // console.log("parsedPDF", parsedPDF);
 
   const systemPrompt = `
   You are an AI assistant that extracts contact information from a given brochure.

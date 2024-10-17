@@ -1,42 +1,58 @@
-import { z } from 'zod';
-import { zodResponseFormat } from "openai/helpers/zod"
-import { openai } from "./OpenAIClient";
+import axios from 'axios';
+import { env } from '~/env';
 
-
-const Address = z.object({
-  streetAddress: z.string(),
-  city: z.string(),
-  state: z.string(),
-  zip: z.string(),
-})
-
-const AddressesObject = z.object({
-  addresses: z.array(Address),
-})
+interface AddressValidationResponse {
+  result: {
+    address: {
+      formattedAddress: string;
+    };
+  };
+}
 
 export async function formatAddresses(addresses: string[]) {
-  const systemPrompt = `
-  You are an AI assistant that parses a list of addresses and formats them into a standard format.
-  Your output will be in the form of a JSON object with the following properties:
-  - streetAddress: string
-  - city: string
-  - state: string
-  - zip: string
-  Return an array of the JSON objects.
-  If there is no address, return an empty object.
-  `
+    const formattedAddresses = []
+    for (const address of addresses) {
+    const addressLines = address.split("\n");
+    const response = await axios.post<AddressValidationResponse>(
+      "https://addressvalidation.googleapis.com/v1:validateAddress",
+      {
+        address: {
+          regionCode: "US",
+          addressLines: [addressLines[0] ?? ""]
+        }
+      },
+      {
+        params: {
+          key: env.GOOGLE_API_KEY
+        },
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      }
+    );
 
-  const completion = await openai.beta.chat.completions.parse({
-    model: "gpt-4o-2024-08-06",
-    messages: [
-      { role: "system", content: systemPrompt },
-      { role: "user", content: JSON.stringify(addresses) },
-    ],
-    response_format: zodResponseFormat(AddressesObject, "addresses"),
-  });
-  
-  const addressesObject = completion.choices[0]?.message.parsed;
+    const formattedFirstLine = response.data.result.address.formattedAddress
+    formattedAddresses.push(formattedFirstLine + "\n" + (addressLines[1] ?? ""))
+  }
 
-  return addressesObject?.addresses.map((address) => (`${address.streetAddress} \n ${address.city}`));
-
+  return formattedAddresses
 }
+
+
+// async function test() {
+//   const addresses = [
+//     "550 Lytton Avenue Palo Alto, CA 94301\n Palo Alto - California Avenue",
+//     "2335 El Camino Real Palo Alto, CA 94306",
+//     "409 Sherman Avenue Palo Alto, CA 94306",
+//   ]
+
+//   const formattedAddresses = await formatAddresses(addresses)
+
+//   console.log('formattedAddresses', formattedAddresses)
+  
+// }
+
+// void test()
+
+
+

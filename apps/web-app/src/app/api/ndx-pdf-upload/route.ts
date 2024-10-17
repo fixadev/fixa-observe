@@ -14,7 +14,6 @@ export async function POST(request: Request) {
     const formData = await request.formData();
     const file = formData.get("file") as File | null;
     const surveyId = formData.get("surveyId") as string;
-    console.log("file received");
 
     if (!file) {
       return NextResponse.json({ error: "No file uploaded" }, { status: 400 });
@@ -32,8 +31,6 @@ export async function POST(request: Request) {
         },
       },
     );
-
-    console.log("response from scraping service", response);
 
     const properties = response.data as Array<{image_url: string, text: string, link: string | undefined}>;
 
@@ -79,13 +76,11 @@ export async function POST(request: Request) {
           };
         });
 
-    const result = await caller.survey.updateProperties({
+    await caller.survey.updateProperties({
       surveyId,
       properties: propertiesWithAttributes,
       action: "add",
     });
-
-    console.log("result", result);
 
     return NextResponse.json({ status: 200 });
 
