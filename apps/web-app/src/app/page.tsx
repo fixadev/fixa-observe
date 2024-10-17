@@ -188,10 +188,15 @@ export default function LandingPage() {
             </Button>
             <div className="flex gap-2">
               <Button variant="ghost" asChild>
-                <Link href="mailto:contact@apex.deal">Contact</Link>
+                <Link href="mailto:contact@apex.deal" target="_blank">
+                  Contact
+                </Link>
               </Button>
               <Button variant="ghost" asChild>
-                <Link href="https://www.linkedin.com/company/apex-deal">
+                <Link
+                  href="https://www.linkedin.com/company/apex-deal"
+                  target="_blank"
+                >
                   <LinkedInLogoIcon className="size-5" />
                 </Link>
               </Button>
