@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { type z } from "zod";
 import { api } from "~/trpc/react";
 import { Document, Page, pdfjs } from "react-pdf";
@@ -17,13 +17,11 @@ import { useToast } from "~/hooks/use-toast";
 import { TrashIcon } from "@heroicons/react/24/outline";
 import { cn } from "~/lib/utils";
 
-import { type BrochureSchema, type brochureRectangles } from "~/lib/property";
+import { type BrochureSchema, type BrochureRectangles } from "~/lib/property";
 
 import { MaskGenerator } from "./MaskGenerator";
 import { RectangleRenderer } from "./RectangleRenderer";
 import { ConfirmRemovePopup } from "./ConfirmRemovePopup";
-
-type RectanglesToRemoveByPage = z.infer<typeof brochureRectangles>["pageData"];
 
 export function BrochureCarousel({
   brochure,
@@ -37,7 +35,11 @@ export function BrochureCarousel({
   const [isRemoving, setIsRemoving] = useState<boolean>(false);
   const [isMouseDown, setIsMouseDown] = useState<boolean>(false);
   const [rectanglesToRemove, setRectanglesToRemove] =
-    useState<RectanglesToRemoveByPage>([]);
+    useState<BrochureRectangles>([]);
+
+  useEffect(() => {
+    console.log("rectanglesToRemove", rectanglesToRemove);
+  }, [rectanglesToRemove]);
 
   const [deletedPages, setDeletedPages] = useState<Array<number>>([]);
 
@@ -69,7 +71,7 @@ export function BrochureCarousel({
     setIsRemoving(true);
     inpaintRectangles({
       brochureId: brochure.id,
-      pageData: rectanglesToRemove,
+      rectanglesToRemove,
     });
     setRectanglesToRemove([]);
   }
@@ -124,16 +126,14 @@ export function BrochureCarousel({
           </CarouselContent>
           <CarouselPrevious />
           <CarouselNext />
-          {rectanglesToRemove.some((page) => page.rectangles.length > 0) &&
-            !isRemoving &&
-            !isMouseDown && (
-              <ConfirmRemovePopup
-                onConfirm={handleRemoveObjects}
-                onCancel={() => {
-                  setRectanglesToRemove([]);
-                }}
-              />
-            )}
+          {rectanglesToRemove.length > 0 && !isRemoving && !isMouseDown && (
+            <ConfirmRemovePopup
+              onConfirm={handleRemoveObjects}
+              onCancel={() => {
+                setRectanglesToRemove([]);
+              }}
+            />
+          )}
         </Carousel>
         <div className="mt-10 flex h-[100px] flex-row gap-2">
           {Array.from(new Array(numPages), (el, index) => (
