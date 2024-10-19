@@ -6,6 +6,16 @@ export const projectService = ({
 }: {
   db: PrismaClient;
 }) => {
+
+  function testTimeout() {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        console.log("===========================5 seconds have passed!===========================");
+        resolve(void 0);
+      }, 5000);
+    });
+  }
+
   return {
     createProject: async (
       input: CreateProjectInput,
@@ -57,6 +67,7 @@ export const projectService = ({
     },
 
     getProjectsByUser: async (userId: string | null) => {
+      void testTimeout();
       const user = await db.user.findUnique({
         where: {
           id: userId ?? "",

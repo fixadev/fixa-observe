@@ -1,4 +1,4 @@
-import { type PrismaClient } from "@prisma/client";
+import { type Prisma, type PrismaClient } from "@prisma/client";
 import axios from "axios";
 import {
   type BrochureSchema,
@@ -14,14 +14,34 @@ import { formatAddresses } from "../utils/formatAddresses";
 import { env } from "~/env";
 
 export const propertyService = ({ db }: { db: PrismaClient }) => {
+  async function extractAndUploadContactInfo(
+    brochureUrl: string,
+    propertyId: string,
+    userId: string,
+  ) {
+    const contactInfo = await extractContactInfo(brochureUrl);
+    return await db.property.update({
+      where: {
+        id: propertyId,
+        ownerId: userId,
+      },
+      data: {
+        contacts: {
+          createMany: {
+            data: contactInfo ?? [],
+          },
+        },
+      },
+    });
+  }
+
   async function createBrochure(
     propertyId: string,
     brochure: BrochureWithoutPropertyId,
     userId: string,
   ) {
-    console.log("creating brochure in property service", brochure);
-    const contactInfo = await extractContactInfo(brochure.url);
-    console.log("contactInfo", contactInfo);
+    // do this in the background
+    void extractAndUploadContactInfo(brochure.url, propertyId, userId);
     const response = await db.property.update({
       where: {
         id: propertyId,
@@ -38,11 +58,6 @@ export const propertyService = ({ db }: { db: PrismaClient }) => {
             },
           ],
         },
-        contacts: {
-          createMany: {
-            data: contactInfo ?? [],
-          },
-        },
       },
     });
     return response;
@@ -50,10 +65,13 @@ export const propertyService = ({ db }: { db: PrismaClient }) => {
 
   return {
     createProperties: async (input: CreatePropertySchema[], userId: string) => {
+      const startTime = new Date();
       const formattedAddresses = await formatAddresses(
         input.map((property) => property.attributes.address ?? ""),
       );
-      const brochures = input.map((property) => property.brochures[0] ?? []);
+      const brochures: (BrochureWithoutPropertyId | null)[] = input.map(
+        (property) => property.brochures[0] ?? null,
+      );
 
       const propertiesToCreate = input.map(
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -72,17 +90,52 @@ export const propertyService = ({ db }: { db: PrismaClient }) => {
         data: propertiesToCreate,
       });
 
-      for (const [index, property] of createdProperties.entries()) {
-        const brochure = brochures[index];
-        if (
-          property &&
-          brochure &&
-          !Array.isArray(brochure) &&
-          typeof brochure.url === "string" &&
-          typeof brochure.title === "string"
-        ) {
-          await createBrochure(property.id, brochure, userId);
-        }
+      const endTime = new Date();
+      console.log(
+        "===============TIME TO CREATE PROPERTIES===============",
+        endTime.getTime() - startTime.getTime(),
+      );
+
+      const brochuresToCreate: Prisma.BrochureCreateManyInput[] = brochures
+        .map((brochure, index) => {
+          if (brochure) {
+            return {
+              propertyId: createdProperties[index]?.id ?? "",
+              ...brochure,
+              inpaintedRectangles: [],
+            };
+          }
+          return null;
+        })
+        .filter((brochure) => brochure !== null);
+
+      if (brochuresToCreate.length > 0) {
+        const createdBrochures = await db.brochure.createManyAndReturn({
+          data: brochuresToCreate,
+        });
+        const endTime2 = new Date();
+        console.log(
+          "===============TIME TO CREATE BROCHURES===============",
+          endTime2.getTime() - startTime.getTime(),
+        );
+
+        const brochuresToParse = createdBrochures.map((brochure) => ({
+          url: brochure.url,
+          propertyId: brochure.propertyId,
+        }));
+
+        const endTime3 = new Date();
+
+        console.log(
+          "===============SENDING REQUEST TO PARSE BROCHURES===============",
+          endTime3.getTime() - startTime.getTime(),
+        );
+
+        // parse brochures in the background
+        void fetch(`${env.NEXT_PUBLIC_API_URL}/api/parse-brochures`, {
+          method: "POST",
+          body: JSON.stringify({ brochures: brochuresToParse }),
+        });
       }
       return createdProperties.map((property) => property.id);
     },
@@ -247,14 +300,15 @@ export const propertyService = ({ db }: { db: PrismaClient }) => {
             id: input.brochureId,
           },
         });
-        const response = await axios.post<{newRectangles: BrochureRectangles }>(
-          `${env.INPAINTING_SERVICE_URL}/inpaint`,
-          {
-            brochureUrl: data?.url,
-            rectanglesToRemove: input.rectanglesToRemove,
+        const response = await axios.post<{
+          newRectangles: BrochureRectangles;
+        }>(`${env.INPAINTING_SERVICE_URL}/inpaint`, {
+          brochureUrl: data?.url,
+          rectanglesToRemove: input.rectanglesToRemove,
         });
 
-        const oldRectangles = brochureRectangles.safeParse(data?.inpaintedRectangles).data ?? [];
+        const oldRectangles =
+          brochureRectangles.safeParse(data?.inpaintedRectangles).data ?? [];
 
         if (response.status === 200 && response.data.newRectangles) {
           const newRectangles = response.data.newRectangles;
@@ -263,12 +317,13 @@ export const propertyService = ({ db }: { db: PrismaClient }) => {
             where: { id: input.brochureId },
             data: { inpaintedRectangles: updatedRectangles },
           });
-        } else {  
-          throw new Error("Request to inpaint rectangles failed" + response.statusText);
+        } else {
+          throw new Error(
+            "Request to inpaint rectangles failed" + response.statusText,
+          );
         }
-      
       } catch (error) {
-        console.error('Error removing objects:', error);
+        console.error("Error removing objects:", error);
         throw error;
       }
     },

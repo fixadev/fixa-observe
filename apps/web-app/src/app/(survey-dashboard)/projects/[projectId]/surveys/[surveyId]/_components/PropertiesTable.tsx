@@ -540,10 +540,7 @@ export function PropertiesTable({
                 <NDXOutputUploader
                   className="w-full"
                   surveyId={surveyId}
-                  existingProperties={properties}
-                  setProperties={setProperties}
-                  setAttributesOrder={modifyAttributes}
-                  attributesOrder={attributesOrder}
+                  refetchSurvey={refetchSurvey}
                   setUploading={setIsUploadingProperties}
                 />
                 <Button variant="ghost" onClick={addProperty}>
@@ -652,10 +649,7 @@ export function PropertiesTable({
                 <NDXOutputUploader
                   variant="ghost"
                   surveyId={surveyId}
-                  existingProperties={properties}
-                  setProperties={setProperties}
-                  setAttributesOrder={modifyAttributes}
-                  attributesOrder={attributesOrder}
+                  refetchSurvey={refetchSurvey}
                   setUploading={setIsUploadingProperties}
                 />
               </div>
