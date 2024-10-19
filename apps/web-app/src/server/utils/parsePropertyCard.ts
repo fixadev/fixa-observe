@@ -23,11 +23,16 @@ export const parsedPropertyCardSchema = z.object({
   yearBuilt: z.string(),
   parkingRatio: z.string(),
   comments: z.string(),
-})
+});
 
+const numberPeriodRegex = /^\d+\.$/;
+
+function isNumberPeriod(line: string) {
+  return numberPeriodRegex.test(line);
+}
 
 export function parsePropertyCard(text: string) {
-  const propertyObj: Partial<ParsedPropertyCard> = {}
+  const propertyObj: Partial<ParsedPropertyCard> = {};
   const lines = text.split("\n");
   // eslint-disable-next-line @typescript-eslint/prefer-for-of
   for (let i = 1; i < lines.length; i++) {
@@ -35,91 +40,116 @@ export function parsePropertyCard(text: string) {
     const nextLine = lines[i + 1] ?? "";
 
     if (!propertyObj.address) {
+      if (line.startsWith("List ID") || isNumberPeriod(line)) {
+        continue;
+      }
       propertyObj.address = "";
       while (true) {
-        if (line.startsWith("Property Type") || line.startsWith("List ID") || i >= lines.length) {
+        if (
+          line.startsWith("Property Type") ||
+          line.startsWith("List ID") ||
+          i >= lines.length
+        ) {
           break;
         }
         propertyObj.address += line + "\n";
-        i++
+        i++;
         line = lines[i] ?? "";
       }
-    } 
-    else if (line.startsWith("Property Type: ")) {
+    } else if (line.startsWith("Property Type: ")) {
       propertyObj.propertyType = line?.split(":")[1]?.trim();
-    }
-    else if (line.startsWith("Floor/Suite:") && !propertyObj.floorSuite && !nextLine.startsWith("Avail Date:")) {
+    } else if (
+      line.startsWith("Floor/Suite:") &&
+      !propertyObj.floorSuite &&
+      !nextLine.startsWith("Avail Date:")
+    ) {
       propertyObj.floorSuite = nextLine.trim();
-      i++
-    }
-    else if (line.startsWith("Avail Date:") && !propertyObj.availDate && !nextLine.startsWith("Subtype/Class:")) {
+      i++;
+    } else if (
+      line.startsWith("Avail Date:") &&
+      !propertyObj.availDate &&
+      !nextLine.startsWith("Subtype/Class:")
+    ) {
       propertyObj.availDate = nextLine.trim();
-      i++
-    }
-    else if (line.startsWith("Subtype/Class:") && !propertyObj.subtypeClass) {
+      i++;
+    } else if (line.startsWith("Subtype/Class:") && !propertyObj.subtypeClass) {
       propertyObj.subtypeClass = line?.split(":")[1]?.trim();
-    }
-    else if (line.startsWith("Space Use:") && !propertyObj.spaceUse && !nextLine.startsWith("Lease Type:")) {
+    } else if (
+      line.startsWith("Space Use:") &&
+      !propertyObj.spaceUse &&
+      !nextLine.startsWith("Lease Type:")
+    ) {
       propertyObj.spaceUse = line?.split(":")[1]?.trim();
-    } 
-    else if (line.startsWith("Lease Type:") && !propertyObj.leaseType && !nextLine.startsWith("Property Size:")) {
+    } else if (
+      line.startsWith("Lease Type:") &&
+      !propertyObj.leaseType &&
+      !nextLine.startsWith("Property Size:")
+    ) {
       propertyObj.leaseType = nextLine.trim();
-      i++
-    }
-    else if (line.startsWith("Property Size:") && !propertyObj.size) {
+      i++;
+    } else if (line.startsWith("Property Size:") && !propertyObj.size) {
       propertyObj.size = line?.split(":")[1]?.trim();
-      i++
-    }
-    else if (line.startsWith("Avail Space:") && !propertyObj.availSpace && !nextLine.startsWith("Sub Exp Date:")) {
+      i++;
+    } else if (
+      line.startsWith("Avail Space:") &&
+      !propertyObj.availSpace &&
+      !nextLine.startsWith("Sub Exp Date:")
+    ) {
       propertyObj.availSpace = nextLine.trim();
-      i++
-    }
-    else if (line.startsWith("Sub Exp Date:") && !propertyObj.subExpDate) {
+      i++;
+    } else if (line.startsWith("Sub Exp Date:") && !propertyObj.subExpDate) {
       propertyObj.subExpDate = line?.split(":")[1]?.trim();
-    }
-    else if (line.startsWith("Total Floors:") && !propertyObj.totalFloors) {
+    } else if (line.startsWith("Total Floors:") && !propertyObj.totalFloors) {
       propertyObj.totalFloors = line?.split(":")[1]?.trim();
-    }
-    else if (line.startsWith("Vacant Space:") && !propertyObj.vacantSpace) {
+    } else if (line.startsWith("Vacant Space:") && !propertyObj.vacantSpace) {
       propertyObj.vacantSpace = line?.split(":")[1]?.trim();
-    }
-    else if (line.startsWith("Lease Rate:") && !propertyObj.leaseRate && !nextLine.startsWith("Const. Status:")) {
+    } else if (
+      line.startsWith("Lease Rate:") &&
+      !propertyObj.leaseRate &&
+      !nextLine.startsWith("Const. Status:")
+    ) {
       propertyObj.leaseRate = nextLine.trim();
-    }
-    else if (line.startsWith("Const. Status:") && !propertyObj.constructionStatus) {
+    } else if (
+      line.startsWith("Const. Status:") &&
+      !propertyObj.constructionStatus
+    ) {
       propertyObj.constructionStatus = line?.split(":")[1]?.trim();
-    }
-    else if (line.startsWith("Min Divisible:") && !propertyObj.minDivisible) {
+    } else if (line.startsWith("Min Divisible:") && !propertyObj.minDivisible) {
       propertyObj.minDivisible = line?.split(":")[1]?.trim();
-    }
-    else if (line.startsWith("Expenses:") && !propertyObj.opEx && !nextLine.startsWith("Year Built:")) {
+    } else if (
+      line.startsWith("Expenses:") &&
+      !propertyObj.opEx &&
+      !nextLine.startsWith("Year Built:")
+    ) {
       propertyObj.opEx = nextLine.trim();
-      i++
-    }
-    else if (line.startsWith("Year Built:") && !propertyObj.yearBuilt && !nextLine.startsWith("Max Divisible:")) {
+      i++;
+    } else if (
+      line.startsWith("Year Built:") &&
+      !propertyObj.yearBuilt &&
+      !nextLine.startsWith("Max Divisible:")
+    ) {
       propertyObj.yearBuilt = nextLine.trim();
-    }
-    else if (line.startsWith("Max Divisible:") && !propertyObj.maxDivisible) {
+    } else if (line.startsWith("Max Divisible:") && !propertyObj.maxDivisible) {
       propertyObj.maxDivisible = line?.split(":")[1]?.trim();
-    } 
-    else if (line.startsWith("Parking Ratio:") && !propertyObj.parkingRatio) {
+    } else if (line.startsWith("Parking Ratio:") && !propertyObj.parkingRatio) {
       propertyObj.parkingRatio = line?.split(":")[1]?.trim();
-    }
-    else if (line.startsWith("Comments:") && !propertyObj.comments) {
+    } else if (line.startsWith("Comments:") && !propertyObj.comments) {
       propertyObj.comments = line?.split(":")[1] + "\n";
-      i++
+      i++;
       line = lines[i] ?? "";
-      while (!line.startsWith("View Flyer") && !line.startsWith("Reproduction in whole or part is permitted only") && i < lines.length) {
+      while (
+        !line.startsWith("View Flyer") &&
+        !line.startsWith("Reproduction in whole or part is permitted only") &&
+        i < lines.length
+      ) {
         propertyObj.comments += line + "\n";
-        i++
+        i++;
         line = lines[i] ?? "";
       }
     }
   }
   return propertyObj;
 }
-
-
 
 const text = `69.
 585 Hamilton Avenue Palo Alto, CA 94301
@@ -167,11 +197,11 @@ Reproduction in whole or part is permitted only with the written consent of Newm
 independently verified by Newmark, which therefore makes no warranties or representations as to the completeness or accuracy of any information contained in this report. You are
 advised to investigate all such information, and to verify its completeness and accuracy, before making any use thereof or any reliance thereon.
 Page 23 of 24
-`
+`;
 
 function test() {
   const propertyObj = parsePropertyCard(text);
   console.log(propertyObj);
 }
 
-test()
+test();
