@@ -31,15 +31,16 @@ export default function ProjectPage({
     [],
   );
 
-  const { data: project } = api.project.getProject.useQuery({
-    projectId: params.projectId,
-  });
+  const { data: project, refetch: refetchProject } =
+    api.project.getProject.useQuery({
+      projectId: params.projectId,
+    });
 
   useEffect(() => {
     if (project?.surveys) {
       setSurveys(project.surveys);
     }
-  }, [project]);
+  }, [project?.surveys]);
 
   const { mutate: createSurvey } = api.survey.createSurvey.useMutation({
     onSuccess: (data) => {
@@ -118,6 +119,7 @@ export default function ProjectPage({
               projectId={params.projectId}
               surveyId={survey.id}
               surveyName={survey.name}
+              refetchProject={refetchProject}
             />
           ))}
         </div>
