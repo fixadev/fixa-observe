@@ -92,27 +92,25 @@ function UnapprovedBrochureCard({
         property={property}
         handleUpload={handleCreateBrochure}
       />
-      <div className="flex w-5/6 flex-col items-center">
-        {brochure ? (
-          <BrochureCarousel
-            brochure={brochure}
-            refetchProperty={refetchProperty}
-          />
-        ) : (
-          <FileInput
-            className="h-full w-full"
-            triggerElement={
-              <div className="flex h-full w-full flex-col items-center justify-center gap-4 rounded-lg bg-gray-100 p-6 text-center hover:cursor-pointer hover:bg-gray-200">
-                <FilePlusIcon className="h-10 w-10 text-gray-500" />
-                <p className="text-lg font-medium text-gray-500">
-                  Add a brochure
-                </p>
-              </div>
-            }
-            handleFilesChange={handleCreateBrochure}
-          />
-        )}
-      </div>
+      {brochure ? (
+        <BrochureCarousel
+          brochure={brochure}
+          refetchProperty={refetchProperty}
+        />
+      ) : (
+        <FileInput
+          className="h-full w-full"
+          triggerElement={
+            <div className="flex h-full w-full flex-col items-center justify-center gap-4 rounded-lg bg-gray-100 p-6 text-center hover:cursor-pointer hover:bg-gray-200">
+              <FilePlusIcon className="h-10 w-10 text-gray-500" />
+              <p className="text-lg font-medium text-gray-500">
+                Add a brochure
+              </p>
+            </div>
+          }
+          handleFilesChange={handleCreateBrochure}
+        />
+      )}
     </div>
   );
 }
