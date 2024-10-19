@@ -221,7 +221,6 @@ export const surveyService = ({ db }: { db: PrismaClient }) => {
       propertyIds: string[],
       userId: string,
     ) => {
-      console.log("propertyIds", propertyIds);
       const survey = await db.survey.update({
         where: { id: surveyId, ownerId: userId },
         data: { properties: { connect: propertyIds.map((id) => ({ id })) } },

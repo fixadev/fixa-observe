@@ -23,6 +23,12 @@ export const brochureWithoutPropertyIdSchema = BrochureSchema.omit({
   propertyId: true,
   id: true,
 });
+
+export type BrochureWithoutIdSchema = z.infer<typeof brochureWithoutIdSchema>;
+export const brochureWithoutIdSchema = BrochureSchema.omit({
+  id: true,
+});
+
 export type BrochureSchema = z.infer<typeof BrochureSchema>;
 export const brochureSchema = BrochureSchema;
 

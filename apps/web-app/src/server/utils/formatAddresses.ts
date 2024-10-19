@@ -1,5 +1,5 @@
-import axios from 'axios';
-import { env } from '~/env';
+import axios from "axios";
+import { env } from "~/env";
 
 interface AddressValidationResponse {
   result: {
@@ -10,34 +10,32 @@ interface AddressValidationResponse {
 }
 
 export async function formatAddresses(addresses: string[]) {
-    const formattedAddresses = []
-    for (const address of addresses) {
+  const formatPromises = addresses.map(async (address) => {
     const addressLines = address.split("\n");
     const response = await axios.post<AddressValidationResponse>(
       "https://addressvalidation.googleapis.com/v1:validateAddress",
       {
         address: {
           regionCode: "US",
-          addressLines: [addressLines[0] ?? ""]
-        }
+          addressLines: [addressLines[0] ?? ""],
+        },
       },
       {
         params: {
-          key: env.GOOGLE_API_KEY
+          key: env.GOOGLE_API_KEY,
         },
         headers: {
-          'Content-Type': 'application/json'
-        }
-      }
+          "Content-Type": "application/json",
+        },
+      },
     );
 
-    const formattedFirstLine = response.data.result.address.formattedAddress
-    formattedAddresses.push(formattedFirstLine + "\n" + (addressLines[1] ?? ""))
-  }
+    const formattedFirstLine = response.data.result.address.formattedAddress;
+    return formattedFirstLine + "\n" + (addressLines[1] ?? "");
+  });
 
-  return formattedAddresses
+  return Promise.all(formatPromises);
 }
-
 
 // async function test() {
 //   const addresses = [
@@ -49,10 +47,7 @@ export async function formatAddresses(addresses: string[]) {
 //   const formattedAddresses = await formatAddresses(addresses)
 
 //   console.log('formattedAddresses', formattedAddresses)
-  
+
 // }
 
 // void test()
-
-
-
