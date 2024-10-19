@@ -25,6 +25,7 @@ import PDFPage, {
 } from "./PDFPage";
 import { type PDFDocumentProxy } from "pdfjs-dist";
 import { Button } from "~/components/ui/button";
+import ToolSelector, { type Tool } from "./ToolSelector";
 
 export function BrochureCarousel({
   brochure,
@@ -64,7 +65,7 @@ export function BrochureCarousel({
       });
   }, [pdfUrl]);
 
-  const [tool, setTool] = useState<"eraser" | "selector">("selector");
+  const [tool, setTool] = useState<Tool>("selector");
   const [loaded, setLoaded] = useState<boolean>(false);
   const [isRemoving, setIsRemoving] = useState<boolean>(false);
   const [isMouseDown, setIsMouseDown] = useState<boolean>(false);
@@ -164,6 +165,11 @@ export function BrochureCarousel({
             </CarouselContent>
             <CarouselPrevious />
             <CarouselNext />
+            <ToolSelector
+              tool={tool}
+              onToolChange={setTool}
+              isMouseDown={isMouseDown}
+            />
             {rectanglesToRemove.length > 0 && !isRemoving && !isMouseDown && (
               <ConfirmRemovePopup
                 onConfirm={handleRemoveObjects}

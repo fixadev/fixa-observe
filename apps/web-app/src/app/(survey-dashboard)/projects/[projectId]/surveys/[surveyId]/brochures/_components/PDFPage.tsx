@@ -12,6 +12,7 @@ import type {
 } from "pdfjs-dist/types/src/display/api";
 import { Skeleton } from "~/components/ui/skeleton";
 import { cn } from "~/lib/utils";
+import { type Tool } from "./ToolSelector";
 
 export type TransformedTextContent = {
   pageIndex: number;
@@ -137,7 +138,7 @@ export function PDFPageWithControls({
 }: {
   pdf: PDFDocumentProxy;
   pageIndex: number;
-  tool: "selector" | "eraser";
+  tool: Tool;
   isMouseDown: boolean;
   setIsMouseDown: React.Dispatch<React.SetStateAction<boolean>>;
   rectangles: BrochureRectangles;
@@ -151,6 +152,9 @@ export function PDFPageWithControls({
 }) {
   const [viewport, setViewport] = useState<PageViewport | null>(null);
   const [textContent, setTextContent] = useState<TextContent | null>(null);
+  const [curRectangle, setCurRectangle] = useState<
+    BrochureRectangles[0] | null
+  >(null);
 
   // Contains the indices of the text content that is selected
   const [textContentSelected, setTextContentSelected] = useState<Set<number>>(
@@ -250,20 +254,16 @@ export function PDFPageWithControls({
   }, []);
 
   useEffect(() => {
-    if (
-      rectangles.length === 1 &&
-      isMouseDown &&
-      textContentFormatted.length > 0
-    ) {
+    if (curRectangle && isMouseDown && textContentFormatted.length > 0) {
       const selected = new Set<number>();
       for (let i = 0; i < textContentFormatted.length; i++) {
-        if (intersect(rectangles[0]!, textContentFormatted[i]!)) {
+        if (intersect(curRectangle, textContentFormatted[i]!)) {
           selected.add(i);
         }
       }
       setTextContentSelected(selected);
     }
-  }, [intersect, isMouseDown, rectangles, textContentFormatted]);
+  }, [intersect, isMouseDown, curRectangle, textContentFormatted]);
 
   return (
     <PDFPage
@@ -287,6 +287,8 @@ export function PDFPageWithControls({
         setIsDrawing={setIsMouseDown}
         rectangles={rectangles}
         setRectangles={setRectangles}
+        curRectangle={curRectangle}
+        setCurRectangle={setCurRectangle}
         tool={tool}
       />
       <div className="absolute left-0 top-0 h-full w-full">

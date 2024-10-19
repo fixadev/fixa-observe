@@ -1,5 +1,6 @@
-import { useRef, useCallback } from "react";
+import { useRef, useCallback, useMemo } from "react";
 import { type BrochureRectangles } from "@/lib/property";
+import { type Tool } from "./ToolSelector";
 
 export default function MaskGenerator({
   isDrawing,
@@ -7,6 +8,8 @@ export default function MaskGenerator({
   pageIndex,
   rectangles,
   setRectangles,
+  curRectangle,
+  setCurRectangle,
   tool,
 }: {
   isDrawing: boolean;
@@ -14,7 +17,11 @@ export default function MaskGenerator({
   pageIndex: number;
   rectangles: BrochureRectangles;
   setRectangles: React.Dispatch<React.SetStateAction<BrochureRectangles>>;
-  tool: "eraser" | "selector";
+  curRectangle: BrochureRectangles[0] | null;
+  setCurRectangle: React.Dispatch<
+    React.SetStateAction<BrochureRectangles[0] | null>
+  >;
+  tool: Tool;
 }) {
   const startPoint = useRef<{ x: number; y: number } | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -30,24 +37,20 @@ export default function MaskGenerator({
     (e: React.MouseEvent) => {
       if (containerRef.current) {
         const rect = containerRef.current.getBoundingClientRect();
-        startPoint.current = {
-          x: pixelToPercentage(e.clientX - rect.left, rect.width),
-          y: pixelToPercentage(e.clientY - rect.top, rect.height),
-        };
+        const x = pixelToPercentage(e.clientX - rect.left, rect.width);
+        const y = pixelToPercentage(e.clientY - rect.top, rect.height);
+        startPoint.current = { x, y };
         setIsDrawing(true);
-        setRectangles((prev) => {
-          const newObject = {
-            pageIndex,
-            x: startPoint.current?.x ?? 0,
-            y: startPoint.current?.y ?? 0,
-            width: 0,
-            height: 0,
-          };
-          return [...prev, newObject];
+        setCurRectangle({
+          pageIndex,
+          x,
+          y,
+          width: 0,
+          height: 0,
         });
       }
     },
-    [pageIndex, setRectangles, setIsDrawing, pixelToPercentage],
+    [pageIndex, setIsDrawing, pixelToPercentage, setCurRectangle],
   );
 
   const handleMouseMove = useCallback(
@@ -58,30 +61,30 @@ export default function MaskGenerator({
       const endX = pixelToPercentage(e.clientX - rect.left, rect.width);
       const endY = pixelToPercentage(e.clientY - rect.top, rect.height);
 
-      setRectangles((prev) => {
-        const lastIndex = prev.length - 1;
-        const updatedRectangles = [...prev];
-        updatedRectangles[lastIndex] = {
-          pageIndex: pageIndex,
-          x: Math.min(startPoint.current?.x ?? 0, endX),
-          y: Math.min(startPoint.current?.y ?? 0, endY),
-          width: Math.abs(endX - (startPoint.current?.x ?? 0)),
-          height: Math.abs(endY - (startPoint.current?.y ?? 0)),
-        };
-        return updatedRectangles;
+      setCurRectangle({
+        pageIndex: pageIndex,
+        x: Math.min(startPoint.current.x, endX),
+        y: Math.min(startPoint.current.y, endY),
+        width: Math.abs(endX - startPoint.current.x),
+        height: Math.abs(endY - startPoint.current.y),
       });
     },
-    [isDrawing, setRectangles, pixelToPercentage, pageIndex],
+    [isDrawing, pixelToPercentage, pageIndex, setCurRectangle],
   );
 
   const handleMouseUp = useCallback(() => {
     if (!isDrawing) return;
     setIsDrawing(false);
+    if (curRectangle) {
+      setRectangles((prev) => [...prev, curRectangle]);
+    }
+    setCurRectangle(null);
     startPoint.current = null;
-  }, [isDrawing, setIsDrawing]);
+  }, [isDrawing, setIsDrawing, curRectangle, setCurRectangle, setRectangles]);
 
-  const currentPageRectangles = rectangles.filter(
-    (r) => r.pageIndex === pageIndex,
+  const currentPageRectangles = useMemo(
+    () => rectangles.filter((r) => r.pageIndex === pageIndex),
+    [rectangles, pageIndex],
   );
 
   return (
@@ -110,6 +113,22 @@ export default function MaskGenerator({
           }}
         />
       ))}
+      {curRectangle && (
+        <div
+          style={{
+            position: "absolute",
+            left: `${curRectangle.x * 100}%`,
+            top: `${curRectangle.y * 100}%`,
+            width: `${curRectangle.width * 100}%`,
+            height: `${curRectangle.height * 100}%`,
+            border: tool === "eraser" ? "2px solid red" : "2px solid lightblue",
+            backgroundColor:
+              tool === "eraser"
+                ? "rgba(255, 0, 0, 0.2)"
+                : "rgba(178, 216, 254, 0.3)",
+          }}
+        />
+      )}
     </div>
   );
 }
