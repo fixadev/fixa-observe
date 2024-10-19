@@ -705,7 +705,7 @@ function ActionButtons({
             </Button>
             <Button variant="ghost" asChild className="w-full">
               <Link
-                href={`/projects/${projectId}/surveys/${surveyId}/pdf-preview`}
+                href={`/projects/${projectId}/surveys/${surveyId}/pdf-preview/v1`}
               >
                 Export survey instead
               </Link>
@@ -724,7 +724,9 @@ function ActionButtons({
           Verify property data
         </Button>
         <Button variant="outline" asChild className="w-full">
-          <Link href={`/projects/${projectId}/surveys/${surveyId}/pdf-preview`}>
+          <Link
+            href={`/projects/${projectId}/surveys/${surveyId}/pdf-preview/v1`}
+          >
             <ArrowDownTrayIcon className="mr-2 size-4" />
             Export survey PDF
           </Link>

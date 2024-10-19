@@ -1,13 +1,34 @@
 /* eslint-disable jsx-a11y/alt-text */
-import { Page, Text, View, StyleSheet, Image, Link } from "@react-pdf/renderer";
+import {
+  Page,
+  Text,
+  View,
+  StyleSheet,
+  Image,
+  Link,
+  Font,
+} from "@react-pdf/renderer";
 import { type AttributeSchema, type PropertySchema } from "~/lib/property";
+
+Font.register({
+  family: "IBM Plex Sans",
+  fonts: [
+    {
+      src: "/fonts/IBMPlexSans-Regular.ttf",
+    },
+    {
+      src: "/fonts/IBMPlexSans-SemiBold.ttf",
+      fontWeight: "semibold",
+    },
+  ],
+});
 
 const styles = StyleSheet.create({
   page: {
     flexDirection: "column",
     backgroundColor: "#FFFFFF",
-    padding: 10,
     paddingTop: 20,
+    fontFamily: "IBM Plex Sans",
   },
   header: {
     flexDirection: "row",
@@ -25,7 +46,7 @@ const styles = StyleSheet.create({
   },
   table: {
     display: "flex",
-    width: "auto",
+    width: "100%",
     borderStyle: "solid",
     borderWidth: 1,
     borderRightWidth: 0,
@@ -34,31 +55,29 @@ const styles = StyleSheet.create({
     borderTopWidth: 0,
   },
   tableHeader: {
-    backgroundColor: "#046bb6",
-    color: "#FFFFFF",
+    // backgroundColor: "#046bb6",
+    color: "#000000",
   },
   tableRow: {
     margin: "auto",
+    // marginVertical: 1,
     flexDirection: "row",
   },
   tableCol: {
-    width: "10%",
-    borderStyle: "solid",
-    borderWidth: 1,
+    width: "12%",
+    // borderStyle: "solid",
+    // borderWidth: 1,
     borderLeftWidth: 0,
     borderTopWidth: 0,
   },
   leftCol: {
     width: "15px",
-    borderStyle: "solid",
-    borderWidth: 1,
-    borderLeftWidth: 0,
-    borderTopWidth: 0,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#046bb6",
-    color: "#FFFFFF",
+    // backgroundColor: "#046bb6",
+    color: "#000000",
     textAlign: "center",
+    fontWeight: "bold",
   },
   tableCell: {
     margin: "auto",
@@ -70,10 +89,11 @@ const styles = StyleSheet.create({
   },
   commentsCell: {
     textAlign: "left",
+    margin: "auto",
+    justifyContent: "center",
     fontSize: 8,
-    marginLeft: 3,
-    marginVertical: 3,
-    maxHeight: 50,
+    paddingVertical: 6,
+    paddingRight: 6,
   },
   leftCell: {
     alignItems: "center",
@@ -88,6 +108,7 @@ const styles = StyleSheet.create({
     height: 35,
     margin: "5px",
     display: "flex",
+    color: "#808080",
     flexDirection: "column",
     textAlign: "center",
     alignItems: "center",
@@ -96,25 +117,34 @@ const styles = StyleSheet.create({
     alignContent: "center",
     marginVertical: 5,
     fontSize: 10,
+    fontWeight: "semibold",
+    textTransform: "uppercase",
   },
 
   image: {
-    height: 53,
+    height: 65,
     width: "100%",
+  },
+  footer: {
+    height: 4,
+    width: "100%",
+    backgroundColor: "#046bb6",
+    position: "absolute",
+    bottom: 0,
   },
 });
 
-const getWidth = (attribute: AttributeSchema) => {
+const getWidth = (attribute: { id: string }) => {
   if (attribute.id === "address") {
-    return "14%";
-  } else if (attribute.id === "size") {
-    return "8%";
-  } else if (attribute.id === "divisibility") {
-    return "10%";
-  } else if (attribute.id === "askingRate" || attribute.id === "opEx") {
+    return "18%";
+  } else if (attribute.id === "photo") {
+    return "12%";
+  } else if (
+    ["size", "divisibility", "askingRate", "opEx"].includes(attribute.id)
+  ) {
     return "10%";
   } else if (attribute.id === "comments") {
-    return "20%";
+    return "26%";
   } else {
     return "12%";
   }
@@ -136,35 +166,27 @@ export function PDFPage({
     if (!address) {
       return "";
     }
-    const [street, city, state, zip] = address.split("\n");
-    return `${street}, \n ${city}`;
+    return address;
   }
 
   function formatAttributeLabel(label: string) {
     if (label === "Address") {
-      return "Address \n **Click address for \n flyer/website**";
+      return "Address \n **Click for flyer**";
     }
     return label;
   }
 
   return (
     <Page size="A4" orientation="landscape" style={styles.page}>
-      <View style={styles.header}>
-        <Image
-          style={{ width: "20%" }}
-          src="https://mma.prnewswire.com/media/1057994/Newmark_Group_Inc_Logo.jpg?p=facebook"
-        />
-        <Text style={styles.title}>Property Survey</Text>
-      </View>
       <View style={styles.table}>
         <View style={{ ...styles.tableHeader, ...styles.tableRow }}>
           <View style={styles.leftCol}>
             <Text style={styles.leftCell}></Text>
           </View>
-          <View style={{ ...styles.tableCol, width: "10%" }}>
-            <View style={styles.headerCell}>
-              <Text>Photo</Text>
-            </View>
+          <View
+            style={{ ...styles.tableCol, width: getWidth({ id: "photo" }) }}
+          >
+            <View style={styles.headerCell}></View>
           </View>
           {attributes.map((attribute) => (
             <View
@@ -181,7 +203,13 @@ export function PDFPage({
           ))}
         </View>
         {properties.map((property, index) => (
-          <View key={property.id} style={styles.tableRow}>
+          <View
+            key={property.id}
+            style={{
+              ...styles.tableRow,
+              backgroundColor: index % 2 === 0 ? "#f0f0f0" : "#ffffff",
+            }}
+          >
             <View key={index} style={styles.leftCol}>
               <Text style={styles.leftCell}>
                 {(pageNumber - 1) * 7 + index + 1}
@@ -225,6 +253,7 @@ export function PDFPage({
           </View>
         ))}
       </View>
+      <View style={styles.footer}></View>
     </Page>
   );
 }
