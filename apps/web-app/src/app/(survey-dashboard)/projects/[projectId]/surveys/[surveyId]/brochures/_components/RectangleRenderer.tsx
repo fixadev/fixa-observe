@@ -19,11 +19,11 @@ export function RectangleRenderer({
   }
 
   const currentPageRectangles = parsedRectangles.data.filter(
-    (r) => r.pageNumber === pageNumber,
+    (r) => r.pageIndex === pageNumber,
   );
 
   return (
-    <div className="pointer-events-none absolute z-30 flex h-full w-full cursor-crosshair items-center justify-center bg-transparent">
+    <div className="pointer-events-none absolute left-0 top-0 z-30 flex h-full w-full cursor-crosshair items-center justify-center bg-transparent">
       {currentPageRectangles.map((rect, index) => (
         <div
           key={index}

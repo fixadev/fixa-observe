@@ -1,8 +1,6 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { api } from "~/trpc/react";
-import { Document, Page, pdfjs } from "react-pdf";
-
 import {
   Carousel,
   CarouselContent,
@@ -15,12 +13,15 @@ import { Skeleton } from "~/components/ui/skeleton";
 import { useToast } from "~/hooks/use-toast";
 import { TrashIcon } from "@heroicons/react/24/outline";
 import { cn } from "~/lib/utils";
-
 import { type BrochureSchema, type BrochureRectangles } from "~/lib/property";
-
-import { MaskGenerator } from "./MaskGenerator";
-import { RectangleRenderer } from "./RectangleRenderer";
 import { ConfirmRemovePopup } from "./ConfirmRemovePopup";
+import * as pdfjsLib from "~/lib/pdfx.mjs";
+// import { getDocument } from "~/lib/pdfx.mjs";
+import PDFPage, {
+  PDFPageWithControls,
+  type TransformedTextContent,
+} from "./PDFPage";
+import { type PDFDocumentProxy } from "pdfjs-dist";
 
 export function BrochureCarousel({
   brochure,
@@ -29,31 +30,49 @@ export function BrochureCarousel({
   brochure: BrochureSchema;
   refetchProperty: () => void;
 }) {
+  // Load PDF
+  const [pdf, setPdf] = useState<PDFDocumentProxy | null>(null);
+  const pdfLoaded = useRef("");
+  const pdfUrl = useMemo(
+    () => `/api/cors-proxy?url=${encodeURIComponent(brochure.url)}`,
+    [brochure.url],
+  );
   const [numPages, setNumPages] = useState<number>(0);
+
+  useEffect(() => {
+    if (pdfLoaded.current === pdfUrl) return;
+    pdfLoaded.current = pdfUrl;
+
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    pdfjsLib.GlobalWorkerOptions.workerSrc = "/pdf.worker.mjs";
+
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+    pdfjsLib
+      .getDocument(pdfUrl)
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      .promise.then((_pdf: PDFDocumentProxy) => {
+        setPdf(_pdf);
+        setNumPages(_pdf.numPages);
+        setLoaded(true);
+      })
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      .catch((error: unknown) => {
+        console.error("Error loading PDF", error);
+      });
+  }, [pdfUrl]);
+
+  const [tool, setTool] = useState<"eraser" | "selector">("eraser");
   const [loaded, setLoaded] = useState<boolean>(false);
   const [isRemoving, setIsRemoving] = useState<boolean>(false);
   const [isMouseDown, setIsMouseDown] = useState<boolean>(false);
   const [rectanglesToRemove, setRectanglesToRemove] =
     useState<BrochureRectangles>([]);
-
-  useEffect(() => {
-    console.log("rectanglesToRemove", rectanglesToRemove);
-  }, [rectanglesToRemove]);
+  const [textToRemove, setTextToRemove] = useState<TransformedTextContent[]>(
+    [],
+  );
 
   const [deletedPages, setDeletedPages] = useState<Array<number>>([]);
-
   const { toast } = useToast();
-
-  const pdfUrl = `/api/cors-proxy?url=${encodeURIComponent(brochure.url)}`;
-
-  pdfjs.GlobalWorkerOptions.workerSrc = "/pdf.worker.min.mjs";
-
-  function onDocumentLoadSuccess({ numPages }: { numPages: number }) {
-    setNumPages(numPages);
-    setTimeout(() => {
-      setLoaded(true);
-    }, 500);
-  }
 
   const { mutate: inpaintRectangles } =
     api.property.inpaintRectangles.useMutation({
@@ -66,24 +85,18 @@ export function BrochureCarousel({
       },
     });
 
-  function handleRemoveObjects() {
+  const handleRemoveObjects = useCallback(() => {
     setIsRemoving(true);
     inpaintRectangles({
       brochureId: brochure.id,
       rectanglesToRemove,
     });
     setRectanglesToRemove([]);
-  }
-
-  // TODO: fix this styling
+  }, [inpaintRectangles, brochure.id, rectanglesToRemove]);
 
   return (
     <div className="relative w-5/6 flex-col">
-      <Document
-        className="flex h-[740px] max-w-full flex-col justify-center"
-        file={pdfUrl}
-        onLoadSuccess={onDocumentLoadSuccess}
-      >
+      <div className="flex h-[740px] max-w-full flex-col justify-center">
         <Carousel opts={{ watchDrag: false }}>
           <CarouselContent className="h-full">
             {Array.from(
@@ -94,31 +107,27 @@ export function BrochureCarousel({
                     key={`page_${index + 1}`}
                     className="flex flex-col items-center justify-center object-contain px-6"
                   >
-                    <Page
-                      onLoad={() => setLoaded(true)}
-                      className="flex max-w-full"
-                      height={600}
-                      pageNumber={index + 1}
-                      renderTextLayer={false}
-                      renderAnnotationLayer={false}
-                    >
-                      <MaskGenerator
-                        isDrawing={isMouseDown}
-                        setIsDrawing={setIsMouseDown}
-                        pageNumber={index}
+                    {pdf && (
+                      <PDFPageWithControls
+                        pdf={pdf}
+                        pageIndex={index}
+                        tool={tool}
+                        isMouseDown={isMouseDown}
+                        setIsMouseDown={setIsMouseDown}
                         rectangles={rectanglesToRemove}
                         setRectangles={setRectanglesToRemove}
+                        inpaintedRectangles={
+                          brochure.inpaintedRectangles as BrochureRectangles
+                        }
+                        textToRemove={textToRemove}
+                        setTextToRemove={setTextToRemove}
                       />
-                      <RectangleRenderer
-                        pageNumber={index}
-                        rectangles={brochure.inpaintedRectangles}
-                      />
-                      {isRemoving && (
-                        <div className="absolute flex h-full w-full items-center justify-center bg-black/50">
-                          <Spinner className="h-10 w-10 text-white" />
-                        </div>
-                      )}
-                    </Page>
+                    )}
+                    {isRemoving && (
+                      <div className="absolute flex h-full w-full items-center justify-center bg-black/50">
+                        <Spinner className="h-10 w-10 text-white" />
+                      </div>
+                    )}
                   </CarouselItem>
                 ),
             )}
@@ -135,47 +144,56 @@ export function BrochureCarousel({
           )}
         </Carousel>
         <div className="mt-10 flex h-[100px] flex-row gap-2">
-          {Array.from(new Array(numPages), (el, index) => (
-            <Page
-              key={`page_${index + 1}`}
-              onLoad={() => setLoaded(true)}
-              className="flex max-w-full"
-              height={100}
-              pageNumber={index + 1}
-              renderTextLayer={false}
-              renderAnnotationLayer={false}
-            >
-              <div
-                className={`group absolute flex h-full w-full items-center justify-center ${
-                  deletedPages.includes(index)
-                    ? "bg-black/50"
-                    : "bg-transparent"
-                } hover:cursor-pointer hover:bg-black/50`}
-                onClick={() => {
-                  if (deletedPages.includes(index)) {
-                    setDeletedPages((prev) =>
-                      prev.filter((page) => page !== index),
-                    );
-                  } else {
-                    setDeletedPages((prev) => [...prev, index]);
-                  }
-                }}
+          {Array.from(new Array(numPages), (el, index) => {
+            if (!pdf) return null;
+            return (
+              <PDFPage
+                key={`page_${index + 1}`}
+                pdf={pdf}
+                pageIndex={index}
+                inpaintedRectangles={
+                  brochure.inpaintedRectangles as BrochureRectangles
+                }
+                textToRemove={textToRemove}
+                onLoad={() => setLoaded(true)}
+                height={100}
+                // className="h-[100px]"
+                // height={100}
               >
-                <TrashIcon
-                  className={`h-6 w-6 text-white group-hover:opacity-100 ${
-                    deletedPages.includes(index) ? "opacity-100" : "opacity-0"
-                  }`}
-                />
-                {/* <Switch
+                <div
+                  className={`group absolute left-0 top-0 flex h-full w-full items-center justify-center ${
+                    deletedPages.includes(index)
+                      ? "bg-black/50"
+                      : "bg-transparent"
+                  } hover:cursor-pointer hover:bg-black/50`}
+                  onClick={() => {
+                    if (deletedPages.includes(index)) {
+                      setDeletedPages((prev) =>
+                        prev.filter((page) => page !== index),
+                      );
+                    } else {
+                      setDeletedPages((prev) => [...prev, index]);
+                    }
+                  }}
+                >
+                  <TrashIcon
+                    className={`h-6 w-6 text-white group-hover:opacity-100 ${
+                      deletedPages.includes(index) ? "opacity-100" : "opacity-0"
+                    }`}
+                  />
+                  {/* <Switch
                   checked={deletedPages.includes(index)}
                   className="data-[state=checked]:bg-red-500"
                   onCheckedChange={(checked) => {}}
                 /> */}
-              </div>
-            </Page>
-          ))}
+                </div>
+              </PDFPage>
+            );
+          })}
         </div>
-      </Document>
+      </div>
+
+      {/* Loader */}
       <div
         className={cn(
           "pointer-events-none absolute left-0 top-0 flex size-full flex-col bg-white transition-opacity",
