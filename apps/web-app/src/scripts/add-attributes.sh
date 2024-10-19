@@ -1,3 +1,3 @@
 #!/bin/bash
 
-npx tsx src/scripts/addAttributes.ts
+npx tsx -r dotenv/config src/scripts/addAttributes.ts

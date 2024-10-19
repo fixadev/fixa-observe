@@ -1,6 +1,5 @@
 "use client";
 import { useEffect, useState } from "react";
-import { type z } from "zod";
 import { api } from "~/trpc/react";
 import { Document, Page, pdfjs } from "react-pdf";
 
