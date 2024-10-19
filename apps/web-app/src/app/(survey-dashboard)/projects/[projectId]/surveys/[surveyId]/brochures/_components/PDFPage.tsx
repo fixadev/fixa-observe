@@ -39,6 +39,7 @@ export default function PDFPage({
   onTextContentChange,
   height,
   children,
+  className,
   ...props
 }: {
   pdf: PDFDocumentProxy;
@@ -49,6 +50,7 @@ export default function PDFPage({
   onTextContentChange?: (textContent: TextContent) => void;
   height?: number;
   children?: React.ReactNode;
+  className?: string;
 } & React.HTMLAttributes<HTMLDivElement>) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const isLoading = useRef(false);
@@ -101,7 +103,7 @@ export default function PDFPage({
   ]);
 
   return (
-    <div className="relative inline-block" {...props}>
+    <div className={cn("relative inline-block", className)} {...props}>
       <canvas ref={canvasRef} />
       <RectangleRenderer
         pageNumber={pageIndex}
