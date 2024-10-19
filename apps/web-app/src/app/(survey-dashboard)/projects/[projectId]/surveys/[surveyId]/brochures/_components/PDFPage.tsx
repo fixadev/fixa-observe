@@ -10,6 +10,8 @@ import type {
   TextContent,
   TextItem,
 } from "pdfjs-dist/types/src/display/api";
+import { Skeleton } from "~/components/ui/skeleton";
+import { cn } from "~/lib/utils";
 
 export type TransformedTextContent = {
   pageIndex: number;
@@ -50,6 +52,7 @@ export default function PDFPage({
 } & React.HTMLAttributes<HTMLDivElement>) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const isLoading = useRef(false);
+  const [pageLoaded, setPageLoaded] = useState(false);
 
   const filteredTextToRemove = useMemo(() => {
     return textToRemove.filter((item) => item.pageIndex === pageIndex);
@@ -81,6 +84,7 @@ export default function PDFPage({
       void renderTask.promise.then(() => {
         // console.log("Rendered page");
         isLoading.current = false;
+        setPageLoaded(true);
       });
 
       void page.getTextContent().then((_textContent) => {
@@ -104,6 +108,14 @@ export default function PDFPage({
         rectangles={inpaintedRectangles}
       />
       {children}
+      <div
+        className={cn(
+          "pointer-events-none absolute left-0 top-0 z-40 size-full bg-white transition-opacity",
+          pageLoaded ? "opacity-0" : "opacity-100",
+        )}
+      >
+        <Skeleton className="size-full" />
+      </div>
     </div>
   );
 }
@@ -119,6 +131,7 @@ export function PDFPageWithControls({
   inpaintedRectangles,
   textToRemove,
   setTextToRemove,
+  height,
 }: {
   pdf: PDFDocumentProxy;
   pageIndex: number;
@@ -132,6 +145,7 @@ export function PDFPageWithControls({
   setTextToRemove: React.Dispatch<
     React.SetStateAction<TransformedTextContent[]>
   >;
+  height?: number;
 }) {
   const [viewport, setViewport] = useState<PageViewport | null>(null);
   const [textContent, setTextContent] = useState<TextContent | null>(null);
@@ -257,6 +271,7 @@ export function PDFPageWithControls({
       textToRemove={textToRemove}
       onViewportChange={setViewport}
       onTextContentChange={setTextContent}
+      height={height}
       onKeyDown={(e) => {
         if (e.key === "Delete" || e.key === "Backspace") {
           handleRemoveText();
