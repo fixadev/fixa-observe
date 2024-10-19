@@ -87,26 +87,20 @@ export const headerMappingSchema = z.record(
 
 export type HeaderMapping = z.infer<typeof headerMappingSchema>;
 
-
 export type BrochureRectangles = z.infer<typeof brochureRectangles>;
 export const brochureRectangles = z.array(
   z.object({
-        pageNumber: z.number(),
-        x: z.number(),
-        y: z.number(),
-        width: z.number(),
-        height: z.number(),
-        imageUrl: z.string().optional(),
+    pageIndex: z.number(),
+    x: z.number(),
+    y: z.number(),
+    width: z.number(),
+    height: z.number(),
+    imageUrl: z.string().optional(),
   }),
 );
-
 
 export type RemoveRectanglesInput = z.infer<typeof removeRectanglesInput>;
 export const removeRectanglesInput = z.object({
   brochureId: z.string(),
   rectanglesToRemove: brochureRectangles,
 });
-
-
-
-

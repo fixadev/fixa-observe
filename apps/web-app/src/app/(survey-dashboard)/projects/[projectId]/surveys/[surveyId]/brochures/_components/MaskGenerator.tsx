@@ -1,18 +1,20 @@
 import { useRef, useCallback } from "react";
 import { type BrochureRectangles } from "@/lib/property";
 
-export function MaskGenerator({
+export default function MaskGenerator({
   isDrawing,
   setIsDrawing,
-  pageNumber,
+  pageIndex,
   rectangles,
   setRectangles,
+  tool,
 }: {
   isDrawing: boolean;
   setIsDrawing: React.Dispatch<React.SetStateAction<boolean>>;
-  pageNumber: number;
+  pageIndex: number;
   rectangles: BrochureRectangles;
   setRectangles: React.Dispatch<React.SetStateAction<BrochureRectangles>>;
+  tool: "eraser" | "selector";
 }) {
   const startPoint = useRef<{ x: number; y: number } | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -35,7 +37,7 @@ export function MaskGenerator({
         setIsDrawing(true);
         setRectangles((prev) => {
           const newObject = {
-            pageNumber,
+            pageIndex,
             x: startPoint.current?.x ?? 0,
             y: startPoint.current?.y ?? 0,
             width: 0,
@@ -45,7 +47,7 @@ export function MaskGenerator({
         });
       }
     },
-    [pageNumber, setRectangles, setIsDrawing, pixelToPercentage],
+    [pageIndex, setRectangles, setIsDrawing, pixelToPercentage],
   );
 
   const handleMouseMove = useCallback(
@@ -60,16 +62,16 @@ export function MaskGenerator({
         const lastIndex = prev.length - 1;
         const updatedRectangles = [...prev];
         updatedRectangles[lastIndex] = {
-          pageNumber,
-          x: Math.min(startPoint.current!.x, endX),
-          y: Math.min(startPoint.current!.y, endY),
-          width: Math.abs(endX - startPoint.current!.x),
-          height: Math.abs(endY - startPoint.current!.y),
+          pageIndex: pageIndex,
+          x: Math.min(startPoint.current?.x ?? 0, endX),
+          y: Math.min(startPoint.current?.y ?? 0, endY),
+          width: Math.abs(endX - (startPoint.current?.x ?? 0)),
+          height: Math.abs(endY - (startPoint.current?.y ?? 0)),
         };
         return updatedRectangles;
       });
     },
-    [isDrawing, setRectangles, pixelToPercentage, pageNumber],
+    [isDrawing, setRectangles, pixelToPercentage, pageIndex],
   );
 
   const handleMouseUp = useCallback(() => {
@@ -79,13 +81,13 @@ export function MaskGenerator({
   }, [isDrawing, setIsDrawing]);
 
   const currentPageRectangles = rectangles.filter(
-    (r) => r.pageNumber === pageNumber,
+    (r) => r.pageIndex === pageIndex,
   );
 
   return (
     <div
       ref={containerRef}
-      className="absolute z-40 flex h-full w-full cursor-crosshair items-center justify-center bg-transparent"
+      className="absolute left-0 top-0 z-40 flex h-full w-full cursor-crosshair items-center justify-center bg-transparent"
       onMouseDown={handleMouseDown}
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
@@ -100,8 +102,11 @@ export function MaskGenerator({
             top: `${rect.y * 100}%`,
             width: `${rect.width * 100}%`,
             height: `${rect.height * 100}%`,
-            border: "2px solid red",
-            backgroundColor: "rgba(255, 0, 0, 0.2)",
+            border: tool === "eraser" ? "2px solid red" : "2px solid lightblue",
+            backgroundColor:
+              tool === "eraser"
+                ? "rgba(255, 0, 0, 0.2)"
+                : "rgba(178, 216, 254, 0.3)",
           }}
         />
       ))}
