@@ -34,7 +34,9 @@ export function BrochureCarousel({
   brochure: BrochureSchema;
   refetchProperty: () => void;
 }) {
-  // Load PDF
+  // ------------------
+  // #region Load PDF
+  // ------------------
   const [pdf, setPdf] = useState<PDFDocumentProxy | null>(null);
   const pdfLoaded = useRef("");
   const pdfUrl = useMemo(
@@ -42,7 +44,6 @@ export function BrochureCarousel({
     [brochure.url],
   );
   const [numPages, setNumPages] = useState<number>(0);
-
   useEffect(() => {
     if (pdfLoaded.current === pdfUrl) return;
     pdfLoaded.current = pdfUrl;
@@ -64,6 +65,7 @@ export function BrochureCarousel({
         console.error("Error loading PDF", error);
       });
   }, [pdfUrl]);
+  // #endregion
 
   const [tool, setTool] = useState<Tool>("selector");
   const [loaded, setLoaded] = useState<boolean>(false);
@@ -74,6 +76,56 @@ export function BrochureCarousel({
   const [textToRemove, setTextToRemove] = useState<TransformedTextContent[]>(
     [],
   );
+
+  // ------------------
+  // #region Undo and Redo
+  // ------------------
+  // Undo and redo stacks contain ids of the rectangles or text that were removed
+  const [undoStack, setUndoStack] = useState<string[]>([]);
+  const undoStackSet = useMemo(() => new Set(undoStack), [undoStack]);
+  const [redoStack, setRedoStack] = useState<string[]>([]);
+  const redoStackSet = useMemo(() => new Set(redoStack), [redoStack]);
+  const undo = useCallback(() => {
+    const prevUndo = [...undoStack];
+    const prevRedo = [...redoStack];
+    setUndoStack(() => {
+      const last = prevUndo.pop();
+      if (last) {
+        setRedoStack(() => [...prevRedo, last]);
+      }
+      return prevUndo;
+    });
+  }, [undoStack, redoStack]);
+  const redo = useCallback(() => {
+    const prevUndo = [...undoStack];
+    const prevRedo = [...redoStack];
+    setRedoStack(() => {
+      const last = prevRedo.pop();
+      if (last) {
+        setUndoStack(() => [...prevUndo, last]);
+      }
+      return prevRedo;
+    });
+  }, [undoStack, redoStack]);
+  const handleUpdateTextToRemove = useCallback(
+    (textToRemove: TransformedTextContent[]) => {
+      const newTextToRemove: TransformedTextContent[] = [];
+      const id = crypto.randomUUID();
+      for (const text of textToRemove) {
+        if (!text.id) {
+          newTextToRemove.push({ ...text, id });
+        } else if (!redoStackSet.has(text.id)) {
+          // Get rid of all text in the redo stack
+          newTextToRemove.push(text);
+        }
+      }
+      setTextToRemove(newTextToRemove);
+      setUndoStack((prev) => [...prev, id]);
+      setRedoStack([]);
+    },
+    [],
+  );
+  // #endregion
 
   const [deletedPages, setDeletedPages] = useState<Set<number>>(new Set());
   const { toast } = useToast();
@@ -98,6 +150,9 @@ export function BrochureCarousel({
     setRectanglesToRemove([]);
   }, [inpaintRectangles, brochure.id, rectanglesToRemove]);
 
+  // ------------------
+  // #region Carousel
+  // ------------------
   const [carouselApi, setCarouselApi] = useState<CarouselApi>();
   const [currentSlide, setCurrentSlide] = useState<number>(0);
   const updateCurrentSlide = useCallback((_api: CarouselApi) => {
@@ -117,13 +172,12 @@ export function BrochureCarousel({
   );
   useEffect(() => {
     if (!carouselApi) return;
-
     carouselApi.on("select", updateCurrentSlide);
-
     return () => {
       carouselApi.off("select", updateCurrentSlide);
     };
   }, [carouselApi, updateCurrentSlide]);
+  // #endregion
 
   return (
     <div className="relative h-[655px] min-w-0 flex-1">
@@ -150,12 +204,13 @@ export function BrochureCarousel({
                         inpaintedRectangles={
                           brochure.inpaintedRectangles as BrochureRectangles
                         }
+                        idsToShow={undoStackSet}
                         textToRemove={textToRemove}
-                        setTextToRemove={setTextToRemove}
+                        setTextToRemove={handleUpdateTextToRemove}
                         height={500}
                       />
                       {isRemoving && (
-                        <div className="absolute flex h-full w-full items-center justify-center bg-black/50">
+                        <div className="absolute z-40 flex h-full w-full items-center justify-center bg-black/50">
                           <Spinner className="h-10 w-10 text-white" />
                         </div>
                       )}
@@ -168,6 +223,10 @@ export function BrochureCarousel({
             <ToolSelector
               tool={tool}
               onToolChange={setTool}
+              onUndo={undo}
+              undoEnabled={undoStack.length > 0}
+              onRedo={redo}
+              redoEnabled={redoStack.length > 0}
               isMouseDown={isMouseDown}
             />
             {rectanglesToRemove.length > 0 && !isRemoving && !isMouseDown && (
@@ -190,6 +249,7 @@ export function BrochureCarousel({
                     brochure.inpaintedRectangles as BrochureRectangles
                   }
                   textToRemove={textToRemove}
+                  idsToShow={undoStackSet}
                   height={100}
                   className={cn(
                     !deletedPages.has(index) &&
@@ -245,11 +305,6 @@ export function BrochureCarousel({
                         <TrashIcon className="size-4" />
                       )}
                     </Button>
-                    {/* <Switch
-                  checked={deletedPages.includes(index)}
-                  className="data-[state=checked]:bg-red-500"
-                  onCheckedChange={(checked) => {}}
-                /> */}
                   </div>
                 </PDFPage>
               );
