@@ -110,12 +110,18 @@ export default function PDFPage({
     height,
   ]);
 
+  const filteredInpaintedRectangles = useMemo(() => {
+    return inpaintedRectangles.filter((rectangle) =>
+      idsToShow ? idsToShow.has(rectangle.id ?? "") : true,
+    );
+  }, [inpaintedRectangles, idsToShow]);
+
   return (
     <div className={cn("relative inline-block", className)} {...props}>
       <canvas ref={canvasRef} />
       <RectangleRenderer
         pageNumber={pageIndex}
-        rectangles={inpaintedRectangles}
+        rectangles={filteredInpaintedRectangles}
       />
       {children}
       <div
@@ -150,7 +156,7 @@ export function PDFPageWithControls({
   isMouseDown: boolean;
   setIsMouseDown: React.Dispatch<React.SetStateAction<boolean>>;
   rectangles: BrochureRectangles;
-  setRectangles: React.Dispatch<React.SetStateAction<BrochureRectangles>>;
+  setRectangles: (rectangles: BrochureRectangles) => void;
   inpaintedRectangles: BrochureRectangles;
   textToRemove: TransformedTextContent[];
   setTextToRemove: (textToRemove: TransformedTextContent[]) => void;

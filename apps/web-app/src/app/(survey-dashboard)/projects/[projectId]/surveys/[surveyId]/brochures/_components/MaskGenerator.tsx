@@ -16,7 +16,7 @@ export default function MaskGenerator({
   setIsDrawing: React.Dispatch<React.SetStateAction<boolean>>;
   pageIndex: number;
   rectangles: BrochureRectangles;
-  setRectangles: React.Dispatch<React.SetStateAction<BrochureRectangles>>;
+  setRectangles: (rectangles: BrochureRectangles) => void;
   curRectangle: BrochureRectangles[0] | null;
   setCurRectangle: React.Dispatch<
     React.SetStateAction<BrochureRectangles[0] | null>
@@ -76,11 +76,18 @@ export default function MaskGenerator({
     if (!isDrawing) return;
     setIsDrawing(false);
     if (curRectangle) {
-      setRectangles((prev) => [...prev, curRectangle]);
+      setRectangles([...rectangles, curRectangle]);
     }
     setCurRectangle(null);
     startPoint.current = null;
-  }, [isDrawing, setIsDrawing, curRectangle, setCurRectangle, setRectangles]);
+  }, [
+    isDrawing,
+    setIsDrawing,
+    curRectangle,
+    setCurRectangle,
+    setRectangles,
+    rectangles,
+  ]);
 
   const currentPageRectangles = useMemo(
     () => rectangles.filter((r) => r.pageIndex === pageIndex),

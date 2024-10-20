@@ -312,11 +312,18 @@ export const propertyService = ({ db }: { db: PrismaClient }) => {
 
         if (response.status === 200 && response.data.newRectangles) {
           const newRectangles = response.data.newRectangles;
+          for (const rectangle of newRectangles) {
+            if (!rectangle.id) {
+              rectangle.id = crypto.randomUUID();
+            }
+          }
           const updatedRectangles = [...oldRectangles, ...newRectangles];
-          return await db.brochure.update({
+          await db.brochure.update({
             where: { id: input.brochureId },
             data: { inpaintedRectangles: updatedRectangles },
           });
+
+          return { newRectangles };
         } else {
           throw new Error(
             "Request to inpaint rectangles failed" + response.statusText,

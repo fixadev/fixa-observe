@@ -128,7 +128,13 @@ export function BrochureCarousel({
 
   const { mutate: inpaintRectangles } =
     api.property.inpaintRectangles.useMutation({
-      onSuccess: () => {
+      onSuccess: ({ newRectangles }) => {
+        const newIds = newRectangles
+          .map((rectangle) => rectangle.id)
+          .filter((id) => id !== undefined);
+        setUndoStack((prev) => [...prev, ...newIds]);
+        setRedoStack([]);
+
         toast({
           title: "Objects removed successfully",
         });

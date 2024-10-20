@@ -90,6 +90,7 @@ export type HeaderMapping = z.infer<typeof headerMappingSchema>;
 export type BrochureRectangles = z.infer<typeof brochureRectangles>;
 export const brochureRectangles = z.array(
   z.object({
+    id: z.string().optional(),
     pageIndex: z.number(),
     x: z.number(),
     y: z.number(),
