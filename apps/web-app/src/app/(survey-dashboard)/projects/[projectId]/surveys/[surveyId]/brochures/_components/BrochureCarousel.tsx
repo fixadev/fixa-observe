@@ -86,26 +86,22 @@ export function BrochureCarousel({
   const [redoStack, setRedoStack] = useState<string[]>([]);
   const redoStackSet = useMemo(() => new Set(redoStack), [redoStack]);
   const undo = useCallback(() => {
-    const prevUndo = [...undoStack];
-    const prevRedo = [...redoStack];
-    setUndoStack(() => {
-      const last = prevUndo.pop();
-      if (last) {
-        setRedoStack(() => [...prevRedo, last]);
-      }
-      return prevUndo;
-    });
+    const newUndo = [...undoStack];
+    const last = newUndo.pop();
+    if (last) {
+      const newRedo = [...redoStack, last];
+      setRedoStack(newRedo);
+    }
+    setUndoStack(newUndo);
   }, [undoStack, redoStack]);
   const redo = useCallback(() => {
-    const prevUndo = [...undoStack];
-    const prevRedo = [...redoStack];
-    setRedoStack(() => {
-      const last = prevRedo.pop();
-      if (last) {
-        setUndoStack(() => [...prevUndo, last]);
-      }
-      return prevRedo;
-    });
+    const newRedo = [...redoStack];
+    const last = newRedo.pop();
+    if (last) {
+      const newUndo = [...undoStack, last];
+      setUndoStack(newUndo);
+    }
+    setRedoStack(newRedo);
   }, [undoStack, redoStack]);
   const handleUpdateTextToRemove = useCallback(
     (textToRemove: TransformedTextContent[]) => {
@@ -115,7 +111,7 @@ export function BrochureCarousel({
         if (!text.id) {
           newTextToRemove.push({ ...text, id });
         } else if (!redoStackSet.has(text.id)) {
-          // Get rid of all text in the redo stack
+          // Get rid of all text in the redo stack (because we don't need them anymore)
           newTextToRemove.push(text);
         }
       }
@@ -123,7 +119,7 @@ export function BrochureCarousel({
       setUndoStack((prev) => [...prev, id]);
       setRedoStack([]);
     },
-    [],
+    [redoStackSet],
   );
   // #endregion
 
