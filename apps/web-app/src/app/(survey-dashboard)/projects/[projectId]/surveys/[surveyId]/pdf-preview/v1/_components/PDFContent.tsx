@@ -1,8 +1,7 @@
-import { Document, Image, Page } from "@react-pdf/renderer";
-import { type Property, type Attribute } from "@prisma/client";
+import { Document } from "@react-pdf/renderer";
 import { PDFPage } from "./PDFPage";
 import Spinner from "~/components/Spinner";
-import { type PropertySchema } from "~/lib/property";
+import { type PropertySchema, type AttributeSchema } from "~/lib/property";
 import { useEffect } from "react";
 import { CoverPage } from "./CoverPage";
 import { MapPage } from "./MapPage";
@@ -15,17 +14,17 @@ export function PDFContent({
 }: {
   mapImageData: string | null;
   properties: PropertySchema[] | null;
-  attributes: Attribute[] | null;
+  attributes: AttributeSchema[] | null;
   surveyName: string | null;
 }) {
   if (!properties || !attributes) {
     return <Spinner />;
   }
 
-  useEffect(() => {
-    console.log("mapImageData");
-    console.log(mapImageData);
-  }, [mapImageData]);
+  // useEffect(() => {
+  //   console.log("mapImageData");
+  //   console.log(mapImageData);
+  // }, [mapImageData]);
 
   return (
     <Document title={`${surveyName}.pdf` ?? "property-survey.pdf"}>

@@ -49,7 +49,7 @@ const styles = StyleSheet.create({
   },
 });
 
-export function CoverPage({}: {}) {
+export function CoverPage() {
   // ... existing code ...
 
   return (

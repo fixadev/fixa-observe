@@ -115,7 +115,11 @@ export function PropertiesTable({
   useEffect(() => {
     if (attributes) {
       setAttributesOrderState(
-        attributes.map((attr) => ({ ...attr, isNew: false })),
+        attributes.map((attr) => ({
+          ...attr,
+          isNew: false,
+          defaultIndex: attr.defaultIndex ?? 0,
+        })),
       );
     }
   }, [attributes]);
@@ -297,6 +301,7 @@ export function PropertiesTable({
           ownerId: "",
           projectId: "",
           isNew: true,
+          defaultIndex: attributesOrder.length,
         },
       ],
       "add",

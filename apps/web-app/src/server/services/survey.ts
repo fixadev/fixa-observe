@@ -46,6 +46,9 @@ export const surveyService = ({ db }: { db: PrismaClient }) => {
         where: {
           OR: [{ ownerId: userId }, { ownerId: null }],
         },
+        // orderBy: {
+        //   defaultIndex: "asc",
+        // },
       });
     },
 
