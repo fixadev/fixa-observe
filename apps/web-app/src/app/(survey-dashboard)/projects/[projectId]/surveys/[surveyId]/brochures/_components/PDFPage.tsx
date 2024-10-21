@@ -133,11 +133,14 @@ export default function PDFPage({
         onOperatorListChange?.(_operatorList);
       });
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     pageIndex,
     pdf,
-    filteredTextToRemove,
-    filteredPathsToRemove,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    JSON.stringify(filteredTextToRemove), // Needed to only rerender when contents of this array is changed
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    JSON.stringify(filteredPathsToRemove), // Needed to only rerender when contents of this array is changed
     onViewportChange,
     onTextContentChange,
     height,
