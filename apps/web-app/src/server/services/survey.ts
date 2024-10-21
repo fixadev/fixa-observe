@@ -1,9 +1,22 @@
-import { type Attribute, type PrismaClient } from "@prisma/client";
+import { type PrismaClient } from "@prisma/client";
+import { type AttributeSchema } from "~/lib/property";
 import { type CreateSurveyInput } from "~/lib/survey";
 import { type SurveySchema } from "~/lib/survey";
 
 export const surveyService = ({ db }: { db: PrismaClient }) => {
+  const getAttributes = async (userId: string) => {
+    return db.attribute.findMany({
+      where: {
+        OR: [{ ownerId: userId }, { ownerId: null }],
+      },
+      // orderBy: {
+      //   defaultIndex: "asc",
+      // },
+    });
+  };
+
   return {
+    getAttributes,
     getProjectSurveys: async (projectId: string, userId: string) => {
       const surveys = await db.survey.findMany({
         where: { projectId: projectId, ownerId: userId },
@@ -41,14 +54,6 @@ export const surveyService = ({ db }: { db: PrismaClient }) => {
       return survey;
     },
 
-    getAttributes: async (userId: string) => {
-      return db.attribute.findMany({
-        where: {
-          OR: [{ ownerId: userId }, { ownerId: null }],
-        },
-      });
-    },
-
     getSurveyAttributes: async (surveyId: string) => {
       const attributes = await db.attributesOnSurveys.findMany({
         where: { surveyId },
@@ -60,11 +65,20 @@ export const surveyService = ({ db }: { db: PrismaClient }) => {
     },
 
     createSurvey: async (input: CreateSurveyInput, userId: string) => {
+      const attributes = await getAttributes(userId);
       const survey = await db.survey.create({
         data: {
           name: input.surveyName,
           projectId: input.projectId,
           ownerId: userId,
+          attributes: {
+            createMany: {
+              data: attributes.map((attribute, index) => ({
+                attributeId: attribute.id,
+                attributeIndex: index,
+              })),
+            },
+          },
         },
       });
       return survey;
@@ -80,7 +94,7 @@ export const surveyService = ({ db }: { db: PrismaClient }) => {
 
     createAttributes: async (
       surveyId: string,
-      attributes: Attribute[],
+      attributes: AttributeSchema[],
       userId: string,
     ) => {
       const result = await db.attribute.createMany({
@@ -96,7 +110,7 @@ export const surveyService = ({ db }: { db: PrismaClient }) => {
     // TODO: simplify this
     addAttributes: async (
       surveyId: string,
-      attributes: Attribute[],
+      attributes: AttributeSchema[],
       userId: string,
     ) => {
       const existingAttributes = await db.attribute.findMany({
@@ -136,7 +150,7 @@ export const surveyService = ({ db }: { db: PrismaClient }) => {
     },
 
     updateAttributes: async (
-      attributes: Attribute[],
+      attributes: AttributeSchema[],
       idToUpdate: string | undefined,
       userId: string,
     ) => {
@@ -185,7 +199,7 @@ export const surveyService = ({ db }: { db: PrismaClient }) => {
 
     updateAttributesOrder: async (
       surveyId: string,
-      attributes: Attribute[],
+      attributes: AttributeSchema[],
       userId: string,
     ) => {
       await db.survey.update({

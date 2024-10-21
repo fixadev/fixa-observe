@@ -82,6 +82,9 @@ export const DraggableHeader = ({
                 defaultValue={attribute.label}
                 onKeyDown={(e) => {
                   if (e.key === "Enter") {
+                    renameAttribute?.(
+                      (e.currentTarget as HTMLInputElement).value,
+                    );
                     setIsEditing(false);
                   }
                 }}
@@ -97,7 +100,7 @@ export const DraggableHeader = ({
                 variant="ghost"
                 className="w-full min-w-32 text-wrap disabled:opacity-100"
                 onClick={() => setIsEditing(true)}
-                disabled={disabled || !renameAttribute}
+                disabled={disabled || !attribute.ownerId}
               >
                 {attribute.label}
               </Button>
@@ -106,7 +109,7 @@ export const DraggableHeader = ({
               <Button
                 size="icon"
                 variant="ghost"
-                disabled={disabled || attribute.id === "address"}
+                disabled={disabled || attribute.id === "displayAddress"}
                 onClick={deleteAttribute}
               >
                 <TrashIcon className="size-4" />

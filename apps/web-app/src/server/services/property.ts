@@ -81,7 +81,12 @@ export const propertyService = ({ db }: { db: PrismaClient }) => {
           attributes:
             {
               ...property.attributes,
-              address: formattedAddresses ? formattedAddresses[index] : "",
+              address: formattedAddresses
+                ? formattedAddresses[index]?.address
+                : "",
+              displayAddress: formattedAddresses
+                ? formattedAddresses[index]?.displayAddress
+                : "",
             } ?? {},
         }),
       );

@@ -122,6 +122,7 @@ export const DraggableRow = ({
     const attributesToMinWidth = {
       comments: "min-w-72",
       address: "min-w-64",
+      displayAddress: "min-w-64",
       size: "min-w-44",
       askingRate: "min-w-44",
       divisibility: "min-w-44",
@@ -272,10 +273,25 @@ export const DraggableRow = ({
             draggingRow={draggingRow}
             className={attributeToMinWidth(attribute)}
           >
-            {attribute.id === "comments" || attribute.id === "address" ? (
+            {attribute.id === "comments" ||
+            attribute.id === "displayAddress" ? (
               <Textarea
                 defaultValue={property.attributes?.[attribute.id] ?? ""}
                 className={`min-h-[${attribute.id === "comments" ? "90" : "40"}px]`}
+                // onKeyDown={(e) => {
+                //   if (e.key === "Enter") {
+                //     e.preventDefault();
+                //     (e.target as HTMLTextAreaElement).blur();
+                //     updateProperty({
+                //       ...property,
+                //       attributes: {
+                //         ...property.attributes,
+                //         [attribute.id]: (e.currentTarget as HTMLTextAreaElement)
+                //           .value,
+                //       },
+                //     });
+                //   }
+                // }}
                 onBlur={(e) => {
                   updateProperty({
                     ...property,
@@ -293,6 +309,21 @@ export const DraggableRow = ({
                     <Input
                       className={cn(attribute.id in parsedAttributes && "pr-9")}
                       defaultValue={property.attributes?.[attribute.id] ?? ""}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          (e.target as HTMLTextAreaElement).blur();
+                          updateProperty({
+                            ...property,
+                            attributes: {
+                              ...property.attributes,
+                              [attribute.id]: (
+                                e.currentTarget as HTMLInputElement
+                              ).value,
+                            },
+                          });
+                        }
+                      }}
                       onBlur={(e: React.ChangeEvent<HTMLInputElement>) => {
                         updateProperty({
                           ...property,

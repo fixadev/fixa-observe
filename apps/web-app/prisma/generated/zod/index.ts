@@ -62,7 +62,7 @@ export const ProjectScalarFieldEnumSchema = z.enum(['id','ownerId','name','creat
 
 export const SurveyScalarFieldEnumSchema = z.enum(['id','ownerId','createdAt','updatedAt','name','projectId']);
 
-export const AttributeScalarFieldEnumSchema = z.enum(['id','createdAt','updatedAt','label','type','ownerId']);
+export const AttributeScalarFieldEnumSchema = z.enum(['id','createdAt','updatedAt','label','type','ownerId','defaultIndex']);
 
 export const AttributesOnSurveysScalarFieldEnumSchema = z.enum(['id','createdAt','updatedAt','attributeId','attributeIndex','surveyId']);
 
@@ -150,6 +150,7 @@ export const AttributeSchema = z.object({
   label: z.string(),
   type: z.string(),
   ownerId: z.string().nullable(),
+  defaultIndex: z.number().int(),
 })
 
 export type Attribute = z.infer<typeof AttributeSchema>
@@ -432,6 +433,7 @@ export const AttributeSelectSchema: z.ZodType<Prisma.AttributeSelect> = z.object
   label: z.boolean().optional(),
   type: z.boolean().optional(),
   ownerId: z.boolean().optional(),
+  defaultIndex: z.boolean().optional(),
   owner: z.union([z.boolean(),z.lazy(() => UserArgsSchema)]).optional(),
   surveys: z.union([z.boolean(),z.lazy(() => AttributesOnSurveysFindManyArgsSchema)]).optional(),
   _count: z.union([z.boolean(),z.lazy(() => AttributeCountOutputTypeArgsSchema)]).optional(),
@@ -900,6 +902,7 @@ export const AttributeWhereInputSchema: z.ZodType<Prisma.AttributeWhereInput> = 
   label: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   type: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   ownerId: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
+  defaultIndex: z.union([ z.lazy(() => IntFilterSchema),z.number() ]).optional(),
   owner: z.union([ z.lazy(() => UserNullableRelationFilterSchema),z.lazy(() => UserWhereInputSchema) ]).optional().nullable(),
   surveys: z.lazy(() => AttributesOnSurveysListRelationFilterSchema).optional()
 }).strict();
@@ -911,6 +914,7 @@ export const AttributeOrderByWithRelationInputSchema: z.ZodType<Prisma.Attribute
   label: z.lazy(() => SortOrderSchema).optional(),
   type: z.lazy(() => SortOrderSchema).optional(),
   ownerId: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
+  defaultIndex: z.lazy(() => SortOrderSchema).optional(),
   owner: z.lazy(() => UserOrderByWithRelationInputSchema).optional(),
   surveys: z.lazy(() => AttributesOnSurveysOrderByRelationAggregateInputSchema).optional()
 }).strict();
@@ -928,6 +932,7 @@ export const AttributeWhereUniqueInputSchema: z.ZodType<Prisma.AttributeWhereUni
   label: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   type: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   ownerId: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
+  defaultIndex: z.union([ z.lazy(() => IntFilterSchema),z.number().int() ]).optional(),
   owner: z.union([ z.lazy(() => UserNullableRelationFilterSchema),z.lazy(() => UserWhereInputSchema) ]).optional().nullable(),
   surveys: z.lazy(() => AttributesOnSurveysListRelationFilterSchema).optional()
 }).strict());
@@ -939,9 +944,12 @@ export const AttributeOrderByWithAggregationInputSchema: z.ZodType<Prisma.Attrib
   label: z.lazy(() => SortOrderSchema).optional(),
   type: z.lazy(() => SortOrderSchema).optional(),
   ownerId: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
+  defaultIndex: z.lazy(() => SortOrderSchema).optional(),
   _count: z.lazy(() => AttributeCountOrderByAggregateInputSchema).optional(),
+  _avg: z.lazy(() => AttributeAvgOrderByAggregateInputSchema).optional(),
   _max: z.lazy(() => AttributeMaxOrderByAggregateInputSchema).optional(),
-  _min: z.lazy(() => AttributeMinOrderByAggregateInputSchema).optional()
+  _min: z.lazy(() => AttributeMinOrderByAggregateInputSchema).optional(),
+  _sum: z.lazy(() => AttributeSumOrderByAggregateInputSchema).optional()
 }).strict();
 
 export const AttributeScalarWhereWithAggregatesInputSchema: z.ZodType<Prisma.AttributeScalarWhereWithAggregatesInput> = z.object({
@@ -954,6 +962,7 @@ export const AttributeScalarWhereWithAggregatesInputSchema: z.ZodType<Prisma.Att
   label: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
   type: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
   ownerId: z.union([ z.lazy(() => StringNullableWithAggregatesFilterSchema),z.string() ]).optional().nullable(),
+  defaultIndex: z.union([ z.lazy(() => IntWithAggregatesFilterSchema),z.number() ]).optional(),
 }).strict();
 
 export const AttributesOnSurveysWhereInputSchema: z.ZodType<Prisma.AttributesOnSurveysWhereInput> = z.object({
@@ -1785,6 +1794,7 @@ export const AttributeCreateInputSchema: z.ZodType<Prisma.AttributeCreateInput> 
   updatedAt: z.coerce.date().optional(),
   label: z.string(),
   type: z.string(),
+  defaultIndex: z.number().int().optional(),
   owner: z.lazy(() => UserCreateNestedOneWithoutAttributesInputSchema).optional(),
   surveys: z.lazy(() => AttributesOnSurveysCreateNestedManyWithoutAttributeInputSchema).optional()
 }).strict();
@@ -1796,6 +1806,7 @@ export const AttributeUncheckedCreateInputSchema: z.ZodType<Prisma.AttributeUnch
   label: z.string(),
   type: z.string(),
   ownerId: z.string().optional().nullable(),
+  defaultIndex: z.number().int().optional(),
   surveys: z.lazy(() => AttributesOnSurveysUncheckedCreateNestedManyWithoutAttributeInputSchema).optional()
 }).strict();
 
@@ -1805,6 +1816,7 @@ export const AttributeUpdateInputSchema: z.ZodType<Prisma.AttributeUpdateInput> 
   updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   label: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   type: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  defaultIndex: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   owner: z.lazy(() => UserUpdateOneWithoutAttributesNestedInputSchema).optional(),
   surveys: z.lazy(() => AttributesOnSurveysUpdateManyWithoutAttributeNestedInputSchema).optional()
 }).strict();
@@ -1816,6 +1828,7 @@ export const AttributeUncheckedUpdateInputSchema: z.ZodType<Prisma.AttributeUnch
   label: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   type: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   ownerId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  defaultIndex: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   surveys: z.lazy(() => AttributesOnSurveysUncheckedUpdateManyWithoutAttributeNestedInputSchema).optional()
 }).strict();
 
@@ -1825,7 +1838,8 @@ export const AttributeCreateManyInputSchema: z.ZodType<Prisma.AttributeCreateMan
   updatedAt: z.coerce.date().optional(),
   label: z.string(),
   type: z.string(),
-  ownerId: z.string().optional().nullable()
+  ownerId: z.string().optional().nullable(),
+  defaultIndex: z.number().int().optional()
 }).strict();
 
 export const AttributeUpdateManyMutationInputSchema: z.ZodType<Prisma.AttributeUpdateManyMutationInput> = z.object({
@@ -1834,6 +1848,7 @@ export const AttributeUpdateManyMutationInputSchema: z.ZodType<Prisma.AttributeU
   updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   label: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   type: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  defaultIndex: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
 }).strict();
 
 export const AttributeUncheckedUpdateManyInputSchema: z.ZodType<Prisma.AttributeUncheckedUpdateManyInput> = z.object({
@@ -1843,6 +1858,7 @@ export const AttributeUncheckedUpdateManyInputSchema: z.ZodType<Prisma.Attribute
   label: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   type: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   ownerId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  defaultIndex: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
 }).strict();
 
 export const AttributesOnSurveysCreateInputSchema: z.ZodType<Prisma.AttributesOnSurveysCreateInput> = z.object({
@@ -2728,6 +2744,17 @@ export const SurveyMinOrderByAggregateInputSchema: z.ZodType<Prisma.SurveyMinOrd
   projectId: z.lazy(() => SortOrderSchema).optional()
 }).strict();
 
+export const IntFilterSchema: z.ZodType<Prisma.IntFilter> = z.object({
+  equals: z.number().optional(),
+  in: z.number().array().optional(),
+  notIn: z.number().array().optional(),
+  lt: z.number().optional(),
+  lte: z.number().optional(),
+  gt: z.number().optional(),
+  gte: z.number().optional(),
+  not: z.union([ z.number(),z.lazy(() => NestedIntFilterSchema) ]).optional(),
+}).strict();
+
 export const UserNullableRelationFilterSchema: z.ZodType<Prisma.UserNullableRelationFilter> = z.object({
   is: z.lazy(() => UserWhereInputSchema).optional().nullable(),
   isNot: z.lazy(() => UserWhereInputSchema).optional().nullable()
@@ -2739,7 +2766,12 @@ export const AttributeCountOrderByAggregateInputSchema: z.ZodType<Prisma.Attribu
   updatedAt: z.lazy(() => SortOrderSchema).optional(),
   label: z.lazy(() => SortOrderSchema).optional(),
   type: z.lazy(() => SortOrderSchema).optional(),
-  ownerId: z.lazy(() => SortOrderSchema).optional()
+  ownerId: z.lazy(() => SortOrderSchema).optional(),
+  defaultIndex: z.lazy(() => SortOrderSchema).optional()
+}).strict();
+
+export const AttributeAvgOrderByAggregateInputSchema: z.ZodType<Prisma.AttributeAvgOrderByAggregateInput> = z.object({
+  defaultIndex: z.lazy(() => SortOrderSchema).optional()
 }).strict();
 
 export const AttributeMaxOrderByAggregateInputSchema: z.ZodType<Prisma.AttributeMaxOrderByAggregateInput> = z.object({
@@ -2748,7 +2780,8 @@ export const AttributeMaxOrderByAggregateInputSchema: z.ZodType<Prisma.Attribute
   updatedAt: z.lazy(() => SortOrderSchema).optional(),
   label: z.lazy(() => SortOrderSchema).optional(),
   type: z.lazy(() => SortOrderSchema).optional(),
-  ownerId: z.lazy(() => SortOrderSchema).optional()
+  ownerId: z.lazy(() => SortOrderSchema).optional(),
+  defaultIndex: z.lazy(() => SortOrderSchema).optional()
 }).strict();
 
 export const AttributeMinOrderByAggregateInputSchema: z.ZodType<Prisma.AttributeMinOrderByAggregateInput> = z.object({
@@ -2757,10 +2790,15 @@ export const AttributeMinOrderByAggregateInputSchema: z.ZodType<Prisma.Attribute
   updatedAt: z.lazy(() => SortOrderSchema).optional(),
   label: z.lazy(() => SortOrderSchema).optional(),
   type: z.lazy(() => SortOrderSchema).optional(),
-  ownerId: z.lazy(() => SortOrderSchema).optional()
+  ownerId: z.lazy(() => SortOrderSchema).optional(),
+  defaultIndex: z.lazy(() => SortOrderSchema).optional()
 }).strict();
 
-export const IntFilterSchema: z.ZodType<Prisma.IntFilter> = z.object({
+export const AttributeSumOrderByAggregateInputSchema: z.ZodType<Prisma.AttributeSumOrderByAggregateInput> = z.object({
+  defaultIndex: z.lazy(() => SortOrderSchema).optional()
+}).strict();
+
+export const IntWithAggregatesFilterSchema: z.ZodType<Prisma.IntWithAggregatesFilter> = z.object({
   equals: z.number().optional(),
   in: z.number().array().optional(),
   notIn: z.number().array().optional(),
@@ -2768,7 +2806,12 @@ export const IntFilterSchema: z.ZodType<Prisma.IntFilter> = z.object({
   lte: z.number().optional(),
   gt: z.number().optional(),
   gte: z.number().optional(),
-  not: z.union([ z.number(),z.lazy(() => NestedIntFilterSchema) ]).optional(),
+  not: z.union([ z.number(),z.lazy(() => NestedIntWithAggregatesFilterSchema) ]).optional(),
+  _count: z.lazy(() => NestedIntFilterSchema).optional(),
+  _avg: z.lazy(() => NestedFloatFilterSchema).optional(),
+  _sum: z.lazy(() => NestedIntFilterSchema).optional(),
+  _min: z.lazy(() => NestedIntFilterSchema).optional(),
+  _max: z.lazy(() => NestedIntFilterSchema).optional()
 }).strict();
 
 export const AttributeRelationFilterSchema: z.ZodType<Prisma.AttributeRelationFilter> = z.object({
@@ -2814,22 +2857,6 @@ export const AttributesOnSurveysMinOrderByAggregateInputSchema: z.ZodType<Prisma
 
 export const AttributesOnSurveysSumOrderByAggregateInputSchema: z.ZodType<Prisma.AttributesOnSurveysSumOrderByAggregateInput> = z.object({
   attributeIndex: z.lazy(() => SortOrderSchema).optional()
-}).strict();
-
-export const IntWithAggregatesFilterSchema: z.ZodType<Prisma.IntWithAggregatesFilter> = z.object({
-  equals: z.number().optional(),
-  in: z.number().array().optional(),
-  notIn: z.number().array().optional(),
-  lt: z.number().optional(),
-  lte: z.number().optional(),
-  gt: z.number().optional(),
-  gte: z.number().optional(),
-  not: z.union([ z.number(),z.lazy(() => NestedIntWithAggregatesFilterSchema) ]).optional(),
-  _count: z.lazy(() => NestedIntFilterSchema).optional(),
-  _avg: z.lazy(() => NestedFloatFilterSchema).optional(),
-  _sum: z.lazy(() => NestedIntFilterSchema).optional(),
-  _min: z.lazy(() => NestedIntFilterSchema).optional(),
-  _max: z.lazy(() => NestedIntFilterSchema).optional()
 }).strict();
 
 export const JsonNullableFilterSchema: z.ZodType<Prisma.JsonNullableFilter> = z.object({
@@ -3572,6 +3599,14 @@ export const AttributesOnSurveysUncheckedCreateNestedManyWithoutAttributeInputSc
   connect: z.union([ z.lazy(() => AttributesOnSurveysWhereUniqueInputSchema),z.lazy(() => AttributesOnSurveysWhereUniqueInputSchema).array() ]).optional(),
 }).strict();
 
+export const IntFieldUpdateOperationsInputSchema: z.ZodType<Prisma.IntFieldUpdateOperationsInput> = z.object({
+  set: z.number().optional(),
+  increment: z.number().optional(),
+  decrement: z.number().optional(),
+  multiply: z.number().optional(),
+  divide: z.number().optional()
+}).strict();
+
 export const UserUpdateOneWithoutAttributesNestedInputSchema: z.ZodType<Prisma.UserUpdateOneWithoutAttributesNestedInput> = z.object({
   create: z.union([ z.lazy(() => UserCreateWithoutAttributesInputSchema),z.lazy(() => UserUncheckedCreateWithoutAttributesInputSchema) ]).optional(),
   connectOrCreate: z.lazy(() => UserCreateOrConnectWithoutAttributesInputSchema).optional(),
@@ -3620,14 +3655,6 @@ export const SurveyCreateNestedOneWithoutAttributesInputSchema: z.ZodType<Prisma
   create: z.union([ z.lazy(() => SurveyCreateWithoutAttributesInputSchema),z.lazy(() => SurveyUncheckedCreateWithoutAttributesInputSchema) ]).optional(),
   connectOrCreate: z.lazy(() => SurveyCreateOrConnectWithoutAttributesInputSchema).optional(),
   connect: z.lazy(() => SurveyWhereUniqueInputSchema).optional()
-}).strict();
-
-export const IntFieldUpdateOperationsInputSchema: z.ZodType<Prisma.IntFieldUpdateOperationsInput> = z.object({
-  set: z.number().optional(),
-  increment: z.number().optional(),
-  decrement: z.number().optional(),
-  multiply: z.number().optional(),
-  divide: z.number().optional()
 }).strict();
 
 export const AttributeUpdateOneRequiredWithoutSurveysNestedInputSchema: z.ZodType<Prisma.AttributeUpdateOneRequiredWithoutSurveysNestedInput> = z.object({
@@ -4246,6 +4273,7 @@ export const AttributeCreateWithoutOwnerInputSchema: z.ZodType<Prisma.AttributeC
   updatedAt: z.coerce.date().optional(),
   label: z.string(),
   type: z.string(),
+  defaultIndex: z.number().int().optional(),
   surveys: z.lazy(() => AttributesOnSurveysCreateNestedManyWithoutAttributeInputSchema).optional()
 }).strict();
 
@@ -4255,6 +4283,7 @@ export const AttributeUncheckedCreateWithoutOwnerInputSchema: z.ZodType<Prisma.A
   updatedAt: z.coerce.date().optional(),
   label: z.string(),
   type: z.string(),
+  defaultIndex: z.number().int().optional(),
   surveys: z.lazy(() => AttributesOnSurveysUncheckedCreateNestedManyWithoutAttributeInputSchema).optional()
 }).strict();
 
@@ -4372,6 +4401,7 @@ export const AttributeScalarWhereInputSchema: z.ZodType<Prisma.AttributeScalarWh
   label: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   type: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   ownerId: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
+  defaultIndex: z.union([ z.lazy(() => IntFilterSchema),z.number() ]).optional(),
 }).strict();
 
 export const EmailTemplateUpsertWithoutUserInputSchema: z.ZodType<Prisma.EmailTemplateUpsertWithoutUserInput> = z.object({
@@ -4789,6 +4819,7 @@ export const AttributeCreateWithoutSurveysInputSchema: z.ZodType<Prisma.Attribut
   updatedAt: z.coerce.date().optional(),
   label: z.string(),
   type: z.string(),
+  defaultIndex: z.number().int().optional(),
   owner: z.lazy(() => UserCreateNestedOneWithoutAttributesInputSchema).optional()
 }).strict();
 
@@ -4798,7 +4829,8 @@ export const AttributeUncheckedCreateWithoutSurveysInputSchema: z.ZodType<Prisma
   updatedAt: z.coerce.date().optional(),
   label: z.string(),
   type: z.string(),
-  ownerId: z.string().optional().nullable()
+  ownerId: z.string().optional().nullable(),
+  defaultIndex: z.number().int().optional()
 }).strict();
 
 export const AttributeCreateOrConnectWithoutSurveysInputSchema: z.ZodType<Prisma.AttributeCreateOrConnectWithoutSurveysInput> = z.object({
@@ -4848,6 +4880,7 @@ export const AttributeUpdateWithoutSurveysInputSchema: z.ZodType<Prisma.Attribut
   updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   label: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   type: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  defaultIndex: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   owner: z.lazy(() => UserUpdateOneWithoutAttributesNestedInputSchema).optional()
 }).strict();
 
@@ -4858,6 +4891,7 @@ export const AttributeUncheckedUpdateWithoutSurveysInputSchema: z.ZodType<Prisma
   label: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   type: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   ownerId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  defaultIndex: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
 }).strict();
 
 export const SurveyUpsertWithoutAttributesInputSchema: z.ZodType<Prisma.SurveyUpsertWithoutAttributesInput> = z.object({
@@ -5742,7 +5776,8 @@ export const AttributeCreateManyOwnerInputSchema: z.ZodType<Prisma.AttributeCrea
   createdAt: z.coerce.date().optional(),
   updatedAt: z.coerce.date().optional(),
   label: z.string(),
-  type: z.string()
+  type: z.string(),
+  defaultIndex: z.number().int().optional()
 }).strict();
 
 export const ProjectUpdateWithoutOwnerInputSchema: z.ZodType<Prisma.ProjectUpdateWithoutOwnerInput> = z.object({
@@ -5810,6 +5845,7 @@ export const AttributeUpdateWithoutOwnerInputSchema: z.ZodType<Prisma.AttributeU
   updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   label: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   type: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  defaultIndex: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   surveys: z.lazy(() => AttributesOnSurveysUpdateManyWithoutAttributeNestedInputSchema).optional()
 }).strict();
 
@@ -5819,6 +5855,7 @@ export const AttributeUncheckedUpdateWithoutOwnerInputSchema: z.ZodType<Prisma.A
   updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   label: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   type: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  defaultIndex: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   surveys: z.lazy(() => AttributesOnSurveysUncheckedUpdateManyWithoutAttributeNestedInputSchema).optional()
 }).strict();
 
@@ -5828,6 +5865,7 @@ export const AttributeUncheckedUpdateManyWithoutOwnerInputSchema: z.ZodType<Pris
   updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   label: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   type: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  defaultIndex: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
 }).strict();
 
 export const SurveyCreateManyProjectInputSchema: z.ZodType<Prisma.SurveyCreateManyProjectInput> = z.object({

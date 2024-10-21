@@ -4,7 +4,6 @@ import { createSurveyInput, surveySchema } from "~/lib/survey";
 import {
   attributeSchema,
   createPropertySchema,
-  importPropertiesInput,
   propertySchema,
 } from "~/lib/property";
 import { surveyService } from "~/server/services/survey";
@@ -134,7 +133,7 @@ export const surveyRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       if (input.action === "add") {
-        // console.log("PROPERTIES BEFORE FILTER", input.properties);
+        console.log("PROPERTIES BEFORE FILTER", input.properties);
         const propertiesToCreate = input.properties
           .filter(
             (property) => typeof property === "object" && !("id" in property),
@@ -143,11 +142,12 @@ export const surveyRouter = createTRPCRouter({
             ...property,
             ownerId: ctx.user.id,
           }));
-        // console.log("PROPERTIES TO CREATE", propertiesToCreate);
+        console.log("PROPERTIES TO CREATE", propertiesToCreate);
         const propertyIds = await propertyServiceInstance.createProperties(
           propertiesToCreate,
           ctx.user.id,
         );
+        console.log("PROPERTY IDS", propertyIds);
         return await surveyServiceInstance.addPropertiesToSurvey(
           input.surveyId,
           propertyIds,
