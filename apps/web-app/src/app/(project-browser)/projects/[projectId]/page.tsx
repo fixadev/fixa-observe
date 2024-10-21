@@ -84,30 +84,30 @@ export default function ProjectPage({
               <div className="flex flex-col gap-2 py-4">
                 <div className="flex flex-col gap-2">
                   <Label htmlFor="survey-name">Survey name</Label>
-                  {creatingSurvey ? (
-                    <div className="flex items-center gap-2">
-                      Creating survey...
-                      <Spinner />
-                    </div>
-                  ) : (
-                    <Input
-                      id="survey-name"
-                      value={newSurveyName}
-                      onChange={(e) => setNewSurveyName(e.target.value)}
-                      placeholder="Palo Alto survey"
-                      autoComplete="off"
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") {
-                          e.preventDefault();
-                          handleCreateSurvey();
-                        }
-                      }}
-                    />
-                  )}
+                  <Input
+                    id="survey-name"
+                    value={newSurveyName}
+                    onChange={(e) => setNewSurveyName(e.target.value)}
+                    placeholder="Palo Alto survey"
+                    autoComplete="off"
+                    disabled={creatingSurvey}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        handleCreateSurvey();
+                      }
+                    }}
+                  />
                 </div>
               </div>
               <DialogFooter>
-                <Button onClick={handleCreateSurvey}>Create</Button>
+                <Button onClick={handleCreateSurvey}>
+                  {creatingSurvey ? (
+                    <Spinner className="h-5 w-11 text-gray-200" />
+                  ) : (
+                    "Create"
+                  )}
+                </Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>

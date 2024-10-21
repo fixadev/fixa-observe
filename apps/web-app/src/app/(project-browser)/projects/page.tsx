@@ -9,7 +9,6 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-  DialogClose,
 } from "~/components/ui/dialog";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
@@ -18,14 +17,18 @@ import { api } from "~/trpc/react";
 import { useRouter } from "next/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { getInitials } from "~/lib/utils";
+import { useToast } from "~/hooks/use-toast";
+import Spinner from "~/components/Spinner";
 
 export default function Home() {
+  const { toast } = useToast();
   const { user } = useUser();
   const router = useRouter();
   const [projects, setProjects] = useState<Array<{ id: string; name: string }>>(
     [],
   );
   const [projectName, setProjectName] = useState("");
+  const [creatingProject, setCreatingProject] = useState(false);
 
   const {
     data: projectsData,
@@ -35,9 +38,11 @@ export default function Home() {
   const { mutate: createProject, error: createProjectError } =
     api.project.createProject.useMutation({
       onSuccess: (data) => {
-        console.log("Project created");
         setProjectName("");
         router.push(`/projects/${data.id}`);
+        toast({
+          title: "Project created!",
+        });
       },
     });
 
@@ -48,17 +53,10 @@ export default function Home() {
   }, [projectsData]);
 
   const handleCreateProject = () => {
+    setCreatingProject(true);
     createProject({ projectName });
     setProjects([...projects, { id: "1", name: projectName }]);
   };
-
-  useEffect(() => {
-    console.log("projectsError", projectsError);
-  }, [projectsError]);
-
-  useEffect(() => {
-    console.log("createProjectError", createProjectError);
-  }, [createProjectError]);
 
   return (
     <div className="flex flex-col gap-8">
@@ -96,13 +94,25 @@ export default function Home() {
                     onChange={(e) => {
                       setProjectName(e.target.value);
                     }}
+                    disabled={creatingProject}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        setCreatingProject(true);
+                        handleCreateProject();
+                      }
+                    }}
                   />
                 </div>
               </div>
               <DialogFooter>
-                <DialogClose asChild>
-                  <Button onClick={handleCreateProject}>Create</Button>
-                </DialogClose>
+                <Button onClick={handleCreateProject}>
+                  {creatingProject ? (
+                    <Spinner className="h-5 w-11 text-gray-200" />
+                  ) : (
+                    "Create"
+                  )}
+                </Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>
