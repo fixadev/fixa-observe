@@ -6,7 +6,6 @@ import {
 } from "@vis.gl/react-google-maps";
 import { type PropertySchema } from "~/lib/property";
 import { useState, useEffect, useMemo, useRef, useCallback } from "react";
-import html2canvas from "html2canvas";
 
 const MAP_ID = "2b9b510fdba6b2ef";
 
@@ -101,23 +100,39 @@ export function MapRenderer({
   const captureMap = useCallback(() => {
     if (mapRef.current && isMapReady) {
       console.log("Capturing map");
-      const mapContainer = mapRef.current.getDiv();
-      html2canvas(mapContainer, {
-        useCORS: true,
-        allowTaint: true,
-        scale: 5, // Increase scale for better quality
-      })
-        .then((canvas) => {
-          const imageData = canvas.toDataURL("image/png");
-          console.log("Map captured");
-          onMapImageCapture(imageData);
-          setMapCaptured(true);
-        })
-        .catch((error) => {
-          console.error("Error capturing map", error);
-        });
+      const map = mapRef.current;
+
+      // Get the current center and zoom
+      const center = map.getCenter();
+      const zoom = map.getZoom();
+
+      // Prepare the markers string for the static map URL
+      const markersString = markers
+        .map(
+          (marker, index) =>
+            `&markers=color:0x046bb6|label:${index + 1}|${marker.lat},${marker.lng}`,
+        )
+        .join("");
+
+      const scale = 2;
+
+      // Construct the static map URL
+      const staticMapUrl =
+        `https://maps.googleapis.com/maps/api/staticmap?` +
+        `center=${center?.lat()},${center?.lng()}` +
+        `&zoom=${zoom}` +
+        `&size=800x600` +
+        `&scale=${scale}` +
+        `&maptype=roadmap` +
+        `&key=${process.env.NEXT_PUBLIC_GOOGLE_API_KEY}` +
+        `&map_id=${MAP_ID}` +
+        markersString;
+
+      // Use the static map URL as the image data
+      onMapImageCapture(staticMapUrl);
+      setMapCaptured(true);
     }
-  }, [onMapImageCapture, isMapReady, setMapCaptured]);
+  }, [onMapImageCapture, isMapReady, setMapCaptured, markers]);
 
   const handleTilesLoaded = useCallback(
     (e: MapEvent) => {
