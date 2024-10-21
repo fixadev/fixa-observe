@@ -196,7 +196,7 @@ export function PDFPageWithControls({
   isMouseDown: boolean;
   setIsMouseDown: React.Dispatch<React.SetStateAction<boolean>>;
   rectangles: BrochureRectangles;
-  setRectangles: (rectangles: BrochureRectangles) => void;
+  setRectangles: React.Dispatch<React.SetStateAction<BrochureRectangles>>;
   inpaintedRectangles?: BrochureRectangles;
   textToRemove: TransformedTextContent[];
   pathsToRemove: Path[];
