@@ -79,7 +79,8 @@ export function parsePropertyCard(text: string) {
       !propertyObj.spaceUse &&
       !nextLine.startsWith("Lease Type:")
     ) {
-      propertyObj.spaceUse = line?.split(":")[1]?.trim();
+      propertyObj.spaceUse = nextLine.trim();
+      i++;
     } else if (
       line.startsWith("Lease Type:") &&
       !propertyObj.leaseType &&
@@ -89,7 +90,6 @@ export function parsePropertyCard(text: string) {
       i++;
     } else if (line.startsWith("Property Size:") && !propertyObj.size) {
       propertyObj.size = line?.split(":")[1]?.trim();
-      i++;
     } else if (
       line.startsWith("Avail Space:") &&
       !propertyObj.availSpace &&
@@ -109,6 +109,7 @@ export function parsePropertyCard(text: string) {
       !nextLine.startsWith("Const. Status:")
     ) {
       propertyObj.leaseRate = nextLine.trim();
+      i++;
     } else if (
       line.startsWith("Const. Status:") &&
       !propertyObj.constructionStatus
@@ -151,57 +152,57 @@ export function parsePropertyCard(text: string) {
   return propertyObj;
 }
 
-const text = `69.
-585 Hamilton Avenue Palo Alto, CA 94301
-Palo Alto - Downtown
-List ID: 12783946 | 09/04/2024
-Property Type: Office
-Floor/Suite:
-/P1 & P2
-Avail Date:
-03/01/2022
-Subtype/Class: A
-Space Use:
-Office
-Lease Type:
-Direct Lease
-Property Size: 8,513 rsf
-Avail Space:
-8,513 rsf
-Sub Exp Date:N/A
-Bldg Total Flrs: 3
-Vacant Space: 8,513 rsf
-Lease Rate:
-$9.75 NNN
-Const. Status: Completed
-Min Divisible: 4,169 rsf
-Expenses:
-$2.11
-Year Built:
-2022
-Max Divisible: 8,513 rsf
-Parking Ratio: 3
-Comments: - Divisible by Floor to 4,169 sf and 4,344 sf
-- New Class A+ construction
-- 47,000 SF mixed use development with 19 luxury apartment homes
-- Incomparable downtown Palo Alto location
-- Building signage opportunity
-- Secure separate entrance and access for office tenant
-- Ample underground secured parking with 2 EV charging stations solely for office tenant’s use
-- Bike storage
-- Expansive landscaping creating a tranquil environment while also providing privacy
-- Two private outdoor landscaped terraces exclusive for office tenant’s use
-- Warm shell condition
-View Flyer
-Reproduction in whole or part is permitted only with the written consent of Newmark. Some of the data in this report has been gathered from third party sources and has not been
-independently verified by Newmark, which therefore makes no warranties or representations as to the completeness or accuracy of any information contained in this report. You are
-advised to investigate all such information, and to verify its completeness and accuracy, before making any use thereof or any reliance thereon.
-Page 23 of 24
-`;
+// const text = `69.
+// 585 Hamilton Avenue Palo Alto, CA 94301
+// Palo Alto - Downtown
+// List ID: 12783946 | 09/04/2024
+// Property Type: Office
+// Floor/Suite:
+// /P1 & P2
+// Avail Date:
+// 03/01/2022
+// Subtype/Class: A
+// Space Use:
+// Office
+// Lease Type:
+// Direct Lease
+// Property Size: 8,513 rsf
+// Avail Space:
+// 8,513 rsf
+// Sub Exp Date:N/A
+// Bldg Total Flrs: 3
+// Vacant Space: 8,513 rsf
+// Lease Rate:
+// $9.75 NNN
+// Const. Status: Completed
+// Min Divisible: 4,169 rsf
+// Expenses:
+// $2.11
+// Year Built:
+// 2022
+// Max Divisible: 8,513 rsf
+// Parking Ratio: 3
+// Comments: - Divisible by Floor to 4,169 sf and 4,344 sf
+// - New Class A+ construction
+// - 47,000 SF mixed use development with 19 luxury apartment homes
+// - Incomparable downtown Palo Alto location
+// - Building signage opportunity
+// - Secure separate entrance and access for office tenant
+// - Ample underground secured parking with 2 EV charging stations solely for office tenant’s use
+// - Bike storage
+// - Expansive landscaping creating a tranquil environment while also providing privacy
+// - Two private outdoor landscaped terraces exclusive for office tenant’s use
+// - Warm shell condition
+// View Flyer
+// Reproduction in whole or part is permitted only with the written consent of Newmark. Some of the data in this report has been gathered from third party sources and has not been
+// independently verified by Newmark, which therefore makes no warranties or representations as to the completeness or accuracy of any information contained in this report. You are
+// advised to investigate all such information, and to verify its completeness and accuracy, before making any use thereof or any reliance thereon.
+// Page 23 of 24
+// `;
 
-function test() {
-  const propertyObj = parsePropertyCard(text);
-  console.log(propertyObj);
-}
+// function test() {
+//   const propertyObj = parsePropertyCard(text);
+//   console.log(propertyObj);
+// }
 
-test();
+// test();
