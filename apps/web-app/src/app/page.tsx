@@ -22,7 +22,7 @@ export default function LandingPage() {
         image: "/images/landing-page/verify-data.png",
         title: "2. Verify data",
         description:
-          "Apex helps you draft emails. Property data is automatically updated as responses come in.",
+          "Apex helps you draft emails to verify property data. Emails are categorized based on whether a follow-up is needed.",
       },
       {
         image: "/images/landing-page/edit-brochures.png",
