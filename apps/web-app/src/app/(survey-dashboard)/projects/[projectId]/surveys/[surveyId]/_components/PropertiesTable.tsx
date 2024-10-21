@@ -588,24 +588,28 @@ export function PropertiesTable({
                           : horizontalListSortingStrategy
                       }
                     >
-                      {attributesOrder.map((attribute) => (
-                        <DraggableHeader
-                          key={attribute.id}
-                          attribute={attribute}
-                          renameAttribute={
-                            !attribute.ownerId
-                              ? undefined
-                              : (name) => renameAttribute(attribute.id, name)
-                          }
-                          deleteAttribute={() => deleteAttribute(attribute.id)}
-                          draggingRow={draggingRow}
-                          state={state}
-                          checkedState={getHeaderCheckedState(attribute.id)}
-                          onCheckedChange={(checked) =>
-                            handleHeaderCheckedChange(attribute.id, checked)
-                          }
-                        ></DraggableHeader>
-                      ))}
+                      {attributesOrder
+                        .filter((attribute) => attribute.id !== "address")
+                        .map((attribute) => (
+                          <DraggableHeader
+                            key={attribute.id}
+                            attribute={attribute}
+                            renameAttribute={
+                              !attribute.ownerId
+                                ? undefined
+                                : (name) => renameAttribute(attribute.id, name)
+                            }
+                            deleteAttribute={() =>
+                              deleteAttribute(attribute.id)
+                            }
+                            draggingRow={draggingRow}
+                            state={state}
+                            checkedState={getHeaderCheckedState(attribute.id)}
+                            onCheckedChange={(checked) =>
+                              handleHeaderCheckedChange(attribute.id, checked)
+                            }
+                          ></DraggableHeader>
+                        ))}
                     </SortableContext>
                     <TableCell className="justify-center-background sticky right-0 z-20 flex bg-background">
                       <Button

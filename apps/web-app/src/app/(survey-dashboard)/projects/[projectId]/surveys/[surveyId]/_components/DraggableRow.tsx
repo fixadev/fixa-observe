@@ -265,129 +265,133 @@ export const DraggableRow = ({
           />
         )}
       </DraggableCell>
-      {attributes.map((attribute) => {
-        return (
-          <DraggableCell
-            key={attribute.id}
-            id={attribute.id}
-            draggingRow={draggingRow}
-            className={attributeToMinWidth(attribute)}
-          >
-            {attribute.id === "comments" ||
-            attribute.id === "displayAddress" ? (
-              <Textarea
-                defaultValue={property.attributes?.[attribute.id] ?? ""}
-                className={`h-[${attribute.id === "comments" ? "200px" : "60px"}] overflow-visible`}
-                // onKeyDown={(e) => {
-                //   if (e.key === "Enter") {
-                //     e.preventDefault();
-                //     (e.target as HTMLTextAreaElement).blur();
-                //     updateProperty({
-                //       ...property,
-                //       attributes: {
-                //         ...property.attributes,
-                //         [attribute.id]: (e.currentTarget as HTMLTextAreaElement)
-                //           .value,
-                //       },
-                //     });
-                //   }
-                // }}
-                onBlur={(e) => {
-                  updateProperty({
-                    ...property,
-                    attributes: {
-                      ...property.attributes,
-                      [attribute.id]: e.target.value,
-                    },
-                  });
-                }}
-              />
-            ) : (
-              <>
-                {state === "edit" ? (
-                  <div className="relative flex items-center gap-2">
-                    <Input
-                      className={cn(attribute.id in parsedAttributes && "pr-9")}
-                      defaultValue={property.attributes?.[attribute.id] ?? ""}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") {
-                          e.preventDefault();
-                          (e.target as HTMLTextAreaElement).blur();
+      {attributes
+        .filter((attribute) => attribute.id !== "address")
+        .map((attribute) => {
+          return (
+            <DraggableCell
+              key={attribute.id}
+              id={attribute.id}
+              draggingRow={draggingRow}
+              className={attributeToMinWidth(attribute)}
+            >
+              {attribute.id === "comments" ||
+              attribute.id === "displayAddress" ? (
+                <Textarea
+                  defaultValue={property.attributes?.[attribute.id] ?? ""}
+                  className={`h-[${attribute.id === "comments" ? "200px" : "60px"}] overflow-visible`}
+                  // onKeyDown={(e) => {
+                  //   if (e.key === "Enter") {
+                  //     e.preventDefault();
+                  //     (e.target as HTMLTextAreaElement).blur();
+                  //     updateProperty({
+                  //       ...property,
+                  //       attributes: {
+                  //         ...property.attributes,
+                  //         [attribute.id]: (e.currentTarget as HTMLTextAreaElement)
+                  //           .value,
+                  //       },
+                  //     });
+                  //   }
+                  // }}
+                  onBlur={(e) => {
+                    updateProperty({
+                      ...property,
+                      attributes: {
+                        ...property.attributes,
+                        [attribute.id]: e.target.value,
+                      },
+                    });
+                  }}
+                />
+              ) : (
+                <>
+                  {state === "edit" ? (
+                    <div className="relative flex items-center gap-2">
+                      <Input
+                        className={cn(
+                          attribute.id in parsedAttributes && "pr-9",
+                        )}
+                        defaultValue={property.attributes?.[attribute.id] ?? ""}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            e.preventDefault();
+                            (e.target as HTMLTextAreaElement).blur();
+                            updateProperty({
+                              ...property,
+                              attributes: {
+                                ...property.attributes,
+                                [attribute.id]: (
+                                  e.currentTarget as HTMLInputElement
+                                ).value,
+                              },
+                            });
+                          }
+                        }}
+                        onBlur={(e: React.ChangeEvent<HTMLInputElement>) => {
                           updateProperty({
                             ...property,
                             attributes: {
                               ...property.attributes,
-                              [attribute.id]: (
-                                e.currentTarget as HTMLInputElement
-                              ).value,
+                              [attribute.id]: e.target.value,
                             },
                           });
+                        }}
+                      />
+                      {attribute.id in parsedAttributes && (
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              className="absolute right-0 shrink-0"
+                              asChild
+                            >
+                              <Link href={`emails?propertyId=${property.id}`}>
+                                {parsedAttributes[attribute.id] !== null ? (
+                                  <CheckCircleIcon className="size-5 text-green-500" />
+                                ) : isEmailDraft ? (
+                                  <PencilSquareIcon className="size-5 text-gray-500" />
+                                ) : (
+                                  <EllipsisHorizontalCircleIcon className="size-5 text-gray-500" />
+                                )}
+                              </Link>
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            {parsedAttributes[attribute.id] !== null
+                              ? "Verified by email"
+                              : isEmailDraft
+                                ? "Email drafted"
+                                : "Email sent"}
+                          </TooltipContent>
+                        </Tooltip>
+                      )}
+                    </div>
+                  ) : state === "select-fields" ? (
+                    <div className="flex items-center gap-2">
+                      <Checkbox
+                        id={`${property.id}-${attribute.id}`}
+                        checked={selectedFieldsForProperty.has(attribute.id)}
+                        onCheckedChange={(checked) =>
+                          handleSelectedFieldsChange(attribute.id, checked)
                         }
-                      }}
-                      onBlur={(e: React.ChangeEvent<HTMLInputElement>) => {
-                        updateProperty({
-                          ...property,
-                          attributes: {
-                            ...property.attributes,
-                            [attribute.id]: e.target.value,
-                          },
-                        });
-                      }}
-                    />
-                    {attribute.id in parsedAttributes && (
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button
-                            size="icon"
-                            variant="ghost"
-                            className="absolute right-0 shrink-0"
-                            asChild
-                          >
-                            <Link href={`emails?propertyId=${property.id}`}>
-                              {parsedAttributes[attribute.id] !== null ? (
-                                <CheckCircleIcon className="size-5 text-green-500" />
-                              ) : isEmailDraft ? (
-                                <PencilSquareIcon className="size-5 text-gray-500" />
-                              ) : (
-                                <EllipsisHorizontalCircleIcon className="size-5 text-gray-500" />
-                              )}
-                            </Link>
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          {parsedAttributes[attribute.id] !== null
-                            ? "Verified by email"
-                            : isEmailDraft
-                              ? "Email drafted"
-                              : "Email sent"}
-                        </TooltipContent>
-                      </Tooltip>
-                    )}
-                  </div>
-                ) : state === "select-fields" ? (
-                  <div className="flex items-center gap-2">
-                    <Checkbox
-                      id={`${property.id}-${attribute.id}`}
-                      checked={selectedFieldsForProperty.has(attribute.id)}
-                      onCheckedChange={(checked) =>
-                        handleSelectedFieldsChange(attribute.id, checked)
-                      }
-                    />
-                    <Label
-                      htmlFor={`${property.id}-${attribute.id}`}
-                      className="font-normal"
-                    >
-                      {(property.attributes?.[attribute.id]?.length ?? 0 > 0)
-                        ? property.attributes?.[attribute.id]
-                        : "<No value>"}
-                    </Label>
-                  </div>
-                ) : null}
-              </>
-            )}
-          </DraggableCell>
-        );
-      })}
+                      />
+                      <Label
+                        htmlFor={`${property.id}-${attribute.id}`}
+                        className="font-normal"
+                      >
+                        {(property.attributes?.[attribute.id]?.length ?? 0 > 0)
+                          ? property.attributes?.[attribute.id]
+                          : "<No value>"}
+                      </Label>
+                    </div>
+                  ) : null}
+                </>
+              )}
+            </DraggableCell>
+          );
+        })}
       <TableCell>
         <Button
           size="icon"
