@@ -98,10 +98,11 @@ export function BrochureCarousel({
     }
     setRedoStack(newRedo);
   }, [undoStack, redoStack]);
-  const handleUpdateTextToRemove = useCallback(
-    (textToRemove: TransformedTextContent[]) => {
-      const newTextToRemove: TransformedTextContent[] = [];
+  const handleDeleteTextPaths = useCallback(
+    (textToRemove: TransformedTextContent[], pathsToRemove: Path[]) => {
       const id = crypto.randomUUID();
+
+      const newTextToRemove: TransformedTextContent[] = [];
       for (const text of textToRemove) {
         if (!text.id) {
           newTextToRemove.push({ ...text, id });
@@ -111,15 +112,8 @@ export function BrochureCarousel({
         }
       }
       setTextToRemove(newTextToRemove);
-      setUndoStack((prev) => [...prev, id]);
-      setRedoStack([]);
-    },
-    [redoStackSet],
-  );
-  const handleUpdatePathsToRemove = useCallback(
-    (pathsToRemove: Path[]) => {
+
       const newPathsToRemove: Path[] = [];
-      const id = crypto.randomUUID();
       for (const path of pathsToRemove) {
         if (!path.id) {
           newPathsToRemove.push({ ...path, id });
@@ -129,6 +123,7 @@ export function BrochureCarousel({
         }
       }
       setPathsToRemove(newPathsToRemove);
+
       setUndoStack((prev) => [...prev, id]);
       setRedoStack([]);
     },
@@ -226,9 +221,8 @@ export function BrochureCarousel({
                         }
                         idsToShow={undoStackSet}
                         textToRemove={textToRemove}
-                        setTextToRemove={handleUpdateTextToRemove}
                         pathsToRemove={pathsToRemove}
-                        setPathsToRemove={handleUpdatePathsToRemove}
+                        onDeleteTextPaths={handleDeleteTextPaths}
                         height={500}
                       />
                       {/* {isRemoving && (

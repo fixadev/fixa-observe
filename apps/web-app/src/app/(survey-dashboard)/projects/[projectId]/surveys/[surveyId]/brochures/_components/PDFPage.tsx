@@ -180,9 +180,8 @@ export function PDFPageWithControls({
   setRectangles,
   inpaintedRectangles,
   textToRemove,
-  setTextToRemove,
   pathsToRemove,
-  setPathsToRemove,
+  onDeleteTextPaths,
   idsToShow,
   height,
 }: {
@@ -195,9 +194,11 @@ export function PDFPageWithControls({
   setRectangles: (rectangles: BrochureRectangles) => void;
   inpaintedRectangles: BrochureRectangles;
   textToRemove: TransformedTextContent[];
-  setTextToRemove: (textToRemove: TransformedTextContent[]) => void;
   pathsToRemove: Path[];
-  setPathsToRemove: (pathsToRemove: Path[]) => void;
+  onDeleteTextPaths: (
+    textToRemove: TransformedTextContent[],
+    pathsToRemove: Path[],
+  ) => void;
   idsToShow?: Set<string>;
   height?: number;
 }) {
@@ -365,7 +366,6 @@ export function PDFPageWithControls({
         newTextToRemove.push(textContentFormatted[index]);
       }
     }
-    setTextToRemove(newTextToRemove);
     setTextContentSelected(new Set());
 
     const newPathsToRemove = [...pathsToRemove];
@@ -374,13 +374,13 @@ export function PDFPageWithControls({
         newPathsToRemove.push(pathsFormatted[index]);
       }
     }
-    setPathsToRemove(newPathsToRemove);
     setPathsSelected(new Set());
+
+    onDeleteTextPaths(newTextToRemove, newPathsToRemove);
   }, [
     textToRemove,
-    setTextToRemove,
     pathsToRemove,
-    setPathsToRemove,
+    onDeleteTextPaths,
     textContentSelected,
     textContentFormatted,
     pathsSelected,
