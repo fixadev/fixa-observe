@@ -2,29 +2,17 @@ import {
   ArrowUturnLeftIcon,
   ArrowUturnRightIcon,
 } from "@heroicons/react/24/solid";
-import { EraserIcon, TextNoneIcon } from "@radix-ui/react-icons";
 import { Button } from "~/components/ui/button";
-import { ToggleGroup, ToggleGroupItem } from "~/components/ui/toggle-group";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "~/components/ui/tooltip";
-import { cn } from "~/lib/utils";
 
 export type Tool = "eraser" | "selector";
 
 export default function ToolSelector({
-  tool,
-  onToolChange,
   onUndo,
   undoEnabled,
   onRedo,
   redoEnabled,
   isMouseDown,
 }: {
-  tool: Tool;
-  onToolChange: (tool: Tool) => void;
   onUndo: () => void;
   undoEnabled: boolean;
   onRedo: () => void;
@@ -56,7 +44,7 @@ export default function ToolSelector({
           <ArrowUturnRightIcon className="size-4" />
         </Button>
       </div>
-      <ToggleGroup
+      {/* <ToggleGroup
         className="flex flex-col gap-2"
         type="single"
         value={tool}
@@ -92,7 +80,7 @@ export default function ToolSelector({
           </TooltipTrigger>
           <TooltipContent side="left">Erase logos</TooltipContent>
         </Tooltip>
-      </ToggleGroup>
+      </ToggleGroup> */}
     </div>
   );
 }
