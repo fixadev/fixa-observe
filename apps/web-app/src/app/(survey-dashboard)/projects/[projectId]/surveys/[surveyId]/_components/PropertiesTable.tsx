@@ -190,6 +190,7 @@ export function PropertiesTable({
       setPropertiesState(
         updatedProperties.map((property) => ({
           ...property,
+          attributes: { ...property.attributes },
           emailThreads: property.emailThreads ?? [],
           contacts: property.contacts ?? [],
           brochures: property.brochures ?? [],

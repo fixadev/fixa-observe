@@ -154,7 +154,6 @@ export const surveyRouter = createTRPCRouter({
           ctx.user.id,
         );
       } else if (input.action === "update") {
-        // console.log("UPDATING PROPERTY", input.propertyId);
         const propertyToUpdate = input.properties.find(
           (property) => property.id === input.propertyId,
         );
