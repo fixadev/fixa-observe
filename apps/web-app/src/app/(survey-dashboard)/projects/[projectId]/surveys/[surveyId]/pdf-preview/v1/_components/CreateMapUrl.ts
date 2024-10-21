@@ -59,7 +59,7 @@ export async function generateStaticMapUrl(
     markers.sort((a, b) => a.index - b.index);
 
     const center = calculateCenter(markers);
-    const zoom = 13;
+    const zoom = 13.5;
     const scale = 2;
     const size = "800x600";
 

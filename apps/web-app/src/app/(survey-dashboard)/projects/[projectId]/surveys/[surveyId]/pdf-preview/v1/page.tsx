@@ -6,7 +6,6 @@ import { PDFContent } from "./_components/PDFContent";
 import { Button } from "~/components/ui/button";
 import { ChevronLeftIcon } from "@heroicons/react/24/outline";
 import { useRouter } from "next/navigation";
-import { MapRenderer } from "./_components/MapRenderer";
 import { APIProvider } from "@vis.gl/react-google-maps";
 import { env } from "~/env";
 import { useEffect, useState } from "react";
