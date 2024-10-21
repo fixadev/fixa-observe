@@ -21,6 +21,7 @@ import {
   type Property,
 } from "./PropertiesTable";
 import { DraggableCell } from "./DraggableCell";
+import { EditableCell } from "./EditableCell";
 import { TableRow } from "@/components/ui/table";
 import { Textarea } from "~/components/ui/textarea";
 import Image from "next/image";
@@ -30,21 +31,10 @@ import Spinner from "~/components/Spinner";
 import { Checkbox } from "~/components/ui/checkbox";
 import { Label } from "~/components/ui/label";
 import { type CheckedState } from "@radix-ui/react-checkbox";
-import {
-  CheckCircleIcon,
-  EllipsisHorizontalCircleIcon,
-  PencilIcon,
-  PencilSquareIcon,
-} from "@heroicons/react/24/solid";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { PencilIcon } from "@heroicons/react/24/solid";
+
 import { cn, emailIsDraft } from "~/lib/utils";
-import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { advancedParseFloat } from "~/app/parseNumbers";
 
 export const DraggableRow = ({
   photoUrl,
@@ -280,21 +270,7 @@ export const DraggableRow = ({
               attribute.id === "displayAddress" ? (
                 <Textarea
                   defaultValue={property.attributes?.[attribute.id] ?? ""}
-                  className={`h-[${attribute.id === "comments" ? "200px" : "60px"}] overflow-visible`}
-                  // onKeyDown={(e) => {
-                  //   if (e.key === "Enter") {
-                  //     e.preventDefault();
-                  //     (e.target as HTMLTextAreaElement).blur();
-                  //     updateProperty({
-                  //       ...property,
-                  //       attributes: {
-                  //         ...property.attributes,
-                  //         [attribute.id]: (e.currentTarget as HTMLTextAreaElement)
-                  //           .value,
-                  //       },
-                  //     });
-                  //   }
-                  // }}
+                  className={`h-[${attribute.label === "Comments" ? "200px" : "60px"}] overflow-visible`}
                   onBlur={(e) => {
                     updateProperty({
                       ...property,
@@ -308,102 +284,13 @@ export const DraggableRow = ({
               ) : (
                 <>
                   {state === "edit" ? (
-                    <div className="relative flex items-center gap-2">
-                      <Input
-                        className={cn(
-                          attribute.id in parsedAttributes && "pr-9",
-                        )}
-                        defaultValue={property.attributes?.[attribute.id] ?? ""}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter") {
-                            e.preventDefault();
-                            (e.target as HTMLTextAreaElement).blur();
-                            updateProperty({
-                              ...property,
-                              attributes: {
-                                ...property.attributes,
-                                [attribute.id]: (
-                                  e.currentTarget as HTMLInputElement
-                                ).value,
-                              },
-                            });
-                          }
-                        }}
-                        onBlur={(e: React.ChangeEvent<HTMLInputElement>) => {
-                          const newTotalCost = null;
-                          if (
-                            attribute.id === "askingRate" ||
-                            attribute.id === "opEx"
-                          ) {
-                            const inputValue = advancedParseFloat(
-                              e.target.value ?? "0",
-                            );
-                            const size = advancedParseFloat(
-                              property.attributes?.size &&
-                                property.attributes?.size?.length > 0
-                                ? property.attributes?.size
-                                : "0",
-                            );
-                            const otherValue = advancedParseFloat(
-                              attribute.id === "askingRate"
-                                ? (property.attributes?.opEx ?? "0")
-                                : (property.attributes?.askingRate ?? "0"),
-                            );
-
-                            console.log("otherValue IS", otherValue);
-                            console.log("inputValue IS", inputValue);
-                            console.log("size IS", size);
-
-                            const newTotalCost = (
-                              otherValue *
-                              inputValue *
-                              size
-                            ).toString();
-
-                            console.log("newTotalCost IS", newTotalCost);
-                          }
-                          updateProperty({
-                            ...property,
-                            attributes: {
-                              ...property.attributes,
-                              [attribute.id]: e.target.value,
-                              totalCost: newTotalCost
-                                ? newTotalCost
-                                : (property.attributes?.totalCost ?? "0"),
-                            },
-                          });
-                        }}
-                      />
-                      {attribute.id in parsedAttributes && (
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button
-                              size="icon"
-                              variant="ghost"
-                              className="absolute right-0 shrink-0"
-                              asChild
-                            >
-                              <Link href={`emails?propertyId=${property.id}`}>
-                                {parsedAttributes[attribute.id] !== null ? (
-                                  <CheckCircleIcon className="size-5 text-green-500" />
-                                ) : isEmailDraft ? (
-                                  <PencilSquareIcon className="size-5 text-gray-500" />
-                                ) : (
-                                  <EllipsisHorizontalCircleIcon className="size-5 text-gray-500" />
-                                )}
-                              </Link>
-                            </Button>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            {parsedAttributes[attribute.id] !== null
-                              ? "Verified by email"
-                              : isEmailDraft
-                                ? "Email drafted"
-                                : "Email sent"}
-                          </TooltipContent>
-                        </Tooltip>
-                      )}
-                    </div>
+                    <EditableCell
+                      property={property}
+                      attribute={attribute}
+                      isEmailDraft={isEmailDraft}
+                      parsedAttributes={parsedAttributes}
+                      updateProperty={updateProperty}
+                    />
                   ) : state === "select-fields" ? (
                     <div className="flex items-center gap-2">
                       <Checkbox

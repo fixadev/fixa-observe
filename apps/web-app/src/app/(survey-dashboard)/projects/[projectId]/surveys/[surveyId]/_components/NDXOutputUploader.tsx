@@ -22,7 +22,7 @@ export const NDXOutputUploader = ({
   className?: string;
 }) => {
   const pdfjs = usePDFJS((pdfjs) => {
-    console.log("PDFJS loaded", pdfjs);
+    // console.log("PDFJS loaded", pdfjs);
   });
 
   const { toast } = useToast();

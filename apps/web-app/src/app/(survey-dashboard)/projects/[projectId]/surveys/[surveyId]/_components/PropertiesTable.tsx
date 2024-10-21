@@ -190,6 +190,7 @@ export function PropertiesTable({
       setPropertiesState(
         updatedProperties.map((property) => ({
           ...property,
+          attributes: { ...property.attributes },
           emailThreads: property.emailThreads ?? [],
           contacts: property.contacts ?? [],
           brochures: property.brochures ?? [],
@@ -221,7 +222,7 @@ export function PropertiesTable({
     ) => {
       if (!survey) return;
       let newOrder: Attribute[];
-      console.log("NEW ORDER OR CALLBACK", newOrderOrCallback);
+      // console.log("NEW ORDER OR CALLBACK", newOrderOrCallback);
       if (typeof newOrderOrCallback === "function") {
         newOrder = newOrderOrCallback(attributesOrder);
       } else {
