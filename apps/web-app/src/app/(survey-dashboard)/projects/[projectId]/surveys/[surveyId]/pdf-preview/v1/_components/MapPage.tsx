@@ -8,49 +8,47 @@ const styles = StyleSheet.create({
     fontFamily: "IBM Plex Sans",
   },
   leftColumn: {
-    width: "50%",
-    padding: 20,
+    width: "30%",
   },
   rightColumn: {
-    width: "50%",
+    width: "70%",
     height: "100%",
     display: "flex",
     alignItems: "center",
-    justifyContent: "flex-start",
     backgroundColor: "#F0F0F0",
   },
   header: {
     fontSize: 24,
     fontWeight: "semibold",
-    marginBottom: 20,
-    textTransform: "uppercase",
+    marginBottom: 10,
+    paddingLeft: 20,
+    paddingTop: 20,
   },
   subheader: {
     fontSize: 18,
     marginBottom: 10,
   },
   propertyList: {
-    marginTop: 20,
+    marginTop: 10,
   },
   propertyItem: {
-    padding: 10,
-    gap: 10,
     paddingVertical: 20,
     display: "flex",
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "flex-start",
     backgroundColor: "#F0F0F0",
+    paddingLeft: 20,
   },
   propertyText: {
     marginLeft: 10,
     fontSize: 12,
-    width: "50%",
     textAlign: "left",
     fontWeight: "semibold",
   },
   propertyNeighborhood: {
     fontSize: 12,
+    paddingRight: 10,
   },
   propertyNumber: {
     fontSize: 14,
@@ -118,9 +116,6 @@ export function MapPage({
               <Text style={styles.propertyNumber}>{index + 1}.</Text>
               <Text style={styles.propertyText}>
                 {property.attributes.displayAddress?.split("\n")[0]}
-              </Text>
-              <Text style={styles.propertyNeighborhood}>
-                {property.attributes.displayAddress?.split("\n")[1]?.trim()}
               </Text>
               {/* Add more property details as needed */}
             </View>
