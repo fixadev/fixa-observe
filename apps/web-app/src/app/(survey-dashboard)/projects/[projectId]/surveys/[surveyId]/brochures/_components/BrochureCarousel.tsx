@@ -12,18 +12,19 @@ import { Skeleton } from "~/components/ui/skeleton";
 import { TrashIcon } from "@heroicons/react/24/outline";
 import { TrashIcon as TrashIconSolid } from "@heroicons/react/24/solid";
 import { cn } from "~/lib/utils";
-import { type BrochureSchema, type BrochureRectangles } from "~/lib/property";
+import {
+  type BrochureSchema,
+  type BrochureRectangles,
+  type Path,
+  type TransformedTextContent,
+} from "~/lib/property";
 import {
   type PDFDocumentProxy,
   getDocument,
   GlobalWorkerOptions,
 } from "~/lib/pdfx.mjs";
 // import { getDocument } from "~/lib/pdfx.mjs";
-import PDFPage, {
-  type Path,
-  PDFPageWithControls,
-  type TransformedTextContent,
-} from "./PDFPage";
+import PDFPage, { PDFPageWithControls } from "./PDFPage";
 import { Button } from "~/components/ui/button";
 import ToolSelector, { type Tool } from "./ToolSelector";
 import { useToast } from "~/hooks/use-toast";
@@ -78,8 +79,24 @@ export function BrochureCarousel({
   const [pathsToRemove, setPathsToRemove] = useState<Path[]>([]);
 
   // ------------------
+  // #region Load initial state from brochure
+  useEffect(() => {
+    setTextToRemove(brochure.textToRemove as TransformedTextContent[]);
+    setPathsToRemove(brochure.pathsToRemove as Path[]);
+    setUndoStack(brochure.undoStack);
+  }, [brochure]);
+  // #endregion
+
+  // ------------------
   // #region Undo and Redo
   // ------------------
+  // Mutations
+  const { mutate: updateUndoStack } =
+    api.brochure.updateUndoStack.useMutation();
+  const { mutate: updateTextToRemove } =
+    api.brochure.updateTextToRemove.useMutation();
+  const { mutate: updatePathsToRemove } =
+    api.brochure.updatePathsToRemove.useMutation();
   // Undo and redo stacks contain ids of the rectangles or text that were removed
   const [undoStack, setUndoStack] = useState<string[]>([]);
   const undoStackSet = useMemo(() => new Set(undoStack), [undoStack]);
@@ -92,8 +109,12 @@ export function BrochureCarousel({
       const newRedo = [...redoStack, last];
       setRedoStack(newRedo);
     }
+    updateUndoStack({
+      brochureId: brochure.id,
+      undoStack: newUndo,
+    });
     setUndoStack(newUndo);
-  }, [undoStack, redoStack]);
+  }, [undoStack, redoStack, updateUndoStack]);
   const redo = useCallback(() => {
     const newRedo = [...redoStack];
     const last = newRedo.pop();
@@ -117,6 +138,10 @@ export function BrochureCarousel({
         }
       }
       setTextToRemove(newTextToRemove);
+      updateTextToRemove({
+        brochureId: brochure.id,
+        textToRemove: newTextToRemove,
+      });
 
       const newPathsToRemove: Path[] = [];
       for (const path of pathsToRemove) {
@@ -128,11 +153,26 @@ export function BrochureCarousel({
         }
       }
       setPathsToRemove(newPathsToRemove);
+      updatePathsToRemove({
+        brochureId: brochure.id,
+        pathsToRemove: newPathsToRemove,
+      });
 
+      updateUndoStack({
+        brochureId: brochure.id,
+        undoStack: [...undoStack, id],
+      });
       setUndoStack((prev) => [...prev, id]);
       setRedoStack([]);
     },
-    [redoStackSet],
+    [
+      brochure.id,
+      redoStackSet,
+      undoStack,
+      updatePathsToRemove,
+      updateTextToRemove,
+      updateUndoStack,
+    ],
   );
   // #endregion
 
@@ -145,11 +185,15 @@ export function BrochureCarousel({
   const { toast } = useToast();
 
   const { mutate: inpaintRectangles } =
-    api.property.inpaintRectangles.useMutation({
+    api.brochure.inpaintRectangles.useMutation({
       onSuccess: ({ newRectangles }) => {
         const newIds = newRectangles
           .map((rectangle) => rectangle.id)
           .filter((id) => id !== undefined);
+        updateUndoStack({
+          brochureId: brochure.id,
+          undoStack: [...undoStack, ...newIds],
+        });
         setUndoStack((prev) => [...prev, ...newIds]);
         setRedoStack([]);
 

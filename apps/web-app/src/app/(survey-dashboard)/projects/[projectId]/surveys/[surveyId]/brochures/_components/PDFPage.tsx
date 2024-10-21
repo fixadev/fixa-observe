@@ -2,7 +2,11 @@
 
 import { useEffect, useRef, useState, useMemo, useCallback } from "react";
 import MaskGenerator from "./MaskGenerator";
-import type { BrochureRectangles } from "~/lib/property";
+import type {
+  BrochureRectangles,
+  Path,
+  TransformedTextContent,
+} from "~/lib/property";
 import { RectangleRenderer } from "./RectangleRenderer";
 import type { PageViewport, PDFDocumentProxy } from "pdfjs-dist";
 import type {
@@ -15,26 +19,6 @@ import { Skeleton } from "~/components/ui/skeleton";
 import { cn } from "~/lib/utils";
 import { type Tool } from "./ToolSelector";
 
-export type TransformedTextContent = {
-  id?: string;
-  pageIndex: number;
-  str: string;
-  x: number;
-  y: number;
-  left: number;
-  bottom: number;
-  width: number;
-  height: number;
-};
-export type Path = {
-  id?: string;
-  pageIndex: number;
-  minMax: number[];
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-};
 type Rectangle = {
   x: number;
   y: number;

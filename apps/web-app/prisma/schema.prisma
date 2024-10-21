@@ -105,6 +105,9 @@ model Brochure {
   property            Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
   propertyId          String
   inpaintedRectangles Json?    @db.JsonB
+  textToRemove        Json?    @db.JsonB
+  pathsToRemove       Json?    @db.JsonB
+  undoStack           String[]
 }
 
 model Email {

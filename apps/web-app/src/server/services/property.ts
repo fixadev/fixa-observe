@@ -1,13 +1,9 @@
 import { type Prisma, type PrismaClient } from "@prisma/client";
-import axios from "axios";
 import {
   type BrochureSchema,
   type CreatePropertySchema,
   type BrochureWithoutPropertyId,
   type PropertySchema,
-  type RemoveRectanglesInput,
-  brochureRectangles,
-  type BrochureRectangles,
 } from "~/lib/property";
 import { extractContactInfo } from "../utils/extractContactInfo";
 import { formatAddresses } from "../utils/formatAddresses";
@@ -54,7 +50,9 @@ export const propertyService = ({ db }: { db: PrismaClient }) => {
             {
               ...brochure,
               approved: false,
-              inpaintedRectangles: brochure.inpaintedRectangles ?? [],
+              inpaintedRectangles: [],
+              textToRemove: [],
+              pathsToRemove: [],
             },
           ],
         },
@@ -108,6 +106,8 @@ export const propertyService = ({ db }: { db: PrismaClient }) => {
               propertyId: createdProperties[index]?.id ?? "",
               ...brochure,
               inpaintedRectangles: [],
+              textToRemove: [],
+              pathsToRemove: [],
             };
           }
           return null;
@@ -242,6 +242,8 @@ export const propertyService = ({ db }: { db: PrismaClient }) => {
         data: {
           ...brochure,
           inpaintedRectangles: brochure.inpaintedRectangles ?? [],
+          textToRemove: brochure.textToRemove ?? [],
+          pathsToRemove: brochure.pathsToRemove ?? [],
         },
       });
       return response;
@@ -296,48 +298,6 @@ export const propertyService = ({ db }: { db: PrismaClient }) => {
           ownerId: userId,
         },
       });
-    },
-
-    inpaintRectangles: async (input: RemoveRectanglesInput) => {
-      try {
-        const data = await db.brochure.findUnique({
-          where: {
-            id: input.brochureId,
-          },
-        });
-        const response = await axios.post<{
-          newRectangles: BrochureRectangles;
-        }>(`${env.INPAINTING_SERVICE_URL}/inpaint`, {
-          brochureUrl: data?.url,
-          rectanglesToRemove: input.rectanglesToRemove,
-        });
-
-        const oldRectangles =
-          brochureRectangles.safeParse(data?.inpaintedRectangles).data ?? [];
-
-        if (response.status === 200 && response.data.newRectangles) {
-          const newRectangles = response.data.newRectangles;
-          for (const rectangle of newRectangles) {
-            if (!rectangle.id) {
-              rectangle.id = crypto.randomUUID();
-            }
-          }
-          const updatedRectangles = [...oldRectangles, ...newRectangles];
-          await db.brochure.update({
-            where: { id: input.brochureId },
-            data: { inpaintedRectangles: updatedRectangles },
-          });
-
-          return { newRectangles };
-        } else {
-          throw new Error(
-            "Request to inpaint rectangles failed" + response.statusText,
-          );
-        }
-      } catch (error) {
-        console.error("Error removing objects:", error);
-        throw error;
-      }
     },
   };
 };
