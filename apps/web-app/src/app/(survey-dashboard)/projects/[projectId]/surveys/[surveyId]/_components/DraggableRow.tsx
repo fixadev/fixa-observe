@@ -277,6 +277,20 @@ export const DraggableRow = ({
               <Textarea
                 defaultValue={property.attributes?.[attribute.id] ?? ""}
                 className={`min-h-[${attribute.id === "comments" ? "90" : "40"}px]`}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    (e.target as HTMLTextAreaElement).blur();
+                    updateProperty({
+                      ...property,
+                      attributes: {
+                        ...property.attributes,
+                        [attribute.id]: (e.currentTarget as HTMLTextAreaElement)
+                          .value,
+                      },
+                    });
+                  }
+                }}
                 onBlur={(e) => {
                   updateProperty({
                     ...property,
@@ -294,6 +308,21 @@ export const DraggableRow = ({
                     <Input
                       className={cn(attribute.id in parsedAttributes && "pr-9")}
                       defaultValue={property.attributes?.[attribute.id] ?? ""}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          (e.target as HTMLTextAreaElement).blur();
+                          updateProperty({
+                            ...property,
+                            attributes: {
+                              ...property.attributes,
+                              [attribute.id]: (
+                                e.currentTarget as HTMLInputElement
+                              ).value,
+                            },
+                          });
+                        }
+                      }}
                       onBlur={(e: React.ChangeEvent<HTMLInputElement>) => {
                         updateProperty({
                           ...property,
