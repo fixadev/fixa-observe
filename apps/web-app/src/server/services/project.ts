@@ -1,26 +1,20 @@
 import { type PrismaClient } from "@prisma/client";
 import { type CreateProjectInput } from "../../lib/project";
 
-export const projectService = ({
-  db,
-}: {
-  db: PrismaClient;
-}) => {
-
+export const projectService = ({ db }: { db: PrismaClient }) => {
   function testTimeout() {
     return new Promise((resolve) => {
       setTimeout(() => {
-        console.log("===========================5 seconds have passed!===========================");
+        console.log(
+          "===========================5 seconds have passed!===========================",
+        );
         resolve(void 0);
       }, 5000);
     });
   }
 
   return {
-    createProject: async (
-      input: CreateProjectInput,
-      userId: string,
-    ) => {
+    createProject: async (input: CreateProjectInput, userId: string) => {
       const { projectName } = input;
       const project = await db.project.create({
         data: {
@@ -84,10 +78,10 @@ export const projectService = ({
       return user?.projects ?? [];
     },
 
-    deleteProject: async (projectId: string) => {
+    deleteProject: async (projectId: string, userId: string) => {
       const queries = [
         db.project.delete({
-          where: { id: projectId },
+          where: { id: projectId, ownerId: userId },
         }),
       ];
       await db.$transaction(queries);

@@ -5,9 +5,7 @@ import { type CreatePropertySchema } from "~/lib/property";
 import { parsePropertyCard } from "~/server/utils/parsePropertyCard";
 import { getServerCaller } from "~/trpc/backend";
 
-
 export async function POST(request: Request) {
-  
   const caller = await getServerCaller(request.headers);
 
   try {
@@ -32,9 +30,13 @@ export async function POST(request: Request) {
       },
     );
 
-    const properties = response.data as Array<{image_url: string, text: string, link: string | undefined}>;
+    const properties = response.data as Array<{
+      image_url: string;
+      text: string;
+      link: string | undefined;
+    }>;
 
-    const parsedProperties = properties.map((property) => { 
+    const parsedProperties = properties.map((property) => {
       const parsedProperty = parsePropertyCard(property.text);
       return {
         ...parsedProperty,
@@ -44,37 +46,37 @@ export async function POST(request: Request) {
     });
 
     const propertiesWithAttributes: Array<CreatePropertySchema> =
-        parsedProperties.map((property, index) => {
-          return {
-            createdAt: new Date(),
-            updatedAt: new Date(),
-            photoUrl: property.photoUrl,
-            brochures: property.brochureLink
-              ? [
-                  {
-                    createdAt: new Date(),
-                    updatedAt: new Date(),
-                    url: property.brochureLink,
-                    title: "",
-                    approved: false,
-                    inpaintedRectangles: [],
-                  },
-                ]
-              : [],
-            displayIndex: index,
-            surveyId: surveyId,
-            attributes: {
-              address: property.address ?? "",
-              size: property.size ?? "",
-              divisibility:
-                `${property.minDivisible} - ${property.maxDivisible}` ?? "",
-              askingRate: property.leaseRate ?? "",
-              opEx: property.opEx ?? "",
-              directSublease: property.leaseType ?? "",
-              comments: property.comments ?? "",
-            },
-          };
-        });
+      parsedProperties.map((property, index) => {
+        return {
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          photoUrl: property.photoUrl,
+          brochures: property.brochureLink
+            ? [
+                {
+                  createdAt: new Date(),
+                  updatedAt: new Date(),
+                  url: property.brochureLink,
+                  title: "",
+                  approved: false,
+                  inpaintedRectangles: [],
+                },
+              ]
+            : [],
+          displayIndex: index,
+          surveyId: surveyId,
+          attributes: {
+            address: property.address ?? "",
+            size: property.availSpace ?? "",
+            divisibility:
+              `${property.minDivisible} - ${property.maxDivisible}` ?? "",
+            askingRate: property.leaseRate ?? "",
+            opEx: property.opEx ?? "",
+            directSublease: property.leaseType ?? "",
+            comments: property.comments ?? "",
+          },
+        };
+      });
 
     await caller.survey.updateProperties({
       surveyId,
@@ -83,7 +85,6 @@ export async function POST(request: Request) {
     });
 
     return NextResponse.json({ status: 200 });
-
   } catch (error) {
     console.error("Error uploading file:", error);
     return NextResponse.json(

@@ -8,8 +8,6 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
 
@@ -48,15 +46,13 @@ export default function SurveyCard({
           <CardDescription>Last updated 12 hours ago</CardDescription>
         </CardHeader>
         <DropdownMenu>
-          <DropdownMenuTrigger className="mr-6">
+          <DropdownMenuTrigger className="flex size-16 flex-col items-center justify-center">
             <EllipsisHorizontalIcon className="size-6" />
           </DropdownMenuTrigger>
           <DropdownMenuContent>
-            {/* <DropdownMenuLabel>My Account</DropdownMenuLabel>
-            <DropdownMenuSeparator /> */}
             <DropdownMenuItem
               onClick={handleDeleteClick}
-              className="text-center text-red-700"
+              className="flex w-full items-center justify-center text-center text-red-700"
             >
               Delete survey
             </DropdownMenuItem>
