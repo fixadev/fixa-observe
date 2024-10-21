@@ -270,21 +270,7 @@ export const DraggableRow = ({
               attribute.id === "displayAddress" ? (
                 <Textarea
                   defaultValue={property.attributes?.[attribute.id] ?? ""}
-                  className={`h-[${attribute.id === "comments" ? "200px" : "60px"}] overflow-visible`}
-                  // onKeyDown={(e) => {
-                  //   if (e.key === "Enter") {
-                  //     e.preventDefault();
-                  //     (e.target as HTMLTextAreaElement).blur();
-                  //     updateProperty({
-                  //       ...property,
-                  //       attributes: {
-                  //         ...property.attributes,
-                  //         [attribute.id]: (e.currentTarget as HTMLTextAreaElement)
-                  //           .value,
-                  //       },
-                  //     });
-                  //   }
-                  // }}
+                  className={`h-[${attribute.label === "Comments" ? "200px" : "60px"}] overflow-visible`}
                   onBlur={(e) => {
                     updateProperty({
                       ...property,
