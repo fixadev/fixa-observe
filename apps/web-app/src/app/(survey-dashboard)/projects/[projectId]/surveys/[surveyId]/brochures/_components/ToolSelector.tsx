@@ -3,16 +3,28 @@ import {
   ArrowUturnRightIcon,
 } from "@heroicons/react/24/solid";
 import { Button } from "~/components/ui/button";
+import { cn } from "~/lib/utils";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "~/components/ui/tooltip";
+import { ToggleGroup, ToggleGroupItem } from "~/components/ui/toggle-group";
+import { EraserIcon, TextNoneIcon } from "@radix-ui/react-icons";
 
 export type Tool = "eraser" | "selector";
 
 export default function ToolSelector({
+  tool,
+  onToolChange,
   onUndo,
   undoEnabled,
   onRedo,
   redoEnabled,
   isMouseDown,
 }: {
+  tool: Tool;
+  onToolChange: React.Dispatch<React.SetStateAction<Tool>>;
   onUndo: () => void;
   undoEnabled: boolean;
   onRedo: () => void;
@@ -44,7 +56,7 @@ export default function ToolSelector({
           <ArrowUturnRightIcon className="size-4" />
         </Button>
       </div>
-      {/* <ToggleGroup
+      <ToggleGroup
         className="flex flex-col gap-2"
         type="single"
         value={tool}
@@ -65,7 +77,7 @@ export default function ToolSelector({
               <TextNoneIcon />
             </ToggleGroupItem>
           </TooltipTrigger>
-          <TooltipContent side="left">Select and delete text</TooltipContent>
+          <TooltipContent side="left">Delete text and logos</TooltipContent>
         </Tooltip>
         <Tooltip>
           <TooltipTrigger asChild>
@@ -78,9 +90,9 @@ export default function ToolSelector({
               <EraserIcon />
             </ToggleGroupItem>
           </TooltipTrigger>
-          <TooltipContent side="left">Erase logos</TooltipContent>
+          <TooltipContent side="left">Erase with AI</TooltipContent>
         </Tooltip>
-      </ToggleGroup> */}
+      </ToggleGroup>
     </div>
   );
 }

@@ -2,7 +2,11 @@
 
 import { useEffect, useRef, useState, useMemo, useCallback } from "react";
 import MaskGenerator from "./MaskGenerator";
-import type { BrochureRectangles } from "~/lib/property";
+import type {
+  BrochureRectangles,
+  Path,
+  TransformedTextContent,
+} from "~/lib/property";
 import { RectangleRenderer } from "./RectangleRenderer";
 import type { PageViewport, PDFDocumentProxy } from "pdfjs-dist";
 import type {
@@ -15,26 +19,6 @@ import { Skeleton } from "~/components/ui/skeleton";
 import { cn } from "~/lib/utils";
 import { type Tool } from "./ToolSelector";
 
-export type TransformedTextContent = {
-  id?: string;
-  pageIndex: number;
-  str: string;
-  x: number;
-  y: number;
-  left: number;
-  bottom: number;
-  width: number;
-  height: number;
-};
-export type Path = {
-  id?: string;
-  pageIndex: number;
-  minMax: number[];
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-};
 type Rectangle = {
   x: number;
   y: number;
@@ -196,7 +180,7 @@ export function PDFPageWithControls({
   isMouseDown: boolean;
   setIsMouseDown: React.Dispatch<React.SetStateAction<boolean>>;
   rectangles: BrochureRectangles;
-  setRectangles: (rectangles: BrochureRectangles) => void;
+  setRectangles: React.Dispatch<React.SetStateAction<BrochureRectangles>>;
   inpaintedRectangles?: BrochureRectangles;
   textToRemove: TransformedTextContent[];
   pathsToRemove: Path[];
@@ -435,7 +419,7 @@ export function PDFPageWithControls({
     ) {
       const selectedText = new Set<number>();
       for (let i = 0; i < textContentFormatted.length; i++) {
-        if (contains(curRectangle, textContentFormatted[i]!)) {
+        if (intersect(curRectangle, textContentFormatted[i]!)) {
           selectedText.add(i);
         }
       }
