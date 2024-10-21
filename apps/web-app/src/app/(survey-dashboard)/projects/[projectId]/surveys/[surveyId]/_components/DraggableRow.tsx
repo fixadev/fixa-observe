@@ -272,7 +272,8 @@ export const DraggableRow = ({
             draggingRow={draggingRow}
             className={attributeToMinWidth(attribute)}
           >
-            {attribute.id === "comments" || attribute.id === "address" ? (
+            {attribute.id === "comments" ||
+            attribute.id === "displayAddress" ? (
               <Textarea
                 defaultValue={property.attributes?.[attribute.id] ?? ""}
                 className={`min-h-[${attribute.id === "comments" ? "90" : "40"}px]`}

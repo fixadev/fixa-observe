@@ -11,32 +11,40 @@ interface AddressValidationResponse {
 
 export async function formatAddresses(addresses: string[]) {
   const formatPromises = addresses.map(async (address) => {
-    const addressLines = address.split("\n");
-    const response = await axios.post<AddressValidationResponse>(
-      "https://addressvalidation.googleapis.com/v1:validateAddress",
-      {
-        address: {
-          regionCode: "US",
-          addressLines: [addressLines[0] ?? ""],
+    try {
+      const addressLines = address.split("\n");
+      const response = await axios.post<AddressValidationResponse>(
+        "https://addressvalidation.googleapis.com/v1:validateAddress",
+        {
+          address: {
+            regionCode: "US",
+            addressLines: [addressLines[0] ?? ""],
+          },
         },
-      },
-      {
-        params: {
-          key: env.GOOGLE_API_KEY,
+        {
+          params: {
+            key: env.GOOGLE_API_KEY,
+          },
+          headers: {
+            "Content-Type": "application/json",
+          },
         },
-        headers: {
-          "Content-Type": "application/json",
-        },
-      },
-    );
+      );
 
-    const formattedAddress = response.data.result.address.formattedAddress;
-    const streetAddress = formattedAddress.split(",")[0];
+      const formattedAddress = response.data.result.address.formattedAddress;
+      const streetAddress = formattedAddress.split(",")[0];
 
-    return {
-      address: formattedAddress,
-      displayAddress: streetAddress + "\n" + (addressLines[1] ?? ""),
-    };
+      return {
+        address: formattedAddress,
+        displayAddress: streetAddress + "\n" + (addressLines[1] ?? ""),
+      };
+    } catch (error) {
+      console.error(`Error formatting address: ${address}`, error);
+      return {
+        address: address,
+        displayAddress: address,
+      };
+    }
   });
 
   return Promise.all(formatPromises);

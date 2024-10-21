@@ -57,14 +57,15 @@ model Survey {
 }
 
 model Attribute {
-  id        String                @id @default(uuid())
-  createdAt DateTime              @default(now())
-  updatedAt DateTime              @updatedAt
-  label     String
-  type      String
-  owner     User?                 @relation(fields: [ownerId], references: [id], onDelete: Cascade)
-  ownerId   String?
-  surveys   AttributesOnSurveys[]
+  id           String                @id @default(uuid())
+  createdAt    DateTime              @default(now())
+  updatedAt    DateTime              @updatedAt
+  label        String
+  type         String
+  owner        User?                 @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  ownerId      String?
+  defaultIndex Int                   @default(0)
+  surveys      AttributesOnSurveys[]
 }
 
 model AttributesOnSurveys {
