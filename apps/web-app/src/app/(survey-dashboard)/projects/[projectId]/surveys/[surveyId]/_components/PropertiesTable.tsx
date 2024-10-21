@@ -101,6 +101,7 @@ export function PropertiesTable({
           isNew: false,
         })),
       );
+      setIsUploadingProperties(false);
     }
   }, [survey]);
 
@@ -143,7 +144,7 @@ export function PropertiesTable({
         pendingMutations.current--;
         if (pendingMutations.current === 0) {
           void refetchSurvey();
-          setIsUploadingProperties(false);
+          // setIsUploadingProperties(false);
         }
       },
     });

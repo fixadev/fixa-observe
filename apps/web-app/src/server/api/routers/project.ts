@@ -35,4 +35,13 @@ export const projectRouter = createTRPCRouter({
         ctx.user.id,
       );
     }),
+
+  deleteProject: protectedProcedure
+    .input(z.object({ projectId: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      return await projectServiceInstance.deleteProject(
+        input.projectId,
+        ctx.user.id,
+      );
+    }),
 });

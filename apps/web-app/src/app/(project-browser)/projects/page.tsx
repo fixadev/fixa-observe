@@ -32,17 +32,17 @@ export default function Home() {
 
   const {
     data: projectsData,
-    // refetch: refetchProjects,
+    refetch: refetchProjects,
     error: projectsError,
   } = api.project.getProjects.useQuery();
   const { mutate: createProject, error: createProjectError } =
     api.project.createProject.useMutation({
       onSuccess: (data) => {
-        setProjectName("");
         router.push(`/projects/${data.id}`);
         toast({
           title: "Project created!",
         });
+        setProjectName("");
       },
     });
 
@@ -122,7 +122,12 @@ export default function Home() {
         </div>
         <div className="flex flex-col gap-2">
           {projects?.map((project) => (
-            <ProjectCard key={project.id} id={project.id} name={project.name} />
+            <ProjectCard
+              key={project.id}
+              id={project.id}
+              name={project.name}
+              refetchProjects={refetchProjects}
+            />
           ))}
         </div>
       </div>

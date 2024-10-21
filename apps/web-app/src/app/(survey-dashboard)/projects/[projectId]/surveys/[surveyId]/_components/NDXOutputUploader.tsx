@@ -41,19 +41,20 @@ export const NDXOutputUploader = ({
           "Content-Type": "multipart/form-data",
         },
       });
-      setUploading(false);
       refetchSurvey();
 
       if (response.status === 200) {
         toast({
           title: "Properties uploaded successfully",
-          description: "The NDX PDF has been uploaded successfully",
+          description: "NDX PDF uploaded successfully",
+          duration: 3000,
         });
       } else {
         toast({
           title: "Error uploading properties",
           description: "There was an error uploading the properties",
           variant: "destructive",
+          duration: 3000,
         });
       }
     }

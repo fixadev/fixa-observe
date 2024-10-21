@@ -44,8 +44,8 @@ export default function ProjectPage({
 
   const { mutate: createSurvey } = api.survey.createSurvey.useMutation({
     onSuccess: (data) => {
-      setNewSurveyName("");
       router.push(`/projects/${params.projectId}/surveys/${data.id}`);
+      setNewSurveyName("");
     },
   });
 
