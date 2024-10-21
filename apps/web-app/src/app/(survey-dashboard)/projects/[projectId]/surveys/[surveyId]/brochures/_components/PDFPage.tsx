@@ -65,7 +65,7 @@ export default function PDFPage({
 }: {
   pdf: PDFDocumentProxy;
   pageIndex: number;
-  inpaintedRectangles: BrochureRectangles;
+  inpaintedRectangles?: BrochureRectangles;
   textToRemove: TransformedTextContent[];
   pathsToRemove: Path[];
   onViewportChange?: (viewport: PageViewport) => void;
@@ -145,8 +145,10 @@ export default function PDFPage({
   ]);
 
   const filteredInpaintedRectangles = useMemo(() => {
-    return inpaintedRectangles.filter((rectangle) =>
-      idsToShow ? idsToShow.has(rectangle.id ?? "") : true,
+    return (
+      inpaintedRectangles?.filter((rectangle) =>
+        idsToShow ? idsToShow.has(rectangle.id ?? "") : true,
+      ) ?? []
     );
   }, [inpaintedRectangles, idsToShow]);
 
@@ -192,7 +194,7 @@ export function PDFPageWithControls({
   setIsMouseDown: React.Dispatch<React.SetStateAction<boolean>>;
   rectangles: BrochureRectangles;
   setRectangles: (rectangles: BrochureRectangles) => void;
-  inpaintedRectangles: BrochureRectangles;
+  inpaintedRectangles?: BrochureRectangles;
   textToRemove: TransformedTextContent[];
   pathsToRemove: Path[];
   onDeleteTextPaths: (
@@ -430,7 +432,7 @@ export function PDFPageWithControls({
     ) {
       const selectedText = new Set<number>();
       for (let i = 0; i < textContentFormatted.length; i++) {
-        if (intersect(curRectangle, textContentFormatted[i]!)) {
+        if (contains(curRectangle, textContentFormatted[i]!)) {
           selectedText.add(i);
         }
       }
@@ -438,12 +440,8 @@ export function PDFPageWithControls({
 
       const selectedPaths = new Set<number>();
       for (let i = 0; i < pathsFormatted.length; i++) {
-        const path = pathsFormatted[i];
-        if (
-          path &&
-          intersect(curRectangle, path) &&
-          !contains(path, curRectangle)
-        ) {
+        const path = pathsFormatted[i]!;
+        if (contains(curRectangle, path)) {
           selectedPaths.add(i);
         }
       }
