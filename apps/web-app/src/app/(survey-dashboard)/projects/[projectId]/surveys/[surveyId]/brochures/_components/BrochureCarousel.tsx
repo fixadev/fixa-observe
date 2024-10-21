@@ -24,6 +24,7 @@ import {
 } from "~/lib/pdfx.mjs";
 // import { getDocument } from "~/lib/pdfx.mjs";
 import PDFPage, {
+  type Path,
   PDFPageWithControls,
   type TransformedTextContent,
 } from "./PDFPage";
@@ -74,6 +75,7 @@ export function BrochureCarousel({
   const [textToRemove, setTextToRemove] = useState<TransformedTextContent[]>(
     [],
   );
+  const [pathsToRemove, setPathsToRemove] = useState<Path[]>([]);
 
   // ------------------
   // #region Undo and Redo
@@ -114,6 +116,24 @@ export function BrochureCarousel({
         }
       }
       setTextToRemove(newTextToRemove);
+      setUndoStack((prev) => [...prev, id]);
+      setRedoStack([]);
+    },
+    [redoStackSet],
+  );
+  const handleUpdatePathsToRemove = useCallback(
+    (pathsToRemove: Path[]) => {
+      const newPathsToRemove: Path[] = [];
+      const id = crypto.randomUUID();
+      for (const path of pathsToRemove) {
+        if (!path.id) {
+          newPathsToRemove.push({ ...path, id });
+        } else if (!redoStackSet.has(path.id)) {
+          // Get rid of all paths in the redo stack (because we don't need them anymore)
+          newPathsToRemove.push(path);
+        }
+      }
+      setPathsToRemove(newPathsToRemove);
       setUndoStack((prev) => [...prev, id]);
       setRedoStack([]);
     },
@@ -207,6 +227,8 @@ export function BrochureCarousel({
                         idsToShow={undoStackSet}
                         textToRemove={textToRemove}
                         setTextToRemove={handleUpdateTextToRemove}
+                        pathsToRemove={pathsToRemove}
+                        setPathsToRemove={handleUpdatePathsToRemove}
                         height={500}
                       />
                       {isRemoving && (
@@ -249,6 +271,7 @@ export function BrochureCarousel({
                     brochure.inpaintedRectangles as BrochureRectangles
                   }
                   textToRemove={textToRemove}
+                  pathsToRemove={pathsToRemove}
                   idsToShow={undoStackSet}
                   height={100}
                   className={cn(

@@ -6,6 +6,7 @@ import type { BrochureRectangles } from "~/lib/property";
 import { RectangleRenderer } from "./RectangleRenderer";
 import type { PageViewport, PDFDocumentProxy } from "pdfjs-dist";
 import type {
+  PDFOperatorList,
   RenderParameters,
   TextContent,
   TextItem,
@@ -25,11 +26,26 @@ export type TransformedTextContent = {
   width: number;
   height: number;
 };
+export type Path = {
+  id?: string;
+  pageIndex: number;
+  minMax: number[];
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+};
 type Rectangle = {
   x: number;
   y: number;
   width: number;
   height: number;
+};
+const OPS = {
+  save: 10,
+  restore: 11,
+  transform: 12,
+  constructPath: 91,
 };
 
 export default function PDFPage({
@@ -37,8 +53,10 @@ export default function PDFPage({
   pageIndex,
   inpaintedRectangles,
   textToRemove,
+  pathsToRemove,
   onViewportChange,
   onTextContentChange,
+  onOperatorListChange,
   idsToShow,
   height,
   children,
@@ -49,8 +67,10 @@ export default function PDFPage({
   pageIndex: number;
   inpaintedRectangles: BrochureRectangles;
   textToRemove: TransformedTextContent[];
+  pathsToRemove: Path[];
   onViewportChange?: (viewport: PageViewport) => void;
   onTextContentChange?: (textContent: TextContent) => void;
+  onOperatorListChange?: (operatorList: PDFOperatorList) => void;
   idsToShow?: Set<string>;
   height?: number;
   children?: React.ReactNode;
@@ -67,6 +87,14 @@ export default function PDFPage({
         : item.pageIndex === pageIndex,
     );
   }, [textToRemove, pageIndex, idsToShow]);
+
+  const filteredPathsToRemove = useMemo(() => {
+    return pathsToRemove.filter((item) =>
+      idsToShow
+        ? idsToShow.has(item.id ?? "") && item.pageIndex === pageIndex
+        : item.pageIndex === pageIndex,
+    );
+  }, [pathsToRemove, pageIndex, idsToShow]);
 
   useEffect(() => {
     if (!canvasRef.current) return;
@@ -89,6 +117,7 @@ export default function PDFPage({
         canvasContext: context,
         viewport: _viewport,
         textToRemove: filteredTextToRemove,
+        pathsToRemove: filteredPathsToRemove,
       };
       const renderTask = page.render(renderContext as RenderParameters);
       void renderTask.promise.then(() => {
@@ -100,14 +129,19 @@ export default function PDFPage({
       void page.getTextContent().then((_textContent) => {
         onTextContentChange?.(_textContent);
       });
+      void page.getOperatorList().then((_operatorList) => {
+        onOperatorListChange?.(_operatorList);
+      });
     });
   }, [
     pageIndex,
     pdf,
     filteredTextToRemove,
+    filteredPathsToRemove,
     onViewportChange,
     onTextContentChange,
     height,
+    onOperatorListChange,
   ]);
 
   const filteredInpaintedRectangles = useMemo(() => {
@@ -147,6 +181,8 @@ export function PDFPageWithControls({
   inpaintedRectangles,
   textToRemove,
   setTextToRemove,
+  pathsToRemove,
+  setPathsToRemove,
   idsToShow,
   height,
 }: {
@@ -160,11 +196,16 @@ export function PDFPageWithControls({
   inpaintedRectangles: BrochureRectangles;
   textToRemove: TransformedTextContent[];
   setTextToRemove: (textToRemove: TransformedTextContent[]) => void;
+  pathsToRemove: Path[];
+  setPathsToRemove: (pathsToRemove: Path[]) => void;
   idsToShow?: Set<string>;
   height?: number;
 }) {
   const [viewport, setViewport] = useState<PageViewport | null>(null);
   const [textContent, setTextContent] = useState<TextContent | null>(null);
+  const [operatorList, setOperatorList] = useState<PDFOperatorList | null>(
+    null,
+  );
   const [curRectangle, setCurRectangle] = useState<
     BrochureRectangles[0] | null
   >(null);
@@ -173,9 +214,21 @@ export function PDFPageWithControls({
   const [textContentSelected, setTextContentSelected] = useState<Set<number>>(
     new Set(),
   );
+  const [pathsSelected, setPathsSelected] = useState<Set<number>>(new Set());
   const filteredTextToRemove = useMemo(() => {
-    return textToRemove.filter((item) => item.pageIndex === pageIndex);
-  }, [textToRemove, pageIndex]);
+    return textToRemove.filter((item) =>
+      idsToShow
+        ? idsToShow.has(item.id ?? "") && item.pageIndex === pageIndex
+        : item.pageIndex === pageIndex,
+    );
+  }, [textToRemove, pageIndex, idsToShow]);
+  const filteredPathsToRemove = useMemo(() => {
+    return pathsToRemove.filter((item) =>
+      idsToShow
+        ? idsToShow.has(item.id ?? "") && item.pageIndex === pageIndex
+        : item.pageIndex === pageIndex,
+    );
+  }, [pathsToRemove, pageIndex, idsToShow]);
   const textContentFormatted = useMemo<TransformedTextContent[]>(() => {
     if (viewport === null || textContent === null) return [];
 
@@ -217,6 +270,87 @@ export function PDFPageWithControls({
           }),
       );
   }, [textContent, filteredTextToRemove, viewport, pageIndex]);
+  const pathsFormatted = useMemo(() => {
+    if (operatorList === null || viewport === null) return [];
+
+    const _paths: Path[] = [];
+    let transform: number[] = [1, 0, 0, 1, 0, 0];
+    const savedTransform: number[][] = [];
+    const fullWidth = viewport.viewBox[2]!;
+    const fullHeight = viewport.viewBox[3]!;
+    operatorList.fnArray.forEach((op, index: number) => {
+      switch (op) {
+        case OPS.save:
+          savedTransform.push(transform);
+          break;
+        case OPS.restore:
+          transform = savedTransform.pop()!;
+          break;
+        case OPS.transform:
+          // transform
+          transform = operatorList.argsArray[index]! as number[];
+          break;
+        case OPS.constructPath:
+          // construct path
+          const minMax = (operatorList.argsArray[index]! as number[][])[2]!;
+          if (
+            filteredPathsToRemove.some(
+              (path) => JSON.stringify(path.minMax) === JSON.stringify(minMax),
+            )
+          ) {
+            break;
+          }
+
+          if (
+            transform[0] === undefined ||
+            transform[1] === undefined ||
+            transform[2] === undefined ||
+            transform[3] === undefined ||
+            transform[4] === undefined ||
+            transform[5] === undefined ||
+            minMax[0] === undefined ||
+            minMax[1] === undefined ||
+            minMax[2] === undefined ||
+            minMax[3] === undefined
+          ) {
+            break;
+          }
+
+          const [x1, y1, x2, y2] = [
+            (transform[0] * minMax[0] +
+              transform[2] * minMax[1] +
+              transform[4]) /
+              fullWidth,
+            (transform[1] * minMax[0] +
+              transform[3] * minMax[1] +
+              transform[5]) /
+              fullHeight,
+            (transform[0] * minMax[2] +
+              transform[2] * minMax[3] +
+              transform[4]) /
+              fullWidth,
+            (transform[1] * minMax[2] +
+              transform[3] * minMax[3] +
+              transform[5]) /
+              fullHeight,
+          ];
+          const w = x2 - x1;
+          const h = y2 - y1;
+          const formattedPath = {
+            pageIndex,
+            minMax,
+            x: x1,
+            y: 1 - y1 - h,
+            width: w,
+            height: h,
+          };
+          _paths.push(formattedPath);
+
+          break;
+      }
+    });
+    return _paths;
+  }, [operatorList, filteredPathsToRemove, viewport, pageIndex]);
 
   useEffect(() => {
     if (tool === "selector" && rectangles.length > 0 && !isMouseDown) {
@@ -225,7 +359,6 @@ export function PDFPageWithControls({
   }, [tool, rectangles, isMouseDown, pageIndex, setRectangles]);
 
   const handleRemoveText = useCallback(() => {
-    console.log("handleRemoveText", textContentSelected);
     const newTextToRemove = [...textToRemove];
     for (const index of Array.from(textContentSelected)) {
       if (textContentFormatted[index]) {
@@ -234,11 +367,24 @@ export function PDFPageWithControls({
     }
     setTextToRemove(newTextToRemove);
     setTextContentSelected(new Set());
+
+    const newPathsToRemove = [...pathsToRemove];
+    for (const index of Array.from(pathsSelected)) {
+      if (pathsFormatted[index]) {
+        newPathsToRemove.push(pathsFormatted[index]);
+      }
+    }
+    setPathsToRemove(newPathsToRemove);
+    setPathsSelected(new Set());
   }, [
-    textContentSelected,
     textToRemove,
     setTextToRemove,
+    pathsToRemove,
+    setPathsToRemove,
+    textContentSelected,
     textContentFormatted,
+    pathsSelected,
+    pathsFormatted,
   ]);
 
   const intersect = useCallback((rect1: Rectangle, rect2: Rectangle) => {
@@ -265,23 +411,53 @@ export function PDFPageWithControls({
     // If we've made it here, the rectangles must intersect
     return true;
   }, []);
+  // Check if rect1 contains rect2
+  const contains = useCallback((rect1: Rectangle, rect2: Rectangle) => {
+    return (
+      rect1.x <= rect2.x &&
+      rect1.y <= rect2.y &&
+      rect1.x + rect1.width >= rect2.x + rect2.width &&
+      rect1.y + rect1.height >= rect2.y + rect2.height
+    );
+  }, []);
 
   useEffect(() => {
     if (
       tool === "selector" &&
       curRectangle &&
       isMouseDown &&
-      textContentFormatted.length > 0
+      (textContentFormatted.length > 0 || pathsFormatted.length > 0)
     ) {
-      const selected = new Set<number>();
+      const selectedText = new Set<number>();
       for (let i = 0; i < textContentFormatted.length; i++) {
         if (intersect(curRectangle, textContentFormatted[i]!)) {
-          selected.add(i);
+          selectedText.add(i);
         }
       }
-      setTextContentSelected(selected);
+      setTextContentSelected(selectedText);
+
+      const selectedPaths = new Set<number>();
+      for (let i = 0; i < pathsFormatted.length; i++) {
+        const path = pathsFormatted[i];
+        if (
+          path &&
+          intersect(curRectangle, path) &&
+          !contains(path, curRectangle)
+        ) {
+          selectedPaths.add(i);
+        }
+      }
+      setPathsSelected(selectedPaths);
     }
-  }, [intersect, isMouseDown, curRectangle, textContentFormatted, tool]);
+  }, [
+    intersect,
+    isMouseDown,
+    curRectangle,
+    textContentFormatted,
+    tool,
+    pathsFormatted,
+    contains,
+  ]);
 
   return (
     <PDFPage
@@ -289,8 +465,10 @@ export function PDFPageWithControls({
       pageIndex={pageIndex}
       inpaintedRectangles={inpaintedRectangles}
       textToRemove={textToRemove}
+      pathsToRemove={pathsToRemove}
       onViewportChange={setViewport}
       onTextContentChange={setTextContent}
+      onOperatorListChange={setOperatorList}
       idsToShow={idsToShow}
       height={height}
       onKeyDown={(e) => {
@@ -311,19 +489,41 @@ export function PDFPageWithControls({
         tool={tool}
       />
       <div className="absolute left-0 top-0 h-full w-full">
-        {textContentFormatted.map((item, i) => {
+        {textContentFormatted.map((text, i) => {
           if (!textContentSelected.has(i)) {
             return null;
           }
           return (
             <div
-              key={i}
+              key={`text-${i}`}
               className="absolute"
               style={{
-                left: `${item.x * 100}%`,
-                top: `${item.y * 100}%`,
-                width: `${item.width * 100}%`,
-                height: `${item.height * 100}%`,
+                left: `${text.x * 100}%`,
+                top: `${text.y * 100}%`,
+                width: `${text.width * 100}%`,
+                height: `${text.height * 100}%`,
+                border: "2px dashed lightblue",
+                backgroundColor: "rgba(178, 216, 254, 0.3)",
+                overflow: "hidden",
+                whiteSpace: "nowrap",
+                fontSize: "12px",
+              }}
+            ></div>
+          );
+        })}
+        {pathsFormatted.map((path, i) => {
+          if (!pathsSelected.has(i)) {
+            return null;
+          }
+          return (
+            <div
+              key={`path-${i}`}
+              className="absolute"
+              style={{
+                left: `${path.x * 100}%`,
+                top: `${path.y * 100}%`,
+                width: `${path.width * 100}%`,
+                height: `${path.height * 100}%`,
                 border: "2px dashed lightblue",
                 backgroundColor: "rgba(178, 216, 254, 0.3)",
                 overflow: "hidden",
