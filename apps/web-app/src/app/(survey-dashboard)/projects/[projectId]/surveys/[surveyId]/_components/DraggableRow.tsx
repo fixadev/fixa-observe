@@ -232,7 +232,7 @@ export const DraggableRow = ({
         key={"photoUrlCell"}
         id={"photoUrlCell"}
         draggingRow={draggingRow}
-        className="flex w-full items-center justify-center"
+        className="mr-4 w-44"
       >
         {photoUploading ? (
           <div className="flex aspect-[4/3] h-[100px] items-center justify-center">
@@ -277,7 +277,7 @@ export const DraggableRow = ({
             attribute.id === "displayAddress" ? (
               <Textarea
                 defaultValue={property.attributes?.[attribute.id] ?? ""}
-                className={`min-h-[${attribute.id === "comments" ? "90" : "40"}px]`}
+                className={`h-[${attribute.id === "comments" ? "200px" : "60px"}] overflow-visible`}
                 // onKeyDown={(e) => {
                 //   if (e.key === "Enter") {
                 //     e.preventDefault();
