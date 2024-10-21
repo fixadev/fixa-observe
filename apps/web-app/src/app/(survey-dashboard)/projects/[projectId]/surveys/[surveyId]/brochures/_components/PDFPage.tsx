@@ -435,7 +435,7 @@ export function PDFPageWithControls({
     ) {
       const selectedText = new Set<number>();
       for (let i = 0; i < textContentFormatted.length; i++) {
-        if (contains(curRectangle, textContentFormatted[i]!)) {
+        if (intersect(curRectangle, textContentFormatted[i]!)) {
           selectedText.add(i);
         }
       }
