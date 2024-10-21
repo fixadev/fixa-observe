@@ -80,7 +80,7 @@ export const propertyRouter = createTRPCRouter({
 
   inpaintRectangles: protectedProcedure
     .input(removeRectanglesInput)
-    .mutation(async ({ ctx, input }) => {
+    .mutation(async ({ input }) => {
       return await propertyServiceInstance.inpaintRectangles(input);
     }),
 });

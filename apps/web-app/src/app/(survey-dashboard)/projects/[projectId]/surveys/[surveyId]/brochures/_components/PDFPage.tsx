@@ -12,8 +12,10 @@ import type {
 } from "pdfjs-dist/types/src/display/api";
 import { Skeleton } from "~/components/ui/skeleton";
 import { cn } from "~/lib/utils";
+import { type Tool } from "./ToolSelector";
 
 export type TransformedTextContent = {
+  id?: string;
   pageIndex: number;
   str: string;
   x: number;
@@ -37,8 +39,10 @@ export default function PDFPage({
   textToRemove,
   onViewportChange,
   onTextContentChange,
+  idsToShow,
   height,
   children,
+  className,
   ...props
 }: {
   pdf: PDFDocumentProxy;
@@ -47,16 +51,22 @@ export default function PDFPage({
   textToRemove: TransformedTextContent[];
   onViewportChange?: (viewport: PageViewport) => void;
   onTextContentChange?: (textContent: TextContent) => void;
+  idsToShow?: Set<string>;
   height?: number;
   children?: React.ReactNode;
+  className?: string;
 } & React.HTMLAttributes<HTMLDivElement>) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const isLoading = useRef(false);
   const [pageLoaded, setPageLoaded] = useState(false);
 
   const filteredTextToRemove = useMemo(() => {
-    return textToRemove.filter((item) => item.pageIndex === pageIndex);
-  }, [textToRemove, pageIndex]);
+    return textToRemove.filter((item) =>
+      idsToShow
+        ? idsToShow.has(item.id ?? "") && item.pageIndex === pageIndex
+        : item.pageIndex === pageIndex,
+    );
+  }, [textToRemove, pageIndex, idsToShow]);
 
   useEffect(() => {
     if (!canvasRef.current) return;
@@ -100,12 +110,18 @@ export default function PDFPage({
     height,
   ]);
 
+  const filteredInpaintedRectangles = useMemo(() => {
+    return inpaintedRectangles.filter((rectangle) =>
+      idsToShow ? idsToShow.has(rectangle.id ?? "") : true,
+    );
+  }, [inpaintedRectangles, idsToShow]);
+
   return (
-    <div className="relative inline-block" {...props}>
+    <div className={cn("relative inline-block", className)} {...props}>
       <canvas ref={canvasRef} />
       <RectangleRenderer
         pageNumber={pageIndex}
-        rectangles={inpaintedRectangles}
+        rectangles={filteredInpaintedRectangles}
       />
       {children}
       <div
@@ -131,24 +147,27 @@ export function PDFPageWithControls({
   inpaintedRectangles,
   textToRemove,
   setTextToRemove,
+  idsToShow,
   height,
 }: {
   pdf: PDFDocumentProxy;
   pageIndex: number;
-  tool: "selector" | "eraser";
+  tool: Tool;
   isMouseDown: boolean;
   setIsMouseDown: React.Dispatch<React.SetStateAction<boolean>>;
   rectangles: BrochureRectangles;
-  setRectangles: React.Dispatch<React.SetStateAction<BrochureRectangles>>;
+  setRectangles: (rectangles: BrochureRectangles) => void;
   inpaintedRectangles: BrochureRectangles;
   textToRemove: TransformedTextContent[];
-  setTextToRemove: React.Dispatch<
-    React.SetStateAction<TransformedTextContent[]>
-  >;
+  setTextToRemove: (textToRemove: TransformedTextContent[]) => void;
+  idsToShow?: Set<string>;
   height?: number;
 }) {
   const [viewport, setViewport] = useState<PageViewport | null>(null);
   const [textContent, setTextContent] = useState<TextContent | null>(null);
+  const [curRectangle, setCurRectangle] = useState<
+    BrochureRectangles[0] | null
+  >(null);
 
   // Contains the indices of the text content that is selected
   const [textContentSelected, setTextContentSelected] = useState<Set<number>>(
@@ -249,19 +268,20 @@ export function PDFPageWithControls({
 
   useEffect(() => {
     if (
-      rectangles.length === 1 &&
+      tool === "selector" &&
+      curRectangle &&
       isMouseDown &&
       textContentFormatted.length > 0
     ) {
       const selected = new Set<number>();
       for (let i = 0; i < textContentFormatted.length; i++) {
-        if (intersect(rectangles[0]!, textContentFormatted[i]!)) {
+        if (intersect(curRectangle, textContentFormatted[i]!)) {
           selected.add(i);
         }
       }
       setTextContentSelected(selected);
     }
-  }, [intersect, isMouseDown, rectangles, textContentFormatted]);
+  }, [intersect, isMouseDown, curRectangle, textContentFormatted, tool]);
 
   return (
     <PDFPage
@@ -271,6 +291,7 @@ export function PDFPageWithControls({
       textToRemove={textToRemove}
       onViewportChange={setViewport}
       onTextContentChange={setTextContent}
+      idsToShow={idsToShow}
       height={height}
       onKeyDown={(e) => {
         if (e.key === "Delete" || e.key === "Backspace") {
@@ -285,6 +306,8 @@ export function PDFPageWithControls({
         setIsDrawing={setIsMouseDown}
         rectangles={rectangles}
         setRectangles={setRectangles}
+        curRectangle={curRectangle}
+        setCurRectangle={setCurRectangle}
         tool={tool}
       />
       <div className="absolute left-0 top-0 h-full w-full">
