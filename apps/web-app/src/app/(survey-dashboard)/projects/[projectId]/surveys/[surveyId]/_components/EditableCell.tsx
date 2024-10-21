@@ -99,7 +99,6 @@ export function EditableCell({
       <Input
         ref={inputRef}
         className={cn(attribute.id in parsedAttributes && "pr-9")}
-        defaultValue={property.attributes?.[attribute.id] ?? ""}
         value={localValue}
         onChange={(e) => {
           setLocalValue(e.target.value);
