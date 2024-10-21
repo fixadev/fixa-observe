@@ -66,7 +66,7 @@ export function BrochureCarousel({
   }, [pdfUrl]);
   // #endregion
 
-  const [tool, setTool] = useState<Tool>("selector");
+  const tool: Tool = useMemo(() => "selector", []);
   const [loaded, setLoaded] = useState<boolean>(false);
   const [isRemoving, setIsRemoving] = useState<boolean>(false);
   const [isMouseDown, setIsMouseDown] = useState<boolean>(false);
@@ -243,8 +243,6 @@ export function BrochureCarousel({
             <CarouselPrevious />
             <CarouselNext />
             <ToolSelector
-              tool={tool}
-              onToolChange={setTool}
               onUndo={undo}
               undoEnabled={undoStack.length > 0}
               onRedo={redo}
