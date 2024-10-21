@@ -65,7 +65,7 @@ export default function PDFPage({
 }: {
   pdf: PDFDocumentProxy;
   pageIndex: number;
-  inpaintedRectangles: BrochureRectangles;
+  inpaintedRectangles?: BrochureRectangles;
   textToRemove: TransformedTextContent[];
   pathsToRemove: Path[];
   onViewportChange?: (viewport: PageViewport) => void;
@@ -133,11 +133,14 @@ export default function PDFPage({
         onOperatorListChange?.(_operatorList);
       });
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     pageIndex,
     pdf,
-    filteredTextToRemove,
-    filteredPathsToRemove,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    JSON.stringify(filteredTextToRemove), // Needed to only rerender when contents of this array is changed
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    JSON.stringify(filteredPathsToRemove), // Needed to only rerender when contents of this array is changed
     onViewportChange,
     onTextContentChange,
     height,
@@ -145,8 +148,10 @@ export default function PDFPage({
   ]);
 
   const filteredInpaintedRectangles = useMemo(() => {
-    return inpaintedRectangles.filter((rectangle) =>
-      idsToShow ? idsToShow.has(rectangle.id ?? "") : true,
+    return (
+      inpaintedRectangles?.filter((rectangle) =>
+        idsToShow ? idsToShow.has(rectangle.id ?? "") : true,
+      ) ?? []
     );
   }, [inpaintedRectangles, idsToShow]);
 
@@ -192,7 +197,7 @@ export function PDFPageWithControls({
   setIsMouseDown: React.Dispatch<React.SetStateAction<boolean>>;
   rectangles: BrochureRectangles;
   setRectangles: (rectangles: BrochureRectangles) => void;
-  inpaintedRectangles: BrochureRectangles;
+  inpaintedRectangles?: BrochureRectangles;
   textToRemove: TransformedTextContent[];
   pathsToRemove: Path[];
   onDeleteTextPaths: (
@@ -430,7 +435,7 @@ export function PDFPageWithControls({
     ) {
       const selectedText = new Set<number>();
       for (let i = 0; i < textContentFormatted.length; i++) {
-        if (intersect(curRectangle, textContentFormatted[i]!)) {
+        if (contains(curRectangle, textContentFormatted[i]!)) {
           selectedText.add(i);
         }
       }
@@ -438,12 +443,8 @@ export function PDFPageWithControls({
 
       const selectedPaths = new Set<number>();
       for (let i = 0; i < pathsFormatted.length; i++) {
-        const path = pathsFormatted[i];
-        if (
-          path &&
-          intersect(curRectangle, path) &&
-          !contains(path, curRectangle)
-        ) {
+        const path = pathsFormatted[i]!;
+        if (contains(curRectangle, path)) {
           selectedPaths.add(i);
         }
       }
