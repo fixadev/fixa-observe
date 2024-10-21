@@ -1,4 +1,5 @@
-import { type Attribute, type PrismaClient } from "@prisma/client";
+import { type PrismaClient } from "@prisma/client";
+import { type AttributeSchema } from "~/lib/property";
 import { type CreateSurveyInput } from "~/lib/survey";
 import { type SurveySchema } from "~/lib/survey";
 
@@ -83,7 +84,7 @@ export const surveyService = ({ db }: { db: PrismaClient }) => {
 
     createAttributes: async (
       surveyId: string,
-      attributes: Attribute[],
+      attributes: AttributeSchema[],
       userId: string,
     ) => {
       const result = await db.attribute.createMany({
@@ -99,7 +100,7 @@ export const surveyService = ({ db }: { db: PrismaClient }) => {
     // TODO: simplify this
     addAttributes: async (
       surveyId: string,
-      attributes: Attribute[],
+      attributes: AttributeSchema[],
       userId: string,
     ) => {
       const existingAttributes = await db.attribute.findMany({
@@ -139,7 +140,7 @@ export const surveyService = ({ db }: { db: PrismaClient }) => {
     },
 
     updateAttributes: async (
-      attributes: Attribute[],
+      attributes: AttributeSchema[],
       idToUpdate: string | undefined,
       userId: string,
     ) => {
@@ -188,7 +189,7 @@ export const surveyService = ({ db }: { db: PrismaClient }) => {
 
     updateAttributesOrder: async (
       surveyId: string,
-      attributes: Attribute[],
+      attributes: AttributeSchema[],
       userId: string,
     ) => {
       await db.survey.update({

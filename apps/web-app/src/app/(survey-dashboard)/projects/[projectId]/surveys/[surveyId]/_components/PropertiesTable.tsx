@@ -118,7 +118,6 @@ export function PropertiesTable({
         attributes.map((attr) => ({
           ...attr,
           isNew: false,
-          defaultIndex: attr.defaultIndex ?? 0,
         })),
       );
     }
