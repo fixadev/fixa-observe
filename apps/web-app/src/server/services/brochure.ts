@@ -53,7 +53,7 @@ export const brochureService = ({ db }: { db: PrismaClient }) => {
       }
     },
 
-    setTextToRemove: async (
+    updateTextToRemove: async (
       brochureId: string,
       textToRemove: TransformedTextContent[],
     ) => {
@@ -63,17 +63,24 @@ export const brochureService = ({ db }: { db: PrismaClient }) => {
       });
     },
 
-    setPathsToRemove: async (brochureId: string, pathsToRemove: Path[]) => {
+    updatePathsToRemove: async (brochureId: string, pathsToRemove: Path[]) => {
       await db.brochure.update({
         where: { id: brochureId },
         data: { pathsToRemove },
       });
     },
 
-    setUndoStack: async (brochureId: string, undoStack: string[]) => {
+    updateUndoStack: async (brochureId: string, undoStack: string[]) => {
       await db.brochure.update({
         where: { id: brochureId },
         data: { undoStack },
+      });
+    },
+
+    updateDeletedPages: async (brochureId: string, deletedPages: number[]) => {
+      await db.brochure.update({
+        where: { id: brochureId },
+        data: { deletedPages },
       });
     },
   };

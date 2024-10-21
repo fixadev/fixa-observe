@@ -25,7 +25,7 @@ export const brochureRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ input }) => {
-      return await brochureServiceInstance.setTextToRemove(
+      return await brochureServiceInstance.updateTextToRemove(
         input.brochureId,
         input.textToRemove,
       );
@@ -36,7 +36,7 @@ export const brochureRouter = createTRPCRouter({
       z.object({ brochureId: z.string(), pathsToRemove: z.array(pathSchema) }),
     )
     .mutation(async ({ input }) => {
-      return await brochureServiceInstance.setPathsToRemove(
+      return await brochureServiceInstance.updatePathsToRemove(
         input.brochureId,
         input.pathsToRemove,
       );
@@ -45,9 +45,20 @@ export const brochureRouter = createTRPCRouter({
   updateUndoStack: protectedProcedure
     .input(z.object({ brochureId: z.string(), undoStack: z.array(z.string()) }))
     .mutation(async ({ input }) => {
-      return await brochureServiceInstance.setUndoStack(
+      return await brochureServiceInstance.updateUndoStack(
         input.brochureId,
         input.undoStack,
+      );
+    }),
+
+  updateDeletedPages: protectedProcedure
+    .input(
+      z.object({ brochureId: z.string(), deletedPages: z.array(z.number()) }),
+    )
+    .mutation(async ({ input }) => {
+      return await brochureServiceInstance.updateDeletedPages(
+        input.brochureId,
+        input.deletedPages,
       );
     }),
 });

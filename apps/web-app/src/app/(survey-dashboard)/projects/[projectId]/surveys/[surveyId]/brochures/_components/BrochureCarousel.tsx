@@ -79,9 +79,9 @@ export function BrochureCarousel({
   const [pathsToRemove, setPathsToRemove] = useState<Path[]>([]);
   const [inpaintedRectangles, setInpaintedRectangles] =
     useState<BrochureRectangles>([]);
+  const [deletedPages, setDeletedPages] = useState<Set<number>>(new Set());
 
-  // ------------------
-  // #region Load initial state from brochure
+  // Load initial state from brochure
   useEffect(() => {
     setTextToRemove((brochure.textToRemove as TransformedTextContent[]) ?? []);
     setPathsToRemove((brochure.pathsToRemove as Path[]) ?? []);
@@ -89,8 +89,17 @@ export function BrochureCarousel({
       (brochure.inpaintedRectangles as BrochureRectangles) ?? [],
     );
     setUndoStack(brochure.undoStack ?? []);
+    setDeletedPages(new Set(brochure.deletedPages ?? []));
   }, [brochure]);
-  // #endregion
+
+  const { mutate: updateDeletedPages } =
+    api.brochure.updateDeletedPages.useMutation();
+  useEffect(() => {
+    updateDeletedPages({
+      brochureId: brochure.id,
+      deletedPages: Array.from(deletedPages),
+    });
+  }, [brochure.id, deletedPages, updateDeletedPages]);
 
   // ------------------
   // #region Undo and Redo
@@ -184,8 +193,6 @@ export function BrochureCarousel({
     ],
   );
   // #endregion
-
-  const [deletedPages, setDeletedPages] = useState<Set<number>>(new Set());
 
   // ------------------
   // #region Inpainting

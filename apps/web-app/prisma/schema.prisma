@@ -108,6 +108,7 @@ model Brochure {
   textToRemove        Json?    @db.JsonB
   pathsToRemove       Json?    @db.JsonB
   undoStack           String[]
+  deletedPages        Int[]
 }
 
 model Email {
