@@ -36,8 +36,6 @@ export async function formatAddresses(addresses: string[]) {
         },
       );
 
-      console.log("response", JSON.stringify(response.data, null, 2));
-
       const formattedAddress = response.data.result.address.formattedAddress;
       const streetAddress =
         response.data.result.address.postalAddress.addressLines.join("\n");

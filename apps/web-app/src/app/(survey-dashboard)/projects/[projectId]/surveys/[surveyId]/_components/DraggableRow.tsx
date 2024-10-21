@@ -44,6 +44,7 @@ import {
 import { cn, emailIsDraft } from "~/lib/utils";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import { advancedParseFloat } from "~/app/parseNumbers";
 
 export const DraggableRow = ({
   photoUrl,
@@ -329,11 +330,46 @@ export const DraggableRow = ({
                           }
                         }}
                         onBlur={(e: React.ChangeEvent<HTMLInputElement>) => {
+                          const newTotalCost = null;
+                          if (
+                            attribute.id === "askingRate" ||
+                            attribute.id === "opEx"
+                          ) {
+                            const inputValue = advancedParseFloat(
+                              e.target.value ?? "0",
+                            );
+                            const size = advancedParseFloat(
+                              property.attributes?.size &&
+                                property.attributes?.size?.length > 0
+                                ? property.attributes?.size
+                                : "0",
+                            );
+                            const otherValue = advancedParseFloat(
+                              attribute.id === "askingRate"
+                                ? (property.attributes?.opEx ?? "0")
+                                : (property.attributes?.askingRate ?? "0"),
+                            );
+
+                            console.log("otherValue IS", otherValue);
+                            console.log("inputValue IS", inputValue);
+                            console.log("size IS", size);
+
+                            const newTotalCost = (
+                              otherValue *
+                              inputValue *
+                              size
+                            ).toString();
+
+                            console.log("newTotalCost IS", newTotalCost);
+                          }
                           updateProperty({
                             ...property,
                             attributes: {
                               ...property.attributes,
                               [attribute.id]: e.target.value,
+                              totalCost: newTotalCost
+                                ? newTotalCost
+                                : (property.attributes?.totalCost ?? "0"),
                             },
                           });
                         }}
