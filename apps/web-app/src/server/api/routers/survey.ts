@@ -4,7 +4,6 @@ import { createSurveyInput, surveySchema } from "~/lib/survey";
 import {
   attributeSchema,
   createPropertySchema,
-  importPropertiesInput,
   propertySchema,
 } from "~/lib/property";
 import { surveyService } from "~/server/services/survey";

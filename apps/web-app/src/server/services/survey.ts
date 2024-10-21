@@ -14,7 +14,9 @@ export const surveyService = ({ db }: { db: PrismaClient }) => {
       // },
     });
   };
+
   return {
+    getAttributes,
     getProjectSurveys: async (projectId: string, userId: string) => {
       const surveys = await db.survey.findMany({
         where: { projectId: projectId, ownerId: userId },
