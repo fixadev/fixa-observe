@@ -17,13 +17,16 @@ import { TrashIcon as TrashIconSolid } from "@heroicons/react/24/solid";
 import { cn } from "~/lib/utils";
 import { type BrochureSchema, type BrochureRectangles } from "~/lib/property";
 import { ConfirmRemovePopup } from "./ConfirmRemovePopup";
-import * as pdfjsLib from "~/lib/pdfx.mjs";
+import {
+  type PDFDocumentProxy,
+  getDocument,
+  GlobalWorkerOptions,
+} from "~/lib/pdfx.mjs";
 // import { getDocument } from "~/lib/pdfx.mjs";
 import PDFPage, {
   PDFPageWithControls,
   type TransformedTextContent,
 } from "./PDFPage";
-import { type PDFDocumentProxy } from "pdfjs-dist";
 import { Button } from "~/components/ui/button";
 import ToolSelector, { type Tool } from "./ToolSelector";
 
@@ -48,19 +51,14 @@ export function BrochureCarousel({
     if (pdfLoaded.current === pdfUrl) return;
     pdfLoaded.current = pdfUrl;
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    pdfjsLib.GlobalWorkerOptions.workerSrc = "/pdf.worker.mjs";
+    GlobalWorkerOptions.workerSrc = "/pdf.worker.mjs";
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-    pdfjsLib
-      .getDocument(pdfUrl)
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    getDocument(pdfUrl)
       .promise.then((_pdf: PDFDocumentProxy) => {
         setPdf(_pdf);
         setNumPages(_pdf.numPages);
         setLoaded(true);
       })
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       .catch((error: unknown) => {
         console.error("Error loading PDF", error);
       });
