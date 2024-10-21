@@ -106,7 +106,10 @@ export default function Home() {
                 </div>
               </div>
               <DialogFooter>
-                <Button onClick={handleCreateProject}>
+                <Button
+                  disabled={creatingProject || projectName.length === 0}
+                  onClick={handleCreateProject}
+                >
                   {creatingProject ? (
                     <Spinner className="h-5 w-11 text-gray-200" />
                   ) : (

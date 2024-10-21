@@ -101,7 +101,10 @@ export default function ProjectPage({
                 </div>
               </div>
               <DialogFooter>
-                <Button onClick={handleCreateSurvey}>
+                <Button
+                  disabled={creatingSurvey || newSurveyName.length === 0}
+                  onClick={handleCreateSurvey}
+                >
                   {creatingSurvey ? (
                     <Spinner className="h-5 w-11 text-gray-200" />
                   ) : (
