@@ -43,6 +43,7 @@ export const env = createEnv({
     NEXT_PUBLIC_API_URL: z.string(),
     NEXT_PUBLIC_CLERK_SIGN_IN_URL: z.string(),
     NEXT_PUBLIC_CLERK_SIGN_UP_URL: z.string(),
+    NEXT_PUBLIC_GOOGLE_API_KEY: z.string(),
   },
 
   /**
@@ -72,6 +73,7 @@ export const env = createEnv({
     SCRAPING_SERVICE_URL: process.env.SCRAPING_SERVICE_URL,
     INPAINTING_SERVICE_URL: process.env.INPAINTING_SERVICE_URL,
     GOOGLE_API_KEY: process.env.GOOGLE_API_KEY,
+    NEXT_PUBLIC_GOOGLE_API_KEY: process.env.NEXT_PUBLIC_GOOGLE_API_KEY,
     // Temporarily disabled Discord auth functionality
     // DISCORD_CLIENT_ID: process.env.DISCORD_CLIENT_ID,
     // DISCORD_CLIENT_SECRET: process.env.DISCORD_CLIENT_SECRET,

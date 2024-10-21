@@ -227,7 +227,12 @@ export function PDFPage({
             {attributes.map((attribute) => (
               <View
                 key={attribute.id}
-                style={{ ...styles.tableCol, width: getWidth(attribute) }}
+                style={{
+                  ...styles.tableCol,
+                  width: getWidth(attribute),
+                  fontWeight:
+                    attribute.id === "address" ? "semibold" : "normal",
+                }}
               >
                 <View
                   style={

@@ -69,6 +69,7 @@ export const propertyService = ({ db }: { db: PrismaClient }) => {
       const formattedAddresses = await formatAddresses(
         input.map((property) => property.attributes.address ?? ""),
       );
+      console.log("FORMATTED ADDRESSES", formattedAddresses);
       const brochures: (BrochureWithoutPropertyId | null)[] = input.map(
         (property) => property.brochures[0] ?? null,
       );
@@ -81,10 +82,17 @@ export const propertyService = ({ db }: { db: PrismaClient }) => {
           attributes:
             {
               ...property.attributes,
-              address: formattedAddresses ? formattedAddresses[index] : "",
+              address: formattedAddresses
+                ? formattedAddresses[index]?.address
+                : "",
+              displayAddress: formattedAddresses
+                ? formattedAddresses[index]?.displayAddress
+                : "",
             } ?? {},
         }),
       );
+
+      console.log("CREATING PROPERTIES", propertiesToCreate);
 
       const createdProperties = await db.property.createManyAndReturn({
         data: propertiesToCreate,

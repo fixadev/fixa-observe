@@ -30,8 +30,13 @@ export async function formatAddresses(addresses: string[]) {
       },
     );
 
-    const formattedFirstLine = response.data.result.address.formattedAddress;
-    return formattedFirstLine + "\n" + (addressLines[1] ?? "");
+    const formattedAddress = response.data.result.address.formattedAddress;
+    const streetAddress = formattedAddress.split(",")[0];
+
+    return {
+      address: formattedAddress,
+      displayAddress: streetAddress + "\n" + (addressLines[1] ?? ""),
+    };
   });
 
   return Promise.all(formatPromises);
