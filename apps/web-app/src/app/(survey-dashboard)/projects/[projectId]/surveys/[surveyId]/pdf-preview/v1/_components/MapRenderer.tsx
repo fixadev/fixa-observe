@@ -99,7 +99,7 @@ export function MapRenderer({
   );
 
   const captureMap = useCallback(() => {
-    if (mapRef.current && isMapReady && mapImageData === null) {
+    if (mapRef.current && isMapReady) {
       console.log("Capturing map");
       const mapContainer = mapRef.current.getDiv();
       html2canvas(mapContainer, {
@@ -117,10 +117,11 @@ export function MapRenderer({
           console.error("Error capturing map", error);
         });
     }
-  }, [onMapImageCapture, isMapReady, mapImageData, setMapCaptured]);
+  }, [onMapImageCapture, isMapReady, setMapCaptured]);
 
   const handleTilesLoaded = useCallback(
     (e: MapEvent) => {
+      console.log("Tiles loaded");
       setIsMapReady(true);
       mapRef.current = e.map;
       captureMap();
@@ -128,18 +129,18 @@ export function MapRenderer({
     [captureMap],
   );
 
-  // useEffect(() => {
-  //   if (isMapReady && markers.length > 0) {
-  //     // Wait for the map to be fully loaded and rendered
-  //     const timer = setTimeout(captureMap, 3000);
-  //     return () => clearTimeout(timer);
-  //   }
-  // }, [isMapReady, markers, captureMap]);
+  // this fires when the map has already rendered but needs to be captured again
+  useEffect(() => {
+    if (isMapReady && mapImageData === null) {
+      console.log("firing useEffect", mapImageData);
+      captureMap();
+    }
+  }, [isMapReady, captureMap, mapImageData]);
 
   return (
     <div className="display-none">
       <Map
-        defaultZoom={13}
+        defaultZoom={13.3}
         center={center}
         mapId={MAP_ID}
         {...mapOptions}

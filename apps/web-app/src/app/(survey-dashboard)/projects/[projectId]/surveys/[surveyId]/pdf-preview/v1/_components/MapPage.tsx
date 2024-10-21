@@ -13,7 +13,6 @@ const styles = StyleSheet.create({
   },
   rightColumn: {
     width: "50%",
-    padding: 20,
     height: "100%",
     display: "flex",
     alignItems: "center",
@@ -57,10 +56,19 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "semibold",
   },
-  map: {
+  mapContainer: {
     width: "100%",
     height: "100%",
-    objectFit: "contain",
+    overflow: "hidden",
+    position: "relative",
+  },
+  map: {
+    position: "absolute",
+    width: "120%",
+    height: "120%",
+    objectFit: "cover",
+    left: "-10%",
+    top: "-10%",
   },
   footer: {
     height: 4,
@@ -121,7 +129,9 @@ export function MapPage({
       </View>
 
       <View style={styles.rightColumn}>
-        <Image src={mapImageData} style={styles.map} />
+        <View style={styles.mapContainer}>
+          <Image src={mapImageData} style={styles.map} />
+        </View>
       </View>
       <View style={styles.footer}></View>
     </Page>
