@@ -137,7 +137,7 @@ export default function PDFPage({
         idsToShow ? idsToShow.has(rectangle.id ?? "") : true,
       ) ?? []
     );
-  }, [inpaintedRectangles, idsToShow]);
+  }, [idsToShow, inpaintedRectangles]);
 
   return (
     <div className={cn("relative inline-block", className)} {...props}>
@@ -230,12 +230,14 @@ export function PDFPageWithControls({
       .map((item) => {
         const origX = item.transform[4]! as number;
         const origY = item.transform[5]! as number;
-        const x = origX / fullWidth;
-        const y = (fullHeight - origY - item.height) / fullHeight;
-        const left = x;
-        const bottom = (fullHeight - origY) / fullHeight;
-        const width = item.width / fullWidth;
-        const height = item.height / fullHeight;
+        const x = Number((origX / fullWidth).toFixed(4));
+        const y = Number(
+          ((fullHeight - origY - item.height) / fullHeight).toFixed(4),
+        );
+        const left = Number(x.toFixed(4));
+        const bottom = Number(((fullHeight - origY) / fullHeight).toFixed(4));
+        const width = Number((item.width / fullWidth).toFixed(4));
+        const height = Number((item.height / fullHeight).toFixed(4));
         return {
           pageIndex,
           str: item.str,
@@ -329,10 +331,10 @@ export function PDFPageWithControls({
           const formattedPath = {
             pageIndex,
             minMax,
-            x: x1,
-            y: 1 - y1 - h,
-            width: w,
-            height: h,
+            x: Number(x1.toFixed(4)),
+            y: Number((1 - y1 - h).toFixed(4)),
+            width: Number(w.toFixed(4)),
+            height: Number(h.toFixed(4)),
           };
           _paths.push(formattedPath);
 

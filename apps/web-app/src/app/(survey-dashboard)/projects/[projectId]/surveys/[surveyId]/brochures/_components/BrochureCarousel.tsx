@@ -34,7 +34,7 @@ import { ConfirmRemovePopup } from "./ConfirmRemovePopup";
 
 export function BrochureCarousel({
   brochure,
-  refetchProperty,
+  // refetchProperty,
 }: {
   brochure: BrochureSchema;
   refetchProperty: () => void;
@@ -77,13 +77,18 @@ export function BrochureCarousel({
     [],
   );
   const [pathsToRemove, setPathsToRemove] = useState<Path[]>([]);
+  const [inpaintedRectangles, setInpaintedRectangles] =
+    useState<BrochureRectangles>([]);
 
   // ------------------
   // #region Load initial state from brochure
   useEffect(() => {
-    setTextToRemove(brochure.textToRemove as TransformedTextContent[]);
-    setPathsToRemove(brochure.pathsToRemove as Path[]);
-    setUndoStack(brochure.undoStack);
+    setTextToRemove((brochure.textToRemove as TransformedTextContent[]) ?? []);
+    setPathsToRemove((brochure.pathsToRemove as Path[]) ?? []);
+    setInpaintedRectangles(
+      (brochure.inpaintedRectangles as BrochureRectangles) ?? [],
+    );
+    setUndoStack(brochure.undoStack ?? []);
   }, [brochure]);
   // #endregion
 
@@ -114,16 +119,20 @@ export function BrochureCarousel({
       undoStack: newUndo,
     });
     setUndoStack(newUndo);
-  }, [undoStack, redoStack, updateUndoStack]);
+  }, [undoStack, updateUndoStack, brochure.id, redoStack]);
   const redo = useCallback(() => {
     const newRedo = [...redoStack];
     const last = newRedo.pop();
     if (last) {
       const newUndo = [...undoStack, last];
+      updateUndoStack({
+        brochureId: brochure.id,
+        undoStack: newUndo,
+      });
       setUndoStack(newUndo);
     }
     setRedoStack(newRedo);
-  }, [undoStack, redoStack]);
+  }, [undoStack, redoStack, updateUndoStack, brochure.id]);
   const handleDeleteTextPaths = useCallback(
     (textToRemove: TransformedTextContent[], pathsToRemove: Path[]) => {
       const id = crypto.randomUUID();
@@ -187,20 +196,22 @@ export function BrochureCarousel({
   const { mutate: inpaintRectangles } =
     api.brochure.inpaintRectangles.useMutation({
       onSuccess: ({ newRectangles }) => {
+        setInpaintedRectangles((prev) => [...prev, ...newRectangles]);
+
         const newIds = newRectangles
           .map((rectangle) => rectangle.id)
           .filter((id) => id !== undefined);
+        const newUndoStack = [...undoStack, ...newIds];
         updateUndoStack({
           brochureId: brochure.id,
-          undoStack: [...undoStack, ...newIds],
+          undoStack: newUndoStack,
         });
-        setUndoStack((prev) => [...prev, ...newIds]);
+        setUndoStack(newUndoStack);
         setRedoStack([]);
 
         toast({
           title: "Objects removed successfully",
         });
-        void refetchProperty();
         setIsRemoving(false);
       },
     });
@@ -266,9 +277,7 @@ export function BrochureCarousel({
                         setIsMouseDown={setIsMouseDown}
                         rectangles={rectanglesToRemove}
                         setRectangles={setRectanglesToRemove}
-                        inpaintedRectangles={
-                          brochure.inpaintedRectangles as BrochureRectangles
-                        }
+                        inpaintedRectangles={inpaintedRectangles}
                         idsToShow={undoStackSet}
                         textToRemove={textToRemove}
                         pathsToRemove={pathsToRemove}
@@ -312,9 +321,7 @@ export function BrochureCarousel({
                   key={`page_${index + 1}`}
                   pdf={pdf}
                   pageIndex={index}
-                  inpaintedRectangles={
-                    brochure.inpaintedRectangles as BrochureRectangles
-                  }
+                  inpaintedRectangles={inpaintedRectangles}
                   textToRemove={textToRemove}
                   pathsToRemove={pathsToRemove}
                   idsToShow={undoStackSet}
