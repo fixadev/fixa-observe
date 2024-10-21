@@ -1,5 +1,10 @@
-import { Map, AdvancedMarker, Pin, MapEvent } from "@vis.gl/react-google-maps";
-import { PropertySchema } from "~/lib/property";
+import {
+  Map,
+  AdvancedMarker,
+  Pin,
+  type MapEvent,
+} from "@vis.gl/react-google-maps";
+import { type PropertySchema } from "~/lib/property";
 import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import html2canvas from "html2canvas";
 
@@ -10,11 +15,13 @@ export function MapRenderer({
   mapLoaded,
   mapImageData,
   onMapImageCapture,
+  setMapCaptured,
 }: {
   properties: PropertySchema[];
   mapLoaded: boolean;
   mapImageData: string | null;
   onMapImageCapture: (imageData: string) => void;
+  setMapCaptured: (isCaptured: boolean) => void;
 }) {
   const mapRef = useRef<google.maps.Map | null>(null);
   const [markers, setMarkers] = useState<
@@ -28,21 +35,35 @@ export function MapRenderer({
       (property, index) =>
         new Promise<google.maps.LatLngLiteral & { index: number }>(
           (resolve, reject) => {
-            geocoder.geocode(
-              { address: property.attributes.address },
-              (results, status) => {
-                if (status === "OK" && results && results[0]) {
-                  const location = results[0].geometry.location;
-                  resolve({ lat: location.lat(), lng: location.lng(), index });
-                } else {
-                  reject(
-                    new Error(
-                      `Geocoding failed for address: ${property.attributes.address}`,
-                    ),
-                  );
-                }
-              },
-            );
+            geocoder
+              .geocode(
+                { address: property.attributes.address },
+                (results, status) => {
+                  if (
+                    status === google.maps.GeocoderStatus.OK &&
+                    results?.[0]
+                  ) {
+                    const location = results[0].geometry.location;
+                    resolve({
+                      lat: location.lat(),
+                      lng: location.lng(),
+                      index,
+                    });
+                  } else {
+                    reject(
+                      new Error(
+                        `Geocoding failed for address: ${property.attributes.address}`,
+                      ),
+                    );
+                  }
+                },
+              )
+              .catch((error) => {
+                console.error(
+                  `Error geocoding address: ${property.attributes.address}`,
+                  error,
+                );
+              });
           },
         ),
     );
@@ -85,53 +106,59 @@ export function MapRenderer({
         useCORS: true,
         allowTaint: true,
         scale: 5, // Increase scale for better quality
-      }).then((canvas) => {
-        const imageData = canvas.toDataURL("image/png");
-        console.log("Map captured");
-        onMapImageCapture(imageData);
-      });
+      })
+        .then((canvas) => {
+          const imageData = canvas.toDataURL("image/png");
+          console.log("Map captured");
+          onMapImageCapture(imageData);
+          setMapCaptured(true);
+        })
+        .catch((error) => {
+          console.error("Error capturing map", error);
+        });
     }
-  }, [onMapImageCapture, isMapReady]);
+  }, [onMapImageCapture, isMapReady, mapImageData, setMapCaptured]);
 
-  const handleMapIdle = useCallback((e: MapEvent) => {
-    if (e.map && !mapRef.current) {
-      mapRef.current = e.map;
+  const handleTilesLoaded = useCallback(
+    (e: MapEvent) => {
       setIsMapReady(true);
-      if (mapLoaded) {
-        captureMap();
-      }
-    }
-  }, []);
+      mapRef.current = e.map;
+      captureMap();
+    },
+    [captureMap],
+  );
 
-  useEffect(() => {
-    if (isMapReady && markers.length > 0) {
-      // Wait for the map to be fully loaded and rendered
-      const timer = setTimeout(captureMap, 2000);
-      return () => clearTimeout(timer);
-    }
-  }, [isMapReady, markers, captureMap]);
+  // useEffect(() => {
+  //   if (isMapReady && markers.length > 0) {
+  //     // Wait for the map to be fully loaded and rendered
+  //     const timer = setTimeout(captureMap, 3000);
+  //     return () => clearTimeout(timer);
+  //   }
+  // }, [isMapReady, markers, captureMap]);
 
   return (
-    <Map
-      defaultZoom={13}
-      center={center}
-      mapId={MAP_ID}
-      {...mapOptions}
-      onIdle={handleMapIdle}
-      style={{ width: "800px", height: "600px" }}
-    >
-      {markers.map((marker) => (
-        <AdvancedMarker key={marker.index} position={marker}>
-          <Pin
-            background={"#046bb6"}
-            borderColor={"#046bb6"}
-            glyphColor={"#FFFFFF"}
-            scale={1}
-          >
-            {marker.index + 1}
-          </Pin>
-        </AdvancedMarker>
-      ))}
-    </Map>
+    <div className="display-none">
+      <Map
+        defaultZoom={13}
+        center={center}
+        mapId={MAP_ID}
+        {...mapOptions}
+        onTilesLoaded={handleTilesLoaded}
+        style={{ width: "800px", height: "600px" }}
+      >
+        {markers.map((marker) => (
+          <AdvancedMarker key={marker.index} position={marker}>
+            <Pin
+              background={"#046bb6"}
+              borderColor={"#046bb6"}
+              glyphColor={"#FFFFFF"}
+              scale={1}
+            >
+              {marker.index + 1}
+            </Pin>
+          </AdvancedMarker>
+        ))}
+      </Map>
+    </div>
   );
 }

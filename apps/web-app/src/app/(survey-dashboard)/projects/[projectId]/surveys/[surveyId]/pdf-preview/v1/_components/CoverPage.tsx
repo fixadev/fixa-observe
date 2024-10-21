@@ -1,11 +1,4 @@
-import {
-  Document,
-  Page,
-  Text,
-  View,
-  StyleSheet,
-  Font,
-} from "@react-pdf/renderer";
+import { Page, Text, View, StyleSheet, Font, Image } from "@react-pdf/renderer";
 
 Font.register({
   family: "IBM Plex Sans",
@@ -23,10 +16,31 @@ Font.register({
 const styles = StyleSheet.create({
   page: {
     fontFamily: "IBM Plex Sans",
-    flexDirection: "column",
     backgroundColor: "#FFFFFF",
-    padding: 40,
+    width: "100%",
     height: "100%",
+    position: "relative",
+    padding: 0,
+  },
+  image: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+  },
+  quadrangle: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    width: "50%",
+    height: "100%",
+    backgroundColor: "rgba(255, 255, 255, 0.5)",
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "center",
+    alignItems: "flex-start",
+    padding: 40,
   },
   header: {
     fontSize: 36,
@@ -43,21 +57,27 @@ const styles = StyleSheet.create({
     position: "absolute",
     bottom: 20,
     left: 0,
-    right: 0,
-    textAlign: "center",
+    right: 20,
+    textAlign: "right",
     fontSize: 18,
+  },
+  newmarkLogo: {
+    position: "absolute",
+    bottom: 20,
+    left: 20,
+    width: "30%",
   },
 });
 
 export function CoverPage() {
-  // ... existing code ...
-
   return (
     <Page size="A4" orientation="landscape" style={styles.page}>
-      <View>
+      <Image src={"/images/palo-alto.jpg"} style={styles.image} />
+      <View style={styles.quadrangle}>
         <Text style={styles.header}>Peninsula Property Survey</Text>
-        <Text style={styles.subheader}>Prepared for: Oliver</Text>
+        {/* <Text style={styles.subheader}>Prepared for: Oliver</Text> */}
         <Text style={styles.footer}>Colin Kloezeman</Text>
+        <Image src={"/images/newmark.png"} style={styles.newmarkLogo} />
       </View>
     </Page>
   );

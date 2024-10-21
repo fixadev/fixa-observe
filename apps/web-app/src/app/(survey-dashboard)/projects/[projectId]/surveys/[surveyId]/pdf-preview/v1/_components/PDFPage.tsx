@@ -135,7 +135,7 @@ const styles = StyleSheet.create({
 });
 
 const getWidth = (attribute: { id: string }) => {
-  if (attribute.id === "address") {
+  if (attribute.id === "displayAddress") {
     return "18%";
   } else if (attribute.id === "photo") {
     return "12%";
@@ -231,7 +231,7 @@ export function PDFPage({
                   ...styles.tableCol,
                   width: getWidth(attribute),
                   fontWeight:
-                    attribute.id === "address" ? "semibold" : "normal",
+                    attribute.id === "displayAddress" ? "semibold" : "normal",
                 }}
               >
                 <View
@@ -241,13 +241,15 @@ export function PDFPage({
                       : styles.tableCell
                   }
                 >
-                  {attribute.id === "address" ? (
+                  {attribute.id === "displayAddress" ? (
                     property.brochures[0]?.url ? (
                       <Link src={property.brochures[0]?.url ?? ""}>
-                        {formatAddress(property.attributes.address)}
+                        {formatAddress(property.attributes.displayAddress)}
                       </Link>
                     ) : (
-                      <Text>{formatAddress(property.attributes.address)}</Text>
+                      <Text>
+                        {formatAddress(property.attributes.displayAddress)}
+                      </Text>
                     )
                   ) : (
                     <Text>{property.attributes?.[attribute.id]}</Text>

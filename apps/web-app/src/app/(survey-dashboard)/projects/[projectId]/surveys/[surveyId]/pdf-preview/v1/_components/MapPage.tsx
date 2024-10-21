@@ -1,5 +1,5 @@
 import { Image, Page, Text, View, StyleSheet, Font } from "@react-pdf/renderer";
-import { PropertySchema } from "~/lib/property";
+import { type PropertySchema } from "~/lib/property";
 
 const styles = StyleSheet.create({
   page: {
@@ -40,7 +40,7 @@ const styles = StyleSheet.create({
     display: "flex",
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
+    justifyContent: "flex-start",
     backgroundColor: "#F0F0F0",
   },
   propertyText: {
@@ -109,10 +109,10 @@ export function MapPage({
             >
               <Text style={styles.propertyNumber}>{index + 1}.</Text>
               <Text style={styles.propertyText}>
-                {property.attributes.address?.split(",")[0]}
+                {property.attributes.displayAddress?.split("\n")[0]}
               </Text>
               <Text style={styles.propertyNeighborhood}>
-                {property.attributes.address?.split(",")[1]?.trim()}
+                {property.attributes.displayAddress?.split("\n")[1]?.trim()}
               </Text>
               {/* Add more property details as needed */}
             </View>

@@ -122,6 +122,7 @@ export const DraggableRow = ({
     const attributesToMinWidth = {
       comments: "min-w-72",
       address: "min-w-64",
+      displayAddress: "min-w-64",
       size: "min-w-44",
       askingRate: "min-w-44",
       divisibility: "min-w-44",
@@ -277,20 +278,20 @@ export const DraggableRow = ({
               <Textarea
                 defaultValue={property.attributes?.[attribute.id] ?? ""}
                 className={`min-h-[${attribute.id === "comments" ? "90" : "40"}px]`}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    e.preventDefault();
-                    (e.target as HTMLTextAreaElement).blur();
-                    updateProperty({
-                      ...property,
-                      attributes: {
-                        ...property.attributes,
-                        [attribute.id]: (e.currentTarget as HTMLTextAreaElement)
-                          .value,
-                      },
-                    });
-                  }
-                }}
+                // onKeyDown={(e) => {
+                //   if (e.key === "Enter") {
+                //     e.preventDefault();
+                //     (e.target as HTMLTextAreaElement).blur();
+                //     updateProperty({
+                //       ...property,
+                //       attributes: {
+                //         ...property.attributes,
+                //         [attribute.id]: (e.currentTarget as HTMLTextAreaElement)
+                //           .value,
+                //       },
+                //     });
+                //   }
+                // }}
                 onBlur={(e) => {
                   updateProperty({
                     ...property,

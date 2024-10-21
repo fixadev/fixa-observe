@@ -2,7 +2,6 @@ import { Document } from "@react-pdf/renderer";
 import { PDFPage } from "./PDFPage";
 import Spinner from "~/components/Spinner";
 import { type PropertySchema, type AttributeSchema } from "~/lib/property";
-import { useEffect } from "react";
 import { CoverPage } from "./CoverPage";
 import { MapPage } from "./MapPage";
 
@@ -20,11 +19,6 @@ export function PDFContent({
   if (!properties || !attributes) {
     return <Spinner />;
   }
-
-  // useEffect(() => {
-  //   console.log("mapImageData");
-  //   console.log(mapImageData);
-  // }, [mapImageData]);
 
   return (
     <Document title={`${surveyName}.pdf` ?? "property-survey.pdf"}>

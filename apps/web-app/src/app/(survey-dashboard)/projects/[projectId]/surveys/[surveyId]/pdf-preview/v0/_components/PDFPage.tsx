@@ -132,14 +132,6 @@ export function PDFPage({
   console.log("properties", properties);
   console.log("attributes", attributes);
 
-  function formatAddress(address: string | undefined) {
-    if (!address) {
-      return "";
-    }
-    const [street, city, state, zip] = address.split("\n");
-    return `${street}, \n ${city}`;
-  }
-
   function formatAttributeLabel(label: string) {
     if (label === "Address") {
       return "Address \n **Click address for \n flyer/website**";
@@ -208,13 +200,13 @@ export function PDFPage({
                       : styles.tableCell
                   }
                 >
-                  {attribute.id === "address" ? (
+                  {attribute.id === "displayAddress" ? (
                     property.brochures[0]?.url ? (
                       <Link src={property.brochures[0]?.url ?? ""}>
-                        {formatAddress(property.attributes.address)}
+                        {property.attributes.displayAddress}
                       </Link>
                     ) : (
-                      <Text>{formatAddress(property.attributes.address)}</Text>
+                      <Text>{property.attributes.displayAddress}</Text>
                     )
                   ) : (
                     <Text>{property.attributes?.[attribute.id]}</Text>
