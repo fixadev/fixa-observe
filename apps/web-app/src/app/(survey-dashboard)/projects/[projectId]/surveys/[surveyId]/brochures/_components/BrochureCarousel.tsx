@@ -1,6 +1,5 @@
 "use client";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { api } from "~/trpc/react";
 import {
   Carousel,
   CarouselContent,
@@ -9,14 +8,11 @@ import {
   CarouselNext,
   type CarouselApi,
 } from "~/components/ui/carousel";
-import Spinner from "~/components/Spinner";
 import { Skeleton } from "~/components/ui/skeleton";
-import { useToast } from "~/hooks/use-toast";
 import { TrashIcon } from "@heroicons/react/24/outline";
 import { TrashIcon as TrashIconSolid } from "@heroicons/react/24/solid";
 import { cn } from "~/lib/utils";
 import { type BrochureSchema, type BrochureRectangles } from "~/lib/property";
-import { ConfirmRemovePopup } from "./ConfirmRemovePopup";
 import {
   type PDFDocumentProxy,
   getDocument,
@@ -33,7 +29,6 @@ import ToolSelector, { type Tool } from "./ToolSelector";
 
 export function BrochureCarousel({
   brochure,
-  refetchProperty,
 }: {
   brochure: BrochureSchema;
   refetchProperty: () => void;
@@ -68,7 +63,7 @@ export function BrochureCarousel({
 
   const tool: Tool = useMemo(() => "selector", []);
   const [loaded, setLoaded] = useState<boolean>(false);
-  const [isRemoving, setIsRemoving] = useState<boolean>(false);
+  // const [isRemoving, setIsRemoving] = useState<boolean>(false); // Previously used for inpainting
   const [isMouseDown, setIsMouseDown] = useState<boolean>(false);
   const [rectanglesToRemove, setRectanglesToRemove] =
     useState<BrochureRectangles>([]);
@@ -142,33 +137,38 @@ export function BrochureCarousel({
   // #endregion
 
   const [deletedPages, setDeletedPages] = useState<Set<number>>(new Set());
-  const { toast } = useToast();
 
-  const { mutate: inpaintRectangles } =
-    api.property.inpaintRectangles.useMutation({
-      onSuccess: ({ newRectangles }) => {
-        const newIds = newRectangles
-          .map((rectangle) => rectangle.id)
-          .filter((id) => id !== undefined);
-        setUndoStack((prev) => [...prev, ...newIds]);
-        setRedoStack([]);
+  // ------------------
+  // #region Inpainting
+  // ------------------
+  // const { toast } = useToast();
 
-        toast({
-          title: "Objects removed successfully",
-        });
-        void refetchProperty();
-        setIsRemoving(false);
-      },
-    });
+  // const { mutate: inpaintRectangles } =
+  //   api.property.inpaintRectangles.useMutation({
+  //     onSuccess: ({ newRectangles }) => {
+  //       const newIds = newRectangles
+  //         .map((rectangle) => rectangle.id)
+  //         .filter((id) => id !== undefined);
+  //       setUndoStack((prev) => [...prev, ...newIds]);
+  //       setRedoStack([]);
 
-  const handleRemoveObjects = useCallback(() => {
-    setIsRemoving(true);
-    inpaintRectangles({
-      brochureId: brochure.id,
-      rectanglesToRemove,
-    });
-    setRectanglesToRemove([]);
-  }, [inpaintRectangles, brochure.id, rectanglesToRemove]);
+  //       toast({
+  //         title: "Objects removed successfully",
+  //       });
+  //       void refetchProperty();
+  //       setIsRemoving(false);
+  //     },
+  //   });
+
+  // const handleRemoveObjects = useCallback(() => {
+  //   setIsRemoving(true);
+  //   inpaintRectangles({
+  //     brochureId: brochure.id,
+  //     rectanglesToRemove,
+  //   });
+  //   setRectanglesToRemove([]);
+  // }, [inpaintRectangles, brochure.id, rectanglesToRemove]);
+  // #endregion
 
   // ------------------
   // #region Carousel
@@ -231,11 +231,11 @@ export function BrochureCarousel({
                         setPathsToRemove={handleUpdatePathsToRemove}
                         height={500}
                       />
-                      {isRemoving && (
+                      {/* {isRemoving && (
                         <div className="absolute z-40 flex h-full w-full items-center justify-center bg-black/50">
                           <Spinner className="h-10 w-10 text-white" />
                         </div>
-                      )}
+                      )} */}
                     </CarouselItem>
                   ),
               )}
@@ -249,14 +249,15 @@ export function BrochureCarousel({
               redoEnabled={redoStack.length > 0}
               isMouseDown={isMouseDown}
             />
-            {rectanglesToRemove.length > 0 && !isRemoving && !isMouseDown && (
+            {/* For inpainting */}
+            {/* {rectanglesToRemove.length > 0 && !isRemoving && !isMouseDown && (
               <ConfirmRemovePopup
                 onConfirm={handleRemoveObjects}
                 onCancel={() => {
                   setRectanglesToRemove([]);
                 }}
               />
-            )}
+            )} */}
           </Carousel>
           <div className="mt-10 flex flex-row gap-2 overflow-x-auto">
             {Array.from(new Array(numPages), (el, index) => {
