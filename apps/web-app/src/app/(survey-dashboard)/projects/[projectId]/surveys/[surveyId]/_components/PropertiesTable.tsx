@@ -300,12 +300,12 @@ export function PropertiesTable({
           ownerId: "",
           projectId: "",
           isNew: true,
-          defaultIndex: attributesOrder.length,
+          defaultIndex: attributesOrder.length ?? 1000,
         },
       ],
       "add",
     );
-  }, [modifyAttributes]);
+  }, [modifyAttributes, attributesOrder.length]);
 
   const renameAttribute = useCallback(
     (id: string, label: string) => {

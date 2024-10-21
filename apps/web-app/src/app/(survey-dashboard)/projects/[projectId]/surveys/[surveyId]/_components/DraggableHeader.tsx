@@ -33,7 +33,7 @@ export const DraggableHeader = ({
   onCheckedChange?: (checked: boolean) => void;
   disabled?: boolean;
 }) => {
-  const [isEditing, setIsEditing] = useState(attribute.isNew ?? false);
+  const [isEditing, setIsEditing] = useState(attribute.ownerId ?? false);
 
   const {
     transform,
