@@ -8775,16 +8775,17 @@ class CanvasGraphics {
       .replace(/\s/gi, "");
     if (this.textToRemoveMap.has(str)) {
       const transform = ctx.getTransform();
-      const left = Number((transform.e / current.clipBox[2]).toFixed(2));
-      const bottom = Number((transform.f / current.clipBox[3]).toFixed(2));
+      let x = transform.e
+      let y = transform.f
+      const left = x / current.clipBox[2];
+      const bottom = y / current.clipBox[3];
       const textToRemove = this.textToRemoveMap.get(str);
 
       for (const text of textToRemove) {
-        const removeLeft = Number(text.left.toFixed(2));
-        const removeBottom = Number(text.bottom.toFixed(2));
-        if (left === removeLeft && bottom === removeBottom) {
-          ctx.restore();
-          return undefined;
+        const distance = Math.hypot(left - text.left, bottom - text.bottom)
+        if (distance < 0.05) {
+          ctx.restore()
+          return undefined
         }
       }
     }
