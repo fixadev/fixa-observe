@@ -64,7 +64,7 @@ import { replaceTemplateVariables, splitAddress } from "~/lib/utils";
 import { useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import { useSurvey } from "~/hooks/useSurvey";
-import { SurveyDownloadLink } from "../pdf-preview/v1/_components/DownloadLink";
+import { SurveyDownloadLink } from "../pdf-preview/v1/_components/DownloadLink2";
 
 export type Property = PropertySchema & {
   brochures: Brochure[];
