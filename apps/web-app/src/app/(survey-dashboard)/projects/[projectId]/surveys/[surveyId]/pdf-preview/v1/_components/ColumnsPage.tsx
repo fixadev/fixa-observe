@@ -155,7 +155,7 @@ const getWidth = (attribute: { id: string }) => {
   }
 };
 
-export function PDFPage({
+export function RowsPage({
   pageNumber,
   properties,
   attributes,
