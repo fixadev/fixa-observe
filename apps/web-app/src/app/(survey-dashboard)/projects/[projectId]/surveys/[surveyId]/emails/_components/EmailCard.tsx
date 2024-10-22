@@ -18,6 +18,7 @@ export default function EmailCard({
   notAvailable = false,
   warning = "",
   expanded = false,
+  showRecipient = false,
   onClick,
   className,
 }: {
@@ -29,6 +30,7 @@ export default function EmailCard({
   notAvailable?: boolean;
   warning?: string;
   expanded?: boolean;
+  showRecipient?: boolean;
   onClick?: (e: React.MouseEvent<HTMLDivElement>) => void;
   className?: string;
 }) {
@@ -74,7 +76,7 @@ export default function EmailCard({
               <div className={cn("text-base", unread ? "font-medium" : "")}>
                 {user.primaryEmailAddress?.emailAddress === email.senderEmail
                   ? "You"
-                  : email.senderName}
+                  : (email.senderName ?? email.senderEmail)}
               </div>
             )}
             {!draft &&
@@ -94,9 +96,20 @@ export default function EmailCard({
                 </div>
               ))}
           </div>
-          <div className={cn("text-sm", unread ? "font-medium" : "")}>
-            {email.subject}
-          </div>
+          {showRecipient ? (
+            <div className="text-sm">
+              <span>To:</span>{" "}
+              <span>
+                {user.primaryEmailAddress?.emailAddress === email.recipientEmail
+                  ? "You"
+                  : (email.recipientName ?? email.recipientEmail)}
+              </span>
+            </div>
+          ) : (
+            <div className={cn("text-sm", unread ? "font-medium" : "")}>
+              {email.subject}
+            </div>
+          )}
           {!expanded && (
             <div
               className={cn(

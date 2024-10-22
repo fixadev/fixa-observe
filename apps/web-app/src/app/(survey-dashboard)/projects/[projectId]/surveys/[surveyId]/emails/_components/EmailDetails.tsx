@@ -131,6 +131,9 @@ function EmailThreadDetails({
 
   return (
     <div className="flex h-full flex-col gap-2 overflow-x-hidden p-2 pb-8">
+      <div className="p-4 text-lg font-medium">
+        {emailThread.emails[0]?.subject}
+      </div>
       {emailThread.emails.map((email) => (
         <EmailCard
           key={email.id}
@@ -145,6 +148,7 @@ function EmailThreadDetails({
               return newExpanded;
             })
           }
+          showRecipient={true}
         />
       ))}
       <div className="flex-1" />
