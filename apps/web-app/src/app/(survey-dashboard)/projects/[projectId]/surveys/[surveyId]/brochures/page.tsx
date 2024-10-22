@@ -24,6 +24,7 @@ export default function BrochuresPage({
   return (
     <div className="flex h-full flex-col gap-10 overflow-y-auto p-6">
       {survey?.properties && survey?.properties.length > 0 ? (
+        // <BrochureCard propertyId={survey?.properties[2]!.id} />
         survey?.properties.map((property) => {
           return <BrochureCard key={property.id} propertyId={property.id} />;
         })

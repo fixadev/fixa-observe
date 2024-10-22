@@ -111,10 +111,15 @@ export default function AttachmentCard({
         propertyId,
         brochure: {
           inpaintedRectangles: [],
+          textToRemove: [],
+          pathsToRemove: [],
+          undoStack: [],
+          deletedPages: [],
           createdAt: new Date(),
           updatedAt: new Date(),
           title: attachment.name,
           url: response.data.url,
+          exportedUrl: null,
           approved: false,
         },
       });

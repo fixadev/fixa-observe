@@ -34,9 +34,11 @@ import { ConfirmRemovePopup } from "./ConfirmRemovePopup";
 
 export function BrochureCarousel({
   brochure,
+  onEdit,
   // refetchProperty,
 }: {
   brochure: BrochureSchema;
+  onEdit: (brochure: BrochureSchema) => void;
   refetchProperty: () => void;
 }) {
   // ------------------
@@ -80,6 +82,8 @@ export function BrochureCarousel({
   const [inpaintedRectangles, setInpaintedRectangles] =
     useState<BrochureRectangles>([]);
   const [deletedPages, setDeletedPages] = useState<Set<number>>(new Set());
+  const [undoStack, setUndoStack] = useState<string[]>([]);
+  const [redoStack, setRedoStack] = useState<string[]>([]);
 
   // Load initial state from brochure
   useEffect(() => {
@@ -92,29 +96,47 @@ export function BrochureCarousel({
     setDeletedPages(new Set(brochure.deletedPages ?? []));
   }, [brochure]);
 
-  const { mutate: updateDeletedPages } =
-    api.brochure.updateDeletedPages.useMutation();
-  useEffect(() => {
-    updateDeletedPages({
-      brochureId: brochure.id,
+  const _onEdit = useCallback(() => {
+    onEdit({
+      ...brochure,
+      textToRemove,
+      pathsToRemove,
+      inpaintedRectangles,
       deletedPages: Array.from(deletedPages),
+      undoStack,
     });
-  }, [brochure.id, deletedPages, updateDeletedPages]);
+  }, [
+    onEdit,
+    brochure,
+    textToRemove,
+    pathsToRemove,
+    inpaintedRectangles,
+    deletedPages,
+    undoStack,
+  ]);
+
+  const { mutate: updateDeletedPages } =
+    api.brochure.updateDeletedPages.useMutation({
+      onSuccess: _onEdit,
+    });
 
   // ------------------
   // #region Undo and Redo
   // ------------------
   // Mutations
-  const { mutate: updateUndoStack } =
-    api.brochure.updateUndoStack.useMutation();
+  const { mutate: updateUndoStack } = api.brochure.updateUndoStack.useMutation({
+    onSuccess: _onEdit,
+  });
   const { mutate: updateTextToRemove } =
-    api.brochure.updateTextToRemove.useMutation();
+    api.brochure.updateTextToRemove.useMutation({
+      onSuccess: _onEdit,
+    });
   const { mutate: updatePathsToRemove } =
-    api.brochure.updatePathsToRemove.useMutation();
+    api.brochure.updatePathsToRemove.useMutation({
+      onSuccess: _onEdit,
+    });
   // Undo and redo stacks contain ids of the rectangles or text that were removed
-  const [undoStack, setUndoStack] = useState<string[]>([]);
   const undoStackSet = useMemo(() => new Set(undoStack), [undoStack]);
-  const [redoStack, setRedoStack] = useState<string[]>([]);
   const redoStackSet = useMemo(() => new Set(redoStack), [redoStack]);
   const undo = useCallback(() => {
     const newUndo = [...undoStack];
@@ -220,6 +242,8 @@ export function BrochureCarousel({
           title: "Objects removed successfully",
         });
         setIsRemoving(false);
+
+        _onEdit();
       },
     });
 
@@ -360,19 +384,26 @@ export function BrochureCarousel({
                       variant="outline"
                       size="icon"
                       onClick={() => {
+                        let arr = Array.from(deletedPages);
                         if (deletedPages.has(index)) {
                           setDeletedPages((prev) => {
                             const newSet = new Set(prev);
                             newSet.delete(index);
                             return newSet;
                           });
+                          arr = arr.filter((page) => page !== index);
                         } else {
                           setDeletedPages((prev) => {
                             const newSet = new Set(prev);
                             newSet.add(index);
                             return newSet;
                           });
+                          arr.push(index);
                         }
+                        updateDeletedPages({
+                          brochureId: brochure.id,
+                          deletedPages: arr,
+                        });
                       }}
                       className={cn(
                         "m-1.5 size-7",

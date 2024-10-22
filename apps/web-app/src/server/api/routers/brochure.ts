@@ -61,4 +61,13 @@ export const brochureRouter = createTRPCRouter({
         input.deletedPages,
       );
     }),
+
+  updateExportedUrl: protectedProcedure
+    .input(z.object({ brochureId: z.string(), exportedUrl: z.string() }))
+    .mutation(async ({ input }) => {
+      return await brochureServiceInstance.updateExportedUrl(
+        input.brochureId,
+        input.exportedUrl,
+      );
+    }),
 });

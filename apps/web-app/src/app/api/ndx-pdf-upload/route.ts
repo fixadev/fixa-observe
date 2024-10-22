@@ -60,6 +60,7 @@ export async function POST(request: Request) {
                   url: property.brochureLink,
                   title: "",
                   approved: false,
+                  exportedUrl: null,
                   inpaintedRectangles: [],
                   textToRemove: [],
                   pathsToRemove: [],

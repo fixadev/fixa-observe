@@ -83,5 +83,12 @@ export const brochureService = ({ db }: { db: PrismaClient }) => {
         data: { deletedPages },
       });
     },
+
+    updateExportedUrl: async (brochureId: string, exportedUrl: string) => {
+      await db.brochure.update({
+        where: { id: brochureId },
+        data: { exportedUrl },
+      });
+    },
   };
 };

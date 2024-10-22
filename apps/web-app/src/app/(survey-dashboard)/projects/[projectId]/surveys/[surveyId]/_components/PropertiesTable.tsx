@@ -107,10 +107,9 @@ export function PropertiesTable({
     }
   }, [survey]);
 
-  const { data: attributes, refetch: refetchAttributes } =
-    api.survey.getSurveyAttributes.useQuery({
-      surveyId,
-    });
+  const { data: attributes } = api.survey.getSurveyAttributes.useQuery({
+    surveyId,
+  });
   const attributesMap = useMemo(
     () => new Map(attributes?.map((attr) => [attr.id, attr]) ?? []),
     [attributes],
@@ -534,7 +533,8 @@ export function PropertiesTable({
         );
         promises.push(createDraftEmail(emailDetails));
       }
-      await Promise.all(promises);
+      // All settled because we don't want it to fail if one fails
+      await Promise.allSettled(promises);
     },
     [selectedFields, createDraftEmail, generateDraftEmail, properties],
   );
@@ -701,6 +701,7 @@ export function PropertiesTable({
         onSubmitted={() => {
           void refetchSurvey();
           void router.push(`/projects/${projectId}/surveys/${surveyId}/emails`);
+          localStorage.setItem("hasDraftedEmails", "true");
         }}
       />
     </>
@@ -722,10 +723,10 @@ function ActionButtons({
   attributes: AttributeSchema[];
   draftEmails: () => void;
 }) {
-  const newUser = true;
+  const hasDraftedEmails = localStorage.getItem("hasDraftedEmails") === "true";
 
   if (state === "edit") {
-    if (newUser) {
+    if (!hasDraftedEmails) {
       return (
         <div className="flex max-w-64 flex-col items-stretch gap-4 rounded-md border border-input p-4 shadow-sm">
           <div className="flex flex-col gap-1">

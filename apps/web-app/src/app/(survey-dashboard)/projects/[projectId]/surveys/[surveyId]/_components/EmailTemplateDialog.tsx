@@ -71,10 +71,9 @@ export default function EmailTemplateDialog({
         }),
       ]);
       void refetchEmailTemplate();
+      onSubmitted?.();
     } finally {
       setIsSaving(false);
-      onOpenChange(false);
-      onSubmitted?.();
     }
   }, [
     updateEmailTemplate,
@@ -83,7 +82,6 @@ export default function EmailTemplateDialog({
     onSubmit,
     user?.id,
     refetchEmailTemplate,
-    onOpenChange,
     onSubmitted,
   ]);
 
