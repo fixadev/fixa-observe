@@ -7,7 +7,6 @@ import type {
   Path,
   TransformedTextContent,
 } from "~/lib/property";
-import { RectangleRenderer } from "./RectangleRenderer";
 import type { PageViewport, PDFDocumentProxy } from "pdfjs-dist";
 import type {
   PDFOperatorList,
@@ -38,13 +37,15 @@ export default function PDFPage({
   inpaintedRectangles,
   textToRemove,
   pathsToRemove,
-  onViewportChange,
-  onTextContentChange,
-  onOperatorListChange,
   idsToShow,
   height,
   children,
   className,
+  onViewportChange,
+  onTextContentChange,
+  onOperatorListChange,
+  onCanvasRef,
+  onPageLoaded,
   ...props
 }: {
   pdf: PDFDocumentProxy;
@@ -52,15 +53,17 @@ export default function PDFPage({
   inpaintedRectangles?: BrochureRectangles;
   textToRemove: TransformedTextContent[];
   pathsToRemove: Path[];
-  onViewportChange?: (viewport: PageViewport) => void;
-  onTextContentChange?: (textContent: TextContent) => void;
-  onOperatorListChange?: (operatorList: PDFOperatorList) => void;
   idsToShow?: Set<string>;
   height?: number;
   children?: React.ReactNode;
   className?: string;
+  onViewportChange?: (viewport: PageViewport) => void;
+  onTextContentChange?: (textContent: TextContent) => void;
+  onOperatorListChange?: (operatorList: PDFOperatorList) => void;
+  onCanvasRef?: (el: HTMLCanvasElement | null) => void;
+  onPageLoaded?: () => void;
 } & React.HTMLAttributes<HTMLDivElement>) {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const isLoading = useRef(false);
   const [pageLoaded, setPageLoaded] = useState(false);
 
@@ -79,6 +82,17 @@ export default function PDFPage({
         : item.pageIndex === pageIndex,
     );
   }, [pathsToRemove, pageIndex, idsToShow]);
+
+  const filteredInpaintedRectangles = useMemo(() => {
+    return (
+      inpaintedRectangles?.filter((rectangle) =>
+        idsToShow
+          ? idsToShow.has(rectangle.id ?? "") &&
+            rectangle.pageIndex === pageIndex
+          : rectangle.pageIndex === pageIndex,
+      ) ?? []
+    );
+  }, [idsToShow, inpaintedRectangles, pageIndex]);
 
   useEffect(() => {
     if (!canvasRef.current) return;
@@ -106,8 +120,33 @@ export default function PDFPage({
       const renderTask = page.render(renderContext as RenderParameters);
       void renderTask.promise.then(() => {
         // console.log("Rendered page");
+
+        // Render inpainted rectangles
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+        const context = canvas.getContext("2d");
+        if (!context) return;
+        filteredInpaintedRectangles.forEach((rectangle) => {
+          if (rectangle.imageUrl) {
+            const img = new Image();
+            img.onload = () => {
+              context.drawImage(
+                img,
+                rectangle.x * canvas.width,
+                rectangle.y * canvas.height,
+                rectangle.width * canvas.width,
+                rectangle.height * canvas.height,
+              );
+            };
+            img.crossOrigin = "anonymous";
+            img.src = rectangle.imageUrl;
+          }
+        });
+
+        // Set page as loaded
         isLoading.current = false;
         setPageLoaded(true);
+        onPageLoaded?.();
       });
 
       void page.getTextContent().then((_textContent) => {
@@ -125,26 +164,23 @@ export default function PDFPage({
     JSON.stringify(filteredTextToRemove), // Needed to only rerender when contents of this array is changed
     // eslint-disable-next-line react-hooks/exhaustive-deps
     JSON.stringify(filteredPathsToRemove), // Needed to only rerender when contents of this array is changed
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    JSON.stringify(filteredInpaintedRectangles), // Needed to only rerender when contents of this array is changed
     onViewportChange,
     onTextContentChange,
     height,
     onOperatorListChange,
   ]);
 
-  const filteredInpaintedRectangles = useMemo(() => {
-    return (
-      inpaintedRectangles?.filter((rectangle) =>
-        idsToShow ? idsToShow.has(rectangle.id ?? "") : true,
-      ) ?? []
-    );
-  }, [idsToShow, inpaintedRectangles]);
-
   return (
     <div className={cn("relative inline-block", className)} {...props}>
-      <canvas ref={canvasRef} />
-      <RectangleRenderer
-        pageNumber={pageIndex}
-        rectangles={filteredInpaintedRectangles}
+      <canvas
+        ref={(el) => {
+          if (el) {
+            canvasRef.current = el;
+          }
+          onCanvasRef?.(el);
+        }}
       />
       {children}
       <div

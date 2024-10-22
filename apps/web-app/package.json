@@ -73,6 +73,7 @@
     "google-auth-library": "^9.14.1",
     "hls.js": "^1.5.15",
     "jsdom": "^25.0.1",
+    "jspdf": "^2.5.2",
     "jszip": "^3.10.1",
     "lucide-react": "^0.445.0",
     "next": "^14.2.4",
