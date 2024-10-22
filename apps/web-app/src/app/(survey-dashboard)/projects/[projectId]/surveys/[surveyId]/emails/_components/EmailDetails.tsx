@@ -1,7 +1,7 @@
 import { Separator } from "~/components/ui/separator";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Label } from "~/components/ui/label";
-import PropertyCard from "~/components/PropertyCard";
+import PropertyCard, { ParsedAttributes } from "~/components/PropertyCard";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Textarea } from "~/components/ui/textarea";
@@ -22,6 +22,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "~/components/ui/alert-dialog";
+import { useUser } from "@clerk/nextjs";
 
 export default function EmailDetails({
   emailThread,
@@ -129,11 +130,22 @@ function EmailThreadDetails({
     setReplyBody("");
   }, [onSend, replyBody, isSending]);
 
+  const { user } = useUser();
+  const shouldShowParsedAttributes = useMemo(() => {
+    // Only show if the email thread contains emails from other people
+    return emailThread.emails.some(
+      (email) => email.senderEmail !== user?.primaryEmailAddress?.emailAddress,
+    );
+  }, [emailThread.emails, user?.primaryEmailAddress?.emailAddress]);
+
   return (
     <div className="flex h-full flex-col gap-2 overflow-x-hidden p-2 pb-8">
-      <div className="p-4 text-lg font-medium">
-        {emailThread.emails[0]?.subject}
-      </div>
+      <PropertyCard emailThread={emailThread} />
+      {shouldShowParsedAttributes && (
+        <div className="flex rounded-md border-[2px] border-input p-2 shadow-md">
+          <ParsedAttributes emailThread={emailThread} />
+        </div>
+      )}
       {emailThread.emails.map((email) => (
         <EmailCard
           key={email.id}
@@ -153,7 +165,6 @@ function EmailThreadDetails({
       ))}
       <div className="flex-1" />
       <Separator className="-mx-2 w-[calc(100%+1rem)]" />
-      <PropertyCard emailThread={emailThread} />
       <Textarea
         className="h-40 shrink-0"
         placeholder="Write a reply..."
