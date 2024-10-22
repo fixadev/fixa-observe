@@ -4,7 +4,7 @@ import { PDFContent } from "./PDFContent";
 import { Button } from "~/components/ui/button";
 import { APIProvider } from "@vis.gl/react-google-maps";
 import { env } from "~/env";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Spinner from "~/components/Spinner";
 import { generateStaticMapUrl } from "./CreateMapUrl";
 import { usePDF } from "@react-pdf/renderer";
