@@ -58,11 +58,13 @@ import type {
   Contact,
   EmailTemplate,
   Email,
+  Survey,
 } from "prisma/generated/zod";
 import { replaceTemplateVariables, splitAddress } from "~/lib/utils";
 import { useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import { useSurvey } from "~/hooks/useSurvey";
+import { SurveyDownloadLink } from "../pdf-preview/v1/_components/DownloadLink";
 
 export type Property = PropertySchema & {
   brochures: Brochure[];
@@ -581,8 +583,9 @@ export function PropertiesTable({
           <div>
             <div className="mb-6 flex justify-start">
               <ActionButtons
-                surveyId={surveyId}
-                projectId={projectId}
+                surveyName={survey?.name ?? ""}
+                properties={properties}
+                attributes={attributesOrder}
                 state={state}
                 onStateChange={setState}
                 draftEmails={draftEmails}
@@ -705,16 +708,18 @@ export function PropertiesTable({
 }
 
 function ActionButtons({
-  surveyId,
-  projectId,
+  surveyName,
+  properties,
+  attributes,
   state,
   onStateChange,
   draftEmails,
 }: {
+  surveyName: string;
   state: PropertiesTableState;
   onStateChange: (state: PropertiesTableState) => void;
-  surveyId: string;
-  projectId: string;
+  properties: Property[];
+  attributes: AttributeSchema[];
   draftEmails: () => void;
 }) {
   const newUser = true;
@@ -737,13 +742,13 @@ function ActionButtons({
               <EnvelopeIcon className="mr-2 size-4" />
               Verify property data
             </Button>
-            <Button variant="ghost" asChild className="w-full">
-              <Link
-                href={`/projects/${projectId}/surveys/${surveyId}/pdf-preview/v1`}
-              >
-                Export survey instead
-              </Link>
-            </Button>
+
+            <SurveyDownloadLink
+              buttonText="Export PDF instead"
+              surveyName={surveyName}
+              properties={properties}
+              attributes={attributes}
+            />
           </div>
         </div>
       );
@@ -757,14 +762,12 @@ function ActionButtons({
           <EnvelopeIcon className="mr-2 size-4" />
           Verify property data
         </Button>
-        <Button variant="outline" asChild className="w-full">
-          <Link
-            href={`/projects/${projectId}/surveys/${surveyId}/pdf-preview/v1`}
-          >
-            <ArrowDownTrayIcon className="mr-2 size-4" />
-            Export survey PDF
-          </Link>
-        </Button>
+        <SurveyDownloadLink
+          buttonText="Export Survey PDF"
+          surveyName={surveyName}
+          properties={properties}
+          attributes={attributes}
+        />
       </div>
     );
   } else if (state === "select-fields") {

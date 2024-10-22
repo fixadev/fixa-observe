@@ -45,7 +45,7 @@ export default function PDFPreviewPage({
 
   useEffect(() => {
     const fetchMapUrl = async () => {
-      if (parsedProperties) {
+      if (parsedProperties && mapLoaded) {
         try {
           const url = await generateStaticMapUrl(parsedProperties);
           setMapUrl(url);
@@ -56,7 +56,7 @@ export default function PDFPreviewPage({
     };
 
     void fetchMapUrl();
-  }, [parsedProperties]);
+  }, [parsedProperties, mapLoaded]);
 
   return (
     <APIProvider
@@ -102,4 +102,13 @@ export default function PDFPreviewPage({
       </div>
     </APIProvider>
   );
+}
+
+{
+  /* <PDFDownloadLink
+  document={<PDFPreviewPage params={{ projectId, surveyId }} />}
+  fileName="survey.pdf"
+>
+  Download PDF
+</PDFDownloadLink>; */
 }
