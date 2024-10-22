@@ -10,9 +10,12 @@ import { s3Client } from "~/server/config/s3client";
 
 export const uploadFileToS3 = async (
   file: File,
+  keepOriginalName = false,
 ): Promise<{ url: string; type: string }> => {
   const fileExtension = file.name.split(".").pop();
-  const fileName = `${uuidv4()}.${fileExtension}`;
+  const fileName = keepOriginalName
+    ? file.name
+    : `${uuidv4()}.${fileExtension}`;
   const arrayBuffer = Buffer.from(await file.arrayBuffer());
   const params: PutObjectCommandInput = {
     Bucket: process.env.AWS_BUCKET_NAME,
@@ -33,7 +36,6 @@ export const uploadFileToS3 = async (
     throw new Error("Failed to upload file");
   }
 };
-
 
 // const filepath = "/Users/oliverwendell-braly/pixa/real-estate-platform/apps/web-app/src/server/utils/366cambridge.pdf"
 

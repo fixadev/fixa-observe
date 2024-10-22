@@ -1,6 +1,9 @@
 import Image from "next/image";
 import { Button } from "~/components/ui/button";
-import { type PropertyWithBrochures } from "~/lib/property";
+import {
+  type BrochureSchema,
+  type PropertyWithBrochures,
+} from "~/lib/property";
 import { api } from "~/trpc/react";
 import { BrochureCarousel } from "./BrochureCarousel";
 import { FilePlusIcon } from "lucide-react";
@@ -13,7 +16,7 @@ import { type EmailThread } from "prisma/generated/zod";
 import { useSurvey } from "~/hooks/useSurvey";
 import { BrochurePDFRenderer } from "./BrochurePDFRenderer";
 import { useState } from "react";
-import Spinner from "~/components/Spinner";
+import axios from "axios";
 
 export function BrochureCard({ propertyId }: { propertyId: string }) {
   const { survey } = useSurvey();
@@ -89,9 +92,74 @@ function UnapprovedBrochureCard({
         approved: false,
         createdAt: new Date(),
         updatedAt: new Date(),
+        exportedUrl: null,
       },
     });
   };
+
+  const { mutate: updateExportedUrl } =
+    api.brochure.updateExportedUrl.useMutation();
+  const [generatingPDF, setGeneratingPDF] = useState(false);
+  const [editedBrochure, setEditedBrochure] = useState<BrochureSchema | null>(
+    null,
+  );
+  const uploadPDF = useCallback(
+    async (blob: Blob) => {
+      const address = splitAddress(
+        (property.attributes as { address?: string })?.address ?? "",
+      );
+      const file = new File(
+        [blob],
+        `${address.streetAddress}_${property.id}.pdf`,
+        {
+          type: "application/pdf",
+        },
+      );
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("keepOriginalName", "true");
+
+      try {
+        const response = await axios.post<{ url: string }>(
+          "/api/upload",
+          formData,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          },
+        );
+
+        console.log("PDF uploaded successfully:", response.data);
+        return response.data.url;
+      } catch (error) {
+        console.error("Error uploading PDF:", error);
+        return null;
+      }
+    },
+    [property.attributes, property.id],
+  );
+  const handlePDFGenerated = useCallback(
+    async (blob: Blob) => {
+      const url = await uploadPDF(blob);
+      if (url && editedBrochure) {
+        setGeneratingPDF(false);
+        updateExportedUrl({
+          brochureId: editedBrochure.id,
+          exportedUrl: url,
+        });
+      }
+    },
+    [editedBrochure, updateExportedUrl, uploadPDF],
+  );
+  const handleEdit = useCallback((brochure: BrochureSchema) => {
+    setGeneratingPDF(false);
+    setEditedBrochure(null);
+    setTimeout(() => {
+      setEditedBrochure(brochure);
+      setGeneratingPDF(true);
+    }, 1);
+  }, []);
 
   return (
     <div id={property.id} className="flex flex-row gap-6">
@@ -104,7 +172,14 @@ function UnapprovedBrochureCard({
           <BrochureCarousel
             brochure={brochure}
             refetchProperty={refetchProperty}
+            onEdit={handleEdit}
           />
+          {generatingPDF && editedBrochure && (
+            <BrochurePDFRenderer
+              brochure={editedBrochure}
+              onPDFGenerated={handlePDFGenerated}
+            />
+          )}
         </>
       ) : (
         <FileInput
@@ -152,24 +227,6 @@ function BrochureSidebar({
     [property.attributes],
   );
 
-  const [downloading, setDownloading] = useState(false);
-  const downloadPDF = useCallback(
-    (blob: Blob) => {
-      if (blob) {
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = `${address.streetAddress} brochure.pdf`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-      }
-      setDownloading(false);
-    },
-    [address.streetAddress],
-  );
-
   return (
     <div className="relative flex w-[250px] shrink-0 flex-col self-start rounded-md border border-input shadow-sm">
       <div className="relative aspect-[4/3] w-full overflow-hidden rounded-t-md">
@@ -196,24 +253,14 @@ function BrochureSidebar({
           </div>
           {brochure && (
             <>
-              <Button
-                size="icon"
-                variant="ghost"
-                onClick={() => setDownloading(true)}
-                disabled={downloading}
-              >
-                {downloading ? (
-                  <Spinner className="size-4" />
-                ) : (
+              <Button size="icon" variant="ghost" asChild>
+                <Link
+                  href={brochure.exportedUrl ?? brochure.url}
+                  target="_blank"
+                >
                   <ArrowDownTrayIcon className="size-4" />
-                )}
+                </Link>
               </Button>
-              {downloading && (
-                <BrochurePDFRenderer
-                  brochure={brochure}
-                  onPDFGenerated={downloadPDF}
-                />
-              )}
             </>
           )}
         </div>
