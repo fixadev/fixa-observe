@@ -12,7 +12,6 @@ import {
 } from "react";
 import { Button } from "@/components/ui/button";
 import { TableCell } from "@/components/ui/table";
-import { Input } from "@/components/ui/input";
 import { ImagePlusIcon, TrashIcon } from "lucide-react";
 import { DragHandleDots2Icon } from "@radix-ui/react-icons";
 import {
