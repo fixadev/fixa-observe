@@ -26,109 +26,125 @@ Font.register({
 const styles = StyleSheet.create({
   page: {
     flexDirection: "column",
+    alignItems: "flex-start",
     backgroundColor: "#FFFFFF",
-    paddingTop: 20,
     fontFamily: "IBM Plex Sans",
   },
   header: {
     flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    height: 35,
+    width: "100%",
+    height: "12%",
     display: "flex",
-    margin: 15,
+    alignItems: "center",
+    paddingHorizontal: 25,
+    paddingVertical: 10,
+    justifyContent: "space-between",
+  },
+  logo: {
+    height: 20,
+    display: "flex",
   },
   title: {
-    fontSize: 20,
-    marginBottom: 10,
-    fontWeight: "ultrabold",
+    display: "flex",
+    fontSize: 25,
+    fontWeight: "semibold",
     textAlign: "center",
   },
   table: {
     display: "flex",
     width: "100%",
-    borderStyle: "solid",
-    borderWidth: 1,
-    borderRightWidth: 0,
-    borderBottomWidth: 0,
-    borderLeftWidth: 0,
-    borderTopWidth: 0,
-  },
-  tableHeader: {
-    // backgroundColor: "#046bb6",
-    color: "#000000",
-  },
-  tableRow: {
-    margin: "auto",
-    // marginVertical: 1,
+    height: "88%",
+    alignItems: "flex-start",
     flexDirection: "row",
   },
+
   tableCol: {
-    width: "12%",
-    alignItems: "center",
-    justifyContent: "center",
-    // borderStyle: "solid",
-    // borderWidth: 1,
-    borderLeftWidth: 0,
-    borderTopWidth: 0,
-  },
-  leftCol: {
-    width: "15px",
-    alignItems: "center",
-    justifyContent: "center",
-    // backgroundColor: "#046bb6",
-    color: "#000000",
-    textAlign: "center",
-    fontWeight: "bold",
+    // marginVertical: 1,
+    // width: "auto",
+    flexDirection: "column",
+    alignItems: "flex-start",
+    width: "20%",
+    height: "100%",
   },
   tableCell: {
-    margin: "auto",
+    width: "100%",
     // maxHeight: "30px",
-    alignItems: "center",
-    justifyContent: "center",
-    textAlign: "center",
+    alignItems: "flex-start",
+    justifyContent: "flex-start",
+    textAlign: "left",
     fontSize: 10,
+    padding: 5,
+    position: "relative",
+
+    borderStyle: "solid",
+    borderColor: "#DDDEDE",
+    borderTopWidth: 1,
+    borderLeftWidth: 0,
+    borderRightWidth: 0,
+    borderBottomWidth: 0,
   },
   commentsCell: {
     textAlign: "left",
-    flexDirection: "row",
-    alignItems: "center",
-    margin: "auto",
-    justifyContent: "flex-start",
     fontSize: 8,
-    paddingVertical: 6,
-    paddingRight: 6,
+    padding: 5,
     width: "100%",
+    borderStyle: "solid",
+    borderColor: "#DDDEDE",
+    borderTopWidth: 1,
+    borderLeftWidth: 0,
+    borderRightWidth: 0,
+    borderBottomWidth: 0,
   },
-  leftCell: {
-    alignItems: "center",
-    justifyContent: "center",
-    alignText: "center",
-    marginTop: 5,
-    width: "2%",
-    fontSize: 10,
-    paddingLeft: -2,
-  },
-  headerCell: {
-    height: 35,
-    margin: "5px",
-    display: "flex",
-    color: "#808080",
+
+  tableHeader: {
     flexDirection: "column",
-    textAlign: "center",
-    alignItems: "center",
-    justifyContent: "center",
-    alignSelf: "center",
-    alignContent: "center",
-    marginVertical: 5,
+    alignItems: "flex-start",
+    backgroundColor: "#F6F7F8",
+    width: "20%",
+    height: "100%",
+  },
+
+  headerCell: {
+    width: "100%",
+    alignItems: "flex-start",
+    justifyContent: "flex-start",
+    textAlign: "left",
     fontSize: 10,
     fontWeight: "semibold",
     textTransform: "uppercase",
+    padding: 5,
+    paddingLeft: 15,
+    color: "#999DA9",
+
+    borderStyle: "solid",
+    borderColor: "#DDDEDE",
+    borderTopWidth: 1,
+    borderLeftWidth: 0,
+    borderRightWidth: 0,
+    borderBottomWidth: 0,
   },
 
   image: {
-    height: 65,
-    width: "100%",
+    position: "relative",
+    height: 90,
+    width: 120,
+    borderRadius: 10,
+    zIndex: 100,
+  },
+  imageBubble: {
+    height: 25,
+    width: 25,
+    fontWeight: "semibold",
+    position: "absolute",
+    top: 2,
+    left: 2,
+    backgroundColor: "#046bb6",
+    color: "#FFFFFF",
+    borderRadius: "50%",
+    alignItems: "center",
+    justifyContent: "center",
+    fontSize: 12,
+    zIndex: 1,
   },
   footer: {
     height: 4,
@@ -139,30 +155,26 @@ const styles = StyleSheet.create({
   },
 });
 
-const getWidth = (attribute: { id: string }) => {
+const getHeight = (attribute: { id: string }) => {
   if (attribute.id === "displayAddress") {
-    return "18%";
-  } else if (attribute.id === "photo") {
-    return "12%";
-  } else if (
-    ["size", "divisibility", "askingRate", "opEx"].includes(attribute.id)
-  ) {
     return "10%";
   } else if (attribute.id === "comments") {
     return "26%";
   } else {
-    return "12%";
+    return "5%";
   }
 };
 
-export function RowsPage({
+export function ColumnsPage({
   pageNumber,
   properties,
   attributes,
+  propertyOrientation,
 }: {
   pageNumber: number;
   properties: PropertySchema[];
   attributes: AttributeSchema[];
+  propertyOrientation: "rows" | "columns";
 }) {
   function formatAddress(address: string | undefined) {
     if (!address) {
@@ -178,29 +190,25 @@ export function RowsPage({
     return label;
   }
 
+  const propertiesPerPage = propertyOrientation === "rows" ? 7 : 4;
+
   return (
     <Page size="A4" orientation="landscape" style={styles.page}>
+      <View style={styles.header}>
+        <Text style={styles.title}>Property Matrix</Text>
+        <Image style={styles.logo} src="/images/newmark-dark.png" />
+      </View>
       <View style={styles.table}>
-        <View style={{ ...styles.tableHeader, ...styles.tableRow }}>
-          <View style={styles.leftCol}>
-            <Text style={styles.leftCell}></Text>
-          </View>
-          <View
-            style={{ ...styles.tableCol, width: getWidth({ id: "photo" }) }}
-          >
-            <View style={styles.headerCell}></View>
+        <View style={styles.tableHeader}>
+          <View style={styles.tableCell}>
+            <View style={styles.image}></View>
           </View>
           {attributes.map((attribute) => (
             <View
               key={attribute.id}
-              style={{
-                ...styles.tableCol,
-                width: getWidth(attribute),
-              }}
+              style={{ height: getHeight(attribute), ...styles.headerCell }}
             >
-              <View style={styles.headerCell}>
-                <Text>{formatAttributeLabel(attribute.label)}</Text>
-              </View>
+              <Text>{formatAttributeLabel(attribute.label)}</Text>
             </View>
           ))}
         </View>
@@ -208,16 +216,10 @@ export function RowsPage({
           <View
             key={property.id}
             style={{
-              ...styles.tableRow,
-              backgroundColor: index % 2 === 0 ? "#f0f0f0" : "#ffffff",
+              ...styles.tableCol,
             }}
           >
-            <View key={index} style={styles.leftCol}>
-              <Text style={styles.leftCell}>
-                {(pageNumber - 1) * 7 + index + 1}
-              </Text>
-            </View>
-            <View style={styles.tableCol}>
+            <View style={styles.tableCell}>
               <Image
                 style={styles.image}
                 src={
@@ -225,24 +227,23 @@ export function RowsPage({
                   "https://m.foolcdn.com/media/dubs/images/GettyImages-695968212.width-880.jpg"
                 }
               />
+              <View style={styles.imageBubble}>
+                <Text>{(pageNumber - 1) * propertiesPerPage + index + 1}</Text>
+              </View>
             </View>
             {attributes.map((attribute) => (
               <View
                 key={attribute.id}
                 style={{
-                  ...styles.tableCol,
-                  width: getWidth(attribute),
+                  ...(attribute.id === "comments"
+                    ? styles.commentsCell
+                    : styles.tableCell),
+                  height: getHeight(attribute),
                   fontWeight:
                     attribute.id === "displayAddress" ? "semibold" : "normal",
                 }}
               >
-                <View
-                  style={
-                    attribute.id === "comments"
-                      ? styles.commentsCell
-                      : styles.tableCell
-                  }
-                >
+                <View>
                   {attribute.id === "displayAddress" ? (
                     property.brochures[0]?.url ? (
                       <Link

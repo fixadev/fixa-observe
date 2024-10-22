@@ -70,13 +70,21 @@ export function SurveyDownloadLink({
         mapImageData={mapUrl}
         surveyName={surveyName}
         properties={parsedProperties ?? null}
+        propertyOrientation={propertyOrientation}
         attributes={
           attributes?.filter((attribute) => attribute.id !== "address") ?? null
         }
       />,
     );
     setPendingDownload(true);
-  }, [surveyName, parsedProperties, attributes, mapUrl, updateInstance]);
+  }, [
+    surveyName,
+    parsedProperties,
+    attributes,
+    mapUrl,
+    updateInstance,
+    propertyOrientation,
+  ]);
 
   return (
     <APIProvider
