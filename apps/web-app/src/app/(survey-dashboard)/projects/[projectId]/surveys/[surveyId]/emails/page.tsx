@@ -328,13 +328,13 @@ export default function EmailsPage() {
     ],
   );
   const handleDiscard = useCallback(
-    (emailThreadId: string) => {
+    async (emailThreadId: string) => {
       setEmailThreads((prev) =>
         prev.filter((thread) => thread.id !== emailThreadId),
       );
       goToNextUnsentEmail(emailThreadId);
-      void deleteEmailThread({ emailThreadId });
-      void refetchSurvey();
+      await deleteEmailThread({ emailThreadId });
+      await refetchSurvey();
     },
     [deleteEmailThread, goToNextUnsentEmail, refetchSurvey],
   );
@@ -449,7 +449,7 @@ export default function EmailsPage() {
                 await handleSend(selectedThreadId, body);
               }}
               onDiscard={() => {
-                handleDiscard(selectedThreadId);
+                void handleDiscard(selectedThreadId);
               }}
             />
           ) : (
