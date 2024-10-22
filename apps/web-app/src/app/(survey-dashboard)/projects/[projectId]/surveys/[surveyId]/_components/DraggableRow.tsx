@@ -270,7 +270,7 @@ export const DraggableRow = ({
               attribute.id === "displayAddress" ? (
                 <Textarea
                   defaultValue={property.attributes?.[attribute.id] ?? ""}
-                  className={`h-[${attribute.label === "Comments" ? "200px" : "60px"}] overflow-visible`}
+                  className={`h-[${attribute.id === "comments" ? "200px" : "60px"}] overflow-visible`}
                   onBlur={(e) => {
                     updateProperty({
                       ...property,

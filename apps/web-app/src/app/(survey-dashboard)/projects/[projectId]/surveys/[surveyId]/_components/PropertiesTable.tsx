@@ -289,25 +289,46 @@ export function PropertiesTable({
     useSensor(KeyboardSensor, {}),
   );
 
-  const addAttribute = useCallback(() => {
-    void modifyAttributes(
-      (data) => [
-        ...data,
-        {
-          id: crypto.randomUUID(),
-          createdAt: new Date(),
-          updatedAt: new Date(),
-          type: "string",
-          label: "New field",
-          ownerId: "",
-          projectId: "",
-          isNew: true,
-          defaultIndex: attributesOrder.length ?? 1000,
-        },
-      ],
-      "add",
-    );
-  }, [modifyAttributes, attributesOrder.length]);
+  const addAttributeToState = useCallback(() => {
+    void setAttributesOrderState((data) => [
+      ...data,
+      {
+        id: "new-attribute-lol",
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        type: "string",
+        label: "New field",
+        ownerId: "",
+        projectId: "",
+        isNew: true,
+        defaultIndex: attributesOrder.length ?? 1000,
+      },
+    ]);
+  }, [setAttributesOrderState, attributesOrder.length]);
+
+  const saveNewAttribute = useCallback(
+    (label: string) => {
+      console.log("saving new attribute", label);
+      void modifyAttributes(
+        (data) => [
+          ...data.filter((attribute) => !attribute.isNew),
+          {
+            id: crypto.randomUUID(),
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            type: "string",
+            label,
+            ownerId: "",
+            projectId: "",
+            isNew: false,
+            defaultIndex: attributesOrder.length ?? 1000,
+          },
+        ],
+        "add",
+      );
+    },
+    [modifyAttributes, attributesOrder.length],
+  );
 
   const renameAttribute = useCallback(
     (id: string, label: string) => {
@@ -597,9 +618,12 @@ export function PropertiesTable({
                             key={attribute.id}
                             attribute={attribute}
                             renameAttribute={
-                              !attribute.ownerId
+                              !attribute.ownerId && !attribute.isNew
                                 ? undefined
-                                : (name) => renameAttribute(attribute.id, name)
+                                : attribute.isNew
+                                  ? (name) => saveNewAttribute(name)
+                                  : (name) =>
+                                      renameAttribute(attribute.id, name)
                             }
                             deleteAttribute={() =>
                               deleteAttribute(attribute.id)
@@ -617,7 +641,7 @@ export function PropertiesTable({
                       <Button
                         size="icon"
                         variant="ghost"
-                        onClick={addAttribute}
+                        onClick={addAttributeToState}
                       >
                         <PlusIcon className="size-4" />
                       </Button>
