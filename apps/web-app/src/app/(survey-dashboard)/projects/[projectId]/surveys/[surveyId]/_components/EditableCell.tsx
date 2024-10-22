@@ -70,9 +70,9 @@ export function EditableCell({
           ? inputValue
           : advancedParseFloat(property.attributes?.opEx ?? "0");
 
-      const computedTotalCost = ((askingRate + opEx) * size)
-        .toFixed(2)
-        .toString();
+      const computedTotalCost = Math.round(
+        (askingRate + opEx) * size,
+      ).toString();
 
       const newTotalCost = "$" + computedTotalCost;
       updateProperty({

@@ -89,11 +89,14 @@ const styles = StyleSheet.create({
   },
   commentsCell: {
     textAlign: "left",
+    flexDirection: "row",
+    alignItems: "center",
     margin: "auto",
-    justifyContent: "center",
+    justifyContent: "flex-start",
     fontSize: 8,
     paddingVertical: 6,
     paddingRight: 6,
+    width: "100%",
   },
   leftCell: {
     alignItems: "center",
