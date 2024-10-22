@@ -108,6 +108,7 @@ export const propertyService = ({ db }: { db: PrismaClient }) => {
               inpaintedRectangles: [],
               textToRemove: [],
               pathsToRemove: [],
+              exportedUrl: null,
             };
           }
           return null;
