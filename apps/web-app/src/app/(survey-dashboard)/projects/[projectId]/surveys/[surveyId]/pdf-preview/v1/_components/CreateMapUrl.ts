@@ -1,11 +1,5 @@
 import { type PropertySchema } from "~/lib/property";
 import { env } from "~/env";
-import {
-  Map,
-  AdvancedMarker,
-  Pin,
-  type MapEvent,
-} from "@vis.gl/react-google-maps";
 
 const MAP_ID = "2b9b510fdba6b2ef";
 

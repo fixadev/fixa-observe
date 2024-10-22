@@ -155,7 +155,7 @@ const getWidth = (attribute: { id: string }) => {
   }
 };
 
-export function PDFPage({
+export function RowsPage({
   pageNumber,
   properties,
   attributes,
@@ -245,7 +245,13 @@ export function PDFPage({
                 >
                   {attribute.id === "displayAddress" ? (
                     property.brochures[0]?.url ? (
-                      <Link src={property.brochures[0]?.url ?? ""}>
+                      <Link
+                        src={
+                          property.brochures[0]?.exportedUrl ??
+                          property.brochures[0]?.url ??
+                          ""
+                        }
+                      >
                         {formatAddress(property.attributes.displayAddress)}
                       </Link>
                     ) : (

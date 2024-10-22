@@ -16,11 +16,13 @@ export function SurveyDownloadLink({
   surveyName,
   properties,
   attributes,
+  propertyOrientation = "rows",
 }: {
   buttonText: string;
   surveyName: string;
   properties: PropertySchema[];
   attributes: AttributeSchema[];
+  propertyOrientation?: "rows" | "columns";
 }) {
   const [mapLoaded, setMapLoaded] = useState(false);
   const [mapUrl, setMapUrl] = useState<string | null>(null);

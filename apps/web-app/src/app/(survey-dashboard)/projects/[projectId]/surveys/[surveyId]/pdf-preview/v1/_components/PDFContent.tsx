@@ -1,5 +1,5 @@
 import { Document } from "@react-pdf/renderer";
-import { PDFPage } from "./PDFPage";
+import { RowsPage } from "./RowsPage";
 import Spinner from "~/components/Spinner";
 import { type PropertySchema, type AttributeSchema } from "~/lib/property";
 import { CoverPage } from "./CoverPage";
@@ -10,15 +10,19 @@ export function PDFContent({
   properties,
   attributes,
   surveyName,
+  propertyOrientation,
 }: {
   mapImageData: string | null;
   properties: PropertySchema[] | null;
   attributes: AttributeSchema[] | null;
   surveyName: string | null;
+  propertyOrientation?: "rows" | "columns";
 }) {
   if (!properties || !attributes) {
     return <Spinner />;
   }
+
+  const propertiesPerPage = propertyOrientation === "rows" ? 7 : 4;
 
   return (
     <Document title={`${surveyName}.pdf` ?? "property-survey.pdf"}>
@@ -29,12 +33,12 @@ export function PDFContent({
         clientName="Colin Kloezeman"
       />
       {properties.reduce((pages, _, index) => {
-        if (index % 7 === 0) {
+        if (index % propertiesPerPage === 0) {
           pages.push(
-            <PDFPage
+            <RowsPage
               key={index}
-              pageNumber={index / 7 + 1}
-              properties={properties.slice(index, index + 7)}
+              pageNumber={index / propertiesPerPage + 1}
+              properties={properties.slice(index, index + propertiesPerPage)}
               attributes={attributes}
             />,
           );

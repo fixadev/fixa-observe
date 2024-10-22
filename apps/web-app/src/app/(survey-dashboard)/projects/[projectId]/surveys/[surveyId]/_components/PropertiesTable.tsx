@@ -30,11 +30,7 @@ import {
   restrictToVerticalAxis,
 } from "@dnd-kit/modifiers";
 import { Button } from "~/components/ui/button";
-import {
-  ArrowDownTrayIcon,
-  EnvelopeIcon,
-  PlusIcon,
-} from "@heroicons/react/24/solid";
+import { EnvelopeIcon, PlusIcon } from "@heroicons/react/24/solid";
 import { NDXOutputUploader } from "./NDXOutputUploader";
 import { api } from "~/trpc/react";
 import {
@@ -45,7 +41,6 @@ import {
 import { DraggableHeader } from "./DraggableHeader";
 import { DraggableRow } from "./DraggableRow";
 import Spinner from "~/components/Spinner";
-import Link from "next/link";
 import EmailTemplateDialog from "../_components/EmailTemplateDialog";
 import {
   DEFAULT_EMAIL_TEMPLATE_BODY,
@@ -58,7 +53,6 @@ import type {
   Contact,
   EmailTemplate,
   Email,
-  Survey,
 } from "prisma/generated/zod";
 import { replaceTemplateVariables, splitAddress } from "~/lib/utils";
 import { useUser } from "@clerk/nextjs";
