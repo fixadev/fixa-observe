@@ -65,6 +65,8 @@ const styles = StyleSheet.create({
   },
   tableCol: {
     width: "12%",
+    alignItems: "center",
+    justifyContent: "center",
     // borderStyle: "solid",
     // borderWidth: 1,
     borderLeftWidth: 0,

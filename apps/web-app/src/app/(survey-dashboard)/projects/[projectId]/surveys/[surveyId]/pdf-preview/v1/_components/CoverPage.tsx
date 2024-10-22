@@ -1,4 +1,12 @@
-import { Page, Text, View, StyleSheet, Font, Image } from "@react-pdf/renderer";
+import {
+  Page,
+  Text,
+  View,
+  StyleSheet,
+  Font,
+  Image,
+  Svg,
+} from "@react-pdf/renderer";
 
 Font.register({
   family: "IBM Plex Sans",
@@ -24,8 +32,8 @@ const styles = StyleSheet.create({
   },
   image: {
     position: "absolute",
-    top: 0,
-    left: 0,
+    top: -2,
+    left: -2,
     right: 0,
     bottom: 0,
   },
@@ -73,13 +81,13 @@ const styles = StyleSheet.create({
 export function CoverPage() {
   return (
     <Page size="A4" orientation="landscape" style={styles.page}>
-      <Image src={"/images/palo-alto.jpg"} style={styles.image} />
+      <Image src={"/images/CoverPage.png"} style={styles.image} />
+      {/* <Image src={"/images/palo-alto.jpg"} style={styles.image} />
       <View style={styles.quadrangle}>
         <Text style={styles.header}>Peninsula Property Survey</Text>
-        {/* <Text style={styles.subheader}>Prepared for: Oliver</Text> */}
         <Text style={styles.footer}>Colin Kloezeman</Text>
         <Image src={"/images/newmark.png"} style={styles.newmarkLogo} />
-      </View>
+      </View> */}
     </Page>
   );
 }
