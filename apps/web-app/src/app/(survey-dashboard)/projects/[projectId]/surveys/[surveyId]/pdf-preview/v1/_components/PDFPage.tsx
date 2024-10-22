@@ -162,9 +162,6 @@ export function PDFPage({
   properties: PropertySchema[];
   attributes: AttributeSchema[];
 }) {
-  console.log("properties", properties);
-  console.log("attributes", attributes);
-
   function formatAddress(address: string | undefined) {
     if (!address) {
       return "";

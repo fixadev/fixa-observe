@@ -77,8 +77,6 @@ export default function PDFPreviewPage({
             <Button
               variant={"ghost"}
               onClick={() => {
-                console.log("projectId", params.projectId);
-                console.log("surveyId", params.surveyId);
                 router.push(
                   `/projects/${params.projectId}/surveys/${params.surveyId}`,
                 );
