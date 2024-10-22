@@ -105,9 +105,10 @@ export function PropertiesTable({
     }
   }, [survey]);
 
-  const { data: attributes } = api.survey.getSurveyAttributes.useQuery({
-    surveyId,
-  });
+  const { data: attributes, refetch: refetchAttributes } =
+    api.survey.getSurveyAttributes.useQuery({
+      surveyId,
+    });
   const attributesMap = useMemo(
     () => new Map(attributes?.map((attr) => [attr.id, attr]) ?? []),
     [attributes],
@@ -131,7 +132,8 @@ export function PropertiesTable({
     onSettled: () => {
       pendingMutations.current--;
       if (pendingMutations.current === 0) {
-        void refetchSurvey();
+        // void refetchSurvey();
+        // void refetchAttributes();
         setIsUploadingProperties(false);
       }
     },
@@ -289,25 +291,45 @@ export function PropertiesTable({
     useSensor(KeyboardSensor, {}),
   );
 
-  const addAttribute = useCallback(() => {
-    void modifyAttributes(
-      (data) => [
-        ...data,
-        {
-          id: crypto.randomUUID(),
-          createdAt: new Date(),
-          updatedAt: new Date(),
-          type: "string",
-          label: "New field",
-          ownerId: "",
-          projectId: "",
-          isNew: true,
-          defaultIndex: attributesOrder.length ?? 1000,
-        },
-      ],
-      "add",
-    );
-  }, [modifyAttributes, attributesOrder.length]);
+  const addAttributeToState = useCallback(() => {
+    void setAttributesOrderState((data) => [
+      ...data,
+      {
+        id: "new-attribute-lol",
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        type: "string",
+        label: "New field",
+        ownerId: "",
+        projectId: "",
+        isNew: true,
+        defaultIndex: attributesOrder.length ?? 1000,
+      },
+    ]);
+  }, [setAttributesOrderState, attributesOrder.length]);
+
+  const saveNewAttribute = useCallback(
+    (label: string) => {
+      void modifyAttributes(
+        (data) => [
+          ...data.filter((attribute) => !attribute.isNew),
+          {
+            id: crypto.randomUUID(),
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            type: "string",
+            label,
+            ownerId: "",
+            projectId: "",
+            isNew: false,
+            defaultIndex: attributesOrder.length ?? 1000,
+          },
+        ],
+        "add",
+      );
+    },
+    [modifyAttributes, attributesOrder.length],
+  );
 
   const renameAttribute = useCallback(
     (id: string, label: string) => {
@@ -328,7 +350,6 @@ export function PropertiesTable({
 
   const deleteAttribute = useCallback(
     (id: string) => {
-      console.log("deleting attribute", id);
       void modifyAttributes(
         (data) => {
           const index = data.findIndex((attribute) => attribute.id === id);
@@ -345,7 +366,6 @@ export function PropertiesTable({
   );
 
   const addProperty = useCallback(() => {
-    console.log("adding property");
     void setProperties(
       (data) => [
         ...data,
@@ -597,9 +617,12 @@ export function PropertiesTable({
                             key={attribute.id}
                             attribute={attribute}
                             renameAttribute={
-                              !attribute.ownerId
+                              !attribute.ownerId && !attribute.isNew
                                 ? undefined
-                                : (name) => renameAttribute(attribute.id, name)
+                                : attribute.isNew
+                                  ? (name) => saveNewAttribute(name)
+                                  : (name) =>
+                                      renameAttribute(attribute.id, name)
                             }
                             deleteAttribute={() =>
                               deleteAttribute(attribute.id)
@@ -617,7 +640,7 @@ export function PropertiesTable({
                       <Button
                         size="icon"
                         variant="ghost"
-                        onClick={addAttribute}
+                        onClick={addAttributeToState}
                       >
                         <PlusIcon className="size-4" />
                       </Button>
