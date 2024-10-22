@@ -16,7 +16,7 @@ export function SurveyDownloadLink({
   surveyName,
   properties,
   attributes,
-  propertyOrientation = "rows",
+  propertyOrientation = "columns",
 }: {
   buttonText: string;
   surveyName: string;
