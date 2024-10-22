@@ -94,12 +94,6 @@ export function BrochureCarousel({
 
   const { mutate: updateDeletedPages } =
     api.brochure.updateDeletedPages.useMutation();
-  useEffect(() => {
-    updateDeletedPages({
-      brochureId: brochure.id,
-      deletedPages: Array.from(deletedPages),
-    });
-  }, [brochure.id, deletedPages, updateDeletedPages]);
 
   // ------------------
   // #region Undo and Redo
@@ -360,19 +354,26 @@ export function BrochureCarousel({
                       variant="outline"
                       size="icon"
                       onClick={() => {
+                        let arr = Array.from(deletedPages);
                         if (deletedPages.has(index)) {
                           setDeletedPages((prev) => {
                             const newSet = new Set(prev);
                             newSet.delete(index);
                             return newSet;
                           });
+                          arr = arr.filter((page) => page !== index);
                         } else {
                           setDeletedPages((prev) => {
                             const newSet = new Set(prev);
                             newSet.add(index);
                             return newSet;
                           });
+                          arr.push(index);
                         }
+                        updateDeletedPages({
+                          brochureId: brochure.id,
+                          deletedPages: arr,
+                        });
                       }}
                       className={cn(
                         "m-1.5 size-7",
