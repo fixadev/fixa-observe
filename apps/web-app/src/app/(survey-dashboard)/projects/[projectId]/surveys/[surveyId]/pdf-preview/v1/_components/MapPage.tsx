@@ -103,7 +103,7 @@ export function MapPage({
   return (
     <Page size="A4" orientation="landscape" style={styles.page}>
       <View style={styles.leftColumn}>
-        <Text style={styles.header}>Map</Text>
+        <Text style={styles.header}>Location Overview</Text>
         <View style={styles.propertyList}>
           {properties.map((property, index) => (
             <View
