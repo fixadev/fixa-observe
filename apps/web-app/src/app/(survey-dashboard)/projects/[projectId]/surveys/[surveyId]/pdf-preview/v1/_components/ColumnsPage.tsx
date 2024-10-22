@@ -190,6 +190,23 @@ export function ColumnsPage({
     return label;
   }
 
+  // const brochureAttribute: AttributeSchema = {
+  //   id: "brochure",
+  //   label: "Brochure",
+  //   type: "text",
+  //   createdAt: new Date(),
+  //   updatedAt: new Date(),
+  //   ownerId: null,
+  //   defaultIndex: 0,
+  // };
+
+  // const attributesWithBrochures = [...attributes];
+  // attributesWithBrochures.splice(
+  //   attributesWithBrochures.length - 1,
+  //   0,
+  //   brochureAttribute,
+  // );
+
   const propertiesPerPage = propertyOrientation === "rows" ? 7 : 4;
 
   return (
