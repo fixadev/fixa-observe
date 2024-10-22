@@ -61,6 +61,10 @@ export async function POST(request: Request) {
                   title: "",
                   approved: false,
                   inpaintedRectangles: [],
+                  textToRemove: [],
+                  pathsToRemove: [],
+                  undoStack: [],
+                  deletedPages: [],
                 },
               ]
             : [],
