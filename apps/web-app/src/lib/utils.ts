@@ -120,6 +120,6 @@ export function downloadBase64File(
 }
 
 export function splitAddress(address: string) {
-  const [streetAddress, city] = address.split("\n").map((line) => line.trim());
+  const [streetAddress, city] = address.split(",").map((line) => line.trim());
   return { streetAddress, city };
 }

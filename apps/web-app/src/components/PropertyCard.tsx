@@ -3,6 +3,7 @@ import {
   cn,
   isParsedAttributesComplete,
   isPropertyNotAvailable,
+  splitAddress,
 } from "~/lib/utils";
 import Image from "next/image";
 import { Button } from "./ui/button";
@@ -51,8 +52,7 @@ export default function PropertyCard({
   const property = emailThread.property;
   const photoUrl = property.photoUrl ?? "";
   const attributes = property.attributes as Record<string, string>;
-  const streetAddress = attributes?.address?.split("\n")[0] ?? "";
-  const city = attributes?.address?.split("\n").slice(1) ?? "";
+  const { streetAddress, city } = splitAddress(attributes?.address ?? "");
 
   const { user } = useUser();
   const shouldShowParsedAttributes = useMemo(() => {
@@ -72,7 +72,7 @@ export default function PropertyCard({
       <div className="relative aspect-square h-full min-h-24 min-w-24 shrink-0 overflow-hidden rounded-l-md bg-gray-500">
         <Image
           src={photoUrl}
-          alt={streetAddress}
+          alt={streetAddress ?? "Property photo"}
           fill
           className="object-cover"
         />
