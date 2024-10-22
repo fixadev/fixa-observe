@@ -5,6 +5,7 @@ import Spinner from "~/components/Spinner";
 import { type PropertySchema, type AttributeSchema } from "~/lib/property";
 import { CoverPage } from "./CoverPage";
 import { MapPage } from "./MapPage";
+import { ThankYouPage } from "./ThankYouPage";
 
 export function PDFContent({
   mapImageData,
@@ -56,6 +57,7 @@ export function PDFContent({
         }
         return pages;
       }, [] as React.ReactElement[])}
+      <ThankYouPage />
     </Document>
   );
 }
