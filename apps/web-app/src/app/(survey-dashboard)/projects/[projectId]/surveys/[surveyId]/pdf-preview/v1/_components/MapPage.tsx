@@ -32,13 +32,19 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   propertyItem: {
-    paddingVertical: 20,
+    paddingVertical: 12,
     display: "flex",
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "flex-start",
-    backgroundColor: "#F0F0F0",
     paddingLeft: 20,
+
+    borderStyle: "solid",
+    borderColor: "#DDDEDE",
+    borderTopWidth: 1,
+    borderLeftWidth: 0,
+    borderRightWidth: 0,
+    borderBottomWidth: 0,
   },
   propertyText: {
     marginLeft: 10,
@@ -75,6 +81,19 @@ const styles = StyleSheet.create({
     position: "absolute",
     bottom: 0,
   },
+  imageBubble: {
+    height: 25,
+    width: 25,
+    fontWeight: "semibold",
+    position: "relative",
+    backgroundColor: "#046bb6",
+    color: "#FFFFFF",
+    borderRadius: "50%",
+    alignItems: "center",
+    justifyContent: "center",
+    fontSize: 12,
+    zIndex: 1,
+  },
 });
 
 Font.register({
@@ -106,14 +125,10 @@ export function MapPage({
         <Text style={styles.header}>Location Overview</Text>
         <View style={styles.propertyList}>
           {properties.map((property, index) => (
-            <View
-              key={index}
-              style={{
-                ...styles.propertyItem,
-                backgroundColor: index % 2 === 0 ? "#F0F0F0" : "#FFFFFF",
-              }}
-            >
-              <Text style={styles.propertyNumber}>{index + 1}.</Text>
+            <View key={index} style={styles.propertyItem}>
+              <View style={styles.imageBubble}>
+                <Text>{index + 1}</Text>
+              </View>
               <Text style={styles.propertyText}>
                 {property.attributes.displayAddress?.split("\n")[0]}
               </Text>

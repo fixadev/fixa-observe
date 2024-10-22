@@ -1,5 +1,6 @@
 import { Document } from "@react-pdf/renderer";
 import { RowsPage } from "./RowsPage";
+import { ColumnsPage } from "./ColumnsPage";
 import Spinner from "~/components/Spinner";
 import { type PropertySchema, type AttributeSchema } from "~/lib/property";
 import { CoverPage } from "./CoverPage";
@@ -35,12 +36,22 @@ export function PDFContent({
       {properties.reduce((pages, _, index) => {
         if (index % propertiesPerPage === 0) {
           pages.push(
-            <RowsPage
-              key={index}
-              pageNumber={index / propertiesPerPage + 1}
-              properties={properties.slice(index, index + propertiesPerPage)}
-              attributes={attributes}
-            />,
+            propertyOrientation === "rows" ? (
+              <RowsPage
+                key={index}
+                pageNumber={index / propertiesPerPage + 1}
+                properties={properties.slice(index, index + propertiesPerPage)}
+                attributes={attributes}
+              />
+            ) : (
+              <ColumnsPage
+                key={index}
+                pageNumber={index / propertiesPerPage + 1}
+                properties={properties.slice(index, index + propertiesPerPage)}
+                attributes={attributes}
+                propertyOrientation={propertyOrientation ?? "rows"}
+              />
+            ),
           );
         }
         return pages;
