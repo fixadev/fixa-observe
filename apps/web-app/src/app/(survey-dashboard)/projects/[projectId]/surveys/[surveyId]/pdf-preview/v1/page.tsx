@@ -21,12 +21,20 @@ export default function PDFPreviewPage({
   const [mapUrl, setMapUrl] = useState<string | null>(null);
 
   const router = useRouter();
-  const { data: survey } = api.survey.getSurvey.useQuery({
-    surveyId: params.surveyId,
-  });
-  const { data: attributes } = api.survey.getSurveyAttributes.useQuery({
-    surveyId: params.surveyId,
-  });
+  const { data: survey } = api.survey.getSurvey.useQuery(
+    { surveyId: params.surveyId },
+    {
+      refetchOnMount: true,
+      staleTime: 0,
+    },
+  );
+  const { data: attributes } = api.survey.getSurveyAttributes.useQuery(
+    { surveyId: params.surveyId },
+    {
+      refetchOnMount: true,
+      staleTime: 0,
+    },
+  );
 
   const parsedProperties = survey?.properties.map((property) => {
     return {
@@ -69,8 +77,6 @@ export default function PDFPreviewPage({
             <Button
               variant={"ghost"}
               onClick={() => {
-                console.log("projectId", params.projectId);
-                console.log("surveyId", params.surveyId);
                 router.push(
                   `/projects/${params.projectId}/surveys/${params.surveyId}`,
                 );

@@ -89,11 +89,14 @@ const styles = StyleSheet.create({
   },
   commentsCell: {
     textAlign: "left",
+    flexDirection: "row",
+    alignItems: "center",
     margin: "auto",
-    justifyContent: "center",
+    justifyContent: "flex-start",
     fontSize: 8,
     paddingVertical: 6,
     paddingRight: 6,
+    width: "100%",
   },
   leftCell: {
     alignItems: "center",
@@ -159,9 +162,6 @@ export function PDFPage({
   properties: PropertySchema[];
   attributes: AttributeSchema[];
 }) {
-  console.log("properties", properties);
-  console.log("attributes", attributes);
-
   function formatAddress(address: string | undefined) {
     if (!address) {
       return "";
