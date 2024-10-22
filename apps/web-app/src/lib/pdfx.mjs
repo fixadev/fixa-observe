@@ -7707,7 +7707,7 @@ class CanvasGraphics {
     this.outputScaleY = 1;
     this.pageColors = pageColors;
     this.textToRemoveMap = new Map();
-    textToRemove.forEach((item) => {
+    textToRemove?.forEach((item) => {
       const key = item.str.replace(/\s/gi, "");
       if (this.textToRemoveMap.has(key)) {
         this.textToRemoveMap.get(key).push(item);
@@ -7716,9 +7716,9 @@ class CanvasGraphics {
       }
     });
     this.pathsToRemoveSet = new Set(
-      pathsToRemove.map((p) =>
+      pathsToRemove?.map((p) =>
         JSON.stringify(p.minMax.map((n) => n.toFixed(2)))
-      )
+      ) ?? []
     );
     this._cachedScaleForStroking = [-1, 0];
     this._cachedGetSinglePixelWidth = null;

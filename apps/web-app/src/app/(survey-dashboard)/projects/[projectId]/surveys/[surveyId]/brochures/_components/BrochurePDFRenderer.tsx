@@ -39,6 +39,7 @@ export function BrochurePDFRenderer({
       .promise.then((_pdf: PDFDocumentProxy) => {
         setPdf(_pdf);
         setNumPages(_pdf.numPages);
+        setPagesLoaded(0);
         // setLoaded(true);
       })
       .catch((error: unknown) => {
@@ -47,7 +48,6 @@ export function BrochurePDFRenderer({
   }, [brochure.deletedPages.length, pdfUrl]);
   // #endregion
 
-  const [isRendering, setIsRendering] = useState(true);
   const canvasRefs = useRef<(HTMLCanvasElement | null)[]>([]);
   const [pagesLoaded, setPagesLoaded] = useState(0);
   const deletedPages = useMemo(() => {
@@ -99,7 +99,6 @@ export function BrochurePDFRenderer({
 
   useEffect(() => {
     if (pagesLoaded === numPages - brochure.deletedPages.length) {
-      setIsRendering(false);
       generatePDF();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -107,7 +106,7 @@ export function BrochurePDFRenderer({
 
   if (!pdf) return null;
   return (
-    <div style={{ position: "absolute", left: "-9999px" }}>
+    <div className="hidden">
       {Array.from(new Array(numPages), (el, index) => {
         if (deletedPages.has(index)) {
           return null;
@@ -126,7 +125,6 @@ export function BrochurePDFRenderer({
           />
         );
       })}
-      {isRendering && <div>Rendering pages...</div>}
     </div>
   );
 }
