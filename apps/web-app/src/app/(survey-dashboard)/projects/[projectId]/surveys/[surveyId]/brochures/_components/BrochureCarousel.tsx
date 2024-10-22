@@ -34,12 +34,14 @@ import { ConfirmRemovePopup } from "./ConfirmRemovePopup";
 
 export function BrochureCarousel({
   brochure,
+  isGeneratingPDF,
   onEdit,
   // refetchProperty,
 }: {
   brochure: BrochureSchema;
+  isGeneratingPDF: boolean;
   onEdit: (brochure: BrochureSchema) => void;
-  refetchProperty: () => void;
+  // refetchProperty: () => void;
 }) {
   // ------------------
   // #region Load PDF
@@ -96,7 +98,8 @@ export function BrochureCarousel({
     setDeletedPages(new Set(brochure.deletedPages ?? []));
   }, [brochure]);
 
-  const _onEdit = useCallback(() => {
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState<boolean>(false);
+  const saveChanges = useCallback(() => {
     onEdit({
       ...brochure,
       textToRemove,
@@ -105,6 +108,7 @@ export function BrochureCarousel({
       deletedPages: Array.from(deletedPages),
       undoStack,
     });
+    setHasUnsavedChanges(false);
   }, [
     onEdit,
     brochure,
@@ -114,6 +118,9 @@ export function BrochureCarousel({
     deletedPages,
     undoStack,
   ]);
+  const _onEdit = useCallback(() => {
+    setHasUnsavedChanges(true);
+  }, []);
 
   const { mutate: updateDeletedPages } =
     api.brochure.updateDeletedPages.useMutation({
@@ -336,14 +343,28 @@ export function BrochureCarousel({
               isMouseDown={isMouseDown}
             />
             {/* For inpainting */}
-            {rectanglesToRemove.length > 0 && !isRemoving && !isMouseDown && (
+            {rectanglesToRemove.length > 0 && !isRemoving && !isMouseDown ? (
               <ConfirmRemovePopup
+                title="Remove selected items?"
+                cancelText="Undo"
+                confirmText="Remove"
                 onConfirm={handleRemoveObjects}
                 onCancel={() => {
                   setRectanglesToRemove([]);
                 }}
               />
-            )}
+            ) : (hasUnsavedChanges || isGeneratingPDF) &&
+              !isRemoving &&
+              !isMouseDown ? (
+              <ConfirmRemovePopup
+                title="Save changes?"
+                cancelText="Discard"
+                confirmText="Save"
+                isLoading={isGeneratingPDF}
+                onConfirm={saveChanges}
+                onCancel={() => null}
+              />
+            ) : null}
           </Carousel>
           <div className="mt-10 flex flex-row gap-2 overflow-x-auto">
             {Array.from(new Array(numPages), (el, index) => {

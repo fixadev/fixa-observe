@@ -171,7 +171,7 @@ function UnapprovedBrochureCard({
         <>
           <BrochureCarousel
             brochure={brochure}
-            refetchProperty={refetchProperty}
+            isGeneratingPDF={generatingPDF}
             onEdit={handleEdit}
           />
           {generatingPDF && editedBrochure && (
