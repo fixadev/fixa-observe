@@ -6,11 +6,14 @@ import { BrochureCarousel } from "./BrochureCarousel";
 import { FilePlusIcon } from "lucide-react";
 import { FileInput } from "../../../../../../../_components/FileInput";
 import Link from "next/link";
-import { useMemo } from "react";
+import { useCallback, useMemo } from "react";
 import { splitAddress } from "~/lib/utils";
 import { ArrowDownTrayIcon } from "@heroicons/react/24/solid";
 import { type EmailThread } from "prisma/generated/zod";
 import { useSurvey } from "~/hooks/useSurvey";
+import { BrochurePDFRenderer } from "./BrochurePDFRenderer";
+import { useState } from "react";
+import Spinner from "~/components/Spinner";
 
 export function BrochureCard({ propertyId }: { propertyId: string }) {
   const { survey } = useSurvey();
@@ -97,10 +100,12 @@ function UnapprovedBrochureCard({
         handleUpload={handleCreateBrochure}
       />
       {brochure ? (
-        <BrochureCarousel
-          brochure={brochure}
-          refetchProperty={refetchProperty}
-        />
+        <>
+          <BrochureCarousel
+            brochure={brochure}
+            refetchProperty={refetchProperty}
+          />
+        </>
       ) : (
         <FileInput
           className="h-full w-full"
@@ -147,6 +152,24 @@ function BrochureSidebar({
     [property.attributes],
   );
 
+  const [downloading, setDownloading] = useState(false);
+  const downloadPDF = useCallback(
+    (blob: Blob) => {
+      if (blob) {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `${address.streetAddress} brochure.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }
+      setDownloading(false);
+    },
+    [address.streetAddress],
+  );
+
   return (
     <div className="relative flex w-[250px] shrink-0 flex-col self-start rounded-md border border-input shadow-sm">
       <div className="relative aspect-[4/3] w-full overflow-hidden rounded-t-md">
@@ -172,9 +195,26 @@ function BrochureSidebar({
             <div className="text-sm text-muted-foreground">{address.city}</div>
           </div>
           {brochure && (
-            <Button size="icon" variant="ghost">
-              <ArrowDownTrayIcon className="size-4" />
-            </Button>
+            <>
+              <Button
+                size="icon"
+                variant="ghost"
+                onClick={() => setDownloading(true)}
+                disabled={downloading}
+              >
+                {downloading ? (
+                  <Spinner className="size-4" />
+                ) : (
+                  <ArrowDownTrayIcon className="size-4" />
+                )}
+              </Button>
+              {downloading && (
+                <BrochurePDFRenderer
+                  brochure={brochure}
+                  onPDFGenerated={downloadPDF}
+                />
+              )}
+            </>
           )}
         </div>
         {/* eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing */}
