@@ -105,9 +105,10 @@ export function PropertiesTable({
     }
   }, [survey]);
 
-  const { data: attributes } = api.survey.getSurveyAttributes.useQuery({
-    surveyId,
-  });
+  const { data: attributes, refetch: refetchAttributes } =
+    api.survey.getSurveyAttributes.useQuery({
+      surveyId,
+    });
   const attributesMap = useMemo(
     () => new Map(attributes?.map((attr) => [attr.id, attr]) ?? []),
     [attributes],
@@ -131,7 +132,8 @@ export function PropertiesTable({
     onSettled: () => {
       pendingMutations.current--;
       if (pendingMutations.current === 0) {
-        void refetchSurvey();
+        // void refetchSurvey();
+        // void refetchAttributes();
         setIsUploadingProperties(false);
       }
     },
@@ -308,7 +310,6 @@ export function PropertiesTable({
 
   const saveNewAttribute = useCallback(
     (label: string) => {
-      console.log("saving new attribute", label);
       void modifyAttributes(
         (data) => [
           ...data.filter((attribute) => !attribute.isNew),
@@ -349,7 +350,6 @@ export function PropertiesTable({
 
   const deleteAttribute = useCallback(
     (id: string) => {
-      console.log("deleting attribute", id);
       void modifyAttributes(
         (data) => {
           const index = data.findIndex((attribute) => attribute.id === id);
@@ -366,7 +366,6 @@ export function PropertiesTable({
   );
 
   const addProperty = useCallback(() => {
-    console.log("adding property");
     void setProperties(
       (data) => [
         ...data,
