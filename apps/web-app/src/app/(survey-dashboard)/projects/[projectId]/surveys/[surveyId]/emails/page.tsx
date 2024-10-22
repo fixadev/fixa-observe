@@ -43,13 +43,21 @@ export default function EmailsPage() {
   );
   useEffect(() => {
     if (survey && user) {
-      const threads = [];
+      const threads: EmailThreadWithEmailsAndProperty[] = [];
       for (const property of survey.properties) {
         for (const thread of property.emailThreads) {
           threads.push({ ...thread, property });
         }
       }
-      setEmailThreads(threads);
+      // Only update email threads that are not draft emails
+      setEmailThreads((prev) => {
+        const draftEmails = prev.filter((email) => emailIsDraft(email));
+        const draftEmailIds = new Set(draftEmails.map((email) => email.id));
+        const threadsWithoutDraftEmails = threads.filter(
+          (thread) => !draftEmailIds.has(thread.id),
+        );
+        return [...draftEmails, ...threadsWithoutDraftEmails];
+      });
     }
   }, [survey, user]);
 
@@ -320,13 +328,13 @@ export default function EmailsPage() {
     ],
   );
   const handleDiscard = useCallback(
-    (emailThreadId: string) => {
+    async (emailThreadId: string) => {
       setEmailThreads((prev) =>
         prev.filter((thread) => thread.id !== emailThreadId),
       );
       goToNextUnsentEmail(emailThreadId);
-      void deleteEmailThread({ emailThreadId });
-      void refetchSurvey();
+      await deleteEmailThread({ emailThreadId });
+      await refetchSurvey();
     },
     [deleteEmailThread, goToNextUnsentEmail, refetchSurvey],
   );
@@ -441,7 +449,7 @@ export default function EmailsPage() {
                 await handleSend(selectedThreadId, body);
               }}
               onDiscard={() => {
-                handleDiscard(selectedThreadId);
+                void handleDiscard(selectedThreadId);
               }}
             />
           ) : (

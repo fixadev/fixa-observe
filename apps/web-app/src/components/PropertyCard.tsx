@@ -10,7 +10,6 @@ import { Button } from "./ui/button";
 import Link from "next/link";
 import { Separator } from "./ui/separator";
 import { type EmailThreadWithEmailsAndProperty } from "~/lib/types";
-import { useUser } from "@clerk/nextjs";
 import { useMemo } from "react";
 import { useSurvey } from "~/hooks/useSurvey";
 import { api } from "~/trpc/react";
@@ -53,14 +52,6 @@ export default function PropertyCard({
   const photoUrl = property.photoUrl ?? "";
   const attributes = property.attributes as Record<string, string>;
   const { streetAddress, city } = splitAddress(attributes?.address ?? "");
-
-  const { user } = useUser();
-  const shouldShowParsedAttributes = useMemo(() => {
-    // Only show if the email thread contains emails from other people
-    return emailThread.emails.some(
-      (email) => email.senderEmail !== user?.primaryEmailAddress?.emailAddress,
-    );
-  }, [emailThread.emails, user?.primaryEmailAddress?.emailAddress]);
 
   return (
     <div
@@ -115,15 +106,12 @@ export default function PropertyCard({
             </div>
           </>
         )}
-        {shouldShowParsedAttributes && (
-          <ParsedAttributes emailThread={emailThread} />
-        )}
       </div>
     </div>
   );
 }
 
-function ParsedAttributes({
+export function ParsedAttributes({
   emailThread,
 }: {
   emailThread: EmailThreadWithEmailsAndProperty;
@@ -166,53 +154,50 @@ function ParsedAttributes({
   }, [parsedAttributes]);
 
   return (
-    <>
-      <Separator orientation="vertical" />
-      <div className="flex shrink-0 flex-col items-start gap-2 pr-4">
-        <div className="flex w-full items-baseline gap-1 px-2 pt-2 text-sm font-medium">
-          <div className="flex items-center gap-1">
-            {propertyNotAvailable
-              ? "Property not available"
-              : completed
-                ? "Property details confirmed"
-                : "More info needed"}
-            {propertyNotAvailable ? (
-              <XCircleIcon className="size-5 text-destructive" />
-            ) : completed ? (
-              <CheckCircleIcon className="size-5 text-green-500" />
-            ) : (
-              <EllipsisHorizontalCircleIcon className="size-5 text-gray-500" />
-            )}
-          </div>
-          <div className="flex-1" />
-          <Button variant="ghost" size="sm" asChild>
-            <Link href={`./?propertyId=${emailThread.propertyId}`}>
-              View table
-            </Link>
-          </Button>
+    <div className="flex shrink-0 flex-col items-start gap-2 pr-4">
+      <div className="flex w-full items-baseline gap-1 px-2 pt-2 text-sm font-medium">
+        <div className="flex items-center gap-1">
+          {propertyNotAvailable
+            ? "Property not available"
+            : completed
+              ? "Property details confirmed"
+              : "More info needed"}
+          {propertyNotAvailable ? (
+            <XCircleIcon className="size-5 text-destructive" />
+          ) : completed ? (
+            <CheckCircleIcon className="size-5 text-green-500" />
+          ) : (
+            <EllipsisHorizontalCircleIcon className="size-5 text-gray-500" />
+          )}
         </div>
-        <Table className="text-xs">
-          <TableHeader>
-            <TableRow className="border-none">
-              {parsedAttributesKeys.map((attributeId) => (
-                <TableHead key={attributeId} className="h-[unset]">
-                  {attributesMap.get(attributeId)?.label ??
-                    attributeId.charAt(0).toUpperCase() + attributeId.slice(1)}
-                </TableHead>
-              ))}
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            <TableRow className="border-none">
-              {parsedAttributesKeys.map((attributeId) => (
-                <TableCell key={attributeId}>
-                  {parsedAttributes?.[attributeId] ?? "???"}
-                </TableCell>
-              ))}
-            </TableRow>
-          </TableBody>
-        </Table>
+        <div className="flex-1" />
+        <Button variant="ghost" size="sm" asChild>
+          <Link href={`./?propertyId=${emailThread.propertyId}`}>
+            View table
+          </Link>
+        </Button>
       </div>
-    </>
+      <Table className="text-xs">
+        <TableHeader>
+          <TableRow className="border-none">
+            {parsedAttributesKeys.map((attributeId) => (
+              <TableHead key={attributeId} className="h-[unset]">
+                {attributesMap.get(attributeId)?.label ??
+                  attributeId.charAt(0).toUpperCase() + attributeId.slice(1)}
+              </TableHead>
+            ))}
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          <TableRow className="border-none">
+            {parsedAttributesKeys.map((attributeId) => (
+              <TableCell key={attributeId}>
+                {parsedAttributes?.[attributeId] ?? "???"}
+              </TableCell>
+            ))}
+          </TableRow>
+        </TableBody>
+      </Table>
+    </div>
   );
 }

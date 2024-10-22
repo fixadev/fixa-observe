@@ -4,6 +4,7 @@ import {
   CheckCircleIcon,
   EllipsisHorizontalCircleIcon,
   PencilSquareIcon,
+  XCircleIcon,
 } from "@heroicons/react/24/solid";
 import Link from "next/link";
 import { advancedParseFloat } from "~/app/parseNumbers";
@@ -15,7 +16,7 @@ import {
   TooltipTrigger,
 } from "~/components/ui/tooltip";
 import { type Attribute, type Property } from "./PropertiesTable";
-import { cn } from "~/lib/utils";
+import { cn, isPropertyNotAvailable } from "~/lib/utils";
 import { useEffect, useRef, useState } from "react";
 
 export function EditableCell({
@@ -132,6 +133,8 @@ export function EditableCell({
                   <CheckCircleIcon className="size-5 text-green-500" />
                 ) : isEmailDraft ? (
                   <PencilSquareIcon className="size-5 text-gray-500" />
+                ) : isPropertyNotAvailable(parsedAttributes) ? (
+                  <XCircleIcon className="size-5 text-destructive" />
                 ) : (
                   <EllipsisHorizontalCircleIcon className="size-5 text-gray-500" />
                 )}
@@ -143,7 +146,9 @@ export function EditableCell({
               ? "Verified by email"
               : isEmailDraft
                 ? "Email drafted"
-                : "Email sent"}
+                : isPropertyNotAvailable(parsedAttributes)
+                  ? "Property not available"
+                  : "Email sent"}
           </TooltipContent>
         </Tooltip>
       )}
