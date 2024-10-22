@@ -77,6 +77,10 @@ function UnapprovedBrochureCard({
       propertyId: property.id,
       brochure: {
         inpaintedRectangles: [],
+        textToRemove: [],
+        pathsToRemove: [],
+        undoStack: [],
+        deletedPages: [],
         url: uploadedFile.url,
         title: file.name,
         approved: false,
