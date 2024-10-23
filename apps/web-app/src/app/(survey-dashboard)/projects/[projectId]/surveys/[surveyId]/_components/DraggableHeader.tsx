@@ -109,7 +109,11 @@ export const DraggableHeader = ({
               <Button
                 size="icon"
                 variant="ghost"
-                disabled={disabled || attribute.id === "displayAddress"}
+                disabled={
+                  disabled ||
+                  attribute.id === "displayAddress" ||
+                  attribute.id === "address"
+                }
                 onClick={deleteAttribute}
               >
                 <TrashIcon className="size-4" />
