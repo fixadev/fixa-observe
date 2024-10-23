@@ -84,9 +84,18 @@ export function PropertiesTable({
   const [properties, setPropertiesState] = useState<Property[]>([]);
   const [attributesOrder, setAttributesOrderState] = useState<Attribute[]>([]);
   const [draggingRow, setDraggingRow] = useState<boolean>(false);
-  const [isUploadingProperties, setIsUploadingProperties] =
+  const [isImportingProperties, setIsImportingProperties] =
     useState<boolean>(false);
   const { survey, isLoadingSurvey, refetchSurvey } = useSurvey();
+
+  const [mapErrors, setMapErrors] = useState<
+    { propertyId: string; error: string }[]
+  >([]);
+
+  // useEffect(() => {
+  //   console.log("MAP ERRORS");
+  //   console.log(mapErrors);
+  // }, [mapErrors]);
 
   useEffect(() => {
     if (survey?.properties) {
@@ -97,7 +106,7 @@ export function PropertiesTable({
           isNew: false,
         })),
       );
-      setIsUploadingProperties(false);
+      setIsImportingProperties(false);
     }
   }, [survey]);
 
@@ -122,6 +131,8 @@ export function PropertiesTable({
 
   const pendingMutations = useRef(0);
 
+  const [addingProperties, setAddingProperties] = useState(false);
+
   const { mutate: updateAttributes } = api.survey.updateAttributes.useMutation({
     onMutate: () => pendingMutations.current++,
     onSettled: () => {
@@ -129,7 +140,6 @@ export function PropertiesTable({
       if (pendingMutations.current === 0) {
         // void refetchSurvey();
         // void refetchAttributes();
-        setIsUploadingProperties(false);
       }
     },
   });
@@ -140,9 +150,13 @@ export function PropertiesTable({
       onSettled: () => {
         pendingMutations.current--;
         if (pendingMutations.current === 0) {
-          void refetchSurvey();
-          // setIsUploadingProperties(false);
+          // void refetchSurvey();
         }
+        if (addingProperties) {
+          void refetchSurvey();
+          setAddingProperties(false);
+        }
+        setIsImportingProperties(false);
       },
     });
 
@@ -150,7 +164,7 @@ export function PropertiesTable({
     api.survey.updatePropertiesOrder.useMutation({
       onMutate: () => pendingMutations.current++,
       onSettled: () => {
-        pendingMutations.current--;
+        // pendingMutations.current--;
       },
     });
 
@@ -181,6 +195,10 @@ export function PropertiesTable({
         ) as typeof updatedProperties;
       } else {
         updatedProperties = newPropertiesOrCallback as typeof updatedProperties;
+      }
+
+      if (action === "add") {
+        setAddingProperties(true);
       }
 
       // Update state
@@ -538,7 +556,7 @@ export function PropertiesTable({
   return (
     <>
       <div>
-        {isUploadingProperties ? (
+        {isImportingProperties ? (
           // Loading state
           <div className="flex h-[90vh] w-full flex-col items-center justify-center">
             <Spinner className="flex size-12 text-gray-500" />
@@ -563,7 +581,7 @@ export function PropertiesTable({
                   className="w-full"
                   surveyId={surveyId}
                   refetchSurvey={refetchSurvey}
-                  setUploading={setIsUploadingProperties}
+                  setUploading={setIsImportingProperties}
                 />
                 <Button variant="ghost" onClick={addProperty}>
                   Manually add properties
@@ -577,6 +595,7 @@ export function PropertiesTable({
           <div>
             <div className="mb-6 flex justify-start">
               <ActionButtons
+                setMapErrors={setMapErrors}
                 surveyName={survey?.name ?? ""}
                 properties={properties}
                 attributes={attributesOrder}
@@ -607,31 +626,26 @@ export function PropertiesTable({
                           : horizontalListSortingStrategy
                       }
                     >
-                      {attributesOrder
-                        .filter((attribute) => attribute.id !== "address")
-                        .map((attribute) => (
-                          <DraggableHeader
-                            key={attribute.id}
-                            attribute={attribute}
-                            renameAttribute={
-                              !attribute.ownerId && !attribute.isNew
-                                ? undefined
-                                : attribute.isNew
-                                  ? (name) => saveNewAttribute(name)
-                                  : (name) =>
-                                      renameAttribute(attribute.id, name)
-                            }
-                            deleteAttribute={() =>
-                              deleteAttribute(attribute.id)
-                            }
-                            draggingRow={draggingRow}
-                            state={state}
-                            checkedState={getHeaderCheckedState(attribute.id)}
-                            onCheckedChange={(checked) =>
-                              handleHeaderCheckedChange(attribute.id, checked)
-                            }
-                          ></DraggableHeader>
-                        ))}
+                      {attributesOrder.map((attribute) => (
+                        <DraggableHeader
+                          key={attribute.id}
+                          attribute={attribute}
+                          renameAttribute={
+                            !attribute.ownerId && !attribute.isNew
+                              ? undefined
+                              : attribute.isNew
+                                ? (name) => saveNewAttribute(name)
+                                : (name) => renameAttribute(attribute.id, name)
+                          }
+                          deleteAttribute={() => deleteAttribute(attribute.id)}
+                          draggingRow={draggingRow}
+                          state={state}
+                          checkedState={getHeaderCheckedState(attribute.id)}
+                          onCheckedChange={(checked) =>
+                            handleHeaderCheckedChange(attribute.id, checked)
+                          }
+                        ></DraggableHeader>
+                      ))}
                     </SortableContext>
                     <TableCell className="justify-center-background sticky right-0 z-20 flex bg-background">
                       <Button
@@ -667,6 +681,11 @@ export function PropertiesTable({
                           updateProperty={updateProperty}
                           selectedFields={selectedFields}
                           onSelectedFieldsChange={setSelectedFields}
+                          mapError={
+                            mapErrors.find(
+                              (error) => error.propertyId === property.id,
+                            )?.error
+                          }
                         />
                       );
                     })}
@@ -681,7 +700,7 @@ export function PropertiesTable({
                   variant="ghost"
                   surveyId={surveyId}
                   refetchSurvey={refetchSurvey}
-                  setUploading={setIsUploadingProperties}
+                  setUploading={setIsImportingProperties}
                 />
               </div>
             </DndContext>
@@ -709,6 +728,7 @@ function ActionButtons({
   state,
   onStateChange,
   draftEmails,
+  setMapErrors,
 }: {
   surveyName: string;
   state: PropertiesTableState;
@@ -716,6 +736,7 @@ function ActionButtons({
   properties: Property[];
   attributes: AttributeSchema[];
   draftEmails: () => void;
+  setMapErrors: (errors: { propertyId: string; error: string }[]) => void;
 }) {
   const hasDraftedEmails = localStorage.getItem("hasDraftedEmails") === "true";
 
@@ -739,6 +760,7 @@ function ActionButtons({
             </Button>
 
             <SurveyDownloadLink
+              setErrors={setMapErrors}
               buttonText="Export PDF instead"
               surveyName={surveyName}
               properties={properties}
@@ -758,6 +780,7 @@ function ActionButtons({
           Verify property data
         </Button>
         <SurveyDownloadLink
+          setErrors={setMapErrors}
           buttonText="Export Survey PDF"
           surveyName={surveyName}
           properties={properties}

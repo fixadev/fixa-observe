@@ -46,6 +46,7 @@ export const DraggableRow = ({
   updateProperty,
   selectedFields,
   onSelectedFieldsChange,
+  mapError,
 }: {
   photoUrl: string;
   property: Property;
@@ -57,6 +58,7 @@ export const DraggableRow = ({
   updateProperty: (property: Property) => void;
   selectedFields: Record<string, Set<string>>;
   onSelectedFieldsChange: (selectedFields: Record<string, Set<string>>) => void;
+  mapError: string | undefined;
 }) => {
   const {
     transform,
@@ -255,65 +257,64 @@ export const DraggableRow = ({
           />
         )}
       </DraggableCell>
-      {attributes
-        .filter((attribute) => attribute.id !== "address")
-        .map((attribute) => {
-          return (
-            <DraggableCell
-              key={attribute.id}
-              id={attribute.id}
-              draggingRow={draggingRow}
-              className={attributeToMinWidth(attribute)}
-            >
-              {attribute.id === "comments" ||
-              attribute.id === "displayAddress" ? (
-                <Textarea
-                  defaultValue={property.attributes?.[attribute.id] ?? ""}
-                  className={`h-[${attribute.id === "comments" ? "200px" : "60px"}] overflow-visible`}
-                  onBlur={(e) => {
-                    updateProperty({
-                      ...property,
-                      attributes: {
-                        ...property.attributes,
-                        [attribute.id]: e.target.value,
-                      },
-                    });
-                  }}
-                />
-              ) : (
-                <>
-                  {state === "edit" ? (
-                    <EditableCell
-                      property={property}
-                      attribute={attribute}
-                      isEmailDraft={isEmailDraft}
-                      parsedAttributes={parsedAttributes}
-                      updateProperty={updateProperty}
+      {attributes.map((attribute) => {
+        return (
+          <DraggableCell
+            key={attribute.id}
+            id={attribute.id}
+            draggingRow={draggingRow}
+            className={attributeToMinWidth(attribute)}
+          >
+            {attribute.id === "comments" ||
+            attribute.id === "displayAddress" ||
+            attribute.id === "address" ? (
+              <Textarea
+                defaultValue={property.attributes?.[attribute.id] ?? ""}
+                className={`h-[${attribute.id === "comments" ? "200px" : "60px"}] overflow-visible ${attribute.id === "address" && mapError ? "border-2 border-red-500" : ""}`}
+                onBlur={(e) => {
+                  updateProperty({
+                    ...property,
+                    attributes: {
+                      ...property.attributes,
+                      [attribute.id]: e.target.value,
+                    },
+                  });
+                }}
+              />
+            ) : (
+              <>
+                {state === "edit" ? (
+                  <EditableCell
+                    property={property}
+                    attribute={attribute}
+                    isEmailDraft={isEmailDraft}
+                    parsedAttributes={parsedAttributes}
+                    updateProperty={updateProperty}
+                  />
+                ) : state === "select-fields" ? (
+                  <div className="flex items-center gap-2">
+                    <Checkbox
+                      id={`${property.id}-${attribute.id}`}
+                      checked={selectedFieldsForProperty.has(attribute.id)}
+                      onCheckedChange={(checked) =>
+                        handleSelectedFieldsChange(attribute.id, checked)
+                      }
                     />
-                  ) : state === "select-fields" ? (
-                    <div className="flex items-center gap-2">
-                      <Checkbox
-                        id={`${property.id}-${attribute.id}`}
-                        checked={selectedFieldsForProperty.has(attribute.id)}
-                        onCheckedChange={(checked) =>
-                          handleSelectedFieldsChange(attribute.id, checked)
-                        }
-                      />
-                      <Label
-                        htmlFor={`${property.id}-${attribute.id}`}
-                        className="font-normal"
-                      >
-                        {(property.attributes?.[attribute.id]?.length ?? 0 > 0)
-                          ? property.attributes?.[attribute.id]
-                          : "<No value>"}
-                      </Label>
-                    </div>
-                  ) : null}
-                </>
-              )}
-            </DraggableCell>
-          );
-        })}
+                    <Label
+                      htmlFor={`${property.id}-${attribute.id}`}
+                      className="font-normal"
+                    >
+                      {(property.attributes?.[attribute.id]?.length ?? 0 > 0)
+                        ? property.attributes?.[attribute.id]
+                        : "<No value>"}
+                    </Label>
+                  </div>
+                ) : null}
+              </>
+            )}
+          </DraggableCell>
+        );
+      })}
       <TableCell>
         <Button
           size="icon"
