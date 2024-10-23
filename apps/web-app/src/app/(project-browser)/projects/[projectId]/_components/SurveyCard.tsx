@@ -39,7 +39,7 @@ export default function SurveyCard({
   };
 
   return (
-    <Link href={`/projects/${projectId}/surveys/${surveyId}`}>
+    <Link href={`/projects/${projectId}/surveys/${surveyId}/`}>
       <Card className="relative flex flex-row items-center justify-between rounded-md p-1">
         <CardHeader className="p-4">
           <CardTitle>{surveyName}</CardTitle>

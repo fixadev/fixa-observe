@@ -12,6 +12,16 @@ const clerkApiUrl = "https://api.clerk.com/v1";
 
 const taskServiceInstance = taskService();
 
+export type DraftParams = {
+  senderName: string;
+  senderEmail: string;
+  to: string;
+  subject: string;
+  body: string;
+  propertyId: string;
+  attributesToVerify: string[];
+};
+
 export const emailService = ({ db }: { db: PrismaClient }) => {
   const getAccessToken = async (userId: string) => {
     const response = await axios.get<{ token: string; scopes: string[] }[]>(
@@ -59,6 +69,73 @@ export const emailService = ({ db }: { db: PrismaClient }) => {
     return fileAttachments;
   };
 
+  // Creates a draft email
+  const createDraftEmail = async ({
+    accessToken,
+    ...params
+  }: {
+    accessToken: string;
+  } & DraftParams) => {
+    // Create draft email
+    const response = await axios.post<{
+      id: string;
+      conversationId: string;
+      webLink: string;
+    }>(
+      `${outlookApiUrl}/me/messages`,
+      {
+        subject: params.subject,
+        body: {
+          contentType: "Text",
+          content: params.body,
+        },
+        toRecipients: [{ emailAddress: { address: params.to } }],
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          Prefer: `IdType="ImmutableId", outlook.body-content-type="text"`,
+        },
+      },
+    );
+    const { id, conversationId, webLink } = response.data;
+
+    const parsedAttributes: Record<string, string | null> = {};
+    for (const attributeId of params.attributesToVerify) {
+      parsedAttributes[attributeId] = null;
+    }
+
+    // Create email thread
+    const emailThread = await db.emailThread.create({
+      data: {
+        id: conversationId,
+        propertyId: params.propertyId,
+        parsedAttributes,
+      },
+    });
+
+    // Save email to database
+    const email = await db.email.create({
+      data: {
+        id,
+        emailThreadId: conversationId,
+        senderName: params.senderName,
+        senderEmail: params.senderEmail,
+        recipientName: params.to,
+        recipientEmail: params.to,
+        subject: params.subject,
+        body: params.body,
+        webLink,
+        isDraft: true,
+      },
+    });
+
+    return {
+      email,
+      emailThread: { ...emailThread, emails: [email] },
+    };
+  };
+
   return {
     getEmailThread: async (emailThreadId: string) => {
       const emailThread = await db.emailThread.findUnique({
@@ -68,89 +145,27 @@ export const emailService = ({ db }: { db: PrismaClient }) => {
       return emailThread;
     },
 
-    // Creates a draft email
-    createDraftEmail: async ({
+    // Creates multiple draft emails
+    createDraftEmails: async ({
       userId,
-
-      senderName,
-      senderEmail,
-
-      to,
-      subject,
-      body,
-
-      propertyId,
-      attributesToVerify,
+      drafts,
     }: {
       userId: string;
-      senderName: string;
-      senderEmail: string;
-      to: string;
-      subject: string;
-      body: string;
-      propertyId: string;
-      attributesToVerify: string[];
+      drafts: DraftParams[];
     }) => {
       const accessToken = await getAccessToken(userId);
 
-      // Create draft email
-      const response = await axios.post<{
-        id: string;
-        conversationId: string;
-        webLink: string;
-      }>(
-        `${outlookApiUrl}/me/messages`,
-        {
-          subject,
-          body: {
-            contentType: "Text",
-            content: body,
-          },
-          toRecipients: [{ emailAddress: { address: to } }],
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-            Prefer: `IdType="ImmutableId", outlook.body-content-type="text"`,
-          },
-        },
-      );
-      const { id, conversationId, webLink } = response.data;
-
-      const parsedAttributes: Record<string, string | null> = {};
-      for (const attributeId of attributesToVerify) {
-        parsedAttributes[attributeId] = null;
+      const results = [];
+      for (const draft of drafts) {
+        try {
+          const result = await createDraftEmail({ accessToken, ...draft });
+          results.push(result);
+        } catch (error) {
+          console.error("Error creating draft email", error);
+        }
       }
 
-      // Create email thread
-      const emailThread = await db.emailThread.create({
-        data: {
-          id: conversationId,
-          propertyId,
-          parsedAttributes,
-        },
-      });
-
-      // Save email to database
-      const email = await db.email.create({
-        data: {
-          id,
-          emailThreadId: conversationId,
-          senderName,
-          senderEmail,
-          recipientName: to,
-          recipientEmail: to,
-          subject,
-          body,
-          webLink,
-          isDraft: true,
-        },
-      });
-
-      return {
-        email,
-        emailThread: { ...emailThread, emails: [email] },
-      };
+      return results;
     },
 
     updateDraftEmail: async ({

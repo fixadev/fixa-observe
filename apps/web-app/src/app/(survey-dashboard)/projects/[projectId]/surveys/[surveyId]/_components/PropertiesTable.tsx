@@ -489,8 +489,8 @@ export function PropertiesTable({
     setTemplateDialog(true);
   }, []);
 
-  const { mutateAsync: createDraftEmail } =
-    api.email.createDraftEmail.useMutation();
+  const { mutateAsync: createDraftEmails } =
+    api.email.createDraftEmails.useMutation();
   const generateDraftEmail = useCallback(
     (
       property: Property,
@@ -534,21 +534,20 @@ export function PropertiesTable({
     },
     [attributesMap, user?.fullName],
   );
-  const createDraftEmails = useCallback(
+  const _createDraftEmails = useCallback(
     async (emailTemplate: EmailTemplate) => {
-      const promises = [];
+      const drafts = [];
       for (const propertyId of Object.keys(selectedFields)) {
         const emailDetails = generateDraftEmail(
           properties.find((p) => p.id === propertyId)!,
           emailTemplate,
           Array.from(selectedFields[propertyId]!),
         );
-        promises.push(createDraftEmail(emailDetails));
+        drafts.push(emailDetails);
       }
-      // All settled because we don't want it to fail if one fails
-      await Promise.allSettled(promises);
+      await createDraftEmails({ drafts });
     },
-    [selectedFields, createDraftEmail, generateDraftEmail, properties],
+    [selectedFields, createDraftEmails, generateDraftEmail, properties],
   );
 
   const tableRef = useRef<HTMLTableElement>(null);
@@ -710,7 +709,7 @@ export function PropertiesTable({
       <EmailTemplateDialog
         open={templateDialog}
         onOpenChange={setTemplateDialog}
-        onSubmit={createDraftEmails}
+        onSubmit={_createDraftEmails}
         onSubmitted={() => {
           void refetchSurvey();
           void router.push(`/projects/${projectId}/surveys/${surveyId}/emails`);
