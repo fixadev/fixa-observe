@@ -76,4 +76,14 @@ export const propertyRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       return await propertyServiceInstance.updateBrochure(input, ctx.user.id);
     }),
+
+  deleteBrochure: protectedProcedure
+    .input(z.object({ propertyId: z.string(), brochureId: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      return await propertyServiceInstance.deleteBrochure(
+        input.propertyId,
+        input.brochureId,
+        ctx.user.id,
+      );
+    }),
 });
