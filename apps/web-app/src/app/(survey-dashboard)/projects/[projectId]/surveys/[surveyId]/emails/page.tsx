@@ -327,21 +327,27 @@ export default function EmailsPage() {
       user?.primaryEmailAddress?.emailAddress,
     ],
   );
+  const emailsDiscarding = useRef(0);
   const handleDiscard = useCallback(
     async (emailThreadId: string) => {
       setEmailThreads((prev) =>
         prev.filter((thread) => thread.id !== emailThreadId),
       );
       goToNextUnsentEmail(emailThreadId);
-      await deleteEmailThread({ emailThreadId });
-      await refetchSurvey();
+
+      emailsDiscarding.current++;
+      try {
+        await deleteEmailThread({ emailThreadId });
+      } finally {
+        emailsDiscarding.current--;
+      }
     },
-    [deleteEmailThread, goToNextUnsentEmail, refetchSurvey],
+    [deleteEmailThread, goToNextUnsentEmail],
   );
 
   const [lastRefreshedAt, setLastRefreshedAt] = useState(new Date());
   const handleRefresh = useCallback(() => {
-    if (emailsSending.current === 0) {
+    if (emailsSending.current === 0 && emailsDiscarding.current === 0) {
       void refetchSurvey();
       setLastRefreshedAt(new Date());
     }
