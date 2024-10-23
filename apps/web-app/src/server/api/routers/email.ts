@@ -7,26 +7,29 @@ import { AttachmentSchema } from "prisma/generated/zod";
 const emailServiceInstance = emailService({ db });
 
 export const emailRouter = createTRPCRouter({
-  createDraftEmail: protectedProcedure
+  createDraftEmails: protectedProcedure
     .input(
       z.object({
-        to: z.string(),
-        subject: z.string(),
-        body: z.string(),
-        propertyId: z.string(),
-        attributesToVerify: z.array(z.string()),
+        drafts: z.array(
+          z.object({
+            to: z.string(),
+            subject: z.string(),
+            body: z.string(),
+            propertyId: z.string(),
+            attributesToVerify: z.array(z.string()),
+          }),
+        ),
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      return await emailServiceInstance.createDraftEmail({
-        userId: ctx.user.id,
+      const drafts = input.drafts.map((draft) => ({
+        ...draft,
         senderName: ctx.user.fullName ?? "",
         senderEmail: ctx.user.primaryEmailAddress?.emailAddress ?? "",
-        to: input.to,
-        subject: input.subject,
-        body: input.body,
-        propertyId: input.propertyId,
-        attributesToVerify: input.attributesToVerify,
+      }));
+      return await emailServiceInstance.createDraftEmails({
+        userId: ctx.user.id,
+        drafts,
       });
     }),
 
