@@ -47,8 +47,8 @@ export default function PDFPreviewPage({
     const fetchMapUrl = async () => {
       if (parsedProperties && mapLoaded) {
         try {
-          const url = await generateStaticMapUrl(parsedProperties);
-          setMapUrl(url);
+          const { staticMapUrl } = await generateStaticMapUrl(parsedProperties);
+          setMapUrl(staticMapUrl);
         } catch (err) {
           console.error("Failed to generate static map URL:", err);
         }

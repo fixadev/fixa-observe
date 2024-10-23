@@ -17,6 +17,18 @@ import { useSurvey } from "~/hooks/useSurvey";
 import { BrochurePDFRenderer } from "./BrochurePDFRenderer";
 import { useState } from "react";
 import axios from "axios";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "~/components/ui/alert-dialog";
+import Spinner from "~/components/Spinner";
 
 export function BrochureCard({ propertyId }: { propertyId: string }) {
   const { survey } = useSurvey();
@@ -55,12 +67,13 @@ function UnapprovedBrochureCard({
 }) {
   const brochure = property.brochures[0];
 
-  const { mutate: createBrochure } = api.property.createBrochure.useMutation({
-    onSuccess: (data) => {
-      console.log("Brochure created", data);
-      void refetchProperty();
-    },
-  });
+  const { mutate: createBrochure, isPending: isUploading } =
+    api.property.createBrochure.useMutation({
+      onSuccess: (data) => {
+        console.log("Brochure created", data);
+        void refetchProperty();
+      },
+    });
 
   const handleCreateBrochure = async (files: FileList) => {
     const file = files[0];
@@ -161,11 +174,28 @@ function UnapprovedBrochureCard({
     }, 1);
   }, []);
 
+  const { mutate: deleteBrochure, isPending: isDeleting } =
+    api.property.deleteBrochure.useMutation({
+      onSuccess: () => {
+        void refetchProperty();
+      },
+    });
+
+  const handleDelete = () => {
+    deleteBrochure({
+      propertyId: property.id,
+      brochureId: property.brochures[0]!.id,
+    });
+  };
+
   return (
     <div id={property.id} className="flex flex-row gap-6">
       <BrochureSidebar
         property={property}
         handleUpload={handleCreateBrochure}
+        handleDelete={handleDelete}
+        isDeleting={isDeleting}
+        isUploading={isUploading}
       />
       {brochure ? (
         <>
@@ -186,10 +216,16 @@ function UnapprovedBrochureCard({
           className="h-full w-full"
           triggerElement={
             <div className="flex h-full w-full flex-col items-center justify-center gap-4 rounded-lg bg-gray-100 p-6 text-center hover:cursor-pointer hover:bg-gray-200">
-              <FilePlusIcon className="h-10 w-10 text-gray-500" />
-              <p className="text-lg font-medium text-gray-500">
-                Add a brochure
-              </p>
+              {isUploading ? (
+                <Spinner className="size-10" />
+              ) : (
+                <>
+                  <FilePlusIcon className="h-10 w-10 text-gray-500" />
+                  <p className="text-lg font-medium text-gray-500">
+                    Add a brochure
+                  </p>
+                </>
+              )}
             </div>
           }
           handleFilesChange={handleCreateBrochure}
@@ -202,22 +238,17 @@ function UnapprovedBrochureCard({
 function BrochureSidebar({
   property,
   handleUpload,
+  handleDelete,
+  isDeleting,
+  isUploading,
 }: {
   property: PropertyWithBrochures & { emailThreads: EmailThread[] };
   handleUpload: (files: FileList) => void;
+  handleDelete: () => void;
+  isDeleting: boolean;
+  isUploading: boolean;
 }) {
   const brochure = property.brochures[0];
-  // const { mutate: updateBrochure } = api.property.updateBrochure.useMutation();
-
-  // const handleApprove = () => {
-  //   if (!brochure) {
-  //     return;
-  //   }
-  //   updateBrochure({
-  //     ...brochure,
-  //     approved: true,
-  //   });
-  // };
 
   const address = useMemo(
     () =>
@@ -271,7 +302,9 @@ function BrochureSidebar({
               <FileInput
                 className="w-full"
                 triggerElement={
-                  <Button className="w-full">Upload new brochure</Button>
+                  <Button className="w-full" disabled={isUploading}>
+                    {isUploading ? <Spinner /> : "Upload new brochure"}
+                  </Button>
                 }
                 handleFilesChange={handleUpload}
               />
@@ -282,6 +315,29 @@ function BrochureSidebar({
                   Go to email
                 </Link>
               </Button>
+            )}
+            {brochure && (
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="outline" disabled={isDeleting}>
+                    {isDeleting ? <Spinner /> : "Delete brochure"}
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      This action cannot be undone.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction onClick={handleDelete}>
+                      Delete
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             )}
           </div>
         )}
