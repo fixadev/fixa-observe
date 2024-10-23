@@ -8,7 +8,6 @@ import { useCallback, useEffect, useState } from "react";
 import Spinner from "~/components/Spinner";
 import { generateStaticMapUrl } from "./CreateMapUrl";
 import { usePDF } from "@react-pdf/renderer";
-
 import { type PropertySchema, type AttributeSchema } from "~/lib/property";
 
 export function SurveyDownloadLink({
@@ -17,15 +16,16 @@ export function SurveyDownloadLink({
   properties,
   attributes,
   propertyOrientation = "columns",
+  setErrors,
 }: {
   buttonText: string;
   surveyName: string;
   properties: PropertySchema[];
   attributes: AttributeSchema[];
   propertyOrientation?: "rows" | "columns";
+  setErrors: (errors: { propertyId: string; error: string }[]) => void;
 }) {
   const [mapLoaded, setMapLoaded] = useState(false);
-  const [mapUrl, setMapUrl] = useState<string | null>(null);
 
   const parsedProperties = properties.map((property) => {
     return {
@@ -33,21 +33,6 @@ export function SurveyDownloadLink({
       attributes: property.attributes,
     };
   });
-
-  useEffect(() => {
-    const fetchMapUrl = async () => {
-      if (parsedProperties && mapLoaded) {
-        try {
-          const url = await generateStaticMapUrl(parsedProperties);
-          setMapUrl(url);
-        } catch (err) {
-          console.error("Failed to generate static map URL:", err);
-        }
-      }
-    };
-
-    void fetchMapUrl();
-  }, [parsedProperties, mapLoaded]);
 
   const [instance, updateInstance] = usePDF({ document: undefined });
   const [pendingDownload, setPendingDownload] = useState(false);
@@ -64,12 +49,22 @@ export function SurveyDownloadLink({
     }
   }, [instance.url, instance.loading, pendingDownload, surveyName]);
 
-  const handleDownload = useCallback(() => {
+  const handleDownload = useCallback(async () => {
+    const { staticMapUrl, errors } =
+      await generateStaticMapUrl(parsedProperties);
+
+    if (errors.length > 0) {
+      setErrors(errors);
+    }
+    const propertiesWithoutErrors = parsedProperties?.filter(
+      (property) => !errors.some((error) => error.propertyId === property.id),
+    );
+
     updateInstance(
       <PDFContent
-        mapImageData={mapUrl}
+        mapImageData={staticMapUrl}
         surveyName={surveyName}
-        properties={parsedProperties ?? null}
+        properties={propertiesWithoutErrors ?? null}
         propertyOrientation={propertyOrientation}
         attributes={
           attributes?.filter((attribute) => attribute.id !== "address") ?? null
@@ -81,21 +76,24 @@ export function SurveyDownloadLink({
     surveyName,
     parsedProperties,
     attributes,
-    mapUrl,
     updateInstance,
     propertyOrientation,
+    setErrors,
   ]);
 
   return (
     <APIProvider
       apiKey={env.NEXT_PUBLIC_GOOGLE_API_KEY}
       onLoad={() => {
-        console.log("Maps API has loaded.");
         setMapLoaded(true);
       }}
     >
       <div className="flex h-full flex-col">
-        <Button variant="outline" onClick={handleDownload}>
+        <Button
+          variant="outline"
+          disabled={!mapLoaded}
+          onClick={handleDownload}
+        >
           {instance.loading ? <Spinner /> : buttonText}
         </Button>
       </div>

@@ -41,6 +41,7 @@ export default function Home() {
         router.push(`/projects/${data.id}`);
         toast({
           title: "Project created!",
+          duration: 5000,
         });
         setProjectName("");
       },

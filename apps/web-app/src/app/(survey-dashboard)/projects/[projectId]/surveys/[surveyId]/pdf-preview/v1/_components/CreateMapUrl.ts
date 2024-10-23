@@ -22,7 +22,6 @@ async function geocodeAddress(address: string): Promise<LatLng> {
       })
       .catch((error) => {
         console.error("Error geocoding address:", error);
-        throw error;
       });
   });
 }
@@ -39,25 +38,49 @@ function calculateCenter(markers: LatLng[]): LatLng {
 
 export async function generateStaticMapUrl(
   properties: PropertySchema[],
-): Promise<string> {
+): Promise<{
+  staticMapUrl: string;
+  errors: { propertyId: string; error: string }[];
+}> {
   try {
+    const errors: { propertyId: string; error: string }[] = [];
+
     const markers = await Promise.all(
       properties.map(async (property, index) => {
-        const location = await geocodeAddress(
-          property.attributes.address ?? "",
-        );
-        return { ...location, index };
+        try {
+          const location = await geocodeAddress(
+            property.attributes.address ?? "",
+          );
+          if (!location) {
+            errors.push({
+              propertyId: property.id,
+              error: "Invalid address",
+            });
+            return null;
+          }
+          return { ...location, index };
+        } catch (error) {
+          console.error("Error geocoding address:", error);
+          errors.push({
+            propertyId: property.id,
+            error: error instanceof Error ? error.message : "Unknown error",
+          });
+          return null;
+        }
       }),
     );
 
-    markers.sort((a, b) => a.index - b.index);
+    // Filter out the errors after Promise.all completes
+    const validMarkers = markers.filter((marker) => marker !== null);
 
-    const center = calculateCenter(markers);
+    validMarkers.sort((a, b) => a.index - b.index);
+
+    const center = calculateCenter(validMarkers);
     const zoom = 13.5;
     const scale = 2;
     const size = "800x600";
 
-    const markersString = markers
+    const markersString = validMarkers
       .map(
         (marker, index) =>
           `&markers=color:0x046bb6|label:${index + 1}|${marker.lat},${marker.lng}`,
@@ -75,7 +98,8 @@ export async function generateStaticMapUrl(
       `&map_id=${MAP_ID}` +
       markersString;
 
-    return staticMapUrl;
+    console.log("mapErrors in survey", errors);
+    return { staticMapUrl, errors };
   } catch (error) {
     console.error("Error generating static map URL:", error);
     throw error;
