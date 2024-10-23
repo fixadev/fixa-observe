@@ -59,6 +59,13 @@ import { useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import { useSurvey } from "~/hooks/useSurvey";
 import { SurveyDownloadLink } from "../pdf-preview/v1/_components/DownloadLink";
+import { createClient } from "@supabase/supabase-js";
+import { env } from "~/env";
+
+const supabase = createClient(
+  env.NEXT_PUBLIC_SUPABASE_URL,
+  env.NEXT_PUBLIC_SUPABASE_KEY,
+);
 
 export type Property = PropertySchema & {
   brochures: Brochure[];
