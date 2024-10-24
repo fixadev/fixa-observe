@@ -6,7 +6,7 @@ export default function SurveyPage({
   params: { projectId: string; surveyId: string };
 }) {
   return (
-    <div className="max-w-screen-3xl mx-auto flex h-full w-full flex-col overflow-y-auto p-4 lg:p-6">
+    <div className="max-w-screen-3xl mx-auto flex h-full w-full flex-col overflow-y-auto">
       <PropertiesTable
         surveyId={params.surveyId}
         projectId={params.projectId}
