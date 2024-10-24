@@ -19,6 +19,7 @@ import { useEffect, useState } from "react";
 import { BreadcrumbsFromPath } from "~/components/BreadcrumbsFromPath";
 import Spinner from "~/components/Spinner";
 import { useToast } from "~/hooks/use-toast";
+import { Skeleton } from "~/components/ui/skeleton";
 
 export default function ProjectPage({
   params,
@@ -33,10 +34,13 @@ export default function ProjectPage({
     [],
   );
 
-  const { data: project, refetch: refetchProject } =
-    api.project.getProject.useQuery({
-      projectId: params.projectId,
-    });
+  const {
+    data: project,
+    isLoading: projectLoading,
+    refetch: refetchProject,
+  } = api.project.getProject.useQuery({
+    projectId: params.projectId,
+  });
 
   useEffect(() => {
     if (project?.surveys) {
@@ -74,7 +78,7 @@ export default function ProjectPage({
             },
           ]}
         />
-        <PageHeader title={project?.name ?? ""} />
+        <PageHeader isLoading={projectLoading} title={project?.name ?? ""} />
       </div>
       <div>
         <div className="mb-4 flex items-center justify-between">
@@ -122,15 +126,23 @@ export default function ProjectPage({
           </Dialog>
         </div>
         <div className="flex flex-col gap-2">
-          {surveys?.map((survey) => (
-            <SurveyCard
-              key={survey.id}
-              projectId={params.projectId}
-              surveyId={survey.id}
-              surveyName={survey.name}
-              refetchProject={refetchProject}
-            />
-          ))}
+          {projectLoading ? (
+            <>
+              <Skeleton className="h-[84px] w-full" />
+              <Skeleton className="h-[84px] w-full" />
+              <Skeleton className="h-[84px] w-full" />
+            </>
+          ) : (
+            surveys?.map((survey) => (
+              <SurveyCard
+                key={survey.id}
+                projectId={params.projectId}
+                surveyId={survey.id}
+                surveyName={survey.name}
+                refetchProject={refetchProject}
+              />
+            ))
+          )}
         </div>
       </div>
     </div>

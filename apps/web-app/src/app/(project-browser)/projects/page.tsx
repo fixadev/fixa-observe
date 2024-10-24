@@ -19,6 +19,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { getInitials } from "~/lib/utils";
 import { useToast } from "~/hooks/use-toast";
 import Spinner from "~/components/Spinner";
+import { Skeleton } from "~/components/ui/skeleton";
 
 export default function Home() {
   const { toast } = useToast();
@@ -33,6 +34,7 @@ export default function Home() {
   const {
     data: projectsData,
     refetch: refetchProjects,
+    isLoading: projectsLoading,
     error: projectsError,
   } = api.project.getProjects.useQuery();
   const { mutate: createProject, error: createProjectError } =
@@ -122,14 +124,22 @@ export default function Home() {
           </Dialog>
         </div>
         <div className="flex flex-col gap-2">
-          {projects?.map((project) => (
-            <ProjectCard
-              key={project.id}
-              id={project.id}
-              name={project.name}
-              refetchProjects={refetchProjects}
-            />
-          ))}
+          {projectsLoading ? (
+            <>
+              <Skeleton className="h-[84px] w-full" />
+              <Skeleton className="h-[84px] w-full" />
+              <Skeleton className="h-[84px] w-full" />
+            </>
+          ) : (
+            projects?.map((project) => (
+              <ProjectCard
+                key={project.id}
+                id={project.id}
+                name={project.name}
+                refetchProjects={refetchProjects}
+              />
+            ))
+          )}
         </div>
       </div>
     </div>
