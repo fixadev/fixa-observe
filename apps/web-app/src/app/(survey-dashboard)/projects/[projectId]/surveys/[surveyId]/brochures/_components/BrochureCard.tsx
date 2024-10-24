@@ -77,6 +77,9 @@ function UnapprovedBrochureCard({
     },
   });
 
+  const { mutateAsync: getPresignedS3Url } =
+    api.property.getPresignedS3Url.useMutation();
+
   const handleCreateBrochure = async (files: FileList) => {
     setIsUploading(true);
     const file = files[0];
@@ -85,15 +88,24 @@ function UnapprovedBrochureCard({
       return;
     }
 
-    const formData = new FormData();
-    formData.append("file", file, crypto.randomUUID());
-    const response = await fetch("/api/upload", {
-      method: "POST",
-      body: formData,
+    const presignedS3Url = await getPresignedS3Url({
+      fileName: file.name,
+      fileType: file.type,
     });
 
-    const uploadedFile: { url: string; type: string } =
-      (await response.json()) as { url: string; type: string };
+    const response = await fetch(presignedS3Url, {
+      method: "PUT",
+      body: file,
+      headers: {
+        "Content-Type": file.type,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to upload file to S3");
+    }
+
+    const uploadedFileUrl = presignedS3Url.split("?")[0] ?? presignedS3Url;
 
     createBrochure({
       propertyId: property.id,
@@ -103,7 +115,7 @@ function UnapprovedBrochureCard({
         pathsToRemove: [],
         undoStack: [],
         deletedPages: [],
-        url: uploadedFile.url,
+        url: uploadedFileUrl,
         title: file.name,
         approved: false,
         createdAt: new Date(),
