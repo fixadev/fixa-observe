@@ -1,3 +1,7 @@
 export function advancedParseFloat(string: string): number {
-  return parseFloat(string.replace(/[^\d.]/g, ""));
+  const parsedValue = parseFloat(string.replace(/[^\d.]/g, ""));
+  if (isNaN(parsedValue)) {
+    return 0;
+  }
+  return parsedValue;
 }
