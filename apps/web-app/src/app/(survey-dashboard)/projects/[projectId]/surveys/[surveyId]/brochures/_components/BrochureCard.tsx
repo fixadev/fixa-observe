@@ -309,13 +309,6 @@ function BrochureSidebar({
                 handleFilesChange={handleUpload}
               />
             )}
-            {property.emailThreads.length > 0 && (
-              <Button variant="ghost" asChild className="w-full">
-                <Link href={`emails?propertyId=${property.id}`}>
-                  Go to email
-                </Link>
-              </Button>
-            )}
             {brochure && (
               <AlertDialog>
                 <AlertDialogTrigger asChild>
@@ -338,6 +331,13 @@ function BrochureSidebar({
                   </AlertDialogFooter>
                 </AlertDialogContent>
               </AlertDialog>
+            )}
+            {property.emailThreads.length > 0 && (
+              <Button variant="ghost" asChild className="w-full">
+                <Link href={`emails?propertyId=${property.id}`}>
+                  Go to email
+                </Link>
+              </Button>
             )}
           </div>
         )}
