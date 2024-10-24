@@ -112,7 +112,7 @@ export function PropertiesTable({
         .subscribe();
 
       return () => {
-        void channel.unsubscribe();
+        void supabase.removeChannel(channel);
       };
     }
   }, [supabase]);
