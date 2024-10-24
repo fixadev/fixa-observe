@@ -25,7 +25,10 @@ const config = {
   // This is required to support PostHog trailing slash API requests
   skipTrailingSlashRedirect: true,
   images: {
-    domains: ["newmark.s3.us-east-1.amazonaws.com", "www.fratantoniluxuryestates.com"],
+    domains: [
+      "newmark.s3.us-east-1.amazonaws.com",
+      "www.fratantoniluxuryestates.com",
+    ],
     remotePatterns: [
       {
         protocol: "https",
@@ -51,6 +54,23 @@ const config = {
   },
   experimental: {
     serverComponentsExternalPackages: ["@react-pdf/renderer"],
+  },
+  async headers() {
+    return [
+      {
+        source: "/markers/:path*",
+        headers: [
+          { key: "Content-Type", value: "image/png" },
+          { key: "Cache-Control", value: "public, max-age=3600" },
+          {
+            key: "Expires",
+            value: new Date(Date.now() + 3600 * 1000).toUTCString(),
+          },
+          { key: "Access-Control-Allow-Origin", value: "*" },
+          { key: "Access-Control-Expose-Headers", value: "*" },
+        ],
+      },
+    ];
   },
 };
 
