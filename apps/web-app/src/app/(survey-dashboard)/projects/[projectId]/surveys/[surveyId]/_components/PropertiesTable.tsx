@@ -617,8 +617,9 @@ export function PropertiesTable({
                 <Table
                   ref={tableRef}
                   containerProps={{ className: "flex-1 overflow-auto" }}
+                  className="relative"
                 >
-                  <TableHeader>
+                  <TableHeader className="sticky top-0 z-50 bg-white shadow">
                     <TableRow>
                       <TableCell className="w-[1%]"></TableCell>
                       <TableHead className="w-[1%] text-black" />
