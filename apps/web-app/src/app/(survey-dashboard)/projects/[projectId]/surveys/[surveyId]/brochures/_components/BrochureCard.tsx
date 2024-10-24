@@ -29,6 +29,7 @@ import {
   AlertDialogTrigger,
 } from "~/components/ui/alert-dialog";
 import Spinner from "~/components/Spinner";
+import { useToast } from "~/hooks/use-toast";
 
 export function BrochureCard({ propertyId }: { propertyId: string }) {
   const { survey } = useSurvey();
@@ -65,15 +66,19 @@ function UnapprovedBrochureCard({
   property: PropertyWithBrochures & { emailThreads: EmailThread[] };
   refetchProperty: () => void;
 }) {
+  const { toast } = useToast();
   const brochure = property.brochures[0];
 
   const [isUploading, setIsUploading] = useState(false);
 
   const { mutate: createBrochure } = api.property.createBrochure.useMutation({
     onSuccess: (data) => {
-      console.log("Brochure created", data);
       void refetchProperty();
       setIsUploading(false);
+      toast({
+        title: "Brochure uploaded successfully",
+        duration: 3000,
+      });
     },
   });
 
