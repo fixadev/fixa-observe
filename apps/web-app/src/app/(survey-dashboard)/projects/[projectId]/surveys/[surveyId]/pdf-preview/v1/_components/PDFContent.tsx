@@ -57,7 +57,7 @@ export function PDFContent({
         }
         return pages;
       }, [] as React.ReactElement[])}
-      <ThankYouPage />
+      {/* <ThankYouPage /> */}
     </Document>
   );
 }
