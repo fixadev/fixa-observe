@@ -554,7 +554,7 @@ export function PropertiesTable({
 
   return (
     <>
-      <div>
+      <div className="flex flex-col overflow-hidden">
         {isImportingProperties ? (
           // Loading state
           <div className="flex h-[90vh] w-full flex-col items-center justify-center">
@@ -591,8 +591,8 @@ export function PropertiesTable({
           )
         ) : (
           // Table
-          <div>
-            <div className="mb-6 flex justify-start">
+          <div className="flex flex-col gap-6 overflow-hidden">
+            <div className="flex justify-start p-4">
               <ActionButtons
                 setMapErrors={setMapErrors}
                 surveyName={survey?.name ?? ""}
@@ -603,20 +603,69 @@ export function PropertiesTable({
                 draftEmails={draftEmails}
               />
             </div>
-            <DndContext
-              collisionDetection={closestCenter}
-              modifiers={[
-                draggingRow ? restrictToVerticalAxis : restrictToHorizontalAxis,
-              ]}
-              onDragEnd={handleDragEnd}
-              sensors={sensors}
-            >
-              <Table ref={tableRef}>
-                <TableHeader>
-                  <TableRow>
-                    <TableCell className="w-[1%]"></TableCell>
-                    <TableHead className="w-[1%] text-black" />
-                    {/* <TableHead className="w-[1%] text-black">Photo</TableHead> */}
+            <div className="flex flex-1 flex-col overflow-hidden">
+              <DndContext
+                collisionDetection={closestCenter}
+                modifiers={[
+                  draggingRow
+                    ? restrictToVerticalAxis
+                    : restrictToHorizontalAxis,
+                ]}
+                onDragEnd={handleDragEnd}
+                sensors={sensors}
+              >
+                <Table
+                  ref={tableRef}
+                  containerProps={{ className: "flex-1 overflow-auto" }}
+                >
+                  <TableHeader>
+                    <TableRow>
+                      <TableCell className="w-[1%]"></TableCell>
+                      <TableHead className="w-[1%] text-black" />
+                      <SortableContext
+                        items={draggingRow ? rowIds : colIds}
+                        strategy={
+                          draggingRow
+                            ? verticalListSortingStrategy
+                            : horizontalListSortingStrategy
+                        }
+                      >
+                        {attributesOrder.map((attribute) => (
+                          <DraggableHeader
+                            key={attribute.id}
+                            attribute={attribute}
+                            renameAttribute={
+                              !attribute.ownerId && !attribute.isNew
+                                ? undefined
+                                : attribute.isNew
+                                  ? (name) => saveNewAttribute(name)
+                                  : (name) =>
+                                      renameAttribute(attribute.id, name)
+                            }
+                            deleteAttribute={() =>
+                              deleteAttribute(attribute.id)
+                            }
+                            draggingRow={draggingRow}
+                            state={state}
+                            checkedState={getHeaderCheckedState(attribute.id)}
+                            onCheckedChange={(checked) =>
+                              handleHeaderCheckedChange(attribute.id, checked)
+                            }
+                          ></DraggableHeader>
+                        ))}
+                      </SortableContext>
+                      <TableCell className="justify-center-background sticky right-0 z-20 flex bg-background">
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          onClick={addAttributeToState}
+                        >
+                          <PlusIcon className="size-4" />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
                     <SortableContext
                       items={draggingRow ? rowIds : colIds}
                       strategy={
@@ -625,84 +674,44 @@ export function PropertiesTable({
                           : horizontalListSortingStrategy
                       }
                     >
-                      {attributesOrder.map((attribute) => (
-                        <DraggableHeader
-                          key={attribute.id}
-                          attribute={attribute}
-                          renameAttribute={
-                            !attribute.ownerId && !attribute.isNew
-                              ? undefined
-                              : attribute.isNew
-                                ? (name) => saveNewAttribute(name)
-                                : (name) => renameAttribute(attribute.id, name)
-                          }
-                          deleteAttribute={() => deleteAttribute(attribute.id)}
-                          draggingRow={draggingRow}
-                          state={state}
-                          checkedState={getHeaderCheckedState(attribute.id)}
-                          onCheckedChange={(checked) =>
-                            handleHeaderCheckedChange(attribute.id, checked)
-                          }
-                        ></DraggableHeader>
-                      ))}
+                      {properties.map((property) => {
+                        return (
+                          <DraggableRow
+                            photoUrl={property.photoUrl ?? ""}
+                            key={property.id}
+                            property={property}
+                            attributes={attributesOrder}
+                            deleteProperty={() => deleteProperty(property.id)}
+                            draggingRow={draggingRow}
+                            state={state}
+                            setDraggingRow={setDraggingRow}
+                            updateProperty={updateProperty}
+                            selectedFields={selectedFields}
+                            onSelectedFieldsChange={setSelectedFields}
+                            mapError={
+                              mapErrors.find(
+                                (error) => error.propertyId === property.id,
+                              )?.error
+                            }
+                          />
+                        );
+                      })}
                     </SortableContext>
-                    <TableCell className="justify-center-background sticky right-0 z-20 flex bg-background">
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        onClick={addAttributeToState}
-                      >
-                        <PlusIcon className="size-4" />
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  <SortableContext
-                    items={draggingRow ? rowIds : colIds}
-                    strategy={
-                      draggingRow
-                        ? verticalListSortingStrategy
-                        : horizontalListSortingStrategy
-                    }
-                  >
-                    {properties.map((property) => {
-                      return (
-                        <DraggableRow
-                          photoUrl={property.photoUrl ?? ""}
-                          key={property.id}
-                          property={property}
-                          attributes={attributesOrder}
-                          deleteProperty={() => deleteProperty(property.id)}
-                          draggingRow={draggingRow}
-                          state={state}
-                          setDraggingRow={setDraggingRow}
-                          updateProperty={updateProperty}
-                          selectedFields={selectedFields}
-                          onSelectedFieldsChange={setSelectedFields}
-                          mapError={
-                            mapErrors.find(
-                              (error) => error.propertyId === property.id,
-                            )?.error
-                          }
-                        />
-                      );
-                    })}
-                  </SortableContext>
-                </TableBody>
-              </Table>
-              <div className="mt-2 flex items-center gap-2">
-                <Button variant="ghost" onClick={addProperty}>
-                  + Add property
-                </Button>
-                <NDXOutputUploader
-                  variant="ghost"
-                  surveyId={surveyId}
-                  refetchSurvey={refetchSurvey}
-                  setUploading={setIsImportingProperties}
-                />
-              </div>
-            </DndContext>
+                  </TableBody>
+                </Table>
+                <div className="m-2 flex items-center gap-2">
+                  <Button variant="ghost" onClick={addProperty}>
+                    + Add property
+                  </Button>
+                  <NDXOutputUploader
+                    variant="ghost"
+                    surveyId={surveyId}
+                    refetchSurvey={refetchSurvey}
+                    setUploading={setIsImportingProperties}
+                  />
+                </div>
+              </DndContext>
+            </div>
           </div>
         )}
       </div>
