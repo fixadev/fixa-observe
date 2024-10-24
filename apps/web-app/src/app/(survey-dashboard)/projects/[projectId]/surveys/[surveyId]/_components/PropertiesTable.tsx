@@ -647,7 +647,10 @@ export function PropertiesTable({
                   <TableHeader className="sticky top-0 z-50 bg-white shadow">
                     <TableRow>
                       <TableCell className="w-[1%]"></TableCell>
-                      <TableHead className="w-[1%] text-black" />
+                      <TableHead className="w-[1%]" />
+                      <TableHead className="w-[1%] text-center text-black">
+                        Brochure
+                      </TableHead>
                       <SortableContext
                         items={draggingRow ? rowIds : colIds}
                         strategy={

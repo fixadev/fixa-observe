@@ -21,7 +21,6 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "~/components/ui/alert-dialog";
-import { Button } from "@/components/ui/button";
 import { TableCell } from "@/components/ui/table";
 import { ImagePlusIcon, TrashIcon } from "lucide-react";
 import { DragHandleDots2Icon } from "@radix-ui/react-icons";
@@ -41,11 +40,18 @@ import Spinner from "~/components/Spinner";
 import { Checkbox } from "~/components/ui/checkbox";
 import { Label } from "~/components/ui/label";
 import { type CheckedState } from "@radix-ui/react-checkbox";
-import { PencilIcon } from "@heroicons/react/24/solid";
+import {
+  ArrowUpTrayIcon,
+  BookOpenIcon,
+  DocumentPlusIcon,
+  PencilIcon,
+  TrashIcon as TrashFilledIcon,
+} from "@heroicons/react/24/solid";
 
 import { cn, emailIsDraft } from "~/lib/utils";
 import { useSearchParams } from "next/navigation";
 import axios from "axios";
+import { Button } from "~/components/ui/button";
 
 export const DraggableRow = ({
   photoUrl,
@@ -277,6 +283,65 @@ export const DraggableRow = ({
             handleFilesChange={handleUpload}
           />
         )}
+      </DraggableCell>
+      <DraggableCell
+        id="brochureCell"
+        draggingRow={draggingRow}
+        className="w-48"
+      >
+        <div className="w-48">
+          {property.brochures[0] ? (
+            <div className="relative h-[100px] overflow-hidden rounded-md">
+              <div className="flex size-full items-center justify-center bg-gray-100">
+                <BookOpenIcon className="size-8 text-gray-500" />
+              </div>
+              <div className="group absolute left-0 top-0 flex size-full items-center justify-center bg-black/0 hover:bg-black/30">
+                <div className="opacity-0 group-hover:opacity-100">
+                  <FileInput
+                    accept="application/pdf"
+                    triggerElement={
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        className="size-8 rounded-r-none"
+                      >
+                        <ArrowUpTrayIcon className="size-4" />
+                      </Button>
+                    }
+                    handleFilesChange={() => null}
+                  />
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="-ml-px size-8 rounded-l-none"
+                    onClick={() => null}
+                  >
+                    <TrashFilledIcon className="size-4" />
+                  </Button>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <FileInput
+              accept="application/pdf"
+              className="h-[100px] hover:cursor-pointer"
+              triggerElement={
+                <div className="flex flex-col items-center justify-center gap-2 rounded-md bg-gray-100 hover:bg-gray-200">
+                  <DocumentPlusIcon className="size-8 text-gray-500" />
+                  <div className="text-sm font-medium text-gray-500">
+                    Add brochure
+                  </div>
+                </div>
+              }
+              handleFilesChange={() => null}
+            />
+          )}
+          {property.brochures[0] && (
+            <Button variant="ghost" className="mt-2 w-full">
+              Edit brochure
+            </Button>
+          )}
+        </div>
       </DraggableCell>
       {attributes.map((attribute) => {
         return (
