@@ -1,5 +1,16 @@
 "use client";
 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "~/components/ui/alert-dialog";
 import { useState } from "react";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
@@ -13,6 +24,7 @@ import { type PropertiesTableState, type Attribute } from "./PropertiesTable";
 import { Label } from "~/components/ui/label";
 import { Checkbox } from "~/components/ui/checkbox";
 import { type CheckedState } from "@radix-ui/react-checkbox";
+import Spinner from "~/components/Spinner";
 
 export const DraggableHeader = ({
   attribute,
@@ -106,18 +118,25 @@ export const DraggableHeader = ({
               </Button>
             )}
             <div className="invisible flex text-muted-foreground group-hover:visible">
-              <Button
-                size="icon"
-                variant="ghost"
-                disabled={
-                  disabled ||
-                  attribute.id === "displayAddress" ||
-                  attribute.id === "address"
-                }
-                onClick={deleteAttribute}
-              >
-                <TrashIcon className="size-4" />
-              </Button>
+              <AlertDialog>
+                <AlertDialogTrigger>
+                  <TrashIcon className="size-4" />
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      This action cannot be undone.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction onClick={deleteAttribute}>
+                      {"Delete"}
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             </div>
           </>
         ) : null}
