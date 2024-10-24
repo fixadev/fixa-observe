@@ -18,6 +18,7 @@ import { api } from "~/trpc/react";
 import { useEffect, useState } from "react";
 import { BreadcrumbsFromPath } from "~/components/BreadcrumbsFromPath";
 import Spinner from "~/components/Spinner";
+import { useToast } from "~/hooks/use-toast";
 
 export default function ProjectPage({
   params,
@@ -25,6 +26,7 @@ export default function ProjectPage({
   params: { projectId: string };
 }) {
   const router = useRouter();
+  const { toast } = useToast();
   const [newSurveyName, setNewSurveyName] = useState("");
   const [creatingSurvey, setCreatingSurvey] = useState(false);
   const [surveys, setSurveys] = useState<Array<{ id: string; name: string }>>(
@@ -45,6 +47,10 @@ export default function ProjectPage({
   const { mutate: createSurvey } = api.survey.createSurvey.useMutation({
     onSuccess: (data) => {
       router.push(`/projects/${params.projectId}/surveys/${data.id}`);
+      toast({
+        title: "Survey created!",
+        duration: 5000,
+      });
       setNewSurveyName("");
     },
   });
