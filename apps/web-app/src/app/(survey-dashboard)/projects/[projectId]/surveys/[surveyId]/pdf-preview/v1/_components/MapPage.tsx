@@ -130,7 +130,7 @@ export function MapPage({
                 <Text>{index + 1}</Text>
               </View>
               <Text style={styles.propertyText}>
-                {property.attributes.displayAddress?.split("\n")[0]}
+                {property.attributes.address?.split(",")[0]}
               </Text>
               {/* Add more property details as needed */}
             </View>

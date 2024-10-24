@@ -50,16 +50,12 @@ export function EditableCell({
       attribute.id === "opEx" ||
       attribute.id === "size"
     ) {
-      const inputValue = advancedParseFloat(value ?? "0");
+      const inputValue = advancedParseFloat(value);
 
       const size =
         attribute.id === "size"
           ? inputValue
-          : advancedParseFloat(
-              property.attributes?.size && property.attributes?.size?.length > 0
-                ? property.attributes?.size
-                : "0",
-            );
+          : advancedParseFloat(property.attributes?.size ?? "0");
 
       const askingRate =
         attribute.id === "askingRate"
