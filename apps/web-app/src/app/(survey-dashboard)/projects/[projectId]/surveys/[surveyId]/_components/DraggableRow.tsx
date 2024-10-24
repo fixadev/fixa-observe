@@ -10,6 +10,17 @@ import {
   useState,
   type CSSProperties,
 } from "react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "~/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { TableCell } from "@/components/ui/table";
 import { ImagePlusIcon, TrashIcon } from "lucide-react";
@@ -316,13 +327,25 @@ export const DraggableRow = ({
         );
       })}
       <TableCell>
-        <Button
-          size="icon"
-          variant="ghost"
-          onClick={() => deleteProperty(property.id)}
-        >
-          <TrashIcon className="size-4" />
-        </Button>
+        <AlertDialog>
+          <AlertDialogTrigger>
+            <TrashIcon className="size-4" />
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This action cannot be undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={() => deleteProperty(property.id)}>
+                {"Delete"}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </TableCell>
     </TableRow>
   );
