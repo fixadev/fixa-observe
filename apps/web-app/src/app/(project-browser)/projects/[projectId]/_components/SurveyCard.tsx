@@ -75,16 +75,13 @@ export default function SurveyCard({
         <DropdownMenuContent>
           <DropdownMenuItem className="flex w-full items-center justify-center text-center text-red-700">
             <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button
-                  variant="destructive"
-                  disabled={isDeleting}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                  }}
-                >
-                  Delete survey
-                </Button>
+              <AlertDialogTrigger
+                onClick={(e) => {
+                  e.stopPropagation();
+                }}
+                className="text-destructive"
+              >
+                Delete survey
               </AlertDialogTrigger>
               <AlertDialogContent>
                 <AlertDialogHeader>

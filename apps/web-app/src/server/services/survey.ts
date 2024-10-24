@@ -9,6 +9,9 @@ export const surveyService = ({ db }: { db: PrismaClient }) => {
       where: {
         OR: [{ ownerId: userId }, { ownerId: null }],
       },
+      orderBy: {
+        defaultIndex: "asc",
+      },
     });
   };
 
@@ -70,12 +73,10 @@ export const surveyService = ({ db }: { db: PrismaClient }) => {
           ownerId: userId,
           attributes: {
             createMany: {
-              data: attributes
-                .sort((a, b) => a.defaultIndex - b.defaultIndex)
-                .map((attribute, index) => ({
-                  attributeId: attribute.id,
-                  attributeIndex: index,
-                })),
+              data: attributes.map((attribute, index) => ({
+                attributeId: attribute.id,
+                attributeIndex: index,
+              })),
             },
           },
         },

@@ -73,16 +73,13 @@ export default function ProjectCard({
         <DropdownMenuContent>
           <DropdownMenuItem className="flex w-full items-center justify-center text-center text-red-700">
             <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button
-                  variant="destructive"
-                  disabled={isDeleting}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                  }}
-                >
-                  Delete project
-                </Button>
+              <AlertDialogTrigger
+                className="text-destructive"
+                onClick={(e) => {
+                  e.stopPropagation();
+                }}
+              >
+                Delete project
               </AlertDialogTrigger>
               <AlertDialogContent>
                 <AlertDialogHeader>
