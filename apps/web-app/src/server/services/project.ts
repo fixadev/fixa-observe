@@ -46,6 +46,7 @@ export const projectService = ({ db }: { db: PrismaClient }) => {
             select: {
               id: true,
               name: true,
+              updatedAt: true,
             },
           },
         },
@@ -71,6 +72,7 @@ export const projectService = ({ db }: { db: PrismaClient }) => {
             select: {
               id: true,
               name: true,
+              updatedAt: true,
             },
           },
         },

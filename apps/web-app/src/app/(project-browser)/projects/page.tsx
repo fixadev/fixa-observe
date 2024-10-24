@@ -25,9 +25,9 @@ export default function Home() {
   const { toast } = useToast();
   const { user } = useUser();
   const router = useRouter();
-  const [projects, setProjects] = useState<Array<{ id: string; name: string }>>(
-    [],
-  );
+  const [projects, setProjects] = useState<
+    Array<{ id: string; name: string; updatedAt: Date }>
+  >([]);
   const [projectName, setProjectName] = useState("");
   const [creatingProject, setCreatingProject] = useState(false);
 
@@ -58,7 +58,10 @@ export default function Home() {
   const handleCreateProject = () => {
     setCreatingProject(true);
     createProject({ projectName });
-    setProjects([...projects, { id: "1", name: projectName }]);
+    setProjects([
+      ...projects,
+      { id: "1", name: projectName, updatedAt: new Date() },
+    ]);
   };
 
   return (
@@ -134,8 +137,7 @@ export default function Home() {
             projects?.map((project) => (
               <ProjectCard
                 key={project.id}
-                id={project.id}
-                name={project.name}
+                project={project}
                 refetchProjects={refetchProjects}
               />
             ))

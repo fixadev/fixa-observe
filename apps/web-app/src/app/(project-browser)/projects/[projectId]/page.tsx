@@ -30,9 +30,9 @@ export default function ProjectPage({
   const { toast } = useToast();
   const [newSurveyName, setNewSurveyName] = useState("");
   const [creatingSurvey, setCreatingSurvey] = useState(false);
-  const [surveys, setSurveys] = useState<Array<{ id: string; name: string }>>(
-    [],
-  );
+  const [surveys, setSurveys] = useState<
+    Array<{ id: string; name: string; updatedAt: Date }>
+  >([]);
 
   const {
     data: project,
@@ -62,7 +62,10 @@ export default function ProjectPage({
   const handleCreateSurvey = () => {
     setCreatingSurvey(true);
     createSurvey({ surveyName: newSurveyName, projectId: params.projectId });
-    setSurveys([...surveys, { id: "1", name: newSurveyName }]);
+    setSurveys([
+      ...surveys,
+      { id: "1", name: newSurveyName, updatedAt: new Date() },
+    ]);
   };
 
   return (
@@ -137,8 +140,7 @@ export default function ProjectPage({
               <SurveyCard
                 key={survey.id}
                 projectId={params.projectId}
-                surveyId={survey.id}
-                surveyName={survey.name}
+                survey={survey}
                 refetchProject={refetchProject}
               />
             ))

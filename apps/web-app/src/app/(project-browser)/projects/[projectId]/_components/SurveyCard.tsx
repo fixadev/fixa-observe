@@ -1,3 +1,5 @@
+"use client";
+
 import {
   Card,
   CardDescription,
@@ -27,16 +29,25 @@ import { api } from "~/trpc/react";
 import { EllipsisHorizontalIcon } from "@heroicons/react/24/outline";
 import { Button } from "~/components/ui/button";
 import Spinner from "~/components/Spinner";
+import {
+  differenceInHours,
+  differenceInMinutes,
+  formatDistanceToNow,
+} from "date-fns";
+import { type SurveySchema } from "~/lib/survey";
+import { useEffect } from "react";
 
 export default function SurveyCard({
   projectId,
-  surveyId,
-  surveyName,
+  survey,
   refetchProject,
 }: {
   projectId: string;
-  surveyId: string;
-  surveyName: string;
+  survey: {
+    id: string;
+    name: string;
+    updatedAt: Date;
+  };
   refetchProject: () => void;
 }) {
   const { mutate: deleteSurvey, isPending: isDeleting } =
@@ -49,15 +60,19 @@ export default function SurveyCard({
   const handleDeleteClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    deleteSurvey({ surveyId });
+    deleteSurvey({ surveyId: survey.id });
   };
 
   const handleCardClick = (e: React.MouseEvent) => {
     // Only navigate if the click is directly on the card, not on its children
     if (e.target === e.currentTarget) {
-      window.location.href = `/projects/${projectId}/surveys/${surveyId}`;
+      window.location.href = `/projects/${projectId}/surveys/${survey.id}`;
     }
   };
+
+  useEffect(() => {
+    console.log("survey", survey);
+  }, [survey]);
 
   return (
     <Card
@@ -65,8 +80,11 @@ export default function SurveyCard({
       className="relative flex flex-row items-center justify-between rounded-md p-1 hover:cursor-pointer"
     >
       <CardHeader className="p-4">
-        <CardTitle>{surveyName}</CardTitle>
-        <CardDescription>Last updated 12 hours ago</CardDescription>
+        <CardTitle>{survey.name}</CardTitle>
+        <CardDescription>{`Last updated ${formatDistanceToNow(
+          survey.updatedAt,
+          { addSuffix: true },
+        )}`}</CardDescription>
       </CardHeader>
       <DropdownMenu>
         <DropdownMenuTrigger className="flex size-16 flex-col items-center justify-center">

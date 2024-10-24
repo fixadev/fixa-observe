@@ -67,15 +67,18 @@ function UnapprovedBrochureCard({
 }) {
   const brochure = property.brochures[0];
 
-  const { mutate: createBrochure, isPending: isUploading } =
-    api.property.createBrochure.useMutation({
-      onSuccess: (data) => {
-        console.log("Brochure created", data);
-        void refetchProperty();
-      },
-    });
+  const [isUploading, setIsUploading] = useState(false);
+
+  const { mutate: createBrochure } = api.property.createBrochure.useMutation({
+    onSuccess: (data) => {
+      console.log("Brochure created", data);
+      void refetchProperty();
+      setIsUploading(false);
+    },
+  });
 
   const handleCreateBrochure = async (files: FileList) => {
+    setIsUploading(true);
     const file = files[0];
     if (!file) {
       console.error("No file selected");
