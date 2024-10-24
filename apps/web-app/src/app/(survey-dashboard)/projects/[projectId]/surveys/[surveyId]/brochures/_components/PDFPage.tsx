@@ -39,6 +39,7 @@ export default function PDFPage({
   pathsToRemove,
   idsToShow,
   height,
+  scale = 1.0,
   children,
   className,
   onViewportChange,
@@ -55,6 +56,7 @@ export default function PDFPage({
   pathsToRemove: Path[];
   idsToShow?: Set<string>;
   height?: number;
+  scale?: number;
   children?: React.ReactNode;
   className?: string;
   onViewportChange?: (viewport: PageViewport) => void;
@@ -100,7 +102,7 @@ export default function PDFPage({
     isLoading.current = true;
 
     void pdf.getPage(pageIndex + 1).then((page) => {
-      let _viewport = page.getViewport({ scale: 1.0 });
+      let _viewport = page.getViewport({ scale });
       if (height) {
         const scale = height / _viewport.height;
         _viewport = page.getViewport({ scale });

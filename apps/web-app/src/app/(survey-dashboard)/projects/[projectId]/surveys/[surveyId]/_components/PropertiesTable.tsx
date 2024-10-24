@@ -59,6 +59,7 @@ import { useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import { useSurvey } from "~/hooks/useSurvey";
 import { SurveyDownloadLink } from "../pdf-preview/v1/_components/DownloadLink";
+import { useSupabase } from "~/hooks/useSupabase";
 
 export type Property = PropertySchema & {
   brochures: Brochure[];
@@ -91,6 +92,30 @@ export function PropertiesTable({
   const [mapErrors, setMapErrors] = useState<
     { propertyId: string; error: string }[]
   >([]);
+
+  const supabase = useSupabase();
+  useEffect(() => {
+    if (supabase) {
+      const channel = supabase
+        .channel("table_db_changes")
+        .on(
+          "postgres_changes",
+          {
+            event: "*",
+            schema: "public",
+            table: "Contact",
+          },
+          (payload) => {
+            console.log("PAYLOAD", payload);
+          },
+        )
+        .subscribe();
+
+      return () => {
+        void supabase.removeChannel(channel);
+      };
+    }
+  }, [supabase]);
 
   // useEffect(() => {
   //   console.log("MAP ERRORS");

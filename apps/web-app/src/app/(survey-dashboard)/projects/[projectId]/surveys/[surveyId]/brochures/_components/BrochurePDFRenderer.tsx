@@ -121,6 +121,7 @@ export function BrochurePDFRenderer({
             textToRemove={textToRemove}
             pathsToRemove={pathsToRemove}
             idsToShow={idsToShow}
+            scale={1.5}
             onPageLoaded={() => setPagesLoaded((prev) => prev + 1)}
           />
         );

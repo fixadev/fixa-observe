@@ -54,6 +54,7 @@
     "@react-email/code-block": "^0.0.9",
     "@react-pdf/renderer": "^4.0.0",
     "@react-spring/web": "^9.7.4",
+    "@supabase/supabase-js": "^2.45.6",
     "@t3-oss/env-nextjs": "^0.10.1",
     "@tanstack/react-query": "^5.50.0",
     "@tanstack/react-table": "^8.20.5",
