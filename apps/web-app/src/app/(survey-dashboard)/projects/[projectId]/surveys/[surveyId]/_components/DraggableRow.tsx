@@ -125,8 +125,6 @@ export const DraggableRow = ({
     }
     const cleanUrl = presignedUrl.split("?")[0] ?? presignedUrl;
 
-    console.log("CLEAN URL", cleanUrl);
-
     addPhoto({
       propertyId: property.id,
       photoUrl: cleanUrl,
