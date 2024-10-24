@@ -25,7 +25,7 @@ const config = {
   // This is required to support PostHog trailing slash API requests
   skipTrailingSlashRedirect: true,
   images: {
-    domains: ["pixa-real-estate.s3.amazonaws.com", "www.fratantoniluxuryestates.com"],
+    domains: ["newmark.s3.us-east-1.amazonaws.com", "www.fratantoniluxuryestates.com"],
     remotePatterns: [
       {
         protocol: "https",
@@ -42,6 +42,10 @@ const config = {
       {
         protocol: "https",
         hostname: "newmark.s3.amazonaws.com",
+      },
+      {
+        protocol: "https",
+        hostname: "newmark.s3.us-east-1.amazonaws.com",
       },
     ],
   },

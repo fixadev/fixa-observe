@@ -45,6 +45,7 @@ import { PencilIcon } from "@heroicons/react/24/solid";
 
 import { cn, emailIsDraft } from "~/lib/utils";
 import { useSearchParams } from "next/navigation";
+import axios from "axios";
 
 export const DraggableRow = ({
   photoUrl,
@@ -100,24 +101,35 @@ export const DraggableRow = ({
     },
   });
 
+  const { mutateAsync: getPresignedS3Url } =
+    api.property.getPresignedS3Url.useMutation();
+
   const handleUpload = async (files: FileList) => {
     setPhotoUploading(true);
     const file = files[0];
     if (!file) return;
 
-    const formData = new FormData();
-    formData.append("file", file, crypto.randomUUID());
-    const response = await fetch("/api/upload", {
-      method: "POST",
-      body: formData,
+    const presignedUrl = await getPresignedS3Url({
+      fileName: file.name,
+      fileType: file.type,
     });
 
-    const uploadedFile: { url: string; type: string } =
-      (await response.json()) as { url: string; type: string };
+    const uploadResponse = await axios.put(presignedUrl, file, {
+      headers: {
+        "Content-Type": file.type,
+      },
+    });
+
+    if (uploadResponse.status !== 200) {
+      throw new Error("Failed to upload file to S3");
+    }
+    const cleanUrl = presignedUrl.split("?")[0] ?? presignedUrl;
+
+    console.log("CLEAN URL", cleanUrl);
 
     addPhoto({
       propertyId: property.id,
-      photoUrl: uploadedFile.url,
+      photoUrl: cleanUrl,
     });
   };
 
