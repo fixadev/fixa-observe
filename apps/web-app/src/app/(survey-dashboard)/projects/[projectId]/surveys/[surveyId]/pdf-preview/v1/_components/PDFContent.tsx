@@ -28,7 +28,7 @@ export function PDFContent({
 
   return (
     <Document title={`${surveyName}.pdf` ?? "property-survey.pdf"}>
-      <CoverPage />
+      {/* <CoverPage /> */}
       <MapPage
         mapImageData={mapImageData}
         properties={properties}
