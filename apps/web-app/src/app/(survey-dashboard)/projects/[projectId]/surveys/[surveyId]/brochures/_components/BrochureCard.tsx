@@ -148,29 +148,32 @@ function UnapprovedBrochureCard({
           type: "application/pdf",
         },
       );
-      const formData = new FormData();
-      formData.append("file", file);
-      formData.append("keepOriginalName", "true");
 
       try {
-        const response = await axios.post<{ url: string }>(
-          "/api/upload",
-          formData,
-          {
-            headers: {
-              "Content-Type": "multipart/form-data",
-            },
-          },
-        );
+        const presignedS3Url = await getPresignedS3Url({
+          fileName: file.name,
+          fileType: file.type,
+        });
 
-        console.log("PDF uploaded successfully:", response.data);
-        return response.data.url;
+        const response = await fetch(presignedS3Url, {
+          method: "PUT",
+          body: file,
+          headers: {
+            "Content-Type": file.type,
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to upload file to S3");
+        }
+        const uploadedFileUrl = presignedS3Url.split("?")[0] ?? presignedS3Url;
+        return uploadedFileUrl;
       } catch (error) {
         console.error("Error uploading PDF:", error);
         return null;
       }
     },
-    [property.attributes, property.id],
+    [property.attributes, property.id, getPresignedS3Url],
   );
   const handlePDFGenerated = useCallback(
     async (blob: Blob) => {

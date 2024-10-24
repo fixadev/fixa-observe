@@ -1,11 +1,15 @@
 import { NextResponse } from "next/server";
 import { extractContactInfo } from "~/server/utils/extractContactInfo";
+import { propertyService } from "~/server/services/property";
 import { db } from "~/server/db";
+import { uploadDropboxFileToS3 } from "~/app/utils/downloadDropboxFile";
+
+const propertyServiceInstance = propertyService({ db });
 
 export async function POST(request: Request) {
   try {
     const { brochures } = (await request.json()) as {
-      brochures: Array<{ url: string; propertyId: string }>;
+      brochures: Array<{ id: string; url: string; propertyId: string }>;
     };
 
     if (!brochures) {
@@ -13,7 +17,22 @@ export async function POST(request: Request) {
     }
 
     const updatePromises = brochures.map(async (brochure) => {
-      const contactInfo = await extractContactInfo(brochure.url);
+      let brochureUrl = brochure.url;
+
+      if (brochureUrl.includes("dropbox.com")) {
+        console.log("Uploading dropbox file to S3!");
+        const newUrl = await uploadDropboxFileToS3(brochure.url);
+        await propertyServiceInstance.updateBrochureUrl(
+          brochure.id,
+          newUrl,
+          brochure.propertyId,
+        );
+        console.log("newUrl", newUrl);
+        brochureUrl = newUrl;
+      }
+
+      console.log("extracting contact info from", brochureUrl);
+      const contactInfo = await extractContactInfo(brochureUrl);
       if (contactInfo) {
         const result = await db.property.update({
           where: {

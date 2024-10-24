@@ -128,6 +128,7 @@ export const propertyService = ({ db }: { db: PrismaClient }) => {
         const brochuresToParse = createdBrochures.map((brochure) => ({
           url: brochure.url,
           propertyId: brochure.propertyId,
+          id: brochure.id,
         }));
 
         const endTime3 = new Date();
@@ -248,6 +249,21 @@ export const propertyService = ({ db }: { db: PrismaClient }) => {
         },
       });
       return response;
+    },
+
+    updateBrochureUrl: async (
+      brochureId: string,
+      url: string,
+      userId: string,
+    ) => {
+      return db.brochure.update({
+        where: {
+          id: brochureId,
+        },
+        data: {
+          url,
+        },
+      });
     },
 
     deleteBrochure: async (
