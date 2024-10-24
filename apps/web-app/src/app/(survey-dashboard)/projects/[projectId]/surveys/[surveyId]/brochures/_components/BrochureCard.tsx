@@ -29,6 +29,7 @@ import {
   AlertDialogTrigger,
 } from "~/components/ui/alert-dialog";
 import Spinner from "~/components/Spinner";
+import { useToast } from "~/hooks/use-toast";
 
 export function BrochureCard({ propertyId }: { propertyId: string }) {
   const { survey } = useSurvey();
@@ -65,32 +66,51 @@ function UnapprovedBrochureCard({
   property: PropertyWithBrochures & { emailThreads: EmailThread[] };
   refetchProperty: () => void;
 }) {
+  const { toast } = useToast();
   const brochure = property.brochures[0];
 
-  const { mutate: createBrochure, isPending: isUploading } =
-    api.property.createBrochure.useMutation({
-      onSuccess: (data) => {
-        console.log("Brochure created", data);
-        void refetchProperty();
-      },
-    });
+  const [isUploading, setIsUploading] = useState(false);
+
+  const { mutate: createBrochure } = api.property.createBrochure.useMutation({
+    onSuccess: (data) => {
+      void refetchProperty();
+      setIsUploading(false);
+      toast({
+        title: "Brochure uploaded successfully",
+        duration: 3000,
+      });
+    },
+  });
+
+  const { mutateAsync: getPresignedS3Url } =
+    api.property.getPresignedS3Url.useMutation();
 
   const handleCreateBrochure = async (files: FileList) => {
+    setIsUploading(true);
     const file = files[0];
     if (!file) {
       console.error("No file selected");
       return;
     }
 
-    const formData = new FormData();
-    formData.append("file", file, crypto.randomUUID());
-    const response = await fetch("/api/upload", {
-      method: "POST",
-      body: formData,
+    const presignedS3Url = await getPresignedS3Url({
+      fileName: file.name,
+      fileType: file.type,
     });
 
-    const uploadedFile: { url: string; type: string } =
-      (await response.json()) as { url: string; type: string };
+    const response = await fetch(presignedS3Url, {
+      method: "PUT",
+      body: file,
+      headers: {
+        "Content-Type": file.type,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to upload file to S3");
+    }
+
+    const uploadedFileUrl = presignedS3Url.split("?")[0] ?? presignedS3Url;
 
     createBrochure({
       propertyId: property.id,
@@ -100,7 +120,7 @@ function UnapprovedBrochureCard({
         pathsToRemove: [],
         undoStack: [],
         deletedPages: [],
-        url: uploadedFile.url,
+        url: uploadedFileUrl,
         title: file.name,
         approved: false,
         createdAt: new Date(),

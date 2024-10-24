@@ -10,6 +10,17 @@ import {
   useState,
   type CSSProperties,
 } from "react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "~/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { TableCell } from "@/components/ui/table";
 import { ImagePlusIcon, TrashIcon } from "lucide-react";
@@ -34,6 +45,7 @@ import { PencilIcon } from "@heroicons/react/24/solid";
 
 import { cn, emailIsDraft } from "~/lib/utils";
 import { useSearchParams } from "next/navigation";
+import axios from "axios";
 
 export const DraggableRow = ({
   photoUrl,
@@ -89,24 +101,33 @@ export const DraggableRow = ({
     },
   });
 
+  const { mutateAsync: getPresignedS3Url } =
+    api.property.getPresignedS3Url.useMutation();
+
   const handleUpload = async (files: FileList) => {
     setPhotoUploading(true);
     const file = files[0];
     if (!file) return;
 
-    const formData = new FormData();
-    formData.append("file", file, crypto.randomUUID());
-    const response = await fetch("/api/upload", {
-      method: "POST",
-      body: formData,
+    const presignedUrl = await getPresignedS3Url({
+      fileName: file.name,
+      fileType: file.type,
     });
 
-    const uploadedFile: { url: string; type: string } =
-      (await response.json()) as { url: string; type: string };
+    const uploadResponse = await axios.put(presignedUrl, file, {
+      headers: {
+        "Content-Type": file.type,
+      },
+    });
+
+    if (uploadResponse.status !== 200) {
+      throw new Error("Failed to upload file to S3");
+    }
+    const cleanUrl = presignedUrl.split("?")[0] ?? presignedUrl;
 
     addPhoto({
       propertyId: property.id,
-      photoUrl: uploadedFile.url,
+      photoUrl: cleanUrl,
     });
   };
 
@@ -316,13 +337,25 @@ export const DraggableRow = ({
         );
       })}
       <TableCell>
-        <Button
-          size="icon"
-          variant="ghost"
-          onClick={() => deleteProperty(property.id)}
-        >
-          <TrashIcon className="size-4" />
-        </Button>
+        <AlertDialog>
+          <AlertDialogTrigger>
+            <TrashIcon className="size-4" />
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This action cannot be undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={() => deleteProperty(property.id)}>
+                {"Delete"}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </TableCell>
     </TableRow>
   );

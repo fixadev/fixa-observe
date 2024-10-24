@@ -8,6 +8,7 @@ import {
 } from "~/lib/property";
 import { propertyService } from "~/server/services/property";
 import { db } from "~/server/db";
+import { createPresignedUrl } from "~/server/utils/s3utils";
 
 const propertyServiceInstance = propertyService({ db });
 
@@ -45,6 +46,12 @@ export const propertyRouter = createTRPCRouter({
         input.propertyId,
         ctx.user.id,
       );
+    }),
+
+  getPresignedS3Url: protectedProcedure
+    .input(z.object({ fileName: z.string(), fileType: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      return await createPresignedUrl(input.fileName, input.fileType);
     }),
 
   createBrochure: protectedProcedure

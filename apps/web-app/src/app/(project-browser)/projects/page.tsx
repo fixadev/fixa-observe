@@ -19,20 +19,22 @@ import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { getInitials } from "~/lib/utils";
 import { useToast } from "~/hooks/use-toast";
 import Spinner from "~/components/Spinner";
+import { Skeleton } from "~/components/ui/skeleton";
 
 export default function Home() {
   const { toast } = useToast();
   const { user } = useUser();
   const router = useRouter();
-  const [projects, setProjects] = useState<Array<{ id: string; name: string }>>(
-    [],
-  );
+  const [projects, setProjects] = useState<
+    Array<{ id: string; name: string; updatedAt: Date }>
+  >([]);
   const [projectName, setProjectName] = useState("");
   const [creatingProject, setCreatingProject] = useState(false);
 
   const {
     data: projectsData,
     refetch: refetchProjects,
+    isLoading: projectsLoading,
     error: projectsError,
   } = api.project.getProjects.useQuery();
   const { mutate: createProject, error: createProjectError } =
@@ -56,7 +58,10 @@ export default function Home() {
   const handleCreateProject = () => {
     setCreatingProject(true);
     createProject({ projectName });
-    setProjects([...projects, { id: "1", name: projectName }]);
+    setProjects([
+      ...projects,
+      { id: "1", name: projectName, updatedAt: new Date() },
+    ]);
   };
 
   return (
@@ -122,14 +127,21 @@ export default function Home() {
           </Dialog>
         </div>
         <div className="flex flex-col gap-2">
-          {projects?.map((project) => (
-            <ProjectCard
-              key={project.id}
-              id={project.id}
-              name={project.name}
-              refetchProjects={refetchProjects}
-            />
-          ))}
+          {projectsLoading ? (
+            <>
+              <Skeleton className="h-[84px] w-full" />
+              <Skeleton className="h-[84px] w-full" />
+              <Skeleton className="h-[84px] w-full" />
+            </>
+          ) : (
+            projects?.map((project) => (
+              <ProjectCard
+                key={project.id}
+                project={project}
+                refetchProjects={refetchProjects}
+              />
+            ))
+          )}
         </div>
       </div>
     </div>

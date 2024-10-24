@@ -4,6 +4,7 @@ import {
   type PutObjectCommandInput,
 } from "@aws-sdk/client-s3";
 import { v4 as uuidv4 } from "uuid";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { s3Client } from "~/server/config/s3client";
 // import fs from "fs/promises";
 // import path from "path";
@@ -34,6 +35,31 @@ export const uploadFileToS3 = async (
   } catch (error) {
     console.error("Error uploading file to S3:", error);
     throw new Error("Failed to upload file");
+  }
+};
+
+export const createPresignedUrl = async (
+  fileName: string,
+  fileType: string,
+  expiresIn = 3600,
+): Promise<string> => {
+  const fileExtension = fileName.split(".").pop();
+  const uniqueFileName = `${uuidv4()}.${fileExtension}`;
+
+  const params: PutObjectCommandInput = {
+    Bucket: process.env.AWS_BUCKET_NAME,
+    Key: uniqueFileName,
+    ContentType: fileType,
+    ACL: ObjectCannedACL.public_read,
+  };
+
+  try {
+    const command = new PutObjectCommand(params);
+    const presignedUrl = await getSignedUrl(s3Client, command, { expiresIn });
+    return presignedUrl;
+  } catch (error) {
+    console.error("Error creating presigned URL:", error);
+    throw new Error("Failed to create presigned URL");
   }
 };
 

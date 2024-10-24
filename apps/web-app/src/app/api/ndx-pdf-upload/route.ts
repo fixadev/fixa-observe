@@ -38,7 +38,6 @@ export async function POST(request: Request) {
 
     const parsedProperties = properties.map((property) => {
       const parsedProperty = parsePropertyCard(property.text);
-      console.log("parsedProperty IS", parsedProperty);
       return {
         ...parsedProperty,
         brochureLink: property.link ?? undefined,

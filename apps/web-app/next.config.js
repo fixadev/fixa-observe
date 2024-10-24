@@ -26,7 +26,7 @@ const config = {
   skipTrailingSlashRedirect: true,
   images: {
     domains: [
-      "pixa-real-estate.s3.amazonaws.com",
+      "newmark.s3.us-east-1.amazonaws.com",
       "www.fratantoniluxuryestates.com",
     ],
     remotePatterns: [
@@ -45,6 +45,10 @@ const config = {
       {
         protocol: "https",
         hostname: "newmark.s3.amazonaws.com",
+      },
+      {
+        protocol: "https",
+        hostname: "newmark.s3.us-east-1.amazonaws.com",
       },
     ],
   },

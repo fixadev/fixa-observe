@@ -179,4 +179,14 @@ export const surveyRouter = createTRPCRouter({
         ctx.user.id,
       );
     }),
+
+  importNDXPDF: protectedProcedure
+    .input(z.object({ surveyId: z.string(), pdfUrl: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      return await surveyServiceInstance.importNDXPDF(
+        input.surveyId,
+        input.pdfUrl,
+        ctx.user.id,
+      );
+    }),
 });

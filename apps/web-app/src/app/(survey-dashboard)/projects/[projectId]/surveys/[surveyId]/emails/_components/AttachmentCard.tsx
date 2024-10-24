@@ -55,6 +55,9 @@ export default function AttachmentCard({
   const { mutateAsync: createBrochure } =
     api.property.createBrochure.useMutation();
 
+  const { mutateAsync: getPresignedS3Url } =
+    api.property.getPresignedS3Url.useMutation();
+
   const dismissInfoMessage = useCallback(async () => {
     setAttachment((prev) => ({
       ...prev,
@@ -89,22 +92,27 @@ export default function AttachmentCard({
         emailId: attachment.emailId,
         attachmentId: attachment.id,
       });
+
       const blob = new Blob([base64ToArrayBuffer(content)], {
         type: attachment.contentType,
       });
 
-      // Upload the file to S3
-      const formData = new FormData();
-      formData.append("file", blob, crypto.randomUUID());
-      const response = await axios.post<{ url: string; type: string }>(
-        "/api/upload",
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
+      const presignedUrl = await getPresignedS3Url({
+        fileName: attachment.name,
+        fileType: attachment.contentType,
+      });
+
+      const s3Response = await axios.put(presignedUrl, blob, {
+        headers: {
+          "Content-Type": attachment.contentType,
         },
-      );
+      });
+
+      if (s3Response.status !== 200) {
+        throw new Error("Failed to upload file to S3");
+      }
+
+      const cleanUrl = presignedUrl.split("?")[0] ?? presignedUrl;
 
       // Create the brochure in the database
       await createBrochure({
@@ -118,7 +126,7 @@ export default function AttachmentCard({
           createdAt: new Date(),
           updatedAt: new Date(),
           title: attachment.name,
-          url: response.data.url,
+          url: cleanUrl,
           exportedUrl: null,
           approved: false,
         },
@@ -151,6 +159,7 @@ export default function AttachmentCard({
     propertyId,
     updateAttachment,
     refetchSurvey,
+    getPresignedS3Url,
   ]);
 
   const [isDownloading, setIsDownloading] = useState(false);

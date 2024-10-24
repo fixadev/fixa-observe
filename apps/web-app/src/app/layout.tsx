@@ -7,12 +7,11 @@ import { TRPCReactProvider } from "~/trpc/react";
 import { ibmPlexSans } from "./fonts";
 import { CSPostHogProvider } from "./providers";
 import { ClerkProvider } from "@clerk/nextjs";
-import { APIProvider } from "@vis.gl/react-google-maps";
-import { env } from "~/env";
 
 // import { dark } from "@clerk/themes";
 import ChildrenWrapper from "./_components/ChildrenWrapper";
 import { TooltipProvider } from "~/components/ui/tooltip";
+import { SupabaseProvider } from "~/hooks/useSupabase";
 export const metadata: Metadata = {
   title: "Apex",
   description:
@@ -51,12 +50,14 @@ export default function RootLayout({
               disableTransitionOnChange
             >
               <TRPCReactProvider>
-                <TooltipProvider delayDuration={100}>
-                  <ChildrenWrapper>
-                    {children}
-                    <Toaster />
-                  </ChildrenWrapper>
-                </TooltipProvider>
+                <SupabaseProvider>
+                  <TooltipProvider delayDuration={100}>
+                    <ChildrenWrapper>
+                      {children}
+                      <Toaster />
+                    </ChildrenWrapper>
+                  </TooltipProvider>
+                </SupabaseProvider>
               </TRPCReactProvider>
             </ThemeProvider>
           </body>
