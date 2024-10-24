@@ -27,14 +27,8 @@ import {
 
 import { api } from "~/trpc/react";
 import { EllipsisHorizontalIcon } from "@heroicons/react/24/outline";
-import { Button } from "~/components/ui/button";
 import Spinner from "~/components/Spinner";
-import {
-  differenceInHours,
-  differenceInMinutes,
-  formatDistanceToNow,
-} from "date-fns";
-import { type SurveySchema } from "~/lib/survey";
+import { formatDistanceToNow } from "date-fns";
 import { useEffect } from "react";
 
 export default function SurveyCard({
@@ -69,10 +63,6 @@ export default function SurveyCard({
       window.location.href = `/projects/${projectId}/surveys/${survey.id}`;
     }
   };
-
-  useEffect(() => {
-    console.log("survey", survey);
-  }, [survey]);
 
   return (
     <Card

@@ -1,9 +1,18 @@
 import { type PrismaClient } from "@prisma/client";
-import { type AttributeSchema } from "~/lib/property";
+import axios from "axios";
+import { env } from "~/env";
+import {
+  type CreatePropertySchema,
+  type AttributeSchema,
+} from "~/lib/property";
 import { type CreateSurveyInput } from "~/lib/survey";
 import { type SurveySchema } from "~/lib/survey";
+import { parsePropertyCard } from "../utils/parsePropertyCard";
+import { propertyService } from "./property";
 
 export const surveyService = ({ db }: { db: PrismaClient }) => {
+  const propertyServiceInstance = propertyService({ db });
+
   const getAttributes = async (userId: string) => {
     return db.attribute.findMany({
       where: {
@@ -15,8 +24,23 @@ export const surveyService = ({ db }: { db: PrismaClient }) => {
     });
   };
 
+  const addPropertiesToSurvey = async (
+    surveyId: string,
+    propertyIds: string[],
+    userId: string,
+  ) => {
+    const survey = await db.survey.update({
+      where: { id: surveyId, ownerId: userId },
+      data: { properties: { connect: propertyIds.map((id) => ({ id })) } },
+    });
+    return survey;
+  };
+
   return {
     getAttributes,
+
+    addPropertiesToSurvey,
+
     getProjectSurveys: async (projectId: string, userId: string) => {
       const surveys = await db.survey.findMany({
         where: { projectId: projectId, ownerId: userId },
@@ -230,18 +254,6 @@ export const surveyService = ({ db }: { db: PrismaClient }) => {
       return result;
     },
 
-    addPropertiesToSurvey: async (
-      surveyId: string,
-      propertyIds: string[],
-      userId: string,
-    ) => {
-      const survey = await db.survey.update({
-        where: { id: surveyId, ownerId: userId },
-        data: { properties: { connect: propertyIds.map((id) => ({ id })) } },
-      });
-      return survey;
-    },
-
     updatePropertiesOrder: async (
       propertyIds: string[],
       oldIndex: number,
@@ -273,6 +285,95 @@ export const surveyService = ({ db }: { db: PrismaClient }) => {
         where: { id: surveyId, ownerId: userId },
       });
       return survey;
+    },
+
+    importNDXPDF: async (surveyId: string, pdfUrl: string, ownerId: string) => {
+      try {
+        const response = await axios.post(
+          `${env.SCRAPING_SERVICE_URL}/extract-ndx-pdf`,
+          {
+            pdfUrl,
+          },
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          },
+        );
+
+        const properties = response.data as Array<{
+          image_url: string;
+          text: string;
+          link: string | undefined;
+        }>;
+
+        const parsedProperties = properties.map((property) => {
+          const parsedProperty = parsePropertyCard(property.text);
+          return {
+            ...parsedProperty,
+            brochureLink: property.link ?? undefined,
+            photoUrl: property.image_url,
+          };
+        });
+
+        const propertiesWithAttributes: Array<CreatePropertySchema> =
+          parsedProperties.map((property, index) => {
+            return {
+              createdAt: new Date(),
+              updatedAt: new Date(),
+              photoUrl: property.photoUrl,
+              brochures: property.brochureLink
+                ? [
+                    {
+                      createdAt: new Date(),
+                      updatedAt: new Date(),
+                      url: property.brochureLink,
+                      title: "",
+                      approved: false,
+                      exportedUrl: null,
+                      inpaintedRectangles: [],
+                      textToRemove: [],
+                      pathsToRemove: [],
+                      undoStack: [],
+                      deletedPages: [],
+                    },
+                  ]
+                : [],
+              displayIndex: index,
+              surveyId: surveyId,
+              attributes: {
+                address: property.address ?? "",
+                size: property.availSpace ?? "",
+                divisibility:
+                  `${property.minDivisible} - ${property.maxDivisible}` ?? "",
+                askingRate: property.leaseRate ?? "",
+                opEx: property.opEx ?? "",
+                directSublease: property.leaseType ?? "",
+                comments: property.comments ?? "",
+              },
+            };
+          });
+
+        const propertiesToCreate = propertiesWithAttributes
+          .filter(
+            (property) => typeof property === "object" && !("id" in property),
+          )
+          .map((property) => ({
+            ...property,
+            ownerId,
+          }));
+        // console.log("PROPERTIES TO CREATE", propertiesToCreate);
+        const propertyIds = await propertyServiceInstance.createProperties(
+          propertiesToCreate,
+          ownerId,
+        );
+        await addPropertiesToSurvey(surveyId, propertyIds, ownerId);
+
+        return { status: 200 };
+      } catch (error) {
+        console.error("Error importing NDX PDF", error);
+        return { status: 500 };
+      }
     },
   };
 };
