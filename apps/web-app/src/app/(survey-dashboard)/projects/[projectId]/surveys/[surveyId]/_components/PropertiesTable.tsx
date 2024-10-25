@@ -60,6 +60,7 @@ import { useRouter } from "next/navigation";
 import { useSurvey } from "~/hooks/useSurvey";
 import { SurveyDownloadLink } from "../pdf-preview/v1/_components/DownloadLink";
 import { useSupabase } from "~/hooks/useSupabase";
+import BrochureDialog from "./brochures/BrochureDialog";
 
 export type Property = PropertySchema & {
   brochures: Brochure[];
@@ -575,6 +576,14 @@ export function PropertiesTable({
     [selectedFields, createDraftEmails, generateDraftEmail, properties],
   );
 
+  const [brochureDialogState, setBrochureDialogState] = useState<{
+    propertyId: string;
+    open: boolean;
+  }>({ propertyId: "", open: false });
+  const handleEditBrochure = useCallback((propertyId: string) => {
+    setBrochureDialogState({ propertyId, open: true });
+  }, []);
+
   const tableRef = useRef<HTMLTableElement>(null);
 
   return (
@@ -722,6 +731,7 @@ export function PropertiesTable({
                                 (error) => error.propertyId === property.id,
                               )?.error
                             }
+                            onEditBrochure={handleEditBrochure}
                           />
                         );
                       })}
@@ -744,6 +754,18 @@ export function PropertiesTable({
           </div>
         )}
       </div>
+      <BrochureDialog
+        property={properties.find(
+          (p) => p.id === brochureDialogState.propertyId,
+        )}
+        open={brochureDialogState.open}
+        onOpenChange={() =>
+          setBrochureDialogState({
+            ...brochureDialogState,
+            open: false,
+          })
+        }
+      />
       <EmailTemplateDialog
         open={templateDialog}
         onOpenChange={setTemplateDialog}

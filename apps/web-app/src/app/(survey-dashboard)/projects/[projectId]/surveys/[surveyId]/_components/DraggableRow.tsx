@@ -41,6 +41,7 @@ import { Checkbox } from "~/components/ui/checkbox";
 import { Label } from "~/components/ui/label";
 import { type CheckedState } from "@radix-ui/react-checkbox";
 import {
+  ArrowTopRightOnSquareIcon,
   ArrowUpTrayIcon,
   BookOpenIcon,
   DocumentPlusIcon,
@@ -52,6 +53,11 @@ import { cn, emailIsDraft } from "~/lib/utils";
 import { useSearchParams } from "next/navigation";
 import axios from "axios";
 import { Button } from "~/components/ui/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "~/components/ui/tooltip";
 
 export const DraggableRow = ({
   photoUrl,
@@ -65,6 +71,7 @@ export const DraggableRow = ({
   selectedFields,
   onSelectedFieldsChange,
   mapError,
+  onEditBrochure,
 }: {
   photoUrl: string;
   property: Property;
@@ -77,6 +84,7 @@ export const DraggableRow = ({
   selectedFields: Record<string, Set<string>>;
   onSelectedFieldsChange: (selectedFields: Record<string, Set<string>>) => void;
   mapError: string | undefined;
+  onEditBrochure: (propertyId: string) => void;
 }) => {
   const {
     transform,
@@ -276,7 +284,7 @@ export const DraggableRow = ({
                 </div>
               ) : (
                 <div className="flex items-center justify-center rounded-md bg-gray-100 hover:bg-gray-200">
-                  <ImagePlusIcon className="size-8 text-gray-500" />
+                  <ImagePlusIcon className="size-8 text-gray-500" />{" "}
                 </div>
               )
             }
@@ -297,27 +305,54 @@ export const DraggableRow = ({
               </div>
               <div className="group absolute left-0 top-0 flex size-full items-center justify-center bg-black/0 hover:bg-black/30">
                 <div className="opacity-0 group-hover:opacity-100">
-                  <FileInput
-                    accept="application/pdf"
-                    triggerElement={
+                  <Tooltip>
+                    <TooltipTrigger asChild>
                       <Button
                         variant="outline"
                         size="icon"
-                        className="size-8 rounded-r-none"
+                        className="-mr-px size-8 rounded-r-none"
+                        onClick={() => {
+                          console.log("DELETE");
+                        }}
                       >
-                        <ArrowUpTrayIcon className="size-4" />
+                        <TrashFilledIcon className="size-4" />
                       </Button>
+                    </TooltipTrigger>
+                    <TooltipContent side="top">Delete brochure</TooltipContent>
+                  </Tooltip>
+                  <FileInput
+                    accept="application/pdf"
+                    triggerElement={
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            variant="outline"
+                            size="icon"
+                            className="size-8 rounded-none"
+                          >
+                            <ArrowUpTrayIcon className="size-4" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent side="top">
+                          Replace brochure
+                        </TooltipContent>
+                      </Tooltip>
                     }
                     handleFilesChange={() => null}
                   />
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    className="-ml-px size-8 rounded-l-none"
-                    onClick={() => null}
-                  >
-                    <TrashFilledIcon className="size-4" />
-                  </Button>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        className="-ml-px size-8 rounded-l-none"
+                        onClick={() => null}
+                      >
+                        <ArrowTopRightOnSquareIcon className="size-4" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent side="top">Preview brochure</TooltipContent>
+                  </Tooltip>
                 </div>
               </div>
             </div>
@@ -337,7 +372,11 @@ export const DraggableRow = ({
             />
           )}
           {property.brochures[0] && (
-            <Button variant="ghost" className="mt-2 w-full">
+            <Button
+              variant="ghost"
+              className="mt-2 w-full"
+              onClick={() => onEditBrochure(property.id)}
+            >
               Edit brochure
             </Button>
           )}
