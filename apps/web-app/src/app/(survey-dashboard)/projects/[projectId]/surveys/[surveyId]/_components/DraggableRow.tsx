@@ -314,7 +314,7 @@ export const DraggableRow = ({
                 href={
                   property.brochures[0].exportedUrl ?? property.brochures[0].url
                 }
-                className="relative flex size-full items-center justify-center bg-gray-100 group-hover:cursor-pointer group-hover:bg-gray-200"
+                className="relative flex size-full items-center justify-center bg-gray-300 group-hover:cursor-pointer group-hover:opacity-80"
                 target="_blank"
               >
                 {property.brochures[0].thumbnailUrl ? (
@@ -388,7 +388,7 @@ export const DraggableRow = ({
           )}
           {property.brochures[0] && (
             <Button
-              variant="ghost"
+              variant="outline"
               className="mt-2 w-full"
               onClick={() => onEditBrochure(property.id)}
             >
