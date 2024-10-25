@@ -75,11 +75,11 @@ export const surveyService = ({ db }: { db: PrismaClient }) => {
           name: input.surveyName,
           projectId: input.projectId,
           ownerId: userId,
-          attributes: {
+          columns: {
             createMany: {
               data: attributes.map((attribute, index) => ({
                 attributeId: attribute.id,
-                attributeIndex: index,
+                displayIndex: index,
               })),
             },
           },
@@ -99,6 +99,28 @@ export const surveyService = ({ db }: { db: PrismaClient }) => {
     deleteSurvey: async (surveyId: string, userId: string) => {
       const survey = await db.survey.delete({
         where: { id: surveyId, ownerId: userId },
+      });
+      return survey;
+    },
+
+    addColumn: async (
+      input: {
+        surveyId: string;
+        attributeId: string;
+        displayIndex: number;
+      },
+      userId: string,
+    ) => {
+      const survey = await db.survey.update({
+        where: { id: input.surveyId, ownerId: userId },
+        data: {
+          columns: {
+            create: {
+              attributeId: input.attributeId,
+              displayIndex: input.displayIndex,
+            },
+          },
+        },
       });
       return survey;
     },

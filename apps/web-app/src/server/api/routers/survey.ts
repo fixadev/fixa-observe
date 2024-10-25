@@ -1,13 +1,7 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { createSurveyInput, surveySchema } from "~/lib/survey";
-import {
-  attributeSchema,
-  createPropertySchema,
-  propertySchema,
-} from "~/lib/property";
 import { surveyService } from "~/server/services/survey";
-import { propertyService } from "~/server/services/property";
 import { db } from "~/server/db";
 
 const surveyServiceInstance = surveyService({ db });
@@ -34,9 +28,11 @@ export const surveyRouter = createTRPCRouter({
   addColumn: protectedProcedure
     .input(z.object({ attributeId: z.string(), displayIndex: z.number() }))
     .mutation(async ({ ctx, input }) => {
-      return {
-        status: 200,
-      };
+      return await surveyServiceInstance.addColumn(
+        input.attributeId,
+        input.displayIndex,
+        ctx.user.id,
+      );
     }),
 
   updateColumnAttribute: protectedProcedure
