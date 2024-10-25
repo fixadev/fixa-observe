@@ -18,7 +18,11 @@ import {
   AlertDialogTitle,
   AlertDialogDescription,
 } from "~/components/ui/alert-dialog";
-import { cn } from "~/lib/utils";
+import { cn, getBrochureFileName } from "~/lib/utils";
+import { BrochurePDFRenderer } from "./BrochurePDFRenderer";
+import Spinner from "~/components/Spinner";
+import { api } from "~/trpc/react";
+import axios from "axios";
 
 export default function BrochureDialog({
   property,
@@ -51,6 +55,7 @@ export default function BrochureDialog({
   );
 
   const handleEdit = useCallback((brochure: BrochureSchema) => {
+    console.log("Edited brochure...!", brochure);
     setEditedBrochure(brochure);
   }, []);
 
@@ -60,9 +65,50 @@ export default function BrochureDialog({
     onOpenChange(false);
   }, [onOpenChange]);
 
+  const { mutate: updateBrochure } = api.brochure.update.useMutation();
+  const { mutateAsync: updateExportedUrl } =
+    api.brochure.updateExportedUrl.useMutation();
+  const { mutateAsync: getPresignedS3Url } =
+    api.property.getPresignedS3Url.useMutation();
+
+  const [isSaving, setIsSaving] = useState<boolean>(false);
   const handleSave = useCallback(() => {
-    console.log("save!");
-  }, []);
+    if (!editedBrochure) return;
+    setIsSaving(true);
+    updateBrochure(editedBrochure);
+  }, [editedBrochure, updateBrochure]);
+
+  const handlePDFGenerated = useCallback(
+    async (pdfBlob: Blob) => {
+      if (!property || !brochure) return;
+
+      console.log("PDF generated!!");
+      const brochurePresignedUrl = await getPresignedS3Url({
+        fileName: getBrochureFileName(property, true),
+        fileType: "application/pdf",
+        keepOriginalName: true,
+      });
+      console.log("Uploading PDF to S3...");
+      await axios.put(brochurePresignedUrl, pdfBlob, {
+        headers: {
+          "Content-Type": "application/pdf",
+        },
+      });
+      console.log("PDF uploaded to S3!");
+
+      const brochureUrl =
+        brochurePresignedUrl.split("?")[0] ?? brochurePresignedUrl;
+      await updateExportedUrl({
+        brochureId: brochure.id,
+        exportedUrl: brochureUrl,
+      });
+
+      onOpenChange(false);
+      setIsSaving(false);
+      setEditedBrochure(null);
+    },
+    [property, brochure, getPresignedS3Url, updateExportedUrl, onOpenChange],
+  );
 
   if (!brochure) return null;
   return (
@@ -83,7 +129,9 @@ export default function BrochureDialog({
             <Button variant="outline" onClick={() => setConfirmDiscard(true)}>
               Discard
             </Button>
-            <Button onClick={handleSave}>Save changes</Button>
+            <Button onClick={handleSave} disabled={isSaving}>
+              {isSaving ? <Spinner /> : "Save changes"}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -103,6 +151,12 @@ export default function BrochureDialog({
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+      {isSaving && editedBrochure && (
+        <BrochurePDFRenderer
+          brochure={editedBrochure}
+          onPDFGenerated={handlePDFGenerated}
+        />
+      )}
     </>
   );
 }

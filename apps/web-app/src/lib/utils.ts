@@ -128,9 +128,9 @@ export function splitAddress(address: string) {
   return { streetAddress, city };
 }
 
-export function getBrochureFileName(property: Property) {
+export function getBrochureFileName(property: Property, exported = false) {
   const address = splitAddress(
     (property.attributes as { address?: string })?.address ?? "",
   );
-  return `${address.streetAddress}_${property.id}.pdf`;
+  return `${address.streetAddress}_${exported ? "_" : ""}${property.id}.pdf`;
 }

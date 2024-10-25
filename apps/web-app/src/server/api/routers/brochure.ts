@@ -2,6 +2,7 @@ import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { brochureService } from "~/server/services/brochure";
 import { db } from "~/server/db";
 import {
+  brochureSchema,
   pathSchema,
   removeRectanglesInput,
   transformedTextContentSchema,
@@ -11,6 +12,12 @@ import { z } from "zod";
 const brochureServiceInstance = brochureService({ db });
 
 export const brochureRouter = createTRPCRouter({
+  update: protectedProcedure
+    .input(brochureSchema)
+    .mutation(async ({ input }) => {
+      return await brochureServiceInstance.update(input);
+    }),
+
   inpaintRectangles: protectedProcedure
     .input(removeRectanglesInput)
     .mutation(async ({ input }) => {

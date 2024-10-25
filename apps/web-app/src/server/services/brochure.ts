@@ -1,6 +1,7 @@
 import { type PrismaClient } from "@prisma/client";
 import {
   brochureRectangles,
+  type BrochureSchema,
   type BrochureRectangles,
   type Path,
   type RemoveRectanglesInput,
@@ -11,6 +12,18 @@ import { env } from "~/env";
 
 export const brochureService = ({ db }: { db: PrismaClient }) => {
   return {
+    update: async (input: BrochureSchema) => {
+      await db.brochure.update({
+        where: { id: input.id },
+        data: {
+          ...input,
+          inpaintedRectangles: input.inpaintedRectangles ?? [],
+          textToRemove: input.textToRemove ?? [],
+          pathsToRemove: input.pathsToRemove ?? [],
+        },
+      });
+    },
+
     inpaintRectangles: async (input: RemoveRectanglesInput) => {
       try {
         const data = await db.brochure.findUnique({
