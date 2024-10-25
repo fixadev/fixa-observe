@@ -67,8 +67,7 @@ export const surveyService = ({ db }: { db: PrismaClient }) => {
     },
 
     create: async (input: CreateSurveyInput, userId: string) => {
-      const attributes =
-        await attributesServiceInstance.getDefaultAttributes(userId);
+      const attributes = await attributesServiceInstance.getDefaults(userId);
       const survey = await db.survey.create({
         data: {
           name: input.surveyName,
