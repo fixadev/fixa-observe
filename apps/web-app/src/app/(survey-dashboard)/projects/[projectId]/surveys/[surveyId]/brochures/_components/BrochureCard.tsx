@@ -1,9 +1,7 @@
 import Image from "next/image";
 import { Button } from "~/components/ui/button";
-import {
-  type BrochureSchema,
-  type PropertyWithBrochures,
-} from "~/lib/property";
+import { type PropertyWithBrochures } from "~/lib/property";
+import { type BrochureSchema } from "~/lib/brochure";
 import { api } from "~/trpc/react";
 import { BrochureCarousel } from "./BrochureCarousel";
 import { FilePlusIcon } from "lucide-react";
@@ -83,7 +81,7 @@ function UnapprovedBrochureCard({
   });
 
   const { mutateAsync: getPresignedS3Url } =
-    api.property.getPresignedS3Url.useMutation();
+    api.s3.getPresignedS3Url.useMutation();
 
   const handleCreateBrochure = async (files: FileList) => {
     setIsUploading(true);

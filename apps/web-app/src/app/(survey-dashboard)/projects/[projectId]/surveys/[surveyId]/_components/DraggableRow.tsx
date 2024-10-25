@@ -123,7 +123,7 @@ export const DraggableRow = ({
   });
 
   const { mutateAsync: getPresignedS3Url } =
-    api.property.getPresignedS3Url.useMutation();
+    api.s3.getPresignedS3Url.useMutation();
 
   const handleUpload = async (files: FileList) => {
     setPhotoUploading(true);

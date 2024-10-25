@@ -29,7 +29,7 @@ export const NDXOutputUploader = ({
   const { toast } = useToast();
 
   const { mutateAsync: getPresignedS3Url } =
-    api.property.getPresignedS3Url.useMutation();
+    api.s3.getPresignedS3Url.useMutation();
 
   const { mutateAsync: uploadNDXPDF } = api.survey.importNDXPDF.useMutation();
 

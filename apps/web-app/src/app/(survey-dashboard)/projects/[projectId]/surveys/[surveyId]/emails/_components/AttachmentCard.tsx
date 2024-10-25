@@ -56,7 +56,7 @@ export default function AttachmentCard({
     api.property.createBrochure.useMutation();
 
   const { mutateAsync: getPresignedS3Url } =
-    api.property.getPresignedS3Url.useMutation();
+    api.s3.getPresignedS3Url.useMutation();
 
   const dismissInfoMessage = useCallback(async () => {
     setAttachment((prev) => ({
