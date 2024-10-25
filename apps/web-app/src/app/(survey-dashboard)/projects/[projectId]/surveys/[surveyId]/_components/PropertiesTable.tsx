@@ -639,38 +639,49 @@ export function PropertiesTable({
           throw new Error("Property not found");
         }
 
-        const images = await pdfToImage({ file, pages: [1], height: 100 });
-        const thumbnailBase64 = images[0]!;
-        const base64Data = Buffer.from(
-          thumbnailBase64.replace(/^data:image\/\w+;base64,/, ""),
-          "base64",
-        );
-        const thumbnailPresignedUrl = await getPresignedS3Url({
-          fileName: `brochure-thumbnail-${propertyId}.png`,
-          fileType: "image/png",
-          keepOriginalName: true,
-        });
-        await axios.put(thumbnailPresignedUrl, base64Data, {
-          headers: {
-            "Content-Type": "image/png",
-          },
-        });
-        const thumbnailUrl =
-          thumbnailPresignedUrl.split("?")[0] ?? thumbnailPresignedUrl;
+        const uploadImageTask = async () => {
+          const images = await pdfToImage({ file, pages: [1], height: 100 });
+          const thumbnailBase64 = images[0]!;
+          const base64Data = Buffer.from(
+            thumbnailBase64.replace(/^data:image\/\w+;base64,/, ""),
+            "base64",
+          );
+          const thumbnailPresignedUrl = await getPresignedS3Url({
+            fileName: `brochure-thumbnail-${propertyId}.png`,
+            fileType: "image/png",
+            keepOriginalName: true,
+          });
+          await axios.put(thumbnailPresignedUrl, base64Data, {
+            headers: {
+              "Content-Type": "image/png",
+            },
+          });
+          const thumbnailUrl =
+            thumbnailPresignedUrl.split("?")[0] ?? thumbnailPresignedUrl;
+          return thumbnailUrl;
+        };
 
-        const brochurePresignedUrl = await getPresignedS3Url({
-          fileName: getBrochureFileName(property),
-          fileType: file.type,
-          keepOriginalName: true,
-        });
-        await axios.put(brochurePresignedUrl, file, {
-          headers: {
-            "Content-Type": file.type,
-          },
-        });
+        const uploadBrochureTask = async () => {
+          const brochurePresignedUrl = await getPresignedS3Url({
+            fileName: getBrochureFileName(property),
+            fileType: file.type,
+            keepOriginalName: true,
+          });
+          await axios.put(brochurePresignedUrl, file, {
+            headers: {
+              "Content-Type": file.type,
+            },
+          });
 
-        const uploadedFileUrl =
-          brochurePresignedUrl.split("?")[0] ?? brochurePresignedUrl;
+          const brochureUrl =
+            brochurePresignedUrl.split("?")[0] ?? brochurePresignedUrl;
+          return brochureUrl;
+        };
+
+        const [thumbnailUrl, brochureUrl] = await Promise.all([
+          uploadImageTask(),
+          uploadBrochureTask(),
+        ]);
 
         const result = await createBrochure({
           propertyId: property.id,
@@ -680,7 +691,7 @@ export function PropertiesTable({
             pathsToRemove: [],
             undoStack: [],
             deletedPages: [],
-            url: uploadedFileUrl,
+            url: brochureUrl,
             title: file.name,
             approved: false,
             createdAt: new Date(),
