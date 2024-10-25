@@ -10,6 +10,8 @@ export default function ContactPage() {
           at <a href="mailto:contact@apex.deal">contact@apex.deal</a>.
         </p>
         <p>
+          Pixa Inc.
+          <br />
           1395 22nd St.
           <br />
           Apt 857
