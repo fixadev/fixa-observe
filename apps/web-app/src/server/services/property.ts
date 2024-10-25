@@ -72,29 +72,15 @@ export const propertyService = ({ db }: { db: PrismaClient }) => {
       });
     },
 
-    createMany: async (input: CreatePropertySchema[], userId: string) => {
-      const startTime = new Date();
-      const formattedAddresses = await formatAddresses(
-        input.map((property) => ({
-          addressString: property.attributes.address ?? "",
-          suite: property.attributes.suite ?? "",
-          buildingName: property.attributes.buildingName ?? "",
-        })),
-      );
-      const brochures: (BrochureWithoutPropertyId | null)[] = input.map(
-        (property) => property.brochures[0] ?? null,
-      );
-
+    createManyWithBrochures: async (
+      input: CreatePropertySchema[],
+      userId: string,
+    ) => {
       const propertiesToCreate = input.map(
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        ({ brochures, ...property }, index) => ({
+        ({ brochureUrl, ...property }) => ({
           ...property,
           ownerId: userId,
-          attributes: {
-            ...property.attributes,
-            address: formattedAddresses?.[index]?.address ?? "",
-            displayAddress: formattedAddresses?.[index]?.displayAddress ?? "",
-          },
         }),
       );
 
@@ -102,22 +88,22 @@ export const propertyService = ({ db }: { db: PrismaClient }) => {
         data: propertiesToCreate,
       });
 
-      const endTime = new Date();
-      console.log(
-        "===============TIME TO CREATE PROPERTIES===============",
-        endTime.getTime() - startTime.getTime(),
-      );
-
-      const brochuresToCreate: Prisma.BrochureCreateManyInput[] = brochures
-        .map((brochure, index) => {
-          if (brochure) {
+      const brochuresToCreate: Prisma.BrochureCreateManyInput[] = input
+        .map((property, index) => {
+          if (property.brochureUrl) {
             return {
+              createdAt: new Date(),
+              updatedAt: new Date(),
+              url: property.brochureUrl,
               propertyId: createdProperties[index]?.id ?? "",
-              ...brochure,
               inpaintedRectangles: [],
               textToRemove: [],
               pathsToRemove: [],
+              undoStack: [],
+              deletedPages: [],
               exportedUrl: null,
+              title: "",
+              approved: false,
             };
           }
           return null;
@@ -128,11 +114,6 @@ export const propertyService = ({ db }: { db: PrismaClient }) => {
         const createdBrochures = await db.brochure.createManyAndReturn({
           data: brochuresToCreate,
         });
-        const endTime2 = new Date();
-        console.log(
-          "===============TIME TO CREATE BROCHURES===============",
-          endTime2.getTime() - startTime.getTime(),
-        );
 
         const brochuresToParse = createdBrochures.map((brochure) => ({
           url: brochure.url,
@@ -140,19 +121,13 @@ export const propertyService = ({ db }: { db: PrismaClient }) => {
           id: brochure.id,
         }));
 
-        const endTime3 = new Date();
-
-        console.log(
-          "===============SENDING REQUEST TO PARSE BROCHURES===============",
-          endTime3.getTime() - startTime.getTime(),
-        );
-
         // parse brochures in the background
         void fetch(`${env.NEXT_PUBLIC_API_URL}/api/parse-brochures`, {
           method: "POST",
           body: JSON.stringify({ brochures: brochuresToParse }),
         });
       }
+
       return createdProperties.map((property) => property.id);
     },
 

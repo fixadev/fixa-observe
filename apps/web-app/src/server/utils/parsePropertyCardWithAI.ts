@@ -4,30 +4,33 @@ import { zodResponseFormat } from "openai/helpers/zod.mjs";
 
 export type ParsedPropertyCard = z.infer<typeof parsedPropertyCardSchema>;
 export const parsedPropertyCardSchema = z.object({
+  // stuff that doesn't directly map to an attribute
   buildingName: z.string().nullable(),
   postalAddress: z.string(),
-  propertyType: z.string(),
-  listId: z.string(),
   suite: z.string().nullable(),
-  availDate: z.string(),
+
+  // stuff that does map to an attribute
+  propertyType: z.string().nullable(),
+  listId: z.string().nullable(),
+  availDate: z.string().nullable(),
   subtypeClass: z.string().nullable(),
-  spaceUse: z.string(),
-  leaseType: z.string(),
+  spaceUse: z.string().nullable(),
+  leaseType: z.string().nullable(),
   size: z.string(),
   availSpace: z.string(),
-  subExpDate: z.string(),
-  totalFloors: z.string(),
+  subExpDate: z.string().nullable(),
+  totalFloors: z.string().nullable(),
   cleanRm: z.boolean().nullable(),
   wetRm: z.boolean().nullable(),
   dhDoors: z.string().nullable(),
   glDoors: z.string().nullable(),
   clearHeight: z.string().nullable(),
   power: z.string().nullable(),
-  vacantSpace: z.string(),
-  leaseRate: z.string(),
-  constructionStatus: z.string(),
-  minDivisible: z.string(),
-  maxDivisible: z.string(),
+  vacantSpace: z.string().nullable(),
+  leaseRate: z.string().nullable(),
+  constructionStatus: z.string().nullable(),
+  minDivisible: z.string().nullable(),
+  maxDivisible: z.string().nullable(),
   expenses: z.string().nullable(),
   yearBuilt: z.string().nullable(),
   parkingRatio: z.string().nullable(),
@@ -46,7 +49,7 @@ export async function parsePropertyCardWithAI(text: string) {
 
   Suite is the text that comes after the "/" if the field is Floor/Suite.
 
-  Omit neighborhood text such as "Mountain View - Downtown" or "San Jose - Downtown" -- these are NOT building names.
+  Always omit neighborhood text such as "Mountain View - Downtown" or "San Jose - Downtown" -- these are NOT building names.
 
   Format the comments nicely with line breaks and the "-" character for bullet points.
   `;
