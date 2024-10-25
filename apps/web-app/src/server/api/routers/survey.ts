@@ -19,15 +19,6 @@ export const surveyRouter = createTRPCRouter({
       return await surveyServiceInstance.createSurvey(input, ctx.user.id);
     }),
 
-  getProjectSurveys: protectedProcedure
-    .input(z.object({ projectId: z.string() }))
-    .query(async ({ ctx, input }) => {
-      return await surveyServiceInstance.getProjectSurveys(
-        input.projectId,
-        ctx.user.id,
-      );
-    }),
-
   getSurvey: protectedProcedure
     .input(z.object({ surveyId: z.string() }))
     .query(async ({ ctx, input }) => {
@@ -37,14 +28,7 @@ export const surveyRouter = createTRPCRouter({
   getSurveyAttributes: protectedProcedure
     .input(z.object({ surveyId: z.string() }))
     .query(async ({ ctx, input }) => {
-      const attributes = await surveyServiceInstance.getSurveyAttributes(
-        input.surveyId,
-      );
-      if (attributes.length === 0) {
-        // get basic attributes
-        return await surveyServiceInstance.getAttributes(ctx.user.id);
-      }
-      return attributes;
+      return await surveyServiceInstance.getSurveyAttributes(input.surveyId);
     }),
 
   addColumn: protectedProcedure

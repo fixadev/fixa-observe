@@ -1,16 +1,145 @@
 import { type PrismaClient } from "@prisma/client";
 import {
   brochureRectangles,
+  type BrochureWithoutPropertyId,
   type BrochureRectangles,
   type Path,
   type RemoveRectanglesInput,
   type TransformedTextContent,
+  type BrochureSchema,
 } from "~/lib/property";
 import axios from "axios";
 import { env } from "~/env";
+import { extractContactInfo } from "../utils/extractContactInfo";
 
 export const brochureService = ({ db }: { db: PrismaClient }) => {
+  async function extractAndUploadContactInfo(
+    brochureUrl: string,
+    propertyId: string,
+    userId: string,
+  ) {
+    const contactInfo = await extractContactInfo(brochureUrl);
+    return await db.property.update({
+      where: {
+        id: propertyId,
+        ownerId: userId,
+      },
+      data: {
+        contacts: {
+          createMany: {
+            data: contactInfo ?? [],
+          },
+        },
+      },
+    });
+  }
   return {
+    createBrochure: async (
+      propertyId: string,
+      brochure: BrochureWithoutPropertyId,
+      userId: string,
+    ) => {
+      // TODO: determine if this actually works
+      void extractAndUploadContactInfo(brochure.url, propertyId, userId);
+      const response = await db.property.update({
+        where: {
+          id: propertyId,
+          ownerId: userId,
+        },
+        data: {
+          brochures: {
+            deleteMany: {},
+            create: [
+              {
+                ...brochure,
+                approved: false,
+                inpaintedRectangles: [],
+                textToRemove: [],
+                pathsToRemove: [],
+              },
+            ],
+          },
+        },
+      });
+      return response;
+    },
+
+    getBrochure: async (brochureId: string, userId: string) => {
+      const brochure = await db.brochure.findUnique({
+        where: {
+          id: brochureId,
+          property: {
+            ownerId: userId,
+          },
+        },
+      });
+      return brochure;
+    },
+
+    updateBrochure: async (brochure: BrochureSchema, userId: string) => {
+      const response = await db.brochure.update({
+        where: {
+          id: brochure.id,
+          property: {
+            ownerId: userId,
+          },
+        },
+        data: {
+          ...brochure,
+          inpaintedRectangles: brochure.inpaintedRectangles ?? [],
+          textToRemove: brochure.textToRemove ?? [],
+          pathsToRemove: brochure.pathsToRemove ?? [],
+        },
+      });
+      return response;
+    },
+
+    updateBrochureUrl: async (
+      brochureId: string,
+      url: string,
+      userId: string,
+    ) => {
+      return db.brochure.update({
+        where: {
+          id: brochureId,
+        },
+        data: {
+          url,
+        },
+      });
+    },
+
+    deleteBrochure: async (
+      propertyId: string,
+      brochureId: string,
+      userId: string,
+    ) => {
+      const property = await db.property.findUnique({
+        where: {
+          id: propertyId,
+          ownerId: userId,
+        },
+      });
+
+      if (!property) {
+        throw new Error("Property not found");
+      }
+
+      return db.property.update({
+        where: {
+          id: propertyId,
+          ownerId: userId,
+        },
+        data: {
+          brochures: {
+            delete: {
+              id: brochureId,
+            },
+          },
+        },
+      });
+    },
+
     inpaintRectangles: async (input: RemoveRectanglesInput) => {
       try {
         const data = await db.brochure.findUnique({

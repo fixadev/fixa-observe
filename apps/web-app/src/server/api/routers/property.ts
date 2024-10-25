@@ -23,11 +23,13 @@ export const propertyRouter = createTRPCRouter({
     }),
 
   createProperty: protectedProcedure
-    .input(propertySchema)
+    .input(z.object({ displayIndex: z.number(), surveyId: z.string() }))
     .mutation(async ({ ctx, input }) => {
-      return {
-        status: 200,
-      };
+      return await propertyServiceInstance.createProperty(
+        input.displayIndex,
+        input.surveyId,
+        ctx.user.id,
+      );
     }),
 
   editProperty: protectedProcedure

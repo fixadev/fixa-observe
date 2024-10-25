@@ -9,20 +9,11 @@ import { type CreateSurveyInput } from "~/lib/survey";
 import { type SurveySchema } from "~/lib/survey";
 import { propertyService } from "./property";
 import { parsePropertyCardWithAI } from "../utils/parsePropertyCardWithAI";
+import { attributesService } from "./attributes";
 
 export const surveyService = ({ db }: { db: PrismaClient }) => {
   const propertyServiceInstance = propertyService({ db });
-
-  const getAttributes = async (userId: string) => {
-    return db.attribute.findMany({
-      where: {
-        OR: [{ ownerId: userId }, { ownerId: null }],
-      },
-      orderBy: {
-        defaultIndex: "asc",
-      },
-    });
-  };
+  const attributesServiceInstance = attributesService({ db });
 
   const addPropertiesToSurvey = async (
     surveyId: string,
@@ -37,8 +28,6 @@ export const surveyService = ({ db }: { db: PrismaClient }) => {
   };
 
   return {
-    getAttributes,
-
     addPropertiesToSurvey,
 
     getProjectSurveys: async (projectId: string, userId: string) => {
@@ -89,7 +78,8 @@ export const surveyService = ({ db }: { db: PrismaClient }) => {
     },
 
     createSurvey: async (input: CreateSurveyInput, userId: string) => {
-      const attributes = await getAttributes(userId);
+      const attributes =
+        await attributesServiceInstance.getDefaultAttributes(userId);
       const survey = await db.survey.create({
         data: {
           name: input.surveyName,
