@@ -53,7 +53,7 @@ export default function ProjectPage({
       router.push(`/projects/${params.projectId}/surveys/${data.id}`);
       toast({
         title: "Survey created!",
-        duration: 5000,
+        duration: 3000,
       });
       setNewSurveyName("");
     },

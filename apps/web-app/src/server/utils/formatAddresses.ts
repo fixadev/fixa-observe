@@ -7,23 +7,36 @@ interface AddressValidationResponse {
       formattedAddress: string;
       postalAddress: {
         addressLines: string[];
+        locality: string;
+        postalCode: string;
+        administrativeArea: string;
       };
+      addressComponents: {
+        componentName: {
+          text: string;
+          languageCode: string;
+        };
+        componentType: string;
+      }[];
     };
   };
 }
 
-export async function formatAddresses(addresses: string[]) {
+export async function formatAddresses(
+  addresses: Array<{
+    addressString: string;
+    suite: string;
+    buildingName: string;
+  }>,
+) {
   const formatPromises = addresses.map(async (address) => {
     try {
-      const addressLines = address
-        .split("\n")
-        .filter((line) => line.trim() !== "");
       const response = await axios.post<AddressValidationResponse>(
         "https://addressvalidation.googleapis.com/v1:validateAddress",
         {
           address: {
             regionCode: "US",
-            addressLines: address,
+            addressLines: address.addressString,
           },
         },
         {
@@ -36,20 +49,29 @@ export async function formatAddresses(addresses: string[]) {
         },
       );
 
-      const formattedAddress = response.data.result.address.formattedAddress;
-      const streetAddress =
-        response.data.result.address.postalAddress.addressLines.join("\n");
+      // console.log(
+      //   "response",
+      //   JSON.stringify(response.data.result.address, null, 2),
+      // );
+
+      const { addressLines, locality, postalCode, administrativeArea } =
+        response.data.result.address.postalAddress;
+
+      const fullAddress = `${addressLines.join("\n")}\n${locality}, ${administrativeArea}\n ${postalCode}`;
+
+      const displayAddress = `${address.buildingName ? address.buildingName + "\n" : ""}${addressLines.join("\n")}\n${
+        address.suite ? "Suite " + address.suite + "\n" : ""
+      }${locality}`;
 
       return {
-        address: formattedAddress,
-        displayAddress:
-          streetAddress + "\n" + (addressLines[addressLines.length - 1] ?? ""),
+        address: fullAddress,
+        displayAddress,
       };
     } catch (error) {
       console.error(`Error formatting address: ${address}`, error);
       return {
-        address: address,
-        displayAddress: address,
+        address: "",
+        displayAddress: "",
       };
     }
   });
@@ -59,15 +81,22 @@ export async function formatAddresses(addresses: string[]) {
 
 // async function test() {
 //   const addresses = [
-//     "Town & Country Village\n855 El Camino Real Palo Alto, CA 94301\nPalo Alto - California Avenue",
-//     "550 Lytton Avenue Palo Alto, CA 94301\n Palo Alto - California Avenue",
+//     // "Town & Country Village\n855 El Camino Real Palo Alto, CA 94301\nPalo Alto - California Avenue",
+//     // "550 Lytton Avenue Palo Alto, CA 94301\n Palo Alto - California Avenue",
 //     // "2335 El Camino Real Palo Alto, CA 94306",
 //     // "409 Sherman Avenue Palo Alto, CA 94306",
+//     // "96 N Third Street San Jose, CA 95112-5589",
+//     {
+//       addressString:
+//         "Atrium Center, 31 North Second Street, San Jose, CA 95112",
+//       suite: "Suite 400",
+//       buildingName: "Atrium Center",
+//     },
 //   ];
 
 //   const formattedAddresses = await formatAddresses(addresses);
 
-//   console.log("formattedAddresses", formattedAddresses);
+//   // console.log("formattedAddresses", formattedAddresses);
 // }
 
 // void test();

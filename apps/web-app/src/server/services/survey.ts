@@ -7,8 +7,8 @@ import {
 } from "~/lib/property";
 import { type CreateSurveyInput } from "~/lib/survey";
 import { type SurveySchema } from "~/lib/survey";
-import { parsePropertyCard } from "../utils/parsePropertyCard";
 import { propertyService } from "./property";
+import { parsePropertyCardWithAI } from "../utils/parsePropertyCardWithAI";
 
 export const surveyService = ({ db }: { db: PrismaClient }) => {
   const propertyServiceInstance = propertyService({ db });
@@ -307,14 +307,16 @@ export const surveyService = ({ db }: { db: PrismaClient }) => {
           link: string | undefined;
         }>;
 
-        const parsedProperties = properties.map((property) => {
-          const parsedProperty = parsePropertyCard(property.text);
-          return {
-            ...parsedProperty,
-            brochureLink: property.link ?? undefined,
-            photoUrl: property.image_url,
-          };
-        });
+        const parsedProperties = await Promise.all(
+          properties.map(async (property) => {
+            const parsedProperty = await parsePropertyCardWithAI(property.text);
+            return {
+              ...parsedProperty,
+              brochureLink: property.link ?? undefined,
+              photoUrl: property.image_url,
+            };
+          }),
+        );
 
         const propertiesWithAttributes: Array<CreatePropertySchema> =
           parsedProperties.map((property, index) => {
@@ -342,12 +344,14 @@ export const surveyService = ({ db }: { db: PrismaClient }) => {
               displayIndex: index,
               surveyId: surveyId,
               attributes: {
-                address: property.address ?? "",
+                address: property.postalAddress ?? "",
+                buildingName: property.buildingName ?? "",
+                suite: property.suite ?? "",
                 size: property.availSpace ?? "",
                 divisibility:
                   `${property.minDivisible} - ${property.maxDivisible}` ?? "",
                 askingRate: property.leaseRate ?? "",
-                opEx: property.opEx ?? "",
+                opEx: property.expenses ?? "",
                 directSublease: property.leaseType ?? "",
                 comments: property.comments ?? "",
               },

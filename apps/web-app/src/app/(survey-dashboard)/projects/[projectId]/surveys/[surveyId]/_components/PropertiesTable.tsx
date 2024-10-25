@@ -226,6 +226,11 @@ export function PropertiesTable({
         setAddingProperties(true);
       }
 
+      console.log(
+        "======================input.attributes==========================",
+        updatedProperties,
+      );
+
       // Update state
       setPropertiesState(
         updatedProperties.map((property) => ({
@@ -410,7 +415,6 @@ export function PropertiesTable({
         {
           createdAt: new Date(),
           updatedAt: new Date(),
-          address: "",
           photoUrl: null,
           displayIndex: properties.length,
           attributes: {},

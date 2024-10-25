@@ -65,7 +65,11 @@ export const propertyService = ({ db }: { db: PrismaClient }) => {
     createProperties: async (input: CreatePropertySchema[], userId: string) => {
       const startTime = new Date();
       const formattedAddresses = await formatAddresses(
-        input.map((property) => property.attributes.address ?? ""),
+        input.map((property) => ({
+          addressString: property.attributes.address ?? "",
+          suite: property.attributes.suite ?? "",
+          buildingName: property.attributes.buildingName ?? "",
+        })),
       );
       const brochures: (BrochureWithoutPropertyId | null)[] = input.map(
         (property) => property.brochures[0] ?? null,
