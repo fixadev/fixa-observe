@@ -8,7 +8,6 @@ import {
 } from "~/lib/property";
 import { propertyService } from "~/server/services/property";
 import { db } from "~/server/db";
-import { createPresignedUrl } from "~/server/utils/s3utils";
 
 const propertyServiceInstance = propertyService({ db });
 
@@ -23,10 +22,26 @@ export const propertyRouter = createTRPCRouter({
       return await propertyServiceInstance.getProperty(input.id, ctx.user.id);
     }),
 
-  updateProperty: protectedProcedure
+  createProperty: protectedProcedure
     .input(propertySchema)
     .mutation(async ({ ctx, input }) => {
-      return await propertyServiceInstance.updateProperty(input, ctx.user.id);
+      return {
+        status: 200,
+      };
+    }),
+
+  editProperty: protectedProcedure
+    .input(
+      z.object({
+        propertyId: z.string(),
+        columnId: z.string(),
+        value: z.string(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      return {
+        status: 200,
+      };
     }),
 
   setPropertyPhoto: protectedProcedure
@@ -46,12 +61,6 @@ export const propertyRouter = createTRPCRouter({
         input.propertyId,
         ctx.user.id,
       );
-    }),
-
-  getPresignedS3Url: protectedProcedure
-    .input(z.object({ fileName: z.string(), fileType: z.string() }))
-    .mutation(async ({ ctx, input }) => {
-      return await createPresignedUrl(input.fileName, input.fileType);
     }),
 
   createBrochure: protectedProcedure
