@@ -576,12 +576,20 @@ export function PropertiesTable({
     [selectedFields, createDraftEmails, generateDraftEmail, properties],
   );
 
+  // const { mutateAsync: deleteBrochure } = api.brochure.delete.useMutation();
+  // const { mutateAsync: uploadBrochure } = api.brochure.upload.useMutation();
   const [brochureDialogState, setBrochureDialogState] = useState<{
     propertyId: string;
     open: boolean;
   }>({ propertyId: "", open: false });
   const handleEditBrochure = useCallback((propertyId: string) => {
     setBrochureDialogState({ propertyId, open: true });
+  }, []);
+  const handleDeleteBrochure = useCallback((propertyId: string) => {
+    // void deleteBrochure(propertyId);
+  }, []);
+  const handleUploadBrochure = useCallback((propertyId: string, file: File) => {
+    // void uploadBrochure(propertyId, file);
   }, []);
 
   const tableRef = useRef<HTMLTableElement>(null);
@@ -732,6 +740,8 @@ export function PropertiesTable({
                               )?.error
                             }
                             onEditBrochure={handleEditBrochure}
+                            onDeleteBrochure={handleDeleteBrochure}
+                            onUploadBrochure={handleUploadBrochure}
                           />
                         );
                       })}

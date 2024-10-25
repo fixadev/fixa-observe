@@ -58,6 +58,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "~/components/ui/tooltip";
+import Link from "next/link";
 
 export const DraggableRow = ({
   photoUrl,
@@ -72,6 +73,8 @@ export const DraggableRow = ({
   onSelectedFieldsChange,
   mapError,
   onEditBrochure,
+  onDeleteBrochure,
+  onUploadBrochure,
 }: {
   photoUrl: string;
   property: Property;
@@ -85,6 +88,8 @@ export const DraggableRow = ({
   onSelectedFieldsChange: (selectedFields: Record<string, Set<string>>) => void;
   mapError: string | undefined;
   onEditBrochure: (propertyId: string) => void;
+  onDeleteBrochure: (propertyId: string) => void;
+  onUploadBrochure: (propertyId: string, file: File) => void;
 }) => {
   const {
     transform,
@@ -311,9 +316,7 @@ export const DraggableRow = ({
                         variant="outline"
                         size="icon"
                         className="-mr-px size-8 rounded-r-none"
-                        onClick={() => {
-                          console.log("DELETE");
-                        }}
+                        onClick={() => onDeleteBrochure(property.id)}
                       >
                         <TrashFilledIcon className="size-4" />
                       </Button>
@@ -338,7 +341,9 @@ export const DraggableRow = ({
                         </TooltipContent>
                       </Tooltip>
                     }
-                    handleFilesChange={() => null}
+                    handleFilesChange={(files) =>
+                      onUploadBrochure(property.id, files[0]!)
+                    }
                   />
                   <Tooltip>
                     <TooltipTrigger asChild>
@@ -346,9 +351,17 @@ export const DraggableRow = ({
                         variant="outline"
                         size="icon"
                         className="-ml-px size-8 rounded-l-none"
-                        onClick={() => null}
+                        asChild
                       >
-                        <ArrowTopRightOnSquareIcon className="size-4" />
+                        <Link
+                          href={
+                            property.brochures[0].exportedUrl ??
+                            property.brochures[0].url
+                          }
+                          target="_blank"
+                        >
+                          <ArrowTopRightOnSquareIcon className="size-4" />
+                        </Link>
                       </Button>
                     </TooltipTrigger>
                     <TooltipContent side="top">Preview brochure</TooltipContent>
