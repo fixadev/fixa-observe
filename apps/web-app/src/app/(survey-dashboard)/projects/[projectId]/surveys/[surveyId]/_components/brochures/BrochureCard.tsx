@@ -92,12 +92,10 @@ function UnapprovedBrochureCard({
       console.error("No file selected");
       return;
     }
-
     const presignedS3Url = await getPresignedS3Url({
       fileName: file.name,
       fileType: file.type,
     });
-
     const response = await fetch(presignedS3Url, {
       method: "PUT",
       body: file,
@@ -105,16 +103,14 @@ function UnapprovedBrochureCard({
         "Content-Type": file.type,
       },
     });
-
     if (!response.ok) {
       throw new Error("Failed to upload file to S3");
     }
-
     const uploadedFileUrl = presignedS3Url.split("?")[0] ?? presignedS3Url;
-
     createBrochure({
       propertyId: property.id,
       brochure: {
+        thumbnailUrl: null,
         inpaintedRectangles: [],
         textToRemove: [],
         pathsToRemove: [],
