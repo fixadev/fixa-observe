@@ -226,11 +226,6 @@ export function PropertiesTable({
         setAddingProperties(true);
       }
 
-      console.log(
-        "======================input.attributes==========================",
-        updatedProperties,
-      );
-
       // Update state
       setPropertiesState(
         updatedProperties.map((property) => ({
