@@ -6,6 +6,8 @@ import { surveyRouter } from "./routers/survey";
 import { propertyRouter } from "./routers/property";
 import { brochureRouter } from "./routers/brochure";
 import { emailRouter } from "./routers/email";
+import { attributeRouter } from "./routers/attribute";
+import { s3Router } from "./routers/s3";
 /*  *
  * This is the primary router for your server.
  *
@@ -19,6 +21,8 @@ export const appRouter = createTRPCRouter({
   property: propertyRouter,
   brochure: brochureRouter,
   email: emailRouter,
+  attribute: attributeRouter,
+  s3: s3Router,
 });
 
 // export type definition of API
