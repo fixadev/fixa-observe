@@ -1,4 +1,4 @@
-import { type PrismaClient } from "@prisma/client";
+import { type Prisma, type PrismaClient } from "@prisma/client";
 import {
   brochureRectangles,
   type BrochureWithoutPropertyId,
@@ -62,6 +62,12 @@ export const brochureService = ({ db }: { db: PrismaClient }) => {
         },
       });
       return response;
+    },
+
+    createMany: async (brochures: Prisma.BrochureCreateManyInput[]) => {
+      return await db.brochure.createMany({
+        data: brochures,
+      });
     },
 
     get: async (brochureId: string, userId: string) => {

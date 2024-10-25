@@ -53,9 +53,10 @@ export const createPropertySchema = propertySchema
   .omit({
     id: true,
     ownerId: true,
+    brochures: true,
   })
   .extend({
-    brochures: z.array(brochureSchema.omit({ id: true, propertyId: true })),
+    brochureUrl: z.string(),
   });
 
 export type ImportPropertiesInput = z.infer<typeof importPropertiesInput>;

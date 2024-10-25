@@ -1,4 +1,4 @@
-import { type PrismaClient } from "@prisma/client";
+import { Prisma, type PrismaClient } from "@prisma/client";
 import axios from "axios";
 import { env } from "~/env";
 import {
@@ -10,6 +10,7 @@ import { type SurveySchema } from "~/lib/survey";
 import { propertyService } from "./property";
 import { parsePropertyCardWithAI } from "../utils/parsePropertyCardWithAI";
 import { attributesService } from "./attributes";
+import { formatAddresses } from "../utils/formatAddresses";
 
 export const surveyService = ({ db }: { db: PrismaClient }) => {
   const propertyServiceInstance = propertyService({ db });
@@ -101,7 +102,7 @@ export const surveyService = ({ db }: { db: PrismaClient }) => {
       return survey;
     },
 
-    addColumn: async (input: {
+    createColumn: async (input: {
       surveyId: string;
       attributeId: string;
       displayIndex: number;
@@ -204,60 +205,89 @@ export const surveyService = ({ db }: { db: PrismaClient }) => {
           }),
         );
 
-        const propertiesWithAttributes: Array<CreatePropertySchema> =
+        const existingColumns = await db.column.findMany({
+          where: { surveyId },
+        });
+
+        const allAttributes = await attributesServiceInstance.getAll(ownerId);
+        // figure out what attributes exist + what attributes are default visible
+        const defaultVisibleAttributes = allAttributes.filter(
+          (attribute) => attribute.defaultVisible,
+        );
+        const optionalAttributesToInclude = allAttributes
+          .filter((attribute) => !attribute.defaultVisible)
+          .filter((attribute) =>
+            parsedProperties.some(
+              (property) =>
+                (property as Record<string, unknown>)[attribute.label] !== null,
+            ),
+          );
+
+        // deduplicate attributes
+        const attributesToCreate = [
+          ...defaultVisibleAttributes,
+          ...optionalAttributesToInclude,
+        ].filter(
+          (attribute) =>
+            !existingColumns.some(
+              (column) => column.attributeId === attribute.id,
+            ),
+        );
+
+        // create a column for each attribute -- use default index
+        const newColumns = await db.column.createManyAndReturn({
+          data: attributesToCreate.map((attribute) => ({
+            attributeId: attribute.id,
+            displayIndex: attribute.defaultIndex,
+            surveyId,
+          })),
+        });
+
+        const allColumns = [...existingColumns, ...newColumns];
+
+        // const relevantAttributes = {
+        //   address: property.postalAddress ?? "",
+        //   buildingName: property.buildingName ?? "",
+        //   suite: property.suite ?? "",
+        //   size: property.availSpace ?? "",
+        //   divisibility:
+        //     `${property.minDivisible} - ${property.maxDivisible}` ?? "",
+        //   askingRate: property.leaseRate ?? "",
+        //   opEx: property.expenses ?? "",
+        //   directSublease: property.leaseType ?? "",
+        //   comments: property.comments ?? "",
+        // }
+
+        // create a property for each parsed property
+        const propertiesToCreate: Array<CreatePropertySchema> =
           parsedProperties.map((property, index) => {
             return {
               createdAt: new Date(),
               updatedAt: new Date(),
               photoUrl: property.photoUrl,
-              brochures: property.brochureLink
-                ? [
-                    {
-                      createdAt: new Date(),
-                      updatedAt: new Date(),
-                      url: property.brochureLink,
-                      title: "",
-                      approved: false,
-                      exportedUrl: null,
-                      inpaintedRectangles: [],
-                      textToRemove: [],
-                      pathsToRemove: [],
-                      undoStack: [],
-                      deletedPages: [],
-                    },
-                  ]
-                : [],
               displayIndex: index,
               surveyId: surveyId,
-              attributes: {
-                address: property.postalAddress ?? "",
-                buildingName: property.buildingName ?? "",
-                suite: property.suite ?? "",
-                size: property.availSpace ?? "",
-                divisibility:
-                  `${property.minDivisible} - ${property.maxDivisible}` ?? "",
-                askingRate: property.leaseRate ?? "",
-                opEx: property.expenses ?? "",
-                directSublease: property.leaseType ?? "",
-                comments: property.comments ?? "",
-              },
+              brochureUrl: property.brochureLink ?? "",
             };
           });
 
-        const propertiesToCreate = propertiesWithAttributes
-          .filter(
-            (property) => typeof property === "object" && !("id" in property),
-          )
-          .map((property) => ({
-            ...property,
+        const createdProperties =
+          await propertyServiceInstance.createManyWithBrochures(
+            propertiesToCreate,
             ownerId,
-          }));
-        // console.log("PROPERTIES TO CREATE", propertiesToCreate);
-        const propertyIds = await propertyServiceInstance.createProperties(
-          propertiesToCreate,
-          ownerId,
+          );
+
+        // populate attributes for each property
+
+        const formattedAddresses = await formatAddresses(
+          input.map((property) => ({
+            addressString: property.attributes.address ?? "",
+            suite: property.attributes.suite ?? "",
+            buildingName: property.attributes.buildingName ?? "",
+          })),
         );
-        await addPropertiesToSurvey(surveyId, propertyIds, ownerId);
+
+        await addProperties(surveyId, createdIds, ownerId);
 
         return { status: 200 };
       } catch (error) {

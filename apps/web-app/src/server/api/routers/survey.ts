@@ -31,7 +31,7 @@ export const surveyRouter = createTRPCRouter({
       return await surveyServiceInstance.delete(input.surveyId, ctx.user.id);
     }),
 
-  addColumn: protectedProcedure
+  createColumn: protectedProcedure
     .input(
       z.object({
         surveyId: z.string(),
