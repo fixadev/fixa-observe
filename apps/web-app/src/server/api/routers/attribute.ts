@@ -6,7 +6,7 @@ import { attributesService } from "~/server/services/attributes";
 const attributesServiceInstance = attributesService({ db });
 
 export const attributeRouter = createTRPCRouter({
-  createAttribute: protectedProcedure
+  create: protectedProcedure
     .input(z.object({ label: z.string(), defaultIndex: z.number() }))
     .mutation(async ({ ctx, input }) => {
       return await attributesServiceInstance.createAttribute(

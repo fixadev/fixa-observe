@@ -7,7 +7,7 @@ import {
   type RemoveRectanglesInput,
   type TransformedTextContent,
   type BrochureSchema,
-} from "~/lib/property";
+} from "~/lib/brochure";
 import axios from "axios";
 import { env } from "~/env";
 import { extractContactInfo } from "../utils/extractContactInfo";
@@ -34,7 +34,7 @@ export const brochureService = ({ db }: { db: PrismaClient }) => {
     });
   }
   return {
-    createBrochure: async (
+    create: async (
       propertyId: string,
       brochure: BrochureWithoutPropertyId,
       userId: string,
@@ -64,7 +64,7 @@ export const brochureService = ({ db }: { db: PrismaClient }) => {
       return response;
     },
 
-    getBrochure: async (brochureId: string, userId: string) => {
+    get: async (brochureId: string, userId: string) => {
       const brochure = await db.brochure.findUnique({
         where: {
           id: brochureId,
@@ -76,7 +76,7 @@ export const brochureService = ({ db }: { db: PrismaClient }) => {
       return brochure;
     },
 
-    updateBrochure: async (brochure: BrochureSchema, userId: string) => {
+    update: async (brochure: BrochureSchema, userId: string) => {
       const response = await db.brochure.update({
         where: {
           id: brochure.id,
@@ -94,11 +94,7 @@ export const brochureService = ({ db }: { db: PrismaClient }) => {
       return response;
     },
 
-    updateBrochureUrl: async (
-      brochureId: string,
-      url: string,
-      userId: string,
-    ) => {
+    updateUrl: async (brochureId: string, url: string, userId: string) => {
       return db.brochure.update({
         where: {
           id: brochureId,
@@ -109,11 +105,7 @@ export const brochureService = ({ db }: { db: PrismaClient }) => {
       });
     },
 
-    deleteBrochure: async (
-      propertyId: string,
-      brochureId: string,
-      userId: string,
-    ) => {
+    delete: async (propertyId: string, brochureId: string, userId: string) => {
       const property = await db.property.findUnique({
         where: {
           id: propertyId,

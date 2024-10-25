@@ -1,35 +1,78 @@
-import { z } from "zod";
 import { type Prisma, type PrismaClient } from "@prisma/client";
 import {
   type CreatePropertySchema,
-  type BrochureWithoutPropertyId,
   type PropertySchema,
+  type CreateEmptyPropertySchema,
 } from "~/lib/property";
+import { type BrochureWithoutPropertyId } from "~/lib/brochure";
 import { formatAddresses } from "../utils/formatAddresses";
 import { env } from "~/env";
 
 export const propertyService = ({ db }: { db: PrismaClient }) => {
   return {
-    createProperty: async (
-      input: z.infer<
-        typeof z.object({
-          displayIndex: z.number(),
-          surveyId: z.string(),
-          ownerId: z.string(),
-        })
-      >
-    ) => {
+    create: async (input: CreateEmptyPropertySchema) => {
       const property = await db.property.create({
         data: {
-          displayIndex,
-          ownerId: userId,
-          surveyId: surveyId,
+          displayIndex: input.displayIndex,
+          ownerId: input.ownerId,
+          surveyId: input.surveyId,
         },
       });
       return property.id;
     },
 
-    createProperties: async (input: CreatePropertySchema[], userId: string) => {
+    get: async (propertyId: string, userId: string) => {
+      const property = await db.property.findUnique({
+        where: {
+          id: propertyId,
+          ownerId: userId,
+        },
+        include: {
+          brochures: true,
+          emailThreads: true,
+        },
+      });
+
+      return property;
+    },
+
+    update: async (property: PropertySchema, userId: string) => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { brochures, ...propertyData } = property;
+      const response = await db.property.update({
+        where: {
+          id: property.id,
+          ownerId: userId,
+        },
+        data: {
+          ...propertyData,
+          ownerId: userId,
+        },
+      });
+      return response;
+    },
+
+    delete: async (propertyId: string, userId: string) => {
+      const property = await db.property.findUnique({
+        where: {
+          id: propertyId,
+          ownerId: userId,
+        },
+      });
+
+      if (!property) {
+        throw new Error("Property not found");
+      }
+
+      return db.property.delete({
+        where: {
+          id: propertyId,
+          ownerId: userId,
+        },
+      });
+    },
+
+    createMany: async (input: CreatePropertySchema[], userId: string) => {
       const startTime = new Date();
       const formattedAddresses = await formatAddresses(
         input.map((property) => ({
@@ -113,42 +156,7 @@ export const propertyService = ({ db }: { db: PrismaClient }) => {
       return createdProperties.map((property) => property.id);
     },
 
-    getProperty: async (propertyId: string, userId: string) => {
-      const property = await db.property.findUnique({
-        where: {
-          id: propertyId,
-          ownerId: userId,
-        },
-        include: {
-          brochures: true,
-          emailThreads: true,
-        },
-      });
-
-      return property;
-    },
-
-    updateProperty: async (property: PropertySchema, userId: string) => {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { brochures, ...propertyData } = property;
-      const response = await db.property.update({
-        where: {
-          id: property.id,
-          ownerId: userId,
-        },
-        data: {
-          ...propertyData,
-          ownerId: userId,
-        },
-      });
-      return response;
-    },
-
-    setPropertyPhoto: async (
-      propertyId: string,
-      photoUrl: string,
-      userId: string,
-    ) => {
+    setPhoto: async (propertyId: string, photoUrl: string, userId: string) => {
       await db.property.update({
         where: {
           id: propertyId,
@@ -161,7 +169,7 @@ export const propertyService = ({ db }: { db: PrismaClient }) => {
       return photoUrl;
     },
 
-    deletePropertyPhoto: async (propertyId: string, userId: string) => {
+    deletePhoto: async (propertyId: string, userId: string) => {
       const property = await db.property.findUnique({
         where: {
           id: propertyId,
@@ -180,26 +188,6 @@ export const propertyService = ({ db }: { db: PrismaClient }) => {
         },
         data: {
           photoUrl: null,
-        },
-      });
-    },
-
-    deleteProperty: async (propertyId: string, userId: string) => {
-      const property = await db.property.findUnique({
-        where: {
-          id: propertyId,
-          ownerId: userId,
-        },
-      });
-
-      if (!property) {
-        throw new Error("Property not found");
-      }
-
-      return db.property.delete({
-        where: {
-          id: propertyId,
-          ownerId: userId,
         },
       });
     },

@@ -7,32 +7,45 @@ import { db } from "~/server/db";
 const surveyServiceInstance = surveyService({ db });
 
 export const surveyRouter = createTRPCRouter({
-  createSurvey: protectedProcedure
+  create: protectedProcedure
     .input(createSurveyInput)
     .mutation(async ({ ctx, input }) => {
-      return await surveyServiceInstance.createSurvey(input, ctx.user.id);
+      return await surveyServiceInstance.create(input, ctx.user.id);
     }),
 
-  getSurvey: protectedProcedure
+  get: protectedProcedure
     .input(z.object({ surveyId: z.string() }))
     .query(async ({ ctx, input }) => {
-      return await surveyServiceInstance.getSurvey(input.surveyId, ctx.user.id);
+      return await surveyServiceInstance.get(input.surveyId, ctx.user.id);
     }),
 
-  getSurveyAttributes: protectedProcedure
+  update: protectedProcedure
+    .input(surveySchema)
+    .mutation(async ({ ctx, input }) => {
+      return await surveyServiceInstance.update(input, ctx.user.id);
+    }),
+
+  delete: protectedProcedure
     .input(z.object({ surveyId: z.string() }))
-    .query(async ({ ctx, input }) => {
-      return await surveyServiceInstance.getSurveyAttributes(input.surveyId);
+    .mutation(async ({ ctx, input }) => {
+      return await surveyServiceInstance.delete(input.surveyId, ctx.user.id);
     }),
 
   addColumn: protectedProcedure
-    .input(z.object({ attributeId: z.string(), displayIndex: z.number() }))
+    .input(
+      z.object({
+        surveyId: z.string(),
+        attributeId: z.string(),
+        displayIndex: z.number(),
+      }),
+    )
     .mutation(async ({ ctx, input }) => {
-      return await surveyServiceInstance.addColumn(
-        input.attributeId,
-        input.displayIndex,
-        ctx.user.id,
-      );
+      return await surveyServiceInstance.addColumn({
+        surveyId: input.surveyId,
+        attributeId: input.attributeId,
+        displayIndex: input.displayIndex,
+        userId: ctx.user.id,
+      });
     }),
 
   updateColumnAttribute: protectedProcedure
@@ -46,21 +59,17 @@ export const surveyRouter = createTRPCRouter({
   updateColumnsOrder: protectedProcedure
     .input(
       z.object({
-        oldOrder: z.array(z.string()),
+        columnIds: z.array(z.string()),
         oldIndex: z.number(),
         newIndex: z.number(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      return {
-        status: 200,
-      };
-    }),
-
-  updateSurvey: protectedProcedure
-    .input(surveySchema)
-    .mutation(async ({ ctx, input }) => {
-      return await surveyServiceInstance.updateSurvey(input, ctx.user.id);
+      return await surveyServiceInstance.updateColumnsOrder(
+        input.columnIds,
+        input.oldIndex,
+        input.newIndex,
+      );
     }),
 
   updatePropertiesOrder: protectedProcedure
@@ -76,15 +85,6 @@ export const surveyRouter = createTRPCRouter({
         input.propertyIds,
         input.oldIndex,
         input.newIndex,
-      );
-    }),
-
-  deleteSurvey: protectedProcedure
-    .input(z.object({ surveyId: z.string() }))
-    .mutation(async ({ ctx, input }) => {
-      return await surveyServiceInstance.deleteSurvey(
-        input.surveyId,
-        ctx.user.id,
       );
     }),
 

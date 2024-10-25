@@ -39,6 +39,15 @@ export const photoUploadSchema = z.object({
   photoUrl: z.string(),
 });
 
+export type CreateEmptyPropertySchema = z.infer<
+  typeof createEmptyPropertySchema
+>;
+export const createEmptyPropertySchema = z.object({
+  displayIndex: z.number(),
+  surveyId: z.string(),
+  ownerId: z.string(),
+});
+
 export type CreatePropertySchema = z.infer<typeof createPropertySchema>;
 export const createPropertySchema = propertySchema
   .omit({
@@ -68,48 +77,3 @@ export const headerMappingSchema = z.record(
 );
 
 export type HeaderMapping = z.infer<typeof headerMappingSchema>;
-
-export type BrochureRectangles = z.infer<typeof brochureRectangles>;
-export const brochureRectangles = z.array(
-  z.object({
-    id: z.string().optional(),
-    pageIndex: z.number(),
-    x: z.number(),
-    y: z.number(),
-    width: z.number(),
-    height: z.number(),
-    imageUrl: z.string().optional(),
-  }),
-);
-
-export type RemoveRectanglesInput = z.infer<typeof removeRectanglesInput>;
-export const removeRectanglesInput = z.object({
-  brochureId: z.string(),
-  rectanglesToRemove: brochureRectangles,
-});
-
-export type TransformedTextContent = z.infer<
-  typeof transformedTextContentSchema
->;
-export const transformedTextContentSchema = z.object({
-  id: z.string().optional(),
-  pageIndex: z.number(),
-  str: z.string(),
-  x: z.number(),
-  y: z.number(),
-  left: z.number(),
-  bottom: z.number(),
-  width: z.number(),
-  height: z.number(),
-});
-
-export type Path = z.infer<typeof pathSchema>;
-export const pathSchema = z.object({
-  id: z.string().optional(),
-  pageIndex: z.number(),
-  minMax: z.array(z.number()),
-  x: z.number(),
-  y: z.number(),
-  width: z.number(),
-  height: z.number(),
-});
