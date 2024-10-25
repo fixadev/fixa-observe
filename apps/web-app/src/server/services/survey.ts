@@ -67,16 +67,6 @@ export const surveyService = ({ db }: { db: PrismaClient }) => {
       return survey;
     },
 
-    getSurveyAttributes: async (surveyId: string) => {
-      const attributes = await db.attributesOnSurveys.findMany({
-        where: { surveyId },
-        include: { attribute: true },
-      });
-      return attributes
-        .sort((a, b) => a.attributeIndex - b.attributeIndex)
-        .map((attr) => attr.attribute);
-    },
-
     createSurvey: async (input: CreateSurveyInput, userId: string) => {
       const attributes =
         await attributesServiceInstance.getDefaultAttributes(userId);
@@ -106,109 +96,21 @@ export const surveyService = ({ db }: { db: PrismaClient }) => {
       return result;
     },
 
-    createAttributes: async (
-      surveyId: string,
-      attributes: AttributeSchema[],
-      userId: string,
-    ) => {
-      const result = await db.attribute.createMany({
-        data: attributes.map((attribute) => ({
-          ...attribute,
-          ownerId: userId,
-        })),
-      });
-
-      return result;
-    },
-
-    // TODO: simplify this
-    addAttributes: async (
-      surveyId: string,
-      attributes: AttributeSchema[],
-      userId: string,
-    ) => {
-      const existingAttributes = await db.attribute.findMany({
-        where: {
-          id: { in: attributes.map((attr) => attr.id) },
-        },
-      });
-      const attributesToCreate = attributes
-        .filter(
-          (attribute) =>
-            !existingAttributes.some(
-              (existing) => existing.id === attribute.id,
-            ),
-        )
-        .map((attribute) => ({ ...attribute, ownerId: userId }));
-
-      await db.attribute.createMany({
-        data: attributesToCreate,
-      });
-
-      const result = await db.survey.update({
+    deleteSurvey: async (surveyId: string, userId: string) => {
+      const survey = await db.survey.delete({
         where: { id: surveyId, ownerId: userId },
-        data: {
-          attributes: {
-            createMany: {
-              data: attributesToCreate.map((attribute) => ({
-                attributeId: attribute.id,
-                attributeIndex: attributes.findIndex(
-                  (attr) => attr.id === attribute.id,
-                ),
-              })),
-            },
-          },
-        },
       });
-      return result;
+      return survey;
     },
 
-    updateAttributes: async (
-      attributes: AttributeSchema[],
-      idToUpdate: string | undefined,
-      userId: string,
-    ) => {
-      if (!idToUpdate) {
-        return null;
-      }
-      const attributeToUpdate = attributes.find(
-        (attribute) => attribute.id === idToUpdate,
-      );
-
-      const result = await db.attribute.update({
-        where: { id: idToUpdate, ownerId: userId },
-        data: {
-          ...attributeToUpdate,
-        },
+    getSurveyAttributes: async (surveyId: string) => {
+      const attributes = await db.attributesOnSurveys.findMany({
+        where: { surveyId },
+        include: { attribute: true },
       });
-      return result;
-    },
-
-    deleteAttribute: async (
-      surveyId: string,
-      idToDelete: string | undefined,
-      userId: string,
-    ) => {
-      if (!idToDelete) {
-        return null;
-      }
-
-      await db.attributesOnSurveys.deleteMany({
-        where: {
-          surveyId,
-          attributeId: idToDelete,
-        },
-      });
-
-      const attribute = await db.attribute.findUnique({
-        where: { id: idToDelete },
-      });
-
-      if (attribute?.ownerId === userId) {
-        await db.attribute.delete({
-          where: { id: idToDelete },
-        });
-      }
+      return attributes
+        .sort((a, b) => a.attributeIndex - b.attributeIndex)
+        .map((attr) => attr.attribute);
     },
 
     updateAttributesOrder: async (
@@ -268,13 +170,6 @@ export const surveyService = ({ db }: { db: PrismaClient }) => {
 
       // Execute all updates in a batch transaction
       await db.$transaction(updatePromises);
-    },
-
-    deleteSurvey: async (surveyId: string, userId: string) => {
-      const survey = await db.survey.delete({
-        where: { id: surveyId, ownerId: userId },
-      });
-      return survey;
     },
 
     importNDXPDF: async (surveyId: string, pdfUrl: string, ownerId: string) => {

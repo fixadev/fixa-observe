@@ -13,6 +13,8 @@ export const attributesService = ({ db }: { db: PrismaClient }) => {
   };
 
   return {
+    getDefaultAttributes,
+
     createAttribute: async (
       attributeLabel: string,
       defaultIndex: number,
