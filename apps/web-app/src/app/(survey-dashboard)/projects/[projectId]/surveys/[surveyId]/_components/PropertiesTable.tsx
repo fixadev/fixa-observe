@@ -33,11 +33,6 @@ import { Button } from "~/components/ui/button";
 import { EnvelopeIcon, PlusIcon } from "@heroicons/react/24/solid";
 import { NDXOutputUploader } from "./NDXOutputUploader";
 import { api } from "~/trpc/react";
-import {
-  type PropertySchema,
-  type AttributeSchema,
-  type CreatePropertySchema,
-} from "~/lib/property";
 import { DraggableHeader } from "./DraggableHeader";
 import { DraggableRow } from "./DraggableRow";
 import Spinner from "~/components/Spinner";
@@ -47,29 +42,53 @@ import {
   DEFAULT_EMAIL_TEMPLATE_SUBJECT,
   REPLACEMENT_VARIABLES,
 } from "~/lib/constants";
-import type {
-  Brochure,
-  EmailThread,
-  Contact,
-  EmailTemplate,
-  Email,
+import {
+  type EmailTemplate,
+  AttachmentSchema,
+  BrochureSchema,
+  ContactSchema,
+  EmailSchema,
+  EmailThreadSchema,
+  PropertySchema,
+  PropertyValueSchema,
 } from "prisma/generated/zod";
 import { replaceTemplateVariables, splitAddress } from "~/lib/utils";
 import { useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
-import { useSurvey } from "~/hooks/useSurvey";
+import {
+  type ColumnWithIncludes,
+  type PropertyWithIncludes,
+  useSurvey,
+} from "~/hooks/useSurvey";
+import { z } from "zod";
 import { SurveyDownloadLink } from "../pdf-preview/v1/_components/DownloadLink";
-import { useSupabase } from "~/hooks/useSupabase";
 
-export type Property = PropertySchema & {
-  brochures: Brochure[];
-  emailThreads: (EmailThread & { emails: Email[] })[];
-  contacts: Contact[];
+export type Property = PropertyWithIncludes & {
   isNew?: boolean;
 };
-export type Attribute = AttributeSchema & {
+export type Column = ColumnWithIncludes & {
   isNew?: boolean;
 };
+export const TablePropertySchema = PropertySchema.extend({
+  createdAt: z.coerce.date().default(new Date()),
+  updatedAt: z.coerce.date().default(new Date()),
+  photoUrl: z.string().nullable().default(null),
+  ownerId: z.string().default(""),
+  propertyValues: z.array(PropertyValueSchema).default([]),
+  contacts: z.array(ContactSchema).default([]),
+  emailThreads: z
+    .array(
+      EmailThreadSchema.extend({
+        emails: z.array(
+          EmailSchema.extend({
+            attachments: z.array(AttachmentSchema).default([]),
+          }),
+        ),
+      }),
+    )
+    .default([]),
+  brochures: z.array(BrochureSchema).default([]),
+});
 
 export type PropertiesTableState = "edit" | "select-fields";
 
@@ -82,221 +101,61 @@ export function PropertiesTable({
 }) {
   const { user } = useUser();
   const router = useRouter();
-  const [properties, setPropertiesState] = useState<Property[]>([]);
-  const [attributesOrder, setAttributesOrderState] = useState<Attribute[]>([]);
+  const [properties, setProperties] = useState<Property[]>([]);
+  const [columns, setColumns] = useState<Column[]>([]);
   const [draggingRow, setDraggingRow] = useState<boolean>(false);
   const [isImportingProperties, setIsImportingProperties] =
     useState<boolean>(false);
-  const { survey, isLoadingSurvey, refetchSurvey } = useSurvey();
+  const { survey, isLoadingSurvey } = useSurvey();
 
   const [mapErrors, setMapErrors] = useState<
     { propertyId: string; error: string }[]
   >([]);
 
-  // const supabase = useSupabase();
-  // useEffect(() => {
-  //   if (supabase) {
-  //     const channel = supabase
-  //       .channel("table_db_changes")
-  //       .on(
-  //         "postgres_changes",
-  //         {
-  //           event: "*",
-  //           schema: "public",
-  //           table: "Contact",
-  //         },
-  //         (payload) => {
-  //           console.log("PAYLOAD", payload);
-  //         },
-  //       )
-  //       .subscribe();
-
-  //     return () => {
-  //       void supabase.removeChannel(channel);
-  //     };
-  //   }
-  // }, [supabase]);
-
-  // useEffect(() => {
-  //   console.log("MAP ERRORS");
-  //   console.log(mapErrors);
-  // }, [mapErrors]);
-
+  // Load properties and columns from survey
   useEffect(() => {
-    if (survey?.properties) {
-      setPropertiesState(
-        survey.properties.map((property) => ({
-          ...property,
-          attributes: property.attributes as Record<string, string>,
-          isNew: false,
-        })),
-      );
-      setIsImportingProperties(false);
-    }
+    if (!survey) return;
+
+    setProperties(
+      survey.properties.map((property) => ({
+        ...property,
+        isNew: false,
+      })),
+    );
+
+    setColumns(
+      survey.columns.map((column) => ({
+        ...column,
+        isNew: false,
+      })),
+    );
+
+    setIsImportingProperties(false);
   }, [survey]);
-
-  const { data: attributes } = api.survey.getSurveyAttributes.useQuery({
-    surveyId,
-  });
-  const attributesMap = useMemo(
-    () => new Map(attributes?.map((attr) => [attr.id, attr]) ?? []),
-    [attributes],
-  );
-
-  useEffect(() => {
-    if (attributes) {
-      setAttributesOrderState(
-        attributes.map((attr) => ({
-          ...attr,
-          isNew: false,
-        })),
-      );
-    }
-  }, [attributes]);
 
   const pendingMutations = useRef(0);
 
-  const [addingProperties, setAddingProperties] = useState(false);
-
-  const { mutate: updateAttributes } = api.survey.updateAttributes.useMutation({
-    onMutate: () => pendingMutations.current++,
-    onSettled: () => {
-      pendingMutations.current--;
-      if (pendingMutations.current === 0) {
-        // void refetchSurvey();
-        // void refetchAttributes();
-      }
-    },
-  });
-
-  const { mutateAsync: updateProperties } =
-    api.survey.updateProperties.useMutation({
-      onMutate: () => pendingMutations.current++,
-      onSettled: () => {
-        pendingMutations.current--;
-        if (pendingMutations.current === 0) {
-          // void refetchSurvey();
-        }
-        if (addingProperties) {
-          void refetchSurvey();
-          setAddingProperties(false);
-        }
-        setIsImportingProperties(false);
-      },
-    });
-
+  // Property mutations
+  const { mutateAsync: createProperty } = api.property.create.useMutation();
+  const { mutateAsync: updatePropertyValue } =
+    api.property.updateValue.useMutation();
   const { mutateAsync: updatePropertiesOrder } =
-    api.survey.updatePropertiesOrder.useMutation({
-      onMutate: () => pendingMutations.current++,
-      onSettled: () => {
-        // pendingMutations.current--;
-      },
-    });
+    api.survey.updatePropertiesOrder.useMutation();
+  const { mutateAsync: deleteProperty } = api.property.delete.useMutation();
 
-  // TODO: refactor this into the separate functions
-  const setProperties = useCallback(
-    async (
-      newPropertiesOrCallback:
-        | Array<PropertySchema | (CreatePropertySchema & { isNew?: boolean })>
-        | ((
-            prevProperties: Array<
-              PropertySchema | (CreatePropertySchema & { isNew?: boolean })
-            >,
-          ) => Array<
-            PropertySchema | (CreatePropertySchema & { isNew?: boolean })
-          >),
-      action: "add" | "update" | "delete",
-      propertyId?: string,
-    ) => {
-      if (!survey) return;
-      let updatedProperties: (PropertySchema & {
-        emailThreads?: (EmailThread & { emails: Email[] })[];
-        contacts?: Contact[];
-        brochures?: Brochure[];
-      })[];
-      if (typeof newPropertiesOrCallback === "function") {
-        updatedProperties = newPropertiesOrCallback(
-          properties,
-        ) as typeof updatedProperties;
-      } else {
-        updatedProperties = newPropertiesOrCallback as typeof updatedProperties;
-      }
-
-      if (action === "add") {
-        setAddingProperties(true);
-      }
-
-      // Update state
-      setPropertiesState(
-        updatedProperties.map((property) => ({
-          ...property,
-          attributes: { ...property.attributes },
-          emailThreads: property.emailThreads ?? [],
-          contacts: property.contacts ?? [],
-          brochures: property.brochures ?? [],
-        })),
-      );
-
-      try {
-        await updateProperties({
-          surveyId,
-          properties: updatedProperties,
-          action,
-          propertyId,
-        });
-      } catch (error) {
-        console.error("Failed to update properties:", error);
-      }
-    },
-    [survey, properties, surveyId, updateProperties],
-  );
+  // Column mutations
+  const { mutateAsync: createColumn } = api.survey.createColumn.useMutation();
+  const { mutateAsync: updateColumn } = api.survey.updateColumn.useMutation();
+  const { mutateAsync: updateColumnsOrder } =
+    api.survey.updateColumnsOrder.useMutation();
+  const { mutateAsync: deleteColumn } = api.survey.deleteColumn.useMutation();
 
   // state setter wrapper to update db as well
-  const modifyAttributes = useCallback(
-    async (
-      newOrderOrCallback:
-        | Attribute[]
-        | ((prevOrder: Attribute[]) => Attribute[]),
-      action: "order" | "add" | "update" | "delete",
-      attributeId?: string,
-    ) => {
-      if (!survey) return;
-      let newOrder: Attribute[];
-      // console.log("NEW ORDER OR CALLBACK", newOrderOrCallback);
-      if (typeof newOrderOrCallback === "function") {
-        newOrder = newOrderOrCallback(attributesOrder);
-      } else {
-        newOrder = newOrderOrCallback;
-      }
-      try {
-        void updateAttributes({
-          surveyId,
-          attributes: newOrder,
-          action,
-          attributeId,
-        });
-        setAttributesOrderState(newOrder);
-      } catch (error) {
-        console.error("Failed to update attributes order:", error);
-      }
-    },
-    [
-      survey,
-      attributesOrder,
-      surveyId,
-      updateAttributes,
-      setAttributesOrderState,
-    ],
-  );
-
   const rowIds = useMemo(
     () => properties.map((property) => property.id),
     [properties],
   );
-  const colIds = useMemo(
-    () => attributesOrder?.map((attribute) => attribute.id),
-    [attributesOrder],
-  );
+  const colIds = useMemo(() => columns.map((column) => column.id), [columns]);
 
   const handleDragEnd = useCallback(
     (event: DragEndEvent) => {
@@ -305,22 +164,25 @@ export function PropertiesTable({
         if (draggingRow) {
           const oldIndex = rowIds.findIndex((id) => id === active.id);
           const newIndex = rowIds.findIndex((id) => id === over.id);
-          setPropertiesState((prev) => arrayMove(prev, oldIndex, newIndex));
+          setProperties((prev) => arrayMove(prev, oldIndex, newIndex));
           void updatePropertiesOrder({
             propertyIds: rowIds,
             oldIndex,
             newIndex,
           });
         } else {
-          void modifyAttributes((data) => {
-            const oldIndex = colIds.findIndex((id) => id === active.id);
-            const newIndex = colIds.findIndex((id) => id === over.id);
-            return arrayMove(data, oldIndex, newIndex);
-          }, "order");
+          const oldIndex = colIds.findIndex((id) => id === active.id);
+          const newIndex = colIds.findIndex((id) => id === over.id);
+          setColumns((prev) => arrayMove(prev, oldIndex, newIndex));
+          void updateColumnsOrder({
+            columnIds: colIds,
+            oldIndex,
+            newIndex,
+          });
         }
       }
     },
-    [draggingRow, rowIds, updatePropertiesOrder, modifyAttributes, colIds],
+    [draggingRow, rowIds, updatePropertiesOrder, updateColumnsOrder, colIds],
   );
 
   const sensors = useSensors(
@@ -403,67 +265,74 @@ export function PropertiesTable({
     [modifyAttributes],
   );
 
-  const addProperty = useCallback(() => {
-    void setProperties(
-      (data) => [
-        ...data,
-        {
-          createdAt: new Date(),
-          updatedAt: new Date(),
-          photoUrl: null,
-          displayIndex: properties.length,
-          attributes: {},
-          surveyId: surveyId,
-          brochures: [],
-          contacts: [],
-          isNew: true,
-        },
-      ],
-      "add",
-    );
+  const _createProperty = useCallback(async () => {
+    const tempId = crypto.randomUUID();
+    setProperties((prev) => [
+      ...prev,
+      TablePropertySchema.parse({
+        id: tempId,
+        displayIndex: properties.length,
+        isNew: true,
+        surveyId,
+      }),
+    ]);
     setTimeout(() => {
       tableRef.current?.scrollTo({
         top: tableRef.current.scrollWidth,
       });
     });
-  }, [setProperties, surveyId, properties]);
 
-  const updateProperty = useCallback(
-    (property: Property) => {
-      void setProperties(
-        (data) => {
-          const index = data.findIndex(
-            (prop) => (prop as Property).id === property.id,
-          );
-          if (index === -1) return data;
-          const newData = [...data];
-          newData[index] = property;
-          return newData;
-        },
-        "update",
-        property.id,
+    // Create property on server
+    const { propertyId } = await createProperty({
+      displayIndex: properties.length,
+      surveyId,
+    });
+
+    // Update temp id with new id
+    setProperties((prev) => {
+      const newProperties = [...prev];
+      const index = newProperties.findIndex(
+        (property) => property.id === tempId,
       );
+      newProperties[index].id = propertyId;
+      return newProperties;
+    });
+  }, [createProperty, properties.length, surveyId]);
+
+  const _updatePropertyValue = useCallback(
+    (propertyId: string, columnId: string, value: string) => {
+      setProperties((prev) => {
+        // Get property index
+        const index = prev.findIndex((property) => property.id === propertyId);
+        if (index === -1) return prev;
+
+        // Get column index
+        const newProperties = [...prev];
+        const columnIndex = newProperties[index]!.propertyValues.findIndex(
+          (value) => value.columnId === columnId,
+        );
+        if (columnIndex === -1) return prev;
+
+        newProperties[index]!.propertyValues[columnIndex]!.value = value;
+        return newProperties;
+      });
+      void updatePropertyValue({ propertyId, columnId, value });
     },
-    [setProperties],
+    [updatePropertyValue],
   );
 
-  const deleteProperty = useCallback(
+  const _deleteProperty = useCallback(
     (id: string) => {
-      void setProperties(
-        (data) => {
-          const index = data.findIndex(
-            (property) => (property as Property).id === id,
-          );
-          if (index === -1) return data;
-          const newData = [...data];
-          newData.splice(index, 1);
-          return newData;
-        },
-        "delete",
-        id,
-      );
+      setProperties((prev) => {
+        const index = prev.findIndex((property) => property.id === id);
+        if (index === -1) return prev;
+        const newData = [...prev];
+        newData.splice(index, 1);
+        return newData;
+      });
+      void deleteProperty({ propertyId: id });
     },
-    [setProperties],
+    [deleteProperty],
   );
 
   // Verify property data
@@ -606,7 +475,7 @@ export function PropertiesTable({
                   refetchSurvey={refetchSurvey}
                   setUploading={setIsImportingProperties}
                 />
-                <Button variant="ghost" onClick={addProperty}>
+                <Button variant="ghost" onClick={_createProperty}>
                   Manually add properties
                 </Button>
               </div>
@@ -621,7 +490,7 @@ export function PropertiesTable({
                 setMapErrors={setMapErrors}
                 surveyName={survey?.name ?? ""}
                 properties={properties}
-                attributes={attributesOrder}
+                columns={columns}
                 state={state}
                 onStateChange={setState}
                 draftEmails={draftEmails}
@@ -655,9 +524,9 @@ export function PropertiesTable({
                             : horizontalListSortingStrategy
                         }
                       >
-                        {attributesOrder.map((attribute) => (
+                        {columns.map((column) => (
                           <DraggableHeader
-                            key={attribute.id}
+                            key={column.id}
                             attribute={attribute}
                             renameAttribute={
                               !attribute.ownerId && !attribute.isNew
@@ -705,12 +574,12 @@ export function PropertiesTable({
                             photoUrl={property.photoUrl ?? ""}
                             key={property.id}
                             property={property}
-                            attributes={attributesOrder}
-                            deleteProperty={() => deleteProperty(property.id)}
+                            columns={columns}
+                            updatePropertyValue={_updatePropertyValue}
+                            deleteProperty={() => _deleteProperty(property.id)}
                             draggingRow={draggingRow}
                             state={state}
                             setDraggingRow={setDraggingRow}
-                            updateProperty={updateProperty}
                             selectedFields={selectedFields}
                             onSelectedFieldsChange={setSelectedFields}
                             mapError={
@@ -725,7 +594,7 @@ export function PropertiesTable({
                   </TableBody>
                 </Table>
                 <div className="m-2 flex items-center gap-2">
-                  <Button variant="ghost" onClick={addProperty}>
+                  <Button variant="ghost" onClick={_createProperty}>
                     + Add property
                   </Button>
                   <NDXOutputUploader
@@ -757,7 +626,7 @@ export function PropertiesTable({
 function ActionButtons({
   surveyName,
   properties,
-  attributes,
+  columns,
   state,
   onStateChange,
   draftEmails,
@@ -767,7 +636,7 @@ function ActionButtons({
   state: PropertiesTableState;
   onStateChange: (state: PropertiesTableState) => void;
   properties: Property[];
-  attributes: AttributeSchema[];
+  columns: Column[];
   draftEmails: () => void;
   setMapErrors: (errors: { propertyId: string; error: string }[]) => void;
 }) {
@@ -797,7 +666,7 @@ function ActionButtons({
               buttonText="Export PDF instead"
               surveyName={surveyName}
               properties={properties}
-              attributes={attributes}
+              columns={columns}
             />
           </div>
         </div>
@@ -817,7 +686,7 @@ function ActionButtons({
           buttonText="Export Survey PDF"
           surveyName={surveyName}
           properties={properties}
-          attributes={attributes}
+          columns={columns}
         />
       </div>
     );

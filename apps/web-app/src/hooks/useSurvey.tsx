@@ -1,36 +1,41 @@
 import { useParams } from "next/navigation";
 import { api } from "~/trpc/react";
 import { createContext, useContext, type ReactNode } from "react";
-import type {
-  Attachment,
-  Brochure,
-  Contact,
-  Email,
-  EmailThread,
-  Property,
-  Survey,
-} from "prisma/generated/zod";
+import { type Prisma } from "@prisma/client";
+
+export type SurveyWithIncludes = Prisma.SurveyGetPayload<{
+  include: {
+    properties: {
+      include: {
+        propertyValues: true;
+        brochures: true;
+        contacts: true;
+        emailThreads: {
+          include: {
+            emails: {
+              include: {
+                attachments: true;
+              };
+            };
+          };
+        };
+      };
+    };
+    columns: {
+      include: {
+        attribute: true;
+      };
+    };
+  };
+}>;
+
+export type PropertyWithIncludes = SurveyWithIncludes["properties"][number];
+export type EmailThreadWithIncludes =
+  PropertyWithIncludes["emailThreads"][number];
+export type ColumnWithIncludes = SurveyWithIncludes["columns"][number];
 
 interface SurveyContextType {
-  survey:
-    | (Survey & {
-        properties: Array<
-          Property & {
-            brochures: Array<Brochure>;
-            contacts: Array<Contact>;
-            emailThreads: Array<
-              EmailThread & {
-                emails: Array<
-                  Email & {
-                    attachments: Array<Attachment>;
-                  }
-                >;
-              }
-            >;
-          }
-        >;
-      })
-    | null;
+  survey: SurveyWithIncludes | null;
   refetchSurvey: () => Promise<void>;
   isLoadingSurvey: boolean;
   isRefetchingSurvey: boolean;

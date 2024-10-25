@@ -15,79 +15,79 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "~/components/ui/tooltip";
-import { type Attribute, type Property } from "./PropertiesTable";
+import { type Column, type Property } from "./PropertiesTable";
 import { cn, isPropertyNotAvailable } from "~/lib/utils";
 import { useEffect, useRef, useState } from "react";
 
 export function EditableCell({
   property,
-  attribute,
+  column,
+  columnIdToValue,
+  attributeIdToValue,
+  attributeIdToColumnId,
   isEmailDraft,
   parsedAttributes,
-  updateProperty,
+  updatePropertyValue,
 }: {
   property: Property;
-  attribute: Attribute;
+  column: Column;
+  columnIdToValue: Map<string, string>;
+  attributeIdToValue: Map<string, string>;
+  attributeIdToColumnId: Map<string, string>;
   isEmailDraft: boolean;
   parsedAttributes: Record<string, string | null>;
-  updateProperty: (property: Property) => void;
+  updatePropertyValue: (
+    propertyId: string,
+    columnId: string,
+    value: string,
+  ) => void;
 }) {
   const [localValue, setLocalValue] = useState(
-    property.attributes?.[attribute.id] ?? "",
+    columnIdToValue.get(column.id) ?? "",
   );
-
   const isProgrammaticBlurRef = useRef(false);
-
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    setLocalValue(property.attributes?.[attribute.id] ?? "");
-  }, [property.attributes, attribute.id]);
+    setLocalValue(columnIdToValue.get(column.id) ?? "");
+  }, [columnIdToValue, column.id]);
 
   function handleUpdateProperty(value: string) {
     if (
-      attribute.id === "askingRate" ||
-      attribute.id === "opEx" ||
-      attribute.id === "size"
+      column.attribute.id === "askingRate" ||
+      column.attribute.id === "opEx" ||
+      column.attribute.id === "size"
     ) {
       const inputValue = advancedParseFloat(value);
 
       const size =
-        attribute.id === "size"
+        column.attribute.id === "size"
           ? inputValue
-          : advancedParseFloat(property.attributes?.size ?? "0");
+          : advancedParseFloat(attributeIdToValue.get("size") ?? "0");
 
       const askingRate =
-        attribute.id === "askingRate"
+        column.attribute.id === "askingRate"
           ? inputValue
-          : advancedParseFloat(property.attributes?.askingRate ?? "0");
+          : advancedParseFloat(attributeIdToValue.get("askingRate") ?? "0");
 
       const opEx =
-        attribute.id === "opEx"
+        column.attribute.id === "opEx"
           ? inputValue
-          : advancedParseFloat(property.attributes?.opEx ?? "0");
+          : advancedParseFloat(attributeIdToValue.get("opEx") ?? "0");
 
       const computedTotalCost = Math.round(
         (askingRate + opEx) * size,
       ).toString();
 
       const newTotalCost = "$" + computedTotalCost;
-      updateProperty({
-        ...property,
-        attributes: {
-          ...property.attributes,
-          [attribute.id]: value,
-          totalCost: newTotalCost,
-        },
-      });
+      updatePropertyValue(property.id, column.id, value);
+      updatePropertyValue(
+        property.id,
+        attributeIdToColumnId.get("totalCost") ?? "",
+        newTotalCost,
+      );
     } else {
-      updateProperty({
-        ...property,
-        attributes: {
-          ...property.attributes,
-          [attribute.id]: value,
-        },
-      });
+      updatePropertyValue(property.id, column.id, value);
     }
   }
 
@@ -95,7 +95,7 @@ export function EditableCell({
     <div className="relative flex items-center gap-2">
       <Input
         ref={inputRef}
-        className={cn(attribute.id in parsedAttributes && "pr-9")}
+        className={cn(column.attribute.id in parsedAttributes && "pr-9")}
         value={localValue}
         onChange={(e) => {
           setLocalValue(e.target.value);
@@ -115,7 +115,7 @@ export function EditableCell({
           isProgrammaticBlurRef.current = false;
         }}
       />
-      {attribute.id in parsedAttributes && (
+      {column.attribute.id in parsedAttributes && (
         <Tooltip>
           <TooltipTrigger asChild>
             <Button
@@ -125,7 +125,7 @@ export function EditableCell({
               asChild
             >
               <Link href={`emails?propertyId=${property.id}`}>
-                {parsedAttributes[attribute.id] !== null ? (
+                {parsedAttributes[column.attribute.id] !== null ? (
                   <CheckCircleIcon className="size-5 text-green-500" />
                 ) : isEmailDraft ? (
                   <PencilSquareIcon className="size-5 text-gray-500" />
@@ -138,7 +138,7 @@ export function EditableCell({
             </Button>
           </TooltipTrigger>
           <TooltipContent>
-            {parsedAttributes[attribute.id] !== null
+            {parsedAttributes[column.attribute.id] !== null
               ? "Verified by email"
               : isEmailDraft
                 ? "Email drafted"
