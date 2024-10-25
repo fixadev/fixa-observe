@@ -45,54 +45,74 @@ model Project {
 }
 
 model Survey {
-  id         String                @id @default(uuid())
-  ownerId    String
-  createdAt  DateTime              @default(now())
-  updatedAt  DateTime              @updatedAt
-  name       String
+  id        String   @id @default(uuid())
+  ownerId   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  name      String
+
   projectId  String
-  project    Project               @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  project    Project    @relation(fields: [projectId], references: [id], onDelete: Cascade)
   properties Property[]
-  attributes AttributesOnSurveys[]
+  columns    Column[]
+}
+
+model Column {
+  id           String   @id @default(uuid())
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  displayIndex Int
+
+  surveyId       String
+  survey         Survey          @relation(fields: [surveyId], references: [id], onDelete: Cascade)
+  attributeId    String
+  attribute      Attribute       @relation(fields: [attributeId], references: [id], onDelete: Cascade)
+  propertyValues PropertyValue[]
 }
 
 model Attribute {
-  id           String                @id @default(uuid())
-  createdAt    DateTime              @default(now())
-  updatedAt    DateTime              @updatedAt
-  label        String
-  type         String
-  owner        User?                 @relation(fields: [ownerId], references: [id], onDelete: Cascade)
-  ownerId      String?
-  defaultIndex Int                   @default(0)
-  surveys      AttributesOnSurveys[]
-}
+  id             String   @id @default(uuid())
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  label          String
+  defaultIndex   Int      @default(0)
+  defaultVisible Boolean  @default(false)
 
-model AttributesOnSurveys {
-  id             String    @id @default(uuid())
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
-  attribute      Attribute @relation(fields: [attributeId], references: [id], onDelete: Cascade)
-  attributeId    String
-  attributeIndex Int
-  survey         Survey    @relation(fields: [surveyId], references: [id], onDelete: Cascade)
-  surveyId       String
+  ownerId String?
+  owner   User?    @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  columns Column[]
 }
 
 model Property {
-  id           String        @id @default(uuid())
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
-  owner        User          @relation(fields: [ownerId], references: [id], onDelete: Cascade)
-  ownerId      String
-  brochures    Brochure[]
+  id           String   @id @default(uuid())
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
   photoUrl     String?
-  attributes   Json?
   displayIndex Int
-  survey       Survey        @relation(fields: [surveyId], references: [id], onDelete: Cascade)
-  surveyId     String
-  contacts     Contact[]
-  emailThreads EmailThread[]
+
+  ownerId String
+  owner   User   @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+
+  surveyId String
+  survey   Survey @relation(fields: [surveyId], references: [id], onDelete: Cascade)
+
+  propertyValues PropertyValue[]
+  contacts       Contact[]
+  emailThreads   EmailThread[]
+  brochures      Brochure[]
+}
+
+model PropertyValue {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  value String
+
+  propertyId String
+  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  columnId   String
+  column     Column   @relation(fields: [columnId], references: [id], onDelete: Cascade)
 }
 
 model Brochure {
@@ -100,7 +120,7 @@ model Brochure {
   createdAt           DateTime @default(now())
   updatedAt           DateTime @updatedAt
   url                 String
-  exportedUrl         String?  
+  exportedUrl         String?
   title               String
   approved            Boolean  @default(false)
   property            Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
