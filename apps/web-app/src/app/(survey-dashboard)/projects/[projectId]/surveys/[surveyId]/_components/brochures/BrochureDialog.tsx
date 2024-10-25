@@ -2,7 +2,10 @@
 
 import { useCallback, useMemo, useState } from "react";
 import { Dialog, DialogContent, DialogFooter } from "~/components/ui/dialog";
-import { type PropertyWithBrochures } from "~/lib/property";
+import {
+  type BrochureSchema,
+  type PropertyWithBrochures,
+} from "~/lib/property";
 import { BrochureCarousel } from "./BrochureCarousel";
 import { Button } from "~/components/ui/button";
 import {
@@ -27,8 +30,14 @@ export default function BrochureDialog({
   onOpenChange: (open: boolean) => void;
 }) {
   const brochure = useMemo(() => property?.brochures[0], [property?.brochures]);
-  const [unsavedChanges, setUnsavedChanges] = useState<boolean>(false);
+
   const [confirmDiscard, setConfirmDiscard] = useState<boolean>(false);
+  const [editedBrochure, setEditedBrochure] = useState<BrochureSchema | null>(
+    null,
+  );
+  const unsavedChanges = useMemo(() => {
+    return editedBrochure !== null;
+  }, [editedBrochure]);
 
   const _onOpenChange = useCallback(
     (open: boolean) => {
@@ -41,13 +50,17 @@ export default function BrochureDialog({
     [onOpenChange, unsavedChanges],
   );
 
-  const onDiscard = useCallback(() => {
-    setUnsavedChanges(false);
+  const handleEdit = useCallback((brochure: BrochureSchema) => {
+    setEditedBrochure(brochure);
+  }, []);
+
+  const handleDiscard = useCallback(() => {
+    setEditedBrochure(null);
     setConfirmDiscard(false);
     onOpenChange(false);
   }, [onOpenChange]);
 
-  const onSave = useCallback(() => {
+  const handleSave = useCallback(() => {
     console.log("save!");
   }, []);
 
@@ -60,11 +73,7 @@ export default function BrochureDialog({
           // className="max-h-[80vh] overflow-y-auto"
           // onOpenAutoFocus={(e) => e.preventDefault()}
         >
-          <BrochureCarousel
-            brochure={brochure}
-            isGeneratingPDF={false}
-            onEdit={() => null}
-          />
+          <BrochureCarousel brochure={brochure} onEdit={handleEdit} />
           <DialogFooter
             className={cn(
               unsavedChanges ? "opacity-100" : "opacity-0",
@@ -74,7 +83,7 @@ export default function BrochureDialog({
             <Button variant="outline" onClick={() => setConfirmDiscard(true)}>
               Discard
             </Button>
-            <Button onClick={onSave}>Save changes</Button>
+            <Button onClick={handleSave}>Save changes</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -88,7 +97,9 @@ export default function BrochureDialog({
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={onDiscard}>Discard</AlertDialogAction>
+            <AlertDialogAction onClick={handleDiscard}>
+              Discard
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
