@@ -49,9 +49,19 @@ export const propertyRouter = createTRPCRouter({
     }),
 
   getPresignedS3Url: protectedProcedure
-    .input(z.object({ fileName: z.string(), fileType: z.string() }))
+    .input(
+      z.object({
+        fileName: z.string(),
+        fileType: z.string(),
+        keepOriginalName: z.boolean().optional(),
+      }),
+    )
     .mutation(async ({ input }) => {
-      return await createPresignedUrl(input.fileName, input.fileType);
+      return await createPresignedUrl(
+        input.fileName,
+        input.fileType,
+        input.keepOriginalName,
+      );
     }),
 
   createBrochure: protectedProcedure

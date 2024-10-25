@@ -57,6 +57,9 @@ export const propertyService = ({ db }: { db: PrismaClient }) => {
           ],
         },
       },
+      include: {
+        brochures: true,
+      },
     });
     return response;
   }

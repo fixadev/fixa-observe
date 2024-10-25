@@ -90,7 +90,7 @@ export const DraggableRow = ({
   isLoadingBrochure: boolean;
   onEditBrochure: (propertyId: string) => void;
   onDeleteBrochure: (propertyId: string, brochureId: string) => void;
-  onUploadBrochure: (propertyId: string, file: File) => void;
+  onUploadBrochure: (propertyId: string, file?: File) => void;
 }) => {
   const {
     transform,
@@ -304,13 +304,12 @@ export const DraggableRow = ({
         className="w-48"
       >
         <div className="w-48">
-          {property.brochures[0] ? (
-            <div
-              className={cn(
-                "group relative h-[100px] overflow-hidden rounded-md",
-                isLoadingBrochure && "pointer-events-none",
-              )}
-            >
+          {isLoadingBrochure ? (
+            <div className="flex h-[100px] items-center justify-center bg-gray-100">
+              <Spinner className="size-6 text-gray-500" />
+            </div>
+          ) : property.brochures[0] ? (
+            <div className="group relative h-[100px] overflow-hidden rounded-md">
               <Link
                 href={
                   property.brochures[0].exportedUrl ?? property.brochures[0].url
@@ -318,11 +317,7 @@ export const DraggableRow = ({
                 className="relative flex size-full items-center justify-center bg-gray-100 group-hover:cursor-pointer group-hover:bg-gray-200"
                 target="_blank"
               >
-                {isLoadingBrochure ? (
-                  <Spinner className="size-6 text-gray-500" />
-                ) : (
-                  <BookOpenIcon className="size-6 text-gray-500" />
-                )}
+                <BookOpenIcon className="size-6 text-gray-500" />
               </Link>
               <div className="absolute right-1 top-1 flex flex-col opacity-0 group-hover:opacity-100">
                 {/**
@@ -342,7 +337,7 @@ export const DraggableRow = ({
                         </Button>
                       }
                       handleFilesChange={(files) =>
-                        onUploadBrochure(property.id, files[0]!)
+                        onUploadBrochure(property.id, files[0])
                       }
                     />
                   </TooltipTrigger>
@@ -377,7 +372,9 @@ export const DraggableRow = ({
                   </div>
                 </div>
               }
-              handleFilesChange={() => null}
+              handleFilesChange={(files) =>
+                onUploadBrochure(property.id, files[0])
+              }
             />
           )}
           {property.brochures[0] && (

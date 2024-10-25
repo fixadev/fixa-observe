@@ -41,10 +41,13 @@ export const uploadFileToS3 = async (
 export const createPresignedUrl = async (
   fileName: string,
   fileType: string,
+  keepOriginalName = false,
   expiresIn = 3600,
 ): Promise<string> => {
   const fileExtension = fileName.split(".").pop();
-  const uniqueFileName = `${uuidv4()}.${fileExtension}`;
+  const uniqueFileName = keepOriginalName
+    ? fileName
+    : `${uuidv4()}.${fileExtension}`;
 
   const params: PutObjectCommandInput = {
     Bucket: process.env.AWS_BUCKET_NAME,

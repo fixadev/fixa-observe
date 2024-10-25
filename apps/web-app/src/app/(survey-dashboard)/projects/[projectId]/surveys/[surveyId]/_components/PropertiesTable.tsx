@@ -54,7 +54,11 @@ import type {
   EmailTemplate,
   Email,
 } from "prisma/generated/zod";
-import { replaceTemplateVariables, splitAddress } from "~/lib/utils";
+import {
+  getBrochureFileName,
+  replaceTemplateVariables,
+  splitAddress,
+} from "~/lib/utils";
 import { useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import { useSurvey } from "~/hooks/useSurvey";
@@ -583,6 +587,10 @@ export function PropertiesTable({
     propertyId: string;
     open: boolean;
   }>({ propertyId: "", open: false });
+  const { mutateAsync: getPresignedS3Url } =
+    api.property.getPresignedS3Url.useMutation();
+  const { mutateAsync: createBrochure } =
+    api.property.createBrochure.useMutation();
   const handleEditBrochure = useCallback((propertyId: string) => {
     setBrochureDialogState({ propertyId, open: true });
   }, []);
@@ -608,9 +616,77 @@ export function PropertiesTable({
     },
     [deleteBrochure, setPropertiesState],
   );
-  const handleUploadBrochure = useCallback((propertyId: string, file: File) => {
-    // void uploadBrochure(propertyId, file);
-  }, []);
+  const [isBrochureUploading, setIsBrochureUploading] = useState(false);
+  const handleUploadBrochure = useCallback(
+    async (propertyId: string, file?: File) => {
+      console.log("uploading brochure!", propertyId, file);
+      setIsBrochureUploading(true);
+      setCurBrochurePropertyId(propertyId);
+      try {
+        if (!file) {
+          throw new Error("No file selected");
+        }
+        const property = properties.find((p) => p.id === propertyId)!;
+        if (!property) {
+          throw new Error("Property not found");
+        }
+
+        const presignedS3Url = await getPresignedS3Url({
+          fileName: getBrochureFileName(property),
+          fileType: file.type,
+          keepOriginalName: true,
+        });
+
+        const response = await fetch(presignedS3Url, {
+          method: "PUT",
+          body: file,
+          headers: {
+            "Content-Type": file.type,
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to upload file to S3");
+        }
+
+        const uploadedFileUrl = presignedS3Url.split("?")[0] ?? presignedS3Url;
+
+        const result = await createBrochure({
+          propertyId: property.id,
+          brochure: {
+            inpaintedRectangles: [],
+            textToRemove: [],
+            pathsToRemove: [],
+            undoStack: [],
+            deletedPages: [],
+            url: uploadedFileUrl,
+            title: file.name,
+            approved: false,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            exportedUrl: null,
+          },
+        });
+
+        setPropertiesState((prev) =>
+          prev.map((property) =>
+            property.id === propertyId
+              ? {
+                  ...property,
+                  brochures: result.brochures,
+                }
+              : property,
+          ),
+        );
+      } catch (error) {
+        console.error("Error uploading brochure:", error);
+      } finally {
+        setIsBrochureUploading(false);
+        setCurBrochurePropertyId("");
+      }
+    },
+    [createBrochure, getPresignedS3Url, properties],
+  );
 
   const tableRef = useRef<HTMLTableElement>(null);
 
@@ -760,8 +836,8 @@ export function PropertiesTable({
                               )?.error
                             }
                             isLoadingBrochure={
-                              isDeletingBrochure &&
-                              curBrochurePropertyId === property.id
+                              curBrochurePropertyId === property.id &&
+                              (isDeletingBrochure || isBrochureUploading)
                             }
                             onEditBrochure={handleEditBrochure}
                             onDeleteBrochure={handleDeleteBrochure}
