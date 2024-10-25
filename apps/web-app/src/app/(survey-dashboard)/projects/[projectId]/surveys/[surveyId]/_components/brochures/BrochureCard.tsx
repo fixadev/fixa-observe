@@ -72,7 +72,7 @@ function UnapprovedBrochureCard({
   const [isUploading, setIsUploading] = useState(false);
 
   const { mutate: createBrochure } = api.property.createBrochure.useMutation({
-    onSuccess: (data) => {
+    onSuccess: (_) => {
       void refetchProperty();
       setIsUploading(false);
       toast({

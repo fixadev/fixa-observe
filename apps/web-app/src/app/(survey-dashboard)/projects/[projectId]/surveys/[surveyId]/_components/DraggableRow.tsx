@@ -41,7 +41,6 @@ import { Checkbox } from "~/components/ui/checkbox";
 import { Label } from "~/components/ui/label";
 import { type CheckedState } from "@radix-ui/react-checkbox";
 import {
-  ArrowTopRightOnSquareIcon,
   ArrowUpTrayIcon,
   BookOpenIcon,
   DocumentPlusIcon,
@@ -305,24 +304,16 @@ export const DraggableRow = ({
         <div className="w-48">
           {property.brochures[0] ? (
             <div className="relative h-[100px] overflow-hidden rounded-md">
-              <div className="flex size-full items-center justify-center bg-gray-100">
+              <Link
+                href={
+                  property.brochures[0].exportedUrl ?? property.brochures[0].url
+                }
+                className="group relative flex size-full items-center justify-center bg-gray-100 hover:cursor-pointer hover:bg-gray-200"
+                target="_blank"
+              >
                 <BookOpenIcon className="size-8 text-gray-500" />
-              </div>
-              <div className="group absolute left-0 top-0 flex size-full items-center justify-center bg-black/0 hover:bg-black/30">
-                <div className="opacity-0 group-hover:opacity-100">
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        className="-mr-px size-8 rounded-r-none"
-                        onClick={() => onDeleteBrochure(property.id)}
-                      >
-                        <TrashFilledIcon className="size-4" />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent side="top">Delete brochure</TooltipContent>
-                  </Tooltip>
+
+                <div className="absolute right-1 top-1 flex flex-col opacity-0 group-hover:opacity-100">
                   <FileInput
                     accept="application/pdf"
                     triggerElement={
@@ -331,12 +322,12 @@ export const DraggableRow = ({
                           <Button
                             variant="outline"
                             size="icon"
-                            className="size-8 rounded-none"
+                            className="size-8 rounded-b-none"
                           >
                             <ArrowUpTrayIcon className="size-4" />
                           </Button>
                         </TooltipTrigger>
-                        <TooltipContent side="top">
+                        <TooltipContent side="left">
                           Replace brochure
                         </TooltipContent>
                       </Tooltip>
@@ -350,24 +341,16 @@ export const DraggableRow = ({
                       <Button
                         variant="outline"
                         size="icon"
-                        className="-ml-px size-8 rounded-l-none"
-                        asChild
+                        className="-mt-px size-8 rounded-t-none"
+                        onClick={() => onDeleteBrochure(property.id)}
                       >
-                        <Link
-                          href={
-                            property.brochures[0].exportedUrl ??
-                            property.brochures[0].url
-                          }
-                          target="_blank"
-                        >
-                          <ArrowTopRightOnSquareIcon className="size-4" />
-                        </Link>
+                        <TrashFilledIcon className="size-4" />
                       </Button>
                     </TooltipTrigger>
-                    <TooltipContent side="top">Preview brochure</TooltipContent>
+                    <TooltipContent side="left">Delete brochure</TooltipContent>
                   </Tooltip>
                 </div>
-              </div>
+              </Link>
             </div>
           ) : (
             <FileInput
