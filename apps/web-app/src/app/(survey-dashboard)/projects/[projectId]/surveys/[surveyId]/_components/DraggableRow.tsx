@@ -317,7 +317,16 @@ export const DraggableRow = ({
                 className="relative flex size-full items-center justify-center bg-gray-100 group-hover:cursor-pointer group-hover:bg-gray-200"
                 target="_blank"
               >
-                <BookOpenIcon className="size-6 text-gray-500" />
+                {property.brochures[0].thumbnailUrl ? (
+                  <Image
+                    src={property.brochures[0].thumbnailUrl}
+                    alt="Property brochure"
+                    fill
+                    className="object-contain"
+                  />
+                ) : (
+                  <BookOpenIcon className="size-6 text-gray-500" />
+                )}
               </Link>
               <div className="absolute right-1 top-1 flex flex-col opacity-0 group-hover:opacity-100">
                 {/**

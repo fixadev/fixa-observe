@@ -65,6 +65,8 @@ import { useSurvey } from "~/hooks/useSurvey";
 import { SurveyDownloadLink } from "../pdf-preview/v1/_components/DownloadLink";
 import { useSupabase } from "~/hooks/useSupabase";
 import BrochureDialog from "./brochures/BrochureDialog";
+import { pdfToImage } from "~/lib/pdf-utils";
+import axios from "axios";
 
 export type Property = PropertySchema & {
   brochures: Brochure[];
@@ -472,7 +474,9 @@ export function PropertiesTable({
     [setProperties],
   );
 
-  // Verify property data
+  // ----------------------
+  // #region Verify property data
+  // ----------------------
   const [state, setState] = useState<PropertiesTableState>("edit");
   const [selectedFields, setSelectedFields] = useState<
     Record<string, Set<string>>
@@ -579,23 +583,29 @@ export function PropertiesTable({
     },
     [selectedFields, createDraftEmails, generateDraftEmail, properties],
   );
+  // #endregion
 
-  // const { mutateAsync: uploadBrochure } = api.brochure.upload.useMutation();
+  // ----------------------
+  // #region Brochures
+  // ----------------------
   const { mutateAsync: deleteBrochure, isPending: isDeletingBrochure } =
     api.property.deleteBrochure.useMutation();
-  const [brochureDialogState, setBrochureDialogState] = useState<{
-    propertyId: string;
-    open: boolean;
-  }>({ propertyId: "", open: false });
   const { mutateAsync: getPresignedS3Url } =
     api.property.getPresignedS3Url.useMutation();
   const { mutateAsync: createBrochure } =
     api.property.createBrochure.useMutation();
+
+  const [brochureDialogState, setBrochureDialogState] = useState<{
+    propertyId: string;
+    open: boolean;
+  }>({ propertyId: "", open: false });
+  const [curBrochurePropertyId, setCurBrochurePropertyId] =
+    useState<string>("");
+  const [isBrochureUploading, setIsBrochureUploading] = useState(false);
+
   const handleEditBrochure = useCallback((propertyId: string) => {
     setBrochureDialogState({ propertyId, open: true });
   }, []);
-  const [curBrochurePropertyId, setCurBrochurePropertyId] =
-    useState<string>("");
   const handleDeleteBrochure = useCallback(
     async (propertyId: string, brochureId: string) => {
       setCurBrochurePropertyId(propertyId);
@@ -616,10 +626,8 @@ export function PropertiesTable({
     },
     [deleteBrochure, setPropertiesState],
   );
-  const [isBrochureUploading, setIsBrochureUploading] = useState(false);
   const handleUploadBrochure = useCallback(
     async (propertyId: string, file?: File) => {
-      console.log("uploading brochure!", propertyId, file);
       setIsBrochureUploading(true);
       setCurBrochurePropertyId(propertyId);
       try {
@@ -631,25 +639,38 @@ export function PropertiesTable({
           throw new Error("Property not found");
         }
 
-        const presignedS3Url = await getPresignedS3Url({
+        const images = await pdfToImage({ file, pages: [1], height: 100 });
+        const thumbnailBase64 = images[0]!;
+        const base64Data = Buffer.from(
+          thumbnailBase64.replace(/^data:image\/\w+;base64,/, ""),
+          "base64",
+        );
+        const thumbnailPresignedUrl = await getPresignedS3Url({
+          fileName: `brochure-thumbnail-${propertyId}.png`,
+          fileType: "image/png",
+          keepOriginalName: true,
+        });
+        await axios.put(thumbnailPresignedUrl, base64Data, {
+          headers: {
+            "Content-Type": "image/png",
+          },
+        });
+        const thumbnailUrl =
+          thumbnailPresignedUrl.split("?")[0] ?? thumbnailPresignedUrl;
+
+        const brochurePresignedUrl = await getPresignedS3Url({
           fileName: getBrochureFileName(property),
           fileType: file.type,
           keepOriginalName: true,
         });
-
-        const response = await fetch(presignedS3Url, {
-          method: "PUT",
-          body: file,
+        await axios.put(brochurePresignedUrl, file, {
           headers: {
             "Content-Type": file.type,
           },
         });
 
-        if (!response.ok) {
-          throw new Error("Failed to upload file to S3");
-        }
-
-        const uploadedFileUrl = presignedS3Url.split("?")[0] ?? presignedS3Url;
+        const uploadedFileUrl =
+          brochurePresignedUrl.split("?")[0] ?? brochurePresignedUrl;
 
         const result = await createBrochure({
           propertyId: property.id,
@@ -665,6 +686,7 @@ export function PropertiesTable({
             createdAt: new Date(),
             updatedAt: new Date(),
             exportedUrl: null,
+            thumbnailUrl,
           },
         });
 
@@ -687,6 +709,7 @@ export function PropertiesTable({
     },
     [createBrochure, getPresignedS3Url, properties],
   );
+  // #endregion
 
   const tableRef = useRef<HTMLTableElement>(null);
 
