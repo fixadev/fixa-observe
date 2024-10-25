@@ -94,7 +94,7 @@ export function BrochureCarousel({
     setDeletedPages(new Set(brochure.deletedPages ?? []));
   }, [brochure]);
 
-  const _onEdit = useCallback(() => {
+  useEffect(() => {
     onEdit({
       ...brochure,
       textToRemove,
@@ -103,14 +103,18 @@ export function BrochureCarousel({
       deletedPages: Array.from(deletedPages),
       undoStack,
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
-    onEdit,
-    brochure,
-    textToRemove,
-    pathsToRemove,
-    inpaintedRectangles,
-    deletedPages,
-    undoStack,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    JSON.stringify(textToRemove),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    JSON.stringify(pathsToRemove),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    JSON.stringify(inpaintedRectangles),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    JSON.stringify(Array.from(deletedPages)),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    JSON.stringify(undoStack),
   ]);
 
   // ------------------
@@ -128,8 +132,8 @@ export function BrochureCarousel({
     }
     setUndoStack(newUndo);
 
-    _onEdit();
-  }, [undoStack, redoStack, _onEdit]);
+    // _onEdit();
+  }, [undoStack, redoStack]);
   const redo = useCallback(() => {
     const newRedo = [...redoStack];
     const last = newRedo.pop();
@@ -139,8 +143,8 @@ export function BrochureCarousel({
     }
     setRedoStack(newRedo);
 
-    _onEdit();
-  }, [undoStack, redoStack, _onEdit]);
+    // _onEdit();
+  }, [undoStack, redoStack]);
   const handleDeleteTextPaths = useCallback(
     (textToRemove: TransformedTextContent[], pathsToRemove: Path[]) => {
       const id = crypto.randomUUID();
@@ -170,9 +174,9 @@ export function BrochureCarousel({
       setUndoStack((prev) => [...prev, id]);
       setRedoStack([]);
 
-      _onEdit();
+      // _onEdit();
     },
-    [redoStackSet, _onEdit],
+    [redoStackSet],
   );
   // #endregion
 
@@ -200,7 +204,7 @@ export function BrochureCarousel({
         });
         setIsRemoving(false);
 
-        _onEdit();
+        // _onEdit();
       },
     });
 
@@ -214,22 +218,19 @@ export function BrochureCarousel({
   }, [inpaintRectangles, brochure.id, rectanglesToRemove]);
   // #endregion
 
-  const deletePage = useCallback(
-    (pageIndex: number) => {
-      setDeletedPages((prev) => {
-        const newSet = new Set(prev);
-        if (newSet.has(pageIndex)) {
-          newSet.delete(pageIndex);
-        } else {
-          newSet.add(pageIndex);
-        }
-        return newSet;
-      });
+  const deletePage = useCallback((pageIndex: number) => {
+    setDeletedPages((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(pageIndex)) {
+        newSet.delete(pageIndex);
+      } else {
+        newSet.add(pageIndex);
+      }
+      return newSet;
+    });
 
-      _onEdit();
-    },
-    [_onEdit],
-  );
+    // _onEdit();
+  }, []);
 
   // ------------------
   // #region Carousel
