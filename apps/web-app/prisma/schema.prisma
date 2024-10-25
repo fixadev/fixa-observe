@@ -87,7 +87,7 @@ model Property {
   id           String   @id @default(uuid())
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
-  address      String?
+  address      String   @default("")
   photoUrl     String?
   displayIndex Int
 
