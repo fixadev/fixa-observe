@@ -80,16 +80,11 @@ export const propertyService = ({ db }: { db: PrismaClient }) => {
         ({ brochures, ...property }, index) => ({
           ...property,
           ownerId: userId,
-          attributes:
-            {
-              ...property.attributes,
-              address: formattedAddresses
-                ? formattedAddresses[index]?.address
-                : "",
-              displayAddress: formattedAddresses
-                ? formattedAddresses[index]?.displayAddress
-                : "",
-            } ?? {},
+          attributes: {
+            ...property.attributes,
+            address: formattedAddresses?.[index]?.address ?? "",
+            displayAddress: formattedAddresses?.[index]?.displayAddress ?? "",
+          },
         }),
       );
 
