@@ -68,7 +68,7 @@ export async function formatAddresses(
         displayAddress,
       };
     } catch (error) {
-      console.error(`Error formatting address: ${address}`, error);
+      console.error(`Error formatting address`, error);
       return {
         address: "",
         displayAddress: "",
