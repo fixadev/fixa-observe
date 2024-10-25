@@ -1,11 +1,10 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
+import { photoUploadSchema } from "~/lib/property";
 import {
-  propertySchema,
-  photoUploadSchema,
   brochureSchema,
   brochureWithoutPropertyIdSchema,
-} from "~/lib/property";
+} from "~/lib/brochure";
 import { propertyService } from "~/server/services/property";
 import { db } from "~/server/db";
 

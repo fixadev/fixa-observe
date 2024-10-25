@@ -1,3 +1,4 @@
+import { z } from "zod";
 import { type Prisma, type PrismaClient } from "@prisma/client";
 import {
   type CreatePropertySchema,
@@ -10,9 +11,13 @@ import { env } from "~/env";
 export const propertyService = ({ db }: { db: PrismaClient }) => {
   return {
     createProperty: async (
-      displayIndex: number,
-      surveyId: string,
-      userId: string,
+      input: z.infer<
+        typeof z.object({
+          displayIndex: z.number(),
+          surveyId: z.string(),
+          ownerId: z.string(),
+        })
+      >
     ) => {
       const property = await db.property.create({
         data: {
