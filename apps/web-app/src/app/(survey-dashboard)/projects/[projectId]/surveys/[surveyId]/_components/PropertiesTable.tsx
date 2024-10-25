@@ -72,6 +72,7 @@ export type Column = ColumnWithIncludes & {
 export const TablePropertySchema = PropertySchema.extend({
   createdAt: z.coerce.date().default(new Date()),
   updatedAt: z.coerce.date().default(new Date()),
+  address: z.string().default(""),
   photoUrl: z.string().nullable().default(null),
   ownerId: z.string().default(""),
   propertyValues: z.array(PropertyValueSchema).default([]),
