@@ -27,7 +27,7 @@ export const propertyRouter = createTRPCRouter({
       });
     }),
 
-  edit: protectedProcedure
+  updateValue: protectedProcedure
     .input(
       z.object({
         propertyId: z.string(),
