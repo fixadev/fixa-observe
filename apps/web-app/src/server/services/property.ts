@@ -21,7 +21,7 @@ export const propertyService = ({ db }: { db: PrismaClient }) => {
           surveyId: surveyId,
         },
       });
-      return property;
+      return property.id;
     },
 
     createProperties: async (input: CreatePropertySchema[], userId: string) => {
@@ -134,7 +134,6 @@ export const propertyService = ({ db }: { db: PrismaClient }) => {
         data: {
           ...propertyData,
           ownerId: userId,
-          attributes: property.attributes ?? {},
         },
       });
       return response;

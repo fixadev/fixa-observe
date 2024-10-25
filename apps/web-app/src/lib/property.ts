@@ -39,10 +39,7 @@ export type AttributesObjectSchema = z.infer<typeof attributesObjectSchema>;
 export const attributesObjectSchema = z.record(z.string(), z.string());
 
 export type PropertySchema = z.infer<typeof propertySchema>;
-export const propertySchema = PropertySchema.omit({
-  attributes: true,
-}).extend({
-  attributes: attributesObjectSchema,
+export const propertySchema = PropertySchema.extend({
   brochures: z.array(brochureSchema),
   // contacts: z.array(contactSchema),
 });

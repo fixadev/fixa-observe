@@ -30,13 +30,6 @@ export const surveyService = ({ db }: { db: PrismaClient }) => {
   return {
     addPropertiesToSurvey,
 
-    getProjectSurveys: async (projectId: string, userId: string) => {
-      const surveys = await db.survey.findMany({
-        where: { projectId: projectId, ownerId: userId },
-      });
-      return surveys;
-    },
-
     getSurvey: async (surveyId: string, userId: string) => {
       const survey = await db.survey.findUnique({
         where: { id: surveyId, ownerId: userId },
