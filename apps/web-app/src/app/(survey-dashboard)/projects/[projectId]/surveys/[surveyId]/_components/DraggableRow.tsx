@@ -71,6 +71,7 @@ export const DraggableRow = ({
   selectedFields,
   onSelectedFieldsChange,
   mapError,
+  isLoadingBrochure,
   onEditBrochure,
   onDeleteBrochure,
   onUploadBrochure,
@@ -86,8 +87,9 @@ export const DraggableRow = ({
   selectedFields: Record<string, Set<string>>;
   onSelectedFieldsChange: (selectedFields: Record<string, Set<string>>) => void;
   mapError: string | undefined;
+  isLoadingBrochure: boolean;
   onEditBrochure: (propertyId: string) => void;
-  onDeleteBrochure: (propertyId: string) => void;
+  onDeleteBrochure: (propertyId: string, brochureId: string) => void;
   onUploadBrochure: (propertyId: string, file: File) => void;
 }) => {
   const {
@@ -303,54 +305,65 @@ export const DraggableRow = ({
       >
         <div className="w-48">
           {property.brochures[0] ? (
-            <div className="relative h-[100px] overflow-hidden rounded-md">
+            <div
+              className={cn(
+                "group relative h-[100px] overflow-hidden rounded-md",
+                isLoadingBrochure && "pointer-events-none",
+              )}
+            >
               <Link
                 href={
                   property.brochures[0].exportedUrl ?? property.brochures[0].url
                 }
-                className="group relative flex size-full items-center justify-center bg-gray-100 hover:cursor-pointer hover:bg-gray-200"
+                className="relative flex size-full items-center justify-center bg-gray-100 group-hover:cursor-pointer group-hover:bg-gray-200"
                 target="_blank"
               >
-                <BookOpenIcon className="size-8 text-gray-500" />
-
-                <div className="absolute right-1 top-1 flex flex-col opacity-0 group-hover:opacity-100">
-                  <FileInput
-                    accept="application/pdf"
-                    triggerElement={
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button
-                            variant="outline"
-                            size="icon"
-                            className="size-8 rounded-b-none"
-                          >
-                            <ArrowUpTrayIcon className="size-4" />
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent side="left">
-                          Replace brochure
-                        </TooltipContent>
-                      </Tooltip>
-                    }
-                    handleFilesChange={(files) =>
-                      onUploadBrochure(property.id, files[0]!)
-                    }
-                  />
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        className="-mt-px size-8 rounded-t-none"
-                        onClick={() => onDeleteBrochure(property.id)}
-                      >
-                        <TrashFilledIcon className="size-4" />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent side="left">Delete brochure</TooltipContent>
-                  </Tooltip>
-                </div>
+                {isLoadingBrochure ? (
+                  <Spinner className="size-6 text-gray-500" />
+                ) : (
+                  <BookOpenIcon className="size-6 text-gray-500" />
+                )}
               </Link>
+              <div className="absolute right-1 top-1 flex flex-col opacity-0 group-hover:opacity-100">
+                {/**
+                 * TODO: Fix tooltip not showing
+                 */}
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <FileInput
+                      accept="application/pdf"
+                      triggerElement={
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          className="size-8 rounded-b-none"
+                        >
+                          <ArrowUpTrayIcon className="size-4" />
+                        </Button>
+                      }
+                      handleFilesChange={(files) =>
+                        onUploadBrochure(property.id, files[0]!)
+                      }
+                    />
+                  </TooltipTrigger>
+                  <TooltipContent side="left">Replace brochure</TooltipContent>
+                </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      className="-mt-px size-8 rounded-t-none"
+                      onClick={() =>
+                        onDeleteBrochure(property.id, property.brochures[0]!.id)
+                      }
+                    >
+                      <TrashFilledIcon className="size-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent side="left">Delete brochure</TooltipContent>
+                </Tooltip>
+              </div>
             </div>
           ) : (
             <FileInput
@@ -358,7 +371,7 @@ export const DraggableRow = ({
               className="h-[100px] hover:cursor-pointer"
               triggerElement={
                 <div className="flex flex-col items-center justify-center gap-2 rounded-md bg-gray-100 hover:bg-gray-200">
-                  <DocumentPlusIcon className="size-8 text-gray-500" />
+                  <DocumentPlusIcon className="size-6 text-gray-500" />
                   <div className="text-sm font-medium text-gray-500">
                     Add brochure
                   </div>

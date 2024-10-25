@@ -576,8 +576,9 @@ export function PropertiesTable({
     [selectedFields, createDraftEmails, generateDraftEmail, properties],
   );
 
-  // const { mutateAsync: deleteBrochure } = api.brochure.delete.useMutation();
   // const { mutateAsync: uploadBrochure } = api.brochure.upload.useMutation();
+  const { mutateAsync: deleteBrochure, isPending: isDeletingBrochure } =
+    api.property.deleteBrochure.useMutation();
   const [brochureDialogState, setBrochureDialogState] = useState<{
     propertyId: string;
     open: boolean;
@@ -585,9 +586,28 @@ export function PropertiesTable({
   const handleEditBrochure = useCallback((propertyId: string) => {
     setBrochureDialogState({ propertyId, open: true });
   }, []);
-  const handleDeleteBrochure = useCallback((propertyId: string) => {
-    // void deleteBrochure(propertyId);
-  }, []);
+  const [curBrochurePropertyId, setCurBrochurePropertyId] =
+    useState<string>("");
+  const handleDeleteBrochure = useCallback(
+    async (propertyId: string, brochureId: string) => {
+      setCurBrochurePropertyId(propertyId);
+      await deleteBrochure({ propertyId, brochureId });
+      setPropertiesState((prev) =>
+        prev.map((property) =>
+          property.id === propertyId
+            ? {
+                ...property,
+                brochures: property.brochures.filter(
+                  (b) => b.id !== brochureId,
+                ),
+              }
+            : property,
+        ),
+      );
+      setCurBrochurePropertyId("");
+    },
+    [deleteBrochure, setPropertiesState],
+  );
   const handleUploadBrochure = useCallback((propertyId: string, file: File) => {
     // void uploadBrochure(propertyId, file);
   }, []);
@@ -738,6 +758,10 @@ export function PropertiesTable({
                               mapErrors.find(
                                 (error) => error.propertyId === property.id,
                               )?.error
+                            }
+                            isLoadingBrochure={
+                              isDeletingBrochure &&
+                              curBrochurePropertyId === property.id
                             }
                             onEditBrochure={handleEditBrochure}
                             onDeleteBrochure={handleDeleteBrochure}
