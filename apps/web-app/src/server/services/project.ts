@@ -2,17 +2,6 @@ import { type PrismaClient } from "@prisma/client";
 import { type CreateProjectInput } from "../../lib/project";
 
 export const projectService = ({ db }: { db: PrismaClient }) => {
-  function testTimeout() {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        console.log(
-          "===========================5 seconds have passed!===========================",
-        );
-        resolve(void 0);
-      }, 5000);
-    });
-  }
-
   return {
     createProject: async (input: CreateProjectInput, userId: string) => {
       const { projectName } = input;
@@ -62,7 +51,6 @@ export const projectService = ({ db }: { db: PrismaClient }) => {
     },
 
     getProjectsByUser: async (userId: string | null) => {
-      void testTimeout();
       const user = await db.user.findUnique({
         where: {
           id: userId ?? "",
