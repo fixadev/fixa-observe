@@ -2,7 +2,13 @@ import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 import type { EmailThreadWithEmailsAndProperty } from "./types";
 import { type User } from "@clerk/nextjs/server";
-import { type Email, type EmailThread } from "prisma/generated/zod";
+import {
+  Column,
+  Property,
+  type Email,
+  type EmailThread,
+} from "prisma/generated/zod";
+import { ColumnWithIncludes, PropertyWithIncludes } from "~/hooks/useSurvey";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
