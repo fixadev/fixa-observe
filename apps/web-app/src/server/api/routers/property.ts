@@ -27,6 +27,15 @@ export const propertyRouter = createTRPCRouter({
       });
     }),
 
+  delete: protectedProcedure
+    .input(z.object({ propertyId: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      return await propertyServiceInstance.delete(
+        input.propertyId,
+        ctx.user.id,
+      );
+    }),
+
   updateValue: protectedProcedure
     .input(
       z.object({

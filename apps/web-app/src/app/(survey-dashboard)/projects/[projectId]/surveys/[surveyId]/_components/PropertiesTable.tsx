@@ -136,14 +136,12 @@ export function PropertiesTable({
   const pendingMutations = useRef(0);
 
   // Property mutations
-  const { mutateAsync: createProperty } =
-    api.property.createProperty.useMutation();
+  const { mutateAsync: createProperty } = api.property.create.useMutation();
   const { mutateAsync: updatePropertyValue } =
-    api.property.updatePropertyValue.useMutation();
+    api.property.updateValue.useMutation();
   const { mutateAsync: updatePropertiesOrder } =
-    api.property.updatePropertiesOrder.useMutation();
-  const { mutateAsync: deleteProperty } =
-    api.property.deleteProperty.useMutation();
+    api.survey.updatePropertiesOrder.useMutation();
+  const { mutateAsync: deleteProperty } = api.property.delete.useMutation();
 
   // Column mutations
   const { mutateAsync: createColumn } = api.survey.createColumn.useMutation();
