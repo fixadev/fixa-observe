@@ -294,7 +294,7 @@ export function BrochureCarousel({
   // #endregion
 
   return (
-    <div className="relative h-[655px] min-w-0 flex-1">
+    <div className="relative h-[671px] min-w-0 flex-1">
       {loaded && pdf && (
         <div className="mx-auto flex max-w-[1160px] flex-col justify-center px-12">
           <Carousel opts={{ watchDrag: false }} setApi={setCarouselApi}>
@@ -305,7 +305,7 @@ export function BrochureCarousel({
                   !deletedPages.has(index) && (
                     <CarouselItem
                       key={`page_${index + 1}`}
-                      className="flex flex-col items-center justify-center object-contain px-6"
+                      className="flex flex-col items-center justify-center bg-gray-300 object-contain px-6 py-4"
                     >
                       <PDFPageWithControls
                         pdf={pdf}
@@ -366,7 +366,7 @@ export function BrochureCarousel({
               />
             ) : null}
           </Carousel>
-          <div className="mt-10 flex flex-row gap-2 overflow-x-auto">
+          <div className="mt-6 flex flex-row gap-2 overflow-x-auto">
             {Array.from(new Array(numPages), (el, index) => {
               return (
                 <PDFPage
@@ -450,7 +450,7 @@ export function BrochureCarousel({
       {/* Loader */}
       <div
         className={cn(
-          "pointer-events-none absolute left-0 top-0 z-40 flex size-full flex-col bg-white transition-opacity duration-500",
+          "pointer-events-none absolute left-0 top-0 z-40 flex size-full flex-col bg-white px-12 transition-opacity duration-500",
           loaded && pdf ? "opacity-0" : "opacity-100",
         )}
       >

@@ -1,3 +1,5 @@
+"use client";
+
 import { useCallback, useMemo, useState } from "react";
 import { Dialog, DialogContent, DialogFooter } from "~/components/ui/dialog";
 import { type PropertyWithBrochures } from "~/lib/property";
@@ -13,6 +15,7 @@ import {
   AlertDialogTitle,
   AlertDialogDescription,
 } from "~/components/ui/alert-dialog";
+import { cn } from "~/lib/utils";
 
 export default function BrochureDialog({
   property,
@@ -44,6 +47,10 @@ export default function BrochureDialog({
     onOpenChange(false);
   }, [onOpenChange]);
 
+  const onSave = useCallback(() => {
+    console.log("save!");
+  }, []);
+
   if (!brochure) return null;
   return (
     <>
@@ -58,11 +65,16 @@ export default function BrochureDialog({
             isGeneratingPDF={false}
             onEdit={() => null}
           />
-          <DialogFooter>
+          <DialogFooter
+            className={cn(
+              unsavedChanges ? "opacity-100" : "opacity-0",
+              "flex justify-end gap-2",
+            )}
+          >
             <Button variant="outline" onClick={() => setConfirmDiscard(true)}>
               Discard
             </Button>
-            <Button>Save changes</Button>
+            <Button onClick={onSave}>Save changes</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
