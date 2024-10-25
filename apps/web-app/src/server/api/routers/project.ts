@@ -26,10 +26,10 @@ export const projectRouter = createTRPCRouter({
     return await projectServiceInstance.getProjectsByUser(ctx.user.id);
   }),
 
-  update: protectedProcedure
+  updateName: protectedProcedure
     .input(updateProjectInput)
     .mutation(async ({ ctx, input }) => {
-      return await projectServiceInstance.update(
+      return await projectServiceInstance.updateName(
         input.projectId,
         input.projectName,
         ctx.user.id,

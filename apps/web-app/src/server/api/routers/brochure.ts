@@ -2,6 +2,8 @@ import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { brochureService } from "~/server/services/brochure";
 import { db } from "~/server/db";
 import {
+  brochureSchema,
+  brochureWithoutPropertyIdSchema,
   pathSchema,
   removeRectanglesInput,
   transformedTextContentSchema,

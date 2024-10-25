@@ -25,20 +25,21 @@ async function seedAttributes() {
       defaultVisible: false,
     },
     { id: "totalFloors", label: "Total Floors", defaultVisible: false },
+
+    // lab stuff
     { id: "cleanRm", label: "Clean Room", defaultVisible: false },
     { id: "wetRm", label: "Wet Room", defaultVisible: false },
     { id: "dhDoors", label: "DH Doors", defaultVisible: false },
     { id: "glDoors", label: "GL Doors", defaultVisible: false },
     { id: "clearHeight", label: "Clear Height", defaultVisible: false },
     { id: "power", label: "Power", defaultVisible: false },
+
     { id: "vacantSpace", label: "Vacant Space", defaultVisible: false },
     {
       id: "constructionStatus",
       label: "Construction Status",
       defaultVisible: false,
     },
-    { id: "minDivisible", label: "Minimum Divisible", defaultVisible: false },
-    { id: "maxDivisible", label: "Maximum Divisible", defaultVisible: false },
     { id: "yearBuilt", label: "Year Built", defaultVisible: false },
     { id: "parkingRatio", label: "Parking Ratio", defaultVisible: false },
   ];
