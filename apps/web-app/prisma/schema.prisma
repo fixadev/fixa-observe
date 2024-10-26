@@ -65,8 +65,7 @@ model Column {
 
   surveyId       String
   survey         Survey          @relation(fields: [surveyId], references: [id], onDelete: Cascade)
-  attributeId    String
-  attribute      Attribute       @relation(fields: [attributeId], references: [id], onDelete: Cascade)
+  label          String
   propertyValues PropertyValue[]
 }
 
@@ -79,8 +78,7 @@ model Attribute {
   defaultVisible Boolean  @default(false)
 
   ownerId String?
-  owner   User?    @relation(fields: [ownerId], references: [id], onDelete: Cascade)
-  columns Column[]
+  owner   User?   @relation(fields: [ownerId], references: [id], onDelete: Cascade)
 }
 
 model Property {
