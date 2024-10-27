@@ -58,14 +58,16 @@ model Survey {
 }
 
 model Column {
-  id           String   @id @default(uuid())
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   displayIndex Int
+  attributeId  String
+  attribute    Attribute @relation(fields: [attributeId], references: [id], onDelete: Cascade)
 
   surveyId       String
   survey         Survey          @relation(fields: [surveyId], references: [id], onDelete: Cascade)
-  label          String
   propertyValues PropertyValue[]
 }
 
@@ -79,6 +81,8 @@ model Attribute {
 
   ownerId String?
   owner   User?   @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+
+  columns Column[]
 }
 
 model Property {

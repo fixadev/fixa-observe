@@ -45,7 +45,9 @@ import {
 import {
   type EmailTemplate,
   AttachmentSchema,
+  AttributeSchema,
   BrochureSchema,
+  ColumnSchema,
   ContactSchema,
   EmailSchema,
   EmailThreadSchema,
@@ -69,27 +71,6 @@ export type Property = PropertyWithIncludes & {
 export type Column = ColumnWithIncludes & {
   isNew?: boolean;
 };
-export const TablePropertySchema = PropertySchema.extend({
-  createdAt: z.coerce.date().default(new Date()),
-  updatedAt: z.coerce.date().default(new Date()),
-  address: z.string().default(""),
-  photoUrl: z.string().nullable().default(null),
-  ownerId: z.string().default(""),
-  propertyValues: z.array(PropertyValueSchema).default([]),
-  contacts: z.array(ContactSchema).default([]),
-  emailThreads: z
-    .array(
-      EmailThreadSchema.extend({
-        emails: z.array(
-          EmailSchema.extend({
-            attachments: z.array(AttachmentSchema).default([]),
-          }),
-        ),
-      }),
-    )
-    .default([]),
-  brochures: z.array(BrochureSchema).default([]),
-});
 
 export type PropertiesTableState = "edit" | "select-fields";
 
@@ -104,6 +85,11 @@ export function PropertiesTable({
   const router = useRouter();
   const [properties, setProperties] = useState<Property[]>([]);
   const [columns, setColumns] = useState<Column[]>([]);
+  const columnsMap = useMemo(
+    () => new Map(columns.map((column) => [column.id, column])),
+    [columns],
+  );
+
   const [draggingRow, setDraggingRow] = useState<boolean>(false);
   const [isImportingProperties, setIsImportingProperties] =
     useState<boolean>(false);
@@ -192,47 +178,34 @@ export function PropertiesTable({
     useSensor(KeyboardSensor, {}),
   );
 
-  const addAttributeToState = useCallback(() => {
-    void setAttributesOrderState((data) => [
-      ...data,
+  const _createColumn = useCallback(() => {
+    const tempId = crypto.randomUUID();
+    void setColumns((prev) => [
+      ...prev,
       {
-        id: "new-attribute-lol",
+        id: tempId,
         createdAt: new Date(),
         updatedAt: new Date(),
-        type: "string",
+        displayIndex: prev.length,
         label: "New field",
-        ownerId: "",
-        projectId: "",
         isNew: true,
-        defaultIndex: attributesOrder.length ?? 1000,
+        surveyId,
       },
     ]);
-  }, [setAttributesOrderState, attributesOrder.length]);
+  }, [surveyId]);
 
-  const saveNewAttribute = useCallback(
-    (label: string) => {
-      void modifyAttributes(
-        (data) => [
-          ...data.filter((attribute) => !attribute.isNew),
-          {
-            id: crypto.randomUUID(),
-            createdAt: new Date(),
-            updatedAt: new Date(),
-            type: "string",
-            label,
-            ownerId: "",
-            projectId: "",
-            isNew: false,
-            defaultIndex: attributesOrder.length ?? 1000,
-          },
-        ],
-        "add",
-      );
+  const _saveNewColumn = useCallback(
+    (column: Column) => {
+      void createColumn({
+        label: column.label,
+        displayIndex: column.displayIndex,
+        surveyId,
+      });
     },
-    [modifyAttributes, attributesOrder.length],
+    [createColumn, surveyId],
   );
 
-  const renameAttribute = useCallback(
+  const _renameColumn = useCallback(
     (id: string, label: string) => {
       void modifyAttributes(
         (data) => {
@@ -249,7 +222,7 @@ export function PropertiesTable({
     [modifyAttributes],
   );
 
-  const deleteAttribute = useCallback(
+  const _deleteColumn = useCallback(
     (id: string) => {
       void modifyAttributes(
         (data) => {
@@ -270,12 +243,22 @@ export function PropertiesTable({
     const tempId = crypto.randomUUID();
     setProperties((prev) => [
       ...prev,
-      TablePropertySchema.parse({
+      {
         id: tempId,
-        displayIndex: properties.length,
         isNew: true,
+        displayIndex: properties.length,
+
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        address: "",
+        photoUrl: null,
+        ownerId: user?.id ?? "",
         surveyId,
-      }),
+        propertyValues: [],
+        contacts: [],
+        emailThreads: [],
+        brochures: [],
+      },
     ]);
     setTimeout(() => {
       tableRef.current?.scrollTo({
@@ -284,21 +267,21 @@ export function PropertiesTable({
     });
 
     // Create property on server
-    const { propertyId } = await createProperty({
+    const propertyId = await createProperty({
       displayIndex: properties.length,
       surveyId,
     });
 
     // Update temp id with new id
     setProperties((prev) => {
+      const index = prev.findIndex((property) => property.id === tempId);
+      if (index === -1) return prev;
+
       const newProperties = [...prev];
-      const index = newProperties.findIndex(
-        (property) => property.id === tempId,
-      );
-      newProperties[index].id = propertyId;
+      newProperties[index]!.id = propertyId;
       return newProperties;
     });
-  }, [createProperty, properties.length, surveyId]);
+  }, [createProperty, properties.length, surveyId, user?.id]);
 
   const _updatePropertyValue = useCallback(
     (propertyId: string, columnId: string, value: string) => {
@@ -340,13 +323,13 @@ export function PropertiesTable({
   const [state, setState] = useState<PropertiesTableState>("edit");
   const [selectedFields, setSelectedFields] = useState<
     Record<string, Set<string>>
-  >({}); // Maps property id to a set of attribute ids
+  >({}); // Maps property id to a set of column ids
 
   const getHeaderCheckedState = useCallback(
-    (attributeId: string) => {
+    (columnId: string) => {
       let numChecked = 0;
       for (const property of properties) {
-        if (selectedFields[property.id]?.has(attributeId)) {
+        if (selectedFields[property.id]?.has(columnId)) {
           numChecked++;
         }
       }
@@ -360,15 +343,15 @@ export function PropertiesTable({
     [properties, selectedFields],
   );
   const handleHeaderCheckedChange = useCallback(
-    (attributeId: string, checked: boolean) => {
+    (columnId: string, checked: boolean) => {
       setSelectedFields((prev) => {
         const newSelectedFields = { ...prev };
         for (const property of properties) {
           const newSet = newSelectedFields[property.id] ?? new Set<string>();
           if (checked) {
-            newSet.add(attributeId);
+            newSet.add(columnId);
           } else {
-            newSet.delete(attributeId);
+            newSet.delete(columnId);
           }
           newSelectedFields[property.id] = newSet;
         }
@@ -398,12 +381,11 @@ export function PropertiesTable({
       const replacements = {
         [REPLACEMENT_VARIABLES.name]: recipientFirstName,
         [REPLACEMENT_VARIABLES.address]:
-          splitAddress(property.attributes?.address ?? "").streetAddress ?? "",
+          splitAddress(property.address).streetAddress ?? "",
         [REPLACEMENT_VARIABLES.fieldsToVerify]: attributesToVerify
-          .map((attributeId) => {
-            const attributeLabel = attributesMap.get(attributeId)?.label;
-            if (!attributeLabel) return "";
-            return `- ${attributeLabel}`;
+          .map((columnId) => {
+            const column = columnsMap.get(columnId);
+            return `- ${column?.label ?? ""}`;
           })
           .join("\n"),
       };
@@ -426,7 +408,7 @@ export function PropertiesTable({
       };
       return emailDetails;
     },
-    [attributesMap, user?.fullName],
+    [columnsMap, user?.fullName],
   );
   const _createDraftEmails = useCallback(
     async (emailTemplate: EmailTemplate) => {
@@ -528,23 +510,18 @@ export function PropertiesTable({
                         {columns.map((column) => (
                           <DraggableHeader
                             key={column.id}
-                            attribute={attribute}
-                            renameAttribute={
-                              !attribute.ownerId && !attribute.isNew
-                                ? undefined
-                                : attribute.isNew
-                                  ? (name) => saveNewAttribute(name)
-                                  : (name) =>
-                                      renameAttribute(attribute.id, name)
+                            column={column}
+                            renameColumn={
+                              column.isNew
+                                ? (name) => _saveNewColumn(column)
+                                : (name) => _renameColumn(column.id, name)
                             }
-                            deleteAttribute={() =>
-                              deleteAttribute(attribute.id)
-                            }
+                            deleteColumn={() => _deleteColumn(column.id)}
                             draggingRow={draggingRow}
                             state={state}
-                            checkedState={getHeaderCheckedState(attribute.id)}
+                            checkedState={getHeaderCheckedState(column.id)}
                             onCheckedChange={(checked) =>
-                              handleHeaderCheckedChange(attribute.id, checked)
+                              handleHeaderCheckedChange(column.id, checked)
                             }
                           ></DraggableHeader>
                         ))}
@@ -553,7 +530,7 @@ export function PropertiesTable({
                         <Button
                           size="icon"
                           variant="ghost"
-                          onClick={addAttributeToState}
+                          onClick={_createColumn}
                         >
                           <PlusIcon className="size-4" />
                         </Button>

@@ -8,6 +8,11 @@ import {
   Link,
   Font,
 } from "@react-pdf/renderer";
+import { useMemo } from "react";
+import {
+  type ColumnWithIncludes,
+  type PropertyWithIncludes,
+} from "~/hooks/useSurvey";
 import { type AttributeSchema, type PropertySchema } from "~/lib/property";
 
 Font.register({
@@ -155,10 +160,10 @@ const styles = StyleSheet.create({
   },
 });
 
-const getHeight = (attribute: { id: string }) => {
-  if (attribute.id === "displayAddress") {
+const getHeight = (attributeId: string) => {
+  if (attributeId === "displayAddress") {
     return "10%";
-  } else if (attribute.id === "comments") {
+  } else if (attributeId === "comments") {
     return "26%";
   } else {
     return "5%";
@@ -168,13 +173,11 @@ const getHeight = (attribute: { id: string }) => {
 export function ColumnsPage({
   pageNumber,
   properties,
-  attributes,
-  propertyOrientation,
+  columns,
 }: {
   pageNumber: number;
-  properties: PropertySchema[];
-  attributes: AttributeSchema[];
-  propertyOrientation: "rows" | "columns";
+  properties: PropertyWithIncludes[];
+  columns: ColumnWithIncludes[];
 }) {
   function formatAddress(address: string | undefined) {
     if (!address) {
@@ -189,6 +192,17 @@ export function ColumnsPage({
     }
     return label;
   }
+
+  const propertyIdToColumnIdToValue = useMemo(() => {
+    return new Map(
+      properties.map((property) => [
+        property.id,
+        new Map(
+          property.propertyValues.map((value) => [value.columnId, value.value]),
+        ),
+      ]),
+    );
+  }, [properties]);
 
   // const brochureAttribute: AttributeSchema = {
   //   id: "brochure",
@@ -207,7 +221,7 @@ export function ColumnsPage({
   //   brochureAttribute,
   // );
 
-  const propertiesPerPage = propertyOrientation === "rows" ? 7 : 4;
+  const propertiesPerPage = 4;
 
   return (
     <Page size="A4" orientation="landscape" style={styles.page}>
@@ -220,12 +234,15 @@ export function ColumnsPage({
           <View style={styles.tableCell}>
             <View style={styles.image}></View>
           </View>
-          {attributes.map((attribute) => (
+          {columns.map((column) => (
             <View
-              key={attribute.id}
-              style={{ height: getHeight(attribute), ...styles.headerCell }}
+              key={column.id}
+              style={{
+                height: getHeight(column.attributeId ?? ""),
+                ...styles.headerCell,
+              }}
             >
-              <Text>{formatAttributeLabel(attribute.label)}</Text>
+              <Text>{formatAttributeLabel(column.label)}</Text>
             </View>
           ))}
         </View>
@@ -248,20 +265,22 @@ export function ColumnsPage({
                 <Text>{(pageNumber - 1) * propertiesPerPage + index + 1}</Text>
               </View>
             </View>
-            {attributes.map((attribute) => (
+            {columns.map((column) => (
               <View
-                key={attribute.id}
+                key={column.id}
                 style={{
-                  ...(attribute.id === "comments"
+                  ...(column.attributeId === "comments"
                     ? styles.commentsCell
                     : styles.tableCell),
-                  height: getHeight(attribute),
+                  height: getHeight(column.attributeId ?? ""),
                   fontWeight:
-                    attribute.id === "displayAddress" ? "semibold" : "normal",
+                    column.attributeId === "displayAddress"
+                      ? "semibold"
+                      : "normal",
                 }}
               >
                 <View>
-                  {attribute.id === "displayAddress" ? (
+                  {column.attributeId === "address" ? (
                     property.brochures[0]?.url ? (
                       <Link
                         src={
@@ -270,15 +289,17 @@ export function ColumnsPage({
                           ""
                         }
                       >
-                        {formatAddress(property.attributes.displayAddress)}
+                        {formatAddress(property.address)}
                       </Link>
                     ) : (
-                      <Text>
-                        {formatAddress(property.attributes.displayAddress)}
-                      </Text>
+                      <Text>{formatAddress(property.address)}</Text>
                     )
                   ) : (
-                    <Text>{property.attributes?.[attribute.id]}</Text>
+                    <Text>
+                      {propertyIdToColumnIdToValue
+                        .get(property.id)
+                        ?.get(column.id)}
+                    </Text>
                   )}
                 </View>
               </View>
