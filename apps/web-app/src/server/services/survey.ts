@@ -258,8 +258,6 @@ export const surveyService = ({ db }: { db: PrismaClient }) => {
           id,
         }));
 
-        console.log("propertiesWithIds", propertiesWithIds);
-
         const allAttributes = await attributesServiceInstance.getAll(ownerId);
         // figure out what attributes exist + what attributes are default visible
         const defaultVisibleAttributes = allAttributes.filter(
@@ -276,8 +274,6 @@ export const surveyService = ({ db }: { db: PrismaClient }) => {
           ),
         ];
 
-        console.log("nonNullAttributes", nonNullAttributes);
-
         const optionalAttributesToInclude = allAttributes
           .filter((attribute) => !attribute.defaultVisible)
           .filter((attribute) =>
@@ -285,8 +281,6 @@ export const surveyService = ({ db }: { db: PrismaClient }) => {
               (nonNullAttribute) => nonNullAttribute === attribute.id,
             ),
           );
-
-        console.log("optionalAttributesToInclude", optionalAttributesToInclude);
 
         const existingColumns = await db.column.findMany({
           where: { surveyId },
@@ -321,14 +315,14 @@ export const surveyService = ({ db }: { db: PrismaClient }) => {
                 (column) =>
                   allAttributes.find(
                     (attribute) => attribute.id === column.attributeId,
-                  )?.label === key,
+                  )?.id === key,
               )?.id;
 
               return columnId
                 ? {
                     propertyId: property.id,
                     columnId: columnId,
-                    value: String(value),
+                    value: value ? String(value) : "",
                   }
                 : null;
             })
