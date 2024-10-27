@@ -36,9 +36,10 @@ export default function Home() {
     refetch: refetchProjects,
     isLoading: projectsLoading,
     error: projectsError,
-  } = api.project.getProjects.useQuery();
+  } = api.project.getAll.useQuery();
+
   const { mutate: createProject, error: createProjectError } =
-    api.project.createProject.useMutation({
+    api.project.create.useMutation({
       onSuccess: (data) => {
         router.push(`/projects/${data.id}`);
         toast({
