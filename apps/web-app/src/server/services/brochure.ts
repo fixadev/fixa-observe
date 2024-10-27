@@ -60,6 +60,9 @@ export const brochureService = ({ db }: { db: PrismaClient }) => {
             ],
           },
         },
+        include: {
+          brochures: true,
+        },
       });
       return response;
     },

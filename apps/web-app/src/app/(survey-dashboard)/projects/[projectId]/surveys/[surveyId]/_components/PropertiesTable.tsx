@@ -489,8 +489,7 @@ export function PropertiesTable({
   const handleDeleteBrochure = useCallback(
     async (propertyId: string, brochureId: string) => {
       setCurBrochurePropertyId(propertyId);
-      await deleteBrochure({ propertyId, brochureId });
-      setPropertiesState((prev) =>
+      setProperties((prev) =>
         prev.map((property) =>
           property.id === propertyId
             ? {
@@ -503,8 +502,9 @@ export function PropertiesTable({
         ),
       );
       setCurBrochurePropertyId("");
+      await deleteBrochure({ propertyId, brochureId });
     },
-    [deleteBrochure, setPropertiesState],
+    [deleteBrochure],
   );
   const handleUploadBrochure = useCallback(
     async (propertyId: string, file?: File) => {
@@ -581,7 +581,7 @@ export function PropertiesTable({
           },
         });
 
-        setPropertiesState((prev) =>
+        setProperties((prev) =>
           prev.map((property) =>
             property.id === propertyId
               ? {
