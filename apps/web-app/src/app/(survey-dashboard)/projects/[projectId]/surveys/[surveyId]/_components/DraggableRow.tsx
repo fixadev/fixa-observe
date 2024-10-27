@@ -104,7 +104,7 @@ export const DraggableRow = ({
       columns
         .filter((column) => column.attributeId !== null)
         .map((column) => [
-          column.attributeId!,
+          column.attributeId,
           columnIdToValue.get(column.id) ?? "",
         ]),
     );
@@ -114,7 +114,7 @@ export const DraggableRow = ({
       new Map(
         columns
           .filter((column) => column.attributeId !== null)
-          .map((column) => [column.attributeId!, column.id]),
+          .map((column) => [column.attributeId, column.id]),
       ),
     [columns],
   );

@@ -42,18 +42,7 @@ import {
   DEFAULT_EMAIL_TEMPLATE_SUBJECT,
   REPLACEMENT_VARIABLES,
 } from "~/lib/constants";
-import {
-  type EmailTemplate,
-  AttachmentSchema,
-  AttributeSchema,
-  BrochureSchema,
-  ColumnSchema,
-  ContactSchema,
-  EmailSchema,
-  EmailThreadSchema,
-  PropertySchema,
-  PropertyValueSchema,
-} from "prisma/generated/zod";
+import { type EmailTemplate } from "prisma/generated/zod";
 import { replaceTemplateVariables, splitAddress } from "~/lib/utils";
 import { useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
@@ -62,7 +51,6 @@ import {
   type PropertyWithIncludes,
   useSurvey,
 } from "~/hooks/useSurvey";
-import { z } from "zod";
 import { SurveyDownloadLink } from "../pdf-preview/v1/_components/DownloadLink";
 
 export type Property = PropertyWithIncludes & {
@@ -179,20 +167,30 @@ export function PropertiesTable({
   );
 
   const _createColumn = useCallback(() => {
-    const tempId = crypto.randomUUID();
+    const tempColumnId = crypto.randomUUID();
+    const tempAttributeId = crypto.randomUUID();
     void setColumns((prev) => [
       ...prev,
       {
-        id: tempId,
+        id: tempColumnId,
         createdAt: new Date(),
         updatedAt: new Date(),
         displayIndex: prev.length,
-        label: "New field",
+        attributeId: tempAttributeId,
+        attribute: {
+          id: tempAttributeId,
+          ownerId: user?.id ?? "",
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          label: "New field",
+          defaultIndex: 0,
+          defaultVisible: true,
+        },
         isNew: true,
         surveyId,
       },
     ]);
-  }, [surveyId]);
+  }, [surveyId, user?.id]);
 
   const _saveNewColumn = useCallback(
     (column: Column) => {
@@ -385,7 +383,7 @@ export function PropertiesTable({
         [REPLACEMENT_VARIABLES.fieldsToVerify]: attributesToVerify
           .map((columnId) => {
             const column = columnsMap.get(columnId);
-            return `- ${column?.label ?? ""}`;
+            return `- ${column?.attribute.label ?? ""}`;
           })
           .join("\n"),
       };
@@ -404,7 +402,9 @@ export function PropertiesTable({
         propertyId: property.id,
         subject,
         body,
-        attributesToVerify,
+        attributesToVerify: attributesToVerify.map(
+          (columnId) => columnsMap.get(columnId)!.attributeId,
+        ),
       };
       return emailDetails;
     },
