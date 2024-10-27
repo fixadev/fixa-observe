@@ -2,10 +2,7 @@
 
 import { useCallback, useMemo, useState } from "react";
 import { Dialog, DialogContent, DialogFooter } from "~/components/ui/dialog";
-import {
-  type BrochureSchema,
-  type PropertyWithBrochures,
-} from "~/lib/property";
+import { type PropertyWithBrochures } from "~/lib/property";
 import { BrochureCarousel } from "./BrochureCarousel";
 import { Button } from "~/components/ui/button";
 import {
@@ -23,6 +20,7 @@ import { BrochurePDFRenderer } from "./BrochurePDFRenderer";
 import Spinner from "~/components/Spinner";
 import { api } from "~/trpc/react";
 import axios from "axios";
+import { type Brochure } from "prisma/generated/zod";
 
 export default function BrochureDialog({
   property,
@@ -36,9 +34,7 @@ export default function BrochureDialog({
   const brochure = useMemo(() => property?.brochures[0], [property?.brochures]);
 
   const [confirmDiscard, setConfirmDiscard] = useState<boolean>(false);
-  const [editedBrochure, setEditedBrochure] = useState<BrochureSchema | null>(
-    null,
-  );
+  const [editedBrochure, setEditedBrochure] = useState<Brochure | null>(null);
   const unsavedChanges = useMemo(() => {
     return editedBrochure !== null;
   }, [editedBrochure]);
@@ -54,7 +50,7 @@ export default function BrochureDialog({
     [onOpenChange, unsavedChanges],
   );
 
-  const handleEdit = useCallback((brochure: BrochureSchema) => {
+  const handleEdit = useCallback((brochure: Brochure) => {
     console.log("Edited brochure...!", brochure);
     setEditedBrochure(brochure);
   }, []);
@@ -69,7 +65,7 @@ export default function BrochureDialog({
   const { mutateAsync: updateExportedUrl } =
     api.brochure.updateExportedUrl.useMutation();
   const { mutateAsync: getPresignedS3Url } =
-    api.property.getPresignedS3Url.useMutation();
+    api.s3.getPresignedS3Url.useMutation();
 
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const handleSave = useCallback(() => {

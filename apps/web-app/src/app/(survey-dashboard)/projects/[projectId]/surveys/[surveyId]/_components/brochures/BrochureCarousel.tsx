@@ -13,7 +13,6 @@ import { TrashIcon } from "@heroicons/react/24/outline";
 import { TrashIcon as TrashIconSolid } from "@heroicons/react/24/solid";
 import { cn } from "~/lib/utils";
 import {
-  type BrochureSchema,
   type BrochureRectangles,
   type Path,
   type TransformedTextContent,
@@ -31,13 +30,14 @@ import { useToast } from "~/hooks/use-toast";
 import { api } from "~/trpc/react";
 import Spinner from "~/components/Spinner";
 import { ConfirmRemovePopup } from "./ConfirmRemovePopup";
+import { type Brochure } from "prisma/generated/zod";
 
 export function BrochureCarousel({
   brochure,
   onEdit,
 }: {
-  brochure: BrochureSchema;
-  onEdit: (brochure: BrochureSchema) => void;
+  brochure: Brochure;
+  onEdit: (brochure: Brochure) => void;
 }) {
   // ------------------
   // #region Load PDF
