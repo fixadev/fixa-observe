@@ -68,7 +68,11 @@ export const propertyService = ({ db }: { db: PrismaClient }) => {
     createProperties: async (input: CreatePropertySchema[], userId: string) => {
       const startTime = new Date();
       const formattedAddresses = await formatAddresses(
-        input.map((property) => property.attributes.address ?? ""),
+        input.map((property) => ({
+          addressString: property.attributes.address ?? "",
+          suite: property.attributes.suite ?? "",
+          buildingName: property.attributes.buildingName ?? "",
+        })),
       );
       const brochures: (BrochureWithoutPropertyId | null)[] = input.map(
         (property) => property.brochures[0] ?? null,
@@ -79,16 +83,11 @@ export const propertyService = ({ db }: { db: PrismaClient }) => {
         ({ brochures, ...property }, index) => ({
           ...property,
           ownerId: userId,
-          attributes:
-            {
-              ...property.attributes,
-              address: formattedAddresses
-                ? formattedAddresses[index]?.address
-                : "",
-              displayAddress: formattedAddresses
-                ? formattedAddresses[index]?.displayAddress
-                : "",
-            } ?? {},
+          attributes: {
+            ...property.attributes,
+            address: formattedAddresses?.[index]?.address ?? "",
+            displayAddress: formattedAddresses?.[index]?.displayAddress ?? "",
+          },
         }),
       );
 
@@ -131,6 +130,7 @@ export const propertyService = ({ db }: { db: PrismaClient }) => {
         const brochuresToParse = createdBrochures.map((brochure) => ({
           url: brochure.url,
           propertyId: brochure.propertyId,
+          id: brochure.id,
         }));
 
         const endTime3 = new Date();
@@ -251,6 +251,21 @@ export const propertyService = ({ db }: { db: PrismaClient }) => {
         },
       });
       return response;
+    },
+
+    updateBrochureUrl: async (
+      brochureId: string,
+      url: string,
+      userId: string,
+    ) => {
+      return db.brochure.update({
+        where: {
+          id: brochureId,
+        },
+        data: {
+          url,
+        },
+      });
     },
 
     deleteBrochure: async (

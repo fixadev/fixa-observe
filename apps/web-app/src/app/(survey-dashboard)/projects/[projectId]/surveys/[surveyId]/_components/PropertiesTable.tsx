@@ -100,29 +100,29 @@ export function PropertiesTable({
     { propertyId: string; error: string }[]
   >([]);
 
-  const supabase = useSupabase();
-  useEffect(() => {
-    if (supabase) {
-      const channel = supabase
-        .channel("table_db_changes")
-        .on(
-          "postgres_changes",
-          {
-            event: "*",
-            schema: "public",
-            table: "Contact",
-          },
-          (payload) => {
-            console.log("PAYLOAD", payload);
-          },
-        )
-        .subscribe();
+  // const supabase = useSupabase();
+  // useEffect(() => {
+  //   if (supabase) {
+  //     const channel = supabase
+  //       .channel("table_db_changes")
+  //       .on(
+  //         "postgres_changes",
+  //         {
+  //           event: "*",
+  //           schema: "public",
+  //           table: "Contact",
+  //         },
+  //         (payload) => {
+  //           console.log("PAYLOAD", payload);
+  //         },
+  //       )
+  //       .subscribe();
 
-      return () => {
-        void supabase.removeChannel(channel);
-      };
-    }
-  }, [supabase]);
+  //     return () => {
+  //       void supabase.removeChannel(channel);
+  //     };
+  //   }
+  // }, [supabase]);
 
   // useEffect(() => {
   //   console.log("MAP ERRORS");
@@ -417,7 +417,6 @@ export function PropertiesTable({
         {
           createdAt: new Date(),
           updatedAt: new Date(),
-          address: "",
           photoUrl: null,
           displayIndex: properties.length,
           attributes: {},
