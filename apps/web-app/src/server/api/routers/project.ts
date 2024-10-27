@@ -7,7 +7,7 @@ import { projectService } from "~/server/services/project";
 const projectServiceInstance = projectService({ db });
 
 export const projectRouter = createTRPCRouter({
-  createProject: protectedProcedure
+  create: protectedProcedure
     .input(createProjectInput)
     .mutation(async ({ ctx, input }) => {
       return await projectServiceInstance.createProject(input, ctx.user.id);

@@ -1,16 +1,12 @@
-import { Prisma, type PrismaClient } from "@prisma/client";
+import { type PrismaClient } from "@prisma/client";
 import axios from "axios";
 import { env } from "~/env";
-import {
-  type CreatePropertySchema,
-  type AttributeSchema,
-} from "~/lib/property";
+import { type CreatePropertySchema } from "~/lib/property";
 import { type CreateSurveyInput } from "~/lib/survey";
 import { type SurveySchema } from "~/lib/survey";
 import { propertyService } from "./property";
 import { parsePropertyCardWithAI } from "../utils/parsePropertyCardWithAI";
 import { attributesService } from "./attributes";
-import { formatAddresses } from "../utils/formatAddresses";
 
 export const surveyService = ({ db }: { db: PrismaClient }) => {
   const propertyServiceInstance = propertyService({ db });
@@ -67,8 +63,7 @@ export const surveyService = ({ db }: { db: PrismaClient }) => {
     },
 
     create: async (input: CreateSurveyInput, userId: string) => {
-      const attributes =
-        await attributesServiceInstance.getDefaultAttributes(userId);
+      const attributes = await attributesServiceInstance.getDefaults(userId);
       const survey = await db.survey.create({
         data: {
           name: input.surveyName,
@@ -199,15 +194,38 @@ export const surveyService = ({ db }: { db: PrismaClient }) => {
             const parsedProperty = await parsePropertyCardWithAI(property.text);
             return {
               ...parsedProperty,
-              brochureLink: property.link ?? undefined,
+              brochureUrl: property.link ?? undefined,
               photoUrl: property.image_url,
             };
           }),
         );
 
-        const existingColumns = await db.column.findMany({
-          where: { surveyId },
-        });
+        // create a property for each parsed property
+        const propertiesToCreate: Array<CreatePropertySchema> =
+          parsedProperties.map((property, index) => {
+            return {
+              address: property.displayAddress ?? "",
+              createdAt: new Date(),
+              updatedAt: new Date(),
+              photoUrl: property.photoUrl,
+              displayIndex: index,
+              surveyId: surveyId,
+              brochureUrl: property.brochureUrl ?? "",
+            };
+          });
+
+        const createdPropertyIds =
+          await propertyServiceInstance.createManyWithBrochures(
+            propertiesToCreate,
+            ownerId,
+          );
+
+        const propertiesWithIds = createdPropertyIds.map((id, index) => ({
+          ...parsedProperties[index],
+          brochureUrl: undefined,
+          photoUrl: undefined,
+          id,
+        }));
 
         const allAttributes = await attributesServiceInstance.getAll(ownerId);
         // figure out what attributes exist + what attributes are default visible
@@ -217,14 +235,18 @@ export const surveyService = ({ db }: { db: PrismaClient }) => {
         const optionalAttributesToInclude = allAttributes
           .filter((attribute) => !attribute.defaultVisible)
           .filter((attribute) =>
-            parsedProperties.some(
+            propertiesWithIds.some(
               (property) =>
                 (property as Record<string, unknown>)[attribute.label] !== null,
             ),
           );
 
-        // deduplicate attributes
-        const attributesToCreate = [
+        const existingColumns = await db.column.findMany({
+          where: { surveyId },
+        });
+
+        // deduplicate columns
+        const columnsToCreate = [
           ...defaultVisibleAttributes,
           ...optionalAttributesToInclude,
         ].filter(
@@ -236,7 +258,7 @@ export const surveyService = ({ db }: { db: PrismaClient }) => {
 
         // create a column for each attribute -- use default index
         const newColumns = await db.column.createManyAndReturn({
-          data: attributesToCreate.map((attribute) => ({
+          data: columnsToCreate.map((attribute) => ({
             attributeId: attribute.id,
             displayIndex: attribute.defaultIndex,
             surveyId,
@@ -245,7 +267,33 @@ export const surveyService = ({ db }: { db: PrismaClient }) => {
 
         const allColumns = [...existingColumns, ...newColumns];
 
-        // const relevantAttributes = {
+        const propertyValuesToCreate = propertiesWithIds.flatMap((property) =>
+          Object.entries(property)
+            .map(([key, value]) => {
+              const columnId = allColumns.find(
+                (column) =>
+                  allAttributes.find(
+                    (attribute) => attribute.id === column.attributeId,
+                  )?.label === key,
+              )?.id;
+
+              return columnId
+                ? {
+                    propertyId: property.id,
+                    columnId: columnId,
+                    value: String(value),
+                  }
+                : null;
+            })
+            .filter(
+              (entry): entry is NonNullable<typeof entry> => entry !== null,
+            ),
+        );
+
+        await db.propertyValue.createMany({
+          data: propertyValuesToCreate,
+        });
+
         //   address: property.postalAddress ?? "",
         //   buildingName: property.buildingName ?? "",
         //   suite: property.suite ?? "",
@@ -258,36 +306,9 @@ export const surveyService = ({ db }: { db: PrismaClient }) => {
         //   comments: property.comments ?? "",
         // }
 
-        // create a property for each parsed property
-        const propertiesToCreate: Array<CreatePropertySchema> =
-          parsedProperties.map((property, index) => {
-            return {
-              createdAt: new Date(),
-              updatedAt: new Date(),
-              photoUrl: property.photoUrl,
-              displayIndex: index,
-              surveyId: surveyId,
-              brochureUrl: property.brochureLink ?? "",
-            };
-          });
-
-        const createdProperties =
-          await propertyServiceInstance.createManyWithBrochures(
-            propertiesToCreate,
-            ownerId,
-          );
-
         // populate attributes for each property
 
-        const formattedAddresses = await formatAddresses(
-          input.map((property) => ({
-            addressString: property.attributes.address ?? "",
-            suite: property.attributes.suite ?? "",
-            buildingName: property.attributes.buildingName ?? "",
-          })),
-        );
-
-        await addProperties(surveyId, createdIds, ownerId);
+        await addProperties(surveyId, createdPropertyIds, ownerId);
 
         return { status: 200 };
       } catch (error) {

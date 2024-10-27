@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { openai } from "./OpenAIClient";
 import { zodResponseFormat } from "openai/helpers/zod.mjs";
+import { formatAddress } from "./formatAddresses";
 
 export type ParsedPropertyCard = z.infer<typeof parsedPropertyCardSchema>;
 export const parsedPropertyCardSchema = z.object({
@@ -16,7 +17,7 @@ export const parsedPropertyCardSchema = z.object({
   subtypeClass: z.string().nullable(),
   spaceUse: z.string().nullable(),
   leaseType: z.string().nullable(),
-  size: z.string(),
+  propertySize: z.string(),
   availSpace: z.string(),
   subExpDate: z.string().nullable(),
   totalFloors: z.string().nullable(),
@@ -65,7 +66,21 @@ export async function parsePropertyCardWithAI(text: string) {
     });
 
     const propertyObj = completion.choices[0]?.message.parsed;
-    return propertyObj;
+
+    const { displayAddress } = await formatAddress({
+      addressString: propertyObj?.postalAddress ?? "",
+      suite: propertyObj?.suite ?? "",
+      buildingName: propertyObj?.buildingName ?? "",
+    });
+
+    return {
+      ...propertyObj,
+      divisibility:
+        `${propertyObj?.minDivisible} - ${propertyObj?.maxDivisible}` ?? "",
+      buildingName: undefined,
+      suite: undefined,
+      displayAddress,
+    };
   } catch (error) {
     console.error(error);
     return null;
