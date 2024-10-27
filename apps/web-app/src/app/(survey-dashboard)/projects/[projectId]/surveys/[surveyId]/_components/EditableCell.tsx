@@ -17,7 +17,7 @@ import {
 } from "~/components/ui/tooltip";
 import { type Column, type Property } from "./PropertiesTable";
 import { cn, isPropertyNotAvailable } from "~/lib/utils";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 export function EditableCell({
   property,
@@ -45,51 +45,60 @@ export function EditableCell({
   const [localValue, setLocalValue] = useState(
     columnIdToValue.get(column.id) ?? "",
   );
-  const isProgrammaticBlurRef = useRef(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     setLocalValue(columnIdToValue.get(column.id) ?? "");
   }, [columnIdToValue, column.id]);
 
-  function handleUpdateProperty(value: string) {
-    if (
-      column.attributeId === "askingRate" ||
-      column.attributeId === "opEx" ||
-      column.attributeId === "size"
-    ) {
-      const inputValue = advancedParseFloat(value);
-
-      const size =
+  const handleUpdateProperty = useCallback(
+    (value: string) => {
+      if (
+        column.attributeId === "askingRate" ||
+        column.attributeId === "opEx" ||
         column.attributeId === "size"
-          ? inputValue
-          : advancedParseFloat(attributeIdToValue.get("size") ?? "0");
+      ) {
+        const inputValue = advancedParseFloat(value);
 
-      const askingRate =
-        column.attributeId === "askingRate"
-          ? inputValue
-          : advancedParseFloat(attributeIdToValue.get("askingRate") ?? "0");
+        const size =
+          column.attributeId === "size"
+            ? inputValue
+            : advancedParseFloat(attributeIdToValue.get("size") ?? "0");
 
-      const opEx =
-        column.attributeId === "opEx"
-          ? inputValue
-          : advancedParseFloat(attributeIdToValue.get("opEx") ?? "0");
+        const askingRate =
+          column.attributeId === "askingRate"
+            ? inputValue
+            : advancedParseFloat(attributeIdToValue.get("askingRate") ?? "0");
 
-      const computedTotalCost = Math.round(
-        (askingRate + opEx) * size,
-      ).toString();
+        const opEx =
+          column.attributeId === "opEx"
+            ? inputValue
+            : advancedParseFloat(attributeIdToValue.get("opEx") ?? "0");
 
-      const newTotalCost = "$" + computedTotalCost;
-      updatePropertyValue(property.id, column.id, value);
-      updatePropertyValue(
-        property.id,
-        attributeIdToColumnId.get("totalCost") ?? "",
-        newTotalCost,
-      );
-    } else {
-      updatePropertyValue(property.id, column.id, value);
-    }
-  }
+        const computedTotalCost = Math.round(
+          (askingRate + opEx) * size,
+        ).toString();
+
+        const newTotalCost = "$" + computedTotalCost;
+        updatePropertyValue(property.id, column.id, value);
+        updatePropertyValue(
+          property.id,
+          attributeIdToColumnId.get("totalCost") ?? "",
+          newTotalCost,
+        );
+      } else {
+        updatePropertyValue(property.id, column.id, value);
+      }
+    },
+    [
+      column.attributeId,
+      attributeIdToValue,
+      property.id,
+      column.id,
+      updatePropertyValue,
+      attributeIdToColumnId,
+    ],
+  );
 
   return (
     <div className="relative flex items-center gap-2">
@@ -103,16 +112,11 @@ export function EditableCell({
         onKeyDown={(e) => {
           if (e.key === "Enter") {
             e.preventDefault();
-            handleUpdateProperty(e.currentTarget.value);
-            isProgrammaticBlurRef.current = true;
             inputRef.current?.blur();
           }
         }}
         onBlur={(e: React.FocusEvent<HTMLInputElement>) => {
-          if (!isProgrammaticBlurRef.current) {
-            handleUpdateProperty(e.target.value);
-          }
-          isProgrammaticBlurRef.current = false;
+          handleUpdateProperty(e.target.value);
         }}
       />
       {column.id in parsedAttributes && (
