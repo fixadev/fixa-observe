@@ -117,6 +117,25 @@ export const surveyService = ({ db }: { db: PrismaClient }) => {
       return survey;
     },
 
+    updateColumnAttribute: async (
+      columnId: string,
+      attributeId: string,
+      userId: string,
+    ) => {
+      const column = await db.column.update({
+        where: { id: columnId, survey: { ownerId: userId } },
+        data: { attributeId },
+      });
+      return column;
+    },
+
+    deleteColumn: async (columnId: string, userId: string) => {
+      const column = await db.column.delete({
+        where: { id: columnId, survey: { ownerId: userId } },
+      });
+      return column;
+    },
+
     updateColumnsOrder: async (
       columnIds: string[],
       oldIndex: number,

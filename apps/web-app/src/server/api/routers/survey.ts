@@ -51,9 +51,20 @@ export const surveyRouter = createTRPCRouter({
   updateColumnAttribute: protectedProcedure
     .input(z.object({ columnId: z.string(), attributeId: z.string() }))
     .mutation(async ({ ctx, input }) => {
-      return {
-        status: 200,
-      };
+      return await surveyServiceInstance.updateColumnAttribute(
+        input.columnId,
+        input.attributeId,
+        ctx.user.id,
+      );
+    }),
+
+  deleteColumn: protectedProcedure
+    .input(z.object({ columnId: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      return await surveyServiceInstance.deleteColumn(
+        input.columnId,
+        ctx.user.id,
+      );
     }),
 
   updateColumnsOrder: protectedProcedure
