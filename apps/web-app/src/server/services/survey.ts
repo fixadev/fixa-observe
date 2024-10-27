@@ -91,8 +91,16 @@ export const surveyService = ({ db }: { db: PrismaClient }) => {
     },
 
     delete: async (surveyId: string, userId: string) => {
-      const survey = await db.survey.delete({
-        where: { id: surveyId, ownerId: userId },
+      const survey = await db.$transaction(async (tx) => {
+        await tx.column.deleteMany({
+          where: { surveyId },
+        });
+        await tx.propertyValue.deleteMany({
+          where: { property: { surveyId } },
+        });
+        return await tx.survey.delete({
+          where: { id: surveyId, ownerId: userId },
+        });
       });
       return survey;
     },
@@ -224,22 +232,42 @@ export const surveyService = ({ db }: { db: PrismaClient }) => {
           ...parsedProperties[index],
           brochureUrl: undefined,
           photoUrl: undefined,
+          postalAddress: undefined,
+          buildingName: undefined,
+          minDivisible: undefined,
+          maxDivisible: undefined,
           id,
         }));
+
+        console.log("propertiesWithIds", propertiesWithIds);
 
         const allAttributes = await attributesServiceInstance.getAll(ownerId);
         // figure out what attributes exist + what attributes are default visible
         const defaultVisibleAttributes = allAttributes.filter(
           (attribute) => attribute.defaultVisible,
         );
+
+        const nonNullAttributes = [
+          ...new Set(
+            propertiesWithIds.flatMap((property) =>
+              Object.entries(property)
+                .filter(([_, value]) => value !== null && value !== undefined)
+                .map(([key]) => key),
+            ),
+          ),
+        ];
+
+        console.log("nonNullAttributes", nonNullAttributes);
+
         const optionalAttributesToInclude = allAttributes
           .filter((attribute) => !attribute.defaultVisible)
           .filter((attribute) =>
-            propertiesWithIds.some(
-              (property) =>
-                (property as Record<string, unknown>)[attribute.label] !== null,
+            nonNullAttributes.some(
+              (nonNullAttribute) => nonNullAttribute === attribute.id,
             ),
           );
+
+        console.log("optionalAttributesToInclude", optionalAttributesToInclude);
 
         const existingColumns = await db.column.findMany({
           where: { surveyId },

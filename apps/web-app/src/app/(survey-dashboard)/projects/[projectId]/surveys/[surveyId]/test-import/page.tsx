@@ -1,3 +1,5 @@
+"use client";
+
 import { NDXOutputUploader } from "../_components/NDXOutputUploader";
 
 export default function TestImportPage({
