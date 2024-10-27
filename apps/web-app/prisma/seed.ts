@@ -2,8 +2,6 @@ import { db } from "~/server/db";
 
 async function seedAttributes() {
   const attributes = [
-    { id: "displayAddress", label: "Address", defaultVisible: true },
-    { id: "address", label: "Full address (hidden)", defaultVisible: true },
     { id: "size", label: "Available space (SF)", defaultVisible: true },
     { id: "divisibility", label: "Divisibility (SF)", defaultVisible: true },
     { id: "askingRate", label: "Asking rate (SF/Mo)", defaultVisible: true },
@@ -45,16 +43,23 @@ async function seedAttributes() {
   ];
 
   await db.$transaction(async (tx) => {
-    await tx.attribute.deleteMany({ where: { ownerId: null } });
     await Promise.all(
       attributes.map((attribute, i) =>
-        tx.attribute.create({
-          data: {
+        tx.attribute.upsert({
+          where: {
+            id: attribute.id,
+          },
+          create: {
             id: attribute.id,
             label: attribute.label,
             defaultIndex: i,
             defaultVisible: attribute.defaultVisible,
             ownerId: null,
+          },
+          update: {
+            label: attribute.label,
+            defaultIndex: i,
+            defaultVisible: attribute.defaultVisible,
           },
         }),
       ),
