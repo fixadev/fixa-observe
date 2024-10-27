@@ -12,21 +12,7 @@ export const surveyService = ({ db }: { db: PrismaClient }) => {
   const propertyServiceInstance = propertyService({ db });
   const attributesServiceInstance = attributesService({ db });
 
-  const addProperties = async (
-    surveyId: string,
-    propertyIds: string[],
-    userId: string,
-  ) => {
-    const survey = await db.survey.update({
-      where: { id: surveyId, ownerId: userId },
-      data: { properties: { connect: propertyIds.map((id) => ({ id })) } },
-    });
-    return survey;
-  };
-
   return {
-    addProperties,
-
     get: async (surveyId: string, userId: string) => {
       const survey = await db.survey.findUnique({
         where: { id: surveyId, ownerId: userId },
@@ -348,8 +334,6 @@ export const surveyService = ({ db }: { db: PrismaClient }) => {
         // }
 
         // populate attributes for each property
-
-        await addProperties(surveyId, createdPropertyIds, ownerId);
 
         return { status: 200 };
       } catch (error) {
