@@ -73,7 +73,9 @@ export const DraggableHeader = ({
             {column.attributeId === "comments" ||
             column.attributeId === "photoUrl" ? (
               <div className="flex w-full min-w-32 items-center gap-2">
-                <div className="text-muted-foreground">{column.label}</div>
+                <div className="text-muted-foreground">
+                  {column.attribute.label}
+                </div>
               </div>
             ) : (
               <div className="flex w-full min-w-32 items-center gap-2">
@@ -82,7 +84,7 @@ export const DraggableHeader = ({
                   checked={checkedState}
                   onCheckedChange={onCheckedChange}
                 />
-                <Label htmlFor={column.id}>{column.label}</Label>
+                <Label htmlFor={column.id}>{column.attribute.label}</Label>
               </div>
             )}
           </>
@@ -91,7 +93,7 @@ export const DraggableHeader = ({
             {isEditing ? (
               <Input
                 disabled={disabled}
-                defaultValue={column.label}
+                defaultValue={column.attribute.label}
                 onKeyDown={(e) => {
                   if (e.key === "Enter") {
                     renameColumn?.((e.currentTarget as HTMLInputElement).value);
@@ -112,7 +114,7 @@ export const DraggableHeader = ({
                 onClick={() => setIsEditing(true)}
                 disabled={disabled}
               >
-                {column.label}
+                {column.attribute.label}
               </Button>
             )}
             <div className="invisible flex text-muted-foreground group-hover:visible">
