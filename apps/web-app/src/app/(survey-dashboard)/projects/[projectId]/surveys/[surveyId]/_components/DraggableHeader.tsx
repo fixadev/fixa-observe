@@ -36,7 +36,11 @@ export const DraggableHeader = ({
   disabled = false,
 }: {
   column: Column;
-  renameColumn?: (name: string) => void;
+  renameColumn?: (params: {
+    column: Column;
+    attributeId?: string;
+    attributeLabel: string;
+  }) => void;
   deleteColumn: () => void;
   draggingRow: boolean;
   state: PropertiesTableState;
@@ -96,13 +100,22 @@ export const DraggableHeader = ({
                 defaultValue={column.attribute.label}
                 onKeyDown={(e) => {
                   if (e.key === "Enter") {
-                    renameColumn?.((e.currentTarget as HTMLInputElement).value);
+                    renameColumn?.({
+                      column,
+                      attributeId: undefined, // TODO: Add attributeId when we have the combobox
+                      attributeLabel: (e.currentTarget as HTMLInputElement)
+                        .value,
+                    });
                     setIsEditing(false);
                   }
                 }}
                 onBlur={(e) => {
                   setIsEditing(false);
-                  renameColumn?.(e.target.value);
+                  renameColumn?.({
+                    column,
+                    attributeId: undefined, // TODO: Add attributeId when we have the combobox
+                    attributeLabel: (e.target as HTMLInputElement).value,
+                  });
                 }}
                 autoFocus
                 onFocus={(e) => e.target.select()}

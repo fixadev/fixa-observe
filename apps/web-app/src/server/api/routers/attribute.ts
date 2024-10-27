@@ -9,10 +9,11 @@ export const attributeRouter = createTRPCRouter({
   create: protectedProcedure
     .input(z.object({ label: z.string(), defaultIndex: z.number() }))
     .mutation(async ({ ctx, input }) => {
-      return await attributesServiceInstance.createAttribute(
+      const attribute = await attributesServiceInstance.create(
         input.label,
         input.defaultIndex,
         ctx.user.id,
       );
+      return attribute;
     }),
 });

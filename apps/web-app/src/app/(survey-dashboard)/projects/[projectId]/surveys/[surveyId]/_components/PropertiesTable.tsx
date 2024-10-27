@@ -81,7 +81,7 @@ export function PropertiesTable({
   const [draggingRow, setDraggingRow] = useState<boolean>(false);
   const [isImportingProperties, setIsImportingProperties] =
     useState<boolean>(false);
-  const { survey, isLoadingSurvey } = useSurvey();
+  const { survey, isLoadingSurvey, refetchSurvey } = useSurvey();
 
   const [mapErrors, setMapErrors] = useState<
     { propertyId: string; error: string }[]
@@ -108,8 +108,6 @@ export function PropertiesTable({
     setIsImportingProperties(false);
   }, [survey]);
 
-  const pendingMutations = useRef(0);
-
   // Property mutations
   const { mutateAsync: createProperty } = api.property.create.useMutation();
   const { mutateAsync: updatePropertyValue } =
@@ -120,10 +118,14 @@ export function PropertiesTable({
 
   // Column mutations
   const { mutateAsync: createColumn } = api.survey.createColumn.useMutation();
-  const { mutateAsync: updateColumn } = api.survey.updateColumn.useMutation();
+  const { mutateAsync: updateColumnAttribute } =
+    api.survey.updateColumnAttribute.useMutation();
   const { mutateAsync: updateColumnsOrder } =
     api.survey.updateColumnsOrder.useMutation();
   const { mutateAsync: deleteColumn } = api.survey.deleteColumn.useMutation();
+
+  // Attribute mutations
+  const { mutateAsync: createAttribute } = api.attribute.create.useMutation();
 
   // state setter wrapper to update db as well
   const rowIds = useMemo(
@@ -192,49 +194,76 @@ export function PropertiesTable({
     ]);
   }, [surveyId, user?.id]);
 
-  const _saveNewColumn = useCallback(
-    (column: Column) => {
-      void createColumn({
-        label: column.label,
-        displayIndex: column.displayIndex,
-        surveyId,
-      });
-    },
-    [createColumn, surveyId],
-  );
-
   const _renameColumn = useCallback(
-    (id: string, label: string) => {
-      void modifyAttributes(
-        (data) => {
-          const index = data.findIndex((attribute) => attribute.id === id);
-          if (index === -1) return data;
-          const newData = [...data];
-          newData[index]!.label = label;
-          return newData;
-        },
-        "update",
-        id,
-      );
+    async ({
+      column,
+      attributeId,
+      attributeLabel,
+    }: {
+      column: Column;
+      attributeId?: string;
+      attributeLabel: string;
+    }) => {
+      setColumns((prev) => {
+        const index = prev.findIndex((c) => c.id === column.id);
+        if (index === -1) return prev;
+        const newColumns = [...prev];
+        newColumns[index]!.attributeId = attributeId ?? "";
+        newColumns[index]!.attribute.label = attributeLabel;
+        return newColumns;
+      });
+
+      // Create new attribute if doesn't exist
+      if (!attributeId) {
+        if (!attributeLabel) {
+          throw new Error("Attribute label is required");
+        }
+        const attribute = await createAttribute({
+          label: attributeLabel,
+          defaultIndex: column.displayIndex,
+        });
+        attributeId = attribute.id;
+      }
+
+      if (column.isNew) {
+        const newColumn = await createColumn({
+          attributeId,
+          displayIndex: column.displayIndex,
+          surveyId,
+        });
+
+        // Update column with the new id
+        setColumns((prev) => {
+          const index = prev.findIndex((c) => c.id === column.id);
+          if (index === -1) return prev;
+          const newColumns = [...prev];
+          newColumns[index]!.id = newColumn.id;
+          newColumns[index]!.attributeId = attributeId;
+          newColumns[index]!.attribute.label = attributeLabel;
+          return newColumns;
+        });
+      } else {
+        void updateColumnAttribute({
+          columnId: column.id,
+          attributeId,
+        });
+      }
     },
-    [modifyAttributes],
+    [createAttribute, createColumn, surveyId, updateColumnAttribute],
   );
 
   const _deleteColumn = useCallback(
     (id: string) => {
-      void modifyAttributes(
-        (data) => {
-          const index = data.findIndex((attribute) => attribute.id === id);
-          if (index === -1) return data;
-          const newData = [...data];
-          newData.splice(index, 1);
-          return newData;
-        },
-        "delete",
-        id,
-      );
+      setColumns((prev) => {
+        const index = prev.findIndex((column) => column.id === id);
+        if (index === -1) return prev;
+        const newColumns = [...prev];
+        newColumns.splice(index, 1);
+        return newColumns;
+      });
+      void deleteColumn({ columnId: id });
     },
-    [modifyAttributes],
+    [deleteColumn],
   );
 
   const _createProperty = useCallback(async () => {
@@ -511,10 +540,16 @@ export function PropertiesTable({
                           <DraggableHeader
                             key={column.id}
                             column={column}
-                            renameColumn={
-                              column.isNew
-                                ? (name) => _saveNewColumn(column)
-                                : (name) => _renameColumn(column.id, name)
+                            renameColumn={({
+                              column,
+                              attributeId,
+                              attributeLabel,
+                            }) =>
+                              _renameColumn({
+                                column,
+                                attributeId,
+                                attributeLabel,
+                              })
                             }
                             deleteColumn={() => _deleteColumn(column.id)}
                             draggingRow={draggingRow}

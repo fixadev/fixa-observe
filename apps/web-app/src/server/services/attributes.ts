@@ -27,6 +27,12 @@ export const attributesService = ({ db }: { db: PrismaClient }) => {
       });
     },
 
+    get: async (id: string) => {
+      return db.attribute.findUnique({
+        where: { id },
+      });
+    },
+
     create: async (
       attributeLabel: string,
       defaultIndex: number,
@@ -41,11 +47,7 @@ export const attributesService = ({ db }: { db: PrismaClient }) => {
       });
     },
 
-    delete: async (
-      surveyId: string,
-      idToDelete: string | undefined,
-      userId: string,
-    ) => {
+    delete: async (idToDelete: string | undefined, userId: string) => {
       if (!idToDelete) {
         return null;
       }
