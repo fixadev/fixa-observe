@@ -29,11 +29,7 @@ export function PDFContent({
   return (
     <Document title={`${surveyName}.pdf` ?? "property-survey.pdf"}>
       {/* <CoverPage /> */}
-      <MapPage
-        mapImageData={mapImageData}
-        properties={properties}
-        clientName="Colin Kloezeman"
-      />
+      <MapPage mapImageData={mapImageData} properties={properties} />
       {properties.reduce((pages, _, index) => {
         if (index % propertiesPerPage === 0) {
           pages.push(

@@ -65,7 +65,7 @@ export function SurveyDownloadLink({
         surveyName={surveyName}
         properties={propertiesWithoutErrors ?? null}
         propertyOrientation={propertyOrientation}
-        columns={columns.filter((column) => column.attributeId !== "address")}
+        columns={columns}
       />,
     );
     setPendingDownload(true);

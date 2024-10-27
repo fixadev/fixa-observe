@@ -21,7 +21,11 @@ export type SurveyWithIncludes = Prisma.SurveyGetPayload<{
         };
       };
     };
-    columns: true;
+    columns: {
+      include: {
+        attribute: true;
+      };
+    };
   };
 }>;
 

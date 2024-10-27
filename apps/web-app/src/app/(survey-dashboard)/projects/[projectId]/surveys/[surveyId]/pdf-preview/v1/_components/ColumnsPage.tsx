@@ -13,7 +13,6 @@ import {
   type ColumnWithIncludes,
   type PropertyWithIncludes,
 } from "~/hooks/useSurvey";
-import { type AttributeSchema, type PropertySchema } from "~/lib/property";
 
 Font.register({
   family: "IBM Plex Sans",
@@ -238,11 +237,11 @@ export function ColumnsPage({
             <View
               key={column.id}
               style={{
-                height: getHeight(column.attributeId ?? ""),
+                height: getHeight(column.attributeId),
                 ...styles.headerCell,
               }}
             >
-              <Text>{formatAttributeLabel(column.label)}</Text>
+              <Text>{formatAttributeLabel(column.attribute.label)}</Text>
             </View>
           ))}
         </View>
@@ -272,7 +271,7 @@ export function ColumnsPage({
                   ...(column.attributeId === "comments"
                     ? styles.commentsCell
                     : styles.tableCell),
-                  height: getHeight(column.attributeId ?? ""),
+                  height: getHeight(column.attributeId),
                   fontWeight:
                     column.attributeId === "displayAddress"
                       ? "semibold"
