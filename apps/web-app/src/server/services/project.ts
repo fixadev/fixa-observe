@@ -15,7 +15,7 @@ export const projectService = ({ db }: { db: PrismaClient }) => {
       return project;
     },
 
-    updateProject: async (
+    updateName: async (
       projectId: string,
       projectName: string,
       userId: string,
@@ -43,13 +43,6 @@ export const projectService = ({ db }: { db: PrismaClient }) => {
       return project;
     },
 
-    validateUserOwnsProject: async (projectId: string, userId: string) => {
-      const project = await db.project.findUnique({
-        where: { id: projectId, ownerId: userId },
-      });
-      return project;
-    },
-
     getProjectsByUser: async (userId: string | null) => {
       const user = await db.user.findUnique({
         where: {
@@ -68,7 +61,7 @@ export const projectService = ({ db }: { db: PrismaClient }) => {
       return user?.projects ?? [];
     },
 
-    deleteProject: async (projectId: string, userId: string) => {
+    delete: async (projectId: string, userId: string) => {
       const queries = [
         db.project.delete({
           where: { id: projectId, ownerId: userId },

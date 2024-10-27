@@ -122,7 +122,11 @@ const deleteUser = async (userId: string) => {
     console.log("No existing email subscription to delete");
   }
 
-  await db.user.delete({
-    where: { id: userId },
-  });
+  try {
+    await db.user.delete({
+      where: { id: userId },
+    });
+  } catch (error) {
+    console.log("No existing user to delete");
+  }
 };

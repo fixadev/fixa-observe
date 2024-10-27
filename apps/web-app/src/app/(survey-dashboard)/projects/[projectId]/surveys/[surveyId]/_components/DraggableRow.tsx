@@ -26,7 +26,7 @@ import { ImagePlusIcon, TrashIcon } from "lucide-react";
 import { DragHandleDots2Icon } from "@radix-ui/react-icons";
 import {
   type PropertiesTableState,
-  type Attribute,
+  type Column,
   type Property,
 } from "./PropertiesTable";
 import { DraggableCell } from "./DraggableCell";
@@ -62,12 +62,12 @@ import Link from "next/link";
 export const DraggableRow = ({
   photoUrl,
   property,
-  attributes,
+  columns,
+  updatePropertyValue,
   deleteProperty,
   draggingRow,
   state,
   setDraggingRow,
-  updateProperty,
   selectedFields,
   onSelectedFieldsChange,
   mapError,
@@ -78,12 +78,16 @@ export const DraggableRow = ({
 }: {
   photoUrl: string;
   property: Property;
-  attributes: Attribute[];
+  columns: Column[];
   draggingRow: boolean;
   state: PropertiesTableState;
+  updatePropertyValue: (
+    propertyId: string,
+    columnId: string,
+    value: string,
+  ) => void;
   deleteProperty: (id: string) => void;
   setDraggingRow: (draggingRow: boolean) => void;
-  updateProperty: (property: Property) => void;
   selectedFields: Record<string, Set<string>>;
   onSelectedFieldsChange: (selectedFields: Record<string, Set<string>>) => void;
   mapError: string | undefined;
@@ -97,7 +101,7 @@ export const DraggableRow = ({
     transition,
     setNodeRef,
     isDragging,
-    attributes: dragAttributes,
+    attributes,
     listeners,
   } = useSortable({
     id: draggingRow ? property.id : "",
@@ -111,10 +115,36 @@ export const DraggableRow = ({
     position: "relative",
   };
 
+  const columnIdToValue = useMemo(() => {
+    return new Map(
+      property.propertyValues.map((value) => [value.columnId, value.value]),
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [JSON.stringify(property.propertyValues)]);
+  const attributeIdToValue = useMemo(() => {
+    return new Map(
+      columns
+        .filter((column) => column.attributeId !== null)
+        .map((column) => [
+          column.attributeId,
+          columnIdToValue.get(column.id) ?? "",
+        ]),
+    );
+  }, [columns, columnIdToValue]);
+  const attributeIdToColumnId = useMemo(
+    () =>
+      new Map(
+        columns
+          .filter((column) => column.attributeId !== null)
+          .map((column) => [column.attributeId, column.id]),
+      ),
+    [columns],
+  );
+
   const [photo, setPhoto] = useState<string | null>(photoUrl);
   const [photoUploading, setPhotoUploading] = useState<boolean>(false);
 
-  const { mutate: addPhoto } = api.property.setPropertyPhoto.useMutation({
+  const { mutate: addPhoto } = api.property.setPhoto.useMutation({
     onSuccess: (data) => {
       setPhoto(data);
       setPhotoUploading(false);
@@ -122,7 +152,7 @@ export const DraggableRow = ({
   });
 
   const { mutateAsync: getPresignedS3Url } =
-    api.property.getPresignedS3Url.useMutation();
+    api.s3.getPresignedS3Url.useMutation();
 
   const handleUpload = async (files: FileList) => {
     setPhotoUploading(true);
@@ -151,7 +181,7 @@ export const DraggableRow = ({
     });
   };
 
-  function attributeToMinWidth(attribute: Attribute) {
+  function columnToMinWidth(column: Column) {
     const attributesToMinWidth = {
       comments: "min-w-72",
       address: "min-w-64",
@@ -164,8 +194,9 @@ export const DraggableRow = ({
     };
 
     return (
-      attributesToMinWidth[attribute.id as keyof typeof attributesToMinWidth] ||
-      "min-w-44"
+      attributesToMinWidth[
+        column.attributeId as keyof typeof attributesToMinWidth
+      ] || "min-w-44"
     );
   }
 
@@ -257,7 +288,7 @@ export const DraggableRow = ({
       >
         <DragHandleDots2Icon
           className="size-4"
-          {...dragAttributes}
+          {...attributes}
           {...listeners}
         />
       </TableCell>
@@ -397,60 +428,57 @@ export const DraggableRow = ({
           )}
         </div>
       </DraggableCell>
-      {attributes.map((attribute) => {
+      {columns.map((column) => {
         return (
           <DraggableCell
-            key={attribute.id}
-            id={attribute.id}
+            key={column.id}
+            id={column.id}
             draggingRow={draggingRow}
-            className={attributeToMinWidth(attribute)}
+            className={columnToMinWidth(column)}
           >
-            {attribute.id === "comments" ||
-            attribute.id === "displayAddress" ||
-            attribute.id === "address" ? (
+            {column.attributeId === "comments" ||
+            column.attributeId === "displayAddress" ||
+            column.attributeId === "address" ? (
               <Textarea
-                defaultValue={property.attributes?.[attribute.id] ?? ""}
+                defaultValue={columnIdToValue.get(column.id) ?? ""}
                 className={cn(
                   "flex h-[100px] overflow-visible",
-                  attribute.id === "address" && mapError
+                  column.attributeId === "address" && mapError
                     ? "border-2 border-red-500"
                     : "",
                 )}
-                onBlur={(e) => {
-                  updateProperty({
-                    ...property,
-                    attributes: {
-                      ...property.attributes,
-                      [attribute.id]: e.target.value,
-                    },
-                  });
-                }}
+                onBlur={(e) =>
+                  updatePropertyValue(property.id, column.id, e.target.value)
+                }
               />
             ) : (
               <>
                 {state === "edit" ? (
                   <EditableCell
                     property={property}
-                    attribute={attribute}
+                    column={column}
+                    columnIdToValue={columnIdToValue}
+                    attributeIdToValue={attributeIdToValue}
+                    attributeIdToColumnId={attributeIdToColumnId}
                     isEmailDraft={isEmailDraft}
                     parsedAttributes={parsedAttributes}
-                    updateProperty={updateProperty}
+                    updatePropertyValue={updatePropertyValue}
                   />
                 ) : state === "select-fields" ? (
                   <div className="flex items-center gap-2">
                     <Checkbox
-                      id={`${property.id}-${attribute.id}`}
-                      checked={selectedFieldsForProperty.has(attribute.id)}
+                      id={`${property.id}-${column.id}`}
+                      checked={selectedFieldsForProperty.has(column.id)}
                       onCheckedChange={(checked) =>
-                        handleSelectedFieldsChange(attribute.id, checked)
+                        handleSelectedFieldsChange(column.id, checked)
                       }
                     />
                     <Label
-                      htmlFor={`${property.id}-${attribute.id}`}
+                      htmlFor={`${property.id}-${column.id}`}
                       className="font-normal"
                     >
-                      {(property.attributes?.[attribute.id]?.length ?? 0 > 0)
-                        ? property.attributes?.[attribute.id]
+                      {(columnIdToValue.get(column.id)?.length ?? 0 > 0)
+                        ? columnIdToValue.get(column.id)
                         : "<No value>"}
                     </Label>
                   </div>

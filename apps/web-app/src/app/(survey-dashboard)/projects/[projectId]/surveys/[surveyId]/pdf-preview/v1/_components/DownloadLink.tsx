@@ -8,20 +8,20 @@ import { useCallback, useEffect, useState } from "react";
 import Spinner from "~/components/Spinner";
 import { generateStaticMapUrl } from "./CreateMapUrl";
 import { usePDF } from "@react-pdf/renderer";
-import { type PropertySchema, type AttributeSchema } from "~/lib/property";
+import type { Column, Property } from "../../../_components/PropertiesTable";
 
 export function SurveyDownloadLink({
   buttonText,
   surveyName,
   properties,
-  attributes,
+  columns,
   propertyOrientation = "columns",
   setErrors,
 }: {
   buttonText: string;
   surveyName: string;
-  properties: PropertySchema[];
-  attributes: AttributeSchema[];
+  properties: Property[];
+  columns: Column[];
   propertyOrientation?: "rows" | "columns";
   setErrors: (errors: { propertyId: string; error: string }[]) => void;
 }) {
@@ -30,7 +30,6 @@ export function SurveyDownloadLink({
   const parsedProperties = properties.map((property) => {
     return {
       ...property,
-      attributes: property.attributes,
     };
   });
 
@@ -66,16 +65,14 @@ export function SurveyDownloadLink({
         surveyName={surveyName}
         properties={propertiesWithoutErrors ?? null}
         propertyOrientation={propertyOrientation}
-        attributes={
-          attributes?.filter((attribute) => attribute.id !== "address") ?? null
-        }
+        columns={columns}
       />,
     );
     setPendingDownload(true);
   }, [
     surveyName,
     parsedProperties,
-    attributes,
+    columns,
     updateInstance,
     propertyOrientation,
     setErrors,

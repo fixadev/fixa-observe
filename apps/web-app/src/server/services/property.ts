@@ -1,155 +1,25 @@
 import { type Prisma, type PrismaClient } from "@prisma/client";
 import {
-  type BrochureSchema,
   type CreatePropertySchema,
-  type BrochureWithoutPropertyId,
   type PropertySchema,
+  type CreateEmptyPropertySchema,
 } from "~/lib/property";
-import { extractContactInfo } from "../utils/extractContactInfo";
-import { formatAddresses } from "../utils/formatAddresses";
 import { env } from "~/env";
 
 export const propertyService = ({ db }: { db: PrismaClient }) => {
-  async function extractAndUploadContactInfo(
-    brochureUrl: string,
-    propertyId: string,
-    userId: string,
-  ) {
-    const contactInfo = await extractContactInfo(brochureUrl);
-    return await db.property.update({
-      where: {
-        id: propertyId,
-        ownerId: userId,
-      },
-      data: {
-        contacts: {
-          createMany: {
-            data: contactInfo ?? [],
-          },
-        },
-      },
-    });
-  }
-
-  async function createBrochure(
-    propertyId: string,
-    brochure: BrochureWithoutPropertyId,
-    userId: string,
-  ) {
-    // do this in the background
-    void extractAndUploadContactInfo(brochure.url, propertyId, userId);
-    const response = await db.property.update({
-      where: {
-        id: propertyId,
-        ownerId: userId,
-      },
-      data: {
-        brochures: {
-          deleteMany: {},
-          create: [
-            {
-              ...brochure,
-              approved: false,
-              inpaintedRectangles: [],
-              textToRemove: [],
-              pathsToRemove: [],
-            },
-          ],
-        },
-      },
-      include: {
-        brochures: true,
-      },
-    });
-    return response;
-  }
-
   return {
-    createProperties: async (input: CreatePropertySchema[], userId: string) => {
-      const startTime = new Date();
-      const formattedAddresses = await formatAddresses(
-        input.map((property) => ({
-          addressString: property.attributes.address ?? "",
-          suite: property.attributes.suite ?? "",
-          buildingName: property.attributes.buildingName ?? "",
-        })),
-      );
-      const brochures: (BrochureWithoutPropertyId | null)[] = input.map(
-        (property) => property.brochures[0] ?? null,
-      );
-
-      const propertiesToCreate = input.map(
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        ({ brochures, ...property }, index) => ({
-          ...property,
-          ownerId: userId,
-          attributes: {
-            ...property.attributes,
-            address: formattedAddresses?.[index]?.address ?? "",
-            displayAddress: formattedAddresses?.[index]?.displayAddress ?? "",
-          },
-        }),
-      );
-
-      const createdProperties = await db.property.createManyAndReturn({
-        data: propertiesToCreate,
+    create: async (input: CreateEmptyPropertySchema) => {
+      const property = await db.property.create({
+        data: {
+          displayIndex: input.displayIndex,
+          ownerId: input.ownerId,
+          surveyId: input.surveyId,
+        },
       });
-
-      const endTime = new Date();
-      console.log(
-        "===============TIME TO CREATE PROPERTIES===============",
-        endTime.getTime() - startTime.getTime(),
-      );
-
-      const brochuresToCreate: Prisma.BrochureCreateManyInput[] = brochures
-        .map((brochure, index) => {
-          if (brochure) {
-            return {
-              propertyId: createdProperties[index]?.id ?? "",
-              ...brochure,
-              inpaintedRectangles: [],
-              textToRemove: [],
-              pathsToRemove: [],
-              exportedUrl: null,
-            };
-          }
-          return null;
-        })
-        .filter((brochure) => brochure !== null);
-
-      if (brochuresToCreate.length > 0) {
-        const createdBrochures = await db.brochure.createManyAndReturn({
-          data: brochuresToCreate,
-        });
-        const endTime2 = new Date();
-        console.log(
-          "===============TIME TO CREATE BROCHURES===============",
-          endTime2.getTime() - startTime.getTime(),
-        );
-
-        const brochuresToParse = createdBrochures.map((brochure) => ({
-          url: brochure.url,
-          propertyId: brochure.propertyId,
-          id: brochure.id,
-        }));
-
-        const endTime3 = new Date();
-
-        console.log(
-          "===============SENDING REQUEST TO PARSE BROCHURES===============",
-          endTime3.getTime() - startTime.getTime(),
-        );
-
-        // parse brochures in the background
-        void fetch(`${env.NEXT_PUBLIC_API_URL}/api/parse-brochures`, {
-          method: "POST",
-          body: JSON.stringify({ brochures: brochuresToParse }),
-        });
-      }
-      return createdProperties.map((property) => property.id);
+      return property.id;
     },
 
-    getProperty: async (propertyId: string, userId: string) => {
+    get: async (propertyId: string, userId: string) => {
       const property = await db.property.findUnique({
         where: {
           id: propertyId,
@@ -164,7 +34,7 @@ export const propertyService = ({ db }: { db: PrismaClient }) => {
       return property;
     },
 
-    updateProperty: async (property: PropertySchema, userId: string) => {
+    update: async (property: PropertySchema, userId: string) => {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { brochures, ...propertyData } = property;
       const response = await db.property.update({
@@ -175,17 +45,115 @@ export const propertyService = ({ db }: { db: PrismaClient }) => {
         data: {
           ...propertyData,
           ownerId: userId,
-          attributes: property.attributes ?? {},
         },
       });
       return response;
     },
 
-    setPropertyPhoto: async (
+    updateValue: async (
       propertyId: string,
-      photoUrl: string,
+      columnId: string,
+      value: string,
+    ) => {
+      // Upsert the property value - create if doesn't exist, update if it does
+      return await db.propertyValue.upsert({
+        where: {
+          propertyId_columnId: {
+            propertyId,
+            columnId,
+          },
+        },
+        create: {
+          propertyId,
+          columnId,
+          value,
+        },
+        update: {
+          value,
+        },
+      });
+    },
+
+    delete: async (propertyId: string, userId: string) => {
+      const property = await db.property.findUnique({
+        where: {
+          id: propertyId,
+          ownerId: userId,
+        },
+      });
+
+      if (!property) {
+        throw new Error("Property not found");
+      }
+
+      return db.property.delete({
+        where: {
+          id: propertyId,
+          ownerId: userId,
+        },
+      });
+    },
+
+    createManyWithBrochures: async (
+      input: CreatePropertySchema[],
       userId: string,
     ) => {
+      const propertiesToCreate = input.map(
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        ({ brochureUrl, ...property }) => ({
+          ...property,
+          ownerId: userId,
+        }),
+      );
+
+      const createdProperties = await db.property.createManyAndReturn({
+        data: propertiesToCreate,
+      });
+
+      const brochuresToCreate: Prisma.BrochureCreateManyInput[] = input
+        .map((property, index) => {
+          if (property.brochureUrl) {
+            return {
+              createdAt: new Date(),
+              updatedAt: new Date(),
+              url: property.brochureUrl,
+              propertyId: createdProperties[index]?.id ?? "",
+              inpaintedRectangles: [],
+              textToRemove: [],
+              pathsToRemove: [],
+              undoStack: [],
+              deletedPages: [],
+              exportedUrl: null,
+              title: "",
+              approved: false,
+            };
+          }
+          return null;
+        })
+        .filter((brochure) => brochure !== null);
+
+      if (brochuresToCreate.length > 0) {
+        const createdBrochures = await db.brochure.createManyAndReturn({
+          data: brochuresToCreate,
+        });
+
+        const brochuresToParse = createdBrochures.map((brochure) => ({
+          url: brochure.url,
+          propertyId: brochure.propertyId,
+          id: brochure.id,
+        }));
+
+        // parse brochures in the background
+        void fetch(`${env.NEXT_PUBLIC_API_URL}/api/parse-brochures`, {
+          method: "POST",
+          body: JSON.stringify({ brochures: brochuresToParse }),
+        });
+      }
+
+      return createdProperties.map((property) => property.id);
+    },
+
+    setPhoto: async (propertyId: string, photoUrl: string, userId: string) => {
       await db.property.update({
         where: {
           id: propertyId,
@@ -198,7 +166,7 @@ export const propertyService = ({ db }: { db: PrismaClient }) => {
       return photoUrl;
     },
 
-    deletePropertyPhoto: async (propertyId: string, userId: string) => {
+    deletePhoto: async (propertyId: string, userId: string) => {
       const property = await db.property.findUnique({
         where: {
           id: propertyId,
@@ -217,104 +185,6 @@ export const propertyService = ({ db }: { db: PrismaClient }) => {
         },
         data: {
           photoUrl: null,
-        },
-      });
-    },
-
-    createBrochure,
-
-    getBrochure: async (brochureId: string, userId: string) => {
-      const brochure = await db.brochure.findUnique({
-        where: {
-          id: brochureId,
-          property: {
-            ownerId: userId,
-          },
-        },
-      });
-      return brochure;
-    },
-
-    updateBrochure: async (brochure: BrochureSchema, userId: string) => {
-      const response = await db.brochure.update({
-        where: {
-          id: brochure.id,
-          property: {
-            ownerId: userId,
-          },
-        },
-        data: {
-          ...brochure,
-          inpaintedRectangles: brochure.inpaintedRectangles ?? [],
-          textToRemove: brochure.textToRemove ?? [],
-          pathsToRemove: brochure.pathsToRemove ?? [],
-        },
-      });
-      return response;
-    },
-
-    updateBrochureUrl: async (
-      brochureId: string,
-      url: string,
-      userId: string,
-    ) => {
-      return db.brochure.update({
-        where: {
-          id: brochureId,
-        },
-        data: {
-          url,
-        },
-      });
-    },
-
-    deleteBrochure: async (
-      propertyId: string,
-      brochureId: string,
-      userId: string,
-    ) => {
-      const property = await db.property.findUnique({
-        where: {
-          id: propertyId,
-          ownerId: userId,
-        },
-      });
-
-      if (!property) {
-        throw new Error("Property not found");
-      }
-
-      return db.property.update({
-        where: {
-          id: propertyId,
-          ownerId: userId,
-        },
-        data: {
-          brochures: {
-            delete: {
-              id: brochureId,
-            },
-          },
-        },
-      });
-    },
-
-    deleteProperty: async (propertyId: string, userId: string) => {
-      const property = await db.property.findUnique({
-        where: {
-          id: propertyId,
-          ownerId: userId,
-        },
-      });
-
-      if (!property) {
-        throw new Error("Property not found");
-      }
-
-      return db.property.delete({
-        where: {
-          id: propertyId,
-          ownerId: userId,
         },
       });
     },

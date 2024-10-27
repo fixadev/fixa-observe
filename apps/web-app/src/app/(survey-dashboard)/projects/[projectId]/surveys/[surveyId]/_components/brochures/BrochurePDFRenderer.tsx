@@ -8,7 +8,7 @@ import {
   type BrochureRectangles,
   type Path,
   type TransformedTextContent,
-} from "~/lib/property";
+} from "~/lib/brochure";
 
 interface BrochurePDFRendererProps {
   brochure: Brochure;

@@ -6,7 +6,7 @@ import type {
   BrochureRectangles,
   Path,
   TransformedTextContent,
-} from "~/lib/property";
+} from "~/lib/brochure";
 import type { PageViewport, PDFDocumentProxy } from "pdfjs-dist";
 import type {
   PDFOperatorList,

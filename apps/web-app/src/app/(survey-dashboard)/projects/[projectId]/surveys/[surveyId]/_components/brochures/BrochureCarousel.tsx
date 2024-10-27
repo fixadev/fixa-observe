@@ -17,7 +17,7 @@ import {
   type BrochureRectangles,
   type Path,
   type TransformedTextContent,
-} from "~/lib/property";
+} from "~/lib/brochure";
 import {
   type PDFDocumentProxy,
   getDocument,

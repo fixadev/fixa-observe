@@ -38,7 +38,7 @@ export default function ProjectPage({
     data: project,
     isLoading: projectLoading,
     refetch: refetchProject,
-  } = api.project.getProject.useQuery({
+  } = api.project.get.useQuery({
     projectId: params.projectId,
   });
 
@@ -48,7 +48,7 @@ export default function ProjectPage({
     }
   }, [project?.surveys]);
 
-  const { mutate: createSurvey } = api.survey.createSurvey.useMutation({
+  const { mutate: createSurvey } = api.survey.create.useMutation({
     onSuccess: (data) => {
       router.push(`/projects/${params.projectId}/surveys/${data.id}`);
       toast({

@@ -93,7 +93,7 @@ export default function PDFPreviewPage({
               propertyOrientation="columns"
               surveyName={survey?.name ?? null}
               properties={parsedProperties ?? null}
-              attributes={
+              columns={
                 attributes?.filter((attribute) => attribute.id !== "address") ??
                 null
               }

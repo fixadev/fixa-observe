@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
 import { extractContactInfo } from "~/server/utils/extractContactInfo";
-import { propertyService } from "~/server/services/property";
 import { db } from "~/server/db";
 import { uploadDropboxFileToS3 } from "~/app/utils/downloadDropboxFile";
+import { brochureService } from "~/server/services/brochure";
 
-const propertyServiceInstance = propertyService({ db });
+const brochureServiceInstance = brochureService({ db });
 
 export async function POST(request: Request) {
   try {
@@ -22,7 +22,7 @@ export async function POST(request: Request) {
       if (brochureUrl.includes("dropbox.com")) {
         console.log("Uploading dropbox file to S3!");
         const newUrl = await uploadDropboxFileToS3(brochure.url);
-        await propertyServiceInstance.updateBrochureUrl(
+        await brochureServiceInstance.updateUrl(
           brochure.id,
           newUrl,
           brochure.propertyId,

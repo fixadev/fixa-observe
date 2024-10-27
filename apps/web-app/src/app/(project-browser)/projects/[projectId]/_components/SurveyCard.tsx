@@ -45,7 +45,7 @@ export default function SurveyCard({
   refetchProject: () => void;
 }) {
   const { mutate: deleteSurvey, isPending: isDeleting } =
-    api.survey.deleteSurvey.useMutation({
+    api.survey.delete.useMutation({
       onSuccess: () => {
         refetchProject();
       },
