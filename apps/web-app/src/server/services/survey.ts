@@ -12,21 +12,7 @@ export const surveyService = ({ db }: { db: PrismaClient }) => {
   const propertyServiceInstance = propertyService({ db });
   const attributesServiceInstance = attributesService({ db });
 
-  const addProperties = async (
-    surveyId: string,
-    propertyIds: string[],
-    userId: string,
-  ) => {
-    const survey = await db.survey.update({
-      where: { id: surveyId, ownerId: userId },
-      data: { properties: { connect: propertyIds.map((id) => ({ id })) } },
-    });
-    return survey;
-  };
-
   return {
-    addProperties,
-
     get: async (surveyId: string, userId: string) => {
       const survey = await db.survey.findUnique({
         where: { id: surveyId, ownerId: userId },
@@ -91,8 +77,16 @@ export const surveyService = ({ db }: { db: PrismaClient }) => {
     },
 
     delete: async (surveyId: string, userId: string) => {
-      const survey = await db.survey.delete({
-        where: { id: surveyId, ownerId: userId },
+      const survey = await db.$transaction(async (tx) => {
+        await tx.column.deleteMany({
+          where: { surveyId },
+        });
+        await tx.propertyValue.deleteMany({
+          where: { property: { surveyId } },
+        });
+        return await tx.survey.delete({
+          where: { id: surveyId, ownerId: userId },
+        });
       });
       return survey;
     },
@@ -243,6 +237,10 @@ export const surveyService = ({ db }: { db: PrismaClient }) => {
           ...parsedProperties[index],
           brochureUrl: undefined,
           photoUrl: undefined,
+          postalAddress: undefined,
+          buildingName: undefined,
+          minDivisible: undefined,
+          maxDivisible: undefined,
           id,
         }));
 
@@ -251,12 +249,22 @@ export const surveyService = ({ db }: { db: PrismaClient }) => {
         const defaultVisibleAttributes = allAttributes.filter(
           (attribute) => attribute.defaultVisible,
         );
+
+        const nonNullAttributes = [
+          ...new Set(
+            propertiesWithIds.flatMap((property) =>
+              Object.entries(property)
+                .filter(([_, value]) => value !== null && value !== undefined)
+                .map(([key]) => key),
+            ),
+          ),
+        ];
+
         const optionalAttributesToInclude = allAttributes
           .filter((attribute) => !attribute.defaultVisible)
           .filter((attribute) =>
-            propertiesWithIds.some(
-              (property) =>
-                (property as Record<string, unknown>)[attribute.label] !== null,
+            nonNullAttributes.some(
+              (nonNullAttribute) => nonNullAttribute === attribute.id,
             ),
           );
 
@@ -293,14 +301,14 @@ export const surveyService = ({ db }: { db: PrismaClient }) => {
                 (column) =>
                   allAttributes.find(
                     (attribute) => attribute.id === column.attributeId,
-                  )?.label === key,
+                  )?.id === key,
               )?.id;
 
               return columnId
                 ? {
                     propertyId: property.id,
                     columnId: columnId,
-                    value: String(value),
+                    value: value ? String(value) : "",
                   }
                 : null;
             })
@@ -326,8 +334,6 @@ export const surveyService = ({ db }: { db: PrismaClient }) => {
         // }
 
         // populate attributes for each property
-
-        await addProperties(surveyId, createdPropertyIds, ownerId);
 
         return { status: 200 };
       } catch (error) {

@@ -4,8 +4,6 @@ import {
   type PropertySchema,
   type CreateEmptyPropertySchema,
 } from "~/lib/property";
-import { type BrochureWithoutPropertyId } from "~/lib/brochure";
-import { formatAddresses } from "../utils/formatAddresses";
 import { env } from "~/env";
 
 export const propertyService = ({ db }: { db: PrismaClient }) => {

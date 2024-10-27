@@ -53,7 +53,7 @@ async function seedAttributes() {
             id: attribute.id,
             label: attribute.label,
             defaultIndex: i,
-            defaultVisible: true,
+            defaultVisible: attribute.defaultVisible,
             ownerId: null,
           },
         }),
