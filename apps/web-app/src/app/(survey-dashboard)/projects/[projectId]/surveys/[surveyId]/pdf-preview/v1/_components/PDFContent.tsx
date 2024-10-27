@@ -2,25 +2,26 @@ import { Document } from "@react-pdf/renderer";
 import { RowsPage } from "./RowsPage";
 import { ColumnsPage } from "./ColumnsPage";
 import Spinner from "~/components/Spinner";
-import { type PropertySchema, type AttributeSchema } from "~/lib/property";
-import { CoverPage } from "./CoverPage";
 import { MapPage } from "./MapPage";
-import { ThankYouPage } from "./ThankYouPage";
+import type {
+  ColumnWithIncludes,
+  PropertyWithIncludes,
+} from "~/hooks/useSurvey";
 
 export function PDFContent({
   mapImageData,
   properties,
-  attributes,
+  columns,
   surveyName,
   propertyOrientation,
 }: {
   mapImageData: string | null;
-  properties: PropertySchema[] | null;
-  attributes: AttributeSchema[] | null;
+  properties: PropertyWithIncludes[] | null;
+  columns: ColumnWithIncludes[] | null;
   surveyName: string | null;
   propertyOrientation?: "rows" | "columns";
 }) {
-  if (!properties || !attributes) {
+  if (!properties || !columns) {
     return <Spinner />;
   }
 
@@ -37,22 +38,12 @@ export function PDFContent({
       {properties.reduce((pages, _, index) => {
         if (index % propertiesPerPage === 0) {
           pages.push(
-            propertyOrientation === "rows" ? (
-              <RowsPage
-                key={index}
-                pageNumber={index / propertiesPerPage + 1}
-                properties={properties.slice(index, index + propertiesPerPage)}
-                attributes={attributes}
-              />
-            ) : (
-              <ColumnsPage
-                key={index}
-                pageNumber={index / propertiesPerPage + 1}
-                properties={properties.slice(index, index + propertiesPerPage)}
-                attributes={attributes}
-                propertyOrientation={propertyOrientation ?? "rows"}
-              />
-            ),
+            <ColumnsPage
+              key={index}
+              pageNumber={index / propertiesPerPage + 1}
+              properties={properties.slice(index, index + propertiesPerPage)}
+              columns={columns}
+            />,
           );
         }
         return pages;

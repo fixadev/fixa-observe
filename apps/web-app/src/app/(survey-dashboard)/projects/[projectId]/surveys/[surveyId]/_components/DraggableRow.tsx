@@ -99,23 +99,30 @@ export const DraggableRow = ({
       property.propertyValues.map((value) => [value.columnId, value.value]),
     );
   }, [property.propertyValues]);
-  const attributeIdToColumnId = useMemo(
-    () => new Map(columns.map((column) => [column.attribute.id, column.id])),
-    [columns],
-  );
   const attributeIdToValue = useMemo(() => {
     return new Map(
-      columns.map((column) => [
-        column.attribute.id,
-        columnIdToValue.get(column.id) ?? "",
-      ]),
+      columns
+        .filter((column) => column.attributeId !== null)
+        .map((column) => [
+          column.attributeId!,
+          columnIdToValue.get(column.id) ?? "",
+        ]),
     );
   }, [columns, columnIdToValue]);
+  const attributeIdToColumnId = useMemo(
+    () =>
+      new Map(
+        columns
+          .filter((column) => column.attributeId !== null)
+          .map((column) => [column.attributeId!, column.id]),
+      ),
+    [columns],
+  );
 
   const [photo, setPhoto] = useState<string | null>(photoUrl);
   const [photoUploading, setPhotoUploading] = useState<boolean>(false);
 
-  const { mutate: addPhoto } = api.property.setPropertyPhoto.useMutation({
+  const { mutate: addPhoto } = api.property.setPhoto.useMutation({
     onSuccess: (data) => {
       setPhoto(data);
       setPhotoUploading(false);
@@ -166,7 +173,7 @@ export const DraggableRow = ({
 
     return (
       attributesToMinWidth[
-        column.attribute.id as keyof typeof attributesToMinWidth
+        column.attributeId as keyof typeof attributesToMinWidth
       ] || "min-w-44"
     );
   }
@@ -308,14 +315,14 @@ export const DraggableRow = ({
             draggingRow={draggingRow}
             className={columnToMinWidth(column)}
           >
-            {column.attribute.id === "comments" ||
-            column.attribute.id === "displayAddress" ||
-            column.attribute.id === "address" ? (
+            {column.attributeId === "comments" ||
+            column.attributeId === "displayAddress" ||
+            column.attributeId === "address" ? (
               <Textarea
                 defaultValue={columnIdToValue.get(column.id) ?? ""}
                 className={cn(
                   "flex h-[100px] overflow-visible",
-                  column.attribute.id === "address" && mapError
+                  column.attributeId === "address" && mapError
                     ? "border-2 border-red-500"
                     : "",
                 )}
@@ -339,16 +346,14 @@ export const DraggableRow = ({
                 ) : state === "select-fields" ? (
                   <div className="flex items-center gap-2">
                     <Checkbox
-                      id={`${property.id}-${column.attribute.id}`}
-                      checked={selectedFieldsForProperty.has(
-                        column.attribute.id,
-                      )}
+                      id={`${property.id}-${column.id}`}
+                      checked={selectedFieldsForProperty.has(column.id)}
                       onCheckedChange={(checked) =>
-                        handleSelectedFieldsChange(column.attribute.id, checked)
+                        handleSelectedFieldsChange(column.id, checked)
                       }
                     />
                     <Label
-                      htmlFor={`${property.id}-${column.attribute.id}`}
+                      htmlFor={`${property.id}-${column.id}`}
                       className="font-normal"
                     >
                       {(columnIdToValue.get(column.id)?.length ?? 0 > 0)

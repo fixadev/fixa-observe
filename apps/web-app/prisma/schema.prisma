@@ -58,14 +58,16 @@ model Survey {
 }
 
 model Column {
-  id           String   @id @default(uuid())
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  label        String
   displayIndex Int
+  attributeId  String? // If this column is based on an attribute
 
   surveyId       String
   survey         Survey          @relation(fields: [surveyId], references: [id], onDelete: Cascade)
-  label          String
   propertyValues PropertyValue[]
 }
 

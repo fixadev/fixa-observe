@@ -54,24 +54,24 @@ export function EditableCell({
 
   function handleUpdateProperty(value: string) {
     if (
-      column.attribute.id === "askingRate" ||
-      column.attribute.id === "opEx" ||
-      column.attribute.id === "size"
+      column.attributeId === "askingRate" ||
+      column.attributeId === "opEx" ||
+      column.attributeId === "size"
     ) {
       const inputValue = advancedParseFloat(value);
 
       const size =
-        column.attribute.id === "size"
+        column.attributeId === "size"
           ? inputValue
           : advancedParseFloat(attributeIdToValue.get("size") ?? "0");
 
       const askingRate =
-        column.attribute.id === "askingRate"
+        column.attributeId === "askingRate"
           ? inputValue
           : advancedParseFloat(attributeIdToValue.get("askingRate") ?? "0");
 
       const opEx =
-        column.attribute.id === "opEx"
+        column.attributeId === "opEx"
           ? inputValue
           : advancedParseFloat(attributeIdToValue.get("opEx") ?? "0");
 
@@ -95,7 +95,7 @@ export function EditableCell({
     <div className="relative flex items-center gap-2">
       <Input
         ref={inputRef}
-        className={cn(column.attribute.id in parsedAttributes && "pr-9")}
+        className={cn(column.id in parsedAttributes && "pr-9")}
         value={localValue}
         onChange={(e) => {
           setLocalValue(e.target.value);
@@ -115,7 +115,7 @@ export function EditableCell({
           isProgrammaticBlurRef.current = false;
         }}
       />
-      {column.attribute.id in parsedAttributes && (
+      {column.id in parsedAttributes && (
         <Tooltip>
           <TooltipTrigger asChild>
             <Button
@@ -125,7 +125,7 @@ export function EditableCell({
               asChild
             >
               <Link href={`emails?propertyId=${property.id}`}>
-                {parsedAttributes[column.attribute.id] !== null ? (
+                {parsedAttributes[column.id] !== null ? (
                   <CheckCircleIcon className="size-5 text-green-500" />
                 ) : isEmailDraft ? (
                   <PencilSquareIcon className="size-5 text-gray-500" />
@@ -138,7 +138,7 @@ export function EditableCell({
             </Button>
           </TooltipTrigger>
           <TooltipContent>
-            {parsedAttributes[column.attribute.id] !== null
+            {parsedAttributes[column.id] !== null
               ? "Verified by email"
               : isEmailDraft
                 ? "Email drafted"

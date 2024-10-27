@@ -21,11 +21,7 @@ export type SurveyWithIncludes = Prisma.SurveyGetPayload<{
         };
       };
     };
-    columns: {
-      include: {
-        attribute: true;
-      };
-    };
+    columns: true;
   };
 }>;
 
@@ -51,7 +47,7 @@ export function SurveyProvider({ children }: { children: ReactNode }) {
     refetch,
     isLoading,
     isRefetching,
-  } = api.survey.getSurvey.useQuery({ surveyId });
+  } = api.survey.get.useQuery({ surveyId });
 
   const refetchSurvey = async () => {
     await refetch();

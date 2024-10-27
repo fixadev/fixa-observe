@@ -8,7 +8,11 @@ import {
   Link,
   Font,
 } from "@react-pdf/renderer";
-import { type AttributeSchema, type PropertySchema } from "~/lib/property";
+import { useMemo } from "react";
+import {
+  type ColumnWithIncludes,
+  type PropertyWithIncludes,
+} from "~/hooks/useSurvey";
 
 Font.register({
   family: "IBM Plex Sans",
@@ -139,16 +143,16 @@ const styles = StyleSheet.create({
   },
 });
 
-const getWidth = (attribute: { id: string }) => {
-  if (attribute.id === "displayAddress") {
+const getWidth = (attributeId: string) => {
+  if (attributeId === "displayAddress") {
     return "18%";
-  } else if (attribute.id === "photo") {
+  } else if (attributeId === "photo") {
     return "12%";
   } else if (
-    ["size", "divisibility", "askingRate", "opEx"].includes(attribute.id)
+    ["size", "divisibility", "askingRate", "opEx"].includes(attributeId)
   ) {
     return "10%";
-  } else if (attribute.id === "comments") {
+  } else if (attributeId === "comments") {
     return "26%";
   } else {
     return "12%";
@@ -158,11 +162,11 @@ const getWidth = (attribute: { id: string }) => {
 export function RowsPage({
   pageNumber,
   properties,
-  attributes,
+  columns,
 }: {
   pageNumber: number;
-  properties: PropertySchema[];
-  attributes: AttributeSchema[];
+  properties: PropertyWithIncludes[];
+  columns: ColumnWithIncludes[];
 }) {
   function formatAddress(address: string | undefined) {
     if (!address) {
@@ -178,6 +182,17 @@ export function RowsPage({
     return label;
   }
 
+  const propertyIdToColumnIdToValue = useMemo(() => {
+    return new Map(
+      properties.map((property) => [
+        property.id,
+        new Map(
+          property.propertyValues.map((value) => [value.columnId, value.value]),
+        ),
+      ]),
+    );
+  }, [properties]);
+
   return (
     <Page size="A4" orientation="landscape" style={styles.page}>
       <View style={styles.table}>
@@ -185,21 +200,19 @@ export function RowsPage({
           <View style={styles.leftCol}>
             <Text style={styles.leftCell}></Text>
           </View>
-          <View
-            style={{ ...styles.tableCol, width: getWidth({ id: "photo" }) }}
-          >
+          <View style={{ ...styles.tableCol, width: getWidth("photo") }}>
             <View style={styles.headerCell}></View>
           </View>
-          {attributes.map((attribute) => (
+          {columns.map((column) => (
             <View
-              key={attribute.id}
+              key={column.id}
               style={{
                 ...styles.tableCol,
-                width: getWidth(attribute),
+                width: getWidth(column.attributeId),
               }}
             >
               <View style={styles.headerCell}>
-                <Text>{formatAttributeLabel(attribute.label)}</Text>
+                <Text>{formatAttributeLabel(column.label)}</Text>
               </View>
             </View>
           ))}
@@ -226,24 +239,26 @@ export function RowsPage({
                 }
               />
             </View>
-            {attributes.map((attribute) => (
+            {columns.map((column) => (
               <View
-                key={attribute.id}
+                key={column.id}
                 style={{
                   ...styles.tableCol,
-                  width: getWidth(attribute),
+                  width: getWidth(column.attributeId),
                   fontWeight:
-                    attribute.id === "displayAddress" ? "semibold" : "normal",
+                    column.attributeId === "displayAddress"
+                      ? "semibold"
+                      : "normal",
                 }}
               >
                 <View
                   style={
-                    attribute.id === "comments"
+                    column.attributeId === "comments"
                       ? styles.commentsCell
                       : styles.tableCell
                   }
                 >
-                  {attribute.id === "displayAddress" ? (
+                  {column.attributeId === "displayAddress" ? (
                     property.brochures[0]?.url ? (
                       <Link
                         src={
@@ -260,7 +275,11 @@ export function RowsPage({
                       </Text>
                     )
                   ) : (
-                    <Text>{property.attributes?.[attribute.id]}</Text>
+                    <Text>
+                      {propertyIdToColumnIdToValue
+                        .get(property.id)
+                        ?.get(column.id)}
+                    </Text>
                   )}
                 </View>
               </View>

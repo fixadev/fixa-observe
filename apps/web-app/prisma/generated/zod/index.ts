@@ -62,7 +62,7 @@ export const ProjectScalarFieldEnumSchema = z.enum(['id','ownerId','name','creat
 
 export const SurveyScalarFieldEnumSchema = z.enum(['id','ownerId','createdAt','updatedAt','name','projectId']);
 
-export const ColumnScalarFieldEnumSchema = z.enum(['id','createdAt','updatedAt','displayIndex','surveyId','label']);
+export const ColumnScalarFieldEnumSchema = z.enum(['id','createdAt','updatedAt','label','displayIndex','attributeId','surveyId']);
 
 export const AttributeScalarFieldEnumSchema = z.enum(['id','createdAt','updatedAt','label','defaultIndex','defaultVisible','ownerId']);
 
@@ -149,9 +149,10 @@ export const ColumnSchema = z.object({
   id: z.string(),
   createdAt: z.coerce.date(),
   updatedAt: z.coerce.date(),
-  displayIndex: z.number().int(),
-  surveyId: z.string(),
   label: z.string(),
+  displayIndex: z.number().int(),
+  attributeId: z.string().nullable(),
+  surveyId: z.string(),
 })
 
 export type Column = z.infer<typeof ColumnSchema>
@@ -452,9 +453,10 @@ export const ColumnSelectSchema: z.ZodType<Prisma.ColumnSelect> = z.object({
   id: z.boolean().optional(),
   createdAt: z.boolean().optional(),
   updatedAt: z.boolean().optional(),
-  displayIndex: z.boolean().optional(),
-  surveyId: z.boolean().optional(),
   label: z.boolean().optional(),
+  displayIndex: z.boolean().optional(),
+  attributeId: z.boolean().optional(),
+  surveyId: z.boolean().optional(),
   survey: z.union([z.boolean(),z.lazy(() => SurveyArgsSchema)]).optional(),
   propertyValues: z.union([z.boolean(),z.lazy(() => PropertyValueFindManyArgsSchema)]).optional(),
   _count: z.union([z.boolean(),z.lazy(() => ColumnCountOutputTypeArgsSchema)]).optional(),
@@ -951,9 +953,10 @@ export const ColumnWhereInputSchema: z.ZodType<Prisma.ColumnWhereInput> = z.obje
   id: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   createdAt: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
   updatedAt: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
-  displayIndex: z.union([ z.lazy(() => IntFilterSchema),z.number() ]).optional(),
-  surveyId: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   label: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
+  displayIndex: z.union([ z.lazy(() => IntFilterSchema),z.number() ]).optional(),
+  attributeId: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
+  surveyId: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   survey: z.union([ z.lazy(() => SurveyRelationFilterSchema),z.lazy(() => SurveyWhereInputSchema) ]).optional(),
   propertyValues: z.lazy(() => PropertyValueListRelationFilterSchema).optional()
 }).strict();
@@ -962,9 +965,10 @@ export const ColumnOrderByWithRelationInputSchema: z.ZodType<Prisma.ColumnOrderB
   id: z.lazy(() => SortOrderSchema).optional(),
   createdAt: z.lazy(() => SortOrderSchema).optional(),
   updatedAt: z.lazy(() => SortOrderSchema).optional(),
-  displayIndex: z.lazy(() => SortOrderSchema).optional(),
-  surveyId: z.lazy(() => SortOrderSchema).optional(),
   label: z.lazy(() => SortOrderSchema).optional(),
+  displayIndex: z.lazy(() => SortOrderSchema).optional(),
+  attributeId: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
+  surveyId: z.lazy(() => SortOrderSchema).optional(),
   survey: z.lazy(() => SurveyOrderByWithRelationInputSchema).optional(),
   propertyValues: z.lazy(() => PropertyValueOrderByRelationAggregateInputSchema).optional()
 }).strict();
@@ -979,9 +983,10 @@ export const ColumnWhereUniqueInputSchema: z.ZodType<Prisma.ColumnWhereUniqueInp
   NOT: z.union([ z.lazy(() => ColumnWhereInputSchema),z.lazy(() => ColumnWhereInputSchema).array() ]).optional(),
   createdAt: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
   updatedAt: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
-  displayIndex: z.union([ z.lazy(() => IntFilterSchema),z.number().int() ]).optional(),
-  surveyId: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   label: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
+  displayIndex: z.union([ z.lazy(() => IntFilterSchema),z.number().int() ]).optional(),
+  attributeId: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
+  surveyId: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   survey: z.union([ z.lazy(() => SurveyRelationFilterSchema),z.lazy(() => SurveyWhereInputSchema) ]).optional(),
   propertyValues: z.lazy(() => PropertyValueListRelationFilterSchema).optional()
 }).strict());
@@ -990,9 +995,10 @@ export const ColumnOrderByWithAggregationInputSchema: z.ZodType<Prisma.ColumnOrd
   id: z.lazy(() => SortOrderSchema).optional(),
   createdAt: z.lazy(() => SortOrderSchema).optional(),
   updatedAt: z.lazy(() => SortOrderSchema).optional(),
-  displayIndex: z.lazy(() => SortOrderSchema).optional(),
-  surveyId: z.lazy(() => SortOrderSchema).optional(),
   label: z.lazy(() => SortOrderSchema).optional(),
+  displayIndex: z.lazy(() => SortOrderSchema).optional(),
+  attributeId: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
+  surveyId: z.lazy(() => SortOrderSchema).optional(),
   _count: z.lazy(() => ColumnCountOrderByAggregateInputSchema).optional(),
   _avg: z.lazy(() => ColumnAvgOrderByAggregateInputSchema).optional(),
   _max: z.lazy(() => ColumnMaxOrderByAggregateInputSchema).optional(),
@@ -1007,9 +1013,10 @@ export const ColumnScalarWhereWithAggregatesInputSchema: z.ZodType<Prisma.Column
   id: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
   createdAt: z.union([ z.lazy(() => DateTimeWithAggregatesFilterSchema),z.coerce.date() ]).optional(),
   updatedAt: z.union([ z.lazy(() => DateTimeWithAggregatesFilterSchema),z.coerce.date() ]).optional(),
-  displayIndex: z.union([ z.lazy(() => IntWithAggregatesFilterSchema),z.number() ]).optional(),
-  surveyId: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
   label: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
+  displayIndex: z.union([ z.lazy(() => IntWithAggregatesFilterSchema),z.number() ]).optional(),
+  attributeId: z.union([ z.lazy(() => StringNullableWithAggregatesFilterSchema),z.string() ]).optional().nullable(),
+  surveyId: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
 }).strict();
 
 export const AttributeWhereInputSchema: z.ZodType<Prisma.AttributeWhereInput> = z.object({
@@ -1937,8 +1944,9 @@ export const ColumnCreateInputSchema: z.ZodType<Prisma.ColumnCreateInput> = z.ob
   id: z.string().optional(),
   createdAt: z.coerce.date().optional(),
   updatedAt: z.coerce.date().optional(),
-  displayIndex: z.number().int(),
   label: z.string(),
+  displayIndex: z.number().int(),
+  attributeId: z.string().optional().nullable(),
   survey: z.lazy(() => SurveyCreateNestedOneWithoutColumnsInputSchema),
   propertyValues: z.lazy(() => PropertyValueCreateNestedManyWithoutColumnInputSchema).optional()
 }).strict();
@@ -1947,9 +1955,10 @@ export const ColumnUncheckedCreateInputSchema: z.ZodType<Prisma.ColumnUncheckedC
   id: z.string().optional(),
   createdAt: z.coerce.date().optional(),
   updatedAt: z.coerce.date().optional(),
-  displayIndex: z.number().int(),
-  surveyId: z.string(),
   label: z.string(),
+  displayIndex: z.number().int(),
+  attributeId: z.string().optional().nullable(),
+  surveyId: z.string(),
   propertyValues: z.lazy(() => PropertyValueUncheckedCreateNestedManyWithoutColumnInputSchema).optional()
 }).strict();
 
@@ -1957,8 +1966,9 @@ export const ColumnUpdateInputSchema: z.ZodType<Prisma.ColumnUpdateInput> = z.ob
   id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  displayIndex: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   label: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  displayIndex: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
+  attributeId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   survey: z.lazy(() => SurveyUpdateOneRequiredWithoutColumnsNestedInputSchema).optional(),
   propertyValues: z.lazy(() => PropertyValueUpdateManyWithoutColumnNestedInputSchema).optional()
 }).strict();
@@ -1967,9 +1977,10 @@ export const ColumnUncheckedUpdateInputSchema: z.ZodType<Prisma.ColumnUncheckedU
   id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  displayIndex: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
-  surveyId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   label: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  displayIndex: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
+  attributeId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  surveyId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   propertyValues: z.lazy(() => PropertyValueUncheckedUpdateManyWithoutColumnNestedInputSchema).optional()
 }).strict();
 
@@ -1977,26 +1988,29 @@ export const ColumnCreateManyInputSchema: z.ZodType<Prisma.ColumnCreateManyInput
   id: z.string().optional(),
   createdAt: z.coerce.date().optional(),
   updatedAt: z.coerce.date().optional(),
+  label: z.string(),
   displayIndex: z.number().int(),
-  surveyId: z.string(),
-  label: z.string()
+  attributeId: z.string().optional().nullable(),
+  surveyId: z.string()
 }).strict();
 
 export const ColumnUpdateManyMutationInputSchema: z.ZodType<Prisma.ColumnUpdateManyMutationInput> = z.object({
   id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  displayIndex: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   label: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  displayIndex: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
+  attributeId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
 }).strict();
 
 export const ColumnUncheckedUpdateManyInputSchema: z.ZodType<Prisma.ColumnUncheckedUpdateManyInput> = z.object({
   id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  displayIndex: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
-  surveyId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   label: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  displayIndex: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
+  attributeId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  surveyId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
 }).strict();
 
 export const AttributeCreateInputSchema: z.ZodType<Prisma.AttributeCreateInput> = z.object({
@@ -3020,9 +3034,10 @@ export const ColumnCountOrderByAggregateInputSchema: z.ZodType<Prisma.ColumnCoun
   id: z.lazy(() => SortOrderSchema).optional(),
   createdAt: z.lazy(() => SortOrderSchema).optional(),
   updatedAt: z.lazy(() => SortOrderSchema).optional(),
+  label: z.lazy(() => SortOrderSchema).optional(),
   displayIndex: z.lazy(() => SortOrderSchema).optional(),
-  surveyId: z.lazy(() => SortOrderSchema).optional(),
-  label: z.lazy(() => SortOrderSchema).optional()
+  attributeId: z.lazy(() => SortOrderSchema).optional(),
+  surveyId: z.lazy(() => SortOrderSchema).optional()
 }).strict();
 
 export const ColumnAvgOrderByAggregateInputSchema: z.ZodType<Prisma.ColumnAvgOrderByAggregateInput> = z.object({
@@ -3033,18 +3048,20 @@ export const ColumnMaxOrderByAggregateInputSchema: z.ZodType<Prisma.ColumnMaxOrd
   id: z.lazy(() => SortOrderSchema).optional(),
   createdAt: z.lazy(() => SortOrderSchema).optional(),
   updatedAt: z.lazy(() => SortOrderSchema).optional(),
+  label: z.lazy(() => SortOrderSchema).optional(),
   displayIndex: z.lazy(() => SortOrderSchema).optional(),
-  surveyId: z.lazy(() => SortOrderSchema).optional(),
-  label: z.lazy(() => SortOrderSchema).optional()
+  attributeId: z.lazy(() => SortOrderSchema).optional(),
+  surveyId: z.lazy(() => SortOrderSchema).optional()
 }).strict();
 
 export const ColumnMinOrderByAggregateInputSchema: z.ZodType<Prisma.ColumnMinOrderByAggregateInput> = z.object({
   id: z.lazy(() => SortOrderSchema).optional(),
   createdAt: z.lazy(() => SortOrderSchema).optional(),
   updatedAt: z.lazy(() => SortOrderSchema).optional(),
+  label: z.lazy(() => SortOrderSchema).optional(),
   displayIndex: z.lazy(() => SortOrderSchema).optional(),
-  surveyId: z.lazy(() => SortOrderSchema).optional(),
-  label: z.lazy(() => SortOrderSchema).optional()
+  attributeId: z.lazy(() => SortOrderSchema).optional(),
+  surveyId: z.lazy(() => SortOrderSchema).optional()
 }).strict();
 
 export const ColumnSumOrderByAggregateInputSchema: z.ZodType<Prisma.ColumnSumOrderByAggregateInput> = z.object({
@@ -5006,8 +5023,9 @@ export const ColumnCreateWithoutSurveyInputSchema: z.ZodType<Prisma.ColumnCreate
   id: z.string().optional(),
   createdAt: z.coerce.date().optional(),
   updatedAt: z.coerce.date().optional(),
-  displayIndex: z.number().int(),
   label: z.string(),
+  displayIndex: z.number().int(),
+  attributeId: z.string().optional().nullable(),
   propertyValues: z.lazy(() => PropertyValueCreateNestedManyWithoutColumnInputSchema).optional()
 }).strict();
 
@@ -5015,8 +5033,9 @@ export const ColumnUncheckedCreateWithoutSurveyInputSchema: z.ZodType<Prisma.Col
   id: z.string().optional(),
   createdAt: z.coerce.date().optional(),
   updatedAt: z.coerce.date().optional(),
-  displayIndex: z.number().int(),
   label: z.string(),
+  displayIndex: z.number().int(),
+  attributeId: z.string().optional().nullable(),
   propertyValues: z.lazy(() => PropertyValueUncheckedCreateNestedManyWithoutColumnInputSchema).optional()
 }).strict();
 
@@ -5096,9 +5115,10 @@ export const ColumnScalarWhereInputSchema: z.ZodType<Prisma.ColumnScalarWhereInp
   id: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   createdAt: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
   updatedAt: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
-  displayIndex: z.union([ z.lazy(() => IntFilterSchema),z.number() ]).optional(),
-  surveyId: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   label: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
+  displayIndex: z.union([ z.lazy(() => IntFilterSchema),z.number() ]).optional(),
+  attributeId: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
+  surveyId: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
 }).strict();
 
 export const SurveyCreateWithoutColumnsInputSchema: z.ZodType<Prisma.SurveyCreateWithoutColumnsInput> = z.object({
@@ -5665,8 +5685,9 @@ export const ColumnCreateWithoutPropertyValuesInputSchema: z.ZodType<Prisma.Colu
   id: z.string().optional(),
   createdAt: z.coerce.date().optional(),
   updatedAt: z.coerce.date().optional(),
-  displayIndex: z.number().int(),
   label: z.string(),
+  displayIndex: z.number().int(),
+  attributeId: z.string().optional().nullable(),
   survey: z.lazy(() => SurveyCreateNestedOneWithoutColumnsInputSchema)
 }).strict();
 
@@ -5674,9 +5695,10 @@ export const ColumnUncheckedCreateWithoutPropertyValuesInputSchema: z.ZodType<Pr
   id: z.string().optional(),
   createdAt: z.coerce.date().optional(),
   updatedAt: z.coerce.date().optional(),
+  label: z.string(),
   displayIndex: z.number().int(),
-  surveyId: z.string(),
-  label: z.string()
+  attributeId: z.string().optional().nullable(),
+  surveyId: z.string()
 }).strict();
 
 export const ColumnCreateOrConnectWithoutPropertyValuesInputSchema: z.ZodType<Prisma.ColumnCreateOrConnectWithoutPropertyValuesInput> = z.object({
@@ -5738,8 +5760,9 @@ export const ColumnUpdateWithoutPropertyValuesInputSchema: z.ZodType<Prisma.Colu
   id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  displayIndex: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   label: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  displayIndex: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
+  attributeId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   survey: z.lazy(() => SurveyUpdateOneRequiredWithoutColumnsNestedInputSchema).optional()
 }).strict();
 
@@ -5747,9 +5770,10 @@ export const ColumnUncheckedUpdateWithoutPropertyValuesInputSchema: z.ZodType<Pr
   id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  displayIndex: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
-  surveyId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   label: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  displayIndex: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
+  attributeId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  surveyId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
 }).strict();
 
 export const PropertyCreateWithoutBrochuresInputSchema: z.ZodType<Prisma.PropertyCreateWithoutBrochuresInput> = z.object({
@@ -6461,8 +6485,9 @@ export const ColumnCreateManySurveyInputSchema: z.ZodType<Prisma.ColumnCreateMan
   id: z.string().optional(),
   createdAt: z.coerce.date().optional(),
   updatedAt: z.coerce.date().optional(),
+  label: z.string(),
   displayIndex: z.number().int(),
-  label: z.string()
+  attributeId: z.string().optional().nullable()
 }).strict();
 
 export const PropertyUpdateWithoutSurveyInputSchema: z.ZodType<Prisma.PropertyUpdateWithoutSurveyInput> = z.object({
@@ -6507,8 +6532,9 @@ export const ColumnUpdateWithoutSurveyInputSchema: z.ZodType<Prisma.ColumnUpdate
   id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  displayIndex: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   label: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  displayIndex: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
+  attributeId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   propertyValues: z.lazy(() => PropertyValueUpdateManyWithoutColumnNestedInputSchema).optional()
 }).strict();
 
@@ -6516,8 +6542,9 @@ export const ColumnUncheckedUpdateWithoutSurveyInputSchema: z.ZodType<Prisma.Col
   id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  displayIndex: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   label: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  displayIndex: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
+  attributeId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   propertyValues: z.lazy(() => PropertyValueUncheckedUpdateManyWithoutColumnNestedInputSchema).optional()
 }).strict();
 
@@ -6525,8 +6552,9 @@ export const ColumnUncheckedUpdateManyWithoutSurveyInputSchema: z.ZodType<Prisma
   id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  displayIndex: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   label: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  displayIndex: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
+  attributeId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
 }).strict();
 
 export const PropertyValueCreateManyColumnInputSchema: z.ZodType<Prisma.PropertyValueCreateManyColumnInput> = z.object({
