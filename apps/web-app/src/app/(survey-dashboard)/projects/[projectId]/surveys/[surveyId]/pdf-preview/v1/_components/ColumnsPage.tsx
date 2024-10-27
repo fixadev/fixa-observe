@@ -280,7 +280,7 @@ export function ColumnsPage({
                 }}
               >
                 <View>
-                  {column.attributeId === "displayAddress" ? (
+                  {column.attributeId === "address" ? (
                     property.brochures[0]?.url ? (
                       <Link
                         src={
@@ -289,12 +289,10 @@ export function ColumnsPage({
                           ""
                         }
                       >
-                        {formatAddress(property.attributes.displayAddress)}
+                        {formatAddress(property.address)}
                       </Link>
                     ) : (
-                      <Text>
-                        {formatAddress(property.attributes.displayAddress)}
-                      </Text>
+                      <Text>{formatAddress(property.address)}</Text>
                     )
                   ) : (
                     <Text>
