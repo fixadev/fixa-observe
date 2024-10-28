@@ -5,9 +5,9 @@ import {
   PaperClipIcon,
   PhotoIcon,
 } from "@heroicons/react/24/solid";
-import axios from "axios";
 import { type Attachment } from "prisma/generated/zod";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { uploadBrochureTask, uploadImageTask } from "~/app/utils/brochureTasks";
 import Spinner from "~/components/Spinner";
 import { Button } from "~/components/ui/button";
 import {
@@ -28,6 +28,10 @@ export default function AttachmentCard({
   propertyId: string;
 }) {
   const { refetchSurvey } = useSurvey();
+
+  const { data: property } = api.property.get.useQuery({
+    id: propertyId,
+  });
 
   const [attachment, setAttachment] = useState<Attachment>(_attachment);
   useEffect(() => {
@@ -52,8 +56,7 @@ export default function AttachmentCard({
     api.email.updateAttachment.useMutation();
   const { mutateAsync: getAttachmentContent } =
     api.email.getAttachmentContent.useMutation();
-  const { mutateAsync: createBrochure } =
-    api.property.createBrochure.useMutation();
+  const { mutateAsync: createBrochure } = api.brochure.create.useMutation();
 
   const { mutateAsync: getPresignedS3Url } =
     api.s3.getPresignedS3Url.useMutation();
@@ -97,27 +100,22 @@ export default function AttachmentCard({
         type: attachment.contentType,
       });
 
-      const presignedUrl = await getPresignedS3Url({
-        fileName: attachment.name,
-        fileType: attachment.contentType,
+      const file = new File([blob], attachment.name, {
+        type: attachment.contentType,
       });
 
-      const s3Response = await axios.put(presignedUrl, blob, {
-        headers: {
-          "Content-Type": attachment.contentType,
-        },
-      });
+      if (!property) throw new Error("Property not found");
 
-      if (s3Response.status !== 200) {
-        throw new Error("Failed to upload file to S3");
-      }
-
-      const cleanUrl = presignedUrl.split("?")[0] ?? presignedUrl;
+      const [thumbnailUrl, brochureUrl] = await Promise.all([
+        uploadImageTask(file, propertyId, getPresignedS3Url),
+        uploadBrochureTask(file, property, getPresignedS3Url),
+      ]);
 
       // Create the brochure in the database
       await createBrochure({
         propertyId,
         brochure: {
+          thumbnailUrl,
           inpaintedRectangles: [],
           textToRemove: [],
           pathsToRemove: [],
@@ -126,7 +124,7 @@ export default function AttachmentCard({
           createdAt: new Date(),
           updatedAt: new Date(),
           title: attachment.name,
-          url: cleanUrl,
+          url: brochureUrl,
           exportedUrl: null,
           approved: false,
         },

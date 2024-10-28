@@ -7,7 +7,7 @@ declare module "./pdfx.mjs" {
     workerSrc: string;
   }
 
-  export function getDocument(url: string): {
+  export function getDocument(url: string | Uint8Array): {
     promise: Promise<PDFDocumentProxy>;
   };
 

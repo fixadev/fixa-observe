@@ -7,6 +7,7 @@ import { TRPCReactProvider } from "~/trpc/react";
 import { ibmPlexSans } from "./fonts";
 import { CSPostHogProvider } from "./providers";
 import { ClerkProvider } from "@clerk/nextjs";
+import { PdfWorkerInit } from "./_components/PDFInit";
 
 // import { dark } from "@clerk/themes";
 import ChildrenWrapper from "./_components/ChildrenWrapper";
@@ -55,6 +56,7 @@ export default function RootLayout({
                     <ChildrenWrapper>
                       {children}
                       <Toaster />
+                      <PdfWorkerInit />
                     </ChildrenWrapper>
                   </TooltipProvider>
                 </SupabaseProvider>
