@@ -116,6 +116,17 @@ export function MapPage({
   mapImageData: string | null;
   properties: PropertyWithIncludes[] | null;
 }) {
+  function formatAddress(address: string | undefined) {
+    if (!address) {
+      return "";
+    }
+    const addressLines = address.split("\n");
+    if (addressLines.length === 4) {
+      return addressLines[1];
+    } else {
+      return addressLines[0];
+    }
+  }
   if (!mapImageData || !properties) return null;
   return (
     <Page size="A4" orientation="landscape" style={styles.page}>
@@ -128,7 +139,7 @@ export function MapPage({
                 <Text>{index + 1}</Text>
               </View>
               <Text style={styles.propertyText}>
-                {property.address.split(",")[0]}
+                {formatAddress(property.address)}
               </Text>
               {/* Add more property details as needed */}
             </View>

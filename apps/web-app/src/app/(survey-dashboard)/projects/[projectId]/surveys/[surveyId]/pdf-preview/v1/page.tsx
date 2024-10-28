@@ -10,7 +10,7 @@ import { APIProvider } from "@vis.gl/react-google-maps";
 import { env } from "~/env";
 import { useEffect, useState } from "react";
 import Spinner from "~/components/Spinner";
-import { generateStaticMapUrl } from "./_components/CreateMapUrl";
+import { generateStaticMapUrl } from "./_components/CreateMapboxUrl";
 
 export default function PDFPreviewPage({
   params,
@@ -21,33 +21,21 @@ export default function PDFPreviewPage({
   const [mapUrl, setMapUrl] = useState<string | null>(null);
 
   const router = useRouter();
-  const { data: survey } = api.survey.getSurvey.useQuery(
+  const { data: survey } = api.survey.get.useQuery(
     { surveyId: params.surveyId },
     {
       refetchOnMount: true,
       staleTime: 0,
     },
   );
-  const { data: attributes } = api.survey.getSurveyAttributes.useQuery(
-    { surveyId: params.surveyId },
-    {
-      refetchOnMount: true,
-      staleTime: 0,
-    },
-  );
-
-  const parsedProperties = survey?.properties.map((property) => {
-    return {
-      ...property,
-      attributes: property.attributes as Record<string, string>,
-    };
-  });
 
   useEffect(() => {
     const fetchMapUrl = async () => {
-      if (parsedProperties && mapLoaded) {
+      if (survey?.properties && mapLoaded) {
         try {
-          const { staticMapUrl } = await generateStaticMapUrl(parsedProperties);
+          const { staticMapUrl } = await generateStaticMapUrl(
+            survey.properties,
+          );
           setMapUrl(staticMapUrl);
         } catch (err) {
           console.error("Failed to generate static map URL:", err);
@@ -56,7 +44,7 @@ export default function PDFPreviewPage({
     };
 
     void fetchMapUrl();
-  }, [parsedProperties, mapLoaded]);
+  }, [survey?.properties, mapLoaded]);
 
   return (
     <APIProvider
@@ -92,11 +80,8 @@ export default function PDFPreviewPage({
               mapImageData={mapUrl}
               propertyOrientation="columns"
               surveyName={survey?.name ?? null}
-              properties={parsedProperties ?? null}
-              columns={
-                attributes?.filter((attribute) => attribute.id !== "address") ??
-                null
-              }
+              properties={survey?.properties ?? null}
+              columns={survey?.columns ?? null}
             />
           </PDFViewer>
         </div>
