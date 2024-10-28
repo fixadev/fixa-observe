@@ -40,13 +40,8 @@ import EmailTemplateDialog from "../_components/EmailTemplateDialog";
 import {
   DEFAULT_EMAIL_TEMPLATE_BODY,
   DEFAULT_EMAIL_TEMPLATE_SUBJECT,
-  REPLACEMENT_VARIABLES,
 } from "~/lib/constants";
-import {
-  getBrochureFileName,
-  replaceTemplateVariables,
-  splitAddress,
-} from "~/lib/utils";
+import { getBrochureFileName } from "~/lib/utils";
 import { type EmailTemplate } from "prisma/generated/zod";
 import { useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
@@ -419,47 +414,34 @@ export function PropertiesTable({
     setTemplateDialog(true);
   }, []);
 
-  const { mutateAsync: createDraftEmails } =
-    api.email.createDraftEmails.useMutation();
+  const { mutateAsync: createDraftEmailsFromTemplate } =
+    api.email.createDraftEmailsFromTemplate.useMutation();
   const generateDraftEmail = useCallback(
     (
       property: Property,
       emailTemplate: EmailTemplate,
       attributesToVerify: string[],
     ) => {
-      // TODO: get recipient name and email from property
       const recipientFirstName = property.contacts[0]?.firstName ?? "";
       const recipientEmail = property.contacts[0]?.email ?? "";
 
-      const replacements = {
-        [REPLACEMENT_VARIABLES.name]: recipientFirstName,
-        [REPLACEMENT_VARIABLES.address]:
-          splitAddress(property.address).streetAddress ?? "",
-        [REPLACEMENT_VARIABLES.fieldsToVerify]: attributesToVerify
-          .map((columnId) => {
-            const column = columnsMap.get(columnId);
-            return `- ${column?.attribute.label ?? ""}`;
-          })
-          .join("\n"),
-      };
-      const subject = replaceTemplateVariables(
-        emailTemplate?.subject ?? DEFAULT_EMAIL_TEMPLATE_SUBJECT,
-        replacements,
-      );
-      const body = replaceTemplateVariables(
-        emailTemplate?.body ??
-          DEFAULT_EMAIL_TEMPLATE_BODY(user?.fullName ?? ""),
-        replacements,
-      );
-
       const emailDetails = {
-        to: recipientEmail,
+        recipientEmail: recipientEmail,
+        recipientName: recipientFirstName,
         propertyId: property.id,
-        subject,
-        body,
+        address: property.address,
+        templateSubject:
+          emailTemplate?.subject ?? DEFAULT_EMAIL_TEMPLATE_SUBJECT,
+        templateBody:
+          emailTemplate?.body ??
+          DEFAULT_EMAIL_TEMPLATE_BODY(user?.fullName ?? ""),
         attributesToVerify: attributesToVerify.map(
           (columnId) => columnsMap.get(columnId)!.attributeId,
         ),
+        attributeLabels: attributesToVerify.map((columnId) => {
+          const column = columnsMap.get(columnId);
+          return column?.attribute.label ?? "";
+        }),
       };
       return emailDetails;
     },
@@ -476,9 +458,14 @@ export function PropertiesTable({
         );
         drafts.push(emailDetails);
       }
-      await createDraftEmails({ drafts });
+      await createDraftEmailsFromTemplate({ drafts });
     },
-    [selectedFields, createDraftEmails, generateDraftEmail, properties],
+    [
+      selectedFields,
+      createDraftEmailsFromTemplate,
+      generateDraftEmail,
+      properties,
+    ],
   );
   // #endregion
 
