@@ -4,22 +4,31 @@ import sharp from "sharp";
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const number = searchParams.get("number");
+  const size = searchParams.get("size") ?? "32";
 
   if (!number || isNaN(Number(number))) {
     return new NextResponse("Invalid number parameter", { status: 400 });
   }
 
-  // Create a 32x32 blue circle with white text
+  if (isNaN(Number(size))) {
+    return new NextResponse("Invalid size parameter", { status: 400 });
+  }
+
+  const sizeNum = Number(size);
+  const fontSize = Math.floor(sizeNum / 2);
+  const radius = sizeNum / 2;
+
+  // Create a circle with white text
   const svgBuffer = Buffer.from(`
-    <svg width="32" height="32">
-      <circle cx="16" cy="16" r="16" fill="#046bb6"/>
+    <svg width="${sizeNum}" height="${sizeNum}">
+      <circle cx="${radius}" cy="${radius}" r="${radius}" fill="#046bb6"/>
       <text 
         x="50%" 
         y="50%" 
         text-anchor="middle" 
         dy=".3em" 
         fill="white" 
-        font-size="16"
+        font-size="${fontSize}"
         font-family="Arial"
       >${number}</text>
     </svg>
