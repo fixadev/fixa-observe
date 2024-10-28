@@ -1,4 +1,5 @@
-import { getDocument, type PageViewport } from "pdfjs-dist";
+import { PageViewport } from "pdfjs-dist";
+import { getDocument } from "~/lib/pdfx.mjs";
 
 export async function pdfToImage({
   file,
@@ -11,6 +12,8 @@ export async function pdfToImage({
   scale?: number;
   height?: number;
 }): Promise<string[]> {
+  // Set the worker source to the local PDF worker
+
   return new Promise<string[]>((resolve, reject) => {
     const fileReader = new FileReader();
     fileReader.onload = async function () {
