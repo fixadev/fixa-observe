@@ -209,12 +209,15 @@ export function PropertiesTable({
       attributeId?: string;
       attributeLabel: string;
     }) => {
+      const isNew = column.isNew;
+
       setColumns((prev) => {
         const index = prev.findIndex((c) => c.id === column.id);
         if (index === -1) return prev;
         const newColumns = [...prev];
         newColumns[index]!.attributeId = attributeId ?? "";
         newColumns[index]!.attribute.label = attributeLabel;
+        newColumns[index]!.isNew = false;
         return newColumns;
       });
 
@@ -230,7 +233,7 @@ export function PropertiesTable({
         attributeId = attribute.id;
       }
 
-      if (column.isNew) {
+      if (isNew) {
         const newColumn = await createColumn({
           attributeId,
           displayIndex: column.displayIndex,
@@ -245,6 +248,7 @@ export function PropertiesTable({
           newColumns[index]!.id = newColumn.id;
           newColumns[index]!.attributeId = attributeId;
           newColumns[index]!.attribute.label = attributeLabel;
+          newColumns[index]!.isNew = false;
           return newColumns;
         });
       } else {
