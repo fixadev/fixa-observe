@@ -161,7 +161,7 @@ const styles = StyleSheet.create({
 
 const getHeight = (attributeId: string) => {
   if (attributeId === "displayAddress") {
-    return "10%";
+    return "12%";
   } else if (attributeId === "comments") {
     return "26%";
   } else {

@@ -11,6 +11,7 @@ import { env } from "~/env";
 import { useEffect, useState } from "react";
 import Spinner from "~/components/Spinner";
 import { generateStaticMapUrl } from "./_components/CreateMapboxUrl";
+import { type PropertyWithIncludes } from "~/hooks/useSurvey";
 
 export default function PDFPreviewPage({
   params,
@@ -19,6 +20,8 @@ export default function PDFPreviewPage({
 }) {
   const [mapLoaded, setMapLoaded] = useState(false);
   const [mapUrl, setMapUrl] = useState<string | null>(null);
+  const [propertiesWithStreetAddresses, setPropertiesWithStreetAddresses] =
+    useState<(PropertyWithIncludes & { streetAddress: string })[] | null>(null);
 
   const router = useRouter();
   const { data: survey } = api.survey.get.useQuery(
@@ -29,6 +32,9 @@ export default function PDFPreviewPage({
     },
   );
 
+  const { mutateAsync: extractStreetAddresses } =
+    api.property.extractStreetAddresses.useMutation();
+
   useEffect(() => {
     const fetchMapUrl = async () => {
       if (survey?.properties && mapLoaded) {
@@ -37,6 +43,17 @@ export default function PDFPreviewPage({
             survey.properties,
           );
           setMapUrl(staticMapUrl);
+          const streetAddresses = await extractStreetAddresses({
+            properties: survey?.properties ?? [],
+          });
+
+          const updatedProperties = survey?.properties?.map(
+            (property, index) => ({
+              ...property,
+              streetAddress: streetAddresses[index] ?? "",
+            }),
+          );
+          setPropertiesWithStreetAddresses(updatedProperties);
         } catch (err) {
           console.error("Failed to generate static map URL:", err);
         }
@@ -44,7 +61,7 @@ export default function PDFPreviewPage({
     };
 
     void fetchMapUrl();
-  }, [survey?.properties, mapLoaded]);
+  }, [survey?.properties, mapLoaded, extractStreetAddresses]);
 
   return (
     <APIProvider
@@ -80,7 +97,7 @@ export default function PDFPreviewPage({
               mapImageData={mapUrl}
               propertyOrientation="columns"
               surveyName={survey?.name ?? null}
-              properties={survey?.properties ?? null}
+              properties={propertiesWithStreetAddresses ?? null}
               columns={survey?.columns ?? null}
             />
           </PDFViewer>
