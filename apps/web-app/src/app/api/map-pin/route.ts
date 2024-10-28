@@ -29,7 +29,7 @@ export async function GET(request: Request) {
         dy=".3em" 
         fill="white" 
         font-size="${fontSize}"
-        font-family="Arial"
+        font-family="sans-serif"
       >${number}</text>
     </svg>
   `);
