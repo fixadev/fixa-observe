@@ -22,11 +22,7 @@ export async function POST(request: Request) {
       if (brochureUrl.includes("dropbox.com")) {
         console.log("Uploading dropbox file to S3!");
         const newUrl = await uploadDropboxFileToS3(brochure.url);
-        await brochureServiceInstance.updateUrl(
-          brochure.id,
-          newUrl,
-          brochure.propertyId,
-        );
+        await brochureServiceInstance.updateUrl(brochure.id, newUrl);
         console.log("newUrl", newUrl);
         brochureUrl = newUrl;
       }
