@@ -64,6 +64,7 @@ export const DraggableRow = ({
   property,
   columns,
   updatePropertyValue,
+  updatePropertyAddress,
   deleteProperty,
   draggingRow,
   state,
@@ -86,6 +87,7 @@ export const DraggableRow = ({
     columnId: string,
     value: string,
   ) => void;
+  updatePropertyAddress: (propertyId: string, address: string) => void;
   deleteProperty: (id: string) => void;
   setDraggingRow: (draggingRow: boolean) => void;
   selectedFields: Record<string, Set<string>>;
@@ -423,6 +425,18 @@ export const DraggableRow = ({
               Edit brochure
             </Button>
           )}
+        </div>
+      </DraggableCell>
+      <DraggableCell id="addressCell" draggingRow={draggingRow}>
+        <div className="">
+          <Textarea
+            defaultValue={property.address ?? ""}
+            className={cn(
+              "flex h-[100px] overflow-visible",
+              mapError ? "border-2 border-red-500" : "",
+            )}
+            onBlur={(e) => updatePropertyAddress(property.id, e.target.value)}
+          />
         </div>
       </DraggableCell>
       {columns.map((column) => {

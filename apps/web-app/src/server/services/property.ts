@@ -74,6 +74,13 @@ export const propertyService = ({ db }: { db: PrismaClient }) => {
       });
     },
 
+    updateAddress: async (propertyId: string, address: string) => {
+      return await db.property.update({
+        where: { id: propertyId },
+        data: { address },
+      });
+    },
+
     delete: async (propertyId: string, userId: string) => {
       const property = await db.property.findUnique({
         where: {

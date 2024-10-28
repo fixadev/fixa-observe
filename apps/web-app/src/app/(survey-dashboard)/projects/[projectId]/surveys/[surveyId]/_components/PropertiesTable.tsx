@@ -119,6 +119,8 @@ export function PropertiesTable({
   const { mutateAsync: createProperty } = api.property.create.useMutation();
   const { mutateAsync: updatePropertyValue } =
     api.property.updateValue.useMutation();
+  const { mutateAsync: updatePropertyAddress } =
+    api.property.updateAddress.useMutation();
   const { mutateAsync: updatePropertiesOrder } =
     api.survey.updatePropertiesOrder.useMutation();
   const { mutateAsync: deleteProperty } = api.property.delete.useMutation();
@@ -338,6 +340,20 @@ export function PropertiesTable({
       void updatePropertyValue({ propertyId, columnId, value });
     },
     [updatePropertyValue],
+  );
+
+  const _updatePropertyAddress = useCallback(
+    (propertyId: string, address: string) => {
+      setProperties((prev) => {
+        const index = prev.findIndex((property) => property.id === propertyId);
+        if (index === -1) return prev;
+        const newProperties = [...prev];
+        newProperties[index]!.address = address;
+        return newProperties;
+      });
+      void updatePropertyAddress({ propertyId, address });
+    },
+    [updatePropertyAddress],
   );
 
   const _deleteProperty = useCallback(
@@ -629,7 +645,6 @@ export function PropertiesTable({
               </div>
               <div className="flex flex-col items-stretch gap-2">
                 <NDXOutputUploader
-                  className="w-full"
                   surveyId={surveyId}
                   refetchSurvey={refetchSurvey}
                   setUploading={setIsImportingProperties}
@@ -677,6 +692,9 @@ export function PropertiesTable({
                       <TableHead className="w-[1%]" />
                       <TableHead className="w-[1%] text-center text-black">
                         Brochure
+                      </TableHead>
+                      <TableHead className="w-[1%] text-center text-black">
+                        Address
                       </TableHead>
                       <SortableContext
                         items={draggingRow ? rowIds : colIds}
@@ -739,6 +757,7 @@ export function PropertiesTable({
                             property={property}
                             columns={columns}
                             updatePropertyValue={_updatePropertyValue}
+                            updatePropertyAddress={_updatePropertyAddress}
                             deleteProperty={() => _deleteProperty(property.id)}
                             draggingRow={draggingRow}
                             state={state}
