@@ -38,7 +38,7 @@ export default function ProjectCard({
   refetchProjects: () => void;
 }) {
   const { mutate: deleteProject, isPending: isDeleting } =
-    api.project.deleteProject.useMutation({
+    api.project.delete.useMutation({
       onSuccess: () => {
         refetchProjects();
       },
