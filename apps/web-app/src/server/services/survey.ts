@@ -311,8 +311,6 @@ export const surveyService = ({ db }: { db: PrismaClient }) => {
             ),
         );
 
-        console.log("propertyValuesToCreate", propertyValuesToCreate);
-
         await db.propertyValue.createMany({
           data: propertyValuesToCreate,
         });
