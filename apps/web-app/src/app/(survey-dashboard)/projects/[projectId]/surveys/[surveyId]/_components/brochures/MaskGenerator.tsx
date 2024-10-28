@@ -1,5 +1,5 @@
 import { useRef, useCallback, useMemo } from "react";
-import { type BrochureRectangles } from "@/lib/property";
+import { type BrochureRectangles } from "@/lib/brochure";
 import { type Tool } from "./ToolSelector";
 
 export default function MaskGenerator({
