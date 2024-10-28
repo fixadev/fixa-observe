@@ -41,7 +41,6 @@ import {
   DEFAULT_EMAIL_TEMPLATE_BODY,
   DEFAULT_EMAIL_TEMPLATE_SUBJECT,
 } from "~/lib/constants";
-import { getBrochureFileName } from "~/lib/utils";
 import { type EmailTemplate } from "prisma/generated/zod";
 import { useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
