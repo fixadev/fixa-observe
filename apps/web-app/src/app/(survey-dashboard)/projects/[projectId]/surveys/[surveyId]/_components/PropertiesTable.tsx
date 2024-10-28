@@ -52,6 +52,7 @@ import {
 import { SurveyDownloadLink } from "../pdf-preview/v1/_components/DownloadLink";
 import BrochureDialog from "./brochures/BrochureDialog";
 import { uploadBrochureTask, uploadImageTask } from "~/app/utils/brochureTasks";
+import useSocketMessage from "./UseSocketMessage";
 
 export type Property = PropertyWithIncludes & {
   isNew?: boolean;
@@ -81,7 +82,20 @@ export function PropertiesTable({
   const [draggingRow, setDraggingRow] = useState<boolean>(false);
   const [isImportingProperties, setIsImportingProperties] =
     useState<boolean>(false);
+  const [isParsingBrochures, setIsParsingBrochures] = useState<boolean>(false);
+
   const { survey, isLoadingSurvey, refetchSurvey } = useSurvey();
+
+  const { triggered: parsingBrochuresCompleted, setTriggered } =
+    useSocketMessage(user?.id ?? "");
+
+  useEffect(() => {
+    if (parsingBrochuresCompleted) {
+      setTriggered(false);
+      setIsParsingBrochures(false);
+      void refetchSurvey();
+    }
+  }, [parsingBrochuresCompleted, refetchSurvey, setTriggered]);
 
   const [mapErrors, setMapErrors] = useState<
     { propertyId: string; error: string }[]
@@ -146,7 +160,9 @@ export function PropertiesTable({
 
     setIsImportingProperties(false);
 
-    void uploadBrochureThumbnails(survey.properties);
+    setIsParsingBrochures(survey.importInProgress);
+
+    // void uploadBrochureThumbnails(survey.properties);
   }, [survey, uploadBrochureThumbnails]);
 
   // Property mutations
@@ -661,6 +677,7 @@ export function PropertiesTable({
                   surveyId={surveyId}
                   refetchSurvey={refetchSurvey}
                   setUploading={setIsImportingProperties}
+                  setParsingBrochures={setIsParsingBrochures}
                 />
                 <Button variant="ghost" onClick={_createProperty}>
                   Manually add properties
@@ -679,6 +696,7 @@ export function PropertiesTable({
                 properties={properties}
                 columns={columns}
                 state={state}
+                isParsingBrochures={isParsingBrochures}
                 onStateChange={setState}
                 draftEmails={draftEmails}
               />
@@ -806,6 +824,7 @@ export function PropertiesTable({
                     surveyId={surveyId}
                     refetchSurvey={refetchSurvey}
                     setUploading={setIsImportingProperties}
+                    setParsingBrochures={setIsParsingBrochures}
                   />
                 </div>
               </DndContext>
@@ -847,15 +866,17 @@ function ActionButtons({
   properties,
   columns,
   state,
+  isParsingBrochures,
   onStateChange,
   draftEmails,
   setMapErrors,
 }: {
   surveyName: string;
   state: PropertiesTableState;
-  onStateChange: (state: PropertiesTableState) => void;
   properties: Property[];
   columns: Column[];
+  isParsingBrochures: boolean;
+  onStateChange: (state: PropertiesTableState) => void;
   draftEmails: () => void;
   setMapErrors: (errors: { propertyId: string; error: string }[]) => void;
 }) {
@@ -875,9 +896,19 @@ function ActionButtons({
             <Button
               className="w-full"
               onClick={() => onStateChange("select-fields")}
+              disabled={isParsingBrochures}
             >
-              <EnvelopeIcon className="mr-2 size-4" />
-              Verify property data
+              {isParsingBrochures ? (
+                <>
+                  <Spinner className="mr-2 flex size-4 text-white" />
+                  Extracting contacts
+                </>
+              ) : (
+                <>
+                  <EnvelopeIcon className="mr-2 size-4" />
+                  Verify property data
+                </>
+              )}
             </Button>
 
             <SurveyDownloadLink
@@ -896,9 +927,19 @@ function ActionButtons({
         <Button
           className="w-full"
           onClick={() => onStateChange("select-fields")}
+          disabled={isParsingBrochures}
         >
-          <EnvelopeIcon className="mr-2 size-4" />
-          Verify property data
+          {isParsingBrochures ? (
+            <>
+              <Spinner className="mr-2 flex size-4 text-white" />
+              Extracting contacts
+            </>
+          ) : (
+            <>
+              <EnvelopeIcon className="mr-2 size-4" />
+              Verify property data
+            </>
+          )}
         </Button>
         <SurveyDownloadLink
           setErrors={setMapErrors}

@@ -46,17 +46,17 @@ model Project {
 }
 
 model Survey {
-  id        String   @id @default(uuid())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  name      String
-
-  ownerId    String
-  owner      User       @relation(fields: [ownerId], references: [id], onDelete: Cascade)
-  projectId  String
-  project    Project    @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  properties Property[]
-  columns    Column[]
+  id               String     @id @default(uuid())
+  createdAt        DateTime   @default(now())
+  updatedAt        DateTime   @updatedAt
+  name             String
+  ownerId          String
+  owner            User       @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  projectId        String
+  project          Project    @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  properties       Property[]
+  columns          Column[]
+  importInProgress Boolean    @default(false)
 }
 
 model Column {

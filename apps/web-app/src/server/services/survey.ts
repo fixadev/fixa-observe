@@ -189,6 +189,12 @@ export const surveyService = ({ db }: { db: PrismaClient }) => {
       ownerId: string;
     }) => {
       try {
+        // set import in progress
+        await db.survey.update({
+          where: { id: input.surveyId },
+          data: { importInProgress: true },
+        });
+
         const response = await axios.post(
           `${env.SCRAPING_SERVICE_URL}/extract-ndx-pdf`,
           {
@@ -236,7 +242,10 @@ export const surveyService = ({ db }: { db: PrismaClient }) => {
           await propertyServiceInstance.createManyWithBrochures(
             propertiesToCreate,
             input.ownerId,
+            input.surveyId,
           );
+
+        const startTime = new Date();
 
         const propertiesWithIds = createdPropertyIds.map((id, index) => ({
           ...parsedProperties[index],
@@ -324,7 +333,13 @@ export const surveyService = ({ db }: { db: PrismaClient }) => {
 
         // populate attributes for each property
 
-        return { status: 200 };
+        console.log(
+          "======================done populating attributes====================== in ",
+          new Date().getTime() - startTime.getTime(),
+          "ms",
+        );
+
+        return { status: 200, numberOfProperties: propertiesWithIds.length };
       } catch (error) {
         console.error("Error importing NDX PDF", error);
         return { status: 500 };

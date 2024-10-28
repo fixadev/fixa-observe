@@ -31,6 +31,7 @@ import Spinner from "~/components/Spinner";
 import { formatDistanceToNow } from "date-fns";
 import { Button } from "~/components/ui/button";
 import Link from "next/link";
+import { useState } from "react";
 
 export default function SurveyCard({
   projectId,
@@ -45,14 +46,16 @@ export default function SurveyCard({
   };
   refetchProject: () => void;
 }) {
-  const { mutate: deleteSurvey, isPending: isDeleting } =
-    api.survey.delete.useMutation({
-      onSuccess: () => {
-        refetchProject();
-      },
-    });
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const { mutate: deleteSurvey } = api.survey.delete.useMutation({
+    onSuccess: () => {
+      refetchProject();
+    },
+  });
 
   const handleDeleteClick = (e: React.MouseEvent) => {
+    setIsDeleting(true);
     e.preventDefault();
     e.stopPropagation();
     deleteSurvey({ surveyId: survey.id });

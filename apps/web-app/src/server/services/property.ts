@@ -111,6 +111,7 @@ export const propertyService = ({ db }: { db: PrismaClient }) => {
     createManyWithBrochures: async (
       input: CreatePropertySchema[],
       userId: string,
+      surveyId: string,
     ) => {
       const propertiesToCreate = input.map(
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -160,7 +161,11 @@ export const propertyService = ({ db }: { db: PrismaClient }) => {
         // parse brochures in the background
         void fetch(`${env.NEXT_PUBLIC_API_URL}/api/parse-brochures`, {
           method: "POST",
-          body: JSON.stringify({ brochures: brochuresToParse }),
+          body: JSON.stringify({
+            brochures: brochuresToParse,
+            userId,
+            surveyId,
+          }),
         });
       }
 
