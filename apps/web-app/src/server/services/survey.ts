@@ -100,20 +100,15 @@ export const surveyService = ({ db }: { db: PrismaClient }) => {
       surveyId: string;
       attributeId: string;
       displayIndex: number;
-      userId: string;
     }) => {
-      const survey = await db.survey.update({
-        where: { id: input.surveyId, ownerId: input.userId },
+      const column = await db.column.create({
         data: {
-          columns: {
-            create: {
-              attributeId: input.attributeId,
-              displayIndex: input.displayIndex,
-            },
-          },
+          attributeId: input.attributeId,
+          displayIndex: input.displayIndex,
+          surveyId: input.surveyId,
         },
       });
-      return survey;
+      return column;
     },
 
     updateColumnAttribute: async (
