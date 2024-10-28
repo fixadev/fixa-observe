@@ -139,7 +139,7 @@ export async function generateStaticMapUrl(
       .map(
         (marker, index) =>
           `url-${encodeURIComponent(
-            `https://www.apex.deal/api/map-pin?number=${index + 1}&size=24`,
+            `https://pin-server.fly.dev/api/map-pin?number=${index + 1}&size=24`,
           )}(${marker.lng},${marker.lat})`,
       )
       .join(",");
