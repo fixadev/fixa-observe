@@ -96,8 +96,6 @@ export async function generateStaticMapUrl(
     // Filter out the errors after Promise.all completes
     const validMarkers = markers.filter((marker) => marker !== null);
 
-    // validMarkers.sort((a, b) => b.lat - a.lat);
-
     // Function to calculate distance between two points in degrees
     const getDistance = (p1: LatLng, p2: LatLng) => {
       return Math.sqrt(
@@ -135,7 +133,7 @@ export async function generateStaticMapUrl(
       [],
     );
 
-    console.log("validMarkers", validMarkers);
+    // console.log("validMarkers", validMarkers);
 
     const markersString = validMarkers
       .map(
