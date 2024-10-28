@@ -24,7 +24,7 @@ export async function GET(request: Request) {
         dy=".3em" 
         fill="white" 
         font-size="${fontSize}"
-        font-family="system-ui"
+        font-family="Arial, sans-serif"
       >${number}</text>
     </svg>
   `;
