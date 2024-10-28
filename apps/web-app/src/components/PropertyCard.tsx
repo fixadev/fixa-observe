@@ -129,50 +129,67 @@ export function ParsedAttributes({
   }, [parsedAttributes]);
 
   return (
-    <div className="flex shrink-0 flex-col items-start gap-2 pr-4">
-      <div className="flex w-full items-baseline gap-1 px-2 pt-2 text-sm font-medium">
-        <div className="flex items-center gap-1">
-          {propertyNotAvailable
-            ? "Property not available"
-            : completed
-              ? "Property details confirmed"
-              : "More info needed"}
-          {propertyNotAvailable ? (
-            <XCircleIcon className="size-5 text-destructive" />
-          ) : completed ? (
-            <CheckCircleIcon className="size-5 text-green-500" />
-          ) : (
-            <EllipsisHorizontalCircleIcon className="size-5 text-gray-500" />
-          )}
+    <div
+      className={cn(
+        "flex shrink-0 flex-col items-start gap-2 rounded-md border-[2px] border-input p-2 pr-4 shadow-sm",
+        propertyNotAvailable && "border-destructive bg-destructive/10",
+        completed && "border-green-500 bg-green-500/10",
+        !completed && !propertyNotAvailable && "border-orange-500",
+      )}
+    >
+      <div>
+        <div className="flex w-full items-baseline gap-1 px-2 pt-2 text-sm font-medium">
+          <div className="flex items-center gap-1">
+            {propertyNotAvailable
+              ? "Property not available"
+              : completed
+                ? "Property details confirmed"
+                : "More info needed"}
+            {propertyNotAvailable ? (
+              <XCircleIcon className="size-5 text-destructive" />
+            ) : completed ? (
+              <CheckCircleIcon className="size-5 text-green-500" />
+            ) : (
+              <EllipsisHorizontalCircleIcon className="size-5 text-gray-500" />
+            )}
+          </div>
+          <div className="flex-1" />
+          <Button variant="link" size="sm" asChild>
+            <Link href={`./?propertyId=${emailThread.propertyId}`}>
+              View table
+            </Link>
+          </Button>
         </div>
-        <div className="flex-1" />
-        <Button variant="ghost" size="sm" asChild>
-          <Link href={`./?propertyId=${emailThread.propertyId}`}>
-            View table
-          </Link>
-        </Button>
+        <Table className="text-xs">
+          <TableHeader>
+            <TableRow className="border-none hover:bg-transparent">
+              {parsedAttributesKeys.map((attributeId) => (
+                <TableHead key={attributeId} className="h-[unset]">
+                  {attributesMap.get(attributeId)?.label ??
+                    attributeId.charAt(0).toUpperCase() + attributeId.slice(1)}
+                </TableHead>
+              ))}
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            <TableRow className="border-none hover:bg-transparent">
+              {parsedAttributesKeys.map((attributeId) => (
+                <TableCell
+                  key={attributeId}
+                  className={cn(
+                    !propertyNotAvailable &&
+                      !completed &&
+                      !parsedAttributes?.[attributeId] &&
+                      "bg-orange-500/30",
+                  )}
+                >
+                  {parsedAttributes?.[attributeId] ?? "???"}
+                </TableCell>
+              ))}
+            </TableRow>
+          </TableBody>
+        </Table>
       </div>
-      <Table className="text-xs">
-        <TableHeader>
-          <TableRow className="border-none">
-            {parsedAttributesKeys.map((attributeId) => (
-              <TableHead key={attributeId} className="h-[unset]">
-                {attributesMap.get(attributeId)?.label ??
-                  attributeId.charAt(0).toUpperCase() + attributeId.slice(1)}
-              </TableHead>
-            ))}
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          <TableRow className="border-none">
-            {parsedAttributesKeys.map((attributeId) => (
-              <TableCell key={attributeId}>
-                {parsedAttributes?.[attributeId] ?? "???"}
-              </TableCell>
-            ))}
-          </TableRow>
-        </TableBody>
-      </Table>
     </div>
   );
 }

@@ -363,14 +363,14 @@ export const DraggableRow = ({
                 {/**
                  * TODO: Fix tooltip not showing
                  */}
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <FileInput
-                      accept="application/pdf"
-                      handleFilesChange={(files) =>
-                        onUploadBrochure(property.id, files[0])
-                      }
-                    >
+                <FileInput
+                  accept="application/pdf"
+                  handleFilesChange={(files) =>
+                    onUploadBrochure(property.id, files[0])
+                  }
+                >
+                  <Tooltip>
+                    <TooltipTrigger asChild>
                       <Button
                         variant="outline"
                         size="icon"
@@ -378,10 +378,12 @@ export const DraggableRow = ({
                       >
                         <ArrowUpTrayIcon className="size-4" />
                       </Button>
-                    </FileInput>
-                  </TooltipTrigger>
-                  <TooltipContent side="left">Replace brochure</TooltipContent>
-                </Tooltip>
+                    </TooltipTrigger>
+                    <TooltipContent side="left">
+                      Replace brochure
+                    </TooltipContent>
+                  </Tooltip>
+                </FileInput>
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Button
@@ -407,7 +409,7 @@ export const DraggableRow = ({
               }
             >
               <div className="h-[100px] hover:cursor-pointer">
-                <div className="flex flex-col items-center justify-center gap-2 rounded-md bg-gray-100 hover:bg-gray-200">
+                <div className="flex size-full flex-col items-center justify-center gap-2 rounded-md bg-gray-100 hover:bg-gray-200">
                   <DocumentPlusIcon className="size-6 text-gray-500" />
                   <div className="text-sm font-medium text-gray-500">
                     Add brochure
