@@ -13,7 +13,6 @@ import { TrashIcon } from "@heroicons/react/24/outline";
 import { TrashIcon as TrashIconSolid } from "@heroicons/react/24/solid";
 import { cn } from "~/lib/utils";
 import {
-  type BrochureSchema,
   type BrochureRectangles,
   type Path,
   type TransformedTextContent,
@@ -31,17 +30,14 @@ import { useToast } from "~/hooks/use-toast";
 import { api } from "~/trpc/react";
 import Spinner from "~/components/Spinner";
 import { ConfirmRemovePopup } from "./ConfirmRemovePopup";
+import { type Brochure } from "prisma/generated/zod";
 
 export function BrochureCarousel({
   brochure,
-  isGeneratingPDF,
   onEdit,
-  // refetchProperty,
 }: {
-  brochure: BrochureSchema;
-  isGeneratingPDF: boolean;
-  onEdit: (brochure: BrochureSchema) => void;
-  // refetchProperty: () => void;
+  brochure: Brochure;
+  onEdit: (brochure: Brochure) => void;
 }) {
   // ------------------
   // #region Load PDF
@@ -98,8 +94,7 @@ export function BrochureCarousel({
     setDeletedPages(new Set(brochure.deletedPages ?? []));
   }, [brochure]);
 
-  const [hasUnsavedChanges, setHasUnsavedChanges] = useState<boolean>(false);
-  const saveChanges = useCallback(() => {
+  useEffect(() => {
     onEdit({
       ...brochure,
       textToRemove,
@@ -108,40 +103,23 @@ export function BrochureCarousel({
       deletedPages: Array.from(deletedPages),
       undoStack,
     });
-    setHasUnsavedChanges(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
-    onEdit,
-    brochure,
-    textToRemove,
-    pathsToRemove,
-    inpaintedRectangles,
-    deletedPages,
-    undoStack,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    JSON.stringify(textToRemove),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    JSON.stringify(pathsToRemove),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    JSON.stringify(inpaintedRectangles),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    JSON.stringify(Array.from(deletedPages)),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    JSON.stringify(undoStack),
   ]);
-  const _onEdit = useCallback(() => {
-    setHasUnsavedChanges(true);
-  }, []);
-
-  const { mutate: updateDeletedPages } =
-    api.brochure.updateDeletedPages.useMutation({
-      onSuccess: _onEdit,
-    });
 
   // ------------------
   // #region Undo and Redo
   // ------------------
-  // Mutations
-  const { mutate: updateUndoStack } = api.brochure.updateUndoStack.useMutation({
-    onSuccess: _onEdit,
-  });
-  const { mutate: updateTextToRemove } =
-    api.brochure.updateTextToRemove.useMutation({
-      onSuccess: _onEdit,
-    });
-  const { mutate: updatePathsToRemove } =
-    api.brochure.updatePathsToRemove.useMutation({
-      onSuccess: _onEdit,
-    });
   // Undo and redo stacks contain ids of the rectangles or text that were removed
   const undoStackSet = useMemo(() => new Set(undoStack), [undoStack]);
   const redoStackSet = useMemo(() => new Set(redoStack), [redoStack]);
@@ -152,25 +130,21 @@ export function BrochureCarousel({
       const newRedo = [...redoStack, last];
       setRedoStack(newRedo);
     }
-    updateUndoStack({
-      brochureId: brochure.id,
-      undoStack: newUndo,
-    });
     setUndoStack(newUndo);
-  }, [undoStack, updateUndoStack, brochure.id, redoStack]);
+
+    // _onEdit();
+  }, [undoStack, redoStack]);
   const redo = useCallback(() => {
     const newRedo = [...redoStack];
     const last = newRedo.pop();
     if (last) {
       const newUndo = [...undoStack, last];
-      updateUndoStack({
-        brochureId: brochure.id,
-        undoStack: newUndo,
-      });
       setUndoStack(newUndo);
     }
     setRedoStack(newRedo);
-  }, [undoStack, redoStack, updateUndoStack, brochure.id]);
+
+    // _onEdit();
+  }, [undoStack, redoStack]);
   const handleDeleteTextPaths = useCallback(
     (textToRemove: TransformedTextContent[], pathsToRemove: Path[]) => {
       const id = crypto.randomUUID();
@@ -185,10 +159,6 @@ export function BrochureCarousel({
         }
       }
       setTextToRemove(newTextToRemove);
-      updateTextToRemove({
-        brochureId: brochure.id,
-        textToRemove: newTextToRemove,
-      });
 
       const newPathsToRemove: Path[] = [];
       for (const path of pathsToRemove) {
@@ -200,26 +170,13 @@ export function BrochureCarousel({
         }
       }
       setPathsToRemove(newPathsToRemove);
-      updatePathsToRemove({
-        brochureId: brochure.id,
-        pathsToRemove: newPathsToRemove,
-      });
 
-      updateUndoStack({
-        brochureId: brochure.id,
-        undoStack: [...undoStack, id],
-      });
       setUndoStack((prev) => [...prev, id]);
       setRedoStack([]);
+
+      // _onEdit();
     },
-    [
-      brochure.id,
-      redoStackSet,
-      undoStack,
-      updatePathsToRemove,
-      updateTextToRemove,
-      updateUndoStack,
-    ],
+    [redoStackSet],
   );
   // #endregion
 
@@ -238,10 +195,7 @@ export function BrochureCarousel({
           .map((rectangle) => rectangle.id)
           .filter((id) => id !== undefined);
         const newUndoStack = [...undoStack, ...newIds];
-        updateUndoStack({
-          brochureId: brochure.id,
-          undoStack: newUndoStack,
-        });
+
         setUndoStack(newUndoStack);
         setRedoStack([]);
 
@@ -250,7 +204,7 @@ export function BrochureCarousel({
         });
         setIsRemoving(false);
 
-        _onEdit();
+        // _onEdit();
       },
     });
 
@@ -263,6 +217,20 @@ export function BrochureCarousel({
     setRectanglesToRemove([]);
   }, [inpaintRectangles, brochure.id, rectanglesToRemove]);
   // #endregion
+
+  const deletePage = useCallback((pageIndex: number) => {
+    setDeletedPages((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(pageIndex)) {
+        newSet.delete(pageIndex);
+      } else {
+        newSet.add(pageIndex);
+      }
+      return newSet;
+    });
+
+    // _onEdit();
+  }, []);
 
   // ------------------
   // #region Carousel
@@ -294,7 +262,7 @@ export function BrochureCarousel({
   // #endregion
 
   return (
-    <div className="relative h-[655px] min-w-0 flex-1">
+    <div className="relative h-[671px] min-w-0 flex-1">
       {loaded && pdf && (
         <div className="mx-auto flex max-w-[1160px] flex-col justify-center px-12">
           <Carousel opts={{ watchDrag: false }} setApi={setCarouselApi}>
@@ -305,7 +273,7 @@ export function BrochureCarousel({
                   !deletedPages.has(index) && (
                     <CarouselItem
                       key={`page_${index + 1}`}
-                      className="flex flex-col items-center justify-center object-contain px-6"
+                      className="flex flex-col items-center justify-center bg-gray-300 object-contain px-6 py-4"
                     >
                       <PDFPageWithControls
                         pdf={pdf}
@@ -343,7 +311,7 @@ export function BrochureCarousel({
               isMouseDown={isMouseDown}
             />
             {/* For inpainting */}
-            {rectanglesToRemove.length > 0 && !isRemoving && !isMouseDown ? (
+            {rectanglesToRemove.length > 0 && !isRemoving && !isMouseDown && (
               <ConfirmRemovePopup
                 title="Remove selected items?"
                 cancelText="Undo"
@@ -353,20 +321,9 @@ export function BrochureCarousel({
                   setRectanglesToRemove([]);
                 }}
               />
-            ) : (hasUnsavedChanges || isGeneratingPDF) &&
-              !isRemoving &&
-              !isMouseDown ? (
-              <ConfirmRemovePopup
-                title="Save changes?"
-                cancelText="Discard"
-                confirmText="Save"
-                isLoading={isGeneratingPDF}
-                onConfirm={saveChanges}
-                onCancel={() => null}
-              />
-            ) : null}
+            )}
           </Carousel>
-          <div className="mt-10 flex flex-row gap-2 overflow-x-auto">
+          <div className="mt-6 flex flex-row gap-2 overflow-x-auto">
             {Array.from(new Array(numPages), (el, index) => {
               return (
                 <PDFPage
@@ -404,28 +361,7 @@ export function BrochureCarousel({
                     <Button
                       variant="outline"
                       size="icon"
-                      onClick={() => {
-                        let arr = Array.from(deletedPages);
-                        if (deletedPages.has(index)) {
-                          setDeletedPages((prev) => {
-                            const newSet = new Set(prev);
-                            newSet.delete(index);
-                            return newSet;
-                          });
-                          arr = arr.filter((page) => page !== index);
-                        } else {
-                          setDeletedPages((prev) => {
-                            const newSet = new Set(prev);
-                            newSet.add(index);
-                            return newSet;
-                          });
-                          arr.push(index);
-                        }
-                        updateDeletedPages({
-                          brochureId: brochure.id,
-                          deletedPages: arr,
-                        });
-                      }}
+                      onClick={() => deletePage(index)}
                       className={cn(
                         "m-1.5 size-7",
                         deletedPages.has(index)
@@ -450,7 +386,7 @@ export function BrochureCarousel({
       {/* Loader */}
       <div
         className={cn(
-          "pointer-events-none absolute left-0 top-0 z-40 flex size-full flex-col bg-white transition-opacity duration-500",
+          "pointer-events-none absolute left-0 top-0 z-40 flex size-full flex-col bg-white px-12 transition-opacity duration-500",
           loaded && pdf ? "opacity-0" : "opacity-100",
         )}
       >

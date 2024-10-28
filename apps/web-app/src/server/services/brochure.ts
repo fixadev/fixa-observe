@@ -1,12 +1,12 @@
 import { type Prisma, type PrismaClient } from "@prisma/client";
 import {
   brochureRectangles,
+  type BrochureSchema,
   type BrochureWithoutPropertyId,
   type BrochureRectangles,
   type Path,
   type RemoveRectanglesInput,
   type TransformedTextContent,
-  type BrochureSchema,
 } from "~/lib/brochure";
 import axios from "axios";
 import { env } from "~/env";
@@ -60,6 +60,9 @@ export const brochureService = ({ db }: { db: PrismaClient }) => {
             ],
           },
         },
+        include: {
+          brochures: true,
+        },
       });
       return response;
     },
@@ -100,7 +103,7 @@ export const brochureService = ({ db }: { db: PrismaClient }) => {
       return response;
     },
 
-    updateUrl: async (brochureId: string, url: string, userId: string) => {
+    updateUrl: async (brochureId: string, url: string) => {
       return db.brochure.update({
         where: {
           id: brochureId,

@@ -42,8 +42,12 @@ import {
   DEFAULT_EMAIL_TEMPLATE_SUBJECT,
   REPLACEMENT_VARIABLES,
 } from "~/lib/constants";
+import {
+  getBrochureFileName,
+  replaceTemplateVariables,
+  splitAddress,
+} from "~/lib/utils";
 import { type EmailTemplate } from "prisma/generated/zod";
-import { replaceTemplateVariables, splitAddress } from "~/lib/utils";
 import { useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import {
@@ -52,6 +56,9 @@ import {
   useSurvey,
 } from "~/hooks/useSurvey";
 import { SurveyDownloadLink } from "../pdf-preview/v1/_components/DownloadLink";
+import BrochureDialog from "./brochures/BrochureDialog";
+import { pdfToImage } from "~/lib/pdf-utils";
+import axios from "axios";
 
 export type Property = PropertyWithIncludes & {
   isNew?: boolean;
@@ -347,7 +354,9 @@ export function PropertiesTable({
     [deleteProperty],
   );
 
-  // Verify property data
+  // ----------------------
+  // #region Verify property data
+  // ----------------------
   const [state, setState] = useState<PropertiesTableState>("edit");
   const [selectedFields, setSelectedFields] = useState<
     Record<string, Set<string>>
@@ -455,6 +464,143 @@ export function PropertiesTable({
     },
     [selectedFields, createDraftEmails, generateDraftEmail, properties],
   );
+  // #endregion
+
+  // ----------------------
+  // #region Brochures
+  // ----------------------
+  const { mutateAsync: deleteBrochure, isPending: isDeletingBrochure } =
+    api.brochure.delete.useMutation();
+  const { mutateAsync: getPresignedS3Url } =
+    api.s3.getPresignedS3Url.useMutation();
+  const { mutateAsync: createBrochure } = api.brochure.create.useMutation();
+
+  const [brochureDialogState, setBrochureDialogState] = useState<{
+    propertyId: string;
+    open: boolean;
+  }>({ propertyId: "", open: false });
+  const [curBrochurePropertyId, setCurBrochurePropertyId] =
+    useState<string>("");
+  const [isBrochureUploading, setIsBrochureUploading] = useState(false);
+
+  const handleEditBrochure = useCallback((propertyId: string) => {
+    setBrochureDialogState({ propertyId, open: true });
+  }, []);
+  const handleDeleteBrochure = useCallback(
+    async (propertyId: string, brochureId: string) => {
+      setCurBrochurePropertyId(propertyId);
+      setProperties((prev) =>
+        prev.map((property) =>
+          property.id === propertyId
+            ? {
+                ...property,
+                brochures: property.brochures.filter(
+                  (b) => b.id !== brochureId,
+                ),
+              }
+            : property,
+        ),
+      );
+      setCurBrochurePropertyId("");
+      await deleteBrochure({ propertyId, brochureId });
+    },
+    [deleteBrochure],
+  );
+  const handleUploadBrochure = useCallback(
+    async (propertyId: string, file?: File) => {
+      setIsBrochureUploading(true);
+      setCurBrochurePropertyId(propertyId);
+      try {
+        if (!file) {
+          throw new Error("No file selected");
+        }
+        const property = properties.find((p) => p.id === propertyId)!;
+        if (!property) {
+          throw new Error("Property not found");
+        }
+
+        const uploadImageTask = async () => {
+          const images = await pdfToImage({ file, pages: [1], height: 100 });
+          const thumbnailBase64 = images[0]!;
+          const base64Data = Buffer.from(
+            thumbnailBase64.replace(/^data:image\/\w+;base64,/, ""),
+            "base64",
+          );
+          const thumbnailPresignedUrl = await getPresignedS3Url({
+            fileName: `brochure-thumbnail-${propertyId}.png`,
+            fileType: "image/png",
+            keepOriginalName: true,
+          });
+          await axios.put(thumbnailPresignedUrl, base64Data, {
+            headers: {
+              "Content-Type": "image/png",
+            },
+          });
+          const thumbnailUrl =
+            thumbnailPresignedUrl.split("?")[0] ?? thumbnailPresignedUrl;
+          return thumbnailUrl;
+        };
+
+        const uploadBrochureTask = async () => {
+          const brochurePresignedUrl = await getPresignedS3Url({
+            fileName: getBrochureFileName(property),
+            fileType: file.type,
+            keepOriginalName: true,
+          });
+          await axios.put(brochurePresignedUrl, file, {
+            headers: {
+              "Content-Type": file.type,
+            },
+          });
+
+          const brochureUrl =
+            brochurePresignedUrl.split("?")[0] ?? brochurePresignedUrl;
+          return brochureUrl;
+        };
+
+        const [thumbnailUrl, brochureUrl] = await Promise.all([
+          uploadImageTask(),
+          uploadBrochureTask(),
+        ]);
+
+        const result = await createBrochure({
+          propertyId: property.id,
+          brochure: {
+            inpaintedRectangles: [],
+            textToRemove: [],
+            pathsToRemove: [],
+            undoStack: [],
+            deletedPages: [],
+            url: brochureUrl,
+            title: file.name,
+            approved: false,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            exportedUrl: null,
+            thumbnailUrl,
+          },
+        });
+
+        setProperties((prev) =>
+          prev.map((property) =>
+            property.id === propertyId
+              ? {
+                  ...property,
+                  brochures: result.brochures,
+                }
+              : property,
+          ),
+        );
+      } catch (error) {
+        console.error("Error uploading brochure:", error);
+      } finally {
+        setIsBrochureUploading(false);
+        setCurBrochurePropertyId("");
+      }
+    },
+    [createBrochure, getPresignedS3Url, properties],
+  );
+  // #endregion
 
   const tableRef = useRef<HTMLTableElement>(null);
 
@@ -528,7 +674,10 @@ export function PropertiesTable({
                   <TableHeader className="sticky top-0 z-50 bg-white shadow">
                     <TableRow>
                       <TableCell className="w-[1%]"></TableCell>
-                      <TableHead className="w-[1%] text-black" />
+                      <TableHead className="w-[1%]" />
+                      <TableHead className="w-[1%] text-center text-black">
+                        Brochure
+                      </TableHead>
                       <SortableContext
                         items={draggingRow ? rowIds : colIds}
                         strategy={
@@ -601,6 +750,13 @@ export function PropertiesTable({
                                 (error) => error.propertyId === property.id,
                               )?.error
                             }
+                            isLoadingBrochure={
+                              curBrochurePropertyId === property.id &&
+                              (isDeletingBrochure || isBrochureUploading)
+                            }
+                            onEditBrochure={handleEditBrochure}
+                            onDeleteBrochure={handleDeleteBrochure}
+                            onUploadBrochure={handleUploadBrochure}
                           />
                         );
                       })}
@@ -623,6 +779,18 @@ export function PropertiesTable({
           </div>
         )}
       </div>
+      <BrochureDialog
+        property={properties.find(
+          (p) => p.id === brochureDialogState.propertyId,
+        )}
+        open={brochureDialogState.open}
+        onOpenChange={() =>
+          setBrochureDialogState({
+            ...brochureDialogState,
+            open: false,
+          })
+        }
+      />
       <EmailTemplateDialog
         open={templateDialog}
         onOpenChange={setTemplateDialog}

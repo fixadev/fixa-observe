@@ -102,8 +102,11 @@ export default function PDFPage({
     isLoading.current = true;
 
     void pdf.getPage(pageIndex + 1).then((page) => {
-      let _viewport = page.getViewport({ scale });
-      if (height) {
+      let _viewport: PageViewport;
+      if (!height) {
+        _viewport = page.getViewport({ scale });
+      } else {
+        _viewport = page.getViewport({ scale: 1.0 });
         const scale = height / _viewport.height;
         _viewport = page.getViewport({ scale });
       }

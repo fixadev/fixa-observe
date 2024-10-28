@@ -69,7 +69,11 @@ export default function ToolSelector({
         <Tooltip>
           <TooltipTrigger asChild>
             <ToggleGroupItem
-              className={cn(tool === "selector" ? "bg-muted" : "bg-white")}
+              className={cn(
+                tool === "selector"
+                  ? "bg-muted outline outline-2 -outline-offset-2 outline-black"
+                  : "bg-white",
+              )}
               value="selector"
               variant="outline"
               size="icon"
@@ -82,7 +86,11 @@ export default function ToolSelector({
         <Tooltip>
           <TooltipTrigger asChild>
             <ToggleGroupItem
-              className={cn(tool === "eraser" ? "bg-muted" : "bg-white")}
+              className={cn(
+                tool === "eraser"
+                  ? "bg-muted outline outline-2 -outline-offset-2 outline-black"
+                  : "bg-white",
+              )}
               value="eraser"
               variant="outline"
               size="icon"

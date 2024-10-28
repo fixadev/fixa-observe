@@ -4,12 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import {
-  Bars3Icon,
-  DocumentTextIcon,
-  EnvelopeIcon,
-  HomeIcon,
-} from "@heroicons/react/24/outline";
+import { Bars3Icon, EnvelopeIcon, HomeIcon } from "@heroicons/react/24/outline";
 import { UserButton } from "@clerk/nextjs";
 import { ChevronLeftIcon } from "@heroicons/react/24/solid";
 import { useCallback } from "react";
@@ -19,7 +14,6 @@ import { SurveyProvider, useSurvey } from "~/hooks/useSurvey";
 const navItems = [
   { href: "/", icon: HomeIcon, label: "Properties" },
   { href: "/emails", icon: EnvelopeIcon, label: "Emails" },
-  { href: "/brochures", icon: DocumentTextIcon, label: "Brochures" },
 ];
 
 function SurveyLayout({
