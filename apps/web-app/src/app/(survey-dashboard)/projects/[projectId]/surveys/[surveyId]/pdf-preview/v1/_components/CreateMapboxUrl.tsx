@@ -98,31 +98,58 @@ export async function generateStaticMapUrl(
 
     validMarkers.sort((a, b) => b.lat - a.lat);
 
+    // Function to calculate distance between two points in degrees
+    const getDistance = (p1: LatLng, p2: LatLng) => {
+      return Math.sqrt(
+        Math.pow(p1.lat - p2.lat, 2) + Math.pow(p1.lng - p2.lng, 2),
+      );
+    };
+
+    // Adjust overlapping markers
+    const minDistance = 0.01; // Minimum distance in degrees (~1km)
+    const adjustedMarkers = validMarkers.reduce(
+      (acc: typeof validMarkers, marker) => {
+        if (!marker) return acc;
+
+        const adjustedMarker = { ...marker };
+        let attempts = 0;
+
+        while (attempts < 8) {
+          const hasOverlap = acc.some(
+            (m) => getDistance(m, adjustedMarker) < minDistance,
+          );
+
+          if (!hasOverlap) break;
+
+          // Adjust position in a spiral pattern
+          const angle = (Math.PI / 4) * attempts;
+          const offset = 0.007 * (Math.floor(attempts / 8) + 1);
+          adjustedMarker.lat = marker.lat + Math.cos(angle) * offset;
+          adjustedMarker.lng = marker.lng + Math.sin(angle) * offset;
+
+          attempts++;
+        }
+
+        return [...acc, adjustedMarker];
+      },
+      [],
+    );
+
+    const markersString = adjustedMarkers
+      .map(
+        (marker, index) =>
+          `url-${encodeURIComponent(
+            `https://www.apex.deal/api/map-pin?number=${index + 1}&size=24`,
+          )}(${marker.lng},${marker.lat})`,
+      )
+      .join(",");
+
     const center = calculateCenter(validMarkers);
     const zoom = 6;
     const scale = 2;
     // const size = "800x600";
     const size = "600x600";
     const padding = 100;
-
-    const markersString = validMarkers
-      .map(
-        (marker, index) =>
-          `url-${encodeURIComponent(
-            `https://www.apex.deal/api/map-pin?number=${index + 1}&size=32`,
-          )}(${marker.lng},${marker.lat})`,
-      )
-      .join(",");
-
-    // let staticMapUrl =
-    //   `https://api.mapbox.com/styles/v1/mapbox/light-v11/static/` +
-    //   markersString +
-    //   `/auto/${size}?` +
-    //   `padding=${padding}` +
-    //   `&access_token=${env.NEXT_PUBLIC_MAPBOX_TOKEN}` +
-    //   `&logo=false` +
-    //   `&attribution=false`;
-    // console.log("staticMapUrl", staticMapUrl);
 
     const staticMapUrl =
       `https://api.mapbox.com/styles/v1/mapbox/light-v11/static/` +
