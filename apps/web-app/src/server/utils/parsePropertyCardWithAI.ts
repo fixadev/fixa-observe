@@ -51,7 +51,7 @@ export async function parsePropertyCardWithAI(text: string) {
 
   Suite is the text that comes after the "/" if the field is Floor/Suite.
 
-  Always omit neighborhood text such as "Mountain View - Downtown" or "San Jose - Downtown" -- these are NOT building names.
+  Often time a building name will not exist. NEVER use neighborhood names such as "Mountain View - Downtown" or "San Jose - Downtown" or "Palo Alto - California Avenue"as the building name -- these are NOT building names.
 
   Format the comments nicely with line breaks and the "-" character for bullet points.
   `;

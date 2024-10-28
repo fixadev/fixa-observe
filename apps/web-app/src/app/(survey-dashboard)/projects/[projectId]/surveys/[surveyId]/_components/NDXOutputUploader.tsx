@@ -25,11 +25,13 @@ export const NDXOutputUploader = ({
   variant = "default",
   surveyId,
   setUploading,
+  setParsingBrochures,
   refetchSurvey,
 }: {
   variant?: "default" | "ghost";
   surveyId: string;
   setUploading: (uploading: boolean) => void;
+  setParsingBrochures: (parsing: boolean) => void;
   refetchSurvey: () => void;
 }) => {
   const { toast } = useToast();
@@ -63,7 +65,7 @@ export const NDXOutputUploader = ({
       const file = files[0];
       if (file) {
         setUploading(true);
-
+        setParsingBrochures(true);
         const presignedS3Url = await getPresignedS3Url({
           fileName: file.name,
           fileType: file.type,
@@ -90,6 +92,13 @@ export const NDXOutputUploader = ({
         });
 
         refetchSurvey();
+
+        // setTimeout(
+        //   () => {
+        //     refetchSurvey();
+        //   },
+        //   (1000 * (response.numberOfProperties ?? 1)) / 2,
+        // );
 
         if (response.status === 200) {
           toast({

@@ -49,22 +49,24 @@ export async function formatAddress(address: {
     const { addressLines, locality, postalCode, administrativeArea } =
       response.data.result.address.postalAddress;
 
-    const postalAddress = `${addressLines.join("\n")}\n${
-      locality ?? ""
-    }, ${administrativeArea ?? ""}\n ${postalCode ?? ""}`;
+    // const postalAddress = addressLines
+    //   ? `${addressLines.join("\n")}\n${
+    //       locality ?? ""
+    //     }, ${administrativeArea ?? ""}\n ${postalCode ?? ""}`
+    //   : "";
 
-    const displayAddress = `${address.buildingName ? address.buildingName + "\n" : ""}${addressLines.join("\n")}\n${
+    const displayAddress = `${address.buildingName ? address.buildingName + "\n" : ""}${addressLines ? addressLines.join("\n") : ""}\n${
       address.suite ? "Suite " + address.suite + "\n" : ""
     }${locality ?? ""}`;
 
     return {
-      postalAddress,
+      // postalAddress,
       displayAddress,
     };
   } catch (error) {
     console.error(`Error formatting address`, error);
     return {
-      postalAddress: "",
+      // postalAddress: "",
       displayAddress: "",
     };
   }
