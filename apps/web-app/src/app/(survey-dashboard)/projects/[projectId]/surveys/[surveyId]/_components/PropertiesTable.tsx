@@ -41,7 +41,7 @@ import {
   DEFAULT_EMAIL_TEMPLATE_BODY,
   DEFAULT_EMAIL_TEMPLATE_SUBJECT,
 } from "~/lib/constants";
-import { type EmailTemplate } from "prisma/generated/zod";
+import { type Brochure, type EmailTemplate } from "prisma/generated/zod";
 import { useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import {
@@ -327,7 +327,6 @@ export function PropertiesTable({
 
   const _updatePropertyValue = useCallback(
     (propertyId: string, columnId: string, value: string) => {
-      console.log("updating property value", propertyId, columnId, value);
       setProperties((prev) => {
         // Get property index
         const index = prev.findIndex((property) => property.id === propertyId);
@@ -501,6 +500,21 @@ export function PropertiesTable({
   const handleEditBrochure = useCallback((propertyId: string) => {
     setBrochureDialogState({ propertyId, open: true });
   }, []);
+  const handleSaveBrochure = useCallback(
+    (propertyId: string, brochure: Brochure) => {
+      setProperties((prev) =>
+        prev.map((property) =>
+          property.id === propertyId
+            ? {
+                ...property,
+                brochures: [brochure],
+              }
+            : property,
+        ),
+      );
+    },
+    [],
+  );
   const handleDeleteBrochure = useCallback(
     async (propertyId: string, brochureId: string) => {
       setCurBrochurePropertyId(propertyId);
@@ -770,6 +784,9 @@ export function PropertiesTable({
             ...brochureDialogState,
             open: false,
           })
+        }
+        onSave={(brochure) =>
+          handleSaveBrochure(brochureDialogState.propertyId, brochure)
         }
       />
       <EmailTemplateDialog
