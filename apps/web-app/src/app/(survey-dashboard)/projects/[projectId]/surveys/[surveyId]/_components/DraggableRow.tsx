@@ -303,30 +303,28 @@ export const DraggableRow = ({
             <Spinner className="size-5 text-gray-500" />
           </div>
         ) : (
-          <FileInput
-            accept="image/*"
-            className="aspect-[4/3] h-[100px] hover:cursor-pointer"
-            triggerElement={
-              photo ? (
-                <div className="relative overflow-hidden rounded-md">
+          <FileInput accept="image/*" handleFilesChange={handleUpload}>
+            <div className="aspect-[4/3] h-[100px] hover:cursor-pointer">
+              {photo ? (
+                <div className="relative size-full overflow-hidden rounded-md">
                   <Image
                     src={photo}
                     alt="Property photo"
-                    fill
-                    className="rounded-md object-cover"
+                    height={120}
+                    width={120 * (4 / 3)}
+                    className="size-full rounded-md object-cover"
                   />
-                  <div className="group absolute flex size-full items-center justify-center bg-black/0 hover:bg-black/30">
+                  <div className="group absolute left-0 top-0 flex size-full items-center justify-center bg-black/0 hover:bg-black/30">
                     <PencilIcon className="size-6 text-white opacity-0 group-hover:opacity-100" />
                   </div>
                 </div>
               ) : (
                 <div className="flex items-center justify-center rounded-md bg-gray-100 hover:bg-gray-200">
-                  <ImagePlusIcon className="size-8 text-gray-500" />{" "}
+                  <ImagePlusIcon className="size-8 text-gray-500" />
                 </div>
-              )
-            }
-            handleFilesChange={handleUpload}
-          />
+              )}
+            </div>
+          </FileInput>
         )}
       </DraggableCell>
       <DraggableCell
@@ -367,19 +365,18 @@ export const DraggableRow = ({
                   <TooltipTrigger asChild>
                     <FileInput
                       accept="application/pdf"
-                      triggerElement={
-                        <Button
-                          variant="outline"
-                          size="icon"
-                          className="size-8 rounded-b-none"
-                        >
-                          <ArrowUpTrayIcon className="size-4" />
-                        </Button>
-                      }
                       handleFilesChange={(files) =>
                         onUploadBrochure(property.id, files[0])
                       }
-                    />
+                    >
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        className="size-8 rounded-b-none"
+                      >
+                        <ArrowUpTrayIcon className="size-4" />
+                      </Button>
+                    </FileInput>
                   </TooltipTrigger>
                   <TooltipContent side="left">Replace brochure</TooltipContent>
                 </Tooltip>
@@ -403,19 +400,19 @@ export const DraggableRow = ({
           ) : (
             <FileInput
               accept="application/pdf"
-              className="h-[100px] hover:cursor-pointer"
-              triggerElement={
+              handleFilesChange={(files) =>
+                onUploadBrochure(property.id, files[0])
+              }
+            >
+              <div className="h-[100px] hover:cursor-pointer">
                 <div className="flex flex-col items-center justify-center gap-2 rounded-md bg-gray-100 hover:bg-gray-200">
                   <DocumentPlusIcon className="size-6 text-gray-500" />
                   <div className="text-sm font-medium text-gray-500">
                     Add brochure
                   </div>
                 </div>
-              }
-              handleFilesChange={(files) =>
-                onUploadBrochure(property.id, files[0])
-              }
-            />
+              </div>
+            </FileInput>
           )}
           {property.brochures[0] && (
             <Button

@@ -1,14 +1,11 @@
-import { cloneElement, type ReactElement, useRef } from "react";
-import { cn } from "~/lib/utils";
+import { useRef, type ReactNode } from "react";
 
 export const FileInput = ({
-  triggerElement,
-  className,
+  children,
   accept = "application/pdf",
   handleFilesChange,
 }: {
-  triggerElement: ReactElement;
-  className?: string;
+  children: ReactNode;
   accept?: string;
   handleFilesChange: (files: FileList) => void;
 }) => {
@@ -26,15 +23,9 @@ export const FileInput = ({
 
   return (
     <>
-      {cloneElement(triggerElement, {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access
-        className: cn(triggerElement.props.className, className),
-        onClick: (e: React.MouseEvent) => {
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-          (triggerElement.props.onClick as React.MouseEventHandler)?.(e);
-          handleButtonClick();
-        },
-      })}
+      <div onClick={handleButtonClick} className="inline cursor-pointer">
+        {children}
+      </div>
       <input
         ref={fileInputRef}
         type="file"
