@@ -33,6 +33,32 @@ export const emailRouter = createTRPCRouter({
       });
     }),
 
+  createDraftEmailsFromTemplate: protectedProcedure
+    .input(
+      z.object({
+        drafts: z.array(
+          z.object({
+            recipientEmail: z.string(),
+            recipientName: z.string(),
+            propertyId: z.string(),
+            address: z.string(),
+            templateSubject: z.string(),
+            templateBody: z.string(),
+            attributesToVerify: z.array(z.string()),
+            attributeLabels: z.array(z.string()),
+          }),
+        ),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      return await emailServiceInstance.createDraftEmailsFromTemplate({
+        userId: ctx.user.id,
+        senderName: ctx.user.fullName ?? "",
+        senderEmail: ctx.user.primaryEmailAddress?.emailAddress ?? "",
+        drafts: input.drafts,
+      });
+    }),
+
   sendEmail: protectedProcedure
     .input(
       z.object({

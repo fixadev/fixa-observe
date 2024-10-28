@@ -119,7 +119,7 @@ export function EditableCell({
           handleUpdateProperty(e.target.value);
         }}
       />
-      {column.id in parsedAttributes && (
+      {column.attributeId in parsedAttributes && (
         <Tooltip>
           <TooltipTrigger asChild>
             <Button
@@ -129,7 +129,7 @@ export function EditableCell({
               asChild
             >
               <Link href={`emails?propertyId=${property.id}`}>
-                {parsedAttributes[column.id] !== null ? (
+                {parsedAttributes[column.attributeId] !== null ? (
                   <CheckCircleIcon className="size-5 text-green-500" />
                 ) : isEmailDraft ? (
                   <PencilSquareIcon className="size-5 text-gray-500" />
@@ -142,7 +142,7 @@ export function EditableCell({
             </Button>
           </TooltipTrigger>
           <TooltipContent>
-            {parsedAttributes[column.id] !== null
+            {parsedAttributes[column.attributeId] !== null
               ? "Verified by email"
               : isEmailDraft
                 ? "Email drafted"
