@@ -143,7 +143,6 @@ export async function generateStaticMapUrl(
       `&map_id=${MAP_ID}` +
       markersString;
 
-    console.log("mapErrors in survey", errors);
     return { staticMapUrl, errors };
   } catch (error) {
     console.error("Error generating static map URL:", error);
