@@ -1,48 +1,46 @@
-import { cloneElement, type ReactElement, useRef } from "react";
-import { cn } from "~/lib/utils";
+import { useRef, type ReactNode, forwardRef } from "react";
 
-export const FileInput = ({
-  triggerElement,
-  className,
-  accept = "application/pdf",
-  handleFilesChange,
-}: {
-  triggerElement: ReactElement;
-  className?: string;
+interface FileInputProps {
+  children: ReactNode;
   accept?: string;
   handleFilesChange: (files: FileList) => void;
-}) => {
-  const fileInputRef = useRef<HTMLInputElement | null>(null);
-  const handleButtonClick = () => {
-    fileInputRef.current?.click();
-  };
+}
 
-  const onFilesChangeHandler = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (files) {
-      handleFilesChange(files);
-    }
-  };
+export const FileInput = forwardRef<HTMLDivElement, FileInputProps>(
+  ({ children, accept = "application/pdf", handleFilesChange }, ref) => {
+    const fileInputRef = useRef<HTMLInputElement | null>(null);
 
-  return (
-    <>
-      {cloneElement(triggerElement, {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access
-        className: cn(triggerElement.props.className, className),
-        onClick: (e: React.MouseEvent) => {
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-          (triggerElement.props.onClick as React.MouseEventHandler)?.(e);
-          handleButtonClick();
-        },
-      })}
-      <input
-        ref={fileInputRef}
-        type="file"
-        id="pdfFileSelector"
-        className="hidden"
-        accept={accept}
-        onChange={onFilesChangeHandler}
-      />
-    </>
-  );
-};
+    const handleButtonClick = () => {
+      fileInputRef.current?.click();
+    };
+
+    const onFilesChangeHandler = (e: React.ChangeEvent<HTMLInputElement>) => {
+      const files = e.target.files;
+      if (files) {
+        handleFilesChange(files);
+      }
+    };
+
+    return (
+      <>
+        <div
+          ref={ref}
+          onClick={handleButtonClick}
+          className="inline cursor-pointer"
+        >
+          {children}
+        </div>
+        <input
+          ref={fileInputRef}
+          type="file"
+          id="pdfFileSelector"
+          className="hidden"
+          accept={accept}
+          onChange={onFilesChangeHandler}
+        />
+      </>
+    );
+  },
+);
+
+FileInput.displayName = "FileInput";

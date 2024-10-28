@@ -52,6 +52,15 @@ export const propertyRouter = createTRPCRouter({
       );
     }),
 
+  updateAddress: protectedProcedure
+    .input(z.object({ propertyId: z.string(), address: z.string() }))
+    .mutation(async ({ input }) => {
+      return await propertyServiceInstance.updateAddress(
+        input.propertyId,
+        input.address,
+      );
+    }),
+
   setPhoto: protectedProcedure
     .input(photoUploadSchema)
     .mutation(async ({ ctx, input }) => {

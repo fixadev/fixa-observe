@@ -26,13 +26,11 @@ export const NDXOutputUploader = ({
   surveyId,
   setUploading,
   refetchSurvey,
-  className,
 }: {
   variant?: "default" | "ghost";
   surveyId: string;
   setUploading: (uploading: boolean) => void;
   refetchSurvey: () => void;
-  className?: string;
 }) => {
   const { toast } = useToast();
   const [attributesToInclude, setAttributesToInclude] = useState<string[]>([]);
@@ -204,16 +202,12 @@ export const NDXOutputUploader = ({
           })}
         </div>
         <DialogFooter>
-          <FileInput
-            className={className}
-            triggerElement={
-              <Button variant={variant}>
-                <ArrowUpTrayIcon className="mr-2 size-4" />
-                Upload NDX PDF
-              </Button>
-            }
-            handleFilesChange={onFilesChangeHandler}
-          />
+          <FileInput handleFilesChange={onFilesChangeHandler}>
+            <Button variant={variant}>
+              <ArrowUpTrayIcon className="mr-2 size-4" />
+              Upload NDX PDF
+            </Button>
+          </FileInput>
         </DialogFooter>
       </DialogContent>
     </Dialog>
