@@ -26,10 +26,12 @@ export default function BrochureDialog({
   property,
   open,
   onOpenChange,
+  onSave,
 }: {
   property?: PropertyWithBrochures;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onSave: (brochure: Brochure) => void;
 }) {
   const brochure = useMemo(() => property?.brochures[0], [property?.brochures]);
 
@@ -76,7 +78,7 @@ export default function BrochureDialog({
 
   const handlePDFGenerated = useCallback(
     async (pdfBlob: Blob) => {
-      if (!property || !brochure) return;
+      if (!property || !editedBrochure) return;
 
       console.log("PDF generated!!");
       const brochurePresignedUrl = await getPresignedS3Url({
@@ -95,15 +97,23 @@ export default function BrochureDialog({
       const brochureUrl =
         brochurePresignedUrl.split("?")[0] ?? brochurePresignedUrl;
       await updateExportedUrl({
-        brochureId: brochure.id,
+        brochureId: editedBrochure.id,
         exportedUrl: brochureUrl,
       });
 
+      onSave({ ...editedBrochure, exportedUrl: brochureUrl });
       onOpenChange(false);
       setIsSaving(false);
       setEditedBrochure(null);
     },
-    [property, brochure, getPresignedS3Url, updateExportedUrl, onOpenChange],
+    [
+      property,
+      editedBrochure,
+      getPresignedS3Url,
+      updateExportedUrl,
+      onOpenChange,
+      onSave,
+    ],
   );
 
   if (!brochure) return null;
