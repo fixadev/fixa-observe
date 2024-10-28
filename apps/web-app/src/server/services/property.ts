@@ -5,6 +5,7 @@ import {
   type CreateEmptyPropertySchema,
 } from "~/lib/property";
 import { env } from "~/env";
+import { extractStreetAddress } from "../utils/extractStreetAddress";
 
 export const propertyService = ({ db }: { db: PrismaClient }) => {
   return {
@@ -79,6 +80,12 @@ export const propertyService = ({ db }: { db: PrismaClient }) => {
         where: { id: propertyId },
         data: { address },
       });
+    },
+
+    extractStreetAddresses: async (properties: PropertySchema[]) => {
+      return await Promise.all(
+        properties.map((property) => extractStreetAddress(property.address)),
+      );
     },
 
     delete: async (propertyId: string, userId: string) => {

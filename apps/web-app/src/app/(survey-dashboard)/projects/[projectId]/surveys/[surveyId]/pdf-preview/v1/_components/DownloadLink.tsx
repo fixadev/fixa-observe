@@ -9,6 +9,7 @@ import Spinner from "~/components/Spinner";
 import { generateStaticMapUrl } from "./CreateMapUrl";
 import { usePDF } from "@react-pdf/renderer";
 import type { Column, Property } from "../../../_components/PropertiesTable";
+import { api } from "~/trpc/react";
 
 export function SurveyDownloadLink({
   buttonText,
@@ -26,9 +27,11 @@ export function SurveyDownloadLink({
   setErrors: (errors: { propertyId: string; error: string }[]) => void;
 }) {
   const [mapLoaded, setMapLoaded] = useState(false);
-
   const [instance, updateInstance] = usePDF({ document: undefined });
   const [pendingDownload, setPendingDownload] = useState(false);
+
+  const { mutateAsync: extractStreetAddresses } =
+    api.property.extractStreetAddresses.useMutation();
 
   useEffect(() => {
     if (instance.url && !instance.loading && pendingDownload) {
@@ -45,12 +48,19 @@ export function SurveyDownloadLink({
   const handleDownload = useCallback(async () => {
     const { staticMapUrl, errors } = await generateStaticMapUrl(properties);
 
+    const streetAddresses = await extractStreetAddresses({ properties });
+
     if (errors.length > 0) {
       setErrors(errors);
     }
-    const propertiesWithoutErrors = properties?.filter(
-      (property) => !errors.some((error) => error.propertyId === property.id),
-    );
+    const propertiesWithoutErrors = properties
+      ?.filter(
+        (property) => !errors.some((error) => error.propertyId === property.id),
+      )
+      .map((property, index) => ({
+        ...property,
+        streetAddress: streetAddresses[index] ?? "",
+      }));
 
     updateInstance(
       <PDFContent
@@ -69,6 +79,7 @@ export function SurveyDownloadLink({
     updateInstance,
     propertyOrientation,
     setErrors,
+    extractStreetAddresses,
   ]);
 
   return (
