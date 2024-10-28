@@ -96,8 +96,6 @@ export async function generateStaticMapUrl(
     // Filter out the errors after Promise.all completes
     const validMarkers = markers.filter((marker) => marker !== null);
 
-    validMarkers.sort((a, b) => b.lat - a.lat);
-
     // Function to calculate distance between two points in degrees
     const getDistance = (p1: LatLng, p2: LatLng) => {
       return Math.sqrt(
@@ -135,11 +133,13 @@ export async function generateStaticMapUrl(
       [],
     );
 
-    const markersString = adjustedMarkers
+    // console.log("validMarkers", validMarkers);
+
+    const markersString = validMarkers
       .map(
         (marker, index) =>
           `url-${encodeURIComponent(
-            `https://pin-server.fly.dev/api/map-pin?number=${index + 1}&size=24`,
+            `https://www.apex.deal/api/map-pin?number=${index + 1}&size=32`,
           )}(${marker.lng},${marker.lat})`,
       )
       .join(",");
