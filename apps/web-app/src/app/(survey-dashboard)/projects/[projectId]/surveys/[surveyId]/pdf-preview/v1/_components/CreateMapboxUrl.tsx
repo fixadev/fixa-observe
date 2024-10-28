@@ -109,7 +109,7 @@ export async function generateStaticMapUrl(
       .map(
         (marker, index) =>
           `url-${encodeURIComponent(
-            `https://www.apex.deal/api/map-pin?number=${index + 1}&size=32`,
+            `https://www.apex.deal/markers/1_small.png`,
           )}(${marker.lng},${marker.lat})`,
       )
       .join(",");
@@ -124,7 +124,7 @@ export async function generateStaticMapUrl(
     //   `&attribution=false`;
     // console.log("staticMapUrl", staticMapUrl);
 
-    let staticMapUrl =
+    const staticMapUrl =
       `https://api.mapbox.com/styles/v1/mapbox/light-v11/static/` +
       markersString +
       `/auto/${size}@2x?` +
@@ -134,14 +134,16 @@ export async function generateStaticMapUrl(
       `&attribution=false`;
     console.log("staticMapUrl", staticMapUrl);
 
-    `center=${center.lat},${center.lng}` +
-      `&zoom=${zoom}` +
-      `&size=${size}` +
-      `&scale=${scale}` +
-      `&maptype=roadmap` +
-      `&key=${env.NEXT_PUBLIC_GOOGLE_API_KEY}` +
-      `&map_id=${MAP_ID}` +
-      markersString;
+    // staticMapUrl =
+    //   `https://maps.googleapis.com/maps/api/staticmap?` +
+    //   `center=${center.lat},${center.lng}` +
+    //   `&zoom=${zoom}` +
+    //   `&size=${size}` +
+    //   `&scale=${scale}` +
+    //   `&maptype=roadmap` +
+    //   `&key=${env.NEXT_PUBLIC_GOOGLE_API_KEY}` +
+    //   `&map_id=${MAP_ID}` +
+    //   markersString;
 
     return { staticMapUrl, errors };
   } catch (error) {
