@@ -109,7 +109,7 @@ export async function generateStaticMapUrl(
       .map(
         (marker, index) =>
           `url-${encodeURIComponent(
-            `https://www.apex.deal/markers/1_small.png`,
+            `https://www.apex.deal/api/map-pin?number=${index + 1}&size=32`,
           )}(${marker.lng},${marker.lat})`,
       )
       .join(",");
