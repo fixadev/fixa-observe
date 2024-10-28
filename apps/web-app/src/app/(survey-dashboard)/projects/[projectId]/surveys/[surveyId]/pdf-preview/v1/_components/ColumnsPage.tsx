@@ -182,14 +182,8 @@ export function ColumnsPage({
     if (!address) {
       return "";
     }
-    return address;
-  }
 
-  function formatAttributeLabel(label: string) {
-    if (label === "Address") {
-      return "Address \n **Click for flyer**";
-    }
-    return label;
+    return address;
   }
 
   const propertyIdToColumnIdToValue = useMemo(() => {
@@ -222,6 +216,28 @@ export function ColumnsPage({
 
   const propertiesPerPage = 4;
 
+  const linkColumn: ColumnWithIncludes = {
+    id: "brochure",
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    displayIndex: 0,
+    surveyId: "",
+    attributeId: "brochure",
+    attribute: {
+      id: "brochure",
+      ownerId: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      label: "Brochure",
+      defaultIndex: 0,
+      defaultVisible: true,
+    },
+  };
+
+  const columnsWithBrochures = [...columns];
+
+  columnsWithBrochures.splice(columnsWithBrochures.length - 1, 0, linkColumn);
+
   return (
     <Page size="A4" orientation="landscape" style={styles.page}>
       <View style={styles.header}>
@@ -233,7 +249,15 @@ export function ColumnsPage({
           <View style={styles.tableCell}>
             <View style={styles.image}></View>
           </View>
-          {columns.map((column) => (
+          <View
+            style={{
+              height: getHeight("displayAddress"),
+              ...styles.headerCell,
+            }}
+          >
+            <Text>Address</Text>
+          </View>
+          {columnsWithBrochures.map((column) => (
             <View
               key={column.id}
               style={{
@@ -241,7 +265,7 @@ export function ColumnsPage({
                 ...styles.headerCell,
               }}
             >
-              <Text>{formatAttributeLabel(column.attribute.label)}</Text>
+              <Text>{column.attribute.label}</Text>
             </View>
           ))}
         </View>
@@ -264,7 +288,20 @@ export function ColumnsPage({
                 <Text>{(pageNumber - 1) * propertiesPerPage + index + 1}</Text>
               </View>
             </View>
-            {columns.map((column) => (
+
+            <View
+              style={{
+                ...styles.tableCell,
+                height: getHeight("displayAddress"),
+                fontWeight: "semibold",
+              }}
+            >
+              <View>
+                <Text>{formatAddress(property.address)}</Text>
+              </View>
+            </View>
+
+            {columnsWithBrochures.map((column) => (
               <View
                 key={column.id}
                 style={{
@@ -279,7 +316,7 @@ export function ColumnsPage({
                 }}
               >
                 <View>
-                  {column.attributeId === "address" ? (
+                  {column.attributeId === "brochure" ? (
                     property.brochures[0]?.url ? (
                       <Link
                         src={
@@ -288,10 +325,10 @@ export function ColumnsPage({
                           ""
                         }
                       >
-                        {formatAddress(property.address)}
+                        Link
                       </Link>
                     ) : (
-                      <Text>{formatAddress(property.address)}</Text>
+                      <Text></Text>
                     )
                   ) : (
                     <Text>

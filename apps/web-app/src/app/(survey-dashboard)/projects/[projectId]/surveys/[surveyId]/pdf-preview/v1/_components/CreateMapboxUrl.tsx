@@ -8,14 +8,30 @@ interface LatLng {
   lng: number;
 }
 
-async function geocodeAddress(address: string): Promise<LatLng> {
+async function geocodeAddress(
+  address: string,
+): Promise<LatLng & { city: string }> {
   const geocoder = new google.maps.Geocoder();
   return new Promise((resolve, reject) => {
     geocoder
       .geocode({ address }, (results, status) => {
         if (status === google.maps.GeocoderStatus.OK && results?.[0]) {
+          // Get the city from the address components
+          let city = "";
+          for (const component of results[0].address_components) {
+            if (
+              component.types.includes("locality") &&
+              component.types.includes("political")
+            ) {
+              city = component.long_name;
+              break;
+            }
+          }
+
+          // Get the lat and lng from the geometry
           const location = results[0].geometry.location;
-          resolve({ lat: location.lat(), lng: location.lng() });
+
+          resolve({ lat: location.lat(), lng: location.lng(), city: city });
         } else {
           reject(new Error(`Geocoding failed for address: ${address}`));
         }
@@ -36,13 +52,20 @@ function calculateCenter(markers: LatLng[]): LatLng {
   };
 }
 
-export async function generateStaticMapUrl(properties: Property[]): Promise<{
+export async function generateStaticMapUrl(
+  properties: Property[],
+  pagePerCity = false,
+): Promise<{
   staticMapUrl: string;
   errors: { propertyId: string; error: string }[];
 }> {
   try {
     const errors: { propertyId: string; error: string }[] = [];
 
+    const cityMarkers: Record<
+      string,
+      (LatLng & { city: string; index: number })[]
+    > = {};
     const markers = await Promise.all(
       properties.map(async (property, index) => {
         try {
@@ -54,6 +77,10 @@ export async function generateStaticMapUrl(properties: Property[]): Promise<{
             });
             return null;
           }
+          cityMarkers[location.city] = [
+            ...(cityMarkers[location.city] ?? []),
+            { ...location, index },
+          ];
           return { ...location, index };
         } catch (error) {
           console.error("Error geocoding address:", error);
@@ -69,23 +96,45 @@ export async function generateStaticMapUrl(properties: Property[]): Promise<{
     // Filter out the errors after Promise.all completes
     const validMarkers = markers.filter((marker) => marker !== null);
 
-    validMarkers.sort((a, b) => a.index - b.index);
+    validMarkers.sort((a, b) => b.lat - a.lat);
 
     const center = calculateCenter(validMarkers);
-    const zoom = 13.5;
+    const zoom = 6;
     const scale = 2;
-    const size = "800x600";
+    // const size = "800x600";
+    const size = "600x600";
+    const padding = 100;
 
     const markersString = validMarkers
       .map(
         (marker, index) =>
-          `&markers=color:0x046bb6|label:${index + 1}|${marker.lat},${marker.lng}`,
+          `url-${encodeURIComponent(
+            `https://www.apex.deal/markers/1_small.png`,
+          )}(${marker.lng},${marker.lat})`,
       )
-      .join("");
+      .join(",");
 
-    const staticMapUrl =
-      `https://maps.googleapis.com/maps/api/staticmap?` +
-      `center=${center.lat},${center.lng}` +
+    // let staticMapUrl =
+    //   `https://api.mapbox.com/styles/v1/mapbox/light-v11/static/` +
+    //   markersString +
+    //   `/auto/${size}?` +
+    //   `padding=${padding}` +
+    //   `&access_token=${env.NEXT_PUBLIC_MAPBOX_TOKEN}` +
+    //   `&logo=false` +
+    //   `&attribution=false`;
+    // console.log("staticMapUrl", staticMapUrl);
+
+    let staticMapUrl =
+      `https://api.mapbox.com/styles/v1/mapbox/light-v11/static/` +
+      markersString +
+      `/auto/${size}@2x?` +
+      `padding=${padding}` +
+      `&access_token=${env.NEXT_PUBLIC_MAPBOX_TOKEN}` +
+      `&logo=false` +
+      `&attribution=false`;
+    console.log("staticMapUrl", staticMapUrl);
+
+    `center=${center.lat},${center.lng}` +
       `&zoom=${zoom}` +
       `&size=${size}` +
       `&scale=${scale}` +
@@ -94,6 +143,7 @@ export async function generateStaticMapUrl(properties: Property[]): Promise<{
       `&map_id=${MAP_ID}` +
       markersString;
 
+    console.log("mapErrors in survey", errors);
     return { staticMapUrl, errors };
   } catch (error) {
     console.error("Error generating static map URL:", error);

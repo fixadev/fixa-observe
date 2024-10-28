@@ -27,12 +27,6 @@ export function SurveyDownloadLink({
 }) {
   const [mapLoaded, setMapLoaded] = useState(false);
 
-  const parsedProperties = properties.map((property) => {
-    return {
-      ...property,
-    };
-  });
-
   const [instance, updateInstance] = usePDF({ document: undefined });
   const [pendingDownload, setPendingDownload] = useState(false);
 
@@ -49,13 +43,12 @@ export function SurveyDownloadLink({
   }, [instance.url, instance.loading, pendingDownload, surveyName]);
 
   const handleDownload = useCallback(async () => {
-    const { staticMapUrl, errors } =
-      await generateStaticMapUrl(parsedProperties);
+    const { staticMapUrl, errors } = await generateStaticMapUrl(properties);
 
     if (errors.length > 0) {
       setErrors(errors);
     }
-    const propertiesWithoutErrors = parsedProperties?.filter(
+    const propertiesWithoutErrors = properties?.filter(
       (property) => !errors.some((error) => error.propertyId === property.id),
     );
 
@@ -71,7 +64,7 @@ export function SurveyDownloadLink({
     setPendingDownload(true);
   }, [
     surveyName,
-    parsedProperties,
+    properties,
     columns,
     updateInstance,
     propertyOrientation,
