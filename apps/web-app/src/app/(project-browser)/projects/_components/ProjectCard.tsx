@@ -53,7 +53,7 @@ export default function ProjectCard({
   };
 
   return (
-    <Link href={`/projects/${project.id}`}>
+    <Link href={`/projects/${project.id}/`}>
       <Card className="relative flex flex-row items-center justify-between rounded-md p-1 hover:cursor-pointer">
         <CardHeader className="p-4">
           <CardTitle>{project.name}</CardTitle>
