@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import sharp from "sharp";
+import { Resvg } from "@resvg/resvg-js";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -10,17 +10,12 @@ export async function GET(request: Request) {
     return new NextResponse("Invalid number parameter", { status: 400 });
   }
 
-  if (isNaN(Number(size))) {
-    return new NextResponse("Invalid size parameter", { status: 400 });
-  }
-
   const sizeNum = Number(size);
   const fontSize = Math.floor(sizeNum / 2);
   const radius = sizeNum / 2;
 
-  // Create a circle with white text
-  const svgBuffer = Buffer.from(`
-    <svg width="${sizeNum}" height="${sizeNum}">
+  const svg = `
+    <svg width="${sizeNum}" height="${sizeNum}" xmlns="http://www.w3.org/2000/svg">
       <circle cx="${radius}" cy="${radius}" r="${radius}" fill="#046bb6"/>
       <text 
         x="50%" 
@@ -29,22 +24,19 @@ export async function GET(request: Request) {
         dy=".3em" 
         fill="white" 
         font-size="${fontSize}"
-        font-family="sans-serif"
+        font-family="system-ui"
       >${number}</text>
     </svg>
-  `);
+  `;
 
-  try {
-    const pngBuffer = await sharp(svgBuffer).png().toBuffer();
+  const resvg = new Resvg(svg);
+  const pngData = resvg.render();
+  const pngBuffer = pngData.asPng();
 
-    return new NextResponse(pngBuffer, {
-      headers: {
-        "Content-Type": "image/png",
-        "Cache-Control": "public, max-age=31536000, immutable",
-      },
-    });
-  } catch (error) {
-    console.error("Error generating pin:", error);
-    return new NextResponse("Error generating pin", { status: 500 });
-  }
+  return new NextResponse(pngBuffer, {
+    headers: {
+      "Content-Type": "image/png",
+      "Cache-Control": "public, max-age=31536000, immutable",
+    },
+  });
 }
