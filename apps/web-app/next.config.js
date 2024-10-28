@@ -53,7 +53,7 @@ const config = {
     ],
   },
   experimental: {
-    serverComponentsExternalPackages: ["@react-pdf/renderer"],
+    serverComponentsExternalPackages: ["@react-pdf/renderer", "@resvg/resvg-js"],
   },
   async headers() {
     return [
