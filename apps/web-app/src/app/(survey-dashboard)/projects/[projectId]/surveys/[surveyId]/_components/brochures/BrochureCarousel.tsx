@@ -69,7 +69,6 @@ export function BrochureCarousel({
 
   const [tool, setTool] = useState<Tool>("selector");
   const [loaded, setLoaded] = useState<boolean>(false);
-  // const [isRemoving, setIsRemoving] = useState<boolean>(false); // Previously used for inpainting
   const [isMouseDown, setIsMouseDown] = useState<boolean>(false);
   const [rectanglesToRemove, setRectanglesToRemove] =
     useState<BrochureRectangles>([]);
@@ -95,6 +94,7 @@ export function BrochureCarousel({
   }, [brochure]);
 
   useEffect(() => {
+    if (!loaded) return;
     onEdit({
       ...brochure,
       textToRemove,

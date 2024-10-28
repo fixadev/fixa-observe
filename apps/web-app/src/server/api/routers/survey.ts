@@ -39,12 +39,11 @@ export const surveyRouter = createTRPCRouter({
         displayIndex: z.number(),
       }),
     )
-    .mutation(async ({ ctx, input }) => {
+    .mutation(async ({ input }) => {
       const column = await surveyServiceInstance.createColumn({
         surveyId: input.surveyId,
         attributeId: input.attributeId,
         displayIndex: input.displayIndex,
-        userId: ctx.user.id,
       });
       return column;
     }),
