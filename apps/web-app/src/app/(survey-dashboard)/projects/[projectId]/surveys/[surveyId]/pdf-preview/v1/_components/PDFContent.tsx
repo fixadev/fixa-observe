@@ -15,7 +15,7 @@ export function PDFContent({
   propertyOrientation,
 }: {
   mapImageData: string | null;
-  properties: PropertyWithIncludes[] | null;
+  properties: (PropertyWithIncludes & { streetAddress: string })[] | null;
   columns: ColumnWithIncludes[] | null;
   surveyName: string | null;
   propertyOrientation?: "rows" | "columns";
