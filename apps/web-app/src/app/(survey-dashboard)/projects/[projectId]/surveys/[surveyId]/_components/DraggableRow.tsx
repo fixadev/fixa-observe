@@ -98,7 +98,8 @@ export const DraggableRow = ({
     return new Map(
       property.propertyValues.map((value) => [value.columnId, value.value]),
     );
-  }, [property.propertyValues]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [JSON.stringify(property.propertyValues)]);
   const attributeIdToValue = useMemo(() => {
     return new Map(
       columns

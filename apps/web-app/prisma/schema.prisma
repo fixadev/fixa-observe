@@ -116,6 +116,8 @@ model PropertyValue {
   property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
   columnId   String
   column     Column   @relation(fields: [columnId], references: [id], onDelete: Cascade)
+
+  @@unique([propertyId, columnId])
 }
 
 model Brochure {

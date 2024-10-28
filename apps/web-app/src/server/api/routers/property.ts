@@ -44,10 +44,12 @@ export const propertyRouter = createTRPCRouter({
         value: z.string(),
       }),
     )
-    .mutation(async ({ ctx, input }) => {
-      return {
-        status: 200,
-      };
+    .mutation(async ({ input }) => {
+      return await propertyServiceInstance.updateValue(
+        input.propertyId,
+        input.columnId,
+        input.value,
+      );
     }),
 
   setPhoto: protectedProcedure

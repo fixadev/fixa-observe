@@ -1217,11 +1217,21 @@ export const PropertyValueOrderByWithRelationInputSchema: z.ZodType<Prisma.Prope
   column: z.lazy(() => ColumnOrderByWithRelationInputSchema).optional()
 }).strict();
 
-export const PropertyValueWhereUniqueInputSchema: z.ZodType<Prisma.PropertyValueWhereUniqueInput> = z.object({
-  id: z.string()
-})
+export const PropertyValueWhereUniqueInputSchema: z.ZodType<Prisma.PropertyValueWhereUniqueInput> = z.union([
+  z.object({
+    id: z.string(),
+    propertyId_columnId: z.lazy(() => PropertyValuePropertyIdColumnIdCompoundUniqueInputSchema)
+  }),
+  z.object({
+    id: z.string(),
+  }),
+  z.object({
+    propertyId_columnId: z.lazy(() => PropertyValuePropertyIdColumnIdCompoundUniqueInputSchema),
+  }),
+])
 .and(z.object({
   id: z.string().optional(),
+  propertyId_columnId: z.lazy(() => PropertyValuePropertyIdColumnIdCompoundUniqueInputSchema).optional(),
   AND: z.union([ z.lazy(() => PropertyValueWhereInputSchema),z.lazy(() => PropertyValueWhereInputSchema).array() ]).optional(),
   OR: z.lazy(() => PropertyValueWhereInputSchema).array().optional(),
   NOT: z.union([ z.lazy(() => PropertyValueWhereInputSchema),z.lazy(() => PropertyValueWhereInputSchema).array() ]).optional(),
@@ -3230,6 +3240,11 @@ export const PropertyRelationFilterSchema: z.ZodType<Prisma.PropertyRelationFilt
 export const ColumnRelationFilterSchema: z.ZodType<Prisma.ColumnRelationFilter> = z.object({
   is: z.lazy(() => ColumnWhereInputSchema).optional(),
   isNot: z.lazy(() => ColumnWhereInputSchema).optional()
+}).strict();
+
+export const PropertyValuePropertyIdColumnIdCompoundUniqueInputSchema: z.ZodType<Prisma.PropertyValuePropertyIdColumnIdCompoundUniqueInput> = z.object({
+  propertyId: z.string(),
+  columnId: z.string()
 }).strict();
 
 export const PropertyValueCountOrderByAggregateInputSchema: z.ZodType<Prisma.PropertyValueCountOrderByAggregateInput> = z.object({

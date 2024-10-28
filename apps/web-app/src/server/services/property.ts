@@ -50,6 +50,30 @@ export const propertyService = ({ db }: { db: PrismaClient }) => {
       return response;
     },
 
+    updateValue: async (
+      propertyId: string,
+      columnId: string,
+      value: string,
+    ) => {
+      // Upsert the property value - create if doesn't exist, update if it does
+      return await db.propertyValue.upsert({
+        where: {
+          propertyId_columnId: {
+            propertyId,
+            columnId,
+          },
+        },
+        create: {
+          propertyId,
+          columnId,
+          value,
+        },
+        update: {
+          value,
+        },
+      });
+    },
+
     delete: async (propertyId: string, userId: string) => {
       const property = await db.property.findUnique({
         where: {

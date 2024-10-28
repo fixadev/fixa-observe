@@ -312,6 +312,7 @@ export function PropertiesTable({
 
   const _updatePropertyValue = useCallback(
     (propertyId: string, columnId: string, value: string) => {
+      console.log("updating property value", propertyId, columnId, value);
       setProperties((prev) => {
         // Get property index
         const index = prev.findIndex((property) => property.id === propertyId);
