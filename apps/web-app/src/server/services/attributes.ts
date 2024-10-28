@@ -27,6 +27,12 @@ export const attributesService = ({ db }: { db: PrismaClient }) => {
       });
     },
 
+    getSelected: async (selectedAttributeIds: string[]) => {
+      return db.attribute.findMany({
+        where: { id: { in: selectedAttributeIds } },
+      });
+    },
+
     get: async (id: string) => {
       return db.attribute.findUnique({
         where: { id },

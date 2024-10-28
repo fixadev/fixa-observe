@@ -16,4 +16,12 @@ export const attributeRouter = createTRPCRouter({
       );
       return attribute;
     }),
+
+  getAll: protectedProcedure.query(async ({ ctx }) => {
+    return await attributesServiceInstance.getAll(ctx.user.id);
+  }),
+
+  getDefaults: protectedProcedure.query(async ({ ctx }) => {
+    return await attributesServiceInstance.getDefaults(ctx.user.id);
+  }),
 });

@@ -186,12 +186,17 @@ export const surveyService = ({ db }: { db: PrismaClient }) => {
       await db.$transaction(updatePromises);
     },
 
-    importNDXPDF: async (surveyId: string, pdfUrl: string, ownerId: string) => {
+    importNDXPDF: async (input: {
+      surveyId: string;
+      pdfUrl: string;
+      selectedAttributeIds: string[];
+      ownerId: string;
+    }) => {
       try {
         const response = await axios.post(
           `${env.SCRAPING_SERVICE_URL}/extract-ndx-pdf`,
           {
-            pdfUrl,
+            pdfUrl: input.pdfUrl,
           },
           {
             headers: {
@@ -226,7 +231,7 @@ export const surveyService = ({ db }: { db: PrismaClient }) => {
               updatedAt: new Date(),
               photoUrl: property.photoUrl,
               displayIndex: index,
-              surveyId: surveyId,
+              surveyId: input.surveyId,
               brochureUrl: property.brochureUrl ?? "",
             };
           });
@@ -234,7 +239,7 @@ export const surveyService = ({ db }: { db: PrismaClient }) => {
         const createdPropertyIds =
           await propertyServiceInstance.createManyWithBrochures(
             propertiesToCreate,
-            ownerId,
+            input.ownerId,
           );
 
         const propertiesWithIds = createdPropertyIds.map((id, index) => ({
@@ -248,39 +253,16 @@ export const surveyService = ({ db }: { db: PrismaClient }) => {
           id,
         }));
 
-        const allAttributes = await attributesServiceInstance.getAll(ownerId);
-        // figure out what attributes exist + what attributes are default visible
-        const defaultVisibleAttributes = allAttributes.filter(
-          (attribute) => attribute.defaultVisible,
+        const selectedAttributes = await attributesServiceInstance.getSelected(
+          input.selectedAttributeIds,
         );
 
-        const nonNullAttributes = [
-          ...new Set(
-            propertiesWithIds.flatMap((property) =>
-              Object.entries(property)
-                .filter(([_, value]) => value !== null && value !== undefined)
-                .map(([key]) => key),
-            ),
-          ),
-        ];
-
-        const optionalAttributesToInclude = allAttributes
-          .filter((attribute) => !attribute.defaultVisible)
-          .filter((attribute) =>
-            nonNullAttributes.some(
-              (nonNullAttribute) => nonNullAttribute === attribute.id,
-            ),
-          );
-
         const existingColumns = await db.column.findMany({
-          where: { surveyId },
+          where: { surveyId: input.surveyId },
         });
 
         // deduplicate columns
-        const columnsToCreate = [
-          ...defaultVisibleAttributes,
-          ...optionalAttributesToInclude,
-        ].filter(
+        const columnsToCreate = selectedAttributes.filter(
           (attribute) =>
             !existingColumns.some(
               (column) => column.attributeId === attribute.id,
@@ -292,18 +274,22 @@ export const surveyService = ({ db }: { db: PrismaClient }) => {
           data: columnsToCreate.map((attribute) => ({
             attributeId: attribute.id,
             displayIndex: attribute.defaultIndex,
-            surveyId,
+            surveyId: input.surveyId,
           })),
         });
 
         const allColumns = [...existingColumns, ...newColumns];
+
+        console.log("allColumns", allColumns);
+
+        console.log("propertiesWithIds", propertiesWithIds);
 
         const propertyValuesToCreate = propertiesWithIds.flatMap((property) =>
           Object.entries(property)
             .map(([key, value]) => {
               const columnId = allColumns.find(
                 (column) =>
-                  allAttributes.find(
+                  selectedAttributes.find(
                     (attribute) => attribute.id === column.attributeId,
                   )?.id === key,
               )?.id;
@@ -320,6 +306,8 @@ export const surveyService = ({ db }: { db: PrismaClient }) => {
               (entry): entry is NonNullable<typeof entry> => entry !== null,
             ),
         );
+
+        console.log("propertyValuesToCreate", propertyValuesToCreate);
 
         await db.propertyValue.createMany({
           data: propertyValuesToCreate,

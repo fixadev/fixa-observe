@@ -11,6 +11,7 @@ export const parsedPropertyCardSchema = z.object({
   suite: z.string().nullable(),
 
   // stuff that does map to an attribute
+
   propertyType: z.string().nullable(),
   listId: z.string().nullable(),
   availDate: z.string().nullable(),

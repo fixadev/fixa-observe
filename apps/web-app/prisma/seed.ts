@@ -2,17 +2,17 @@ import { db } from "~/server/db";
 
 async function seedAttributes() {
   const attributes = [
-    { id: "size", label: "Available space (SF)", defaultVisible: true },
+    { id: "availSpace", label: "Available space (SF)", defaultVisible: true },
+    { id: "propertySize", label: "Property Size (SF)", defaultVisible: true },
     { id: "divisibility", label: "Divisibility (SF)", defaultVisible: true },
-    { id: "askingRate", label: "Asking rate (SF/Mo)", defaultVisible: true },
-    { id: "opEx", label: "Opex (SF/Mo)", defaultVisible: true },
+    { id: "leaseRate", label: "Asking rate (SF/Mo)", defaultVisible: true },
+    { id: "expenses", label: "Opex (SF/Mo)", defaultVisible: true },
     { id: "totalCost", label: "All-in cost", defaultVisible: true },
-    { id: "directSublease", label: "Direct/Sublease", defaultVisible: true },
+    { id: "leaseType", label: "Direct/Sublease", defaultVisible: true },
     { id: "comments", label: "Comments", defaultVisible: true },
 
     { id: "propertyType", label: "Property Type", defaultVisible: false },
     { id: "listId", label: "List ID", defaultVisible: false },
-    { id: "suite", label: "Suite", defaultVisible: false },
     { id: "availDate", label: "Available Date", defaultVisible: false },
     { id: "subtypeClass", label: "Subtype Class", defaultVisible: false },
     { id: "spaceUse", label: "Space Use", defaultVisible: false },
@@ -43,6 +43,12 @@ async function seedAttributes() {
   ];
 
   await db.$transaction(async (tx) => {
+    await tx.attribute.deleteMany({
+      where: {
+        id: { notIn: attributes.map((a) => a.id) },
+        ownerId: null,
+      },
+    });
     await Promise.all(
       attributes.map((attribute, i) =>
         tx.attribute.upsert({

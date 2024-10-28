@@ -55,15 +55,15 @@ export function EditableCell({
   function handleUpdateProperty(value: string) {
     if (
       column.attributeId === "askingRate" ||
-      column.attributeId === "opEx" ||
-      column.attributeId === "size"
+      column.attributeId === "expenses" ||
+      column.attributeId === "availSpace"
     ) {
       const inputValue = advancedParseFloat(value);
 
       const size =
-        column.attributeId === "size"
+        column.attributeId === "availSpace"
           ? inputValue
-          : advancedParseFloat(attributeIdToValue.get("size") ?? "0");
+          : advancedParseFloat(attributeIdToValue.get("availSpace") ?? "0");
 
       const askingRate =
         column.attributeId === "askingRate"
@@ -71,9 +71,9 @@ export function EditableCell({
           : advancedParseFloat(attributeIdToValue.get("askingRate") ?? "0");
 
       const opEx =
-        column.attributeId === "opEx"
+        column.attributeId === "expenses"
           ? inputValue
-          : advancedParseFloat(attributeIdToValue.get("opEx") ?? "0");
+          : advancedParseFloat(attributeIdToValue.get("expenses") ?? "0");
 
       const computedTotalCost = Math.round(
         (askingRate + opEx) * size,
