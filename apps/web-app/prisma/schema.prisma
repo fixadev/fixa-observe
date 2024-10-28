@@ -32,6 +32,7 @@ model User {
   properties    Property[]
   attributes    Attribute[]
   emailTemplate EmailTemplate?
+  surveys       Survey[]
 }
 
 model Project {
@@ -46,11 +47,12 @@ model Project {
 
 model Survey {
   id        String   @id @default(uuid())
-  ownerId   String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   name      String
 
+  ownerId    String
+  owner      User       @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   projectId  String
   project    Project    @relation(fields: [projectId], references: [id], onDelete: Cascade)
   properties Property[]

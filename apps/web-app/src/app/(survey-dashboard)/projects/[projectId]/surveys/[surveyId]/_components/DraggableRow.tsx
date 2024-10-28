@@ -321,7 +321,7 @@ export const DraggableRow = ({
                   </div>
                 </div>
               ) : (
-                <div className="flex items-center justify-center rounded-md bg-gray-100 hover:bg-gray-200">
+                <div className="flex size-full items-center justify-center rounded-md bg-gray-100 hover:bg-gray-200">
                   <ImagePlusIcon className="size-8 text-gray-500" />
                 </div>
               )}

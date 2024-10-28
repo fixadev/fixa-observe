@@ -5,7 +5,8 @@ import { cn } from "~/lib/utils";
 const Table = React.forwardRef<
   HTMLTableElement,
   React.HTMLAttributes<HTMLTableElement> & {
-    containerProps?: React.HTMLAttributes<HTMLDivElement>;
+    containerProps?: React.HTMLAttributes<HTMLDivElement> &
+      React.RefAttributes<HTMLDivElement>;
   }
 >(({ className, containerProps, ...props }, ref) => (
   <div className="relative w-full overflow-auto" {...containerProps}>
