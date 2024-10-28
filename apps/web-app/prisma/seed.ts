@@ -3,7 +3,7 @@ import { db } from "~/server/db";
 async function seedAttributes() {
   const attributes = [
     { id: "availSpace", label: "Available space (SF)", defaultVisible: true },
-    { id: "propertySize", label: "Property Size (SF)", defaultVisible: true },
+    { id: "propertySize", label: "Property size (SF)", defaultVisible: true },
     { id: "divisibility", label: "Divisibility (SF)", defaultVisible: true },
     { id: "leaseRate", label: "Asking rate (SF/Mo)", defaultVisible: true },
     { id: "expenses", label: "Opex (SF/Mo)", defaultVisible: true },
