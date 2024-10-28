@@ -54,6 +54,9 @@ const config = {
   },
   experimental: {
     serverComponentsExternalPackages: ["@react-pdf/renderer", "@resvg/resvg-js"],
+    outputFileTracingIncludes: {
+      "/api/map-pin": ["./fonts/**/*"],
+    },
   },
   async headers() {
     return [
