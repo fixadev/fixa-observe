@@ -1,7 +1,7 @@
 import axios from "axios";
 import { pdfToImage } from "~/lib/pdf-utils";
 import { getBrochureFileName } from "~/lib/utils";
-import { PropertySchema } from "~/lib/property";
+import { type PropertySchema } from "~/lib/property";
 
 export const uploadImageTask = async (
   file: File,

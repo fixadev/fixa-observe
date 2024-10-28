@@ -50,6 +50,15 @@ export const brochureRouter = createTRPCRouter({
       );
     }),
 
+  updateThumbnailUrl: protectedProcedure
+    .input(z.object({ brochureId: z.string(), thumbnailUrl: z.string() }))
+    .mutation(async ({ input }) => {
+      return await brochureServiceInstance.updateThumbnailUrl(
+        input.brochureId,
+        input.thumbnailUrl,
+      );
+    }),
+
   inpaintRectangles: protectedProcedure
     .input(removeRectanglesInput)
     .mutation(async ({ input }) => {

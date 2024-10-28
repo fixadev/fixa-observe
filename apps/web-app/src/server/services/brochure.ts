@@ -141,6 +141,13 @@ export const brochureService = ({ db }: { db: PrismaClient }) => {
       });
     },
 
+    updateThumbnailUrl: async (brochureId: string, thumbnailUrl: string) => {
+      return db.brochure.update({
+        where: { id: brochureId },
+        data: { thumbnailUrl },
+      });
+    },
+
     inpaintRectangles: async (input: RemoveRectanglesInput) => {
       try {
         const data = await db.brochure.findUnique({

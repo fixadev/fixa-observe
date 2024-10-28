@@ -1,4 +1,4 @@
-import { PageViewport } from "pdfjs-dist";
+import { type PageViewport } from "pdfjs-dist";
 import { getDocument } from "~/lib/pdfx.mjs";
 
 export async function pdfToImage({

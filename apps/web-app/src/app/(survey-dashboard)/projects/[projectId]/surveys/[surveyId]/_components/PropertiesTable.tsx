@@ -52,6 +52,7 @@ import {
 import { SurveyDownloadLink } from "../pdf-preview/v1/_components/DownloadLink";
 import BrochureDialog from "./brochures/BrochureDialog";
 import { uploadBrochureTask, uploadImageTask } from "~/app/utils/brochureTasks";
+import { env } from "~/env";
 
 export type Property = PropertyWithIncludes & {
   isNew?: boolean;
@@ -87,6 +88,45 @@ export function PropertiesTable({
     { propertyId: string; error: string }[]
   >([]);
 
+  const { mutateAsync: getPresignedS3Url } =
+    api.s3.getPresignedS3Url.useMutation();
+  const { mutateAsync: updateBrochureThumbnailUrl } =
+    api.brochure.updateThumbnailUrl.useMutation();
+
+  const uploadBrochureThumbnails = useCallback(
+    async (properties: Property[]) => {
+      for (const property of properties) {
+        if (property.brochures.length > 0) {
+          const brochure = property.brochures[0]!;
+          if (!brochure.thumbnailUrl) {
+            const url = `/api/cors-proxy?url=${encodeURIComponent(brochure.exportedUrl ?? brochure.url)}`;
+            const file = await fetch(url).then((res) => res.blob());
+            const pdfFile = new File([file], brochure.title, {
+              type: "application/pdf",
+            });
+            const thumbnailUrl = await uploadImageTask(
+              pdfFile,
+              property.id,
+              getPresignedS3Url,
+            );
+            setProperties((prev) => {
+              const index = prev.findIndex((p) => p.id === property.id);
+              if (index === -1) return prev;
+              const newProperties = [...prev];
+              newProperties[index]!.brochures[0]!.thumbnailUrl = thumbnailUrl;
+              return newProperties;
+            });
+            await updateBrochureThumbnailUrl({
+              brochureId: brochure.id,
+              thumbnailUrl,
+            });
+          }
+        }
+      }
+    },
+    [getPresignedS3Url, updateBrochureThumbnailUrl],
+  );
+
   // Load properties and columns from survey
   useEffect(() => {
     if (!survey) return;
@@ -106,7 +146,9 @@ export function PropertiesTable({
     );
 
     setIsImportingProperties(false);
-  }, [survey]);
+
+    void uploadBrochureThumbnails(survey.properties);
+  }, [survey, uploadBrochureThumbnails]);
 
   // Property mutations
   const { mutateAsync: createProperty } = api.property.create.useMutation();
@@ -485,8 +527,6 @@ export function PropertiesTable({
   // ----------------------
   const { mutateAsync: deleteBrochure, isPending: isDeletingBrochure } =
     api.brochure.delete.useMutation();
-  const { mutateAsync: getPresignedS3Url } =
-    api.s3.getPresignedS3Url.useMutation();
   const { mutateAsync: createBrochure } = api.brochure.create.useMutation();
 
   const [brochureDialogState, setBrochureDialogState] = useState<{
