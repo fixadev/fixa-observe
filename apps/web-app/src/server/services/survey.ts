@@ -7,6 +7,7 @@ import { type SurveySchema } from "~/lib/survey";
 import { propertyService } from "./property";
 import { parsePropertyCardWithAI } from "../utils/parsePropertyCardWithAI";
 import { attributesService } from "./attributes";
+import { advancedParseFloat } from "~/app/parseNumbers";
 
 export const surveyService = ({ db }: { db: PrismaClient }) => {
   const propertyServiceInstance = propertyService({ db });
@@ -244,6 +245,13 @@ export const surveyService = ({ db }: { db: PrismaClient }) => {
 
         const propertiesWithIds = createdPropertyIds.map((id, index) => ({
           ...parsedProperties[index],
+          totalCost:
+            "$" +
+            Math.round(
+              advancedParseFloat(parsedProperties[index]?.availSpace ?? "0") *
+                (advancedParseFloat(parsedProperties[index]?.leaseRate ?? "0") +
+                  advancedParseFloat(parsedProperties[index]?.expenses ?? "0")),
+            ).toString(),
           brochureUrl: undefined,
           photoUrl: undefined,
           postalAddress: undefined,
@@ -279,10 +287,6 @@ export const surveyService = ({ db }: { db: PrismaClient }) => {
         });
 
         const allColumns = [...existingColumns, ...newColumns];
-
-        console.log("allColumns", allColumns);
-
-        console.log("propertiesWithIds", propertiesWithIds);
 
         const propertyValuesToCreate = propertiesWithIds.flatMap((property) =>
           Object.entries(property)
