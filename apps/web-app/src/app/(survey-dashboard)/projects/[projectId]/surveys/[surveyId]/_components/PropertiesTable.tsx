@@ -172,6 +172,9 @@ export function PropertiesTable({
     useSensor(KeyboardSensor, {}),
   );
 
+  // ----------------------
+  // #region Column CRUD
+  // ----------------------
   const _createColumn = useCallback(() => {
     const tempColumnId = crypto.randomUUID();
     const tempAttributeId = crypto.randomUUID();
@@ -269,7 +272,11 @@ export function PropertiesTable({
     },
     [deleteColumn],
   );
+  // #endregion
 
+  // ----------------------
+  // #region Property CRUD
+  // ----------------------
   const _createProperty = useCallback(async () => {
     const tempId = crypto.randomUUID();
     setProperties((prev) => [
@@ -278,7 +285,6 @@ export function PropertiesTable({
         id: tempId,
         isNew: true,
         displayIndex: properties.length,
-
         createdAt: new Date(),
         updatedAt: new Date(),
         address: "",
@@ -292,9 +298,12 @@ export function PropertiesTable({
       },
     ]);
     setTimeout(() => {
-      tableRef.current?.scrollTo({
-        top: tableRef.current.scrollWidth,
-      });
+      if (tableContainerRef.current) {
+        tableContainerRef.current.scrollTo({
+          top: tableContainerRef.current.scrollHeight,
+          behavior: "smooth",
+        });
+      }
     });
 
     // Create property on server
@@ -364,6 +373,7 @@ export function PropertiesTable({
     },
     [deleteProperty],
   );
+  // #endregion
 
   // ----------------------
   // #region Verify property data
@@ -605,7 +615,7 @@ export function PropertiesTable({
   );
   // #endregion
 
-  const tableRef = useRef<HTMLTableElement>(null);
+  const tableContainerRef = useRef<HTMLDivElement>(null);
 
   return (
     <>
@@ -669,8 +679,10 @@ export function PropertiesTable({
                 sensors={sensors}
               >
                 <Table
-                  ref={tableRef}
-                  containerProps={{ className: "flex-1 overflow-auto" }}
+                  containerProps={{
+                    ref: tableContainerRef,
+                    className: "flex-1 overflow-auto",
+                  }}
                   className="relative"
                 >
                   <TableHeader className="sticky top-0 z-50 bg-white shadow">
