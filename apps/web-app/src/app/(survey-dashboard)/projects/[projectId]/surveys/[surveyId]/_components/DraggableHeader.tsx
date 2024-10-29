@@ -11,36 +11,31 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "~/components/ui/alert-dialog";
-import { useState } from "react";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { type CSSProperties } from "react";
-import { Button } from "@/components/ui/button";
 import { TableCell } from "@/components/ui/table";
-import { Input } from "@/components/ui/input";
 import { TrashIcon } from "lucide-react";
 import { DragHandleDots2Icon } from "@radix-ui/react-icons";
 import { type PropertiesTableState, type Column } from "./PropertiesTable";
 import { Label } from "~/components/ui/label";
 import { Checkbox } from "~/components/ui/checkbox";
 import { type CheckedState } from "@radix-ui/react-checkbox";
+import { AttributeCombobox } from "./AttributeCombobox";
+import { type Attribute } from "prisma/generated/zod";
 
 export const DraggableHeader = ({
   column,
-  renameColumn,
+  updateColumnAttribute,
   deleteColumn,
   draggingRow,
   state,
   checkedState = false,
   onCheckedChange,
-  disabled = false,
+  // disabled = false,
 }: {
   column: Column;
-  renameColumn?: (params: {
-    column: Column;
-    attributeId?: string;
-    attributeLabel: string;
-  }) => void;
+  updateColumnAttribute: (attribute: Attribute) => void;
   deleteColumn: () => void;
   draggingRow: boolean;
   state: PropertiesTableState;
@@ -48,8 +43,6 @@ export const DraggableHeader = ({
   onCheckedChange?: (checked: boolean) => void;
   disabled?: boolean;
 }) => {
-  const [isEditing, setIsEditing] = useState(column.isNew ?? false);
-
   const {
     transform,
     transition,
@@ -94,42 +87,12 @@ export const DraggableHeader = ({
           </>
         ) : state === "edit" ? (
           <>
-            {isEditing ? (
-              <Input
-                disabled={disabled}
-                defaultValue={column.attribute.label}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    renameColumn?.({
-                      column,
-                      attributeId: undefined, // TODO: Add attributeId when we have the combobox
-                      attributeLabel: (e.currentTarget as HTMLInputElement)
-                        .value,
-                    });
-                    setIsEditing(false);
-                  }
-                }}
-                onBlur={(e) => {
-                  setIsEditing(false);
-                  renameColumn?.({
-                    column,
-                    attributeId: undefined, // TODO: Add attributeId when we have the combobox
-                    attributeLabel: (e.target as HTMLInputElement).value,
-                  });
-                }}
-                autoFocus
-                onFocus={(e) => e.target.select()}
-              />
-            ) : (
-              <Button
-                variant="ghost"
-                className="w-full min-w-32 text-wrap disabled:opacity-100"
-                onClick={() => setIsEditing(true)}
-                disabled={disabled}
-              >
-                {column.attribute.label}
-              </Button>
-            )}
+            <AttributeCombobox
+              startOpen={column.isNew}
+              attribute={column.attribute}
+              columnIndex={column.displayIndex}
+              onAttributeChange={updateColumnAttribute}
+            />
             <div className="invisible flex text-muted-foreground group-hover:visible">
               <AlertDialog>
                 <AlertDialogTrigger>
