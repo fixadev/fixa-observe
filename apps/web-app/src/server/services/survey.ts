@@ -342,6 +342,10 @@ export const surveyService = ({ db }: { db: PrismaClient }) => {
         return { status: 200, numberOfProperties: propertiesWithIds.length };
       } catch (error) {
         console.error("Error importing NDX PDF", error);
+        await db.survey.update({
+          where: { id: input.surveyId },
+          data: { importInProgress: false },
+        });
         return { status: 500 };
       }
     },

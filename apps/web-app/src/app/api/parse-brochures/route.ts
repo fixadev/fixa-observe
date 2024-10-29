@@ -10,13 +10,13 @@ const brochureServiceInstance = brochureService({ db });
 
 export async function POST(request: Request) {
   const startTime = new Date();
-  try {
-    const { brochures, userId, surveyId } = (await request.json()) as {
-      brochures: Array<{ id: string; url: string; propertyId: string }>;
-      userId: string;
-      surveyId: string;
-    };
+  const { brochures, userId, surveyId } = (await request.json()) as {
+    brochures: Array<{ id: string; url: string; propertyId: string }>;
+    userId: string;
+    surveyId: string;
+  };
 
+  try {
     if (!brochures) {
       return NextResponse.json({ error: "No brochures" }, { status: 400 });
     }
@@ -75,6 +75,10 @@ export async function POST(request: Request) {
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Error parsing brochures:", error);
+    await db.survey.update({
+      where: { id: surveyId },
+      data: { importInProgress: false },
+    });
     return NextResponse.json(
       { error: "Failed to parse brochures" },
       { status: 500 },
