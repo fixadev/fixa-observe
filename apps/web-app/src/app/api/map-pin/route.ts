@@ -1,9 +1,5 @@
 import { NextResponse } from "next/server";
-<<<<<<< HEAD
-import { Resvg } from "@resvg/resvg-js";
-=======
 import { Resvg, type ResvgRenderOptions } from "@resvg/resvg-js";
->>>>>>> e4eb2868bf2ed0c65ae18ddbf17348a516b5cf76
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -28,18 +24,11 @@ export async function GET(request: Request) {
         dy=".3em" 
         fill="white" 
         font-size="${fontSize}"
-<<<<<<< HEAD
-        font-family="system-ui"
-=======
         font-family="IBM Plex Sans"
->>>>>>> e4eb2868bf2ed0c65ae18ddbf17348a516b5cf76
       >${number}</text>
     </svg>
   `;
 
-<<<<<<< HEAD
-  const resvg = new Resvg(svg);
-=======
   const options: ResvgRenderOptions = {
     font: {
       fontFiles: [`${process.cwd()}/public/fonts/IBMPlexSans-SemiBold.ttf`],
@@ -50,7 +39,6 @@ export async function GET(request: Request) {
 
   const resvg = new Resvg(svg, options);
 
->>>>>>> e4eb2868bf2ed0c65ae18ddbf17348a516b5cf76
   const pngData = resvg.render();
   const pngBuffer = pngData.asPng();
 
