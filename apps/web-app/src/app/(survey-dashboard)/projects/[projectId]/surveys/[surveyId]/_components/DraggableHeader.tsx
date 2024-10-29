@@ -20,32 +20,35 @@ import { TableCell } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import { TrashIcon } from "lucide-react";
 import { DragHandleDots2Icon } from "@radix-ui/react-icons";
-import { type PropertiesTableState, type Attribute } from "./PropertiesTable";
+import { type PropertiesTableState, type Column } from "./PropertiesTable";
 import { Label } from "~/components/ui/label";
 import { Checkbox } from "~/components/ui/checkbox";
 import { type CheckedState } from "@radix-ui/react-checkbox";
-import Spinner from "~/components/Spinner";
 
 export const DraggableHeader = ({
-  attribute,
-  renameAttribute,
-  deleteAttribute,
+  column,
+  renameColumn,
+  deleteColumn,
   draggingRow,
   state,
   checkedState = false,
   onCheckedChange,
   disabled = false,
 }: {
-  attribute: Attribute;
-  renameAttribute?: (name: string) => void;
-  deleteAttribute: () => void;
+  column: Column;
+  renameColumn?: (params: {
+    column: Column;
+    attributeId?: string;
+    attributeLabel: string;
+  }) => void;
+  deleteColumn: () => void;
   draggingRow: boolean;
   state: PropertiesTableState;
   checkedState?: CheckedState;
   onCheckedChange?: (checked: boolean) => void;
   disabled?: boolean;
 }) => {
-  const [isEditing, setIsEditing] = useState(attribute.isNew ?? false);
+  const [isEditing, setIsEditing] = useState(column.isNew ?? false);
 
   const {
     transform,
@@ -55,7 +58,7 @@ export const DraggableHeader = ({
     attributes,
     listeners,
   } = useSortable({
-    id: !draggingRow ? attribute.id : "",
+    id: !draggingRow ? column.id : "",
   });
 
   const style: CSSProperties = {
@@ -71,18 +74,21 @@ export const DraggableHeader = ({
       <div className="flex items-center justify-between gap-2">
         {state === "select-fields" ? (
           <>
-            {attribute.id === "comments" || attribute.id === "photoUrl" ? (
+            {column.attributeId === "comments" ||
+            column.attributeId === "photoUrl" ? (
               <div className="flex w-full min-w-32 items-center gap-2">
-                <div className="text-muted-foreground">{attribute.label}</div>
+                <div className="text-muted-foreground">
+                  {column.attribute.label}
+                </div>
               </div>
             ) : (
               <div className="flex w-full min-w-32 items-center gap-2">
                 <Checkbox
-                  id={attribute.id}
+                  id={column.id}
                   checked={checkedState}
                   onCheckedChange={onCheckedChange}
                 />
-                <Label htmlFor={attribute.id}>{attribute.label}</Label>
+                <Label htmlFor={column.id}>{column.attribute.label}</Label>
               </div>
             )}
           </>
@@ -91,18 +97,25 @@ export const DraggableHeader = ({
             {isEditing ? (
               <Input
                 disabled={disabled}
-                defaultValue={attribute.label}
+                defaultValue={column.attribute.label}
                 onKeyDown={(e) => {
                   if (e.key === "Enter") {
-                    renameAttribute?.(
-                      (e.currentTarget as HTMLInputElement).value,
-                    );
+                    renameColumn?.({
+                      column,
+                      attributeId: undefined, // TODO: Add attributeId when we have the combobox
+                      attributeLabel: (e.currentTarget as HTMLInputElement)
+                        .value,
+                    });
                     setIsEditing(false);
                   }
                 }}
                 onBlur={(e) => {
                   setIsEditing(false);
-                  renameAttribute?.(e.target.value);
+                  renameColumn?.({
+                    column,
+                    attributeId: undefined, // TODO: Add attributeId when we have the combobox
+                    attributeLabel: (e.target as HTMLInputElement).value,
+                  });
                 }}
                 autoFocus
                 onFocus={(e) => e.target.select()}
@@ -112,9 +125,9 @@ export const DraggableHeader = ({
                 variant="ghost"
                 className="w-full min-w-32 text-wrap disabled:opacity-100"
                 onClick={() => setIsEditing(true)}
-                disabled={disabled || !attribute.ownerId}
+                disabled={disabled}
               >
-                {attribute.label}
+                {column.attribute.label}
               </Button>
             )}
             <div className="invisible flex text-muted-foreground group-hover:visible">
@@ -131,7 +144,7 @@ export const DraggableHeader = ({
                   </AlertDialogHeader>
                   <AlertDialogFooter>
                     <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction onClick={deleteAttribute}>
+                    <AlertDialogAction onClick={deleteColumn}>
                       {"Delete"}
                     </AlertDialogAction>
                   </AlertDialogFooter>

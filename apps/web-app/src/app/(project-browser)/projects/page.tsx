@@ -35,19 +35,18 @@ export default function Home() {
     data: projectsData,
     refetch: refetchProjects,
     isLoading: projectsLoading,
-    error: projectsError,
-  } = api.project.getProjects.useQuery();
-  const { mutate: createProject, error: createProjectError } =
-    api.project.createProject.useMutation({
-      onSuccess: (data) => {
-        router.push(`/projects/${data.id}`);
-        toast({
-          title: "Project created!",
-          duration: 5000,
-        });
-        setProjectName("");
-      },
-    });
+  } = api.project.getAll.useQuery();
+
+  const { mutate: createProject } = api.project.create.useMutation({
+    onSuccess: (data) => {
+      router.push(`/projects/${data.id}`);
+      toast({
+        title: "Project created!",
+        duration: 5000,
+      });
+      setProjectName("");
+    },
+  });
 
   useEffect(() => {
     if (projectsData) {

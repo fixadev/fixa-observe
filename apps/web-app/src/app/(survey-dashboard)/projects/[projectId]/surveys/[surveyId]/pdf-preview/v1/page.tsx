@@ -10,7 +10,8 @@ import { APIProvider } from "@vis.gl/react-google-maps";
 import { env } from "~/env";
 import { useEffect, useState } from "react";
 import Spinner from "~/components/Spinner";
-import { generateStaticMapUrl } from "./_components/CreateMapUrl";
+import { generateStaticMapUrl } from "./_components/CreateMapboxUrl";
+import { type PropertyWithIncludes } from "~/hooks/useSurvey";
 
 export default function PDFPreviewPage({
   params,
@@ -19,16 +20,11 @@ export default function PDFPreviewPage({
 }) {
   const [mapLoaded, setMapLoaded] = useState(false);
   const [mapUrl, setMapUrl] = useState<string | null>(null);
+  const [propertiesWithStreetAddresses, setPropertiesWithStreetAddresses] =
+    useState<(PropertyWithIncludes & { streetAddress: string })[] | null>(null);
 
   const router = useRouter();
-  const { data: survey } = api.survey.getSurvey.useQuery(
-    { surveyId: params.surveyId },
-    {
-      refetchOnMount: true,
-      staleTime: 0,
-    },
-  );
-  const { data: attributes } = api.survey.getSurveyAttributes.useQuery(
+  const { data: survey } = api.survey.get.useQuery(
     { surveyId: params.surveyId },
     {
       refetchOnMount: true,
@@ -36,19 +32,28 @@ export default function PDFPreviewPage({
     },
   );
 
-  const parsedProperties = survey?.properties.map((property) => {
-    return {
-      ...property,
-      attributes: property.attributes as Record<string, string>,
-    };
-  });
+  const { mutateAsync: extractStreetAddresses } =
+    api.property.extractStreetAddresses.useMutation();
 
   useEffect(() => {
     const fetchMapUrl = async () => {
-      if (parsedProperties && mapLoaded) {
+      if (survey?.properties && mapLoaded) {
         try {
-          const { staticMapUrl } = await generateStaticMapUrl(parsedProperties);
+          const { staticMapUrl } = await generateStaticMapUrl(
+            survey.properties,
+          );
           setMapUrl(staticMapUrl);
+          const streetAddresses = await extractStreetAddresses({
+            properties: survey?.properties ?? [],
+          });
+
+          const updatedProperties = survey?.properties?.map(
+            (property, index) => ({
+              ...property,
+              streetAddress: streetAddresses[index] ?? "",
+            }),
+          );
+          setPropertiesWithStreetAddresses(updatedProperties);
         } catch (err) {
           console.error("Failed to generate static map URL:", err);
         }
@@ -56,7 +61,7 @@ export default function PDFPreviewPage({
     };
 
     void fetchMapUrl();
-  }, [parsedProperties, mapLoaded]);
+  }, [survey?.properties, mapLoaded, extractStreetAddresses]);
 
   return (
     <APIProvider
@@ -92,11 +97,8 @@ export default function PDFPreviewPage({
               mapImageData={mapUrl}
               propertyOrientation="columns"
               surveyName={survey?.name ?? null}
-              properties={parsedProperties ?? null}
-              attributes={
-                attributes?.filter((attribute) => attribute.id !== "address") ??
-                null
-              }
+              properties={propertiesWithStreetAddresses ?? null}
+              columns={survey?.columns ?? null}
             />
           </PDFViewer>
         </div>

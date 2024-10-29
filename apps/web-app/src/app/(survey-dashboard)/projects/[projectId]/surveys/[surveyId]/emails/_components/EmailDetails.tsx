@@ -142,9 +142,7 @@ function EmailThreadDetails({
     <div className="flex h-full flex-col gap-2 overflow-x-hidden p-2 pb-8">
       <PropertyCard emailThread={emailThread} />
       {shouldShowParsedAttributes && (
-        <div className="flex rounded-md border-[2px] border-input p-2 shadow-md">
-          <ParsedAttributes emailThread={emailThread} />
-        </div>
+        <ParsedAttributes emailThread={emailThread} />
       )}
       {emailThread.emails.map((email) => (
         <EmailCard

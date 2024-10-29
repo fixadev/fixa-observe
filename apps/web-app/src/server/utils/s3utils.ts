@@ -18,9 +18,10 @@ export const uploadFileToS3 = async (
     ? file.name
     : `${uuidv4()}.${fileExtension}`;
   const arrayBuffer = Buffer.from(await file.arrayBuffer());
+  const key = fileName + "-" + uuidv4();
   const params: PutObjectCommandInput = {
     Bucket: process.env.AWS_BUCKET_NAME,
-    Key: fileName + "-" + uuidv4(),
+    Key: key,
     Body: arrayBuffer,
     ContentType: file.type,
     ACL: ObjectCannedACL.public_read,
@@ -29,7 +30,7 @@ export const uploadFileToS3 = async (
   try {
     await s3Client.send(new PutObjectCommand(params));
     return {
-      url: `https://${process.env.AWS_BUCKET_NAME}.s3.us-east-1.amazonaws.com/${fileName}`,
+      url: `https://${process.env.AWS_BUCKET_NAME}.s3.us-east-1.amazonaws.com/${key}`,
       type: file.type,
     };
   } catch (error) {
@@ -41,10 +42,13 @@ export const uploadFileToS3 = async (
 export const createPresignedUrl = async (
   fileName: string,
   fileType: string,
+  keepOriginalName = false,
   expiresIn = 3600,
 ): Promise<string> => {
   const fileExtension = fileName.split(".").pop();
-  const uniqueFileName = `${uuidv4()}.${fileExtension}`;
+  const uniqueFileName = keepOriginalName
+    ? fileName
+    : `${uuidv4()}.${fileExtension}`;
 
   const prefix = fileType === "application/pdf" ? "brochures" : "images";
 

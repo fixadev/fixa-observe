@@ -1,4 +1,4 @@
-import { type PropertySchema } from "~/lib/property";
+import { type Property } from "../../../_components/PropertiesTable";
 import { env } from "~/env";
 
 const MAP_ID = "2b9b510fdba6b2ef";
@@ -36,9 +36,7 @@ function calculateCenter(markers: LatLng[]): LatLng {
   };
 }
 
-export async function generateStaticMapUrl(
-  properties: PropertySchema[],
-): Promise<{
+export async function generateStaticMapUrl(properties: Property[]): Promise<{
   staticMapUrl: string;
   errors: { propertyId: string; error: string }[];
 }> {
@@ -48,9 +46,7 @@ export async function generateStaticMapUrl(
     const markers = await Promise.all(
       properties.map(async (property, index) => {
         try {
-          const location = await geocodeAddress(
-            property.attributes.address ?? "",
-          );
+          const location = await geocodeAddress(property.address ?? "");
           if (!location) {
             errors.push({
               propertyId: property.id,
@@ -98,7 +94,6 @@ export async function generateStaticMapUrl(
       `&map_id=${MAP_ID}` +
       markersString;
 
-    console.log("mapErrors in survey", errors);
     return { staticMapUrl, errors };
   } catch (error) {
     console.error("Error generating static map URL:", error);

@@ -8,7 +8,11 @@ import {
   Link,
   Font,
 } from "@react-pdf/renderer";
-import { type AttributeSchema, type PropertySchema } from "~/lib/property";
+import { useMemo } from "react";
+import {
+  type ColumnWithIncludes,
+  type PropertyWithIncludes,
+} from "~/hooks/useSurvey";
 
 Font.register({
   family: "IBM Plex Sans",
@@ -155,10 +159,10 @@ const styles = StyleSheet.create({
   },
 });
 
-const getHeight = (attribute: { id: string }) => {
-  if (attribute.id === "displayAddress") {
-    return "10%";
-  } else if (attribute.id === "comments") {
+const getHeight = (attributeId: string) => {
+  if (attributeId === "displayAddress") {
+    return "12%";
+  } else if (attributeId === "comments") {
     return "26%";
   } else {
     return "5%";
@@ -168,27 +172,30 @@ const getHeight = (attribute: { id: string }) => {
 export function ColumnsPage({
   pageNumber,
   properties,
-  attributes,
-  propertyOrientation,
+  columns,
 }: {
   pageNumber: number;
-  properties: PropertySchema[];
-  attributes: AttributeSchema[];
-  propertyOrientation: "rows" | "columns";
+  properties: PropertyWithIncludes[];
+  columns: ColumnWithIncludes[];
 }) {
   function formatAddress(address: string | undefined) {
     if (!address) {
       return "";
     }
+
     return address;
   }
 
-  function formatAttributeLabel(label: string) {
-    if (label === "Address") {
-      return "Address \n **Click for flyer**";
-    }
-    return label;
-  }
+  const propertyIdToColumnIdToValue = useMemo(() => {
+    return new Map(
+      properties.map((property) => [
+        property.id,
+        new Map(
+          property.propertyValues.map((value) => [value.columnId, value.value]),
+        ),
+      ]),
+    );
+  }, [properties]);
 
   // const brochureAttribute: AttributeSchema = {
   //   id: "brochure",
@@ -207,7 +214,29 @@ export function ColumnsPage({
   //   brochureAttribute,
   // );
 
-  const propertiesPerPage = propertyOrientation === "rows" ? 7 : 4;
+  const propertiesPerPage = 4;
+
+  const linkColumn: ColumnWithIncludes = {
+    id: "brochure",
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    displayIndex: 0,
+    surveyId: "",
+    attributeId: "brochure",
+    attribute: {
+      id: "brochure",
+      ownerId: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      label: "Brochure",
+      defaultIndex: 0,
+      defaultVisible: true,
+    },
+  };
+
+  const columnsWithBrochures = [...columns];
+
+  columnsWithBrochures.splice(columnsWithBrochures.length - 1, 0, linkColumn);
 
   return (
     <Page size="A4" orientation="landscape" style={styles.page}>
@@ -220,12 +249,23 @@ export function ColumnsPage({
           <View style={styles.tableCell}>
             <View style={styles.image}></View>
           </View>
-          {attributes.map((attribute) => (
+          <View
+            style={{
+              height: getHeight("displayAddress"),
+              ...styles.headerCell,
+            }}
+          >
+            <Text>Address</Text>
+          </View>
+          {columnsWithBrochures.map((column) => (
             <View
-              key={attribute.id}
-              style={{ height: getHeight(attribute), ...styles.headerCell }}
+              key={column.id}
+              style={{
+                height: getHeight(column.attributeId),
+                ...styles.headerCell,
+              }}
             >
-              <Text>{formatAttributeLabel(attribute.label)}</Text>
+              <Text>{column.attribute.label}</Text>
             </View>
           ))}
         </View>
@@ -248,20 +288,35 @@ export function ColumnsPage({
                 <Text>{(pageNumber - 1) * propertiesPerPage + index + 1}</Text>
               </View>
             </View>
-            {attributes.map((attribute) => (
+
+            <View
+              style={{
+                ...styles.tableCell,
+                height: getHeight("displayAddress"),
+                fontWeight: "semibold",
+              }}
+            >
+              <View>
+                <Text>{formatAddress(property.address)}</Text>
+              </View>
+            </View>
+
+            {columnsWithBrochures.map((column) => (
               <View
-                key={attribute.id}
+                key={column.id}
                 style={{
-                  ...(attribute.id === "comments"
+                  ...(column.attributeId === "comments"
                     ? styles.commentsCell
                     : styles.tableCell),
-                  height: getHeight(attribute),
+                  height: getHeight(column.attributeId),
                   fontWeight:
-                    attribute.id === "displayAddress" ? "semibold" : "normal",
+                    column.attributeId === "displayAddress"
+                      ? "semibold"
+                      : "normal",
                 }}
               >
                 <View>
-                  {attribute.id === "displayAddress" ? (
+                  {column.attributeId === "brochure" ? (
                     property.brochures[0]?.url ? (
                       <Link
                         src={
@@ -270,15 +325,17 @@ export function ColumnsPage({
                           ""
                         }
                       >
-                        {formatAddress(property.attributes.displayAddress)}
+                        Link
                       </Link>
                     ) : (
-                      <Text>
-                        {formatAddress(property.attributes.displayAddress)}
-                      </Text>
+                      <Text></Text>
                     )
                   ) : (
-                    <Text>{property.attributes?.[attribute.id]}</Text>
+                    <Text>
+                      {propertyIdToColumnIdToValue
+                        .get(property.id)
+                        ?.get(column.id)}
+                    </Text>
                   )}
                 </View>
               </View>

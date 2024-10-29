@@ -2,7 +2,11 @@ import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 import type { EmailThreadWithEmailsAndProperty } from "./types";
 import { type User } from "@clerk/nextjs/server";
-import { type Email, type EmailThread } from "prisma/generated/zod";
+import {
+  type Property,
+  type Email,
+  type EmailThread,
+} from "prisma/generated/zod";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -122,4 +126,9 @@ export function downloadBase64File(
 export function splitAddress(address: string) {
   const [streetAddress, city] = address.split(",").map((line) => line.trim());
   return { streetAddress, city };
+}
+
+export function getBrochureFileName(property: Property, exported = false) {
+  const address = splitAddress(property.address ?? "");
+  return `${address.streetAddress}_${exported ? "_" : ""}${property.id}.pdf`;
 }

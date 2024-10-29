@@ -33,11 +33,6 @@ import { Button } from "~/components/ui/button";
 import { EnvelopeIcon, PlusIcon } from "@heroicons/react/24/solid";
 import { NDXOutputUploader } from "./NDXOutputUploader";
 import { api } from "~/trpc/react";
-import {
-  type PropertySchema,
-  type AttributeSchema,
-  type CreatePropertySchema,
-} from "~/lib/property";
 import { DraggableHeader } from "./DraggableHeader";
 import { DraggableRow } from "./DraggableRow";
 import Spinner from "~/components/Spinner";
@@ -45,29 +40,24 @@ import EmailTemplateDialog from "../_components/EmailTemplateDialog";
 import {
   DEFAULT_EMAIL_TEMPLATE_BODY,
   DEFAULT_EMAIL_TEMPLATE_SUBJECT,
-  REPLACEMENT_VARIABLES,
 } from "~/lib/constants";
-import type {
-  Brochure,
-  EmailThread,
-  Contact,
-  EmailTemplate,
-  Email,
-} from "prisma/generated/zod";
-import { replaceTemplateVariables, splitAddress } from "~/lib/utils";
+import { type Brochure, type EmailTemplate } from "prisma/generated/zod";
 import { useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
-import { useSurvey } from "~/hooks/useSurvey";
+import {
+  type ColumnWithIncludes,
+  type PropertyWithIncludes,
+  useSurvey,
+} from "~/hooks/useSurvey";
 import { SurveyDownloadLink } from "../pdf-preview/v1/_components/DownloadLink";
-import { useSupabase } from "~/hooks/useSupabase";
+import BrochureDialog from "./brochures/BrochureDialog";
+import { uploadBrochureTask, uploadImageTask } from "~/app/utils/brochureTasks";
+import useSocketMessage from "./UseSocketMessage";
 
-export type Property = PropertySchema & {
-  brochures: Brochure[];
-  emailThreads: (EmailThread & { emails: Email[] })[];
-  contacts: Contact[];
+export type Property = PropertyWithIncludes & {
   isNew?: boolean;
 };
-export type Attribute = AttributeSchema & {
+export type Column = ColumnWithIncludes & {
   isNew?: boolean;
 };
 
@@ -82,221 +72,126 @@ export function PropertiesTable({
 }) {
   const { user } = useUser();
   const router = useRouter();
-  const [properties, setPropertiesState] = useState<Property[]>([]);
-  const [attributesOrder, setAttributesOrderState] = useState<Attribute[]>([]);
+  const [properties, setProperties] = useState<Property[]>([]);
+  const [columns, setColumns] = useState<Column[]>([]);
+  const columnsMap = useMemo(
+    () => new Map(columns.map((column) => [column.id, column])),
+    [columns],
+  );
+
   const [draggingRow, setDraggingRow] = useState<boolean>(false);
   const [isImportingProperties, setIsImportingProperties] =
     useState<boolean>(false);
+  const [isParsingBrochures, setIsParsingBrochures] = useState<boolean>(false);
+
   const { survey, isLoadingSurvey, refetchSurvey } = useSurvey();
+
+  const { triggered: parsingBrochuresCompleted, setTriggered } =
+    useSocketMessage(user?.id ?? "");
+
+  useEffect(() => {
+    if (parsingBrochuresCompleted) {
+      setTriggered(false);
+      setIsParsingBrochures(false);
+      void refetchSurvey();
+    }
+  }, [parsingBrochuresCompleted, refetchSurvey, setTriggered]);
 
   const [mapErrors, setMapErrors] = useState<
     { propertyId: string; error: string }[]
   >([]);
 
-  // const supabase = useSupabase();
-  // useEffect(() => {
-  //   if (supabase) {
-  //     const channel = supabase
-  //       .channel("table_db_changes")
-  //       .on(
-  //         "postgres_changes",
-  //         {
-  //           event: "*",
-  //           schema: "public",
-  //           table: "Contact",
-  //         },
-  //         (payload) => {
-  //           console.log("PAYLOAD", payload);
-  //         },
-  //       )
-  //       .subscribe();
+  const { mutateAsync: getPresignedS3Url } =
+    api.s3.getPresignedS3Url.useMutation();
+  const { mutateAsync: updateBrochureThumbnailUrl } =
+    api.brochure.updateThumbnailUrl.useMutation();
 
-  //     return () => {
-  //       void supabase.removeChannel(channel);
-  //     };
-  //   }
-  // }, [supabase]);
-
-  // useEffect(() => {
-  //   console.log("MAP ERRORS");
-  //   console.log(mapErrors);
-  // }, [mapErrors]);
-
-  useEffect(() => {
-    if (survey?.properties) {
-      setPropertiesState(
-        survey.properties.map((property) => ({
-          ...property,
-          attributes: property.attributes as Record<string, string>,
-          isNew: false,
-        })),
-      );
-      setIsImportingProperties(false);
-    }
-  }, [survey]);
-
-  const { data: attributes } = api.survey.getSurveyAttributes.useQuery({
-    surveyId,
-  });
-  const attributesMap = useMemo(
-    () => new Map(attributes?.map((attr) => [attr.id, attr]) ?? []),
-    [attributes],
-  );
-
-  useEffect(() => {
-    if (attributes) {
-      setAttributesOrderState(
-        attributes.map((attr) => ({
-          ...attr,
-          isNew: false,
-        })),
-      );
-    }
-  }, [attributes]);
-
-  const pendingMutations = useRef(0);
-
-  const [addingProperties, setAddingProperties] = useState(false);
-
-  const { mutate: updateAttributes } = api.survey.updateAttributes.useMutation({
-    onMutate: () => pendingMutations.current++,
-    onSettled: () => {
-      pendingMutations.current--;
-      if (pendingMutations.current === 0) {
-        // void refetchSurvey();
-        // void refetchAttributes();
+  const uploadBrochureThumbnails = useCallback(
+    async (properties: Property[]) => {
+      for (const property of properties) {
+        if (property.brochures.length > 0) {
+          const brochure = property.brochures[0]!;
+          if (!brochure.thumbnailUrl) {
+            const url = `/api/cors-proxy?url=${encodeURIComponent(brochure.exportedUrl ?? brochure.url)}`;
+            const file = await fetch(url).then((res) => res.blob());
+            const pdfFile = new File([file], brochure.title, {
+              type: "application/pdf",
+            });
+            const thumbnailUrl = await uploadImageTask(
+              pdfFile,
+              property.id,
+              getPresignedS3Url,
+            );
+            setProperties((prev) => {
+              const index = prev.findIndex((p) => p.id === property.id);
+              if (index === -1) return prev;
+              const newProperties = [...prev];
+              newProperties[index]!.brochures[0]!.thumbnailUrl = thumbnailUrl;
+              return newProperties;
+            });
+            await updateBrochureThumbnailUrl({
+              brochureId: brochure.id,
+              thumbnailUrl,
+            });
+          }
+        }
       }
     },
-  });
+    [getPresignedS3Url, updateBrochureThumbnailUrl],
+  );
 
-  const { mutateAsync: updateProperties } =
-    api.survey.updateProperties.useMutation({
-      onMutate: () => pendingMutations.current++,
-      onSettled: () => {
-        pendingMutations.current--;
-        if (pendingMutations.current === 0) {
-          // void refetchSurvey();
-        }
-        if (addingProperties) {
-          void refetchSurvey();
-          setAddingProperties(false);
-        }
-        setIsImportingProperties(false);
-      },
-    });
+  // Load properties and columns from survey
+  useEffect(() => {
+    if (!survey) return;
 
+    setProperties(
+      survey.properties.map((property) => ({
+        ...property,
+        isNew: false,
+      })),
+    );
+
+    setColumns(
+      survey.columns.map((column) => ({
+        ...column,
+        isNew: false,
+      })),
+    );
+
+    setIsImportingProperties(false);
+
+    setIsParsingBrochures(survey.importInProgress);
+
+    // void uploadBrochureThumbnails(survey.properties);
+  }, [survey, uploadBrochureThumbnails]);
+
+  // Property mutations
+  const { mutateAsync: createProperty } = api.property.create.useMutation();
+  const { mutateAsync: updatePropertyValue } =
+    api.property.updateValue.useMutation();
+  const { mutateAsync: updatePropertyAddress } =
+    api.property.updateAddress.useMutation();
   const { mutateAsync: updatePropertiesOrder } =
-    api.survey.updatePropertiesOrder.useMutation({
-      onMutate: () => pendingMutations.current++,
-      onSettled: () => {
-        // pendingMutations.current--;
-      },
-    });
+    api.survey.updatePropertiesOrder.useMutation();
+  const { mutateAsync: deleteProperty } = api.property.delete.useMutation();
 
-  // TODO: refactor this into the separate functions
-  const setProperties = useCallback(
-    async (
-      newPropertiesOrCallback:
-        | Array<PropertySchema | (CreatePropertySchema & { isNew?: boolean })>
-        | ((
-            prevProperties: Array<
-              PropertySchema | (CreatePropertySchema & { isNew?: boolean })
-            >,
-          ) => Array<
-            PropertySchema | (CreatePropertySchema & { isNew?: boolean })
-          >),
-      action: "add" | "update" | "delete",
-      propertyId?: string,
-    ) => {
-      if (!survey) return;
-      let updatedProperties: (PropertySchema & {
-        emailThreads?: (EmailThread & { emails: Email[] })[];
-        contacts?: Contact[];
-        brochures?: Brochure[];
-      })[];
-      if (typeof newPropertiesOrCallback === "function") {
-        updatedProperties = newPropertiesOrCallback(
-          properties,
-        ) as typeof updatedProperties;
-      } else {
-        updatedProperties = newPropertiesOrCallback as typeof updatedProperties;
-      }
+  // Column mutations
+  const { mutateAsync: createColumn } = api.survey.createColumn.useMutation();
+  const { mutateAsync: updateColumnAttribute } =
+    api.survey.updateColumnAttribute.useMutation();
+  const { mutateAsync: updateColumnsOrder } =
+    api.survey.updateColumnsOrder.useMutation();
+  const { mutateAsync: deleteColumn } = api.survey.deleteColumn.useMutation();
 
-      if (action === "add") {
-        setAddingProperties(true);
-      }
-
-      // Update state
-      setPropertiesState(
-        updatedProperties.map((property) => ({
-          ...property,
-          attributes: { ...property.attributes },
-          emailThreads: property.emailThreads ?? [],
-          contacts: property.contacts ?? [],
-          brochures: property.brochures ?? [],
-        })),
-      );
-
-      try {
-        await updateProperties({
-          surveyId,
-          properties: updatedProperties,
-          action,
-          propertyId,
-        });
-      } catch (error) {
-        console.error("Failed to update properties:", error);
-      }
-    },
-    [survey, properties, surveyId, updateProperties],
-  );
+  // Attribute mutations
+  const { mutateAsync: createAttribute } = api.attribute.create.useMutation();
 
   // state setter wrapper to update db as well
-  const modifyAttributes = useCallback(
-    async (
-      newOrderOrCallback:
-        | Attribute[]
-        | ((prevOrder: Attribute[]) => Attribute[]),
-      action: "order" | "add" | "update" | "delete",
-      attributeId?: string,
-    ) => {
-      if (!survey) return;
-      let newOrder: Attribute[];
-      // console.log("NEW ORDER OR CALLBACK", newOrderOrCallback);
-      if (typeof newOrderOrCallback === "function") {
-        newOrder = newOrderOrCallback(attributesOrder);
-      } else {
-        newOrder = newOrderOrCallback;
-      }
-      try {
-        void updateAttributes({
-          surveyId,
-          attributes: newOrder,
-          action,
-          attributeId,
-        });
-        setAttributesOrderState(newOrder);
-      } catch (error) {
-        console.error("Failed to update attributes order:", error);
-      }
-    },
-    [
-      survey,
-      attributesOrder,
-      surveyId,
-      updateAttributes,
-      setAttributesOrderState,
-    ],
-  );
-
   const rowIds = useMemo(
     () => properties.map((property) => property.id),
     [properties],
   );
-  const colIds = useMemo(
-    () => attributesOrder?.map((attribute) => attribute.id),
-    [attributesOrder],
-  );
+  const colIds = useMemo(() => columns.map((column) => column.id), [columns]);
 
   const handleDragEnd = useCallback(
     (event: DragEndEvent) => {
@@ -305,22 +200,25 @@ export function PropertiesTable({
         if (draggingRow) {
           const oldIndex = rowIds.findIndex((id) => id === active.id);
           const newIndex = rowIds.findIndex((id) => id === over.id);
-          setPropertiesState((prev) => arrayMove(prev, oldIndex, newIndex));
+          setProperties((prev) => arrayMove(prev, oldIndex, newIndex));
           void updatePropertiesOrder({
             propertyIds: rowIds,
             oldIndex,
             newIndex,
           });
         } else {
-          void modifyAttributes((data) => {
-            const oldIndex = colIds.findIndex((id) => id === active.id);
-            const newIndex = colIds.findIndex((id) => id === over.id);
-            return arrayMove(data, oldIndex, newIndex);
-          }, "order");
+          const oldIndex = colIds.findIndex((id) => id === active.id);
+          const newIndex = colIds.findIndex((id) => id === over.id);
+          setColumns((prev) => arrayMove(prev, oldIndex, newIndex));
+          void updateColumnsOrder({
+            columnIds: colIds,
+            oldIndex,
+            newIndex,
+          });
         }
       }
     },
-    [draggingRow, rowIds, updatePropertiesOrder, modifyAttributes, colIds],
+    [draggingRow, rowIds, updatePropertiesOrder, updateColumnsOrder, colIds],
   );
 
   const sensors = useSensors(
@@ -329,154 +227,225 @@ export function PropertiesTable({
     useSensor(KeyboardSensor, {}),
   );
 
-  const addAttributeToState = useCallback(() => {
-    void setAttributesOrderState((data) => [
-      ...data,
+  // ----------------------
+  // #region Column CRUD
+  // ----------------------
+  const _createColumn = useCallback(() => {
+    const tempColumnId = crypto.randomUUID();
+    const tempAttributeId = crypto.randomUUID();
+    void setColumns((prev) => [
+      ...prev,
       {
-        id: "new-attribute-lol",
+        id: tempColumnId,
         createdAt: new Date(),
         updatedAt: new Date(),
-        type: "string",
-        label: "New field",
-        ownerId: "",
-        projectId: "",
-        isNew: true,
-        defaultIndex: attributesOrder.length ?? 1000,
-      },
-    ]);
-  }, [setAttributesOrderState, attributesOrder.length]);
-
-  const saveNewAttribute = useCallback(
-    (label: string) => {
-      void modifyAttributes(
-        (data) => [
-          ...data.filter((attribute) => !attribute.isNew),
-          {
-            id: crypto.randomUUID(),
-            createdAt: new Date(),
-            updatedAt: new Date(),
-            type: "string",
-            label,
-            ownerId: "",
-            projectId: "",
-            isNew: false,
-            defaultIndex: attributesOrder.length ?? 1000,
-          },
-        ],
-        "add",
-      );
-    },
-    [modifyAttributes, attributesOrder.length],
-  );
-
-  const renameAttribute = useCallback(
-    (id: string, label: string) => {
-      void modifyAttributes(
-        (data) => {
-          const index = data.findIndex((attribute) => attribute.id === id);
-          if (index === -1) return data;
-          const newData = [...data];
-          newData[index]!.label = label;
-          return newData;
-        },
-        "update",
-        id,
-      );
-    },
-    [modifyAttributes],
-  );
-
-  const deleteAttribute = useCallback(
-    (id: string) => {
-      void modifyAttributes(
-        (data) => {
-          const index = data.findIndex((attribute) => attribute.id === id);
-          if (index === -1) return data;
-          const newData = [...data];
-          newData.splice(index, 1);
-          return newData;
-        },
-        "delete",
-        id,
-      );
-    },
-    [modifyAttributes],
-  );
-
-  const addProperty = useCallback(() => {
-    void setProperties(
-      (data) => [
-        ...data,
-        {
+        displayIndex: prev.length,
+        attributeId: tempAttributeId,
+        attribute: {
+          id: tempAttributeId,
+          ownerId: user?.id ?? "",
           createdAt: new Date(),
           updatedAt: new Date(),
-          photoUrl: null,
-          displayIndex: properties.length,
-          attributes: {},
-          surveyId: surveyId,
-          brochures: [],
-          contacts: [],
-          isNew: true,
+          label: "New field",
+          defaultIndex: 0,
+          defaultVisible: true,
         },
-      ],
-      "add",
-    );
-    setTimeout(() => {
-      tableRef.current?.scrollTo({
-        top: tableRef.current.scrollWidth,
+        isNew: true,
+        surveyId,
+      },
+    ]);
+  }, [surveyId, user?.id]);
+
+  const _renameColumn = useCallback(
+    async ({
+      column,
+      attributeId,
+      attributeLabel,
+    }: {
+      column: Column;
+      attributeId?: string;
+      attributeLabel: string;
+    }) => {
+      const isNew = column.isNew;
+
+      setColumns((prev) => {
+        const index = prev.findIndex((c) => c.id === column.id);
+        if (index === -1) return prev;
+        const newColumns = [...prev];
+        newColumns[index]!.attributeId = attributeId ?? "";
+        newColumns[index]!.attribute.label = attributeLabel;
+        newColumns[index]!.isNew = false;
+        return newColumns;
       });
-    });
-  }, [setProperties, surveyId, properties]);
 
-  const updateProperty = useCallback(
-    (property: Property) => {
-      void setProperties(
-        (data) => {
-          const index = data.findIndex(
-            (prop) => (prop as Property).id === property.id,
-          );
-          if (index === -1) return data;
-          const newData = [...data];
-          newData[index] = property;
-          return newData;
-        },
-        "update",
-        property.id,
-      );
+      // Create new attribute if doesn't exist
+      if (!attributeId) {
+        if (!attributeLabel) {
+          throw new Error("Attribute label is required");
+        }
+        const attribute = await createAttribute({
+          label: attributeLabel,
+          defaultIndex: column.displayIndex,
+        });
+        attributeId = attribute.id;
+      }
+
+      if (isNew) {
+        const newColumn = await createColumn({
+          attributeId,
+          displayIndex: column.displayIndex,
+          surveyId,
+        });
+
+        // Update column with the new id
+        setColumns((prev) => {
+          const index = prev.findIndex((c) => c.id === column.id);
+          if (index === -1) return prev;
+          const newColumns = [...prev];
+          newColumns[index]!.id = newColumn.id;
+          newColumns[index]!.attributeId = attributeId;
+          newColumns[index]!.attribute.label = attributeLabel;
+          newColumns[index]!.isNew = false;
+          return newColumns;
+        });
+      } else {
+        void updateColumnAttribute({
+          columnId: column.id,
+          attributeId,
+        });
+      }
     },
-    [setProperties],
+    [createAttribute, createColumn, surveyId, updateColumnAttribute],
   );
 
-  const deleteProperty = useCallback(
+  const _deleteColumn = useCallback(
     (id: string) => {
-      void setProperties(
-        (data) => {
-          const index = data.findIndex(
-            (property) => (property as Property).id === id,
-          );
-          if (index === -1) return data;
-          const newData = [...data];
-          newData.splice(index, 1);
-          return newData;
-        },
-        "delete",
-        id,
-      );
+      setColumns((prev) => {
+        const index = prev.findIndex((column) => column.id === id);
+        if (index === -1) return prev;
+        const newColumns = [...prev];
+        newColumns.splice(index, 1);
+        return newColumns;
+      });
+      void deleteColumn({ columnId: id });
     },
-    [setProperties],
+    [deleteColumn],
+  );
+  // #endregion
+
+  // ----------------------
+  // #region Property CRUD
+  // ----------------------
+  const _createProperty = useCallback(async () => {
+    const tempId = crypto.randomUUID();
+    setProperties((prev) => [
+      ...prev,
+      {
+        id: tempId,
+        isNew: true,
+        displayIndex: properties.length,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        address: "",
+        photoUrl: null,
+        ownerId: user?.id ?? "",
+        surveyId,
+        propertyValues: [],
+        contacts: [],
+        emailThreads: [],
+        brochures: [],
+      },
+    ]);
+    setTimeout(() => {
+      if (tableContainerRef.current) {
+        tableContainerRef.current.scrollTo({
+          top: tableContainerRef.current.scrollHeight,
+          behavior: "smooth",
+        });
+      }
+    });
+
+    // Create property on server
+    const propertyId = await createProperty({
+      displayIndex: properties.length,
+      surveyId,
+    });
+
+    // Update temp id with new id
+    setProperties((prev) => {
+      const index = prev.findIndex((property) => property.id === tempId);
+      if (index === -1) return prev;
+
+      const newProperties = [...prev];
+      newProperties[index]!.id = propertyId;
+      return newProperties;
+    });
+  }, [createProperty, properties.length, surveyId, user?.id]);
+
+  const _updatePropertyValue = useCallback(
+    (propertyId: string, columnId: string, value: string) => {
+      setProperties((prev) => {
+        // Get property index
+        const index = prev.findIndex((property) => property.id === propertyId);
+        if (index === -1) return prev;
+
+        // Get column index
+        const newProperties = [...prev];
+        const columnIndex = newProperties[index]!.propertyValues.findIndex(
+          (value) => value.columnId === columnId,
+        );
+        if (columnIndex === -1) return prev;
+
+        newProperties[index]!.propertyValues[columnIndex]!.value = value;
+        return newProperties;
+      });
+      void updatePropertyValue({ propertyId, columnId, value });
+    },
+    [updatePropertyValue],
   );
 
-  // Verify property data
+  const _updatePropertyAddress = useCallback(
+    (propertyId: string, address: string) => {
+      setProperties((prev) => {
+        const index = prev.findIndex((property) => property.id === propertyId);
+        if (index === -1) return prev;
+        const newProperties = [...prev];
+        newProperties[index]!.address = address;
+        return newProperties;
+      });
+      void updatePropertyAddress({ propertyId, address });
+    },
+    [updatePropertyAddress],
+  );
+
+  const _deleteProperty = useCallback(
+    (id: string) => {
+      setProperties((prev) => {
+        const index = prev.findIndex((property) => property.id === id);
+        if (index === -1) return prev;
+        const newData = [...prev];
+        newData.splice(index, 1);
+        return newData;
+      });
+      void deleteProperty({ propertyId: id });
+    },
+    [deleteProperty],
+  );
+  // #endregion
+
+  // ----------------------
+  // #region Verify property data
+  // ----------------------
   const [state, setState] = useState<PropertiesTableState>("edit");
   const [selectedFields, setSelectedFields] = useState<
     Record<string, Set<string>>
-  >({}); // Maps property id to a set of attribute ids
+  >({}); // Maps property id to a set of column ids
 
   const getHeaderCheckedState = useCallback(
-    (attributeId: string) => {
+    (columnId: string) => {
       let numChecked = 0;
       for (const property of properties) {
-        if (selectedFields[property.id]?.has(attributeId)) {
+        if (selectedFields[property.id]?.has(columnId)) {
           numChecked++;
         }
       }
@@ -490,15 +459,15 @@ export function PropertiesTable({
     [properties, selectedFields],
   );
   const handleHeaderCheckedChange = useCallback(
-    (attributeId: string, checked: boolean) => {
+    (columnId: string, checked: boolean) => {
       setSelectedFields((prev) => {
         const newSelectedFields = { ...prev };
         for (const property of properties) {
           const newSet = newSelectedFields[property.id] ?? new Set<string>();
           if (checked) {
-            newSet.add(attributeId);
+            newSet.add(columnId);
           } else {
-            newSet.delete(attributeId);
+            newSet.delete(columnId);
           }
           newSelectedFields[property.id] = newSet;
         }
@@ -513,50 +482,38 @@ export function PropertiesTable({
     setTemplateDialog(true);
   }, []);
 
-  const { mutateAsync: createDraftEmails } =
-    api.email.createDraftEmails.useMutation();
+  const { mutateAsync: createDraftEmailsFromTemplate } =
+    api.email.createDraftEmailsFromTemplate.useMutation();
   const generateDraftEmail = useCallback(
     (
       property: Property,
       emailTemplate: EmailTemplate,
       attributesToVerify: string[],
     ) => {
-      // TODO: get recipient name and email from property
       const recipientFirstName = property.contacts[0]?.firstName ?? "";
       const recipientEmail = property.contacts[0]?.email ?? "";
 
-      const replacements = {
-        [REPLACEMENT_VARIABLES.name]: recipientFirstName,
-        [REPLACEMENT_VARIABLES.address]:
-          splitAddress(property.attributes?.address ?? "").streetAddress ?? "",
-        [REPLACEMENT_VARIABLES.fieldsToVerify]: attributesToVerify
-          .map((attributeId) => {
-            const attributeLabel = attributesMap.get(attributeId)?.label;
-            if (!attributeLabel) return "";
-            return `- ${attributeLabel}`;
-          })
-          .join("\n"),
-      };
-      const subject = replaceTemplateVariables(
-        emailTemplate?.subject ?? DEFAULT_EMAIL_TEMPLATE_SUBJECT,
-        replacements,
-      );
-      const body = replaceTemplateVariables(
-        emailTemplate?.body ??
-          DEFAULT_EMAIL_TEMPLATE_BODY(user?.fullName ?? ""),
-        replacements,
-      );
-
       const emailDetails = {
-        to: recipientEmail,
+        recipientEmail: recipientEmail,
+        recipientName: recipientFirstName,
         propertyId: property.id,
-        subject,
-        body,
-        attributesToVerify,
+        address: property.address,
+        templateSubject:
+          emailTemplate?.subject ?? DEFAULT_EMAIL_TEMPLATE_SUBJECT,
+        templateBody:
+          emailTemplate?.body ??
+          DEFAULT_EMAIL_TEMPLATE_BODY(user?.fullName ?? ""),
+        attributesToVerify: attributesToVerify.map(
+          (columnId) => columnsMap.get(columnId)!.attributeId,
+        ),
+        attributeLabels: attributesToVerify.map((columnId) => {
+          const column = columnsMap.get(columnId);
+          return column?.attribute.label ?? "";
+        }),
       };
       return emailDetails;
     },
-    [attributesMap, user?.fullName],
+    [columnsMap, user?.fullName],
   );
   const _createDraftEmails = useCallback(
     async (emailTemplate: EmailTemplate) => {
@@ -569,12 +526,128 @@ export function PropertiesTable({
         );
         drafts.push(emailDetails);
       }
-      await createDraftEmails({ drafts });
+      await createDraftEmailsFromTemplate({ drafts });
     },
-    [selectedFields, createDraftEmails, generateDraftEmail, properties],
+    [
+      selectedFields,
+      createDraftEmailsFromTemplate,
+      generateDraftEmail,
+      properties,
+    ],
   );
+  // #endregion
 
-  const tableRef = useRef<HTMLTableElement>(null);
+  // ----------------------
+  // #region Brochures
+  // ----------------------
+  const { mutateAsync: deleteBrochure, isPending: isDeletingBrochure } =
+    api.brochure.delete.useMutation();
+  const { mutateAsync: createBrochure } = api.brochure.create.useMutation();
+
+  const [brochureDialogState, setBrochureDialogState] = useState<{
+    propertyId: string;
+    open: boolean;
+  }>({ propertyId: "", open: false });
+  const [curBrochurePropertyId, setCurBrochurePropertyId] =
+    useState<string>("");
+  const [isBrochureUploading, setIsBrochureUploading] = useState(false);
+
+  const handleEditBrochure = useCallback((propertyId: string) => {
+    setBrochureDialogState({ propertyId, open: true });
+  }, []);
+  const handleSaveBrochure = useCallback(
+    (propertyId: string, brochure: Brochure) => {
+      setProperties((prev) =>
+        prev.map((property) =>
+          property.id === propertyId
+            ? {
+                ...property,
+                brochures: [brochure],
+              }
+            : property,
+        ),
+      );
+    },
+    [],
+  );
+  const handleDeleteBrochure = useCallback(
+    async (propertyId: string, brochureId: string) => {
+      setCurBrochurePropertyId(propertyId);
+      setProperties((prev) =>
+        prev.map((property) =>
+          property.id === propertyId
+            ? {
+                ...property,
+                brochures: property.brochures.filter(
+                  (b) => b.id !== brochureId,
+                ),
+              }
+            : property,
+        ),
+      );
+      setCurBrochurePropertyId("");
+      await deleteBrochure({ propertyId, brochureId });
+    },
+    [deleteBrochure],
+  );
+  const handleUploadBrochure = useCallback(
+    async (propertyId: string, file?: File) => {
+      setIsBrochureUploading(true);
+      setCurBrochurePropertyId(propertyId);
+      try {
+        if (!file) {
+          throw new Error("No file selected");
+        }
+        const property = properties.find((p) => p.id === propertyId)!;
+        if (!property) {
+          throw new Error("Property not found");
+        }
+
+        const [thumbnailUrl, brochureUrl] = await Promise.all([
+          uploadImageTask(file, propertyId, getPresignedS3Url),
+          uploadBrochureTask(file, property, getPresignedS3Url),
+        ]);
+
+        const result = await createBrochure({
+          propertyId: property.id,
+          brochure: {
+            inpaintedRectangles: [],
+            textToRemove: [],
+            pathsToRemove: [],
+            undoStack: [],
+            deletedPages: [],
+            url: brochureUrl,
+            title: file.name,
+            approved: false,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            exportedUrl: null,
+            thumbnailUrl,
+          },
+        });
+
+        setProperties((prev) =>
+          prev.map((property) =>
+            property.id === propertyId
+              ? {
+                  ...property,
+                  brochures: result.brochures,
+                }
+              : property,
+          ),
+        );
+      } catch (error) {
+        console.error("Error uploading brochure:", error);
+      } finally {
+        setIsBrochureUploading(false);
+        setCurBrochurePropertyId("");
+      }
+    },
+    [createBrochure, getPresignedS3Url, properties],
+  );
+  // #endregion
+
+  const tableContainerRef = useRef<HTMLDivElement>(null);
 
   return (
     <>
@@ -601,12 +674,12 @@ export function PropertiesTable({
               </div>
               <div className="flex flex-col items-stretch gap-2">
                 <NDXOutputUploader
-                  className="w-full"
                   surveyId={surveyId}
                   refetchSurvey={refetchSurvey}
                   setUploading={setIsImportingProperties}
+                  setParsingBrochures={setIsParsingBrochures}
                 />
-                <Button variant="ghost" onClick={addProperty}>
+                <Button variant="ghost" onClick={_createProperty}>
                   Manually add properties
                 </Button>
               </div>
@@ -621,8 +694,9 @@ export function PropertiesTable({
                 setMapErrors={setMapErrors}
                 surveyName={survey?.name ?? ""}
                 properties={properties}
-                attributes={attributesOrder}
+                columns={columns}
                 state={state}
+                isParsingBrochures={isParsingBrochures}
                 onStateChange={setState}
                 draftEmails={draftEmails}
               />
@@ -639,14 +713,22 @@ export function PropertiesTable({
                 sensors={sensors}
               >
                 <Table
-                  ref={tableRef}
-                  containerProps={{ className: "flex-1 overflow-auto" }}
+                  containerProps={{
+                    ref: tableContainerRef,
+                    className: "flex-1 overflow-auto",
+                  }}
                   className="relative"
                 >
                   <TableHeader className="sticky top-0 z-50 bg-white shadow">
                     <TableRow>
                       <TableCell className="w-[1%]"></TableCell>
-                      <TableHead className="w-[1%] text-black" />
+                      <TableHead className="w-[1%]" />
+                      <TableHead className="w-[1%] text-center text-black">
+                        Brochure
+                      </TableHead>
+                      <TableHead className="w-[1%] text-center text-black">
+                        Address
+                      </TableHead>
                       <SortableContext
                         items={draggingRow ? rowIds : colIds}
                         strategy={
@@ -655,26 +737,27 @@ export function PropertiesTable({
                             : horizontalListSortingStrategy
                         }
                       >
-                        {attributesOrder.map((attribute) => (
+                        {columns.map((column) => (
                           <DraggableHeader
-                            key={attribute.id}
-                            attribute={attribute}
-                            renameAttribute={
-                              !attribute.ownerId && !attribute.isNew
-                                ? undefined
-                                : attribute.isNew
-                                  ? (name) => saveNewAttribute(name)
-                                  : (name) =>
-                                      renameAttribute(attribute.id, name)
+                            key={column.id}
+                            column={column}
+                            renameColumn={({
+                              column,
+                              attributeId,
+                              attributeLabel,
+                            }) =>
+                              _renameColumn({
+                                column,
+                                attributeId,
+                                attributeLabel,
+                              })
                             }
-                            deleteAttribute={() =>
-                              deleteAttribute(attribute.id)
-                            }
+                            deleteColumn={() => _deleteColumn(column.id)}
                             draggingRow={draggingRow}
                             state={state}
-                            checkedState={getHeaderCheckedState(attribute.id)}
+                            checkedState={getHeaderCheckedState(column.id)}
                             onCheckedChange={(checked) =>
-                              handleHeaderCheckedChange(attribute.id, checked)
+                              handleHeaderCheckedChange(column.id, checked)
                             }
                           ></DraggableHeader>
                         ))}
@@ -683,7 +766,7 @@ export function PropertiesTable({
                         <Button
                           size="icon"
                           variant="ghost"
-                          onClick={addAttributeToState}
+                          onClick={_createColumn}
                         >
                           <PlusIcon className="size-4" />
                         </Button>
@@ -705,12 +788,13 @@ export function PropertiesTable({
                             photoUrl={property.photoUrl ?? ""}
                             key={property.id}
                             property={property}
-                            attributes={attributesOrder}
-                            deleteProperty={() => deleteProperty(property.id)}
+                            columns={columns}
+                            updatePropertyValue={_updatePropertyValue}
+                            updatePropertyAddress={_updatePropertyAddress}
+                            deleteProperty={() => _deleteProperty(property.id)}
                             draggingRow={draggingRow}
                             state={state}
                             setDraggingRow={setDraggingRow}
-                            updateProperty={updateProperty}
                             selectedFields={selectedFields}
                             onSelectedFieldsChange={setSelectedFields}
                             mapError={
@@ -718,6 +802,13 @@ export function PropertiesTable({
                                 (error) => error.propertyId === property.id,
                               )?.error
                             }
+                            isLoadingBrochure={
+                              curBrochurePropertyId === property.id &&
+                              (isDeletingBrochure || isBrochureUploading)
+                            }
+                            onEditBrochure={handleEditBrochure}
+                            onDeleteBrochure={handleDeleteBrochure}
+                            onUploadBrochure={handleUploadBrochure}
                           />
                         );
                       })}
@@ -725,7 +816,7 @@ export function PropertiesTable({
                   </TableBody>
                 </Table>
                 <div className="m-2 flex items-center gap-2">
-                  <Button variant="ghost" onClick={addProperty}>
+                  <Button variant="ghost" onClick={_createProperty}>
                     + Add property
                   </Button>
                   <NDXOutputUploader
@@ -733,6 +824,7 @@ export function PropertiesTable({
                     surveyId={surveyId}
                     refetchSurvey={refetchSurvey}
                     setUploading={setIsImportingProperties}
+                    setParsingBrochures={setIsParsingBrochures}
                   />
                 </div>
               </DndContext>
@@ -740,6 +832,21 @@ export function PropertiesTable({
           </div>
         )}
       </div>
+      <BrochureDialog
+        property={properties.find(
+          (p) => p.id === brochureDialogState.propertyId,
+        )}
+        open={brochureDialogState.open}
+        onOpenChange={() =>
+          setBrochureDialogState({
+            ...brochureDialogState,
+            open: false,
+          })
+        }
+        onSave={(brochure) =>
+          handleSaveBrochure(brochureDialogState.propertyId, brochure)
+        }
+      />
       <EmailTemplateDialog
         open={templateDialog}
         onOpenChange={setTemplateDialog}
@@ -757,17 +864,19 @@ export function PropertiesTable({
 function ActionButtons({
   surveyName,
   properties,
-  attributes,
+  columns,
   state,
+  isParsingBrochures,
   onStateChange,
   draftEmails,
   setMapErrors,
 }: {
   surveyName: string;
   state: PropertiesTableState;
-  onStateChange: (state: PropertiesTableState) => void;
   properties: Property[];
-  attributes: AttributeSchema[];
+  columns: Column[];
+  isParsingBrochures: boolean;
+  onStateChange: (state: PropertiesTableState) => void;
   draftEmails: () => void;
   setMapErrors: (errors: { propertyId: string; error: string }[]) => void;
 }) {
@@ -787,9 +896,19 @@ function ActionButtons({
             <Button
               className="w-full"
               onClick={() => onStateChange("select-fields")}
+              disabled={isParsingBrochures}
             >
-              <EnvelopeIcon className="mr-2 size-4" />
-              Verify property data
+              {isParsingBrochures ? (
+                <>
+                  <Spinner className="mr-2 flex size-4 text-white" />
+                  Extracting contacts
+                </>
+              ) : (
+                <>
+                  <EnvelopeIcon className="mr-2 size-4" />
+                  Verify property data
+                </>
+              )}
             </Button>
 
             <SurveyDownloadLink
@@ -797,7 +916,7 @@ function ActionButtons({
               buttonText="Export PDF instead"
               surveyName={surveyName}
               properties={properties}
-              attributes={attributes}
+              columns={columns}
             />
           </div>
         </div>
@@ -808,16 +927,26 @@ function ActionButtons({
         <Button
           className="w-full"
           onClick={() => onStateChange("select-fields")}
+          disabled={isParsingBrochures}
         >
-          <EnvelopeIcon className="mr-2 size-4" />
-          Verify property data
+          {isParsingBrochures ? (
+            <>
+              <Spinner className="mr-2 flex size-4 text-white" />
+              Extracting contacts
+            </>
+          ) : (
+            <>
+              <EnvelopeIcon className="mr-2 size-4" />
+              Verify property data
+            </>
+          )}
         </Button>
         <SurveyDownloadLink
           setErrors={setMapErrors}
           buttonText="Export Survey PDF"
           surveyName={surveyName}
           properties={properties}
-          attributes={attributes}
+          columns={columns}
         />
       </div>
     );

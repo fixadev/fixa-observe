@@ -1,5 +1,5 @@
 import { Image, Page, Text, View, StyleSheet, Font } from "@react-pdf/renderer";
-import { type PropertySchema } from "~/lib/property";
+import { type PropertyWithIncludes } from "~/hooks/useSurvey";
 
 const styles = StyleSheet.create({
   page: {
@@ -112,11 +112,9 @@ Font.register({
 export function MapPage({
   mapImageData,
   properties,
-  clientName,
 }: {
   mapImageData: string | null;
-  properties: PropertySchema[] | null;
-  clientName: string;
+  properties: (PropertyWithIncludes & { streetAddress: string })[] | null;
 }) {
   if (!mapImageData || !properties) return null;
   return (
@@ -129,10 +127,7 @@ export function MapPage({
               <View style={styles.imageBubble}>
                 <Text>{index + 1}</Text>
               </View>
-              <Text style={styles.propertyText}>
-                {property.attributes.address?.split(",")[0]}
-              </Text>
-              {/* Add more property details as needed */}
+              <Text style={styles.propertyText}>{property.streetAddress}</Text>
             </View>
           ))}
         </View>
@@ -140,6 +135,7 @@ export function MapPage({
 
       <View style={styles.rightColumn}>
         <View style={styles.mapContainer}>
+          {/* eslint-disable-next-line jsx-a11y/alt-text */}
           <Image src={mapImageData} style={styles.map} />
         </View>
       </View>

@@ -1,45 +1,71 @@
 /* eslint-disable @typescript-eslint/prefer-nullish-coalescing */
 "use client";
 import type React from "react";
-import { usePDFJS } from "./usePDFjs";
 import axios from "axios";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "~/components/ui/dialog";
+
+import { Checkbox } from "~/components/ui/checkbox";
 import { useToast } from "~/hooks/use-toast";
 import { FileInput } from "../../../../../../_components/FileInput";
 import { Button } from "~/components/ui/button";
 import { ArrowUpTrayIcon } from "@heroicons/react/24/outline";
 import { api } from "~/trpc/react";
+import { Label } from "~/components/ui/label";
+import { useEffect, useMemo, useState } from "react";
+import { cn } from "~/lib/utils";
 
 export const NDXOutputUploader = ({
   variant = "default",
   surveyId,
   setUploading,
+  setParsingBrochures,
   refetchSurvey,
-  className,
 }: {
   variant?: "default" | "ghost";
   surveyId: string;
   setUploading: (uploading: boolean) => void;
+  setParsingBrochures: (parsing: boolean) => void;
   refetchSurvey: () => void;
-  className?: string;
 }) => {
-  const pdfjs = usePDFJS((pdfjs) => {
-    // console.log("PDFJS loaded", pdfjs);
-  });
-
   const { toast } = useToast();
+  const [attributesToInclude, setAttributesToInclude] = useState<string[]>([]);
 
   const { mutateAsync: getPresignedS3Url } =
-    api.property.getPresignedS3Url.useMutation();
+    api.s3.getPresignedS3Url.useMutation();
 
   const { mutateAsync: uploadNDXPDF } = api.survey.importNDXPDF.useMutation();
+
+  const { data: attributes } = api.attribute.getAll.useQuery();
+
+  const defaultAttributes = useMemo(
+    () => attributes?.filter((attribute) => attribute.defaultVisible),
+    [attributes],
+  );
+
+  useEffect(() => {
+    setAttributesToInclude(
+      defaultAttributes?.map((attribute) => attribute.id) ?? [],
+    );
+  }, [defaultAttributes]);
+
+  const remainingAttributes = attributes
+    ?.filter((attribute) => !attribute.defaultVisible)
+    .sort((a, b) => a.label.localeCompare(b.label));
 
   // TODO: Move all this functionality to backend
   const onFilesChangeHandler = async (files: FileList) => {
     try {
       const file = files[0];
-      if (file && pdfjs) {
+      if (file) {
         setUploading(true);
-
+        setParsingBrochures(true);
         const presignedS3Url = await getPresignedS3Url({
           fileName: file.name,
           fileType: file.type,
@@ -62,9 +88,17 @@ export const NDXOutputUploader = ({
         const response = await uploadNDXPDF({
           surveyId,
           pdfUrl: cleanedPresignedS3Url,
+          selectedAttributeIds: attributesToInclude,
         });
 
         refetchSurvey();
+
+        // setTimeout(
+        //   () => {
+        //     refetchSurvey();
+        //   },
+        //   (1000 * (response.numberOfProperties ?? 1)) / 2,
+        // );
 
         if (response.status === 200) {
           toast({
@@ -93,15 +127,98 @@ export const NDXOutputUploader = ({
   };
 
   return (
-    <FileInput
-      className={className}
-      triggerElement={
-        <Button variant={variant}>
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button>
           <ArrowUpTrayIcon className="mr-2 size-4" />
           Upload NDX PDF
         </Button>
-      }
-      handleFilesChange={onFilesChangeHandler}
-    />
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Select information to import</DialogTitle>
+        </DialogHeader>
+        <div className="flex flex-col gap-4 py-4">
+          <div className="flex items-center gap-2">
+            <Checkbox checked={true} disabled />
+            <Label>Address</Label>
+          </div>
+          <div className="flex flex-col gap-4">
+            {defaultAttributes?.map((attribute) => {
+              return (
+                <div
+                  key={attribute.id}
+                  className="flex flex-row items-center gap-2"
+                >
+                  <Checkbox
+                    key={attribute.id}
+                    id={attribute.id}
+                    checked={attributesToInclude.includes(attribute.id)}
+                    onCheckedChange={(checked) => {
+                      if (checked) {
+                        setAttributesToInclude([
+                          ...attributesToInclude,
+                          attribute.id,
+                        ]);
+                      } else {
+                        setAttributesToInclude(
+                          attributesToInclude.filter(
+                            (id) => id !== attribute.id,
+                          ),
+                        );
+                      }
+                    }}
+                  />
+                  <Label htmlFor={attribute.id}>{attribute.label}</Label>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+        <div className="h-px w-full bg-gray-200" />
+        <div
+          className={cn(
+            `flex grid grid-flow-col grid-cols-2`,
+            `grid-rows-9 gap-4 overflow-y-auto py-4`,
+          )}
+        >
+          {remainingAttributes?.map((attribute) => {
+            return (
+              <div
+                key={attribute.id}
+                className="flex flex-row items-center gap-2"
+              >
+                <Checkbox
+                  key={attribute.id}
+                  id={attribute.id}
+                  checked={attributesToInclude.includes(attribute.id)}
+                  onCheckedChange={(checked) => {
+                    if (checked) {
+                      setAttributesToInclude([
+                        ...attributesToInclude,
+                        attribute.id,
+                      ]);
+                    } else {
+                      setAttributesToInclude(
+                        attributesToInclude.filter((id) => id !== attribute.id),
+                      );
+                    }
+                  }}
+                />
+                <Label htmlFor={attribute.id}>{attribute.label}</Label>
+              </div>
+            );
+          })}
+        </div>
+        <DialogFooter>
+          <FileInput handleFilesChange={onFilesChangeHandler}>
+            <Button variant={variant}>
+              <ArrowUpTrayIcon className="mr-2 size-4" />
+              Upload NDX PDF
+            </Button>
+          </FileInput>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 };

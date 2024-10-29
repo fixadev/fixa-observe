@@ -7,13 +7,13 @@ import { projectService } from "~/server/services/project";
 const projectServiceInstance = projectService({ db });
 
 export const projectRouter = createTRPCRouter({
-  createProject: protectedProcedure
+  create: protectedProcedure
     .input(createProjectInput)
     .mutation(async ({ ctx, input }) => {
       return await projectServiceInstance.createProject(input, ctx.user.id);
     }),
 
-  getProject: protectedProcedure
+  get: protectedProcedure
     .input(z.object({ projectId: z.string() }))
     .query(async ({ ctx, input }) => {
       return await projectServiceInstance.getProject(
@@ -22,26 +22,23 @@ export const projectRouter = createTRPCRouter({
       );
     }),
 
-  getProjects: protectedProcedure.query(async ({ ctx }) => {
+  getAll: protectedProcedure.query(async ({ ctx }) => {
     return await projectServiceInstance.getProjectsByUser(ctx.user.id);
   }),
 
-  updateProject: protectedProcedure
+  updateName: protectedProcedure
     .input(updateProjectInput)
     .mutation(async ({ ctx, input }) => {
-      return await projectServiceInstance.updateProject(
+      return await projectServiceInstance.updateName(
         input.projectId,
         input.projectName,
         ctx.user.id,
       );
     }),
 
-  deleteProject: protectedProcedure
+  delete: protectedProcedure
     .input(z.object({ projectId: z.string() }))
     .mutation(async ({ ctx, input }) => {
-      return await projectServiceInstance.deleteProject(
-        input.projectId,
-        ctx.user.id,
-      );
+      return await projectServiceInstance.delete(input.projectId, ctx.user.id);
     }),
 });

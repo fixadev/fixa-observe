@@ -2,15 +2,63 @@ import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { brochureService } from "~/server/services/brochure";
 import { db } from "~/server/db";
 import {
+  brochureSchema,
+  brochureWithoutPropertyIdSchema,
   pathSchema,
   removeRectanglesInput,
   transformedTextContentSchema,
-} from "~/lib/property";
+} from "~/lib/brochure";
 import { z } from "zod";
 
 const brochureServiceInstance = brochureService({ db });
 
 export const brochureRouter = createTRPCRouter({
+  create: protectedProcedure
+    .input(
+      z.object({
+        propertyId: z.string(),
+        brochure: brochureWithoutPropertyIdSchema,
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      return await brochureServiceInstance.create(
+        input.propertyId,
+        input.brochure,
+        ctx.user.id,
+      );
+    }),
+
+  get: protectedProcedure
+    .input(z.object({ brochureId: z.string() }))
+    .query(async ({ ctx, input }) => {
+      return await brochureServiceInstance.get(input.brochureId, ctx.user.id);
+    }),
+
+  update: protectedProcedure
+    .input(brochureSchema)
+    .mutation(async ({ ctx, input }) => {
+      return await brochureServiceInstance.update(input, ctx.user.id);
+    }),
+
+  delete: protectedProcedure
+    .input(z.object({ propertyId: z.string(), brochureId: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      return await brochureServiceInstance.delete(
+        input.propertyId,
+        input.brochureId,
+        ctx.user.id,
+      );
+    }),
+
+  updateThumbnailUrl: protectedProcedure
+    .input(z.object({ brochureId: z.string(), thumbnailUrl: z.string() }))
+    .mutation(async ({ input }) => {
+      return await brochureServiceInstance.updateThumbnailUrl(
+        input.brochureId,
+        input.thumbnailUrl,
+      );
+    }),
+
   inpaintRectangles: protectedProcedure
     .input(removeRectanglesInput)
     .mutation(async ({ input }) => {

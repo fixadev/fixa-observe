@@ -5,6 +5,9 @@ import { extractAttributes } from "../utils/extractAttributes";
 import { taskService } from "./task";
 import { JSDOM } from "jsdom";
 import { type Attachment } from "prisma/generated/zod";
+import { REPLACEMENT_VARIABLES } from "~/lib/constants";
+import { replaceTemplateVariables } from "~/lib/utils";
+import { extractStreetAddress } from "../utils/extractStreetAddress";
 // import { db } from "../db";
 
 const outlookApiUrl = "https://graph.microsoft.com/v1.0";
@@ -76,7 +79,7 @@ export const emailService = ({ db }: { db: PrismaClient }) => {
   }: {
     accessToken: string;
   } & DraftParams) => {
-    // Create draft email
+    // Create draft email in Outlook
     const response = await axios.post<{
       id: string;
       conversationId: string;
@@ -98,6 +101,7 @@ export const emailService = ({ db }: { db: PrismaClient }) => {
         },
       },
     );
+
     const { id, conversationId, webLink } = response.data;
 
     const parsedAttributes: Record<string, string | null> = {};
@@ -105,34 +109,39 @@ export const emailService = ({ db }: { db: PrismaClient }) => {
       parsedAttributes[attributeId] = null;
     }
 
-    // Create email thread
-    const emailThread = await db.emailThread.create({
-      data: {
-        id: conversationId,
-        propertyId: params.propertyId,
-        parsedAttributes,
-      },
-    });
+    // Use transaction to ensure both operations succeed or fail together
+    const result = await db.$transaction(async (tx) => {
+      // Create email thread
+      const emailThread = await tx.emailThread.create({
+        data: {
+          id: conversationId,
+          propertyId: params.propertyId,
+          parsedAttributes,
+        },
+      });
 
-    // Save email to database
-    const email = await db.email.create({
-      data: {
-        id,
-        emailThreadId: conversationId,
-        senderName: params.senderName,
-        senderEmail: params.senderEmail,
-        recipientName: params.to,
-        recipientEmail: params.to,
-        subject: params.subject,
-        body: params.body,
-        webLink,
-        isDraft: true,
-      },
+      // Save email to database
+      const email = await tx.email.create({
+        data: {
+          id,
+          emailThreadId: conversationId,
+          senderName: params.senderName,
+          senderEmail: params.senderEmail,
+          recipientName: params.to,
+          recipientEmail: params.to,
+          subject: params.subject,
+          body: params.body,
+          webLink,
+          isDraft: true,
+        },
+      });
+
+      return { email, emailThread };
     });
 
     return {
-      email,
-      emailThread: { ...emailThread, emails: [email] },
+      email: result.email,
+      emailThread: { ...result.emailThread, emails: [result.email] },
     };
   };
 
@@ -159,6 +168,78 @@ export const emailService = ({ db }: { db: PrismaClient }) => {
       for (const draft of drafts) {
         try {
           const result = await createDraftEmail({ accessToken, ...draft });
+          results.push(result);
+        } catch (error) {
+          console.error("Error creating draft email", error);
+        }
+      }
+
+      return results;
+    },
+
+    createDraftEmailsFromTemplate: async ({
+      userId,
+      senderName,
+      senderEmail,
+      drafts,
+    }: {
+      userId: string;
+      senderName: string;
+      senderEmail: string;
+      drafts: {
+        recipientEmail: string;
+        recipientName: string;
+        propertyId: string;
+        address: string;
+        templateSubject: string;
+        templateBody: string;
+        attributesToVerify: string[];
+        attributeLabels: string[];
+      }[];
+    }) => {
+      const accessToken = await getAccessToken(userId);
+
+      // Extract addresses with AI
+      const addressPromises = [];
+      for (const draft of drafts) {
+        const promise = extractStreetAddress(draft.address);
+        addressPromises.push(promise);
+      }
+      const addresses = await Promise.all(addressPromises);
+
+      // Replace template variables and create draft emails
+      const results = [];
+      for (let index = 0; index < drafts.length; index++) {
+        const draft = drafts[index]!;
+        const address = addresses[index]!;
+
+        const replacements = {
+          [REPLACEMENT_VARIABLES.name]: draft.recipientName,
+          [REPLACEMENT_VARIABLES.address]: address,
+          [REPLACEMENT_VARIABLES.fieldsToVerify]: draft.attributeLabels
+            .map((label) => {
+              return `- ${label}`;
+            })
+            .join("\n"),
+        };
+
+        const subject = replaceTemplateVariables(
+          draft.templateSubject,
+          replacements,
+        );
+        const body = replaceTemplateVariables(draft.templateBody, replacements);
+
+        try {
+          const result = await createDraftEmail({
+            accessToken,
+            senderName,
+            senderEmail,
+            to: draft.recipientEmail,
+            subject,
+            body,
+            propertyId: draft.propertyId,
+            attributesToVerify: draft.attributesToVerify,
+          });
           results.push(result);
         } catch (error) {
           console.error("Error creating draft email", error);
@@ -564,32 +645,42 @@ export const emailService = ({ db }: { db: PrismaClient }) => {
         );
         const propertyToUpdate = await db.property.findUnique({
           where: { id: emailThread.propertyId },
+          include: {
+            propertyValues: {
+              include: { column: true },
+            },
+          },
         });
 
         if (!propertyToUpdate) {
           throw new Error("Property not found");
         }
 
+        const attributeIdToColumnId = new Map(
+          propertyToUpdate.propertyValues.map((propertyValue) => [
+            propertyValue.column.attributeId,
+            propertyValue.column.id,
+          ]),
+        );
+
         // update property attributes
-        for (const attributeId of Object.keys(attributesToUpdate)) {
-          if (
-            propertyToUpdate?.attributes &&
-            typeof propertyToUpdate.attributes === "object" &&
-            attributesToUpdate[attributeId] !== null
-          ) {
-            (
-              propertyToUpdate.attributes as Record<
-                string,
-                string | null | undefined
-              >
-            )[attributeId] = attributesToUpdate[attributeId];
+        await db.$transaction(async (tx) => {
+          for (const attributeId of Object.keys(attributesToUpdate)) {
+            if (attributesToUpdate[attributeId] !== null) {
+              const columnId = attributeIdToColumnId.get(attributeId);
+              if (columnId) {
+                await tx.propertyValue.update({
+                  where: {
+                    propertyId_columnId: {
+                      propertyId: emailThread.propertyId,
+                      columnId,
+                    },
+                  },
+                  data: { value: attributesToUpdate[attributeId]! },
+                });
+              }
+            }
           }
-        }
-        await db.property.update({
-          where: { id: emailThread.propertyId },
-          data: {
-            attributes: propertyToUpdate?.attributes ?? {},
-          },
         });
 
         // Update email thread with attributes

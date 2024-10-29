@@ -1,95 +1,86 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { createSurveyInput, surveySchema } from "~/lib/survey";
-import {
-  attributeSchema,
-  createPropertySchema,
-  propertySchema,
-} from "~/lib/property";
 import { surveyService } from "~/server/services/survey";
-import { propertyService } from "~/server/services/property";
 import { db } from "~/server/db";
 
 const surveyServiceInstance = surveyService({ db });
-const propertyServiceInstance = propertyService({ db });
 
 export const surveyRouter = createTRPCRouter({
-  createSurvey: protectedProcedure
+  create: protectedProcedure
     .input(createSurveyInput)
     .mutation(async ({ ctx, input }) => {
-      return await surveyServiceInstance.createSurvey(input, ctx.user.id);
+      return await surveyServiceInstance.create(input, ctx.user.id);
     }),
 
-  getProjectSurveys: protectedProcedure
-    .input(z.object({ projectId: z.string() }))
+  get: protectedProcedure
+    .input(z.object({ surveyId: z.string() }))
     .query(async ({ ctx, input }) => {
-      return await surveyServiceInstance.getProjectSurveys(
-        input.projectId,
+      return await surveyServiceInstance.get(input.surveyId, ctx.user.id);
+    }),
+
+  update: protectedProcedure
+    .input(surveySchema)
+    .mutation(async ({ ctx, input }) => {
+      return await surveyServiceInstance.update(input, ctx.user.id);
+    }),
+
+  delete: protectedProcedure
+    .input(z.object({ surveyId: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      return await surveyServiceInstance.delete(input.surveyId, ctx.user.id);
+    }),
+
+  createColumn: protectedProcedure
+    .input(
+      z.object({
+        surveyId: z.string(),
+        attributeId: z.string(),
+        displayIndex: z.number(),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      const column = await surveyServiceInstance.createColumn({
+        surveyId: input.surveyId,
+        attributeId: input.attributeId,
+        displayIndex: input.displayIndex,
+      });
+      return column;
+    }),
+
+  updateColumnAttribute: protectedProcedure
+    .input(z.object({ columnId: z.string(), attributeId: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      return await surveyServiceInstance.updateColumnAttribute(
+        input.columnId,
+        input.attributeId,
         ctx.user.id,
       );
     }),
 
-  getSurvey: protectedProcedure
-    .input(z.object({ surveyId: z.string() }))
-    .query(async ({ ctx, input }) => {
-      return await surveyServiceInstance.getSurvey(input.surveyId, ctx.user.id);
-    }),
-
-  getSurveyAttributes: protectedProcedure
-    .input(z.object({ surveyId: z.string() }))
-    .query(async ({ ctx, input }) => {
-      const attributes = await surveyServiceInstance.getSurveyAttributes(
-        input.surveyId,
+  deleteColumn: protectedProcedure
+    .input(z.object({ columnId: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      return await surveyServiceInstance.deleteColumn(
+        input.columnId,
+        ctx.user.id,
       );
-      if (attributes.length === 0) {
-        // get basic attributes
-        return await surveyServiceInstance.getAttributes(ctx.user.id);
-      }
-      return attributes;
     }),
 
-  // TODO: refactor this into 4 routes -- and update frontend to use the separate routes
-  updateAttributes: protectedProcedure
+  updateColumnsOrder: protectedProcedure
     .input(
       z.object({
-        surveyId: z.string(),
-        attributes: z.array(attributeSchema),
-        action: z.enum(["order", "add", "update", "delete"]),
-        attributeId: z.string().optional(),
+        columnIds: z.array(z.string()),
+        oldIndex: z.number(),
+        newIndex: z.number(),
       }),
     )
-    .mutation(async ({ ctx, input }) => {
-      if (input.action === "order") {
-        return await surveyServiceInstance.updateAttributesOrder(
-          input.surveyId,
-          input.attributes,
-          ctx.user.id,
-        );
-      } else if (input.action === "add") {
-        return await surveyServiceInstance.addAttributes(
-          input.surveyId,
-          input.attributes,
-          ctx.user.id,
-        );
-      } else if (input.action === "update") {
-        return await surveyServiceInstance.updateAttributes(
-          input.attributes,
-          input.attributeId,
-          ctx.user.id,
-        );
-      } else if (input.action === "delete") {
-        return await surveyServiceInstance.deleteAttribute(
-          input.surveyId,
-          input.attributeId,
-          ctx.user.id,
-        );
-      }
-    }),
-
-  updateSurvey: protectedProcedure
-    .input(surveySchema)
-    .mutation(async ({ ctx, input }) => {
-      return await surveyServiceInstance.updateSurvey(input, ctx.user.id);
+    .mutation(async ({ input }) => {
+      return await surveyServiceInstance.updateColumnsOrder(
+        input.columnIds,
+        input.oldIndex,
+        input.newIndex,
+      );
     }),
 
   updatePropertiesOrder: protectedProcedure
@@ -108,85 +99,18 @@ export const surveyRouter = createTRPCRouter({
       );
     }),
 
-  // TODO: refactor this into 4 routes -- and update frontend to use the separate routes
-  updateProperties: protectedProcedure
+  importNDXPDF: protectedProcedure
     .input(
-      z.discriminatedUnion("action", [
-        z.object({
-          surveyId: z.string(),
-          action: z.literal("add"),
-          properties: z.array(
-            createPropertySchema.extend({
-              id: z.string().optional(),
-              ownerId: z.string().optional(),
-            }),
-          ),
-          propertyId: z.string().optional(),
-        }),
-        z.object({
-          surveyId: z.string(),
-          action: z.enum(["update", "delete"]),
-          properties: z.array(propertySchema),
-          propertyId: z.string().optional(),
-        }),
-      ]),
+      z.object({
+        surveyId: z.string(),
+        pdfUrl: z.string(),
+        selectedAttributeIds: z.array(z.string()),
+      }),
     )
     .mutation(async ({ ctx, input }) => {
-      if (input.action === "add") {
-        // console.log("PROPERTIES BEFORE FILTER", input.properties);
-        const propertiesToCreate = input.properties
-          .filter(
-            (property) => typeof property === "object" && !("id" in property),
-          )
-          .map((property) => ({
-            ...property,
-            ownerId: ctx.user.id,
-          }));
-        // console.log("PROPERTIES TO CREATE", propertiesToCreate);
-        const propertyIds = await propertyServiceInstance.createProperties(
-          propertiesToCreate,
-          ctx.user.id,
-        );
-        // console.log("PROPERTY IDS", propertyIds);
-        return await surveyServiceInstance.addPropertiesToSurvey(
-          input.surveyId,
-          propertyIds,
-          ctx.user.id,
-        );
-      } else if (input.action === "update") {
-        const propertyToUpdate = input.properties.find(
-          (property) => property.id === input.propertyId,
-        );
-        if (!propertyToUpdate) return null;
-        return await propertyServiceInstance.updateProperty(
-          propertyToUpdate,
-          ctx.user.id,
-        );
-      } else if (input.action === "delete") {
-        if (!input.propertyId) return null;
-        return await propertyServiceInstance.deleteProperty(
-          input.propertyId,
-          ctx.user.id,
-        );
-      }
-    }),
-
-  deleteSurvey: protectedProcedure
-    .input(z.object({ surveyId: z.string() }))
-    .mutation(async ({ ctx, input }) => {
-      return await surveyServiceInstance.deleteSurvey(
-        input.surveyId,
-        ctx.user.id,
-      );
-    }),
-
-  importNDXPDF: protectedProcedure
-    .input(z.object({ surveyId: z.string(), pdfUrl: z.string() }))
-    .mutation(async ({ ctx, input }) => {
-      return await surveyServiceInstance.importNDXPDF(
-        input.surveyId,
-        input.pdfUrl,
-        ctx.user.id,
-      );
+      return await surveyServiceInstance.importNDXPDF({
+        ...input,
+        ownerId: ctx.user.id,
+      });
     }),
 });

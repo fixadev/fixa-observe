@@ -1,59 +1,34 @@
 import { type PrismaClient } from "@prisma/client";
 import axios from "axios";
 import { env } from "~/env";
-import {
-  type CreatePropertySchema,
-  type AttributeSchema,
-} from "~/lib/property";
+import { type CreatePropertySchema } from "~/lib/property";
 import { type CreateSurveyInput } from "~/lib/survey";
 import { type SurveySchema } from "~/lib/survey";
 import { propertyService } from "./property";
 import { parsePropertyCardWithAI } from "../utils/parsePropertyCardWithAI";
+import { attributesService } from "./attributes";
+import { advancedParseFloat } from "~/app/parseNumbers";
 
 export const surveyService = ({ db }: { db: PrismaClient }) => {
   const propertyServiceInstance = propertyService({ db });
-
-  const getAttributes = async (userId: string) => {
-    return db.attribute.findMany({
-      where: {
-        OR: [{ ownerId: userId }, { ownerId: null }],
-      },
-      orderBy: {
-        defaultIndex: "asc",
-      },
-    });
-  };
-
-  const addPropertiesToSurvey = async (
-    surveyId: string,
-    propertyIds: string[],
-    userId: string,
-  ) => {
-    const survey = await db.survey.update({
-      where: { id: surveyId, ownerId: userId },
-      data: { properties: { connect: propertyIds.map((id) => ({ id })) } },
-    });
-    return survey;
-  };
+  const attributesServiceInstance = attributesService({ db });
 
   return {
-    getAttributes,
-
-    addPropertiesToSurvey,
-
-    getProjectSurveys: async (projectId: string, userId: string) => {
-      const surveys = await db.survey.findMany({
-        where: { projectId: projectId, ownerId: userId },
-      });
-      return surveys;
-    },
-
-    getSurvey: async (surveyId: string, userId: string) => {
+    get: async (surveyId: string, userId: string) => {
       const survey = await db.survey.findUnique({
         where: { id: surveyId, ownerId: userId },
         include: {
+          columns: {
+            include: {
+              attribute: true,
+            },
+            orderBy: {
+              displayIndex: "asc",
+            },
+          },
           properties: {
             include: {
+              propertyValues: true,
               brochures: true,
               contacts: true,
               emailThreads: {
@@ -78,28 +53,18 @@ export const surveyService = ({ db }: { db: PrismaClient }) => {
       return survey;
     },
 
-    getSurveyAttributes: async (surveyId: string) => {
-      const attributes = await db.attributesOnSurveys.findMany({
-        where: { surveyId },
-        include: { attribute: true },
-      });
-      return attributes
-        .sort((a, b) => a.attributeIndex - b.attributeIndex)
-        .map((attr) => attr.attribute);
-    },
-
-    createSurvey: async (input: CreateSurveyInput, userId: string) => {
-      const attributes = await getAttributes(userId);
+    create: async (input: CreateSurveyInput, userId: string) => {
+      const attributes = await attributesServiceInstance.getDefaults(userId);
       const survey = await db.survey.create({
         data: {
           name: input.surveyName,
           projectId: input.projectId,
           ownerId: userId,
-          attributes: {
+          columns: {
             createMany: {
               data: attributes.map((attribute, index) => ({
                 attributeId: attribute.id,
-                attributeIndex: index,
+                displayIndex: index,
               })),
             },
           },
@@ -108,7 +73,7 @@ export const surveyService = ({ db }: { db: PrismaClient }) => {
       return survey;
     },
 
-    updateSurvey: async (surveyData: SurveySchema, userId: string) => {
+    update: async (surveyData: SurveySchema, userId: string) => {
       const result = await db.survey.update({
         where: { id: surveyData.id, ownerId: userId },
         data: { ...surveyData },
@@ -116,142 +81,79 @@ export const surveyService = ({ db }: { db: PrismaClient }) => {
       return result;
     },
 
-    createAttributes: async (
-      surveyId: string,
-      attributes: AttributeSchema[],
-      userId: string,
-    ) => {
-      const result = await db.attribute.createMany({
-        data: attributes.map((attribute) => ({
-          ...attribute,
-          ownerId: userId,
-        })),
+    delete: async (surveyId: string, userId: string) => {
+      const survey = await db.$transaction(async (tx) => {
+        await tx.column.deleteMany({
+          where: { surveyId },
+        });
+        await tx.propertyValue.deleteMany({
+          where: { property: { surveyId } },
+        });
+        return await tx.survey.delete({
+          where: { id: surveyId, ownerId: userId },
+        });
       });
-
-      return result;
+      return survey;
     },
 
-    // TODO: simplify this
-    addAttributes: async (
-      surveyId: string,
-      attributes: AttributeSchema[],
-      userId: string,
-    ) => {
-      const existingAttributes = await db.attribute.findMany({
-        where: {
-          id: { in: attributes.map((attr) => attr.id) },
-        },
-      });
-      const attributesToCreate = attributes
-        .filter(
-          (attribute) =>
-            !existingAttributes.some(
-              (existing) => existing.id === attribute.id,
-            ),
-        )
-        .map((attribute) => ({ ...attribute, ownerId: userId }));
-
-      await db.attribute.createMany({
-        data: attributesToCreate,
-      });
-
-      const result = await db.survey.update({
-        where: { id: surveyId, ownerId: userId },
+    createColumn: async (input: {
+      surveyId: string;
+      attributeId: string;
+      displayIndex: number;
+    }) => {
+      const column = await db.column.create({
         data: {
-          attributes: {
-            createMany: {
-              data: attributesToCreate.map((attribute) => ({
-                attributeId: attribute.id,
-                attributeIndex: attributes.findIndex(
-                  (attr) => attr.id === attribute.id,
-                ),
-              })),
-            },
-          },
+          attributeId: input.attributeId,
+          displayIndex: input.displayIndex,
+          surveyId: input.surveyId,
         },
       });
-      return result;
+      return column;
     },
 
-    updateAttributes: async (
-      attributes: AttributeSchema[],
-      idToUpdate: string | undefined,
+    updateColumnAttribute: async (
+      columnId: string,
+      attributeId: string,
       userId: string,
     ) => {
-      if (!idToUpdate) {
-        return null;
+      const column = await db.column.update({
+        where: { id: columnId, survey: { ownerId: userId } },
+        data: { attributeId },
+      });
+      return column;
+    },
+
+    deleteColumn: async (columnId: string, userId: string) => {
+      const column = await db.column.delete({
+        where: { id: columnId, survey: { ownerId: userId } },
+      });
+      return column;
+    },
+
+    updateColumnsOrder: async (
+      columnIds: string[],
+      oldIndex: number,
+      newIndex: number,
+    ) => {
+      const updatePromises = [];
+      const increment = oldIndex < newIndex ? -1 : 1;
+      for (let i = newIndex; i !== oldIndex; i += increment) {
+        updatePromises.push(
+          db.column.update({
+            where: { id: columnIds[i] },
+            data: { displayIndex: i + increment },
+          }),
+        );
       }
-      const attributeToUpdate = attributes.find(
-        (attribute) => attribute.id === idToUpdate,
+      updatePromises.push(
+        db.column.update({
+          where: { id: columnIds[oldIndex] },
+          data: { displayIndex: newIndex },
+        }),
       );
 
-      const result = await db.attribute.update({
-        where: { id: idToUpdate, ownerId: userId },
-        data: {
-          ...attributeToUpdate,
-        },
-      });
-      return result;
-    },
-
-    deleteAttribute: async (
-      surveyId: string,
-      idToDelete: string | undefined,
-      userId: string,
-    ) => {
-      if (!idToDelete) {
-        return null;
-      }
-
-      await db.attributesOnSurveys.deleteMany({
-        where: {
-          surveyId,
-          attributeId: idToDelete,
-        },
-      });
-
-      const attribute = await db.attribute.findUnique({
-        where: { id: idToDelete },
-      });
-
-      if (attribute?.ownerId === userId) {
-        await db.attribute.delete({
-          where: { id: idToDelete },
-        });
-      }
-    },
-
-    updateAttributesOrder: async (
-      surveyId: string,
-      attributes: AttributeSchema[],
-      userId: string,
-    ) => {
-      await db.survey.update({
-        where: { id: surveyId, ownerId: userId },
-        data: {
-          attributes: {
-            deleteMany: {},
-          },
-        },
-      });
-
-      const attributesOnSurveys = attributes.map((attribute, index) => ({
-        attributeId: attribute.id,
-        attributeIndex: index,
-      }));
-
-      const result = await db.survey.update({
-        where: { id: surveyId, ownerId: userId },
-        data: {
-          attributes: {
-            createMany: {
-              data: attributesOnSurveys,
-            },
-          },
-        },
-      });
-
-      return result;
+      // Execute all updates in a batch transaction
+      await db.$transaction(updatePromises);
     },
 
     updatePropertiesOrder: async (
@@ -280,19 +182,23 @@ export const surveyService = ({ db }: { db: PrismaClient }) => {
       await db.$transaction(updatePromises);
     },
 
-    deleteSurvey: async (surveyId: string, userId: string) => {
-      const survey = await db.survey.delete({
-        where: { id: surveyId, ownerId: userId },
-      });
-      return survey;
-    },
-
-    importNDXPDF: async (surveyId: string, pdfUrl: string, ownerId: string) => {
+    importNDXPDF: async (input: {
+      surveyId: string;
+      pdfUrl: string;
+      selectedAttributeIds: string[];
+      ownerId: string;
+    }) => {
       try {
+        // set import in progress
+        await db.survey.update({
+          where: { id: input.surveyId },
+          data: { importInProgress: true },
+        });
+
         const response = await axios.post(
           `${env.SCRAPING_SERVICE_URL}/extract-ndx-pdf`,
           {
-            pdfUrl,
+            pdfUrl: input.pdfUrl,
           },
           {
             headers: {
@@ -312,68 +218,128 @@ export const surveyService = ({ db }: { db: PrismaClient }) => {
             const parsedProperty = await parsePropertyCardWithAI(property.text);
             return {
               ...parsedProperty,
-              brochureLink: property.link ?? undefined,
+              brochureUrl: property.link ?? undefined,
               photoUrl: property.image_url,
             };
           }),
         );
 
-        const propertiesWithAttributes: Array<CreatePropertySchema> =
+        // create a property for each parsed property
+        const propertiesToCreate: Array<CreatePropertySchema> =
           parsedProperties.map((property, index) => {
             return {
+              address: property.displayAddress ?? "",
               createdAt: new Date(),
               updatedAt: new Date(),
               photoUrl: property.photoUrl,
-              brochures: property.brochureLink
-                ? [
-                    {
-                      createdAt: new Date(),
-                      updatedAt: new Date(),
-                      url: property.brochureLink,
-                      title: "",
-                      approved: false,
-                      exportedUrl: null,
-                      inpaintedRectangles: [],
-                      textToRemove: [],
-                      pathsToRemove: [],
-                      undoStack: [],
-                      deletedPages: [],
-                    },
-                  ]
-                : [],
               displayIndex: index,
-              surveyId: surveyId,
-              attributes: {
-                address: property.postalAddress ?? "",
-                buildingName: property.buildingName ?? "",
-                suite: property.suite ?? "",
-                size: property.availSpace ?? "",
-                divisibility:
-                  `${property.minDivisible} - ${property.maxDivisible}` ?? "",
-                askingRate: property.leaseRate ?? "",
-                opEx: property.expenses ?? "",
-                directSublease: property.leaseType ?? "",
-                comments: property.comments ?? "",
-              },
+              surveyId: input.surveyId,
+              brochureUrl: property.brochureUrl ?? "",
             };
           });
 
-        const propertiesToCreate = propertiesWithAttributes
-          .filter(
-            (property) => typeof property === "object" && !("id" in property),
-          )
-          .map((property) => ({
-            ...property,
-            ownerId,
-          }));
-        // console.log("PROPERTIES TO CREATE", propertiesToCreate);
-        const propertyIds = await propertyServiceInstance.createProperties(
-          propertiesToCreate,
-          ownerId,
-        );
-        await addPropertiesToSurvey(surveyId, propertyIds, ownerId);
+        const createdPropertyIds =
+          await propertyServiceInstance.createManyWithBrochures(
+            propertiesToCreate,
+            input.ownerId,
+            input.surveyId,
+          );
 
-        return { status: 200 };
+        const startTime = new Date();
+
+        const propertiesWithIds = createdPropertyIds.map((id, index) => ({
+          ...parsedProperties[index],
+          totalCost:
+            "$" +
+            Math.round(
+              advancedParseFloat(parsedProperties[index]?.availSpace ?? "0") *
+                (advancedParseFloat(parsedProperties[index]?.leaseRate ?? "0") +
+                  advancedParseFloat(parsedProperties[index]?.expenses ?? "0")),
+            ).toString(),
+          brochureUrl: undefined,
+          photoUrl: undefined,
+          postalAddress: undefined,
+          buildingName: undefined,
+          minDivisible: undefined,
+          maxDivisible: undefined,
+          id,
+        }));
+
+        const selectedAttributes = await attributesServiceInstance.getSelected(
+          input.selectedAttributeIds,
+        );
+
+        const existingColumns = await db.column.findMany({
+          where: { surveyId: input.surveyId },
+        });
+
+        // deduplicate columns
+        const columnsToCreate = selectedAttributes.filter(
+          (attribute) =>
+            !existingColumns.some(
+              (column) => column.attributeId === attribute.id,
+            ),
+        );
+
+        // create a column for each attribute -- use default index
+        const newColumns = await db.column.createManyAndReturn({
+          data: columnsToCreate.map((attribute) => ({
+            attributeId: attribute.id,
+            displayIndex: attribute.defaultIndex,
+            surveyId: input.surveyId,
+          })),
+        });
+
+        const allColumns = [...existingColumns, ...newColumns];
+
+        const propertyValuesToCreate = propertiesWithIds.flatMap((property) =>
+          Object.entries(property)
+            .map(([key, value]) => {
+              const columnId = allColumns.find(
+                (column) =>
+                  selectedAttributes.find(
+                    (attribute) => attribute.id === column.attributeId,
+                  )?.id === key,
+              )?.id;
+
+              return columnId
+                ? {
+                    propertyId: property.id,
+                    columnId: columnId,
+                    value: value ? String(value) : "",
+                  }
+                : null;
+            })
+            .filter(
+              (entry): entry is NonNullable<typeof entry> => entry !== null,
+            ),
+        );
+
+        await db.propertyValue.createMany({
+          data: propertyValuesToCreate,
+        });
+
+        //   address: property.postalAddress ?? "",
+        //   buildingName: property.buildingName ?? "",
+        //   suite: property.suite ?? "",
+        //   size: property.availSpace ?? "",
+        //   divisibility:
+        //     `${property.minDivisible} - ${property.maxDivisible}` ?? "",
+        //   askingRate: property.leaseRate ?? "",
+        //   opEx: property.expenses ?? "",
+        //   directSublease: property.leaseType ?? "",
+        //   comments: property.comments ?? "",
+        // }
+
+        // populate attributes for each property
+
+        console.log(
+          "======================done populating attributes====================== in ",
+          new Date().getTime() - startTime.getTime(),
+          "ms",
+        );
+
+        return { status: 200, numberOfProperties: propertiesWithIds.length };
       } catch (error) {
         console.error("Error importing NDX PDF", error);
         return { status: 500 };
