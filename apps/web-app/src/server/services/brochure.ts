@@ -11,6 +11,7 @@ import {
 import axios from "axios";
 import { env } from "~/env";
 import { extractContactInfo } from "../utils/extractContactInfo";
+// import { extractThumbnail } from "../utils/extractThumbnail";
 
 export const brochureService = ({ db }: { db: PrismaClient }) => {
   async function extractAndUploadContactInfo(
@@ -41,6 +42,7 @@ export const brochureService = ({ db }: { db: PrismaClient }) => {
     ) => {
       // TODO: determine if this actually works
       void extractAndUploadContactInfo(brochure.url, propertyId, userId);
+      // const thumbnailUrl = await extractThumbnail(brochure.url);
       const response = await db.property.update({
         where: {
           id: propertyId,
