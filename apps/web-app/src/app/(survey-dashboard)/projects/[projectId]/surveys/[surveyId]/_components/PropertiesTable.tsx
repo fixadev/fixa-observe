@@ -57,6 +57,7 @@ import { SurveyDownloadLink } from "../pdf-preview/v1/_components/DownloadLink";
 import BrochureDialog from "./brochures/BrochureDialog";
 import { uploadBrochureTask } from "~/app/utils/brochureTasks";
 import useSocketMessage from "./UseSocketMessage";
+import { useToast } from "~/hooks/use-toast";
 
 export type Property = PropertyWithIncludes & {
   isNew?: boolean;
@@ -76,6 +77,7 @@ export function PropertiesTable({
 }) {
   const { user } = useUser();
   const router = useRouter();
+  const { toast } = useToast();
   const [properties, setProperties] = useState<Property[]>([]);
   const [columns, setColumns] = useState<Column[]>([]);
   const columnsMap = useMemo(
@@ -138,7 +140,13 @@ export function PropertiesTable({
     api.property.updateAddress.useMutation();
   const { mutateAsync: updatePropertiesOrder } =
     api.survey.updatePropertiesOrder.useMutation();
-  const { mutateAsync: deleteProperty } = api.property.delete.useMutation();
+  const { mutateAsync: deleteProperty } = api.property.delete.useMutation({
+    onSuccess: () => {
+      toast({
+        title: "Property deleted!",
+      });
+    },
+  });
 
   // Column mutations
   const { mutateAsync: createColumn } = api.survey.createColumn.useMutation();
@@ -146,7 +154,13 @@ export function PropertiesTable({
     api.survey.updateColumnAttribute.useMutation();
   const { mutateAsync: updateColumnsOrder } =
     api.survey.updateColumnsOrder.useMutation();
-  const { mutateAsync: deleteColumn } = api.survey.deleteColumn.useMutation();
+  const { mutateAsync: deleteColumn } = api.survey.deleteColumn.useMutation({
+    onSuccess: () => {
+      toast({
+        title: "Column deleted!",
+      });
+    },
+  });
 
   // state setter wrapper to update db as well
   const rowIds = useMemo(
