@@ -91,7 +91,7 @@ export function PropertiesTable({
   const { survey, isLoadingSurvey, refetchSurvey } = useSurvey();
 
   const { triggered: parsingBrochuresCompleted, setTriggered } =
-    useSocketMessage(user?.id ?? "");
+    useSocketMessage(user?.id);
 
   useEffect(() => {
     if (parsingBrochuresCompleted) {
@@ -753,7 +753,7 @@ export function PropertiesTable({
                     + Add property
                   </Button>
                   <NDXOutputUploader
-                    variant="ghost"
+                    // variant="ghost"
                     surveyId={surveyId}
                     refetchSurvey={refetchSurvey}
                     setUploading={setIsImportingProperties}

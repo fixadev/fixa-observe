@@ -19,7 +19,6 @@ import { ArrowUpTrayIcon } from "@heroicons/react/24/outline";
 import { api } from "~/trpc/react";
 import { Label } from "~/components/ui/label";
 import { useEffect, useMemo, useState } from "react";
-import { cn } from "~/lib/utils";
 
 export const NDXOutputUploader = ({
   variant = "default",
@@ -138,13 +137,54 @@ export const NDXOutputUploader = ({
         <DialogHeader>
           <DialogTitle>Select information to import</DialogTitle>
         </DialogHeader>
-        <div className="flex flex-col gap-4 py-4">
-          <div className="flex items-center gap-2">
-            <Checkbox checked={true} disabled />
-            <Label>Address</Label>
+        <div className="-mx-6 max-h-[75vh] overflow-y-auto p-6">
+          <div className="flex flex-col gap-4 py-4">
+            <div className="flex items-center gap-2">
+              <Checkbox checked={true} disabled />
+              <Label>Address</Label>
+            </div>
+            <div className="flex flex-col gap-4">
+              {defaultAttributes?.map((attribute) => {
+                return (
+                  <div
+                    key={attribute.id}
+                    className="flex flex-row items-center gap-2"
+                  >
+                    <Checkbox
+                      key={attribute.id}
+                      id={attribute.id}
+                      checked={attributesToInclude.includes(attribute.id)}
+                      onCheckedChange={(checked) => {
+                        if (checked) {
+                          setAttributesToInclude([
+                            ...attributesToInclude,
+                            attribute.id,
+                          ]);
+                        } else {
+                          setAttributesToInclude(
+                            attributesToInclude.filter(
+                              (id) => id !== attribute.id,
+                            ),
+                          );
+                        }
+                      }}
+                    />
+                    <Label htmlFor={attribute.id}>{attribute.label}</Label>
+                  </div>
+                );
+              })}
+            </div>
           </div>
-          <div className="flex flex-col gap-4">
-            {defaultAttributes?.map((attribute) => {
+          <div className="h-px w-full bg-gray-200" />
+          <div
+            className="flex grid grid-flow-col grid-cols-2 gap-4 overflow-y-auto py-4"
+            style={{
+              gridTemplateRows: `repeat(${Math.ceil(
+                (remainingAttributes?.length ?? 0) / 2,
+              )}, minmax(0, 1fr))`,
+            }}
+          >
+            {remainingAttributes?.map((attribute) => {
               return (
                 <div
                   key={attribute.id}
@@ -174,41 +214,6 @@ export const NDXOutputUploader = ({
               );
             })}
           </div>
-        </div>
-        <div className="h-px w-full bg-gray-200" />
-        <div
-          className={cn(
-            `flex grid grid-flow-col grid-cols-2`,
-            `grid-rows-9 gap-4 overflow-y-auto py-4`,
-          )}
-        >
-          {remainingAttributes?.map((attribute) => {
-            return (
-              <div
-                key={attribute.id}
-                className="flex flex-row items-center gap-2"
-              >
-                <Checkbox
-                  key={attribute.id}
-                  id={attribute.id}
-                  checked={attributesToInclude.includes(attribute.id)}
-                  onCheckedChange={(checked) => {
-                    if (checked) {
-                      setAttributesToInclude([
-                        ...attributesToInclude,
-                        attribute.id,
-                      ]);
-                    } else {
-                      setAttributesToInclude(
-                        attributesToInclude.filter((id) => id !== attribute.id),
-                      );
-                    }
-                  }}
-                />
-                <Label htmlFor={attribute.id}>{attribute.label}</Label>
-              </div>
-            );
-          })}
         </div>
         <DialogFooter>
           <FileInput handleFilesChange={onFilesChangeHandler}>
