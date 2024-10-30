@@ -333,20 +333,6 @@ export const surveyService = ({ db }: { db: PrismaClient }) => {
           data: propertyValuesToCreate,
         });
 
-        //   address: property.postalAddress ?? "",
-        //   buildingName: property.buildingName ?? "",
-        //   suite: property.suite ?? "",
-        //   size: property.availSpace ?? "",
-        //   divisibility:
-        //     `${property.minDivisible} - ${property.maxDivisible}` ?? "",
-        //   askingRate: property.leaseRate ?? "",
-        //   opEx: property.expenses ?? "",
-        //   directSublease: property.leaseType ?? "",
-        //   comments: property.comments ?? "",
-        // }
-
-        // populate attributes for each property
-
         console.log(
           "======================done populating attributes====================== in ",
           new Date().getTime() - startTime.getTime(),
