@@ -45,7 +45,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
   logo: {
-    height: 40,
+    height: 20,
     display: "flex",
   },
   title: {
@@ -242,7 +242,7 @@ export function ColumnsPage({
     <Page size="A4" orientation="landscape" style={styles.page}>
       <View style={styles.header}>
         <Text style={styles.title}>Property Matrix</Text>
-        <Image style={styles.logo} src="/images/avison-young.png" />
+        <Image style={styles.logo} src="/images/newmark-dark.png" />
       </View>
       <View style={styles.table}>
         <View style={styles.tableHeader}>

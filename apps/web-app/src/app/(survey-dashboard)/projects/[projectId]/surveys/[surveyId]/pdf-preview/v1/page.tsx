@@ -10,7 +10,7 @@ import { APIProvider } from "@vis.gl/react-google-maps";
 import { env } from "~/env";
 import { useEffect, useState } from "react";
 import Spinner from "~/components/Spinner";
-import { generateStaticMapUrl } from "./_components/CreateMapboxUrl";
+import { generateStaticMapboxUrl } from "./_components/CreateMapboxUrl";
 import { type PropertyWithIncludes } from "~/hooks/useSurvey";
 
 export default function PDFPreviewPage({
@@ -39,7 +39,7 @@ export default function PDFPreviewPage({
     const fetchMapUrl = async () => {
       if (survey?.properties && mapLoaded) {
         try {
-          const { staticMapUrl } = await generateStaticMapUrl(
+          const { staticMapUrl } = await generateStaticMapboxUrl(
             survey.properties,
           );
           setMapUrl(staticMapUrl);

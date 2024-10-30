@@ -6,10 +6,10 @@ import { APIProvider } from "@vis.gl/react-google-maps";
 import { env } from "~/env";
 import { useCallback, useEffect, useState } from "react";
 import Spinner from "~/components/Spinner";
-import { generateStaticMapUrl } from "./CreateMapUrl";
 import { usePDF } from "@react-pdf/renderer";
 import type { Column, Property } from "../../../_components/PropertiesTable";
 import { api } from "~/trpc/react";
+import { generateStaticMapboxUrl } from "./CreateMapboxUrl";
 
 export function SurveyDownloadLink({
   buttonText,
@@ -46,7 +46,7 @@ export function SurveyDownloadLink({
   }, [instance.url, instance.loading, pendingDownload, surveyName]);
 
   const handleDownload = useCallback(async () => {
-    const { staticMapUrl, errors } = await generateStaticMapUrl(properties);
+    const { staticMapUrl, errors } = await generateStaticMapboxUrl(properties);
 
     const streetAddresses = await extractStreetAddresses({ properties });
 

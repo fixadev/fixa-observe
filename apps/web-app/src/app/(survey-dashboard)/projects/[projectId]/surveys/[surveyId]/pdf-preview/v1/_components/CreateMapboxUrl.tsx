@@ -52,7 +52,7 @@ function calculateCenter(markers: LatLng[]): LatLng {
   };
 }
 
-export async function generateStaticMapUrl(
+export async function generateStaticMapboxUrl(
   properties: Property[],
   pagePerCity = false,
 ): Promise<{
