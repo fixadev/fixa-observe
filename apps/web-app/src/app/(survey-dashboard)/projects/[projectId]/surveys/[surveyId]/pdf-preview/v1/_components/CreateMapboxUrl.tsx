@@ -93,47 +93,102 @@ export async function generateStaticMapboxUrl(
       }),
     );
 
-    // Filter out the errors after Promise.all completes
-    const validMarkers = markers.filter((marker) => marker !== null);
+    let validMarkers = markers.filter((marker) => marker !== null);
 
-    // Function to calculate distance between two points in degrees
     const getDistance = (p1: LatLng, p2: LatLng) => {
       return Math.sqrt(
         Math.pow(p1.lat - p2.lat, 2) + Math.pow(p1.lng - p2.lng, 2),
       );
     };
 
-    // Adjust overlapping markers
-    const minDistance = 0.01; // Minimum distance in degrees (~1km)
-    const adjustedMarkers = validMarkers.reduce(
-      (acc: typeof validMarkers, marker) => {
-        if (!marker) return acc;
+    const getMinDistance = (markers: LatLng[]) => {
+      if (markers.length <= 1) return 0.007;
 
-        const adjustedMarker = { ...marker };
-        let attempts = 0;
+      // Find the bounds of all markers
+      const bounds = markers.reduce(
+        (acc, marker) => ({
+          minLat: Math.min(acc.minLat, marker.lat),
+          maxLat: Math.max(acc.maxLat, marker.lat),
+          minLng: Math.min(acc.minLng, marker.lng),
+          maxLng: Math.max(acc.maxLng, marker.lng),
+        }),
+        { minLat: 90, maxLat: -90, minLng: 180, maxLng: -180 },
+      );
 
-        while (attempts < 8) {
-          const hasOverlap = acc.some(
-            (m) => getDistance(m, adjustedMarker) < minDistance,
+      // Calculate the diagonal distance of the bounding box
+      const diagonalDistance = Math.sqrt(
+        Math.pow(bounds.maxLat - bounds.minLat, 2) +
+          Math.pow(bounds.maxLng - bounds.minLng, 2),
+      );
+
+      // Use about 3% of the diagonal as minimum distance
+      // with a minimum of 0.0001 and maximum of 0.007
+      return Math.max(0.0001, Math.min(0.007, diagonalDistance * 0.03));
+    };
+
+    const minDistance = getMinDistance(validMarkers);
+    let allMarkers: typeof validMarkers = [];
+
+    // First pass: initial positioning
+    allMarkers = validMarkers.reduce((acc: typeof validMarkers, marker) => {
+      if (!marker) return acc;
+      return [...acc, { ...marker }];
+    }, []);
+
+    // Iteratively adjust until no overlaps exist
+    let hasOverlaps = true;
+    const maxIterations = 10;
+    let iteration = 0;
+
+    while (hasOverlaps && iteration < maxIterations) {
+      hasOverlaps = false;
+
+      for (let i = 0; i < allMarkers.length; i++) {
+        const marker = allMarkers[i];
+        if (!marker) continue;
+
+        const overlappingMarkers = allMarkers.filter(
+          (m, idx) => idx !== i && m && getDistance(m, marker) < minDistance,
+        );
+
+        if (overlappingMarkers.length > 0) {
+          hasOverlaps = true;
+
+          const avgPos = overlappingMarkers.reduce(
+            (sum, m) => ({
+              lat: sum.lat + m.lat,
+              lng: sum.lng + m.lng,
+            }),
+            { lat: 0, lng: 0 },
           );
+          avgPos.lat /= overlappingMarkers.length;
+          avgPos.lng /= overlappingMarkers.length;
 
-          if (!hasOverlap) break;
+          const direction = {
+            lat: marker.lat - avgPos.lat,
+            lng: marker.lng - avgPos.lng,
+          };
 
-          // Adjust position in a spiral pattern
-          const angle = (Math.PI / 4) * attempts;
-          const offset = 0.007 * (Math.floor(attempts / 8) + 1);
-          adjustedMarker.lat = marker.lat + Math.cos(angle) * offset;
-          adjustedMarker.lng = marker.lng + Math.sin(angle) * offset;
+          if (direction.lat === 0 && direction.lng === 0) {
+            direction.lat = 1;
+          }
 
-          attempts++;
+          const magnitude = Math.sqrt(direction.lat ** 2 + direction.lng ** 2);
+          const normalizedDir = {
+            lat: direction.lat / (magnitude || 1),
+            lng: direction.lng / (magnitude || 1),
+          };
+
+          const pushDistance = minDistance * 0.3;
+          marker.lat += normalizedDir.lat * pushDistance;
+          marker.lng += normalizedDir.lng * pushDistance;
         }
+      }
 
-        return [...acc, adjustedMarker];
-      },
-      [],
-    );
+      iteration++;
+    }
 
-    // console.log("validMarkers", validMarkers);
+    validMarkers = allMarkers;
 
     const markersString = validMarkers
       .map(

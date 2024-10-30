@@ -18,15 +18,11 @@ const styles = StyleSheet.create({
     backgroundColor: "#F0F0F0",
   },
   header: {
-    fontSize: 24,
+    fontSize: 20,
     fontWeight: "semibold",
-    marginBottom: 10,
+    marginBottom: 5,
     paddingLeft: 20,
-    paddingTop: 20,
-  },
-  subheader: {
-    fontSize: 18,
-    marginBottom: 10,
+    paddingTop: 15,
   },
   propertyList: {
     marginTop: 10,
@@ -117,17 +113,41 @@ export function MapPage({
   properties: (PropertyWithIncludes & { streetAddress: string })[] | null;
 }) {
   if (!mapImageData || !properties) return null;
+
+  const bubbleSize = Math.min(25, Math.max(30 - properties.length, 15));
+  console.log("bubbleSize", bubbleSize);
+
   return (
     <Page size="A4" orientation="landscape" style={styles.page}>
       <View style={styles.leftColumn}>
         <Text style={styles.header}>Location Overview</Text>
         <View style={styles.propertyList}>
           {properties.map((property, index) => (
-            <View key={index} style={styles.propertyItem}>
-              <View style={styles.imageBubble}>
+            <View
+              key={index}
+              style={{
+                ...styles.propertyItem,
+                paddingVertical: bubbleSize / 2.5,
+              }}
+            >
+              <View
+                style={{
+                  ...styles.imageBubble,
+                  height: bubbleSize,
+                  width: bubbleSize,
+                  fontSize: bubbleSize / 2,
+                }}
+              >
                 <Text>{index + 1}</Text>
               </View>
-              <Text style={styles.propertyText}>{property.streetAddress}</Text>
+              <Text
+                style={{
+                  ...styles.propertyText,
+                  fontSize: Math.min(bubbleSize / 1.5, 12),
+                }}
+              >
+                {property.streetAddress}
+              </Text>
             </View>
           ))}
         </View>
