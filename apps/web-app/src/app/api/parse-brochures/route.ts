@@ -23,7 +23,7 @@ export async function POST(request: Request) {
 
     const prismaTransactions: Prisma.PropertyUpdateArgs[] = [];
 
-    const updatePromises = brochures.map(async (brochure) => {
+    const extractContactPromises = brochures.map(async (brochure) => {
       let brochureUrl = brochure.url;
 
       if (brochureUrl.includes("dropbox.com")) {
@@ -49,7 +49,7 @@ export async function POST(request: Request) {
       }
     });
 
-    await Promise.all(updatePromises);
+    await Promise.allSettled(extractContactPromises);
 
     await db.$transaction(
       prismaTransactions.map((tx) => db.property.update(tx)),
@@ -79,6 +79,7 @@ export async function POST(request: Request) {
       where: { id: surveyId },
       data: { importInProgress: false },
     });
+    await sendSocketMessage(userId, "done!");
     return NextResponse.json(
       { error: "Failed to parse brochures" },
       { status: 500 },

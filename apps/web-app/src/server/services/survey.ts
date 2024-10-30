@@ -213,7 +213,7 @@ export const surveyService = ({ db }: { db: PrismaClient }) => {
           link: string | undefined;
         }>;
 
-        const parsedProperties = await Promise.all(
+        const parsedPropertiesPromises = await Promise.allSettled(
           properties.map(async (property) => {
             const parsedProperty = await parsePropertyCardWithAI(property.text);
             return {
@@ -223,6 +223,19 @@ export const surveyService = ({ db }: { db: PrismaClient }) => {
             };
           }),
         );
+
+        const parsedProperties = parsedPropertiesPromises
+          .map((promise) => {
+            if (promise.status === "rejected") {
+              console.error(
+                "Error parsing property card with AI",
+                promise.reason,
+              );
+              return undefined;
+            }
+            return promise.value;
+          })
+          .filter((p) => p !== undefined);
 
         // create a property for each parsed property
         const propertiesToCreate: Array<CreatePropertySchema> =
