@@ -1,21 +1,27 @@
 import axios from "axios";
+import { env } from "~/env";
 export async function extractThumbnail(pdfUrl: string) {
   try {
     const response = await axios.post<{ thumbnailUrl: string }>(
-      `${process.env.SCRAPING_SERVICE_URL}/extract-thumbnail`,
+      `${env.SCRAPING_SERVICE_URL}/extract-thumbnail`,
       {
         pdfUrl,
+      },
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
       },
     );
 
     if (response.status !== 200) {
+      console.log("Non-200 status code received, returning null");
       return null;
     }
 
-    console.log("THUMBNAIL URL", response.data.thumbnailUrl);
     return response.data.thumbnailUrl;
   } catch (error) {
-    console.error(error);
+    console.error("Error extracting thumbnail:", error);
     return null;
   }
 }
