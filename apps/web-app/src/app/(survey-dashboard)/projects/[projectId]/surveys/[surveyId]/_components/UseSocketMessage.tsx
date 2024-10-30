@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { io } from "socket.io-client";
 import { env } from "~/env";
 
-const useSocketMessage = (userId: string) => {
+const useSocketMessage = (userId?: string) => {
   const [triggered, setTriggered] = useState(false);
 
   useEffect(() => {
