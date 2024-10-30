@@ -29,6 +29,7 @@ export function SurveyDownloadLink({
   const [mapLoaded, setMapLoaded] = useState(false);
   const [instance, updateInstance] = usePDF({ document: undefined });
   const [pendingDownload, setPendingDownload] = useState(false);
+  const [creatingPdf, setCreatingPdf] = useState(false);
 
   const { mutateAsync: extractStreetAddresses } =
     api.property.extractStreetAddresses.useMutation();
@@ -42,10 +43,12 @@ export function SurveyDownloadLink({
       link.click();
       document.body.removeChild(link);
       setPendingDownload(false);
+      setCreatingPdf(false);
     }
   }, [instance.url, instance.loading, pendingDownload, surveyName]);
 
   const handleDownload = useCallback(async () => {
+    setCreatingPdf(true);
     const { staticMapUrl, errors } = await generateStaticMapboxUrl(properties);
 
     const streetAddresses = await extractStreetAddresses({ properties });
@@ -95,7 +98,7 @@ export function SurveyDownloadLink({
           disabled={!mapLoaded}
           onClick={handleDownload}
         >
-          {instance.loading ? <Spinner /> : buttonText}
+          {instance.loading || creatingPdf ? <Spinner /> : buttonText}
         </Button>
       </div>
     </APIProvider>
