@@ -753,7 +753,7 @@ export function PropertiesTable({
                     + Add property
                   </Button>
                   <NDXOutputUploader
-                    variant="ghost"
+                    // variant="ghost"
                     surveyId={surveyId}
                     refetchSurvey={refetchSurvey}
                     setUploading={setIsImportingProperties}
