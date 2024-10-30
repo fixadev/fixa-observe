@@ -256,6 +256,14 @@ export function PropertiesTable({
       },
     ]);
 
+    // Scroll to the right to make room for the new column
+    setTimeout(() => {
+      tableContainerRef.current?.scrollTo({
+        left: tableContainerRef.current?.scrollWidth,
+        behavior: "smooth",
+      });
+    });
+
     const column = await createColumn({
       displayIndex: columns.length,
       attributeId: "availSpace", // Random hardcoded attribute id
