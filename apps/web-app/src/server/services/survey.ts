@@ -333,12 +333,6 @@ export const surveyService = ({ db }: { db: PrismaClient }) => {
           data: propertyValuesToCreate,
         });
 
-        console.log(
-          "======================done populating attributes====================== in ",
-          new Date().getTime() - startTime.getTime(),
-          "ms",
-        );
-
         return { status: 200, numberOfProperties: propertiesWithIds.length };
       } catch (error) {
         console.error("Error importing NDX PDF", error);
