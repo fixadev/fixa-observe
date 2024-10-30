@@ -9,7 +9,7 @@ export async function extractStreetAddress(address: string): Promise<string> {
   });
 
   const systemPrompt = [
-    `Given the following string, return the street address (e.g. 123 Main St)`,
+    `Given the following string, return the street address (e.g. 123 Main St). DO NOT INCLUDE SUITE INFO. JUST THE STREET ADDRESS`,
   ].join("\n");
 
   const completion = await openai.beta.chat.completions.parse({
