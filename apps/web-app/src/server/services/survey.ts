@@ -259,8 +259,6 @@ export const surveyService = ({ db }: { db: PrismaClient }) => {
             input.surveyId,
           );
 
-        const startTime = new Date();
-
         const propertiesWithIds = createdPropertyIds.map((id, index) => ({
           ...parsedProperties[index],
           totalCost:

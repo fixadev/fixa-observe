@@ -107,17 +107,6 @@ export const brochureService = ({ db }: { db: PrismaClient }) => {
       return response;
     },
 
-    updateUrl: async (brochureId: string, url: string) => {
-      return db.brochure.update({
-        where: {
-          id: brochureId,
-        },
-        data: {
-          url,
-        },
-      });
-    },
-
     delete: async (propertyId: string, brochureId: string, userId: string) => {
       const property = await db.property.findUnique({
         where: {
