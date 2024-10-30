@@ -44,7 +44,6 @@ export const brochureService = ({ db }: { db: PrismaClient }) => {
       // TODO: determine if this actually works
       void extractAndUploadContactInfo(brochure.url, propertyId, userId);
       const thumbnailUrl = await extractThumbnail(brochure.url);
-      console.log("THUMBNAIL URL", thumbnailUrl);
       const response = await db.property.update({
         where: {
           id: propertyId,
