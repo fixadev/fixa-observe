@@ -1,20 +1,21 @@
+import axios from "axios";
 export async function extractThumbnail(pdfUrl: string) {
-  // await configureUnPDF({
-  //   // Use the official PDF.js build
-  //   pdfjs: () => import("pdfjs-dist"),
-  // });
+  try {
+    const response = await axios.post<{ thumbnailUrl: string }>(
+      `${process.env.SCRAPING_SERVICE_URL}/extract-thumbnail`,
+      {
+        pdfUrl,
+      },
+    );
 
-  // const pdf = await fetch(pdfUrl);
-  // const buffer = new Uint8Array(await pdf.arrayBuffer());
-  // const pageNumber = 1;
+    if (response.status !== 200) {
+      return null;
+    }
 
-  // const result = await renderPageAsImage(buffer, pageNumber, {
-  //   canvas: async () => import("canvas"),
-  // });
-  // const { url } = await uploadFileToS3(
-  //   new File([result], "thumbnail.png", { type: "image/png" }),
-  //   false,
-  // );
-  // return url;
-  return null;
+    console.log("THUMBNAIL URL", response.data.thumbnailUrl);
+    return response.data.thumbnailUrl;
+  } catch (error) {
+    console.error(error);
+    return null;
+  }
 }
