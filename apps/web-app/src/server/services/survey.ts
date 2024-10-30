@@ -8,6 +8,7 @@ import { propertyService } from "./property";
 import { parsePropertyCardWithAI } from "../utils/parsePropertyCardWithAI";
 import { attributesService } from "./attributes";
 import { advancedParseFloat } from "~/app/parseNumbers";
+import { sendSocketMessage } from "~/app/utils/sendSocketMessage";
 
 export const surveyService = ({ db }: { db: PrismaClient }) => {
   const propertyServiceInstance = propertyService({ db });
@@ -359,6 +360,7 @@ export const surveyService = ({ db }: { db: PrismaClient }) => {
           where: { id: input.surveyId },
           data: { importInProgress: false },
         });
+        await sendSocketMessage(input.ownerId, "done!");
         return { status: 500 };
       }
     },

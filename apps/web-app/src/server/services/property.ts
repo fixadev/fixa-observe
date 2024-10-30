@@ -6,6 +6,7 @@ import {
 } from "~/lib/property";
 import { env } from "~/env";
 import { extractStreetAddress } from "../utils/extractStreetAddress";
+import { sendSocketMessage } from "~/app/utils/sendSocketMessage";
 
 export const propertyService = ({ db }: { db: PrismaClient }) => {
   return {
@@ -167,6 +168,12 @@ export const propertyService = ({ db }: { db: PrismaClient }) => {
             surveyId,
           }),
         });
+      } else {
+        await db.survey.update({
+          where: { id: surveyId },
+          data: { importInProgress: false },
+        });
+        await sendSocketMessage(userId, "done!");
       }
 
       return createdProperties.map((property) => property.id);
