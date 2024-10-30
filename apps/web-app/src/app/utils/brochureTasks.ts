@@ -1,45 +1,6 @@
 import axios from "axios";
-import { pdfToImage } from "~/lib/pdf-utils";
 import { getBrochureFileName } from "~/lib/utils";
 import { type PropertySchema } from "~/lib/property";
-
-export const uploadImageTask = async (
-  file: File,
-  propertyId: string,
-  getPresignedS3Url?: (args: {
-    fileName: string;
-    fileType: string;
-    keepOriginalName: boolean;
-  }) => Promise<string>,
-  presignedS3Url?: string,
-) => {
-  if (!getPresignedS3Url && !presignedS3Url) {
-    throw new Error("getPresignedS3Url or presignedS3Url is required");
-  }
-
-  const images = await pdfToImage({ file, pages: [1], height: 100 });
-  const thumbnailBase64 = images[0]!;
-  const base64Data = Buffer.from(
-    thumbnailBase64.replace(/^data:image\/\w+;base64,/, ""),
-    "base64",
-  );
-  const thumbnailPresignedUrl =
-    presignedS3Url ??
-    (await getPresignedS3Url!({
-      fileName: `brochure-thumbnail-${propertyId}.png`,
-      fileType: "image/png",
-      keepOriginalName: true,
-    }));
-
-  await axios.put(thumbnailPresignedUrl, base64Data, {
-    headers: {
-      "Content-Type": "image/png",
-    },
-  });
-  const thumbnailUrl =
-    thumbnailPresignedUrl.split("?")[0] ?? thumbnailPresignedUrl;
-  return thumbnailUrl;
-};
 
 export const uploadBrochureTask = async (
   file: File,

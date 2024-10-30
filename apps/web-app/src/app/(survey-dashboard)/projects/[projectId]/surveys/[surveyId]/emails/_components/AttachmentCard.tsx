@@ -7,7 +7,7 @@ import {
 } from "@heroicons/react/24/solid";
 import { type Attachment } from "prisma/generated/zod";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { uploadBrochureTask, uploadImageTask } from "~/app/utils/brochureTasks";
+import { uploadBrochureTask } from "~/app/utils/brochureTasks";
 import Spinner from "~/components/Spinner";
 import { Button } from "~/components/ui/button";
 import {
@@ -106,16 +106,17 @@ export default function AttachmentCard({
 
       if (!property) throw new Error("Property not found");
 
-      const [thumbnailUrl, brochureUrl] = await Promise.all([
-        uploadImageTask(file, propertyId, getPresignedS3Url),
-        uploadBrochureTask(file, property, getPresignedS3Url),
-      ]);
+      const brochureUrl = await uploadBrochureTask(
+        file,
+        property,
+        getPresignedS3Url,
+      );
 
       // Create the brochure in the database
       await createBrochure({
         propertyId,
         brochure: {
-          thumbnailUrl,
+          thumbnailUrl: null,
           inpaintedRectangles: [],
           textToRemove: [],
           pathsToRemove: [],
@@ -158,6 +159,7 @@ export default function AttachmentCard({
     updateAttachment,
     refetchSurvey,
     getPresignedS3Url,
+    property,
   ]);
 
   const [isDownloading, setIsDownloading] = useState(false);
