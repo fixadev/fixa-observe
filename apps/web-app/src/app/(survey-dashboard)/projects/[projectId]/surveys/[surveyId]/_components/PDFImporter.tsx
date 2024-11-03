@@ -19,6 +19,13 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "~/components/ui/accordion";
+
 import { Checkbox } from "~/components/ui/checkbox";
 import { useToast } from "~/hooks/use-toast";
 import { FileInput } from "../../../../../../_components/FileInput";
@@ -162,9 +169,9 @@ export const PDFImporter = ({
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Import PDF</DialogTitle>
+          <DialogTitle>Configure Import</DialogTitle>
         </DialogHeader>
-        <Label>PDF type</Label>
+        <Label className="mt-2">PDF type</Label>
         <Select
           onValueChange={(value) =>
             setPdfType(value.toLowerCase() as "costar" | "ndx")
@@ -179,7 +186,7 @@ export const PDFImporter = ({
           </SelectContent>
         </Select>
         <div className="-mx-6 max-h-[75vh] overflow-y-auto p-6 pt-2">
-          <Label className="text-md font-medium">Default Info</Label>
+          <Label className="text-sm font-medium">Information to import</Label>
           <div className="flex flex-col gap-4 py-4">
             <div className="flex items-center gap-2">
               <Checkbox checked={true} disabled />
@@ -211,68 +218,82 @@ export const PDFImporter = ({
                         }
                       }}
                     />
-                    <Label htmlFor={attribute.id}>{attribute.label}</Label>
+                    <Label
+                      className="text-sm font-normal"
+                      htmlFor={attribute.id}
+                    >
+                      {attribute.label}
+                    </Label>
                   </div>
                 );
               })}
             </div>
           </div>
-          <div className="h-px w-full bg-gray-200" />
-          <div className="flex flex-col gap-4 overflow-y-auto py-4">
-            {Object.keys(categorizedAttributes ?? {})
-              .sort((a, b) => a.localeCompare(b))
-              .map((category) => {
-                return (
-                  <div key={category} className="flex flex-col gap-2">
-                    <Label className="text-md font-medium">
-                      {camelCaseToTitleCase(category)}
-                    </Label>
-
-                    <div
-                      className="flex grid grid-flow-col grid-cols-2 gap-4 overflow-y-auto pb-2"
-                      style={{
-                        gridTemplateRows: `repeat(${Math.ceil(
-                          (categorizedAttributes?.[category]?.length ?? 0) / 2,
-                        )}, minmax(0, 1fr))`,
-                      }}
-                    >
-                      {categorizedAttributes?.[category]?.map((attribute) => {
-                        return (
-                          <div
-                            key={attribute.id}
-                            className="flex flex-row items-center gap-2"
-                          >
-                            <Checkbox
-                              key={attribute.id}
-                              id={attribute.id}
-                              checked={attributesToInclude.includes(
-                                attribute.id,
-                              )}
-                              onCheckedChange={(checked) => {
-                                if (checked) {
-                                  setAttributesToInclude([
-                                    ...attributesToInclude,
-                                    attribute.id,
-                                  ]);
-                                } else {
-                                  setAttributesToInclude(
-                                    attributesToInclude.filter(
-                                      (id) => id !== attribute.id,
-                                    ),
-                                  );
-                                }
-                              }}
-                            />
-                            <Label htmlFor={attribute.id}>
-                              {attribute.label}
-                            </Label>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                );
-              })}
+          {/* <div className="h-px w-full bg-gray-200" /> */}
+          <div className="flex flex-col gap-4 overflow-y-auto py-2">
+            <Accordion type="multiple" className="w-full">
+              {Object.keys(categorizedAttributes ?? {})
+                .sort((a, b) => a.localeCompare(b))
+                .map((category) => {
+                  return (
+                    <AccordionItem key={category} value={category}>
+                      <AccordionTrigger>
+                        {camelCaseToTitleCase(category)}
+                      </AccordionTrigger>
+                      <AccordionContent>
+                        <div
+                          className="flex grid grid-flow-col grid-cols-2 gap-4 overflow-y-auto pb-2"
+                          style={{
+                            gridTemplateRows: `repeat(${Math.ceil(
+                              (categorizedAttributes?.[category]?.length ?? 0) /
+                                2,
+                            )}, minmax(0, 1fr))`,
+                          }}
+                        >
+                          {categorizedAttributes?.[category]?.map(
+                            (attribute) => {
+                              return (
+                                <div
+                                  key={attribute.id}
+                                  className="flex flex-row items-center gap-2"
+                                >
+                                  <Checkbox
+                                    key={attribute.id}
+                                    id={attribute.id}
+                                    checked={attributesToInclude.includes(
+                                      attribute.id,
+                                    )}
+                                    onCheckedChange={(checked) => {
+                                      if (checked) {
+                                        setAttributesToInclude([
+                                          ...attributesToInclude,
+                                          attribute.id,
+                                        ]);
+                                      } else {
+                                        setAttributesToInclude(
+                                          attributesToInclude.filter(
+                                            (id) => id !== attribute.id,
+                                          ),
+                                        );
+                                      }
+                                    }}
+                                  />
+                                  <Label
+                                    className="text-sm font-normal"
+                                    htmlFor={attribute.id}
+                                  >
+                                    {attribute.label}
+                                  </Label>
+                                </div>
+                              );
+                            },
+                          )}
+                        </div>
+                      </AccordionContent>
+                    </AccordionItem>
+                  );
+                })}
+            </Accordion>
           </div>
         </div>
         <DialogFooter>
