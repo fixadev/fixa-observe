@@ -82,6 +82,7 @@ export function AttributeCombobox({
             defaultIndex: 0,
             defaultVisible: false,
             ownerId: null,
+            category: null,
           },
         ];
         return newAttributes.sort((a, b) => a.label.localeCompare(b.label));
