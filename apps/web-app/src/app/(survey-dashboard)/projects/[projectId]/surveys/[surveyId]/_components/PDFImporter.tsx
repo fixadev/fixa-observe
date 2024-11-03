@@ -11,6 +11,14 @@ import {
   DialogTrigger,
 } from "~/components/ui/dialog";
 
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "~/components/ui/select";
+
 import { Checkbox } from "~/components/ui/checkbox";
 import { useToast } from "~/hooks/use-toast";
 import { FileInput } from "../../../../../../_components/FileInput";
@@ -137,9 +145,24 @@ export const PDFImporter = ({
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Select information to import</DialogTitle>
+          <DialogTitle>Import PDF</DialogTitle>
         </DialogHeader>
-        <div className="-mx-6 max-h-[75vh] overflow-y-auto p-6">
+        <Label>PDF type</Label>
+        <Select
+          onValueChange={(value) =>
+            setPdfType(value.toLowerCase() as "costar" | "ndx")
+          }
+        >
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Costar" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="costar">Costar</SelectItem>
+            <SelectItem value="ndx">NDX</SelectItem>
+          </SelectContent>
+        </Select>
+        <div className="-mx-6 max-h-[75vh] overflow-y-auto p-6 pt-2">
+          <Label>Information to import</Label>
           <div className="flex flex-col gap-4 py-4">
             <div className="flex items-center gap-2">
               <Checkbox checked={true} disabled />
