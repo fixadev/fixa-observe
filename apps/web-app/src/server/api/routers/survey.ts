@@ -99,16 +99,17 @@ export const surveyRouter = createTRPCRouter({
       );
     }),
 
-  importNDXPDF: protectedProcedure
+  importPDF: protectedProcedure
     .input(
       z.object({
         surveyId: z.string(),
         pdfUrl: z.string(),
         selectedAttributeIds: z.array(z.string()),
+        pdfType: z.enum(["ndx", "costar"]),
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      return await surveyServiceInstance.importNDXPDF({
+      return await surveyServiceInstance.importPDF({
         ...input,
         ownerId: ctx.user.id,
       });

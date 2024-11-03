@@ -5,7 +5,8 @@ import { type CreatePropertySchema } from "~/lib/property";
 import { type CreateSurveyInput } from "~/lib/survey";
 import { type SurveySchema } from "~/lib/survey";
 import { propertyService } from "./property";
-import { parsePropertyCardWithAI } from "../utils/parsePropertyCardWithAI";
+import { parseNDXPropertyCard } from "../utils/parseNDXPropertyCard";
+import { parseCoStarPropertyCard } from "../utils/parseCoStarPropertyCard";
 import { attributesService } from "./attributes";
 import { advancedParseFloat } from "~/app/parseNumbers";
 import { sendSocketMessage } from "~/app/utils/sendSocketMessage";
@@ -183,11 +184,12 @@ export const surveyService = ({ db }: { db: PrismaClient }) => {
       await db.$transaction(updatePromises);
     },
 
-    importNDXPDF: async (input: {
+    importPDF: async (input: {
       surveyId: string;
       pdfUrl: string;
       selectedAttributeIds: string[];
       ownerId: string;
+      pdfType: "ndx" | "costar";
     }) => {
       try {
         // set import in progress
@@ -196,10 +198,13 @@ export const surveyService = ({ db }: { db: PrismaClient }) => {
           data: { importInProgress: true },
         });
 
+        const url = `${env.SCRAPING_SERVICE_URL}/scrape-pdf`;
+
         const response = await axios.post(
-          `${env.SCRAPING_SERVICE_URL}/extract-ndx-pdf`,
+          url,
           {
             pdfUrl: input.pdfUrl,
+            pdfType: input.pdfType,
           },
           {
             headers: {
@@ -216,7 +221,10 @@ export const surveyService = ({ db }: { db: PrismaClient }) => {
 
         const parsedPropertiesPromises = await Promise.allSettled(
           properties.map(async (property) => {
-            const parsedProperty = await parsePropertyCardWithAI(property.text);
+            const parsedProperty =
+              input.pdfType === "ndx"
+                ? await parseNDXPropertyCard(property.text)
+                : await parseCoStarPropertyCard(property.text);
             return {
               ...parsedProperty,
               brochureUrl: property.link ?? undefined,

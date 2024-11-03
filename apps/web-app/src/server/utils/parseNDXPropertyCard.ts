@@ -39,7 +39,7 @@ export const parsedPropertyCardSchema = z.object({
   comments: z.string().nullable(),
 });
 
-export async function parsePropertyCardWithAI(text: string) {
+export async function parseNDXPropertyCard(text: string) {
   const systemPrompt = `
   You are an expert at parsing property cards. 
   You are given a string of text that contains a property card. 

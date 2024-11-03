@@ -35,11 +35,12 @@ export const NDXOutputUploader = ({
 }) => {
   const { toast } = useToast();
   const [attributesToInclude, setAttributesToInclude] = useState<string[]>([]);
+  const [pdfType, setPdfType] = useState<"ndx" | "costar">("ndx");
 
   const { mutateAsync: getPresignedS3Url } =
     api.s3.getPresignedS3Url.useMutation();
 
-  const { mutateAsync: uploadNDXPDF } = api.survey.importNDXPDF.useMutation();
+  const { mutateAsync: uploadPDF } = api.survey.importPDF.useMutation();
 
   const { data: attributes } = api.attribute.getAll.useQuery();
 
@@ -84,10 +85,11 @@ export const NDXOutputUploader = ({
         const cleanedPresignedS3Url =
           presignedS3Url.split("?")[0] ?? presignedS3Url;
 
-        const response = await uploadNDXPDF({
+        const response = await uploadPDF({
           surveyId,
           pdfUrl: cleanedPresignedS3Url,
           selectedAttributeIds: attributesToInclude,
+          pdfType,
         });
 
         refetchSurvey();
