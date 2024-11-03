@@ -1,6 +1,5 @@
 "use client";
 
-import { PDFContent } from "./PDFContent";
 import { Button } from "~/components/ui/button";
 import { APIProvider } from "@vis.gl/react-google-maps";
 import { env } from "~/env";
@@ -10,8 +9,9 @@ import { usePDF } from "@react-pdf/renderer";
 import type { Column, Property } from "../../../_components/PropertiesTable";
 import { api } from "~/trpc/react";
 import { generateStaticMapboxUrl } from "./CreateMapboxUrl";
+import PDFContent from "./PDFContent";
 
-export function SurveyDownloadLink({
+export default function SurveyDownloadLink({
   buttonText,
   surveyName,
   properties,

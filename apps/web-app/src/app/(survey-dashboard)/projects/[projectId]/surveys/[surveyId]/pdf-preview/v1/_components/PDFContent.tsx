@@ -7,7 +7,7 @@ import type {
   PropertyWithIncludes,
 } from "~/hooks/useSurvey";
 
-export function PDFContent({
+export default function PDFContent({
   mapImageData,
   properties,
   columns,

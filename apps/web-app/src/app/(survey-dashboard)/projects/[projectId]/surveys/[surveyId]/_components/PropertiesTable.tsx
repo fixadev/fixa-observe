@@ -31,7 +31,7 @@ import {
 } from "@dnd-kit/modifiers";
 import { Button } from "~/components/ui/button";
 import { EnvelopeIcon, PlusIcon } from "@heroicons/react/24/solid";
-import { NDXOutputUploader } from "./NDXOutputUploader";
+import { PDFImporter } from "./PDFImporter";
 import { api } from "~/trpc/react";
 import { DraggableHeader } from "./DraggableHeader";
 import { DraggableRow } from "./DraggableRow";
@@ -53,11 +53,19 @@ import {
   type PropertyWithIncludes,
   useSurvey,
 } from "~/hooks/useSurvey";
-import { SurveyDownloadLink } from "../pdf-preview/v1/_components/DownloadLink";
+
 import BrochureDialog from "./brochures/BrochureDialog";
 import { uploadBrochureTask } from "~/app/utils/brochureTasks";
 import useSocketMessage from "./UseSocketMessage";
 import { useToast } from "~/hooks/use-toast";
+import dynamic from "next/dynamic";
+
+const SurveyDownloadLink = dynamic(
+  () => import("../pdf-preview/v1/_components/DownloadLink"),
+  {
+    ssr: false,
+  },
+);
 
 export type Property = PropertyWithIncludes & {
   isNew?: boolean;
@@ -628,7 +636,7 @@ export function PropertiesTable({
                 </div>
               </div>
               <div className="flex flex-col items-stretch gap-2">
-                <NDXOutputUploader
+                <PDFImporter
                   surveyId={surveyId}
                   refetchSurvey={refetchSurvey}
                   setUploading={setIsImportingProperties}
@@ -766,7 +774,7 @@ export function PropertiesTable({
                   <Button variant="ghost" onClick={_createProperty}>
                     + Add property
                   </Button>
-                  <NDXOutputUploader
+                  <PDFImporter
                     // variant="ghost"
                     surveyId={surveyId}
                     refetchSurvey={refetchSurvey}

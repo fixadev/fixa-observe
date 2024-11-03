@@ -20,7 +20,7 @@ import { api } from "~/trpc/react";
 import { Label } from "~/components/ui/label";
 import { useEffect, useMemo, useState } from "react";
 
-export const NDXOutputUploader = ({
+export const PDFImporter = ({
   variant = "default",
   surveyId,
   setUploading,
@@ -35,7 +35,7 @@ export const NDXOutputUploader = ({
 }) => {
   const { toast } = useToast();
   const [attributesToInclude, setAttributesToInclude] = useState<string[]>([]);
-  const [pdfType, setPdfType] = useState<"ndx" | "costar">("ndx");
+  const [pdfType, setPdfType] = useState<"ndx" | "costar">("costar");
 
   const { mutateAsync: getPresignedS3Url } =
     api.s3.getPresignedS3Url.useMutation();
@@ -132,7 +132,7 @@ export const NDXOutputUploader = ({
       <DialogTrigger asChild>
         <Button>
           <ArrowUpTrayIcon className="mr-2 size-4" />
-          Upload NDX PDF
+          Import via PDF
         </Button>
       </DialogTrigger>
       <DialogContent>
@@ -221,7 +221,7 @@ export const NDXOutputUploader = ({
           <FileInput handleFilesChange={onFilesChangeHandler}>
             <Button variant={variant}>
               <ArrowUpTrayIcon className="mr-2 size-4" />
-              Upload NDX PDF
+              Select file
             </Button>
           </FileInput>
         </DialogFooter>

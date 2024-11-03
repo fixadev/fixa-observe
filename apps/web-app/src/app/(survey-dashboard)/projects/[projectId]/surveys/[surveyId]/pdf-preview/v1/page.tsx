@@ -1,8 +1,8 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import PDFViewer from "./_components/PDFViewer";
 import { api } from "~/trpc/react";
-import { PDFContent } from "./_components/PDFContent";
 import { Button } from "~/components/ui/button";
 import { ChevronLeftIcon } from "@heroicons/react/24/outline";
 import { useRouter } from "next/navigation";
@@ -12,6 +12,9 @@ import { useEffect, useState } from "react";
 import Spinner from "~/components/Spinner";
 import { generateStaticMapboxUrl } from "./_components/CreateMapboxUrl";
 import { type PropertyWithIncludes } from "~/hooks/useSurvey";
+const PDFContent = dynamic(() => import("./_components/PDFContent"), {
+  ssr: false,
+});
 
 export default function PDFPreviewPage({
   params,

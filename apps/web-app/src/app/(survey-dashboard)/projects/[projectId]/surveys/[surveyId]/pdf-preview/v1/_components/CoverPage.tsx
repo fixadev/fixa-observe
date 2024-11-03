@@ -1,12 +1,4 @@
-import {
-  Page,
-  Text,
-  View,
-  StyleSheet,
-  Font,
-  Image,
-  Svg,
-} from "@react-pdf/renderer";
+import { Page, StyleSheet, Font, Image } from "@react-pdf/renderer";
 
 Font.register({
   family: "IBM Plex Sans",
