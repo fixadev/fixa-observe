@@ -80,6 +80,7 @@ model Attribute {
   label          String
   defaultIndex   Int      @default(0)
   defaultVisible Boolean  @default(false)
+  category       String?
 
   ownerId String?
   owner   User?   @relation(fields: [ownerId], references: [id], onDelete: Cascade)

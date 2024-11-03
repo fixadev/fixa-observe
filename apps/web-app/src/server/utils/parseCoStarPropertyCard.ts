@@ -11,7 +11,6 @@ export const parsedPropertyCardSchema = z.object({
   suite: z.string().nullable(),
 
   // stuff that does map to an attribute
-
   propertyType: z.string().nullable(),
   listId: z.string().nullable(),
   availDate: z.string().nullable(),
@@ -37,6 +36,14 @@ export const parsedPropertyCardSchema = z.object({
   yearBuilt: z.string().nullable(),
   parkingRatio: z.string().nullable(),
   comments: z.string().nullable(),
+
+  // co star stuff
+  amenities: z.string().nullable(),
+  transit: z.string().nullable(),
+  commuterRail: z.string().nullable(),
+  airport: z.string().nullable(),
+  walkScore: z.string().nullable(),
+  transitScore: z.string().nullable(),
 });
 
 export async function parseCoStarPropertyCard(text: string) {

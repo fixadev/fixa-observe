@@ -64,7 +64,7 @@ export const SurveyScalarFieldEnumSchema = z.enum(['id','createdAt','updatedAt',
 
 export const ColumnScalarFieldEnumSchema = z.enum(['id','createdAt','updatedAt','displayIndex','attributeId','surveyId']);
 
-export const AttributeScalarFieldEnumSchema = z.enum(['id','createdAt','updatedAt','label','defaultIndex','defaultVisible','ownerId']);
+export const AttributeScalarFieldEnumSchema = z.enum(['id','createdAt','updatedAt','label','defaultIndex','defaultVisible','category','ownerId']);
 
 export const PropertyScalarFieldEnumSchema = z.enum(['id','createdAt','updatedAt','address','photoUrl','displayIndex','ownerId','surveyId']);
 
@@ -168,6 +168,7 @@ export const AttributeSchema = z.object({
   label: z.string(),
   defaultIndex: z.number().int(),
   defaultVisible: z.boolean(),
+  category: z.string().nullable(),
   ownerId: z.string().nullable(),
 })
 
@@ -499,6 +500,7 @@ export const AttributeSelectSchema: z.ZodType<Prisma.AttributeSelect> = z.object
   label: z.boolean().optional(),
   defaultIndex: z.boolean().optional(),
   defaultVisible: z.boolean().optional(),
+  category: z.boolean().optional(),
   ownerId: z.boolean().optional(),
   owner: z.union([z.boolean(),z.lazy(() => UserArgsSchema)]).optional(),
   columns: z.union([z.boolean(),z.lazy(() => ColumnFindManyArgsSchema)]).optional(),
@@ -1059,6 +1061,7 @@ export const AttributeWhereInputSchema: z.ZodType<Prisma.AttributeWhereInput> = 
   label: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   defaultIndex: z.union([ z.lazy(() => IntFilterSchema),z.number() ]).optional(),
   defaultVisible: z.union([ z.lazy(() => BoolFilterSchema),z.boolean() ]).optional(),
+  category: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
   ownerId: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
   owner: z.union([ z.lazy(() => UserNullableRelationFilterSchema),z.lazy(() => UserWhereInputSchema) ]).optional().nullable(),
   columns: z.lazy(() => ColumnListRelationFilterSchema).optional()
@@ -1071,6 +1074,7 @@ export const AttributeOrderByWithRelationInputSchema: z.ZodType<Prisma.Attribute
   label: z.lazy(() => SortOrderSchema).optional(),
   defaultIndex: z.lazy(() => SortOrderSchema).optional(),
   defaultVisible: z.lazy(() => SortOrderSchema).optional(),
+  category: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
   ownerId: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
   owner: z.lazy(() => UserOrderByWithRelationInputSchema).optional(),
   columns: z.lazy(() => ColumnOrderByRelationAggregateInputSchema).optional()
@@ -1089,6 +1093,7 @@ export const AttributeWhereUniqueInputSchema: z.ZodType<Prisma.AttributeWhereUni
   label: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   defaultIndex: z.union([ z.lazy(() => IntFilterSchema),z.number().int() ]).optional(),
   defaultVisible: z.union([ z.lazy(() => BoolFilterSchema),z.boolean() ]).optional(),
+  category: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
   ownerId: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
   owner: z.union([ z.lazy(() => UserNullableRelationFilterSchema),z.lazy(() => UserWhereInputSchema) ]).optional().nullable(),
   columns: z.lazy(() => ColumnListRelationFilterSchema).optional()
@@ -1101,6 +1106,7 @@ export const AttributeOrderByWithAggregationInputSchema: z.ZodType<Prisma.Attrib
   label: z.lazy(() => SortOrderSchema).optional(),
   defaultIndex: z.lazy(() => SortOrderSchema).optional(),
   defaultVisible: z.lazy(() => SortOrderSchema).optional(),
+  category: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
   ownerId: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
   _count: z.lazy(() => AttributeCountOrderByAggregateInputSchema).optional(),
   _avg: z.lazy(() => AttributeAvgOrderByAggregateInputSchema).optional(),
@@ -1119,6 +1125,7 @@ export const AttributeScalarWhereWithAggregatesInputSchema: z.ZodType<Prisma.Att
   label: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
   defaultIndex: z.union([ z.lazy(() => IntWithAggregatesFilterSchema),z.number() ]).optional(),
   defaultVisible: z.union([ z.lazy(() => BoolWithAggregatesFilterSchema),z.boolean() ]).optional(),
+  category: z.union([ z.lazy(() => StringNullableWithAggregatesFilterSchema),z.string() ]).optional().nullable(),
   ownerId: z.union([ z.lazy(() => StringNullableWithAggregatesFilterSchema),z.string() ]).optional().nullable(),
 }).strict();
 
@@ -2070,6 +2077,7 @@ export const AttributeCreateInputSchema: z.ZodType<Prisma.AttributeCreateInput> 
   label: z.string(),
   defaultIndex: z.number().int().optional(),
   defaultVisible: z.boolean().optional(),
+  category: z.string().optional().nullable(),
   owner: z.lazy(() => UserCreateNestedOneWithoutAttributesInputSchema).optional(),
   columns: z.lazy(() => ColumnCreateNestedManyWithoutAttributeInputSchema).optional()
 }).strict();
@@ -2081,6 +2089,7 @@ export const AttributeUncheckedCreateInputSchema: z.ZodType<Prisma.AttributeUnch
   label: z.string(),
   defaultIndex: z.number().int().optional(),
   defaultVisible: z.boolean().optional(),
+  category: z.string().optional().nullable(),
   ownerId: z.string().optional().nullable(),
   columns: z.lazy(() => ColumnUncheckedCreateNestedManyWithoutAttributeInputSchema).optional()
 }).strict();
@@ -2092,6 +2101,7 @@ export const AttributeUpdateInputSchema: z.ZodType<Prisma.AttributeUpdateInput> 
   label: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   defaultIndex: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   defaultVisible: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
+  category: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   owner: z.lazy(() => UserUpdateOneWithoutAttributesNestedInputSchema).optional(),
   columns: z.lazy(() => ColumnUpdateManyWithoutAttributeNestedInputSchema).optional()
 }).strict();
@@ -2103,6 +2113,7 @@ export const AttributeUncheckedUpdateInputSchema: z.ZodType<Prisma.AttributeUnch
   label: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   defaultIndex: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   defaultVisible: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
+  category: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   ownerId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   columns: z.lazy(() => ColumnUncheckedUpdateManyWithoutAttributeNestedInputSchema).optional()
 }).strict();
@@ -2114,6 +2125,7 @@ export const AttributeCreateManyInputSchema: z.ZodType<Prisma.AttributeCreateMan
   label: z.string(),
   defaultIndex: z.number().int().optional(),
   defaultVisible: z.boolean().optional(),
+  category: z.string().optional().nullable(),
   ownerId: z.string().optional().nullable()
 }).strict();
 
@@ -2124,6 +2136,7 @@ export const AttributeUpdateManyMutationInputSchema: z.ZodType<Prisma.AttributeU
   label: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   defaultIndex: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   defaultVisible: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
+  category: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
 }).strict();
 
 export const AttributeUncheckedUpdateManyInputSchema: z.ZodType<Prisma.AttributeUncheckedUpdateManyInput> = z.object({
@@ -2133,6 +2146,7 @@ export const AttributeUncheckedUpdateManyInputSchema: z.ZodType<Prisma.Attribute
   label: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   defaultIndex: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   defaultVisible: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
+  category: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   ownerId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
 }).strict();
 
@@ -3175,6 +3189,7 @@ export const AttributeCountOrderByAggregateInputSchema: z.ZodType<Prisma.Attribu
   label: z.lazy(() => SortOrderSchema).optional(),
   defaultIndex: z.lazy(() => SortOrderSchema).optional(),
   defaultVisible: z.lazy(() => SortOrderSchema).optional(),
+  category: z.lazy(() => SortOrderSchema).optional(),
   ownerId: z.lazy(() => SortOrderSchema).optional()
 }).strict();
 
@@ -3189,6 +3204,7 @@ export const AttributeMaxOrderByAggregateInputSchema: z.ZodType<Prisma.Attribute
   label: z.lazy(() => SortOrderSchema).optional(),
   defaultIndex: z.lazy(() => SortOrderSchema).optional(),
   defaultVisible: z.lazy(() => SortOrderSchema).optional(),
+  category: z.lazy(() => SortOrderSchema).optional(),
   ownerId: z.lazy(() => SortOrderSchema).optional()
 }).strict();
 
@@ -3199,6 +3215,7 @@ export const AttributeMinOrderByAggregateInputSchema: z.ZodType<Prisma.Attribute
   label: z.lazy(() => SortOrderSchema).optional(),
   defaultIndex: z.lazy(() => SortOrderSchema).optional(),
   defaultVisible: z.lazy(() => SortOrderSchema).optional(),
+  category: z.lazy(() => SortOrderSchema).optional(),
   ownerId: z.lazy(() => SortOrderSchema).optional()
 }).strict();
 
@@ -4869,6 +4886,7 @@ export const AttributeCreateWithoutOwnerInputSchema: z.ZodType<Prisma.AttributeC
   label: z.string(),
   defaultIndex: z.number().int().optional(),
   defaultVisible: z.boolean().optional(),
+  category: z.string().optional().nullable(),
   columns: z.lazy(() => ColumnCreateNestedManyWithoutAttributeInputSchema).optional()
 }).strict();
 
@@ -4879,6 +4897,7 @@ export const AttributeUncheckedCreateWithoutOwnerInputSchema: z.ZodType<Prisma.A
   label: z.string(),
   defaultIndex: z.number().int().optional(),
   defaultVisible: z.boolean().optional(),
+  category: z.string().optional().nullable(),
   columns: z.lazy(() => ColumnUncheckedCreateNestedManyWithoutAttributeInputSchema).optional()
 }).strict();
 
@@ -5028,6 +5047,7 @@ export const AttributeScalarWhereInputSchema: z.ZodType<Prisma.AttributeScalarWh
   label: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   defaultIndex: z.union([ z.lazy(() => IntFilterSchema),z.number() ]).optional(),
   defaultVisible: z.union([ z.lazy(() => BoolFilterSchema),z.boolean() ]).optional(),
+  category: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
   ownerId: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
 }).strict();
 
@@ -5436,6 +5456,7 @@ export const AttributeCreateWithoutColumnsInputSchema: z.ZodType<Prisma.Attribut
   label: z.string(),
   defaultIndex: z.number().int().optional(),
   defaultVisible: z.boolean().optional(),
+  category: z.string().optional().nullable(),
   owner: z.lazy(() => UserCreateNestedOneWithoutAttributesInputSchema).optional()
 }).strict();
 
@@ -5446,6 +5467,7 @@ export const AttributeUncheckedCreateWithoutColumnsInputSchema: z.ZodType<Prisma
   label: z.string(),
   defaultIndex: z.number().int().optional(),
   defaultVisible: z.boolean().optional(),
+  category: z.string().optional().nullable(),
   ownerId: z.string().optional().nullable()
 }).strict();
 
@@ -5525,6 +5547,7 @@ export const AttributeUpdateWithoutColumnsInputSchema: z.ZodType<Prisma.Attribut
   label: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   defaultIndex: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   defaultVisible: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
+  category: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   owner: z.lazy(() => UserUpdateOneWithoutAttributesNestedInputSchema).optional()
 }).strict();
 
@@ -5535,6 +5558,7 @@ export const AttributeUncheckedUpdateWithoutColumnsInputSchema: z.ZodType<Prisma
   label: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   defaultIndex: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   defaultVisible: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
+  category: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   ownerId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
 }).strict();
 
@@ -6771,7 +6795,8 @@ export const AttributeCreateManyOwnerInputSchema: z.ZodType<Prisma.AttributeCrea
   updatedAt: z.coerce.date().optional(),
   label: z.string(),
   defaultIndex: z.number().int().optional(),
-  defaultVisible: z.boolean().optional()
+  defaultVisible: z.boolean().optional(),
+  category: z.string().optional().nullable()
 }).strict();
 
 export const SurveyCreateManyOwnerInputSchema: z.ZodType<Prisma.SurveyCreateManyOwnerInput> = z.object({
@@ -6851,6 +6876,7 @@ export const AttributeUpdateWithoutOwnerInputSchema: z.ZodType<Prisma.AttributeU
   label: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   defaultIndex: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   defaultVisible: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
+  category: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   columns: z.lazy(() => ColumnUpdateManyWithoutAttributeNestedInputSchema).optional()
 }).strict();
 
@@ -6861,6 +6887,7 @@ export const AttributeUncheckedUpdateWithoutOwnerInputSchema: z.ZodType<Prisma.A
   label: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   defaultIndex: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   defaultVisible: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
+  category: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   columns: z.lazy(() => ColumnUncheckedUpdateManyWithoutAttributeNestedInputSchema).optional()
 }).strict();
 
@@ -6871,6 +6898,7 @@ export const AttributeUncheckedUpdateManyWithoutOwnerInputSchema: z.ZodType<Pris
   label: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   defaultIndex: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   defaultVisible: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
+  category: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
 }).strict();
 
 export const SurveyUpdateWithoutOwnerInputSchema: z.ZodType<Prisma.SurveyUpdateWithoutOwnerInput> = z.object({

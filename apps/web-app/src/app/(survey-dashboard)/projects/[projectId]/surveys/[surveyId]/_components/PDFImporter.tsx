@@ -63,9 +63,19 @@ export const PDFImporter = ({
     );
   }, [defaultAttributes]);
 
-  const remainingAttributes = attributes
+  const categorizedAttributes = attributes
     ?.filter((attribute) => !attribute.defaultVisible)
-    .sort((a, b) => a.label.localeCompare(b.label));
+    .sort((a, b) => a.label.localeCompare(b.label))
+    .reduce(
+      (acc, attribute) => {
+        acc[attribute.category ?? ""] = [
+          ...(acc[attribute.category ?? ""] || []),
+          attribute,
+        ];
+        return acc;
+      },
+      {} as Record<string, typeof attributes>,
+    );
 
   // TODO: Move all this functionality to backend
   const onFilesChangeHandler = async (files: FileList) => {
@@ -135,6 +145,13 @@ export const PDFImporter = ({
     }
   };
 
+  function camelCaseToTitleCase(str: string) {
+    return str
+      .replace(/([A-Z])/g, " $1")
+      .trim()
+      .replace(/^./, (str) => str.toUpperCase());
+  }
+
   return (
     <Dialog>
       <DialogTrigger asChild>
@@ -162,7 +179,7 @@ export const PDFImporter = ({
           </SelectContent>
         </Select>
         <div className="-mx-6 max-h-[75vh] overflow-y-auto p-6 pt-2">
-          <Label>Information to import</Label>
+          <Label className="text-md font-medium">Default Info</Label>
           <div className="flex flex-col gap-4 py-4">
             <div className="flex items-center gap-2">
               <Checkbox checked={true} disabled />
@@ -201,43 +218,61 @@ export const PDFImporter = ({
             </div>
           </div>
           <div className="h-px w-full bg-gray-200" />
-          <div
-            className="flex grid grid-flow-col grid-cols-2 gap-4 overflow-y-auto py-4"
-            style={{
-              gridTemplateRows: `repeat(${Math.ceil(
-                (remainingAttributes?.length ?? 0) / 2,
-              )}, minmax(0, 1fr))`,
-            }}
-          >
-            {remainingAttributes?.map((attribute) => {
-              return (
-                <div
-                  key={attribute.id}
-                  className="flex flex-row items-center gap-2"
-                >
-                  <Checkbox
-                    key={attribute.id}
-                    id={attribute.id}
-                    checked={attributesToInclude.includes(attribute.id)}
-                    onCheckedChange={(checked) => {
-                      if (checked) {
-                        setAttributesToInclude([
-                          ...attributesToInclude,
-                          attribute.id,
-                        ]);
-                      } else {
-                        setAttributesToInclude(
-                          attributesToInclude.filter(
-                            (id) => id !== attribute.id,
-                          ),
+          <div className="flex flex-col gap-4 overflow-y-auto py-4">
+            {Object.keys(categorizedAttributes ?? {})
+              .sort((a, b) => a.localeCompare(b))
+              .map((category) => {
+                return (
+                  <div key={category} className="flex flex-col gap-2">
+                    <Label className="text-md font-medium">
+                      {camelCaseToTitleCase(category)}
+                    </Label>
+
+                    <div
+                      className="flex grid grid-flow-col grid-cols-2 gap-4 overflow-y-auto pb-2"
+                      style={{
+                        gridTemplateRows: `repeat(${Math.ceil(
+                          (categorizedAttributes?.[category]?.length ?? 0) / 2,
+                        )}, minmax(0, 1fr))`,
+                      }}
+                    >
+                      {categorizedAttributes?.[category]?.map((attribute) => {
+                        return (
+                          <div
+                            key={attribute.id}
+                            className="flex flex-row items-center gap-2"
+                          >
+                            <Checkbox
+                              key={attribute.id}
+                              id={attribute.id}
+                              checked={attributesToInclude.includes(
+                                attribute.id,
+                              )}
+                              onCheckedChange={(checked) => {
+                                if (checked) {
+                                  setAttributesToInclude([
+                                    ...attributesToInclude,
+                                    attribute.id,
+                                  ]);
+                                } else {
+                                  setAttributesToInclude(
+                                    attributesToInclude.filter(
+                                      (id) => id !== attribute.id,
+                                    ),
+                                  );
+                                }
+                              }}
+                            />
+                            <Label htmlFor={attribute.id}>
+                              {attribute.label}
+                            </Label>
+                          </div>
                         );
-                      }
-                    }}
-                  />
-                  <Label htmlFor={attribute.id}>{attribute.label}</Label>
-                </div>
-              );
-            })}
+                      })}
+                    </div>
+                  </div>
+                );
+              })}
           </div>
         </div>
         <DialogFooter>
