@@ -233,6 +233,7 @@ export function PropertiesTable({
           label: "",
           defaultIndex: 0,
           defaultVisible: true,
+          category: null,
         },
         isNew: true,
         surveyId,
