@@ -231,6 +231,7 @@ export function ColumnsPage({
       label: "Brochure",
       defaultIndex: 0,
       defaultVisible: true,
+      category: null,
     },
   };
 
