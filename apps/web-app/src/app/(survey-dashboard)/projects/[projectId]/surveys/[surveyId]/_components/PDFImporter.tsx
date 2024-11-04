@@ -168,26 +168,28 @@ export const PDFImporter = ({
         </Button>
       </DialogTrigger>
       <DialogContent>
-        <div className="-mx-6 max-h-[75vh] overflow-y-auto p-6 pt-2">
+        <div className="-mx-6 flex max-h-[75vh] flex-col gap-2 overflow-y-auto p-6 py-2">
           <DialogHeader>
             <DialogTitle>Configure Import</DialogTitle>
           </DialogHeader>
-          <Label className="mt-2">PDF type</Label>
-          <Select
-            onValueChange={(value) =>
-              setPdfType(value.toLowerCase() as "costar" | "ndx")
-            }
-          >
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Costar" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="costar">Costar</SelectItem>
-              <SelectItem value="ndx">NDX</SelectItem>
-            </SelectContent>
-          </Select>
-          <Label className="text-sm font-medium">Information to import</Label>
+          <div className="mt-4 flex flex-col gap-2">
+            <Label>PDF type</Label>
+            <Select
+              onValueChange={(value) =>
+                setPdfType(value.toLowerCase() as "costar" | "ndx")
+              }
+            >
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Costar" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="costar">Costar</SelectItem>
+                <SelectItem value="ndx">NDX</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
           <div className="flex flex-col gap-4 py-4">
+            <Label className="text-sm font-medium">Information to import</Label>
             <div className="flex items-center gap-2">
               <Checkbox checked={true} disabled />
               <Label>Address</Label>
@@ -295,15 +297,15 @@ export const PDFImporter = ({
                 })}
             </Accordion>
           </div>
-          <DialogFooter>
-            <FileInput handleFilesChange={onFilesChangeHandler}>
-              <Button variant={variant}>
-                <ArrowUpTrayIcon className="mr-2 size-4" />
-                Select file
-              </Button>
-            </FileInput>
-          </DialogFooter>
         </div>
+        <DialogFooter>
+          <FileInput handleFilesChange={onFilesChangeHandler}>
+            <Button variant={variant}>
+              <ArrowUpTrayIcon className="mr-2 size-4" />
+              Select file
+            </Button>
+          </FileInput>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );
