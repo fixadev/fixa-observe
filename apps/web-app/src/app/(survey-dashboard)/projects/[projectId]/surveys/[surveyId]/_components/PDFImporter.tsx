@@ -232,7 +232,7 @@ export const PDFImporter = ({
             </div>
           </div>
           {/* <div className="h-px w-full bg-gray-200" /> */}
-          <div className="flex flex-col gap-4 overflow-y-auto py-2">
+          <div className="flex flex-col gap-4 py-2">
             <Accordion type="multiple" className="w-full">
               {Object.keys(categorizedAttributes ?? {})
                 .sort((a, b) => a.localeCompare(b))
