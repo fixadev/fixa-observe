@@ -188,11 +188,11 @@ export const PDFImporter = ({
               </SelectContent>
             </Select>
           </div>
-          <div className="flex flex-col gap-4 py-4">
+          <div className="flex flex-col gap-2 py-2">
             <Label className="text-sm font-medium">Information to import</Label>
-            <div className="flex items-center gap-2">
+            <div className="mb-2 flex items-center gap-2">
               <Checkbox checked={true} disabled />
-              <Label>Address</Label>
+              <Label className="text-sm font-normal">Address</Label>
             </div>
             <div className="flex flex-col gap-4">
               {defaultAttributes?.map((attribute) => {
@@ -232,7 +232,7 @@ export const PDFImporter = ({
             </div>
           </div>
           {/* <div className="h-px w-full bg-gray-200" /> */}
-          <div className="flex flex-col gap-4 py-2">
+          <div className="flex flex-col gap-4 pb-2">
             <Accordion type="multiple" className="w-full">
               {Object.keys(categorizedAttributes ?? {})
                 .sort((a, b) => a.localeCompare(b))
