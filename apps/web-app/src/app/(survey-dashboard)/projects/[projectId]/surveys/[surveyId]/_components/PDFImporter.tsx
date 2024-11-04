@@ -168,24 +168,24 @@ export const PDFImporter = ({
         </Button>
       </DialogTrigger>
       <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Configure Import</DialogTitle>
-        </DialogHeader>
-        <Label className="mt-2">PDF type</Label>
-        <Select
-          onValueChange={(value) =>
-            setPdfType(value.toLowerCase() as "costar" | "ndx")
-          }
-        >
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Costar" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="costar">Costar</SelectItem>
-            <SelectItem value="ndx">NDX</SelectItem>
-          </SelectContent>
-        </Select>
         <div className="-mx-6 max-h-[75vh] overflow-y-auto p-6 pt-2">
+          <DialogHeader>
+            <DialogTitle>Configure Import</DialogTitle>
+          </DialogHeader>
+          <Label className="mt-2">PDF type</Label>
+          <Select
+            onValueChange={(value) =>
+              setPdfType(value.toLowerCase() as "costar" | "ndx")
+            }
+          >
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Costar" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="costar">Costar</SelectItem>
+              <SelectItem value="ndx">NDX</SelectItem>
+            </SelectContent>
+          </Select>
           <Label className="text-sm font-medium">Information to import</Label>
           <div className="flex flex-col gap-4 py-4">
             <div className="flex items-center gap-2">
@@ -295,15 +295,15 @@ export const PDFImporter = ({
                 })}
             </Accordion>
           </div>
+          <DialogFooter>
+            <FileInput handleFilesChange={onFilesChangeHandler}>
+              <Button variant={variant}>
+                <ArrowUpTrayIcon className="mr-2 size-4" />
+                Select file
+              </Button>
+            </FileInput>
+          </DialogFooter>
         </div>
-        <DialogFooter>
-          <FileInput handleFilesChange={onFilesChangeHandler}>
-            <Button variant={variant}>
-              <ArrowUpTrayIcon className="mr-2 size-4" />
-              Select file
-            </Button>
-          </FileInput>
-        </DialogFooter>
       </DialogContent>
     </Dialog>
   );
