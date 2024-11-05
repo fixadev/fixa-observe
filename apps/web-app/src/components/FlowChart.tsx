@@ -740,7 +740,7 @@ function StateEdge({
               cy={labelY}
               r={Math.max(15, 15 + data.percentage * 30)}
               fill="white"
-              stroke={`rgba(0, 0, 0, ${0.5 + data.percentage * 0.7})`}
+              stroke="#D3D3D3"
               strokeWidth="1"
               className="pointer-events-none"
             />
