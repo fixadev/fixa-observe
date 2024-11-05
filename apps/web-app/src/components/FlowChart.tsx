@@ -734,17 +734,30 @@ function StateEdge({
       />
       {data?.hoverState === HoverState.HOVER &&
         data?.percentage !== undefined && (
-          <foreignObject
-            x={labelX - 20}
-            y={labelY - 20}
-            width={40}
-            height={40}
-            className="pointer-events-none"
-          >
-            <div className="flex h-full w-full items-center justify-center rounded-full border border-[#e5e5e5] bg-white text-xs font-medium">
+          <>
+            <circle
+              cx={labelX}
+              cy={labelY}
+              r={Math.max(15, 15 + data.percentage * 30)}
+              fill="white"
+              stroke={`rgba(0, 0, 0, ${0.5 + data.percentage * 0.7})`}
+              strokeWidth="1"
+              className="pointer-events-none"
+            />
+            <text
+              x={labelX}
+              y={labelY}
+              textAnchor="middle"
+              dominantBaseline="middle"
+              className="pointer-events-none text-xs font-medium"
+              style={{
+                fontSize: `${Math.max(10, 10 + data.percentage * 10)}px`,
+                fill: `rgba(0, 0, 0, ${0.5 + data.percentage * 0.7})`,
+              }}
+            >
               {`${Math.round(data.percentage * 100)}%`}
-            </div>
-          </foreignObject>
+            </text>
+          </>
         )}
     </>
   );
