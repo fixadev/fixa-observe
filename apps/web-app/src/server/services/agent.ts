@@ -42,21 +42,40 @@ export class AgentService {
   async listCallsPerNode(apiKey: string, agentId: string) {
     const states = await this.getStates(apiKey, agentId);
     const calls = await this.listCalls(apiKey, agentId);
-    const statesWithCalls = states?.map((state) => {
-      return {
-        ...state,
-        calls:
-          state.name === "start_of_conversation"
-            ? calls
-            : calls.filter((call) =>
-                call.transcript_with_tool_calls?.some(
-                  (entry) =>
-                    entry.role === "tool_call_invocation" &&
-                    entry.name === `transition_to_${state.name}`,
+    const statesWithCalls = states
+      ?.map((state) => {
+        return {
+          ...state,
+          calls:
+            state.name === "start_of_conversation"
+              ? calls
+              : calls.filter((call) =>
+                  call.transcript_with_tool_calls?.some(
+                    (entry) =>
+                      entry.role === "tool_call_invocation" &&
+                      entry.name === `transition_to_${state.name}`,
+                  ),
                 ),
-              ),
-      };
-    });
+        };
+      })
+      .concat({
+        name: "success",
+        calls: calls.filter((call) => call.call_analysis?.call_successful),
+      })
+      .concat({
+        name: "failure",
+        calls: calls.filter((call) => !call.call_analysis?.call_successful),
+      })
+      .concat({
+        name: "forwarded_to_human",
+        calls: calls.filter((call) =>
+          call.transcript_with_tool_calls?.some(
+            (entry) =>
+              entry.role === "tool_call_invocation" &&
+              entry.name === `transition_to_transfer_to_human`,
+          ),
+        ),
+      });
     return statesWithCalls;
   }
 }
