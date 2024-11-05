@@ -67,12 +67,12 @@ export class AgentService {
         calls: calls.filter((call) => !call.call_analysis?.call_successful),
       })
       .concat({
-        name: "forwarded_to_human",
+        name: "call_transferred",
         calls: calls.filter((call) =>
           call.transcript_with_tool_calls?.some(
             (entry) =>
               entry.role === "tool_call_invocation" &&
-              entry.name === `transition_to_transfer_to_human`,
+              entry.name === `transfer_call`,
           ),
         ),
       });
