@@ -18,24 +18,6 @@ export class AgentService {
     return await retellClient.agent.list();
   }
 
-  // async getAgent(
-  //   provider: PlatformOptions,
-  //   apiKey: string,
-  //   agentId: string,
-  // ) {
-  //   const endpoint =
-  //     provider === "retell"
-  //       ? `https://api.retellai.com/get-agent/${agentId}`
-  //       : `https://api.vapi.ai/assistant/${agentId}`;
-
-  //   const res = await axios.get(endpoint, {
-  //     headers: {
-  //       Authorization: `Bearer ${apiKey}`,
-  //     },
-  //   });
-  //   return res.data;
-  // }
-
   async getStates(apiKey: string, agentId: string) {
     const retellClient = new Retell({
       apiKey,
