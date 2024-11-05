@@ -7,15 +7,13 @@ import { TRPCReactProvider } from "~/trpc/react";
 import { ibmPlexSans } from "./fonts";
 import { CSPostHogProvider } from "./providers";
 import { ClerkProvider } from "@clerk/nextjs";
-import { PdfWorkerInit } from "./_components/PDFInit";
 
 // import { dark } from "@clerk/themes";
 import ChildrenWrapper from "./_components/ChildrenWrapper";
 import { TooltipProvider } from "~/components/ui/tooltip";
 export const metadata: Metadata = {
-  title: "Apex",
-  description:
-    "Quickly create commercial real estate surveys and export as PDF",
+  title: "pixa",
+  description: "the observability platform for voice AI",
   icons: [{ rel: "icon", url: "/favicon.ico" }],
 };
 
@@ -54,7 +52,6 @@ export default function RootLayout({
                   <ChildrenWrapper>
                     {children}
                     <Toaster />
-                    <PdfWorkerInit />
                   </ChildrenWrapper>
                 </TooltipProvider>
               </TRPCReactProvider>
