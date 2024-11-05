@@ -12,7 +12,6 @@ import { PdfWorkerInit } from "./_components/PDFInit";
 // import { dark } from "@clerk/themes";
 import ChildrenWrapper from "./_components/ChildrenWrapper";
 import { TooltipProvider } from "~/components/ui/tooltip";
-import { SupabaseProvider } from "~/hooks/useSupabase";
 export const metadata: Metadata = {
   title: "Apex",
   description:
@@ -51,15 +50,13 @@ export default function RootLayout({
               disableTransitionOnChange
             >
               <TRPCReactProvider>
-                <SupabaseProvider>
-                  <TooltipProvider delayDuration={100}>
-                    <ChildrenWrapper>
-                      {children}
-                      <Toaster />
-                      <PdfWorkerInit />
-                    </ChildrenWrapper>
-                  </TooltipProvider>
-                </SupabaseProvider>
+                <TooltipProvider delayDuration={100}>
+                  <ChildrenWrapper>
+                    {children}
+                    <Toaster />
+                    <PdfWorkerInit />
+                  </ChildrenWrapper>
+                </TooltipProvider>
               </TRPCReactProvider>
             </ThemeProvider>
           </body>
