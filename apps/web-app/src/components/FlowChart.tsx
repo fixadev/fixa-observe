@@ -14,6 +14,12 @@ import {
   type Node,
   type Edge,
   useReactFlow,
+  type EdgeProps,
+  getBezierPath,
+  BaseEdge,
+  getSimpleBezierPath,
+  getStraightPath,
+  MarkerType,
 } from "@xyflow/react";
 
 import "@xyflow/react/dist/style.css";
@@ -23,12 +29,14 @@ type StateNode = Node<{
   numFailures?: number;
   numForwards?: number;
   numSuccesses?: number;
+  isHovered?: boolean;
 }>;
 
 type ResultNode = Node<{
   label: string;
   type: "failure" | "forward" | "success";
   numCalls?: number;
+  isHovered?: boolean;
 }>;
 
 const totalCalls = 1000;
@@ -82,18 +90,90 @@ const initialNodes = [
   },
 ] as (StateNode | ResultNode)[];
 const initialEdges = [
-  { id: "e1-2", source: "1", target: "2" },
-  { id: "e1-3", source: "1", target: "3" },
-  { id: "e1-4", source: "1", target: "4" },
-  { id: "e2-5", source: "2", target: "5" },
-  { id: "e2-6", source: "2", target: "6" },
-  { id: "e2-7", source: "2", target: "7" },
-  { id: "e3-5", source: "3", target: "5" },
-  { id: "e3-6", source: "3", target: "6" },
-  { id: "e3-7", source: "3", target: "7" },
-  { id: "e4-5", source: "4", target: "5" },
-  { id: "e4-6", source: "4", target: "6" },
-  { id: "e4-7", source: "4", target: "7" },
+  {
+    id: "e1-2",
+    type: "stateEdge",
+    source: "1",
+    target: "2",
+    markerEnd: { type: MarkerType.Arrow },
+  },
+  {
+    id: "e1-3",
+    type: "stateEdge",
+    source: "1",
+    target: "3",
+    markerEnd: { type: MarkerType.Arrow },
+  },
+  {
+    id: "e1-4",
+    type: "stateEdge",
+    source: "1",
+    target: "4",
+    markerEnd: { type: MarkerType.Arrow },
+  },
+  {
+    id: "e2-5",
+    type: "stateEdge",
+    source: "2",
+    target: "5",
+    markerEnd: { type: MarkerType.Arrow },
+  },
+  {
+    id: "e2-6",
+    type: "stateEdge",
+    source: "2",
+    target: "6",
+    markerEnd: { type: MarkerType.Arrow },
+  },
+  {
+    id: "e2-7",
+    type: "stateEdge",
+    source: "2",
+    target: "7",
+    markerEnd: { type: MarkerType.Arrow },
+  },
+  {
+    id: "e3-5",
+    type: "stateEdge",
+    source: "3",
+    target: "5",
+    markerEnd: { type: MarkerType.Arrow },
+  },
+  {
+    id: "e3-6",
+    type: "stateEdge",
+    source: "3",
+    target: "6",
+    markerEnd: { type: MarkerType.Arrow },
+  },
+  {
+    id: "e3-7",
+    type: "stateEdge",
+    source: "3",
+    target: "7",
+    markerEnd: { type: MarkerType.Arrow },
+  },
+  {
+    id: "e4-5",
+    type: "stateEdge",
+    source: "4",
+    target: "5",
+    markerEnd: { type: MarkerType.Arrow },
+  },
+  {
+    id: "e4-6",
+    type: "stateEdge",
+    source: "4",
+    target: "6",
+    markerEnd: { type: MarkerType.Arrow },
+  },
+  {
+    id: "e4-7",
+    type: "stateEdge",
+    source: "4",
+    target: "7",
+    markerEnd: { type: MarkerType.Arrow },
+  },
 ];
 
 export default function FlowChart() {
@@ -101,9 +181,13 @@ export default function FlowChart() {
     () => ({ state: StateNode, result: ResultNode }),
     [],
   );
+  const edgeTypes = useMemo(() => ({ stateEdge: StateEdge }), []);
   const { fitView } = useReactFlow();
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
+  const [hoveredNodeId, setHoveredNodeId] = React.useState<string | null>(null);
+  const [hoveredEdgeId, setHoveredEdgeId] = React.useState<string | null>(null);
+  const adjacencyMap = useMemo(() => buildAdjacencyMap(edges), [edges]);
 
   const onConnect = useCallback(
     (params: Connection) => setEdges((eds) => addEdge(params, eds)),
@@ -122,16 +206,114 @@ export default function FlowChart() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const onNodeMouseEnter = useCallback(
+    (_: React.MouseEvent, node: Node) => {
+      setHoveredNodeId(node.id);
+
+      // Get adjacent node IDs from adjacency map
+      const adjacentNodes = adjacencyMap.get(node.id) ?? new Set();
+
+      setNodes((nds) =>
+        nds.map((n) => ({
+          ...n,
+          data: {
+            ...n.data,
+            isHovered: n.id === node.id || adjacentNodes.has(n.id),
+          },
+        })),
+      );
+
+      // Highlight edges connected to hovered node
+      setEdges((eds) =>
+        eds.map((e) => ({
+          ...e,
+          data: {
+            ...e.data,
+            isHovered: e.source === node.id || e.target === node.id,
+          },
+        })),
+      );
+    },
+    [setNodes, setEdges, adjacencyMap],
+  );
+
+  const onNodeMouseLeave = useCallback(() => {
+    setHoveredNodeId(null);
+    setNodes((nds) =>
+      nds.map((n) => ({
+        ...n,
+        data: { ...n.data, isHovered: false },
+      })),
+    );
+    setEdges((eds) =>
+      eds.map((e) => ({
+        ...e,
+        data: { ...e.data, isHovered: false },
+      })),
+    );
+  }, [setNodes, setEdges]);
+
+  const onEdgeMouseEnter = useCallback(
+    (_: React.MouseEvent, edge: Edge) => {
+      setHoveredEdgeId(edge.id);
+
+      // Highlight the edge
+      setEdges((eds) =>
+        eds.map((e) => ({
+          ...e,
+          data: { ...e.data, isHovered: e.id === edge.id },
+        })),
+      );
+
+      // Highlight the connected nodes
+      setNodes((nds) =>
+        nds.map((n) => ({
+          ...n,
+          data: {
+            ...n.data,
+            isHovered: n.id === edge.source || n.id === edge.target,
+          },
+        })),
+      );
+    },
+    [setEdges, setNodes],
+  );
+
+  const onEdgeMouseLeave = useCallback(() => {
+    setHoveredEdgeId(null);
+
+    // Reset edge highlighting
+    setEdges((eds) =>
+      eds.map((e) => ({
+        ...e,
+        data: { ...e.data, isHovered: false },
+      })),
+    );
+
+    // Reset node highlighting
+    setNodes((nds) =>
+      nds.map((n) => ({
+        ...n,
+        data: { ...n.data, isHovered: false },
+      })),
+    );
+  }, [setEdges, setNodes]);
+
   return (
     <div style={{ width: "100vw", height: "100vh" }}>
       <ReactFlow
         nodes={nodes}
         edges={edges}
         nodeTypes={nodeTypes}
+        edgeTypes={edgeTypes}
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
         onConnect={onConnect}
         fitView
+        onNodeMouseEnter={onNodeMouseEnter}
+        onNodeMouseLeave={onNodeMouseLeave}
+        onEdgeMouseEnter={onEdgeMouseEnter}
+        onEdgeMouseLeave={onEdgeMouseLeave}
       />
     </div>
   );
@@ -170,12 +352,27 @@ function getLayoutedElements(
   };
 }
 
+function buildAdjacencyMap(edges: Edge[]): Map<string, Set<string>> {
+  const adjacencyMap = new Map<string, Set<string>>();
+
+  edges.forEach((edge) => {
+    // Initialize set for source if it doesn't exist
+    if (!adjacencyMap.has(edge.source)) {
+      adjacencyMap.set(edge.source, new Set());
+    }
+    // Add target to source's set
+    adjacencyMap.get(edge.source)!.add(edge.target);
+  });
+
+  return adjacencyMap;
+}
+
 const RED = "#FE331B";
 const YELLOW = "#FDCD2E";
 const GREEN = "#90CF27";
 // const GREEN = "white";
 
-function StateNode({ data }: NodeProps<StateNode>) {
+function StateNode({ id, data }: NodeProps<StateNode>) {
   const percentageOfTotalCalls = useMemo(() => {
     return (
       ((data.numFailures ?? 0) +
@@ -223,12 +420,14 @@ function StateNode({ data }: NodeProps<StateNode>) {
 
   return (
     <>
-      <Handle type="target" position={Position.Top} />
+      <Handle className="z-10" type="target" position={Position.Top} />
       <div
         className="relative rounded-md p-6 shadow-sm outline outline-2 outline-input"
         style={{
           padding: `${padding.vertical}rem ${padding.horizontal}rem`,
           background: gradient,
+          transform: data.isHovered ? "scale(1.05)" : "scale(1)",
+          transition: "transform 0.1s ease-in-out",
         }}
       >
         <span className="invisible" style={{ fontSize: `${fontSize}rem` }}>
@@ -280,25 +479,52 @@ function ResultNode({ data }: NodeProps<ResultNode>) {
 
   return (
     <>
-      <Handle type="target" position={Position.Top} />
+      <Handle className="z-10" type="target" position={Position.Top} />
       <div
         className="relative rounded-md shadow-sm outline outline-2"
         style={{
           padding: `${padding.vertical}rem ${padding.horizontal}rem`,
           backgroundColor: `${backgroundColor}1A`,
           outlineColor: backgroundColor,
+          transform: data.isHovered ? "scale(1.05)" : "scale(1)",
+          transition: "transform 0.1s ease-in-out",
         }}
       >
         {data.label}
-        {/* <div
-          className="absolute bottom-0 left-0 h-[20%] w-full rounded-b-md"
-          style={{ backgroundColor }}
-        ></div> */}
         <div
           className="absolute left-0 top-0 h-[20%] w-full rounded-t-md"
           style={{ backgroundColor }}
         ></div>
       </div>
     </>
+  );
+}
+
+function StateEdge({
+  id,
+  sourceX,
+  sourceY,
+  targetX,
+  targetY,
+  markerEnd,
+  data,
+}: EdgeProps) {
+  const [edgePath, labelX, labelY] = getSimpleBezierPath({
+    sourceX,
+    sourceY,
+    targetX,
+    targetY,
+  });
+
+  return (
+    <BaseEdge
+      id={id}
+      path={edgePath}
+      markerEnd={markerEnd}
+      style={{
+        strokeWidth: data?.isHovered ? 2 : 1,
+        opacity: data?.isHovered ? 1 : 0.5,
+      }}
+    />
   );
 }
