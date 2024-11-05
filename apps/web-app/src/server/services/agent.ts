@@ -59,10 +59,6 @@ export class AgentService {
         };
       })
       .concat({
-        name: "success",
-        calls: calls.filter((call) => call.call_analysis?.call_successful),
-      })
-      .concat({
         name: "failure",
         calls: calls.filter((call) => !call.call_analysis?.call_successful),
       })
@@ -72,7 +68,8 @@ export class AgentService {
           call.transcript_with_tool_calls?.some(
             (entry) =>
               entry.role === "tool_call_invocation" &&
-              entry.name === `transfer_call`,
+              entry.name === `transfer_call` &&
+              call.call_analysis?.call_successful,
           ),
         ),
       });
