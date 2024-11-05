@@ -8,18 +8,17 @@ import { skipToken } from "@tanstack/react-query";
 
 // 420 69 🍆
 export default function LandingPage() {
-  // const { data: agents } = api.agent.listAgents.useQuery({});
+  const { data: agents } = api.agent.listAgents.useQuery({});
 
-  // const { data: flow } = api.agent.getFlow.useQuery(
-  //   agents?.[0]?.agent_id ? { agentId: agents[0].agent_id } : skipToken,
-  // );
-  // console.log(agents);
-  // console.log(flow);
+  const { data: states } = api.agent.listCallsPerState.useQuery(
+    agents?.[0]?.agent_id ? { agentId: agents[0].agent_id } : skipToken,
+  );
+  console.log(states);
 
-  // const { data: calls } = api.agent.listCalls.useQuery(
-  //   agents?.[0]?.agent_id ? { agentId: agents[0].agent_id } : skipToken,
-  // );
-  // console.log(calls);
+  const { data: calls } = api.agent.listCalls.useQuery(
+    agents?.[0]?.agent_id ? { agentId: agents[0].agent_id } : skipToken,
+  );
+  console.log(calls);
 
   return (
     <div className="container relative mx-auto flex h-screen items-center">
