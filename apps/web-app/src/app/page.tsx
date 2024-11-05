@@ -13,7 +13,7 @@ export default function LandingPage() {
           <div className="-ml-1 text-7xl font-medium md:-ml-2 md:text-8xl lg:text-9xl">
             pixa.
           </div>
-          <div className="text-2xl text-muted-foreground sm:text-3xl md:text-4xl lg:text-5xl">
+          <div className="text-2xl text-muted-foreground/60 sm:text-3xl md:text-4xl lg:text-5xl">
             the observability platform for voice AI.
           </div>
         </div>
