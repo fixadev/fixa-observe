@@ -4,13 +4,10 @@ import { type WebhookEvent } from "@clerk/nextjs/server";
 import { env } from "~/env";
 import { db } from "~/server/db";
 import { addSubscriber } from "~/server/listmonk";
-import { emailService } from "~/server/services/email";
 
 export async function GET() {
   return new Response("ok", { status: 200 });
 }
-
-const emailServiceInstance = emailService({ db });
 
 export async function POST(req: Request) {
   // You can find this in the Clerk Dashboard -> Webhooks -> choose the endpoint
@@ -75,7 +72,6 @@ export async function POST(req: Request) {
       }
 
       await upsertUser(userId, email, first_name, last_name);
-      await emailServiceInstance.createEmailSubscription({ userId });
 
       try {
         await addSubscriber(email, first_name, last_name);
@@ -116,12 +112,6 @@ const upsertUser = async (
 };
 
 const deleteUser = async (userId: string) => {
-  try {
-    await emailServiceInstance.deleteEmailSubscription({ userId });
-  } catch (error) {
-    console.log("No existing email subscription to delete");
-  }
-
   try {
     await db.user.delete({
       where: { id: userId },
