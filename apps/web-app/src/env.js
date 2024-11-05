@@ -20,16 +20,7 @@ export const env = createEnv({
     LISTMONK_LIST_ID: z.number(),
     ANTHROPIC_KEY: z.string(),
     OPENAI_KEY: z.string(),
-    ADOBE_CLIENT_ID: z.string(),
-    ADOBE_CLIENT_SECRET: z.string(),
     GCLOUD_CREDS: z.string(),
-    SCRAPING_SERVICE_URL: z.string().url(),
-    INPAINTING_SERVICE_URL: z.string().url(),
-    GOOGLE_API_KEY: z.string(),
-    SOCKET_URL: z.string().url(),
-    // Temporarily disabled Discord auth functionality
-    // DISCORD_CLIENT_ID: z.string(),
-    // DISCORD_CLIENT_SECRET: z.string(),
   },
 
   /**
@@ -38,17 +29,10 @@ export const env = createEnv({
    * `NEXT_PUBLIC_`.
    */
   client: {
-    // NEXT_PUBLIC_CLIENTVAR: z.string(),
     NEXT_PUBLIC_POSTHOG_KEY: z.string(),
     NEXT_PUBLIC_POSTHOG_HOST: z.string(),
-    NEXT_PUBLIC_API_URL: z.string(),
-    NEXT_PUBLIC_SOCKET_URL: z.string(),
     NEXT_PUBLIC_CLERK_SIGN_IN_URL: z.string(),
     NEXT_PUBLIC_CLERK_SIGN_UP_URL: z.string(),
-    NEXT_PUBLIC_GOOGLE_API_KEY: z.string(),
-    NEXT_PUBLIC_SUPABASE_URL: z.string(),
-    NEXT_PUBLIC_SUPABASE_KEY: z.string(),
-    NEXT_PUBLIC_MAPBOX_TOKEN: z.string(),
   },
 
   /**
@@ -59,10 +43,8 @@ export const env = createEnv({
     DATABASE_URL: process.env.DATABASE_URL,
     DIRECT_URL: process.env.DIRECT_URL,
     NODE_ENV: process.env.NODE_ENV,
-    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
     NEXT_PUBLIC_POSTHOG_KEY: process.env.NEXT_PUBLIC_POSTHOG_KEY,
     NEXT_PUBLIC_POSTHOG_HOST: process.env.NEXT_PUBLIC_POSTHOG_HOST,
-    NEXT_PUBLIC_SOCKET_URL: process.env.NEXT_PUBLIC_SOCKET_URL,
     NEXT_PUBLIC_CLERK_SIGN_IN_URL: process.env.NEXT_PUBLIC_CLERK_SIGN_IN_URL,
     NEXT_PUBLIC_CLERK_SIGN_UP_URL: process.env.NEXT_PUBLIC_CLERK_SIGN_UP_URL,
     CLERK_WEBHOOK_SECRET: process.env.CLERK_WEBHOOK_SECRET,
@@ -73,20 +55,7 @@ export const env = createEnv({
     LISTMONK_LIST_ID: parseInt(process.env.LISTMONK_LIST_ID ?? "0"),
     ANTHROPIC_KEY: process.env.ANTHROPIC_KEY,
     OPENAI_KEY: process.env.OPENAI_KEY,
-    ADOBE_CLIENT_ID: process.env.ADOBE_CLIENT_ID,
-    ADOBE_CLIENT_SECRET: process.env.ADOBE_CLIENT_SECRET,
     GCLOUD_CREDS: process.env.GCLOUD_CREDS,
-    SCRAPING_SERVICE_URL: process.env.SCRAPING_SERVICE_URL,
-    INPAINTING_SERVICE_URL: process.env.INPAINTING_SERVICE_URL,
-    GOOGLE_API_KEY: process.env.GOOGLE_API_KEY,
-    NEXT_PUBLIC_GOOGLE_API_KEY: process.env.NEXT_PUBLIC_GOOGLE_API_KEY,
-    NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
-    NEXT_PUBLIC_SUPABASE_KEY: process.env.NEXT_PUBLIC_SUPABASE_KEY,
-    NEXT_PUBLIC_MAPBOX_TOKEN: process.env.NEXT_PUBLIC_MAPBOX_TOKEN,
-    SOCKET_URL: process.env.NEXT_PUBLIC_SOCKET_URL,
-    // Temporarily disabled Discord auth functionality
-    // DISCORD_CLIENT_ID: process.env.DISCORD_CLIENT_ID,
-    // DISCORD_CLIENT_SECRET: process.env.DISCORD_CLIENT_SECRET,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially
