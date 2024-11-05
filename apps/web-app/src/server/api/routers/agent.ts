@@ -14,14 +14,14 @@ export const agentRouter = createTRPCRouter({
         apiKey: z.string().optional(),
       }),
     )
-    .mutation(async ({ input }) => {
+    .query(async ({ input }) => {
       return await agentServiceInstance.listAgents(
         input.apiKey ?? retellApiKey,
       );
     }),
   getFlow: protectedProcedure
     .input(z.object({ apiKey: z.string().optional(), agentId: z.string() }))
-    .mutation(async ({ input }) => {
+    .query(async ({ input }) => {
       return await agentServiceInstance.getFlow(
         input.apiKey ?? retellApiKey,
         input.agentId,
@@ -29,7 +29,7 @@ export const agentRouter = createTRPCRouter({
     }),
   listCalls: protectedProcedure
     .input(z.object({ apiKey: z.string().optional(), agentId: z.string() }))
-    .mutation(async ({ input }) => {
+    .query(async ({ input }) => {
       return await agentServiceInstance.listCalls(
         input.apiKey ?? retellApiKey,
         input.agentId,
