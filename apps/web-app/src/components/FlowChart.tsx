@@ -517,7 +517,7 @@ function getLayoutedElements(
   options: Record<string, string>,
 ) {
   const g = new Dagre.graphlib.Graph().setDefaultEdgeLabel(() => ({}));
-  g.setGraph({ rankdir: options.direction });
+  g.setGraph({ rankdir: options.direction, ranksep: 200 });
 
   edges.forEach((edge) => g.setEdge(edge.source, edge.target));
   nodes.forEach((node) =>
