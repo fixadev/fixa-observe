@@ -4,6 +4,7 @@ import { Button } from "~/components/ui/button";
 import Link from "next/link";
 import Image from "next/image";
 
+// 420 69 🍆
 export default function LandingPage() {
   return (
     <div className="container relative mx-auto flex h-screen items-center">
