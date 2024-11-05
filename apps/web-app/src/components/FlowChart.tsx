@@ -325,11 +325,10 @@ export default function FlowChart() {
       );
 
       // Calculate total incoming and outgoing flow for hovered node
-      const nodeData = node.data as StateNode["data"];
-      const totalNodeFlow =
-        (nodeData.numFailures ?? 0) +
-        (nodeData.numForwards ?? 0) +
-        (nodeData.numSuccesses ?? 0);
+      // const nodeData = node.data as StateNode["data"];
+      const totalNodeFlow = getTotalCallsForNode(
+        node as StateNode | ResultNode,
+      );
 
       setEdges((eds) =>
         eds.map((e) => {
@@ -339,8 +338,29 @@ export default function FlowChart() {
           if (isConnected) {
             if (e.source === node.id) {
               // Outgoing edge - percentage relative to total outgoing flow
-              newPercentage =
-                ((e.data?.percentage ?? 0) * totalCalls) / totalNodeFlow;
+              const targetNode = initialNodes.find((n) => n.id === e.target)!;
+              const curFlow = getTotalCallsForNode(targetNode);
+              if (targetNode.type === "result") {
+                switch ((targetNode as ResultNode).data.type) {
+                  case "success":
+                    newPercentage =
+                      ((node as StateNode).data.numSuccesses ?? 0) /
+                      totalNodeFlow;
+                    break;
+                  case "forward":
+                    newPercentage =
+                      ((node as StateNode).data.numForwards ?? 0) /
+                      totalNodeFlow;
+                    break;
+                  case "failure":
+                    newPercentage =
+                      ((node as StateNode).data.numFailures ?? 0) /
+                      totalNodeFlow;
+                    break;
+                }
+              } else {
+                newPercentage = curFlow / totalNodeFlow;
+              }
             } else {
               // Incoming edge - keep original percentage (relative to parent's flow)
               newPercentage = e.data?.percentage;
