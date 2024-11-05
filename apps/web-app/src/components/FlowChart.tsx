@@ -24,19 +24,30 @@ import {
 
 import "@xyflow/react/dist/style.css";
 
+enum HoverState {
+  HOVER = "hover",
+  DEFAULT = "default",
+  DISABLED = "disabled",
+}
+
 type StateNode = Node<{
   label: string;
   numFailures?: number;
   numForwards?: number;
   numSuccesses?: number;
-  isHovered?: boolean;
+  hoverState: HoverState;
 }>;
 
 type ResultNode = Node<{
   label: string;
   type: "failure" | "forward" | "success";
   numCalls?: number;
-  isHovered?: boolean;
+  hoverState: HoverState;
+}>;
+
+type StateEdge = Edge<{
+  hoverState: HoverState;
+  percentage?: number;
 }>;
 
 const totalCalls = 1000;
@@ -45,19 +56,33 @@ const initialNodes = [
     id: "1",
     type: "state",
     position: { x: 0, y: 0 },
-    data: { label: "Start of conversation", numSuccesses: 1000 },
+    data: {
+      label: "Start of conversation",
+      numSuccesses: 1000,
+      hoverState: HoverState.DEFAULT,
+    },
   },
   {
     id: "2",
     type: "state",
     position: { x: 0, y: 0 },
-    data: { label: "General question", numFailures: 100, numSuccesses: 200 },
+    data: {
+      label: "General question",
+      numFailures: 100,
+      numSuccesses: 200,
+      hoverState: HoverState.DEFAULT,
+    },
   },
   {
     id: "3",
     type: "state",
     position: { x: 0, y: 0 },
-    data: { label: "Order takeout", numFailures: 10, numSuccesses: 100 },
+    data: {
+      label: "Order takeout",
+      numFailures: 10,
+      numSuccesses: 100,
+      hoverState: HoverState.DEFAULT,
+    },
   },
   {
     id: "4",
@@ -65,116 +90,236 @@ const initialNodes = [
     position: { x: 0, y: 0 },
     data: {
       label: "Make reservation",
-      numFailures: 400,
-      numForwards: 90,
-      numSuccesses: 100,
+      numFailures: 0,
+      numForwards: 0,
+      numSuccesses: 0,
+      hoverState: HoverState.DEFAULT,
+    },
+  },
+  {
+    id: "4a",
+    type: "state",
+    position: { x: 0, y: 0 },
+    data: {
+      label: "Group < 6 people",
+      numFailures: 150,
+      numForwards: 30,
+      numSuccesses: 60,
+      hoverState: HoverState.DEFAULT,
+    },
+  },
+  {
+    id: "4b",
+    type: "state",
+    position: { x: 0, y: 0 },
+    data: {
+      label: "Group ≥ 6 people",
+      numFailures: 250,
+      numForwards: 60,
+      numSuccesses: 40,
+      hoverState: HoverState.DEFAULT,
     },
   },
   {
     id: "5",
     type: "result",
     position: { x: 0, y: 0 },
-    data: { label: "Failure", numCalls: 600 - 90, type: "failure" }, // 100 + 10 + 490 failures
+    data: {
+      label: "Failure",
+      numCalls: 600 - 90,
+      type: "failure",
+      hoverState: HoverState.DEFAULT,
+    }, // 100 + 10 + 490 failures
   },
   {
     id: "6",
     type: "result",
     position: { x: 0, y: 0 },
-    data: { label: "Forward call to human", numCalls: 90, type: "forward" }, // No forwards shown in data
+    data: {
+      label: "Forward call to human",
+      numCalls: 90,
+      type: "forward",
+      hoverState: HoverState.DEFAULT,
+    }, // No forwards shown in data
   },
   {
     id: "7",
     type: "result",
     position: { x: 0, y: 0 },
-    data: { label: "Success", numCalls: 400, type: "success" }, // 200 + 100 + 100 successes
+    data: {
+      label: "Success",
+      numCalls: 400,
+      type: "success",
+      hoverState: HoverState.DEFAULT,
+    }, // 200 + 100 + 100 successes
   },
 ] as (StateNode | ResultNode)[];
-const initialEdges = [
-  {
-    id: "e1-2",
-    type: "stateEdge",
-    source: "1",
-    target: "2",
-    markerEnd: { type: MarkerType.Arrow },
-  },
-  {
-    id: "e1-3",
-    type: "stateEdge",
-    source: "1",
-    target: "3",
-    markerEnd: { type: MarkerType.Arrow },
-  },
-  {
-    id: "e1-4",
-    type: "stateEdge",
-    source: "1",
-    target: "4",
-    markerEnd: { type: MarkerType.Arrow },
-  },
-  {
-    id: "e2-5",
-    type: "stateEdge",
-    source: "2",
-    target: "5",
-    markerEnd: { type: MarkerType.Arrow },
-  },
-  {
-    id: "e2-6",
-    type: "stateEdge",
-    source: "2",
-    target: "6",
-    markerEnd: { type: MarkerType.Arrow },
-  },
-  {
-    id: "e2-7",
-    type: "stateEdge",
-    source: "2",
-    target: "7",
-    markerEnd: { type: MarkerType.Arrow },
-  },
-  {
-    id: "e3-5",
-    type: "stateEdge",
-    source: "3",
-    target: "5",
-    markerEnd: { type: MarkerType.Arrow },
-  },
-  {
-    id: "e3-6",
-    type: "stateEdge",
-    source: "3",
-    target: "6",
-    markerEnd: { type: MarkerType.Arrow },
-  },
-  {
-    id: "e3-7",
-    type: "stateEdge",
-    source: "3",
-    target: "7",
-    markerEnd: { type: MarkerType.Arrow },
-  },
-  {
-    id: "e4-5",
-    type: "stateEdge",
-    source: "4",
-    target: "5",
-    markerEnd: { type: MarkerType.Arrow },
-  },
-  {
-    id: "e4-6",
-    type: "stateEdge",
-    source: "4",
-    target: "6",
-    markerEnd: { type: MarkerType.Arrow },
-  },
-  {
-    id: "e4-7",
-    type: "stateEdge",
-    source: "4",
-    target: "7",
-    markerEnd: { type: MarkerType.Arrow },
-  },
-];
+const initialEdges = (() => {
+  const edges: StateEdge[] = [
+    {
+      id: "e1-2",
+      type: "stateEdge",
+      source: "1",
+      target: "2",
+      data: { percentage: 300 / totalCalls, hoverState: HoverState.DEFAULT }, // 100 failures + 200 successes
+      markerEnd: { type: MarkerType.Arrow },
+    },
+    {
+      id: "e1-3",
+      type: "stateEdge",
+      source: "1",
+      target: "3",
+      data: { percentage: 110 / totalCalls, hoverState: HoverState.DEFAULT }, // 10 failures + 100 successes
+      markerEnd: { type: MarkerType.Arrow },
+    },
+    {
+      id: "e1-4",
+      type: "stateEdge",
+      source: "1",
+      target: "4",
+      data: { percentage: 590 / totalCalls, hoverState: HoverState.DEFAULT }, // 400 failures + 90 forwards + 100 successes
+      markerEnd: { type: MarkerType.Arrow },
+    },
+    {
+      id: "e2-5",
+      type: "stateEdge",
+      source: "2",
+      target: "5",
+      data: { percentage: 10 / 100, hoverState: HoverState.DEFAULT }, // 10 failures
+      markerEnd: { type: MarkerType.Arrow },
+    },
+    {
+      id: "e2-6",
+      type: "stateEdge",
+      source: "2",
+      target: "6",
+      data: { percentage: 90 / 100, hoverState: HoverState.DEFAULT }, // 90 forwards
+      markerEnd: { type: MarkerType.Arrow },
+    },
+    {
+      id: "e2-7",
+      type: "stateEdge",
+      source: "2",
+      target: "7",
+      data: { percentage: 200 / 100, hoverState: HoverState.DEFAULT }, // 200 successes
+      markerEnd: { type: MarkerType.Arrow },
+    },
+    {
+      id: "e3-5",
+      type: "stateEdge",
+      source: "3",
+      target: "5",
+      data: { percentage: 10 / 100, hoverState: HoverState.DEFAULT }, // 10 failures
+      markerEnd: { type: MarkerType.Arrow },
+    },
+    {
+      id: "e3-6",
+      type: "stateEdge",
+      source: "3",
+      target: "6",
+      data: { percentage: 90 / 100, hoverState: HoverState.DEFAULT }, // 90 forwards
+      markerEnd: { type: MarkerType.Arrow },
+    },
+    {
+      id: "e3-7",
+      type: "stateEdge",
+      source: "3",
+      target: "7",
+      data: { percentage: 200 / 100, hoverState: HoverState.DEFAULT }, // 200 successes
+      markerEnd: { type: MarkerType.Arrow },
+    },
+    {
+      id: "e4-5",
+      type: "stateEdge",
+      source: "4",
+      target: "5",
+      data: { percentage: 400 / 100, hoverState: HoverState.DEFAULT }, // 400 failures
+      markerEnd: { type: MarkerType.Arrow },
+    },
+    {
+      id: "e4-6",
+      type: "stateEdge",
+      source: "4",
+      target: "6",
+      data: { percentage: 90 / 100, hoverState: HoverState.DEFAULT }, // 90 forwards
+      markerEnd: { type: MarkerType.Arrow },
+    },
+    {
+      id: "e4-7",
+      type: "stateEdge",
+      source: "4",
+      target: "7",
+      data: { percentage: 100 / 100, hoverState: HoverState.DEFAULT }, // 100 successes
+      markerEnd: { type: MarkerType.Arrow },
+    },
+    {
+      id: "e4-4a",
+      type: "stateEdge",
+      source: "4",
+      target: "4a",
+      data: { percentage: 240 / totalCalls, hoverState: HoverState.DEFAULT }, // 150 + 30 + 60
+      markerEnd: { type: MarkerType.Arrow },
+    },
+    {
+      id: "e4-4b",
+      type: "stateEdge",
+      source: "4",
+      target: "4b",
+      data: { percentage: 350 / totalCalls, hoverState: HoverState.DEFAULT }, // 250 + 60 + 40
+      markerEnd: { type: MarkerType.Arrow },
+    },
+    {
+      id: "e4a-5",
+      type: "stateEdge",
+      source: "4a",
+      target: "5",
+      data: { percentage: 150 / totalCalls, hoverState: HoverState.DEFAULT },
+      markerEnd: { type: MarkerType.Arrow },
+    },
+    {
+      id: "e4a-6",
+      type: "stateEdge",
+      source: "4a",
+      target: "6",
+      data: { percentage: 30 / totalCalls, hoverState: HoverState.DEFAULT },
+      markerEnd: { type: MarkerType.Arrow },
+    },
+    {
+      id: "e4a-7",
+      type: "stateEdge",
+      source: "4a",
+      target: "7",
+      data: { percentage: 60 / totalCalls, hoverState: HoverState.DEFAULT },
+      markerEnd: { type: MarkerType.Arrow },
+    },
+    {
+      id: "e4b-5",
+      type: "stateEdge",
+      source: "4b",
+      target: "5",
+      data: { percentage: 250 / totalCalls, hoverState: HoverState.DEFAULT },
+      markerEnd: { type: MarkerType.Arrow },
+    },
+    {
+      id: "e4b-6",
+      type: "stateEdge",
+      source: "4b",
+      target: "6",
+      data: { percentage: 60 / totalCalls, hoverState: HoverState.DEFAULT },
+      markerEnd: { type: MarkerType.Arrow },
+    },
+    {
+      id: "e4b-7",
+      type: "stateEdge",
+      source: "4b",
+      target: "7",
+      data: { percentage: 40 / totalCalls, hoverState: HoverState.DEFAULT },
+      markerEnd: { type: MarkerType.Arrow },
+    },
+  ];
+
+  return edges;
+})();
 
 export default function FlowChart() {
   const nodeTypes = useMemo(
@@ -198,7 +343,7 @@ export default function FlowChart() {
     const layouted = getLayoutedElements(nodes, edges, { direction: "TB" });
 
     setNodes([...layouted.nodes] as StateNode[]);
-    setEdges([...layouted.edges]);
+    setEdges([...layouted.edges] as StateEdge[]);
 
     window.requestAnimationFrame(() => {
       void fitView();
@@ -218,7 +363,10 @@ export default function FlowChart() {
           ...n,
           data: {
             ...n.data,
-            isHovered: n.id === node.id || adjacentNodes.has(n.id),
+            hoverState:
+              n.id === node.id || adjacentNodes.has(n.id)
+                ? HoverState.HOVER
+                : HoverState.DISABLED,
           },
         })),
       );
@@ -229,7 +377,10 @@ export default function FlowChart() {
           ...e,
           data: {
             ...e.data,
-            isHovered: e.source === node.id || e.target === node.id,
+            hoverState:
+              e.source === node.id || e.target === node.id
+                ? HoverState.HOVER
+                : HoverState.DISABLED,
           },
         })),
       );
@@ -242,62 +393,69 @@ export default function FlowChart() {
     setNodes((nds) =>
       nds.map((n) => ({
         ...n,
-        data: { ...n.data, isHovered: false },
+        data: { ...n.data, hoverState: HoverState.DEFAULT },
       })),
     );
     setEdges((eds) =>
       eds.map((e) => ({
         ...e,
-        data: { ...e.data, isHovered: false },
+        data: { ...e.data, hoverState: HoverState.DEFAULT },
       })),
     );
   }, [setNodes, setEdges]);
 
-  const onEdgeMouseEnter = useCallback(
-    (_: React.MouseEvent, edge: Edge) => {
-      setHoveredEdgeId(edge.id);
+  // const onEdgeMouseEnter = useCallback(
+  //   (_: React.MouseEvent, edge: Edge) => {
+  //     setHoveredEdgeId(edge.id);
 
-      // Highlight the edge
-      setEdges((eds) =>
-        eds.map((e) => ({
-          ...e,
-          data: { ...e.data, isHovered: e.id === edge.id },
-        })),
-      );
+  //     // Highlight the edge
+  //     setEdges((eds) =>
+  //       eds.map((e) => ({
+  //         ...e,
+  //         data: {
+  //           ...e.data,
+  //           hoverState:
+  //             e.id === edge.id ? HoverState.HOVER : HoverState.DISABLED,
+  //         },
+  //       })),
+  //     );
 
-      // Highlight the connected nodes
-      setNodes((nds) =>
-        nds.map((n) => ({
-          ...n,
-          data: {
-            ...n.data,
-            isHovered: n.id === edge.source || n.id === edge.target,
-          },
-        })),
-      );
-    },
-    [setEdges, setNodes],
-  );
+  //     // Highlight the connected nodes
+  //     setNodes((nds) =>
+  //       nds.map((n) => ({
+  //         ...n,
+  //         data: {
+  //           ...n.data,
+  //           hoverState:
+  //             n.id === edge.source || n.id === edge.target
+  //               ? HoverState.HOVER
+  //               : HoverState.DISABLED,
+  //         },
+  //       })),
+  //     );
+  //   },
+  //   [setEdges, setNodes],
+  // );
 
-  const onEdgeMouseLeave = useCallback(() => {
-    setHoveredEdgeId(null);
+  // const onEdgeMouseLeave = useCallback(() => {
+  //   setHoveredEdgeId(null);
 
-    // Reset edge highlighting
-    setEdges((eds) =>
-      eds.map((e) => ({
-        ...e,
-        data: { ...e.data, isHovered: false },
-      })),
-    );
+  //   // Reset edge highlighting
+  //   setEdges((eds) =>
+  //     eds.map((e) => ({
+  //       ...e,
+  //       data: { ...e.data, hoverState: HoverState.DEFAULT },
+  //     })),
+  //   );
 
-    // Reset node highlighting
-    setNodes((nds) =>
-      nds.map((n) => ({
-        ...n,
-        data: { ...n.data, isHovered: false },
-      })),
-    );
-  }, [setEdges, setNodes]);
+  //   // Reset node highlighting
+  //   setNodes((nds) =>
+  //     nds.map((n) => ({
+  //       ...n,
+  //       data: { ...n.data, hoverState: HoverState.DEFAULT },
+  //     })),
+  //   );
+  // }, [setEdges, setNodes]);
 
   return (
     <div style={{ width: "100vw", height: "100vh" }}>
@@ -312,8 +470,8 @@ export default function FlowChart() {
         fitView
         onNodeMouseEnter={onNodeMouseEnter}
         onNodeMouseLeave={onNodeMouseLeave}
-        onEdgeMouseEnter={onEdgeMouseEnter}
-        onEdgeMouseLeave={onEdgeMouseLeave}
+        // onEdgeMouseEnter={onEdgeMouseEnter}
+        // onEdgeMouseLeave={onEdgeMouseLeave}
       />
     </div>
   );
@@ -352,16 +510,21 @@ function getLayoutedElements(
   };
 }
 
-function buildAdjacencyMap(edges: Edge[]): Map<string, Set<string>> {
+function buildAdjacencyMap(edges: StateEdge[]): Map<string, Set<string>> {
   const adjacencyMap = new Map<string, Set<string>>();
 
   edges.forEach((edge) => {
-    // Initialize set for source if it doesn't exist
+    // Initialize sets if they don't exist
     if (!adjacencyMap.has(edge.source)) {
       adjacencyMap.set(edge.source, new Set());
     }
-    // Add target to source's set
+    if (!adjacencyMap.has(edge.target)) {
+      adjacencyMap.set(edge.target, new Set());
+    }
+
+    // Add bidirectional connections
     adjacencyMap.get(edge.source)!.add(edge.target);
+    adjacencyMap.get(edge.target)!.add(edge.source);
   });
 
   return adjacencyMap;
@@ -418,6 +581,17 @@ function StateNode({ id, data }: NodeProps<StateNode>) {
     return 0.25 + percentageOfTotalCalls * 0.5;
   }, [percentageOfTotalCalls]);
 
+  const getOpacityForState = (state: HoverState) => {
+    switch (state) {
+      case HoverState.HOVER:
+        return 1;
+      case HoverState.DISABLED:
+        return 0.2;
+      default:
+        return 1;
+    }
+  };
+
   return (
     <>
       <Handle className="z-10" type="target" position={Position.Top} />
@@ -426,8 +600,10 @@ function StateNode({ id, data }: NodeProps<StateNode>) {
         style={{
           padding: `${padding.vertical}rem ${padding.horizontal}rem`,
           background: gradient,
-          transform: data.isHovered ? "scale(1.05)" : "scale(1)",
+          transform:
+            data.hoverState === HoverState.HOVER ? "scale(1.05)" : "scale(1)",
           transition: "transform 0.1s ease-in-out",
+          opacity: getOpacityForState(data.hoverState),
         }}
       >
         <span className="invisible" style={{ fontSize: `${fontSize}rem` }}>
@@ -477,6 +653,17 @@ function ResultNode({ data }: NodeProps<ResultNode>) {
     }
   }, [data.type]);
 
+  const getOpacityForState = (state: HoverState) => {
+    switch (state) {
+      case HoverState.HOVER:
+        return 1;
+      case HoverState.DISABLED:
+        return 0.2;
+      default:
+        return 1;
+    }
+  };
+
   return (
     <>
       <Handle className="z-10" type="target" position={Position.Top} />
@@ -486,8 +673,10 @@ function ResultNode({ data }: NodeProps<ResultNode>) {
           padding: `${padding.vertical}rem ${padding.horizontal}rem`,
           backgroundColor: `${backgroundColor}1A`,
           outlineColor: backgroundColor,
-          transform: data.isHovered ? "scale(1.05)" : "scale(1)",
+          transform:
+            data.hoverState === HoverState.HOVER ? "scale(1.05)" : "scale(1)",
           transition: "transform 0.1s ease-in-out",
+          opacity: getOpacityForState(data.hoverState),
         }}
       >
         {data.label}
@@ -508,7 +697,7 @@ function StateEdge({
   targetY,
   markerEnd,
   data,
-}: EdgeProps) {
+}: EdgeProps<StateEdge>) {
   const [edgePath, labelX, labelY] = getSimpleBezierPath({
     sourceX,
     sourceY,
@@ -516,15 +705,42 @@ function StateEdge({
     targetY,
   });
 
+  const getOpacityForState = (state: HoverState) => {
+    switch (state) {
+      case HoverState.HOVER:
+        return 1;
+      case HoverState.DISABLED:
+        return 0.1;
+      default:
+        return 0.5;
+    }
+  };
+
   return (
-    <BaseEdge
-      id={id}
-      path={edgePath}
-      markerEnd={markerEnd}
-      style={{
-        strokeWidth: data?.isHovered ? 2 : 1,
-        opacity: data?.isHovered ? 1 : 0.5,
-      }}
-    />
+    <>
+      <BaseEdge
+        id={id}
+        path={edgePath}
+        markerEnd={markerEnd}
+        style={{
+          strokeWidth: data?.hoverState === HoverState.HOVER ? 2 : 1,
+          opacity: getOpacityForState(data?.hoverState ?? HoverState.DEFAULT),
+        }}
+      />
+      {data?.hoverState === HoverState.HOVER &&
+        data?.percentage !== undefined && (
+          <foreignObject
+            x={labelX - 20}
+            y={labelY - 20}
+            width={40}
+            height={40}
+            className="pointer-events-none"
+          >
+            <div className="flex h-full w-full items-center justify-center rounded-full border border-[#e5e5e5] bg-white text-xs font-medium">
+              {`${Math.round(data.percentage * 100)}%`}
+            </div>
+          </foreignObject>
+        )}
+    </>
   );
 }
