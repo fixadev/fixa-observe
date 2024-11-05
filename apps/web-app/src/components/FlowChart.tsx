@@ -96,7 +96,7 @@ const initialNodes = [
       label: "Make reservation",
       numFailures: 100,
       numForwards: 10,
-      numSuccesses: 400,
+      numSuccesses: 500,
       hoverState: HoverState.DEFAULT,
     },
   },
@@ -108,7 +108,7 @@ const initialNodes = [
       label: "Group < 6 people",
       numFailures: 15,
       numForwards: 30,
-      numSuccesses: 60,
+      numSuccesses: 105,
       hoverState: HoverState.DEFAULT,
     },
   },
@@ -130,7 +130,7 @@ const initialNodes = [
     position: { x: 0, y: 0 },
     data: {
       label: "Failure",
-      numCalls: 910,
+      numCalls: 475,
       type: "failure",
       hoverState: HoverState.DEFAULT,
     },
@@ -141,7 +141,7 @@ const initialNodes = [
     position: { x: 0, y: 0 },
     data: {
       label: "Forward call to human",
-      numCalls: 180,
+      numCalls: 100,
       type: "forward",
       hoverState: HoverState.DEFAULT,
     },
@@ -152,166 +152,104 @@ const initialNodes = [
     position: { x: 0, y: 0 },
     data: {
       label: "Success",
-      numCalls: 400,
+      numCalls: 445,
       type: "success",
       hoverState: HoverState.DEFAULT,
     },
   },
 ] as (StateNode | ResultNode)[];
-const initialEdges: StateEdge[] = [
+const edgeRelations = [
   {
-    id: "e1-2",
-    type: "stateEdge",
     source: "1",
-    target: "2",
-    data: { percentage: 300 / totalCalls, hoverState: HoverState.DEFAULT }, // 100 failures + 200 successes
-    markerEnd: { type: MarkerType.Arrow },
+    targets: ["2", "3", "4"],
   },
   {
-    id: "e1-3",
-    type: "stateEdge",
-    source: "1",
-    target: "3",
-    data: { percentage: 110 / totalCalls, hoverState: HoverState.DEFAULT }, // 10 failures + 100 successes
-    markerEnd: { type: MarkerType.Arrow },
-  },
-  {
-    id: "e1-4",
-    type: "stateEdge",
-    source: "1",
-    target: "4",
-    data: { percentage: 590 / totalCalls, hoverState: HoverState.DEFAULT }, // 400 failures + 90 forwards + 100 successes
-    markerEnd: { type: MarkerType.Arrow },
-  },
-  {
-    id: "e2-5",
-    type: "stateEdge",
     source: "2",
-    target: "5",
-    data: { percentage: 10 / 100, hoverState: HoverState.DEFAULT }, // 10 failures
-    markerEnd: { type: MarkerType.Arrow },
+    targets: ["5", "6", "7"],
   },
   {
-    id: "e2-6",
-    type: "stateEdge",
-    source: "2",
-    target: "6",
-    data: { percentage: 90 / 100, hoverState: HoverState.DEFAULT }, // 90 forwards
-    markerEnd: { type: MarkerType.Arrow },
-  },
-  {
-    id: "e2-7",
-    type: "stateEdge",
-    source: "2",
-    target: "7",
-    data: { percentage: 200 / 100, hoverState: HoverState.DEFAULT }, // 200 successes
-    markerEnd: { type: MarkerType.Arrow },
-  },
-  {
-    id: "e3-5",
-    type: "stateEdge",
     source: "3",
-    target: "5",
-    data: { percentage: 10 / 100, hoverState: HoverState.DEFAULT }, // 10 failures
-    markerEnd: { type: MarkerType.Arrow },
+    targets: ["5", "6", "7"],
   },
   {
-    id: "e3-6",
-    type: "stateEdge",
-    source: "3",
-    target: "6",
-    data: { percentage: 90 / 100, hoverState: HoverState.DEFAULT }, // 90 forwards
-    markerEnd: { type: MarkerType.Arrow },
-  },
-  {
-    id: "e3-7",
-    type: "stateEdge",
-    source: "3",
-    target: "7",
-    data: { percentage: 200 / 100, hoverState: HoverState.DEFAULT }, // 200 successes
-    markerEnd: { type: MarkerType.Arrow },
-  },
-  {
-    id: "e4-5",
-    type: "stateEdge",
     source: "4",
-    target: "5",
-    data: { percentage: 400 / 100, hoverState: HoverState.DEFAULT }, // 400 failures
-    markerEnd: { type: MarkerType.Arrow },
+    targets: ["5", "6", "4a", "4b"],
   },
   {
-    id: "e4-6",
-    type: "stateEdge",
-    source: "4",
-    target: "6",
-    data: { percentage: 90 / 100, hoverState: HoverState.DEFAULT }, // 90 forwards
-    markerEnd: { type: MarkerType.Arrow },
-  },
-  {
-    id: "e4-4a",
-    type: "stateEdge",
-    source: "4",
-    target: "4a",
-    data: { percentage: 240 / totalCalls, hoverState: HoverState.DEFAULT }, // 150 + 30 + 60
-    markerEnd: { type: MarkerType.Arrow },
-  },
-  {
-    id: "e4-4b",
-    type: "stateEdge",
-    source: "4",
-    target: "4b",
-    data: { percentage: 350 / totalCalls, hoverState: HoverState.DEFAULT }, // 250 + 60 + 40
-    markerEnd: { type: MarkerType.Arrow },
-  },
-  {
-    id: "e4a-5",
-    type: "stateEdge",
     source: "4a",
-    target: "5",
-    data: { percentage: 15 / totalCalls, hoverState: HoverState.DEFAULT },
-    markerEnd: { type: MarkerType.Arrow },
+    targets: ["5", "6", "7"],
   },
   {
-    id: "e4a-6",
-    type: "stateEdge",
-    source: "4a",
-    target: "6",
-    data: { percentage: 30 / totalCalls, hoverState: HoverState.DEFAULT },
-    markerEnd: { type: MarkerType.Arrow },
-  },
-  {
-    id: "e4a-7",
-    type: "stateEdge",
-    source: "4a",
-    target: "7",
-    data: { percentage: 60 / totalCalls, hoverState: HoverState.DEFAULT },
-    markerEnd: { type: MarkerType.Arrow },
-  },
-  {
-    id: "e4b-5",
-    type: "stateEdge",
     source: "4b",
-    target: "5",
-    data: { percentage: 250 / totalCalls, hoverState: HoverState.DEFAULT },
-    markerEnd: { type: MarkerType.Arrow },
-  },
-  {
-    id: "e4b-6",
-    type: "stateEdge",
-    source: "4b",
-    target: "6",
-    data: { percentage: 60 / totalCalls, hoverState: HoverState.DEFAULT },
-    markerEnd: { type: MarkerType.Arrow },
-  },
-  {
-    id: "e4b-7",
-    type: "stateEdge",
-    source: "4b",
-    target: "7",
-    data: { percentage: 40 / totalCalls, hoverState: HoverState.DEFAULT },
-    markerEnd: { type: MarkerType.Arrow },
+    targets: ["5", "6", "7"],
   },
 ];
+
+function getTotalCallsForNode(node: StateNode | ResultNode): number {
+  if (node.type === "result") {
+    return (node as ResultNode).data.numCalls ?? 0;
+  }
+  return (
+    ((node as StateNode).data.numFailures ?? 0) +
+    ((node as StateNode).data.numForwards ?? 0) +
+    ((node as StateNode).data.numSuccesses ?? 0)
+  );
+}
+
+const initialEdges: StateEdge[] = edgeRelations.flatMap(
+  ({ source, targets }) => {
+    const sourceNode = initialNodes.find((n) => n.id === source);
+    if (!sourceNode) return [];
+
+    return targets
+      .map((target) => {
+        const targetNode = initialNodes.find((n) => n.id === target)!;
+
+        let sourceCalls = 0;
+        if (targetNode.type === "result") {
+          // For result nodes, only count the specific type of calls
+          switch ((targetNode as ResultNode).data.type) {
+            case "success":
+              sourceCalls = (sourceNode as StateNode).data.numSuccesses ?? 0;
+              break;
+            case "failure":
+              sourceCalls = (sourceNode as StateNode).data.numFailures ?? 0;
+              break;
+            case "forward":
+              sourceCalls = (sourceNode as StateNode).data.numForwards ?? 0;
+              break;
+            default:
+              sourceCalls = 0;
+          }
+        } else {
+          sourceCalls = getTotalCallsForNode(sourceNode);
+        }
+
+        if (sourceCalls === 0) return null;
+
+        const targetTotalCalls = getTotalCallsForNode(targetNode);
+
+        const percentage =
+          targetNode.type === "result"
+            ? sourceCalls / targetTotalCalls
+            : targetTotalCalls / sourceCalls;
+
+        return {
+          id: `e${source}-${target}`,
+          type: "stateEdge",
+          source,
+          target,
+          data: {
+            percentage,
+            hoverState: HoverState.DEFAULT,
+          },
+          markerEnd: { type: MarkerType.Arrow },
+        };
+      })
+      .filter((e) => e !== null);
+  },
+);
+console.log(initialEdges);
 
 export default function FlowChart() {
   const nodeTypes = useMemo(
@@ -339,7 +277,6 @@ export default function FlowChart() {
         nodes.map((node) => {
           const element = document.getElementById(`node-${node.id}`);
           const measured = element?.getBoundingClientRect();
-          console.log(`node-${node.id}`, measured, element);
 
           return {
             ...node,
@@ -387,30 +324,38 @@ export default function FlowChart() {
         })),
       );
 
-      // Calculate total flow for hovered node
+      // Calculate total incoming and outgoing flow for hovered node
       const nodeData = node.data as StateNode["data"];
       const totalNodeFlow =
         (nodeData.numFailures ?? 0) +
         (nodeData.numForwards ?? 0) +
         (nodeData.numSuccesses ?? 0);
 
-      // Highlight edges and calculate relative percentages
       setEdges((eds) =>
-        eds.map((e) => ({
-          ...e,
-          data: {
-            ...e.data,
-            hoverState:
-              e.source === node.id || e.target === node.id
-                ? HoverState.HOVER
-                : HoverState.DISABLED,
-            // Update percentage for connected edges relative to node's total flow
-            percentage:
-              e.source === node.id || e.target === node.id
-                ? ((e.data?.percentage ?? 0) * totalCalls) / totalNodeFlow
-                : e.data?.percentage,
-          },
-        })),
+        eds.map((e) => {
+          const isConnected = e.source === node.id || e.target === node.id;
+          let newPercentage = e.data?.percentage;
+
+          if (isConnected) {
+            if (e.source === node.id) {
+              // Outgoing edge - percentage relative to total outgoing flow
+              newPercentage =
+                ((e.data?.percentage ?? 0) * totalCalls) / totalNodeFlow;
+            } else {
+              // Incoming edge - keep original percentage (relative to parent's flow)
+              newPercentage = e.data?.percentage;
+            }
+          }
+
+          return {
+            ...e,
+            data: {
+              ...e.data,
+              hoverState: isConnected ? HoverState.HOVER : HoverState.DISABLED,
+              percentage: newPercentage,
+            },
+          };
+        }),
       );
     },
     [setNodes, setEdges, adjacencyMap],
