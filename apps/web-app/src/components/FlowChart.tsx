@@ -27,6 +27,7 @@ type StateNode = Node<{
 
 type ResultNode = Node<{
   label: string;
+  type: "failure" | "forward" | "success";
   numCalls?: number;
 }>;
 
@@ -54,25 +55,30 @@ const initialNodes = [
     id: "4",
     type: "state",
     position: { x: 0, y: 0 },
-    data: { label: "Make reservation", numFailures: 490, numSuccesses: 100 },
+    data: {
+      label: "Make reservation",
+      numFailures: 400,
+      numForwards: 90,
+      numSuccesses: 100,
+    },
   },
   {
     id: "5",
     type: "result",
     position: { x: 0, y: 0 },
-    data: { label: "Failure", numCalls: 600 }, // 100 + 10 + 490 failures
+    data: { label: "Failure", numCalls: 600 - 90, type: "failure" }, // 100 + 10 + 490 failures
   },
   {
     id: "6",
     type: "result",
     position: { x: 0, y: 0 },
-    data: { label: "Forward call to human", numCalls: 0 }, // No forwards shown in data
+    data: { label: "Forward call to human", numCalls: 90, type: "forward" }, // No forwards shown in data
   },
   {
     id: "7",
     type: "result",
     position: { x: 0, y: 0 },
-    data: { label: "Success", numCalls: 400 }, // 200 + 100 + 100 successes
+    data: { label: "Success", numCalls: 400, type: "success" }, // 200 + 100 + 100 successes
   },
 ] as (StateNode | ResultNode)[];
 const initialEdges = [
@@ -164,29 +170,82 @@ function getLayoutedElements(
   };
 }
 
+const RED = "#FE331B";
+const YELLOW = "#FDCD2E";
+const GREEN = "#90CF27";
+// const GREEN = "white";
+
 function StateNode({ data }: NodeProps<StateNode>) {
-  const padding = useMemo(() => {
-    const percentageOfTotalCalls =
+  const percentageOfTotalCalls = useMemo(() => {
+    return (
       ((data.numFailures ?? 0) +
         (data.numForwards ?? 0) +
         (data.numSuccesses ?? 0)) /
-      totalCalls;
+      totalCalls
+    );
+  }, [data.numFailures, data.numForwards, data.numSuccesses]);
+
+  const padding = useMemo(() => {
     return {
       horizontal: 2 + percentageOfTotalCalls * 8,
       vertical: 0.5 + percentageOfTotalCalls * 4,
     };
+  }, [percentageOfTotalCalls]);
+
+  const gradient = useMemo(() => {
+    const total =
+      (data.numFailures ?? 0) +
+      (data.numForwards ?? 0) +
+      (data.numSuccesses ?? 0);
+    if (total === 0) return "white";
+
+    const failurePercent = ((data.numFailures ?? 0) / total) * 100;
+    const forwardPercent = ((data.numForwards ?? 0) / total) * 100;
+
+    return `linear-gradient(to right, 
+      ${RED} 0%, 
+      ${RED} ${failurePercent}%, 
+      ${YELLOW} ${failurePercent}%, 
+      ${YELLOW} ${failurePercent + forwardPercent}%, 
+      ${GREEN} ${failurePercent + forwardPercent}%, 
+      ${GREEN} 100%
+    )`;
   }, [data.numFailures, data.numForwards, data.numSuccesses]);
+
+  const fontSize = useMemo(() => {
+    // Scale from 0.75rem to 1.5rem based on percentage of total calls
+    return 0.5 + percentageOfTotalCalls * 0.5;
+  }, [percentageOfTotalCalls]);
+
+  const textPadding = useMemo(() => {
+    return 0.25 + percentageOfTotalCalls * 0.5;
+  }, [percentageOfTotalCalls]);
 
   return (
     <>
       <Handle type="target" position={Position.Top} />
       <div
-        className="rounded-md border border-input p-6 shadow-sm"
+        className="relative rounded-md p-6 shadow-sm outline outline-2 outline-input"
         style={{
           padding: `${padding.vertical}rem ${padding.horizontal}rem`,
+          background: gradient,
         }}
       >
-        {data.label}
+        <span className="invisible" style={{ fontSize: `${fontSize}rem` }}>
+          {data.label}
+        </span>
+        <div
+          className="absolute rounded-md bg-white shadow-sm"
+          style={{
+            fontSize: `${fontSize}rem`,
+            padding: `${textPadding}rem`,
+            top: `${textPadding}rem`,
+            left: `${textPadding}rem`,
+          }}
+        >
+          {data.label}
+        </div>
+        <div className="absolute bottom-0 left-0 h-[20%] w-full rounded-b-md bg-black/10"></div>
       </div>
       <Handle type="source" position={Position.Bottom} />
     </>
@@ -194,21 +253,51 @@ function StateNode({ data }: NodeProps<StateNode>) {
 }
 
 function ResultNode({ data }: NodeProps<ResultNode>) {
+  const percentageOfTotalCalls = useMemo(
+    () => (data.numCalls ?? 0) / totalCalls,
+    [data.numCalls],
+  );
+
   const padding = useMemo(() => {
-    const percentageOfTotalCalls = (data.numCalls ?? 0) / totalCalls;
     return {
       horizontal: 2 + percentageOfTotalCalls * 8,
-      vertical: 0.5 + percentageOfTotalCalls * 4,
+      vertical: 1 + percentageOfTotalCalls * 4,
     };
-  }, [data.numCalls]);
+  }, [percentageOfTotalCalls]);
+
+  const backgroundColor = useMemo(() => {
+    switch (data.type) {
+      case "success":
+        return GREEN;
+      case "failure":
+        return RED;
+      case "forward":
+        return YELLOW;
+      default:
+        return "white";
+    }
+  }, [data.type]);
+
   return (
     <>
       <Handle type="target" position={Position.Top} />
       <div
-        className="rounded-md border border-input shadow-sm"
-        style={{ padding: `${padding.vertical}rem ${padding.horizontal}rem` }}
+        className="relative rounded-md shadow-sm outline outline-2"
+        style={{
+          padding: `${padding.vertical}rem ${padding.horizontal}rem`,
+          backgroundColor: `${backgroundColor}1A`,
+          outlineColor: backgroundColor,
+        }}
       >
         {data.label}
+        {/* <div
+          className="absolute bottom-0 left-0 h-[20%] w-full rounded-b-md"
+          style={{ backgroundColor }}
+        ></div> */}
+        <div
+          className="absolute left-0 top-0 h-[20%] w-full rounded-t-md"
+          style={{ backgroundColor }}
+        ></div>
       </div>
     </>
   );
