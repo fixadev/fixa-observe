@@ -1,27 +1,48 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
-import { agentService } from "~/server/services/agent";
+import { AgentService } from "~/server/services/agent";
+import { env } from "~/env";
 
-const agentServiceInstance = agentService();
+const agentServiceInstance = new AgentService();
+
+const retellApiKey = env.RETELL_API_KEY;
 
 export const agentRouter = createTRPCRouter({
   listAgents: protectedProcedure
     .input(
       z.object({
-        apiKey: z.string(),
+        apiKey: z.string().optional(),
       }),
     )
-    .mutation(async ({ input }) => {
-      return await agentServiceInstance.listAgents(input.apiKey);
+    .query(async ({ input }) => {
+      return await agentServiceInstance.listAgents(
+        input.apiKey ?? retellApiKey,
+      );
     }),
-  getFlow: protectedProcedure
-    .input(z.object({ apiKey: z.string(), agentId: z.string() }))
-    .mutation(async ({ input }) => {
-      return await agentServiceInstance.getFlow(input.apiKey, input.agentId);
+  getStates: protectedProcedure
+    .input(z.object({ apiKey: z.string().optional(), agentId: z.string() }))
+    .query(async ({ input }) => {
+      return await agentServiceInstance.getStates(
+        input.apiKey ?? retellApiKey,
+        input.agentId,
+      );
     }),
+
   listCalls: protectedProcedure
-    .input(z.object({ apiKey: z.string(), agentId: z.string() }))
-    .mutation(async ({ input }) => {
-      return await agentServiceInstance.listCalls(input.apiKey, input.agentId);
+    .input(z.object({ apiKey: z.string().optional(), agentId: z.string() }))
+    .query(async ({ input }) => {
+      return await agentServiceInstance.listCalls(
+        input.apiKey ?? retellApiKey,
+        input.agentId,
+      );
+    }),
+
+  listCallsPerState: protectedProcedure
+    .input(z.object({ apiKey: z.string().optional(), agentId: z.string() }))
+    .query(async ({ input }) => {
+      return await agentServiceInstance.listCallsPerNode(
+        input.apiKey ?? retellApiKey,
+        input.agentId,
+      );
     }),
 });

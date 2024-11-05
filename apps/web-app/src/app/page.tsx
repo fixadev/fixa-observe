@@ -3,9 +3,23 @@
 import { Button } from "~/components/ui/button";
 import Link from "next/link";
 import Image from "next/image";
+import { api } from "~/trpc/react";
+import { skipToken } from "@tanstack/react-query";
 
 // 420 69 🍆
 export default function LandingPage() {
+  const { data: agents } = api.agent.listAgents.useQuery({});
+
+  const { data: states } = api.agent.listCallsPerState.useQuery(
+    agents?.[0]?.agent_id ? { agentId: agents[0].agent_id } : skipToken,
+  );
+  console.log(states);
+
+  const { data: calls } = api.agent.listCalls.useQuery(
+    agents?.[0]?.agent_id ? { agentId: agents[0].agent_id } : skipToken,
+  );
+  console.log(calls);
+
   return (
     <div className="container relative mx-auto flex h-screen items-center">
       <div className="flex flex-col gap-12">
