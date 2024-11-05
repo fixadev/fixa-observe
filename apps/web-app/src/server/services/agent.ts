@@ -61,7 +61,7 @@ export const agentService = () => {
       return await retellClient.llm.retrieve(llmId);
     },
 
-    listConversations: async (apiKey: string, agentId: string) => {
+    listCalls: async (apiKey: string, agentId: string) => {
       const retellClient = new Retell({
         apiKey,
       });
