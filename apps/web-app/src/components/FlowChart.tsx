@@ -730,6 +730,12 @@ function StateEdge({
         style={{
           strokeWidth: data?.hoverState === HoverState.HOVER ? 2 : 1,
           opacity: getOpacityForState(data?.hoverState ?? HoverState.DEFAULT),
+          strokeDasharray:
+            data?.hoverState === HoverState.HOVER ? "6 6" : "none",
+          animation:
+            data?.hoverState === HoverState.HOVER
+              ? "flowingDash 0.5s linear infinite"
+              : "none",
         }}
       />
       {data?.hoverState === HoverState.HOVER &&
