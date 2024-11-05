@@ -9,15 +9,11 @@ export const agentRouter = createTRPCRouter({
   listAgents: protectedProcedure
     .input(
       z.object({
-        provider: platformOptions,
         apiKey: z.string(),
       }),
     )
     .mutation(async ({ input }) => {
-      return await agentServiceInstance.listAgents(
-        input.provider,
-        input.apiKey,
-      );
+      return await agentServiceInstance.listAgents(input.apiKey);
     }),
   getFlow: protectedProcedure
     .input(z.object({ apiKey: z.string(), agentId: z.string() }))
