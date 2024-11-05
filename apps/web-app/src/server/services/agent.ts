@@ -44,23 +44,100 @@ export class AgentService {
     const calls = await this.listCalls(apiKey, agentId);
     const statesWithCalls = states
       ?.map((state) => {
-        return {
-          ...state,
-          calls:
-            state.name === "start_of_conversation"
-              ? calls
-              : calls.filter((call) =>
+        const callsThatHitThisNode = calls.filter(
+          (call) =>
+            call.transcript_with_tool_calls?.some(
+              (entry) =>
+                entry.role === "tool_call_invocation" &&
+                entry.name === `transition_to_${state.name}`,
+            ) || state.name === "start_of_conversation",
+        );
+
+        const edgesFollowingThisNode = state.edges?.filter(
+          (edge) => edge.destination_state_name !== state.name,
+        );
+
+        const callsThatPassedThroughThisNode = callsThatHitThisNode.filter(
+          (call) =>
+            call.transcript_with_tool_calls?.some(
+              (entry) =>
+                entry.role === "tool_call_invocation" &&
+                edgesFollowingThisNode?.some(
+                  (edge) =>
+                    entry.name ===
+                    `transition_to_${edge.destination_state_name}`,
+                ),
+            ),
+        );
+
+        const callsThatGotForwardedToAHumanFromThisNode =
+          callsThatHitThisNode.filter(
+            (call) =>
+              !callsThatPassedThroughThisNode.includes(call) &&
+              (() => {
+                const callTransferToolCall:
+                  | Retell.Call.WebCallResponse.ToolCallInvocationUtterance
+                  | undefined = call.transcript_with_tool_calls?.find(
+                  (entry) =>
+                    entry.role === "tool_call_invocation" &&
+                    entry.name === `transfer_call`,
+                ) as
+                  | Retell.Call.WebCallResponse.ToolCallInvocationUtterance
+                  | undefined;
+                return (
+                  callTransferToolCall &&
                   call.transcript_with_tool_calls?.some(
                     (entry) =>
-                      entry.role === "tool_call_invocation" &&
-                      entry.name === `transition_to_${state.name}`,
-                  ),
-                ),
+                      entry.role === "tool_call_result" &&
+                      entry.tool_call_id ===
+                        callTransferToolCall?.tool_call_id &&
+                      !entry.content.includes("error"),
+                  )
+                );
+              })(),
+          );
+
+        const callsThatFailedThisNode = callsThatHitThisNode
+          .filter(
+            (call) =>
+              !callsThatPassedThroughThisNode.includes(call) &&
+              !callsThatGotForwardedToAHumanFromThisNode.includes(call),
+          )
+          .map((call) => ({ ...call, node_result: "failure" }));
+
+        callsThatGotForwardedToAHumanFromThisNode.forEach((call) => ({
+          ...call,
+          node_result: "forwarded",
+        }));
+
+        callsThatPassedThroughThisNode.forEach((call) => ({
+          ...call,
+          node_result: "success",
+        }));
+
+        return {
+          ...state,
+          counts: {
+            failed: callsThatFailedThisNode.length,
+            forwarded: callsThatGotForwardedToAHumanFromThisNode.length,
+            success: callsThatPassedThroughThisNode.length,
+          },
+          calls: [
+            ...callsThatFailedThisNode,
+            ...callsThatGotForwardedToAHumanFromThisNode,
+            ...callsThatPassedThroughThisNode,
+          ],
         };
       })
       .concat({
         name: "failure",
         calls: calls.filter((call) => !call.call_analysis?.call_successful),
+        counts: {
+          failed: calls.filter((call) => !call.call_analysis?.call_successful)
+            .length,
+          forwarded: 0,
+          success: 0,
+        },
       })
       .concat({
         name: "call_transferred",
@@ -72,6 +149,17 @@ export class AgentService {
               call.call_analysis?.call_successful,
           ),
         ),
+        counts: {
+          failed: 0,
+          forwarded: calls.filter((call) =>
+            call.transcript_with_tool_calls?.some(
+              (entry) =>
+                entry.role === "tool_call_invocation" &&
+                entry.name === `transfer_call`,
+            ),
+          ).length,
+          success: 0,
+        },
       });
     return statesWithCalls;
   }
