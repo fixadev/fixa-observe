@@ -17,15 +17,6 @@ export const metadata: Metadata = {
   icons: [{ rel: "icon", url: "/favicon.ico" }],
 };
 
-// const localization = {
-//   signIn: {
-//     start: {
-//       title: "please sign in to continue using pixa",
-//       subtitle: "an account is required to prevent abuse",
-//     },
-//   },
-// };
-
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
