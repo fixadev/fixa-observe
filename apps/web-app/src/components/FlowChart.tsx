@@ -1,6 +1,12 @@
 "use client";
 
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+  useRef,
+} from "react";
 import Dagre from "@dagrejs/dagre";
 import {
   ReactFlow,
@@ -313,12 +319,13 @@ export default function FlowChart() {
     [],
   );
   const edgeTypes = useMemo(() => ({ stateEdge: StateEdge }), []);
-  const { fitView } = useReactFlow();
+  const { fitView, viewportInitialized } = useReactFlow();
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
   const [, setHoveredNodeId] = useState<string | null>(null);
   // const [hoveredEdgeId, setHoveredEdgeId] = useState<string | null>(null);
   const adjacencyMap = useMemo(() => buildAdjacencyMap(edges), [edges]);
+  const [nodesMeasured, setNodesMeasured] = useState(false);
 
   const onConnect = useCallback(
     (params: Connection) => setEdges((eds) => addEdge(params, eds)),
@@ -326,8 +333,31 @@ export default function FlowChart() {
   );
 
   useEffect(() => {
-    const layouted = getLayoutedElements(nodes, edges, { direction: "TB" });
+    if (!viewportInitialized) return;
+    if (!nodesMeasured) {
+      setNodes((nodes) =>
+        nodes.map((node) => {
+          const element = document.getElementById(`node-${node.id}`);
+          const measured = element?.getBoundingClientRect();
+          console.log(`node-${node.id}`, measured, element);
 
+          return {
+            ...node,
+            measured: {
+              width: measured?.width ?? 0,
+              height: measured?.height ?? 0,
+            },
+          };
+        }),
+      );
+      setNodesMeasured(true);
+    }
+  }, [nodesMeasured, setNodes, viewportInitialized]);
+
+  useEffect(() => {
+    if (!nodesMeasured) return;
+
+    const layouted = getLayoutedElements(nodes, edges, { direction: "TB" });
     setNodes([...layouted.nodes] as StateNode[]);
     setEdges([...layouted.edges] as StateEdge[]);
 
@@ -335,7 +365,7 @@ export default function FlowChart() {
       void fitView();
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [nodesMeasured]);
 
   const onNodeMouseEnter = useCallback(
     (_: React.MouseEvent, node: Node) => {
@@ -599,9 +629,12 @@ function StateNode({ id, data }: NodeProps<StateNode>) {
     <>
       <Handle className="z-10" type="target" position={Position.Top} />
       <div
+        id={`node-${id}`}
         className="relative rounded-md p-6 shadow-sm outline outline-2 outline-input"
         style={{
           padding: `${padding.vertical}rem ${padding.horizontal}rem`,
+          // width: `${2 * padding.horizontal}rem`,
+          // height: `${2 * padding.vertical}rem`,
           background: gradient,
           transform:
             data.hoverState === HoverState.HOVER ? "scale(1.05)" : "scale(1)",
@@ -630,7 +663,7 @@ function StateNode({ id, data }: NodeProps<StateNode>) {
   );
 }
 
-function ResultNode({ data }: NodeProps<ResultNode>) {
+function ResultNode({ id, data }: NodeProps<ResultNode>) {
   const percentageOfTotalCalls = useMemo(
     () => (data.numCalls ?? 0) / totalCalls,
     [data.numCalls],
@@ -671,10 +704,14 @@ function ResultNode({ data }: NodeProps<ResultNode>) {
     <>
       <Handle className="z-10" type="target" position={Position.Top} />
       <div
+        id={`node-${id}`}
         className="relative rounded-md shadow-sm outline outline-2"
         style={{
           padding: `${padding.vertical}rem ${padding.horizontal}rem`,
-          backgroundColor: `${backgroundColor}1A`,
+          // width: `${2 * padding.horizontal}rem`,
+          // height: `${2 * padding.vertical}rem`,
+          // backgroundColor: `${backgroundColor}1A`,
+          backgroundColor: "white",
           outlineColor: backgroundColor,
           transform:
             data.hoverState === HoverState.HOVER ? "scale(1.05)" : "scale(1)",
