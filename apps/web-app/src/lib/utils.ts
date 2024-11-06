@@ -8,7 +8,7 @@ export function cn(...inputs: ClassValue[]) {
 export function formatDurationHoursMinutesSeconds(numSeconds: number): string {
   const hours = Math.floor(numSeconds / 3600);
   const minutes = Math.floor((numSeconds % 3600) / 60);
-  const seconds = numSeconds % 60;
+  const seconds = Math.floor(numSeconds % 60);
 
   const parts = [
     minutes.toString().padStart(2, "0"),

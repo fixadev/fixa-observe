@@ -8,22 +8,10 @@ import {
   SelectContent,
   SelectTrigger,
 } from "~/components/ui/select";
-import { formatDistanceToNow } from "date-fns";
-import { cn, formatDurationHoursMinutesSeconds } from "~/lib/utils";
+import CallCard from "./_components/CallCard";
+import type { Call, CallStatus } from "~/lib/types";
+import CallDetails from "./_components/CallDetails";
 
-type Call = {
-  id: string;
-  createdAt: Date;
-
-  status: CallStatus;
-  recordingUrl: string;
-  summary: string;
-  originalTranscript: string;
-  updatedTranscript: string;
-  duration: number;
-  unread: boolean;
-};
-type CallStatus = "error" | "no-errors";
 type CallType = "error" | "no-errors" | "all";
 
 export default function DashboardPage() {
@@ -66,47 +54,20 @@ export default function DashboardPage() {
                 ? true
                 : call.status === selectedCallType,
             ).map((call) => (
-              <div
+              <CallCard
                 key={call.id}
-                className="relative cursor-pointer border-b border-input p-2 pl-4 hover:bg-muted"
-                onClick={() => setSelectedCallId(call.id)}
-              >
-                <div
-                  className={cn(
-                    "absolute left-0 top-0 h-full w-1 bg-primary",
-                    call.id === selectedCallId ? "visible" : "hidden",
-                  )}
-                ></div>
-                <div className="mb-1 flex items-center justify-between">
-                  <div className="truncate text-sm font-medium">{call.id}</div>
-                  <div className="ml-2 flex shrink-0 items-center text-xs text-muted-foreground">
-                    {formatDistanceToNow(call.createdAt, { addSuffix: true })}
-                    <div
-                      className={cn(
-                        "ml-2 size-2 shrink-0 rounded-full bg-primary",
-                        call.unread ? "opacity-100" : "opacity-0",
-                      )}
-                    ></div>
-                  </div>
-                </div>
-                <div className="flex items-center justify-between">
-                  <div
-                    className={cn(
-                      "rounded-full px-2 py-1 text-xs",
-                      call.status === "error" ? "bg-red-100" : "bg-gray-100",
-                    )}
-                  >
-                    {call.status === "error" ? "error detected" : "no errors"}
-                  </div>
-                  <div className="ml-2 flex shrink-0 items-center text-xs text-muted-foreground">
-                    {formatDurationHoursMinutesSeconds(call.duration)}
-                    <div className="ml-2 size-2 shrink-0"></div>
-                  </div>
-                </div>
-              </div>
+                call={call}
+                selectedCallId={selectedCallId}
+                onSelect={setSelectedCallId}
+              />
             ))}
           </div>
         </div>
+        {selectedCallId && (
+          <CallDetails
+            call={TEST_CALLS.find((call) => call.id === selectedCallId)!}
+          />
+        )}
       </div>
     </div>
   );
