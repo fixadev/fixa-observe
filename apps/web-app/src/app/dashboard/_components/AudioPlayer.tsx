@@ -26,16 +26,15 @@ export default function AudioPlayer({ call }: { call: Call }) {
   const [duration, setDuration] = useState(0);
   const [playbackSpeed, setPlaybackSpeed] = useState(1);
   const [sound, setSound] = useState<Howl | null>(null);
-
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
 
+  // Fetch the audio blob
   useEffect(() => {
     const fetchAudio = async () => {
       try {
         const response = await fetch(call.recordingUrl);
         const blob = await response.blob();
         setAudioBlob(blob);
-        console.log("Audio blob fetched");
       } catch (error) {
         console.error("Error fetching audio:", error);
       }
@@ -44,6 +43,7 @@ export default function AudioPlayer({ call }: { call: Call }) {
     void fetchAudio();
   }, [call.recordingUrl]);
 
+  // Create the sound object
   useEffect(() => {
     const howl = new Howl({
       src: [call.recordingUrl],
@@ -60,12 +60,12 @@ export default function AudioPlayer({ call }: { call: Call }) {
     };
   }, [call.recordingUrl]);
 
+  // Play the sound
   useEffect(() => {
     if (!sound) return;
 
     if (isPlaying) {
       sound.play();
-      sound.rate(playbackSpeed);
     } else {
       sound.pause();
     }
@@ -80,13 +80,15 @@ export default function AudioPlayer({ call }: { call: Call }) {
     return () => {
       clearInterval(interval);
     };
-  }, [isPlaying, sound, playbackSpeed]);
+  }, [isPlaying, sound]);
 
+  // Set the playback speed
   useEffect(() => {
     if (!sound) return;
     sound.rate(playbackSpeed);
   }, [playbackSpeed, sound]);
 
+  // Seek to a specific time
   const handleSeek = useCallback(
     (x: number) => {
       if (!sound || !containerRef.current) return;
@@ -110,17 +112,14 @@ export default function AudioPlayer({ call }: { call: Call }) {
     },
     [isDragging],
   );
-
   const handleMouseLeave = useCallback(() => {
     setPlayheadHoverX(null);
     setIsDragging(false);
   }, []);
-
   const handleMouseDown = useCallback(() => {
     setIsDragging(true);
     setPlayheadX(playheadHoverX);
   }, [playheadHoverX]);
-
   const handleMouseUp = useCallback(() => {
     setIsDragging(false);
     if (playheadX !== null) {
@@ -128,11 +127,13 @@ export default function AudioPlayer({ call }: { call: Call }) {
     }
   }, [playheadX, handleSeek]);
 
+  // Set the container width
   useEffect(() => {
     if (!containerRef.current) return;
     setContainerWidth(containerRef.current.offsetWidth);
   }, []);
 
+  // Set the playhead position based on the current time
   useEffect(() => {
     if (!containerWidth || !duration || isDragging) return;
     const percentage = currentTime / duration;
