@@ -16,7 +16,7 @@ const port = process.env.PORT || 8080;
 
 // Middleware
 app.use(express.json());
-app.use(cors({ origin: "*", headers: "*" }));
+app.use(cors({ origin: "*", allowedHeaders: "*" }));
 
 // Store connected sockets by userId
 const connectedUsers = new Map();

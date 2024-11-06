@@ -7,10 +7,15 @@
     "dev": "nodemon src/index.js"
   },
   "dependencies": {
+    "@t3-oss/env-core": "^0.11.1",
+    "@vapi-ai/server-sdk": "^0.1.0",
     "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
     "express": "^4.18.2",
+    "openai": "^4.67.1",
     "sharp": "^0.33.2",
-    "socket.io": "^4.8.1"
+    "socket.io": "^4.8.1",
+    "zod": "^3.23.3"
   },
   "devDependencies": {
     "@flydotio/dockerfile": "^0.5.9",
