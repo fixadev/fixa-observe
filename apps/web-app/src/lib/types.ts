@@ -13,6 +13,13 @@ export const callSchema = z.object({
   recordingUrl: z.string(),
   summary: z.string(),
   originalTranscript: z.string(),
+  originalMessages: z.array(
+    z.object({
+      role: z.enum(["system", "bot", "user"]),
+      message: z.string(),
+      secondsFromStart: z.number(),
+    }),
+  ),
   updatedTranscript: z.string(),
   duration: z.number(),
   unread: z.boolean(),
