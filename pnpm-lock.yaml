@@ -171,6 +171,9 @@ importers:
       '@trpc/server':
         specifier: 11.0.0-rc.502
         version: 11.0.0-rc.502
+      '@types/howler':
+        specifier: ^2.2.12
+        version: 2.2.12
       '@vapi-ai/server-sdk':
         specifier: ^0.1.0
         version: 0.1.0
@@ -210,6 +213,9 @@ importers:
       google-auth-library:
         specifier: ^9.14.1
         version: 9.14.1
+      howler:
+        specifier: ^2.2.4
+        version: 2.2.4
       jsdom:
         specifier: ^25.0.1
         version: 25.0.1(canvas@2.11.2)
@@ -237,6 +243,9 @@ importers:
       react:
         specifier: ^18.3.1
         version: 18.3.1
+      react-audio-visualize:
+        specifier: ^1.2.0
+        version: 1.2.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       react-code-blocks:
         specifier: ^0.1.6
         version: 0.1.6(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -2297,6 +2306,9 @@ packages:
   '@types/hast@2.3.10':
     resolution: {integrity: sha512-McWspRw8xx8J9HurkVBfYj0xKoE25tOFlHGdx4MJ5xORQrMGZNqJhVQWaIbm6Oyla5kYOXtDiopzKRJzEOkwJw==}
 
+  '@types/howler@2.2.12':
+    resolution: {integrity: sha512-hy769UICzOSdK0Kn1FBk4gN+lswcj1EKRkmiDtMkUGvFfYJzgaDXmVXkSShS2m89ERAatGIPnTUlp2HhfkVo5g==}
+
   '@types/inquirer@6.5.0':
     resolution: {integrity: sha512-rjaYQ9b9y/VFGOpqBEXRavc3jh0a+e6evAbI31tMda8VlPaSy0AZJfXsvmIe3wklc7W6C3zCSfleuMXR7NOyXw==}
 
@@ -4141,6 +4153,9 @@ packages:
   hosted-git-info@2.8.9:
     resolution: {integrity: sha512-mxIDAb9Lsm6DoOJ7xH+5+X4y1LU/4Hi50L9C5sIswK3JzULS4bwk1FvjdBgvYR4bzT4tuUQiC15FE2f5HbLvYw==}
 
+  howler@2.2.4:
+    resolution: {integrity: sha512-iARIBPgcQrwtEr+tALF+rapJ8qSc+Set2GJQl7xT1MQzWaVkFebdJhR3alVlSiUf5U7nAANKuj3aWpwerocD5w==}
+
   html-encoding-sniffer@4.0.0:
     resolution: {integrity: sha512-Y22oTqIU4uuPgEemfz7NDJz6OeKf12Lsu+QC+s3BVpda64lTiMYCyGwg5ki4vFxkMwQdeZDl2adZoqUgdFuTgQ==}
     engines: {node: '>=18'}
@@ -5356,6 +5371,12 @@ packages:
   rc@1.2.8:
     resolution: {integrity: sha512-y3bGgqKj3QBdxLbLkomlohkvsA8gdAiUQlSBJnBhfn+BPxg4bc62d8TcBW15wavDfgexCgccckhcZvywyQYPOw==}
     hasBin: true
+
+  react-audio-visualize@1.2.0:
+    resolution: {integrity: sha512-rfO5nmT0fp23gjU0y2WQT6+ZOq2ZsuPTMphchwX1PCz1Di4oaIr6x7JZII8MLrbHdG7UB0OHfGONTIsWdh67kQ==}
+    peerDependencies:
+      react: '>=16.2.0'
+      react-dom: '>=16.2.0'
 
   react-code-blocks@0.1.6:
     resolution: {integrity: sha512-ENNuxG07yO+OuX1ChRje3ieefPRz6yrIpHmebQlaFQgzcAHbUfVeTINpOpoI9bSRSObeYo/OdHsporeToZ7fcg==}
@@ -9018,6 +9039,8 @@ snapshots:
     dependencies:
       '@types/unist': 2.0.11
 
+  '@types/howler@2.2.12': {}
+
   '@types/inquirer@6.5.0':
     dependencies:
       '@types/through': 0.0.30
@@ -11363,6 +11386,8 @@ snapshots:
 
   hosted-git-info@2.8.9: {}
 
+  howler@2.2.4: {}
+
   html-encoding-sniffer@4.0.0:
     dependencies:
       whatwg-encoding: 3.1.1
@@ -12553,6 +12578,11 @@ snapshots:
       ini: 1.3.8
       minimist: 1.2.8
       strip-json-comments: 2.0.1
+
+  react-audio-visualize@1.2.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
+    dependencies:
+      react: 18.3.1
+      react-dom: 18.3.1(react@18.3.1)
 
   react-code-blocks@0.1.6(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
     dependencies:
