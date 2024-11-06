@@ -1,26 +1,11 @@
 import io
-import wave
-import numpy as np
 import requests
 import soundfile as sf
 from ..utils.vapi_client import create_vapi_client
 from ..utils.openai_client import create_openai_client
 from ..config import settings
-
-def create_mono_buffer(channel_data: np.ndarray, sample_rate: int) -> io.BytesIO:
-    """Create a mono WAV buffer from channel data."""
-    buffer = io.BytesIO()
-    with wave.open(buffer, 'wb') as wav_file:
-        wav_file.setnchannels(1)
-        wav_file.setsampwidth(2)  # 16-bit
-        wav_file.setframerate(sample_rate)
-        
-        # Convert float32 to int16
-        channel_data = (channel_data * 32767).astype(np.int16)
-        wav_file.writeframes(channel_data.tobytes())
-    
-    buffer.seek(0)
-    return buffer
+from ..utils.create_mono_buffer import create_mono_buffer
+from ..utils.create_segments import create_segments_from_words
 
 async def analyze_call(call_id: str):
     """Analyze a call recording and generate transcripts."""
@@ -45,9 +30,19 @@ async def analyze_call(call_id: str):
     left_channel = data[:, 0]
     right_channel = data[:, 1]
     
-    # Create mono buffers for each channel
+    # Create and save mono buffers for each channel
     left_buffer = create_mono_buffer(left_channel, sample_rate)
     right_buffer = create_mono_buffer(right_channel, sample_rate)
+    
+    # Save files locally for testing
+    with open(f"temp_{call_id}_left.wav", "wb") as f:
+        f.write(left_buffer.getvalue())
+    with open(f"temp_{call_id}_right.wav", "wb") as f:
+        f.write(right_buffer.getvalue())
+        
+    # Reset buffer positions for subsequent use
+    left_buffer.seek(0)
+    right_buffer.seek(0)
     
     # Transcribe left channel
     left_transcript = openai_client.audio.transcriptions.create(
@@ -55,7 +50,7 @@ async def analyze_call(call_id: str):
         model="whisper-1",
         language="en",
         response_format="verbose_json",
-        timestamp_granularities=["word"]
+        timestamp_granularities=["word"],
     )
     
     # Transcribe right channel
@@ -64,11 +59,14 @@ async def analyze_call(call_id: str):
         model="whisper-1",
         language="en",
         response_format="verbose_json",
-        timestamp_granularities=["word"]
+        timestamp_granularities=["word"],
     )
     
     original_transcript = call.artifact.transcript
-    
-    print("originalTranscript", original_transcript)
-    print("openaitranscript", left_transcript)
-    print("openaitranscript", right_transcript) 
+
+    # In your analyze_call function:
+    segments = create_segments_from_words(left_transcript.words, right_transcript.words)
+    print("\n".join([segment["text"] for segment in segments]))
+
+    print("\n=== Original Transcript ===")
+    print(original_transcript)
