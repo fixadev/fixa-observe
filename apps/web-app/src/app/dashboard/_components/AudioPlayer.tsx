@@ -21,6 +21,12 @@ import {
 import type { Call, CallError } from "~/lib/types";
 import { formatDurationHoursMinutesSeconds } from "~/lib/utils";
 import { Howl } from "howler";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "~/components/ui/tooltip";
+import { ERROR_LABELS } from "~/lib/constants";
 
 export type AudioPlayerRef = {
   seekToTime: (timeInSeconds: number) => void;
@@ -241,22 +247,45 @@ const AudioPlayer = forwardRef<AudioPlayerRef, { call: Call }>(
             return (
               <div
                 key={index}
-                className="absolute top-0 h-full cursor-pointer border border-red-500 bg-red-500/20 hover:bg-red-500/50"
+                className="absolute top-0 h-full"
                 style={{
                   left: `${startPosition}px`,
                   width: `${width}px`,
                 }}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleErrorClick(error);
-                }}
-                onMouseDown={(e) => {
-                  e.stopPropagation();
-                }}
-                onMouseUp={(e) => {
-                  e.stopPropagation();
-                }}
-              />
+              >
+                <Tooltip key={index}>
+                  <TooltipTrigger asChild>
+                    <div
+                      className="size-full cursor-pointer border border-red-500 bg-red-500/20 hover:bg-red-500/50"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleErrorClick(error);
+                      }}
+                      onMouseDown={(e) => {
+                        e.stopPropagation();
+                      }}
+                      onMouseUp={(e) => {
+                        e.stopPropagation();
+                      }}
+                    />
+                  </TooltipTrigger>
+                  <TooltipContent side="right" asChild>
+                    <div className="pointer-events-none rounded-md border border-input bg-white p-2 shadow-sm">
+                      <div className="mb-1 text-sm font-medium text-foreground">
+                        {ERROR_LABELS[error.type]}
+                      </div>
+                      <div
+                        className="text-sm"
+                        style={{
+                          color: `rgb(${Math.round(255 * error.confidence)}, ${Math.round(75 * (1 - error.confidence))}, ${Math.round(75 * (1 - error.confidence))})`,
+                        }}
+                      >
+                        {(error.confidence * 100).toFixed(0)}% likely
+                      </div>
+                    </div>
+                  </TooltipContent>
+                </Tooltip>
+              </div>
             );
           })}
         </div>
