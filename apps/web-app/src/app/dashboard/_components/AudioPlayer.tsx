@@ -24,6 +24,8 @@ import { Howl } from "howler";
 
 export type AudioPlayerRef = {
   seekToTime: (timeInSeconds: number) => void;
+  play: () => void;
+  pause: () => void;
 };
 
 const AudioPlayer = forwardRef<AudioPlayerRef, { call: Call }>(
@@ -63,6 +65,12 @@ const AudioPlayer = forwardRef<AudioPlayerRef, { call: Call }>(
         preload: true,
         onload: () => {
           setDuration(howl.duration());
+        },
+        onpause: () => {
+          setIsPlaying(false);
+        },
+        onend: () => {
+          setIsPlaying(false);
         },
       });
       setSound(howl);
@@ -167,6 +175,8 @@ const AudioPlayer = forwardRef<AudioPlayerRef, { call: Call }>(
       ref,
       () => ({
         seekToTime,
+        play: () => setIsPlaying(true),
+        pause: () => setIsPlaying(false),
       }),
       [seekToTime],
     );

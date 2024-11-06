@@ -26,6 +26,7 @@ export default function CallDetails({ call }: { call: Call }) {
                 audioPlayerRef.current?.seekToTime(
                   message.secondsFromStart - offsetFromStart,
                 );
+                audioPlayerRef.current?.play();
               }}
               className="cursor-pointer rounded-lg bg-gray-50 p-4 hover:bg-muted"
             >

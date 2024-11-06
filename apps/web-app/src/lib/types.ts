@@ -17,6 +17,7 @@ export const callSchema = z.object({
     z.object({
       role: z.enum(["system", "bot", "user"]),
       message: z.string(),
+      duration: z.number(),
       secondsFromStart: z.number(),
     }),
   ),
