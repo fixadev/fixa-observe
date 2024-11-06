@@ -17,3 +17,4 @@ dependencies:
     - soundfile
     - pydantic
     - pydantic-settings
+    - fal-client

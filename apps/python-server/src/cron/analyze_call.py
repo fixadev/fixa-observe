@@ -1,11 +1,15 @@
 import io
 import requests
+import replicate
 import soundfile as sf
 from ..utils.vapi_client import create_vapi_client
 from ..utils.openai_client import create_openai_client
 from ..config import settings
 from ..utils.create_mono_buffer import create_mono_buffer
 from ..utils.create_segments import create_segments_from_words
+from fal_client import SyncClient
+
+fal_client = SyncClient(key=settings.fal_api_key)
 
 async def analyze_call(call_id: str):
     """Analyze a call recording and generate transcripts."""
@@ -43,30 +47,29 @@ async def analyze_call(call_id: str):
     # Reset buffer positions for subsequent use
     left_buffer.seek(0)
     right_buffer.seek(0)
+
+    
     
     # Transcribe left channel
-    left_transcript = openai_client.audio.transcriptions.create(
-        file=("audio.wav", left_buffer, "audio/wav"),
-        model="whisper-1",
-        language="en",
-        response_format="verbose_json",
-        timestamp_granularities=["word"],
+    left_transcript = fal_client.run(
+        "whisper",
+        arguments={"audio": left_buffer, "language": "en", "chunk_level": "word"},
     )
-    
-    # Transcribe right channel
-    right_transcript = openai_client.audio.transcriptions.create(
-        file=("audio.wav", right_buffer, "audio/wav"),
-        model="whisper-1",
-        language="en",
-        response_format="verbose_json",
-        timestamp_granularities=["word"],
-    )
+
+    print("=========Left Transcript=========")
+    print(left_transcript)
     
     original_transcript = call.artifact.transcript
 
-    # In your analyze_call function:
-    segments = create_segments_from_words(left_transcript.words, right_transcript.words)
-    print("\n".join([segment["text"] for segment in segments]))
+    # # In your analyze_call function:
+    # segments = create_segments_from_words(left_transcript.words, right_transcript.words)
+    # print("\n".join([segment["text"] for segment in segments]))
 
-    print("\n=== Original Transcript ===")
-    print(original_transcript)
+    # print("\n=== Original Transcript ===")
+    # print(original_transcript)
+
+    # print("\n=== Left Transcript ===")
+    # print(left_transcript)
+
+    # print("\n=== Right Transcript ===")
+    # print(right_transcript) 
