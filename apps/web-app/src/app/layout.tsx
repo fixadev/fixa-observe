@@ -23,7 +23,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${ibmPlexSans.className} light`}
+      className={`${ibmPlexSans.className} light h-full`}
       style={{ colorScheme: "light" }}
     >
       <CSPostHogProvider>
@@ -31,7 +31,7 @@ export default function RootLayout({
         // appearance={{ baseTheme: dark }}
         // localization={localization}
         >
-          <body>
+          <body className="h-full">
             <ThemeProvider
               attribute="class"
               defaultTheme="light"

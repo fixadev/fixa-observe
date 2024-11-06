@@ -19,10 +19,10 @@ export default function DashboardPage() {
   const [selectedCallId, setSelectedCallId] = useState<string | null>(null);
 
   return (
-    <div className="container mx-auto py-8">
+    <div className="container mx-auto flex h-full flex-col overflow-hidden pt-8">
       <h1 className="mb-8 text-2xl font-medium">Dashboard</h1>
-      <div className="flex rounded-md border border-input shadow-sm">
-        <div className="flex w-96 flex-col border-r border-input">
+      <div className="flex flex-1 overflow-hidden rounded-md border border-input shadow-sm">
+        <div className="flex w-96 shrink-0 flex-col overflow-hidden border-r border-input">
           <div className="border-b border-input p-2 text-lg font-medium">
             calls
           </div>
@@ -48,7 +48,7 @@ export default function DashboardPage() {
               </SelectContent>
             </Select>
           </div>
-          <div className="flex flex-col">
+          <div className="flex flex-col overflow-y-auto">
             {TEST_CALLS.filter((call) => {
               if (selectedCallType === "error")
                 return call.errors !== undefined;

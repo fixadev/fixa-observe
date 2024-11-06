@@ -1,11 +1,13 @@
 import type { Call } from "~/lib/types";
 import AudioPlayer, { type AudioPlayerRef } from "./AudioPlayer";
-import { useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState, useEffect } from "react";
 import { cn, formatDurationHoursMinutesSeconds } from "~/lib/utils";
 
 export default function CallDetails({ call }: { call: Call }) {
   const audioPlayerRef = useRef<AudioPlayerRef>(null);
   const [currentTime, setCurrentTime] = useState(0);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const lastActiveIndexRef = useRef(-1);
 
   const offsetFromStart = useMemo(() => {
     return (
@@ -14,8 +16,49 @@ export default function CallDetails({ call }: { call: Call }) {
     );
   }, [call.originalMessages]);
 
+  const activeMessageIndex = useMemo(() => {
+    return call.originalMessages.findIndex((message, index) => {
+      if (message.role === "system") return false;
+      const messageStart = message.secondsFromStart - offsetFromStart;
+      const nextMessage = call.originalMessages[index + 1];
+      const nextMessageStart = nextMessage?.secondsFromStart
+        ? nextMessage.secondsFromStart - offsetFromStart
+        : Infinity;
+
+      return currentTime >= messageStart && currentTime < nextMessageStart;
+    });
+  }, [currentTime, call.originalMessages, offsetFromStart]);
+
+  useEffect(() => {
+    if (
+      activeMessageIndex !== -1 &&
+      activeMessageIndex !== lastActiveIndexRef.current &&
+      scrollContainerRef.current
+    ) {
+      const messageElements = scrollContainerRef.current.children;
+      const activeElement = messageElements[activeMessageIndex];
+      console.log(activeElement);
+
+      if (activeElement) {
+        const container = scrollContainerRef.current;
+        const containerBottom = container.offsetTop + container.clientHeight;
+        const elementBottom = activeElement.getBoundingClientRect().bottom;
+
+        // Only scroll if the element is below the visible area
+        if (elementBottom > containerBottom) {
+          activeElement.scrollIntoView({
+            behavior: "smooth",
+            block: "nearest",
+          });
+        }
+      }
+
+      lastActiveIndexRef.current = activeMessageIndex;
+    }
+  }, [activeMessageIndex]);
+
   return (
-    <div className="w-full p-4">
+    <div className="flex w-full flex-col overflow-hidden px-4 pt-4">
       <AudioPlayer
         ref={audioPlayerRef}
         call={call}
@@ -24,7 +67,10 @@ export default function CallDetails({ call }: { call: Call }) {
         }}
       />
 
-      <div className="mt-4">
+      <div
+        ref={scrollContainerRef}
+        className="-mx-4 mt-4 flex flex-1 flex-col overflow-y-auto px-4"
+      >
         {call.originalMessages.map((message, index) => {
           if (message.role === "system") return null;
           return (
@@ -53,7 +99,7 @@ export default function CallDetails({ call }: { call: Call }) {
                       : Infinity;
                     return currentTime >= currentMessageStart &&
                       currentTime < nextMessageStart
-                      ? "bg-muted"
+                      ? "bg-muted hover:bg-muted"
                       : "";
                   })(),
                 )}
@@ -68,6 +114,7 @@ export default function CallDetails({ call }: { call: Call }) {
             </div>
           );
         })}
+        <div className="h-10 shrink-0" />
       </div>
     </div>
   );
