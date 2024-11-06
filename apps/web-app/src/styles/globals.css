@@ -69,3 +69,12 @@
     --chart-5: 340 75% 55%;
   }
 }
+
+@keyframes flowingDash {
+  from {
+    stroke-dashoffset: 12;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
