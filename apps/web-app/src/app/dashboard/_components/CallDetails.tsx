@@ -1,6 +1,6 @@
 import type { Call } from "~/lib/types";
 import AudioPlayer, { type AudioPlayerRef } from "./AudioPlayer";
-import { useMemo, useRef, useState, useEffect } from "react";
+import { useMemo, useRef, useState, useEffect, useCallback } from "react";
 import { cn, formatDurationHoursMinutesSeconds } from "~/lib/utils";
 
 export default function CallDetails({ call }: { call: Call }) {
@@ -31,6 +31,26 @@ export default function CallDetails({ call }: { call: Call }) {
     });
   }, [currentTime, messagesFiltered, offsetFromStart]);
 
+  const scrollMessageIntoView = useCallback((messageIndex: number) => {
+    if (!scrollContainerRef.current) return;
+    const messageElements = scrollContainerRef.current.children;
+    const activeElement = messageElements[messageIndex];
+
+    if (activeElement) {
+      const container = scrollContainerRef.current;
+      const containerBottom = container.offsetTop + container.clientHeight;
+      const { bottom: elementBottom, top: elementTop } =
+        activeElement.getBoundingClientRect();
+      // Only scroll if the element is below the visible area
+      if (elementBottom > containerBottom || elementTop < container.offsetTop) {
+        activeElement.scrollIntoView({
+          behavior: "smooth",
+          block: "nearest",
+        });
+      }
+    }
+  }, []);
+
   // Scroll to the active message if it has changed
   useEffect(() => {
     if (
@@ -38,27 +58,25 @@ export default function CallDetails({ call }: { call: Call }) {
       activeMessageIndex !== lastActiveIndexRef.current &&
       scrollContainerRef.current
     ) {
-      const messageElements = scrollContainerRef.current.children;
-      const activeElement = messageElements[activeMessageIndex];
-      console.log(activeMessageIndex, activeElement);
-
-      if (activeElement) {
-        const container = scrollContainerRef.current;
-        const containerBottom = container.offsetTop + container.clientHeight;
-        const elementBottom = activeElement.getBoundingClientRect().bottom;
-
-        // Only scroll if the element is below the visible area
-        if (elementBottom > containerBottom) {
-          activeElement.scrollIntoView({
-            behavior: "smooth",
-            block: "nearest",
-          });
-        }
-      }
-
+      scrollMessageIntoView(activeMessageIndex);
       lastActiveIndexRef.current = activeMessageIndex;
     }
-  }, [activeMessageIndex]);
+  }, [activeMessageIndex, scrollMessageIntoView]);
+
+  const getMessageErrorRanges = useCallback(
+    (messageIndex: number) => {
+      return (
+        call.errors
+          ?.filter(
+            (error) =>
+              error.type === "transcription" &&
+              error.details?.messageIndex === messageIndex,
+          )
+          .map((error) => error.details?.wordIndexRange) ?? []
+      );
+    },
+    [call.errors],
+  );
 
   return (
     <div className="flex w-full flex-col overflow-hidden px-4 pt-4">
@@ -75,6 +93,9 @@ export default function CallDetails({ call }: { call: Call }) {
         className="-mx-4 mt-4 flex flex-1 flex-col overflow-y-auto px-4"
       >
         {messagesFiltered.map((message, index) => {
+          const errorRanges = getMessageErrorRanges(index);
+          const words = message.message.split(" ");
+
           return (
             <div key={index} className="flex gap-2">
               <div className="mt-2 w-8 shrink-0 text-xs text-muted-foreground">
@@ -98,7 +119,27 @@ export default function CallDetails({ call }: { call: Call }) {
                   {message.role === "bot" ? "assistant" : "user"}
                 </div>
                 <div className="mt-1 text-sm text-muted-foreground">
-                  {message.message}
+                  {words.map((word, wordIndex) => {
+                    const isErrorWord = errorRanges.some(
+                      (range) =>
+                        range?.[0] !== undefined &&
+                        range?.[1] !== undefined &&
+                        wordIndex >= range[0] &&
+                        wordIndex < range[1],
+                    );
+                    return (
+                      <span
+                        key={wordIndex}
+                        className={
+                          isErrorWord
+                            ? "underline decoration-red-500 decoration-solid decoration-2 underline-offset-4"
+                            : undefined
+                        }
+                      >
+                        {word}{" "}
+                      </span>
+                    );
+                  })}
                 </div>
               </div>
             </div>

@@ -3,6 +3,13 @@ import { z } from "zod";
 export type PlatformOptions = z.infer<typeof platformOptions>;
 export const platformOptions = z.enum(["retell", "vapi", "bland"]);
 
+export const transcriptionErrorSchema = z.object({
+  messageIndex: z.number(),
+  wordIndexRange: z.array(z.number()),
+  correctWord: z.string(),
+});
+export type TranscriptionError = z.infer<typeof transcriptionErrorSchema>;
+
 export const callSchema = z.object({
   id: z.string(),
   createdAt: z.date(),
@@ -27,6 +34,7 @@ export const callSchema = z.object({
         end: z.number(),
         type: z.enum(["transcription"]),
         confidence: z.number(),
+        details: transcriptionErrorSchema.optional(),
       }),
     )
     .optional(),
