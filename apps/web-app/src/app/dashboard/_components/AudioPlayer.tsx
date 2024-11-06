@@ -250,6 +250,12 @@ const AudioPlayer = forwardRef<AudioPlayerRef, { call: Call }>(
                   e.stopPropagation();
                   handleErrorClick(error);
                 }}
+                onMouseDown={(e) => {
+                  e.stopPropagation();
+                }}
+                onMouseUp={(e) => {
+                  e.stopPropagation();
+                }}
               />
             );
           })}
