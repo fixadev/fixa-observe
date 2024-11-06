@@ -18,7 +18,7 @@ import {
   SelectContent,
   SelectTrigger,
 } from "~/components/ui/select";
-import type { Call } from "~/lib/types";
+import type { Call, CallError } from "~/lib/types";
 import { formatDurationHoursMinutesSeconds } from "~/lib/utils";
 import { Howl } from "howler";
 
@@ -41,6 +41,7 @@ const AudioPlayer = forwardRef<AudioPlayerRef, { call: Call }>(
     const [playbackSpeed, setPlaybackSpeed] = useState(1);
     const [sound, setSound] = useState<Howl | null>(null);
     const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
+    const [activeError, setActiveError] = useState<CallError | null>(null);
 
     // Fetch the audio blob
     useEffect(() => {
@@ -93,14 +94,22 @@ const AudioPlayer = forwardRef<AudioPlayerRef, { call: Call }>(
       // Set up time tracking
       const interval = setInterval(() => {
         if (sound.playing()) {
-          setCurrentTime(sound.seek());
+          const currentPos = sound.seek();
+          setCurrentTime(currentPos);
+
+          // Check if we need to stop playback due to reaching error end
+          if (activeError && currentPos >= activeError.end) {
+            sound.pause();
+            setIsPlaying(false);
+            setActiveError(null);
+          }
         }
-      }, 100);
+      }, 1 / 30);
 
       return () => {
         clearInterval(interval);
       };
-    }, [isPlaying, sound]);
+    }, [isPlaying, sound, activeError]);
 
     // Set the playback speed
     useEffect(() => {
@@ -116,6 +125,7 @@ const AudioPlayer = forwardRef<AudioPlayerRef, { call: Call }>(
         const seekTime = percentage * duration;
         sound.seek(seekTime);
         setCurrentTime(seekTime);
+        setActiveError(null);
       },
       [sound, containerWidth, duration],
     );
@@ -181,6 +191,18 @@ const AudioPlayer = forwardRef<AudioPlayerRef, { call: Call }>(
       [seekToTime],
     );
 
+    const handleErrorClick = useCallback(
+      (error: CallError) => {
+        if (!sound) return;
+
+        sound.seek(error.start);
+        setCurrentTime(error.start);
+        setIsPlaying(true);
+        setActiveError(error);
+      },
+      [sound],
+    );
+
     return (
       <div className="flex flex-col gap-4">
         <div
@@ -209,9 +231,37 @@ const AudioPlayer = forwardRef<AudioPlayerRef, { call: Call }>(
             className="absolute left-0 top-0 h-full w-0.5 bg-primary"
             style={{ left: `${playheadX}px` }}
           />
+          {call.errors?.map((error, index) => {
+            if (!containerWidth || !duration) return null;
+            const startPercentage = error.start / duration;
+            const endPercentage = error.end / duration;
+            const startPosition = startPercentage * containerWidth;
+            const width = (endPercentage - startPercentage) * containerWidth;
+
+            return (
+              <div
+                key={index}
+                className="absolute top-0 h-full cursor-pointer border border-red-500 bg-red-500/20 hover:bg-red-500/50"
+                style={{
+                  left: `${startPosition}px`,
+                  width: `${width}px`,
+                }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleErrorClick(error);
+                }}
+              />
+            );
+          })}
         </div>
         <div className="flex items-center gap-4">
-          <Button size="icon" onClick={() => setIsPlaying(!isPlaying)}>
+          <Button
+            size="icon"
+            onClick={() => {
+              setIsPlaying(!isPlaying);
+              setActiveError(null);
+            }}
+          >
             {isPlaying ? (
               <PauseIcon className="size-4" />
             ) : (

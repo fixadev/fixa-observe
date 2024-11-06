@@ -9,7 +9,7 @@ import {
   SelectTrigger,
 } from "~/components/ui/select";
 import CallCard from "./_components/CallCard";
-import type { Call, CallStatus } from "~/lib/types";
+import type { Call } from "~/lib/types";
 import CallDetails from "./_components/CallDetails";
 
 type CallType = "error" | "no-errors" | "all";
@@ -49,11 +49,13 @@ export default function DashboardPage() {
             </Select>
           </div>
           <div className="flex flex-col">
-            {TEST_CALLS.filter((call) =>
-              selectedCallType === "all"
-                ? true
-                : call.status === selectedCallType,
-            ).map((call) => (
+            {TEST_CALLS.filter((call) => {
+              if (selectedCallType === "error")
+                return call.errors !== undefined;
+              if (selectedCallType === "no-errors")
+                return call.errors === undefined;
+              return true;
+            }).map((call) => (
               <CallCard
                 key={call.id}
                 call={call}
@@ -76,7 +78,6 @@ export default function DashboardPage() {
 const TEST_CALLS: Call[] = [
   {
     id: crypto.randomUUID(),
-    status: "error" as CallStatus,
     recordingUrl:
       "https://jtuyprjjgxbgmtjiykoa.supabase.co/storage/v1/object/public/recordings/1a9a9108-95c4-4fd9-befc-a27cfb5eff69-1730766982390-5c6dd41d-32ec-4fe3-bbc1-e5f3e682a58f-mono.wav",
     summary: "Network connectivity issues during call",
@@ -87,7 +88,6 @@ const TEST_CALLS: Call[] = [
   },
   {
     id: crypto.randomUUID(),
-    status: "no-errors" as CallStatus,
     recordingUrl:
       "https://jtuyprjjgxbgmtjiykoa.supabase.co/storage/v1/object/public/recordings/1a9a9108-95c4-4fd9-befc-a27cfb5eff69-1730766982390-5c6dd41d-32ec-4fe3-bbc1-e5f3e682a58f-mono.wav",
     summary: "Customer inquired about account balance",
@@ -96,7 +96,6 @@ const TEST_CALLS: Call[] = [
   },
   {
     id: crypto.randomUUID(),
-    status: "error" as CallStatus,
     recordingUrl:
       "https://jtuyprjjgxbgmtjiykoa.supabase.co/storage/v1/object/public/recordings/1a9a9108-95c4-4fd9-befc-a27cfb5eff69-1730766982390-5c6dd41d-32ec-4fe3-bbc1-e5f3e682a58f-mono.wav",
     summary: "Technical difficulties during call",
@@ -105,7 +104,6 @@ const TEST_CALLS: Call[] = [
   },
   {
     id: crypto.randomUUID(),
-    status: "no-errors" as CallStatus,
     recordingUrl:
       "https://jtuyprjjgxbgmtjiykoa.supabase.co/storage/v1/object/public/recordings/1a9a9108-95c4-4fd9-befc-a27cfb5eff69-1730766982390-5c6dd41d-32ec-4fe3-bbc1-e5f3e682a58f-mono.wav",
     summary: "Product inquiry call",
@@ -114,7 +112,6 @@ const TEST_CALLS: Call[] = [
   },
   {
     id: crypto.randomUUID(),
-    status: "error" as CallStatus,
     recordingUrl:
       "https://jtuyprjjgxbgmtjiykoa.supabase.co/storage/v1/object/public/recordings/1a9a9108-95c4-4fd9-befc-a27cfb5eff69-1730766982390-5c6dd41d-32ec-4fe3-bbc1-e5f3e682a58f-mono.wav",
     summary: "Disconnected call",
@@ -123,7 +120,6 @@ const TEST_CALLS: Call[] = [
   },
   {
     id: crypto.randomUUID(),
-    status: "no-errors" as CallStatus,
     recordingUrl:
       "https://jtuyprjjgxbgmtjiykoa.supabase.co/storage/v1/object/public/recordings/1a9a9108-95c4-4fd9-befc-a27cfb5eff69-1730766982390-5c6dd41d-32ec-4fe3-bbc1-e5f3e682a58f-mono.wav",
     summary: "Subscription cancellation request",
@@ -132,7 +128,6 @@ const TEST_CALLS: Call[] = [
   },
   {
     id: crypto.randomUUID(),
-    status: "error" as CallStatus,
     recordingUrl:
       "https://jtuyprjjgxbgmtjiykoa.supabase.co/storage/v1/object/public/recordings/1a9a9108-95c4-4fd9-befc-a27cfb5eff69-1730766982390-5c6dd41d-32ec-4fe3-bbc1-e5f3e682a58f-mono.wav",
     summary: "System error during payment",
@@ -141,7 +136,6 @@ const TEST_CALLS: Call[] = [
   },
   {
     id: crypto.randomUUID(),
-    status: "no-errors" as CallStatus,
     recordingUrl:
       "https://jtuyprjjgxbgmtjiykoa.supabase.co/storage/v1/object/public/recordings/1a9a9108-95c4-4fd9-befc-a27cfb5eff69-1730766982390-5c6dd41d-32ec-4fe3-bbc1-e5f3e682a58f-mono.wav",
     summary: "General product support",
@@ -150,7 +144,6 @@ const TEST_CALLS: Call[] = [
   },
   {
     id: crypto.randomUUID(),
-    status: "error" as CallStatus,
     recordingUrl:
       "https://jtuyprjjgxbgmtjiykoa.supabase.co/storage/v1/object/public/recordings/1a9a9108-95c4-4fd9-befc-a27cfb5eff69-1730766982390-5c6dd41d-32ec-4fe3-bbc1-e5f3e682a58f-mono.wav",
     summary: "Audio quality issues",
@@ -159,7 +152,6 @@ const TEST_CALLS: Call[] = [
   },
   {
     id: crypto.randomUUID(),
-    status: "no-errors" as CallStatus,
     recordingUrl:
       "https://jtuyprjjgxbgmtjiykoa.supabase.co/storage/v1/object/public/recordings/1a9a9108-95c4-4fd9-befc-a27cfb5eff69-1730766982390-5c6dd41d-32ec-4fe3-bbc1-e5f3e682a58f-mono.wav",
     summary: "Feature request discussion",
@@ -269,6 +261,20 @@ const TEST_CALLS: Call[] = [
       message: "Right.",
       duration: 500,
       secondsFromStart: 63.59,
+    },
+  ],
+  errors: [
+    {
+      start: 1.36,
+      end: 2.4,
+      type: "transcription",
+      confidence: 0.9,
+    },
+    {
+      start: 10.58,
+      end: 15.2,
+      type: "transcription",
+      confidence: 0.9,
     },
   ],
 }));

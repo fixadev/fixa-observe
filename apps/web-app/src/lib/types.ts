@@ -3,13 +3,9 @@ import { z } from "zod";
 export type PlatformOptions = z.infer<typeof platformOptions>;
 export const platformOptions = z.enum(["retell", "vapi", "bland"]);
 
-export const callStatusSchema = z.enum(["error", "no-errors"]);
-export type CallStatus = z.infer<typeof callStatusSchema>;
-
 export const callSchema = z.object({
   id: z.string(),
   createdAt: z.date(),
-  status: callStatusSchema,
   recordingUrl: z.string(),
   summary: z.string(),
   originalTranscript: z.string(),
@@ -17,12 +13,24 @@ export const callSchema = z.object({
     z.object({
       role: z.enum(["system", "bot", "user"]),
       message: z.string(),
-      duration: z.number(),
+      duration: z.number().optional(),
       secondsFromStart: z.number(),
     }),
   ),
   updatedTranscript: z.string(),
   duration: z.number(),
   unread: z.boolean(),
+  errors: z
+    .array(
+      z.object({
+        start: z.number(),
+        end: z.number(),
+        type: z.enum(["transcription"]),
+        confidence: z.number(),
+      }),
+    )
+    .optional(),
 });
 export type Call = z.infer<typeof callSchema>;
+
+export type CallError = NonNullable<Call["errors"]>[number];
