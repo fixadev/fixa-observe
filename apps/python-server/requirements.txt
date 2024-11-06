@@ -1,0 +1,9 @@
+fastapi==0.109.0
+uvicorn==0.27.0
+numpy==1.26.3
+requests==2.31.0
+openai==1.10.0
+pydub==0.25.1
+soundfile==0.12.1
+python-dotenv==1.0.0
+vapi-sdk==0.1.0 

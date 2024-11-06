@@ -1,0 +1,19 @@
+name: python-server
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.13
+  - pip
+  - numpy
+  - requests
+  - pydub
+  - python-dotenv
+  - pip:
+    - fastapi
+    - uvicorn
+    - openai
+    - vapi_server_sdk
+    - soundfile
+    - pydantic
+    - pydantic-settings
