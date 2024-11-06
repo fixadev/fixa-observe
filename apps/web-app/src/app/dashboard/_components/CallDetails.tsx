@@ -1,6 +1,7 @@
 import type { Call } from "~/lib/types";
 import AudioPlayer, { type AudioPlayerRef } from "./AudioPlayer";
 import { useMemo, useRef } from "react";
+import { formatDurationHoursMinutesSeconds } from "~/lib/utils";
 
 export default function CallDetails({ call }: { call: Call }) {
   const audioPlayerRef = useRef<AudioPlayerRef>(null);
@@ -16,24 +17,32 @@ export default function CallDetails({ call }: { call: Call }) {
     <div className="w-full p-4">
       <AudioPlayer ref={audioPlayerRef} call={call} />
 
-      <div className="mt-4 space-y-4">
+      <div className="mt-4">
         {call.originalMessages.map((message, index) => {
           if (message.role === "system") return null;
           return (
-            <div
-              key={index}
-              onClick={() => {
-                audioPlayerRef.current?.seekToTime(
+            <div key={index} className="flex gap-2">
+              <div className="mt-2 w-8 shrink-0 text-xs text-muted-foreground">
+                {formatDurationHoursMinutesSeconds(
                   message.secondsFromStart - offsetFromStart,
-                );
-                audioPlayerRef.current?.play();
-              }}
-              className="cursor-pointer rounded-lg bg-gray-50 p-4 hover:bg-muted"
-            >
-              <div className="font-medium text-gray-700">
-                {message.role === "bot" ? "Assistant" : "User"}
+                )}
               </div>
-              <div className="mt-1 text-gray-600">{message.message}</div>
+              <div
+                onClick={() => {
+                  audioPlayerRef.current?.seekToTime(
+                    message.secondsFromStart - offsetFromStart,
+                  );
+                  audioPlayerRef.current?.play();
+                }}
+                className="flex-1 cursor-pointer rounded-md p-2 hover:bg-muted"
+              >
+                <div className="text-xs font-medium">
+                  {message.role === "bot" ? "assistant" : "user"}
+                </div>
+                <div className="mt-1 text-sm text-muted-foreground">
+                  {message.message}
+                </div>
+              </div>
             </div>
           );
         })}
