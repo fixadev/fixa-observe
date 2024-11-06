@@ -7,7 +7,7 @@ class Settings(BaseSettings):
     # API Keys
     openai_api_key: str = Field(..., alias="OPENAI_API_KEY")
     vapi_api_key: str = Field(..., alias="VAPI_API_KEY")
-    
+    fal_api_key: str = Field(..., alias="FAL_API_KEY")
     # Server settings
     host: str = Field(default="0.0.0.0", alias="HOST")
     port: int = Field(default=8000, alias="PORT")
