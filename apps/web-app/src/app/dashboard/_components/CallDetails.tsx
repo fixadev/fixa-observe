@@ -9,26 +9,29 @@ export default function CallDetails({ call }: { call: Call }) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const lastActiveIndexRef = useRef(-1);
 
-  const offsetFromStart = useMemo(() => {
-    return (
-      call.originalMessages.find((m) => m.role !== "system")
-        ?.secondsFromStart ?? 0
-    );
+  const messagesFiltered = useMemo(() => {
+    return call.originalMessages.filter((m) => m.role !== "system");
   }, [call.originalMessages]);
 
+  // Offset from the start of the call to the first message
+  const offsetFromStart = useMemo(() => {
+    return messagesFiltered[0]?.secondsFromStart ?? 0;
+  }, [messagesFiltered]);
+
+  // Index of the currently active message
   const activeMessageIndex = useMemo(() => {
-    return call.originalMessages.findIndex((message, index) => {
-      if (message.role === "system") return false;
+    return messagesFiltered.findIndex((message, index) => {
       const messageStart = message.secondsFromStart - offsetFromStart;
-      const nextMessage = call.originalMessages[index + 1];
+      const nextMessage = messagesFiltered[index + 1];
       const nextMessageStart = nextMessage?.secondsFromStart
         ? nextMessage.secondsFromStart - offsetFromStart
         : Infinity;
 
       return currentTime >= messageStart && currentTime < nextMessageStart;
     });
-  }, [currentTime, call.originalMessages, offsetFromStart]);
+  }, [currentTime, messagesFiltered, offsetFromStart]);
 
+  // Scroll to the active message if it has changed
   useEffect(() => {
     if (
       activeMessageIndex !== -1 &&
@@ -37,7 +40,7 @@ export default function CallDetails({ call }: { call: Call }) {
     ) {
       const messageElements = scrollContainerRef.current.children;
       const activeElement = messageElements[activeMessageIndex];
-      console.log(activeElement);
+      console.log(activeMessageIndex, activeElement);
 
       if (activeElement) {
         const container = scrollContainerRef.current;
@@ -71,8 +74,7 @@ export default function CallDetails({ call }: { call: Call }) {
         ref={scrollContainerRef}
         className="-mx-4 mt-4 flex flex-1 flex-col overflow-y-auto px-4"
       >
-        {call.originalMessages.map((message, index) => {
-          if (message.role === "system") return null;
+        {messagesFiltered.map((message, index) => {
           return (
             <div key={index} className="flex gap-2">
               <div className="mt-2 w-8 shrink-0 text-xs text-muted-foreground">
@@ -89,19 +91,7 @@ export default function CallDetails({ call }: { call: Call }) {
                 }}
                 className={cn(
                   "flex-1 cursor-pointer rounded-md p-2 hover:bg-muted/30",
-                  (() => {
-                    // Determine if the current time is within the current message
-                    const currentMessageStart =
-                      message.secondsFromStart - offsetFromStart;
-                    const nextMessage = call.originalMessages[index + 1];
-                    const nextMessageStart = nextMessage?.secondsFromStart
-                      ? nextMessage.secondsFromStart - offsetFromStart
-                      : Infinity;
-                    return currentTime >= currentMessageStart &&
-                      currentTime < nextMessageStart
-                      ? "bg-muted hover:bg-muted"
-                      : "";
-                  })(),
+                  activeMessageIndex === index ? "bg-muted hover:bg-muted" : "",
                 )}
               >
                 <div className="text-xs font-medium">
