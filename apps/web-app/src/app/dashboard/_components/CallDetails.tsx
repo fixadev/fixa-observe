@@ -1,10 +1,11 @@
 import type { Call } from "~/lib/types";
 import AudioPlayer, { type AudioPlayerRef } from "./AudioPlayer";
-import { useMemo, useRef } from "react";
-import { formatDurationHoursMinutesSeconds } from "~/lib/utils";
+import { useMemo, useRef, useState } from "react";
+import { cn, formatDurationHoursMinutesSeconds } from "~/lib/utils";
 
 export default function CallDetails({ call }: { call: Call }) {
   const audioPlayerRef = useRef<AudioPlayerRef>(null);
+  const [currentTime, setCurrentTime] = useState(0);
 
   const offsetFromStart = useMemo(() => {
     return (
@@ -15,7 +16,13 @@ export default function CallDetails({ call }: { call: Call }) {
 
   return (
     <div className="w-full p-4">
-      <AudioPlayer ref={audioPlayerRef} call={call} />
+      <AudioPlayer
+        ref={audioPlayerRef}
+        call={call}
+        onTimeChange={(timeInSeconds) => {
+          setCurrentTime(timeInSeconds);
+        }}
+      />
 
       <div className="mt-4">
         {call.originalMessages.map((message, index) => {
@@ -34,7 +41,22 @@ export default function CallDetails({ call }: { call: Call }) {
                   );
                   audioPlayerRef.current?.play();
                 }}
-                className="flex-1 cursor-pointer rounded-md p-2 hover:bg-muted"
+                className={cn(
+                  "flex-1 cursor-pointer rounded-md p-2 hover:bg-muted/30",
+                  (() => {
+                    // Determine if the current time is within the current message
+                    const currentMessageStart =
+                      message.secondsFromStart - offsetFromStart;
+                    const nextMessage = call.originalMessages[index + 1];
+                    const nextMessageStart = nextMessage?.secondsFromStart
+                      ? nextMessage.secondsFromStart - offsetFromStart
+                      : Infinity;
+                    return currentTime >= currentMessageStart &&
+                      currentTime < nextMessageStart
+                      ? "bg-muted"
+                      : "";
+                  })(),
+                )}
               >
                 <div className="text-xs font-medium">
                   {message.role === "bot" ? "assistant" : "user"}
