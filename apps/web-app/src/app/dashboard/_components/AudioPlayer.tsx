@@ -191,7 +191,7 @@ const AudioPlayer = forwardRef<
       >
         {botAudioBlob && (
           <AudioVisualizer
-            key={key}
+            key={`bot-${key}`}
             width={containerWidth}
             height={50}
             blob={botAudioBlob}
@@ -201,7 +201,7 @@ const AudioPlayer = forwardRef<
         )}
         {userAudioBlob && (
           <AudioVisualizer
-            key={key}
+            key={`user-${key}`}
             width={containerWidth}
             height={50}
             blob={userAudioBlob}

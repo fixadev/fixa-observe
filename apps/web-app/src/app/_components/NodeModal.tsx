@@ -3,9 +3,7 @@
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogHeader,
-  DialogTitle,
   DialogTrigger,
 } from "~/components/ui/dialog";
 
@@ -22,7 +20,7 @@ interface NodeModalProps {
   state: State;
 }
 
-export function NodeModal({ children, title, state }: NodeModalProps) {
+export function NodeModal({ children, state }: NodeModalProps) {
   const [selectedCall, setSelectedCall] = useState<Call.CallResponse | null>(
     null,
   );

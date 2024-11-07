@@ -1,6 +1,3 @@
-import axios from "axios";
-import { type PlatformOptions } from "~/lib/types";
-import { VapiClient } from "@vapi-ai/server-sdk";
 import Retell from "retell-sdk";
 import { type AgentResponse } from "retell-sdk/resources/agent";
 
@@ -50,7 +47,7 @@ export class AgentService {
               (entry) =>
                 entry.role === "tool_call_invocation" &&
                 entry.name === `transition_to_${state.name}`,
-            ) || state.name === "start_of_conversation",
+            ) ?? state.name === "start_of_conversation",
         );
 
         const edgesFollowingThisNode = state.edges?.filter(
