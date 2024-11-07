@@ -242,7 +242,7 @@ const AudioPlayer = forwardRef<
         <div
           className="absolute right-0 top-0 h-full bg-primary/10"
           style={{
-            width: `${containerWidth - (playheadX ?? 0)}px`,
+            width: `${containerWidth - (playheadX ?? 0) - 2}px`,
           }}
         />
         {playheadHoverX !== null && (

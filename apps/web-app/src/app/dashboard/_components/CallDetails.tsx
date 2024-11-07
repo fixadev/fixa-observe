@@ -185,7 +185,6 @@ export default function CallDetails({ call }: { call: Call }) {
                                 audioPlayerRef.current?.setActiveError(
                                   error ?? null,
                                 );
-                                console.log("ERROR: ", error);
                                 audioPlayerRef.current?.play();
                               }}
                             />,
@@ -268,6 +267,7 @@ function ErrorWord({
               "inline-block self-end bg-red-500/10 text-red-500 underline decoration-red-500 decoration-solid decoration-2 underline-offset-4 hover:bg-red-500/20",
               error.details?.type === "addition" && "text-transparent",
               error.details?.type === "deletion" && "hover:line-through",
+              error.id === activeErrorId && "bg-red-500/20",
             )}
           >
             {error.details?.type === "addition"
