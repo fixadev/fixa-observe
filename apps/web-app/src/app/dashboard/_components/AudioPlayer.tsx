@@ -21,6 +21,7 @@ import {
 import type { Call, CallError } from "~/lib/types";
 import { formatDurationHoursMinutesSeconds } from "~/lib/utils";
 import { Howl } from "howler";
+import debounce from "lodash/debounce";
 
 export type AudioPlayerRef = {
   seekToTime: (timeInSeconds: number) => void;
@@ -50,6 +51,7 @@ const AudioPlayer = forwardRef<
   const [sound, setSound] = useState<Howl | null>(null);
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
   const [activeError, setActiveError] = useState<CallError | null>(null);
+  const [key, setKey] = useState(0);
 
   // Fetch the audio blob
   useEffect(() => {
@@ -166,10 +168,33 @@ const AudioPlayer = forwardRef<
     }
   }, [playheadX, handleSeek]);
 
-  // Set the container width
+  // Set the container width and update on window resize
   useEffect(() => {
     if (!containerRef.current) return;
-    setContainerWidth(containerRef.current.offsetWidth);
+
+    const updateWidth = () => {
+      if (containerRef.current) {
+        setContainerWidth(containerRef.current.offsetWidth);
+      }
+    };
+
+    const debouncedSetKey = debounce(() => {
+      setKey((prev) => prev + 1);
+    }, 250);
+
+    const handleResize = () => {
+      updateWidth();
+      debouncedSetKey();
+    };
+
+    updateWidth(); // Initial width
+    setKey((prev) => prev + 1); // Initial key set
+    window.addEventListener("resize", handleResize);
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+      debouncedSetKey.cancel(); // Clean up debounce
+    };
   }, []);
 
   // Set the playhead position based on the current time
@@ -232,6 +257,7 @@ const AudioPlayer = forwardRef<
       >
         {audioBlob && (
           <AudioVisualizer
+            key={key}
             width={containerWidth}
             height={100}
             blob={audioBlob}
