@@ -38,10 +38,10 @@ export default function CallCard({
         <div
           className={cn(
             "rounded-full px-2 py-1 text-xs",
-            call.status === "error" ? "bg-red-100" : "bg-gray-100",
+            call.errors ? "bg-red-100" : "bg-gray-100",
           )}
         >
-          {call.status === "error" ? "error detected" : "no errors"}
+          {call.errors ? "error detected" : "no errors"}
         </div>
         <div className="ml-2 flex shrink-0 items-center text-xs text-muted-foreground">
           {formatDurationHoursMinutesSeconds(call.duration)}

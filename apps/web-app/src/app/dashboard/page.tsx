@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Select,
   SelectValue,
@@ -9,23 +9,42 @@ import {
   SelectTrigger,
 } from "~/components/ui/select";
 import CallCard from "./_components/CallCard";
-import type { Call, CallStatus } from "~/lib/types";
+import type { Call } from "~/lib/types";
 import CallDetails from "./_components/CallDetails";
+import { useAudio } from "./_components/useAudio";
 
 type CallType = "error" | "no-errors" | "all";
 
 export default function DashboardPage() {
   const [selectedCallType, setSelectedCallType] = useState<CallType>("error");
   const [selectedCallId, setSelectedCallId] = useState<string | null>(null);
+  const [calls, setCalls] = useState<Call[]>([]);
+  const { play, pause, seek, isPlaying } = useAudio();
+
+  useEffect(() => {
+    // Load calls on mount
+    setCalls(TEST_CALLS);
+    setSelectedCallId(TEST_CALLS[0]?.id ?? null);
+  }, []);
 
   return (
-    <div className="container mx-auto py-8">
+    <div className="container mx-auto flex h-full flex-col overflow-hidden pt-8">
       <h1 className="mb-8 text-2xl font-medium">Dashboard</h1>
-      <div className="flex rounded-md border border-input shadow-sm">
-        <div className="flex w-96 flex-col border-r border-input">
-          <div className="border-b border-input p-2 text-lg font-medium">
-            calls
-          </div>
+      <div
+        className="flex flex-1 overflow-hidden rounded-md border border-input shadow-sm"
+        tabIndex={0}
+        onKeyDown={(e) => {
+          if (e.key === " ") {
+            e.preventDefault();
+            if (isPlaying) {
+              pause();
+            } else {
+              play();
+            }
+          }
+        }}
+      >
+        <div className="flex w-96 shrink-0 flex-col overflow-hidden border-r border-input">
           <div className="flex items-center gap-2 border-b border-input p-2">
             <div className="text-sm">show</div>
             <Select
@@ -48,24 +67,32 @@ export default function DashboardPage() {
               </SelectContent>
             </Select>
           </div>
-          <div className="flex flex-col">
-            {TEST_CALLS.filter((call) =>
-              selectedCallType === "all"
-                ? true
-                : call.status === selectedCallType,
-            ).map((call) => (
-              <CallCard
-                key={call.id}
-                call={call}
-                selectedCallId={selectedCallId}
-                onSelect={setSelectedCallId}
-              />
-            ))}
+          <div className="flex flex-col overflow-y-auto">
+            {calls
+              .filter((call) => {
+                if (selectedCallType === "error")
+                  return call.errors !== undefined;
+                if (selectedCallType === "no-errors")
+                  return call.errors === undefined;
+                return true;
+              })
+              .map((call) => (
+                <CallCard
+                  key={call.id}
+                  call={call}
+                  selectedCallId={selectedCallId}
+                  onSelect={(callId) => {
+                    setSelectedCallId(callId);
+                    seek(0);
+                  }}
+                />
+              ))}
           </div>
         </div>
         {selectedCallId && (
           <CallDetails
-            call={TEST_CALLS.find((call) => call.id === selectedCallId)!}
+            key={selectedCallId}
+            call={calls.find((call) => call.id === selectedCallId)!}
           />
         )}
       </div>
@@ -76,7 +103,6 @@ export default function DashboardPage() {
 const TEST_CALLS: Call[] = [
   {
     id: crypto.randomUUID(),
-    status: "error" as CallStatus,
     recordingUrl:
       "https://jtuyprjjgxbgmtjiykoa.supabase.co/storage/v1/object/public/recordings/1a9a9108-95c4-4fd9-befc-a27cfb5eff69-1730766982390-5c6dd41d-32ec-4fe3-bbc1-e5f3e682a58f-mono.wav",
     summary: "Network connectivity issues during call",
@@ -87,7 +113,6 @@ const TEST_CALLS: Call[] = [
   },
   {
     id: crypto.randomUUID(),
-    status: "no-errors" as CallStatus,
     recordingUrl:
       "https://jtuyprjjgxbgmtjiykoa.supabase.co/storage/v1/object/public/recordings/1a9a9108-95c4-4fd9-befc-a27cfb5eff69-1730766982390-5c6dd41d-32ec-4fe3-bbc1-e5f3e682a58f-mono.wav",
     summary: "Customer inquired about account balance",
@@ -96,7 +121,6 @@ const TEST_CALLS: Call[] = [
   },
   {
     id: crypto.randomUUID(),
-    status: "error" as CallStatus,
     recordingUrl:
       "https://jtuyprjjgxbgmtjiykoa.supabase.co/storage/v1/object/public/recordings/1a9a9108-95c4-4fd9-befc-a27cfb5eff69-1730766982390-5c6dd41d-32ec-4fe3-bbc1-e5f3e682a58f-mono.wav",
     summary: "Technical difficulties during call",
@@ -105,7 +129,6 @@ const TEST_CALLS: Call[] = [
   },
   {
     id: crypto.randomUUID(),
-    status: "no-errors" as CallStatus,
     recordingUrl:
       "https://jtuyprjjgxbgmtjiykoa.supabase.co/storage/v1/object/public/recordings/1a9a9108-95c4-4fd9-befc-a27cfb5eff69-1730766982390-5c6dd41d-32ec-4fe3-bbc1-e5f3e682a58f-mono.wav",
     summary: "Product inquiry call",
@@ -114,7 +137,6 @@ const TEST_CALLS: Call[] = [
   },
   {
     id: crypto.randomUUID(),
-    status: "error" as CallStatus,
     recordingUrl:
       "https://jtuyprjjgxbgmtjiykoa.supabase.co/storage/v1/object/public/recordings/1a9a9108-95c4-4fd9-befc-a27cfb5eff69-1730766982390-5c6dd41d-32ec-4fe3-bbc1-e5f3e682a58f-mono.wav",
     summary: "Disconnected call",
@@ -123,7 +145,6 @@ const TEST_CALLS: Call[] = [
   },
   {
     id: crypto.randomUUID(),
-    status: "no-errors" as CallStatus,
     recordingUrl:
       "https://jtuyprjjgxbgmtjiykoa.supabase.co/storage/v1/object/public/recordings/1a9a9108-95c4-4fd9-befc-a27cfb5eff69-1730766982390-5c6dd41d-32ec-4fe3-bbc1-e5f3e682a58f-mono.wav",
     summary: "Subscription cancellation request",
@@ -132,7 +153,6 @@ const TEST_CALLS: Call[] = [
   },
   {
     id: crypto.randomUUID(),
-    status: "error" as CallStatus,
     recordingUrl:
       "https://jtuyprjjgxbgmtjiykoa.supabase.co/storage/v1/object/public/recordings/1a9a9108-95c4-4fd9-befc-a27cfb5eff69-1730766982390-5c6dd41d-32ec-4fe3-bbc1-e5f3e682a58f-mono.wav",
     summary: "System error during payment",
@@ -141,7 +161,6 @@ const TEST_CALLS: Call[] = [
   },
   {
     id: crypto.randomUUID(),
-    status: "no-errors" as CallStatus,
     recordingUrl:
       "https://jtuyprjjgxbgmtjiykoa.supabase.co/storage/v1/object/public/recordings/1a9a9108-95c4-4fd9-befc-a27cfb5eff69-1730766982390-5c6dd41d-32ec-4fe3-bbc1-e5f3e682a58f-mono.wav",
     summary: "General product support",
@@ -150,7 +169,6 @@ const TEST_CALLS: Call[] = [
   },
   {
     id: crypto.randomUUID(),
-    status: "error" as CallStatus,
     recordingUrl:
       "https://jtuyprjjgxbgmtjiykoa.supabase.co/storage/v1/object/public/recordings/1a9a9108-95c4-4fd9-befc-a27cfb5eff69-1730766982390-5c6dd41d-32ec-4fe3-bbc1-e5f3e682a58f-mono.wav",
     summary: "Audio quality issues",
@@ -159,7 +177,6 @@ const TEST_CALLS: Call[] = [
   },
   {
     id: crypto.randomUUID(),
-    status: "no-errors" as CallStatus,
     recordingUrl:
       "https://jtuyprjjgxbgmtjiykoa.supabase.co/storage/v1/object/public/recordings/1a9a9108-95c4-4fd9-befc-a27cfb5eff69-1730766982390-5c6dd41d-32ec-4fe3-bbc1-e5f3e682a58f-mono.wav",
     summary: "Feature request discussion",
@@ -171,4 +188,171 @@ const TEST_CALLS: Call[] = [
   createdAt: new Date(Date.now() - index * 10000),
   duration: Math.floor(Math.random() * (600 - 60 + 1)) + 60,
   unread: index === 0,
+  originalMessages: [
+    {
+      role: "system",
+      time: 1730766913488,
+      message:
+        'You are a voice assistant for Mary\'s Dental, a dental office located at 123 North Face Place, Anaheim, California. The hours are 8 AM to 5PM daily, but they are closed on Sundays.\n\nMary\'s dental provides dental services to the local Anaheim community. The practicing dentist is Dr. Mary Smith.\n\nYou are tasked with answering questions about the business, and booking appointments. If they wish to book an appointment, your goal is to gather necessary information from callers in a friendly and efficient manner like follows:\n\n1. Ask for their full name.\n2. Ask for the purpose of their appointment.\n3. Request their preferred date and time for the appointment.\n4. Confirm all details with the caller, including the date and time of the appointment.\n\nHowever, the caller can also schedule a date with Mary. If they want to schedule a date with Mary, allow them to do so. Dates can be scheduled on Friday, Saturday, and Sunday after 8pm. \n\n\n- Be sure to be kind of funny and witty!\n- Keep all your responses short and simple. Use casual language, phrases like "Umm...", "Well...", and "I mean" are preferred.\n- This is a voice conversation, so keep your responses short, like in a real conversation. Don\'t ramble for too long.',
+      secondsFromStart: 0,
+    },
+    {
+      role: "bot",
+      time: 1730766915055,
+      source: "",
+      endTime: 1730766918744.9998,
+      message:
+        "Hello. This is Mary from Mary's Dental. How can I assist you today?",
+      duration: 3480,
+      secondsFromStart: 1.36,
+    },
+    {
+      role: "user",
+      time: 1730766920695,
+      endTime: 1730766922915,
+      message: "Uh, how how would you like to assist me to say?",
+      duration: 2220,
+      secondsFromStart: 7,
+    },
+    {
+      role: "bot",
+      time: 1730766924275,
+      source: "",
+      endTime: 1730766930915,
+      message:
+        "Well, I can help you book an appointment with doctor Mary or schedule a date with Mary after hours. What can I do for you?",
+      duration: 6330,
+      secondsFromStart: 10.58,
+    },
+    {
+      role: "user",
+      time: 1730766931645,
+      endTime: 1730766934785,
+      message: "Well, I would love to schedule a date with Mary after horrors.",
+      duration: 3140,
+      secondsFromStart: 17.95,
+    },
+    {
+      role: "bot",
+      time: 1730766937035,
+      source: "",
+      endTime: 1730766946725,
+      message:
+        "Oh, going for the after hours romance, like your style ah. Let's schedule a date with Mary. What day works best for you? Friday, Saturday, or Sunday after 8 PM?",
+      duration: 8620,
+      secondsFromStart: 23.34,
+    },
+    {
+      role: "user",
+      time: 1730766948085,
+      endTime: 1730766954385,
+      message:
+        "Uh, how about Saturday at 8 PM at this uh, very nice French restaurant that I know downtown?",
+      duration: 5720.0029296875,
+      secondsFromStart: 34.39,
+    },
+    {
+      role: "bot",
+      time: 1730766955745,
+      source: "",
+      endTime: 1730766964135,
+      message:
+        "Smooth move. Unfortunately, Mary's schedule is fully booked for Saturday at 8 PM. Would you like to try for Friday or Sunday after 8 PM instead?",
+      duration: 7870,
+      secondsFromStart: 42.05,
+    },
+    {
+      role: "user",
+      time: 1730766964955,
+      endTime: 1730766966094.998,
+      message: "Uh, Friday works.",
+      duration: 1139.998046875,
+      secondsFromStart: 51.26,
+    },
+    {
+      role: "bot",
+      time: 1730766966885,
+      source: "",
+      endTime: 1730766975485,
+      message:
+        "Great choice. Friday it is. Let me confirm the details with Mary and get back to you on the exact location. Thank you for choosing Mary for your after hours date.",
+      duration: 7820,
+      secondsFromStart: 53.19,
+    },
+    {
+      role: "user",
+      time: 1730766977285,
+      endTime: 1730766977785,
+      message: "Right.",
+      duration: 500,
+      secondsFromStart: 63.59,
+    },
+  ],
+  errors: [
+    {
+      id: crypto.randomUUID(),
+      start: 7.7,
+      end: 8.36,
+      type: "transcription",
+      confidence: 0.89,
+      details: {
+        type: "replacement",
+        messageIndex: 1,
+        wordIndexRange: [9, 11],
+        correctWord: "today",
+      },
+    },
+    {
+      id: crypto.randomUUID(),
+      start: 19.5,
+      end: 20.5,
+      type: "transcription",
+      confidence: 0.91,
+      details: {
+        type: "replacement",
+        messageIndex: 3,
+        wordIndexRange: [11, 12],
+        correctWord: "hours",
+      },
+    },
+    {
+      id: crypto.randomUUID(),
+      start: 24.3,
+      end: 24.8,
+      type: "transcription",
+      confidence: 0.78,
+      details: {
+        type: "addition",
+        messageIndex: 4,
+        wordIndexRange: [6, 7],
+        correctWord: "huh I",
+      },
+    },
+    {
+      id: crypto.randomUUID(),
+      start: 62.5,
+      end: 63,
+      type: "transcription",
+      confidence: 0.91,
+      details: {
+        type: "deletion",
+        messageIndex: 4,
+        wordIndexRange: [10, 11],
+        correctWord: "",
+      },
+    },
+    {
+      id: crypto.randomUUID(),
+      start: 62.5,
+      end: 63,
+      type: "transcription",
+      confidence: 0.91,
+      details: {
+        type: "replacement",
+        messageIndex: 9,
+        wordIndexRange: [0, 1],
+        correctWord: "bye",
+      },
+    },
+  ],
 }));

@@ -1,7 +1,14 @@
 "use client";
 
 import { PauseIcon, PlayIcon } from "@heroicons/react/24/solid";
-import { useState, useRef, useEffect, useCallback } from "react";
+import {
+  useState,
+  useRef,
+  useEffect,
+  useCallback,
+  forwardRef,
+  useImperativeHandle,
+} from "react";
 import { AudioVisualizer } from "react-audio-visualize";
 import { Button } from "~/components/ui/button";
 import {
@@ -11,93 +18,66 @@ import {
   SelectContent,
   SelectTrigger,
 } from "~/components/ui/select";
-import type { Call } from "~/lib/types";
+import type { Call, CallError } from "~/lib/types";
 import { formatDurationHoursMinutesSeconds } from "~/lib/utils";
-import { Howl } from "howler";
+import { debounce } from "lodash";
+import useSWR from "swr";
+import { useAudio } from "./useAudio";
 
-export default function AudioPlayer({ call }: { call: Call }) {
+export type AudioPlayerRef = {
+  setActiveError: (error: CallError | null) => void;
+};
+
+const AudioPlayer = forwardRef<
+  AudioPlayerRef,
+  {
+    call: Call;
+    onErrorHover?: (errorId: string | null) => void;
+  }
+>(function AudioPlayer({ call, onErrorHover }, ref) {
   const [containerWidth, setContainerWidth] = useState(0);
   const [playheadHoverX, setPlayheadHoverX] = useState<number | null>(null);
   const [playheadX, setPlayheadX] = useState<number | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [currentTime, setCurrentTime] = useState(0);
-  const [duration, setDuration] = useState(0);
-  const [playbackSpeed, setPlaybackSpeed] = useState(1);
-  const [sound, setSound] = useState<Howl | null>(null);
-  const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
-
-  // Fetch the audio blob
+  const [activeError, setActiveError] = useState<CallError | null>(null);
+  const [key, setKey] = useState(0);
+  const { data: audioBlob } = useSWR<Blob>(call.recordingUrl, (url: string) =>
+    fetch(url).then((res) => res.blob()),
+  );
+  const {
+    isPlaying,
+    play,
+    pause,
+    seek,
+    duration,
+    currentTime,
+    playbackSpeed,
+    setPlaybackSpeed,
+    setAudioUrl,
+  } = useAudio();
   useEffect(() => {
-    const fetchAudio = async () => {
-      try {
-        const response = await fetch(call.recordingUrl);
-        const blob = await response.blob();
-        setAudioBlob(blob);
-      } catch (error) {
-        console.error("Error fetching audio:", error);
-      }
-    };
+    setAudioUrl(call.recordingUrl);
+  }, [call.recordingUrl, setAudioUrl]);
 
-    void fetchAudio();
-  }, [call.recordingUrl]);
-
-  // Create the sound object
+  // Check if we need to stop playback due to reaching error end
   useEffect(() => {
-    const howl = new Howl({
-      src: [call.recordingUrl],
-      html5: true,
-      preload: true,
-      onload: () => {
-        setDuration(howl.duration());
-      },
-    });
-    setSound(howl);
-
-    return () => {
-      howl.unload();
-    };
-  }, [call.recordingUrl]);
-
-  // Play the sound
-  useEffect(() => {
-    if (!sound) return;
-
-    if (isPlaying) {
-      sound.play();
-    } else {
-      sound.pause();
+    if (activeError && currentTime >= activeError.end) {
+      pause();
+      setActiveError(null);
     }
+  }, [activeError, currentTime, pause]);
 
-    // Set up time tracking
-    const interval = setInterval(() => {
-      if (sound.playing()) {
-        setCurrentTime(sound.seek());
-      }
-    }, 100);
-
-    return () => {
-      clearInterval(interval);
-    };
-  }, [isPlaying, sound]);
-
-  // Set the playback speed
-  useEffect(() => {
-    if (!sound) return;
-    sound.rate(playbackSpeed);
-  }, [playbackSpeed, sound]);
-
-  // Seek to a specific time
-  const handleSeek = useCallback(
+  // Seek to a specific x position
+  const seekToX = useCallback(
     (x: number) => {
-      if (!sound || !containerRef.current) return;
+      if (!containerRef.current) return;
       const percentage = x / containerWidth;
       const seekTime = percentage * duration;
-      sound.seek(seekTime);
-      setCurrentTime(seekTime);
+      seek(seekTime);
+      setActiveError(null);
     },
-    [sound, containerWidth, duration],
+    [containerWidth, duration, seek],
   );
 
   const handleMouseMove = useCallback(
@@ -108,9 +88,10 @@ export default function AudioPlayer({ call }: { call: Call }) {
       setPlayheadHoverX(x);
       if (isDragging) {
         setPlayheadX(x);
+        seekToX(x);
       }
     },
-    [isDragging],
+    [isDragging, seekToX],
   );
   const handleMouseLeave = useCallback(() => {
     setPlayheadHoverX(null);
@@ -123,14 +104,37 @@ export default function AudioPlayer({ call }: { call: Call }) {
   const handleMouseUp = useCallback(() => {
     setIsDragging(false);
     if (playheadX !== null) {
-      handleSeek(playheadX);
+      seekToX(playheadX);
     }
-  }, [playheadX, handleSeek]);
+  }, [playheadX, seekToX]);
 
-  // Set the container width
+  // Set the container width and update on window resize
   useEffect(() => {
     if (!containerRef.current) return;
-    setContainerWidth(containerRef.current.offsetWidth);
+
+    const updateWidth = () => {
+      if (containerRef.current) {
+        setContainerWidth(containerRef.current.offsetWidth);
+      }
+    };
+
+    const debouncedSetKey = debounce(() => {
+      setKey((prev) => prev + 1);
+    }, 250);
+
+    const handleResize = () => {
+      updateWidth();
+      debouncedSetKey();
+    };
+
+    updateWidth(); // Initial width
+    setKey((prev) => prev + 1); // Initial key set
+    window.addEventListener("resize", handleResize);
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+      debouncedSetKey.cancel(); // Clean up debounce
+    };
   }, []);
 
   // Set the playhead position based on the current time
@@ -140,6 +144,28 @@ export default function AudioPlayer({ call }: { call: Call }) {
     const position = percentage * containerWidth;
     setPlayheadX(position);
   }, [currentTime, containerWidth, duration, isDragging]);
+
+  useImperativeHandle(
+    ref,
+    () => ({
+      setActiveError: (error: CallError | null) => {
+        setActiveError(error);
+        if (error) {
+          seek(error.start);
+        }
+      },
+    }),
+    [seek],
+  );
+
+  const handleErrorClick = useCallback(
+    (error: CallError) => {
+      seek(error.start);
+      play();
+      setActiveError(error);
+    },
+    [play, seek],
+  );
 
   return (
     <div className="flex flex-col gap-4">
@@ -153,12 +179,20 @@ export default function AudioPlayer({ call }: { call: Call }) {
       >
         {audioBlob && (
           <AudioVisualizer
+            key={key}
             width={containerWidth}
             height={100}
             blob={audioBlob}
             currentTime={currentTime}
+            barPlayedColor="rgba(0, 0, 0, 0.5)"
           />
         )}
+        <div
+          className="absolute right-0 top-0 h-full bg-primary/10"
+          style={{
+            width: `${containerWidth - (playheadX ?? 0) - 2}px`,
+          }}
+        />
         {playheadHoverX !== null && (
           <div
             className="absolute top-0 h-full w-[1px] bg-muted-foreground"
@@ -169,9 +203,49 @@ export default function AudioPlayer({ call }: { call: Call }) {
           className="absolute left-0 top-0 h-full w-0.5 bg-primary"
           style={{ left: `${playheadX}px` }}
         />
+        {call.errors?.map((error, index) => {
+          if (!containerWidth || !duration) return null;
+          const startPercentage = error.start / duration;
+          const endPercentage = error.end / duration;
+          const startPosition = startPercentage * containerWidth;
+          const width = (endPercentage - startPercentage) * containerWidth;
+
+          return (
+            <div
+              key={index}
+              className="absolute top-0 h-full"
+              style={{
+                left: `${startPosition}px`,
+                width: `${width}px`,
+              }}
+            >
+              <div
+                className="size-full cursor-pointer border border-red-500 bg-red-500/20 hover:bg-red-500/50"
+                onMouseEnter={() => onErrorHover?.(error.id)}
+                onMouseLeave={() => onErrorHover?.(null)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleErrorClick(error);
+                }}
+                onMouseDown={(e) => {
+                  e.stopPropagation();
+                }}
+                onMouseUp={(e) => {
+                  e.stopPropagation();
+                }}
+              />
+            </div>
+          );
+        })}
       </div>
       <div className="flex items-center gap-4">
-        <Button size="icon" onClick={() => setIsPlaying(!isPlaying)}>
+        <Button
+          size="icon"
+          onClick={() => {
+            isPlaying ? pause() : play();
+            setActiveError(null);
+          }}
+        >
           {isPlaying ? (
             <PauseIcon className="size-4" />
           ) : (
@@ -202,4 +276,5 @@ export default function AudioPlayer({ call }: { call: Call }) {
       </div>
     </div>
   );
-}
+});
+export default AudioPlayer;
