@@ -21,7 +21,7 @@ import {
 import type { Call, CallError } from "~/lib/types";
 import { formatDurationHoursMinutesSeconds } from "~/lib/utils";
 import { Howl } from "howler";
-import debounce from "lodash/debounce";
+import { debounce } from "lodash";
 
 export type AudioPlayerRef = {
   seekToTime: (timeInSeconds: number) => void;

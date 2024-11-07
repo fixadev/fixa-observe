@@ -107,6 +107,7 @@
   "devDependencies": {
     "@types/eslint": "^8.56.10",
     "@types/jsdom": "^21.1.7",
+    "@types/lodash": "^4.17.13",
     "@types/node": "^20.14.10",
     "@types/papaparse": "^5.3.14",
     "@types/pdf-parse": "^1.1.4",
