@@ -31,7 +31,8 @@ export default function DashboardPage() {
     <div className="container mx-auto flex h-full flex-col overflow-hidden pt-8">
       <h1 className="mb-8 text-2xl font-medium">Dashboard</h1>
       <div
-        className="flex flex-1 overflow-hidden rounded-md border border-input shadow-sm"
+        className="flex flex-1 overflow-hidden rounded-md border border-input shadow-sm outline-none"
+        autoFocus
         tabIndex={0}
         onKeyDown={(e) => {
           if (e.key === " ") {

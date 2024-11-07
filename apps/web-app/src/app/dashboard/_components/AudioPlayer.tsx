@@ -68,6 +68,13 @@ const AudioPlayer = forwardRef<
     }
   }, [activeError, currentTime, pause]);
 
+  // Get rid of active error if we pause in the middle of it playing
+  useEffect(() => {
+    if (!isPlaying && activeError) {
+      setActiveError(null);
+    }
+  }, [activeError, isPlaying]);
+
   // Seek to a specific x position
   const seekToX = useCallback(
     (x: number) => {
