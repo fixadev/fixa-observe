@@ -42,8 +42,13 @@ const AudioPlayer = forwardRef<
   const containerRef = useRef<HTMLDivElement>(null);
   const [activeError, setActiveError] = useState<CallError | null>(null);
   const [key, setKey] = useState(0);
-  const { data: audioBlob } = useSWR<Blob>(call.recordingUrl, (url: string) =>
-    fetch(url).then((res) => res.blob()),
+  const { data: botAudioBlob } = useSWR<Blob>(
+    call.botRecordingUrl,
+    (url: string) => fetch(url).then((res) => res.blob()),
+  );
+  const { data: userAudioBlob } = useSWR<Blob>(
+    call.userRecordingUrl,
+    (url: string) => fetch(url).then((res) => res.blob()),
   );
   const {
     isPlaying,
@@ -184,12 +189,22 @@ const AudioPlayer = forwardRef<
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
       >
-        {audioBlob && (
+        {botAudioBlob && (
           <AudioVisualizer
             key={key}
             width={containerWidth}
-            height={100}
-            blob={audioBlob}
+            height={50}
+            blob={botAudioBlob}
+            currentTime={currentTime}
+            barPlayedColor="rgba(0, 0, 0, 0.5)"
+          />
+        )}
+        {userAudioBlob && (
+          <AudioVisualizer
+            key={key}
+            width={containerWidth}
+            height={50}
+            blob={userAudioBlob}
             currentTime={currentTime}
             barPlayedColor="rgba(0, 0, 0, 0.5)"
           />
