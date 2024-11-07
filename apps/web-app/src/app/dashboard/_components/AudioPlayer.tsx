@@ -22,6 +22,7 @@ import type { Call, CallError } from "~/lib/types";
 import { formatDurationHoursMinutesSeconds } from "~/lib/utils";
 import { Howl } from "howler";
 import { debounce } from "lodash";
+import useSWR from "swr";
 
 export type AudioPlayerRef = {
   seekToTime: (timeInSeconds: number) => void;
@@ -49,24 +50,11 @@ const AudioPlayer = forwardRef<
   const [duration, setDuration] = useState(0);
   const [playbackSpeed, setPlaybackSpeed] = useState(1);
   const [sound, setSound] = useState<Howl | null>(null);
-  const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
   const [activeError, setActiveError] = useState<CallError | null>(null);
   const [key, setKey] = useState(0);
-
-  // Fetch the audio blob
-  useEffect(() => {
-    const fetchAudio = async () => {
-      try {
-        const response = await fetch(call.recordingUrl);
-        const blob = await response.blob();
-        setAudioBlob(blob);
-      } catch (error) {
-        console.error("Error fetching audio:", error);
-      }
-    };
-
-    void fetchAudio();
-  }, [call.recordingUrl]);
+  const { data: audioBlob } = useSWR<Blob>(call.recordingUrl, (url: string) =>
+    fetch(url).then((res) => res.blob()),
+  );
 
   // Create the sound object
   useEffect(() => {

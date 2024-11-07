@@ -96,6 +96,7 @@
     "socket.io-client": "^4.8.1",
     "superjson": "^2.2.1",
     "svix": "^1.32.0",
+    "swr": "^2.2.5",
     "tailwind-merge": "^2.5.2",
     "tailwindcss-animate": "^1.0.7",
     "uuid": "^10.0.0",
