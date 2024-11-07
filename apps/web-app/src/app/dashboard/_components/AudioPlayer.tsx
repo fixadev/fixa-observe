@@ -21,23 +21,22 @@ import {
 import type { Call, CallError } from "~/lib/types";
 import { formatDurationHoursMinutesSeconds } from "~/lib/utils";
 import { Howl } from "howler";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "~/components/ui/tooltip";
-import { ERROR_LABELS } from "~/lib/constants";
 
 export type AudioPlayerRef = {
   seekToTime: (timeInSeconds: number) => void;
   play: () => void;
   pause: () => void;
+  setActiveError: (error: CallError | null) => void;
 };
 
 const AudioPlayer = forwardRef<
   AudioPlayerRef,
-  { call: Call; onTimeChange?: (timeInSeconds: number) => void }
->(function AudioPlayer({ call, onTimeChange }, ref) {
+  {
+    call: Call;
+    onTimeChange?: (timeInSeconds: number) => void;
+    onErrorHover?: (errorId: string | null) => void;
+  }
+>(function AudioPlayer({ call, onTimeChange, onErrorHover }, ref) {
   const [containerWidth, setContainerWidth] = useState(0);
   const [playheadHoverX, setPlayheadHoverX] = useState<number | null>(null);
   const [playheadX, setPlayheadX] = useState<number | null>(null);
@@ -196,8 +195,15 @@ const AudioPlayer = forwardRef<
       seekToTime,
       play: () => setIsPlaying(true),
       pause: () => setIsPlaying(false),
+      setActiveError: (error: CallError | null) => {
+        setActiveError(error);
+        if (error) {
+          sound?.seek(error.start);
+          setCurrentTime(error.start);
+        }
+      },
     }),
-    [seekToTime],
+    [seekToTime, sound],
   );
 
   const handleErrorClick = useCallback(
@@ -256,38 +262,21 @@ const AudioPlayer = forwardRef<
                 width: `${width}px`,
               }}
             >
-              <Tooltip key={index}>
-                <TooltipTrigger asChild>
-                  <div
-                    className="size-full cursor-pointer border border-red-500 bg-red-500/20 hover:bg-red-500/50"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleErrorClick(error);
-                    }}
-                    onMouseDown={(e) => {
-                      e.stopPropagation();
-                    }}
-                    onMouseUp={(e) => {
-                      e.stopPropagation();
-                    }}
-                  />
-                </TooltipTrigger>
-                <TooltipContent side="right" asChild>
-                  <div className="pointer-events-none rounded-md border border-input bg-white p-2 shadow-sm">
-                    <div className="mb-1 text-sm font-medium text-foreground">
-                      {ERROR_LABELS[error.type]}
-                    </div>
-                    <div
-                      className="text-sm"
-                      style={{
-                        color: `rgb(${Math.round(255 * error.confidence)}, ${Math.round(75 * (1 - error.confidence))}, ${Math.round(75 * (1 - error.confidence))})`,
-                      }}
-                    >
-                      {(error.confidence * 100).toFixed(0)}% likely
-                    </div>
-                  </div>
-                </TooltipContent>
-              </Tooltip>
+              <div
+                className="size-full cursor-pointer border border-red-500 bg-red-500/20 hover:bg-red-500/50"
+                onMouseEnter={() => onErrorHover?.(error.id)}
+                onMouseLeave={() => onErrorHover?.(null)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleErrorClick(error);
+                }}
+                onMouseDown={(e) => {
+                  e.stopPropagation();
+                }}
+                onMouseUp={(e) => {
+                  e.stopPropagation();
+                }}
+              />
             </div>
           );
         })}

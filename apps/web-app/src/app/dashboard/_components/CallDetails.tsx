@@ -1,13 +1,20 @@
-import type { Call } from "~/lib/types";
+import type { Call, CallError } from "~/lib/types";
 import AudioPlayer, { type AudioPlayerRef } from "./AudioPlayer";
 import { useMemo, useRef, useState, useEffect, useCallback } from "react";
 import { cn, formatDurationHoursMinutesSeconds } from "~/lib/utils";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "~/components/ui/tooltip";
+import { ERROR_LABELS } from "~/lib/constants";
 
 export default function CallDetails({ call }: { call: Call }) {
   const audioPlayerRef = useRef<AudioPlayerRef>(null);
   const [currentTime, setCurrentTime] = useState(0);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const lastActiveIndexRef = useRef(-1);
+  const [activeErrorId, setActiveErrorId] = useState<string | null>(null);
 
   const messagesFiltered = useMemo(() => {
     return call.originalMessages.filter((m) => m.role !== "system");
@@ -63,16 +70,12 @@ export default function CallDetails({ call }: { call: Call }) {
     }
   }, [activeMessageIndex, scrollMessageIntoView]);
 
-  const getMessageErrorRanges = useCallback(
+  const getMessageErrors = useCallback(
     (messageIndex: number) => {
-      return (
-        call.errors
-          ?.filter(
-            (error) =>
-              error.type === "transcription" &&
-              error.details?.messageIndex === messageIndex,
-          )
-          .map((error) => error.details?.wordIndexRange) ?? []
+      return call.errors?.filter(
+        (error) =>
+          error.type === "transcription" &&
+          error.details?.messageIndex === messageIndex,
       );
     },
     [call.errors],
@@ -86,6 +89,9 @@ export default function CallDetails({ call }: { call: Call }) {
         onTimeChange={(timeInSeconds) => {
           setCurrentTime(timeInSeconds);
         }}
+        onErrorHover={(errorId) => {
+          setActiveErrorId(errorId);
+        }}
       />
 
       <div
@@ -93,7 +99,7 @@ export default function CallDetails({ call }: { call: Call }) {
         className="-mx-4 mt-4 flex flex-1 flex-col overflow-y-auto px-4"
       >
         {messagesFiltered.map((message, index) => {
-          const errorRanges = getMessageErrorRanges(index);
+          const errors = getMessageErrors(index);
           const words = message.message.split(" ");
 
           return (
@@ -119,27 +125,72 @@ export default function CallDetails({ call }: { call: Call }) {
                   {message.role === "bot" ? "assistant" : "user"}
                 </div>
                 <div className="mt-1 text-sm text-muted-foreground">
-                  {words.map((word, wordIndex) => {
-                    const isErrorWord = errorRanges.some(
-                      (range) =>
-                        range?.[0] !== undefined &&
-                        range?.[1] !== undefined &&
-                        wordIndex >= range[0] &&
-                        wordIndex < range[1],
-                    );
-                    return (
-                      <span
-                        key={wordIndex}
-                        className={
-                          isErrorWord
-                            ? "underline decoration-red-500 decoration-solid decoration-2 underline-offset-4"
-                            : undefined
+                  {(() => {
+                    let currentGroup: string[] = [];
+                    const result: JSX.Element[] = [];
+                    let currentHasError = false;
+                    let currentError: CallError | undefined;
+
+                    words.forEach((word, wordIndex) => {
+                      const newErrorIndex =
+                        errors?.findIndex(
+                          (error) =>
+                            error.details?.wordIndexRange?.[0] !== undefined &&
+                            error.details?.wordIndexRange?.[1] !== undefined &&
+                            wordIndex >= error.details.wordIndexRange[0] &&
+                            wordIndex < error.details.wordIndexRange[1],
+                        ) ?? -1;
+                      const newError =
+                        newErrorIndex !== -1
+                          ? (errors?.[newErrorIndex] ?? undefined)
+                          : undefined;
+
+                      if (Boolean(newError) !== currentHasError) {
+                        // Flush current group
+                        if (currentGroup.length > 0) {
+                          result.push(
+                            <ErrorWord
+                              key={result.length}
+                              words={currentGroup.join(" ")}
+                              error={currentError}
+                              activeErrorId={activeErrorId}
+                              onClick={() => {
+                                audioPlayerRef.current?.setActiveError(
+                                  currentError ?? null,
+                                );
+                                audioPlayerRef.current?.play();
+                              }}
+                            />,
+                          );
+                          currentGroup = [];
                         }
-                      >
-                        {word}{" "}
-                      </span>
-                    );
-                  })}
+                        currentHasError = Boolean(newError);
+                        currentError = newError;
+                      }
+
+                      currentGroup.push(word);
+                    });
+
+                    // Flush final group
+                    if (currentGroup.length > 0) {
+                      result.push(
+                        <ErrorWord
+                          key={result.length}
+                          words={currentGroup.join(" ")}
+                          error={currentError}
+                          activeErrorId={activeErrorId}
+                          onClick={() => {
+                            audioPlayerRef.current?.setActiveError(
+                              currentError ?? null,
+                            );
+                            audioPlayerRef.current?.play();
+                          }}
+                        />,
+                      );
+                    }
+
+                    return result;
+                  })()}
                 </div>
               </div>
             </div>
@@ -148,5 +199,63 @@ export default function CallDetails({ call }: { call: Call }) {
         <div className="h-10 shrink-0" />
       </div>
     </div>
+  );
+}
+
+function ErrorWord({
+  words,
+  error,
+  activeErrorId,
+  onClick,
+}: {
+  words: string;
+  error?: CallError;
+  activeErrorId: string | null;
+  onClick?: () => void;
+}) {
+  const [isTooltipOpen, setIsTooltipOpen] = useState(false);
+
+  if (!error) {
+    return <span>{words} </span>;
+  }
+  return (
+    <Tooltip open={error.id === activeErrorId || isTooltipOpen}>
+      <TooltipTrigger
+        asChild
+        disabled
+        onClick={(e) => {
+          e.stopPropagation();
+          onClick?.();
+        }}
+      >
+        <span
+          onMouseEnter={() => setIsTooltipOpen(true)}
+          onMouseLeave={() => setIsTooltipOpen(false)}
+          className={
+            "bg-red-500/10 underline decoration-red-500 decoration-solid decoration-2 underline-offset-4 hover:bg-red-500/20"
+          }
+        >
+          {words}{" "}
+        </span>
+      </TooltipTrigger>
+      <TooltipContent asChild side="right">
+        <div className="flex flex-col gap-1 rounded-md border border-input bg-white p-2 text-foreground">
+          <div className="text-xs font-medium text-muted-foreground">
+            {ERROR_LABELS[error.type]}
+          </div>
+          <div className="text-sm text-foreground">
+            {error.details?.correctWord}
+          </div>
+          <div
+            className="text-xs"
+            style={{
+              color: `rgb(${Math.round(255 * error.confidence)}, ${Math.round(75 * (1 - error.confidence))}, ${Math.round(75 * (1 - error.confidence))})`,
+            }}
+          >
+            {(error.confidence * 100).toFixed(0)}% likely
+          </div>
+        </div>
+      </TooltipContent>
+    </Tooltip>
   );
 }

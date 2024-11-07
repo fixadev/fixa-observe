@@ -265,6 +265,7 @@ const TEST_CALLS: Call[] = [
   ],
   errors: [
     {
+      id: crypto.randomUUID(),
       start: 7.7,
       end: 8.36,
       type: "transcription",
@@ -276,6 +277,7 @@ const TEST_CALLS: Call[] = [
       },
     },
     {
+      id: crypto.randomUUID(),
       start: 19.5,
       end: 20.5,
       type: "transcription",

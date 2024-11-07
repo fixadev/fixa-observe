@@ -30,6 +30,7 @@ export const callSchema = z.object({
   errors: z
     .array(
       z.object({
+        id: z.string(),
         start: z.number(),
         end: z.number(),
         type: z.enum(["transcription"]),
