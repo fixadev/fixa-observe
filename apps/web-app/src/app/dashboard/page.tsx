@@ -288,5 +288,17 @@ const TEST_CALLS: Call[] = [
         correctWord: "hours",
       },
     },
+    {
+      id: crypto.randomUUID(),
+      start: 62.5,
+      end: 63,
+      type: "transcription",
+      confidence: 0.91,
+      details: {
+        messageIndex: 9,
+        wordIndexRange: [0, 1],
+        correctWord: "bye",
+      },
+    },
   ],
 }));

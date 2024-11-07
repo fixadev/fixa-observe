@@ -58,6 +58,18 @@ export default function CallDetails({ call }: { call: Call }) {
     }
   }, []);
 
+  const activeErrorMessageIndex = useMemo(() => {
+    return call.errors?.find((error) => error.id === activeErrorId)?.details
+      ?.messageIndex;
+  }, [call.errors, activeErrorId]);
+
+  // Scroll to the active error message if it has changed
+  useEffect(() => {
+    if (activeErrorMessageIndex) {
+      scrollMessageIntoView(activeErrorMessageIndex);
+    }
+  }, [activeErrorMessageIndex, scrollMessageIntoView]);
+
   // Scroll to the active message if it has changed
   useEffect(() => {
     if (
