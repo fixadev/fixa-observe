@@ -52,7 +52,7 @@ export default function CallDetails({ call }: { call: Call }) {
       if (elementBottom > containerBottom || elementTop < container.offsetTop) {
         activeElement.scrollIntoView({
           behavior: "smooth",
-          block: "nearest",
+          block: "start",
         });
       }
     }
@@ -147,6 +147,7 @@ export default function CallDetails({ call }: { call: Call }) {
                       const newErrorIndex =
                         errors?.findIndex(
                           (error) =>
+                            error.type === "transcription" &&
                             error.details?.wordIndexRange?.[0] !== undefined &&
                             error.details?.wordIndexRange?.[1] !== undefined &&
                             wordIndex >= error.details.wordIndexRange[0] &&
@@ -160,16 +161,18 @@ export default function CallDetails({ call }: { call: Call }) {
                       if (Boolean(newError) !== currentHasError) {
                         // Flush current group
                         if (currentGroup.length > 0) {
+                          const error = currentError;
                           result.push(
                             <ErrorWord
                               key={result.length}
                               words={currentGroup.join(" ")}
-                              error={currentError}
+                              error={error}
                               activeErrorId={activeErrorId}
                               onClick={() => {
                                 audioPlayerRef.current?.setActiveError(
-                                  currentError ?? null,
+                                  error ?? null,
                                 );
+                                console.log("ERROR: ", error);
                                 audioPlayerRef.current?.play();
                               }}
                             />,
@@ -185,15 +188,16 @@ export default function CallDetails({ call }: { call: Call }) {
 
                     // Flush final group
                     if (currentGroup.length > 0) {
+                      const error = currentError;
                       result.push(
                         <ErrorWord
                           key={result.length}
                           words={currentGroup.join(" ")}
-                          error={currentError}
+                          error={error}
                           activeErrorId={activeErrorId}
                           onClick={() => {
                             audioPlayerRef.current?.setActiveError(
-                              currentError ?? null,
+                              error ?? null,
                             );
                             audioPlayerRef.current?.play();
                           }}
@@ -230,6 +234,7 @@ function ErrorWord({
   if (!error) {
     return <span>{words} </span>;
   }
+
   return (
     <Tooltip open={error.id === activeErrorId || isTooltipOpen}>
       <TooltipTrigger
@@ -240,14 +245,20 @@ function ErrorWord({
           onClick?.();
         }}
       >
-        <span
-          onMouseEnter={() => setIsTooltipOpen(true)}
-          onMouseLeave={() => setIsTooltipOpen(false)}
-          className={
-            "bg-red-500/10 underline decoration-red-500 decoration-solid decoration-2 underline-offset-4 hover:bg-red-500/20"
-          }
-        >
-          {words}{" "}
+        <span>
+          {error.details?.type === "addition" && <span>{words}</span>}{" "}
+          <span
+            onMouseEnter={() => setIsTooltipOpen(true)}
+            onMouseLeave={() => setIsTooltipOpen(false)}
+            className={cn(
+              "inline-block self-end bg-red-500/10 text-red-500 underline decoration-red-500 decoration-solid decoration-2 underline-offset-4 hover:bg-red-500/20",
+              error.details?.type === "addition" && "text-transparent",
+            )}
+          >
+            {error.details?.type === "addition"
+              ? error.details?.correctWord
+              : words}
+          </span>{" "}
         </span>
       </TooltipTrigger>
       <TooltipContent asChild side="right">

@@ -271,6 +271,7 @@ const TEST_CALLS: Call[] = [
       type: "transcription",
       confidence: 0.89,
       details: {
+        type: "replacement",
         messageIndex: 1,
         wordIndexRange: [9, 11],
         correctWord: "today",
@@ -283,9 +284,23 @@ const TEST_CALLS: Call[] = [
       type: "transcription",
       confidence: 0.91,
       details: {
+        type: "replacement",
         messageIndex: 3,
         wordIndexRange: [11, 12],
         correctWord: "hours",
+      },
+    },
+    {
+      id: crypto.randomUUID(),
+      start: 24.3,
+      end: 24.8,
+      type: "transcription",
+      confidence: 0.78,
+      details: {
+        type: "addition",
+        messageIndex: 4,
+        wordIndexRange: [6, 7],
+        correctWord: "huh I",
       },
     },
     {
@@ -295,6 +310,7 @@ const TEST_CALLS: Call[] = [
       type: "transcription",
       confidence: 0.91,
       details: {
+        type: "replacement",
         messageIndex: 9,
         wordIndexRange: [0, 1],
         correctWord: "bye",

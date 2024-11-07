@@ -4,6 +4,7 @@ export type PlatformOptions = z.infer<typeof platformOptions>;
 export const platformOptions = z.enum(["retell", "vapi", "bland"]);
 
 export const transcriptionErrorSchema = z.object({
+  type: z.enum(["replacement", "addition", "deletion"]),
   messageIndex: z.number(),
   wordIndexRange: z.array(z.number()),
   correctWord: z.string(),
