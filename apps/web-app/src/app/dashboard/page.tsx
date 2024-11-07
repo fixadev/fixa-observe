@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Select,
   SelectValue,
@@ -17,15 +17,19 @@ type CallType = "error" | "no-errors" | "all";
 export default function DashboardPage() {
   const [selectedCallType, setSelectedCallType] = useState<CallType>("error");
   const [selectedCallId, setSelectedCallId] = useState<string | null>(null);
+  const [calls, setCalls] = useState<Call[]>([]);
+
+  useEffect(() => {
+    // Load calls on mount
+    setCalls(TEST_CALLS);
+    setSelectedCallId(TEST_CALLS[0]?.id ?? null);
+  }, []);
 
   return (
     <div className="container mx-auto flex h-full flex-col overflow-hidden pt-8">
       <h1 className="mb-8 text-2xl font-medium">Dashboard</h1>
       <div className="flex flex-1 overflow-hidden rounded-md border border-input shadow-sm">
         <div className="flex w-96 shrink-0 flex-col overflow-hidden border-r border-input">
-          <div className="border-b border-input p-2 text-lg font-medium">
-            calls
-          </div>
           <div className="flex items-center gap-2 border-b border-input p-2">
             <div className="text-sm">show</div>
             <Select
@@ -49,25 +53,28 @@ export default function DashboardPage() {
             </Select>
           </div>
           <div className="flex flex-col overflow-y-auto">
-            {TEST_CALLS.filter((call) => {
-              if (selectedCallType === "error")
-                return call.errors !== undefined;
-              if (selectedCallType === "no-errors")
-                return call.errors === undefined;
-              return true;
-            }).map((call) => (
-              <CallCard
-                key={call.id}
-                call={call}
-                selectedCallId={selectedCallId}
-                onSelect={setSelectedCallId}
-              />
-            ))}
+            {calls
+              .filter((call) => {
+                if (selectedCallType === "error")
+                  return call.errors !== undefined;
+                if (selectedCallType === "no-errors")
+                  return call.errors === undefined;
+                return true;
+              })
+              .map((call) => (
+                <CallCard
+                  key={call.id}
+                  call={call}
+                  selectedCallId={selectedCallId}
+                  onSelect={setSelectedCallId}
+                />
+              ))}
           </div>
         </div>
         {selectedCallId && (
           <CallDetails
-            call={TEST_CALLS.find((call) => call.id === selectedCallId)!}
+            key={selectedCallId}
+            call={calls.find((call) => call.id === selectedCallId)!}
           />
         )}
       </div>
