@@ -213,7 +213,7 @@ const TEST_CALLS: Call[] = [
       source: "",
       endTime: 1730766946725,
       message:
-        "Oh, going for the after hours romance, like your style. Let's schedule a date with Mary. What day works best for you? Friday, Saturday, or Sunday after 8 PM?",
+        "Oh, going for the after hours romance, like your style ah. Let's schedule a date with Mary. What day works best for you? Friday, Saturday, or Sunday after 8 PM?",
       duration: 8620,
       secondsFromStart: 23.34,
     },
@@ -301,6 +301,19 @@ const TEST_CALLS: Call[] = [
         messageIndex: 4,
         wordIndexRange: [6, 7],
         correctWord: "huh I",
+      },
+    },
+    {
+      id: crypto.randomUUID(),
+      start: 62.5,
+      end: 63,
+      type: "transcription",
+      confidence: 0.91,
+      details: {
+        type: "deletion",
+        messageIndex: 4,
+        wordIndexRange: [10, 11],
+        correctWord: "",
       },
     },
     {

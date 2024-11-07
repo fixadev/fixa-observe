@@ -241,6 +241,7 @@ function ErrorWord({
         asChild
         disabled
         onClick={(e) => {
+          if (error.details?.type === "deletion") return;
           e.stopPropagation();
           onClick?.();
         }}
@@ -253,6 +254,7 @@ function ErrorWord({
             className={cn(
               "inline-block self-end bg-red-500/10 text-red-500 underline decoration-red-500 decoration-solid decoration-2 underline-offset-4 hover:bg-red-500/20",
               error.details?.type === "addition" && "text-transparent",
+              error.details?.type === "deletion" && "hover:line-through",
             )}
           >
             {error.details?.type === "addition"
@@ -267,7 +269,11 @@ function ErrorWord({
             {ERROR_LABELS[error.type]}
           </div>
           <div className="text-sm text-foreground">
-            {error.details?.correctWord}
+            {error.details?.type === "deletion" ? (
+              <span className="italic">deleted</span>
+            ) : (
+              error.details?.correctWord
+            )}
           </div>
           <div
             className="text-xs"
