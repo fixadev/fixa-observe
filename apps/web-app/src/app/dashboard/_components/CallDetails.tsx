@@ -94,7 +94,20 @@ export default function CallDetails({ call }: { call: Call }) {
   );
 
   return (
-    <div className="flex w-full flex-col overflow-hidden px-4 pt-4">
+    <div
+      className="flex w-full flex-col overflow-hidden px-4 pt-4 outline-none"
+      onKeyDown={(e) => {
+        if (e.key === " ") {
+          e.preventDefault();
+          if (audioPlayerRef.current?.isPlaying()) {
+            audioPlayerRef.current?.pause();
+          } else {
+            audioPlayerRef.current?.play();
+          }
+        }
+      }}
+      tabIndex={0}
+    >
       <AudioPlayer
         ref={audioPlayerRef}
         call={call}

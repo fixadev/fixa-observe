@@ -25,6 +25,7 @@ import { Howl } from "howler";
 export type AudioPlayerRef = {
   seekToTime: (timeInSeconds: number) => void;
   play: () => void;
+  isPlaying: () => boolean;
   pause: () => void;
   setActiveError: (error: CallError | null) => void;
 };
@@ -194,6 +195,7 @@ const AudioPlayer = forwardRef<
     () => ({
       seekToTime,
       play: () => setIsPlaying(true),
+      isPlaying: () => isPlaying,
       pause: () => setIsPlaying(false),
       setActiveError: (error: CallError | null) => {
         setActiveError(error);
@@ -203,7 +205,7 @@ const AudioPlayer = forwardRef<
         }
       },
     }),
-    [seekToTime, sound],
+    [seekToTime, sound, isPlaying],
   );
 
   const handleErrorClick = useCallback(
@@ -234,8 +236,15 @@ const AudioPlayer = forwardRef<
             height={100}
             blob={audioBlob}
             currentTime={currentTime}
+            barPlayedColor="rgba(0, 0, 0, 0.5)"
           />
         )}
+        <div
+          className="absolute right-0 top-0 h-full bg-primary/10"
+          style={{
+            width: `${containerWidth - (playheadX ?? 0)}px`,
+          }}
+        />
         {playheadHoverX !== null && (
           <div
             className="absolute top-0 h-full w-[1px] bg-muted-foreground"
