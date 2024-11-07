@@ -20,15 +20,11 @@ import {
 } from "~/components/ui/select";
 import type { Call, CallError } from "~/lib/types";
 import { formatDurationHoursMinutesSeconds } from "~/lib/utils";
-import { Howl } from "howler";
 import { debounce } from "lodash";
 import useSWR from "swr";
+import { useAudio } from "./useAudio";
 
 export type AudioPlayerRef = {
-  seekToTime: (timeInSeconds: number) => void;
-  play: () => void;
-  isPlaying: () => boolean;
-  pause: () => void;
   setActiveError: (error: CallError | null) => void;
 };
 
@@ -36,96 +32,52 @@ const AudioPlayer = forwardRef<
   AudioPlayerRef,
   {
     call: Call;
-    onTimeChange?: (timeInSeconds: number) => void;
     onErrorHover?: (errorId: string | null) => void;
   }
->(function AudioPlayer({ call, onTimeChange, onErrorHover }, ref) {
+>(function AudioPlayer({ call, onErrorHover }, ref) {
   const [containerWidth, setContainerWidth] = useState(0);
   const [playheadHoverX, setPlayheadHoverX] = useState<number | null>(null);
   const [playheadX, setPlayheadX] = useState<number | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [currentTime, setCurrentTime] = useState(0);
-  const [duration, setDuration] = useState(0);
-  const [playbackSpeed, setPlaybackSpeed] = useState(1);
-  const [sound, setSound] = useState<Howl | null>(null);
   const [activeError, setActiveError] = useState<CallError | null>(null);
   const [key, setKey] = useState(0);
   const { data: audioBlob } = useSWR<Blob>(call.recordingUrl, (url: string) =>
     fetch(url).then((res) => res.blob()),
   );
-
-  // Create the sound object
+  const {
+    isPlaying,
+    play,
+    pause,
+    seek,
+    duration,
+    currentTime,
+    playbackSpeed,
+    setPlaybackSpeed,
+    setAudioUrl,
+  } = useAudio();
   useEffect(() => {
-    const howl = new Howl({
-      src: [call.recordingUrl],
-      html5: true,
-      preload: true,
-      onload: () => {
-        setDuration(howl.duration());
-      },
-      onpause: () => {
-        setIsPlaying(false);
-      },
-      onend: () => {
-        setIsPlaying(false);
-      },
-    });
-    setSound(howl);
+    setAudioUrl(call.recordingUrl);
+  }, [call.recordingUrl, setAudioUrl]);
 
-    return () => {
-      howl.unload();
-    };
-  }, [call.recordingUrl]);
-
-  // Play the sound
+  // Check if we need to stop playback due to reaching error end
   useEffect(() => {
-    if (!sound) return;
-
-    if (isPlaying) {
-      sound.play();
-    } else {
-      sound.pause();
+    if (activeError && currentTime >= activeError.end) {
+      pause();
+      setActiveError(null);
     }
+  }, [activeError, currentTime, pause]);
 
-    // Set up time tracking
-    const interval = setInterval(() => {
-      if (sound.playing()) {
-        const currentPos = sound.seek();
-        setCurrentTime(currentPos);
-
-        // Check if we need to stop playback due to reaching error end
-        if (activeError && currentPos >= activeError.end) {
-          sound.pause();
-          setIsPlaying(false);
-          setActiveError(null);
-        }
-      }
-    }, 1 / 30);
-
-    return () => {
-      clearInterval(interval);
-    };
-  }, [isPlaying, sound, activeError]);
-
-  // Set the playback speed
-  useEffect(() => {
-    if (!sound) return;
-    sound.rate(playbackSpeed);
-  }, [playbackSpeed, sound]);
-
-  // Seek to a specific time
-  const handleSeek = useCallback(
+  // Seek to a specific x position
+  const seekToX = useCallback(
     (x: number) => {
-      if (!sound || !containerRef.current) return;
+      if (!containerRef.current) return;
       const percentage = x / containerWidth;
       const seekTime = percentage * duration;
-      sound.seek(seekTime);
-      setCurrentTime(seekTime);
+      seek(seekTime);
       setActiveError(null);
     },
-    [sound, containerWidth, duration],
+    [containerWidth, duration, seek],
   );
 
   const handleMouseMove = useCallback(
@@ -136,10 +88,10 @@ const AudioPlayer = forwardRef<
       setPlayheadHoverX(x);
       if (isDragging) {
         setPlayheadX(x);
-        handleSeek(x);
+        seekToX(x);
       }
     },
-    [isDragging, handleSeek],
+    [isDragging, seekToX],
   );
   const handleMouseLeave = useCallback(() => {
     setPlayheadHoverX(null);
@@ -152,9 +104,9 @@ const AudioPlayer = forwardRef<
   const handleMouseUp = useCallback(() => {
     setIsDragging(false);
     if (playheadX !== null) {
-      handleSeek(playheadX);
+      seekToX(playheadX);
     }
-  }, [playheadX, handleSeek]);
+  }, [playheadX, seekToX]);
 
   // Set the container width and update on window resize
   useEffect(() => {
@@ -191,46 +143,28 @@ const AudioPlayer = forwardRef<
     const percentage = currentTime / duration;
     const position = percentage * containerWidth;
     setPlayheadX(position);
-    onTimeChange?.(currentTime);
-  }, [currentTime, containerWidth, duration, isDragging, onTimeChange]);
-
-  const seekToTime = useCallback(
-    (timeInSeconds: number) => {
-      if (!sound) return;
-      sound.seek(timeInSeconds);
-      setCurrentTime(timeInSeconds);
-    },
-    [sound],
-  );
+  }, [currentTime, containerWidth, duration, isDragging]);
 
   useImperativeHandle(
     ref,
     () => ({
-      seekToTime,
-      play: () => setIsPlaying(true),
-      isPlaying: () => isPlaying,
-      pause: () => setIsPlaying(false),
       setActiveError: (error: CallError | null) => {
         setActiveError(error);
         if (error) {
-          sound?.seek(error.start);
-          setCurrentTime(error.start);
+          seek(error.start);
         }
       },
     }),
-    [seekToTime, sound, isPlaying],
+    [seek],
   );
 
   const handleErrorClick = useCallback(
     (error: CallError) => {
-      if (!sound) return;
-
-      sound.seek(error.start);
-      setCurrentTime(error.start);
-      setIsPlaying(true);
+      seek(error.start);
+      play();
       setActiveError(error);
     },
-    [sound],
+    [play, seek],
   );
 
   return (
@@ -308,7 +242,7 @@ const AudioPlayer = forwardRef<
         <Button
           size="icon"
           onClick={() => {
-            setIsPlaying(!isPlaying);
+            isPlaying ? pause() : play();
             setActiveError(null);
           }}
         >

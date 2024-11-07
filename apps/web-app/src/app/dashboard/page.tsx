@@ -11,6 +11,7 @@ import {
 import CallCard from "./_components/CallCard";
 import type { Call } from "~/lib/types";
 import CallDetails from "./_components/CallDetails";
+import { useAudio } from "./_components/useAudio";
 
 type CallType = "error" | "no-errors" | "all";
 
@@ -18,6 +19,7 @@ export default function DashboardPage() {
   const [selectedCallType, setSelectedCallType] = useState<CallType>("error");
   const [selectedCallId, setSelectedCallId] = useState<string | null>(null);
   const [calls, setCalls] = useState<Call[]>([]);
+  const { play, pause, seek, isPlaying } = useAudio();
 
   useEffect(() => {
     // Load calls on mount
@@ -28,7 +30,20 @@ export default function DashboardPage() {
   return (
     <div className="container mx-auto flex h-full flex-col overflow-hidden pt-8">
       <h1 className="mb-8 text-2xl font-medium">Dashboard</h1>
-      <div className="flex flex-1 overflow-hidden rounded-md border border-input shadow-sm">
+      <div
+        className="flex flex-1 overflow-hidden rounded-md border border-input shadow-sm"
+        tabIndex={0}
+        onKeyDown={(e) => {
+          if (e.key === " ") {
+            e.preventDefault();
+            if (isPlaying) {
+              pause();
+            } else {
+              play();
+            }
+          }
+        }}
+      >
         <div className="flex w-96 shrink-0 flex-col overflow-hidden border-r border-input">
           <div className="flex items-center gap-2 border-b border-input p-2">
             <div className="text-sm">show</div>
@@ -66,7 +81,10 @@ export default function DashboardPage() {
                   key={call.id}
                   call={call}
                   selectedCallId={selectedCallId}
-                  onSelect={setSelectedCallId}
+                  onSelect={(callId) => {
+                    setSelectedCallId(callId);
+                    seek(0);
+                  }}
                 />
               ))}
           </div>

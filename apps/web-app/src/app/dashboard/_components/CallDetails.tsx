@@ -8,13 +8,14 @@ import {
   TooltipTrigger,
 } from "~/components/ui/tooltip";
 import { ERROR_LABELS } from "~/lib/constants";
+import { useAudio } from "./useAudio";
 
 export default function CallDetails({ call }: { call: Call }) {
   const audioPlayerRef = useRef<AudioPlayerRef>(null);
-  const [currentTime, setCurrentTime] = useState(0);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const lastActiveIndexRef = useRef(-1);
   const [activeErrorId, setActiveErrorId] = useState<string | null>(null);
+  const { play, seek, currentTime } = useAudio();
 
   const messagesFiltered = useMemo(() => {
     return call.originalMessages.filter((m) => m.role !== "system");
@@ -94,26 +95,10 @@ export default function CallDetails({ call }: { call: Call }) {
   );
 
   return (
-    <div
-      className="flex w-full flex-col overflow-hidden px-4 pt-4 outline-none"
-      onKeyDown={(e) => {
-        if (e.key === " ") {
-          e.preventDefault();
-          if (audioPlayerRef.current?.isPlaying()) {
-            audioPlayerRef.current?.pause();
-          } else {
-            audioPlayerRef.current?.play();
-          }
-        }
-      }}
-      tabIndex={0}
-    >
+    <div className="flex w-full flex-col overflow-hidden px-4 pt-4 outline-none">
       <AudioPlayer
         ref={audioPlayerRef}
         call={call}
-        onTimeChange={(timeInSeconds) => {
-          setCurrentTime(timeInSeconds);
-        }}
         onErrorHover={(errorId) => {
           setActiveErrorId(errorId);
         }}
@@ -136,10 +121,8 @@ export default function CallDetails({ call }: { call: Call }) {
               </div>
               <div
                 onClick={() => {
-                  audioPlayerRef.current?.seekToTime(
-                    message.secondsFromStart - offsetFromStart,
-                  );
-                  audioPlayerRef.current?.play();
+                  seek(message.secondsFromStart - offsetFromStart);
+                  play();
                 }}
                 className={cn(
                   "flex-1 cursor-pointer rounded-md p-2 hover:bg-muted/30",
@@ -185,7 +168,7 @@ export default function CallDetails({ call }: { call: Call }) {
                                 audioPlayerRef.current?.setActiveError(
                                   error ?? null,
                                 );
-                                audioPlayerRef.current?.play();
+                                play();
                               }}
                             />,
                           );
@@ -211,7 +194,7 @@ export default function CallDetails({ call }: { call: Call }) {
                             audioPlayerRef.current?.setActiveError(
                               error ?? null,
                             );
-                            audioPlayerRef.current?.play();
+                            play();
                           }}
                         />,
                       );
