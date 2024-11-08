@@ -65,6 +65,13 @@ const AudioPlayer = forwardRef<
     setAudioUrl(call.recordingUrl);
   }, [call.recordingUrl, setAudioUrl]);
 
+  const [loaded, setLoaded] = useState(false);
+  useEffect(() => {
+    setTimeout(() => {
+      setLoaded(true);
+    }, 600);
+  }, []);
+
   // Check if we need to stop playback due to reaching error end
   useEffect(() => {
     if (activeError && currentTime >= activeError.end) {
@@ -189,25 +196,29 @@ const AudioPlayer = forwardRef<
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
       >
-        {botAudioBlob && (
-          <AudioVisualizer
-            key={`bot-${key}`}
-            width={containerWidth}
-            height={50}
-            blob={botAudioBlob}
-            currentTime={currentTime}
-            barPlayedColor="rgba(0, 0, 0, 0.5)"
-          />
-        )}
-        {userAudioBlob && (
-          <AudioVisualizer
-            key={`user-${key}`}
-            width={containerWidth}
-            height={50}
-            blob={userAudioBlob}
-            currentTime={currentTime}
-            barPlayedColor="rgba(0, 0, 0, 0.5)"
-          />
+        {loaded && (
+          <>
+            {botAudioBlob && (
+              <AudioVisualizer
+                key={`bot-${key}`}
+                width={containerWidth}
+                height={50}
+                blob={botAudioBlob}
+                currentTime={currentTime}
+                barPlayedColor="rgba(0, 0, 0, 0.5)"
+              />
+            )}
+            {userAudioBlob && (
+              <AudioVisualizer
+                key={`user-${key}`}
+                width={containerWidth}
+                height={50}
+                blob={userAudioBlob}
+                currentTime={currentTime}
+                barPlayedColor="rgba(0, 0, 0, 0.5)"
+              />
+            )}
+          </>
         )}
         <div
           className="absolute right-0 top-0 h-full bg-primary/10"
