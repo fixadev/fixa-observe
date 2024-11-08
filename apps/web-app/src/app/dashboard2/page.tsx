@@ -24,6 +24,7 @@ export default function Dashboard2Page() {
   const [calls, setCalls] = useState<Call[]>([]);
   const { seek } = useAudio();
   const [selectedTimeRange, setSelectedTimeRange] = useState<TimeRange>("24h");
+  const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
 
   useEffect(() => {
     // Load calls on mount
@@ -34,9 +35,20 @@ export default function Dashboard2Page() {
     return new Map<string, Call>(calls.map((call) => [call.id, call]));
   }, [calls]);
 
+  useEffect(() => {
+    if (selectedCallId) {
+      setSelectedNodeId(callsMap.get(selectedCallId)?.node ?? null);
+    } else {
+      setSelectedNodeId(null);
+    }
+  }, [callsMap, selectedCallId]);
+
   return (
     <div className="relative flex w-full overflow-hidden">
-      <FlowChart calls={calls} selectedCallId={selectedCallId} />
+      <FlowChart
+        selectedNodeId={selectedNodeId}
+        onSelectNodeId={setSelectedNodeId}
+      />
       <div className="pointer-events-none absolute left-0 top-0 flex h-full w-full gap-4 overflow-hidden p-4">
         <div className="pointer-events-auto flex w-[20vw] min-w-[240px] max-w-[400px] flex-col">
           <div className="mb-2 flex items-center justify-between">
@@ -65,7 +77,7 @@ export default function Dashboard2Page() {
               <FunnelIcon className="size-4" />
             </Button>
           </div>
-          <div className="flex flex-1 flex-col gap-2 overflow-y-auto rounded-md border border-input bg-background shadow-sm">
+          <div className="flex flex-1 flex-col overflow-y-auto rounded-md border border-input bg-background shadow-sm">
             {calls
               // .filter((call) => true)
               .map((call) => (

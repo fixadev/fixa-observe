@@ -21,7 +21,6 @@ import {
 } from "@xyflow/react";
 
 import "@xyflow/react/dist/style.css";
-import { type Call } from "~/lib/types";
 
 enum HoverState {
   HOVER = "hover",
@@ -247,11 +246,11 @@ const initialEdges: StateEdge[] = edgeRelations.flatMap(
 console.log(initialEdges);
 
 export default function FlowChart({
-  calls,
-  selectedCallId,
+  selectedNodeId,
+  onSelectNodeId,
 }: {
-  calls: Call[];
-  selectedCallId: string | null;
+  selectedNodeId: string | null;
+  onSelectNodeId: (nodeId: string | null) => void;
 }) {
   const nodeTypes = useMemo(
     () => ({ state: StateNode, result: ResultNode }),
@@ -262,36 +261,26 @@ export default function FlowChart({
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
   const [, setHoveredNodeId] = useState<string | null>(null);
-  const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
   // const [hoveredEdgeId, setHoveredEdgeId] = useState<string | null>(null);
   const adjacencyMap = useMemo(() => buildAdjacencyMap(edges), [edges]);
   const [nodesMeasured, setNodesMeasured] = useState(false);
 
-  const callsMap = useMemo(() => {
-    return new Map<string, Call>(calls.map((call) => [call.id, call]));
-  }, [calls]);
-
   useEffect(() => {
-    if (!selectedCallId) {
+    if (!selectedNodeId) {
       // Node was deselected
-      if (selectedNodeId) {
-        setSelectedNodeId(null);
-        setNodes((nds) =>
-          nds.map((n) => ({
-            ...n,
-            data: { ...n.data, hoverState: HoverState.DEFAULT },
-          })),
-        );
-      }
+      setNodes((nds) =>
+        nds.map((n) => ({
+          ...n,
+          data: { ...n.data, hoverState: HoverState.DEFAULT },
+        })),
+      );
       return;
     }
-    const call = callsMap.get(selectedCallId);
-    if (!call) return;
 
     // Find the node that matches the call's node ID
-    const nodeToZoom = nodes.find((n) => n.id === call.node);
+    const nodeToZoom = nodes.find((n) => n.id === selectedNodeId);
     if (nodeToZoom) {
-      setSelectedNodeId(nodeToZoom.id);
+      onSelectNodeId(nodeToZoom.id);
       setNodes((nds) =>
         nds.map((n) => ({
           ...n,
@@ -317,9 +306,8 @@ export default function FlowChart({
         );
       })();
     }
-    console.log(call);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedCallId]);
+  }, [selectedNodeId]);
 
   const onConnect = useCallback(
     (params: Connection) => setEdges((eds) => addEdge(params, eds)),
