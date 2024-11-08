@@ -95,7 +95,7 @@ export default function CallDetails({ call }: { call: Call }) {
   );
 
   return (
-    <div className="flex w-full flex-col overflow-hidden px-4 pt-4 outline-none">
+    <div className="flex w-full flex-col overflow-hidden bg-background px-4 pt-4 outline-none">
       <AudioPlayer
         ref={audioPlayerRef}
         call={call}
