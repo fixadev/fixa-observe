@@ -258,7 +258,7 @@ export default function FlowChart({
     [],
   );
   const edgeTypes = useMemo(() => ({ stateEdge: StateEdge }), []);
-  const { fitView, viewportInitialized } = useReactFlow();
+  const { fitView, fitBounds, viewportInitialized } = useReactFlow();
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
   const [, setHoveredNodeId] = useState<string | null>(null);
@@ -303,11 +303,19 @@ export default function FlowChart({
         })),
       );
       // Zoom to the node with some padding
-      void fitView({
-        nodes: [nodeToZoom],
-        padding: 0.5,
-        duration: 800,
-      });
+      void (async () => {
+        const width = nodeToZoom.measured?.width ?? 0;
+        const height = nodeToZoom.measured?.height ?? 0;
+        await fitBounds(
+          {
+            x: nodeToZoom.position.x,
+            y: nodeToZoom.position.y + height,
+            width: width,
+            height: height + height * 2,
+          },
+          { padding: 1, duration: 600 },
+        );
+      })();
     }
     console.log(call);
     // eslint-disable-next-line react-hooks/exhaustive-deps
