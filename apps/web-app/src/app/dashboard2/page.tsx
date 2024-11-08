@@ -79,7 +79,10 @@ export default function Dashboard2Page() {
           </div>
           <div className="flex flex-1 flex-col overflow-y-auto rounded-md border border-input bg-background shadow-sm">
             {calls
-              // .filter((call) => true)
+              .filter(
+                (call) =>
+                  selectedNodeId === null || call.node === selectedNodeId,
+              )
               .map((call) => (
                 <CallCard
                   key={call.id}

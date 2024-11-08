@@ -460,6 +460,18 @@ export default function FlowChart({
     );
   }, [setNodes, setEdges, selectedNodeId]);
 
+  const onNodeClick = useCallback(
+    (_: React.MouseEvent, node: Node) => {
+      // If clicking the already selected node, deselect it
+      if (node.id === selectedNodeId) {
+        onSelectNodeId(null);
+      } else {
+        onSelectNodeId(node.id);
+      }
+    },
+    [selectedNodeId, onSelectNodeId],
+  );
+
   // const onEdgeMouseEnter = useCallback(
   //   (_: React.MouseEvent, edge: Edge) => {
   //     setHoveredEdgeId(edge.id);
@@ -526,6 +538,7 @@ export default function FlowChart({
         fitView
         onNodeMouseEnter={onNodeMouseEnter}
         onNodeMouseLeave={onNodeMouseLeave}
+        onNodeClick={onNodeClick}
         // onEdgeMouseEnter={onEdgeMouseEnter}
         // onEdgeMouseLeave={onEdgeMouseLeave}
       />
