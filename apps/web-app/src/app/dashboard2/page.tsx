@@ -7,6 +7,8 @@ import type { Call } from "~/lib/types";
 import { useState, useEffect, useMemo } from "react";
 import CallCard from "../dashboard/_components/CallCard";
 import CallDetails from "../dashboard/_components/CallDetails";
+import { Button } from "~/components/ui/button";
+import { XMarkIcon } from "@heroicons/react/24/solid";
 
 export default function Dashboard2Page() {
   const [selectedCallId, setSelectedCallId] = useState<string | null>(null);
@@ -42,11 +44,19 @@ export default function Dashboard2Page() {
             ))}
         </div>
         {selectedCallId && (
-          <div className="pointer-events-auto flex h-[60%] flex-1 self-end overflow-hidden rounded-md border border-input bg-background shadow-sm">
+          <div className="pointer-events-auto flex h-[50%] flex-1 self-end overflow-hidden rounded-md border border-input bg-background shadow-sm">
             <CallDetails
               key={selectedCallId}
               call={callsMap.get(selectedCallId)!}
             />
+            <Button
+              size="icon"
+              variant="ghost"
+              className="-ml-3 shrink-0"
+              onClick={() => setSelectedCallId(null)}
+            >
+              <XMarkIcon className="size-4" />
+            </Button>
           </div>
         )}
       </div>
