@@ -245,19 +245,69 @@ const initialEdges: StateEdge[] = edgeRelations.flatMap(
 );
 console.log(initialEdges);
 
-export default function FlowChart() {
+export default function FlowChart({
+  selectedNodeId,
+  onSelectNodeId,
+}: {
+  selectedNodeId: string | null;
+  onSelectNodeId: (nodeId: string | null) => void;
+}) {
   const nodeTypes = useMemo(
     () => ({ state: StateNode, result: ResultNode }),
     [],
   );
   const edgeTypes = useMemo(() => ({ stateEdge: StateEdge }), []);
-  const { fitView, viewportInitialized } = useReactFlow();
+  const { fitView, fitBounds, viewportInitialized } = useReactFlow();
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
   const [, setHoveredNodeId] = useState<string | null>(null);
   // const [hoveredEdgeId, setHoveredEdgeId] = useState<string | null>(null);
   const adjacencyMap = useMemo(() => buildAdjacencyMap(edges), [edges]);
   const [nodesMeasured, setNodesMeasured] = useState(false);
+
+  useEffect(() => {
+    if (!selectedNodeId) {
+      // Node was deselected
+      setNodes((nds) =>
+        nds.map((n) => ({
+          ...n,
+          data: { ...n.data, hoverState: HoverState.DEFAULT },
+        })),
+      );
+      return;
+    }
+
+    // Find the node that matches the call's node ID
+    const nodeToZoom = nodes.find((n) => n.id === selectedNodeId);
+    if (nodeToZoom) {
+      onSelectNodeId(nodeToZoom.id);
+      setNodes((nds) =>
+        nds.map((n) => ({
+          ...n,
+          data: {
+            ...n.data,
+            hoverState:
+              n.id === nodeToZoom.id ? HoverState.HOVER : HoverState.DISABLED,
+          },
+        })),
+      );
+      // Zoom to the node with some padding
+      void (async () => {
+        const width = nodeToZoom.measured?.width ?? 0;
+        const height = nodeToZoom.measured?.height ?? 0;
+        await fitBounds(
+          {
+            x: nodeToZoom.position.x,
+            y: nodeToZoom.position.y + height,
+            width: width,
+            height: height + height * 2,
+          },
+          { padding: 1, duration: 600 },
+        );
+      })();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedNodeId]);
 
   const onConnect = useCallback(
     (params: Connection) => setEdges((eds) => addEdge(params, eds)),
@@ -378,12 +428,25 @@ export default function FlowChart() {
   // Don't forget to reset percentages when mouse leaves
   const onNodeMouseLeave = useCallback(() => {
     setHoveredNodeId(null);
-    setNodes((nds) =>
-      nds.map((n) => ({
-        ...n,
-        data: { ...n.data, hoverState: HoverState.DEFAULT },
-      })),
-    );
+    if (selectedNodeId) {
+      setNodes((nds) =>
+        nds.map((n) => ({
+          ...n,
+          data: {
+            ...n.data,
+            hoverState:
+              n.id === selectedNodeId ? HoverState.HOVER : HoverState.DISABLED,
+          },
+        })),
+      );
+    } else {
+      setNodes((nds) =>
+        nds.map((n) => ({
+          ...n,
+          data: { ...n.data, hoverState: HoverState.DEFAULT },
+        })),
+      );
+    }
     setEdges((eds) =>
       eds.map((e) => ({
         ...e,
@@ -395,7 +458,19 @@ export default function FlowChart() {
         },
       })),
     );
-  }, [setNodes, setEdges]);
+  }, [setNodes, setEdges, selectedNodeId]);
+
+  const onNodeClick = useCallback(
+    (_: React.MouseEvent, node: Node) => {
+      // If clicking the already selected node, deselect it
+      if (node.id === selectedNodeId) {
+        onSelectNodeId(null);
+      } else {
+        onSelectNodeId(node.id);
+      }
+    },
+    [selectedNodeId, onSelectNodeId],
+  );
 
   // const onEdgeMouseEnter = useCallback(
   //   (_: React.MouseEvent, edge: Edge) => {
@@ -463,6 +538,7 @@ export default function FlowChart() {
         fitView
         onNodeMouseEnter={onNodeMouseEnter}
         onNodeMouseLeave={onNodeMouseLeave}
+        onNodeClick={onNodeClick}
         // onEdgeMouseEnter={onEdgeMouseEnter}
         // onEdgeMouseLeave={onEdgeMouseLeave}
       />

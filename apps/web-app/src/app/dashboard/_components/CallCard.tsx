@@ -13,7 +13,7 @@ export default function CallCard({
 }) {
   return (
     <div
-      className="relative cursor-pointer border-b border-input p-2 pl-4 hover:bg-muted"
+      className="relative cursor-pointer border-b border-input bg-background p-2 pl-4 hover:bg-muted"
       onClick={() => onSelect(call.id)}
     >
       <div

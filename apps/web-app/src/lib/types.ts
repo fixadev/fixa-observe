@@ -18,6 +18,7 @@ export const callSchema = z.object({
   botRecordingUrl: z.string().optional(),
   userRecordingUrl: z.string().optional(),
   summary: z.string(),
+  node: z.string(),
   originalTranscript: z.string(),
   originalMessages: z.array(
     z.object({
