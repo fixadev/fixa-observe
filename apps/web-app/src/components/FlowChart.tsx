@@ -21,6 +21,7 @@ import {
 } from "@xyflow/react";
 
 import "@xyflow/react/dist/style.css";
+import { type Call } from "~/lib/types";
 
 enum HoverState {
   HOVER = "hover",
@@ -245,7 +246,13 @@ const initialEdges: StateEdge[] = edgeRelations.flatMap(
 );
 console.log(initialEdges);
 
-export default function FlowChart() {
+export default function FlowChart({
+  calls,
+  selectedCallId,
+}: {
+  calls: Call[];
+  selectedCallId: string | null;
+}) {
   const nodeTypes = useMemo(
     () => ({ state: StateNode, result: ResultNode }),
     [],
@@ -255,9 +262,56 @@ export default function FlowChart() {
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
   const [, setHoveredNodeId] = useState<string | null>(null);
+  const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
   // const [hoveredEdgeId, setHoveredEdgeId] = useState<string | null>(null);
   const adjacencyMap = useMemo(() => buildAdjacencyMap(edges), [edges]);
   const [nodesMeasured, setNodesMeasured] = useState(false);
+
+  const callsMap = useMemo(() => {
+    return new Map<string, Call>(calls.map((call) => [call.id, call]));
+  }, [calls]);
+
+  useEffect(() => {
+    if (!selectedCallId) {
+      // Node was deselected
+      if (selectedNodeId) {
+        setSelectedNodeId(null);
+        setNodes((nds) =>
+          nds.map((n) => ({
+            ...n,
+            data: { ...n.data, hoverState: HoverState.DEFAULT },
+          })),
+        );
+      }
+      return;
+    }
+    const call = callsMap.get(selectedCallId);
+    if (!call) return;
+
+    // Find the node that matches the call's node ID
+    const nodeToZoom = nodes.find((n) => n.id === call.node);
+    if (nodeToZoom) {
+      setSelectedNodeId(nodeToZoom.id);
+      setNodes((nds) =>
+        nds.map((n) => ({
+          ...n,
+          data: {
+            ...n.data,
+            hoverState:
+              n.id === nodeToZoom.id ? HoverState.HOVER : HoverState.DISABLED,
+          },
+        })),
+      );
+      // Zoom to the node with some padding
+      void fitView({
+        nodes: [nodeToZoom],
+        padding: 0.5,
+        duration: 800,
+      });
+    }
+    console.log(call);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedCallId]);
 
   const onConnect = useCallback(
     (params: Connection) => setEdges((eds) => addEdge(params, eds)),
@@ -378,12 +432,25 @@ export default function FlowChart() {
   // Don't forget to reset percentages when mouse leaves
   const onNodeMouseLeave = useCallback(() => {
     setHoveredNodeId(null);
-    setNodes((nds) =>
-      nds.map((n) => ({
-        ...n,
-        data: { ...n.data, hoverState: HoverState.DEFAULT },
-      })),
-    );
+    if (selectedNodeId) {
+      setNodes((nds) =>
+        nds.map((n) => ({
+          ...n,
+          data: {
+            ...n.data,
+            hoverState:
+              n.id === selectedNodeId ? HoverState.HOVER : HoverState.DISABLED,
+          },
+        })),
+      );
+    } else {
+      setNodes((nds) =>
+        nds.map((n) => ({
+          ...n,
+          data: { ...n.data, hoverState: HoverState.DEFAULT },
+        })),
+      );
+    }
     setEdges((eds) =>
       eds.map((e) => ({
         ...e,
@@ -395,7 +462,7 @@ export default function FlowChart() {
         },
       })),
     );
-  }, [setNodes, setEdges]);
+  }, [setNodes, setEdges, selectedNodeId]);
 
   // const onEdgeMouseEnter = useCallback(
   //   (_: React.MouseEvent, edge: Edge) => {

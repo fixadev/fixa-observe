@@ -1,5 +1,5 @@
 import FlowChart from "~/components/FlowChart";
 
 export default function Dashboard() {
-  return <FlowChart />;
+  return <FlowChart calls={[]} selectedCallId={null} />;
 }
