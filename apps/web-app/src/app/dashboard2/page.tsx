@@ -22,7 +22,7 @@ type TimeRange = "24h" | "3d" | "7d";
 export default function Dashboard2Page() {
   const [selectedCallId, setSelectedCallId] = useState<string | null>(null);
   const [calls, setCalls] = useState<Call[]>([]);
-  const { play, pause, seek, isPlaying } = useAudio();
+  const { seek } = useAudio();
   const [selectedTimeRange, setSelectedTimeRange] = useState<TimeRange>("24h");
 
   useEffect(() => {
@@ -67,7 +67,7 @@ export default function Dashboard2Page() {
           </div>
           <div className="flex flex-1 flex-col gap-2 overflow-y-auto rounded-md border border-input bg-background shadow-sm">
             {calls
-              .filter((call) => true)
+              // .filter((call) => true)
               .map((call) => (
                 <CallCard
                   key={call.id}
