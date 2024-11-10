@@ -1,6 +1,6 @@
 import { PlusIcon } from "@heroicons/react/24/solid";
 import { Button } from "~/components/ui/button";
-import AgentCard from "./_components/AgentCard";
+import AgentCard from "~/components/dashboard/AgentCard";
 import { TEST_AGENT } from "~/lib/test-data";
 
 export default function DashboardPage() {

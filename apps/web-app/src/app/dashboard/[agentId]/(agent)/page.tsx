@@ -2,7 +2,7 @@ import { RocketLaunchIcon } from "@heroicons/react/24/solid";
 import { useMemo } from "react";
 import { Button } from "~/components/ui/button";
 import { TEST_AGENT } from "~/lib/test-data";
-import TestCard from "./_components/TestCard";
+import TestCard from "~/components/dashboard/TestCard";
 
 export default function AgentPage({}: { params: { agentId: string } }) {
   const agent = useMemo(() => {
@@ -32,12 +32,12 @@ export default function AgentPage({}: { params: { agentId: string } }) {
       {/* content */}
       <div className="container py-8">
         <div className="rounded-t-md border-x border-t border-input shadow-sm">
-          <TestCard />
-          <TestCard />
-          <TestCard />
-          <TestCard />
-          <TestCard />
-          <TestCard />
+          <TestCard agentId={agent.id} testId="1" />
+          <TestCard agentId={agent.id} testId="2" />
+          <TestCard agentId={agent.id} testId="3" />
+          <TestCard agentId={agent.id} testId="4" />
+          <TestCard agentId={agent.id} testId="5" />
+          <TestCard agentId={agent.id} testId="6" />
         </div>
       </div>
     </div>
