@@ -2,9 +2,6 @@ import express, { Request, Response } from "express";
 import { createServer } from "http";
 import SocketManager from "./socket/socketManager";
 import { handleVapiCallEnded } from "./services/handleVapiCalEnded";
-import dotenv from "dotenv";
-
-dotenv.config();
 
 const app = express();
 const httpServer = createServer(app);

@@ -47,8 +47,8 @@ export const analyzeCall = async (
   - errors: An array of objects, each representing an error. Each error object will have the following fields:
     - type: A string describing the type of error
     - description: A string describing the error
-    - start: The start time of the error (use the secondsFromStart for this)
-    - end: The end time of the error (use secondsFromStart + duration to calculate this)
+    - secondsFromStart: The start time of the error (use the secondsFromStart for this)
+    - duration: The duration of the error (use duration for this)
   `;
 
   const prompt = `${basePrompt}\n\nAssistant Agent Prompt: ${agentPrompt}\n\nUser Agent Prompt: ${testAgentPrompt}\n\nCall Transcript: ${JSON.stringify(
@@ -72,7 +72,19 @@ export const analyzeCall = async (
     .replace("\n```", "")
     .trim();
 
-  const parsedResponse = outputSchema.parse(cleanedResult);
+  console.log("Cleaned result:", cleanedResult);
+
+  if (!cleanedResult) {
+    throw new Error("No result from LLM");
+  }
+
+  const jsonResult = JSON.parse(cleanedResult);
+
+  console.log("JSON result:", jsonResult);
+
+  const parsedResponse = outputSchema.parse(jsonResult);
+
+  console.log("Parsed response:", parsedResponse);
 
   return {
     errors: parsedResponse.errors,

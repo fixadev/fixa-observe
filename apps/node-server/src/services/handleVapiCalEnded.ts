@@ -62,35 +62,35 @@ export const handleVapiCallEnded = async (
     return;
   }
 
-  const test = await db.test.findFirst({
-    where: { calls: { some: { id: callId } } },
-    include: { calls: true, agent: true },
-  });
+  // const test = await db.test.findFirst({
+  //   where: { calls: { some: { id: callId } } },
+  //   include: { calls: true, agent: true },
+  // });
 
-  const call = await db.call.findFirst({
-    where: { id: callId },
-    include: { testAgent: true },
-  });
+  // const call = await db.call.findFirst({
+  //   where: { id: callId },
+  //   include: { testAgent: true },
+  // });
 
-  const agent = test?.agent;
-  const testAgent = call?.testAgent;
+  // const agent = test?.agent;
+  // const testAgent = call?.testAgent;
 
-  const ownerId = agent?.ownerId;
+  // const ownerId = agent?.ownerId;
 
-  if (!ownerId) {
-    console.error("No owner ID found for agent");
-    return;
-  }
+  // if (!ownerId) {
+  //   console.error("No owner ID found for agent");
+  //   return;
+  // }
 
-  if (!call) {
-    console.error("No call found in DB for call ID", callId);
-    return;
-  }
+  // if (!call) {
+  //   console.error("No call found in DB for call ID", callId);
+  //   return;
+  // }
 
-  if (!agent?.systemPrompt || !testAgent?.prompt) {
-    console.error("No agent or test agent prompt found");
-    return;
-  }
+  // if (!agent?.systemPrompt || !testAgent?.prompt) {
+  //   console.error("No agent or test agent prompt found");
+  //   return;
+  // }
 
   if (!message.call || !message.artifact.messages) {
     console.error("No artifact messages found");
@@ -115,17 +115,17 @@ export const handleVapiCallEnded = async (
   console.log("RESULT", result);
   console.log("FAILURE REASON", failureReason);
 
-  await db.call.update({
-    where: { id: callId },
-    data: {
-      status: CallStatus.completed,
-      errors: {
-        create: errors,
-      },
-      result: result ? CallResult.success : CallResult.failure,
-      failureReason,
-    },
-  });
+  // await db.call.update({
+  //   where: { id: callId },
+  //   data: {
+  //     status: CallStatus.completed,
+  //     errors: {
+  //       create: errors,
+  //     },
+  //     result: result ? CallResult.success : CallResult.failure,
+  //     failureReason,
+  //   },
+  // });
 
-  socketManager.sendMessageToUser(ownerId, "call-ended", test?.id);
+  // socketManager.sendMessageToUser(ownerId, "call-ended", test?.id);
 };
