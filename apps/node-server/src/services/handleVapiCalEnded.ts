@@ -1,7 +1,7 @@
 import { CallResult, CallStatus } from "@prisma/client";
 import { db } from "../db";
 import { type ServerMessageEndOfCallReport } from "@vapi-ai/server-sdk/api";
-import { analyzeCall } from "./findErrors";
+import { analyzeCall } from "./findLLMErrors";
 
 const mockSystemPrompt = `
 System Prompt: Drive-Through Donut Order AI Agent
