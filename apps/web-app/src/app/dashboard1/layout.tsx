@@ -1,4 +1,4 @@
-import { AudioProvider } from "../../hooks/useAudio";
+import { AudioProvider } from "./_components/useAudio";
 
 export default function DashboardLayout({
   children,

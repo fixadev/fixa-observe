@@ -7,7 +7,7 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="h-full">
+    <div className="flex h-full flex-col overflow-hidden">
       <div className="flex w-full items-center justify-between p-4">
         <Logo href="/dashboard" />
         <UserButton />

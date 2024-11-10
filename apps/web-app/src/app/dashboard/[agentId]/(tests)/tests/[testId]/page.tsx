@@ -41,14 +41,14 @@ function TestPage({ params }: { params: { agentId: string; testId: string } }) {
     setSelectedCallId(TEST_CALLS[0]?.id ?? null);
   }, []);
   return (
-    <div>
+    <div className="flex flex-1 flex-col overflow-hidden">
       {/* header */}
-      <div className="container flex items-center justify-between py-8">
+      <div className="container flex items-center justify-between py-4">
         <TestCard className="w-full rounded-md border border-input shadow-sm" />
       </div>
 
       {/* content */}
-      <div className="container mx-auto flex h-full flex-col overflow-hidden">
+      <div className="container mx-auto flex flex-1 flex-col overflow-hidden">
         <div
           className="flex flex-1 overflow-hidden rounded-md border border-input shadow-sm outline-none"
           autoFocus
@@ -64,7 +64,7 @@ function TestPage({ params }: { params: { agentId: string; testId: string } }) {
             }
           }}
         >
-          <div className="flex w-96 shrink-0 flex-col overflow-hidden border-r border-input">
+          <div className="flex w-80 shrink-0 flex-col overflow-hidden border-r border-input">
             <div className="flex items-center gap-2 border-b border-input p-2">
               <div className="text-sm">show</div>
               <Select
@@ -101,6 +101,7 @@ function TestPage({ params }: { params: { agentId: string; testId: string } }) {
                 .map((call) => (
                   <CallCard
                     key={call.id}
+                    className="shrink-0"
                     call={call}
                     selectedCallId={selectedCallId}
                     onSelect={(callId) => {
