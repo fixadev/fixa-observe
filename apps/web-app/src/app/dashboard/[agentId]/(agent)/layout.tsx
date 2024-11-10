@@ -19,7 +19,7 @@ export default function AgentLayout({
   }, [pathname]);
 
   return (
-    <div>
+    <div className="flex flex-1 flex-col overflow-hidden">
       <div className="w-full border-b border-input">
         <Tabs value={tabValue}>
           <TabsList variant="outline" className="h-10">

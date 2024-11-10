@@ -5,7 +5,7 @@ import Link from "next/link";
 
 export default function AgentPage({ params }: { params: { agentId: string } }) {
   return (
-    <div>
+    <div className="flex flex-1 flex-col overflow-hidden">
       {/* header */}
       <div className="container flex items-center justify-between py-8">
         <div className="text-2xl font-medium">tests</div>
@@ -21,7 +21,7 @@ export default function AgentPage({ params }: { params: { agentId: string } }) {
       <div className="h-px w-full bg-input" />
 
       {/* content */}
-      <div className="container py-8">
+      <div className="container flex-1 overflow-y-auto py-8">
         <div className="rounded-t-md border-x border-t border-input shadow-sm">
           {Array.from({ length: 6 }).map((_, i) => (
             <Link href={`/dashboard/${params.agentId}/tests/${i + 1}`} key={i}>
