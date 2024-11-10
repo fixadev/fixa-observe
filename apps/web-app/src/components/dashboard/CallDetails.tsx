@@ -166,7 +166,7 @@ export default function CallDetails({ call }: { call: CallWithIncludes }) {
   }, [call.errors, messagesFiltered, doesErrorOverlapMessage]);
 
   return (
-    <div className="flex w-full flex-col bg-background px-4 outline-none">
+    <div className="flex w-full flex-col rounded-md bg-background px-4 outline-none">
       <div
         ref={headerRef}
         className="sticky top-[calc(2.5rem+1px)] z-20 bg-background py-4"

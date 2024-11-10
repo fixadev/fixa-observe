@@ -48,9 +48,9 @@ function TestPage({ params }: { params: { agentId: string; testId: string } }) {
       </div>
 
       {/* content */}
-      <div className="container mx-auto">
+      <div className="container">
         <div
-          className="flex rounded-md border border-input shadow-sm outline-none"
+          className="flex rounded-t-md border border-input shadow-sm outline-none"
           autoFocus
           tabIndex={0}
           onKeyDown={(e) => {
