@@ -3,6 +3,7 @@
 import {
   Dialog,
   DialogContent,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -13,9 +14,10 @@ import { Label } from "~/components/ui/label";
 
 import { useEffect, useState } from "react";
 import { cn } from "~/lib/utils";
-import { type Agent, type AgentWithoutId } from "~/lib/agent";
+import { type Agent, type CreateAgentSchema } from "~/lib/agent";
 import { Textarea } from "~/components/ui/textarea";
 import { api } from "~/trpc/react";
+import { IntentCard } from "./IntentCard";
 
 interface AddAgentModalProps {
   children: React.ReactNode;
@@ -51,7 +53,7 @@ function TextAreaWithLabel({ label, value, onChange }: InputWithLabelProps) {
 }
 
 export function AddAgentModal({ children, onComplete }: AddAgentModalProps) {
-  const [agent, setAgent] = useState<AgentWithoutId>({
+  const [agent, setAgent] = useState<CreateAgentSchema>({
     name: "",
     systemPrompt: "",
     phoneNumber: "",
@@ -67,66 +69,59 @@ export function AddAgentModal({ children, onComplete }: AddAgentModalProps) {
     ],
   });
 
+  const addIntent = () => {
+    setAgent({
+      ...agent,
+      intents: [...agent.intents, { name: "", instructions: "" }],
+    });
+  };
+
   const { mutate: createAgent } = api.agent.create.useMutation();
 
   return (
     <Dialog>
       <DialogTrigger asChild>{children}</DialogTrigger>
-      <DialogContent className="w-[50vw] min-w-[600px] max-w-screen-xl p-6">
-        <DialogTitle>New Agent</DialogTitle>
+      <DialogContent className="w-[50vw] min-w-[600px] max-w-screen-xl overflow-y-auto p-6">
+        <DialogTitle>new agent</DialogTitle>
         <InputWithLabel
-          label="Name"
+          label="name"
           value={agent?.name ?? ""}
           onChange={(value) => setAgent({ ...agent, name: value })}
         />
         <InputWithLabel
-          label="Phone Number"
+          label="phone number"
           value={agent?.phoneNumber ?? ""}
           onChange={(value) => setAgent({ ...agent, phoneNumber: value })}
         />
         <InputWithLabel
-          label="Github Repo URL"
+          label="github repo url"
           value={agent?.githubRepoUrl ?? ""}
           onChange={(value) => setAgent({ ...agent, githubRepoUrl: value })}
         />
         <TextAreaWithLabel
-          label="System Prompt"
+          label="system prompt"
           value={agent?.systemPrompt ?? ""}
           onChange={(value) => setAgent({ ...agent, systemPrompt: value })}
         />
         <div className="flex flex-col gap-2">
-          <Label>Intents</Label>
+          <Label>intents</Label>
           {agent.intents.map((intent, index) => (
-            <div key={index} className="flex flex-col gap-2">
-              <InputWithLabel
-                label="Name"
-                value={intent.name}
-                onChange={(value) =>
-                  setAgent({
-                    ...agent,
-                    intents: agent.intents.map((i, iIndex) =>
-                      iIndex === index ? { ...i, name: value } : i,
-                    ),
-                  })
-                }
-              />
-              <TextAreaWithLabel
-                label="Instructions"
-                value={intent.instructions}
-                onChange={(value) =>
-                  setAgent({
-                    ...agent,
-                    intents: agent.intents.map((i, iIndex) =>
-                      iIndex === index ? { ...i, instructions: value } : i,
-                    ),
-                  })
-                }
-              />
-            </div>
+            <IntentCard
+              key={index}
+              intent={intent}
+              index={index}
+              agent={agent}
+              setAgent={setAgent}
+            />
           ))}
-          <Button variant="outline">Add Intent</Button>
+          <Button variant="outline" onClick={addIntent}>
+            add intent
+          </Button>
         </div>
       </DialogContent>
+      <DialogFooter>
+        <Button onClick={() => createAgent(agent)}>create agent</Button>
+      </DialogFooter>
     </Dialog>
   );
 }

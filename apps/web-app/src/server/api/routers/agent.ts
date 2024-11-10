@@ -1,26 +1,19 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { AgentService } from "~/server/services/agent";
-import { IntentSchemaWithoutId } from "~/lib/agent";
+import { CreateAgentSchema } from "~/lib/agent";
 import { db } from "~/server/db";
 
 const agentServiceInstance = new AgentService(db);
 
 export const agentRouter = createTRPCRouter({
   create: protectedProcedure
-    .input(
-      z.object({
-        phoneNumber: z.string(),
-        name: z.string(),
-        prompt: z.string(),
-        intents: z.array(IntentSchemaWithoutId),
-      }),
-    )
+    .input(CreateAgentSchema)
     .mutation(async ({ input, ctx }) => {
       const agent = await agentServiceInstance.createAgent(
         input.phoneNumber,
         input.name,
-        input.prompt,
+        input.systemPrompt,
         input.intents,
         ctx.user.id,
       );
