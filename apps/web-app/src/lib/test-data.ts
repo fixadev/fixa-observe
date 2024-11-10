@@ -12,6 +12,30 @@ export const TEST_AGENT: Agent = {
   systemPrompt: "Test system prompt",
 };
 
+export const TEST_INTENTS = [
+  {
+    id: "1",
+    name: "order food",
+    instructions:
+      "Help the customer place a food order. Get specific items, quantities, any special requests or dietary restrictions.",
+    agentId: "test-agent-1",
+  },
+  {
+    id: "2",
+    name: "make reservation",
+    instructions:
+      "Assist in making a restaurant reservation. Collect date, time, party size, and any special accommodations needed.",
+    agentId: "test-agent-1",
+  },
+  {
+    id: "3",
+    name: "general question",
+    instructions:
+      "Answer general questions about the restaurant including hours, location, menu items, or policies.",
+    agentId: "test-agent-1",
+  },
+];
+
 export const TEST_CALLS: CallWithIncludes[] = [
   {
     id: crypto.randomUUID(),
@@ -20,6 +44,8 @@ export const TEST_CALLS: CallWithIncludes[] = [
     failureReason: null,
     testId: "1",
     testAgentId: "1",
+    intentId: TEST_INTENTS[0]!.id,
+    intent: TEST_INTENTS[0]!,
   },
   {
     id: crypto.randomUUID(),
@@ -28,6 +54,8 @@ export const TEST_CALLS: CallWithIncludes[] = [
     failureReason: null,
     testId: "1",
     testAgentId: "1",
+    intentId: TEST_INTENTS[1]!.id,
+    intent: TEST_INTENTS[1]!,
   },
   {
     id: crypto.randomUUID(),
@@ -36,6 +64,8 @@ export const TEST_CALLS: CallWithIncludes[] = [
     failureReason: "Technical difficulties during call",
     testId: "1",
     testAgentId: "1",
+    intentId: TEST_INTENTS[2]!.id,
+    intent: TEST_INTENTS[2]!,
   },
   {
     id: crypto.randomUUID(),
@@ -44,6 +74,8 @@ export const TEST_CALLS: CallWithIncludes[] = [
     failureReason: null,
     testId: "1",
     testAgentId: "1",
+    intentId: TEST_INTENTS[0]!.id,
+    intent: TEST_INTENTS[0]!,
   },
   {
     id: crypto.randomUUID(),
@@ -52,6 +84,8 @@ export const TEST_CALLS: CallWithIncludes[] = [
     failureReason: "Call disconnected",
     testId: "1",
     testAgentId: "1",
+    intentId: TEST_INTENTS[1]!.id,
+    intent: TEST_INTENTS[1]!,
   },
   {
     id: crypto.randomUUID(),
@@ -60,6 +94,8 @@ export const TEST_CALLS: CallWithIncludes[] = [
     failureReason: null,
     testId: "1",
     testAgentId: "1",
+    intentId: TEST_INTENTS[0]!.id,
+    intent: TEST_INTENTS[0]!,
   },
   {
     id: crypto.randomUUID(),
@@ -68,6 +104,8 @@ export const TEST_CALLS: CallWithIncludes[] = [
     failureReason: "System error during payment",
     testId: "1",
     testAgentId: "1",
+    intentId: TEST_INTENTS[2]!.id,
+    intent: TEST_INTENTS[2]!,
   },
   {
     id: crypto.randomUUID(),
@@ -76,6 +114,8 @@ export const TEST_CALLS: CallWithIncludes[] = [
     failureReason: null,
     testId: "1",
     testAgentId: "1",
+    intentId: TEST_INTENTS[0]!.id,
+    intent: TEST_INTENTS[0]!,
   },
   {
     id: crypto.randomUUID(),
@@ -84,6 +124,8 @@ export const TEST_CALLS: CallWithIncludes[] = [
     failureReason: "Audio quality issues",
     testId: "1",
     testAgentId: "1",
+    intentId: TEST_INTENTS[1]!.id,
+    intent: TEST_INTENTS[1]!,
   },
   {
     id: crypto.randomUUID(),
@@ -92,6 +134,8 @@ export const TEST_CALLS: CallWithIncludes[] = [
     failureReason: null,
     testId: "1",
     testAgentId: "1",
+    intentId: TEST_INTENTS[0]!.id,
+    intent: TEST_INTENTS[0]!,
   },
 ].map((call, index) => ({
   ...call,
