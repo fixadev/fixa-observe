@@ -1,23 +1,14 @@
 import { RocketLaunchIcon } from "@heroicons/react/24/solid";
-import { useMemo } from "react";
 import { Button } from "~/components/ui/button";
-import { TEST_AGENT } from "~/lib/test-data";
 import TestCard from "~/components/dashboard/TestCard";
+import Link from "next/link";
 
-export default function AgentPage({}: { params: { agentId: string } }) {
-  const agent = useMemo(() => {
-    return TEST_AGENT;
-  }, []);
-
+export default function AgentPage({ params }: { params: { agentId: string } }) {
   return (
     <div>
       {/* header */}
       <div className="container flex items-center justify-between py-8">
-        <div className="flex items-center gap-4">
-          <div className="flex flex-col gap-1">
-            <div className="text-2xl font-medium">tests</div>
-          </div>
-        </div>
+        <div className="text-2xl font-medium">tests</div>
         <div className="flex gap-2">
           <Button variant="outline" size="lg">
             configure test agents
@@ -32,12 +23,11 @@ export default function AgentPage({}: { params: { agentId: string } }) {
       {/* content */}
       <div className="container py-8">
         <div className="rounded-t-md border-x border-t border-input shadow-sm">
-          <TestCard agentId={agent.id} testId="1" />
-          <TestCard agentId={agent.id} testId="2" />
-          <TestCard agentId={agent.id} testId="3" />
-          <TestCard agentId={agent.id} testId="4" />
-          <TestCard agentId={agent.id} testId="5" />
-          <TestCard agentId={agent.id} testId="6" />
+          {Array.from({ length: 6 }).map((_, i) => (
+            <Link href={`/dashboard/${params.agentId}/tests/${i + 1}`} key={i}>
+              <TestCard className="cursor-pointer hover:bg-muted" />
+            </Link>
+          ))}
         </div>
       </div>
     </div>

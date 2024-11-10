@@ -22,7 +22,7 @@ import type { Call, CallError } from "~/lib/types";
 import { formatDurationHoursMinutesSeconds } from "~/lib/utils";
 import { debounce } from "lodash";
 import useSWR from "swr";
-import { useAudio } from "./useAudio";
+import { useAudio } from "~/hooks/useAudio";
 
 export type AudioPlayerRef = {
   setActiveError: (error: CallError | null) => void;

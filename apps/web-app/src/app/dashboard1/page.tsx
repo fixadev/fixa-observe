@@ -8,10 +8,10 @@ import {
   SelectContent,
   SelectTrigger,
 } from "~/components/ui/select";
-import CallCard from "./_components/CallCard";
+import CallCard from "../../components/dashboard/CallCard";
 import type { Call } from "~/lib/types";
-import CallDetails from "./_components/CallDetails";
-import { useAudio } from "./_components/useAudio";
+import CallDetails from "../../components/dashboard/CallDetails";
+import { useAudio } from "../../hooks/useAudio";
 import { TEST_CALLS } from "~/lib/test-data";
 
 type CallType = "error" | "no-errors" | "all";

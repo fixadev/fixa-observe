@@ -8,7 +8,7 @@ import {
   TooltipTrigger,
 } from "~/components/ui/tooltip";
 import { ERROR_LABELS } from "~/lib/constants";
-import { useAudio } from "./useAudio";
+import { useAudio } from "~/hooks/useAudio";
 
 export default function CallDetails({ call }: { call: Call }) {
   const audioPlayerRef = useRef<AudioPlayerRef>(null);
