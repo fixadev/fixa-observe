@@ -48,10 +48,9 @@ model Test {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  agent       Agent   @relation(fields: [agentId], references: [id])
-  agentId     String
-  calls       Call[]
-  testAgentId String?
+  agent   Agent  @relation(fields: [agentId], references: [id])
+  agentId String
+  calls   Call[]
 }
 
 model TestAgent {

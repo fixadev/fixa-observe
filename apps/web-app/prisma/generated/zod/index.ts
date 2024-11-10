@@ -16,7 +16,7 @@ export const UserScalarFieldEnumSchema = z.enum(['id','createdAt','updatedAt','e
 
 export const AgentScalarFieldEnumSchema = z.enum(['id','createdAt','updatedAt','name','phoneNumber','githubRepoUrl','systemPrompt','ownerId']);
 
-export const TestScalarFieldEnumSchema = z.enum(['id','createdAt','updatedAt','agentId','testAgentId']);
+export const TestScalarFieldEnumSchema = z.enum(['id','createdAt','updatedAt','agentId']);
 
 export const TestAgentScalarFieldEnumSchema = z.enum(['id','ownerId','name','headshotUrl','description','prompt','vapiId']);
 
@@ -93,7 +93,6 @@ export const TestSchema = z.object({
   createdAt: z.coerce.date(),
   updatedAt: z.coerce.date(),
   agentId: z.string(),
-  testAgentId: z.string().nullable(),
 })
 
 export type Test = z.infer<typeof TestSchema>
@@ -270,7 +269,6 @@ export const TestSelectSchema: z.ZodType<Prisma.TestSelect> = z.object({
   createdAt: z.boolean().optional(),
   updatedAt: z.boolean().optional(),
   agentId: z.boolean().optional(),
-  testAgentId: z.boolean().optional(),
   agent: z.union([z.boolean(),z.lazy(() => AgentArgsSchema)]).optional(),
   calls: z.union([z.boolean(),z.lazy(() => CallFindManyArgsSchema)]).optional(),
   _count: z.union([z.boolean(),z.lazy(() => TestCountOutputTypeArgsSchema)]).optional(),
@@ -614,7 +612,6 @@ export const TestWhereInputSchema: z.ZodType<Prisma.TestWhereInput> = z.object({
   createdAt: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
   updatedAt: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
   agentId: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
-  testAgentId: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
   agent: z.union([ z.lazy(() => AgentRelationFilterSchema),z.lazy(() => AgentWhereInputSchema) ]).optional(),
   calls: z.lazy(() => CallListRelationFilterSchema).optional()
 }).strict();
@@ -624,7 +621,6 @@ export const TestOrderByWithRelationInputSchema: z.ZodType<Prisma.TestOrderByWit
   createdAt: z.lazy(() => SortOrderSchema).optional(),
   updatedAt: z.lazy(() => SortOrderSchema).optional(),
   agentId: z.lazy(() => SortOrderSchema).optional(),
-  testAgentId: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
   agent: z.lazy(() => AgentOrderByWithRelationInputSchema).optional(),
   calls: z.lazy(() => CallOrderByRelationAggregateInputSchema).optional()
 }).strict();
@@ -640,7 +636,6 @@ export const TestWhereUniqueInputSchema: z.ZodType<Prisma.TestWhereUniqueInput> 
   createdAt: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
   updatedAt: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
   agentId: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
-  testAgentId: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
   agent: z.union([ z.lazy(() => AgentRelationFilterSchema),z.lazy(() => AgentWhereInputSchema) ]).optional(),
   calls: z.lazy(() => CallListRelationFilterSchema).optional()
 }).strict());
@@ -650,7 +645,6 @@ export const TestOrderByWithAggregationInputSchema: z.ZodType<Prisma.TestOrderBy
   createdAt: z.lazy(() => SortOrderSchema).optional(),
   updatedAt: z.lazy(() => SortOrderSchema).optional(),
   agentId: z.lazy(() => SortOrderSchema).optional(),
-  testAgentId: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
   _count: z.lazy(() => TestCountOrderByAggregateInputSchema).optional(),
   _max: z.lazy(() => TestMaxOrderByAggregateInputSchema).optional(),
   _min: z.lazy(() => TestMinOrderByAggregateInputSchema).optional()
@@ -664,7 +658,6 @@ export const TestScalarWhereWithAggregatesInputSchema: z.ZodType<Prisma.TestScal
   createdAt: z.union([ z.lazy(() => DateTimeWithAggregatesFilterSchema),z.coerce.date() ]).optional(),
   updatedAt: z.union([ z.lazy(() => DateTimeWithAggregatesFilterSchema),z.coerce.date() ]).optional(),
   agentId: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
-  testAgentId: z.union([ z.lazy(() => StringNullableWithAggregatesFilterSchema),z.string() ]).optional().nullable(),
 }).strict();
 
 export const TestAgentWhereInputSchema: z.ZodType<Prisma.TestAgentWhereInput> = z.object({
@@ -1222,7 +1215,6 @@ export const TestCreateInputSchema: z.ZodType<Prisma.TestCreateInput> = z.object
   id: z.string().cuid().optional(),
   createdAt: z.coerce.date().optional(),
   updatedAt: z.coerce.date().optional(),
-  testAgentId: z.string().optional().nullable(),
   agent: z.lazy(() => AgentCreateNestedOneWithoutTestsInputSchema),
   calls: z.lazy(() => CallCreateNestedManyWithoutTestInputSchema).optional()
 }).strict();
@@ -1232,7 +1224,6 @@ export const TestUncheckedCreateInputSchema: z.ZodType<Prisma.TestUncheckedCreat
   createdAt: z.coerce.date().optional(),
   updatedAt: z.coerce.date().optional(),
   agentId: z.string(),
-  testAgentId: z.string().optional().nullable(),
   calls: z.lazy(() => CallUncheckedCreateNestedManyWithoutTestInputSchema).optional()
 }).strict();
 
@@ -1240,7 +1231,6 @@ export const TestUpdateInputSchema: z.ZodType<Prisma.TestUpdateInput> = z.object
   id: z.union([ z.string().cuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  testAgentId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   agent: z.lazy(() => AgentUpdateOneRequiredWithoutTestsNestedInputSchema).optional(),
   calls: z.lazy(() => CallUpdateManyWithoutTestNestedInputSchema).optional()
 }).strict();
@@ -1250,7 +1240,6 @@ export const TestUncheckedUpdateInputSchema: z.ZodType<Prisma.TestUncheckedUpdat
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   agentId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  testAgentId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   calls: z.lazy(() => CallUncheckedUpdateManyWithoutTestNestedInputSchema).optional()
 }).strict();
 
@@ -1258,15 +1247,13 @@ export const TestCreateManyInputSchema: z.ZodType<Prisma.TestCreateManyInput> = 
   id: z.string().cuid().optional(),
   createdAt: z.coerce.date().optional(),
   updatedAt: z.coerce.date().optional(),
-  agentId: z.string(),
-  testAgentId: z.string().optional().nullable()
+  agentId: z.string()
 }).strict();
 
 export const TestUpdateManyMutationInputSchema: z.ZodType<Prisma.TestUpdateManyMutationInput> = z.object({
   id: z.union([ z.string().cuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  testAgentId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
 }).strict();
 
 export const TestUncheckedUpdateManyInputSchema: z.ZodType<Prisma.TestUncheckedUpdateManyInput> = z.object({
@@ -1274,7 +1261,6 @@ export const TestUncheckedUpdateManyInputSchema: z.ZodType<Prisma.TestUncheckedU
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   agentId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  testAgentId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
 }).strict();
 
 export const TestAgentCreateInputSchema: z.ZodType<Prisma.TestAgentCreateInput> = z.object({
@@ -1865,24 +1851,21 @@ export const TestCountOrderByAggregateInputSchema: z.ZodType<Prisma.TestCountOrd
   id: z.lazy(() => SortOrderSchema).optional(),
   createdAt: z.lazy(() => SortOrderSchema).optional(),
   updatedAt: z.lazy(() => SortOrderSchema).optional(),
-  agentId: z.lazy(() => SortOrderSchema).optional(),
-  testAgentId: z.lazy(() => SortOrderSchema).optional()
+  agentId: z.lazy(() => SortOrderSchema).optional()
 }).strict();
 
 export const TestMaxOrderByAggregateInputSchema: z.ZodType<Prisma.TestMaxOrderByAggregateInput> = z.object({
   id: z.lazy(() => SortOrderSchema).optional(),
   createdAt: z.lazy(() => SortOrderSchema).optional(),
   updatedAt: z.lazy(() => SortOrderSchema).optional(),
-  agentId: z.lazy(() => SortOrderSchema).optional(),
-  testAgentId: z.lazy(() => SortOrderSchema).optional()
+  agentId: z.lazy(() => SortOrderSchema).optional()
 }).strict();
 
 export const TestMinOrderByAggregateInputSchema: z.ZodType<Prisma.TestMinOrderByAggregateInput> = z.object({
   id: z.lazy(() => SortOrderSchema).optional(),
   createdAt: z.lazy(() => SortOrderSchema).optional(),
   updatedAt: z.lazy(() => SortOrderSchema).optional(),
-  agentId: z.lazy(() => SortOrderSchema).optional(),
-  testAgentId: z.lazy(() => SortOrderSchema).optional()
+  agentId: z.lazy(() => SortOrderSchema).optional()
 }).strict();
 
 export const TestAgentCountOrderByAggregateInputSchema: z.ZodType<Prisma.TestAgentCountOrderByAggregateInput> = z.object({
@@ -2960,7 +2943,6 @@ export const TestCreateWithoutAgentInputSchema: z.ZodType<Prisma.TestCreateWitho
   id: z.string().cuid().optional(),
   createdAt: z.coerce.date().optional(),
   updatedAt: z.coerce.date().optional(),
-  testAgentId: z.string().optional().nullable(),
   calls: z.lazy(() => CallCreateNestedManyWithoutTestInputSchema).optional()
 }).strict();
 
@@ -2968,7 +2950,6 @@ export const TestUncheckedCreateWithoutAgentInputSchema: z.ZodType<Prisma.TestUn
   id: z.string().cuid().optional(),
   createdAt: z.coerce.date().optional(),
   updatedAt: z.coerce.date().optional(),
-  testAgentId: z.string().optional().nullable(),
   calls: z.lazy(() => CallUncheckedCreateNestedManyWithoutTestInputSchema).optional()
 }).strict();
 
@@ -3056,7 +3037,6 @@ export const TestScalarWhereInputSchema: z.ZodType<Prisma.TestScalarWhereInput> 
   createdAt: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
   updatedAt: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
   agentId: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
-  testAgentId: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
 }).strict();
 
 export const AgentCreateWithoutTestsInputSchema: z.ZodType<Prisma.AgentCreateWithoutTestsInput> = z.object({
@@ -3397,7 +3377,6 @@ export const TestCreateWithoutCallsInputSchema: z.ZodType<Prisma.TestCreateWitho
   id: z.string().cuid().optional(),
   createdAt: z.coerce.date().optional(),
   updatedAt: z.coerce.date().optional(),
-  testAgentId: z.string().optional().nullable(),
   agent: z.lazy(() => AgentCreateNestedOneWithoutTestsInputSchema)
 }).strict();
 
@@ -3405,8 +3384,7 @@ export const TestUncheckedCreateWithoutCallsInputSchema: z.ZodType<Prisma.TestUn
   id: z.string().cuid().optional(),
   createdAt: z.coerce.date().optional(),
   updatedAt: z.coerce.date().optional(),
-  agentId: z.string(),
-  testAgentId: z.string().optional().nullable()
+  agentId: z.string()
 }).strict();
 
 export const TestCreateOrConnectWithoutCallsInputSchema: z.ZodType<Prisma.TestCreateOrConnectWithoutCallsInput> = z.object({
@@ -3531,7 +3509,6 @@ export const TestUpdateWithoutCallsInputSchema: z.ZodType<Prisma.TestUpdateWitho
   id: z.union([ z.string().cuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  testAgentId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   agent: z.lazy(() => AgentUpdateOneRequiredWithoutTestsNestedInputSchema).optional()
 }).strict();
 
@@ -3540,7 +3517,6 @@ export const TestUncheckedUpdateWithoutCallsInputSchema: z.ZodType<Prisma.TestUn
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   agentId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  testAgentId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
 }).strict();
 
 export const TestAgentUpsertWithoutCallsInputSchema: z.ZodType<Prisma.TestAgentUpsertWithoutCallsInput> = z.object({
@@ -3928,8 +3904,7 @@ export const IntentCreateManyAgentInputSchema: z.ZodType<Prisma.IntentCreateMany
 export const TestCreateManyAgentInputSchema: z.ZodType<Prisma.TestCreateManyAgentInput> = z.object({
   id: z.string().cuid().optional(),
   createdAt: z.coerce.date().optional(),
-  updatedAt: z.coerce.date().optional(),
-  testAgentId: z.string().optional().nullable()
+  updatedAt: z.coerce.date().optional()
 }).strict();
 
 export const AgentToTestAgentUpdateWithoutAgentInputSchema: z.ZodType<Prisma.AgentToTestAgentUpdateWithoutAgentInput> = z.object({
@@ -3968,7 +3943,6 @@ export const TestUpdateWithoutAgentInputSchema: z.ZodType<Prisma.TestUpdateWitho
   id: z.union([ z.string().cuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  testAgentId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   calls: z.lazy(() => CallUpdateManyWithoutTestNestedInputSchema).optional()
 }).strict();
 
@@ -3976,7 +3950,6 @@ export const TestUncheckedUpdateWithoutAgentInputSchema: z.ZodType<Prisma.TestUn
   id: z.union([ z.string().cuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  testAgentId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   calls: z.lazy(() => CallUncheckedUpdateManyWithoutTestNestedInputSchema).optional()
 }).strict();
 
@@ -3984,7 +3957,6 @@ export const TestUncheckedUpdateManyWithoutAgentInputSchema: z.ZodType<Prisma.Te
   id: z.union([ z.string().cuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  testAgentId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
 }).strict();
 
 export const CallCreateManyTestInputSchema: z.ZodType<Prisma.CallCreateManyTestInput> = z.object({

@@ -13,7 +13,7 @@ import CallCard from "~/components/dashboard/CallCard";
 import type { CallWithIncludes } from "~/lib/types";
 import CallDetails from "~/components/dashboard/CallDetails";
 import { AudioProvider, useAudio } from "~/hooks/useAudio";
-import { TEST_CALLS } from "~/lib/test-data";
+import { TEST_CALLS, TEST_TESTS } from "~/lib/test-data";
 
 type CallType = "error" | "no-errors" | "all";
 
@@ -29,7 +29,7 @@ export default function TestPageWithProvider({
   );
 }
 
-function TestPage({ params }: { params: { agentId: string; testId: string } }) {
+function TestPage({}: { params: { agentId: string; testId: string } }) {
   const [selectedCallType, setSelectedCallType] = useState<CallType>("error");
   const [selectedCallId, setSelectedCallId] = useState<string | null>(null);
   const [calls, setCalls] = useState<CallWithIncludes[]>([]);
@@ -41,16 +41,19 @@ function TestPage({ params }: { params: { agentId: string; testId: string } }) {
     setSelectedCallId(TEST_CALLS[0]?.id ?? null);
   }, []);
   return (
-    <div className="flex flex-1 flex-col overflow-hidden">
+    <div>
       {/* header */}
       <div className="container flex items-center justify-between py-4">
-        <TestCard className="w-full rounded-md border border-input shadow-sm" />
+        <TestCard
+          test={TEST_TESTS[0]!}
+          className="w-full rounded-md border border-input shadow-sm"
+        />
       </div>
 
       {/* content */}
-      <div className="container mx-auto flex flex-1 flex-col overflow-hidden">
+      <div className="container">
         <div
-          className="flex flex-1 overflow-hidden rounded-md border border-input shadow-sm outline-none"
+          className="flex rounded-t-md border border-input shadow-sm outline-none"
           autoFocus
           tabIndex={0}
           onKeyDown={(e) => {
@@ -64,7 +67,7 @@ function TestPage({ params }: { params: { agentId: string; testId: string } }) {
             }
           }}
         >
-          <div className="flex w-80 shrink-0 flex-col overflow-hidden border-r border-input">
+          <div className="sticky top-[2.5rem] flex h-[calc(100vh-2.5rem-1px)] w-80 shrink-0 flex-col border-r border-input">
             <div className="flex items-center gap-2 border-b border-input p-2">
               <div className="text-sm">show</div>
               <Select
@@ -113,10 +116,12 @@ function TestPage({ params }: { params: { agentId: string; testId: string } }) {
             </div>
           </div>
           {selectedCallId && (
-            <CallDetails
-              key={selectedCallId}
-              call={calls.find((call) => call.id === selectedCallId)!}
-            />
+            <div className="min-h-screen flex-1">
+              <CallDetails
+                key={selectedCallId}
+                call={calls.find((call) => call.id === selectedCallId)!}
+              />
+            </div>
           )}
         </div>
       </div>

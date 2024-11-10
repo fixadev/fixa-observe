@@ -139,15 +139,17 @@ const AudioPlayer = forwardRef<
 
     const updateWidth = () => {
       if (containerRef.current) {
-        setContainerWidth(containerRef.current.offsetWidth);
+        setContainerWidth(containerRef.current.offsetWidth - 2);
       }
     };
 
     const debouncedSetKey = debounce(() => {
       setKey((prev) => prev + 1);
+      setLoaded(true);
     }, 250);
 
     const handleResize = () => {
+      setLoaded(false);
       updateWidth();
       debouncedSetKey();
     };
@@ -193,7 +195,7 @@ const AudioPlayer = forwardRef<
   );
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex w-full flex-col gap-4">
       <div
         className="relative h-[100px] w-full rounded-md border border-input shadow-sm"
         ref={containerRef}

@@ -1,5 +1,5 @@
 import type { Agent, RoleType } from "prisma/generated/zod";
-import { type CallWithIncludes } from "./types";
+import { type TestWithIncludes, type CallWithIncludes } from "./types";
 
 export const TEST_AGENT: Agent = {
   id: "1",
@@ -296,3 +296,13 @@ export const TEST_CALLS: CallWithIncludes[] = [
   userRecordingUrl:
     "https://jtuyprjjgxbgmtjiykoa.supabase.co/storage/v1/object/public/recordings/1a9a9108-95c4-4fd9-befc-a27cfb5eff69-1730766982390-5c6dd41d-32ec-4fe3-bbc1-e5f3e682a58f-mono.wav",
 }));
+
+export const TEST_TESTS: TestWithIncludes[] = [
+  {
+    id: "1",
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    agentId: "test-agent-1",
+    calls: TEST_CALLS,
+  },
+];
