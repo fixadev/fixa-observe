@@ -11,6 +11,7 @@ import { Button } from "~/components/ui/button";
 import { Cog6ToothIcon, TrashIcon } from "@heroicons/react/24/solid";
 import { Label } from "~/components/ui/label";
 import { Textarea } from "~/components/ui/textarea";
+import { useEffect, useState } from "react";
 
 interface IntentCardProps {
   intent: {
@@ -20,6 +21,7 @@ interface IntentCardProps {
   index: number;
   agent: AgentWithoutId;
   setAgent: (agent: AgentWithoutId) => void;
+  modalOpen: boolean;
 }
 
 export function IntentCard({
@@ -27,6 +29,7 @@ export function IntentCard({
   index,
   agent,
   setAgent,
+  modalOpen,
 }: IntentCardProps) {
   const removeIntent = (index: number) => {
     setAgent({
@@ -52,6 +55,7 @@ export function IntentCard({
         index={index}
         agent={agent}
         setAgent={setAgent}
+        modalOpen={modalOpen}
       />
       <Button
         variant="ghost"
@@ -72,24 +76,43 @@ interface SettingsPopoverProps {
   index: number;
   agent: AgentWithoutId;
   setAgent: (agent: AgentWithoutId) => void;
+  modalOpen: boolean;
 }
 function SettingsPopover({
   intent,
   index,
   agent,
   setAgent,
+  modalOpen,
 }: SettingsPopoverProps) {
+  const [popoverOpen, setPopoverOpen] = useState(false);
+
+  useEffect(() => {
+    if (!modalOpen) {
+      console.log("closing popover");
+      setPopoverOpen(false);
+    }
+  }, [modalOpen]);
+
+  useEffect(() => {
+    console.log("popoverOpen", popoverOpen);
+  }, [popoverOpen]);
+
   return (
-    <Popover>
+    <Popover modal open={popoverOpen} onOpenChange={setPopoverOpen}>
       <PopoverTrigger>
         <Button variant="ghost" className="px-1 py-3">
           <Cog6ToothIcon className="size-6 text-muted-foreground" />
         </Button>
       </PopoverTrigger>
       <PopoverContent
-        className="flex flex-col gap-4"
+        className="flex h-[200px] w-[500px] flex-col gap-4"
+        onOpenAutoFocus={(e) => e.preventDefault()}
+        onPointerDownOutside={(e) => {
+          e.stopPropagation();
+          setPopoverOpen(false);
+        }}
         onClick={(e) => e.stopPropagation()}
-        onMouseDown={(e) => e.stopPropagation()}
       >
         <Label className="text-md font-medium">settings</Label>
         <div className="flex flex-col gap-2">
@@ -100,6 +123,7 @@ function SettingsPopover({
             </Label>
           </div>
           <Textarea
+            className="h-[100px] overflow-y-auto"
             value={intent.instructions}
             onChange={(e) =>
               setAgent({

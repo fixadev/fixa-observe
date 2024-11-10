@@ -68,6 +68,7 @@ const loadingMessages = [
 export function AddAgentModal({ children }: AddAgentModalProps) {
   const [isGeneratingIntents, setIsGeneratingIntents] = useState(false);
   const [loadingText, setLoadingText] = useState("generating intents");
+  const [modalOpen, setModalOpen] = useState(false);
 
   useEffect(() => {
     if (!isGeneratingIntents) return;
@@ -112,7 +113,11 @@ export function AddAgentModal({ children }: AddAgentModalProps) {
     });
   };
 
-  const { mutate: createAgent } = api.agent.create.useMutation();
+  const { mutate: createAgent } = api.agent.create.useMutation({
+    onSuccess: () => {
+      setModalOpen(false);
+    },
+  });
 
   const { mutate: generateIntents } =
     api.agent.generateIntentsFromPrompt.useMutation({
@@ -135,8 +140,12 @@ export function AddAgentModal({ children }: AddAgentModalProps) {
     console.log("isGeneratingIntents", isGeneratingIntents);
   }, [isGeneratingIntents]);
 
+  useEffect(() => {
+    console.log("modalOpen", modalOpen);
+  }, [modalOpen]);
+
   return (
-    <Dialog>
+    <Dialog open={modalOpen} onOpenChange={setModalOpen}>
       <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent className="flex h-[80vh] w-[50vw] min-w-[600px] max-w-screen-xl flex-col p-0">
         <DialogTitle className="p-6 pb-2">new agent</DialogTitle>
@@ -178,6 +187,7 @@ export function AddAgentModal({ children }: AddAgentModalProps) {
                     index={index}
                     agent={agent}
                     setAgent={setAgent}
+                    modalOpen={modalOpen}
                   />
                 ))}
                 <Button variant="outline" onClick={addIntent}>
