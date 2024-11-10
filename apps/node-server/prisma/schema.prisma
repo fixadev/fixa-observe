@@ -25,3 +25,87 @@ model User {
   firstName String?
   lastName  String?
 }
+
+model Agent {
+  id           String      @id
+  phoneNumber  String
+  systemPrompt String
+  testAgents   TestAgent[]
+  intents      Intent[]
+  tests        Test[]
+}
+
+model Test {
+  id                String   @id @default(cuid())
+  agent             Agent    @relation(fields: [agentId], references: [id])
+  agentId           String
+  inProgressCallIds String[]
+  completedCalls    Call[]
+}
+
+model TestAgent {
+  id          String @id @default(cuid())
+  name        String
+  headshotUrl String
+  description String
+  prompt      String
+  vapiId      String
+  agent       Agent  @relation(fields: [agentId], references: [id])
+  agentId     String
+}
+
+model TestAgentTemplate {
+  id          String @id @default(cuid())
+  name        String
+  headshotUrl String
+  description String
+}
+
+model Intent {
+  id          String @id @default(cuid())
+  name        String
+  description String
+  details     String
+  agent       Agent  @relation(fields: [agentId], references: [id])
+  agentId     String
+}
+
+model Call {
+  id            String     @id @default(cuid())
+  result        CallResult
+  failureReason String?
+  test          Test       @relation(fields: [testId], references: [id])
+  testId        String
+  messages      Message[]
+  errors        Error[]
+}
+
+model Message {
+  id      String   @id @default(cuid())
+  speaker Speaker
+  text    String
+  start   DateTime
+  end     DateTime
+  call    Call     @relation(fields: [callId], references: [id])
+  callId  String
+}
+
+model Error {
+  id          String   @id @default(cuid())
+  start       DateTime
+  end         DateTime
+  type        String
+  description String
+  call        Call     @relation(fields: [callId], references: [id])
+  callId      String
+}
+
+enum CallResult {
+  SUCCESS
+  FAILURE
+}
+
+enum Speaker {
+  USER
+  ASSISTANT
+}

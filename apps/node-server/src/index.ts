@@ -1,6 +1,7 @@
 import express, { Request, Response } from "express";
 import { createServer } from "http";
 import SocketManager from "./socket/socketManager";
+import { handleVapiCallEnded } from "./services/handleVapiCalEnded";
 
 const app = express();
 const httpServer = createServer(app);
@@ -14,6 +15,14 @@ export { socketManager };
 // Basic health check endpoint
 app.get("/health", (req: Request, res: Response) => {
   res.json({ status: "ok" });
+});
+
+app.post("/vapi", (req: Request, res: Response) => {
+  const { type } = req.body;
+  if (type === "end-of-call-report") {
+    handleVapiCallEnded(req.body);
+  }
+  res.json({ success: true });
 });
 
 // Example endpoint that sends a message to a specific user

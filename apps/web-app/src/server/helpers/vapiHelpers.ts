@@ -23,3 +23,15 @@ export const createVapiAssistant = async (prompt: string) => {
     },
   });
 };
+
+export const initiateVapiCall = async (
+  assistantId: string,
+  phoneNumber: string,
+) => {
+  return await vapi.calls.create({
+    assistantId,
+    customer: {
+      number: phoneNumber,
+    },
+  });
+};

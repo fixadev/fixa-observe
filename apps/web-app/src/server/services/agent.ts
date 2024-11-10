@@ -2,8 +2,10 @@ import { db } from "../db";
 import { type TestAgent, type IntentWithoutId } from "~/lib/agent";
 import { createTestAgents } from "../helpers/createTestAgents";
 import { v4 as uuidv4 } from "uuid";
+import { type PrismaClient } from "@prisma/client";
 
 export class AgentService {
+  constructor(private db: PrismaClient) {}
   async createAgent(
     phoneNumber: string,
     prompt: string,

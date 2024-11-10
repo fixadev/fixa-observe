@@ -2,8 +2,9 @@ import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { AgentService } from "~/server/services/agent";
 import { IntentSchemaWithoutId } from "~/lib/agent";
+import { db } from "~/server/db";
 
-const agentServiceInstance = new AgentService();
+const agentServiceInstance = new AgentService(db);
 
 export const agentRouter = createTRPCRouter({
   createAgent: protectedProcedure
