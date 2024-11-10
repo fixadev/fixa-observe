@@ -3,8 +3,15 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
+// console.log(
+//   "Raw env file contents:",
+//   require("fs").readFileSync(".env", "utf8"),
+// );
+console.log("Process env:", process.env.OPENAI_API_KEY);
+
 const envSchema = z.object({
-  VAPI_API_KEY: z.string().min(1),
+  OPENAI_API_KEY: z.string(),
+  VAPI_API_KEY: z.string(),
   HOST: z.string().min(1),
   PORT: z.string().transform((val) => parseInt(val)),
   ENVIRONMENT: z.enum(["development", "production", "test"]),
