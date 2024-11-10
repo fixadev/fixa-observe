@@ -1,6 +1,7 @@
 import { createCallerFactory, createTRPCRouter } from "~/server/api/trpc";
 import { s3Router } from "./routers/s3";
-import { agentRouter } from "./routers/retellAgent";
+import { agentRouter } from "./routers/agent";
+import { testRouter } from "./routers/test";
 /*  *
  * This is the primary router for your server.
  *

@@ -7,6 +7,7 @@ import {
 import { type z } from "zod";
 
 export type Agent = z.infer<typeof AgentSchema>;
+export type AgentWithoutId = Omit<Agent, "id">;
 
 export type TestAgent = z.infer<typeof TestAgentSchema>;
 export type TestAgentWithoutId = Omit<TestAgent, "id">;
