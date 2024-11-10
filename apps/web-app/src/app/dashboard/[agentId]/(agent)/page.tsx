@@ -21,13 +21,18 @@ export default function AgentPage({ params }: { params: { agentId: string } }) {
       <div className="h-px w-full bg-input" />
 
       {/* content */}
-      <div className="container flex-1 overflow-y-auto py-8">
-        <div className="rounded-t-md border-x border-t border-input shadow-sm">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <Link href={`/dashboard/${params.agentId}/tests/${i + 1}`} key={i}>
-              <TestCard className="cursor-pointer hover:bg-muted" />
-            </Link>
-          ))}
+      <div className="flex-1 overflow-y-auto py-8">
+        <div className="container">
+          <div className="rounded-t-md border-x border-t border-input shadow-sm">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <Link
+                href={`/dashboard/${params.agentId}/tests/${i + 1}`}
+                key={i}
+              >
+                <TestCard className="cursor-pointer hover:bg-muted" />
+              </Link>
+            ))}
+          </div>
         </div>
       </div>
     </div>
