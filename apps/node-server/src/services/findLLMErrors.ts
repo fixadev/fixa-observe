@@ -1,6 +1,5 @@
 import { openai } from "../utils/OpenAIClient";
 import { z } from "zod";
-import { zodResponseFormat } from "openai/helpers/zod";
 import { ArtifactMessagesItem, Call } from "@vapi-ai/server-sdk/api";
 
 type CallResult = {
@@ -10,7 +9,7 @@ type CallResult = {
     secondsFromStart: number;
     duration: number;
   }[];
-  result: boolean;
+  success: boolean;
   failureReason: string;
 };
 
@@ -23,7 +22,7 @@ const outputSchema = z.object({
       duration: z.number(),
     }),
   ),
-  result: z.boolean(),
+  success: z.boolean(),
   failureReason: z.string(),
 });
 
@@ -42,7 +41,7 @@ export const analyzeCall = async (
   - The call transcript
 
   You will output a JSON object with the following fields:
-  - result: A boolean indicating if the call was successful
+  - success: A boolean indicating if the call was successful
   - failureReason: A short sentence describing the primary failure reason, if any
   - errors: An array of objects, each representing an error. Each error object will have the following fields:
     - type: A string describing the type of error
@@ -88,7 +87,7 @@ export const analyzeCall = async (
 
   return {
     errors: parsedResponse.errors,
-    result: parsedResponse.result,
+    success: parsedResponse.success,
     failureReason: parsedResponse.failureReason,
   };
 };

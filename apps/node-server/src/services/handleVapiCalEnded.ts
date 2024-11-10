@@ -104,7 +104,7 @@ export const handleVapiCallEnded = async (
   //   message.artifact.messages,
   // );
 
-  const { errors, result, failureReason } = await analyzeCall(
+  const { errors, success, failureReason } = await analyzeCall(
     mockSystemPrompt,
     mockUserPrompt,
     message.call,
@@ -112,7 +112,7 @@ export const handleVapiCallEnded = async (
   );
 
   console.log("ERRORS", errors);
-  console.log("RESULT", result);
+  console.log("SUCCESS", success);
   console.log("FAILURE REASON", failureReason);
 
   // await db.call.update({
