@@ -9,7 +9,7 @@ export class AgentService {
   async createAgent(
     phoneNumber: string,
     name: string,
-    prompt: string,
+    systemPrompt: string,
     intents: IntentWithoutId[],
     ownerId: string,
   ) {
@@ -18,7 +18,7 @@ export class AgentService {
         id: uuidv4(),
         phoneNumber,
         name,
-        systemPrompt: prompt,
+        systemPrompt,
         intents: {
           createMany: {
             data: intents,
