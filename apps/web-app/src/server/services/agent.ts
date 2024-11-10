@@ -1,5 +1,5 @@
 import { db } from "../db";
-import { type TestAgent, type IntentWithoutId } from "~/lib/agent";
+import { type IntentWithoutId, type TestAgentWithoutId } from "~/lib/agent";
 import { createTestAgents } from "../helpers/createTestAgents";
 import { v4 as uuidv4 } from "uuid";
 import { type PrismaClient } from "@prisma/client";
@@ -8,6 +8,7 @@ export class AgentService {
   constructor(private db: PrismaClient) {}
   async createAgent(
     phoneNumber: string,
+    name: string,
     prompt: string,
     intents: IntentWithoutId[],
   ) {
@@ -15,6 +16,7 @@ export class AgentService {
       data: {
         id: uuidv4(),
         phoneNumber,
+        name,
         systemPrompt: prompt,
         intents: {
           createMany: {
@@ -41,7 +43,7 @@ export class AgentService {
     }
     const testAgentTemplates = await db.testAgent.findMany();
 
-    const testAgentsToCreate: TestAgent[] = await createTestAgents(
+    const testAgentsToCreate: TestAgentWithoutId[] = await createTestAgents(
       testAgentTemplates,
       agent,
       agent?.intents,
