@@ -10,15 +10,13 @@ export const agentRouter = createTRPCRouter({
   create: protectedProcedure
     .input(CreateAgentSchema)
     .mutation(async ({ input, ctx }) => {
-      const agent = await agentServiceInstance.createAgent(
+      return await agentServiceInstance.createAgent(
         input.phoneNumber,
         input.name,
         input.systemPrompt,
         input.intents,
         ctx.user.id,
       );
-      const testAgents = await agentServiceInstance.createTestAgents(agent.id);
-      return { agent, testAgents };
     }),
 
   getAgent: protectedProcedure
@@ -30,14 +28,22 @@ export const agentRouter = createTRPCRouter({
   toggleTestAgentEnabled: protectedProcedure
     .input(
       z.object({
+        agentId: z.string().cuid(),
         testAgentId: z.string().cuid(),
         enabled: z.boolean(),
       }),
     )
     .mutation(async ({ input }) => {
       return await agentServiceInstance.toggleTestAgentEnabled(
+        input.agentId,
         input.testAgentId,
         input.enabled,
       );
+    }),
+
+  generateIntentsFromPrompt: protectedProcedure
+    .input(z.object({ prompt: z.string() }))
+    .mutation(async ({ input }) => {
+      return await agentServiceInstance.generateIntentsFromPrompt(input.prompt);
     }),
 });

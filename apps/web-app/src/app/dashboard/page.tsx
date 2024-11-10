@@ -9,11 +9,13 @@ export default function DashboardPage() {
     <div className="flex flex-1 flex-col gap-8 overflow-hidden">
       <div className="container flex items-center justify-between">
         <div className="text-2xl font-medium">agents.</div>
-        <AddAgentModal>
-          <Button className="flex items-center gap-2">
-            <PlusIcon className="size-4" /> create agent
-          </Button>
-        </AddAgentModal>
+        <div>
+          <AddAgentModal>
+            <Button className="flex items-center gap-2">
+              <PlusIcon className="size-4" /> create agent
+            </Button>
+          </AddAgentModal>
+        </div>
       </div>
       <div className="flex-1 overflow-y-auto pb-8">
         <div className="container grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
