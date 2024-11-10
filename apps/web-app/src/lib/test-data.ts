@@ -1,4 +1,4 @@
-import type { Agent, RoleType } from "prisma/generated/zod";
+import type { Agent, RoleType, TestAgent } from "prisma/generated/zod";
 import { type TestWithIncludes, type CallWithIncludes } from "./types";
 
 export const TEST_AGENT: Agent = {
@@ -11,6 +11,36 @@ export const TEST_AGENT: Agent = {
   githubRepoUrl: "https://github.com/pixa-dev/pixa-drive-thru",
   systemPrompt: "Test system prompt",
 };
+
+export const TEST_TEST_AGENTS: TestAgent[] = [
+  {
+    id: "1",
+    ownerId: null,
+    name: "steve",
+    headshotUrl: "/images/agent-avatars/steve.jpeg",
+    description: "angry man who had a bad day",
+    prompt: "Test prompt",
+    vapiId: "test-vapi-id",
+  },
+  {
+    id: "2",
+    ownerId: null,
+    name: "marge",
+    headshotUrl: "/images/agent-avatars/marge.jpeg",
+    description: "old lady with a temper",
+    prompt: "Test prompt",
+    vapiId: "test-vapi-id",
+  },
+  {
+    id: "3",
+    ownerId: null,
+    name: "lily",
+    headshotUrl: "/images/agent-avatars/lily.jpeg",
+    description: "young woman who says 'like' a lot",
+    prompt: "Test prompt",
+    vapiId: "test-vapi-id",
+  },
+];
 
 export const TEST_INTENTS = [
   {
@@ -143,6 +173,7 @@ export const TEST_CALLS: CallWithIncludes[] = [
   duration: Math.floor(Math.random() * (600 - 60 + 1)) + 60,
   unread: index === 0,
   node: ["1", "2", "3", "4", "4a", "4b"][index % 6]!,
+  testAgent: TEST_TEST_AGENTS[Math.floor(Math.random() * 3)]!,
   messages: [
     {
       id: crypto.randomUUID(),
