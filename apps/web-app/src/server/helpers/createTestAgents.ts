@@ -50,7 +50,7 @@ export const createTestAgents = async (
         `\n\n 3. system prompt of agent to test: ${agent.systemPrompt}`;
 
       const completion = await openai.beta.chat.completions.parse({
-        model: "gpt-4o-2024-08-06",
+        model: "gpt-4o",
         messages: [{ role: "system", content: prompt }],
         response_format: zodResponseFormat(outputSchema, "prompt"),
       });

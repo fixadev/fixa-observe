@@ -41,7 +41,7 @@ model Test {
   id         String      @id @default(cuid())
   agent      Agent       @relation(fields: [agentId], references: [id])
   agentId    String
-  testAgents TestAgent[]
+  testAgents TestAgent[] @relation("TestToTestAgent")
   calls      Call[]
 }
 
@@ -53,11 +53,10 @@ model TestAgent {
   description String
   prompt      String
   vapiId      String
-  test        Test    @relation(fields: [testId], references: [id])
-  testId      String
   Call        Call[]
   Agent       Agent?  @relation(fields: [agentId], references: [id])
   agentId     String?
+  tests       Test[]  @relation("TestToTestAgent")
 }
 
 model TestAgentTemplate {

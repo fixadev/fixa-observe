@@ -1,4 +1,4 @@
-import { CallStatus } from "@prisma/client";
+import { CallResult, CallStatus } from "@prisma/client";
 import { db } from "../db";
 import { type ServerMessageEndOfCallReport } from "@vapi-ai/server-sdk/api";
 import { analyzeCall } from "./findErrors";
@@ -47,13 +47,15 @@ export const handleVapiCallEnded = async (
     message.artifact.messages,
   );
 
-  console.log("ARTIFACTS", message.artifact.messages);
-  console.log("ARTIFACTS", message.artifact.messages);
   await db.call.update({
     where: { id: callId },
     data: {
       status: CallStatus.COMPLETED,
-      errors,
+      errors: {
+        create: errors,
+      },
+      result: result ? CallResult.SUCCESS : CallResult.FAILURE,
+      failureReason,
     },
   });
 };
