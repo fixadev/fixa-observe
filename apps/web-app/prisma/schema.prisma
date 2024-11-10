@@ -30,17 +30,17 @@ model User {
 }
 
 model Agent {
-  id            String      @id
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
-  name          String
-  phoneNumber   String
-  githubRepoUrl String?
-  systemPrompt  String
-  testAgents    TestAgent[]
-  intents       Intent[]
-  tests         Test[]
-  ownerId       String
+  id                String             @id
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  name              String
+  phoneNumber       String
+  githubRepoUrl     String?
+  systemPrompt      String
+  enabledTestAgents AgentToTestAgent[]
+  intents           Intent[]
+  tests             Test[]
+  ownerId           String
 }
 
 model Test {
@@ -48,26 +48,23 @@ model Test {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  agent      Agent       @relation(fields: [agentId], references: [id])
-  agentId    String
-  testAgents TestAgent[] @relation("TestToTestAgent")
-  calls      Call[]
+  agent       Agent   @relation(fields: [agentId], references: [id])
+  agentId     String
+  calls       Call[]
+  testAgentId String?
 }
 
 model TestAgent {
-  id          String  @id @default(cuid())
+  id          String             @id @default(cuid())
+  ownerId     String?
   name        String
-  enabled     Boolean @default(true)
+  enabled     Boolean            @default(true)
   headshotUrl String
   description String
   prompt      String
   vapiId      String
-
-  agent   Agent?  @relation(fields: [agentId], references: [id])
-  agentId String?
-
-  tests Test[] @relation("TestToTestAgent")
-  calls Call[]
+  calls       Call[]
+  agents      AgentToTestAgent[]
 }
 
 model TestAgentTemplate {
@@ -142,4 +139,13 @@ enum Role {
 enum CallStatus {
   in_progress
   completed
+}
+
+model AgentToTestAgent {
+  agent       Agent     @relation(fields: [agentId], references: [id])
+  agentId     String
+  testAgent   TestAgent @relation(fields: [testAgentId], references: [id])
+  testAgentId String
+
+  @@id([agentId, testAgentId])
 }
