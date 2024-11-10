@@ -102,12 +102,12 @@ model Message {
 }
 
 model Error {
-  id          String   @id @default(cuid())
-  start       DateTime
-  end         DateTime
+  id          String @id @default(cuid())
+  start       String
+  end         String
   type        String
   description String
-  call        Call     @relation(fields: [callId], references: [id])
+  call        Call   @relation(fields: [callId], references: [id])
   callId      String
 }
 
