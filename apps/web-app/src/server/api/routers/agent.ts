@@ -7,7 +7,7 @@ import { db } from "~/server/db";
 const agentServiceInstance = new AgentService(db);
 
 export const agentRouter = createTRPCRouter({
-  createAgent: protectedProcedure
+  create: protectedProcedure
     .input(
       z.object({
         phoneNumber: z.string(),
@@ -32,5 +32,19 @@ export const agentRouter = createTRPCRouter({
     .input(z.object({ id: z.string().cuid() }))
     .query(async ({ input }) => {
       return await agentServiceInstance.getAgent(input.id);
+    }),
+
+  toggleTestAgentEnabled: protectedProcedure
+    .input(
+      z.object({
+        testAgentId: z.string().cuid(),
+        enabled: z.boolean(),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      return await agentServiceInstance.toggleTestAgentEnabled(
+        input.testAgentId,
+        input.enabled,
+      );
     }),
 });

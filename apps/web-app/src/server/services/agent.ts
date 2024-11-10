@@ -57,4 +57,11 @@ export class AgentService {
       })),
     });
   }
+
+  async toggleTestAgentEnabled(testAgentId: string, enabled: boolean) {
+    return await db.testAgent.update({
+      where: { id: testAgentId },
+      data: { enabled },
+    });
+  }
 }
