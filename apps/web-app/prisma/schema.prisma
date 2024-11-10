@@ -47,9 +47,17 @@ model TestAgent {
   name        String
   headshotUrl String
   description String
+  prompt      String
   vapiId      String
   agent       Agent  @relation(fields: [agentId], references: [id])
   agentId     String
+}
+
+model TestAgentTemplate {
+  id          String @id @default(cuid())
+  name        String
+  headshotUrl String
+  description String
 }
 
 model Intent {
