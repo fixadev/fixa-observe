@@ -1,46 +1,61 @@
-import { CallResult } from "@prisma/client";
+import { CallResult, CallStatus } from "@prisma/client";
 import { db } from "../db";
 import { type ServerMessageEndOfCallReport } from "@vapi-ai/server-sdk/api";
+import { analyzeCall } from "./findErrors";
 
 export const handleVapiCallEnded = async (
-  body: ServerMessageEndOfCallReport,
+  message: ServerMessageEndOfCallReport,
 ) => {
-  const callId = body?.call?.id;
+  const callId = message?.call?.id;
   if (!callId) {
     console.error("No call ID found in Vapi call ended message");
     return;
   }
-  const relevantTest = await db.test.findFirst({
-    where: { inProgressCallIds: { has: callId } },
+
+  const test = await db.test.findFirst({
+    where: { calls: { some: { id: callId } } },
+    include: { calls: true, agent: true },
   });
 
-  if (!relevantTest) return;
-  const updatedInProgressCallIds = relevantTest.inProgressCallIds.filter(
-    (id) => id !== callId,
+  const call = await db.call.findFirst({
+    where: { id: callId },
+    include: { testAgent: true },
+  });
+
+  const testAgent = call?.testAgent;
+  const agent = test?.agent;
+
+  if (!call) {
+    console.error("No call found in DB for call ID", callId);
+    return;
+  }
+
+  if (!agent?.systemPrompt || !testAgent?.prompt) {
+    console.error("No agent or test agent prompt found");
+    return;
+  }
+
+  if (!message.call || !message.artifact.messages) {
+    console.error("No artifact messages found");
+    return;
+  }
+
+  const { errors, result, failureReason } = await analyzeCall(
+    agent.systemPrompt,
+    testAgent?.prompt,
+    message.call,
+    message.artifact.messages,
   );
 
-  console.log("VAPI CALL ENDED", body);
-  // await db.test.update({
-  //   where: { id: relevantTest.id },
-  //   data: {
-  //     inProgressCallIds: updatedInProgressCallIds,
-  //     completedCalls: {
-  //       create: {
-  //         id: callId,
-  //         result: CallResult.SUCCESS,
-  //         failureReason: null,
-  //         messages: {
-  //           createMany: {
-  //             data: body.call?.messages?.map((message) => ({
-  //               speaker: message.,
-  //               text: message.text,
-  //               start: message.start,
-  //               end: message.end,
-  //             })),
-  //           },
-  //         },
-  //       },
-  //     },
-  //   },
-  // });
+  await db.call.update({
+    where: { id: callId },
+    data: {
+      status: CallStatus.COMPLETED,
+      errors: {
+        create: errors,
+      },
+      result: result ? CallResult.SUCCESS : CallResult.FAILURE,
+      failureReason,
+    },
+  });
 };

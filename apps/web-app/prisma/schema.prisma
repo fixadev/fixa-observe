@@ -38,22 +38,25 @@ model Agent {
 }
 
 model Test {
-  id                String   @id @default(cuid())
-  agent             Agent    @relation(fields: [agentId], references: [id])
-  agentId           String
-  inProgressCallIds String[]
-  completedCalls    Call[]
+  id         String      @id @default(cuid())
+  agent      Agent       @relation(fields: [agentId], references: [id])
+  agentId    String
+  testAgents TestAgent[] @relation("TestToTestAgent")
+  calls      Call[]
 }
 
 model TestAgent {
-  id          String @id @default(cuid())
+  id          String  @id @default(cuid())
   name        String
+  enabled     Boolean @default(true)
   headshotUrl String
   description String
   prompt      String
   vapiId      String
-  agent       Agent  @relation(fields: [agentId], references: [id])
-  agentId     String
+  Call        Call[]
+  Agent       Agent?  @relation(fields: [agentId], references: [id])
+  agentId     String?
+  tests       Test[]  @relation("TestToTestAgent")
 }
 
 model TestAgentTemplate {
@@ -74,31 +77,36 @@ model Intent {
 
 model Call {
   id            String     @id @default(cuid())
+  status        CallStatus
   result        CallResult
   failureReason String?
   test          Test       @relation(fields: [testId], references: [id])
   testId        String
+  testAgent     TestAgent  @relation(fields: [testAgentId], references: [id])
+  testAgentId   String
   messages      Message[]
   errors        Error[]
 }
 
 model Message {
-  id      String   @id @default(cuid())
-  speaker Speaker
-  text    String
-  start   DateTime
-  end     DateTime
-  call    Call     @relation(fields: [callId], references: [id])
-  callId  String
+  id               String @id @default(cuid())
+  role             Role
+  text             String
+  secondsFromStart Float
+  duration         Float
+  startTime        Float
+  endTime          Float
+  call             Call   @relation(fields: [callId], references: [id])
+  callId           String
 }
 
 model Error {
-  id          String   @id @default(cuid())
-  start       DateTime
-  end         DateTime
+  id          String @id @default(cuid())
+  start       String
+  end         String
   type        String
   description String
-  call        Call     @relation(fields: [callId], references: [id])
+  call        Call   @relation(fields: [callId], references: [id])
   callId      String
 }
 
@@ -107,7 +115,12 @@ enum CallResult {
   FAILURE
 }
 
-enum Speaker {
+enum Role {
   USER
   ASSISTANT
+}
+
+enum CallStatus {
+  IN_PROGRESS
+  COMPLETED
 }

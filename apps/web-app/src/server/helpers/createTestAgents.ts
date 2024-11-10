@@ -5,7 +5,7 @@ import {
   type TestAgentTemplate,
   type Agent,
   type Intent,
-  type TestAgent,
+  type TestAgentWithoutId,
 } from "~/lib/agent";
 import { createVapiAssistant } from "./vapiHelpers";
 import { v4 as uuidv4 } from "uuid";
@@ -18,7 +18,7 @@ export const createTestAgents = async (
   testAgentTemplates: TestAgentTemplate[],
   agent: Agent,
   intents: Intent[],
-): Promise<TestAgent[]> => {
+): Promise<TestAgentWithoutId[]> => {
   const testAgentIntentPairs = testAgentTemplates.flatMap((testAgentTemplate) =>
     intents.map((intent) => ({
       testAgentTemplate,
@@ -50,7 +50,7 @@ export const createTestAgents = async (
         `\n\n 3. system prompt of agent to test: ${agent.systemPrompt}`;
 
       const completion = await openai.beta.chat.completions.parse({
-        model: "gpt-4o-2024-08-06",
+        model: "gpt-4o",
         messages: [{ role: "system", content: prompt }],
         response_format: zodResponseFormat(outputSchema, "prompt"),
       });
@@ -68,6 +68,7 @@ export const createTestAgents = async (
         vapiId: vapiAssistant.id,
         agentId: agent.id,
         id: uuidv4(),
+        enabled: true,
       };
     }),
   );

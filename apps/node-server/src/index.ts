@@ -5,36 +5,44 @@ import { handleVapiCallEnded } from "./services/handleVapiCalEnded";
 
 const app = express();
 const httpServer = createServer(app);
-
-// Create socket manager instance
 const socketManager = new SocketManager(httpServer);
-
-// Export for use in other parts of the application
 export { socketManager };
 
-// Basic health check endpoint
-app.get("/health", (req: Request, res: Response) => {
-  res.json({ status: "ok" });
-});
+// Middleware
+app.use(express.json());
+
+// Routes
+app.get("/health", (_, res: Response) => res.json({ status: "ok" }));
 
 app.post("/vapi", (req: Request, res: Response) => {
-  const { type } = req.body;
-  if (type === "end-of-call-report") {
-    handleVapiCallEnded(req.body);
+  const { message } = req.body;
+  console.log("VAPI WEBHOOK RECEIVED", req.body);
+  if (message.type === "end-of-call-report") {
+    handleVapiCallEnded(message);
   }
   res.json({ success: true });
 });
 
-// Example endpoint that sends a message to a specific user
-app.post("/message/:userId", express.json(), (req: Request, res: Response) => {
+app.post("/message/:userId", (req: Request, res: Response) => {
   const { userId } = req.params;
   const { event, data } = req.body;
-
   socketManager.sendMessageToUser(userId, event, data);
   res.json({ success: true });
 });
 
-const PORT = process.env.PORT || 3000;
+// Server setup with unified cleanup
+const PORT = process.env.PORT || 3003;
+const cleanup = () => {
+  httpServer.close(() => {
+    console.log("Server closed");
+    process.exit(0);
+  });
+};
+
+["SIGINT", "SIGTERM", "SIGUSR2"].forEach((signal) => {
+  process.on(signal, cleanup);
+});
+
 httpServer.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });

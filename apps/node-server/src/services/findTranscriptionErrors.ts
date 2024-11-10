@@ -2,7 +2,7 @@ import vapi from "../utils/vapiClient";
 import axios from "axios";
 import { env } from "../env";
 
-export const analyzeCall = async (callId: string) => {
+export const findTranscriptionErrors = async (callId: string) => {
   try {
     const call = await vapi.calls.get(callId);
     const result = await axios.post(`${env.AUDIO_SERVICE_URL}/transcribe`, {
@@ -21,4 +21,4 @@ export const analyzeCall = async (callId: string) => {
   }
 };
 
-analyzeCall("bcf202e5-f9a9-411a-b98e-d4cb356be680");
+findTranscriptionErrors("bcf202e5-f9a9-411a-b98e-d4cb356be680");
