@@ -3,6 +3,7 @@
 import { Tabs, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
+import { useMemo } from "react";
 
 export default function AgentLayout({
   params,
@@ -12,12 +13,15 @@ export default function AgentLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
-  const isSettings = pathname.endsWith("/settings");
+  const tabValue = useMemo(() => {
+    if (pathname.endsWith("/settings")) return "settings";
+    return "tests";
+  }, [pathname]);
 
   return (
     <div>
       <div className="w-full border-b border-input">
-        <Tabs value={isSettings ? "settings" : "tests"}>
+        <Tabs value={tabValue}>
           <TabsList variant="outline" className="h-10">
             <TabsTrigger
               variant="outline"
