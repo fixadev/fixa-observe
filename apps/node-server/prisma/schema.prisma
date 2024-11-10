@@ -76,12 +76,11 @@ model TestAgentTemplate {
 }
 
 model Intent {
-  id          String @id @default(cuid())
-  name        String
-  description String
-  details     String
-  agent       Agent  @relation(fields: [agentId], references: [id])
-  agentId     String
+  id           String @id @default(cuid())
+  name         String
+  instructions String
+  agent        Agent  @relation(fields: [agentId], references: [id])
+  agentId      String
 }
 
 model Call {

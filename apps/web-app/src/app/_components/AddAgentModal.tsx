@@ -11,8 +11,6 @@ import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 
-import { type LlmResponse } from "retell-sdk/resources/llm.mjs";
-import { type Call } from "retell-sdk/resources/call.mjs";
 import { useEffect, useState } from "react";
 import { cn } from "~/lib/utils";
 import { type Agent, type AgentWithoutId } from "~/lib/agent";
@@ -61,6 +59,12 @@ export function AddAgentModal({ children, onComplete }: AddAgentModalProps) {
     updatedAt: new Date(),
     githubRepoUrl: "",
     ownerId: "",
+    intents: [
+      {
+        name: "",
+        instructions: "",
+      },
+    ],
   });
 
   const { mutate: createAgent } = api.agent.create.useMutation();
@@ -92,7 +96,35 @@ export function AddAgentModal({ children, onComplete }: AddAgentModalProps) {
         />
         <div className="flex flex-col gap-2">
           <Label>Intents</Label>
-          <Button>Add Intent</Button>
+          {agent.intents.map((intent, index) => (
+            <div key={index} className="flex flex-col gap-2">
+              <InputWithLabel
+                label="Name"
+                value={intent.name}
+                onChange={(value) =>
+                  setAgent({
+                    ...agent,
+                    intents: agent.intents.map((i, iIndex) =>
+                      iIndex === index ? { ...i, name: value } : i,
+                    ),
+                  })
+                }
+              />
+              <TextAreaWithLabel
+                label="Instructions"
+                value={intent.instructions}
+                onChange={(value) =>
+                  setAgent({
+                    ...agent,
+                    intents: agent.intents.map((i, iIndex) =>
+                      iIndex === index ? { ...i, instructions: value } : i,
+                    ),
+                  })
+                }
+              />
+            </div>
+          ))}
+          <Button variant="outline">Add Intent</Button>
         </div>
       </DialogContent>
     </Dialog>
