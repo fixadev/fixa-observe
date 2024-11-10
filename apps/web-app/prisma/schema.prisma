@@ -36,10 +36,11 @@ model Agent {
 }
 
 model Test {
-  id      String @id @default(cuid())
-  agent   Agent  @relation(fields: [agentId], references: [id])
-  agentId String
-  calls   Call[]
+  id                String   @id @default(cuid())
+  agent             Agent    @relation(fields: [agentId], references: [id])
+  agentId           String
+  inProgressCallIds String[]
+  completedCalls    Call[]
 }
 
 model TestAgent {
