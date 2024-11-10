@@ -267,56 +267,28 @@ export const TEST_CALLS: CallWithIncludes[] = [
       callId: call.id,
     },
   ],
-  errors: [
-    {
-      id: crypto.randomUUID(),
-      secondsFromStart: 1.36,
-      duration: 3.48,
-      type: "",
-      description: "agent did not mention correct business name in greeting",
-      callId: call.id,
-    },
-    {
-      id: crypto.randomUUID(),
-      secondsFromStart: 50.36,
-      duration: 2.48,
-      type: "",
-      description: "agent did not mention correct business name in greeting",
-      callId: call.id,
-    },
-    // {
-    //   id: crypto.randomUUID(),
-    //   secondsFromStart: 19.5,
-    //   duration: 1,
-    //   type: "",
-    //   description: "",
-    //   callId: call.id,
-    // },
-    // {
-    //   id: crypto.randomUUID(),
-    //   secondsFromStart: 24.3,
-    //   duration: 0.5,
-    //   type: "",
-    //   description: "",
-    //   callId: call.id,
-    // },
-    // {
-    //   id: crypto.randomUUID(),
-    //   secondsFromStart: 62.5,
-    //   duration: 0.5,
-    //   type: "",
-    //   description: "",
-    //   callId: call.id,
-    // },
-    // {
-    //   id: crypto.randomUUID(),
-    //   secondsFromStart: 62.5,
-    //   duration: 0.5,
-    //   type: "",
-    //   description: "",
-    //   callId: call.id,
-    // },
-  ],
+  errors:
+    call.result === "success"
+      ? []
+      : [
+          {
+            id: crypto.randomUUID(),
+            secondsFromStart: 1.36,
+            duration: 3.48,
+            type: "",
+            description:
+              "agent did not mention correct business name in greeting",
+            callId: call.id,
+          },
+          {
+            id: crypto.randomUUID(),
+            secondsFromStart: 50.36,
+            duration: 2.48,
+            type: "",
+            description: "agent got order incorrect",
+            callId: call.id,
+          },
+        ],
   stereoRecordingUrl:
     "https://jtuyprjjgxbgmtjiykoa.supabase.co/storage/v1/object/public/recordings/1a9a9108-95c4-4fd9-befc-a27cfb5eff69-1730766982390-5c6dd41d-32ec-4fe3-bbc1-e5f3e682a58f-mono.wav",
   botRecordingUrl:
