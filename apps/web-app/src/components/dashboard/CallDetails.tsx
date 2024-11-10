@@ -1,16 +1,12 @@
-import type { Call, CallError } from "~/lib/types";
+import type { CallWithIncludes } from "~/lib/types";
 import AudioPlayer, { type AudioPlayerRef } from "./AudioPlayer";
 import { useMemo, useRef, useState, useEffect, useCallback } from "react";
 import { cn, formatDurationHoursMinutesSeconds } from "~/lib/utils";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "~/components/ui/tooltip";
-import { ERROR_LABELS } from "~/lib/constants";
 import { useAudio } from "~/hooks/useAudio";
+import { type CallError } from "prisma/generated/zod";
+import { ExclamationCircleIcon } from "@heroicons/react/24/solid";
 
-export default function CallDetails({ call }: { call: Call }) {
+export default function CallDetails({ call }: { call: CallWithIncludes }) {
   const audioPlayerRef = useRef<AudioPlayerRef>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const lastActiveIndexRef = useRef(-1);
@@ -18,8 +14,8 @@ export default function CallDetails({ call }: { call: Call }) {
   const { play, seek, currentTime } = useAudio();
 
   const messagesFiltered = useMemo(() => {
-    return call.originalMessages.filter((m) => m.role !== "system");
-  }, [call.originalMessages]);
+    return call.messages.filter((m) => m.role !== "system");
+  }, [call.messages]);
 
   // Offset from the start of the call to the first message
   const offsetFromStart = useMemo(() => {
@@ -59,17 +55,36 @@ export default function CallDetails({ call }: { call: Call }) {
     }
   }, []);
 
-  const activeErrorMessageIndex = useMemo(() => {
-    return call.errors?.find((error) => error.id === activeErrorId)?.details
-      ?.messageIndex;
-  }, [call.errors, activeErrorId]);
+  const activeErrorMessageIndices = useMemo(() => {
+    if (!activeErrorId || !call.errors) return new Set<number>();
+
+    const activeError = call.errors.find((error) => error.id === activeErrorId);
+    if (!activeError) return new Set<number>();
+
+    const overlappingIndices = new Set<number>();
+    messagesFiltered.forEach((message, index) => {
+      if (
+        activeError.secondsFromStart <
+          (messagesFiltered[index + 1]?.secondsFromStart ?? Infinity) &&
+        activeError.secondsFromStart + activeError.duration >
+          message.secondsFromStart
+      ) {
+        overlappingIndices.add(index);
+      }
+    });
+
+    return overlappingIndices;
+  }, [call.errors, activeErrorId, messagesFiltered]);
 
   // Scroll to the active error message if it has changed
   useEffect(() => {
-    if (activeErrorMessageIndex) {
-      scrollMessageIntoView(activeErrorMessageIndex);
+    if (activeErrorMessageIndices.size > 0) {
+      const firstIndex = Array.from(activeErrorMessageIndices)[0];
+      if (typeof firstIndex === "number") {
+        scrollMessageIntoView(firstIndex);
+      }
     }
-  }, [activeErrorMessageIndex, scrollMessageIntoView]);
+  }, [activeErrorMessageIndices, scrollMessageIntoView]);
 
   // Scroll to the active message if it has changed
   useEffect(() => {
@@ -83,22 +98,74 @@ export default function CallDetails({ call }: { call: Call }) {
     }
   }, [activeMessageIndex, scrollMessageIntoView]);
 
-  const getMessageErrors = useCallback(
-    (messageIndex: number) => {
-      return call.errors?.filter(
-        (error) =>
-          error.type === "transcription" &&
-          error.details?.messageIndex === messageIndex,
+  const doesErrorOverlapMessage = useCallback(
+    (error: CallError, messageIndex: number) => {
+      return (
+        error.secondsFromStart <
+          (messagesFiltered[messageIndex + 1]?.secondsFromStart ?? Infinity) &&
+        error.secondsFromStart + error.duration >
+          (messagesFiltered[messageIndex]?.secondsFromStart ?? 0)
       );
     },
-    [call.errors],
+    [messagesFiltered],
   );
+
+  const { messageErrorsMap, errorRangesMap } = useMemo(() => {
+    if (!call.errors) {
+      return {
+        messageErrorsMap: new Map<number, CallError>(),
+        errorRangesMap: new Map<
+          string,
+          { firstMessageIndex: number; lastMessageIndex: number }
+        >(),
+      };
+    }
+
+    const messageMap = new Map<number, CallError>();
+    const rangesMap = new Map<
+      string,
+      { firstMessageIndex: number; lastMessageIndex: number }
+    >();
+
+    // First collect all message -> errors mappings
+    messagesFiltered.forEach((_, messageIndex) => {
+      const overlappingErrors = call.errors.find((error) =>
+        doesErrorOverlapMessage(error, messageIndex),
+      );
+      if (overlappingErrors) {
+        messageMap.set(messageIndex, overlappingErrors);
+      }
+    });
+
+    // Then find ranges for each error
+    call.errors?.forEach((error) => {
+      let firstMessageIndex = Infinity;
+      let lastMessageIndex = -1;
+
+      messagesFiltered.forEach((_, messageIndex) => {
+        if (doesErrorOverlapMessage(error, messageIndex)) {
+          firstMessageIndex = Math.min(firstMessageIndex, messageIndex);
+          lastMessageIndex = Math.max(lastMessageIndex, messageIndex);
+        }
+      });
+
+      if (lastMessageIndex !== -1) {
+        rangesMap.set(error.id, {
+          firstMessageIndex,
+          lastMessageIndex,
+        });
+      }
+    });
+
+    return { messageErrorsMap: messageMap, errorRangesMap: rangesMap };
+  }, [call.errors, messagesFiltered, doesErrorOverlapMessage]);
 
   return (
     <div className="flex w-full flex-col overflow-hidden bg-background px-4 pt-4 outline-none">
       <AudioPlayer
         ref={audioPlayerRef}
         call={call}
+        offsetFromStart={offsetFromStart}
         onErrorHover={(errorId) => {
           setActiveErrorId(errorId);
         }}
@@ -109,8 +176,14 @@ export default function CallDetails({ call }: { call: Call }) {
         className="-mx-4 mt-4 flex flex-1 flex-col overflow-y-auto px-4"
       >
         {messagesFiltered.map((message, index) => {
-          const errors = getMessageErrors(index);
-          const words = message.message.split(" ");
+          const error = messageErrorsMap.get(index);
+          const isFirstErrorMessage = error
+            ? errorRangesMap.get(error.id)?.firstMessageIndex === index
+            : false;
+          const isLastErrorMessage = error
+            ? errorRangesMap.get(error.id)?.lastMessageIndex === index
+            : false;
+          const isActiveErrorMessage = activeErrorMessageIndices.has(index);
 
           return (
             <div key={index} className="flex gap-2">
@@ -119,90 +192,47 @@ export default function CallDetails({ call }: { call: Call }) {
                   message.secondsFromStart - offsetFromStart,
                 )}
               </div>
-              <div
-                onClick={() => {
-                  seek(message.secondsFromStart - offsetFromStart);
-                  play();
-                }}
-                className={cn(
-                  "flex-1 cursor-pointer rounded-md p-2 hover:bg-muted/30",
-                  activeMessageIndex === index ? "bg-muted hover:bg-muted" : "",
+              <div className="flex flex-1 flex-col">
+                <div
+                  onClick={() => {
+                    seek(message.secondsFromStart - offsetFromStart);
+                    play();
+                  }}
+                  className={cn(
+                    "flex-1 cursor-pointer rounded-md p-2 hover:bg-muted/30",
+                    activeMessageIndex === index
+                      ? "bg-muted hover:bg-muted"
+                      : "",
+                    error ? "rounded-none border-x border-red-500" : "",
+                    error && isActiveErrorMessage ? "-mx-px border-x-2" : "",
+                    isFirstErrorMessage
+                      ? "mt-px rounded-t-md border-t border-red-500"
+                      : "",
+                    isFirstErrorMessage && isActiveErrorMessage
+                      ? "mt-0 border-t-2"
+                      : "",
+                  )}
+                >
+                  <div className="text-xs font-medium">
+                    {message.role === "bot" ? "assistant" : "user"}
+                  </div>
+                  <div className="mt-1 text-sm text-muted-foreground">
+                    {message.message}
+                  </div>
+                </div>
+                {isLastErrorMessage && (
+                  <div
+                    className={cn(
+                      "flex items-center gap-1 rounded-b-md border-x border-b border-red-500 bg-red-500/20 p-2 text-sm text-red-500",
+                      isActiveErrorMessage
+                        ? "z-10 -mx-px -mb-px border-x-2 border-b-2 shadow-lg"
+                        : "",
+                    )}
+                  >
+                    <ExclamationCircleIcon className="size-5" />
+                    {error?.description}
+                  </div>
                 )}
-              >
-                <div className="text-xs font-medium">
-                  {message.role === "bot" ? "assistant" : "user"}
-                </div>
-                <div className="mt-1 text-sm text-muted-foreground">
-                  {(() => {
-                    let currentGroup: string[] = [];
-                    const result: JSX.Element[] = [];
-                    let currentHasError = false;
-                    let currentError: CallError | undefined;
-
-                    words.forEach((word, wordIndex) => {
-                      const newErrorIndex =
-                        errors?.findIndex(
-                          (error) =>
-                            error.type === "transcription" &&
-                            error.details?.wordIndexRange?.[0] !== undefined &&
-                            error.details?.wordIndexRange?.[1] !== undefined &&
-                            wordIndex >= error.details.wordIndexRange[0] &&
-                            wordIndex < error.details.wordIndexRange[1],
-                        ) ?? -1;
-                      const newError =
-                        newErrorIndex !== -1
-                          ? (errors?.[newErrorIndex] ?? undefined)
-                          : undefined;
-
-                      if (Boolean(newError) !== currentHasError) {
-                        // Flush current group
-                        if (currentGroup.length > 0) {
-                          const error = currentError;
-                          result.push(
-                            <ErrorWord
-                              key={result.length}
-                              words={currentGroup.join(" ")}
-                              error={error}
-                              activeErrorId={activeErrorId}
-                              onClick={() => {
-                                audioPlayerRef.current?.setActiveError(
-                                  error ?? null,
-                                );
-                                play();
-                              }}
-                            />,
-                          );
-                          currentGroup = [];
-                        }
-                        currentHasError = Boolean(newError);
-                        currentError = newError;
-                      }
-
-                      currentGroup.push(word);
-                    });
-
-                    // Flush final group
-                    if (currentGroup.length > 0) {
-                      const error = currentError;
-                      result.push(
-                        <ErrorWord
-                          key={result.length}
-                          words={currentGroup.join(" ")}
-                          error={error}
-                          activeErrorId={activeErrorId}
-                          onClick={() => {
-                            audioPlayerRef.current?.setActiveError(
-                              error ?? null,
-                            );
-                            play();
-                          }}
-                        />,
-                      );
-                    }
-
-                    return result;
-                  })()}
-                </div>
               </div>
             </div>
           );
@@ -210,77 +240,5 @@ export default function CallDetails({ call }: { call: Call }) {
         <div className="h-10 shrink-0" />
       </div>
     </div>
-  );
-}
-
-function ErrorWord({
-  words,
-  error,
-  activeErrorId,
-  onClick,
-}: {
-  words: string;
-  error?: CallError;
-  activeErrorId: string | null;
-  onClick?: () => void;
-}) {
-  const [isTooltipOpen, setIsTooltipOpen] = useState(false);
-
-  if (!error) {
-    return <span>{words} </span>;
-  }
-
-  return (
-    <Tooltip open={error.id === activeErrorId || isTooltipOpen}>
-      <TooltipTrigger
-        asChild
-        disabled
-        onClick={(e) => {
-          if (error.details?.type === "deletion") return;
-          e.stopPropagation();
-          onClick?.();
-        }}
-      >
-        <span>
-          {error.details?.type === "addition" && <span>{words}</span>}{" "}
-          <span
-            onMouseEnter={() => setIsTooltipOpen(true)}
-            onMouseLeave={() => setIsTooltipOpen(false)}
-            className={cn(
-              "inline-block self-end bg-red-500/10 text-red-500 underline decoration-red-500 decoration-solid decoration-2 underline-offset-4 hover:bg-red-500/20",
-              error.details?.type === "addition" && "text-transparent",
-              error.details?.type === "deletion" && "hover:line-through",
-              error.id === activeErrorId && "bg-red-500/20",
-            )}
-          >
-            {error.details?.type === "addition"
-              ? error.details?.correctWord
-              : words}
-          </span>{" "}
-        </span>
-      </TooltipTrigger>
-      <TooltipContent asChild side="right">
-        <div className="flex flex-col gap-1 rounded-md border border-input bg-white p-2 text-foreground">
-          <div className="text-xs font-medium text-muted-foreground">
-            {ERROR_LABELS[error.type]}
-          </div>
-          <div className="text-sm text-foreground">
-            {error.details?.type === "deletion" ? (
-              <span className="italic">deleted</span>
-            ) : (
-              error.details?.correctWord
-            )}
-          </div>
-          <div
-            className="text-xs"
-            style={{
-              color: `rgb(${Math.round(255 * error.confidence)}, ${Math.round(75 * (1 - error.confidence))}, ${Math.round(75 * (1 - error.confidence))})`,
-            }}
-          >
-            {(error.confidence * 100).toFixed(0)}% likely
-          </div>
-        </div>
-      </TooltipContent>
-    </Tooltip>
   );
 }

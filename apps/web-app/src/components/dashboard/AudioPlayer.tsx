@@ -18,7 +18,8 @@ import {
   SelectContent,
   SelectTrigger,
 } from "~/components/ui/select";
-import type { Call, CallError } from "~/lib/types";
+import type { CallWithIncludes } from "~/lib/types";
+import { type CallError } from "prisma/generated/zod";
 import { formatDurationHoursMinutesSeconds } from "~/lib/utils";
 import { debounce } from "lodash";
 import useSWR from "swr";
@@ -31,10 +32,11 @@ export type AudioPlayerRef = {
 const AudioPlayer = forwardRef<
   AudioPlayerRef,
   {
-    call: Call;
+    call: CallWithIncludes;
+    offsetFromStart?: number;
     onErrorHover?: (errorId: string | null) => void;
   }
->(function AudioPlayer({ call, onErrorHover }, ref) {
+>(function AudioPlayer({ call, offsetFromStart = 0, onErrorHover }, ref) {
   const [containerWidth, setContainerWidth] = useState(0);
   const [playheadHoverX, setPlayheadHoverX] = useState<number | null>(null);
   const [playheadX, setPlayheadX] = useState<number | null>(null);
@@ -43,11 +45,11 @@ const AudioPlayer = forwardRef<
   const [activeError, setActiveError] = useState<CallError | null>(null);
   const [key, setKey] = useState(0);
   const { data: botAudioBlob } = useSWR<Blob>(
-    call.botRecordingUrl,
+    call.stereoRecordingUrl,
     (url: string) => fetch(url).then((res) => res.blob()),
   );
   const { data: userAudioBlob } = useSWR<Blob>(
-    call.userRecordingUrl,
+    call.stereoRecordingUrl,
     (url: string) => fetch(url).then((res) => res.blob()),
   );
   const {
@@ -62,8 +64,8 @@ const AudioPlayer = forwardRef<
     setAudioUrl,
   } = useAudio();
   useEffect(() => {
-    setAudioUrl(call.recordingUrl);
-  }, [call.recordingUrl, setAudioUrl]);
+    setAudioUrl(call.stereoRecordingUrl);
+  }, [call.stereoRecordingUrl, setAudioUrl]);
 
   const [loaded, setLoaded] = useState(false);
   useEffect(() => {
@@ -74,11 +76,15 @@ const AudioPlayer = forwardRef<
 
   // Check if we need to stop playback due to reaching error end
   useEffect(() => {
-    if (activeError && currentTime >= activeError.end) {
+    if (
+      activeError &&
+      currentTime >=
+        activeError.secondsFromStart + activeError.duration - offsetFromStart
+    ) {
       pause();
       setActiveError(null);
     }
-  }, [activeError, currentTime, pause]);
+  }, [activeError, currentTime, pause, offsetFromStart]);
 
   // Get rid of active error if we pause in the middle of it playing
   useEffect(() => {
@@ -170,20 +176,20 @@ const AudioPlayer = forwardRef<
       setActiveError: (error: CallError | null) => {
         setActiveError(error);
         if (error) {
-          seek(error.start);
+          seek(error.secondsFromStart - offsetFromStart);
         }
       },
     }),
-    [seek],
+    [seek, offsetFromStart],
   );
 
   const handleErrorClick = useCallback(
     (error: CallError) => {
-      seek(error.start);
+      seek(error.secondsFromStart - offsetFromStart);
       play();
       setActiveError(error);
     },
-    [play, seek],
+    [play, seek, offsetFromStart],
   );
 
   return (
@@ -238,8 +244,11 @@ const AudioPlayer = forwardRef<
         />
         {call.errors?.map((error, index) => {
           if (!containerWidth || !duration) return null;
-          const startPercentage = error.start / duration;
-          const endPercentage = error.end / duration;
+          const startPercentage =
+            (error.secondsFromStart - offsetFromStart) / duration;
+          const endPercentage =
+            (error.secondsFromStart + error.duration - offsetFromStart) /
+            duration;
           const startPosition = startPercentage * containerWidth;
           const width = (endPercentage - startPercentage) * containerWidth;
 

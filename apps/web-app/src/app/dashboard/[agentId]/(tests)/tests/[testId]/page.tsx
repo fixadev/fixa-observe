@@ -10,7 +10,7 @@ import {
   SelectTrigger,
 } from "~/components/ui/select";
 import CallCard from "~/components/dashboard/CallCard";
-import type { Call } from "~/lib/types";
+import type { CallWithIncludes } from "~/lib/types";
 import CallDetails from "~/components/dashboard/CallDetails";
 import { AudioProvider, useAudio } from "~/hooks/useAudio";
 import { TEST_CALLS } from "~/lib/test-data";
@@ -32,7 +32,7 @@ export default function TestPageWithProvider({
 function TestPage({ params }: { params: { agentId: string; testId: string } }) {
   const [selectedCallType, setSelectedCallType] = useState<CallType>("error");
   const [selectedCallId, setSelectedCallId] = useState<string | null>(null);
-  const [calls, setCalls] = useState<Call[]>([]);
+  const [calls, setCalls] = useState<CallWithIncludes[]>([]);
   const { play, pause, seek, isPlaying } = useAudio();
 
   useEffect(() => {
