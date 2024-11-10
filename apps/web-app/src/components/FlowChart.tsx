@@ -302,7 +302,7 @@ export default function FlowChart({
             width: width,
             height: height + height * 2,
           },
-          { padding: 1, duration: 600 },
+          { padding: 2, duration: 600 },
         );
       })();
     }
