@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
-import { AgentService } from "~/server/services/agent";
+import { AgentService } from "~/server/services/retellAgent";
 import { env } from "~/env";
 
 const agentServiceInstance = new AgentService();
