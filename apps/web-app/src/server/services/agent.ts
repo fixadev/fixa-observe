@@ -3,6 +3,7 @@ import { type IntentWithoutId, type TestAgentWithoutId } from "~/lib/agent";
 import { createTestAgents } from "../helpers/createTestAgents";
 import { v4 as uuidv4 } from "uuid";
 import { type PrismaClient } from "@prisma/client";
+import { generateIntentsFromPrompt } from "../helpers/generateIntents";
 
 export class AgentService {
   constructor(private db: PrismaClient) {}
@@ -63,5 +64,9 @@ export class AgentService {
       where: { id: testAgentId },
       data: { enabled },
     });
+  }
+
+  async generateIntentsFromPrompt(prompt: string) {
+    return await generateIntentsFromPrompt(prompt);
   }
 }

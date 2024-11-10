@@ -40,4 +40,10 @@ export const agentRouter = createTRPCRouter({
         input.enabled,
       );
     }),
+
+  generateIntentsFromPrompt: protectedProcedure
+    .input(z.object({ prompt: z.string() }))
+    .mutation(async ({ input }) => {
+      return await agentServiceInstance.generateIntentsFromPrompt(input.prompt);
+    }),
 });
