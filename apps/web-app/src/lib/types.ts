@@ -19,3 +19,9 @@ export type CallWithIncludes = Prisma.CallGetPayload<{
     intent: true;
   };
 }>;
+
+export type TestWithIncludes = Prisma.TestGetPayload<{
+  include: {
+    calls: true;
+  };
+}>;

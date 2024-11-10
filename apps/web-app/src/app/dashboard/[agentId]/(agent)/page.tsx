@@ -2,6 +2,7 @@ import { RocketLaunchIcon } from "@heroicons/react/24/solid";
 import { Button } from "~/components/ui/button";
 import TestCard from "~/components/dashboard/TestCard";
 import Link from "next/link";
+import { TEST_TESTS } from "~/lib/test-data";
 
 export default function AgentPage({ params }: { params: { agentId: string } }) {
   return (
@@ -25,7 +26,10 @@ export default function AgentPage({ params }: { params: { agentId: string } }) {
         <div className="rounded-t-md border-x border-t border-input shadow-sm">
           {Array.from({ length: 26 }).map((_, i) => (
             <Link href={`/dashboard/${params.agentId}/tests/${i + 1}`} key={i}>
-              <TestCard className="cursor-pointer hover:bg-muted" />
+              <TestCard
+                test={TEST_TESTS[0]!}
+                className="cursor-pointer hover:bg-muted"
+              />
             </Link>
           ))}
         </div>

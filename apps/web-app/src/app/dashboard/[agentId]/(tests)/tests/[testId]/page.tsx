@@ -13,7 +13,7 @@ import CallCard from "~/components/dashboard/CallCard";
 import type { CallWithIncludes } from "~/lib/types";
 import CallDetails from "~/components/dashboard/CallDetails";
 import { AudioProvider, useAudio } from "~/hooks/useAudio";
-import { TEST_CALLS } from "~/lib/test-data";
+import { TEST_CALLS, TEST_TESTS } from "~/lib/test-data";
 
 type CallType = "error" | "no-errors" | "all";
 
@@ -29,7 +29,7 @@ export default function TestPageWithProvider({
   );
 }
 
-function TestPage({ params }: { params: { agentId: string; testId: string } }) {
+function TestPage({}: { params: { agentId: string; testId: string } }) {
   const [selectedCallType, setSelectedCallType] = useState<CallType>("error");
   const [selectedCallId, setSelectedCallId] = useState<string | null>(null);
   const [calls, setCalls] = useState<CallWithIncludes[]>([]);
@@ -44,7 +44,10 @@ function TestPage({ params }: { params: { agentId: string; testId: string } }) {
     <div>
       {/* header */}
       <div className="container flex items-center justify-between py-4">
-        <TestCard className="w-full rounded-md border border-input shadow-sm" />
+        <TestCard
+          test={TEST_TESTS[0]!}
+          className="w-full rounded-md border border-input shadow-sm"
+        />
       </div>
 
       {/* content */}
