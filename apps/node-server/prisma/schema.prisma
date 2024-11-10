@@ -20,7 +20,10 @@ datasource db {
 }
 
 model User {
-  id        String  @id // Should be the clerkId
+  id        String   @id // Should be the clerkId
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   email     String  @unique
   firstName String?
   lastName  String?
@@ -28,6 +31,8 @@ model User {
 
 model Agent {
   id            String      @id
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
   name          String
   phoneNumber   String
   githubRepoUrl String?
@@ -35,10 +40,14 @@ model Agent {
   testAgents    TestAgent[]
   intents       Intent[]
   tests         Test[]
+  ownerId       String?
 }
 
 model Test {
-  id         String      @id @default(cuid())
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   agent      Agent       @relation(fields: [agentId], references: [id])
   agentId    String
   testAgents TestAgent[] @relation("TestToTestAgent")
@@ -76,34 +85,38 @@ model Intent {
 }
 
 model Call {
-  id            String     @id @default(cuid())
-  status        CallStatus
-  result        CallResult
-  failureReason String?
-  test          Test       @relation(fields: [testId], references: [id])
-  testId        String
-  testAgent     TestAgent  @relation(fields: [testAgentId], references: [id])
-  testAgentId   String
-  messages      Message[]
-  errors        Error[]
+  id                 String     @id @default(cuid())
+  status             CallStatus
+  result             CallResult
+  failureReason      String?
+  stereoRecordingUrl String
+
+  test        Test      @relation(fields: [testId], references: [id])
+  testId      String
+  testAgent   TestAgent @relation(fields: [testAgentId], references: [id])
+  testAgentId String
+
+  messages Message[]
+  errors   CallError[]
 }
 
 model Message {
   id               String @id @default(cuid())
   role             Role
-  text             String
+  message          String
+  time             Float
+  endTime          Float
   secondsFromStart Float
   duration         Float
-  startTime        Float
-  endTime          Float
-  call             Call   @relation(fields: [callId], references: [id])
-  callId           String
+
+  call   Call   @relation(fields: [callId], references: [id])
+  callId String
 }
 
-model Error {
+model CallError {
   id          String @id @default(cuid())
-  start       String
-  end         String
+  start       Float
+  end         Float
   type        String
   description String
   call        Call   @relation(fields: [callId], references: [id])
@@ -111,16 +124,17 @@ model Error {
 }
 
 enum CallResult {
-  SUCCESS
-  FAILURE
+  success
+  failure
 }
 
 enum Role {
-  USER
-  ASSISTANT
+  user
+  bot
+  system
 }
 
 enum CallStatus {
-  IN_PROGRESS
-  COMPLETED
+  in_progress
+  completed
 }

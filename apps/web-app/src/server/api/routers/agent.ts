@@ -16,12 +16,13 @@ export const agentRouter = createTRPCRouter({
         intents: z.array(IntentSchemaWithoutId),
       }),
     )
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
       const agent = await agentServiceInstance.createAgent(
         input.phoneNumber,
         input.name,
         input.prompt,
         input.intents,
+        ctx.user.id,
       );
       const testAgents = await agentServiceInstance.createTestAgents(agent.id);
       return { agent, testAgents };

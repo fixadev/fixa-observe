@@ -11,6 +11,7 @@ export class AgentService {
     name: string,
     prompt: string,
     intents: IntentWithoutId[],
+    ownerId: string,
   ) {
     return await db.agent.create({
       data: {
@@ -23,6 +24,7 @@ export class AgentService {
             data: intents,
           },
         },
+        ownerId,
       },
     });
   }

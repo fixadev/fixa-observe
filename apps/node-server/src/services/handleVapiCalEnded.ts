@@ -2,6 +2,7 @@ import { CallResult, CallStatus } from "@prisma/client";
 import { db } from "../db";
 import { type ServerMessageEndOfCallReport } from "@vapi-ai/server-sdk/api";
 import { analyzeCall } from "./findLLMErrors";
+import { socketManager } from "../index";
 
 const mockSystemPrompt = `
 System Prompt: Drive-Through Donut Order AI Agent
@@ -61,28 +62,30 @@ export const handleVapiCallEnded = async (
     return;
   }
 
-  // const test = await db.test.findFirst({
-  //   where: { calls: { some: { id: callId } } },
-  //   include: { calls: true, agent: true },
-  // });
+  const test = await db.test.findFirst({
+    where: { calls: { some: { id: callId } } },
+    include: { calls: true, agent: true },
+  });
 
-  // const call = await db.call.findFirst({
-  //   where: { id: callId },
-  //   include: { testAgent: true },
-  // });
+  const call = await db.call.findFirst({
+    where: { id: callId },
+    include: { testAgent: true },
+  });
 
-  // const testAgent = call?.testAgent;
-  // const agent = test?.agent;
+  const testAgent = call?.testAgent;
+  const agent = test?.agent;
 
-  // if (!call) {
-  //   console.error("No call found in DB for call ID", callId);
-  //   return;
-  // }
+  const ownerId = agent?.ownerId;
 
-  // if (!agent?.systemPrompt || !testAgent?.prompt) {
-  //   console.error("No agent or test agent prompt found");
-  //   return;
-  // }
+  if (!call) {
+    console.error("No call found in DB for call ID", callId);
+    return;
+  }
+
+  if (!agent?.systemPrompt || !testAgent?.prompt) {
+    console.error("No agent or test agent prompt found");
+    return;
+  }
 
   if (!message.call || !message.artifact.messages) {
     console.error("No artifact messages found");
@@ -118,4 +121,6 @@ export const handleVapiCallEnded = async (
   //     failureReason,
   //   },
   // });
+
+  socketManager.sendMessageToUser(ownerId, "call-ended", test?.id);
 };

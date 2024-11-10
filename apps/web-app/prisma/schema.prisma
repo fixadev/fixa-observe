@@ -30,10 +30,9 @@ model User {
 }
 
 model Agent {
-  id        String   @id
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
+  id            String      @id
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
   name          String
   phoneNumber   String
   githubRepoUrl String?
@@ -41,6 +40,7 @@ model Agent {
   testAgents    TestAgent[]
   intents       Intent[]
   tests         Test[]
+  ownerId       String?
 }
 
 model Test {
