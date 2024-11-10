@@ -72,10 +72,15 @@ export const handleVapiCallEnded = async (
     include: { testAgent: true },
   });
 
-  const testAgent = call?.testAgent;
   const agent = test?.agent;
+  const testAgent = call?.testAgent;
 
   const ownerId = agent?.ownerId;
+
+  if (!ownerId) {
+    console.error("No owner ID found for agent");
+    return;
+  }
 
   if (!call) {
     console.error("No call found in DB for call ID", callId);
@@ -110,17 +115,17 @@ export const handleVapiCallEnded = async (
   console.log("RESULT", result);
   console.log("FAILURE REASON", failureReason);
 
-  // await db.call.update({
-  //   where: { id: callId },
-  //   data: {
-  //     status: CallStatus.COMPLETED,
-  //     errors: {
-  //       create: errors,
-  //     },
-  //     result: result ? CallResult.SUCCESS : CallResult.FAILURE,
-  //     failureReason,
-  //   },
-  // });
+  await db.call.update({
+    where: { id: callId },
+    data: {
+      status: CallStatus.completed,
+      errors: {
+        create: errors,
+      },
+      result: result ? CallResult.success : CallResult.failure,
+      failureReason,
+    },
+  });
 
   socketManager.sendMessageToUser(ownerId, "call-ended", test?.id);
 };

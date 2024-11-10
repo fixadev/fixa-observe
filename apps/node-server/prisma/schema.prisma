@@ -114,13 +114,13 @@ model Message {
 }
 
 model CallError {
-  id          String @id @default(cuid())
-  start       Float
-  end         Float
-  type        String
-  description String
-  call        Call   @relation(fields: [callId], references: [id])
-  callId      String
+  id               String @id @default(cuid())
+  secondsFromStart Float
+  duration         Float
+  type             String
+  description      String
+  call             Call   @relation(fields: [callId], references: [id])
+  callId           String
 }
 
 enum CallResult {

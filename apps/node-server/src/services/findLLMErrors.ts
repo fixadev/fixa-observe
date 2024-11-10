@@ -7,8 +7,8 @@ type CallResult = {
   errors: {
     type: string;
     description: string;
-    start: string;
-    end: string;
+    secondsFromStart: number;
+    duration: number;
   }[];
   result: boolean;
   failureReason: string;
@@ -19,10 +19,12 @@ const outputSchema = z.object({
     z.object({
       type: z.string(),
       description: z.string(),
-      start: z.string(),
-      end: z.string(),
+      secondsFromStart: z.number(),
+      duration: z.number(),
     }),
   ),
+  result: z.boolean(),
+  failureReason: z.string(),
 });
 
 export const analyzeCall = async (
@@ -74,7 +76,7 @@ export const analyzeCall = async (
 
   return {
     errors: parsedResponse.errors,
-    result: parsedResponse.errors.length === 0,
-    failureReason: parsedResponse.errors[0].description,
+    result: parsedResponse.result,
+    failureReason: parsedResponse.failureReason,
   };
 };
