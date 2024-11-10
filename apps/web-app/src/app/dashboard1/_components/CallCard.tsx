@@ -1,6 +1,6 @@
 import { formatDistanceToNow } from "date-fns";
 import { cn, formatDurationHoursMinutesSeconds } from "~/lib/utils";
-import type { Call } from "~/lib/types";
+import type { Call } from "./test-data";
 
 export default function CallCard({
   call,

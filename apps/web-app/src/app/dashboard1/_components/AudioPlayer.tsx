@@ -18,7 +18,7 @@ import {
   SelectContent,
   SelectTrigger,
 } from "~/components/ui/select";
-import type { Call, CallError } from "~/lib/types";
+import type { Call, CallError } from "./test-data";
 import { formatDurationHoursMinutesSeconds } from "~/lib/utils";
 import { debounce } from "lodash";
 import useSWR from "swr";

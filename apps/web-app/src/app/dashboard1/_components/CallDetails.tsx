@@ -1,4 +1,4 @@
-import type { Call, CallError } from "~/lib/types";
+import type { Call, CallError } from "./test-data";
 import AudioPlayer, { type AudioPlayerRef } from "./AudioPlayer";
 import { useMemo, useRef, useState, useEffect, useCallback } from "react";
 import { cn, formatDurationHoursMinutesSeconds } from "~/lib/utils";

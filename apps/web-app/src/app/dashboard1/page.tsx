@@ -9,10 +9,10 @@ import {
   SelectTrigger,
 } from "~/components/ui/select";
 import CallCard from "./_components/CallCard";
-import type { Call } from "~/lib/types";
+import type { Call } from "./_components/test-data";
 import CallDetails from "./_components/CallDetails";
 import { useAudio } from "./_components/useAudio";
-import { TEST_CALLS } from "~/lib/test-data";
+import { TEST_CALLS } from "./_components/test-data";
 
 type CallType = "error" | "no-errors" | "all";
 
