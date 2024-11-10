@@ -1,4 +1,4 @@
-import type { Call, CallError } from "./test-data";
+import type { Call, CallError } from "~/lib/types";
 import AudioPlayer, { type AudioPlayerRef } from "./AudioPlayer";
 import { useMemo, useRef, useState, useEffect, useCallback } from "react";
 import { cn, formatDurationHoursMinutesSeconds } from "~/lib/utils";
@@ -8,7 +8,7 @@ import {
   TooltipTrigger,
 } from "~/components/ui/tooltip";
 import { ERROR_LABELS } from "~/lib/constants";
-import { useAudio } from "./useAudio";
+import { useAudio } from "~/hooks/useAudio";
 
 export default function CallDetails({ call }: { call: Call }) {
   const audioPlayerRef = useRef<AudioPlayerRef>(null);

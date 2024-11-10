@@ -2,8 +2,8 @@
 
 import FlowChart from "~/components/FlowChart";
 import { useAudio } from "../dashboard1/_components/useAudio";
-import { TEST_CALLS } from "~/lib/test-data";
-import type { Call } from "~/lib/types";
+import { TEST_CALLS } from "../dashboard1/_components/test-data";
+import type { Call } from "../dashboard1/_components/test-data";
 import { useState, useEffect, useMemo } from "react";
 import CallCard from "../dashboard1/_components/CallCard";
 import CallDetails from "../dashboard1/_components/CallDetails";

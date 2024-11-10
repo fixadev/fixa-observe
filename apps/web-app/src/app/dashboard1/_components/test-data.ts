@@ -1,13 +1,49 @@
-import type { Call } from "./types";
-import type { Agent } from "prisma/generated/zod";
+import { z } from "zod";
 
-export const TEST_AGENT: Agent = {
-  id: "1",
-  name: "Test Agent",
-  phoneNumber: "+1 (234) 567-8901",
-  githubRepoUrl: "https://github.com/pixa-dev/pixa-drive-thru",
-  systemPrompt: "Test system prompt",
-};
+export const transcriptionErrorSchema = z.object({
+  type: z.enum(["replacement", "addition", "deletion"]),
+  messageIndex: z.number(),
+  wordIndexRange: z.array(z.number()),
+  correctWord: z.string(),
+});
+export type TranscriptionError = z.infer<typeof transcriptionErrorSchema>;
+
+export const callSchema = z.object({
+  id: z.string(),
+  createdAt: z.date(),
+  recordingUrl: z.string(),
+  botRecordingUrl: z.string().optional(),
+  userRecordingUrl: z.string().optional(),
+  summary: z.string(),
+  node: z.string(),
+  originalTranscript: z.string(),
+  originalMessages: z.array(
+    z.object({
+      role: z.enum(["system", "bot", "user"]),
+      message: z.string(),
+      duration: z.number().optional(),
+      secondsFromStart: z.number(),
+    }),
+  ),
+  updatedTranscript: z.string(),
+  duration: z.number(),
+  unread: z.boolean(),
+  errors: z
+    .array(
+      z.object({
+        id: z.string(),
+        start: z.number(),
+        end: z.number(),
+        type: z.enum(["transcription"]),
+        confidence: z.number(),
+        details: transcriptionErrorSchema.optional(),
+      }),
+    )
+    .optional(),
+});
+export type Call = z.infer<typeof callSchema>;
+
+export type CallError = NonNullable<Call["errors"]>[number];
 
 export const TEST_CALLS: Call[] = [
   {
