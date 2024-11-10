@@ -24,7 +24,7 @@ export const TestAgentTemplateScalarFieldEnumSchema = z.enum(['id','name','heads
 
 export const IntentScalarFieldEnumSchema = z.enum(['id','name','instructions','agentId']);
 
-export const CallScalarFieldEnumSchema = z.enum(['id','status','result','failureReason','stereoRecordingUrl','testId','testAgentId']);
+export const CallScalarFieldEnumSchema = z.enum(['id','status','result','failureReason','stereoRecordingUrl','testId','testAgentId','intentId']);
 
 export const MessageScalarFieldEnumSchema = z.enum(['id','role','message','time','endTime','secondsFromStart','duration','callId']);
 
@@ -152,6 +152,7 @@ export const CallSchema = z.object({
   stereoRecordingUrl: z.string(),
   testId: z.string(),
   testAgentId: z.string(),
+  intentId: z.string(),
 })
 
 export type Call = z.infer<typeof CallSchema>
@@ -283,9 +284,9 @@ export const TestSelectSchema: z.ZodType<Prisma.TestSelect> = z.object({
 //------------------------------------------------------
 
 export const TestAgentIncludeSchema: z.ZodType<Prisma.TestAgentInclude> = z.object({
-  Call: z.union([z.boolean(),z.lazy(() => CallFindManyArgsSchema)]).optional(),
-  Agent: z.union([z.boolean(),z.lazy(() => AgentArgsSchema)]).optional(),
+  agent: z.union([z.boolean(),z.lazy(() => AgentArgsSchema)]).optional(),
   tests: z.union([z.boolean(),z.lazy(() => TestFindManyArgsSchema)]).optional(),
+  calls: z.union([z.boolean(),z.lazy(() => CallFindManyArgsSchema)]).optional(),
   _count: z.union([z.boolean(),z.lazy(() => TestAgentCountOutputTypeArgsSchema)]).optional(),
 }).strict()
 
@@ -299,8 +300,8 @@ export const TestAgentCountOutputTypeArgsSchema: z.ZodType<Prisma.TestAgentCount
 }).strict();
 
 export const TestAgentCountOutputTypeSelectSchema: z.ZodType<Prisma.TestAgentCountOutputTypeSelect> = z.object({
-  Call: z.boolean().optional(),
   tests: z.boolean().optional(),
+  calls: z.boolean().optional(),
 }).strict();
 
 export const TestAgentSelectSchema: z.ZodType<Prisma.TestAgentSelect> = z.object({
@@ -312,9 +313,9 @@ export const TestAgentSelectSchema: z.ZodType<Prisma.TestAgentSelect> = z.object
   prompt: z.boolean().optional(),
   vapiId: z.boolean().optional(),
   agentId: z.boolean().optional(),
-  Call: z.union([z.boolean(),z.lazy(() => CallFindManyArgsSchema)]).optional(),
-  Agent: z.union([z.boolean(),z.lazy(() => AgentArgsSchema)]).optional(),
+  agent: z.union([z.boolean(),z.lazy(() => AgentArgsSchema)]).optional(),
   tests: z.union([z.boolean(),z.lazy(() => TestFindManyArgsSchema)]).optional(),
+  calls: z.union([z.boolean(),z.lazy(() => CallFindManyArgsSchema)]).optional(),
   _count: z.union([z.boolean(),z.lazy(() => TestAgentCountOutputTypeArgsSchema)]).optional(),
 }).strict()
 
@@ -333,11 +334,21 @@ export const TestAgentTemplateSelectSchema: z.ZodType<Prisma.TestAgentTemplateSe
 
 export const IntentIncludeSchema: z.ZodType<Prisma.IntentInclude> = z.object({
   agent: z.union([z.boolean(),z.lazy(() => AgentArgsSchema)]).optional(),
+  calls: z.union([z.boolean(),z.lazy(() => CallFindManyArgsSchema)]).optional(),
+  _count: z.union([z.boolean(),z.lazy(() => IntentCountOutputTypeArgsSchema)]).optional(),
 }).strict()
 
 export const IntentArgsSchema: z.ZodType<Prisma.IntentDefaultArgs> = z.object({
   select: z.lazy(() => IntentSelectSchema).optional(),
   include: z.lazy(() => IntentIncludeSchema).optional(),
+}).strict();
+
+export const IntentCountOutputTypeArgsSchema: z.ZodType<Prisma.IntentCountOutputTypeDefaultArgs> = z.object({
+  select: z.lazy(() => IntentCountOutputTypeSelectSchema).nullish(),
+}).strict();
+
+export const IntentCountOutputTypeSelectSchema: z.ZodType<Prisma.IntentCountOutputTypeSelect> = z.object({
+  calls: z.boolean().optional(),
 }).strict();
 
 export const IntentSelectSchema: z.ZodType<Prisma.IntentSelect> = z.object({
@@ -346,6 +357,8 @@ export const IntentSelectSchema: z.ZodType<Prisma.IntentSelect> = z.object({
   instructions: z.boolean().optional(),
   agentId: z.boolean().optional(),
   agent: z.union([z.boolean(),z.lazy(() => AgentArgsSchema)]).optional(),
+  calls: z.union([z.boolean(),z.lazy(() => CallFindManyArgsSchema)]).optional(),
+  _count: z.union([z.boolean(),z.lazy(() => IntentCountOutputTypeArgsSchema)]).optional(),
 }).strict()
 
 // CALL
@@ -354,6 +367,7 @@ export const IntentSelectSchema: z.ZodType<Prisma.IntentSelect> = z.object({
 export const CallIncludeSchema: z.ZodType<Prisma.CallInclude> = z.object({
   test: z.union([z.boolean(),z.lazy(() => TestArgsSchema)]).optional(),
   testAgent: z.union([z.boolean(),z.lazy(() => TestAgentArgsSchema)]).optional(),
+  intent: z.union([z.boolean(),z.lazy(() => IntentArgsSchema)]).optional(),
   messages: z.union([z.boolean(),z.lazy(() => MessageFindManyArgsSchema)]).optional(),
   errors: z.union([z.boolean(),z.lazy(() => CallErrorFindManyArgsSchema)]).optional(),
   _count: z.union([z.boolean(),z.lazy(() => CallCountOutputTypeArgsSchema)]).optional(),
@@ -381,8 +395,10 @@ export const CallSelectSchema: z.ZodType<Prisma.CallSelect> = z.object({
   stereoRecordingUrl: z.boolean().optional(),
   testId: z.boolean().optional(),
   testAgentId: z.boolean().optional(),
+  intentId: z.boolean().optional(),
   test: z.union([z.boolean(),z.lazy(() => TestArgsSchema)]).optional(),
   testAgent: z.union([z.boolean(),z.lazy(() => TestAgentArgsSchema)]).optional(),
+  intent: z.union([z.boolean(),z.lazy(() => IntentArgsSchema)]).optional(),
   messages: z.union([z.boolean(),z.lazy(() => MessageFindManyArgsSchema)]).optional(),
   errors: z.union([z.boolean(),z.lazy(() => CallErrorFindManyArgsSchema)]).optional(),
   _count: z.union([z.boolean(),z.lazy(() => CallCountOutputTypeArgsSchema)]).optional(),
@@ -658,9 +674,9 @@ export const TestAgentWhereInputSchema: z.ZodType<Prisma.TestAgentWhereInput> = 
   prompt: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   vapiId: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   agentId: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
-  Call: z.lazy(() => CallListRelationFilterSchema).optional(),
-  Agent: z.union([ z.lazy(() => AgentNullableRelationFilterSchema),z.lazy(() => AgentWhereInputSchema) ]).optional().nullable(),
-  tests: z.lazy(() => TestListRelationFilterSchema).optional()
+  agent: z.union([ z.lazy(() => AgentNullableRelationFilterSchema),z.lazy(() => AgentWhereInputSchema) ]).optional().nullable(),
+  tests: z.lazy(() => TestListRelationFilterSchema).optional(),
+  calls: z.lazy(() => CallListRelationFilterSchema).optional()
 }).strict();
 
 export const TestAgentOrderByWithRelationInputSchema: z.ZodType<Prisma.TestAgentOrderByWithRelationInput> = z.object({
@@ -672,9 +688,9 @@ export const TestAgentOrderByWithRelationInputSchema: z.ZodType<Prisma.TestAgent
   prompt: z.lazy(() => SortOrderSchema).optional(),
   vapiId: z.lazy(() => SortOrderSchema).optional(),
   agentId: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
-  Call: z.lazy(() => CallOrderByRelationAggregateInputSchema).optional(),
-  Agent: z.lazy(() => AgentOrderByWithRelationInputSchema).optional(),
-  tests: z.lazy(() => TestOrderByRelationAggregateInputSchema).optional()
+  agent: z.lazy(() => AgentOrderByWithRelationInputSchema).optional(),
+  tests: z.lazy(() => TestOrderByRelationAggregateInputSchema).optional(),
+  calls: z.lazy(() => CallOrderByRelationAggregateInputSchema).optional()
 }).strict();
 
 export const TestAgentWhereUniqueInputSchema: z.ZodType<Prisma.TestAgentWhereUniqueInput> = z.object({
@@ -692,9 +708,9 @@ export const TestAgentWhereUniqueInputSchema: z.ZodType<Prisma.TestAgentWhereUni
   prompt: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   vapiId: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   agentId: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
-  Call: z.lazy(() => CallListRelationFilterSchema).optional(),
-  Agent: z.union([ z.lazy(() => AgentNullableRelationFilterSchema),z.lazy(() => AgentWhereInputSchema) ]).optional().nullable(),
-  tests: z.lazy(() => TestListRelationFilterSchema).optional()
+  agent: z.union([ z.lazy(() => AgentNullableRelationFilterSchema),z.lazy(() => AgentWhereInputSchema) ]).optional().nullable(),
+  tests: z.lazy(() => TestListRelationFilterSchema).optional(),
+  calls: z.lazy(() => CallListRelationFilterSchema).optional()
 }).strict());
 
 export const TestAgentOrderByWithAggregationInputSchema: z.ZodType<Prisma.TestAgentOrderByWithAggregationInput> = z.object({
@@ -784,6 +800,7 @@ export const IntentWhereInputSchema: z.ZodType<Prisma.IntentWhereInput> = z.obje
   instructions: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   agentId: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   agent: z.union([ z.lazy(() => AgentRelationFilterSchema),z.lazy(() => AgentWhereInputSchema) ]).optional(),
+  calls: z.lazy(() => CallListRelationFilterSchema).optional()
 }).strict();
 
 export const IntentOrderByWithRelationInputSchema: z.ZodType<Prisma.IntentOrderByWithRelationInput> = z.object({
@@ -791,7 +808,8 @@ export const IntentOrderByWithRelationInputSchema: z.ZodType<Prisma.IntentOrderB
   name: z.lazy(() => SortOrderSchema).optional(),
   instructions: z.lazy(() => SortOrderSchema).optional(),
   agentId: z.lazy(() => SortOrderSchema).optional(),
-  agent: z.lazy(() => AgentOrderByWithRelationInputSchema).optional()
+  agent: z.lazy(() => AgentOrderByWithRelationInputSchema).optional(),
+  calls: z.lazy(() => CallOrderByRelationAggregateInputSchema).optional()
 }).strict();
 
 export const IntentWhereUniqueInputSchema: z.ZodType<Prisma.IntentWhereUniqueInput> = z.object({
@@ -806,6 +824,7 @@ export const IntentWhereUniqueInputSchema: z.ZodType<Prisma.IntentWhereUniqueInp
   instructions: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   agentId: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   agent: z.union([ z.lazy(() => AgentRelationFilterSchema),z.lazy(() => AgentWhereInputSchema) ]).optional(),
+  calls: z.lazy(() => CallListRelationFilterSchema).optional()
 }).strict());
 
 export const IntentOrderByWithAggregationInputSchema: z.ZodType<Prisma.IntentOrderByWithAggregationInput> = z.object({
@@ -839,8 +858,10 @@ export const CallWhereInputSchema: z.ZodType<Prisma.CallWhereInput> = z.object({
   stereoRecordingUrl: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   testId: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   testAgentId: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
+  intentId: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   test: z.union([ z.lazy(() => TestRelationFilterSchema),z.lazy(() => TestWhereInputSchema) ]).optional(),
   testAgent: z.union([ z.lazy(() => TestAgentRelationFilterSchema),z.lazy(() => TestAgentWhereInputSchema) ]).optional(),
+  intent: z.union([ z.lazy(() => IntentRelationFilterSchema),z.lazy(() => IntentWhereInputSchema) ]).optional(),
   messages: z.lazy(() => MessageListRelationFilterSchema).optional(),
   errors: z.lazy(() => CallErrorListRelationFilterSchema).optional()
 }).strict();
@@ -853,8 +874,10 @@ export const CallOrderByWithRelationInputSchema: z.ZodType<Prisma.CallOrderByWit
   stereoRecordingUrl: z.lazy(() => SortOrderSchema).optional(),
   testId: z.lazy(() => SortOrderSchema).optional(),
   testAgentId: z.lazy(() => SortOrderSchema).optional(),
+  intentId: z.lazy(() => SortOrderSchema).optional(),
   test: z.lazy(() => TestOrderByWithRelationInputSchema).optional(),
   testAgent: z.lazy(() => TestAgentOrderByWithRelationInputSchema).optional(),
+  intent: z.lazy(() => IntentOrderByWithRelationInputSchema).optional(),
   messages: z.lazy(() => MessageOrderByRelationAggregateInputSchema).optional(),
   errors: z.lazy(() => CallErrorOrderByRelationAggregateInputSchema).optional()
 }).strict();
@@ -873,8 +896,10 @@ export const CallWhereUniqueInputSchema: z.ZodType<Prisma.CallWhereUniqueInput> 
   stereoRecordingUrl: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   testId: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   testAgentId: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
+  intentId: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   test: z.union([ z.lazy(() => TestRelationFilterSchema),z.lazy(() => TestWhereInputSchema) ]).optional(),
   testAgent: z.union([ z.lazy(() => TestAgentRelationFilterSchema),z.lazy(() => TestAgentWhereInputSchema) ]).optional(),
+  intent: z.union([ z.lazy(() => IntentRelationFilterSchema),z.lazy(() => IntentWhereInputSchema) ]).optional(),
   messages: z.lazy(() => MessageListRelationFilterSchema).optional(),
   errors: z.lazy(() => CallErrorListRelationFilterSchema).optional()
 }).strict());
@@ -887,6 +912,7 @@ export const CallOrderByWithAggregationInputSchema: z.ZodType<Prisma.CallOrderBy
   stereoRecordingUrl: z.lazy(() => SortOrderSchema).optional(),
   testId: z.lazy(() => SortOrderSchema).optional(),
   testAgentId: z.lazy(() => SortOrderSchema).optional(),
+  intentId: z.lazy(() => SortOrderSchema).optional(),
   _count: z.lazy(() => CallCountOrderByAggregateInputSchema).optional(),
   _max: z.lazy(() => CallMaxOrderByAggregateInputSchema).optional(),
   _min: z.lazy(() => CallMinOrderByAggregateInputSchema).optional()
@@ -903,6 +929,7 @@ export const CallScalarWhereWithAggregatesInputSchema: z.ZodType<Prisma.CallScal
   stereoRecordingUrl: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
   testId: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
   testAgentId: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
+  intentId: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
 }).strict();
 
 export const MessageWhereInputSchema: z.ZodType<Prisma.MessageWhereInput> = z.object({
@@ -1261,9 +1288,9 @@ export const TestAgentCreateInputSchema: z.ZodType<Prisma.TestAgentCreateInput> 
   description: z.string(),
   prompt: z.string(),
   vapiId: z.string(),
-  Call: z.lazy(() => CallCreateNestedManyWithoutTestAgentInputSchema).optional(),
-  Agent: z.lazy(() => AgentCreateNestedOneWithoutTestAgentsInputSchema).optional(),
-  tests: z.lazy(() => TestCreateNestedManyWithoutTestAgentsInputSchema).optional()
+  agent: z.lazy(() => AgentCreateNestedOneWithoutTestAgentsInputSchema).optional(),
+  tests: z.lazy(() => TestCreateNestedManyWithoutTestAgentsInputSchema).optional(),
+  calls: z.lazy(() => CallCreateNestedManyWithoutTestAgentInputSchema).optional()
 }).strict();
 
 export const TestAgentUncheckedCreateInputSchema: z.ZodType<Prisma.TestAgentUncheckedCreateInput> = z.object({
@@ -1275,8 +1302,8 @@ export const TestAgentUncheckedCreateInputSchema: z.ZodType<Prisma.TestAgentUnch
   prompt: z.string(),
   vapiId: z.string(),
   agentId: z.string().optional().nullable(),
-  Call: z.lazy(() => CallUncheckedCreateNestedManyWithoutTestAgentInputSchema).optional(),
-  tests: z.lazy(() => TestUncheckedCreateNestedManyWithoutTestAgentsInputSchema).optional()
+  tests: z.lazy(() => TestUncheckedCreateNestedManyWithoutTestAgentsInputSchema).optional(),
+  calls: z.lazy(() => CallUncheckedCreateNestedManyWithoutTestAgentInputSchema).optional()
 }).strict();
 
 export const TestAgentUpdateInputSchema: z.ZodType<Prisma.TestAgentUpdateInput> = z.object({
@@ -1287,9 +1314,9 @@ export const TestAgentUpdateInputSchema: z.ZodType<Prisma.TestAgentUpdateInput> 
   description: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   prompt: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   vapiId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  Call: z.lazy(() => CallUpdateManyWithoutTestAgentNestedInputSchema).optional(),
-  Agent: z.lazy(() => AgentUpdateOneWithoutTestAgentsNestedInputSchema).optional(),
-  tests: z.lazy(() => TestUpdateManyWithoutTestAgentsNestedInputSchema).optional()
+  agent: z.lazy(() => AgentUpdateOneWithoutTestAgentsNestedInputSchema).optional(),
+  tests: z.lazy(() => TestUpdateManyWithoutTestAgentsNestedInputSchema).optional(),
+  calls: z.lazy(() => CallUpdateManyWithoutTestAgentNestedInputSchema).optional()
 }).strict();
 
 export const TestAgentUncheckedUpdateInputSchema: z.ZodType<Prisma.TestAgentUncheckedUpdateInput> = z.object({
@@ -1301,8 +1328,8 @@ export const TestAgentUncheckedUpdateInputSchema: z.ZodType<Prisma.TestAgentUnch
   prompt: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   vapiId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   agentId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  Call: z.lazy(() => CallUncheckedUpdateManyWithoutTestAgentNestedInputSchema).optional(),
-  tests: z.lazy(() => TestUncheckedUpdateManyWithoutTestAgentsNestedInputSchema).optional()
+  tests: z.lazy(() => TestUncheckedUpdateManyWithoutTestAgentsNestedInputSchema).optional(),
+  calls: z.lazy(() => CallUncheckedUpdateManyWithoutTestAgentNestedInputSchema).optional()
 }).strict();
 
 export const TestAgentCreateManyInputSchema: z.ZodType<Prisma.TestAgentCreateManyInput> = z.object({
@@ -1390,21 +1417,24 @@ export const IntentCreateInputSchema: z.ZodType<Prisma.IntentCreateInput> = z.ob
   id: z.string().cuid().optional(),
   name: z.string(),
   instructions: z.string(),
-  agent: z.lazy(() => AgentCreateNestedOneWithoutIntentsInputSchema)
+  agent: z.lazy(() => AgentCreateNestedOneWithoutIntentsInputSchema),
+  calls: z.lazy(() => CallCreateNestedManyWithoutIntentInputSchema).optional()
 }).strict();
 
 export const IntentUncheckedCreateInputSchema: z.ZodType<Prisma.IntentUncheckedCreateInput> = z.object({
   id: z.string().cuid().optional(),
   name: z.string(),
   instructions: z.string(),
-  agentId: z.string()
+  agentId: z.string(),
+  calls: z.lazy(() => CallUncheckedCreateNestedManyWithoutIntentInputSchema).optional()
 }).strict();
 
 export const IntentUpdateInputSchema: z.ZodType<Prisma.IntentUpdateInput> = z.object({
   id: z.union([ z.string().cuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   instructions: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  agent: z.lazy(() => AgentUpdateOneRequiredWithoutIntentsNestedInputSchema).optional()
+  agent: z.lazy(() => AgentUpdateOneRequiredWithoutIntentsNestedInputSchema).optional(),
+  calls: z.lazy(() => CallUpdateManyWithoutIntentNestedInputSchema).optional()
 }).strict();
 
 export const IntentUncheckedUpdateInputSchema: z.ZodType<Prisma.IntentUncheckedUpdateInput> = z.object({
@@ -1412,6 +1442,7 @@ export const IntentUncheckedUpdateInputSchema: z.ZodType<Prisma.IntentUncheckedU
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   instructions: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   agentId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  calls: z.lazy(() => CallUncheckedUpdateManyWithoutIntentNestedInputSchema).optional()
 }).strict();
 
 export const IntentCreateManyInputSchema: z.ZodType<Prisma.IntentCreateManyInput> = z.object({
@@ -1441,7 +1472,8 @@ export const CallCreateInputSchema: z.ZodType<Prisma.CallCreateInput> = z.object
   failureReason: z.string().optional().nullable(),
   stereoRecordingUrl: z.string(),
   test: z.lazy(() => TestCreateNestedOneWithoutCallsInputSchema),
-  testAgent: z.lazy(() => TestAgentCreateNestedOneWithoutCallInputSchema),
+  testAgent: z.lazy(() => TestAgentCreateNestedOneWithoutCallsInputSchema),
+  intent: z.lazy(() => IntentCreateNestedOneWithoutCallsInputSchema),
   messages: z.lazy(() => MessageCreateNestedManyWithoutCallInputSchema).optional(),
   errors: z.lazy(() => CallErrorCreateNestedManyWithoutCallInputSchema).optional()
 }).strict();
@@ -1454,6 +1486,7 @@ export const CallUncheckedCreateInputSchema: z.ZodType<Prisma.CallUncheckedCreat
   stereoRecordingUrl: z.string(),
   testId: z.string(),
   testAgentId: z.string(),
+  intentId: z.string(),
   messages: z.lazy(() => MessageUncheckedCreateNestedManyWithoutCallInputSchema).optional(),
   errors: z.lazy(() => CallErrorUncheckedCreateNestedManyWithoutCallInputSchema).optional()
 }).strict();
@@ -1465,7 +1498,8 @@ export const CallUpdateInputSchema: z.ZodType<Prisma.CallUpdateInput> = z.object
   failureReason: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   stereoRecordingUrl: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   test: z.lazy(() => TestUpdateOneRequiredWithoutCallsNestedInputSchema).optional(),
-  testAgent: z.lazy(() => TestAgentUpdateOneRequiredWithoutCallNestedInputSchema).optional(),
+  testAgent: z.lazy(() => TestAgentUpdateOneRequiredWithoutCallsNestedInputSchema).optional(),
+  intent: z.lazy(() => IntentUpdateOneRequiredWithoutCallsNestedInputSchema).optional(),
   messages: z.lazy(() => MessageUpdateManyWithoutCallNestedInputSchema).optional(),
   errors: z.lazy(() => CallErrorUpdateManyWithoutCallNestedInputSchema).optional()
 }).strict();
@@ -1478,6 +1512,7 @@ export const CallUncheckedUpdateInputSchema: z.ZodType<Prisma.CallUncheckedUpdat
   stereoRecordingUrl: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   testId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   testAgentId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  intentId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   messages: z.lazy(() => MessageUncheckedUpdateManyWithoutCallNestedInputSchema).optional(),
   errors: z.lazy(() => CallErrorUncheckedUpdateManyWithoutCallNestedInputSchema).optional()
 }).strict();
@@ -1489,7 +1524,8 @@ export const CallCreateManyInputSchema: z.ZodType<Prisma.CallCreateManyInput> = 
   failureReason: z.string().optional().nullable(),
   stereoRecordingUrl: z.string(),
   testId: z.string(),
-  testAgentId: z.string()
+  testAgentId: z.string(),
+  intentId: z.string()
 }).strict();
 
 export const CallUpdateManyMutationInputSchema: z.ZodType<Prisma.CallUpdateManyMutationInput> = z.object({
@@ -1508,6 +1544,7 @@ export const CallUncheckedUpdateManyInputSchema: z.ZodType<Prisma.CallUncheckedU
   stereoRecordingUrl: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   testId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   testAgentId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  intentId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
 }).strict();
 
 export const MessageCreateInputSchema: z.ZodType<Prisma.MessageCreateInput> = z.object({
@@ -1987,6 +2024,11 @@ export const TestAgentRelationFilterSchema: z.ZodType<Prisma.TestAgentRelationFi
   isNot: z.lazy(() => TestAgentWhereInputSchema).optional()
 }).strict();
 
+export const IntentRelationFilterSchema: z.ZodType<Prisma.IntentRelationFilter> = z.object({
+  is: z.lazy(() => IntentWhereInputSchema).optional(),
+  isNot: z.lazy(() => IntentWhereInputSchema).optional()
+}).strict();
+
 export const MessageListRelationFilterSchema: z.ZodType<Prisma.MessageListRelationFilter> = z.object({
   every: z.lazy(() => MessageWhereInputSchema).optional(),
   some: z.lazy(() => MessageWhereInputSchema).optional(),
@@ -2014,7 +2056,8 @@ export const CallCountOrderByAggregateInputSchema: z.ZodType<Prisma.CallCountOrd
   failureReason: z.lazy(() => SortOrderSchema).optional(),
   stereoRecordingUrl: z.lazy(() => SortOrderSchema).optional(),
   testId: z.lazy(() => SortOrderSchema).optional(),
-  testAgentId: z.lazy(() => SortOrderSchema).optional()
+  testAgentId: z.lazy(() => SortOrderSchema).optional(),
+  intentId: z.lazy(() => SortOrderSchema).optional()
 }).strict();
 
 export const CallMaxOrderByAggregateInputSchema: z.ZodType<Prisma.CallMaxOrderByAggregateInput> = z.object({
@@ -2024,7 +2067,8 @@ export const CallMaxOrderByAggregateInputSchema: z.ZodType<Prisma.CallMaxOrderBy
   failureReason: z.lazy(() => SortOrderSchema).optional(),
   stereoRecordingUrl: z.lazy(() => SortOrderSchema).optional(),
   testId: z.lazy(() => SortOrderSchema).optional(),
-  testAgentId: z.lazy(() => SortOrderSchema).optional()
+  testAgentId: z.lazy(() => SortOrderSchema).optional(),
+  intentId: z.lazy(() => SortOrderSchema).optional()
 }).strict();
 
 export const CallMinOrderByAggregateInputSchema: z.ZodType<Prisma.CallMinOrderByAggregateInput> = z.object({
@@ -2034,7 +2078,8 @@ export const CallMinOrderByAggregateInputSchema: z.ZodType<Prisma.CallMinOrderBy
   failureReason: z.lazy(() => SortOrderSchema).optional(),
   stereoRecordingUrl: z.lazy(() => SortOrderSchema).optional(),
   testId: z.lazy(() => SortOrderSchema).optional(),
-  testAgentId: z.lazy(() => SortOrderSchema).optional()
+  testAgentId: z.lazy(() => SortOrderSchema).optional(),
+  intentId: z.lazy(() => SortOrderSchema).optional()
 }).strict();
 
 export const EnumCallStatusWithAggregatesFilterSchema: z.ZodType<Prisma.EnumCallStatusWithAggregatesFilter> = z.object({
@@ -2422,13 +2467,6 @@ export const CallUncheckedUpdateManyWithoutTestNestedInputSchema: z.ZodType<Pris
   deleteMany: z.union([ z.lazy(() => CallScalarWhereInputSchema),z.lazy(() => CallScalarWhereInputSchema).array() ]).optional(),
 }).strict();
 
-export const CallCreateNestedManyWithoutTestAgentInputSchema: z.ZodType<Prisma.CallCreateNestedManyWithoutTestAgentInput> = z.object({
-  create: z.union([ z.lazy(() => CallCreateWithoutTestAgentInputSchema),z.lazy(() => CallCreateWithoutTestAgentInputSchema).array(),z.lazy(() => CallUncheckedCreateWithoutTestAgentInputSchema),z.lazy(() => CallUncheckedCreateWithoutTestAgentInputSchema).array() ]).optional(),
-  connectOrCreate: z.union([ z.lazy(() => CallCreateOrConnectWithoutTestAgentInputSchema),z.lazy(() => CallCreateOrConnectWithoutTestAgentInputSchema).array() ]).optional(),
-  createMany: z.lazy(() => CallCreateManyTestAgentInputEnvelopeSchema).optional(),
-  connect: z.union([ z.lazy(() => CallWhereUniqueInputSchema),z.lazy(() => CallWhereUniqueInputSchema).array() ]).optional(),
-}).strict();
-
 export const AgentCreateNestedOneWithoutTestAgentsInputSchema: z.ZodType<Prisma.AgentCreateNestedOneWithoutTestAgentsInput> = z.object({
   create: z.union([ z.lazy(() => AgentCreateWithoutTestAgentsInputSchema),z.lazy(() => AgentUncheckedCreateWithoutTestAgentsInputSchema) ]).optional(),
   connectOrCreate: z.lazy(() => AgentCreateOrConnectWithoutTestAgentsInputSchema).optional(),
@@ -2441,7 +2479,7 @@ export const TestCreateNestedManyWithoutTestAgentsInputSchema: z.ZodType<Prisma.
   connect: z.union([ z.lazy(() => TestWhereUniqueInputSchema),z.lazy(() => TestWhereUniqueInputSchema).array() ]).optional(),
 }).strict();
 
-export const CallUncheckedCreateNestedManyWithoutTestAgentInputSchema: z.ZodType<Prisma.CallUncheckedCreateNestedManyWithoutTestAgentInput> = z.object({
+export const CallCreateNestedManyWithoutTestAgentInputSchema: z.ZodType<Prisma.CallCreateNestedManyWithoutTestAgentInput> = z.object({
   create: z.union([ z.lazy(() => CallCreateWithoutTestAgentInputSchema),z.lazy(() => CallCreateWithoutTestAgentInputSchema).array(),z.lazy(() => CallUncheckedCreateWithoutTestAgentInputSchema),z.lazy(() => CallUncheckedCreateWithoutTestAgentInputSchema).array() ]).optional(),
   connectOrCreate: z.union([ z.lazy(() => CallCreateOrConnectWithoutTestAgentInputSchema),z.lazy(() => CallCreateOrConnectWithoutTestAgentInputSchema).array() ]).optional(),
   createMany: z.lazy(() => CallCreateManyTestAgentInputEnvelopeSchema).optional(),
@@ -2454,22 +2492,15 @@ export const TestUncheckedCreateNestedManyWithoutTestAgentsInputSchema: z.ZodTyp
   connect: z.union([ z.lazy(() => TestWhereUniqueInputSchema),z.lazy(() => TestWhereUniqueInputSchema).array() ]).optional(),
 }).strict();
 
-export const BoolFieldUpdateOperationsInputSchema: z.ZodType<Prisma.BoolFieldUpdateOperationsInput> = z.object({
-  set: z.boolean().optional()
-}).strict();
-
-export const CallUpdateManyWithoutTestAgentNestedInputSchema: z.ZodType<Prisma.CallUpdateManyWithoutTestAgentNestedInput> = z.object({
+export const CallUncheckedCreateNestedManyWithoutTestAgentInputSchema: z.ZodType<Prisma.CallUncheckedCreateNestedManyWithoutTestAgentInput> = z.object({
   create: z.union([ z.lazy(() => CallCreateWithoutTestAgentInputSchema),z.lazy(() => CallCreateWithoutTestAgentInputSchema).array(),z.lazy(() => CallUncheckedCreateWithoutTestAgentInputSchema),z.lazy(() => CallUncheckedCreateWithoutTestAgentInputSchema).array() ]).optional(),
   connectOrCreate: z.union([ z.lazy(() => CallCreateOrConnectWithoutTestAgentInputSchema),z.lazy(() => CallCreateOrConnectWithoutTestAgentInputSchema).array() ]).optional(),
-  upsert: z.union([ z.lazy(() => CallUpsertWithWhereUniqueWithoutTestAgentInputSchema),z.lazy(() => CallUpsertWithWhereUniqueWithoutTestAgentInputSchema).array() ]).optional(),
   createMany: z.lazy(() => CallCreateManyTestAgentInputEnvelopeSchema).optional(),
-  set: z.union([ z.lazy(() => CallWhereUniqueInputSchema),z.lazy(() => CallWhereUniqueInputSchema).array() ]).optional(),
-  disconnect: z.union([ z.lazy(() => CallWhereUniqueInputSchema),z.lazy(() => CallWhereUniqueInputSchema).array() ]).optional(),
-  delete: z.union([ z.lazy(() => CallWhereUniqueInputSchema),z.lazy(() => CallWhereUniqueInputSchema).array() ]).optional(),
   connect: z.union([ z.lazy(() => CallWhereUniqueInputSchema),z.lazy(() => CallWhereUniqueInputSchema).array() ]).optional(),
-  update: z.union([ z.lazy(() => CallUpdateWithWhereUniqueWithoutTestAgentInputSchema),z.lazy(() => CallUpdateWithWhereUniqueWithoutTestAgentInputSchema).array() ]).optional(),
-  updateMany: z.union([ z.lazy(() => CallUpdateManyWithWhereWithoutTestAgentInputSchema),z.lazy(() => CallUpdateManyWithWhereWithoutTestAgentInputSchema).array() ]).optional(),
-  deleteMany: z.union([ z.lazy(() => CallScalarWhereInputSchema),z.lazy(() => CallScalarWhereInputSchema).array() ]).optional(),
+}).strict();
+
+export const BoolFieldUpdateOperationsInputSchema: z.ZodType<Prisma.BoolFieldUpdateOperationsInput> = z.object({
+  set: z.boolean().optional()
 }).strict();
 
 export const AgentUpdateOneWithoutTestAgentsNestedInputSchema: z.ZodType<Prisma.AgentUpdateOneWithoutTestAgentsNestedInput> = z.object({
@@ -2495,7 +2526,7 @@ export const TestUpdateManyWithoutTestAgentsNestedInputSchema: z.ZodType<Prisma.
   deleteMany: z.union([ z.lazy(() => TestScalarWhereInputSchema),z.lazy(() => TestScalarWhereInputSchema).array() ]).optional(),
 }).strict();
 
-export const CallUncheckedUpdateManyWithoutTestAgentNestedInputSchema: z.ZodType<Prisma.CallUncheckedUpdateManyWithoutTestAgentNestedInput> = z.object({
+export const CallUpdateManyWithoutTestAgentNestedInputSchema: z.ZodType<Prisma.CallUpdateManyWithoutTestAgentNestedInput> = z.object({
   create: z.union([ z.lazy(() => CallCreateWithoutTestAgentInputSchema),z.lazy(() => CallCreateWithoutTestAgentInputSchema).array(),z.lazy(() => CallUncheckedCreateWithoutTestAgentInputSchema),z.lazy(() => CallUncheckedCreateWithoutTestAgentInputSchema).array() ]).optional(),
   connectOrCreate: z.union([ z.lazy(() => CallCreateOrConnectWithoutTestAgentInputSchema),z.lazy(() => CallCreateOrConnectWithoutTestAgentInputSchema).array() ]).optional(),
   upsert: z.union([ z.lazy(() => CallUpsertWithWhereUniqueWithoutTestAgentInputSchema),z.lazy(() => CallUpsertWithWhereUniqueWithoutTestAgentInputSchema).array() ]).optional(),
@@ -2522,10 +2553,38 @@ export const TestUncheckedUpdateManyWithoutTestAgentsNestedInputSchema: z.ZodTyp
   deleteMany: z.union([ z.lazy(() => TestScalarWhereInputSchema),z.lazy(() => TestScalarWhereInputSchema).array() ]).optional(),
 }).strict();
 
+export const CallUncheckedUpdateManyWithoutTestAgentNestedInputSchema: z.ZodType<Prisma.CallUncheckedUpdateManyWithoutTestAgentNestedInput> = z.object({
+  create: z.union([ z.lazy(() => CallCreateWithoutTestAgentInputSchema),z.lazy(() => CallCreateWithoutTestAgentInputSchema).array(),z.lazy(() => CallUncheckedCreateWithoutTestAgentInputSchema),z.lazy(() => CallUncheckedCreateWithoutTestAgentInputSchema).array() ]).optional(),
+  connectOrCreate: z.union([ z.lazy(() => CallCreateOrConnectWithoutTestAgentInputSchema),z.lazy(() => CallCreateOrConnectWithoutTestAgentInputSchema).array() ]).optional(),
+  upsert: z.union([ z.lazy(() => CallUpsertWithWhereUniqueWithoutTestAgentInputSchema),z.lazy(() => CallUpsertWithWhereUniqueWithoutTestAgentInputSchema).array() ]).optional(),
+  createMany: z.lazy(() => CallCreateManyTestAgentInputEnvelopeSchema).optional(),
+  set: z.union([ z.lazy(() => CallWhereUniqueInputSchema),z.lazy(() => CallWhereUniqueInputSchema).array() ]).optional(),
+  disconnect: z.union([ z.lazy(() => CallWhereUniqueInputSchema),z.lazy(() => CallWhereUniqueInputSchema).array() ]).optional(),
+  delete: z.union([ z.lazy(() => CallWhereUniqueInputSchema),z.lazy(() => CallWhereUniqueInputSchema).array() ]).optional(),
+  connect: z.union([ z.lazy(() => CallWhereUniqueInputSchema),z.lazy(() => CallWhereUniqueInputSchema).array() ]).optional(),
+  update: z.union([ z.lazy(() => CallUpdateWithWhereUniqueWithoutTestAgentInputSchema),z.lazy(() => CallUpdateWithWhereUniqueWithoutTestAgentInputSchema).array() ]).optional(),
+  updateMany: z.union([ z.lazy(() => CallUpdateManyWithWhereWithoutTestAgentInputSchema),z.lazy(() => CallUpdateManyWithWhereWithoutTestAgentInputSchema).array() ]).optional(),
+  deleteMany: z.union([ z.lazy(() => CallScalarWhereInputSchema),z.lazy(() => CallScalarWhereInputSchema).array() ]).optional(),
+}).strict();
+
 export const AgentCreateNestedOneWithoutIntentsInputSchema: z.ZodType<Prisma.AgentCreateNestedOneWithoutIntentsInput> = z.object({
   create: z.union([ z.lazy(() => AgentCreateWithoutIntentsInputSchema),z.lazy(() => AgentUncheckedCreateWithoutIntentsInputSchema) ]).optional(),
   connectOrCreate: z.lazy(() => AgentCreateOrConnectWithoutIntentsInputSchema).optional(),
   connect: z.lazy(() => AgentWhereUniqueInputSchema).optional()
+}).strict();
+
+export const CallCreateNestedManyWithoutIntentInputSchema: z.ZodType<Prisma.CallCreateNestedManyWithoutIntentInput> = z.object({
+  create: z.union([ z.lazy(() => CallCreateWithoutIntentInputSchema),z.lazy(() => CallCreateWithoutIntentInputSchema).array(),z.lazy(() => CallUncheckedCreateWithoutIntentInputSchema),z.lazy(() => CallUncheckedCreateWithoutIntentInputSchema).array() ]).optional(),
+  connectOrCreate: z.union([ z.lazy(() => CallCreateOrConnectWithoutIntentInputSchema),z.lazy(() => CallCreateOrConnectWithoutIntentInputSchema).array() ]).optional(),
+  createMany: z.lazy(() => CallCreateManyIntentInputEnvelopeSchema).optional(),
+  connect: z.union([ z.lazy(() => CallWhereUniqueInputSchema),z.lazy(() => CallWhereUniqueInputSchema).array() ]).optional(),
+}).strict();
+
+export const CallUncheckedCreateNestedManyWithoutIntentInputSchema: z.ZodType<Prisma.CallUncheckedCreateNestedManyWithoutIntentInput> = z.object({
+  create: z.union([ z.lazy(() => CallCreateWithoutIntentInputSchema),z.lazy(() => CallCreateWithoutIntentInputSchema).array(),z.lazy(() => CallUncheckedCreateWithoutIntentInputSchema),z.lazy(() => CallUncheckedCreateWithoutIntentInputSchema).array() ]).optional(),
+  connectOrCreate: z.union([ z.lazy(() => CallCreateOrConnectWithoutIntentInputSchema),z.lazy(() => CallCreateOrConnectWithoutIntentInputSchema).array() ]).optional(),
+  createMany: z.lazy(() => CallCreateManyIntentInputEnvelopeSchema).optional(),
+  connect: z.union([ z.lazy(() => CallWhereUniqueInputSchema),z.lazy(() => CallWhereUniqueInputSchema).array() ]).optional(),
 }).strict();
 
 export const AgentUpdateOneRequiredWithoutIntentsNestedInputSchema: z.ZodType<Prisma.AgentUpdateOneRequiredWithoutIntentsNestedInput> = z.object({
@@ -2536,16 +2595,50 @@ export const AgentUpdateOneRequiredWithoutIntentsNestedInputSchema: z.ZodType<Pr
   update: z.union([ z.lazy(() => AgentUpdateToOneWithWhereWithoutIntentsInputSchema),z.lazy(() => AgentUpdateWithoutIntentsInputSchema),z.lazy(() => AgentUncheckedUpdateWithoutIntentsInputSchema) ]).optional(),
 }).strict();
 
+export const CallUpdateManyWithoutIntentNestedInputSchema: z.ZodType<Prisma.CallUpdateManyWithoutIntentNestedInput> = z.object({
+  create: z.union([ z.lazy(() => CallCreateWithoutIntentInputSchema),z.lazy(() => CallCreateWithoutIntentInputSchema).array(),z.lazy(() => CallUncheckedCreateWithoutIntentInputSchema),z.lazy(() => CallUncheckedCreateWithoutIntentInputSchema).array() ]).optional(),
+  connectOrCreate: z.union([ z.lazy(() => CallCreateOrConnectWithoutIntentInputSchema),z.lazy(() => CallCreateOrConnectWithoutIntentInputSchema).array() ]).optional(),
+  upsert: z.union([ z.lazy(() => CallUpsertWithWhereUniqueWithoutIntentInputSchema),z.lazy(() => CallUpsertWithWhereUniqueWithoutIntentInputSchema).array() ]).optional(),
+  createMany: z.lazy(() => CallCreateManyIntentInputEnvelopeSchema).optional(),
+  set: z.union([ z.lazy(() => CallWhereUniqueInputSchema),z.lazy(() => CallWhereUniqueInputSchema).array() ]).optional(),
+  disconnect: z.union([ z.lazy(() => CallWhereUniqueInputSchema),z.lazy(() => CallWhereUniqueInputSchema).array() ]).optional(),
+  delete: z.union([ z.lazy(() => CallWhereUniqueInputSchema),z.lazy(() => CallWhereUniqueInputSchema).array() ]).optional(),
+  connect: z.union([ z.lazy(() => CallWhereUniqueInputSchema),z.lazy(() => CallWhereUniqueInputSchema).array() ]).optional(),
+  update: z.union([ z.lazy(() => CallUpdateWithWhereUniqueWithoutIntentInputSchema),z.lazy(() => CallUpdateWithWhereUniqueWithoutIntentInputSchema).array() ]).optional(),
+  updateMany: z.union([ z.lazy(() => CallUpdateManyWithWhereWithoutIntentInputSchema),z.lazy(() => CallUpdateManyWithWhereWithoutIntentInputSchema).array() ]).optional(),
+  deleteMany: z.union([ z.lazy(() => CallScalarWhereInputSchema),z.lazy(() => CallScalarWhereInputSchema).array() ]).optional(),
+}).strict();
+
+export const CallUncheckedUpdateManyWithoutIntentNestedInputSchema: z.ZodType<Prisma.CallUncheckedUpdateManyWithoutIntentNestedInput> = z.object({
+  create: z.union([ z.lazy(() => CallCreateWithoutIntentInputSchema),z.lazy(() => CallCreateWithoutIntentInputSchema).array(),z.lazy(() => CallUncheckedCreateWithoutIntentInputSchema),z.lazy(() => CallUncheckedCreateWithoutIntentInputSchema).array() ]).optional(),
+  connectOrCreate: z.union([ z.lazy(() => CallCreateOrConnectWithoutIntentInputSchema),z.lazy(() => CallCreateOrConnectWithoutIntentInputSchema).array() ]).optional(),
+  upsert: z.union([ z.lazy(() => CallUpsertWithWhereUniqueWithoutIntentInputSchema),z.lazy(() => CallUpsertWithWhereUniqueWithoutIntentInputSchema).array() ]).optional(),
+  createMany: z.lazy(() => CallCreateManyIntentInputEnvelopeSchema).optional(),
+  set: z.union([ z.lazy(() => CallWhereUniqueInputSchema),z.lazy(() => CallWhereUniqueInputSchema).array() ]).optional(),
+  disconnect: z.union([ z.lazy(() => CallWhereUniqueInputSchema),z.lazy(() => CallWhereUniqueInputSchema).array() ]).optional(),
+  delete: z.union([ z.lazy(() => CallWhereUniqueInputSchema),z.lazy(() => CallWhereUniqueInputSchema).array() ]).optional(),
+  connect: z.union([ z.lazy(() => CallWhereUniqueInputSchema),z.lazy(() => CallWhereUniqueInputSchema).array() ]).optional(),
+  update: z.union([ z.lazy(() => CallUpdateWithWhereUniqueWithoutIntentInputSchema),z.lazy(() => CallUpdateWithWhereUniqueWithoutIntentInputSchema).array() ]).optional(),
+  updateMany: z.union([ z.lazy(() => CallUpdateManyWithWhereWithoutIntentInputSchema),z.lazy(() => CallUpdateManyWithWhereWithoutIntentInputSchema).array() ]).optional(),
+  deleteMany: z.union([ z.lazy(() => CallScalarWhereInputSchema),z.lazy(() => CallScalarWhereInputSchema).array() ]).optional(),
+}).strict();
+
 export const TestCreateNestedOneWithoutCallsInputSchema: z.ZodType<Prisma.TestCreateNestedOneWithoutCallsInput> = z.object({
   create: z.union([ z.lazy(() => TestCreateWithoutCallsInputSchema),z.lazy(() => TestUncheckedCreateWithoutCallsInputSchema) ]).optional(),
   connectOrCreate: z.lazy(() => TestCreateOrConnectWithoutCallsInputSchema).optional(),
   connect: z.lazy(() => TestWhereUniqueInputSchema).optional()
 }).strict();
 
-export const TestAgentCreateNestedOneWithoutCallInputSchema: z.ZodType<Prisma.TestAgentCreateNestedOneWithoutCallInput> = z.object({
-  create: z.union([ z.lazy(() => TestAgentCreateWithoutCallInputSchema),z.lazy(() => TestAgentUncheckedCreateWithoutCallInputSchema) ]).optional(),
-  connectOrCreate: z.lazy(() => TestAgentCreateOrConnectWithoutCallInputSchema).optional(),
+export const TestAgentCreateNestedOneWithoutCallsInputSchema: z.ZodType<Prisma.TestAgentCreateNestedOneWithoutCallsInput> = z.object({
+  create: z.union([ z.lazy(() => TestAgentCreateWithoutCallsInputSchema),z.lazy(() => TestAgentUncheckedCreateWithoutCallsInputSchema) ]).optional(),
+  connectOrCreate: z.lazy(() => TestAgentCreateOrConnectWithoutCallsInputSchema).optional(),
   connect: z.lazy(() => TestAgentWhereUniqueInputSchema).optional()
+}).strict();
+
+export const IntentCreateNestedOneWithoutCallsInputSchema: z.ZodType<Prisma.IntentCreateNestedOneWithoutCallsInput> = z.object({
+  create: z.union([ z.lazy(() => IntentCreateWithoutCallsInputSchema),z.lazy(() => IntentUncheckedCreateWithoutCallsInputSchema) ]).optional(),
+  connectOrCreate: z.lazy(() => IntentCreateOrConnectWithoutCallsInputSchema).optional(),
+  connect: z.lazy(() => IntentWhereUniqueInputSchema).optional()
 }).strict();
 
 export const MessageCreateNestedManyWithoutCallInputSchema: z.ZodType<Prisma.MessageCreateNestedManyWithoutCallInput> = z.object({
@@ -2592,12 +2685,20 @@ export const TestUpdateOneRequiredWithoutCallsNestedInputSchema: z.ZodType<Prism
   update: z.union([ z.lazy(() => TestUpdateToOneWithWhereWithoutCallsInputSchema),z.lazy(() => TestUpdateWithoutCallsInputSchema),z.lazy(() => TestUncheckedUpdateWithoutCallsInputSchema) ]).optional(),
 }).strict();
 
-export const TestAgentUpdateOneRequiredWithoutCallNestedInputSchema: z.ZodType<Prisma.TestAgentUpdateOneRequiredWithoutCallNestedInput> = z.object({
-  create: z.union([ z.lazy(() => TestAgentCreateWithoutCallInputSchema),z.lazy(() => TestAgentUncheckedCreateWithoutCallInputSchema) ]).optional(),
-  connectOrCreate: z.lazy(() => TestAgentCreateOrConnectWithoutCallInputSchema).optional(),
-  upsert: z.lazy(() => TestAgentUpsertWithoutCallInputSchema).optional(),
+export const TestAgentUpdateOneRequiredWithoutCallsNestedInputSchema: z.ZodType<Prisma.TestAgentUpdateOneRequiredWithoutCallsNestedInput> = z.object({
+  create: z.union([ z.lazy(() => TestAgentCreateWithoutCallsInputSchema),z.lazy(() => TestAgentUncheckedCreateWithoutCallsInputSchema) ]).optional(),
+  connectOrCreate: z.lazy(() => TestAgentCreateOrConnectWithoutCallsInputSchema).optional(),
+  upsert: z.lazy(() => TestAgentUpsertWithoutCallsInputSchema).optional(),
   connect: z.lazy(() => TestAgentWhereUniqueInputSchema).optional(),
-  update: z.union([ z.lazy(() => TestAgentUpdateToOneWithWhereWithoutCallInputSchema),z.lazy(() => TestAgentUpdateWithoutCallInputSchema),z.lazy(() => TestAgentUncheckedUpdateWithoutCallInputSchema) ]).optional(),
+  update: z.union([ z.lazy(() => TestAgentUpdateToOneWithWhereWithoutCallsInputSchema),z.lazy(() => TestAgentUpdateWithoutCallsInputSchema),z.lazy(() => TestAgentUncheckedUpdateWithoutCallsInputSchema) ]).optional(),
+}).strict();
+
+export const IntentUpdateOneRequiredWithoutCallsNestedInputSchema: z.ZodType<Prisma.IntentUpdateOneRequiredWithoutCallsNestedInput> = z.object({
+  create: z.union([ z.lazy(() => IntentCreateWithoutCallsInputSchema),z.lazy(() => IntentUncheckedCreateWithoutCallsInputSchema) ]).optional(),
+  connectOrCreate: z.lazy(() => IntentCreateOrConnectWithoutCallsInputSchema).optional(),
+  upsert: z.lazy(() => IntentUpsertWithoutCallsInputSchema).optional(),
+  connect: z.lazy(() => IntentWhereUniqueInputSchema).optional(),
+  update: z.union([ z.lazy(() => IntentUpdateToOneWithWhereWithoutCallsInputSchema),z.lazy(() => IntentUpdateWithoutCallsInputSchema),z.lazy(() => IntentUncheckedUpdateWithoutCallsInputSchema) ]).optional(),
 }).strict();
 
 export const MessageUpdateManyWithoutCallNestedInputSchema: z.ZodType<Prisma.MessageUpdateManyWithoutCallNestedInput> = z.object({
@@ -2904,8 +3005,8 @@ export const TestAgentCreateWithoutAgentInputSchema: z.ZodType<Prisma.TestAgentC
   description: z.string(),
   prompt: z.string(),
   vapiId: z.string(),
-  Call: z.lazy(() => CallCreateNestedManyWithoutTestAgentInputSchema).optional(),
-  tests: z.lazy(() => TestCreateNestedManyWithoutTestAgentsInputSchema).optional()
+  tests: z.lazy(() => TestCreateNestedManyWithoutTestAgentsInputSchema).optional(),
+  calls: z.lazy(() => CallCreateNestedManyWithoutTestAgentInputSchema).optional()
 }).strict();
 
 export const TestAgentUncheckedCreateWithoutAgentInputSchema: z.ZodType<Prisma.TestAgentUncheckedCreateWithoutAgentInput> = z.object({
@@ -2916,8 +3017,8 @@ export const TestAgentUncheckedCreateWithoutAgentInputSchema: z.ZodType<Prisma.T
   description: z.string(),
   prompt: z.string(),
   vapiId: z.string(),
-  Call: z.lazy(() => CallUncheckedCreateNestedManyWithoutTestAgentInputSchema).optional(),
-  tests: z.lazy(() => TestUncheckedCreateNestedManyWithoutTestAgentsInputSchema).optional()
+  tests: z.lazy(() => TestUncheckedCreateNestedManyWithoutTestAgentsInputSchema).optional(),
+  calls: z.lazy(() => CallUncheckedCreateNestedManyWithoutTestAgentInputSchema).optional()
 }).strict();
 
 export const TestAgentCreateOrConnectWithoutAgentInputSchema: z.ZodType<Prisma.TestAgentCreateOrConnectWithoutAgentInput> = z.object({
@@ -2933,13 +3034,15 @@ export const TestAgentCreateManyAgentInputEnvelopeSchema: z.ZodType<Prisma.TestA
 export const IntentCreateWithoutAgentInputSchema: z.ZodType<Prisma.IntentCreateWithoutAgentInput> = z.object({
   id: z.string().cuid().optional(),
   name: z.string(),
-  instructions: z.string()
+  instructions: z.string(),
+  calls: z.lazy(() => CallCreateNestedManyWithoutIntentInputSchema).optional()
 }).strict();
 
 export const IntentUncheckedCreateWithoutAgentInputSchema: z.ZodType<Prisma.IntentUncheckedCreateWithoutAgentInput> = z.object({
   id: z.string().cuid().optional(),
   name: z.string(),
-  instructions: z.string()
+  instructions: z.string(),
+  calls: z.lazy(() => CallUncheckedCreateNestedManyWithoutIntentInputSchema).optional()
 }).strict();
 
 export const IntentCreateOrConnectWithoutAgentInputSchema: z.ZodType<Prisma.IntentCreateOrConnectWithoutAgentInput> = z.object({
@@ -3099,8 +3202,8 @@ export const TestAgentCreateWithoutTestsInputSchema: z.ZodType<Prisma.TestAgentC
   description: z.string(),
   prompt: z.string(),
   vapiId: z.string(),
-  Call: z.lazy(() => CallCreateNestedManyWithoutTestAgentInputSchema).optional(),
-  Agent: z.lazy(() => AgentCreateNestedOneWithoutTestAgentsInputSchema).optional()
+  agent: z.lazy(() => AgentCreateNestedOneWithoutTestAgentsInputSchema).optional(),
+  calls: z.lazy(() => CallCreateNestedManyWithoutTestAgentInputSchema).optional()
 }).strict();
 
 export const TestAgentUncheckedCreateWithoutTestsInputSchema: z.ZodType<Prisma.TestAgentUncheckedCreateWithoutTestsInput> = z.object({
@@ -3112,7 +3215,7 @@ export const TestAgentUncheckedCreateWithoutTestsInputSchema: z.ZodType<Prisma.T
   prompt: z.string(),
   vapiId: z.string(),
   agentId: z.string().optional().nullable(),
-  Call: z.lazy(() => CallUncheckedCreateNestedManyWithoutTestAgentInputSchema).optional()
+  calls: z.lazy(() => CallUncheckedCreateNestedManyWithoutTestAgentInputSchema).optional()
 }).strict();
 
 export const TestAgentCreateOrConnectWithoutTestsInputSchema: z.ZodType<Prisma.TestAgentCreateOrConnectWithoutTestsInput> = z.object({
@@ -3126,7 +3229,8 @@ export const CallCreateWithoutTestInputSchema: z.ZodType<Prisma.CallCreateWithou
   result: z.lazy(() => CallResultSchema).optional().nullable(),
   failureReason: z.string().optional().nullable(),
   stereoRecordingUrl: z.string(),
-  testAgent: z.lazy(() => TestAgentCreateNestedOneWithoutCallInputSchema),
+  testAgent: z.lazy(() => TestAgentCreateNestedOneWithoutCallsInputSchema),
+  intent: z.lazy(() => IntentCreateNestedOneWithoutCallsInputSchema),
   messages: z.lazy(() => MessageCreateNestedManyWithoutCallInputSchema).optional(),
   errors: z.lazy(() => CallErrorCreateNestedManyWithoutCallInputSchema).optional()
 }).strict();
@@ -3138,6 +3242,7 @@ export const CallUncheckedCreateWithoutTestInputSchema: z.ZodType<Prisma.CallUnc
   failureReason: z.string().optional().nullable(),
   stereoRecordingUrl: z.string(),
   testAgentId: z.string(),
+  intentId: z.string(),
   messages: z.lazy(() => MessageUncheckedCreateNestedManyWithoutCallInputSchema).optional(),
   errors: z.lazy(() => CallErrorUncheckedCreateNestedManyWithoutCallInputSchema).optional()
 }).strict();
@@ -3232,38 +3337,7 @@ export const CallScalarWhereInputSchema: z.ZodType<Prisma.CallScalarWhereInput> 
   stereoRecordingUrl: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   testId: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   testAgentId: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
-}).strict();
-
-export const CallCreateWithoutTestAgentInputSchema: z.ZodType<Prisma.CallCreateWithoutTestAgentInput> = z.object({
-  id: z.string().cuid().optional(),
-  status: z.lazy(() => CallStatusSchema),
-  result: z.lazy(() => CallResultSchema).optional().nullable(),
-  failureReason: z.string().optional().nullable(),
-  stereoRecordingUrl: z.string(),
-  test: z.lazy(() => TestCreateNestedOneWithoutCallsInputSchema),
-  messages: z.lazy(() => MessageCreateNestedManyWithoutCallInputSchema).optional(),
-  errors: z.lazy(() => CallErrorCreateNestedManyWithoutCallInputSchema).optional()
-}).strict();
-
-export const CallUncheckedCreateWithoutTestAgentInputSchema: z.ZodType<Prisma.CallUncheckedCreateWithoutTestAgentInput> = z.object({
-  id: z.string().cuid().optional(),
-  status: z.lazy(() => CallStatusSchema),
-  result: z.lazy(() => CallResultSchema).optional().nullable(),
-  failureReason: z.string().optional().nullable(),
-  stereoRecordingUrl: z.string(),
-  testId: z.string(),
-  messages: z.lazy(() => MessageUncheckedCreateNestedManyWithoutCallInputSchema).optional(),
-  errors: z.lazy(() => CallErrorUncheckedCreateNestedManyWithoutCallInputSchema).optional()
-}).strict();
-
-export const CallCreateOrConnectWithoutTestAgentInputSchema: z.ZodType<Prisma.CallCreateOrConnectWithoutTestAgentInput> = z.object({
-  where: z.lazy(() => CallWhereUniqueInputSchema),
-  create: z.union([ z.lazy(() => CallCreateWithoutTestAgentInputSchema),z.lazy(() => CallUncheckedCreateWithoutTestAgentInputSchema) ]),
-}).strict();
-
-export const CallCreateManyTestAgentInputEnvelopeSchema: z.ZodType<Prisma.CallCreateManyTestAgentInputEnvelope> = z.object({
-  data: z.union([ z.lazy(() => CallCreateManyTestAgentInputSchema),z.lazy(() => CallCreateManyTestAgentInputSchema).array() ]),
-  skipDuplicates: z.boolean().optional()
+  intentId: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
 }).strict();
 
 export const AgentCreateWithoutTestAgentsInputSchema: z.ZodType<Prisma.AgentCreateWithoutTestAgentsInput> = z.object({
@@ -3318,20 +3392,38 @@ export const TestCreateOrConnectWithoutTestAgentsInputSchema: z.ZodType<Prisma.T
   create: z.union([ z.lazy(() => TestCreateWithoutTestAgentsInputSchema),z.lazy(() => TestUncheckedCreateWithoutTestAgentsInputSchema) ]),
 }).strict();
 
-export const CallUpsertWithWhereUniqueWithoutTestAgentInputSchema: z.ZodType<Prisma.CallUpsertWithWhereUniqueWithoutTestAgentInput> = z.object({
+export const CallCreateWithoutTestAgentInputSchema: z.ZodType<Prisma.CallCreateWithoutTestAgentInput> = z.object({
+  id: z.string().cuid().optional(),
+  status: z.lazy(() => CallStatusSchema),
+  result: z.lazy(() => CallResultSchema).optional().nullable(),
+  failureReason: z.string().optional().nullable(),
+  stereoRecordingUrl: z.string(),
+  test: z.lazy(() => TestCreateNestedOneWithoutCallsInputSchema),
+  intent: z.lazy(() => IntentCreateNestedOneWithoutCallsInputSchema),
+  messages: z.lazy(() => MessageCreateNestedManyWithoutCallInputSchema).optional(),
+  errors: z.lazy(() => CallErrorCreateNestedManyWithoutCallInputSchema).optional()
+}).strict();
+
+export const CallUncheckedCreateWithoutTestAgentInputSchema: z.ZodType<Prisma.CallUncheckedCreateWithoutTestAgentInput> = z.object({
+  id: z.string().cuid().optional(),
+  status: z.lazy(() => CallStatusSchema),
+  result: z.lazy(() => CallResultSchema).optional().nullable(),
+  failureReason: z.string().optional().nullable(),
+  stereoRecordingUrl: z.string(),
+  testId: z.string(),
+  intentId: z.string(),
+  messages: z.lazy(() => MessageUncheckedCreateNestedManyWithoutCallInputSchema).optional(),
+  errors: z.lazy(() => CallErrorUncheckedCreateNestedManyWithoutCallInputSchema).optional()
+}).strict();
+
+export const CallCreateOrConnectWithoutTestAgentInputSchema: z.ZodType<Prisma.CallCreateOrConnectWithoutTestAgentInput> = z.object({
   where: z.lazy(() => CallWhereUniqueInputSchema),
-  update: z.union([ z.lazy(() => CallUpdateWithoutTestAgentInputSchema),z.lazy(() => CallUncheckedUpdateWithoutTestAgentInputSchema) ]),
   create: z.union([ z.lazy(() => CallCreateWithoutTestAgentInputSchema),z.lazy(() => CallUncheckedCreateWithoutTestAgentInputSchema) ]),
 }).strict();
 
-export const CallUpdateWithWhereUniqueWithoutTestAgentInputSchema: z.ZodType<Prisma.CallUpdateWithWhereUniqueWithoutTestAgentInput> = z.object({
-  where: z.lazy(() => CallWhereUniqueInputSchema),
-  data: z.union([ z.lazy(() => CallUpdateWithoutTestAgentInputSchema),z.lazy(() => CallUncheckedUpdateWithoutTestAgentInputSchema) ]),
-}).strict();
-
-export const CallUpdateManyWithWhereWithoutTestAgentInputSchema: z.ZodType<Prisma.CallUpdateManyWithWhereWithoutTestAgentInput> = z.object({
-  where: z.lazy(() => CallScalarWhereInputSchema),
-  data: z.union([ z.lazy(() => CallUpdateManyMutationInputSchema),z.lazy(() => CallUncheckedUpdateManyWithoutTestAgentInputSchema) ]),
+export const CallCreateManyTestAgentInputEnvelopeSchema: z.ZodType<Prisma.CallCreateManyTestAgentInputEnvelope> = z.object({
+  data: z.union([ z.lazy(() => CallCreateManyTestAgentInputSchema),z.lazy(() => CallCreateManyTestAgentInputSchema).array() ]),
+  skipDuplicates: z.boolean().optional()
 }).strict();
 
 export const AgentUpsertWithoutTestAgentsInputSchema: z.ZodType<Prisma.AgentUpsertWithoutTestAgentsInput> = z.object({
@@ -3387,6 +3479,22 @@ export const TestUpdateManyWithWhereWithoutTestAgentsInputSchema: z.ZodType<Pris
   data: z.union([ z.lazy(() => TestUpdateManyMutationInputSchema),z.lazy(() => TestUncheckedUpdateManyWithoutTestAgentsInputSchema) ]),
 }).strict();
 
+export const CallUpsertWithWhereUniqueWithoutTestAgentInputSchema: z.ZodType<Prisma.CallUpsertWithWhereUniqueWithoutTestAgentInput> = z.object({
+  where: z.lazy(() => CallWhereUniqueInputSchema),
+  update: z.union([ z.lazy(() => CallUpdateWithoutTestAgentInputSchema),z.lazy(() => CallUncheckedUpdateWithoutTestAgentInputSchema) ]),
+  create: z.union([ z.lazy(() => CallCreateWithoutTestAgentInputSchema),z.lazy(() => CallUncheckedCreateWithoutTestAgentInputSchema) ]),
+}).strict();
+
+export const CallUpdateWithWhereUniqueWithoutTestAgentInputSchema: z.ZodType<Prisma.CallUpdateWithWhereUniqueWithoutTestAgentInput> = z.object({
+  where: z.lazy(() => CallWhereUniqueInputSchema),
+  data: z.union([ z.lazy(() => CallUpdateWithoutTestAgentInputSchema),z.lazy(() => CallUncheckedUpdateWithoutTestAgentInputSchema) ]),
+}).strict();
+
+export const CallUpdateManyWithWhereWithoutTestAgentInputSchema: z.ZodType<Prisma.CallUpdateManyWithWhereWithoutTestAgentInput> = z.object({
+  where: z.lazy(() => CallScalarWhereInputSchema),
+  data: z.union([ z.lazy(() => CallUpdateManyMutationInputSchema),z.lazy(() => CallUncheckedUpdateManyWithoutTestAgentInputSchema) ]),
+}).strict();
+
 export const AgentCreateWithoutIntentsInputSchema: z.ZodType<Prisma.AgentCreateWithoutIntentsInput> = z.object({
   id: z.string(),
   createdAt: z.coerce.date().optional(),
@@ -3416,6 +3524,40 @@ export const AgentUncheckedCreateWithoutIntentsInputSchema: z.ZodType<Prisma.Age
 export const AgentCreateOrConnectWithoutIntentsInputSchema: z.ZodType<Prisma.AgentCreateOrConnectWithoutIntentsInput> = z.object({
   where: z.lazy(() => AgentWhereUniqueInputSchema),
   create: z.union([ z.lazy(() => AgentCreateWithoutIntentsInputSchema),z.lazy(() => AgentUncheckedCreateWithoutIntentsInputSchema) ]),
+}).strict();
+
+export const CallCreateWithoutIntentInputSchema: z.ZodType<Prisma.CallCreateWithoutIntentInput> = z.object({
+  id: z.string().cuid().optional(),
+  status: z.lazy(() => CallStatusSchema),
+  result: z.lazy(() => CallResultSchema).optional().nullable(),
+  failureReason: z.string().optional().nullable(),
+  stereoRecordingUrl: z.string(),
+  test: z.lazy(() => TestCreateNestedOneWithoutCallsInputSchema),
+  testAgent: z.lazy(() => TestAgentCreateNestedOneWithoutCallsInputSchema),
+  messages: z.lazy(() => MessageCreateNestedManyWithoutCallInputSchema).optional(),
+  errors: z.lazy(() => CallErrorCreateNestedManyWithoutCallInputSchema).optional()
+}).strict();
+
+export const CallUncheckedCreateWithoutIntentInputSchema: z.ZodType<Prisma.CallUncheckedCreateWithoutIntentInput> = z.object({
+  id: z.string().cuid().optional(),
+  status: z.lazy(() => CallStatusSchema),
+  result: z.lazy(() => CallResultSchema).optional().nullable(),
+  failureReason: z.string().optional().nullable(),
+  stereoRecordingUrl: z.string(),
+  testId: z.string(),
+  testAgentId: z.string(),
+  messages: z.lazy(() => MessageUncheckedCreateNestedManyWithoutCallInputSchema).optional(),
+  errors: z.lazy(() => CallErrorUncheckedCreateNestedManyWithoutCallInputSchema).optional()
+}).strict();
+
+export const CallCreateOrConnectWithoutIntentInputSchema: z.ZodType<Prisma.CallCreateOrConnectWithoutIntentInput> = z.object({
+  where: z.lazy(() => CallWhereUniqueInputSchema),
+  create: z.union([ z.lazy(() => CallCreateWithoutIntentInputSchema),z.lazy(() => CallUncheckedCreateWithoutIntentInputSchema) ]),
+}).strict();
+
+export const CallCreateManyIntentInputEnvelopeSchema: z.ZodType<Prisma.CallCreateManyIntentInputEnvelope> = z.object({
+  data: z.union([ z.lazy(() => CallCreateManyIntentInputSchema),z.lazy(() => CallCreateManyIntentInputSchema).array() ]),
+  skipDuplicates: z.boolean().optional()
 }).strict();
 
 export const AgentUpsertWithoutIntentsInputSchema: z.ZodType<Prisma.AgentUpsertWithoutIntentsInput> = z.object({
@@ -3455,6 +3597,22 @@ export const AgentUncheckedUpdateWithoutIntentsInputSchema: z.ZodType<Prisma.Age
   tests: z.lazy(() => TestUncheckedUpdateManyWithoutAgentNestedInputSchema).optional()
 }).strict();
 
+export const CallUpsertWithWhereUniqueWithoutIntentInputSchema: z.ZodType<Prisma.CallUpsertWithWhereUniqueWithoutIntentInput> = z.object({
+  where: z.lazy(() => CallWhereUniqueInputSchema),
+  update: z.union([ z.lazy(() => CallUpdateWithoutIntentInputSchema),z.lazy(() => CallUncheckedUpdateWithoutIntentInputSchema) ]),
+  create: z.union([ z.lazy(() => CallCreateWithoutIntentInputSchema),z.lazy(() => CallUncheckedCreateWithoutIntentInputSchema) ]),
+}).strict();
+
+export const CallUpdateWithWhereUniqueWithoutIntentInputSchema: z.ZodType<Prisma.CallUpdateWithWhereUniqueWithoutIntentInput> = z.object({
+  where: z.lazy(() => CallWhereUniqueInputSchema),
+  data: z.union([ z.lazy(() => CallUpdateWithoutIntentInputSchema),z.lazy(() => CallUncheckedUpdateWithoutIntentInputSchema) ]),
+}).strict();
+
+export const CallUpdateManyWithWhereWithoutIntentInputSchema: z.ZodType<Prisma.CallUpdateManyWithWhereWithoutIntentInput> = z.object({
+  where: z.lazy(() => CallScalarWhereInputSchema),
+  data: z.union([ z.lazy(() => CallUpdateManyMutationInputSchema),z.lazy(() => CallUncheckedUpdateManyWithoutIntentInputSchema) ]),
+}).strict();
+
 export const TestCreateWithoutCallsInputSchema: z.ZodType<Prisma.TestCreateWithoutCallsInput> = z.object({
   id: z.string().cuid().optional(),
   createdAt: z.coerce.date().optional(),
@@ -3476,7 +3634,7 @@ export const TestCreateOrConnectWithoutCallsInputSchema: z.ZodType<Prisma.TestCr
   create: z.union([ z.lazy(() => TestCreateWithoutCallsInputSchema),z.lazy(() => TestUncheckedCreateWithoutCallsInputSchema) ]),
 }).strict();
 
-export const TestAgentCreateWithoutCallInputSchema: z.ZodType<Prisma.TestAgentCreateWithoutCallInput> = z.object({
+export const TestAgentCreateWithoutCallsInputSchema: z.ZodType<Prisma.TestAgentCreateWithoutCallsInput> = z.object({
   id: z.string().cuid().optional(),
   name: z.string(),
   enabled: z.boolean().optional(),
@@ -3484,11 +3642,11 @@ export const TestAgentCreateWithoutCallInputSchema: z.ZodType<Prisma.TestAgentCr
   description: z.string(),
   prompt: z.string(),
   vapiId: z.string(),
-  Agent: z.lazy(() => AgentCreateNestedOneWithoutTestAgentsInputSchema).optional(),
+  agent: z.lazy(() => AgentCreateNestedOneWithoutTestAgentsInputSchema).optional(),
   tests: z.lazy(() => TestCreateNestedManyWithoutTestAgentsInputSchema).optional()
 }).strict();
 
-export const TestAgentUncheckedCreateWithoutCallInputSchema: z.ZodType<Prisma.TestAgentUncheckedCreateWithoutCallInput> = z.object({
+export const TestAgentUncheckedCreateWithoutCallsInputSchema: z.ZodType<Prisma.TestAgentUncheckedCreateWithoutCallsInput> = z.object({
   id: z.string().cuid().optional(),
   name: z.string(),
   enabled: z.boolean().optional(),
@@ -3500,9 +3658,28 @@ export const TestAgentUncheckedCreateWithoutCallInputSchema: z.ZodType<Prisma.Te
   tests: z.lazy(() => TestUncheckedCreateNestedManyWithoutTestAgentsInputSchema).optional()
 }).strict();
 
-export const TestAgentCreateOrConnectWithoutCallInputSchema: z.ZodType<Prisma.TestAgentCreateOrConnectWithoutCallInput> = z.object({
+export const TestAgentCreateOrConnectWithoutCallsInputSchema: z.ZodType<Prisma.TestAgentCreateOrConnectWithoutCallsInput> = z.object({
   where: z.lazy(() => TestAgentWhereUniqueInputSchema),
-  create: z.union([ z.lazy(() => TestAgentCreateWithoutCallInputSchema),z.lazy(() => TestAgentUncheckedCreateWithoutCallInputSchema) ]),
+  create: z.union([ z.lazy(() => TestAgentCreateWithoutCallsInputSchema),z.lazy(() => TestAgentUncheckedCreateWithoutCallsInputSchema) ]),
+}).strict();
+
+export const IntentCreateWithoutCallsInputSchema: z.ZodType<Prisma.IntentCreateWithoutCallsInput> = z.object({
+  id: z.string().cuid().optional(),
+  name: z.string(),
+  instructions: z.string(),
+  agent: z.lazy(() => AgentCreateNestedOneWithoutIntentsInputSchema)
+}).strict();
+
+export const IntentUncheckedCreateWithoutCallsInputSchema: z.ZodType<Prisma.IntentUncheckedCreateWithoutCallsInput> = z.object({
+  id: z.string().cuid().optional(),
+  name: z.string(),
+  instructions: z.string(),
+  agentId: z.string()
+}).strict();
+
+export const IntentCreateOrConnectWithoutCallsInputSchema: z.ZodType<Prisma.IntentCreateOrConnectWithoutCallsInput> = z.object({
+  where: z.lazy(() => IntentWhereUniqueInputSchema),
+  create: z.union([ z.lazy(() => IntentCreateWithoutCallsInputSchema),z.lazy(() => IntentUncheckedCreateWithoutCallsInputSchema) ]),
 }).strict();
 
 export const MessageCreateWithoutCallInputSchema: z.ZodType<Prisma.MessageCreateWithoutCallInput> = z.object({
@@ -3588,18 +3765,18 @@ export const TestUncheckedUpdateWithoutCallsInputSchema: z.ZodType<Prisma.TestUn
   testAgents: z.lazy(() => TestAgentUncheckedUpdateManyWithoutTestsNestedInputSchema).optional()
 }).strict();
 
-export const TestAgentUpsertWithoutCallInputSchema: z.ZodType<Prisma.TestAgentUpsertWithoutCallInput> = z.object({
-  update: z.union([ z.lazy(() => TestAgentUpdateWithoutCallInputSchema),z.lazy(() => TestAgentUncheckedUpdateWithoutCallInputSchema) ]),
-  create: z.union([ z.lazy(() => TestAgentCreateWithoutCallInputSchema),z.lazy(() => TestAgentUncheckedCreateWithoutCallInputSchema) ]),
+export const TestAgentUpsertWithoutCallsInputSchema: z.ZodType<Prisma.TestAgentUpsertWithoutCallsInput> = z.object({
+  update: z.union([ z.lazy(() => TestAgentUpdateWithoutCallsInputSchema),z.lazy(() => TestAgentUncheckedUpdateWithoutCallsInputSchema) ]),
+  create: z.union([ z.lazy(() => TestAgentCreateWithoutCallsInputSchema),z.lazy(() => TestAgentUncheckedCreateWithoutCallsInputSchema) ]),
   where: z.lazy(() => TestAgentWhereInputSchema).optional()
 }).strict();
 
-export const TestAgentUpdateToOneWithWhereWithoutCallInputSchema: z.ZodType<Prisma.TestAgentUpdateToOneWithWhereWithoutCallInput> = z.object({
+export const TestAgentUpdateToOneWithWhereWithoutCallsInputSchema: z.ZodType<Prisma.TestAgentUpdateToOneWithWhereWithoutCallsInput> = z.object({
   where: z.lazy(() => TestAgentWhereInputSchema).optional(),
-  data: z.union([ z.lazy(() => TestAgentUpdateWithoutCallInputSchema),z.lazy(() => TestAgentUncheckedUpdateWithoutCallInputSchema) ]),
+  data: z.union([ z.lazy(() => TestAgentUpdateWithoutCallsInputSchema),z.lazy(() => TestAgentUncheckedUpdateWithoutCallsInputSchema) ]),
 }).strict();
 
-export const TestAgentUpdateWithoutCallInputSchema: z.ZodType<Prisma.TestAgentUpdateWithoutCallInput> = z.object({
+export const TestAgentUpdateWithoutCallsInputSchema: z.ZodType<Prisma.TestAgentUpdateWithoutCallsInput> = z.object({
   id: z.union([ z.string().cuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   enabled: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
@@ -3607,11 +3784,11 @@ export const TestAgentUpdateWithoutCallInputSchema: z.ZodType<Prisma.TestAgentUp
   description: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   prompt: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   vapiId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  Agent: z.lazy(() => AgentUpdateOneWithoutTestAgentsNestedInputSchema).optional(),
+  agent: z.lazy(() => AgentUpdateOneWithoutTestAgentsNestedInputSchema).optional(),
   tests: z.lazy(() => TestUpdateManyWithoutTestAgentsNestedInputSchema).optional()
 }).strict();
 
-export const TestAgentUncheckedUpdateWithoutCallInputSchema: z.ZodType<Prisma.TestAgentUncheckedUpdateWithoutCallInput> = z.object({
+export const TestAgentUncheckedUpdateWithoutCallsInputSchema: z.ZodType<Prisma.TestAgentUncheckedUpdateWithoutCallsInput> = z.object({
   id: z.union([ z.string().cuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   enabled: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
@@ -3621,6 +3798,31 @@ export const TestAgentUncheckedUpdateWithoutCallInputSchema: z.ZodType<Prisma.Te
   vapiId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   agentId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   tests: z.lazy(() => TestUncheckedUpdateManyWithoutTestAgentsNestedInputSchema).optional()
+}).strict();
+
+export const IntentUpsertWithoutCallsInputSchema: z.ZodType<Prisma.IntentUpsertWithoutCallsInput> = z.object({
+  update: z.union([ z.lazy(() => IntentUpdateWithoutCallsInputSchema),z.lazy(() => IntentUncheckedUpdateWithoutCallsInputSchema) ]),
+  create: z.union([ z.lazy(() => IntentCreateWithoutCallsInputSchema),z.lazy(() => IntentUncheckedCreateWithoutCallsInputSchema) ]),
+  where: z.lazy(() => IntentWhereInputSchema).optional()
+}).strict();
+
+export const IntentUpdateToOneWithWhereWithoutCallsInputSchema: z.ZodType<Prisma.IntentUpdateToOneWithWhereWithoutCallsInput> = z.object({
+  where: z.lazy(() => IntentWhereInputSchema).optional(),
+  data: z.union([ z.lazy(() => IntentUpdateWithoutCallsInputSchema),z.lazy(() => IntentUncheckedUpdateWithoutCallsInputSchema) ]),
+}).strict();
+
+export const IntentUpdateWithoutCallsInputSchema: z.ZodType<Prisma.IntentUpdateWithoutCallsInput> = z.object({
+  id: z.union([ z.string().cuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  instructions: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  agent: z.lazy(() => AgentUpdateOneRequiredWithoutIntentsNestedInputSchema).optional()
+}).strict();
+
+export const IntentUncheckedUpdateWithoutCallsInputSchema: z.ZodType<Prisma.IntentUncheckedUpdateWithoutCallsInput> = z.object({
+  id: z.union([ z.string().cuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  instructions: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  agentId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
 }).strict();
 
 export const MessageUpsertWithWhereUniqueWithoutCallInputSchema: z.ZodType<Prisma.MessageUpsertWithWhereUniqueWithoutCallInput> = z.object({
@@ -3688,7 +3890,8 @@ export const CallCreateWithoutMessagesInputSchema: z.ZodType<Prisma.CallCreateWi
   failureReason: z.string().optional().nullable(),
   stereoRecordingUrl: z.string(),
   test: z.lazy(() => TestCreateNestedOneWithoutCallsInputSchema),
-  testAgent: z.lazy(() => TestAgentCreateNestedOneWithoutCallInputSchema),
+  testAgent: z.lazy(() => TestAgentCreateNestedOneWithoutCallsInputSchema),
+  intent: z.lazy(() => IntentCreateNestedOneWithoutCallsInputSchema),
   errors: z.lazy(() => CallErrorCreateNestedManyWithoutCallInputSchema).optional()
 }).strict();
 
@@ -3700,6 +3903,7 @@ export const CallUncheckedCreateWithoutMessagesInputSchema: z.ZodType<Prisma.Cal
   stereoRecordingUrl: z.string(),
   testId: z.string(),
   testAgentId: z.string(),
+  intentId: z.string(),
   errors: z.lazy(() => CallErrorUncheckedCreateNestedManyWithoutCallInputSchema).optional()
 }).strict();
 
@@ -3726,7 +3930,8 @@ export const CallUpdateWithoutMessagesInputSchema: z.ZodType<Prisma.CallUpdateWi
   failureReason: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   stereoRecordingUrl: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   test: z.lazy(() => TestUpdateOneRequiredWithoutCallsNestedInputSchema).optional(),
-  testAgent: z.lazy(() => TestAgentUpdateOneRequiredWithoutCallNestedInputSchema).optional(),
+  testAgent: z.lazy(() => TestAgentUpdateOneRequiredWithoutCallsNestedInputSchema).optional(),
+  intent: z.lazy(() => IntentUpdateOneRequiredWithoutCallsNestedInputSchema).optional(),
   errors: z.lazy(() => CallErrorUpdateManyWithoutCallNestedInputSchema).optional()
 }).strict();
 
@@ -3738,6 +3943,7 @@ export const CallUncheckedUpdateWithoutMessagesInputSchema: z.ZodType<Prisma.Cal
   stereoRecordingUrl: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   testId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   testAgentId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  intentId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   errors: z.lazy(() => CallErrorUncheckedUpdateManyWithoutCallNestedInputSchema).optional()
 }).strict();
 
@@ -3748,7 +3954,8 @@ export const CallCreateWithoutErrorsInputSchema: z.ZodType<Prisma.CallCreateWith
   failureReason: z.string().optional().nullable(),
   stereoRecordingUrl: z.string(),
   test: z.lazy(() => TestCreateNestedOneWithoutCallsInputSchema),
-  testAgent: z.lazy(() => TestAgentCreateNestedOneWithoutCallInputSchema),
+  testAgent: z.lazy(() => TestAgentCreateNestedOneWithoutCallsInputSchema),
+  intent: z.lazy(() => IntentCreateNestedOneWithoutCallsInputSchema),
   messages: z.lazy(() => MessageCreateNestedManyWithoutCallInputSchema).optional()
 }).strict();
 
@@ -3760,6 +3967,7 @@ export const CallUncheckedCreateWithoutErrorsInputSchema: z.ZodType<Prisma.CallU
   stereoRecordingUrl: z.string(),
   testId: z.string(),
   testAgentId: z.string(),
+  intentId: z.string(),
   messages: z.lazy(() => MessageUncheckedCreateNestedManyWithoutCallInputSchema).optional()
 }).strict();
 
@@ -3786,7 +3994,8 @@ export const CallUpdateWithoutErrorsInputSchema: z.ZodType<Prisma.CallUpdateWith
   failureReason: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   stereoRecordingUrl: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   test: z.lazy(() => TestUpdateOneRequiredWithoutCallsNestedInputSchema).optional(),
-  testAgent: z.lazy(() => TestAgentUpdateOneRequiredWithoutCallNestedInputSchema).optional(),
+  testAgent: z.lazy(() => TestAgentUpdateOneRequiredWithoutCallsNestedInputSchema).optional(),
+  intent: z.lazy(() => IntentUpdateOneRequiredWithoutCallsNestedInputSchema).optional(),
   messages: z.lazy(() => MessageUpdateManyWithoutCallNestedInputSchema).optional()
 }).strict();
 
@@ -3798,6 +4007,7 @@ export const CallUncheckedUpdateWithoutErrorsInputSchema: z.ZodType<Prisma.CallU
   stereoRecordingUrl: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   testId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   testAgentId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  intentId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   messages: z.lazy(() => MessageUncheckedUpdateManyWithoutCallNestedInputSchema).optional()
 }).strict();
 
@@ -3831,8 +4041,8 @@ export const TestAgentUpdateWithoutAgentInputSchema: z.ZodType<Prisma.TestAgentU
   description: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   prompt: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   vapiId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  Call: z.lazy(() => CallUpdateManyWithoutTestAgentNestedInputSchema).optional(),
-  tests: z.lazy(() => TestUpdateManyWithoutTestAgentsNestedInputSchema).optional()
+  tests: z.lazy(() => TestUpdateManyWithoutTestAgentsNestedInputSchema).optional(),
+  calls: z.lazy(() => CallUpdateManyWithoutTestAgentNestedInputSchema).optional()
 }).strict();
 
 export const TestAgentUncheckedUpdateWithoutAgentInputSchema: z.ZodType<Prisma.TestAgentUncheckedUpdateWithoutAgentInput> = z.object({
@@ -3843,8 +4053,8 @@ export const TestAgentUncheckedUpdateWithoutAgentInputSchema: z.ZodType<Prisma.T
   description: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   prompt: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   vapiId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  Call: z.lazy(() => CallUncheckedUpdateManyWithoutTestAgentNestedInputSchema).optional(),
-  tests: z.lazy(() => TestUncheckedUpdateManyWithoutTestAgentsNestedInputSchema).optional()
+  tests: z.lazy(() => TestUncheckedUpdateManyWithoutTestAgentsNestedInputSchema).optional(),
+  calls: z.lazy(() => CallUncheckedUpdateManyWithoutTestAgentNestedInputSchema).optional()
 }).strict();
 
 export const TestAgentUncheckedUpdateManyWithoutAgentInputSchema: z.ZodType<Prisma.TestAgentUncheckedUpdateManyWithoutAgentInput> = z.object({
@@ -3861,12 +4071,14 @@ export const IntentUpdateWithoutAgentInputSchema: z.ZodType<Prisma.IntentUpdateW
   id: z.union([ z.string().cuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   instructions: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  calls: z.lazy(() => CallUpdateManyWithoutIntentNestedInputSchema).optional()
 }).strict();
 
 export const IntentUncheckedUpdateWithoutAgentInputSchema: z.ZodType<Prisma.IntentUncheckedUpdateWithoutAgentInput> = z.object({
   id: z.union([ z.string().cuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   instructions: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  calls: z.lazy(() => CallUncheckedUpdateManyWithoutIntentNestedInputSchema).optional()
 }).strict();
 
 export const IntentUncheckedUpdateManyWithoutAgentInputSchema: z.ZodType<Prisma.IntentUncheckedUpdateManyWithoutAgentInput> = z.object({
@@ -3903,7 +4115,8 @@ export const CallCreateManyTestInputSchema: z.ZodType<Prisma.CallCreateManyTestI
   result: z.lazy(() => CallResultSchema).optional().nullable(),
   failureReason: z.string().optional().nullable(),
   stereoRecordingUrl: z.string(),
-  testAgentId: z.string()
+  testAgentId: z.string(),
+  intentId: z.string()
 }).strict();
 
 export const TestAgentUpdateWithoutTestsInputSchema: z.ZodType<Prisma.TestAgentUpdateWithoutTestsInput> = z.object({
@@ -3914,8 +4127,8 @@ export const TestAgentUpdateWithoutTestsInputSchema: z.ZodType<Prisma.TestAgentU
   description: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   prompt: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   vapiId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  Call: z.lazy(() => CallUpdateManyWithoutTestAgentNestedInputSchema).optional(),
-  Agent: z.lazy(() => AgentUpdateOneWithoutTestAgentsNestedInputSchema).optional()
+  agent: z.lazy(() => AgentUpdateOneWithoutTestAgentsNestedInputSchema).optional(),
+  calls: z.lazy(() => CallUpdateManyWithoutTestAgentNestedInputSchema).optional()
 }).strict();
 
 export const TestAgentUncheckedUpdateWithoutTestsInputSchema: z.ZodType<Prisma.TestAgentUncheckedUpdateWithoutTestsInput> = z.object({
@@ -3927,7 +4140,7 @@ export const TestAgentUncheckedUpdateWithoutTestsInputSchema: z.ZodType<Prisma.T
   prompt: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   vapiId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   agentId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  Call: z.lazy(() => CallUncheckedUpdateManyWithoutTestAgentNestedInputSchema).optional()
+  calls: z.lazy(() => CallUncheckedUpdateManyWithoutTestAgentNestedInputSchema).optional()
 }).strict();
 
 export const TestAgentUncheckedUpdateManyWithoutTestsInputSchema: z.ZodType<Prisma.TestAgentUncheckedUpdateManyWithoutTestsInput> = z.object({
@@ -3947,7 +4160,8 @@ export const CallUpdateWithoutTestInputSchema: z.ZodType<Prisma.CallUpdateWithou
   result: z.union([ z.lazy(() => CallResultSchema),z.lazy(() => NullableEnumCallResultFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   failureReason: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   stereoRecordingUrl: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  testAgent: z.lazy(() => TestAgentUpdateOneRequiredWithoutCallNestedInputSchema).optional(),
+  testAgent: z.lazy(() => TestAgentUpdateOneRequiredWithoutCallsNestedInputSchema).optional(),
+  intent: z.lazy(() => IntentUpdateOneRequiredWithoutCallsNestedInputSchema).optional(),
   messages: z.lazy(() => MessageUpdateManyWithoutCallNestedInputSchema).optional(),
   errors: z.lazy(() => CallErrorUpdateManyWithoutCallNestedInputSchema).optional()
 }).strict();
@@ -3959,6 +4173,7 @@ export const CallUncheckedUpdateWithoutTestInputSchema: z.ZodType<Prisma.CallUnc
   failureReason: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   stereoRecordingUrl: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   testAgentId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  intentId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   messages: z.lazy(() => MessageUncheckedUpdateManyWithoutCallNestedInputSchema).optional(),
   errors: z.lazy(() => CallErrorUncheckedUpdateManyWithoutCallNestedInputSchema).optional()
 }).strict();
@@ -3970,6 +4185,7 @@ export const CallUncheckedUpdateManyWithoutTestInputSchema: z.ZodType<Prisma.Cal
   failureReason: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   stereoRecordingUrl: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   testAgentId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  intentId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
 }).strict();
 
 export const CallCreateManyTestAgentInputSchema: z.ZodType<Prisma.CallCreateManyTestAgentInput> = z.object({
@@ -3978,38 +4194,8 @@ export const CallCreateManyTestAgentInputSchema: z.ZodType<Prisma.CallCreateMany
   result: z.lazy(() => CallResultSchema).optional().nullable(),
   failureReason: z.string().optional().nullable(),
   stereoRecordingUrl: z.string(),
-  testId: z.string()
-}).strict();
-
-export const CallUpdateWithoutTestAgentInputSchema: z.ZodType<Prisma.CallUpdateWithoutTestAgentInput> = z.object({
-  id: z.union([ z.string().cuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  status: z.union([ z.lazy(() => CallStatusSchema),z.lazy(() => EnumCallStatusFieldUpdateOperationsInputSchema) ]).optional(),
-  result: z.union([ z.lazy(() => CallResultSchema),z.lazy(() => NullableEnumCallResultFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  failureReason: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  stereoRecordingUrl: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  test: z.lazy(() => TestUpdateOneRequiredWithoutCallsNestedInputSchema).optional(),
-  messages: z.lazy(() => MessageUpdateManyWithoutCallNestedInputSchema).optional(),
-  errors: z.lazy(() => CallErrorUpdateManyWithoutCallNestedInputSchema).optional()
-}).strict();
-
-export const CallUncheckedUpdateWithoutTestAgentInputSchema: z.ZodType<Prisma.CallUncheckedUpdateWithoutTestAgentInput> = z.object({
-  id: z.union([ z.string().cuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  status: z.union([ z.lazy(() => CallStatusSchema),z.lazy(() => EnumCallStatusFieldUpdateOperationsInputSchema) ]).optional(),
-  result: z.union([ z.lazy(() => CallResultSchema),z.lazy(() => NullableEnumCallResultFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  failureReason: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  stereoRecordingUrl: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  testId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  messages: z.lazy(() => MessageUncheckedUpdateManyWithoutCallNestedInputSchema).optional(),
-  errors: z.lazy(() => CallErrorUncheckedUpdateManyWithoutCallNestedInputSchema).optional()
-}).strict();
-
-export const CallUncheckedUpdateManyWithoutTestAgentInputSchema: z.ZodType<Prisma.CallUncheckedUpdateManyWithoutTestAgentInput> = z.object({
-  id: z.union([ z.string().cuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  status: z.union([ z.lazy(() => CallStatusSchema),z.lazy(() => EnumCallStatusFieldUpdateOperationsInputSchema) ]).optional(),
-  result: z.union([ z.lazy(() => CallResultSchema),z.lazy(() => NullableEnumCallResultFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  failureReason: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  stereoRecordingUrl: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  testId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  testId: z.string(),
+  intentId: z.string()
 }).strict();
 
 export const TestUpdateWithoutTestAgentsInputSchema: z.ZodType<Prisma.TestUpdateWithoutTestAgentsInput> = z.object({
@@ -4033,6 +4219,84 @@ export const TestUncheckedUpdateManyWithoutTestAgentsInputSchema: z.ZodType<Pris
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   agentId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+}).strict();
+
+export const CallUpdateWithoutTestAgentInputSchema: z.ZodType<Prisma.CallUpdateWithoutTestAgentInput> = z.object({
+  id: z.union([ z.string().cuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  status: z.union([ z.lazy(() => CallStatusSchema),z.lazy(() => EnumCallStatusFieldUpdateOperationsInputSchema) ]).optional(),
+  result: z.union([ z.lazy(() => CallResultSchema),z.lazy(() => NullableEnumCallResultFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  failureReason: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  stereoRecordingUrl: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  test: z.lazy(() => TestUpdateOneRequiredWithoutCallsNestedInputSchema).optional(),
+  intent: z.lazy(() => IntentUpdateOneRequiredWithoutCallsNestedInputSchema).optional(),
+  messages: z.lazy(() => MessageUpdateManyWithoutCallNestedInputSchema).optional(),
+  errors: z.lazy(() => CallErrorUpdateManyWithoutCallNestedInputSchema).optional()
+}).strict();
+
+export const CallUncheckedUpdateWithoutTestAgentInputSchema: z.ZodType<Prisma.CallUncheckedUpdateWithoutTestAgentInput> = z.object({
+  id: z.union([ z.string().cuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  status: z.union([ z.lazy(() => CallStatusSchema),z.lazy(() => EnumCallStatusFieldUpdateOperationsInputSchema) ]).optional(),
+  result: z.union([ z.lazy(() => CallResultSchema),z.lazy(() => NullableEnumCallResultFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  failureReason: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  stereoRecordingUrl: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  testId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  intentId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  messages: z.lazy(() => MessageUncheckedUpdateManyWithoutCallNestedInputSchema).optional(),
+  errors: z.lazy(() => CallErrorUncheckedUpdateManyWithoutCallNestedInputSchema).optional()
+}).strict();
+
+export const CallUncheckedUpdateManyWithoutTestAgentInputSchema: z.ZodType<Prisma.CallUncheckedUpdateManyWithoutTestAgentInput> = z.object({
+  id: z.union([ z.string().cuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  status: z.union([ z.lazy(() => CallStatusSchema),z.lazy(() => EnumCallStatusFieldUpdateOperationsInputSchema) ]).optional(),
+  result: z.union([ z.lazy(() => CallResultSchema),z.lazy(() => NullableEnumCallResultFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  failureReason: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  stereoRecordingUrl: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  testId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  intentId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+}).strict();
+
+export const CallCreateManyIntentInputSchema: z.ZodType<Prisma.CallCreateManyIntentInput> = z.object({
+  id: z.string().cuid().optional(),
+  status: z.lazy(() => CallStatusSchema),
+  result: z.lazy(() => CallResultSchema).optional().nullable(),
+  failureReason: z.string().optional().nullable(),
+  stereoRecordingUrl: z.string(),
+  testId: z.string(),
+  testAgentId: z.string()
+}).strict();
+
+export const CallUpdateWithoutIntentInputSchema: z.ZodType<Prisma.CallUpdateWithoutIntentInput> = z.object({
+  id: z.union([ z.string().cuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  status: z.union([ z.lazy(() => CallStatusSchema),z.lazy(() => EnumCallStatusFieldUpdateOperationsInputSchema) ]).optional(),
+  result: z.union([ z.lazy(() => CallResultSchema),z.lazy(() => NullableEnumCallResultFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  failureReason: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  stereoRecordingUrl: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  test: z.lazy(() => TestUpdateOneRequiredWithoutCallsNestedInputSchema).optional(),
+  testAgent: z.lazy(() => TestAgentUpdateOneRequiredWithoutCallsNestedInputSchema).optional(),
+  messages: z.lazy(() => MessageUpdateManyWithoutCallNestedInputSchema).optional(),
+  errors: z.lazy(() => CallErrorUpdateManyWithoutCallNestedInputSchema).optional()
+}).strict();
+
+export const CallUncheckedUpdateWithoutIntentInputSchema: z.ZodType<Prisma.CallUncheckedUpdateWithoutIntentInput> = z.object({
+  id: z.union([ z.string().cuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  status: z.union([ z.lazy(() => CallStatusSchema),z.lazy(() => EnumCallStatusFieldUpdateOperationsInputSchema) ]).optional(),
+  result: z.union([ z.lazy(() => CallResultSchema),z.lazy(() => NullableEnumCallResultFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  failureReason: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  stereoRecordingUrl: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  testId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  testAgentId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  messages: z.lazy(() => MessageUncheckedUpdateManyWithoutCallNestedInputSchema).optional(),
+  errors: z.lazy(() => CallErrorUncheckedUpdateManyWithoutCallNestedInputSchema).optional()
+}).strict();
+
+export const CallUncheckedUpdateManyWithoutIntentInputSchema: z.ZodType<Prisma.CallUncheckedUpdateManyWithoutIntentInput> = z.object({
+  id: z.union([ z.string().cuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  status: z.union([ z.lazy(() => CallStatusSchema),z.lazy(() => EnumCallStatusFieldUpdateOperationsInputSchema) ]).optional(),
+  result: z.union([ z.lazy(() => CallResultSchema),z.lazy(() => NullableEnumCallResultFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  failureReason: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  stereoRecordingUrl: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  testId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  testAgentId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
 }).strict();
 
 export const MessageCreateManyCallInputSchema: z.ZodType<Prisma.MessageCreateManyCallInput> = z.object({

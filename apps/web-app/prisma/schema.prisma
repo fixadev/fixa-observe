@@ -62,10 +62,12 @@ model TestAgent {
   description String
   prompt      String
   vapiId      String
-  Call        Call[]
-  Agent       Agent?  @relation(fields: [agentId], references: [id])
-  agentId     String?
-  tests       Test[]  @relation("TestToTestAgent")
+
+  agent   Agent?  @relation(fields: [agentId], references: [id])
+  agentId String?
+
+  tests Test[] @relation("TestToTestAgent")
+  calls Call[]
 }
 
 model TestAgentTemplate {
@@ -79,8 +81,10 @@ model Intent {
   id           String @id @default(cuid())
   name         String
   instructions String
-  agent        Agent  @relation(fields: [agentId], references: [id])
-  agentId      String
+
+  agent   Agent  @relation(fields: [agentId], references: [id])
+  agentId String
+  calls   Call[]
 }
 
 model Call {
@@ -94,6 +98,8 @@ model Call {
   testId      String
   testAgent   TestAgent @relation(fields: [testAgentId], references: [id])
   testAgentId String
+  intent      Intent    @relation(fields: [intentId], references: [id])
+  intentId    String
 
   messages Message[]
   errors   CallError[]
