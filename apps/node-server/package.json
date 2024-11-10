@@ -2,9 +2,8 @@
   "name": "node-server",
   "version": "1.0.0",
   "main": "dist/index.js",
-  "type": "module",
   "scripts": {
-    "start": "node dist/index.js",
+    "start": "node dist/index.ts",
     "dev": "nodemon src/index.ts",
     "build": "tsc"
   },

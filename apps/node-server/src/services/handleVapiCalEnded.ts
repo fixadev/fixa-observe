@@ -1,46 +1,33 @@
 import { CallResult } from "@prisma/client";
 import { db } from "../db";
-import { type ServerMessageEndOfCallReport } from "@vapi-ai/server-sdk/api";
+import {
+  CallStatus,
+  type ServerMessageEndOfCallReport,
+} from "@vapi-ai/server-sdk/api";
 
 export const handleVapiCallEnded = async (
-  body: ServerMessageEndOfCallReport,
+  message: ServerMessageEndOfCallReport,
 ) => {
-  const callId = body?.call?.id;
+  const callId = message?.call?.id;
   if (!callId) {
     console.error("No call ID found in Vapi call ended message");
     return;
   }
-  const relevantTest = await db.test.findFirst({
-    where: { inProgressCallIds: { has: callId } },
+  const call = await db.call.findFirst({
+    where: { id: callId },
   });
 
-  if (!relevantTest) return;
-  const updatedInProgressCallIds = relevantTest.inProgressCallIds.filter(
-    (id) => id !== callId,
-  );
+  if (!call) {
+    console.error("No call found in DB for call ID", callId);
+    return;
+  }
 
-  console.log("VAPI CALL ENDED", body);
-  // await db.test.update({
-  //   where: { id: relevantTest.id },
-  //   data: {
-  //     inProgressCallIds: updatedInProgressCallIds,
-  //     completedCalls: {
-  //       create: {
-  //         id: callId,
-  //         result: CallResult.SUCCESS,
-  //         failureReason: null,
-  //         messages: {
-  //           createMany: {
-  //             data: body.call?.messages?.map((message) => ({
-  //               speaker: message.,
-  //               text: message.text,
-  //               start: message.start,
-  //               end: message.end,
-  //             })),
-  //           },
-  //         },
-  //       },
-  //     },
-  //   },
-  // });
+  console.log("ARTIFACTS", message.artifact.messages);
+  console.log("ARTIFACTS", message.artifact.messages);
+  await db.call.update({
+    where: { id: callId },
+    data: {
+      status: CallStatus.Ended,
+    },
+  });
 };
