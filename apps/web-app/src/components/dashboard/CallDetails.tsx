@@ -55,10 +55,26 @@ export default function CallDetails({ call }: { call: CallWithIncludes }) {
     }
   }, []);
 
-  // const activeErrorMessageIndex = useMemo(() => {
-  //   return call.errors?.find((error) => error.id === activeErrorId)?.details
-  //     ?.messageIndex;
-  // }, [call.errors, activeErrorId]);
+  const activeErrorMessageIndices = useMemo(() => {
+    if (!activeErrorId || !call.errors) return new Set<number>();
+
+    const activeError = call.errors.find((error) => error.id === activeErrorId);
+    if (!activeError) return new Set<number>();
+
+    const overlappingIndices = new Set<number>();
+    messagesFiltered.forEach((message, index) => {
+      if (
+        activeError.secondsFromStart <
+          (messagesFiltered[index + 1]?.secondsFromStart ?? Infinity) &&
+        activeError.secondsFromStart + activeError.duration >
+          message.secondsFromStart
+      ) {
+        overlappingIndices.add(index);
+      }
+    });
+
+    return overlappingIndices;
+  }, [call.errors, activeErrorId, messagesFiltered]);
 
   // Scroll to the active error message if it has changed
   // useEffect(() => {
@@ -164,6 +180,7 @@ export default function CallDetails({ call }: { call: CallWithIncludes }) {
           const isLastErrorMessage = error
             ? errorRangesMap.get(error.id)?.lastMessageIndex === index
             : false;
+          const isActiveErrorMessage = activeErrorMessageIndices.has(index);
 
           return (
             <div key={index} className="flex gap-2">
@@ -184,10 +201,13 @@ export default function CallDetails({ call }: { call: CallWithIncludes }) {
                       ? "bg-muted hover:bg-muted"
                       : "",
                     error ? "rounded-none border-x border-red-500" : "",
+                    error && isActiveErrorMessage ? "-mx-px border-x-2" : "",
                     isFirstErrorMessage
-                      ? "rounded-t-md border-t border-red-500"
+                      ? "mt-px rounded-t-md border-t border-red-500"
                       : "",
-                    isLastErrorMessage ? "border-red-500" : "",
+                    isFirstErrorMessage && isActiveErrorMessage
+                      ? "mt-0 border-t-2"
+                      : "",
                   )}
                 >
                   <div className="text-xs font-medium">
@@ -198,7 +218,14 @@ export default function CallDetails({ call }: { call: CallWithIncludes }) {
                   </div>
                 </div>
                 {isLastErrorMessage && (
-                  <div className="flex w-full items-center gap-1 rounded-b-md border-x border-b border-red-500 bg-red-500/20 p-2 text-sm text-red-500">
+                  <div
+                    className={cn(
+                      "flex items-center gap-1 rounded-b-md border-x border-b border-red-500 bg-red-500/20 p-2 text-sm text-red-500",
+                      isActiveErrorMessage
+                        ? "z-10 -mx-px -mb-px border-x-2 border-b-2 shadow-lg"
+                        : "",
+                    )}
+                  >
                     <ExclamationCircleIcon className="size-5" />
                     {error?.description}
                   </div>
