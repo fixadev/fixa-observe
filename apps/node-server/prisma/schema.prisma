@@ -30,17 +30,17 @@ model User {
 }
 
 model Agent {
-  id            String      @id
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
-  name          String
-  phoneNumber   String
-  githubRepoUrl String?
-  systemPrompt  String
-  testAgents    TestAgent[]
-  intents       Intent[]
-  tests         Test[]
-  ownerId       String
+  id                String             @id
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  name              String
+  phoneNumber       String
+  githubRepoUrl     String?
+  systemPrompt      String
+  enabledTestAgents AgentToTestAgent[]
+  intents           Intent[]
+  tests             Test[]
+  ownerId           String
 }
 
 model Test {
@@ -48,39 +48,32 @@ model Test {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  agent      Agent       @relation(fields: [agentId], references: [id])
-  agentId    String
-  testAgents TestAgent[] @relation("TestToTestAgent")
-  calls      Call[]
+  agent       Agent   @relation(fields: [agentId], references: [id])
+  agentId     String
+  calls       Call[]
+  testAgentId String?
 }
 
 model TestAgent {
-  id          String  @id @default(cuid())
+  id          String             @id @default(cuid())
+  ownerId     String?
   name        String
-  enabled     Boolean @default(true)
   headshotUrl String
   description String
   prompt      String
   vapiId      String
-  Call        Call[]
-  Agent       Agent?  @relation(fields: [agentId], references: [id])
-  agentId     String?
-  tests       Test[]  @relation("TestToTestAgent")
-}
-
-model TestAgentTemplate {
-  id          String @id @default(cuid())
-  name        String
-  headshotUrl String
-  description String
+  calls       Call[]
+  agents      AgentToTestAgent[]
 }
 
 model Intent {
   id           String @id @default(cuid())
   name         String
   instructions String
-  agent        Agent  @relation(fields: [agentId], references: [id])
-  agentId      String
+
+  agent   Agent  @relation(fields: [agentId], references: [id])
+  agentId String
+  calls   Call[]
 }
 
 model Call {
@@ -94,6 +87,8 @@ model Call {
   testId      String
   testAgent   TestAgent @relation(fields: [testAgentId], references: [id])
   testAgentId String
+  intent      Intent    @relation(fields: [intentId], references: [id])
+  intentId    String
 
   messages Message[]
   errors   CallError[]
@@ -136,4 +131,13 @@ enum Role {
 enum CallStatus {
   in_progress
   completed
+}
+
+model AgentToTestAgent {
+  agent       Agent     @relation(fields: [agentId], references: [id])
+  agentId     String
+  testAgent   TestAgent @relation(fields: [testAgentId], references: [id])
+  testAgentId String
+
+  @@id([agentId, testAgentId])
 }

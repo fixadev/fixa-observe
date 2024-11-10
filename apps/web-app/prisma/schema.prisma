@@ -58,20 +58,12 @@ model TestAgent {
   id          String             @id @default(cuid())
   ownerId     String?
   name        String
-  enabled     Boolean            @default(true)
   headshotUrl String
   description String
   prompt      String
   vapiId      String
   calls       Call[]
   agents      AgentToTestAgent[]
-}
-
-model TestAgentTemplate {
-  id          String @id @default(cuid())
-  name        String
-  headshotUrl String
-  description String
 }
 
 model Intent {

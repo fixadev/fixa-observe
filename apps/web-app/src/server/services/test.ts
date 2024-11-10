@@ -36,21 +36,28 @@ export class TestService {
     if (!agent) {
       throw new Error("Agent not found");
     }
-    const testAgents = await db.testAgent.findMany({
-      where: {
-        agentId,
-      },
-    });
+    const testAgentsWithIntents = agent.enabledTestAgents.flatMap((testAgent) =>
+      agent.intents.map((intent) => ({
+        testAgentId: testAgent.testAgentId,
+        intentId: intent.id,
+        testAgentPrompt: testAgent.testAgent.prompt,
+        intentPrompt: intent.instructions,
+      })),
+    );
 
     const calls = await Promise.all(
-      testAgents.map(async (testAgent) => {
+      testAgentsWithIntents.map(async (testAgent) => {
         const { id: callId } = await initiateVapiCall(
-          testAgent.vapiId,
+          testAgent.testAgentId,
           agent.phoneNumber,
+          testAgent.testAgentPrompt,
+          testAgent.intentPrompt,
         );
         return {
           id: callId,
-          testAgentId: testAgent.id,
+          testAgentId: testAgent.testAgentId,
+          intentId: testAgent.intentId,
+          status: CallStatus.in_progress,
         };
       }),
     );
@@ -62,9 +69,10 @@ export class TestService {
           createMany: {
             data: calls.map((call) => ({
               id: call.id,
-              status: CallStatus.in_progress,
+              status: call.status,
               stereoRecordingUrl: "",
               testAgentId: call.testAgentId,
+              intentId: call.intentId,
             })),
           },
         },

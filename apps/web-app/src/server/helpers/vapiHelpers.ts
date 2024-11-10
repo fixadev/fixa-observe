@@ -27,11 +27,29 @@ export const createVapiAssistant = async (prompt: string) => {
 export const initiateVapiCall = async (
   assistantId: string,
   phoneNumber: string,
+  testAgentPrompt?: string,
+  intentPrompt?: string,
 ) => {
   return await vapi.calls.create({
     assistantId,
     customer: {
       number: phoneNumber,
+    },
+    assistantOverrides: {
+      model: {
+        provider: "openai",
+        model: "gpt-4o",
+        messages: [
+          {
+            role: "system",
+            content: testAgentPrompt,
+          },
+          {
+            role: "user",
+            content: intentPrompt,
+          },
+        ],
+      },
     },
   });
 };

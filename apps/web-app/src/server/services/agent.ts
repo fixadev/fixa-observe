@@ -1,9 +1,9 @@
 import { db } from "../db";
 import { type IntentWithoutId, type TestAgentWithoutId } from "~/lib/agent";
-import { createTestAgents } from "../helpers/createTestAgents";
 import { v4 as uuidv4 } from "uuid";
 import { type PrismaClient } from "@prisma/client";
 import { generateIntentsFromPrompt } from "../helpers/generateIntents";
+import { createVapiAssistant } from "../helpers/vapiHelpers";
 
 export class AgentService {
   constructor(private db: PrismaClient) {}
@@ -35,35 +35,61 @@ export class AgentService {
       where: { id },
       include: {
         intents: true,
+        enabledTestAgents: {
+          include: {
+            testAgent: true,
+          },
+        },
       },
     });
   }
 
-  async createTestAgents(agentId: string) {
-    const agent = await this.getAgent(agentId);
-    if (!agent) {
-      throw new Error("Agent not found");
-    }
-    const testAgentTemplates = await db.testAgent.findMany();
+  async createTestAgent(
+    name: string,
+    prompt: string,
+    ownerId: string,
+    headshotUrl: string,
+    description: string,
+  ) {
+    const agent = await createVapiAssistant(prompt);
 
-    const testAgentsToCreate: TestAgentWithoutId[] = await createTestAgents(
-      testAgentTemplates,
-      agent,
-      agent?.intents,
-    );
-
-    return await db.testAgent.createMany({
-      data: testAgentsToCreate.map((testAgent) => ({
-        ...testAgent,
-      })),
+    return await db.testAgent.create({
+      data: {
+        id: uuidv4(),
+        name,
+        prompt,
+        ownerId,
+        headshotUrl,
+        description,
+        vapiId: agent.id,
+      },
     });
   }
 
-  async toggleTestAgentEnabled(testAgentId: string, enabled: boolean) {
-    return await db.testAgent.update({
-      where: { id: testAgentId },
-      data: { enabled },
-    });
+  async toggleTestAgentEnabled(
+    agentId: string,
+    testAgentId: string,
+    enabled: boolean,
+  ) {
+    if (enabled) {
+      return await db.agent.update({
+        where: { id: agentId },
+        data: {
+          enabledTestAgents: {
+            create: { testAgentId },
+          },
+        },
+      });
+    } else {
+      return await db.agent.update({
+        where: { id: agentId },
+        data: {
+          enabledTestAgents: {
+            deleteMany: { testAgentId },
+          },
+        },
+      });
+    }
   }
 
   async generateIntentsFromPrompt(prompt: string) {
