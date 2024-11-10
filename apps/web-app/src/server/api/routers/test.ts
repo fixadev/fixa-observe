@@ -1,20 +1,26 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { TestService } from "~/server/services/test";
-import { IntentSchemaWithoutId } from "~/lib/agent";
 import { db } from "~/server/db";
 
 const testServiceInstance = new TestService(db);
 
 export const testRouter = createTRPCRouter({
-  getTest: protectedProcedure
+  get: protectedProcedure
     .input(z.object({ id: z.string().cuid() }))
     .query(async ({ input }) => {
-      return await testServiceInstance.getTest(input.id);
+      return await testServiceInstance.get(input.id);
     }),
-  runTestSuite: protectedProcedure
+
+  getAll: protectedProcedure
+    .input(z.object({ agentId: z.string().cuid() }))
+    .query(async ({ input }) => {
+      return await testServiceInstance.getAll(input.agentId);
+    }),
+
+  run: protectedProcedure
     .input(z.object({ agentId: z.string().cuid() }))
     .mutation(async ({ input }) => {
-      return await testServiceInstance.runTestSuite(input.agentId);
+      return await testServiceInstance.run(input.agentId);
     }),
 });

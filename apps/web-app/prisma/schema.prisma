@@ -40,7 +40,7 @@ model Agent {
   testAgents    TestAgent[]
   intents       Intent[]
   tests         Test[]
-  ownerId       String?
+  ownerId       String
 }
 
 model Test {
@@ -85,9 +85,9 @@ model Intent {
 }
 
 model Call {
-  id                 String     @id @default(cuid())
+  id                 String      @id @default(cuid())
   status             CallStatus
-  result             CallResult
+  result             CallResult?
   failureReason      String?
   stereoRecordingUrl String
 
@@ -114,12 +114,12 @@ model Message {
 }
 
 model CallError {
-  id               String @id @default(cuid())
+  id               String  @id @default(cuid())
   secondsFromStart Float
   duration         Float
-  type             String
+  type             String?
   description      String
-  call             Call   @relation(fields: [callId], references: [id])
+  call             Call    @relation(fields: [callId], references: [id])
   callId           String
 }
 

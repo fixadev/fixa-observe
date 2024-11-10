@@ -7,7 +7,6 @@ dotenv.config();
 //   "Raw env file contents:",
 //   require("fs").readFileSync(".env", "utf8"),
 // );
-console.log("Process env:", process.env.OPENAI_API_KEY);
 
 const envSchema = z.object({
   OPENAI_API_KEY: z.string(),
