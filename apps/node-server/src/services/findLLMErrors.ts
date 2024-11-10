@@ -1,6 +1,4 @@
 import { openai } from "../utils/OpenAIClient";
-import { VertexAI, type Part } from "@google-cloud/vertexai";
-import { Storage } from "@google-cloud/storage";
 import { z } from "zod";
 import { zodResponseFormat } from "openai/helpers/zod";
 import { ArtifactMessagesItem, Call } from "@vapi-ai/server-sdk/api";
@@ -47,25 +45,32 @@ export const analyzeCall = async (
   - errors: An array of objects, each representing an error. Each error object will have the following fields:
     - type: A string describing the type of error
     - description: A string describing the error
-    - start: The start time of the error
-    - end: The end time of the error
+    - start: The start time of the error (use the secondsFromStart for this)
+    - end: The end time of the error (use secondsFromStart + duration to calculate this)
   `;
 
   const prompt = `${basePrompt}\n\nAssistant Agent Prompt: ${agentPrompt}\n\nUser Agent Prompt: ${testAgentPrompt}\n\nCall Transcript: ${JSON.stringify(
     messages,
   )}`;
 
-  const response = await openai.beta.chat.completions.parse({
-    model: "gpt-4o",
-    messages: [{ role: "system", content: prompt }],
-    response_format: zodResponseFormat(outputSchema, "prompt"),
+  const completion = await openai.chat.completions.create({
+    model: "o1-preview",
+    messages: [
+      {
+        role: "user",
+        content: prompt,
+      },
+    ],
   });
 
-  const parsedResponse = response.choices[0]?.message.parsed;
+  const result = completion.choices[0].message.content;
 
-  if (!parsedResponse) {
-    throw new Error("No response from OpenAI");
-  }
+  const cleanedResult = result
+    ?.replace("```json\n", "")
+    .replace("\n```", "")
+    .trim();
+
+  const parsedResponse = outputSchema.parse(cleanedResult);
 
   return {
     errors: parsedResponse.errors,
