@@ -8,7 +8,7 @@ export default function DashboardLayout({
 }) {
   return (
     <div className="h-full">
-      <div className="flex w-full items-center justify-between p-4">
+      <div className="mb-16 flex w-full items-center justify-between p-4">
         <Logo href="/dashboard" />
         <UserButton />
       </div>

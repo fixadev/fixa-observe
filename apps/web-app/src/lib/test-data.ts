@@ -1,4 +1,13 @@
 import type { Call } from "./types";
+import type { Agent } from "prisma/generated/zod";
+
+export const TEST_AGENT: Agent = {
+  id: "1",
+  name: "Test Agent",
+  phoneNumber: "+1 (234) 567-8901",
+  githubRepoUrl: "https://github.com/pixa-dev/pixa-drive-thru",
+  systemPrompt: "Test system prompt",
+};
 
 export const TEST_CALLS: Call[] = [
   {
