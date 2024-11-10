@@ -5,6 +5,7 @@ import { cn, formatDurationHoursMinutesSeconds } from "~/lib/utils";
 import { useAudio } from "~/hooks/useAudio";
 import { type CallError } from "prisma/generated/zod";
 import { ExclamationCircleIcon } from "@heroicons/react/24/solid";
+import Image from "next/image";
 
 export default function CallDetails({ call }: { call: CallWithIncludes }) {
   const audioPlayerRef = useRef<AudioPlayerRef>(null);
@@ -162,6 +163,51 @@ export default function CallDetails({ call }: { call: CallWithIncludes }) {
 
   return (
     <div className="flex w-full flex-col overflow-hidden bg-background px-4 pt-4 outline-none">
+      <div className="flex items-center gap-4 pb-4">
+        <div className="shrink-0">
+          <Image
+            src="/images/agent-avatars/steve.jpeg"
+            alt="agent avatar"
+            width={48}
+            height={48}
+            className="rounded-full"
+          />
+        </div>
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center gap-2">
+            <div className="text-sm font-medium">{call.intent.name}</div>
+            <div
+              className={cn(
+                "rounded-full px-2 py-1 text-xs",
+                call.result === "failure" ? "bg-red-100" : "bg-green-100",
+              )}
+            >
+              {call.result === "failure" ? "failed" : "succeeded"}
+            </div>
+          </div>
+          <div className="flex w-fit flex-row flex-wrap gap-2">
+            {call.errors?.map((error) => (
+              <div
+                key={error.id}
+                className="flex cursor-pointer items-center gap-1 border-l-2 border-red-500 bg-red-100 p-1 pl-1 text-xs text-red-500 hover:bg-red-200"
+                onMouseEnter={() => {
+                  setActiveErrorId(error.id);
+                }}
+                onMouseLeave={() => {
+                  setActiveErrorId(null);
+                }}
+                onClick={() => {
+                  audioPlayerRef.current?.setActiveError(error);
+                  play();
+                }}
+              >
+                <ExclamationCircleIcon className="h-4 w-4 text-red-500" />
+                {error.description}
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
       <AudioPlayer
         ref={audioPlayerRef}
         call={call}
