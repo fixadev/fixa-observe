@@ -77,11 +77,14 @@ export default function CallDetails({ call }: { call: CallWithIncludes }) {
   }, [call.errors, activeErrorId, messagesFiltered]);
 
   // Scroll to the active error message if it has changed
-  // useEffect(() => {
-  //   if (activeErrorMessageIndex) {
-  //     scrollMessageIntoView(activeErrorMessageIndex);
-  //   }
-  // }, [activeErrorMessageIndex, scrollMessageIntoView]);
+  useEffect(() => {
+    if (activeErrorMessageIndices.size > 0) {
+      const firstIndex = Array.from(activeErrorMessageIndices)[0];
+      if (typeof firstIndex === "number") {
+        scrollMessageIntoView(firstIndex);
+      }
+    }
+  }, [activeErrorMessageIndices, scrollMessageIntoView]);
 
   // Scroll to the active message if it has changed
   useEffect(() => {

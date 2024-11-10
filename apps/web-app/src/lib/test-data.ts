@@ -234,8 +234,8 @@ export const TEST_CALLS: CallWithIncludes[] = [
     },
     {
       id: crypto.randomUUID(),
-      secondsFromStart: 10.36,
-      duration: 13.48,
+      secondsFromStart: 50.36,
+      duration: 2.48,
       type: "",
       description: "agent did not mention correct business name in greeting",
       callId: call.id,
