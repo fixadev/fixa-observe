@@ -97,7 +97,7 @@ model Call {
   testAgentId String
 
   messages Message[]
-  errors   Error[]
+  errors   CallError[]
 }
 
 model Message {
@@ -113,7 +113,7 @@ model Message {
   callId String
 }
 
-model Error {
+model CallError {
   id          String @id @default(cuid())
   start       Float
   end         Float

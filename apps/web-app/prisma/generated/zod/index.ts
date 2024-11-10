@@ -28,7 +28,7 @@ export const CallScalarFieldEnumSchema = z.enum(['id','status','result','failure
 
 export const MessageScalarFieldEnumSchema = z.enum(['id','role','message','time','endTime','secondsFromStart','duration','callId']);
 
-export const ErrorScalarFieldEnumSchema = z.enum(['id','start','end','type','description','callId']);
+export const CallErrorScalarFieldEnumSchema = z.enum(['id','start','end','type','description','callId']);
 
 export const SortOrderSchema = z.enum(['asc','desc']);
 
@@ -174,10 +174,10 @@ export const MessageSchema = z.object({
 export type Message = z.infer<typeof MessageSchema>
 
 /////////////////////////////////////////
-// ERROR SCHEMA
+// CALL ERROR SCHEMA
 /////////////////////////////////////////
 
-export const ErrorSchema = z.object({
+export const CallErrorSchema = z.object({
   id: z.string().cuid(),
   start: z.number(),
   end: z.number(),
@@ -186,7 +186,7 @@ export const ErrorSchema = z.object({
   callId: z.string(),
 })
 
-export type Error = z.infer<typeof ErrorSchema>
+export type CallError = z.infer<typeof CallErrorSchema>
 
 /////////////////////////////////////////
 // SELECT & INCLUDE
@@ -355,7 +355,7 @@ export const CallIncludeSchema: z.ZodType<Prisma.CallInclude> = z.object({
   test: z.union([z.boolean(),z.lazy(() => TestArgsSchema)]).optional(),
   testAgent: z.union([z.boolean(),z.lazy(() => TestAgentArgsSchema)]).optional(),
   messages: z.union([z.boolean(),z.lazy(() => MessageFindManyArgsSchema)]).optional(),
-  errors: z.union([z.boolean(),z.lazy(() => ErrorFindManyArgsSchema)]).optional(),
+  errors: z.union([z.boolean(),z.lazy(() => CallErrorFindManyArgsSchema)]).optional(),
   _count: z.union([z.boolean(),z.lazy(() => CallCountOutputTypeArgsSchema)]).optional(),
 }).strict()
 
@@ -384,7 +384,7 @@ export const CallSelectSchema: z.ZodType<Prisma.CallSelect> = z.object({
   test: z.union([z.boolean(),z.lazy(() => TestArgsSchema)]).optional(),
   testAgent: z.union([z.boolean(),z.lazy(() => TestAgentArgsSchema)]).optional(),
   messages: z.union([z.boolean(),z.lazy(() => MessageFindManyArgsSchema)]).optional(),
-  errors: z.union([z.boolean(),z.lazy(() => ErrorFindManyArgsSchema)]).optional(),
+  errors: z.union([z.boolean(),z.lazy(() => CallErrorFindManyArgsSchema)]).optional(),
   _count: z.union([z.boolean(),z.lazy(() => CallCountOutputTypeArgsSchema)]).optional(),
 }).strict()
 
@@ -412,19 +412,19 @@ export const MessageSelectSchema: z.ZodType<Prisma.MessageSelect> = z.object({
   call: z.union([z.boolean(),z.lazy(() => CallArgsSchema)]).optional(),
 }).strict()
 
-// ERROR
+// CALL ERROR
 //------------------------------------------------------
 
-export const ErrorIncludeSchema: z.ZodType<Prisma.ErrorInclude> = z.object({
+export const CallErrorIncludeSchema: z.ZodType<Prisma.CallErrorInclude> = z.object({
   call: z.union([z.boolean(),z.lazy(() => CallArgsSchema)]).optional(),
 }).strict()
 
-export const ErrorArgsSchema: z.ZodType<Prisma.ErrorDefaultArgs> = z.object({
-  select: z.lazy(() => ErrorSelectSchema).optional(),
-  include: z.lazy(() => ErrorIncludeSchema).optional(),
+export const CallErrorArgsSchema: z.ZodType<Prisma.CallErrorDefaultArgs> = z.object({
+  select: z.lazy(() => CallErrorSelectSchema).optional(),
+  include: z.lazy(() => CallErrorIncludeSchema).optional(),
 }).strict();
 
-export const ErrorSelectSchema: z.ZodType<Prisma.ErrorSelect> = z.object({
+export const CallErrorSelectSchema: z.ZodType<Prisma.CallErrorSelect> = z.object({
   id: z.boolean().optional(),
   start: z.boolean().optional(),
   end: z.boolean().optional(),
@@ -842,7 +842,7 @@ export const CallWhereInputSchema: z.ZodType<Prisma.CallWhereInput> = z.object({
   test: z.union([ z.lazy(() => TestRelationFilterSchema),z.lazy(() => TestWhereInputSchema) ]).optional(),
   testAgent: z.union([ z.lazy(() => TestAgentRelationFilterSchema),z.lazy(() => TestAgentWhereInputSchema) ]).optional(),
   messages: z.lazy(() => MessageListRelationFilterSchema).optional(),
-  errors: z.lazy(() => ErrorListRelationFilterSchema).optional()
+  errors: z.lazy(() => CallErrorListRelationFilterSchema).optional()
 }).strict();
 
 export const CallOrderByWithRelationInputSchema: z.ZodType<Prisma.CallOrderByWithRelationInput> = z.object({
@@ -856,7 +856,7 @@ export const CallOrderByWithRelationInputSchema: z.ZodType<Prisma.CallOrderByWit
   test: z.lazy(() => TestOrderByWithRelationInputSchema).optional(),
   testAgent: z.lazy(() => TestAgentOrderByWithRelationInputSchema).optional(),
   messages: z.lazy(() => MessageOrderByRelationAggregateInputSchema).optional(),
-  errors: z.lazy(() => ErrorOrderByRelationAggregateInputSchema).optional()
+  errors: z.lazy(() => CallErrorOrderByRelationAggregateInputSchema).optional()
 }).strict();
 
 export const CallWhereUniqueInputSchema: z.ZodType<Prisma.CallWhereUniqueInput> = z.object({
@@ -876,7 +876,7 @@ export const CallWhereUniqueInputSchema: z.ZodType<Prisma.CallWhereUniqueInput> 
   test: z.union([ z.lazy(() => TestRelationFilterSchema),z.lazy(() => TestWhereInputSchema) ]).optional(),
   testAgent: z.union([ z.lazy(() => TestAgentRelationFilterSchema),z.lazy(() => TestAgentWhereInputSchema) ]).optional(),
   messages: z.lazy(() => MessageListRelationFilterSchema).optional(),
-  errors: z.lazy(() => ErrorListRelationFilterSchema).optional()
+  errors: z.lazy(() => CallErrorListRelationFilterSchema).optional()
 }).strict());
 
 export const CallOrderByWithAggregationInputSchema: z.ZodType<Prisma.CallOrderByWithAggregationInput> = z.object({
@@ -980,10 +980,10 @@ export const MessageScalarWhereWithAggregatesInputSchema: z.ZodType<Prisma.Messa
   callId: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
 }).strict();
 
-export const ErrorWhereInputSchema: z.ZodType<Prisma.ErrorWhereInput> = z.object({
-  AND: z.union([ z.lazy(() => ErrorWhereInputSchema),z.lazy(() => ErrorWhereInputSchema).array() ]).optional(),
-  OR: z.lazy(() => ErrorWhereInputSchema).array().optional(),
-  NOT: z.union([ z.lazy(() => ErrorWhereInputSchema),z.lazy(() => ErrorWhereInputSchema).array() ]).optional(),
+export const CallErrorWhereInputSchema: z.ZodType<Prisma.CallErrorWhereInput> = z.object({
+  AND: z.union([ z.lazy(() => CallErrorWhereInputSchema),z.lazy(() => CallErrorWhereInputSchema).array() ]).optional(),
+  OR: z.lazy(() => CallErrorWhereInputSchema).array().optional(),
+  NOT: z.union([ z.lazy(() => CallErrorWhereInputSchema),z.lazy(() => CallErrorWhereInputSchema).array() ]).optional(),
   id: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   start: z.union([ z.lazy(() => FloatFilterSchema),z.number() ]).optional(),
   end: z.union([ z.lazy(() => FloatFilterSchema),z.number() ]).optional(),
@@ -993,7 +993,7 @@ export const ErrorWhereInputSchema: z.ZodType<Prisma.ErrorWhereInput> = z.object
   call: z.union([ z.lazy(() => CallRelationFilterSchema),z.lazy(() => CallWhereInputSchema) ]).optional(),
 }).strict();
 
-export const ErrorOrderByWithRelationInputSchema: z.ZodType<Prisma.ErrorOrderByWithRelationInput> = z.object({
+export const CallErrorOrderByWithRelationInputSchema: z.ZodType<Prisma.CallErrorOrderByWithRelationInput> = z.object({
   id: z.lazy(() => SortOrderSchema).optional(),
   start: z.lazy(() => SortOrderSchema).optional(),
   end: z.lazy(() => SortOrderSchema).optional(),
@@ -1003,14 +1003,14 @@ export const ErrorOrderByWithRelationInputSchema: z.ZodType<Prisma.ErrorOrderByW
   call: z.lazy(() => CallOrderByWithRelationInputSchema).optional()
 }).strict();
 
-export const ErrorWhereUniqueInputSchema: z.ZodType<Prisma.ErrorWhereUniqueInput> = z.object({
+export const CallErrorWhereUniqueInputSchema: z.ZodType<Prisma.CallErrorWhereUniqueInput> = z.object({
   id: z.string().cuid()
 })
 .and(z.object({
   id: z.string().cuid().optional(),
-  AND: z.union([ z.lazy(() => ErrorWhereInputSchema),z.lazy(() => ErrorWhereInputSchema).array() ]).optional(),
-  OR: z.lazy(() => ErrorWhereInputSchema).array().optional(),
-  NOT: z.union([ z.lazy(() => ErrorWhereInputSchema),z.lazy(() => ErrorWhereInputSchema).array() ]).optional(),
+  AND: z.union([ z.lazy(() => CallErrorWhereInputSchema),z.lazy(() => CallErrorWhereInputSchema).array() ]).optional(),
+  OR: z.lazy(() => CallErrorWhereInputSchema).array().optional(),
+  NOT: z.union([ z.lazy(() => CallErrorWhereInputSchema),z.lazy(() => CallErrorWhereInputSchema).array() ]).optional(),
   start: z.union([ z.lazy(() => FloatFilterSchema),z.number() ]).optional(),
   end: z.union([ z.lazy(() => FloatFilterSchema),z.number() ]).optional(),
   type: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
@@ -1019,24 +1019,24 @@ export const ErrorWhereUniqueInputSchema: z.ZodType<Prisma.ErrorWhereUniqueInput
   call: z.union([ z.lazy(() => CallRelationFilterSchema),z.lazy(() => CallWhereInputSchema) ]).optional(),
 }).strict());
 
-export const ErrorOrderByWithAggregationInputSchema: z.ZodType<Prisma.ErrorOrderByWithAggregationInput> = z.object({
+export const CallErrorOrderByWithAggregationInputSchema: z.ZodType<Prisma.CallErrorOrderByWithAggregationInput> = z.object({
   id: z.lazy(() => SortOrderSchema).optional(),
   start: z.lazy(() => SortOrderSchema).optional(),
   end: z.lazy(() => SortOrderSchema).optional(),
   type: z.lazy(() => SortOrderSchema).optional(),
   description: z.lazy(() => SortOrderSchema).optional(),
   callId: z.lazy(() => SortOrderSchema).optional(),
-  _count: z.lazy(() => ErrorCountOrderByAggregateInputSchema).optional(),
-  _avg: z.lazy(() => ErrorAvgOrderByAggregateInputSchema).optional(),
-  _max: z.lazy(() => ErrorMaxOrderByAggregateInputSchema).optional(),
-  _min: z.lazy(() => ErrorMinOrderByAggregateInputSchema).optional(),
-  _sum: z.lazy(() => ErrorSumOrderByAggregateInputSchema).optional()
+  _count: z.lazy(() => CallErrorCountOrderByAggregateInputSchema).optional(),
+  _avg: z.lazy(() => CallErrorAvgOrderByAggregateInputSchema).optional(),
+  _max: z.lazy(() => CallErrorMaxOrderByAggregateInputSchema).optional(),
+  _min: z.lazy(() => CallErrorMinOrderByAggregateInputSchema).optional(),
+  _sum: z.lazy(() => CallErrorSumOrderByAggregateInputSchema).optional()
 }).strict();
 
-export const ErrorScalarWhereWithAggregatesInputSchema: z.ZodType<Prisma.ErrorScalarWhereWithAggregatesInput> = z.object({
-  AND: z.union([ z.lazy(() => ErrorScalarWhereWithAggregatesInputSchema),z.lazy(() => ErrorScalarWhereWithAggregatesInputSchema).array() ]).optional(),
-  OR: z.lazy(() => ErrorScalarWhereWithAggregatesInputSchema).array().optional(),
-  NOT: z.union([ z.lazy(() => ErrorScalarWhereWithAggregatesInputSchema),z.lazy(() => ErrorScalarWhereWithAggregatesInputSchema).array() ]).optional(),
+export const CallErrorScalarWhereWithAggregatesInputSchema: z.ZodType<Prisma.CallErrorScalarWhereWithAggregatesInput> = z.object({
+  AND: z.union([ z.lazy(() => CallErrorScalarWhereWithAggregatesInputSchema),z.lazy(() => CallErrorScalarWhereWithAggregatesInputSchema).array() ]).optional(),
+  OR: z.lazy(() => CallErrorScalarWhereWithAggregatesInputSchema).array().optional(),
+  NOT: z.union([ z.lazy(() => CallErrorScalarWhereWithAggregatesInputSchema),z.lazy(() => CallErrorScalarWhereWithAggregatesInputSchema).array() ]).optional(),
   id: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
   start: z.union([ z.lazy(() => FloatWithAggregatesFilterSchema),z.number() ]).optional(),
   end: z.union([ z.lazy(() => FloatWithAggregatesFilterSchema),z.number() ]).optional(),
@@ -1443,7 +1443,7 @@ export const CallCreateInputSchema: z.ZodType<Prisma.CallCreateInput> = z.object
   test: z.lazy(() => TestCreateNestedOneWithoutCallsInputSchema),
   testAgent: z.lazy(() => TestAgentCreateNestedOneWithoutCallInputSchema),
   messages: z.lazy(() => MessageCreateNestedManyWithoutCallInputSchema).optional(),
-  errors: z.lazy(() => ErrorCreateNestedManyWithoutCallInputSchema).optional()
+  errors: z.lazy(() => CallErrorCreateNestedManyWithoutCallInputSchema).optional()
 }).strict();
 
 export const CallUncheckedCreateInputSchema: z.ZodType<Prisma.CallUncheckedCreateInput> = z.object({
@@ -1455,7 +1455,7 @@ export const CallUncheckedCreateInputSchema: z.ZodType<Prisma.CallUncheckedCreat
   testId: z.string(),
   testAgentId: z.string(),
   messages: z.lazy(() => MessageUncheckedCreateNestedManyWithoutCallInputSchema).optional(),
-  errors: z.lazy(() => ErrorUncheckedCreateNestedManyWithoutCallInputSchema).optional()
+  errors: z.lazy(() => CallErrorUncheckedCreateNestedManyWithoutCallInputSchema).optional()
 }).strict();
 
 export const CallUpdateInputSchema: z.ZodType<Prisma.CallUpdateInput> = z.object({
@@ -1467,7 +1467,7 @@ export const CallUpdateInputSchema: z.ZodType<Prisma.CallUpdateInput> = z.object
   test: z.lazy(() => TestUpdateOneRequiredWithoutCallsNestedInputSchema).optional(),
   testAgent: z.lazy(() => TestAgentUpdateOneRequiredWithoutCallNestedInputSchema).optional(),
   messages: z.lazy(() => MessageUpdateManyWithoutCallNestedInputSchema).optional(),
-  errors: z.lazy(() => ErrorUpdateManyWithoutCallNestedInputSchema).optional()
+  errors: z.lazy(() => CallErrorUpdateManyWithoutCallNestedInputSchema).optional()
 }).strict();
 
 export const CallUncheckedUpdateInputSchema: z.ZodType<Prisma.CallUncheckedUpdateInput> = z.object({
@@ -1479,7 +1479,7 @@ export const CallUncheckedUpdateInputSchema: z.ZodType<Prisma.CallUncheckedUpdat
   testId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   testAgentId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   messages: z.lazy(() => MessageUncheckedUpdateManyWithoutCallNestedInputSchema).optional(),
-  errors: z.lazy(() => ErrorUncheckedUpdateManyWithoutCallNestedInputSchema).optional()
+  errors: z.lazy(() => CallErrorUncheckedUpdateManyWithoutCallNestedInputSchema).optional()
 }).strict();
 
 export const CallCreateManyInputSchema: z.ZodType<Prisma.CallCreateManyInput> = z.object({
@@ -1586,7 +1586,7 @@ export const MessageUncheckedUpdateManyInputSchema: z.ZodType<Prisma.MessageUnch
   callId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
 }).strict();
 
-export const ErrorCreateInputSchema: z.ZodType<Prisma.ErrorCreateInput> = z.object({
+export const CallErrorCreateInputSchema: z.ZodType<Prisma.CallErrorCreateInput> = z.object({
   id: z.string().cuid().optional(),
   start: z.number(),
   end: z.number(),
@@ -1595,7 +1595,7 @@ export const ErrorCreateInputSchema: z.ZodType<Prisma.ErrorCreateInput> = z.obje
   call: z.lazy(() => CallCreateNestedOneWithoutErrorsInputSchema)
 }).strict();
 
-export const ErrorUncheckedCreateInputSchema: z.ZodType<Prisma.ErrorUncheckedCreateInput> = z.object({
+export const CallErrorUncheckedCreateInputSchema: z.ZodType<Prisma.CallErrorUncheckedCreateInput> = z.object({
   id: z.string().cuid().optional(),
   start: z.number(),
   end: z.number(),
@@ -1604,7 +1604,7 @@ export const ErrorUncheckedCreateInputSchema: z.ZodType<Prisma.ErrorUncheckedCre
   callId: z.string()
 }).strict();
 
-export const ErrorUpdateInputSchema: z.ZodType<Prisma.ErrorUpdateInput> = z.object({
+export const CallErrorUpdateInputSchema: z.ZodType<Prisma.CallErrorUpdateInput> = z.object({
   id: z.union([ z.string().cuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   start: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
   end: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
@@ -1613,7 +1613,7 @@ export const ErrorUpdateInputSchema: z.ZodType<Prisma.ErrorUpdateInput> = z.obje
   call: z.lazy(() => CallUpdateOneRequiredWithoutErrorsNestedInputSchema).optional()
 }).strict();
 
-export const ErrorUncheckedUpdateInputSchema: z.ZodType<Prisma.ErrorUncheckedUpdateInput> = z.object({
+export const CallErrorUncheckedUpdateInputSchema: z.ZodType<Prisma.CallErrorUncheckedUpdateInput> = z.object({
   id: z.union([ z.string().cuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   start: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
   end: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
@@ -1622,7 +1622,7 @@ export const ErrorUncheckedUpdateInputSchema: z.ZodType<Prisma.ErrorUncheckedUpd
   callId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
 }).strict();
 
-export const ErrorCreateManyInputSchema: z.ZodType<Prisma.ErrorCreateManyInput> = z.object({
+export const CallErrorCreateManyInputSchema: z.ZodType<Prisma.CallErrorCreateManyInput> = z.object({
   id: z.string().cuid().optional(),
   start: z.number(),
   end: z.number(),
@@ -1631,7 +1631,7 @@ export const ErrorCreateManyInputSchema: z.ZodType<Prisma.ErrorCreateManyInput> 
   callId: z.string()
 }).strict();
 
-export const ErrorUpdateManyMutationInputSchema: z.ZodType<Prisma.ErrorUpdateManyMutationInput> = z.object({
+export const CallErrorUpdateManyMutationInputSchema: z.ZodType<Prisma.CallErrorUpdateManyMutationInput> = z.object({
   id: z.union([ z.string().cuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   start: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
   end: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
@@ -1639,7 +1639,7 @@ export const ErrorUpdateManyMutationInputSchema: z.ZodType<Prisma.ErrorUpdateMan
   description: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
 }).strict();
 
-export const ErrorUncheckedUpdateManyInputSchema: z.ZodType<Prisma.ErrorUncheckedUpdateManyInput> = z.object({
+export const CallErrorUncheckedUpdateManyInputSchema: z.ZodType<Prisma.CallErrorUncheckedUpdateManyInput> = z.object({
   id: z.union([ z.string().cuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   start: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
   end: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
@@ -1993,17 +1993,17 @@ export const MessageListRelationFilterSchema: z.ZodType<Prisma.MessageListRelati
   none: z.lazy(() => MessageWhereInputSchema).optional()
 }).strict();
 
-export const ErrorListRelationFilterSchema: z.ZodType<Prisma.ErrorListRelationFilter> = z.object({
-  every: z.lazy(() => ErrorWhereInputSchema).optional(),
-  some: z.lazy(() => ErrorWhereInputSchema).optional(),
-  none: z.lazy(() => ErrorWhereInputSchema).optional()
+export const CallErrorListRelationFilterSchema: z.ZodType<Prisma.CallErrorListRelationFilter> = z.object({
+  every: z.lazy(() => CallErrorWhereInputSchema).optional(),
+  some: z.lazy(() => CallErrorWhereInputSchema).optional(),
+  none: z.lazy(() => CallErrorWhereInputSchema).optional()
 }).strict();
 
 export const MessageOrderByRelationAggregateInputSchema: z.ZodType<Prisma.MessageOrderByRelationAggregateInput> = z.object({
   _count: z.lazy(() => SortOrderSchema).optional()
 }).strict();
 
-export const ErrorOrderByRelationAggregateInputSchema: z.ZodType<Prisma.ErrorOrderByRelationAggregateInput> = z.object({
+export const CallErrorOrderByRelationAggregateInputSchema: z.ZodType<Prisma.CallErrorOrderByRelationAggregateInput> = z.object({
   _count: z.lazy(() => SortOrderSchema).optional()
 }).strict();
 
@@ -2153,7 +2153,7 @@ export const FloatWithAggregatesFilterSchema: z.ZodType<Prisma.FloatWithAggregat
   _max: z.lazy(() => NestedFloatFilterSchema).optional()
 }).strict();
 
-export const ErrorCountOrderByAggregateInputSchema: z.ZodType<Prisma.ErrorCountOrderByAggregateInput> = z.object({
+export const CallErrorCountOrderByAggregateInputSchema: z.ZodType<Prisma.CallErrorCountOrderByAggregateInput> = z.object({
   id: z.lazy(() => SortOrderSchema).optional(),
   start: z.lazy(() => SortOrderSchema).optional(),
   end: z.lazy(() => SortOrderSchema).optional(),
@@ -2162,12 +2162,12 @@ export const ErrorCountOrderByAggregateInputSchema: z.ZodType<Prisma.ErrorCountO
   callId: z.lazy(() => SortOrderSchema).optional()
 }).strict();
 
-export const ErrorAvgOrderByAggregateInputSchema: z.ZodType<Prisma.ErrorAvgOrderByAggregateInput> = z.object({
+export const CallErrorAvgOrderByAggregateInputSchema: z.ZodType<Prisma.CallErrorAvgOrderByAggregateInput> = z.object({
   start: z.lazy(() => SortOrderSchema).optional(),
   end: z.lazy(() => SortOrderSchema).optional()
 }).strict();
 
-export const ErrorMaxOrderByAggregateInputSchema: z.ZodType<Prisma.ErrorMaxOrderByAggregateInput> = z.object({
+export const CallErrorMaxOrderByAggregateInputSchema: z.ZodType<Prisma.CallErrorMaxOrderByAggregateInput> = z.object({
   id: z.lazy(() => SortOrderSchema).optional(),
   start: z.lazy(() => SortOrderSchema).optional(),
   end: z.lazy(() => SortOrderSchema).optional(),
@@ -2176,7 +2176,7 @@ export const ErrorMaxOrderByAggregateInputSchema: z.ZodType<Prisma.ErrorMaxOrder
   callId: z.lazy(() => SortOrderSchema).optional()
 }).strict();
 
-export const ErrorMinOrderByAggregateInputSchema: z.ZodType<Prisma.ErrorMinOrderByAggregateInput> = z.object({
+export const CallErrorMinOrderByAggregateInputSchema: z.ZodType<Prisma.CallErrorMinOrderByAggregateInput> = z.object({
   id: z.lazy(() => SortOrderSchema).optional(),
   start: z.lazy(() => SortOrderSchema).optional(),
   end: z.lazy(() => SortOrderSchema).optional(),
@@ -2185,7 +2185,7 @@ export const ErrorMinOrderByAggregateInputSchema: z.ZodType<Prisma.ErrorMinOrder
   callId: z.lazy(() => SortOrderSchema).optional()
 }).strict();
 
-export const ErrorSumOrderByAggregateInputSchema: z.ZodType<Prisma.ErrorSumOrderByAggregateInput> = z.object({
+export const CallErrorSumOrderByAggregateInputSchema: z.ZodType<Prisma.CallErrorSumOrderByAggregateInput> = z.object({
   start: z.lazy(() => SortOrderSchema).optional(),
   end: z.lazy(() => SortOrderSchema).optional()
 }).strict();
@@ -2555,11 +2555,11 @@ export const MessageCreateNestedManyWithoutCallInputSchema: z.ZodType<Prisma.Mes
   connect: z.union([ z.lazy(() => MessageWhereUniqueInputSchema),z.lazy(() => MessageWhereUniqueInputSchema).array() ]).optional(),
 }).strict();
 
-export const ErrorCreateNestedManyWithoutCallInputSchema: z.ZodType<Prisma.ErrorCreateNestedManyWithoutCallInput> = z.object({
-  create: z.union([ z.lazy(() => ErrorCreateWithoutCallInputSchema),z.lazy(() => ErrorCreateWithoutCallInputSchema).array(),z.lazy(() => ErrorUncheckedCreateWithoutCallInputSchema),z.lazy(() => ErrorUncheckedCreateWithoutCallInputSchema).array() ]).optional(),
-  connectOrCreate: z.union([ z.lazy(() => ErrorCreateOrConnectWithoutCallInputSchema),z.lazy(() => ErrorCreateOrConnectWithoutCallInputSchema).array() ]).optional(),
-  createMany: z.lazy(() => ErrorCreateManyCallInputEnvelopeSchema).optional(),
-  connect: z.union([ z.lazy(() => ErrorWhereUniqueInputSchema),z.lazy(() => ErrorWhereUniqueInputSchema).array() ]).optional(),
+export const CallErrorCreateNestedManyWithoutCallInputSchema: z.ZodType<Prisma.CallErrorCreateNestedManyWithoutCallInput> = z.object({
+  create: z.union([ z.lazy(() => CallErrorCreateWithoutCallInputSchema),z.lazy(() => CallErrorCreateWithoutCallInputSchema).array(),z.lazy(() => CallErrorUncheckedCreateWithoutCallInputSchema),z.lazy(() => CallErrorUncheckedCreateWithoutCallInputSchema).array() ]).optional(),
+  connectOrCreate: z.union([ z.lazy(() => CallErrorCreateOrConnectWithoutCallInputSchema),z.lazy(() => CallErrorCreateOrConnectWithoutCallInputSchema).array() ]).optional(),
+  createMany: z.lazy(() => CallErrorCreateManyCallInputEnvelopeSchema).optional(),
+  connect: z.union([ z.lazy(() => CallErrorWhereUniqueInputSchema),z.lazy(() => CallErrorWhereUniqueInputSchema).array() ]).optional(),
 }).strict();
 
 export const MessageUncheckedCreateNestedManyWithoutCallInputSchema: z.ZodType<Prisma.MessageUncheckedCreateNestedManyWithoutCallInput> = z.object({
@@ -2569,11 +2569,11 @@ export const MessageUncheckedCreateNestedManyWithoutCallInputSchema: z.ZodType<P
   connect: z.union([ z.lazy(() => MessageWhereUniqueInputSchema),z.lazy(() => MessageWhereUniqueInputSchema).array() ]).optional(),
 }).strict();
 
-export const ErrorUncheckedCreateNestedManyWithoutCallInputSchema: z.ZodType<Prisma.ErrorUncheckedCreateNestedManyWithoutCallInput> = z.object({
-  create: z.union([ z.lazy(() => ErrorCreateWithoutCallInputSchema),z.lazy(() => ErrorCreateWithoutCallInputSchema).array(),z.lazy(() => ErrorUncheckedCreateWithoutCallInputSchema),z.lazy(() => ErrorUncheckedCreateWithoutCallInputSchema).array() ]).optional(),
-  connectOrCreate: z.union([ z.lazy(() => ErrorCreateOrConnectWithoutCallInputSchema),z.lazy(() => ErrorCreateOrConnectWithoutCallInputSchema).array() ]).optional(),
-  createMany: z.lazy(() => ErrorCreateManyCallInputEnvelopeSchema).optional(),
-  connect: z.union([ z.lazy(() => ErrorWhereUniqueInputSchema),z.lazy(() => ErrorWhereUniqueInputSchema).array() ]).optional(),
+export const CallErrorUncheckedCreateNestedManyWithoutCallInputSchema: z.ZodType<Prisma.CallErrorUncheckedCreateNestedManyWithoutCallInput> = z.object({
+  create: z.union([ z.lazy(() => CallErrorCreateWithoutCallInputSchema),z.lazy(() => CallErrorCreateWithoutCallInputSchema).array(),z.lazy(() => CallErrorUncheckedCreateWithoutCallInputSchema),z.lazy(() => CallErrorUncheckedCreateWithoutCallInputSchema).array() ]).optional(),
+  connectOrCreate: z.union([ z.lazy(() => CallErrorCreateOrConnectWithoutCallInputSchema),z.lazy(() => CallErrorCreateOrConnectWithoutCallInputSchema).array() ]).optional(),
+  createMany: z.lazy(() => CallErrorCreateManyCallInputEnvelopeSchema).optional(),
+  connect: z.union([ z.lazy(() => CallErrorWhereUniqueInputSchema),z.lazy(() => CallErrorWhereUniqueInputSchema).array() ]).optional(),
 }).strict();
 
 export const EnumCallStatusFieldUpdateOperationsInputSchema: z.ZodType<Prisma.EnumCallStatusFieldUpdateOperationsInput> = z.object({
@@ -2614,18 +2614,18 @@ export const MessageUpdateManyWithoutCallNestedInputSchema: z.ZodType<Prisma.Mes
   deleteMany: z.union([ z.lazy(() => MessageScalarWhereInputSchema),z.lazy(() => MessageScalarWhereInputSchema).array() ]).optional(),
 }).strict();
 
-export const ErrorUpdateManyWithoutCallNestedInputSchema: z.ZodType<Prisma.ErrorUpdateManyWithoutCallNestedInput> = z.object({
-  create: z.union([ z.lazy(() => ErrorCreateWithoutCallInputSchema),z.lazy(() => ErrorCreateWithoutCallInputSchema).array(),z.lazy(() => ErrorUncheckedCreateWithoutCallInputSchema),z.lazy(() => ErrorUncheckedCreateWithoutCallInputSchema).array() ]).optional(),
-  connectOrCreate: z.union([ z.lazy(() => ErrorCreateOrConnectWithoutCallInputSchema),z.lazy(() => ErrorCreateOrConnectWithoutCallInputSchema).array() ]).optional(),
-  upsert: z.union([ z.lazy(() => ErrorUpsertWithWhereUniqueWithoutCallInputSchema),z.lazy(() => ErrorUpsertWithWhereUniqueWithoutCallInputSchema).array() ]).optional(),
-  createMany: z.lazy(() => ErrorCreateManyCallInputEnvelopeSchema).optional(),
-  set: z.union([ z.lazy(() => ErrorWhereUniqueInputSchema),z.lazy(() => ErrorWhereUniqueInputSchema).array() ]).optional(),
-  disconnect: z.union([ z.lazy(() => ErrorWhereUniqueInputSchema),z.lazy(() => ErrorWhereUniqueInputSchema).array() ]).optional(),
-  delete: z.union([ z.lazy(() => ErrorWhereUniqueInputSchema),z.lazy(() => ErrorWhereUniqueInputSchema).array() ]).optional(),
-  connect: z.union([ z.lazy(() => ErrorWhereUniqueInputSchema),z.lazy(() => ErrorWhereUniqueInputSchema).array() ]).optional(),
-  update: z.union([ z.lazy(() => ErrorUpdateWithWhereUniqueWithoutCallInputSchema),z.lazy(() => ErrorUpdateWithWhereUniqueWithoutCallInputSchema).array() ]).optional(),
-  updateMany: z.union([ z.lazy(() => ErrorUpdateManyWithWhereWithoutCallInputSchema),z.lazy(() => ErrorUpdateManyWithWhereWithoutCallInputSchema).array() ]).optional(),
-  deleteMany: z.union([ z.lazy(() => ErrorScalarWhereInputSchema),z.lazy(() => ErrorScalarWhereInputSchema).array() ]).optional(),
+export const CallErrorUpdateManyWithoutCallNestedInputSchema: z.ZodType<Prisma.CallErrorUpdateManyWithoutCallNestedInput> = z.object({
+  create: z.union([ z.lazy(() => CallErrorCreateWithoutCallInputSchema),z.lazy(() => CallErrorCreateWithoutCallInputSchema).array(),z.lazy(() => CallErrorUncheckedCreateWithoutCallInputSchema),z.lazy(() => CallErrorUncheckedCreateWithoutCallInputSchema).array() ]).optional(),
+  connectOrCreate: z.union([ z.lazy(() => CallErrorCreateOrConnectWithoutCallInputSchema),z.lazy(() => CallErrorCreateOrConnectWithoutCallInputSchema).array() ]).optional(),
+  upsert: z.union([ z.lazy(() => CallErrorUpsertWithWhereUniqueWithoutCallInputSchema),z.lazy(() => CallErrorUpsertWithWhereUniqueWithoutCallInputSchema).array() ]).optional(),
+  createMany: z.lazy(() => CallErrorCreateManyCallInputEnvelopeSchema).optional(),
+  set: z.union([ z.lazy(() => CallErrorWhereUniqueInputSchema),z.lazy(() => CallErrorWhereUniqueInputSchema).array() ]).optional(),
+  disconnect: z.union([ z.lazy(() => CallErrorWhereUniqueInputSchema),z.lazy(() => CallErrorWhereUniqueInputSchema).array() ]).optional(),
+  delete: z.union([ z.lazy(() => CallErrorWhereUniqueInputSchema),z.lazy(() => CallErrorWhereUniqueInputSchema).array() ]).optional(),
+  connect: z.union([ z.lazy(() => CallErrorWhereUniqueInputSchema),z.lazy(() => CallErrorWhereUniqueInputSchema).array() ]).optional(),
+  update: z.union([ z.lazy(() => CallErrorUpdateWithWhereUniqueWithoutCallInputSchema),z.lazy(() => CallErrorUpdateWithWhereUniqueWithoutCallInputSchema).array() ]).optional(),
+  updateMany: z.union([ z.lazy(() => CallErrorUpdateManyWithWhereWithoutCallInputSchema),z.lazy(() => CallErrorUpdateManyWithWhereWithoutCallInputSchema).array() ]).optional(),
+  deleteMany: z.union([ z.lazy(() => CallErrorScalarWhereInputSchema),z.lazy(() => CallErrorScalarWhereInputSchema).array() ]).optional(),
 }).strict();
 
 export const MessageUncheckedUpdateManyWithoutCallNestedInputSchema: z.ZodType<Prisma.MessageUncheckedUpdateManyWithoutCallNestedInput> = z.object({
@@ -2642,18 +2642,18 @@ export const MessageUncheckedUpdateManyWithoutCallNestedInputSchema: z.ZodType<P
   deleteMany: z.union([ z.lazy(() => MessageScalarWhereInputSchema),z.lazy(() => MessageScalarWhereInputSchema).array() ]).optional(),
 }).strict();
 
-export const ErrorUncheckedUpdateManyWithoutCallNestedInputSchema: z.ZodType<Prisma.ErrorUncheckedUpdateManyWithoutCallNestedInput> = z.object({
-  create: z.union([ z.lazy(() => ErrorCreateWithoutCallInputSchema),z.lazy(() => ErrorCreateWithoutCallInputSchema).array(),z.lazy(() => ErrorUncheckedCreateWithoutCallInputSchema),z.lazy(() => ErrorUncheckedCreateWithoutCallInputSchema).array() ]).optional(),
-  connectOrCreate: z.union([ z.lazy(() => ErrorCreateOrConnectWithoutCallInputSchema),z.lazy(() => ErrorCreateOrConnectWithoutCallInputSchema).array() ]).optional(),
-  upsert: z.union([ z.lazy(() => ErrorUpsertWithWhereUniqueWithoutCallInputSchema),z.lazy(() => ErrorUpsertWithWhereUniqueWithoutCallInputSchema).array() ]).optional(),
-  createMany: z.lazy(() => ErrorCreateManyCallInputEnvelopeSchema).optional(),
-  set: z.union([ z.lazy(() => ErrorWhereUniqueInputSchema),z.lazy(() => ErrorWhereUniqueInputSchema).array() ]).optional(),
-  disconnect: z.union([ z.lazy(() => ErrorWhereUniqueInputSchema),z.lazy(() => ErrorWhereUniqueInputSchema).array() ]).optional(),
-  delete: z.union([ z.lazy(() => ErrorWhereUniqueInputSchema),z.lazy(() => ErrorWhereUniqueInputSchema).array() ]).optional(),
-  connect: z.union([ z.lazy(() => ErrorWhereUniqueInputSchema),z.lazy(() => ErrorWhereUniqueInputSchema).array() ]).optional(),
-  update: z.union([ z.lazy(() => ErrorUpdateWithWhereUniqueWithoutCallInputSchema),z.lazy(() => ErrorUpdateWithWhereUniqueWithoutCallInputSchema).array() ]).optional(),
-  updateMany: z.union([ z.lazy(() => ErrorUpdateManyWithWhereWithoutCallInputSchema),z.lazy(() => ErrorUpdateManyWithWhereWithoutCallInputSchema).array() ]).optional(),
-  deleteMany: z.union([ z.lazy(() => ErrorScalarWhereInputSchema),z.lazy(() => ErrorScalarWhereInputSchema).array() ]).optional(),
+export const CallErrorUncheckedUpdateManyWithoutCallNestedInputSchema: z.ZodType<Prisma.CallErrorUncheckedUpdateManyWithoutCallNestedInput> = z.object({
+  create: z.union([ z.lazy(() => CallErrorCreateWithoutCallInputSchema),z.lazy(() => CallErrorCreateWithoutCallInputSchema).array(),z.lazy(() => CallErrorUncheckedCreateWithoutCallInputSchema),z.lazy(() => CallErrorUncheckedCreateWithoutCallInputSchema).array() ]).optional(),
+  connectOrCreate: z.union([ z.lazy(() => CallErrorCreateOrConnectWithoutCallInputSchema),z.lazy(() => CallErrorCreateOrConnectWithoutCallInputSchema).array() ]).optional(),
+  upsert: z.union([ z.lazy(() => CallErrorUpsertWithWhereUniqueWithoutCallInputSchema),z.lazy(() => CallErrorUpsertWithWhereUniqueWithoutCallInputSchema).array() ]).optional(),
+  createMany: z.lazy(() => CallErrorCreateManyCallInputEnvelopeSchema).optional(),
+  set: z.union([ z.lazy(() => CallErrorWhereUniqueInputSchema),z.lazy(() => CallErrorWhereUniqueInputSchema).array() ]).optional(),
+  disconnect: z.union([ z.lazy(() => CallErrorWhereUniqueInputSchema),z.lazy(() => CallErrorWhereUniqueInputSchema).array() ]).optional(),
+  delete: z.union([ z.lazy(() => CallErrorWhereUniqueInputSchema),z.lazy(() => CallErrorWhereUniqueInputSchema).array() ]).optional(),
+  connect: z.union([ z.lazy(() => CallErrorWhereUniqueInputSchema),z.lazy(() => CallErrorWhereUniqueInputSchema).array() ]).optional(),
+  update: z.union([ z.lazy(() => CallErrorUpdateWithWhereUniqueWithoutCallInputSchema),z.lazy(() => CallErrorUpdateWithWhereUniqueWithoutCallInputSchema).array() ]).optional(),
+  updateMany: z.union([ z.lazy(() => CallErrorUpdateManyWithWhereWithoutCallInputSchema),z.lazy(() => CallErrorUpdateManyWithWhereWithoutCallInputSchema).array() ]).optional(),
+  deleteMany: z.union([ z.lazy(() => CallErrorScalarWhereInputSchema),z.lazy(() => CallErrorScalarWhereInputSchema).array() ]).optional(),
 }).strict();
 
 export const CallCreateNestedOneWithoutMessagesInputSchema: z.ZodType<Prisma.CallCreateNestedOneWithoutMessagesInput> = z.object({
@@ -3129,7 +3129,7 @@ export const CallCreateWithoutTestInputSchema: z.ZodType<Prisma.CallCreateWithou
   stereoRecordingUrl: z.string(),
   testAgent: z.lazy(() => TestAgentCreateNestedOneWithoutCallInputSchema),
   messages: z.lazy(() => MessageCreateNestedManyWithoutCallInputSchema).optional(),
-  errors: z.lazy(() => ErrorCreateNestedManyWithoutCallInputSchema).optional()
+  errors: z.lazy(() => CallErrorCreateNestedManyWithoutCallInputSchema).optional()
 }).strict();
 
 export const CallUncheckedCreateWithoutTestInputSchema: z.ZodType<Prisma.CallUncheckedCreateWithoutTestInput> = z.object({
@@ -3140,7 +3140,7 @@ export const CallUncheckedCreateWithoutTestInputSchema: z.ZodType<Prisma.CallUnc
   stereoRecordingUrl: z.string(),
   testAgentId: z.string(),
   messages: z.lazy(() => MessageUncheckedCreateNestedManyWithoutCallInputSchema).optional(),
-  errors: z.lazy(() => ErrorUncheckedCreateNestedManyWithoutCallInputSchema).optional()
+  errors: z.lazy(() => CallErrorUncheckedCreateNestedManyWithoutCallInputSchema).optional()
 }).strict();
 
 export const CallCreateOrConnectWithoutTestInputSchema: z.ZodType<Prisma.CallCreateOrConnectWithoutTestInput> = z.object({
@@ -3241,7 +3241,7 @@ export const CallCreateWithoutTestAgentInputSchema: z.ZodType<Prisma.CallCreateW
   stereoRecordingUrl: z.string(),
   test: z.lazy(() => TestCreateNestedOneWithoutCallsInputSchema),
   messages: z.lazy(() => MessageCreateNestedManyWithoutCallInputSchema).optional(),
-  errors: z.lazy(() => ErrorCreateNestedManyWithoutCallInputSchema).optional()
+  errors: z.lazy(() => CallErrorCreateNestedManyWithoutCallInputSchema).optional()
 }).strict();
 
 export const CallUncheckedCreateWithoutTestAgentInputSchema: z.ZodType<Prisma.CallUncheckedCreateWithoutTestAgentInput> = z.object({
@@ -3252,7 +3252,7 @@ export const CallUncheckedCreateWithoutTestAgentInputSchema: z.ZodType<Prisma.Ca
   stereoRecordingUrl: z.string(),
   testId: z.string(),
   messages: z.lazy(() => MessageUncheckedCreateNestedManyWithoutCallInputSchema).optional(),
-  errors: z.lazy(() => ErrorUncheckedCreateNestedManyWithoutCallInputSchema).optional()
+  errors: z.lazy(() => CallErrorUncheckedCreateNestedManyWithoutCallInputSchema).optional()
 }).strict();
 
 export const CallCreateOrConnectWithoutTestAgentInputSchema: z.ZodType<Prisma.CallCreateOrConnectWithoutTestAgentInput> = z.object({
@@ -3526,7 +3526,7 @@ export const MessageCreateManyCallInputEnvelopeSchema: z.ZodType<Prisma.MessageC
   skipDuplicates: z.boolean().optional()
 }).strict();
 
-export const ErrorCreateWithoutCallInputSchema: z.ZodType<Prisma.ErrorCreateWithoutCallInput> = z.object({
+export const CallErrorCreateWithoutCallInputSchema: z.ZodType<Prisma.CallErrorCreateWithoutCallInput> = z.object({
   id: z.string().cuid().optional(),
   start: z.number(),
   end: z.number(),
@@ -3534,7 +3534,7 @@ export const ErrorCreateWithoutCallInputSchema: z.ZodType<Prisma.ErrorCreateWith
   description: z.string()
 }).strict();
 
-export const ErrorUncheckedCreateWithoutCallInputSchema: z.ZodType<Prisma.ErrorUncheckedCreateWithoutCallInput> = z.object({
+export const CallErrorUncheckedCreateWithoutCallInputSchema: z.ZodType<Prisma.CallErrorUncheckedCreateWithoutCallInput> = z.object({
   id: z.string().cuid().optional(),
   start: z.number(),
   end: z.number(),
@@ -3542,13 +3542,13 @@ export const ErrorUncheckedCreateWithoutCallInputSchema: z.ZodType<Prisma.ErrorU
   description: z.string()
 }).strict();
 
-export const ErrorCreateOrConnectWithoutCallInputSchema: z.ZodType<Prisma.ErrorCreateOrConnectWithoutCallInput> = z.object({
-  where: z.lazy(() => ErrorWhereUniqueInputSchema),
-  create: z.union([ z.lazy(() => ErrorCreateWithoutCallInputSchema),z.lazy(() => ErrorUncheckedCreateWithoutCallInputSchema) ]),
+export const CallErrorCreateOrConnectWithoutCallInputSchema: z.ZodType<Prisma.CallErrorCreateOrConnectWithoutCallInput> = z.object({
+  where: z.lazy(() => CallErrorWhereUniqueInputSchema),
+  create: z.union([ z.lazy(() => CallErrorCreateWithoutCallInputSchema),z.lazy(() => CallErrorUncheckedCreateWithoutCallInputSchema) ]),
 }).strict();
 
-export const ErrorCreateManyCallInputEnvelopeSchema: z.ZodType<Prisma.ErrorCreateManyCallInputEnvelope> = z.object({
-  data: z.union([ z.lazy(() => ErrorCreateManyCallInputSchema),z.lazy(() => ErrorCreateManyCallInputSchema).array() ]),
+export const CallErrorCreateManyCallInputEnvelopeSchema: z.ZodType<Prisma.CallErrorCreateManyCallInputEnvelope> = z.object({
+  data: z.union([ z.lazy(() => CallErrorCreateManyCallInputSchema),z.lazy(() => CallErrorCreateManyCallInputSchema).array() ]),
   skipDuplicates: z.boolean().optional()
 }).strict();
 
@@ -3644,26 +3644,26 @@ export const MessageScalarWhereInputSchema: z.ZodType<Prisma.MessageScalarWhereI
   callId: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
 }).strict();
 
-export const ErrorUpsertWithWhereUniqueWithoutCallInputSchema: z.ZodType<Prisma.ErrorUpsertWithWhereUniqueWithoutCallInput> = z.object({
-  where: z.lazy(() => ErrorWhereUniqueInputSchema),
-  update: z.union([ z.lazy(() => ErrorUpdateWithoutCallInputSchema),z.lazy(() => ErrorUncheckedUpdateWithoutCallInputSchema) ]),
-  create: z.union([ z.lazy(() => ErrorCreateWithoutCallInputSchema),z.lazy(() => ErrorUncheckedCreateWithoutCallInputSchema) ]),
+export const CallErrorUpsertWithWhereUniqueWithoutCallInputSchema: z.ZodType<Prisma.CallErrorUpsertWithWhereUniqueWithoutCallInput> = z.object({
+  where: z.lazy(() => CallErrorWhereUniqueInputSchema),
+  update: z.union([ z.lazy(() => CallErrorUpdateWithoutCallInputSchema),z.lazy(() => CallErrorUncheckedUpdateWithoutCallInputSchema) ]),
+  create: z.union([ z.lazy(() => CallErrorCreateWithoutCallInputSchema),z.lazy(() => CallErrorUncheckedCreateWithoutCallInputSchema) ]),
 }).strict();
 
-export const ErrorUpdateWithWhereUniqueWithoutCallInputSchema: z.ZodType<Prisma.ErrorUpdateWithWhereUniqueWithoutCallInput> = z.object({
-  where: z.lazy(() => ErrorWhereUniqueInputSchema),
-  data: z.union([ z.lazy(() => ErrorUpdateWithoutCallInputSchema),z.lazy(() => ErrorUncheckedUpdateWithoutCallInputSchema) ]),
+export const CallErrorUpdateWithWhereUniqueWithoutCallInputSchema: z.ZodType<Prisma.CallErrorUpdateWithWhereUniqueWithoutCallInput> = z.object({
+  where: z.lazy(() => CallErrorWhereUniqueInputSchema),
+  data: z.union([ z.lazy(() => CallErrorUpdateWithoutCallInputSchema),z.lazy(() => CallErrorUncheckedUpdateWithoutCallInputSchema) ]),
 }).strict();
 
-export const ErrorUpdateManyWithWhereWithoutCallInputSchema: z.ZodType<Prisma.ErrorUpdateManyWithWhereWithoutCallInput> = z.object({
-  where: z.lazy(() => ErrorScalarWhereInputSchema),
-  data: z.union([ z.lazy(() => ErrorUpdateManyMutationInputSchema),z.lazy(() => ErrorUncheckedUpdateManyWithoutCallInputSchema) ]),
+export const CallErrorUpdateManyWithWhereWithoutCallInputSchema: z.ZodType<Prisma.CallErrorUpdateManyWithWhereWithoutCallInput> = z.object({
+  where: z.lazy(() => CallErrorScalarWhereInputSchema),
+  data: z.union([ z.lazy(() => CallErrorUpdateManyMutationInputSchema),z.lazy(() => CallErrorUncheckedUpdateManyWithoutCallInputSchema) ]),
 }).strict();
 
-export const ErrorScalarWhereInputSchema: z.ZodType<Prisma.ErrorScalarWhereInput> = z.object({
-  AND: z.union([ z.lazy(() => ErrorScalarWhereInputSchema),z.lazy(() => ErrorScalarWhereInputSchema).array() ]).optional(),
-  OR: z.lazy(() => ErrorScalarWhereInputSchema).array().optional(),
-  NOT: z.union([ z.lazy(() => ErrorScalarWhereInputSchema),z.lazy(() => ErrorScalarWhereInputSchema).array() ]).optional(),
+export const CallErrorScalarWhereInputSchema: z.ZodType<Prisma.CallErrorScalarWhereInput> = z.object({
+  AND: z.union([ z.lazy(() => CallErrorScalarWhereInputSchema),z.lazy(() => CallErrorScalarWhereInputSchema).array() ]).optional(),
+  OR: z.lazy(() => CallErrorScalarWhereInputSchema).array().optional(),
+  NOT: z.union([ z.lazy(() => CallErrorScalarWhereInputSchema),z.lazy(() => CallErrorScalarWhereInputSchema).array() ]).optional(),
   id: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   start: z.union([ z.lazy(() => FloatFilterSchema),z.number() ]).optional(),
   end: z.union([ z.lazy(() => FloatFilterSchema),z.number() ]).optional(),
@@ -3680,7 +3680,7 @@ export const CallCreateWithoutMessagesInputSchema: z.ZodType<Prisma.CallCreateWi
   stereoRecordingUrl: z.string(),
   test: z.lazy(() => TestCreateNestedOneWithoutCallsInputSchema),
   testAgent: z.lazy(() => TestAgentCreateNestedOneWithoutCallInputSchema),
-  errors: z.lazy(() => ErrorCreateNestedManyWithoutCallInputSchema).optional()
+  errors: z.lazy(() => CallErrorCreateNestedManyWithoutCallInputSchema).optional()
 }).strict();
 
 export const CallUncheckedCreateWithoutMessagesInputSchema: z.ZodType<Prisma.CallUncheckedCreateWithoutMessagesInput> = z.object({
@@ -3691,7 +3691,7 @@ export const CallUncheckedCreateWithoutMessagesInputSchema: z.ZodType<Prisma.Cal
   stereoRecordingUrl: z.string(),
   testId: z.string(),
   testAgentId: z.string(),
-  errors: z.lazy(() => ErrorUncheckedCreateNestedManyWithoutCallInputSchema).optional()
+  errors: z.lazy(() => CallErrorUncheckedCreateNestedManyWithoutCallInputSchema).optional()
 }).strict();
 
 export const CallCreateOrConnectWithoutMessagesInputSchema: z.ZodType<Prisma.CallCreateOrConnectWithoutMessagesInput> = z.object({
@@ -3718,7 +3718,7 @@ export const CallUpdateWithoutMessagesInputSchema: z.ZodType<Prisma.CallUpdateWi
   stereoRecordingUrl: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   test: z.lazy(() => TestUpdateOneRequiredWithoutCallsNestedInputSchema).optional(),
   testAgent: z.lazy(() => TestAgentUpdateOneRequiredWithoutCallNestedInputSchema).optional(),
-  errors: z.lazy(() => ErrorUpdateManyWithoutCallNestedInputSchema).optional()
+  errors: z.lazy(() => CallErrorUpdateManyWithoutCallNestedInputSchema).optional()
 }).strict();
 
 export const CallUncheckedUpdateWithoutMessagesInputSchema: z.ZodType<Prisma.CallUncheckedUpdateWithoutMessagesInput> = z.object({
@@ -3729,7 +3729,7 @@ export const CallUncheckedUpdateWithoutMessagesInputSchema: z.ZodType<Prisma.Cal
   stereoRecordingUrl: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   testId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   testAgentId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  errors: z.lazy(() => ErrorUncheckedUpdateManyWithoutCallNestedInputSchema).optional()
+  errors: z.lazy(() => CallErrorUncheckedUpdateManyWithoutCallNestedInputSchema).optional()
 }).strict();
 
 export const CallCreateWithoutErrorsInputSchema: z.ZodType<Prisma.CallCreateWithoutErrorsInput> = z.object({
@@ -3944,7 +3944,7 @@ export const CallUpdateWithoutTestInputSchema: z.ZodType<Prisma.CallUpdateWithou
   stereoRecordingUrl: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   testAgent: z.lazy(() => TestAgentUpdateOneRequiredWithoutCallNestedInputSchema).optional(),
   messages: z.lazy(() => MessageUpdateManyWithoutCallNestedInputSchema).optional(),
-  errors: z.lazy(() => ErrorUpdateManyWithoutCallNestedInputSchema).optional()
+  errors: z.lazy(() => CallErrorUpdateManyWithoutCallNestedInputSchema).optional()
 }).strict();
 
 export const CallUncheckedUpdateWithoutTestInputSchema: z.ZodType<Prisma.CallUncheckedUpdateWithoutTestInput> = z.object({
@@ -3955,7 +3955,7 @@ export const CallUncheckedUpdateWithoutTestInputSchema: z.ZodType<Prisma.CallUnc
   stereoRecordingUrl: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   testAgentId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   messages: z.lazy(() => MessageUncheckedUpdateManyWithoutCallNestedInputSchema).optional(),
-  errors: z.lazy(() => ErrorUncheckedUpdateManyWithoutCallNestedInputSchema).optional()
+  errors: z.lazy(() => CallErrorUncheckedUpdateManyWithoutCallNestedInputSchema).optional()
 }).strict();
 
 export const CallUncheckedUpdateManyWithoutTestInputSchema: z.ZodType<Prisma.CallUncheckedUpdateManyWithoutTestInput> = z.object({
@@ -3984,7 +3984,7 @@ export const CallUpdateWithoutTestAgentInputSchema: z.ZodType<Prisma.CallUpdateW
   stereoRecordingUrl: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   test: z.lazy(() => TestUpdateOneRequiredWithoutCallsNestedInputSchema).optional(),
   messages: z.lazy(() => MessageUpdateManyWithoutCallNestedInputSchema).optional(),
-  errors: z.lazy(() => ErrorUpdateManyWithoutCallNestedInputSchema).optional()
+  errors: z.lazy(() => CallErrorUpdateManyWithoutCallNestedInputSchema).optional()
 }).strict();
 
 export const CallUncheckedUpdateWithoutTestAgentInputSchema: z.ZodType<Prisma.CallUncheckedUpdateWithoutTestAgentInput> = z.object({
@@ -3995,7 +3995,7 @@ export const CallUncheckedUpdateWithoutTestAgentInputSchema: z.ZodType<Prisma.Ca
   stereoRecordingUrl: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   testId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   messages: z.lazy(() => MessageUncheckedUpdateManyWithoutCallNestedInputSchema).optional(),
-  errors: z.lazy(() => ErrorUncheckedUpdateManyWithoutCallNestedInputSchema).optional()
+  errors: z.lazy(() => CallErrorUncheckedUpdateManyWithoutCallNestedInputSchema).optional()
 }).strict();
 
 export const CallUncheckedUpdateManyWithoutTestAgentInputSchema: z.ZodType<Prisma.CallUncheckedUpdateManyWithoutTestAgentInput> = z.object({
@@ -4040,7 +4040,7 @@ export const MessageCreateManyCallInputSchema: z.ZodType<Prisma.MessageCreateMan
   duration: z.number()
 }).strict();
 
-export const ErrorCreateManyCallInputSchema: z.ZodType<Prisma.ErrorCreateManyCallInput> = z.object({
+export const CallErrorCreateManyCallInputSchema: z.ZodType<Prisma.CallErrorCreateManyCallInput> = z.object({
   id: z.string().cuid().optional(),
   start: z.number(),
   end: z.number(),
@@ -4078,7 +4078,7 @@ export const MessageUncheckedUpdateManyWithoutCallInputSchema: z.ZodType<Prisma.
   duration: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
 }).strict();
 
-export const ErrorUpdateWithoutCallInputSchema: z.ZodType<Prisma.ErrorUpdateWithoutCallInput> = z.object({
+export const CallErrorUpdateWithoutCallInputSchema: z.ZodType<Prisma.CallErrorUpdateWithoutCallInput> = z.object({
   id: z.union([ z.string().cuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   start: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
   end: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
@@ -4086,7 +4086,7 @@ export const ErrorUpdateWithoutCallInputSchema: z.ZodType<Prisma.ErrorUpdateWith
   description: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
 }).strict();
 
-export const ErrorUncheckedUpdateWithoutCallInputSchema: z.ZodType<Prisma.ErrorUncheckedUpdateWithoutCallInput> = z.object({
+export const CallErrorUncheckedUpdateWithoutCallInputSchema: z.ZodType<Prisma.CallErrorUncheckedUpdateWithoutCallInput> = z.object({
   id: z.union([ z.string().cuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   start: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
   end: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
@@ -4094,7 +4094,7 @@ export const ErrorUncheckedUpdateWithoutCallInputSchema: z.ZodType<Prisma.ErrorU
   description: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
 }).strict();
 
-export const ErrorUncheckedUpdateManyWithoutCallInputSchema: z.ZodType<Prisma.ErrorUncheckedUpdateManyWithoutCallInput> = z.object({
+export const CallErrorUncheckedUpdateManyWithoutCallInputSchema: z.ZodType<Prisma.CallErrorUncheckedUpdateManyWithoutCallInput> = z.object({
   id: z.union([ z.string().cuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   start: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
   end: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
@@ -4592,66 +4592,66 @@ export const MessageFindUniqueOrThrowArgsSchema: z.ZodType<Prisma.MessageFindUni
   where: MessageWhereUniqueInputSchema,
 }).strict() ;
 
-export const ErrorFindFirstArgsSchema: z.ZodType<Prisma.ErrorFindFirstArgs> = z.object({
-  select: ErrorSelectSchema.optional(),
-  include: ErrorIncludeSchema.optional(),
-  where: ErrorWhereInputSchema.optional(),
-  orderBy: z.union([ ErrorOrderByWithRelationInputSchema.array(),ErrorOrderByWithRelationInputSchema ]).optional(),
-  cursor: ErrorWhereUniqueInputSchema.optional(),
+export const CallErrorFindFirstArgsSchema: z.ZodType<Prisma.CallErrorFindFirstArgs> = z.object({
+  select: CallErrorSelectSchema.optional(),
+  include: CallErrorIncludeSchema.optional(),
+  where: CallErrorWhereInputSchema.optional(),
+  orderBy: z.union([ CallErrorOrderByWithRelationInputSchema.array(),CallErrorOrderByWithRelationInputSchema ]).optional(),
+  cursor: CallErrorWhereUniqueInputSchema.optional(),
   take: z.number().optional(),
   skip: z.number().optional(),
-  distinct: z.union([ ErrorScalarFieldEnumSchema,ErrorScalarFieldEnumSchema.array() ]).optional(),
+  distinct: z.union([ CallErrorScalarFieldEnumSchema,CallErrorScalarFieldEnumSchema.array() ]).optional(),
 }).strict() ;
 
-export const ErrorFindFirstOrThrowArgsSchema: z.ZodType<Prisma.ErrorFindFirstOrThrowArgs> = z.object({
-  select: ErrorSelectSchema.optional(),
-  include: ErrorIncludeSchema.optional(),
-  where: ErrorWhereInputSchema.optional(),
-  orderBy: z.union([ ErrorOrderByWithRelationInputSchema.array(),ErrorOrderByWithRelationInputSchema ]).optional(),
-  cursor: ErrorWhereUniqueInputSchema.optional(),
+export const CallErrorFindFirstOrThrowArgsSchema: z.ZodType<Prisma.CallErrorFindFirstOrThrowArgs> = z.object({
+  select: CallErrorSelectSchema.optional(),
+  include: CallErrorIncludeSchema.optional(),
+  where: CallErrorWhereInputSchema.optional(),
+  orderBy: z.union([ CallErrorOrderByWithRelationInputSchema.array(),CallErrorOrderByWithRelationInputSchema ]).optional(),
+  cursor: CallErrorWhereUniqueInputSchema.optional(),
   take: z.number().optional(),
   skip: z.number().optional(),
-  distinct: z.union([ ErrorScalarFieldEnumSchema,ErrorScalarFieldEnumSchema.array() ]).optional(),
+  distinct: z.union([ CallErrorScalarFieldEnumSchema,CallErrorScalarFieldEnumSchema.array() ]).optional(),
 }).strict() ;
 
-export const ErrorFindManyArgsSchema: z.ZodType<Prisma.ErrorFindManyArgs> = z.object({
-  select: ErrorSelectSchema.optional(),
-  include: ErrorIncludeSchema.optional(),
-  where: ErrorWhereInputSchema.optional(),
-  orderBy: z.union([ ErrorOrderByWithRelationInputSchema.array(),ErrorOrderByWithRelationInputSchema ]).optional(),
-  cursor: ErrorWhereUniqueInputSchema.optional(),
+export const CallErrorFindManyArgsSchema: z.ZodType<Prisma.CallErrorFindManyArgs> = z.object({
+  select: CallErrorSelectSchema.optional(),
+  include: CallErrorIncludeSchema.optional(),
+  where: CallErrorWhereInputSchema.optional(),
+  orderBy: z.union([ CallErrorOrderByWithRelationInputSchema.array(),CallErrorOrderByWithRelationInputSchema ]).optional(),
+  cursor: CallErrorWhereUniqueInputSchema.optional(),
   take: z.number().optional(),
   skip: z.number().optional(),
-  distinct: z.union([ ErrorScalarFieldEnumSchema,ErrorScalarFieldEnumSchema.array() ]).optional(),
+  distinct: z.union([ CallErrorScalarFieldEnumSchema,CallErrorScalarFieldEnumSchema.array() ]).optional(),
 }).strict() ;
 
-export const ErrorAggregateArgsSchema: z.ZodType<Prisma.ErrorAggregateArgs> = z.object({
-  where: ErrorWhereInputSchema.optional(),
-  orderBy: z.union([ ErrorOrderByWithRelationInputSchema.array(),ErrorOrderByWithRelationInputSchema ]).optional(),
-  cursor: ErrorWhereUniqueInputSchema.optional(),
-  take: z.number().optional(),
-  skip: z.number().optional(),
-}).strict() ;
-
-export const ErrorGroupByArgsSchema: z.ZodType<Prisma.ErrorGroupByArgs> = z.object({
-  where: ErrorWhereInputSchema.optional(),
-  orderBy: z.union([ ErrorOrderByWithAggregationInputSchema.array(),ErrorOrderByWithAggregationInputSchema ]).optional(),
-  by: ErrorScalarFieldEnumSchema.array(),
-  having: ErrorScalarWhereWithAggregatesInputSchema.optional(),
+export const CallErrorAggregateArgsSchema: z.ZodType<Prisma.CallErrorAggregateArgs> = z.object({
+  where: CallErrorWhereInputSchema.optional(),
+  orderBy: z.union([ CallErrorOrderByWithRelationInputSchema.array(),CallErrorOrderByWithRelationInputSchema ]).optional(),
+  cursor: CallErrorWhereUniqueInputSchema.optional(),
   take: z.number().optional(),
   skip: z.number().optional(),
 }).strict() ;
 
-export const ErrorFindUniqueArgsSchema: z.ZodType<Prisma.ErrorFindUniqueArgs> = z.object({
-  select: ErrorSelectSchema.optional(),
-  include: ErrorIncludeSchema.optional(),
-  where: ErrorWhereUniqueInputSchema,
+export const CallErrorGroupByArgsSchema: z.ZodType<Prisma.CallErrorGroupByArgs> = z.object({
+  where: CallErrorWhereInputSchema.optional(),
+  orderBy: z.union([ CallErrorOrderByWithAggregationInputSchema.array(),CallErrorOrderByWithAggregationInputSchema ]).optional(),
+  by: CallErrorScalarFieldEnumSchema.array(),
+  having: CallErrorScalarWhereWithAggregatesInputSchema.optional(),
+  take: z.number().optional(),
+  skip: z.number().optional(),
 }).strict() ;
 
-export const ErrorFindUniqueOrThrowArgsSchema: z.ZodType<Prisma.ErrorFindUniqueOrThrowArgs> = z.object({
-  select: ErrorSelectSchema.optional(),
-  include: ErrorIncludeSchema.optional(),
-  where: ErrorWhereUniqueInputSchema,
+export const CallErrorFindUniqueArgsSchema: z.ZodType<Prisma.CallErrorFindUniqueArgs> = z.object({
+  select: CallErrorSelectSchema.optional(),
+  include: CallErrorIncludeSchema.optional(),
+  where: CallErrorWhereUniqueInputSchema,
+}).strict() ;
+
+export const CallErrorFindUniqueOrThrowArgsSchema: z.ZodType<Prisma.CallErrorFindUniqueOrThrowArgs> = z.object({
+  select: CallErrorSelectSchema.optional(),
+  include: CallErrorIncludeSchema.optional(),
+  where: CallErrorWhereUniqueInputSchema,
 }).strict() ;
 
 export const UserCreateArgsSchema: z.ZodType<Prisma.UserCreateArgs> = z.object({
@@ -5014,48 +5014,48 @@ export const MessageDeleteManyArgsSchema: z.ZodType<Prisma.MessageDeleteManyArgs
   where: MessageWhereInputSchema.optional(),
 }).strict() ;
 
-export const ErrorCreateArgsSchema: z.ZodType<Prisma.ErrorCreateArgs> = z.object({
-  select: ErrorSelectSchema.optional(),
-  include: ErrorIncludeSchema.optional(),
-  data: z.union([ ErrorCreateInputSchema,ErrorUncheckedCreateInputSchema ]),
+export const CallErrorCreateArgsSchema: z.ZodType<Prisma.CallErrorCreateArgs> = z.object({
+  select: CallErrorSelectSchema.optional(),
+  include: CallErrorIncludeSchema.optional(),
+  data: z.union([ CallErrorCreateInputSchema,CallErrorUncheckedCreateInputSchema ]),
 }).strict() ;
 
-export const ErrorUpsertArgsSchema: z.ZodType<Prisma.ErrorUpsertArgs> = z.object({
-  select: ErrorSelectSchema.optional(),
-  include: ErrorIncludeSchema.optional(),
-  where: ErrorWhereUniqueInputSchema,
-  create: z.union([ ErrorCreateInputSchema,ErrorUncheckedCreateInputSchema ]),
-  update: z.union([ ErrorUpdateInputSchema,ErrorUncheckedUpdateInputSchema ]),
+export const CallErrorUpsertArgsSchema: z.ZodType<Prisma.CallErrorUpsertArgs> = z.object({
+  select: CallErrorSelectSchema.optional(),
+  include: CallErrorIncludeSchema.optional(),
+  where: CallErrorWhereUniqueInputSchema,
+  create: z.union([ CallErrorCreateInputSchema,CallErrorUncheckedCreateInputSchema ]),
+  update: z.union([ CallErrorUpdateInputSchema,CallErrorUncheckedUpdateInputSchema ]),
 }).strict() ;
 
-export const ErrorCreateManyArgsSchema: z.ZodType<Prisma.ErrorCreateManyArgs> = z.object({
-  data: z.union([ ErrorCreateManyInputSchema,ErrorCreateManyInputSchema.array() ]),
+export const CallErrorCreateManyArgsSchema: z.ZodType<Prisma.CallErrorCreateManyArgs> = z.object({
+  data: z.union([ CallErrorCreateManyInputSchema,CallErrorCreateManyInputSchema.array() ]),
   skipDuplicates: z.boolean().optional(),
 }).strict() ;
 
-export const ErrorCreateManyAndReturnArgsSchema: z.ZodType<Prisma.ErrorCreateManyAndReturnArgs> = z.object({
-  data: z.union([ ErrorCreateManyInputSchema,ErrorCreateManyInputSchema.array() ]),
+export const CallErrorCreateManyAndReturnArgsSchema: z.ZodType<Prisma.CallErrorCreateManyAndReturnArgs> = z.object({
+  data: z.union([ CallErrorCreateManyInputSchema,CallErrorCreateManyInputSchema.array() ]),
   skipDuplicates: z.boolean().optional(),
 }).strict() ;
 
-export const ErrorDeleteArgsSchema: z.ZodType<Prisma.ErrorDeleteArgs> = z.object({
-  select: ErrorSelectSchema.optional(),
-  include: ErrorIncludeSchema.optional(),
-  where: ErrorWhereUniqueInputSchema,
+export const CallErrorDeleteArgsSchema: z.ZodType<Prisma.CallErrorDeleteArgs> = z.object({
+  select: CallErrorSelectSchema.optional(),
+  include: CallErrorIncludeSchema.optional(),
+  where: CallErrorWhereUniqueInputSchema,
 }).strict() ;
 
-export const ErrorUpdateArgsSchema: z.ZodType<Prisma.ErrorUpdateArgs> = z.object({
-  select: ErrorSelectSchema.optional(),
-  include: ErrorIncludeSchema.optional(),
-  data: z.union([ ErrorUpdateInputSchema,ErrorUncheckedUpdateInputSchema ]),
-  where: ErrorWhereUniqueInputSchema,
+export const CallErrorUpdateArgsSchema: z.ZodType<Prisma.CallErrorUpdateArgs> = z.object({
+  select: CallErrorSelectSchema.optional(),
+  include: CallErrorIncludeSchema.optional(),
+  data: z.union([ CallErrorUpdateInputSchema,CallErrorUncheckedUpdateInputSchema ]),
+  where: CallErrorWhereUniqueInputSchema,
 }).strict() ;
 
-export const ErrorUpdateManyArgsSchema: z.ZodType<Prisma.ErrorUpdateManyArgs> = z.object({
-  data: z.union([ ErrorUpdateManyMutationInputSchema,ErrorUncheckedUpdateManyInputSchema ]),
-  where: ErrorWhereInputSchema.optional(),
+export const CallErrorUpdateManyArgsSchema: z.ZodType<Prisma.CallErrorUpdateManyArgs> = z.object({
+  data: z.union([ CallErrorUpdateManyMutationInputSchema,CallErrorUncheckedUpdateManyInputSchema ]),
+  where: CallErrorWhereInputSchema.optional(),
 }).strict() ;
 
-export const ErrorDeleteManyArgsSchema: z.ZodType<Prisma.ErrorDeleteManyArgs> = z.object({
-  where: ErrorWhereInputSchema.optional(),
+export const CallErrorDeleteManyArgsSchema: z.ZodType<Prisma.CallErrorDeleteManyArgs> = z.object({
+  where: CallErrorWhereInputSchema.optional(),
 }).strict() ;
