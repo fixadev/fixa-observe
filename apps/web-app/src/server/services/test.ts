@@ -36,7 +36,7 @@ export class TestService {
     if (!agent) {
       throw new Error("Agent not found");
     }
-    const testAgentsWithIntents = agent.enabledTestAgents.flatMap((testAgent) =>
+    const tests = agent.enabledTestAgents.flatMap((testAgent) =>
       agent.intents.map((intent) => ({
         testAgentId: testAgent.testAgentId,
         intentId: intent.id,
@@ -46,17 +46,17 @@ export class TestService {
     );
 
     const calls = await Promise.all(
-      testAgentsWithIntents.map(async (testAgent) => {
+      tests.map(async (test) => {
         const { id: callId } = await initiateVapiCall(
-          testAgent.testAgentId,
+          test.testAgentId,
           agent.phoneNumber,
-          testAgent.testAgentPrompt,
-          testAgent.intentPrompt,
+          test.testAgentPrompt,
+          test.intentPrompt,
         );
         return {
           id: callId,
-          testAgentId: testAgent.testAgentId,
-          intentId: testAgent.intentId,
+          testAgentId: test.testAgentId,
+          intentId: test.intentId,
           status: CallStatus.in_progress,
         };
       }),
