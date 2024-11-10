@@ -4,7 +4,7 @@ import { cn } from "~/lib/utils";
 
 export default function TestCard() {
   return (
-    <div className="flex cursor-pointer items-center justify-between border-x border-b border-input p-4 hover:bg-muted">
+    <div className="flex cursor-pointer items-center justify-between border-b border-input p-4 hover:bg-muted">
       <div className="flex items-center gap-2">
         <CheckCircleIcon className="size-8 text-green-500" />
         <div className="font-medium">40/40 checks passed</div>
