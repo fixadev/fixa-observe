@@ -20,14 +20,20 @@ datasource db {
 }
 
 model User {
-  id        String  @id // Should be the clerkId
+  id        String   @id // Should be the clerkId
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   email     String  @unique
   firstName String?
   lastName  String?
 }
 
 model Agent {
-  id            String      @id
+  id        String   @id
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   name          String
   phoneNumber   String
   githubRepoUrl String?
@@ -38,7 +44,10 @@ model Agent {
 }
 
 model Test {
-  id         String      @id @default(cuid())
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   agent      Agent       @relation(fields: [agentId], references: [id])
   agentId    String
   testAgents TestAgent[] @relation("TestToTestAgent")
@@ -115,16 +124,17 @@ model Error {
 }
 
 enum CallResult {
-  SUCCESS
-  FAILURE
+  success
+  failure
 }
 
 enum Role {
-  USER
-  ASSISTANT
+  user
+  bot
+  system
 }
 
 enum CallStatus {
-  IN_PROGRESS
-  COMPLETED
+  in_progress
+  completed
 }
