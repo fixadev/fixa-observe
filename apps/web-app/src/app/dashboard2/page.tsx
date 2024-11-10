@@ -1,12 +1,12 @@
 "use client";
 
 import FlowChart from "~/components/FlowChart";
-import { useAudio } from "../../hooks/useAudio";
+import { useAudio } from "../dashboard1/_components/useAudio";
 import { TEST_CALLS } from "~/lib/test-data";
 import type { Call } from "~/lib/types";
 import { useState, useEffect, useMemo } from "react";
-import CallCard from "../../components/dashboard/CallCard";
-import CallDetails from "../../components/dashboard/CallDetails";
+import CallCard from "../dashboard1/_components/CallCard";
+import CallDetails from "../dashboard1/_components/CallDetails";
 import { Button } from "~/components/ui/button";
 import { FunnelIcon, XMarkIcon } from "@heroicons/react/24/solid";
 import {

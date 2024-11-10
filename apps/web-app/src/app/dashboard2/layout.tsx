@@ -1,4 +1,4 @@
-import { AudioProvider } from "../../hooks/useAudio";
+import { AudioProvider } from "../dashboard1/_components/useAudio";
 import { ReactFlowProvider } from "@xyflow/react";
 
 export default function DashboardLayout({
