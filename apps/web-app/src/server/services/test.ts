@@ -51,7 +51,6 @@ export class TestService {
             data: calls.map((call) => ({
               id: call.id,
               status: CallStatus.in_progress,
-              result: CallResult.in_progress,
               stereoRecordingUrl: "",
               testAgentId: call.testAgentId,
             })),
