@@ -76,16 +76,19 @@ model Intent {
 }
 
 model Call {
-  id            String     @id @default(cuid())
-  status        CallStatus
-  result        CallResult
-  failureReason String?
-  test          Test       @relation(fields: [testId], references: [id])
-  testId        String
-  testAgent     TestAgent  @relation(fields: [testAgentId], references: [id])
-  testAgentId   String
-  messages      Message[]
-  errors        Error[]
+  id                 String     @id @default(cuid())
+  status             CallStatus
+  result             CallResult
+  failureReason      String?
+  stereoRecordingUrl String
+
+  test        Test      @relation(fields: [testId], references: [id])
+  testId      String
+  testAgent   TestAgent @relation(fields: [testAgentId], references: [id])
+  testAgentId String
+
+  messages Message[]
+  errors   Error[]
 }
 
 model Message {

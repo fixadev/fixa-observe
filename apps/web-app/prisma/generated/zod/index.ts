@@ -24,7 +24,7 @@ export const TestAgentTemplateScalarFieldEnumSchema = z.enum(['id','name','heads
 
 export const IntentScalarFieldEnumSchema = z.enum(['id','name','description','details','agentId']);
 
-export const CallScalarFieldEnumSchema = z.enum(['id','status','result','failureReason','testId','testAgentId']);
+export const CallScalarFieldEnumSchema = z.enum(['id','status','result','failureReason','stereoRecordingUrl','testId','testAgentId']);
 
 export const MessageScalarFieldEnumSchema = z.enum(['id','role','text','secondsFromStart','duration','startTime','endTime','callId']);
 
@@ -143,6 +143,7 @@ export const CallSchema = z.object({
   result: CallResultSchema,
   id: z.string().cuid(),
   failureReason: z.string().nullable(),
+  stereoRecordingUrl: z.string(),
   testId: z.string(),
   testAgentId: z.string(),
 })
@@ -365,6 +366,7 @@ export const CallSelectSchema: z.ZodType<Prisma.CallSelect> = z.object({
   status: z.boolean().optional(),
   result: z.boolean().optional(),
   failureReason: z.boolean().optional(),
+  stereoRecordingUrl: z.boolean().optional(),
   testId: z.boolean().optional(),
   testAgentId: z.boolean().optional(),
   test: z.union([z.boolean(),z.lazy(() => TestArgsSchema)]).optional(),
@@ -792,6 +794,7 @@ export const CallWhereInputSchema: z.ZodType<Prisma.CallWhereInput> = z.object({
   status: z.union([ z.lazy(() => EnumCallStatusFilterSchema),z.lazy(() => CallStatusSchema) ]).optional(),
   result: z.union([ z.lazy(() => EnumCallResultFilterSchema),z.lazy(() => CallResultSchema) ]).optional(),
   failureReason: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
+  stereoRecordingUrl: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   testId: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   testAgentId: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   test: z.union([ z.lazy(() => TestRelationFilterSchema),z.lazy(() => TestWhereInputSchema) ]).optional(),
@@ -805,6 +808,7 @@ export const CallOrderByWithRelationInputSchema: z.ZodType<Prisma.CallOrderByWit
   status: z.lazy(() => SortOrderSchema).optional(),
   result: z.lazy(() => SortOrderSchema).optional(),
   failureReason: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
+  stereoRecordingUrl: z.lazy(() => SortOrderSchema).optional(),
   testId: z.lazy(() => SortOrderSchema).optional(),
   testAgentId: z.lazy(() => SortOrderSchema).optional(),
   test: z.lazy(() => TestOrderByWithRelationInputSchema).optional(),
@@ -824,6 +828,7 @@ export const CallWhereUniqueInputSchema: z.ZodType<Prisma.CallWhereUniqueInput> 
   status: z.union([ z.lazy(() => EnumCallStatusFilterSchema),z.lazy(() => CallStatusSchema) ]).optional(),
   result: z.union([ z.lazy(() => EnumCallResultFilterSchema),z.lazy(() => CallResultSchema) ]).optional(),
   failureReason: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
+  stereoRecordingUrl: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   testId: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   testAgentId: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   test: z.union([ z.lazy(() => TestRelationFilterSchema),z.lazy(() => TestWhereInputSchema) ]).optional(),
@@ -837,6 +842,7 @@ export const CallOrderByWithAggregationInputSchema: z.ZodType<Prisma.CallOrderBy
   status: z.lazy(() => SortOrderSchema).optional(),
   result: z.lazy(() => SortOrderSchema).optional(),
   failureReason: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
+  stereoRecordingUrl: z.lazy(() => SortOrderSchema).optional(),
   testId: z.lazy(() => SortOrderSchema).optional(),
   testAgentId: z.lazy(() => SortOrderSchema).optional(),
   _count: z.lazy(() => CallCountOrderByAggregateInputSchema).optional(),
@@ -852,6 +858,7 @@ export const CallScalarWhereWithAggregatesInputSchema: z.ZodType<Prisma.CallScal
   status: z.union([ z.lazy(() => EnumCallStatusWithAggregatesFilterSchema),z.lazy(() => CallStatusSchema) ]).optional(),
   result: z.union([ z.lazy(() => EnumCallResultWithAggregatesFilterSchema),z.lazy(() => CallResultSchema) ]).optional(),
   failureReason: z.union([ z.lazy(() => StringNullableWithAggregatesFilterSchema),z.string() ]).optional().nullable(),
+  stereoRecordingUrl: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
   testId: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
   testAgentId: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
 }).strict();
@@ -1346,6 +1353,7 @@ export const CallCreateInputSchema: z.ZodType<Prisma.CallCreateInput> = z.object
   status: z.lazy(() => CallStatusSchema),
   result: z.lazy(() => CallResultSchema),
   failureReason: z.string().optional().nullable(),
+  stereoRecordingUrl: z.string(),
   test: z.lazy(() => TestCreateNestedOneWithoutCallsInputSchema),
   testAgent: z.lazy(() => TestAgentCreateNestedOneWithoutCallInputSchema),
   messages: z.lazy(() => MessageCreateNestedManyWithoutCallInputSchema).optional(),
@@ -1357,6 +1365,7 @@ export const CallUncheckedCreateInputSchema: z.ZodType<Prisma.CallUncheckedCreat
   status: z.lazy(() => CallStatusSchema),
   result: z.lazy(() => CallResultSchema),
   failureReason: z.string().optional().nullable(),
+  stereoRecordingUrl: z.string(),
   testId: z.string(),
   testAgentId: z.string(),
   messages: z.lazy(() => MessageUncheckedCreateNestedManyWithoutCallInputSchema).optional(),
@@ -1368,6 +1377,7 @@ export const CallUpdateInputSchema: z.ZodType<Prisma.CallUpdateInput> = z.object
   status: z.union([ z.lazy(() => CallStatusSchema),z.lazy(() => EnumCallStatusFieldUpdateOperationsInputSchema) ]).optional(),
   result: z.union([ z.lazy(() => CallResultSchema),z.lazy(() => EnumCallResultFieldUpdateOperationsInputSchema) ]).optional(),
   failureReason: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  stereoRecordingUrl: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   test: z.lazy(() => TestUpdateOneRequiredWithoutCallsNestedInputSchema).optional(),
   testAgent: z.lazy(() => TestAgentUpdateOneRequiredWithoutCallNestedInputSchema).optional(),
   messages: z.lazy(() => MessageUpdateManyWithoutCallNestedInputSchema).optional(),
@@ -1379,6 +1389,7 @@ export const CallUncheckedUpdateInputSchema: z.ZodType<Prisma.CallUncheckedUpdat
   status: z.union([ z.lazy(() => CallStatusSchema),z.lazy(() => EnumCallStatusFieldUpdateOperationsInputSchema) ]).optional(),
   result: z.union([ z.lazy(() => CallResultSchema),z.lazy(() => EnumCallResultFieldUpdateOperationsInputSchema) ]).optional(),
   failureReason: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  stereoRecordingUrl: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   testId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   testAgentId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   messages: z.lazy(() => MessageUncheckedUpdateManyWithoutCallNestedInputSchema).optional(),
@@ -1390,6 +1401,7 @@ export const CallCreateManyInputSchema: z.ZodType<Prisma.CallCreateManyInput> = 
   status: z.lazy(() => CallStatusSchema),
   result: z.lazy(() => CallResultSchema),
   failureReason: z.string().optional().nullable(),
+  stereoRecordingUrl: z.string(),
   testId: z.string(),
   testAgentId: z.string()
 }).strict();
@@ -1399,6 +1411,7 @@ export const CallUpdateManyMutationInputSchema: z.ZodType<Prisma.CallUpdateManyM
   status: z.union([ z.lazy(() => CallStatusSchema),z.lazy(() => EnumCallStatusFieldUpdateOperationsInputSchema) ]).optional(),
   result: z.union([ z.lazy(() => CallResultSchema),z.lazy(() => EnumCallResultFieldUpdateOperationsInputSchema) ]).optional(),
   failureReason: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  stereoRecordingUrl: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
 }).strict();
 
 export const CallUncheckedUpdateManyInputSchema: z.ZodType<Prisma.CallUncheckedUpdateManyInput> = z.object({
@@ -1406,6 +1419,7 @@ export const CallUncheckedUpdateManyInputSchema: z.ZodType<Prisma.CallUncheckedU
   status: z.union([ z.lazy(() => CallStatusSchema),z.lazy(() => EnumCallStatusFieldUpdateOperationsInputSchema) ]).optional(),
   result: z.union([ z.lazy(() => CallResultSchema),z.lazy(() => EnumCallResultFieldUpdateOperationsInputSchema) ]).optional(),
   failureReason: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  stereoRecordingUrl: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   testId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   testAgentId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
 }).strict();
@@ -1869,6 +1883,7 @@ export const CallCountOrderByAggregateInputSchema: z.ZodType<Prisma.CallCountOrd
   status: z.lazy(() => SortOrderSchema).optional(),
   result: z.lazy(() => SortOrderSchema).optional(),
   failureReason: z.lazy(() => SortOrderSchema).optional(),
+  stereoRecordingUrl: z.lazy(() => SortOrderSchema).optional(),
   testId: z.lazy(() => SortOrderSchema).optional(),
   testAgentId: z.lazy(() => SortOrderSchema).optional()
 }).strict();
@@ -1878,6 +1893,7 @@ export const CallMaxOrderByAggregateInputSchema: z.ZodType<Prisma.CallMaxOrderBy
   status: z.lazy(() => SortOrderSchema).optional(),
   result: z.lazy(() => SortOrderSchema).optional(),
   failureReason: z.lazy(() => SortOrderSchema).optional(),
+  stereoRecordingUrl: z.lazy(() => SortOrderSchema).optional(),
   testId: z.lazy(() => SortOrderSchema).optional(),
   testAgentId: z.lazy(() => SortOrderSchema).optional()
 }).strict();
@@ -1887,6 +1903,7 @@ export const CallMinOrderByAggregateInputSchema: z.ZodType<Prisma.CallMinOrderBy
   status: z.lazy(() => SortOrderSchema).optional(),
   result: z.lazy(() => SortOrderSchema).optional(),
   failureReason: z.lazy(() => SortOrderSchema).optional(),
+  stereoRecordingUrl: z.lazy(() => SortOrderSchema).optional(),
   testId: z.lazy(() => SortOrderSchema).optional(),
   testAgentId: z.lazy(() => SortOrderSchema).optional()
 }).strict();
@@ -2931,6 +2948,7 @@ export const CallCreateWithoutTestInputSchema: z.ZodType<Prisma.CallCreateWithou
   status: z.lazy(() => CallStatusSchema),
   result: z.lazy(() => CallResultSchema),
   failureReason: z.string().optional().nullable(),
+  stereoRecordingUrl: z.string(),
   testAgent: z.lazy(() => TestAgentCreateNestedOneWithoutCallInputSchema),
   messages: z.lazy(() => MessageCreateNestedManyWithoutCallInputSchema).optional(),
   errors: z.lazy(() => ErrorCreateNestedManyWithoutCallInputSchema).optional()
@@ -2941,6 +2959,7 @@ export const CallUncheckedCreateWithoutTestInputSchema: z.ZodType<Prisma.CallUnc
   status: z.lazy(() => CallStatusSchema),
   result: z.lazy(() => CallResultSchema),
   failureReason: z.string().optional().nullable(),
+  stereoRecordingUrl: z.string(),
   testAgentId: z.string(),
   messages: z.lazy(() => MessageUncheckedCreateNestedManyWithoutCallInputSchema).optional(),
   errors: z.lazy(() => ErrorUncheckedCreateNestedManyWithoutCallInputSchema).optional()
@@ -3027,6 +3046,7 @@ export const CallScalarWhereInputSchema: z.ZodType<Prisma.CallScalarWhereInput> 
   status: z.union([ z.lazy(() => EnumCallStatusFilterSchema),z.lazy(() => CallStatusSchema) ]).optional(),
   result: z.union([ z.lazy(() => EnumCallResultFilterSchema),z.lazy(() => CallResultSchema) ]).optional(),
   failureReason: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
+  stereoRecordingUrl: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   testId: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   testAgentId: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
 }).strict();
@@ -3036,6 +3056,7 @@ export const CallCreateWithoutTestAgentInputSchema: z.ZodType<Prisma.CallCreateW
   status: z.lazy(() => CallStatusSchema),
   result: z.lazy(() => CallResultSchema),
   failureReason: z.string().optional().nullable(),
+  stereoRecordingUrl: z.string(),
   test: z.lazy(() => TestCreateNestedOneWithoutCallsInputSchema),
   messages: z.lazy(() => MessageCreateNestedManyWithoutCallInputSchema).optional(),
   errors: z.lazy(() => ErrorCreateNestedManyWithoutCallInputSchema).optional()
@@ -3046,6 +3067,7 @@ export const CallUncheckedCreateWithoutTestAgentInputSchema: z.ZodType<Prisma.Ca
   status: z.lazy(() => CallStatusSchema),
   result: z.lazy(() => CallResultSchema),
   failureReason: z.string().optional().nullable(),
+  stereoRecordingUrl: z.string(),
   testId: z.string(),
   messages: z.lazy(() => MessageUncheckedCreateNestedManyWithoutCallInputSchema).optional(),
   errors: z.lazy(() => ErrorUncheckedCreateNestedManyWithoutCallInputSchema).optional()
@@ -3445,6 +3467,7 @@ export const CallCreateWithoutMessagesInputSchema: z.ZodType<Prisma.CallCreateWi
   status: z.lazy(() => CallStatusSchema),
   result: z.lazy(() => CallResultSchema),
   failureReason: z.string().optional().nullable(),
+  stereoRecordingUrl: z.string(),
   test: z.lazy(() => TestCreateNestedOneWithoutCallsInputSchema),
   testAgent: z.lazy(() => TestAgentCreateNestedOneWithoutCallInputSchema),
   errors: z.lazy(() => ErrorCreateNestedManyWithoutCallInputSchema).optional()
@@ -3455,6 +3478,7 @@ export const CallUncheckedCreateWithoutMessagesInputSchema: z.ZodType<Prisma.Cal
   status: z.lazy(() => CallStatusSchema),
   result: z.lazy(() => CallResultSchema),
   failureReason: z.string().optional().nullable(),
+  stereoRecordingUrl: z.string(),
   testId: z.string(),
   testAgentId: z.string(),
   errors: z.lazy(() => ErrorUncheckedCreateNestedManyWithoutCallInputSchema).optional()
@@ -3481,6 +3505,7 @@ export const CallUpdateWithoutMessagesInputSchema: z.ZodType<Prisma.CallUpdateWi
   status: z.union([ z.lazy(() => CallStatusSchema),z.lazy(() => EnumCallStatusFieldUpdateOperationsInputSchema) ]).optional(),
   result: z.union([ z.lazy(() => CallResultSchema),z.lazy(() => EnumCallResultFieldUpdateOperationsInputSchema) ]).optional(),
   failureReason: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  stereoRecordingUrl: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   test: z.lazy(() => TestUpdateOneRequiredWithoutCallsNestedInputSchema).optional(),
   testAgent: z.lazy(() => TestAgentUpdateOneRequiredWithoutCallNestedInputSchema).optional(),
   errors: z.lazy(() => ErrorUpdateManyWithoutCallNestedInputSchema).optional()
@@ -3491,6 +3516,7 @@ export const CallUncheckedUpdateWithoutMessagesInputSchema: z.ZodType<Prisma.Cal
   status: z.union([ z.lazy(() => CallStatusSchema),z.lazy(() => EnumCallStatusFieldUpdateOperationsInputSchema) ]).optional(),
   result: z.union([ z.lazy(() => CallResultSchema),z.lazy(() => EnumCallResultFieldUpdateOperationsInputSchema) ]).optional(),
   failureReason: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  stereoRecordingUrl: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   testId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   testAgentId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   errors: z.lazy(() => ErrorUncheckedUpdateManyWithoutCallNestedInputSchema).optional()
@@ -3501,6 +3527,7 @@ export const CallCreateWithoutErrorsInputSchema: z.ZodType<Prisma.CallCreateWith
   status: z.lazy(() => CallStatusSchema),
   result: z.lazy(() => CallResultSchema),
   failureReason: z.string().optional().nullable(),
+  stereoRecordingUrl: z.string(),
   test: z.lazy(() => TestCreateNestedOneWithoutCallsInputSchema),
   testAgent: z.lazy(() => TestAgentCreateNestedOneWithoutCallInputSchema),
   messages: z.lazy(() => MessageCreateNestedManyWithoutCallInputSchema).optional()
@@ -3511,6 +3538,7 @@ export const CallUncheckedCreateWithoutErrorsInputSchema: z.ZodType<Prisma.CallU
   status: z.lazy(() => CallStatusSchema),
   result: z.lazy(() => CallResultSchema),
   failureReason: z.string().optional().nullable(),
+  stereoRecordingUrl: z.string(),
   testId: z.string(),
   testAgentId: z.string(),
   messages: z.lazy(() => MessageUncheckedCreateNestedManyWithoutCallInputSchema).optional()
@@ -3537,6 +3565,7 @@ export const CallUpdateWithoutErrorsInputSchema: z.ZodType<Prisma.CallUpdateWith
   status: z.union([ z.lazy(() => CallStatusSchema),z.lazy(() => EnumCallStatusFieldUpdateOperationsInputSchema) ]).optional(),
   result: z.union([ z.lazy(() => CallResultSchema),z.lazy(() => EnumCallResultFieldUpdateOperationsInputSchema) ]).optional(),
   failureReason: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  stereoRecordingUrl: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   test: z.lazy(() => TestUpdateOneRequiredWithoutCallsNestedInputSchema).optional(),
   testAgent: z.lazy(() => TestAgentUpdateOneRequiredWithoutCallNestedInputSchema).optional(),
   messages: z.lazy(() => MessageUpdateManyWithoutCallNestedInputSchema).optional()
@@ -3547,6 +3576,7 @@ export const CallUncheckedUpdateWithoutErrorsInputSchema: z.ZodType<Prisma.CallU
   status: z.union([ z.lazy(() => CallStatusSchema),z.lazy(() => EnumCallStatusFieldUpdateOperationsInputSchema) ]).optional(),
   result: z.union([ z.lazy(() => CallResultSchema),z.lazy(() => EnumCallResultFieldUpdateOperationsInputSchema) ]).optional(),
   failureReason: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  stereoRecordingUrl: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   testId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   testAgentId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   messages: z.lazy(() => MessageUncheckedUpdateManyWithoutCallNestedInputSchema).optional()
@@ -3649,6 +3679,7 @@ export const CallCreateManyTestInputSchema: z.ZodType<Prisma.CallCreateManyTestI
   status: z.lazy(() => CallStatusSchema),
   result: z.lazy(() => CallResultSchema),
   failureReason: z.string().optional().nullable(),
+  stereoRecordingUrl: z.string(),
   testAgentId: z.string()
 }).strict();
 
@@ -3692,6 +3723,7 @@ export const CallUpdateWithoutTestInputSchema: z.ZodType<Prisma.CallUpdateWithou
   status: z.union([ z.lazy(() => CallStatusSchema),z.lazy(() => EnumCallStatusFieldUpdateOperationsInputSchema) ]).optional(),
   result: z.union([ z.lazy(() => CallResultSchema),z.lazy(() => EnumCallResultFieldUpdateOperationsInputSchema) ]).optional(),
   failureReason: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  stereoRecordingUrl: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   testAgent: z.lazy(() => TestAgentUpdateOneRequiredWithoutCallNestedInputSchema).optional(),
   messages: z.lazy(() => MessageUpdateManyWithoutCallNestedInputSchema).optional(),
   errors: z.lazy(() => ErrorUpdateManyWithoutCallNestedInputSchema).optional()
@@ -3702,6 +3734,7 @@ export const CallUncheckedUpdateWithoutTestInputSchema: z.ZodType<Prisma.CallUnc
   status: z.union([ z.lazy(() => CallStatusSchema),z.lazy(() => EnumCallStatusFieldUpdateOperationsInputSchema) ]).optional(),
   result: z.union([ z.lazy(() => CallResultSchema),z.lazy(() => EnumCallResultFieldUpdateOperationsInputSchema) ]).optional(),
   failureReason: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  stereoRecordingUrl: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   testAgentId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   messages: z.lazy(() => MessageUncheckedUpdateManyWithoutCallNestedInputSchema).optional(),
   errors: z.lazy(() => ErrorUncheckedUpdateManyWithoutCallNestedInputSchema).optional()
@@ -3712,6 +3745,7 @@ export const CallUncheckedUpdateManyWithoutTestInputSchema: z.ZodType<Prisma.Cal
   status: z.union([ z.lazy(() => CallStatusSchema),z.lazy(() => EnumCallStatusFieldUpdateOperationsInputSchema) ]).optional(),
   result: z.union([ z.lazy(() => CallResultSchema),z.lazy(() => EnumCallResultFieldUpdateOperationsInputSchema) ]).optional(),
   failureReason: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  stereoRecordingUrl: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   testAgentId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
 }).strict();
 
@@ -3720,6 +3754,7 @@ export const CallCreateManyTestAgentInputSchema: z.ZodType<Prisma.CallCreateMany
   status: z.lazy(() => CallStatusSchema),
   result: z.lazy(() => CallResultSchema),
   failureReason: z.string().optional().nullable(),
+  stereoRecordingUrl: z.string(),
   testId: z.string()
 }).strict();
 
@@ -3728,6 +3763,7 @@ export const CallUpdateWithoutTestAgentInputSchema: z.ZodType<Prisma.CallUpdateW
   status: z.union([ z.lazy(() => CallStatusSchema),z.lazy(() => EnumCallStatusFieldUpdateOperationsInputSchema) ]).optional(),
   result: z.union([ z.lazy(() => CallResultSchema),z.lazy(() => EnumCallResultFieldUpdateOperationsInputSchema) ]).optional(),
   failureReason: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  stereoRecordingUrl: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   test: z.lazy(() => TestUpdateOneRequiredWithoutCallsNestedInputSchema).optional(),
   messages: z.lazy(() => MessageUpdateManyWithoutCallNestedInputSchema).optional(),
   errors: z.lazy(() => ErrorUpdateManyWithoutCallNestedInputSchema).optional()
@@ -3738,6 +3774,7 @@ export const CallUncheckedUpdateWithoutTestAgentInputSchema: z.ZodType<Prisma.Ca
   status: z.union([ z.lazy(() => CallStatusSchema),z.lazy(() => EnumCallStatusFieldUpdateOperationsInputSchema) ]).optional(),
   result: z.union([ z.lazy(() => CallResultSchema),z.lazy(() => EnumCallResultFieldUpdateOperationsInputSchema) ]).optional(),
   failureReason: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  stereoRecordingUrl: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   testId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   messages: z.lazy(() => MessageUncheckedUpdateManyWithoutCallNestedInputSchema).optional(),
   errors: z.lazy(() => ErrorUncheckedUpdateManyWithoutCallNestedInputSchema).optional()
@@ -3748,6 +3785,7 @@ export const CallUncheckedUpdateManyWithoutTestAgentInputSchema: z.ZodType<Prism
   status: z.union([ z.lazy(() => CallStatusSchema),z.lazy(() => EnumCallStatusFieldUpdateOperationsInputSchema) ]).optional(),
   result: z.union([ z.lazy(() => CallResultSchema),z.lazy(() => EnumCallResultFieldUpdateOperationsInputSchema) ]).optional(),
   failureReason: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  stereoRecordingUrl: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   testId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
 }).strict();
 
