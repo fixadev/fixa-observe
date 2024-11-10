@@ -27,12 +27,14 @@ model User {
 }
 
 model Agent {
-  id           String      @id
-  phoneNumber  String
-  systemPrompt String
-  testAgents   TestAgent[]
-  intents      Intent[]
-  tests        Test[]
+  id            String      @id
+  name          String
+  phoneNumber   String
+  githubRepoUrl String?
+  systemPrompt  String
+  testAgents    TestAgent[]
+  intents       Intent[]
+  tests         Test[]
 }
 
 model Test {
