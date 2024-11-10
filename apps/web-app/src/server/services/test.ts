@@ -3,7 +3,7 @@ import { createTestAgents } from "../helpers/createTestAgents";
 import { v4 as uuidv4 } from "uuid";
 import { AgentService } from "./agent";
 import { db } from "../db";
-import { type PrismaClient } from "@prisma/client";
+import { CallResult, CallStatus, type PrismaClient } from "@prisma/client";
 import { initiateVapiCall } from "../helpers/vapiHelpers";
 
 const agentServiceInstance = new AgentService(db);
@@ -31,17 +31,32 @@ export class TestService {
     });
 
     const calls = await Promise.all(
-      testAgents.map((testAgent) =>
-        initiateVapiCall(testAgent.vapiId, agent.phoneNumber),
-      ),
+      testAgents.map(async (testAgent) => {
+        const { id: callId } = await initiateVapiCall(
+          testAgent.vapiId,
+          agent.phoneNumber,
+        );
+        return {
+          id: callId,
+          testAgentId: testAgent.id,
+        };
+      }),
     );
-
-    const callIds = calls.map((call) => call.id);
 
     return await db.test.create({
       data: {
         agentId,
-        inProgressCallIds: callIds,
+        calls: {
+          createMany: {
+            data: calls.map((call) => ({
+              id: call.id,
+              status: CallStatus.in_progress,
+              result: CallResult.in_progress,
+              stereoRecordingUrl: "",
+              testAgentId: call.testAgentId,
+            })),
+          },
+        },
       },
     });
   }

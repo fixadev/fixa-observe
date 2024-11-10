@@ -114,18 +114,19 @@ model Message {
 }
 
 model CallError {
-  id               String @id @default(cuid())
+  id               String  @id @default(cuid())
   secondsFromStart Float
   duration         Float
-  type             String
+  type             String?
   description      String
-  call             Call   @relation(fields: [callId], references: [id])
+  call             Call    @relation(fields: [callId], references: [id])
   callId           String
 }
 
 enum CallResult {
   success
   failure
+  in_progress
 }
 
 enum Role {
