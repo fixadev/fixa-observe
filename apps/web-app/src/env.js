@@ -22,6 +22,7 @@ export const env = createEnv({
     OPENAI_KEY: z.string(),
     GCLOUD_CREDS: z.string(),
     RETELL_API_KEY: z.string(),
+    VAPI_API_KEY: z.string(),
   },
 
   /**
@@ -58,6 +59,7 @@ export const env = createEnv({
     OPENAI_KEY: process.env.OPENAI_KEY,
     GCLOUD_CREDS: process.env.GCLOUD_CREDS,
     RETELL_API_KEY: process.env.RETELL_API_KEY,
+    VAPI_API_KEY: process.env.VAPI_API_KEY,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially
