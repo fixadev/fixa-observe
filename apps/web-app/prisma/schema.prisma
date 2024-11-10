@@ -115,8 +115,8 @@ model Message {
 
 model Error {
   id          String @id @default(cuid())
-  start       String
-  end         String
+  start       Float
+  end         Float
   type        String
   description String
   call        Call   @relation(fields: [callId], references: [id])
