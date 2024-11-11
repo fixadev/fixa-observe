@@ -86,7 +86,7 @@ export default function LayoutHeader({
         <UserButton />
       </div>
       {tabs && (
-        <div className="sticky top-0 w-full border-b border-input bg-background">
+        <div className="sticky top-0 z-30 w-full border-b border-input bg-background">
           <div className="flex h-10 items-center">
             <div
               onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}

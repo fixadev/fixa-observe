@@ -5,14 +5,13 @@ import { cn, formatDurationHoursMinutesSeconds } from "~/lib/utils";
 import { useAudio } from "~/hooks/useAudio";
 import { type Agent, type CallError } from "prisma/generated/zod";
 import {
-  ArrowDownLeftIcon,
-  CheckBadgeIcon,
   CheckIcon,
   ExclamationCircleIcon,
   WrenchIcon,
 } from "@heroicons/react/24/solid";
 import Image from "next/image";
-import { Role } from "@prisma/client";
+import { CallResult, CallStatus, Role } from "@prisma/client";
+import Spinner from "../Spinner";
 
 export default function CallDetails({
   call,
@@ -178,6 +177,26 @@ export default function CallDetails({
     return { messageErrorsMap: messageMap, errorRangesMap: rangesMap };
   }, [call.errors, messagesFiltered, doesErrorOverlapMessage]);
 
+  if (call.status === CallStatus.in_progress) {
+    return (
+      <div className="flex h-full w-full items-center justify-center">
+        <div className="flex flex-col items-center gap-2">
+          <Image
+            src={call.testAgent.headshotUrl}
+            alt="agent avatar"
+            width={128}
+            height={128}
+            className="mb-4 rounded-full"
+          />
+          <div className="text-xl font-medium">{call.intent.name}</div>
+          <div className="flex items-center gap-2 text-lg italic text-muted-foreground">
+            <Spinner className="size-4" /> call in progress...
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex w-full flex-col rounded-md bg-background px-4 outline-none">
       <div
@@ -199,11 +218,13 @@ export default function CallDetails({
               <div className="text-sm font-medium">{call.intent.name}</div>
               <div
                 className={cn(
-                  "rounded-full px-2 py-1 text-xs",
-                  call.result === "failure" ? "bg-red-100" : "bg-green-100",
+                  "w-fit rounded-full px-2 py-1 text-xs",
+                  call.result === CallResult.failure
+                    ? "bg-red-100"
+                    : "bg-green-100",
                 )}
               >
-                {call.result === "failure" ? "failed" : "succeeded"}
+                {call.result === CallResult.failure ? "failed" : "succeeded"}
               </div>
             </div>
             <div className="flex w-fit flex-row flex-wrap gap-2">
