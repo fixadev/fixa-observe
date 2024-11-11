@@ -66,13 +66,12 @@ export class AgentService {
 
     return await db.testAgent.create({
       data: {
-        id: uuidv4(),
+        id: agent.id,
         name,
         prompt,
         ownerId,
         headshotUrl,
         description,
-        vapiId: agent.id,
       },
     });
   }

@@ -38,7 +38,7 @@ export class TestService {
     }
     const tests = agent.enabledTestAgents.flatMap((testAgent) =>
       agent.intents.map((intent) => ({
-        testAgentVapiId: testAgent.vapiId,
+        testAgentVapiId: testAgent.id,
         intentId: intent.id,
         testAgentPrompt: testAgent.prompt,
         intentPrompt: intent.instructions,
