@@ -53,6 +53,9 @@ model Test {
   agent   Agent  @relation(fields: [agentId], references: [id])
   agentId String
   calls   Call[]
+
+  gitBranch String?
+  gitCommit String?
 }
 
 model TestAgent {

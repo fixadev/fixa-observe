@@ -29,6 +29,7 @@ export type TestWithIncludes = Prisma.TestGetPayload<{
 
 export type AgentWithIncludes = Prisma.AgentGetPayload<{
   include: {
+    intents: true;
     enabledTestAgents: true;
   };
 }>;
