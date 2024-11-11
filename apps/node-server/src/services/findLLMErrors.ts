@@ -23,7 +23,7 @@ const outputSchema = z.object({
     }),
   ),
   success: z.boolean(),
-  failureReason: z.string(),
+  failureReason: z.string().nullable(),
 });
 
 export const analyzeCall = async (
@@ -93,6 +93,6 @@ export const analyzeCall = async (
   return {
     errors: parsedResponse.errors,
     success: parsedResponse.success,
-    failureReason: parsedResponse.failureReason,
+    failureReason: parsedResponse.failureReason ?? "",
   };
 };

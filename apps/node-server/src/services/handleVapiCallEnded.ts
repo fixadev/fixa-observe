@@ -2,7 +2,6 @@ import { CallResult, CallStatus, Role } from "@prisma/client";
 import { db } from "../db";
 import { type ServerMessageEndOfCallReport } from "@vapi-ai/server-sdk/api";
 import { analyzeCall } from "./findLLMErrors";
-import { socketManager } from "../index";
 
 const mockSystemPrompt = `
 System Prompt: Drive-Through Donut Order AI Agent
@@ -112,13 +111,6 @@ export const handleVapiCallEnded = async (
     report.artifact.messages,
   );
 
-  // const { errors, success, failureReason } = await analyzeCall(
-  //   mockSystemPrompt,
-  //   mockUserPrompt,
-  //   message.call,
-  //   message.artifact.messages,
-  // );
-
   console.log("ERRORS", errors);
   console.log("SUCCESS", success);
   console.log("FAILURE REASON", failureReason);
@@ -149,5 +141,9 @@ export const handleVapiCallEnded = async (
     },
   });
 
-  socketManager.sendMessageToUser(ownerId, "call-ended", test?.id);
+  return {
+    ownerId,
+    testId: test?.id,
+    message: "call-ended",
+  };
 };
