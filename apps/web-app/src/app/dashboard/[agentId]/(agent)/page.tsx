@@ -24,9 +24,10 @@ import { type TestWithIncludes, type AgentWithIncludes } from "~/lib/types";
 import { useUser } from "@clerk/nextjs";
 import { motion, AnimatePresence } from "framer-motion";
 import { type SocketMessage } from "~/lib/agent";
+import { type TestWithCalls } from "~/lib/types";
 
 export default function AgentPage({ params }: { params: { agentId: string } }) {
-  const [tests, setTests] = useState<TestWithIncludes[]>([]);
+  const [tests, setTests] = useState<TestWithCalls[]>([]);
   const [testInitializing, setTestInitializing] = useState(false);
   const [testAgentsModalOpen, setTestAgentsModalOpen] = useState(false);
   const { toast } = useToast();
