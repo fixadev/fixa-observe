@@ -79,13 +79,13 @@ export const handleVapiCallEnded = async (
   const agent = test?.agent;
   const testAgent = call?.testAgent;
 
-  console.log("CALL", call);
+  // console.log("CALL", call);
 
-  console.log("TEST", test);
+  // console.log("TEST", test);
 
-  console.log("AGENT", agent);
+  // console.log("AGENT", agent);
 
-  console.log("TEST AGENT", testAgent);
+  // console.log("TEST AGENT", testAgent);
 
   const ownerId = agent?.ownerId;
 
@@ -114,6 +114,7 @@ export const handleVapiCallEnded = async (
   console.log("ERRORS", errors);
   console.log("SUCCESS", success);
   console.log("FAILURE REASON", failureReason);
+  console.log("MESSAGES", report.artifact.messages);
 
   const updatedCall = await db.call.update({
     where: { id: callId },
