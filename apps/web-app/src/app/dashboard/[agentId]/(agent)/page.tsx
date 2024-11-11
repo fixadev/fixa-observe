@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useCallback, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -18,8 +18,7 @@ import { api } from "~/trpc/react";
 import { useToast } from "~/hooks/use-toast";
 
 import useSocketMessage from "~/app/_components/UseSocketMessage";
-import { TEST_AGENT, TEST_TEST_AGENTS } from "~/lib/test-data";
-import { TEST_TESTS } from "~/lib/test-data";
+import { TEST_TEST_AGENTS } from "~/lib/test-data";
 import { type AgentWithIncludes } from "~/lib/types";
 
 import { useUser } from "@clerk/nextjs";
@@ -27,13 +26,13 @@ import { useUser } from "@clerk/nextjs";
 export default function AgentPage({ params }: { params: { agentId: string } }) {
   const [testInitializing, setTestInitializing] = useState(false);
   const [testAgentsModalOpen, setTestAgentsModalOpen] = useState(false);
-
-  const agent = useMemo(() => TEST_AGENT, []);
-
   const { toast } = useToast();
-
   const { user } = useUser();
   const { triggered, setTriggered } = useSocketMessage(user?.id);
+
+  const { data: agent } = api.agent.get.useQuery({ id: params.agentId });
+
+  const { data: tests } = api.test.getAll.useQuery({ agentId: params.agentId });
   const { mutate: runTest } = api.test.run.useMutation({
     onSuccess: (data) => {
       toast({
@@ -44,10 +43,10 @@ export default function AgentPage({ params }: { params: { agentId: string } }) {
     },
   });
 
-  const handleRunTest = () => {
+  const handleRunTest = useCallback(() => {
     setTestInitializing(true);
     runTest({ agentId: params.agentId });
-  };
+  }, [params.agentId, runTest, setTestInitializing]);
 
   return (
     <div>
@@ -77,21 +76,23 @@ export default function AgentPage({ params }: { params: { agentId: string } }) {
       {/* content */}
       <div className="container py-8">
         <div className="rounded-t-md border-x border-t border-input shadow-sm">
-          {Array.from({ length: 26 }).map((_, i) => (
-            <Link href={`/dashboard/${params.agentId}/tests/${i + 1}`} key={i}>
-              <TestCard
-                test={TEST_TESTS[0]!}
-                className="cursor-pointer hover:bg-muted"
-              />
+          {tests?.map((test) => (
+            <Link
+              href={`/dashboard/${params.agentId}/tests/${test.id}`}
+              key={test.id}
+            >
+              <TestCard test={test} className="cursor-pointer hover:bg-muted" />
             </Link>
           ))}
         </div>
       </div>
-      <TestAgentsModal
-        agent={agent}
-        open={testAgentsModalOpen}
-        onOpenChange={setTestAgentsModalOpen}
-      />
+      {agent && (
+        <TestAgentsModal
+          agent={agent}
+          open={testAgentsModalOpen}
+          onOpenChange={setTestAgentsModalOpen}
+        />
+      )}
     </div>
   );
 }

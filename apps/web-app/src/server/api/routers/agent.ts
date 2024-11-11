@@ -23,8 +23,8 @@ export const agentRouter = createTRPCRouter({
     return await agentServiceInstance.getAllAgents(ctx.user.id);
   }),
 
-  getAgent: protectedProcedure
-    .input(z.object({ id: z.string().cuid() }))
+  get: protectedProcedure
+    .input(z.object({ id: z.string() }))
     .query(async ({ input }) => {
       return await agentServiceInstance.getAgent(input.id);
     }),

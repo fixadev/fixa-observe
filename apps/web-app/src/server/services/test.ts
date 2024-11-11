@@ -28,6 +28,12 @@ export class TestService {
       where: {
         agentId,
       },
+      include: {
+        calls: true,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
     });
   }
 

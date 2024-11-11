@@ -1,10 +1,15 @@
-import { CheckCircleIcon, XCircleIcon } from "@heroicons/react/24/solid";
-import { CallResult } from "@prisma/client";
+import {
+  CheckCircleIcon,
+  WrenchIcon,
+  XCircleIcon,
+} from "@heroicons/react/24/solid";
+import { CallResult, CallStatus } from "@prisma/client";
 import { formatDistanceToNow } from "date-fns";
 import { useMemo } from "react";
 import { ibmPlexMono } from "~/app/fonts";
 import { type TestWithIncludes } from "~/lib/types";
 import { cn } from "~/lib/utils";
+import Spinner from "../Spinner";
 
 export default function TestCard({
   test,
@@ -18,8 +23,18 @@ export default function TestCard({
     [test.calls],
   );
 
-  const testFailed = useMemo(
-    () => test.calls.some((call) => call.result === CallResult.failure),
+  const callsFailed = useMemo(
+    () => test.calls.filter((call) => call.result === CallResult.failure),
+    [test.calls],
+  );
+
+  const callsInProgress = useMemo(
+    () => test.calls.filter((call) => call.status === CallStatus.in_progress),
+    [test.calls],
+  );
+
+  const callsCompleted = useMemo(
+    () => test.calls.filter((call) => call.status === CallStatus.completed),
     [test.calls],
   );
 
@@ -30,46 +45,58 @@ export default function TestCard({
         className,
       )}
     >
-      <div className="flex items-center gap-2">
-        {testFailed ? (
+      <div className="flex items-center gap-3">
+        {callsInProgress.length > 0 ? (
+          <Spinner className="size-6 text-muted-foreground" />
+        ) : callsFailed.length > 0 ? (
           <XCircleIcon className="size-8 text-red-500" />
         ) : (
           <CheckCircleIcon className="size-8 text-green-500" />
         )}
         <div className="flex flex-col gap-1">
           <div className="font-medium">
-            {callsSucceeded.length}/{test.calls.length} checks passed
+            {callsInProgress.length > 0
+              ? `${callsCompleted.length}/${test.calls.length} calls completed`
+              : `${callsSucceeded.length}/${test.calls.length} checks passed`}
           </div>
-          <div className="flex h-1.5 w-48 overflow-hidden rounded-full bg-muted">
-            <div
-              className="h-full bg-green-500 transition-all"
-              style={{
-                width: `${(callsSucceeded.length / test.calls.length) * 100}%`,
-              }}
-            />
-            <div
-              className="h-full bg-red-500 transition-all"
-              style={{
-                width: `${((test.calls.length - callsSucceeded.length) / test.calls.length) * 100}%`,
-              }}
-            />
-          </div>
+          {callsInProgress.length === 0 && callsFailed.length > 0 && (
+            <div className="flex h-1.5 w-48 overflow-hidden rounded-full bg-muted">
+              <div
+                className="h-full bg-green-500 transition-all"
+                style={{
+                  width: `${(callsSucceeded.length / test.calls.length) * 100}%`,
+                }}
+              />
+              <div
+                className="h-full bg-red-500 transition-all"
+                style={{
+                  width: `${((test.calls.length - callsSucceeded.length) / test.calls.length) * 100}%`,
+                }}
+              />
+            </div>
+          )}
         </div>
       </div>
-      <div className="flex flex-col gap-2">
-        <div className="flex items-center gap-2">
-          <div className={cn("text-sm font-medium", ibmPlexMono.className)}>
-            main
+      {test.gitBranch && test.gitCommit ? (
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center gap-2">
+            <div className={cn("text-sm font-medium", ibmPlexMono.className)}>
+              main
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className={cn("text-sm font-medium", ibmPlexMono.className)}>
+              90abcde fixes stuff
+            </div>
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          <div className={cn("text-sm font-medium", ibmPlexMono.className)}>
-            90abcde fixes stuff
-          </div>
+      ) : (
+        <div className="flex items-center gap-2 py-4 text-sm text-muted-foreground">
+          <WrenchIcon className="size-4" /> manual run
         </div>
-      </div>
+      )}
       <div className="flex gap-2">
-        <div className="text-sm text-muted-foreground">
+        <div className="w-40 text-right text-sm text-muted-foreground">
           {formatDistanceToNow(test.createdAt, { addSuffix: true })}
         </div>
       </div>
