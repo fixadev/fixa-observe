@@ -1,21 +1,22 @@
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { io } from "socket.io-client";
 import { env } from "~/env";
+import { type SocketMessage } from "~/lib/agent";
 
-const useSocketMessage = (userId?: string) => {
-  const [triggered, setTriggered] = useState(false);
-
+const useSocketMessage = (
+  userId?: string,
+  handleMessage?: (message: SocketMessage) => void,
+) => {
   useEffect(() => {
     const socket = io(env.NEXT_PUBLIC_SOCKET_URL ?? "");
 
     socket.on("connect", () => {
-      console.log("CONNECTED TO SOCKET");
       socket.emit("register", userId);
     });
 
-    socket.on("message", (message) => {
-      console.log("MESSAGE RECEIVED", message);
-      setTriggered(true);
+    socket.on("call-ended", (message: SocketMessage) => {
+      console.log("CALL ENDED", message);
+      handleMessage?.(message);
     });
 
     return () => {
@@ -24,7 +25,7 @@ const useSocketMessage = (userId?: string) => {
     };
   }, [userId]);
 
-  return { triggered, setTriggered };
+  return;
 };
 
 export default useSocketMessage;

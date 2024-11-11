@@ -49,17 +49,28 @@ app.post("/vapi", async (req: Request, res: Response) => {
       const userSocket = connectedUsers.get(result.ownerId);
       if (userSocket) {
         console.log("Emitting call-ended to user", result.ownerId);
-        userSocket.emit("call-ended", result.testId);
+        userSocket.emit("call-ended", {
+          testId: result.testId,
+          callId: result.callId,
+          call: result.call,
+        });
       }
     }
   }
   res.json({ success: true });
 });
 
+app.post("/message", (req: Request, res: Response) => {
+  const { userId, event, data } = req.body;
+  const userSocket = connectedUsers.get(userId);
+  if (userSocket) {
+    userSocket.emit(event, data);
+  }
+});
+
 app.post("/message/:userId", (req: Request, res: Response) => {
   const { userId } = req.params;
   const { event, data } = req.body;
-
   const userSocket = connectedUsers.get(userId);
   if (userSocket) {
     userSocket.emit(event, data);

@@ -23,14 +23,30 @@ import { type TestWithIncludes, type AgentWithIncludes } from "~/lib/types";
 
 import { useUser } from "@clerk/nextjs";
 import { motion, AnimatePresence } from "framer-motion";
+import { type SocketMessage } from "~/lib/agent";
 
 export default function AgentPage({ params }: { params: { agentId: string } }) {
+  const [tests, setTests] = useState<TestWithIncludes[]>([]);
   const [testInitializing, setTestInitializing] = useState(false);
   const [testAgentsModalOpen, setTestAgentsModalOpen] = useState(false);
   const { toast } = useToast();
   const { user } = useUser();
-  const { triggered, setTriggered } = useSocketMessage(user?.id);
-  const [tests, setTests] = useState<TestWithIncludes[]>([]);
+
+  useSocketMessage(user?.id, (message: SocketMessage) => {
+    console.log("CALL ENDED", message);
+    setTests((prev) =>
+      prev.map((test) =>
+        test.id === message.testId
+          ? {
+              ...test,
+              calls: test.calls.map((call) =>
+                call.id === message.callId ? message.call : call,
+              ),
+            }
+          : test,
+      ),
+    );
+  });
 
   const { data: agent } = api.agent.get.useQuery({ id: params.agentId });
 
@@ -91,7 +107,7 @@ export default function AgentPage({ params }: { params: { agentId: string } }) {
             {tests?.map((test) => (
               <motion.div
                 key={test.id}
-                initial={{ opacity: 1, height: 0 }}
+                initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: "auto" }}
                 exit={{ opacity: 0, height: 0 }}
                 transition={{ duration: 0.3, ease: "easeInOut" }}
