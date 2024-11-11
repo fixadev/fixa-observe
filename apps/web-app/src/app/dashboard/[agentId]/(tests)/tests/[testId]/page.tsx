@@ -38,6 +38,7 @@ function TestPage({ params }: { params: { agentId: string; testId: string } }) {
   const { data: test, isLoading } = api.test.get.useQuery({
     id: params.testId,
   });
+  const { data: agent } = api.agent.get.useQuery({ id: params.agentId });
 
   useEffect(() => {
     // Load calls on mount
@@ -123,11 +124,12 @@ function TestPage({ params }: { params: { agentId: string; testId: string } }) {
                 ))}
             </div>
           </div>
-          {selectedCallId && (
+          {selectedCallId && agent && (
             <div className="min-h-screen flex-1">
               <CallDetails
                 key={selectedCallId}
                 call={calls.find((call) => call.id === selectedCallId)!}
+                agent={agent}
               />
             </div>
           )}
