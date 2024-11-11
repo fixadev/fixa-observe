@@ -1,4 +1,4 @@
-import { CallResult, CallStatus } from "@prisma/client";
+import { CallResult, CallStatus, Role } from "@prisma/client";
 import { db } from "../db";
 import { type ServerMessageEndOfCallReport } from "@vapi-ai/server-sdk/api";
 import { analyzeCall } from "./findLLMErrors";
@@ -54,11 +54,11 @@ You are a customer at a drive through restaurant. You want to order a dozen donu
 `;
 
 export const handleVapiCallEnded = async (
-  message: ServerMessageEndOfCallReport,
+  report: ServerMessageEndOfCallReport,
 ) => {
-  const callId = message?.call?.id;
+  const callId = report?.call?.id;
   if (!callId) {
-    console.error("No call ID found in Vapi call ended message");
+    console.error("No call ID found in Vapi call ended report");
     return;
   }
 
@@ -98,7 +98,7 @@ export const handleVapiCallEnded = async (
     return;
   }
 
-  if (!message.call || !message.artifact.messages) {
+  if (!report.call || !report.artifact.messages) {
     console.error("No artifact messages found");
     return;
   }
@@ -106,8 +106,8 @@ export const handleVapiCallEnded = async (
   const { errors, success, failureReason } = await analyzeCall(
     agent.systemPrompt,
     testAgent?.prompt,
-    message.call,
-    message.artifact.messages,
+    report.call,
+    report.artifact.messages,
   );
 
   // const { errors, success, failureReason } = await analyzeCall(
@@ -121,6 +121,8 @@ export const handleVapiCallEnded = async (
   console.log("SUCCESS", success);
   console.log("FAILURE REASON", failureReason);
 
+  console.log("ARTIFACT", report.artifact);
+
   await db.call.update({
     where: { id: callId },
     data: {
@@ -130,7 +132,19 @@ export const handleVapiCallEnded = async (
       },
       result: success ? CallResult.success : CallResult.failure,
       failureReason,
-      stereoRecordingUrl: message.call.artifact?.stereoRecordingUrl,
+      stereoRecordingUrl: report.artifact.stereoRecordingUrl,
+      messages: {
+        create: report.artifact.messages.map((message) => ({
+          role: message.role as Role,
+          // @ts-expect-error
+          message: message?.message ?? "",
+          time: message.time,
+          // @ts-expect-error
+          endTime: message?.endTime ?? 0,
+          secondsFromStart: message.secondsFromStart,
+          duration: message.time,
+        })),
+      },
     },
   });
 

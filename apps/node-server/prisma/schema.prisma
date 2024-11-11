@@ -127,6 +127,7 @@ enum Role {
   user
   bot
   system
+  tool_calls
 }
 
 enum CallStatus {
