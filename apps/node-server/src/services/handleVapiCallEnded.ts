@@ -142,7 +142,8 @@ export const handleVapiCallEnded = async (
           // @ts-expect-error
           endTime: message?.endTime ?? 0,
           secondsFromStart: message.secondsFromStart,
-          duration: message.time,
+          // @ts-expect-error
+          duration: message.duration,
         })),
       },
     },
