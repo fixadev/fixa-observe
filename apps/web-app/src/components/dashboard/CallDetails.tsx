@@ -5,14 +5,12 @@ import { cn, formatDurationHoursMinutesSeconds } from "~/lib/utils";
 import { useAudio } from "~/hooks/useAudio";
 import { type Agent, type CallError } from "prisma/generated/zod";
 import {
-  ArrowDownLeftIcon,
-  CheckBadgeIcon,
   CheckIcon,
   ExclamationCircleIcon,
   WrenchIcon,
 } from "@heroicons/react/24/solid";
 import Image from "next/image";
-import { Role } from "@prisma/client";
+import { CallStatus, Role } from "@prisma/client";
 
 export default function CallDetails({
   call,
@@ -199,11 +197,19 @@ export default function CallDetails({
               <div className="text-sm font-medium">{call.intent.name}</div>
               <div
                 className={cn(
-                  "rounded-full px-2 py-1 text-xs",
-                  call.result === "failure" ? "bg-red-100" : "bg-green-100",
+                  "w-fit rounded-full px-2 py-1 text-xs",
+                  call.status === CallStatus.in_progress
+                    ? "bg-yellow-100"
+                    : call.result === "failure"
+                      ? "bg-red-100"
+                      : "bg-green-100",
                 )}
               >
-                {call.result === "failure" ? "failed" : "succeeded"}
+                {call.status === CallStatus.in_progress
+                  ? "in progress"
+                  : call.result === "failure"
+                    ? "failed"
+                    : "succeeded"}
               </div>
             </div>
             <div className="flex w-fit flex-row flex-wrap gap-2">
