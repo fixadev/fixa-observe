@@ -14,6 +14,12 @@ export class AgentService {
     intents: IntentWithoutId[],
     ownerId: string,
   ) {
+    const testAgents = await db.testAgent.findMany({
+      where: {
+        OR: [{ ownerId }, { ownerId: null }],
+      },
+    });
+
     return await db.agent.create({
       data: {
         id: uuidv4(),
@@ -24,6 +30,11 @@ export class AgentService {
           createMany: {
             data: intents,
           },
+        },
+        enabledTestAgents: {
+          connect: testAgents.map((testAgent) => ({
+            id: testAgent.id,
+          })),
         },
         ownerId,
       },
