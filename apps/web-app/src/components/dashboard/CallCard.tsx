@@ -21,9 +21,11 @@ export default function CallCard({
   }, [call.messages]);
 
   const duration = useMemo(() => {
+    const lastCallMessage = call.messages[call.messages.length - 1];
+    const firstCallMessage = call.messages[0];
     const d =
-      (call.messages[call.messages.length - 1]?.endTime ?? 0) -
-      (call.messages[0]?.time ?? 0);
+      (lastCallMessage?.endTime ?? lastCallMessage?.time ?? 0) -
+      (firstCallMessage?.time ?? 0);
     return Math.ceil(d / 1000);
   }, [call.messages]);
 

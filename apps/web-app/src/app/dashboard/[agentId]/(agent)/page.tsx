@@ -100,28 +100,30 @@ export default function AgentPage({ params }: { params: { agentId: string } }) {
       <div className="h-px w-full bg-input" />
 
       {/* content */}
-      <div className="container py-8">
-        <div className="rounded-t-md border-x border-t border-input shadow-sm">
-          <AnimatePresence mode="popLayout">
-            {tests?.map((test) => (
-              <motion.div
-                key={test.id}
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: "auto" }}
-                exit={{ opacity: 0, height: 0 }}
-                transition={{ duration: 0.3, ease: "easeInOut" }}
-              >
-                <Link href={`/dashboard/${params.agentId}/tests/${test.id}`}>
-                  <TestCard
-                    test={test}
-                    className="cursor-pointer hover:bg-muted"
-                  />
-                </Link>
-              </motion.div>
-            ))}
-          </AnimatePresence>
+      {tests.length > 0 && (
+        <div className="container py-8">
+          <div className="rounded-t-md border-x border-t border-input shadow-sm">
+            <AnimatePresence mode="popLayout">
+              {tests?.map((test) => (
+                <motion.div
+                  key={test.id}
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  exit={{ opacity: 0, height: 0 }}
+                  transition={{ duration: 0.3, ease: "easeInOut" }}
+                >
+                  <Link href={`/dashboard/${params.agentId}/tests/${test.id}`}>
+                    <TestCard
+                      test={test}
+                      className="cursor-pointer hover:bg-muted"
+                    />
+                  </Link>
+                </motion.div>
+              ))}
+            </AnimatePresence>
+          </div>
         </div>
-      </div>
+      )}
       {agent && (
         <TestAgentsModal
           agent={agent}
