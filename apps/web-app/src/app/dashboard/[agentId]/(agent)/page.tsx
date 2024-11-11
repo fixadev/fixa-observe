@@ -33,7 +33,6 @@ export default function AgentPage({ params }: { params: { agentId: string } }) {
   const { user } = useUser();
 
   useSocketMessage(user?.id, (message: SocketMessage) => {
-    console.log("CALL ENDED", message);
     setTests((prev) =>
       prev.map((test) =>
         test.id === message.testId

@@ -15,6 +15,9 @@ import CallDetails from "~/components/dashboard/CallDetails";
 import { AudioProvider, useAudio } from "~/hooks/useAudio";
 import { api } from "~/trpc/react";
 import { Skeleton } from "~/components/ui/skeleton";
+import useSocketMessage from "~/app/_components/UseSocketMessage";
+import { type SocketMessage } from "~/lib/agent";
+import { useUser } from "@clerk/nextjs";
 
 type CallType = "error" | "no-errors" | "all";
 
@@ -39,6 +42,14 @@ function TestPage({ params }: { params: { agentId: string; testId: string } }) {
     id: params.testId,
   });
   const { data: agent } = api.agent.get.useQuery({ id: params.agentId });
+
+  const { user } = useUser();
+
+  useSocketMessage(user?.id, (message: SocketMessage) => {
+    setCalls((prev) =>
+      prev.map((call) => (call.id === message.callId ? message.call : call)),
+    );
+  });
 
   useEffect(() => {
     // Load calls on mount

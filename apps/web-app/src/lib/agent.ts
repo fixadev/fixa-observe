@@ -5,6 +5,7 @@ import {
   type Call,
 } from "prisma/generated/zod";
 import { z } from "zod";
+import { type CallWithIncludes } from "./types";
 
 export type Agent = z.infer<typeof AgentSchema>;
 export type AgentWithoutId = Omit<Agent, "id"> & {
@@ -29,6 +30,6 @@ export type TestAgentWithoutId = Omit<TestAgent, "id">;
 
 export type SocketMessage = {
   testId: string;
-  call: Call;
+  call: CallWithIncludes;
   callId: string;
 };

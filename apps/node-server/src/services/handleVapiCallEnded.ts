@@ -153,6 +153,12 @@ export const handleVapiCallEnded = async (
           .filter((message) => message !== null),
       },
     },
+    include: {
+      messages: true,
+      testAgent: true,
+      intent: true,
+      errors: true,
+    },
   });
 
   return {
