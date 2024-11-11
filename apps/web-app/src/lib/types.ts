@@ -26,3 +26,9 @@ export type TestWithIncludes = Prisma.TestGetPayload<{
     calls: true;
   };
 }>;
+
+export type AgentWithIncludes = Prisma.AgentGetPayload<{
+  include: {
+    enabledTestAgents: true;
+  };
+}>;
