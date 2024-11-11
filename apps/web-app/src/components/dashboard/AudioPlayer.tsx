@@ -274,11 +274,22 @@ const AudioPlayer = forwardRef<
         />
         {call.errors?.map((error, index) => {
           if (!containerWidth || !duration) return null;
-          const startPercentage =
-            (error.secondsFromStart - offsetFromStart) / duration;
-          const endPercentage =
-            (error.secondsFromStart + error.duration - offsetFromStart) /
-            duration;
+          const startPercentage = Math.min(
+            100,
+            Math.max(
+              0,
+              ((error.secondsFromStart - offsetFromStart) / duration) * 100,
+            ),
+          );
+          const endPercentage = Math.min(
+            100,
+            Math.max(
+              0,
+              ((error.secondsFromStart + error.duration - offsetFromStart) /
+                duration) *
+                100,
+            ),
+          );
           const startPosition = startPercentage * containerWidth;
           const width = (endPercentage - startPercentage) * containerWidth;
 
