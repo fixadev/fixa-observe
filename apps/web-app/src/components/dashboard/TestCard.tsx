@@ -96,7 +96,7 @@ export default function TestCard({
         </div>
       )}
       <div className="flex gap-2">
-        <div className="text-sm text-muted-foreground">
+        <div className="w-40 text-right text-sm text-muted-foreground">
           {formatDistanceToNow(test.createdAt, { addSuffix: true })}
         </div>
       </div>

@@ -31,6 +31,9 @@ export class TestService {
       include: {
         calls: true,
       },
+      orderBy: {
+        createdAt: "desc",
+      },
     });
   }
 
