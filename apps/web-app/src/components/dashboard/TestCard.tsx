@@ -78,7 +78,7 @@ export default function TestCard({
         </div>
       </div>
       {test.gitBranch && test.gitCommit ? (
-        <div className="flex flex-col gap-2">
+        <div className="flex w-60 flex-col gap-2">
           <div className="flex items-center gap-2">
             <div className={cn("text-sm font-medium", ibmPlexMono.className)}>
               {test.gitBranch}
