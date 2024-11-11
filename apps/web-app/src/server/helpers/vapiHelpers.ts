@@ -24,11 +24,6 @@ export const createVapiAssistant = async (
     model: {
       provider: "openai",
       model: "gpt-4o",
-      tools: [
-        {
-          type: "endCall",
-        },
-      ],
       messages: [
         {
           role: "system",
