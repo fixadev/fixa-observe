@@ -7,7 +7,7 @@ import { CallResult, CallStatus } from "@prisma/client";
 import { formatDistanceToNow } from "date-fns";
 import { useMemo } from "react";
 import { ibmPlexMono } from "~/app/fonts";
-import { type TestWithIncludes } from "~/lib/types";
+import { type TestWithCalls } from "~/lib/types";
 import { cn } from "~/lib/utils";
 import Spinner from "../Spinner";
 
@@ -15,7 +15,7 @@ export default function TestCard({
   test,
   className,
 }: {
-  test: TestWithIncludes;
+  test: TestWithCalls;
   className?: string;
 }) {
   const callsSucceeded = useMemo(

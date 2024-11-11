@@ -1,4 +1,4 @@
-import { type Prisma } from "@prisma/client";
+import { type Test, type Call, type Prisma } from "@prisma/client";
 import { z } from "zod";
 
 export type PlatformOptions = z.infer<typeof platformOptions>;
@@ -33,6 +33,8 @@ export type TestWithIncludes = Prisma.TestGetPayload<{
     };
   };
 }>;
+
+export type TestWithCalls = Test & { calls: Call[] };
 
 export type AgentWithIncludes = Prisma.AgentGetPayload<{
   include: {
