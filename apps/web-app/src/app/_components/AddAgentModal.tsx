@@ -94,7 +94,7 @@ export function AddAgentModal({ children, refetchAgents }: AddAgentModalProps) {
   const [agent, setAgent] = useState<CreateAgentSchema>({
     name: "",
     systemPrompt: "",
-    phoneNumber: "",
+    phoneNumber: "+1",
     createdAt: new Date(),
     updatedAt: new Date(),
     githubRepoUrl: "",
