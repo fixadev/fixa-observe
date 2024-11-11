@@ -11,7 +11,7 @@ import { vapi } from "~/server/utils/vapiClient";
 export const createVapiAssistant = async (
   prompt: string,
   name: string,
-  internalId?: string,
+  systemTemplate?: boolean,
 ) => {
   return await vapi.assistants.create({
     name,
@@ -20,9 +20,15 @@ export const createVapiAssistant = async (
       language: "en",
       model: "nova-2",
     },
+    maxDurationSeconds: 300,
     model: {
       provider: "openai",
       model: "gpt-4o",
+      tools: [
+        {
+          type: "endCall",
+        },
+      ],
       messages: [
         {
           role: "system",
@@ -35,7 +41,7 @@ export const createVapiAssistant = async (
       voiceId: "sarah",
     },
     metadata: {
-      internalId,
+      owner: systemTemplate ? "SYSTEM" : "USER",
     },
   });
 };
