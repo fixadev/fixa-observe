@@ -30,17 +30,19 @@ model User {
 }
 
 model Agent {
-  id                String             @id
-  createdAt         DateTime           @default(now())
-  updatedAt         DateTime           @updatedAt
-  name              String
-  phoneNumber       String
-  githubRepoUrl     String?
-  systemPrompt      String
-  enabledTestAgents AgentToTestAgent[]
+  id        String   @id
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  ownerId       String
+  name          String
+  phoneNumber   String
+  githubRepoUrl String?
+  systemPrompt  String
+
+  enabledTestAgents TestAgent[]
   intents           Intent[]
   tests             Test[]
-  ownerId           String
 }
 
 model Test {
@@ -48,22 +50,22 @@ model Test {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  agent       Agent   @relation(fields: [agentId], references: [id])
-  agentId     String
-  calls       Call[]
-  testAgentId String?
+  agent   Agent  @relation(fields: [agentId], references: [id])
+  agentId String
+  calls   Call[]
 }
 
 model TestAgent {
-  id          String             @id @default(cuid())
+  id          String  @id @default(cuid())
   ownerId     String?
   name        String
   headshotUrl String
   description String
   prompt      String
   vapiId      String
-  calls       Call[]
-  agents      AgentToTestAgent[]
+
+  agents Agent[]
+  calls  Call[]
 }
 
 model Intent {
@@ -131,13 +133,4 @@ enum Role {
 enum CallStatus {
   in_progress
   completed
-}
-
-model AgentToTestAgent {
-  agent       Agent     @relation(fields: [agentId], references: [id])
-  agentId     String
-  testAgent   TestAgent @relation(fields: [testAgentId], references: [id])
-  testAgentId String
-
-  @@id([agentId, testAgentId])
 }
