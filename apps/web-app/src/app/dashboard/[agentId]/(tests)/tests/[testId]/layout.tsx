@@ -1,9 +1,7 @@
 "use client";
 
-import { Tabs, TabsList, TabsTrigger } from "~/components/ui/tabs";
-// import { usePathname } from "next/navigation";
-import Link from "next/link";
 import { useMemo } from "react";
+import LayoutHeader from "~/components/dashboard/LayoutHeader";
 
 export default function TestLayout({
   params,
@@ -16,27 +14,19 @@ export default function TestLayout({
   const tabValue = useMemo(() => {
     return "test";
   }, []);
+  const tabs = useMemo(() => {
+    return [
+      {
+        value: "test",
+        label: "test",
+        href: `/dashboard/${params.agentId}/tests/${params.testId}`,
+      },
+    ];
+  }, [params.agentId, params.testId]);
 
   return (
     <div>
-      <div className="sticky top-0 z-20 w-full border-b border-input bg-background">
-        <Tabs value={tabValue}>
-          <TabsList variant="outline" className="h-10">
-            <TabsTrigger
-              variant="outline"
-              value="test"
-              className="w-32 hover:bg-muted"
-              asChild
-            >
-              <Link
-                href={`/dashboard/${params.agentId}/tests/${params.testId}`}
-              >
-                test
-              </Link>
-            </TabsTrigger>
-          </TabsList>
-        </Tabs>
-      </div>
+      <LayoutHeader tabValue={tabValue} tabs={tabs} />
       {children}
     </div>
   );
