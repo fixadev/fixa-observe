@@ -15,6 +15,7 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
+import { cn } from "~/lib/utils";
 
 export default function LayoutHeader({
   tabValue,
@@ -45,7 +46,7 @@ export default function LayoutHeader({
     <>
       <div className="flex w-full items-center justify-between p-4">
         <div className="flex items-center gap-4">
-          <Logo href="/dashboard" />
+          <Logo className="mb-1" href="/dashboard" />
           {agentId && (
             <>
               <SlashIcon className="size-4 text-muted-foreground" />
@@ -89,8 +90,19 @@ export default function LayoutHeader({
           <div className="flex h-10 items-center">
             <div
               onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-              className="flex h-full shrink-0 cursor-pointer items-center px-4 hover:bg-muted"
+              className={cn(
+                "flex h-full shrink-0 cursor-pointer items-center px-4 hover:bg-muted",
+                scrollY < 64 && "pointer-events-none",
+              )}
             >
+              {/* <div
+                className="text-sm font-medium"
+                style={{
+                  opacity: Math.min(1, Math.max(0, scrollY / 64)),
+                }}
+              >
+                pixa.
+              </div> */}
               <Image
                 src="/images/logo.png"
                 alt="pixa logo"
