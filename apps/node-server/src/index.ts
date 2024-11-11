@@ -1,7 +1,7 @@
 import express, { Request, Response } from "express";
 import { createServer } from "http";
 import SocketManager from "./socket/socketManager";
-import { handleVapiCallEnded } from "./services/handleVapiCalEnded";
+import { handleVapiCallEnded } from "./services/handleVapiCallEnded";
 
 const app = express();
 const httpServer = createServer(app);
@@ -16,7 +16,6 @@ app.get("/health", (_, res: Response) => res.json({ status: "ok" }));
 
 app.post("/vapi", (req: Request, res: Response) => {
   const { message } = req.body;
-  console.log("VAPI WEBHOOK RECEIVED", message);
   if (message.type === "end-of-call-report") {
     handleVapiCallEnded(message);
   }

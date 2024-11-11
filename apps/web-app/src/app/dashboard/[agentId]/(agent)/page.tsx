@@ -22,6 +22,8 @@ import { TEST_AGENT, TEST_TEST_AGENTS } from "~/lib/test-data";
 import { TEST_TESTS } from "~/lib/test-data";
 import { type AgentWithIncludes } from "~/lib/types";
 
+import { useUser } from "@clerk/nextjs";
+
 export default function AgentPage({ params }: { params: { agentId: string } }) {
   const [testInitializing, setTestInitializing] = useState(false);
   const [testAgentsModalOpen, setTestAgentsModalOpen] = useState(false);
@@ -29,7 +31,9 @@ export default function AgentPage({ params }: { params: { agentId: string } }) {
   const agent = useMemo(() => TEST_AGENT, []);
 
   const { toast } = useToast();
-  const { triggered, setTriggered } = useSocketMessage();
+
+  const { user } = useUser();
+  const { triggered, setTriggered } = useSocketMessage(user?.id);
   const { mutate: runTest } = api.test.run.useMutation({
     onSuccess: (data) => {
       toast({

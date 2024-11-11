@@ -78,7 +78,7 @@ export const initiateVapiCall = async (
             content: testAgentPrompt,
           },
           {
-            role: "user",
+            role: "assistant",
             content: intentPrompt,
           },
         ],

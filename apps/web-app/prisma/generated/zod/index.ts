@@ -38,7 +38,7 @@ export const CallResultSchema = z.enum(['success','failure']);
 
 export type CallResultType = `${z.infer<typeof CallResultSchema>}`
 
-export const RoleSchema = z.enum(['user','bot','system','tool_calls']);
+export const RoleSchema = z.enum(['user','bot','system','tool_calls','tool_call_result']);
 
 export type RoleType = `${z.infer<typeof RoleSchema>}`
 

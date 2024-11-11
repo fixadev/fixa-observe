@@ -38,7 +38,7 @@ export const analyzeCall = async (
   You will be provided the following information:
   - The assistant agent's prompt
   - The user agent's prompt / intent
-  - The call transcript
+  - The call transcript. In this, the assistant being tested will be labeled as "user" and the test agent will be labeled as "bot".
 
   You will output a JSON object with the following fields:
   - success: A boolean indicating if the call was successful
@@ -48,6 +48,9 @@ export const analyzeCall = async (
     - description: A string describing the error
     - secondsFromStart: The start time of the error (use the secondsFromStart for this)
     - duration: The duration of the error (use duration for this)
+
+
+    OUTPUT ONLY THE JSON - do not include backticks like \`\`\`json or any other formatting
   `;
 
   const prompt = `${basePrompt}\n\nAssistant Agent Prompt: ${agentPrompt}\n\nUser Agent Prompt: ${testAgentPrompt}\n\nCall Transcript: ${JSON.stringify(
@@ -65,6 +68,8 @@ export const analyzeCall = async (
   });
 
   const result = completion.choices[0].message.content;
+
+  console.log("Completion result:", result);
 
   const cleanedResult = result
     ?.replace("```json\n", "")

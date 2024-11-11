@@ -128,6 +128,7 @@ enum Role {
   bot
   system
   tool_calls
+  tool_call_result
 }
 
 enum CallStatus {
