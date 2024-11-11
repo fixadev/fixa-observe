@@ -174,7 +174,7 @@ export default function CallDetails({ call }: { call: CallWithIncludes }) {
         <div className="flex items-center gap-4 pb-4">
           <div className="shrink-0">
             <Image
-              src="/images/agent-avatars/steve.jpeg"
+              src={call.testAgent.headshotUrl}
               alt="agent avatar"
               width={48}
               height={48}

@@ -17,6 +17,7 @@ export type CallWithIncludes = Prisma.CallGetPayload<{
     messages: true;
     errors: true;
     intent: true;
+    testAgent: true;
   };
 }>;
 

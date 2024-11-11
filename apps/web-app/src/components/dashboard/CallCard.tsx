@@ -42,7 +42,7 @@ export default function CallCard({
       ></div>
       <div className="flex shrink-0 items-center">
         <Image
-          src={"/images/agent-avatars/steve.jpeg"}
+          src={call.testAgent.headshotUrl}
           alt="agent avatar"
           width={48}
           height={48}
