@@ -1,8 +1,8 @@
 import {
   AgentSchema,
   type TestAgentSchema,
-  type TestAgentTemplateSchema,
   IntentSchema,
+  type Call,
 } from "prisma/generated/zod";
 import { z } from "zod";
 
@@ -27,4 +27,8 @@ export const CreateAgentSchema = AgentSchema.omit({ id: true }).extend({
 export type TestAgent = z.infer<typeof TestAgentSchema>;
 export type TestAgentWithoutId = Omit<TestAgent, "id">;
 
-export type TestAgentTemplate = z.infer<typeof TestAgentTemplateSchema>;
+export type SocketMessage = {
+  testId: string;
+  call: Call;
+  callId: string;
+};

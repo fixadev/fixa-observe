@@ -115,7 +115,7 @@ export const handleVapiCallEnded = async (
   console.log("SUCCESS", success);
   console.log("FAILURE REASON", failureReason);
 
-  await db.call.update({
+  const updatedCall = await db.call.update({
     where: { id: callId },
     data: {
       status: CallStatus.completed,
@@ -144,6 +144,7 @@ export const handleVapiCallEnded = async (
   return {
     ownerId,
     testId: test?.id,
-    message: "call-ended",
+    callId,
+    call: updatedCall,
   };
 };

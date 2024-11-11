@@ -28,7 +28,10 @@ export default function AgentPage({ params }: { params: { agentId: string } }) {
   const [testAgentsModalOpen, setTestAgentsModalOpen] = useState(false);
   const { toast } = useToast();
   const { user } = useUser();
-  const { triggered, setTriggered } = useSocketMessage(user?.id);
+
+  useSocketMessage(user?.id, (message) => {
+    console.log("CALL ENDED", message);
+  });
 
   const { data: agent } = api.agent.get.useQuery({ id: params.agentId });
 
