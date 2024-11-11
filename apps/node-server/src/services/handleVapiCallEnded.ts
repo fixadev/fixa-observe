@@ -127,17 +127,30 @@ export const handleVapiCallEnded = async (
       failureReason,
       stereoRecordingUrl: report.artifact.stereoRecordingUrl,
       messages: {
-        create: report.artifact.messages.map((message) => ({
-          role: message.role as Role,
-          // @ts-expect-error
-          message: message?.message ?? "",
-          time: message.time,
-          // @ts-expect-error
-          endTime: message?.endTime ?? 0,
-          secondsFromStart: message.secondsFromStart,
-          // @ts-expect-error
-          duration: message.duration,
-        })),
+        create: report.artifact.messages
+          .map((message) => {
+            const baseMessage = {
+              role: message.role as Role,
+              time: message.time,
+              secondsFromStart: message.secondsFromStart,
+            };
+            return {
+              ...baseMessage,
+              // @ts-expect-error
+              ...(message.message && { message: message.message }),
+              // @ts-expect-error
+              ...(message.endTime && { endTime: message.endTime }),
+              // @ts-expect-error
+              ...(message.duration && { duration: message.duration }),
+              // @ts-expect-error
+              ...(message.toolCalls && { toolCalls: message.toolCalls }),
+              // @ts-expect-error
+              ...(message.result && { result: message.result }),
+              // @ts-expect-error
+              ...(message.name && { name: message.name }),
+            };
+          })
+          .filter((message) => message !== null),
       },
     },
   });
