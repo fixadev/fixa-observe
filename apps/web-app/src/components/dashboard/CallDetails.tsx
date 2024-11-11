@@ -3,11 +3,24 @@ import AudioPlayer, { type AudioPlayerRef } from "./AudioPlayer";
 import { useMemo, useRef, useState, useEffect, useCallback } from "react";
 import { cn, formatDurationHoursMinutesSeconds } from "~/lib/utils";
 import { useAudio } from "~/hooks/useAudio";
-import { type CallError } from "prisma/generated/zod";
-import { ExclamationCircleIcon } from "@heroicons/react/24/solid";
+import { type Agent, type CallError } from "prisma/generated/zod";
+import {
+  ArrowDownLeftIcon,
+  CheckBadgeIcon,
+  CheckIcon,
+  ExclamationCircleIcon,
+  WrenchIcon,
+} from "@heroicons/react/24/solid";
 import Image from "next/image";
+import { Role } from "@prisma/client";
 
-export default function CallDetails({ call }: { call: CallWithIncludes }) {
+export default function CallDetails({
+  call,
+  agent,
+}: {
+  call: CallWithIncludes;
+  agent: Agent;
+}) {
   const audioPlayerRef = useRef<AudioPlayerRef>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const lastActiveIndexRef = useRef(-1);
@@ -240,18 +253,30 @@ export default function CallDetails({ call }: { call: CallWithIncludes }) {
           return (
             <div key={index} className="flex gap-2">
               <div className="mt-2 w-8 shrink-0 text-xs text-muted-foreground">
-                {formatDurationHoursMinutesSeconds(
-                  message.secondsFromStart - offsetFromStart,
-                )}
+                {message.role !== Role.tool_calls &&
+                message.role !== Role.tool_call_result
+                  ? formatDurationHoursMinutesSeconds(
+                      message.secondsFromStart - offsetFromStart,
+                    )
+                  : ""}
               </div>
               <div className="flex flex-1 flex-col">
                 <div
                   onClick={() => {
+                    if (
+                      message.role === Role.tool_calls ||
+                      message.role === Role.tool_call_result
+                    ) {
+                      return;
+                    }
                     seek(message.secondsFromStart - offsetFromStart);
                     play();
                   }}
                   className={cn(
                     "flex-1 cursor-pointer rounded-md p-2 hover:bg-muted/30",
+                    (message.role === Role.tool_calls ||
+                      message.role === Role.tool_call_result) &&
+                      "cursor-[unset] hover:bg-background",
                     activeMessageIndex === index
                       ? "bg-muted hover:bg-muted"
                       : "",
@@ -266,8 +291,24 @@ export default function CallDetails({ call }: { call: CallWithIncludes }) {
                   )}
                 >
                   <div className="text-xs font-medium">
-                    {message.role === "bot" ? "assistant" : "user"}
+                    {message.role === Role.bot
+                      ? call.testAgent.name
+                      : message.role === Role.user
+                        ? agent.name
+                        : ""}
                   </div>
+                  {message.role === Role.tool_calls && (
+                    <div className="flex items-center gap-1 text-xs italic text-muted-foreground">
+                      <WrenchIcon className="size-4" />
+                      tool called: &quot;&quot;
+                    </div>
+                  )}
+                  {message.role === Role.tool_call_result && (
+                    <div className="flex items-center gap-1 text-xs italic text-muted-foreground">
+                      <CheckIcon className="size-4" />
+                      tool finished: &quot;&quot;
+                    </div>
+                  )}
                   <div className="mt-1 text-sm text-muted-foreground">
                     {message.message}
                   </div>
