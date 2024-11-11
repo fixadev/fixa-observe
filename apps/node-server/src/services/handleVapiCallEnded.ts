@@ -62,18 +62,25 @@ export const handleVapiCallEnded = async (
     return;
   }
 
-  const test = await db.test.findFirst({
-    where: { calls: { some: { id: callId } } },
-    include: { calls: true, agent: true },
-  });
-
   const call = await db.call.findFirst({
     where: { id: callId },
     include: { testAgent: true },
   });
 
+  if (!call) {
+    console.error("No call found in DB for call ID", callId);
+    return;
+  }
+
+  const test = await db.test.findFirst({
+    where: { id: call.testId },
+    include: { calls: true, agent: true },
+  });
+
   const agent = test?.agent;
   const testAgent = call?.testAgent;
+
+  console.log("CALL", call);
 
   console.log("TEST", test);
 
@@ -85,11 +92,6 @@ export const handleVapiCallEnded = async (
 
   if (!ownerId) {
     console.error("No owner ID found for agent");
-    return;
-  }
-
-  if (!call) {
-    console.error("No call found in DB for call ID", callId);
     return;
   }
 
@@ -120,8 +122,6 @@ export const handleVapiCallEnded = async (
   console.log("ERRORS", errors);
   console.log("SUCCESS", success);
   console.log("FAILURE REASON", failureReason);
-
-  console.log("ARTIFACT", report.artifact);
 
   await db.call.update({
     where: { id: callId },
