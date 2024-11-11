@@ -30,7 +30,8 @@ export default function CallCard({
   return (
     <div
       className={cn(
-        "relative flex cursor-pointer gap-2 overflow-hidden border-b border-input bg-background p-2 pl-4 hover:bg-muted",
+        "relative flex cursor-pointer gap-2 overflow-hidden border-b border-input bg-background p-2 pl-4 hover:bg-muted/50",
+        call.id === selectedCallId && "bg-muted",
         className,
       )}
       onClick={() => onSelect(call.id)}
