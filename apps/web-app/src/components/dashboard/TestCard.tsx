@@ -1,4 +1,8 @@
-import { CheckCircleIcon, XCircleIcon } from "@heroicons/react/24/solid";
+import {
+  CheckCircleIcon,
+  WrenchIcon,
+  XCircleIcon,
+} from "@heroicons/react/24/solid";
 import { CallResult } from "@prisma/client";
 import { formatDistanceToNow } from "date-fns";
 import { useMemo } from "react";
@@ -56,18 +60,24 @@ export default function TestCard({
           </div>
         </div>
       </div>
-      <div className="flex flex-col gap-2">
-        <div className="flex items-center gap-2">
-          <div className={cn("text-sm font-medium", ibmPlexMono.className)}>
-            main
+      {test.gitBranch && test.gitCommit ? (
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center gap-2">
+            <div className={cn("text-sm font-medium", ibmPlexMono.className)}>
+              main
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className={cn("text-sm font-medium", ibmPlexMono.className)}>
+              90abcde fixes stuff
+            </div>
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          <div className={cn("text-sm font-medium", ibmPlexMono.className)}>
-            90abcde fixes stuff
-          </div>
+      ) : (
+        <div className="flex items-center gap-2 py-4 text-sm text-muted-foreground">
+          <WrenchIcon className="size-4" /> manual run
         </div>
-      </div>
+      )}
       <div className="flex gap-2">
         <div className="text-sm text-muted-foreground">
           {formatDistanceToNow(test.createdAt, { addSuffix: true })}
