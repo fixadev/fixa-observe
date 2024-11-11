@@ -45,13 +45,13 @@ export default function TestCard({
         className,
       )}
     >
-      <div className="flex items-center gap-3">
+      <div className="flex w-60 items-center gap-3">
         {callsInProgress.length > 0 ? (
-          <Spinner className="size-6 text-muted-foreground" />
+          <Spinner className="size-6 shrink-0 text-muted-foreground" />
         ) : callsFailed.length > 0 ? (
-          <XCircleIcon className="size-8 text-red-500" />
+          <XCircleIcon className="-mx-0.5 size-7 shrink-0 text-red-500" />
         ) : (
-          <CheckCircleIcon className="size-8 text-green-500" />
+          <CheckCircleIcon className="-mx-0.5 size-7 shrink-0 text-green-500" />
         )}
         <div className="flex flex-col gap-1">
           <div className="font-medium">
@@ -81,12 +81,12 @@ export default function TestCard({
         <div className="flex flex-col gap-2">
           <div className="flex items-center gap-2">
             <div className={cn("text-sm font-medium", ibmPlexMono.className)}>
-              main
+              {test.gitBranch}
             </div>
           </div>
           <div className="flex items-center gap-2">
             <div className={cn("text-sm font-medium", ibmPlexMono.className)}>
-              90abcde fixes stuff
+              {test.gitCommit}
             </div>
           </div>
         </div>

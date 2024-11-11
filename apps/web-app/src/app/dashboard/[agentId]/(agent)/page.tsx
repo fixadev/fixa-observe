@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -19,9 +19,10 @@ import { useToast } from "~/hooks/use-toast";
 
 import useSocketMessage from "~/app/_components/UseSocketMessage";
 import { TEST_TEST_AGENTS } from "~/lib/test-data";
-import { type AgentWithIncludes } from "~/lib/types";
+import { type TestWithIncludes, type AgentWithIncludes } from "~/lib/types";
 
 import { useUser } from "@clerk/nextjs";
+import { motion, AnimatePresence } from "framer-motion";
 
 export default function AgentPage({ params }: { params: { agentId: string } }) {
   const [testInitializing, setTestInitializing] = useState(false);
@@ -29,12 +30,16 @@ export default function AgentPage({ params }: { params: { agentId: string } }) {
   const { toast } = useToast();
   const { user } = useUser();
   const { triggered, setTriggered } = useSocketMessage(user?.id);
+  const [tests, setTests] = useState<TestWithIncludes[]>([]);
 
   const { data: agent } = api.agent.get.useQuery({ id: params.agentId });
 
-  const { data: tests } = api.test.getAll.useQuery({ agentId: params.agentId });
+  const { data: _tests } = api.test.getAll.useQuery({
+    agentId: params.agentId,
+  });
   const { mutate: runTest } = api.test.run.useMutation({
     onSuccess: (data) => {
+      setTests((prev) => [data, ...prev]);
       toast({
         title: "Test initiated successfully",
         duration: 2000,
@@ -42,6 +47,12 @@ export default function AgentPage({ params }: { params: { agentId: string } }) {
       setTestInitializing(false);
     },
   });
+
+  useEffect(() => {
+    if (_tests) {
+      setTests(_tests);
+    }
+  }, [_tests]);
 
   const handleRunTest = useCallback(() => {
     setTestInitializing(true);
@@ -76,14 +87,24 @@ export default function AgentPage({ params }: { params: { agentId: string } }) {
       {/* content */}
       <div className="container py-8">
         <div className="rounded-t-md border-x border-t border-input shadow-sm">
-          {tests?.map((test) => (
-            <Link
-              href={`/dashboard/${params.agentId}/tests/${test.id}`}
-              key={test.id}
-            >
-              <TestCard test={test} className="cursor-pointer hover:bg-muted" />
-            </Link>
-          ))}
+          <AnimatePresence mode="popLayout">
+            {tests?.map((test) => (
+              <motion.div
+                key={test.id}
+                initial={{ opacity: 1, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.3, ease: "easeInOut" }}
+              >
+                <Link href={`/dashboard/${params.agentId}/tests/${test.id}`}>
+                  <TestCard
+                    test={test}
+                    className="cursor-pointer hover:bg-muted"
+                  />
+                </Link>
+              </motion.div>
+            ))}
+          </AnimatePresence>
         </div>
       </div>
       {agent && (

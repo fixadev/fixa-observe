@@ -101,6 +101,9 @@ export class TestService {
           },
         },
       },
+      include: {
+        calls: true,
+      },
     });
   }
 }
