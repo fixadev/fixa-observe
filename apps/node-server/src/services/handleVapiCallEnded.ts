@@ -137,17 +137,17 @@ export const handleVapiCallEnded = async (
             return {
               ...baseMessage,
               // @ts-expect-error
-              ...(message.message && { message: message.message }),
+              message: message.message || "",
               // @ts-expect-error
-              ...(message.endTime && { endTime: message.endTime }),
+              endTime: message.endTime || 0,
               // @ts-expect-error
-              ...(message.duration && { duration: message.duration }),
+              duration: message.duration || 0,
               // @ts-expect-error
-              ...(message.toolCalls && { toolCalls: message.toolCalls }),
+              toolCalls: message.toolCalls || [],
               // @ts-expect-error
-              ...(message.result && { result: message.result }),
+              result: message.result || "",
               // @ts-expect-error
-              ...(message.name && { name: message.name }),
+              name: message.name || "",
             };
           })
           .filter((message) => message !== null),
