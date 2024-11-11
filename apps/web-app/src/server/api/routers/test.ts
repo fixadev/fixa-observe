@@ -7,19 +7,19 @@ const testServiceInstance = new TestService(db);
 
 export const testRouter = createTRPCRouter({
   get: protectedProcedure
-    .input(z.object({ id: z.string().cuid() }))
+    .input(z.object({ id: z.string() }))
     .query(async ({ input }) => {
       return await testServiceInstance.get(input.id);
     }),
 
   getAll: protectedProcedure
-    .input(z.object({ agentId: z.string().cuid() }))
+    .input(z.object({ agentId: z.string() }))
     .query(async ({ input }) => {
       return await testServiceInstance.getAll(input.agentId);
     }),
 
   run: protectedProcedure
-    .input(z.object({ agentId: z.string().cuid() }))
+    .input(z.object({ agentId: z.string() }))
     .mutation(async ({ input }) => {
       return await testServiceInstance.run(input.agentId);
     }),

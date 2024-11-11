@@ -44,6 +44,10 @@ export class AgentService {
     });
   }
 
+  async getAllAgents(ownerId: string) {
+    return await db.agent.findMany({ where: { ownerId } });
+  }
+
   async createTestAgent(
     name: string,
     prompt: string,

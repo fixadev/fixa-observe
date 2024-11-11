@@ -45,14 +45,21 @@ export class TestService {
       })),
     );
 
+    console.log("TESTS", tests);
+
     const calls = await Promise.all(
       tests.map(async (test) => {
-        const { id: callId } = await initiateVapiCall(
+        const vapiCall = await initiateVapiCall(
           test.testAgentId,
           agent.phoneNumber,
           test.testAgentPrompt,
           test.intentPrompt,
         );
+
+        console.log("VAPI CALL INITIATED", vapiCall);
+
+        const callId = vapiCall.id;
+
         return {
           id: callId,
           testAgentId: test.testAgentId,
