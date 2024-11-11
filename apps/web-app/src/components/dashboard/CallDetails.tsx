@@ -275,11 +275,25 @@ export default function CallDetails({ call }: { call: CallWithIncludes }) {
                 {isLastErrorMessage && (
                   <div
                     className={cn(
-                      "flex items-center gap-1 rounded-b-md border-x border-b border-red-500 bg-red-500/20 p-2 text-sm text-red-500",
+                      "flex cursor-pointer items-center gap-1 rounded-b-md border-x border-b border-red-500 bg-red-500/20 p-2 text-sm text-red-500",
                       isActiveErrorMessage
                         ? "z-10 -mx-px -mb-px border-x-2 border-b-2 shadow-lg"
                         : "",
                     )}
+                    onMouseEnter={() => {
+                      setActiveErrorId(error?.id ?? null);
+                      audioPlayerRef.current?.setHoveredError(
+                        error?.id ?? null,
+                      );
+                    }}
+                    onMouseLeave={() => {
+                      setActiveErrorId(null);
+                      audioPlayerRef.current?.setHoveredError(null);
+                    }}
+                    onClick={() => {
+                      audioPlayerRef.current?.setActiveError(error ?? null);
+                      play();
+                    }}
                   >
                     <ExclamationCircleIcon className="size-5" />
                     {error?.description}
