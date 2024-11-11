@@ -41,7 +41,7 @@ export const analyzeCall = async (
   - The call transcript. In this, the assistant being tested will be labeled as "user" and the test agent will be labeled as "bot".
 
   You will output a JSON object with the following fields:
-  - success: A boolean indicating if the call was successful
+  - success: A boolean indicating if the call was successful -- if there are any errors, the call is not successful
   - failureReason: A short sentence describing the primary failure reason, if any
   - errors: An array of objects, each representing an error. Each error object will have the following fields:
     - type: A string describing the type of error

@@ -12,9 +12,9 @@ export const generateIntentsFromPrompt = async (
 
   const systemPrompt = `your job is to create intents to test an AI phone agent. 
   
-  you will be given a system prompt for the agent. 
+  you will be given a system prompt for the phone agent. 
   
-  you will use this information to create three intents that will be used to test the agent. 
+  you will use this information to create three intents that will be used to create other agents that will be used to test the phone agent. 
 
   i.e. if the system prompt is "your are an assistant that answers the phone at a restaurant", 
   
