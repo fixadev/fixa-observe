@@ -75,6 +75,12 @@ export const handleVapiCallEnded = async (
   const agent = test?.agent;
   const testAgent = call?.testAgent;
 
+  console.log("TEST", test);
+
+  console.log("AGENT", agent);
+
+  console.log("TEST AGENT", testAgent);
+
   const ownerId = agent?.ownerId;
 
   if (!ownerId) {

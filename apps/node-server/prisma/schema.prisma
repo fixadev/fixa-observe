@@ -62,7 +62,6 @@ model TestAgent {
   headshotUrl String
   description String
   prompt      String
-  vapiId      String
 
   agents Agent[]
   calls  Call[]

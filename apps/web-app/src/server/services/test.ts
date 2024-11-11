@@ -47,7 +47,7 @@ export class TestService {
 
     console.log("TESTS", tests);
 
-    const calls = await Promise.all(
+    const calls = await Promise.allSettled(
       tests.map(async (test) => {
         const vapiCall = await initiateVapiCall(
           test.testAgentVapiId,
@@ -62,24 +62,35 @@ export class TestService {
 
         return {
           id: callId,
-          testAgentId: test.testAgentId,
+          testAgentVapiId: test.testAgentVapiId,
           intentId: test.intentId,
           status: CallStatus.in_progress,
         };
       }),
     );
 
+    console.log("CALLS", calls);
+
+    const fulfilledCalls = calls.filter(
+      (call) => call.status === "fulfilled",
+    ) as PromiseFulfilledResult<{
+      id: string;
+      testAgentVapiId: string;
+      intentId: string;
+      status: CallStatus;
+    }>[];
+
     return await db.test.create({
       data: {
         agentId,
         calls: {
           createMany: {
-            data: calls.map((call) => ({
-              id: call.id,
-              status: call.status,
+            data: fulfilledCalls.map((call) => ({
+              id: call.value.id,
+              status: call.value.status,
               stereoRecordingUrl: "",
-              testAgentId: call.testAgentId,
-              intentId: call.intentId,
+              testAgentId: call.value.testAgentVapiId,
+              intentId: call.value.intentId,
             })),
           },
         },
