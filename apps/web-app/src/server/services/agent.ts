@@ -35,11 +35,7 @@ export class AgentService {
       where: { id },
       include: {
         intents: true,
-        enabledTestAgents: {
-          include: {
-            testAgent: true,
-          },
-        },
+        enabledTestAgents: true,
       },
     });
   }
@@ -55,7 +51,7 @@ export class AgentService {
     headshotUrl: string,
     description: string,
   ) {
-    const agent = await createVapiAssistant(prompt);
+    const agent = await createVapiAssistant(prompt, name);
 
     return await db.testAgent.create({
       data: {
@@ -80,7 +76,7 @@ export class AgentService {
         where: { id: agentId },
         data: {
           enabledTestAgents: {
-            create: { testAgentId },
+            connect: { id: testAgentId },
           },
         },
       });
@@ -89,7 +85,7 @@ export class AgentService {
         where: { id: agentId },
         data: {
           enabledTestAgents: {
-            deleteMany: { testAgentId },
+            disconnect: { id: testAgentId },
           },
         },
       });

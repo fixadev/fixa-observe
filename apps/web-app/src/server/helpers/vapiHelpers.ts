@@ -1,7 +1,12 @@
 import { vapi } from "~/server/utils/vapiClient";
 
-export const createVapiAssistant = async (prompt: string) => {
+export const createVapiAssistant = async (
+  prompt: string,
+  name: string,
+  internalId?: string,
+) => {
   return await vapi.assistants.create({
+    name,
     transcriber: {
       provider: "deepgram",
       language: "en",
@@ -18,10 +23,23 @@ export const createVapiAssistant = async (prompt: string) => {
       ],
     },
     voice: {
-      provider: "playht",
-      voiceId: "jennifer",
+      provider: "11labs",
+      voiceId: "sarah",
+    },
+    metadata: {
+      internalId,
     },
   });
+};
+
+export const deleteVapiAssistantById = async (assistantId: string) => {
+  const assistants = await vapi.assistants.list();
+  const assistant = assistants.find(
+    (assistant) => assistant.metadata?.internalId === assistantId,
+  );
+  if (assistant) {
+    return await vapi.assistants.delete(assistant.id);
+  }
 };
 
 export const initiateVapiCall = async (
