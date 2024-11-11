@@ -13,7 +13,8 @@ import CallCard from "~/components/dashboard/CallCard";
 import type { CallWithIncludes } from "~/lib/types";
 import CallDetails from "~/components/dashboard/CallDetails";
 import { AudioProvider, useAudio } from "~/hooks/useAudio";
-import { TEST_CALLS, TEST_TESTS } from "~/lib/test-data";
+import { api } from "~/trpc/react";
+import { Skeleton } from "~/components/ui/skeleton";
 
 type CallType = "error" | "no-errors" | "all";
 
@@ -29,25 +30,32 @@ export default function TestPageWithProvider({
   );
 }
 
-function TestPage({}: { params: { agentId: string; testId: string } }) {
+function TestPage({ params }: { params: { agentId: string; testId: string } }) {
   const [selectedCallType, setSelectedCallType] = useState<CallType>("error");
   const [selectedCallId, setSelectedCallId] = useState<string | null>(null);
   const [calls, setCalls] = useState<CallWithIncludes[]>([]);
   const { play, pause, seek, isPlaying } = useAudio();
+  const { data: test, isLoading } = api.test.get.useQuery({
+    id: params.testId,
+  });
 
   useEffect(() => {
     // Load calls on mount
-    setCalls(TEST_CALLS);
-    setSelectedCallId(TEST_CALLS[0]?.id ?? null);
-  }, []);
+    setCalls(test?.calls ?? []);
+    setSelectedCallId(test?.calls[0]?.id ?? null);
+  }, [test]);
   return (
     <div>
       {/* header */}
       <div className="container flex items-center justify-between py-4">
-        <TestCard
-          test={TEST_TESTS[0]!}
-          className="w-full rounded-md border border-input shadow-sm"
-        />
+        {isLoading || !test ? (
+          <Skeleton className="h-20 w-full text-muted-foreground" />
+        ) : (
+          <TestCard
+            test={test}
+            className="w-full rounded-md border border-input shadow-sm"
+          />
+        )}
       </div>
 
       {/* content */}

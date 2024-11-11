@@ -17,6 +17,9 @@ export class TestService {
         calls: {
           include: {
             testAgent: true,
+            messages: true,
+            errors: true,
+            intent: true,
           },
         },
       },
@@ -100,6 +103,9 @@ export class TestService {
             })),
           },
         },
+      },
+      include: {
+        calls: true,
       },
     });
   }
