@@ -46,8 +46,8 @@ export const analyzeCall = async (
   - errors: An array of objects, each representing an error. Each error object will have the following fields:
     - type: A string describing the type of error
     - description: A string describing the error
-    - secondsFromStart: The start time of the error (use the secondsFromStart for this)
-    - duration: The duration of the error (use duration for this)
+    - secondsFromStart: The start time of the error in seconds (use the secondsFromStart for this)
+    - duration: The duration of the error in seconds (use duration for this)
 
 
     OUTPUT ONLY THE JSON - do not include backticks like \`\`\`json or any other formatting
