@@ -33,20 +33,26 @@ export default function AgentPage({ params }: { params: { agentId: string } }) {
   const { toast } = useToast();
   const { user } = useUser();
 
-  useSocketMessage(user?.id, (message: SocketMessage) => {
-    setTests((prev) =>
-      prev.map((test) =>
-        test.id === message.testId
-          ? {
-              ...test,
-              calls: test.calls.map((call) =>
-                call.id === message.callId ? message.call : call,
-              ),
-            }
-          : test,
-      ),
-    );
-  });
+  useSocketMessage(
+    user?.id,
+    useCallback(
+      (message: SocketMessage) => {
+        setTests((prev) =>
+          prev.map((test) =>
+            test.id === message.testId
+              ? {
+                  ...test,
+                  calls: test.calls.map((call) =>
+                    call.id === message.callId ? message.call : call,
+                  ),
+                }
+              : test,
+          ),
+        );
+      },
+      [setTests],
+    ),
+  );
 
   const { data: agent } = api.agent.get.useQuery({ id: params.agentId });
 

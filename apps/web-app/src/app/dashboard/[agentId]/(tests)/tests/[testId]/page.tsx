@@ -1,7 +1,7 @@
 "use client";
 
 import TestCard from "~/components/dashboard/TestCard";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   Select,
   SelectValue,
@@ -45,20 +45,26 @@ function TestPage({ params }: { params: { agentId: string; testId: string } }) {
 
   const { user } = useUser();
 
-  useSocketMessage(user?.id, (message: SocketMessage) => {
-    if (test?.id === message.testId) {
-      setTest((prev) =>
-        prev
-          ? {
-              ...prev,
-              calls: prev.calls.map((call) =>
-                call.id === message.callId ? message.call : call,
-              ),
-            }
-          : prev,
-      );
-    }
-  });
+  useSocketMessage(
+    user?.id,
+    useCallback(
+      (message: SocketMessage) => {
+        if (test?.id === message.testId) {
+          setTest((prev) =>
+            prev
+              ? {
+                  ...prev,
+                  calls: prev.calls.map((call) =>
+                    call.id === message.callId ? message.call : call,
+                  ),
+                }
+              : prev,
+          );
+        }
+      },
+      [test?.id, setTest],
+    ),
+  );
 
   useEffect(() => {
     if (_test) {
