@@ -21,6 +21,7 @@ import Spinner from "~/components/Spinner";
 
 interface AddAgentModalProps {
   children: React.ReactNode;
+  refetchAgents: () => void;
 }
 
 interface InputWithLabelProps {
@@ -65,7 +66,7 @@ const loadingMessages = [
   "finalizing intent structure",
 ];
 
-export function AddAgentModal({ children }: AddAgentModalProps) {
+export function AddAgentModal({ children, refetchAgents }: AddAgentModalProps) {
   const [isGeneratingIntents, setIsGeneratingIntents] = useState(false);
   const [loadingText, setLoadingText] = useState("generating intents");
   const [modalOpen, setModalOpen] = useState(false);
@@ -116,6 +117,7 @@ export function AddAgentModal({ children }: AddAgentModalProps) {
   const { mutate: createAgent } = api.agent.create.useMutation({
     onSuccess: () => {
       setModalOpen(false);
+      refetchAgents();
     },
   });
 

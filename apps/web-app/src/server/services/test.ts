@@ -38,9 +38,9 @@ export class TestService {
     }
     const tests = agent.enabledTestAgents.flatMap((testAgent) =>
       agent.intents.map((intent) => ({
-        testAgentId: testAgent.testAgentId,
+        testAgentVapiId: testAgent.vapiId,
         intentId: intent.id,
-        testAgentPrompt: testAgent.testAgent.prompt,
+        testAgentPrompt: testAgent.prompt,
         intentPrompt: intent.instructions,
       })),
     );
@@ -50,7 +50,7 @@ export class TestService {
     const calls = await Promise.all(
       tests.map(async (test) => {
         const vapiCall = await initiateVapiCall(
-          test.testAgentId,
+          test.testAgentVapiId,
           agent.phoneNumber,
           test.testAgentPrompt,
           test.intentPrompt,

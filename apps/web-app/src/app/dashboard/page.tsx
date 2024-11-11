@@ -7,14 +7,14 @@ import { AddAgentModal } from "~/app/_components/AddAgentModal";
 import { api } from "~/trpc/react";
 
 export default function DashboardPage() {
-  const { data: agents } = api.agent.getAll.useQuery();
+  const { data: agents, refetch: refetchAgents } = api.agent.getAll.useQuery();
 
   return (
     <div className="flex flex-1 flex-col gap-8 overflow-hidden">
       <div className="container flex items-center justify-between">
         <div className="text-2xl font-medium">agents.</div>
         <div>
-          <AddAgentModal>
+          <AddAgentModal refetchAgents={refetchAgents}>
             <Button className="flex items-center gap-2">
               <PlusIcon className="size-4" /> create agent
             </Button>

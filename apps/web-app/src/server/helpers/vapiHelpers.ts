@@ -1,5 +1,13 @@
 import { vapi } from "~/server/utils/vapiClient";
 
+// export const editVapiAssistant = async (
+//   assistantId: string,
+//   name: string,
+//   prompt: string,
+// ) => {
+//   return await vapi.assistants.update(assistantId, { name, prompt });
+// };
+
 export const createVapiAssistant = async (
   prompt: string,
   name: string,
@@ -49,6 +57,7 @@ export const initiateVapiCall = async (
   intentPrompt?: string,
 ) => {
   return await vapi.calls.create({
+    phoneNumberId: "c3235d31-67cf-4e38-a3ed-41e23cac5c3b",
     assistantId,
     customer: {
       number: phoneNumber,

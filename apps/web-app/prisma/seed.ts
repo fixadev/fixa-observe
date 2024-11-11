@@ -50,8 +50,10 @@ async function main() {
     },
   ];
 
+  // TODO: Add editing and deleting that works
+
   for (const agent of testAgents) {
-    await deleteVapiAssistantById(agent.id);
+    // await deleteVapiAssistantById(agent.id);
     const vapiAssistant = await createVapiAssistant(
       agent.prompt,
       agent.name,
