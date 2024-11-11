@@ -3,7 +3,6 @@
 import { PlusIcon } from "@heroicons/react/24/solid";
 import { Button } from "~/components/ui/button";
 import AgentCard from "~/components/dashboard/AgentCard";
-import { TEST_AGENT } from "~/lib/test-data";
 import { AddAgentModal } from "~/app/_components/AddAgentModal";
 import { api } from "~/trpc/react";
 
