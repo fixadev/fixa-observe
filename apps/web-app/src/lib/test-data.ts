@@ -1,16 +1,9 @@
-import type { Agent, RoleType, TestAgent } from "prisma/generated/zod";
-import { type TestWithIncludes, type CallWithIncludes } from "./types";
-
-export const TEST_AGENT: Agent = {
-  id: "1",
-  ownerId: "1",
-  createdAt: new Date(),
-  updatedAt: new Date(),
-  name: "Test Agent",
-  phoneNumber: "+1 (234) 567-8901",
-  githubRepoUrl: "https://github.com/pixa-dev/pixa-drive-thru",
-  systemPrompt: "Test system prompt",
-};
+import type { RoleType, TestAgent } from "prisma/generated/zod";
+import type {
+  TestWithIncludes,
+  CallWithIncludes,
+  AgentWithIncludes,
+} from "./types";
 
 export const TEST_TEST_AGENTS: TestAgent[] = [
   {
@@ -41,6 +34,18 @@ export const TEST_TEST_AGENTS: TestAgent[] = [
     vapiId: "test-vapi-id",
   },
 ];
+
+export const TEST_AGENT: AgentWithIncludes = {
+  id: "1",
+  ownerId: "1",
+  createdAt: new Date(),
+  updatedAt: new Date(),
+  name: "Test Agent",
+  phoneNumber: "+1 (234) 567-8901",
+  githubRepoUrl: "https://github.com/pixa-dev/pixa-drive-thru",
+  systemPrompt: "Test system prompt",
+  enabledTestAgents: [TEST_TEST_AGENTS[0]!, TEST_TEST_AGENTS[1]!],
+};
 
 export const TEST_INTENTS = [
   {

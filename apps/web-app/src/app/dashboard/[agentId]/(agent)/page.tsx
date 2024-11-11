@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -18,12 +18,15 @@ import { api } from "~/trpc/react";
 import { useToast } from "~/hooks/use-toast";
 
 import useSocketMessage from "~/app/_components/UseSocketMessage";
-import { TEST_TEST_AGENTS } from "~/lib/test-data";
+import { TEST_AGENT, TEST_TEST_AGENTS } from "~/lib/test-data";
 import { TEST_TESTS } from "~/lib/test-data";
+import { type AgentWithIncludes } from "~/lib/types";
 
 export default function AgentPage({ params }: { params: { agentId: string } }) {
   const [testInitializing, setTestInitializing] = useState(false);
   const [testAgentsModalOpen, setTestAgentsModalOpen] = useState(false);
+
+  const agent = useMemo(() => TEST_AGENT, []);
 
   const { toast } = useToast();
   const { triggered, setTriggered } = useSocketMessage();
@@ -81,6 +84,7 @@ export default function AgentPage({ params }: { params: { agentId: string } }) {
         </div>
       </div>
       <TestAgentsModal
+        agent={agent}
         open={testAgentsModalOpen}
         onOpenChange={setTestAgentsModalOpen}
       />
@@ -89,13 +93,17 @@ export default function AgentPage({ params }: { params: { agentId: string } }) {
 }
 
 function TestAgentsModal({
+  agent,
   open,
   onOpenChange,
 }: {
+  agent: AgentWithIncludes;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
-  const [enabledAgents, setEnabledAgents] = useState<Set<string>>(new Set());
+  const [enabledAgents, setEnabledAgents] = useState<Set<string>>(
+    new Set(agent.enabledTestAgents.map((agent) => agent.id)),
+  );
 
   const toggleAgent = (agentId: string) => {
     setEnabledAgents((prev) => {
