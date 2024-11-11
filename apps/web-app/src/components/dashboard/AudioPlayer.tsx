@@ -20,13 +20,14 @@ import {
 } from "~/components/ui/select";
 import type { CallWithIncludes } from "~/lib/types";
 import { type CallError } from "prisma/generated/zod";
-import { formatDurationHoursMinutesSeconds } from "~/lib/utils";
+import { cn, formatDurationHoursMinutesSeconds } from "~/lib/utils";
 import { debounce } from "lodash";
 import useSWR from "swr";
 import { useAudio } from "~/hooks/useAudio";
 
 export type AudioPlayerRef = {
   setActiveError: (error: CallError | null) => void;
+  setHoveredError: (errorId: string | null) => void;
 };
 
 const AudioPlayer = forwardRef<
@@ -43,6 +44,7 @@ const AudioPlayer = forwardRef<
   const [isDragging, setIsDragging] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const [activeError, setActiveError] = useState<CallError | null>(null);
+  const [hoveredError, setHoveredError] = useState<string | null>(null);
   const [key, setKey] = useState(0);
   const { data: botAudioBlob } = useSWR<Blob>(
     call.stereoRecordingUrl,
@@ -181,6 +183,9 @@ const AudioPlayer = forwardRef<
           seek(error.secondsFromStart - offsetFromStart);
         }
       },
+      setHoveredError: (errorId: string | null) => {
+        setHoveredError(errorId);
+      },
     }),
     [seek, offsetFromStart],
   );
@@ -264,7 +269,10 @@ const AudioPlayer = forwardRef<
               }}
             >
               <div
-                className="size-full cursor-pointer border border-red-500 bg-red-500/20 hover:bg-red-500/50"
+                className={cn(
+                  "size-full cursor-pointer border border-red-500 bg-red-500/20 hover:bg-red-500/50",
+                  hoveredError === error.id && "bg-red-500/50",
+                )}
                 onMouseEnter={() => onErrorHover?.(error.id)}
                 onMouseLeave={() => onErrorHover?.(null)}
                 onClick={(e) => {
