@@ -101,11 +101,14 @@ model Call {
 model Message {
   id               String @id @default(cuid())
   role             Role
-  message          String
-  time             Float
-  endTime          Float
-  secondsFromStart Float
-  duration         Float?
+  message          String @default("")
+  time             Float  @default(0)
+  endTime          Float  @default(0)
+  secondsFromStart Float  @default(0)
+  duration         Float  @default(0)
+  name             String @default("")
+  result           String @default("")
+  toolCalls        Json   @default("[]")
 
   call   Call   @relation(fields: [callId], references: [id])
   callId String
