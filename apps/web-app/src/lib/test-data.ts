@@ -13,7 +13,6 @@ export const TEST_TEST_AGENTS: TestAgent[] = [
     headshotUrl: "/images/agent-avatars/steve.jpeg",
     description: "angry man who had a bad day",
     prompt: "Test prompt",
-    vapiId: "test-vapi-id",
   },
   {
     id: "2",
@@ -22,7 +21,6 @@ export const TEST_TEST_AGENTS: TestAgent[] = [
     headshotUrl: "/images/agent-avatars/marge.jpeg",
     description: "old lady with a temper",
     prompt: "Test prompt",
-    vapiId: "test-vapi-id",
   },
   {
     id: "3",
@@ -31,7 +29,6 @@ export const TEST_TEST_AGENTS: TestAgent[] = [
     headshotUrl: "/images/agent-avatars/lily.jpeg",
     description: "young woman who says 'like' a lot",
     prompt: "Test prompt",
-    vapiId: "test-vapi-id",
   },
 ];
 
@@ -326,11 +323,7 @@ export const TEST_CALLS: CallWithIncludes[] = [
           },
         ],
   stereoRecordingUrl:
-    "https://jtuyprjjgxbgmtjiykoa.supabase.co/storage/v1/object/public/recordings/1a9a9108-95c4-4fd9-befc-a27cfb5eff69-1730766982390-5c6dd41d-32ec-4fe3-bbc1-e5f3e682a58f-mono.wav",
-  botRecordingUrl:
-    "https://jtuyprjjgxbgmtjiykoa.supabase.co/storage/v1/object/public/recordings/1a9a9108-95c4-4fd9-befc-a27cfb5eff69-1730766982390-5c6dd41d-32ec-4fe3-bbc1-e5f3e682a58f-mono.wav",
-  userRecordingUrl:
-    "https://jtuyprjjgxbgmtjiykoa.supabase.co/storage/v1/object/public/recordings/1a9a9108-95c4-4fd9-befc-a27cfb5eff69-1730766982390-5c6dd41d-32ec-4fe3-bbc1-e5f3e682a58f-mono.wav",
+    "https://jtuyprjjgxbgmtjiykoa.supabase.co/storage/v1/object/public/recordings/1a9a9108-95c4-4fd9-befc-a27cfb5eff69-1730766982390-c7218bd2-42b9-47e4-9ce1-9c6dcf62e8d0-stereo.wav",
 }));
 
 export const TEST_TESTS: TestWithIncludes[] = [
