@@ -29,7 +29,7 @@ export default function AgentLayout({
 
   return (
     <div>
-      <LayoutHeader tabValue={tabValue} tabs={tabs} />
+      <LayoutHeader tabValue={tabValue} tabs={tabs} agentId={params.agentId} />
       {children}
     </div>
   );
