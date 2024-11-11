@@ -10,7 +10,7 @@ import {
   SelectTrigger,
 } from "~/components/ui/select";
 import CallCard from "~/components/dashboard/CallCard";
-import type { CallWithIncludes } from "~/lib/types";
+import type { TestWithIncludes } from "~/lib/types";
 import CallDetails from "~/components/dashboard/CallDetails";
 import { AudioProvider, useAudio } from "~/hooks/useAudio";
 import { api } from "~/trpc/react";
@@ -36,9 +36,9 @@ export default function TestPageWithProvider({
 function TestPage({ params }: { params: { agentId: string; testId: string } }) {
   const [selectedCallType, setSelectedCallType] = useState<CallType>("error");
   const [selectedCallId, setSelectedCallId] = useState<string | null>(null);
-  const [calls, setCalls] = useState<CallWithIncludes[]>([]);
+  const [test, setTest] = useState<TestWithIncludes | null>(null);
   const { play, pause, seek, isPlaying } = useAudio();
-  const { data: test, isLoading } = api.test.get.useQuery({
+  const { data: _test, isLoading } = api.test.get.useQuery({
     id: params.testId,
   });
   const { data: agent } = api.agent.get.useQuery({ id: params.agentId });
@@ -46,16 +46,26 @@ function TestPage({ params }: { params: { agentId: string; testId: string } }) {
   const { user } = useUser();
 
   useSocketMessage(user?.id, (message: SocketMessage) => {
-    setCalls((prev) =>
-      prev.map((call) => (call.id === message.callId ? message.call : call)),
-    );
+    if (test?.id === message.testId) {
+      setTest((prev) =>
+        prev
+          ? {
+              ...prev,
+              calls: prev.calls.map((call) =>
+                call.id === message.callId ? message.call : call,
+              ),
+            }
+          : prev,
+      );
+    }
   });
 
   useEffect(() => {
-    // Load calls on mount
-    setCalls(test?.calls ?? []);
-    setSelectedCallId(test?.calls[0]?.id ?? null);
-  }, [test]);
+    if (_test) {
+      setTest(_test);
+    }
+  }, [_test]);
+
   return (
     <div>
       {/* header */}
@@ -113,7 +123,7 @@ function TestPage({ params }: { params: { agentId: string; testId: string } }) {
               </Select>
             </div>
             <div className="flex flex-col overflow-y-auto">
-              {calls
+              {test?.calls
                 .filter((call) => {
                   if (selectedCallType === "error")
                     return call.errors !== undefined;
@@ -135,11 +145,11 @@ function TestPage({ params }: { params: { agentId: string; testId: string } }) {
                 ))}
             </div>
           </div>
-          {selectedCallId && agent && (
+          {selectedCallId && agent && test && (
             <div className="min-h-screen flex-1">
               <CallDetails
                 key={selectedCallId}
-                call={calls.find((call) => call.id === selectedCallId)!}
+                call={test.calls.find((call) => call.id === selectedCallId)!}
                 agent={agent}
               />
             </div>
