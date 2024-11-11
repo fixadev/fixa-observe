@@ -1,6 +1,5 @@
 import "~/styles/globals.css";
 
-import { ThemeProvider } from "@/components/ThemeProvider";
 import { Toaster } from "@/components/ui/toaster";
 import { type Metadata } from "next";
 import { TRPCReactProvider } from "~/trpc/react";
@@ -25,6 +24,7 @@ export default function RootLayout({
       lang="en"
       className={`${ibmPlexSans.className} light h-full`}
       style={{ colorScheme: "light" }}
+      // suppressHydrationWarning
     >
       <CSPostHogProvider>
         <ClerkProvider
@@ -32,21 +32,21 @@ export default function RootLayout({
         // localization={localization}
         >
           <body className="h-full">
-            <ThemeProvider
+            {/* <ThemeProvider
               attribute="class"
               defaultTheme="light"
               // enableSystem
               disableTransitionOnChange
-            >
-              <TRPCReactProvider>
-                <TooltipProvider delayDuration={100}>
-                  <ChildrenWrapper>
-                    {children}
-                    <Toaster />
-                  </ChildrenWrapper>
-                </TooltipProvider>
-              </TRPCReactProvider>
-            </ThemeProvider>
+            > */}
+            <TRPCReactProvider>
+              <TooltipProvider delayDuration={100}>
+                <ChildrenWrapper>
+                  {children}
+                  <Toaster />
+                </ChildrenWrapper>
+              </TooltipProvider>
+            </TRPCReactProvider>
+            {/* </ThemeProvider> */}
           </body>
         </ClerkProvider>
       </CSPostHogProvider>

@@ -20,7 +20,11 @@ import {
 } from "~/components/ui/select";
 import type { CallWithIncludes } from "~/lib/types";
 import { type CallError } from "prisma/generated/zod";
-import { cn, formatDurationHoursMinutesSeconds } from "~/lib/utils";
+import {
+  cn,
+  createWavBlob,
+  formatDurationHoursMinutesSeconds,
+} from "~/lib/utils";
 import { debounce } from "lodash";
 import useSWR from "swr";
 import { useAudio } from "~/hooks/useAudio";
@@ -46,14 +50,12 @@ const AudioPlayer = forwardRef<
   const [activeError, setActiveError] = useState<CallError | null>(null);
   const [hoveredError, setHoveredError] = useState<string | null>(null);
   const [key, setKey] = useState(0);
-  const { data: botAudioBlob } = useSWR<Blob>(
+  const { data: stereoRecordingBlob } = useSWR<Blob>(
     call.stereoRecordingUrl,
     (url: string) => fetch(url).then((res) => res.blob()),
   );
-  const { data: userAudioBlob } = useSWR<Blob>(
-    call.stereoRecordingUrl,
-    (url: string) => fetch(url).then((res) => res.blob()),
-  );
+  const [botAudioBlob, setBotAudioBlob] = useState<Blob | null>(null);
+  const [userAudioBlob, setUserAudioBlob] = useState<Blob | null>(null);
   const {
     isPlaying,
     play,
@@ -75,6 +77,27 @@ const AudioPlayer = forwardRef<
       setLoaded(true);
     }, 600);
   }, []);
+
+  useEffect(() => {
+    const processAudio = async () => {
+      if (stereoRecordingBlob) {
+        // Create an audio context to split the stereo channels
+        const audioContext = new AudioContext();
+        const audioArrayBuffer = await stereoRecordingBlob.arrayBuffer();
+        const audioBuffer =
+          await audioContext.decodeAudioData(audioArrayBuffer);
+
+        // Get the left and right channel data and create proper WAV blobs
+        const leftChannel = audioBuffer.getChannelData(0);
+        const rightChannel = audioBuffer.getChannelData(1);
+
+        setBotAudioBlob(createWavBlob(leftChannel, audioBuffer.sampleRate));
+        setUserAudioBlob(createWavBlob(rightChannel, audioBuffer.sampleRate));
+      }
+    };
+
+    void processAudio();
+  }, [stereoRecordingBlob, setAudioUrl]);
 
   // Check if we need to stop playback due to reaching error end
   useEffect(() => {
