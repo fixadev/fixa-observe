@@ -4,6 +4,7 @@ import type { CallWithIncludes } from "~/lib/types";
 import { useMemo } from "react";
 import Image from "next/image";
 import { CallStatus } from "@prisma/client";
+import { ExclamationCircleIcon } from "@heroicons/react/24/solid";
 
 export default function CallCard({
   call,
@@ -68,21 +69,33 @@ export default function CallCard({
           )}
         </div>
         <div className="flex items-center justify-between gap-4">
-          <div
-            className={cn(
-              "w-fit rounded-full px-2 py-1 text-xs",
-              call.status === CallStatus.in_progress
-                ? "bg-yellow-100"
+          <div className="flex items-center gap-2">
+            <div
+              className={cn(
+                "w-fit rounded-full px-2 py-1 text-xs",
+                call.status === CallStatus.in_progress
+                  ? "bg-yellow-100"
+                  : call.result === "failure"
+                    ? "bg-red-100"
+                    : "bg-green-100",
+              )}
+            >
+              {call.status === CallStatus.in_progress
+                ? "in progress"
                 : call.result === "failure"
-                  ? "bg-red-100"
-                  : "bg-green-100",
-            )}
-          >
-            {call.status === CallStatus.in_progress
-              ? "in progress"
-              : call.result === "failure"
-                ? "failed"
-                : "succeeded"}
+                  ? "failed"
+                  : "succeeded"}
+            </div>
+
+            {call.status !== CallStatus.in_progress &&
+              call.errors.length > 0 && (
+                <div className="flex gap-0.5">
+                  <ExclamationCircleIcon className="size-4 shrink-0 text-red-500" />
+                  <div className="mt-px text-xs text-muted-foreground">
+                    {call.errors?.length}
+                  </div>
+                </div>
+              )}
           </div>
           {call.status !== CallStatus.in_progress && (
             <div className="flex shrink-0 items-center text-xs text-muted-foreground">
