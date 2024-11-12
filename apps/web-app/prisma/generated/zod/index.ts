@@ -90,7 +90,7 @@ export const RoleSchema = z.enum(['user','bot','system','tool_calls','tool_call_
 
 export type RoleType = `${z.infer<typeof RoleSchema>}`
 
-export const CallStatusSchema = z.enum(['in_progress','completed']);
+export const CallStatusSchema = z.enum(['in_progress','analyzing','completed']);
 
 export type CallStatusType = `${z.infer<typeof CallStatusSchema>}`
 

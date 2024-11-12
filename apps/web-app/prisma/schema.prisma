@@ -140,5 +140,6 @@ enum Role {
 
 enum CallStatus {
   in_progress
+  analyzing
   completed
 }
