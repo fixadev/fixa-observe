@@ -1,5 +1,8 @@
 import { PrismaClient } from "@prisma/client";
-import { createVapiAssistant } from "../src/server/helpers/vapiHelpers";
+import {
+  createOrUpdateVapiAssistant,
+  deleteVapiAssistantById,
+} from "../src/server/helpers/vapiHelpers";
 
 const prisma = new PrismaClient();
 
@@ -9,16 +12,14 @@ async function main() {
       name: "lily",
       headshotUrl: "/images/agent-avatars/lily.jpeg",
       description: "a young woman who says like a lot",
-      prompt:
-        "You are lily smith, a young woman who says like a lot. do not call the end call tool until the person you are speaking to clearly indicates that the conversation is over (e.g. 'bye', 'goodbye', 'see you later', 'have a good day', etc.)",
+      prompt: "You are lily smith, a young woman who says like a lot.",
       voiceId: "sarah",
     },
     {
       name: "steve",
       headshotUrl: "/images/agent-avatars/steve.jpeg",
       description: "a normal guy",
-      prompt:
-        "You are steve wozniak, a normal guy. do not call the end call tool until the person you are speaking to clearly indicates that the conversation is over (e.g. 'bye', 'goodbye', 'see you later', 'have a good day', etc.).",
+      prompt: "You are steve wozniak, a normal guy.",
       voiceId: "ryan",
     },
     // {
@@ -48,22 +49,42 @@ async function main() {
   ];
 
   // TODO: Add editing and deleting that works
+  const oldAssistants = await prisma.testAgent.findMany({
+    where: { ownerId: "SYSTEM" },
+  });
+  const assistantIdsToDelete = oldAssistants.filter(
+    (assistant) => !testAgents.some((agent) => agent.name === assistant.name),
+  );
+
+  for (const assistant of assistantIdsToDelete) {
+    await deleteVapiAssistantById(assistant.id);
+    await prisma.testAgent.delete({ where: { id: assistant.id } });
+  }
 
   for (const agent of testAgents) {
     // await deleteVapiAssistantById(agent.id);
-    const vapiAssistant = await createVapiAssistant(
+    const vapiAssistant = await createOrUpdateVapiAssistant(
       agent.prompt,
       agent.name,
       agent.voiceId,
       true,
     );
-    await prisma.testAgent.create({
-      data: {
+    await prisma.testAgent.upsert({
+      where: { id: vapiAssistant.id },
+      update: {
+        name: agent.name,
+        headshotUrl: agent.headshotUrl,
+        description: agent.description,
+        prompt: agent.prompt,
+        ownerId: "SYSTEM",
+      },
+      create: {
         id: vapiAssistant.id,
         name: agent.name,
         headshotUrl: agent.headshotUrl,
         description: agent.description,
         prompt: agent.prompt,
+        ownerId: "SYSTEM",
       },
     });
   }

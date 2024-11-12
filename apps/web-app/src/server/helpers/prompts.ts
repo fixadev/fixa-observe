@@ -37,7 +37,7 @@ export const generateOutboundIntentsPrompt = `your job is to create intents to t
   your response will be an array of JSON objects with the following properties:
 
   - name: the name of the intent -- don't use underscores or other special characters
-  - instructions: the instructions for the intent
+  - instructions: the instructions for test agent. in this case the test agent will be answering a call from the outbound phone agent
   - successCriteria: what criteria need to be met for a conversation with this intent to be considered successful -- make this as specific as possible
 
   i.e. if the system prompt is "your are an sales agent that calls potential customers to sell a product", 
@@ -46,17 +46,17 @@ export const generateOutboundIntentsPrompt = `your job is to create intents to t
   {
     "name": "ask about the product",
     "instructions": "ask about the product, specifically ask about the features and the benefits",
-    "successCriteria": "the product is successfully described -- including the features and the benefits"
+    "successCriteria": "the agent successfully describes the product -- including the features and the benefits"
   },
   {
     "name": "be skeptical of the product quality",
     "instructions": "ask about the quality of the product, specifically ask about the quality and the durability",
-    "successCriteria": "the quality is successfully described -- including the quality and the durability"
+    "successCriteria": "the agent successfully describes the quality of the product -- including the quality and the durability"
   },
   {
     "name": "ask about the price",
     "instructions": "ask about the price, specifically ask about the price and the payment options",
-    "successCriteria": "the price is successfully described -- including the price and the payment options"
+    "successCriteria": "the agent successfully describes the price and the payment options -- and persuades the customer to buy the product"
   }
   `;
 

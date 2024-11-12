@@ -8,12 +8,37 @@ import { vapi } from "~/server/utils/vapiClient";
 //   return await vapi.assistants.update(assistantId, { name, prompt });
 // };
 
-export const createVapiAssistant = async (
+export const createOrUpdateVapiAssistant = async (
   prompt: string,
   name: string,
   voiceId: string,
   systemTemplate?: boolean,
 ) => {
+  const assistants = await vapi.assistants.list();
+  const existingAssistant = assistants.find(
+    (assistant) =>
+      assistant.metadata?.owner === "SYSTEM" && assistant.name === name,
+  );
+  if (existingAssistant) {
+    return await vapi.assistants.update(existingAssistant.id, {
+      name,
+      model: {
+        provider: "openai",
+        model: "gpt-4o",
+        tools: [
+          {
+            type: "endCall",
+          },
+        ],
+        messages: [
+          {
+            role: "system",
+            content: prompt,
+          },
+        ],
+      },
+    });
+  }
   return await vapi.assistants.create({
     name,
     transcriber: {
@@ -49,13 +74,7 @@ export const createVapiAssistant = async (
 };
 
 export const deleteVapiAssistantById = async (assistantId: string) => {
-  const assistants = await vapi.assistants.list();
-  const assistant = assistants.find(
-    (assistant) => assistant.metadata?.internalId === assistantId,
-  );
-  if (assistant) {
-    return await vapi.assistants.delete(assistant.id);
-  }
+  return await vapi.assistants.delete(assistantId);
 };
 
 export const initiateVapiCall = async (
