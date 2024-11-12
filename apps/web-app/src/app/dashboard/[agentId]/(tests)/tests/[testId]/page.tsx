@@ -21,7 +21,6 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "~/components/ui/popover";
-import { EllipsisHorizontalCircleIcon } from "@heroicons/react/24/outline";
 import { InformationCircleIcon } from "@heroicons/react/24/solid";
 
 // type CallType = "error" | "no-errors" | "all";
