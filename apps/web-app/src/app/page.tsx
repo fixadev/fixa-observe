@@ -4,9 +4,18 @@ import { Button } from "~/components/ui/button";
 import Link from "next/link";
 import Image from "next/image";
 import ImportAgentFlow from "~/app/_components/ImportAgentFlow";
+import { useCallback } from "react";
+import { LinkedInLogoIcon } from "@radix-ui/react-icons";
 
 // 420 69 🍆
 export default function LandingPage() {
+  const scrollToHowItWorks = useCallback(() => {
+    const howItWorksSection = document.getElementById("how-it-works");
+    if (howItWorksSection) {
+      howItWorksSection.scrollIntoView({ behavior: "smooth" });
+    }
+  }, []);
+
   return (
     <>
       <div className="container relative mx-auto flex h-screen items-center">
@@ -28,14 +37,19 @@ export default function LandingPage() {
                 book demo
               </Link>
             </Button>
-            <Button size="lg" variant="ghost" asChild className="w-fit">
-              <Link href="#how-it-works">how it works</Link>
+            <Button
+              size="lg"
+              variant="ghost"
+              className="w-fit"
+              onClick={scrollToHowItWorks}
+            >
+              how it works
             </Button>
           </div>
         </div>
         <div className="absolute bottom-6 left-0 right-0 flex items-center justify-center gap-2">
           <Image
-            src="/images/yc.png"
+            src="/images/landing-page/yc.png"
             alt="y-combinator"
             width={200}
             height={200 * (399 / 1400)}
@@ -93,10 +107,58 @@ export default function LandingPage() {
               </div>
             </div>
           </div>
+          <div className="flex items-center gap-4">
+            <div className="flex flex-col gap-4">
+              <div className="text-2xl font-medium">3. analyze calls 🧐</div>
+              <div className="text-muted-foreground">
+                pinpoint exactly where errors occur in the audio.
+              </div>
+            </div>
+            <div className="rounded-md border border-border bg-background p-2 shadow-sm">
+              <Image
+                src="/images/landing-page/analyze.png"
+                alt="analyze"
+                width={400}
+                height={400}
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className="dark bg-background py-16 text-foreground">
+        <div className="container mx-auto flex flex-col items-center gap-8 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-col items-center gap-4 sm:items-start">
+            <div className="text-2xl font-medium">pixa.</div>
+            <div className="text-center text-lg sm:text-left">
+              testing for AI voice agents :)
+            </div>
+          </div>
           <div className="flex flex-col gap-4">
-            <div className="text-2xl font-medium">3. analyze calls 🧐</div>
-            <div className="text-muted-foreground">
-              pinpoint exactly where errors occur in the audio.
+            <Button size="lg" asChild className="w-fit">
+              <Link
+                href="https://cal.com/team/pixa/20-minute-meeting"
+                target="_blank"
+              >
+                book demo
+              </Link>
+            </Button>
+            {/* <Button onClick={() => setRequestAccessDialogOpen(true)}>
+              Request access
+            </Button> */}
+            <div className="flex gap-2">
+              <Button variant="ghost" asChild>
+                <Link href="mailto:contact@pixa.dev" target="_blank">
+                  Contact
+                </Link>
+              </Button>
+              <Button variant="ghost" asChild>
+                <Link
+                  href="https://www.linkedin.com/company/pixa-dev"
+                  target="_blank"
+                >
+                  <LinkedInLogoIcon className="size-5" />
+                </Link>
+              </Button>
             </div>
           </div>
         </div>

@@ -43,7 +43,7 @@ export default function CallCard({
           call.id === selectedCallId ? "visible" : "hidden",
         )}
       ></div>
-      <div className="flex shrink-0 items-center">
+      <div className="flex size-[48px] shrink-0 items-center">
         <Image
           src={call.testAgent.headshotUrl}
           alt="agent avatar"
