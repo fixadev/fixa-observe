@@ -364,7 +364,10 @@ export default function CallDetails({
                     {errors.map((error) => (
                       <div
                         key={error.id}
-                        className="flex w-full items-start gap-1 py-0.5 hover:bg-red-500/20"
+                        className={cn(
+                          "flex w-full items-start gap-1 py-0.5",
+                          errors.length > 1 && "hover:bg-red-500/20",
+                        )}
                         onMouseEnter={() => {
                           setActiveErrorId(error.id);
                           audioPlayerRef.current?.setHoveredError(error.id);
