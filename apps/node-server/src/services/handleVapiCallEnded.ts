@@ -13,7 +13,11 @@ export const handleVapiCallEnded = async (
   }
   const call = await db.call.findFirst({
     where: { id: callId },
-    include: { testAgent: true, test: { include: { agent: true } } },
+    include: {
+      testAgent: true,
+      intent: true,
+      test: { include: { agent: true } },
+    },
   });
 
   if (!call) {
@@ -52,6 +56,7 @@ export const handleVapiCallEnded = async (
   const { errors, success, failureReason } = await analyzeCall(
     agent.systemPrompt,
     testAgent?.prompt,
+    call.intent.successCriteria,
     report.call,
     report.artifact.messages,
   );

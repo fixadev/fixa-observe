@@ -9,6 +9,10 @@ generator client {
   // previewFeatures = ["multiSchema"]
 }
 
+generator zod {
+  provider = "zod-prisma-types"
+}
+
 datasource db {
   provider  = "postgresql"
   url       = env("DATABASE_URL")
@@ -67,9 +71,10 @@ model TestAgent {
 }
 
 model Intent {
-  id           String @id @default(cuid())
-  name         String
-  instructions String
+  id              String @id @default(cuid())
+  name            String
+  instructions    String
+  successCriteria String @default("")
 
   agent   Agent  @relation(fields: [agentId], references: [id], onDelete: Cascade)
   agentId String

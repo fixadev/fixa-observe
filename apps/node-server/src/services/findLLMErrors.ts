@@ -29,6 +29,7 @@ const outputSchema = z.object({
 export const analyzeCall = async (
   agentPrompt: string,
   testAgentPrompt: string,
+  successCriteria: string,
   call: Call,
   messages: ArtifactMessagesItem[],
 ): Promise<CallResult> => {
@@ -40,10 +41,11 @@ export const analyzeCall = async (
   You will be provided the following information:
   - The main agent's prompt
   - The test agent's prompt / intent
+  - The success criteria for the call
   - The call transcript. In this, the main agent will be labeled as "user" and the test agent will be labeled as "bot".
 
   You will output a JSON object with the following fields:
-  - success: A boolean indicating if the call was successful -- if there are any errors, the call is not successful
+  - success: A boolean indicating if the call was successful. The call is successful if the main agent achieves the success criteria.
   - failureReason: A short sentence CONCISELY describing the primary failure reason, if any
   - errors: An array of objects, each representing an error that the main agent made. Each error object will have the following fields:
     - type: A string describing the type of error
@@ -60,7 +62,7 @@ export const analyzeCall = async (
 
   `;
 
-  const prompt = `${basePrompt}\n\nMain Agent Prompt: ${agentPrompt}\n\nTest Agent Prompt: ${testAgentPrompt}\n\nCall Transcript: ${JSON.stringify(
+  const prompt = `${basePrompt}\n\nMain Agent Prompt: ${agentPrompt}\n\nSuccess Criteria: ${successCriteria}\n\nTest Agent Prompt: ${testAgentPrompt}\n\nCall Transcript: ${JSON.stringify(
     messages,
   )}`;
 
