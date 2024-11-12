@@ -9,9 +9,9 @@ generator client {
   // previewFeatures = ["multiSchema"]
 }
 
-// generator zod {
-//   provider = "zod-prisma-types"
-// }
+generator zod {
+  provider = "zod-prisma-types"
+}
 
 datasource db {
   provider  = "postgresql"
@@ -50,7 +50,7 @@ model Test {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  agent   Agent  @relation(fields: [agentId], references: [id])
+  agent   Agent  @relation(fields: [agentId], references: [id], onDelete: Cascade)
   agentId String
   calls   Call[]
 
@@ -75,23 +75,24 @@ model Intent {
   name         String
   instructions String
 
-  agent   Agent  @relation(fields: [agentId], references: [id])
+  agent   Agent  @relation(fields: [agentId], references: [id], onDelete: Cascade)
   agentId String
   calls   Call[]
 }
 
 model Call {
   id                 String      @id @default(cuid())
+  ownerId            String?
   status             CallStatus
   result             CallResult?
   failureReason      String?
   stereoRecordingUrl String
 
-  test        Test      @relation(fields: [testId], references: [id])
+  test        Test      @relation(fields: [testId], references: [id], onDelete: Cascade)
   testId      String
-  testAgent   TestAgent @relation(fields: [testAgentId], references: [id])
+  testAgent   TestAgent @relation(fields: [testAgentId], references: [id], onDelete: Cascade)
   testAgentId String
-  intent      Intent    @relation(fields: [intentId], references: [id])
+  intent      Intent    @relation(fields: [intentId], references: [id], onDelete: Cascade)
   intentId    String
 
   messages Message[]
@@ -110,7 +111,7 @@ model Message {
   result           String @default("")
   toolCalls        Json   @default("[]")
 
-  call   Call   @relation(fields: [callId], references: [id])
+  call   Call   @relation(fields: [callId], references: [id], onDelete: Cascade)
   callId String
 }
 
@@ -120,7 +121,7 @@ model CallError {
   duration         Float
   type             String?
   description      String
-  call             Call    @relation(fields: [callId], references: [id])
+  call             Call    @relation(fields: [callId], references: [id], onDelete: Cascade)
   callId           String
 }
 
