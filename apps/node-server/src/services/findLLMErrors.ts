@@ -33,17 +33,19 @@ export const analyzeCall = async (
   messages: ArtifactMessagesItem[],
 ): Promise<CallResult> => {
   const basePrompt = `
-  Your job to to analyze a call transcript and determine where the assistant made errors, and what those errors were, if any.
-  
+  Your job to to analyze a call transcript between an AI agent (the main agent) and a test AI agent (the test agent), and determine where the main agent made errors, and what those errors were, if any.
+
+  Some main agents will be outbound agents (i.e. an agent that makes a sale to a human), and some will be inbound agents (i.e. an agent that answers questions about a product or service or helps a human book an appointment).
+
   You will be provided the following information:
-  - The assistant agent's prompt
-  - The user agent's prompt / intent
-  - The call transcript. In this, the assistant being tested will be labeled as "user" and the test agent will be labeled as "bot".
+  - The main agent's prompt
+  - The test agent's prompt / intent
+  - The call transcript. In this, the main agent will be labeled as "user" and the test agent will be labeled as "bot".
 
   You will output a JSON object with the following fields:
   - success: A boolean indicating if the call was successful -- if there are any errors, the call is not successful
   - failureReason: A short sentence CONCISELY describing the primary failure reason, if any
-  - errors: An array of objects, each representing an error. Each error object will have the following fields:
+  - errors: An array of objects, each representing an error that the main agent made. Each error object will have the following fields:
     - type: A string describing the type of error
     - description: A string describing the error
     - secondsFromStart: The start time of the error in seconds (use the secondsFromStart for this)
@@ -54,10 +56,11 @@ export const analyzeCall = async (
   Keep the following in mind:
   - secondsFromStart and duration should only encompass the specific portion of the call where the error occurred. It should not be very long (10 seconds is a good max), unless it makes sense for it to be longer.
   - errors should not overlap.
-  - flag an error if the assistant repeats the same phrase multiple times in a row, even though it doesn't make sense for the assistant to do so.
+  - flag an error if the main agent repeats the same phrase multiple times in a row, even though it doesn't make sense for the main agent to do so.
+
   `;
 
-  const prompt = `${basePrompt}\n\nAssistant Agent Prompt: ${agentPrompt}\n\nUser Agent Prompt: ${testAgentPrompt}\n\nCall Transcript: ${JSON.stringify(
+  const prompt = `${basePrompt}\n\nMain Agent Prompt: ${agentPrompt}\n\nTest Agent Prompt: ${testAgentPrompt}\n\nCall Transcript: ${JSON.stringify(
     messages,
   )}`;
 
