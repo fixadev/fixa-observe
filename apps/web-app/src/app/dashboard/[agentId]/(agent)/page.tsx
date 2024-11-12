@@ -151,6 +151,8 @@ function TestAgentsModal({
   onOpenChange: (open: boolean) => void;
 }) {
   const { data: testAgents } = api.agent.getTestAgents.useQuery();
+  const { mutate: toggleTestAgentEnabled } =
+    api.agent.toggleTestAgentEnabled.useMutation();
 
   const [enabledAgents, setEnabledAgents] = useState<Set<string>>(
     new Set(agent.enabledTestAgents.map((agent) => agent.id)),
@@ -160,15 +162,20 @@ function TestAgentsModal({
     setEnabledAgents(new Set(agent.enabledTestAgents.map((agent) => agent.id)));
   }, [agent.enabledTestAgents]);
 
-  const toggleAgent = (agentId: string) => {
+  const toggleAgent = (testAgentId: string) => {
     setEnabledAgents((prev) => {
       const next = new Set(prev);
-      if (next.has(agentId)) {
-        next.delete(agentId);
+      if (next.has(testAgentId)) {
+        next.delete(testAgentId);
       } else {
-        next.add(agentId);
+        next.add(testAgentId);
       }
       return next;
+    });
+    toggleTestAgentEnabled({
+      agentId: agent.id,
+      testAgentId,
+      enabled: !enabledAgents.has(testAgentId),
     });
   };
 

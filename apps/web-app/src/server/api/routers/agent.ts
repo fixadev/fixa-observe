@@ -36,8 +36,8 @@ export const agentRouter = createTRPCRouter({
   toggleTestAgentEnabled: protectedProcedure
     .input(
       z.object({
-        agentId: z.string().cuid(),
-        testAgentId: z.string().cuid(),
+        agentId: z.string(),
+        testAgentId: z.string(),
         enabled: z.boolean(),
       }),
     )
