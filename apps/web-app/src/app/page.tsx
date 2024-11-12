@@ -17,7 +17,7 @@ export default function LandingPage() {
 
   return (
     <>
-      <div className="container relative mx-auto flex flex-col items-center justify-center gap-8 pb-24 pt-16 md:h-screen md:flex-row md:pb-16">
+      <div className="container relative mx-auto flex flex-col items-center justify-center gap-8 pb-24 pt-16 md:h-screen md:flex-row md:pb-16 xl:gap-24">
         <div className="flex w-full flex-col items-center gap-6 md:w-[unset] md:items-start md:gap-12">
           <div className="flex flex-col items-center gap-4 md:items-start md:gap-8">
             <div className="-ml-1 text-4xl font-medium md:-ml-1 md:text-6xl lg:text-7xl">
@@ -99,28 +99,38 @@ export default function LandingPage() {
             </div>
           </div>
           <div className="flex flex-col-reverse items-center gap-8 lg:flex-row">
-            <div className="relative h-[200px] w-full max-w-[400px] sm:h-[300px] lg:w-[400px] lg:max-w-none">
-              <Image
-                src="/images/agent-avatars/steve.jpeg"
-                alt="Test agent 1"
-                width={200}
-                height={200}
-                className="absolute bottom-0 left-0 h-[120px] w-[120px] rounded-full object-cover sm:left-4 sm:h-[150px] sm:w-[150px]"
-              />
-              <Image
-                src="/images/agent-avatars/lily.jpeg"
-                alt="Test agent 2"
-                width={200}
-                height={200}
-                className="absolute left-1/2 top-0 h-[150px] w-[150px] -translate-x-1/2 rounded-full object-cover sm:h-[200px] sm:w-[200px]"
-              />
-              <Image
-                src="/images/agent-avatars/marge.jpeg"
-                alt="Test agent 3"
-                width={200}
-                height={200}
-                className="absolute bottom-0 right-0 h-[120px] w-[120px] rounded-full object-cover sm:right-4 sm:h-[150px] sm:w-[150px]"
-              />
+            <div className="flex flex-row items-center">
+              <div className="overflow-hidden rounded-md border border-border bg-background py-2 shadow-sm lg:-mr-[190px]">
+                <Image
+                  src="/images/landing-page/test-agents-small.png"
+                  alt="test agents"
+                  width={400}
+                  height={400}
+                />
+              </div>
+              <div className="relative hidden h-[200px] w-full max-w-[400px] sm:h-[300px] lg:block lg:w-[400px] lg:max-w-none">
+                <Image
+                  src="/images/agent-avatars/steve.jpeg"
+                  alt="Test agent 1"
+                  width={200}
+                  height={200}
+                  className="absolute bottom-0 left-0 h-[120px] w-[120px] rounded-full object-cover sm:left-4 sm:h-[150px] sm:w-[150px]"
+                />
+                <Image
+                  src="/images/agent-avatars/lily.jpeg"
+                  alt="Test agent 2"
+                  width={200}
+                  height={200}
+                  className="absolute left-1/2 top-0 h-[150px] w-[150px] -translate-x-1/2 rounded-full object-cover sm:h-[200px] sm:w-[200px]"
+                />
+                <Image
+                  src="/images/agent-avatars/marge.jpeg"
+                  alt="Test agent 3"
+                  width={200}
+                  height={200}
+                  className="absolute bottom-0 right-0 h-[120px] w-[120px] rounded-full object-cover sm:right-4 sm:h-[150px] sm:w-[150px]"
+                />
+              </div>
             </div>
             <div className="flex max-w-[400px] flex-col gap-4 lg:w-[400px] lg:max-w-none">
               <div className="text-2xl font-medium">2. run tests 🚀</div>
