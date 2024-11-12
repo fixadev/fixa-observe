@@ -104,6 +104,7 @@ export class TestService {
               stereoRecordingUrl: "",
               testAgentId: call.value.testAgentVapiId,
               intentId: call.value.intentId,
+              ownerId: agent.ownerId,
             })),
           },
         },

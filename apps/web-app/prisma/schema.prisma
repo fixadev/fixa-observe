@@ -82,6 +82,7 @@ model Intent {
 
 model Call {
   id                 String      @id @default(cuid())
+  ownerId            String?
   status             CallStatus
   result             CallResult?
   failureReason      String?

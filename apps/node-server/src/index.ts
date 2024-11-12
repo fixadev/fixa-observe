@@ -2,7 +2,7 @@ import express, { Request, Response } from "express";
 import { createServer } from "http";
 import { Server } from "socket.io";
 import { handleVapiCallEnded } from "./services/handleVapiCallEnded";
-
+import { handleTranscriptUpdate } from "./services/handleTranscriptUpdate";
 const app = express();
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
@@ -43,17 +43,27 @@ app.get("/health", (_, res: Response) => res.json({ status: "ok" }));
 
 app.post("/vapi", async (req: Request, res: Response) => {
   const { message } = req.body;
+  // console.log("Received message", message);
   if (message.type === "end-of-call-report") {
     const result = await handleVapiCallEnded(message);
-
     if (result) {
       const userSocket = connectedUsers.get(result.ownerId);
       if (userSocket) {
-        console.log("Emitting call-ended to user", result.ownerId);
         userSocket.emit("call-ended", {
           testId: result.testId,
           callId: result.callId,
           call: result.call,
+        });
+      }
+    }
+  } else if (message.type === "transcript") {
+    const result = await handleTranscriptUpdate(message);
+    if (result) {
+      const userSocket = connectedUsers.get(result.userId);
+      if (userSocket) {
+        userSocket.emit("transcript-update", {
+          callId: result.callId,
+          messages: result.messages,
         });
       }
     }
