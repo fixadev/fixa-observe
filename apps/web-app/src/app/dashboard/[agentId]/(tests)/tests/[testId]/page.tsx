@@ -2,13 +2,6 @@
 
 import TestCard from "~/components/dashboard/TestCard";
 import { useCallback, useEffect, useState } from "react";
-import {
-  Select,
-  SelectValue,
-  SelectItem,
-  SelectContent,
-  SelectTrigger,
-} from "~/components/ui/select";
 import CallCard from "~/components/dashboard/CallCard";
 import type { TestWithIncludes } from "~/lib/types";
 import CallDetails from "~/components/dashboard/CallDetails";
@@ -24,7 +17,7 @@ import {
 } from "~/lib/agent";
 import { useUser } from "@clerk/nextjs";
 
-type CallType = "error" | "no-errors" | "all";
+// type CallType = "error" | "no-errors" | "all";
 
 export default function TestPageWithProvider({
   params,
@@ -39,7 +32,7 @@ export default function TestPageWithProvider({
 }
 
 function TestPage({ params }: { params: { agentId: string; testId: string } }) {
-  const [selectedCallType, setSelectedCallType] = useState<CallType>("error");
+  // const [selectedCallType] = useState<CallType>("error");
   const [selectedCallId, setSelectedCallId] = useState<string | null>(null);
   const [test, setTest] = useState<TestWithIncludes | null>(null);
   const [callsBeingAnalyzed, setCallsBeingAnalyzed] = useState<Set<string>>(
@@ -139,7 +132,7 @@ function TestPage({ params }: { params: { agentId: string; testId: string } }) {
           }}
         >
           <div className="sticky top-[2.5rem] flex h-[calc(100vh-2.5rem-1px)] w-80 shrink-0 flex-col border-r border-input">
-            <div className="flex items-center gap-2 border-b border-input p-2">
+            {/* <div className="flex items-center gap-2 border-b border-input p-2">
               <div className="text-sm">show</div>
               <Select
                 value={selectedCallType}
@@ -162,16 +155,63 @@ function TestPage({ params }: { params: { agentId: string; testId: string } }) {
                   </SelectItem>
                 </SelectContent>
               </Select>
+            </div> */}
+            <div className="flex flex-col gap-2 border-b border-input p-2">
+              <div className="text-sm font-medium">Intents</div>
+              {test &&
+                Array.from(
+                  new Set(test.calls.map((call) => call.intent.name)),
+                ).map((intent) => {
+                  const callsWithIntent = test.calls.filter(
+                    (call) => call.intent.name === intent,
+                  );
+                  const successCount = callsWithIntent.filter(
+                    (call) => call.result === "success",
+                  ).length;
+                  const totalCount = callsWithIntent.length;
+                  const successRate = (successCount / totalCount) * 100;
+
+                  return (
+                    <div key={String(intent)} className="flex flex-col gap-1">
+                      <div className="flex items-center justify-between">
+                        <div className="text-xs font-medium">
+                          {String(intent)}
+                        </div>
+                        <div className="text-xs">
+                          {Math.round(successRate)}%
+                        </div>
+                      </div>
+                      <div className="flex h-1.5 w-full overflow-hidden rounded-full bg-muted">
+                        <div
+                          className="bg-green-500"
+                          style={{
+                            width: `${successRate}%`,
+                          }}
+                        />
+                        <div
+                          className="bg-red-500"
+                          style={{
+                            width: `${100 - successRate}%`,
+                          }}
+                        />
+                      </div>
+                      <div className="flex justify-between text-xs text-muted-foreground">
+                        <span>{successCount} succeeded</span>
+                        <span>{totalCount - successCount} failed</span>
+                      </div>
+                    </div>
+                  );
+                })}
             </div>
             <div className="flex flex-col overflow-y-auto">
               {test?.calls
-                .filter((call) => {
-                  if (selectedCallType === "error")
-                    return call.errors !== undefined;
-                  if (selectedCallType === "no-errors")
-                    return call.errors === undefined;
-                  return true;
-                })
+                // .filter((call) => {
+                //   if (selectedCallType === "error")
+                //     return call.errors !== undefined;
+                //   if (selectedCallType === "no-errors")
+                //     return call.errors === undefined;
+                //   return true;
+                // })
                 .map((call) => (
                   <CallCard
                     key={call.id}
