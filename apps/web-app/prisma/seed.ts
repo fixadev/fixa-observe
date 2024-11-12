@@ -8,15 +8,17 @@ async function main() {
     {
       name: "lily",
       headshotUrl: "/images/agent-avatars/lily.jpeg",
-      description: "A busy professional who needs quick and accurate responses",
-      prompt: "You are lily smith, a young woman who says like a lot",
+      description: "a young woman who says like a lot",
+      prompt:
+        "You are lily smith, a young woman who says like a lot. do not call the end call tool until the person you are speaking to clearly indicates that the conversation is over (e.g. 'bye', 'goodbye', 'see you later', 'have a good day', etc.)",
       voiceId: "sarah",
     },
     {
       name: "steve",
       headshotUrl: "/images/agent-avatars/steve.jpeg",
-      description: "A technical user who asks detailed questions",
-      prompt: "You are steve wozniak, a normal guy",
+      description: "a normal guy",
+      prompt:
+        "You are steve wozniak, a normal guy. do not call the end call tool until the person you are speaking to clearly indicates that the conversation is over (e.g. 'bye', 'goodbye', 'see you later', 'have a good day', etc.).",
       voiceId: "ryan",
     },
     // {

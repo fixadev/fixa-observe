@@ -110,8 +110,4 @@ export class AgentService {
       });
     }
   }
-
-  async generateIntentsFromPrompt(prompt: string) {
-    return await generateIntentsFromPrompt(prompt);
-  }
 }
