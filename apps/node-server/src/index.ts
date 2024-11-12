@@ -3,6 +3,7 @@ import { createServer } from "http";
 import { Server } from "socket.io";
 import { handleVapiCallEnded } from "./services/handleVapiCallEnded";
 import { handleTranscriptUpdate } from "./services/handleTranscriptUpdate";
+import { handleAnalysisStarted } from "./services/handleAnalysisStarted";
 const app = express();
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
@@ -60,6 +61,19 @@ app.post("/vapi", async (req: Request, res: Response) => {
       }
     }
   } else if (message.type === "transcript") {
+    const analysisStarted = await handleAnalysisStarted(message);
+    if (analysisStarted) {
+      const userSocket = connectedUsers.get(analysisStarted.userId);
+      if (userSocket) {
+        userSocket.emit("message", {
+          type: "analysis-started",
+          data: {
+            testId: analysisStarted.testId,
+            callId: analysisStarted.callId,
+          },
+        });
+      }
+    }
     const result = await handleTranscriptUpdate(message);
     console.log("Transcript update result", result);
     if (result) {
@@ -77,14 +91,6 @@ app.post("/vapi", async (req: Request, res: Response) => {
     }
   }
   res.json({ success: true });
-});
-
-app.post("/message", (req: Request, res: Response) => {
-  const { userId, event, data } = req.body;
-  const userSocket = connectedUsers.get(userId);
-  if (userSocket) {
-    userSocket.emit(event, data);
-  }
 });
 
 app.post("/message/:userId", (req: Request, res: Response) => {
