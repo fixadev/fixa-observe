@@ -46,6 +46,19 @@ app.post("/vapi", async (req: Request, res: Response) => {
   const { message } = req.body;
   // console.log("Received message", message);
   if (message.type === "end-of-call-report") {
+    const analysisStarted = await handleAnalysisStarted(message);
+    if (analysisStarted) {
+      const userSocket = connectedUsers.get(analysisStarted.userId);
+      if (userSocket) {
+        userSocket.emit("message", {
+          type: "analysis-started",
+          data: {
+            testId: analysisStarted.testId,
+            callId: analysisStarted.callId,
+          },
+        });
+      }
+    }
     const result = await handleVapiCallEnded(message);
     if (result) {
       const userSocket = connectedUsers.get(result.ownerId);
@@ -61,24 +74,17 @@ app.post("/vapi", async (req: Request, res: Response) => {
       }
     }
   } else if (message.type === "transcript") {
-    const analysisStarted = await handleAnalysisStarted(message);
-    if (analysisStarted) {
-      const userSocket = connectedUsers.get(analysisStarted.userId);
-      if (userSocket) {
-        userSocket.emit("message", {
-          type: "analysis-started",
-          data: {
-            testId: analysisStarted.testId,
-            callId: analysisStarted.callId,
-          },
-        });
-      }
-    }
+    console.log("Received transcript update for call", message.call.id);
     const result = await handleTranscriptUpdate(message);
-    console.log("Transcript update result", result);
     if (result) {
       const userSocket = connectedUsers.get(result.userId);
       if (userSocket) {
+        console.log(
+          "Emitting messages updated event for callId",
+          result.callId,
+          "to user",
+          result.userId,
+        );
         userSocket.emit("message", {
           type: "messages-updated",
           data: {

@@ -44,6 +44,7 @@ export const createVapiAssistant = async (
     metadata: {
       owner: systemTemplate ? "SYSTEM" : "USER",
     },
+    serverMessages: ["end-of-call-report", "transcript"],
   });
 };
 
