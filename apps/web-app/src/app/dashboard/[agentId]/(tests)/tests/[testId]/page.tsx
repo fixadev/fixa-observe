@@ -196,16 +196,16 @@ function TestPage({ params }: { params: { agentId: string; testId: string } }) {
                               <InformationCircleIcon className="size-5 shrink-0 text-muted-foreground opacity-80" />
                             </PopoverTrigger>
                             <PopoverContent className="flex flex-col gap-1">
-                              <div className="text-xs font-medium text-muted-foreground">
+                              <div className="text-xs font-medium">
                                 instructions
                               </div>
-                              <div className="mb-1 text-sm">
+                              <div className="mb-1 text-xs text-muted-foreground">
                                 {intent.instructions}
                               </div>
-                              <div className="text-xs font-medium text-muted-foreground">
+                              <div className="text-xs font-medium">
                                 success criteria
                               </div>
-                              <div className="text-sm">
+                              <div className="text-xs text-muted-foreground">
                                 {intent.successCriteria}
                               </div>
                             </PopoverContent>
