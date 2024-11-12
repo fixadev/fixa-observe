@@ -5,9 +5,9 @@ import { cn, formatDurationHoursMinutesSeconds } from "~/lib/utils";
 import { useAudio } from "~/hooks/useAudio";
 import { type Agent, type CallError } from "prisma/generated/zod";
 import {
-  CheckIcon,
+  // CheckIcon,
   ExclamationCircleIcon,
-  WrenchIcon,
+  // WrenchIcon,
 } from "@heroicons/react/24/solid";
 import Image from "next/image";
 import { CallResult, CallStatus, Role } from "@prisma/client";
@@ -185,9 +185,9 @@ export default function CallDetails({
         ref={headerRef}
         className="sticky top-[calc(2.5rem+1px)] z-20 bg-background py-4"
       >
-        CALL ID: {call.id}
+        {/* CALL ID: {call.id} */}
         <div className="flex items-center gap-4 pb-4">
-          <div className="shrink-0">
+          <div className="size-[48px] shrink-0">
             <Image
               src={call.testAgent.headshotUrl}
               alt="agent avatar"
