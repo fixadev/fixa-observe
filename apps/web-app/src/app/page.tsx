@@ -18,13 +18,13 @@ export default function LandingPage() {
 
   return (
     <>
-      <div className="container relative mx-auto flex h-screen items-center gap-8">
-        <div className="flex flex-col gap-12">
-          <div className="flex flex-col gap-8">
-            <div className="-ml-1 text-7xl font-medium md:-ml-2 md:text-8xl lg:text-7xl">
+      <div className="container relative mx-auto flex flex-col items-center justify-center gap-8 pb-24 pt-16 md:h-screen md:flex-row md:pb-16">
+        <div className="flex w-full flex-col items-center gap-6 md:w-[unset] md:items-start md:gap-12">
+          <div className="flex flex-col items-center gap-4 md:items-start md:gap-8">
+            <div className="-ml-1 text-4xl font-medium md:-ml-1 md:text-6xl lg:text-7xl">
               pixa.
             </div>
-            <div className="text-2xl text-muted-foreground/60 sm:text-3xl md:text-4xl lg:text-3xl">
+            <div className="text-xl text-muted-foreground/60 sm:text-2xl md:text-2xl lg:text-3xl">
               testing for AI voice agents :)
             </div>
           </div>
@@ -47,8 +47,8 @@ export default function LandingPage() {
             </Button>
           </div>
         </div>
-        <div className="flex h-full flex-1 items-center justify-center">
-          <div className="relative aspect-[1716/1090] w-full overflow-hidden rounded-md border border-border bg-background object-contain p-2 shadow-sm">
+        <div className="shrink-1 flex w-full items-center justify-center md:flex-1">
+          <div className="relative aspect-square w-full max-w-[400px] overflow-hidden rounded-md border border-border bg-background object-contain p-2 shadow-sm md:aspect-[1716/1090] md:max-w-none">
             <Image
               src="/images/landing-page/hero.png"
               alt="hero image"
@@ -56,27 +56,35 @@ export default function LandingPage() {
               // height={800 * (1090 / 1716)}
               fill
               sizes="80vw"
+              className="hidden md:block"
+            />
+            <Image
+              src="/images/landing-page/analyze.png"
+              alt="hero image"
+              // width={800}
+              // height={800 * (1090 / 1716)}
+              fill
+              sizes="80vw"
+              className="block md:hidden"
             />
           </div>
         </div>
-        <div className="absolute bottom-6 left-0 right-0 flex items-center justify-center gap-2">
+        <div className="absolute bottom-2 left-0 right-0 flex items-center justify-center gap-2 md:bottom-6">
           <Image
             src="/images/landing-page/yc.png"
             alt="y-combinator"
             width={200}
             height={200 * (399 / 1400)}
-            className="w-[150px] sm:w-[200px]"
+            className="w-[150px] md:w-[200px]"
           />
           <div className="text-muted-foreground">
             <span className="mr-1">gave us money</span> <span>🤑</span>
           </div>
         </div>
       </div>
+      <div id="how-it-works" />
       <div className="bg-muted py-16">
-        <div
-          className="container mx-auto flex flex-col items-center gap-16"
-          id="how-it-works"
-        >
+        <div className="container mx-auto flex flex-col items-center gap-16">
           <div className="text-2xl font-medium">how it works.</div>
           <div className="flex flex-col items-center gap-8 lg:flex-row">
             <div className="flex max-w-[400px] flex-col gap-4 lg:w-[400px] lg:max-w-none">
