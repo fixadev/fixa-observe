@@ -1,6 +1,6 @@
 "use client";
 
-import { type AgentWithoutId } from "~/lib/agent";
+import { type IntentWithoutId, type AgentWithoutId } from "~/lib/agent";
 import { Input } from "~/components/ui/input";
 import {
   Popover,
@@ -14,10 +14,7 @@ import { Textarea } from "~/components/ui/textarea";
 import { useEffect, useState } from "react";
 
 interface IntentCardProps {
-  intent: {
-    name: string;
-    instructions: string;
-  };
+  intent: IntentWithoutId;
   index: number;
   agent: AgentWithoutId;
   setAgent: (agent: AgentWithoutId) => void;
@@ -69,10 +66,7 @@ export function IntentCard({
 }
 
 interface SettingsPopoverProps {
-  intent: {
-    name: string;
-    instructions: string;
-  };
+  intent: IntentWithoutId;
   index: number;
   agent: AgentWithoutId;
   setAgent: (agent: AgentWithoutId) => void;
@@ -106,7 +100,7 @@ function SettingsPopover({
         </Button>
       </PopoverTrigger>
       <PopoverContent
-        className="flex h-[200px] w-[500px] flex-col gap-4"
+        className="flex min-h-[400px] w-[500px] flex-col gap-4"
         onOpenAutoFocus={(e) => e.preventDefault()}
         onPointerDownOutside={(e) => {
           e.stopPropagation();
@@ -123,13 +117,33 @@ function SettingsPopover({
             </Label>
           </div>
           <Textarea
-            className="h-[100px] overflow-y-auto"
+            className="h-[125px] overflow-y-auto"
             value={intent.instructions}
             onChange={(e) =>
               setAgent({
                 ...agent,
                 intents: agent.intents.map((i, iIndex) =>
                   iIndex === index ? { ...i, instructions: e.target.value } : i,
+                ),
+              })
+            }
+          />
+          <div className="flex flex-row items-center gap-2">
+            <Label>success criteria</Label>
+            <Label className="text-sm font-light text-muted-foreground">
+              (optional)
+            </Label>
+          </div>
+          <Textarea
+            className="h-[125px] overflow-y-auto"
+            value={intent.successCriteria}
+            onChange={(e) =>
+              setAgent({
+                ...agent,
+                intents: agent.intents.map((i, iIndex) =>
+                  iIndex === index
+                    ? { ...i, successCriteria: e.target.value }
+                    : i,
                 ),
               })
             }

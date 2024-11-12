@@ -103,6 +103,7 @@ export function AddAgentModal({ children, refetchAgents }: AddAgentModalProps) {
       {
         name: "",
         instructions: "",
+        successCriteria: "",
       },
     ],
   });
@@ -110,7 +111,10 @@ export function AddAgentModal({ children, refetchAgents }: AddAgentModalProps) {
   const addIntent = () => {
     setAgent({
       ...agent,
-      intents: [...agent.intents, { name: "", instructions: "" }],
+      intents: [
+        ...agent.intents,
+        { name: "", instructions: "", successCriteria: "" },
+      ],
     });
   };
 

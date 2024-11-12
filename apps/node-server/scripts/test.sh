@@ -1,4 +1,4 @@
 #!/bin/bash
 
-npx tsx src/services/analyzeCall.ts
+npx tsx src/services/test.ts
 
