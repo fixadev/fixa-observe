@@ -10,10 +10,17 @@ export const handleAnalysisStarted = async (
     console.error("No call ID found in Vapi call ended report");
     return;
   }
-  const call = await db.call.update({
+  const call = await db.call.findUnique({
+    where: { id: callId },
+  });
+  if (!call) {
+    console.error("Call not found in database", callId);
+    return;
+  }
+  const updatedCall = await db.call.update({
     where: { id: callId },
     data: { status: CallStatus.analyzing },
   });
-  const userId = call.ownerId;
-  return { userId, testId: call.testId, callId };
+  const userId = updatedCall.ownerId;
+  return { userId, testId: updatedCall.testId, callId };
 };
