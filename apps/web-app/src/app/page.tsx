@@ -17,7 +17,7 @@ export default function LandingPage() {
 
   return (
     <>
-      <div className="container relative mx-auto flex flex-col items-center justify-center gap-8 pb-24 pt-16 md:h-screen md:flex-row md:pb-16 xl:gap-24">
+      <div className="container relative mx-auto flex flex-col items-center justify-center gap-8 pb-24 pt-16 md:h-screen md:flex-row md:gap-16 md:pb-16 lg:gap-8 xl:gap-24">
         <div className="flex w-full flex-col items-center gap-6 md:w-[unset] md:items-start md:gap-12">
           <div className="flex flex-col items-center gap-4 md:items-start md:gap-8">
             <div className="-ml-1 text-4xl font-medium md:-ml-1 md:text-6xl lg:text-7xl">
@@ -89,7 +89,7 @@ export default function LandingPage() {
                 you !
               </div>
             </div>
-            <div className="shrink-1 max-w-[400px] lg:h-[207px] lg:w-[600px] lg:max-w-none">
+            <div className="shrink-1 max-w-[400px] lg:w-[550px] lg:max-w-none">
               <Image
                 src="/images/landing-page/import-agent-flow.png"
                 alt="import agent flow"
