@@ -91,8 +91,9 @@ function TestPage({ params }: { params: { agentId: string; testId: string } }) {
           const data = message.data as AnalysisStartedData;
           if (test?.id === data.testId) {
             setCallsBeingAnalyzed((prev) => {
-              prev.add(data.callId);
-              return prev;
+              const newSet = new Set(prev);
+              newSet.add(data.callId);
+              return newSet;
             });
           }
         }
