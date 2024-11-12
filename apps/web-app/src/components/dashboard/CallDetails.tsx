@@ -132,7 +132,7 @@ export default function CallDetails({
   const { messageErrorsMap, errorRangesMap } = useMemo(() => {
     if (!call.errors) {
       return {
-        messageErrorsMap: new Map<number, CallError>(),
+        messageErrorsMap: new Map<number, CallError[]>(),
         errorRangesMap: new Map<
           string,
           { firstMessageIndex: number; lastMessageIndex: number }
@@ -140,7 +140,7 @@ export default function CallDetails({
       };
     }
 
-    const messageMap = new Map<number, CallError>();
+    const messageMap = new Map<number, CallError[]>();
     const rangesMap = new Map<
       string,
       { firstMessageIndex: number; lastMessageIndex: number }
@@ -148,10 +148,10 @@ export default function CallDetails({
 
     // First collect all message -> errors mappings
     messagesFiltered.forEach((_, messageIndex) => {
-      const overlappingErrors = call.errors.find((error) =>
+      const overlappingErrors = call.errors.filter((error) =>
         doesErrorOverlapMessage(error, messageIndex),
       );
-      if (overlappingErrors) {
+      if (overlappingErrors.length > 0) {
         messageMap.set(messageIndex, overlappingErrors);
       }
     });
@@ -255,13 +255,14 @@ export default function CallDetails({
 
       <div ref={scrollContainerRef} className="-mx-4 flex flex-1 flex-col px-4">
         {messagesFiltered.map((message, index) => {
-          const error = messageErrorsMap.get(index);
-          const isFirstErrorMessage = error
-            ? errorRangesMap.get(error.id)?.firstMessageIndex === index
-            : false;
-          const isLastErrorMessage = error
-            ? errorRangesMap.get(error.id)?.lastMessageIndex === index
-            : false;
+          const errors = messageErrorsMap.get(index) ?? [];
+          const isFirstErrorMessage = errors.some(
+            (error) =>
+              errorRangesMap.get(error.id)?.firstMessageIndex === index,
+          );
+          const isLastErrorMessage = errors.some(
+            (error) => errorRangesMap.get(error.id)?.lastMessageIndex === index,
+          );
           const isActiveErrorMessage = activeErrorMessageIndices.has(index);
 
           return (
@@ -294,8 +295,12 @@ export default function CallDetails({
                     activeMessageIndex === index
                       ? "bg-muted hover:bg-muted"
                       : "",
-                    error ? "rounded-none border-x border-red-500" : "",
-                    error && isActiveErrorMessage ? "-mx-px border-x-2" : "",
+                    errors.length > 0
+                      ? "rounded-none border-x border-red-500"
+                      : "",
+                    errors.length > 0 && isActiveErrorMessage
+                      ? "-mx-px border-x-2"
+                      : "",
                     isFirstErrorMessage
                       ? "mt-px rounded-t-md border-t border-red-500"
                       : "",
@@ -348,28 +353,33 @@ export default function CallDetails({
                 {isLastErrorMessage && (
                   <div
                     className={cn(
-                      "flex cursor-pointer items-center gap-1 rounded-b-md border-x border-b border-red-500 bg-red-500/20 p-2 text-sm text-red-500",
+                      "flex cursor-pointer flex-col items-start rounded-b-md border-x border-b border-red-500 bg-red-500/20 px-1 py-1.5 text-sm text-red-500",
                       isActiveErrorMessage
                         ? "z-10 -mx-px -mb-px border-x-2 border-b-2 shadow-lg"
                         : "",
                     )}
-                    onMouseEnter={() => {
-                      setActiveErrorId(error?.id ?? null);
-                      audioPlayerRef.current?.setHoveredError(
-                        error?.id ?? null,
-                      );
-                    }}
-                    onMouseLeave={() => {
-                      setActiveErrorId(null);
-                      audioPlayerRef.current?.setHoveredError(null);
-                    }}
-                    onClick={() => {
-                      audioPlayerRef.current?.setActiveError(error ?? null);
-                      play();
-                    }}
                   >
-                    <ExclamationCircleIcon className="size-5" />
-                    {error?.description}
+                    {errors.map((error) => (
+                      <div
+                        key={error.id}
+                        className="flex w-full items-start gap-1 py-0.5 hover:bg-red-500/20"
+                        onMouseEnter={() => {
+                          setActiveErrorId(error.id);
+                          audioPlayerRef.current?.setHoveredError(error.id);
+                        }}
+                        onMouseLeave={() => {
+                          setActiveErrorId(null);
+                          audioPlayerRef.current?.setHoveredError(null);
+                        }}
+                        onClick={() => {
+                          audioPlayerRef.current?.setActiveError(error);
+                          play();
+                        }}
+                      >
+                        <ExclamationCircleIcon className="size-5" />
+                        {error.description}
+                      </div>
+                    ))}
                   </div>
                 )}
               </div>
