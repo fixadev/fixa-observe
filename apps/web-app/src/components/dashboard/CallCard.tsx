@@ -17,11 +17,13 @@ export default function CallCard({
   className?: string;
 }) {
   const startedAt = useMemo(() => {
-    return new Date(call.startedAt ?? 0);
+    return call.startedAt ? new Date(call.startedAt) : new Date();
   }, [call.startedAt]);
 
   const duration = useMemo(() => {
-    const diff = new Date(call.endedAt ?? 0).getTime() - startedAt.getTime();
+    const diff = call.endedAt
+      ? new Date(call.endedAt).getTime() - startedAt.getTime()
+      : 0;
     return Math.ceil(diff / 1000);
   }, [call.endedAt, startedAt]);
 
