@@ -68,6 +68,8 @@ export const handleVapiCallEnded = async (
       errors: {
         create: errors,
       },
+      startedAt: report.call.startedAt,
+      endedAt: report.call.endedAt,
       result: success ? CallResult.success : CallResult.failure,
       failureReason,
       stereoRecordingUrl: report.artifact.stereoRecordingUrl,

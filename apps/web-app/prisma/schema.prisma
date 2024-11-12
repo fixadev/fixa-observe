@@ -87,6 +87,8 @@ model Call {
   result             CallResult?
   failureReason      String?
   stereoRecordingUrl String
+  startedAt          String?
+  endedAt            String?
 
   test        Test      @relation(fields: [testId], references: [id], onDelete: Cascade)
   testId      String
