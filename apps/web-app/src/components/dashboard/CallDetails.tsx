@@ -5,9 +5,9 @@ import { cn, formatDurationHoursMinutesSeconds } from "~/lib/utils";
 import { useAudio } from "~/hooks/useAudio";
 import { type Agent, type CallError } from "prisma/generated/zod";
 import {
-  CheckIcon,
+  // CheckIcon,
   ExclamationCircleIcon,
-  WrenchIcon,
+  // WrenchIcon,
 } from "@heroicons/react/24/solid";
 import Image from "next/image";
 import { CallResult, CallStatus, Role } from "@prisma/client";
