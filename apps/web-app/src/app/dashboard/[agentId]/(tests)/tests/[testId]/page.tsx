@@ -72,6 +72,7 @@ function TestPage({ params }: { params: { agentId: string; testId: string } }) {
           }
         } else if (message.type === "messages-updated") {
           const data = message.data as MessagesUpdatedData;
+          data.messages.sort((a, b) => a.time - b.time);
           if (test?.id === data.testId) {
             setTest((prev) =>
               prev

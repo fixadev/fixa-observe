@@ -8,7 +8,6 @@ import { UserButton } from "@clerk/nextjs";
 import Logo from "../Logo";
 import { ChevronUpDownIcon, SlashIcon } from "@heroicons/react/24/solid";
 import { Button } from "../ui/button";
-import { TEST_AGENT } from "~/lib/test-data";
 import {
   DropdownMenu,
   DropdownMenuItem,
