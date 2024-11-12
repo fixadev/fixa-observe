@@ -21,11 +21,16 @@ export default function CallCard({
   }, [call.messages]);
 
   const duration = useMemo(() => {
-    const lastCallMessage = call.messages[call.messages.length - 1];
     const firstCallMessage = call.messages[0];
-    const d =
-      (lastCallMessage?.endTime ?? lastCallMessage?.time ?? 0) -
-      (firstCallMessage?.time ?? 0);
+    const lastCallMessage = call.messages
+      .slice()
+      .reverse()
+      .find(
+        (m) => !["tool_calls", "tool_call_result", "system"].includes(m.role),
+      );
+    const startTime = firstCallMessage?.time ?? 0;
+    const endTime = lastCallMessage?.endTime ?? 0;
+    const d = endTime - startTime;
     return Math.ceil(d / 1000);
   }, [call.messages]);
 
