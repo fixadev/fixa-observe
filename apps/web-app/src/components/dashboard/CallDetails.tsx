@@ -311,13 +311,31 @@ export default function CallDetails({
                   {message.role === Role.tool_calls && (
                     <div className="flex items-center gap-1 text-xs italic text-muted-foreground">
                       <WrenchIcon className="size-4" />
-                      tool called: &quot;&quot;
+                      tool called:
+                      {message.toolCalls &&
+                      Array.isArray(message.toolCalls) &&
+                      message.toolCalls.length > 0
+                        ? ` ${message.toolCalls
+                            .map((toolCall) => {
+                              if (
+                                typeof toolCall === "object" &&
+                                toolCall !== null
+                              ) {
+                                return (
+                                  toolCall as { function?: { name?: string } }
+                                )?.function?.name;
+                              }
+                              return "";
+                            })
+                            .filter(Boolean)
+                            .join(", ")}`
+                        : ""}
                     </div>
                   )}
                   {message.role === Role.tool_call_result && (
                     <div className="flex items-center gap-1 text-xs italic text-muted-foreground">
                       <CheckIcon className="size-4" />
-                      tool finished: &quot;&quot;
+                      tool finished: {message.name}
                     </div>
                   )}
                   <div className="mt-1 text-sm text-muted-foreground">

@@ -52,8 +52,8 @@ export class AgentService {
   }
 
   async getAllAgents(ownerId: string) {
-    // return await db.agent.findMany({ where: {} });
-    return await db.agent.findMany({ where: { ownerId } });
+    return await db.agent.findMany({ where: {} });
+    // return await db.agent.findMany({ where: { ownerId } });
   }
 
   // async createTestAgent(
