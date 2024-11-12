@@ -49,7 +49,7 @@ export const analyzeCall = async (
   - failureReason: A short sentence CONCISELY describing the primary failure reason, if any -- else return null
   - errors: An array of objects, each representing an error that the main agent made. Each error object will have the following fields:
     - type: A string describing the type of error
-    - description: A string describing the error
+    - description: A string describing the error - refer to the main agent only as "agent"
     - secondsFromStart: The start time of the error in seconds (use the secondsFromStart for this)
     - duration: The duration of the error in seconds (use duration for this)
 

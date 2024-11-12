@@ -16,7 +16,7 @@ export class AgentService {
   ) {
     const testAgents = await db.testAgent.findMany({
       where: {
-        OR: [{ ownerId }, { ownerId: null }],
+        OR: [{ ownerId }, { ownerId: "SYSTEM" }],
       },
     });
 
