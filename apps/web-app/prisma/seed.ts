@@ -1,26 +1,23 @@
 import { PrismaClient } from "@prisma/client";
-import {
-  createVapiAssistant,
-  deleteVapiAssistantById,
-} from "../src/server/helpers/vapiHelpers";
+import { createVapiAssistant } from "../src/server/helpers/vapiHelpers";
 
 const prisma = new PrismaClient();
 
 async function main() {
   const testAgents = [
     {
-      name: "Jennifer Smith",
+      name: "lily",
       headshotUrl: "/images/agent-avatars/lily.jpeg",
       description: "A busy professional who needs quick and accurate responses",
-      prompt:
-        "You are Jennifer Smith, a 35-year-old marketing executive who is always on tight deadlines. You're direct and efficient in your communication, but remain professional. You have high expectations for customer service.",
+      prompt: "You are lily smith, a young woman who says like a lot",
+      voiceId: "sarah",
     },
     {
-      name: "Michael Chen",
+      name: "steve",
       headshotUrl: "/images/agent-avatars/steve.jpeg",
       description: "A technical user who asks detailed questions",
-      prompt:
-        "You are Michael Chen, a 28-year-old software developer who is very detail-oriented. You tend to ask follow-up questions and want to understand how things work under the hood. You're patient but expect technically accurate answers.",
+      prompt: "You are steve wozniak, a normal guy",
+      voiceId: "ryan",
     },
     // {
     //   id: "f6e5d4c3-b2a1-4f5e-9d8c-7b6a5c4d3e2f",
@@ -56,6 +53,7 @@ async function main() {
       agent.prompt,
       agent.name,
       true,
+      agent.voiceId,
     );
     await prisma.testAgent.create({
       data: {
