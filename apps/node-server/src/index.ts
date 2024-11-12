@@ -49,10 +49,13 @@ app.post("/vapi", async (req: Request, res: Response) => {
     if (result) {
       const userSocket = connectedUsers.get(result.ownerId);
       if (userSocket) {
-        userSocket.emit("call-ended", {
-          testId: result.testId,
-          callId: result.callId,
-          call: result.call,
+        userSocket.emit("message", {
+          type: "call-ended",
+          data: {
+            testId: result.testId,
+            callId: result.callId,
+            call: result.call,
+          },
         });
       }
     }
@@ -61,9 +64,12 @@ app.post("/vapi", async (req: Request, res: Response) => {
     if (result) {
       const userSocket = connectedUsers.get(result.userId);
       if (userSocket) {
-        userSocket.emit("transcript-update", {
-          callId: result.callId,
-          messages: result.messages,
+        userSocket.emit("message", {
+          type: "messages-updated",
+          data: {
+            callId: result.callId,
+            messages: result.messages,
+          },
         });
       }
     }
