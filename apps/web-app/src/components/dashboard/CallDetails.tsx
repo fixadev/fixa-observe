@@ -196,11 +196,7 @@ export default function CallDetails({
           <div className="flex flex-col gap-2">
             <div className="flex items-center gap-2">
               <div className="text-sm font-medium">{call.intent.name}</div>
-              {call.status === CallStatus.in_progress ? (
-                <div className="flex items-center gap-2 text-lg italic text-muted-foreground">
-                  <Spinner className="size-4" /> call in progress...
-                </div>
-              ) : (
+              {call.status !== CallStatus.in_progress && (
                 <div
                   className={cn(
                     "w-fit rounded-full px-2 py-1 text-xs",
@@ -213,6 +209,11 @@ export default function CallDetails({
                 </div>
               )}
             </div>
+            {call.status === CallStatus.in_progress && (
+              <div className="-mt-1 flex items-center gap-2 text-sm italic text-muted-foreground">
+                <Spinner className="size-4" /> call in progress...
+              </div>
+            )}
             <div className="flex w-fit flex-row flex-wrap gap-2">
               {call.errors?.map((error) => (
                 <div
