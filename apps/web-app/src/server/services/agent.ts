@@ -1,9 +1,9 @@
 import { db } from "../db";
-import { type IntentWithoutId, type TestAgentWithoutId } from "~/lib/agent";
+import { type IntentWithoutId } from "~/lib/agent";
 import { v4 as uuidv4 } from "uuid";
 import { type PrismaClient } from "@prisma/client";
 import { generateIntentsFromPrompt } from "../helpers/generateIntents";
-import { createVapiAssistant } from "../helpers/vapiHelpers";
+// import { createVapiAssistant } from "../helpers/vapiHelpers";
 
 export class AgentService {
   constructor(private db: PrismaClient) {}
@@ -52,26 +52,35 @@ export class AgentService {
   }
 
   async getAllAgents(ownerId: string) {
+    // return await db.agent.findMany({ where: {} });
     return await db.agent.findMany({ where: { ownerId } });
   }
 
-  async createTestAgent(
-    name: string,
-    prompt: string,
-    ownerId: string,
-    headshotUrl: string,
-    description: string,
-  ) {
-    const agent = await createVapiAssistant(prompt, name);
+  // async createTestAgent(
+  //   name: string,
+  //   prompt: string,
+  //   ownerId: string,
+  //   headshotUrl: string,
+  //   description: string,
+  // ) {
+  //   const agent = await createVapiAssistant(prompt, name);
 
-    return await db.testAgent.create({
-      data: {
-        id: agent.id,
-        name,
-        prompt,
-        ownerId,
-        headshotUrl,
-        description,
+  //   return await db.testAgent.create({
+  //     data: {
+  //       id: agent.id,
+  //       name,
+  //       prompt,
+  //       ownerId,
+  //       headshotUrl,
+  //       description,
+  //     },
+  //   });
+  // }
+
+  async getTestAgents(ownerId: string) {
+    return await db.testAgent.findMany({
+      where: {
+        OR: [{ ownerId }, { ownerId: null }],
       },
     });
   }

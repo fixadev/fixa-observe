@@ -18,8 +18,7 @@ import { api } from "~/trpc/react";
 import { useToast } from "~/hooks/use-toast";
 
 import useSocketMessage from "~/app/_components/UseSocketMessage";
-import { TEST_TEST_AGENTS } from "~/lib/test-data";
-import { type TestWithIncludes, type AgentWithIncludes } from "~/lib/types";
+import { type AgentWithIncludes } from "~/lib/types";
 
 import { useUser } from "@clerk/nextjs";
 import { motion, AnimatePresence } from "framer-motion";
@@ -151,9 +150,15 @@ function TestAgentsModal({
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
+  const { data: testAgents } = api.agent.getTestAgents.useQuery();
+
   const [enabledAgents, setEnabledAgents] = useState<Set<string>>(
     new Set(agent.enabledTestAgents.map((agent) => agent.id)),
   );
+
+  useEffect(() => {
+    setEnabledAgents(new Set(agent.enabledTestAgents.map((agent) => agent.id)));
+  }, [agent.enabledTestAgents]);
 
   const toggleAgent = (agentId: string) => {
     setEnabledAgents((prev) => {
@@ -178,7 +183,7 @@ function TestAgentsModal({
         </DialogHeader>
 
         <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3">
-          {TEST_TEST_AGENTS.map((agent) => (
+          {testAgents?.map((agent) => (
             <div
               key={agent.id}
               onClick={() => toggleAgent(agent.id)}
