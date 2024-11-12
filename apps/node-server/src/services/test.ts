@@ -7,7 +7,10 @@ import { CallResult } from "@prisma/client";
 const main = async () => {
   const test = await db.test.findFirst({
     where: { id: "cm3dmyqix0007aq0p57jtgki6" },
-    include: { calls: true, agent: true },
+    include: {
+      calls: true,
+      agent: true,
+    },
   });
 
   const allCalls = await vapiClient.calls.list();
@@ -24,7 +27,7 @@ const main = async () => {
 
     const dbCall = await db.call.findFirst({
       where: { id: call.id },
-      include: { testAgent: true },
+      include: { testAgent: true, intent: true },
     });
 
     if (!dbCall) {
@@ -42,6 +45,7 @@ const main = async () => {
     const { errors, success, failureReason } = await analyzeCall(
       agent?.systemPrompt ?? "",
       testAgent?.prompt ?? "",
+      dbCall?.intent?.successCriteria ?? "",
       call,
       call.artifact.messages,
     );
