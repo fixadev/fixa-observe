@@ -60,10 +60,9 @@ export const handleVapiCallEnded = async (
     console.error("No call ID found in Vapi call ended report");
     return;
   }
-
   const call = await db.call.findFirst({
     where: { id: callId },
-    include: { testAgent: true },
+    include: { testAgent: true, test: { include: { agent: true } } },
   });
 
   if (!call) {
@@ -71,11 +70,7 @@ export const handleVapiCallEnded = async (
     return;
   }
 
-  const test = await db.test.findFirst({
-    where: { id: call.testId },
-    include: { calls: true, agent: true },
-  });
-
+  const test = call.test;
   const agent = test?.agent;
   const testAgent = call?.testAgent;
 
@@ -93,7 +88,6 @@ export const handleVapiCallEnded = async (
     console.error("No owner ID found for agent");
     return;
   }
-
   if (!agent?.systemPrompt || !testAgent?.prompt) {
     console.error("No agent or test agent prompt found");
     return;
@@ -111,10 +105,10 @@ export const handleVapiCallEnded = async (
     report.artifact.messages,
   );
 
-  console.log("ERRORS", errors);
-  console.log("SUCCESS", success);
-  console.log("FAILURE REASON", failureReason);
-  console.log("MESSAGES", report.artifact.messages);
+  // console.log("ERRORS", errors);
+  // console.log("SUCCESS", success);
+  // console.log("FAILURE REASON", failureReason);
+  // console.log("MESSAGES", report.artifact.messages);
 
   const updatedCall = await db.call.update({
     where: { id: callId },
@@ -163,7 +157,7 @@ export const handleVapiCallEnded = async (
 
   return {
     ownerId,
-    testId: test?.id,
+    testId: test.id,
     callId,
     call: updatedCall,
   };
