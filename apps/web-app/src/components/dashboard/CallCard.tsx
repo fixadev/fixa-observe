@@ -16,23 +16,14 @@ export default function CallCard({
   onSelect: (callId: string) => void;
   className?: string;
 }) {
-  const createdAt = useMemo(() => {
-    return new Date(call.messages[0]?.time ?? 0);
-  }, [call.messages]);
+  const startedAt = useMemo(() => {
+    return new Date(call.startedAt ?? 0);
+  }, [call.startedAt]);
 
   const duration = useMemo(() => {
-    const firstCallMessage = call.messages[0];
-    const lastCallMessage = call.messages
-      .slice()
-      .reverse()
-      .find(
-        (m) => !["tool_calls", "tool_call_result", "system"].includes(m.role),
-      );
-    const startTime = firstCallMessage?.time ?? 0;
-    const endTime = lastCallMessage?.endTime ?? 0;
-    const d = endTime - startTime;
-    return Math.ceil(d / 1000);
-  }, [call.messages]);
+    const diff = new Date(call.endedAt ?? 0).getTime() - startedAt.getTime();
+    return Math.ceil(diff / 1000);
+  }, [call.endedAt, startedAt]);
 
   return (
     <div
@@ -64,7 +55,7 @@ export default function CallCard({
 
           {call.status !== CallStatus.in_progress && (
             <div className="flex shrink-0 items-center text-xs text-muted-foreground">
-              {formatDistanceToNow(createdAt, { addSuffix: true })}
+              {formatDistanceToNow(startedAt, { addSuffix: true })}
               <div
                 className={cn(
                   "ml-2 size-2 shrink-0 rounded-full bg-primary",
