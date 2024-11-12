@@ -11,8 +11,8 @@ import { vapi } from "~/server/utils/vapiClient";
 export const createVapiAssistant = async (
   prompt: string,
   name: string,
-  systemTemplate?: boolean,
   voiceId: string,
+  systemTemplate?: boolean,
 ) => {
   return await vapi.assistants.create({
     name,

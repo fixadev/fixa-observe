@@ -52,8 +52,8 @@ async function main() {
     const vapiAssistant = await createVapiAssistant(
       agent.prompt,
       agent.name,
-      true,
       agent.voiceId,
+      true,
     );
     await prisma.testAgent.create({
       data: {
