@@ -52,7 +52,7 @@ export const analyzeCall = async (
   OUTPUT ONLY THE JSON - do not include backticks like \`\`\`json or any other formatting
 
   Keep the following in mind:
-  - secondsFromStart and duration should only encompass the specific portion of the call where the error occurred. It should not be very long (10 seconds is a good max)
+  - secondsFromStart and duration should only encompass the specific portion of the call where the error occurred. It should not be very long (10 seconds is a good max), unless it makes sense for it to be longer.
   - errors should not overlap.
   - flag an error if the assistant repeats the same phrase multiple times in a row, even though it doesn't make sense for the assistant to do so.
   `;
