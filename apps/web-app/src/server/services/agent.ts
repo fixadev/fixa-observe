@@ -80,7 +80,7 @@ export class AgentService {
   async getTestAgents(ownerId: string) {
     return await db.testAgent.findMany({
       where: {
-        OR: [{ ownerId }, { ownerId: null }],
+        OR: [{ ownerId }, { ownerId: "SYSTEM" }],
       },
     });
   }
@@ -109,9 +109,5 @@ export class AgentService {
         },
       });
     }
-  }
-
-  async generateIntentsFromPrompt(prompt: string) {
-    return await generateIntentsFromPrompt(prompt);
   }
 }

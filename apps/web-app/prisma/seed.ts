@@ -1,5 +1,8 @@
 import { PrismaClient } from "@prisma/client";
-import { createVapiAssistant } from "../src/server/helpers/vapiHelpers";
+import {
+  createOrUpdateVapiAssistant,
+  deleteVapiAssistantById,
+} from "../src/server/helpers/vapiHelpers";
 
 const prisma = new PrismaClient();
 
@@ -8,15 +11,15 @@ async function main() {
     {
       name: "lily",
       headshotUrl: "/images/agent-avatars/lily.jpeg",
-      description: "A busy professional who needs quick and accurate responses",
-      prompt: "You are lily smith, a young woman who says like a lot",
+      description: "a young woman who says like a lot",
+      prompt: "You are lily smith, a young woman who says like a lot.",
       voiceId: "sarah",
     },
     {
       name: "steve",
       headshotUrl: "/images/agent-avatars/steve.jpeg",
-      description: "A technical user who asks detailed questions",
-      prompt: "You are steve wozniak, a normal guy",
+      description: "a normal guy",
+      prompt: "You are steve wozniak, a normal guy.",
       voiceId: "ryan",
     },
     // {
@@ -46,22 +49,42 @@ async function main() {
   ];
 
   // TODO: Add editing and deleting that works
+  const oldAssistants = await prisma.testAgent.findMany({
+    where: { ownerId: "SYSTEM" },
+  });
+  const assistantIdsToDelete = oldAssistants.filter(
+    (assistant) => !testAgents.some((agent) => agent.name === assistant.name),
+  );
+
+  for (const assistant of assistantIdsToDelete) {
+    await deleteVapiAssistantById(assistant.id);
+    await prisma.testAgent.delete({ where: { id: assistant.id } });
+  }
 
   for (const agent of testAgents) {
     // await deleteVapiAssistantById(agent.id);
-    const vapiAssistant = await createVapiAssistant(
+    const vapiAssistant = await createOrUpdateVapiAssistant(
       agent.prompt,
       agent.name,
       agent.voiceId,
       true,
     );
-    await prisma.testAgent.create({
-      data: {
+    await prisma.testAgent.upsert({
+      where: { id: vapiAssistant.id },
+      update: {
+        name: agent.name,
+        headshotUrl: agent.headshotUrl,
+        description: agent.description,
+        prompt: agent.prompt,
+        ownerId: "SYSTEM",
+      },
+      create: {
         id: vapiAssistant.id,
         name: agent.name,
         headshotUrl: agent.headshotUrl,
         description: agent.description,
         prompt: agent.prompt,
+        ownerId: "SYSTEM",
       },
     });
   }

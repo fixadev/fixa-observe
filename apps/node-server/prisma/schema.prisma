@@ -9,10 +9,6 @@ generator client {
   // previewFeatures = ["multiSchema"]
 }
 
-generator zod {
-  provider = "zod-prisma-types"
-}
-
 datasource db {
   provider  = "postgresql"
   url       = env("DATABASE_URL")

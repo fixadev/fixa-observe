@@ -3,6 +3,7 @@ import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { AgentService } from "~/server/services/agent";
 import { CreateAgentSchema } from "~/lib/agent";
 import { db } from "~/server/db";
+import { generateIntentsFromPrompt } from "~/server/helpers/generateIntents";
 
 const agentServiceInstance = new AgentService(db);
 
@@ -50,8 +51,12 @@ export const agentRouter = createTRPCRouter({
     }),
 
   generateIntentsFromPrompt: protectedProcedure
-    .input(z.object({ prompt: z.string() }))
+    .input(
+      z.object({
+        prompt: z.string(),
+      }),
+    )
     .mutation(async ({ input }) => {
-      return await agentServiceInstance.generateIntentsFromPrompt(input.prompt);
+      return await generateIntentsFromPrompt(input.prompt);
     }),
 });
