@@ -62,21 +62,29 @@ export default function LandingPage() {
       </div>
       <div className="bg-muted py-16">
         <div
-          className="container mx-auto flex flex-col items-center gap-12"
+          className="container mx-auto flex flex-col items-center gap-16"
           id="how-it-works"
         >
-          <div className="flex items-center gap-4">
-            <div className="flex flex-col gap-4">
+          <div className="text-2xl font-medium">how it works.</div>
+          <div className="flex flex-col items-center gap-8 lg:flex-row">
+            <div className="flex max-w-[400px] flex-col gap-4 lg:w-[400px] lg:max-w-none">
               <div className="text-2xl font-medium">1. import agent 🕵️‍♀️</div>
               <div className="text-muted-foreground">
                 give us your system prompt and we will generate test cases for
                 you !
               </div>
             </div>
-            <ImportAgentFlow />
+            <div className="shrink-1 max-w-[400px] lg:h-[207px] lg:w-[600px] lg:max-w-none">
+              <Image
+                src="/images/landing-page/import-agent-flow.png"
+                alt="import agent flow"
+                width={600 * 2}
+                height={600 * 2 * (610 / 1764)}
+              />
+            </div>
           </div>
-          <div className="flex items-center gap-4">
-            <div className="relative h-[300px] w-[400px]">
+          <div className="flex flex-col-reverse items-center gap-8 lg:flex-row">
+            <div className="relative h-[300px] w-full max-w-[400px] lg:w-[400px] lg:max-w-none">
               <Image
                 src="/images/agent-avatars/steve.jpeg"
                 alt="Test agent 1"
@@ -99,16 +107,15 @@ export default function LandingPage() {
                 className="absolute bottom-0 right-0 h-[150px] w-[150px] rounded-full object-cover"
               />
             </div>
-            <div className="flex flex-col gap-4">
+            <div className="flex max-w-[400px] flex-col gap-4 lg:w-[400px] lg:max-w-none">
               <div className="text-2xl font-medium">2. run tests 🚀</div>
               <div className="text-muted-foreground">
-                our super hot super sexy test agents will call your agents to
-                test them out.
+                our test agents will call your agents to test them out.
               </div>
             </div>
           </div>
-          <div className="flex items-center gap-4">
-            <div className="flex flex-col gap-4">
+          <div className="flex flex-col items-center gap-8 lg:flex-row">
+            <div className="flex max-w-[400px] flex-col gap-4 lg:w-[400px] lg:max-w-none">
               <div className="text-2xl font-medium">3. analyze calls 🧐</div>
               <div className="text-muted-foreground">
                 pinpoint exactly where errors occur in the audio.
