@@ -24,6 +24,7 @@ import { useUser } from "@clerk/nextjs";
 import { motion, AnimatePresence } from "framer-motion";
 import { type CallEndedData, type SocketMessage } from "~/lib/agent";
 import { type TestWithCalls } from "~/lib/types";
+import Spinner from "~/components/Spinner";
 
 export default function AgentPage({ params }: { params: { agentId: string } }) {
   const [tests, setTests] = useState<TestWithCalls[]>([]);
@@ -98,11 +99,20 @@ export default function AgentPage({ params }: { params: { agentId: string } }) {
           </Button>
           <Button
             size="lg"
-            className="flex items-center gap-2"
+            className="flex min-w-[160px] items-center gap-2"
             disabled={testInitializing}
             onClick={handleRunTest}
           >
-            run test <RocketLaunchIcon className="size-4" />
+            {testInitializing ? (
+              <>
+                initializing
+                <Spinner className="size-4" />
+              </>
+            ) : (
+              <>
+                run test <RocketLaunchIcon className="size-4" />
+              </>
+            )}
           </Button>
         </div>
       </div>
