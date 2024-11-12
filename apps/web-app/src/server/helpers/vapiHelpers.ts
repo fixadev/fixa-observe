@@ -66,6 +66,10 @@ export const createOrUpdateVapiAssistant = async (
       provider: "11labs",
       voiceId,
     },
+    startSpeakingPlan: {
+      smartEndpointingEnabled: true,
+      waitSeconds: 0.7,
+    },
     metadata: {
       owner: systemTemplate ? "SYSTEM" : "USER",
     },

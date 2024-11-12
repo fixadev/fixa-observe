@@ -12,7 +12,8 @@ async function main() {
       name: "lily",
       headshotUrl: "/images/agent-avatars/lily.jpeg",
       description: "a young woman who says like a lot",
-      prompt: "You are lily smith, a young woman who says like a lot.",
+      prompt:
+        "You are lily smith, a young woman who says like a lot. end the call only when it is clear the conversation is over -- i.e. 'have a great day, bye or goodbye' or other indicators of the conversation being over.",
       voiceId: "sarah",
     },
     {

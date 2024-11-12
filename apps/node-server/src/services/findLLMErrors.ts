@@ -46,7 +46,7 @@ export const analyzeCall = async (
 
   You will output a JSON object with the following fields:
   - success: A boolean indicating if the call was successful. The call is successful if the main agent achieves the success criteria.
-  - failureReason: A short sentence CONCISELY describing the primary failure reason, if any
+  - failureReason: A short sentence CONCISELY describing the primary failure reason, if any -- else return null
   - errors: An array of objects, each representing an error that the main agent made. Each error object will have the following fields:
     - type: A string describing the type of error
     - description: A string describing the error
@@ -59,7 +59,7 @@ export const analyzeCall = async (
   - secondsFromStart and duration should only encompass the specific portion of the call where the error occurred. It should not be very long (10 seconds is a good max), unless it makes sense for it to be longer.
   - errors should not overlap.
   - flag an error if the main agent repeats the same phrase multiple times in a row, even though it doesn't make sense for the main agent to do so.
-
+  - any tool call messages you see are being made by the test agent, not the main agent. so if they are made erroneously, that's not an error (it is an error in the test agent, not the main agent)
   `;
 
   const prompt = `${basePrompt}\n\nMain Agent Prompt: ${agentPrompt}\n\nSuccess Criteria: ${successCriteria}\n\nTest Agent Prompt: ${testAgentPrompt}\n\nCall Transcript: ${JSON.stringify(
@@ -92,8 +92,6 @@ export const analyzeCall = async (
   }
 
   const jsonResult = JSON.parse(cleanedResult);
-
-  console.log("JSON result:", jsonResult);
 
   const parsedResponse = outputSchema.parse(jsonResult);
 
