@@ -17,7 +17,11 @@ export class TestService {
         calls: {
           include: {
             testAgent: true,
-            messages: true,
+            messages: {
+              orderBy: {
+                time: "asc",
+              },
+            },
             errors: true,
             intent: true,
           },
