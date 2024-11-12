@@ -3,7 +3,6 @@
 import { Button } from "~/components/ui/button";
 import Link from "next/link";
 import Image from "next/image";
-import ImportAgentFlow from "~/app/_components/ImportAgentFlow";
 import { useCallback } from "react";
 import { LinkedInLogoIcon } from "@radix-ui/react-icons";
 
@@ -52,8 +51,6 @@ export default function LandingPage() {
             <Image
               src="/images/landing-page/hero.png"
               alt="hero image"
-              // width={800}
-              // height={800 * (1090 / 1716)}
               fill
               sizes="80vw"
               className="hidden md:block"
@@ -61,8 +58,6 @@ export default function LandingPage() {
             <Image
               src="/images/landing-page/analyze.png"
               alt="hero image"
-              // width={800}
-              // height={800 * (1090 / 1716)}
               fill
               sizes="80vw"
               className="block md:hidden"
@@ -169,9 +164,6 @@ export default function LandingPage() {
                 book demo
               </Link>
             </Button>
-            {/* <Button onClick={() => setRequestAccessDialogOpen(true)}>
-              Request access
-            </Button> */}
             <div className="flex gap-2">
               <Button variant="ghost" asChild>
                 <Link href="mailto:contact@pixa.dev" target="_blank">
