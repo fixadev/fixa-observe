@@ -318,7 +318,7 @@ export default function CallDetails({
                         ? agent.name
                         : ""}
                   </div>
-                  {message.role === Role.tool_calls && (
+                  {/* {message.role === Role.tool_calls && (
                     <div className="flex items-center gap-1 text-xs italic text-muted-foreground">
                       <WrenchIcon className="size-4" />
                       tool called:
@@ -347,7 +347,7 @@ export default function CallDetails({
                       <CheckIcon className="size-4" />
                       tool finished: {message.name}
                     </div>
-                  )}
+                  )} */}
                   <div className="mt-1 text-sm text-muted-foreground">
                     {message.message}
                   </div>
