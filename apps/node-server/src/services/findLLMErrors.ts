@@ -42,15 +42,18 @@ export const analyzeCall = async (
 
   You will output a JSON object with the following fields:
   - success: A boolean indicating if the call was successful -- if there are any errors, the call is not successful
-  - failureReason: A short sentence describing the primary failure reason, if any
+  - failureReason: A short sentence CONCISELY describing the primary failure reason, if any
   - errors: An array of objects, each representing an error. Each error object will have the following fields:
     - type: A string describing the type of error
     - description: A string describing the error
     - secondsFromStart: The start time of the error in seconds (use the secondsFromStart for this)
     - duration: The duration of the error in seconds (use duration for this)
 
+  OUTPUT ONLY THE JSON - do not include backticks like \`\`\`json or any other formatting
 
-    OUTPUT ONLY THE JSON - do not include backticks like \`\`\`json or any other formatting
+  Keep the following in mind:
+  - secondsFromStart and duration should only encompass the specific portion of the call where the error occurred. It should not be very long (10 seconds is a good max)
+  - errors should not overlap.
   `;
 
   const prompt = `${basePrompt}\n\nAssistant Agent Prompt: ${agentPrompt}\n\nUser Agent Prompt: ${testAgentPrompt}\n\nCall Transcript: ${JSON.stringify(
