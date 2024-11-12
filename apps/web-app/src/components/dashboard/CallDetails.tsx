@@ -16,9 +16,11 @@ import Spinner from "../Spinner";
 export default function CallDetails({
   call,
   agent,
+  isBeingAnalyzed,
 }: {
   call: CallWithIncludes;
   agent: Agent;
+  isBeingAnalyzed: boolean;
 }) {
   const audioPlayerRef = useRef<AudioPlayerRef>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -212,7 +214,8 @@ export default function CallDetails({
             </div>
             {call.status === CallStatus.in_progress && (
               <div className="-mt-1 flex items-center gap-2 text-sm italic text-muted-foreground">
-                <Spinner className="size-4" /> call in progress...
+                <Spinner className="size-4" />{" "}
+                {isBeingAnalyzed ? "analyzing call..." : "call in progress..."}
               </div>
             )}
             <div className="flex w-fit flex-row flex-wrap gap-2">

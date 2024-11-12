@@ -20,6 +20,7 @@ import {
   type MessagesUpdatedData,
   type CallEndedData,
   type SocketMessage,
+  type AnalysisStartedData,
 } from "~/lib/agent";
 import { useUser } from "@clerk/nextjs";
 
@@ -41,6 +42,9 @@ function TestPage({ params }: { params: { agentId: string; testId: string } }) {
   const [selectedCallType, setSelectedCallType] = useState<CallType>("error");
   const [selectedCallId, setSelectedCallId] = useState<string | null>(null);
   const [test, setTest] = useState<TestWithIncludes | null>(null);
+  const [callsBeingAnalyzed, setCallsBeingAnalyzed] = useState<Set<string>>(
+    new Set(),
+  );
   const { play, pause, seek, isPlaying } = useAudio();
   const { data: _test, isLoading } = api.test.get.useQuery({
     id: params.testId,
@@ -82,6 +86,14 @@ function TestPage({ params }: { params: { agentId: string; testId: string } }) {
                   }
                 : prev,
             );
+          }
+        } else if (message.type === "analysis-started") {
+          const data = message.data as AnalysisStartedData;
+          if (test?.id === data.testId) {
+            setCallsBeingAnalyzed((prev) => {
+              prev.add(data.callId);
+              return prev;
+            });
           }
         }
       },
@@ -180,6 +192,7 @@ function TestPage({ params }: { params: { agentId: string; testId: string } }) {
                 key={selectedCallId}
                 call={test.calls.find((call) => call.id === selectedCallId)!}
                 agent={agent}
+                isBeingAnalyzed={callsBeingAnalyzed.has(selectedCallId)}
               />
             </div>
           )}

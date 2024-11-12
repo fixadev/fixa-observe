@@ -29,8 +29,8 @@ export type TestAgent = z.infer<typeof TestAgentSchema>;
 export type TestAgentWithoutId = Omit<TestAgent, "id">;
 
 export type SocketMessage = {
-  type: "call-ended" | "messages-updated";
-  data: CallEndedData | MessagesUpdatedData;
+  type: "call-ended" | "messages-updated" | "analysis-started";
+  data: CallEndedData | MessagesUpdatedData | AnalysisStartedData;
 };
 
 export type CallEndedData = {
@@ -43,4 +43,9 @@ export type MessagesUpdatedData = {
   testId: string;
   callId: string;
   messages: Message[];
+};
+
+export type AnalysisStartedData = {
+  testId: string;
+  callId: string;
 };
