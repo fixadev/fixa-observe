@@ -16,6 +16,13 @@ import {
   type AnalysisStartedData,
 } from "~/lib/agent";
 import { useUser } from "@clerk/nextjs";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "~/components/ui/popover";
+import { EllipsisHorizontalCircleIcon } from "@heroicons/react/24/outline";
+import { InformationCircleIcon } from "@heroicons/react/24/solid";
 
 // type CallType = "error" | "no-errors" | "all";
 
@@ -157,13 +164,17 @@ function TestPage({ params }: { params: { agentId: string; testId: string } }) {
               </Select>
             </div> */}
             <div className="flex flex-col gap-2 border-b border-input p-2">
-              <div className="text-sm font-medium">Intents</div>
+              <div className="text-sm font-medium">intents</div>
               {test &&
                 Array.from(
                   new Set(test.calls.map((call) => call.intent.name)),
-                ).map((intent) => {
+                ).map((intentName) => {
+                  const intent = test.calls.find(
+                    (call) => call.intent.name === intentName,
+                  )?.intent;
+                  if (!intent) return null;
                   const callsWithIntent = test.calls.filter(
-                    (call) => call.intent.name === intent,
+                    (call) => call.intent.name === intentName,
                   );
                   const successCount = callsWithIntent.filter(
                     (call) => call.result === "success",
@@ -172,10 +183,33 @@ function TestPage({ params }: { params: { agentId: string; testId: string } }) {
                   const successRate = (successCount / totalCount) * 100;
 
                   return (
-                    <div key={String(intent)} className="flex flex-col gap-1">
+                    <div
+                      key={String(intentName)}
+                      className="flex flex-col gap-1"
+                    >
                       <div className="flex items-center justify-between">
-                        <div className="text-xs font-medium">
-                          {String(intent)}
+                        <div className="flex items-center gap-1 text-xs font-medium">
+                          {intentName}
+                          <Popover>
+                            <PopoverTrigger>
+                              {/* <EllipsisHorizontalCircleIcon className="size-5 shrink-0 text-muted-foreground" /> */}
+                              <InformationCircleIcon className="size-5 shrink-0 text-muted-foreground opacity-80" />
+                            </PopoverTrigger>
+                            <PopoverContent className="flex flex-col gap-1">
+                              <div className="text-xs font-medium text-muted-foreground">
+                                instructions
+                              </div>
+                              <div className="mb-1 text-sm">
+                                {intent.instructions}
+                              </div>
+                              <div className="text-xs font-medium text-muted-foreground">
+                                success criteria
+                              </div>
+                              <div className="text-sm">
+                                {intent.successCriteria}
+                              </div>
+                            </PopoverContent>
+                          </Popover>
                         </div>
                         <div className="text-xs">
                           {Math.round(successRate)}%
