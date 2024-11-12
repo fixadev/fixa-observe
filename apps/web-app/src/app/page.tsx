@@ -18,13 +18,13 @@ export default function LandingPage() {
 
   return (
     <>
-      <div className="container relative mx-auto flex h-screen items-center">
+      <div className="container relative mx-auto flex h-screen items-center gap-8">
         <div className="flex flex-col gap-12">
           <div className="flex flex-col gap-8">
-            <div className="-ml-1 text-7xl font-medium md:-ml-2 md:text-8xl lg:text-9xl">
+            <div className="-ml-1 text-7xl font-medium md:-ml-2 md:text-8xl lg:text-7xl">
               pixa.
             </div>
-            <div className="text-2xl text-muted-foreground/60 sm:text-3xl md:text-4xl lg:text-5xl">
+            <div className="text-2xl text-muted-foreground/60 sm:text-3xl md:text-4xl lg:text-3xl">
               testing for AI voice agents :)
             </div>
           </div>
@@ -45,6 +45,18 @@ export default function LandingPage() {
             >
               how it works
             </Button>
+          </div>
+        </div>
+        <div className="flex h-full flex-1 items-center justify-center">
+          <div className="relative aspect-[1716/1090] w-full overflow-hidden rounded-md border border-border bg-background object-contain p-2 shadow-sm">
+            <Image
+              src="/images/landing-page/hero.png"
+              alt="hero image"
+              // width={800}
+              // height={800 * (1090 / 1716)}
+              fill
+              sizes="80vw"
+            />
           </div>
         </div>
         <div className="absolute bottom-6 left-0 right-0 flex items-center justify-center gap-2">
@@ -90,7 +102,7 @@ export default function LandingPage() {
                 alt="Test agent 1"
                 width={200}
                 height={200}
-                className="absolute bottom-0 left-0 h-[150px] w-[150px] rounded-full object-cover"
+                className="absolute bottom-0 left-4 h-[150px] w-[150px] rounded-full object-cover"
               />
               <Image
                 src="/images/agent-avatars/lily.jpeg"
@@ -104,7 +116,7 @@ export default function LandingPage() {
                 alt="Test agent 3"
                 width={200}
                 height={200}
-                className="absolute bottom-0 right-0 h-[150px] w-[150px] rounded-full object-cover"
+                className="absolute bottom-0 right-4 h-[150px] w-[150px] rounded-full object-cover"
               />
             </div>
             <div className="flex max-w-[400px] flex-col gap-4 lg:w-[400px] lg:max-w-none">
@@ -155,7 +167,7 @@ export default function LandingPage() {
             <div className="flex gap-2">
               <Button variant="ghost" asChild>
                 <Link href="mailto:contact@pixa.dev" target="_blank">
-                  Contact
+                  contact
                 </Link>
               </Button>
               <Button variant="ghost" asChild>
