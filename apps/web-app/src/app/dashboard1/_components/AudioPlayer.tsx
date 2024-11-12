@@ -67,9 +67,10 @@ const AudioPlayer = forwardRef<
 
   const [loaded, setLoaded] = useState(false);
   useEffect(() => {
-    setTimeout(() => {
-      setLoaded(true);
-    }, 600);
+    setLoaded(true);
+    // setTimeout(() => {
+    //   setLoaded(true);
+    // }, 600);
   }, []);
 
   // Check if we need to stop playback due to reaching error end
