@@ -16,6 +16,8 @@ import {
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
 import { cn } from "~/lib/utils";
+import { api } from "~/trpc/react";
+import { Skeleton } from "../ui/skeleton";
 
 export default function LayoutHeader({
   tabValue,
@@ -42,6 +44,10 @@ export default function LayoutHeader({
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  const { data: agents } = api.agent.getAll.useQuery(undefined, {
+    enabled: !!agentId,
+  });
+
   return (
     <>
       <div className="flex w-full items-center justify-between p-4">
@@ -56,7 +62,11 @@ export default function LayoutHeader({
                   className="text-sm font-medium"
                   href={`/dashboard/${agentId}`}
                 >
-                  {TEST_AGENT.name}
+                  {agents ? (
+                    <>{agents.find((a) => a.id === agentId)?.name}</>
+                  ) : (
+                    <Skeleton className="h-4 w-24" />
+                  )}
                 </Link>
                 {/* </Button> */}
                 <DropdownMenu>
@@ -66,11 +76,17 @@ export default function LayoutHeader({
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent>
-                    <DropdownMenuItem className="cursor-pointer" asChild>
-                      <Link href={`/dashboard/${agentId}`}>
-                        {TEST_AGENT.name}
-                      </Link>
-                    </DropdownMenuItem>
+                    {agents?.map((agent) => (
+                      <DropdownMenuItem
+                        className="cursor-pointer"
+                        asChild
+                        key={agent.id}
+                      >
+                        <Link href={`/dashboard/${agent.id}`}>
+                          {agent.name}
+                        </Link>
+                      </DropdownMenuItem>
+                    ))}
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>
