@@ -2,7 +2,7 @@ import {
   AgentSchema,
   type TestAgentSchema,
   IntentSchema,
-  type Call,
+  type Message,
 } from "prisma/generated/zod";
 import { z } from "zod";
 import { type CallWithIncludes } from "./types";
@@ -29,7 +29,18 @@ export type TestAgent = z.infer<typeof TestAgentSchema>;
 export type TestAgentWithoutId = Omit<TestAgent, "id">;
 
 export type SocketMessage = {
+  type: "call-ended" | "messages-updated";
+  data: CallEndedData | MessagesUpdatedData;
+};
+
+export type CallEndedData = {
   testId: string;
-  call: CallWithIncludes;
   callId: string;
+  call: CallWithIncludes;
+};
+
+export type MessagesUpdatedData = {
+  testId: string;
+  callId: string;
+  messages: Message[];
 };

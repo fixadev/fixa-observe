@@ -22,7 +22,7 @@ import { type AgentWithIncludes } from "~/lib/types";
 
 import { useUser } from "@clerk/nextjs";
 import { motion, AnimatePresence } from "framer-motion";
-import { type SocketMessage } from "~/lib/agent";
+import { type CallEndedData, type SocketMessage } from "~/lib/agent";
 import { type TestWithCalls } from "~/lib/types";
 
 export default function AgentPage({ params }: { params: { agentId: string } }) {
@@ -36,18 +36,21 @@ export default function AgentPage({ params }: { params: { agentId: string } }) {
     user?.id,
     useCallback(
       (message: SocketMessage) => {
-        setTests((prev) =>
-          prev.map((test) =>
-            test.id === message.testId
-              ? {
-                  ...test,
-                  calls: test.calls.map((call) =>
-                    call.id === message.callId ? message.call : call,
-                  ),
-                }
-              : test,
-          ),
-        );
+        if (message.type === "call-ended") {
+          const data = message.data as CallEndedData;
+          setTests((prev) =>
+            prev.map((test) =>
+              test.id === data.testId
+                ? {
+                    ...test,
+                    calls: test.calls.map((call) =>
+                      call.id === data.callId ? data.call : call,
+                    ),
+                  }
+                : test,
+            ),
+          );
+        }
       },
       [setTests],
     ),

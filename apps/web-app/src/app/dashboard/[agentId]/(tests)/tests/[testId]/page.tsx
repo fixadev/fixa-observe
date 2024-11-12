@@ -16,7 +16,11 @@ import { AudioProvider, useAudio } from "~/hooks/useAudio";
 import { api } from "~/trpc/react";
 import { Skeleton } from "~/components/ui/skeleton";
 import useSocketMessage from "~/app/_components/UseSocketMessage";
-import { type SocketMessage } from "~/lib/agent";
+import {
+  type MessagesUpdatedData,
+  type CallEndedData,
+  type SocketMessage,
+} from "~/lib/agent";
 import { useUser } from "@clerk/nextjs";
 
 type CallType = "error" | "no-errors" | "all";
@@ -49,17 +53,36 @@ function TestPage({ params }: { params: { agentId: string; testId: string } }) {
     user?.id,
     useCallback(
       (message: SocketMessage) => {
-        if (test?.id === message.testId) {
-          setTest((prev) =>
-            prev
-              ? {
-                  ...prev,
-                  calls: prev.calls.map((call) =>
-                    call.id === message.callId ? message.call : call,
-                  ),
-                }
-              : prev,
-          );
+        if (message.type === "call-ended") {
+          const data = message.data as CallEndedData;
+          if (test?.id === data.testId) {
+            setTest((prev) =>
+              prev
+                ? {
+                    ...prev,
+                    calls: prev.calls.map((call) =>
+                      call.id === data.callId ? data.call : call,
+                    ),
+                  }
+                : prev,
+            );
+          }
+        } else if (message.type === "messages-updated") {
+          const data = message.data as MessagesUpdatedData;
+          if (test?.id === data.testId) {
+            setTest((prev) =>
+              prev
+                ? {
+                    ...prev,
+                    calls: prev.calls.map((call) =>
+                      call.id === data.callId
+                        ? { ...call, messages: data.messages }
+                        : call,
+                    ),
+                  }
+                : prev,
+            );
+          }
         }
       },
       [test?.id, setTest],

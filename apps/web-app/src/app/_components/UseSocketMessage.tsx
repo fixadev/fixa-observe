@@ -15,12 +15,8 @@ const useSocketMessage = (
       socket.emit("register", userId);
     });
 
-    socket.on("message", (message: string) => {
+    socket.on("message", (message: SocketMessage) => {
       console.log("MESSAGE", message);
-    });
-
-    socket.on("call-ended", (message: SocketMessage) => {
-      console.log("CALL ENDED", message);
       handleMessage?.(message);
     });
 
