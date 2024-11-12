@@ -106,10 +106,10 @@ const AudioPlayer = forwardRef<
       currentTime >=
         activeError.secondsFromStart + activeError.duration - offsetFromStart
     ) {
-      // pause();
+      pause();
       setActiveError(null);
     }
-  }, [activeError, currentTime, offsetFromStart]);
+  }, [activeError, currentTime, offsetFromStart, pause]);
 
   // Get rid of active error if we pause in the middle of it playing
   useEffect(() => {

@@ -222,19 +222,21 @@ export default function CallDetails({
               {call.errors?.map((error) => (
                 <div
                   key={error.id}
-                  className="flex cursor-pointer items-center gap-1 border-l-2 border-red-500 bg-red-100 p-1 pl-1 text-xs text-red-500 hover:bg-red-200"
+                  className="flex cursor-pointer items-start gap-1 border-l-2 border-red-500 bg-red-100 p-1 pl-1 text-xs text-red-500 hover:bg-red-200"
                   onMouseEnter={() => {
                     setActiveErrorId(error.id);
+                    audioPlayerRef.current?.setHoveredError(error.id);
                   }}
                   onMouseLeave={() => {
                     setActiveErrorId(null);
+                    audioPlayerRef.current?.setHoveredError(null);
                   }}
                   onClick={() => {
                     audioPlayerRef.current?.setActiveError(error);
                     play();
                   }}
                 >
-                  <ExclamationCircleIcon className="h-4 w-4 text-red-500" />
+                  <ExclamationCircleIcon className="size-4 shrink-0 text-red-500" />
                   {error.description}
                 </div>
               ))}
@@ -376,7 +378,7 @@ export default function CallDetails({
                           play();
                         }}
                       >
-                        <ExclamationCircleIcon className="size-5" />
+                        <ExclamationCircleIcon className="size-5 shrink-0" />
                         {error.description}
                       </div>
                     ))}
