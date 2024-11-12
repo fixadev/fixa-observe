@@ -54,6 +54,7 @@ export const analyzeCall = async (
   Keep the following in mind:
   - secondsFromStart and duration should only encompass the specific portion of the call where the error occurred. It should not be very long (10 seconds is a good max)
   - errors should not overlap.
+  - flag an error if the assistant repeats the same phrase multiple times in a row, even though it doesn't make sense for the assistant to do so.
   `;
 
   const prompt = `${basePrompt}\n\nAssistant Agent Prompt: ${agentPrompt}\n\nUser Agent Prompt: ${testAgentPrompt}\n\nCall Transcript: ${JSON.stringify(
