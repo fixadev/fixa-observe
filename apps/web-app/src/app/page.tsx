@@ -47,20 +47,20 @@ export default function LandingPage() {
           </div>
         </div>
         <div className="shrink-1 flex w-full items-center justify-center md:flex-1">
-          <div className="relative aspect-square w-full max-w-[400px] overflow-hidden rounded-md border border-border bg-background object-contain p-2 shadow-sm md:aspect-[1716/1090] md:max-w-none">
+          <div className="relative aspect-square w-full max-w-[400px] overflow-hidden rounded-md border border-border bg-background object-contain p-2 shadow-sm md:max-w-none lg:aspect-[1716/1090]">
             <Image
               src="/images/landing-page/hero.png"
               alt="hero image"
               fill
               sizes="80vw"
-              className="hidden md:block"
+              className="hidden lg:block"
             />
             <Image
               src="/images/landing-page/analyze.png"
               alt="hero image"
               fill
               sizes="80vw"
-              className="block md:hidden"
+              className="block lg:hidden"
             />
           </div>
         </div>
@@ -99,27 +99,27 @@ export default function LandingPage() {
             </div>
           </div>
           <div className="flex flex-col-reverse items-center gap-8 lg:flex-row">
-            <div className="relative h-[300px] w-full max-w-[400px] lg:w-[400px] lg:max-w-none">
+            <div className="relative h-[200px] w-full max-w-[400px] sm:h-[300px] lg:w-[400px] lg:max-w-none">
               <Image
                 src="/images/agent-avatars/steve.jpeg"
                 alt="Test agent 1"
                 width={200}
                 height={200}
-                className="absolute bottom-0 left-4 h-[150px] w-[150px] rounded-full object-cover"
+                className="absolute bottom-0 left-0 h-[120px] w-[120px] rounded-full object-cover sm:left-4 sm:h-[150px] sm:w-[150px]"
               />
               <Image
                 src="/images/agent-avatars/lily.jpeg"
                 alt="Test agent 2"
                 width={200}
                 height={200}
-                className="absolute left-1/2 top-0 h-[200px] w-[200px] -translate-x-1/2 rounded-full object-cover"
+                className="absolute left-1/2 top-0 h-[150px] w-[150px] -translate-x-1/2 rounded-full object-cover sm:h-[200px] sm:w-[200px]"
               />
               <Image
                 src="/images/agent-avatars/marge.jpeg"
                 alt="Test agent 3"
                 width={200}
                 height={200}
-                className="absolute bottom-0 right-4 h-[150px] w-[150px] rounded-full object-cover"
+                className="absolute bottom-0 right-0 h-[120px] w-[120px] rounded-full object-cover sm:right-4 sm:h-[150px] sm:w-[150px]"
               />
             </div>
             <div className="flex max-w-[400px] flex-col gap-4 lg:w-[400px] lg:max-w-none">
