@@ -5,16 +5,18 @@ import { Message, Role } from "@prisma/client";
 export const handleTranscriptUpdate = async (
   report: ServerMessageEndOfCallReport,
 ): Promise<
-  { userId: string; callId: string; messages: Message[] } | undefined
+  | { userId: string; callId: string; testId: string; messages: Message[] }
+  | undefined
 > => {
   const call = await db.call.findUnique({
     where: {
       id: report.call?.id,
     },
+    include: { test: true },
   });
 
   const userId = call?.ownerId;
-  if (!call || !userId) {
+  if (!call || !userId || !call.test) {
     console.error("No call or userId", report);
     return;
   }
@@ -54,6 +56,7 @@ export const handleTranscriptUpdate = async (
   return {
     userId,
     callId: call.id,
+    testId: call.test.id,
     messages: messagesToEmit,
   };
 };

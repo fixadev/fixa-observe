@@ -61,6 +61,7 @@ app.post("/vapi", async (req: Request, res: Response) => {
     }
   } else if (message.type === "transcript") {
     const result = await handleTranscriptUpdate(message);
+    console.log("Transcript update result", result);
     if (result) {
       const userSocket = connectedUsers.get(result.userId);
       if (userSocket) {
@@ -68,6 +69,7 @@ app.post("/vapi", async (req: Request, res: Response) => {
           type: "messages-updated",
           data: {
             callId: result.callId,
+            testId: result.testId,
             messages: result.messages,
           },
         });
