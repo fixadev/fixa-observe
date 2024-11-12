@@ -45,6 +45,7 @@ app.post("/vapi", async (req: Request, res: Response) => {
   const { message } = req.body;
   if (message.type === "end-of-call-report") {
     const result = await handleVapiCallEnded(message);
+
     if (result) {
       const userSocket = connectedUsers.get(result.ownerId);
       if (userSocket) {
