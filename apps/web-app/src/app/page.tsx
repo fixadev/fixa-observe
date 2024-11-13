@@ -5,19 +5,26 @@ import Link from "next/link";
 import Image from "next/image";
 import { useCallback } from "react";
 import { LinkedInLogoIcon } from "@radix-ui/react-icons";
+import TopBar from "./_components/TopBar";
 
 // 420 69 🍆
 export default function LandingPage() {
   const scrollToHowItWorks = useCallback(() => {
     const howItWorksSection = document.getElementById("how-it-works");
     if (howItWorksSection) {
-      howItWorksSection.scrollIntoView({ behavior: "smooth" });
+      const yOffset = -70; // Scroll to 100px above the section
+      const y =
+        howItWorksSection.getBoundingClientRect().top +
+        window.scrollY +
+        yOffset;
+      window.scrollTo({ top: y, behavior: "smooth" });
     }
   }, []);
 
   return (
     <>
-      <div className="container relative mx-auto flex flex-col items-center justify-center gap-8 pb-24 pt-16 md:h-screen">
+      <TopBar />
+      <div className="container relative mx-auto flex flex-col items-center justify-center gap-8 pb-24 pt-32 md:h-screen">
         <div className="flex flex-col items-center gap-8 md:gap-12">
           <div className="flex flex-col items-center gap-4 md:gap-8">
             <div className="text-center text-2xl font-medium md:text-6xl">
@@ -47,7 +54,7 @@ export default function LandingPage() {
           </div>
         </div>
         <div className="shrink-1 flex w-full items-center justify-center">
-          <div className="relative aspect-square w-full overflow-hidden rounded-md border border-border bg-background object-contain shadow-sm md:aspect-[1806/1044] md:max-w-[900px]">
+          <div className="relative aspect-square w-full max-w-[500px] overflow-hidden rounded-md border border-border bg-background object-contain shadow-sm md:aspect-[1806/1044] md:max-w-[900px]">
             <Image
               src="/images/landing-page/hero.png"
               alt="hero image"
@@ -162,9 +169,9 @@ export default function LandingPage() {
       <div className="dark bg-background py-16 text-foreground">
         <div className="container mx-auto flex flex-col items-center gap-8 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex flex-col items-center gap-4 sm:items-start">
-            <div className="text-2xl font-medium">pixa.</div>
+            <div className="text-2xl font-medium">fixa.</div>
             <div className="text-center text-lg sm:text-left">
-              testing for AI voice agents :)
+              fix AI voice agents faster.
             </div>
           </div>
           <div className="flex flex-col gap-4">
