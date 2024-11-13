@@ -12,12 +12,13 @@ import { Cog6ToothIcon, TrashIcon } from "@heroicons/react/24/solid";
 import { Label } from "~/components/ui/label";
 import { Textarea } from "~/components/ui/textarea";
 import { useEffect, useState } from "react";
+import { type AgentWithIncludes } from "~/lib/types";
 
 interface IntentCardProps {
   intent: IntentWithoutId;
   index: number;
-  agent: AgentWithoutId;
-  setAgent: (agent: AgentWithoutId) => void;
+  agent: AgentWithoutId | AgentWithIncludes;
+  setAgent: (agent: AgentWithoutId | AgentWithIncludes) => void;
   modalOpen: boolean;
 }
 

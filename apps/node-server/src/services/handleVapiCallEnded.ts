@@ -2,6 +2,9 @@ import { CallResult, CallStatus, Role } from "@prisma/client";
 import { db } from "../db";
 import { type ServerMessageEndOfCallReport } from "@vapi-ai/server-sdk/api";
 import { analyzeCall } from "./findLLMErrors";
+import { createGeminiPrompt } from "../utils/createGeminiPrompt";
+import { analyzeCallWithGemini } from "./geminiAnalyzeAudio";
+import { formatOutput } from "./formatOutput";
 
 export const handleVapiCallEnded = async (
   report: ServerMessageEndOfCallReport,
@@ -29,14 +32,6 @@ export const handleVapiCallEnded = async (
   const agent = test?.agent;
   const testAgent = call?.testAgent;
 
-  // console.log("CALL", call);
-
-  // console.log("TEST", test);
-
-  // console.log("AGENT", agent);
-
-  // console.log("TEST AGENT", testAgent);
-
   const ownerId = agent?.ownerId;
 
   if (!ownerId) {
@@ -53,7 +48,12 @@ export const handleVapiCallEnded = async (
     return;
   }
 
-  const { errors, success, failureReason } = await analyzeCall(
+  if (!report.artifact.stereoRecordingUrl) {
+    console.error("No stereo recording URL found");
+    return;
+  }
+
+  const analysis = await analyzeCall(
     agent.systemPrompt,
     testAgent?.prompt,
     call.intent.successCriteria,
@@ -61,9 +61,29 @@ export const handleVapiCallEnded = async (
     report.artifact.messages,
   );
 
-  // console.log("ERRORS", errors);
-  // console.log("SUCCESS", success);
-  // console.log("FAILURE REASON", failureReason);
+  console.log("O1 ANALYSIS", analysis);
+
+  const geminiPrompt = createGeminiPrompt(
+    report.artifact.messages,
+    agent.systemPrompt,
+    testAgent?.prompt,
+    call.intent.successCriteria,
+    analysis,
+  );
+
+  const { cleanedResult } = await analyzeCallWithGemini(
+    report.artifact.stereoRecordingUrl,
+    geminiPrompt,
+  );
+
+  console.log("GEMINI RESULT", cleanedResult);
+
+  const { errors, success, failureReason } = await formatOutput(
+    cleanedResult ?? "",
+  );
+
+  console.log("FORMATTED OUTPUT", errors, success, failureReason);
+
   // console.log("MESSAGES", report.artifact.messages);
 
   const updatedCall = await db.call.update({

@@ -1,5 +1,5 @@
 import { db } from "../db";
-import { type IntentWithoutId } from "~/lib/agent";
+import { type Intent, type IntentWithoutId } from "~/lib/agent";
 import { v4 as uuidv4 } from "uuid";
 import { type PrismaClient } from "@prisma/client";
 import { generateIntentsFromPrompt } from "../helpers/generateIntents";
@@ -109,5 +109,20 @@ export class AgentService {
         },
       });
     }
+  }
+
+  async updateAgentIntents(id: string, intents: Intent[]) {
+    return await db.agent.update({
+      where: { id },
+      data: {
+        intents: {
+          upsert: intents.map(({ agentId, ...intent }) => ({
+            where: { id: intent.id },
+            update: intent,
+            create: intent,
+          })),
+        },
+      },
+    });
   }
 }

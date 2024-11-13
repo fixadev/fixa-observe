@@ -85,33 +85,46 @@ export const deleteVapiAssistantById = async (assistantId: string) => {
   return await vapi.assistants.delete(assistantId);
 };
 
+const vapiPhoneNumbers = [
+  "0f38b46c-c675-406d-ad72-11153f1a951d",
+  "37e16b68-fd70-4690-8ea3-542ccaef1685",
+  "c3235d31-67cf-4e38-a3ed-41e23cac5c3b",
+];
+
+const importedPhoneNumbers = ["de7b790a-4d62-4cf1-ac21-6a02bc90bc58"];
+
 export const initiateVapiCall = async (
   assistantId: string,
   phoneNumber: string,
   testAgentPrompt?: string,
   intentPrompt?: string,
 ) => {
-  return await vapi.calls.create({
-    phoneNumberId: "c3235d31-67cf-4e38-a3ed-41e23cac5c3b",
-    assistantId,
-    customer: {
-      number: phoneNumber,
-    },
-    assistantOverrides: {
-      model: {
-        provider: "openai",
-        model: "gpt-4o",
-        messages: [
-          {
-            role: "system",
-            content: testAgentPrompt,
-          },
-          {
-            role: "system",
-            content: intentPrompt,
-          },
-        ],
+  try {
+    return await vapi.calls.create({
+      phoneNumberId: importedPhoneNumbers[0],
+      assistantId,
+      customer: {
+        number: phoneNumber,
       },
-    },
-  });
+      assistantOverrides: {
+        model: {
+          provider: "openai",
+          model: "gpt-4o",
+          messages: [
+            {
+              role: "system",
+              content: testAgentPrompt,
+            },
+            {
+              role: "system",
+              content: intentPrompt,
+            },
+          ],
+        },
+      },
+    });
+  } catch (error) {
+    console.error("Error initiating VAPI call", error);
+    throw error;
+  }
 };

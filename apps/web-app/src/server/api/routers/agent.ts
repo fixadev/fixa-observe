@@ -4,6 +4,7 @@ import { AgentService } from "~/server/services/agent";
 import { CreateAgentSchema } from "~/lib/agent";
 import { db } from "~/server/db";
 import { generateIntentsFromPrompt } from "~/server/helpers/generateIntents";
+import { IntentSchema } from "prisma/generated/zod";
 
 const agentServiceInstance = new AgentService(db);
 
@@ -17,6 +18,15 @@ export const agentRouter = createTRPCRouter({
         input.systemPrompt,
         input.intents,
         ctx.user.id,
+      );
+    }),
+
+  updateIntents: protectedProcedure
+    .input(z.object({ id: z.string(), intents: z.array(IntentSchema) }))
+    .mutation(async ({ input }) => {
+      return await agentServiceInstance.updateAgentIntents(
+        input.id,
+        input.intents,
       );
     }),
 

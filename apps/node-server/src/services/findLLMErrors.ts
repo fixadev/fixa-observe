@@ -78,14 +78,10 @@ export const analyzeCall = async (
 
   const result = completion.choices[0].message.content;
 
-  console.log("Completion result:", result);
-
   const cleanedResult = result
     ?.replace("```json\n", "")
     .replace("\n```", "")
     .trim();
-
-  console.log("Cleaned result:", cleanedResult);
 
   if (!cleanedResult) {
     throw new Error("No result from LLM");
@@ -94,8 +90,6 @@ export const analyzeCall = async (
   const jsonResult = JSON.parse(cleanedResult);
 
   const parsedResponse = outputSchema.parse(jsonResult);
-
-  console.log("Parsed response:", parsedResponse);
 
   return {
     errors: parsedResponse.errors,
