@@ -22,6 +22,10 @@ export const createOrUpdateVapiAssistant = async (
   if (existingAssistant) {
     return await vapi.assistants.update(existingAssistant.id, {
       name,
+      voice: {
+        provider: "11labs",
+        voiceId,
+      },
       model: {
         provider: "openai",
         model: "gpt-4o",

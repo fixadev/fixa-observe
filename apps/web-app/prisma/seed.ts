@@ -23,14 +23,14 @@ async function main() {
       prompt: "You are steve wozniak, a normal guy.",
       voiceId: "ryan",
     },
-    // {
-    //   id: "f6e5d4c3-b2a1-4f5e-9d8c-7b6a5c4d3e2f",
-    //   name: "Sarah Johnson",
-    //   headshotUrl: "/images/agent-avatars/steve.jpeg",
-    //   description: "A non-technical user who needs clear explanations",
-    //   prompt:
-    //     "You are Sarah Johnson, a 45-year-old small business owner who isn't very tech-savvy. You prefer simple, clear explanations without technical jargon. You can get frustrated if things aren't explained in plain language.",
-    // },
+    {
+      name: "marge",
+      headshotUrl: "/images/agent-avatars/marge.jpeg",
+      description: "friendly elderly lady who loves to talk",
+      prompt:
+        "you are marge simpson, a friendly elderly lady who loves to talk",
+      voiceId: "matilda",
+    },
     // {
     //   id: "b9a8c7d6-e5f4-4a3b-8c2d-1e0f9a8b7c6d",
     //   name: "David Williams",

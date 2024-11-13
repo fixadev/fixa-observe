@@ -24,7 +24,7 @@ export default function LandingPage() {
               pixa.
             </div>
             <div className="text-xl text-muted-foreground/60 sm:text-2xl md:text-2xl lg:text-3xl">
-              testing for AI voice agents :)
+              sentry for AI voice agents :)
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -162,7 +162,7 @@ export default function LandingPage() {
           <div className="flex flex-col items-center gap-4 sm:items-start">
             <div className="text-2xl font-medium">pixa.</div>
             <div className="text-center text-lg sm:text-left">
-              testing for AI voice agents :)
+              sentry for AI voice agents :)
             </div>
           </div>
           <div className="flex flex-col gap-4">
