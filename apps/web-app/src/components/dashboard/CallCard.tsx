@@ -31,7 +31,7 @@ export default function CallCard({
   return (
     <div
       className={cn(
-        "relative flex cursor-pointer gap-2 overflow-hidden border-b border-input bg-background p-2 pl-4 hover:bg-muted/50",
+        "relative flex cursor-pointer gap-2 overflow-hidden border-b border-input bg-background p-2 pl-2 hover:bg-muted/50",
         call.id === selectedCallId && "bg-muted",
         className,
       )}
@@ -52,19 +52,22 @@ export default function CallCard({
           className="rounded-full"
         />
       </div>
-      <div className="flex flex-1 flex-col gap-1">
+      <div className="flex min-w-0 flex-1 flex-col gap-1">
         <div className="flex items-center justify-between gap-4">
           <div className="truncate text-sm font-medium">{call.intent.name}</div>
 
           {call.status !== CallStatus.in_progress && (
             <div className="flex shrink-0 items-center text-xs text-muted-foreground">
-              {formatDistanceToNow(startedAt, { addSuffix: true })}
-              <div
+              {formatDistanceToNow(startedAt, { addSuffix: true }).replace(
+                "about ",
+                "",
+              )}
+              {/* <div
                 className={cn(
                   "ml-2 size-2 shrink-0 rounded-full bg-primary",
                   false ? "opacity-100" : "opacity-0",
                 )}
-              ></div>
+              ></div> */}
             </div>
           )}
         </div>
@@ -100,7 +103,7 @@ export default function CallCard({
           {call.status !== CallStatus.in_progress && (
             <div className="flex shrink-0 items-center text-xs text-muted-foreground">
               {formatDurationHoursMinutesSeconds(duration)}
-              <div className="ml-2 size-2 shrink-0"></div>
+              {/* <div className="ml-2 size-2 shrink-0"></div> */}
             </div>
           )}
         </div>

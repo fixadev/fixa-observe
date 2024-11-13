@@ -165,7 +165,7 @@ function TestPage({ params }: { params: { agentId: string; testId: string } }) {
               </Select>
             </div> */}
             <div className="flex flex-col gap-2 border-b border-input p-2">
-              <div className="text-sm font-medium">intents</div>
+              <div className="text-sm font-medium">scenarios</div>
               {test &&
                 Array.from(
                   new Set(test.calls.map((call) => call.intent.name)),
