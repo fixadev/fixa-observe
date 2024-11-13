@@ -18,7 +18,7 @@ export default function TopBar() {
             {/* <SignedOut> */}
             {/* <Button size="lg" variant="outline" asChild>
               <Link
-                href="https://cal.com/team/pixa/20-minute-meeting"
+                href="https://cal.com/team/fixa/20-minute-meeting"
                 target="_blank"
               >
                 book demo

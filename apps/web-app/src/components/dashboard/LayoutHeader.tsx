@@ -116,11 +116,11 @@ export default function LayoutHeader({
                   opacity: Math.min(1, Math.max(0, scrollY / 64)),
                 }}
               >
-                pixa.
+                fixa.
               </div> */}
               <Image
                 src="/images/logo.png"
-                alt="pixa logo"
+                alt="fixa logo"
                 width={20}
                 height={20}
                 className="h-[20px] w-auto"
