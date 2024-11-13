@@ -148,6 +148,7 @@ enum CallStatus {
 }
 
 model CallRecording {
-  id       String @id
-  audioUrl String
+  id        String   @id
+  audioUrl  String
+  createdAt DateTime @default(now())
 }

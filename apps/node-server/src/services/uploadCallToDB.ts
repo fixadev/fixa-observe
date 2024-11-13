@@ -2,11 +2,12 @@ import { db } from "../db";
 import { uploadFromPresignedUrl } from "./uploadFromPresignedUrl";
 
 export const uploadCallToDB = async (callId: string, audioUrl: string) => {
-  const { url } = await uploadFromPresignedUrl(audioUrl, callId);
+  const { url } = await uploadFromPresignedUrl(callId, audioUrl);
   return await db.callRecording.create({
     data: {
       id: callId,
       audioUrl: url,
+      createdAt: new Date(),
     },
   });
 };

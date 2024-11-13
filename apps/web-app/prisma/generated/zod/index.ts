@@ -72,7 +72,7 @@ export const MessageScalarFieldEnumSchema = z.enum(['id','role','message','time'
 
 export const CallErrorScalarFieldEnumSchema = z.enum(['id','secondsFromStart','duration','type','description','callId']);
 
-export const CallRecordingScalarFieldEnumSchema = z.enum(['id','audioUrl']);
+export const CallRecordingScalarFieldEnumSchema = z.enum(['id','audioUrl','createdAt']);
 
 export const SortOrderSchema = z.enum(['asc','desc']);
 
@@ -238,6 +238,7 @@ export type CallError = z.infer<typeof CallErrorSchema>
 export const CallRecordingSchema = z.object({
   id: z.string(),
   audioUrl: z.string(),
+  createdAt: z.coerce.date(),
 })
 
 export type CallRecording = z.infer<typeof CallRecordingSchema>
@@ -501,6 +502,7 @@ export const CallErrorSelectSchema: z.ZodType<Prisma.CallErrorSelect> = z.object
 export const CallRecordingSelectSchema: z.ZodType<Prisma.CallRecordingSelect> = z.object({
   id: z.boolean().optional(),
   audioUrl: z.boolean().optional(),
+  createdAt: z.boolean().optional(),
 }).strict()
 
 
@@ -1110,11 +1112,13 @@ export const CallRecordingWhereInputSchema: z.ZodType<Prisma.CallRecordingWhereI
   NOT: z.union([ z.lazy(() => CallRecordingWhereInputSchema),z.lazy(() => CallRecordingWhereInputSchema).array() ]).optional(),
   id: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   audioUrl: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
+  createdAt: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
 }).strict();
 
 export const CallRecordingOrderByWithRelationInputSchema: z.ZodType<Prisma.CallRecordingOrderByWithRelationInput> = z.object({
   id: z.lazy(() => SortOrderSchema).optional(),
-  audioUrl: z.lazy(() => SortOrderSchema).optional()
+  audioUrl: z.lazy(() => SortOrderSchema).optional(),
+  createdAt: z.lazy(() => SortOrderSchema).optional()
 }).strict();
 
 export const CallRecordingWhereUniqueInputSchema: z.ZodType<Prisma.CallRecordingWhereUniqueInput> = z.object({
@@ -1126,11 +1130,13 @@ export const CallRecordingWhereUniqueInputSchema: z.ZodType<Prisma.CallRecording
   OR: z.lazy(() => CallRecordingWhereInputSchema).array().optional(),
   NOT: z.union([ z.lazy(() => CallRecordingWhereInputSchema),z.lazy(() => CallRecordingWhereInputSchema).array() ]).optional(),
   audioUrl: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
+  createdAt: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
 }).strict());
 
 export const CallRecordingOrderByWithAggregationInputSchema: z.ZodType<Prisma.CallRecordingOrderByWithAggregationInput> = z.object({
   id: z.lazy(() => SortOrderSchema).optional(),
   audioUrl: z.lazy(() => SortOrderSchema).optional(),
+  createdAt: z.lazy(() => SortOrderSchema).optional(),
   _count: z.lazy(() => CallRecordingCountOrderByAggregateInputSchema).optional(),
   _max: z.lazy(() => CallRecordingMaxOrderByAggregateInputSchema).optional(),
   _min: z.lazy(() => CallRecordingMinOrderByAggregateInputSchema).optional()
@@ -1142,6 +1148,7 @@ export const CallRecordingScalarWhereWithAggregatesInputSchema: z.ZodType<Prisma
   NOT: z.union([ z.lazy(() => CallRecordingScalarWhereWithAggregatesInputSchema),z.lazy(() => CallRecordingScalarWhereWithAggregatesInputSchema).array() ]).optional(),
   id: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
   audioUrl: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
+  createdAt: z.union([ z.lazy(() => DateTimeWithAggregatesFilterSchema),z.coerce.date() ]).optional(),
 }).strict();
 
 export const UserCreateInputSchema: z.ZodType<Prisma.UserCreateInput> = z.object({
@@ -1756,37 +1763,44 @@ export const CallErrorUncheckedUpdateManyInputSchema: z.ZodType<Prisma.CallError
 
 export const CallRecordingCreateInputSchema: z.ZodType<Prisma.CallRecordingCreateInput> = z.object({
   id: z.string(),
-  audioUrl: z.string()
+  audioUrl: z.string(),
+  createdAt: z.coerce.date().optional()
 }).strict();
 
 export const CallRecordingUncheckedCreateInputSchema: z.ZodType<Prisma.CallRecordingUncheckedCreateInput> = z.object({
   id: z.string(),
-  audioUrl: z.string()
+  audioUrl: z.string(),
+  createdAt: z.coerce.date().optional()
 }).strict();
 
 export const CallRecordingUpdateInputSchema: z.ZodType<Prisma.CallRecordingUpdateInput> = z.object({
   id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   audioUrl: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
 }).strict();
 
 export const CallRecordingUncheckedUpdateInputSchema: z.ZodType<Prisma.CallRecordingUncheckedUpdateInput> = z.object({
   id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   audioUrl: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
 }).strict();
 
 export const CallRecordingCreateManyInputSchema: z.ZodType<Prisma.CallRecordingCreateManyInput> = z.object({
   id: z.string(),
-  audioUrl: z.string()
+  audioUrl: z.string(),
+  createdAt: z.coerce.date().optional()
 }).strict();
 
 export const CallRecordingUpdateManyMutationInputSchema: z.ZodType<Prisma.CallRecordingUpdateManyMutationInput> = z.object({
   id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   audioUrl: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
 }).strict();
 
 export const CallRecordingUncheckedUpdateManyInputSchema: z.ZodType<Prisma.CallRecordingUncheckedUpdateManyInput> = z.object({
   id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   audioUrl: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
 }).strict();
 
 export const StringFilterSchema: z.ZodType<Prisma.StringFilter> = z.object({
@@ -2366,17 +2380,20 @@ export const CallErrorSumOrderByAggregateInputSchema: z.ZodType<Prisma.CallError
 
 export const CallRecordingCountOrderByAggregateInputSchema: z.ZodType<Prisma.CallRecordingCountOrderByAggregateInput> = z.object({
   id: z.lazy(() => SortOrderSchema).optional(),
-  audioUrl: z.lazy(() => SortOrderSchema).optional()
+  audioUrl: z.lazy(() => SortOrderSchema).optional(),
+  createdAt: z.lazy(() => SortOrderSchema).optional()
 }).strict();
 
 export const CallRecordingMaxOrderByAggregateInputSchema: z.ZodType<Prisma.CallRecordingMaxOrderByAggregateInput> = z.object({
   id: z.lazy(() => SortOrderSchema).optional(),
-  audioUrl: z.lazy(() => SortOrderSchema).optional()
+  audioUrl: z.lazy(() => SortOrderSchema).optional(),
+  createdAt: z.lazy(() => SortOrderSchema).optional()
 }).strict();
 
 export const CallRecordingMinOrderByAggregateInputSchema: z.ZodType<Prisma.CallRecordingMinOrderByAggregateInput> = z.object({
   id: z.lazy(() => SortOrderSchema).optional(),
-  audioUrl: z.lazy(() => SortOrderSchema).optional()
+  audioUrl: z.lazy(() => SortOrderSchema).optional(),
+  createdAt: z.lazy(() => SortOrderSchema).optional()
 }).strict();
 
 export const StringFieldUpdateOperationsInputSchema: z.ZodType<Prisma.StringFieldUpdateOperationsInput> = z.object({

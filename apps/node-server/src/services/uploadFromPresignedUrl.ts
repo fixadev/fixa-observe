@@ -2,12 +2,19 @@ import s3 from "../utils/s3Client";
 import { PutObjectCommand } from "@aws-sdk/client-s3";
 import { env } from "../env";
 
-export const uploadFromPresignedUrl = async (url: string, callId: string) => {
+export const uploadFromPresignedUrl = async (
+  callId: string,
+  recordingUrl: string,
+) => {
+  if (!recordingUrl) {
+    throw new Error("Recording URL is required");
+  }
+
   try {
     // Download the file from the URL
-    const response = await fetch(url);
+    const response = await fetch(recordingUrl);
     if (!response.ok) {
-      throw new Error(`Failed to download file from URL: ${url}`);
+      throw new Error(`Failed to download file from URL: ${recordingUrl}`);
     }
     // Get content type from response headers
     const contentType =

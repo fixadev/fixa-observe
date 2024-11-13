@@ -15,6 +15,9 @@ const io = new Server(httpServer, {
   },
 });
 
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
 // Store connected sockets by userId
 const connectedUsers = new Map();
 
@@ -100,7 +103,7 @@ app.post("/upload-call", async (req: Request, res: Response) => {
   try {
     const { callId, location } = req.body;
     const result = await uploadCallToDB(callId, location);
-    res.json({ success: true });
+    res.json({ success: true, muizz: "the man" });
   } catch (error) {
     console.error(error);
     res.status(500).json({ success: false, error: (error as Error).message });
