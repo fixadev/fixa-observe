@@ -11,8 +11,8 @@ import { ClerkProvider } from "@clerk/nextjs";
 import ChildrenWrapper from "./_components/ChildrenWrapper";
 import { TooltipProvider } from "~/components/ui/tooltip";
 export const metadata: Metadata = {
-  title: "pixa",
-  description: "the observability platform for voice AI",
+  title: "fixa",
+  description: "fix AI voice agents faster.",
   icons: [{ rel: "icon", url: "/favicon.ico" }],
 };
 
