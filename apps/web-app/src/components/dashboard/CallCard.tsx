@@ -47,8 +47,8 @@ export default function CallCard({
         <Image
           src={call.testAgent.headshotUrl}
           alt="agent avatar"
-          width={48}
-          height={48}
+          width={48 * 2}
+          height={48 * 2}
           className="rounded-full"
         />
       </div>
@@ -58,10 +58,10 @@ export default function CallCard({
 
           {call.status !== CallStatus.in_progress && (
             <div className="flex shrink-0 items-center text-xs text-muted-foreground">
-              {formatDistanceToNow(startedAt, { addSuffix: true }).replace(
-                "about ",
-                "",
-              )}
+              {formatDistanceToNow(
+                new Date().setMinutes(new Date().getMinutes() - 1),
+                { addSuffix: true },
+              ).replace("about ", "")}
               {/* <div
                 className={cn(
                   "ml-2 size-2 shrink-0 rounded-full bg-primary",

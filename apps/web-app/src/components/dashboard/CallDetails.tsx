@@ -191,8 +191,8 @@ export default function CallDetails({
             <Image
               src={call.testAgent.headshotUrl}
               alt="agent avatar"
-              width={48}
-              height={48}
+              width={48 * 2}
+              height={48 * 2}
               className="rounded-full"
             />
           </div>

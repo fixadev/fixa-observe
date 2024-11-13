@@ -1,7 +1,7 @@
 "use client";
 
 import TestCard from "~/components/dashboard/TestCard";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import CallCard from "~/components/dashboard/CallCard";
 import type { TestWithIncludes } from "~/lib/types";
 import CallDetails from "~/components/dashboard/CallDetails";
@@ -108,6 +108,14 @@ function TestPage({ params }: { params: { agentId: string; testId: string } }) {
     }
   }, [_test]);
 
+  const scenariosData = useMemo(() => {
+    return [
+      { successCount: 7, totalCount: 10 },
+      { successCount: 3, totalCount: 10 },
+      { successCount: 9, totalCount: 10 },
+    ];
+  }, []);
+
   return (
     <div>
       {/* header */}
@@ -169,7 +177,7 @@ function TestPage({ params }: { params: { agentId: string; testId: string } }) {
               {test &&
                 Array.from(
                   new Set(test.calls.map((call) => call.intent.name)),
-                ).map((intentName) => {
+                ).map((intentName, index) => {
                   const intent = test.calls.find(
                     (call) => call.intent.name === intentName,
                   )?.intent;
@@ -177,10 +185,12 @@ function TestPage({ params }: { params: { agentId: string; testId: string } }) {
                   const callsWithIntent = test.calls.filter(
                     (call) => call.intent.name === intentName,
                   );
-                  const successCount = callsWithIntent.filter(
-                    (call) => call.result === "success",
-                  ).length;
-                  const totalCount = callsWithIntent.length;
+                  // const successCount = callsWithIntent.filter(
+                  //   (call) => call.result === "success",
+                  // ).length;
+                  // const totalCount = callsWithIntent.length;
+                  const successCount = scenariosData[index]!.successCount;
+                  const totalCount = scenariosData[index]!.totalCount;
                   const successRate = (successCount / totalCount) * 100;
 
                   return (
@@ -191,9 +201,8 @@ function TestPage({ params }: { params: { agentId: string; testId: string } }) {
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-1 text-xs font-medium">
                           {intentName}
-                          <Popover>
+                          {/* <Popover>
                             <PopoverTrigger>
-                              {/* <EllipsisHorizontalCircleIcon className="size-5 shrink-0 text-muted-foreground" /> */}
                               <InformationCircleIcon className="size-5 shrink-0 text-muted-foreground opacity-80" />
                             </PopoverTrigger>
                             <PopoverContent className="flex flex-col gap-1">
@@ -210,7 +219,7 @@ function TestPage({ params }: { params: { agentId: string; testId: string } }) {
                                 {intent.successCriteria}
                               </div>
                             </PopoverContent>
-                          </Popover>
+                          </Popover> */}
                         </div>
                         <div className="text-xs">
                           {Math.round(successRate)}%
@@ -239,26 +248,38 @@ function TestPage({ params }: { params: { agentId: string; testId: string } }) {
                 })}
             </div>
             <div className="flex flex-col overflow-y-auto">
-              {test?.calls
-                // .filter((call) => {
-                //   if (selectedCallType === "error")
-                //     return call.errors !== undefined;
-                //   if (selectedCallType === "no-errors")
-                //     return call.errors === undefined;
-                //   return true;
-                // })
-                .map((call) => (
+              {[0, 1, 2].map((iteration) =>
+                test?.calls.map((call, index) => (
                   <CallCard
-                    key={call.id}
+                    key={`${call.id}-${iteration}`}
                     className="shrink-0"
-                    call={call}
+                    call={{
+                      ...call,
+                      id: iteration === 0 ? call.id : `${call.id}-${iteration}`,
+                      result:
+                        iteration === 0
+                          ? call.result
+                          : Math.random() > 0.5
+                            ? "success"
+                            : "failure",
+                      testAgent: {
+                        ...call.testAgent,
+                        headshotUrl:
+                          index % 3 === 0
+                            ? "/images/agent-avatars/lily.jpeg"
+                            : index % 3 === 1
+                              ? "/images/agent-avatars/marge.jpeg"
+                              : "/images/agent-avatars/steve.jpeg",
+                      },
+                    }}
                     selectedCallId={selectedCallId}
                     onSelect={(callId) => {
                       setSelectedCallId(callId);
                       seek(0);
                     }}
                   />
-                ))}
+                )),
+              )}
             </div>
           </div>
           {selectedCallId && agent && test && (
