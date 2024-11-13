@@ -17,14 +17,14 @@ export default function LandingPage() {
 
   return (
     <>
-      <div className="container relative mx-auto flex flex-col items-center justify-center gap-8 pb-24 pt-16 md:h-screen md:flex-row md:gap-16 md:pb-16 lg:gap-8 xl:gap-24">
-        <div className="flex w-full flex-col items-center gap-6 md:w-[unset] md:items-start md:gap-12">
-          <div className="flex flex-col items-center gap-4 md:items-start md:gap-8">
-            <div className="-ml-1 text-4xl font-medium md:-ml-1 md:text-6xl lg:text-7xl">
-              pixa.
+      <div className="container relative mx-auto flex flex-col items-center justify-center gap-8 pb-24 pt-16 md:h-screen">
+        <div className="flex flex-col items-center gap-8 md:gap-12">
+          <div className="flex flex-col items-center gap-4 md:gap-8">
+            <div className="text-center text-2xl font-medium md:text-6xl">
+              fix AI voice agents faster.
             </div>
-            <div className="text-xl text-muted-foreground/60 sm:text-2xl md:text-2xl lg:text-3xl">
-              testing for AI voice agents :)
+            <div className="text-center text-lg text-muted-foreground/60 md:text-3xl">
+              run tests, analyze calls, fix bugs.
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -46,21 +46,23 @@ export default function LandingPage() {
             </Button>
           </div>
         </div>
-        <div className="shrink-1 flex w-full items-center justify-center md:flex-1">
-          <div className="relative aspect-square w-full max-w-[400px] overflow-hidden rounded-md border border-border bg-background object-contain p-2 shadow-sm md:max-w-none lg:aspect-[1716/1090]">
+        <div className="shrink-1 flex w-full items-center justify-center">
+          <div className="relative aspect-square w-full overflow-hidden rounded-md border border-border bg-background object-contain shadow-sm md:aspect-[1806/1044] md:max-w-[900px]">
             <Image
               src="/images/landing-page/hero.png"
               alt="hero image"
               fill
-              sizes="80vw"
-              className="hidden lg:block"
+              sizes="100vw"
+              className="hidden md:block"
+              priority
             />
             <Image
               src="/images/landing-page/analyze.png"
               alt="hero image"
               fill
-              sizes="80vw"
-              className="block lg:hidden"
+              sizes="100vw"
+              className="block md:hidden"
+              priority
             />
           </div>
         </div>
