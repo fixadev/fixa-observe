@@ -38,7 +38,7 @@ export default function LandingPage() {
           <div className="flex items-center gap-2">
             <Button size="lg" asChild className="w-fit">
               <Link
-                href="https://cal.com/team/pixa/20-minute-meeting"
+                href="https://cal.com/team/fixa/20-minute-meeting"
                 target="_blank"
               >
                 book demo
@@ -197,7 +197,7 @@ export default function LandingPage() {
           <div className="flex flex-col gap-4">
             <Button size="lg" asChild className="w-fit">
               <Link
-                href="https://cal.com/team/pixa/20-minute-meeting"
+                href="https://cal.com/team/fixa/20-minute-meeting"
                 target="_blank"
               >
                 book demo
@@ -205,7 +205,7 @@ export default function LandingPage() {
             </Button>
             <div className="flex gap-2">
               <Button variant="ghost" asChild>
-                <Link href="mailto:contact@pixa.dev" target="_blank">
+                <Link href="mailto:contact@fixa.dev" target="_blank">
                   contact
                 </Link>
               </Button>
