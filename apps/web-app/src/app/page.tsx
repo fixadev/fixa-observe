@@ -6,6 +6,7 @@ import Image from "next/image";
 import { useCallback } from "react";
 import { LinkedInLogoIcon } from "@radix-ui/react-icons";
 import TopBar from "./_components/TopBar";
+import { SuggestedChange } from "./_components/SuggestedChange";
 
 // 420 69 🍆
 export default function LandingPage() {
@@ -74,7 +75,7 @@ export default function LandingPage() {
           </div>
         </div>
         <div className="absolute bottom-2 left-0 right-0 flex items-center justify-center">
-          <div className="flex items-center gap-2 rounded-md bg-background px-4 py-1">
+          <div className="-mx-2 -my-1 flex items-center gap-2 rounded-md bg-background px-2 py-1">
             <Image
               src="/images/landing-page/yc.png"
               alt="y-combinator"
@@ -97,7 +98,7 @@ export default function LandingPage() {
               <div className="text-2xl font-medium">1. import agent 🕵️‍♀️</div>
               <div className="text-muted-foreground">
                 give us your system prompt and we will generate test cases for
-                you !
+                you.
               </div>
             </div>
             <div className="shrink-1 max-w-[400px] lg:w-[550px] lg:max-w-none">
@@ -154,7 +155,7 @@ export default function LandingPage() {
             <div className="flex max-w-[400px] flex-col gap-4 lg:w-[400px] lg:max-w-none">
               <div className="text-2xl font-medium">3. analyze calls 🧐</div>
               <div className="text-muted-foreground">
-                pinpoint exactly where errors occur in the audio.
+                pinpoint exactly where errors occur in both dev and prod.
               </div>
             </div>
             <div className="rounded-md border border-border bg-background p-2 shadow-sm">
@@ -164,6 +165,23 @@ export default function LandingPage() {
                 width={400}
                 height={400}
               />
+            </div>
+          </div>
+          <div className="flex flex-col-reverse items-center gap-8 lg:flex-row">
+            <SuggestedChange
+              removed={["ALWAYS address the user by the user's name"]}
+              added={[
+                "only address the user by name if they have",
+                "provided it to you",
+              ]}
+            />
+            <div className="flex flex-row items-center"></div>
+            <div className="flex max-w-[400px] flex-col gap-4 lg:w-[400px] lg:max-w-none">
+              <div className="text-2xl font-medium">4. fix bugs 🛠️</div>
+              <div className="text-muted-foreground">
+                fixa suggests actionable changes to your prompt to reduce
+                errors.
+              </div>
             </div>
           </div>
         </div>
