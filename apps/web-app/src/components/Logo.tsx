@@ -10,7 +10,7 @@ export default function Logo({
 }) {
   return (
     <Link href={href} className={cn("flex items-center gap-2", className)}>
-      <span className="text-xl font-medium sm:text-2xl">pixa.</span>
+      <span className="text-xl font-medium sm:text-2xl">fixa.</span>
     </Link>
   );
 }

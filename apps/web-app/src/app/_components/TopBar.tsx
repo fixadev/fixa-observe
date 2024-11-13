@@ -15,7 +15,17 @@ export default function TopBar() {
         <div className="flex items-center justify-between">
           <Logo />
           <div className="flex items-center gap-2">
-            <SignedOut>
+            {/* <SignedOut> */}
+            {/* <Button size="lg" variant="outline" asChild>
+              <Link
+                href="https://cal.com/team/pixa/20-minute-meeting"
+                target="_blank"
+              >
+                book demo
+              </Link>
+            </Button> */}
+            {/* </SignedOut> */}
+            {/* <SignedOut>
               <Button variant="ghost" asChild>
                 <SignInButton forceRedirectUrl="/projects" />
               </Button>
@@ -27,7 +37,7 @@ export default function TopBar() {
               <Button asChild>
                 <Link href="/projects">Dashboard</Link>
               </Button>
-            </SignedIn>
+            </SignedIn> */}
           </div>
         </div>
       </div>

@@ -5,26 +5,34 @@ import Link from "next/link";
 import Image from "next/image";
 import { useCallback } from "react";
 import { LinkedInLogoIcon } from "@radix-ui/react-icons";
+import TopBar from "./_components/TopBar";
+import { SuggestedChange } from "./_components/SuggestedChange";
 
 // 420 69 🍆
 export default function LandingPage() {
   const scrollToHowItWorks = useCallback(() => {
     const howItWorksSection = document.getElementById("how-it-works");
     if (howItWorksSection) {
-      howItWorksSection.scrollIntoView({ behavior: "smooth" });
+      const yOffset = -70; // Scroll to 100px above the section
+      const y =
+        howItWorksSection.getBoundingClientRect().top +
+        window.scrollY +
+        yOffset;
+      window.scrollTo({ top: y, behavior: "smooth" });
     }
   }, []);
 
   return (
     <>
-      <div className="container relative mx-auto flex flex-col items-center justify-center gap-8 pb-24 pt-16 md:h-screen md:flex-row md:gap-16 md:pb-16 lg:gap-8 xl:gap-24">
-        <div className="flex w-full flex-col items-center gap-6 md:w-[unset] md:items-start md:gap-12">
-          <div className="flex flex-col items-center gap-4 md:items-start md:gap-8">
-            <div className="-ml-1 text-4xl font-medium md:-ml-1 md:text-6xl lg:text-7xl">
-              pixa.
+      <TopBar />
+      <div className="container relative mx-auto flex flex-col items-center justify-center gap-8 pb-24 pt-32 md:h-screen">
+        <div className="flex flex-col items-center gap-8 md:gap-12">
+          <div className="flex flex-col items-center gap-4 md:gap-8">
+            <div className="text-center text-2xl font-medium md:text-6xl">
+              fix AI voice agents faster.
             </div>
-            <div className="text-xl text-muted-foreground/60 sm:text-2xl md:text-2xl lg:text-3xl">
-              sentry for AI voice agents :)
+            <div className="text-center text-lg text-muted-foreground/60 md:text-3xl">
+              run tests, analyze calls, fix bugs.
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -46,34 +54,38 @@ export default function LandingPage() {
             </Button>
           </div>
         </div>
-        <div className="shrink-1 flex w-full items-center justify-center md:flex-1">
-          <div className="relative aspect-square w-full max-w-[400px] overflow-hidden rounded-md border border-border bg-background object-contain p-2 shadow-sm md:max-w-none lg:aspect-[1716/1090]">
+        <div className="shrink-1 flex w-full items-center justify-center">
+          <div className="relative aspect-square w-full max-w-[min(500px,70vh)] overflow-hidden rounded-md border border-border bg-background object-contain shadow-sm md:aspect-[1806/1044] md:max-w-[min(900px,80vh)]">
             <Image
               src="/images/landing-page/hero.png"
               alt="hero image"
               fill
-              sizes="80vw"
-              className="hidden lg:block"
+              sizes="100vw"
+              className="hidden md:block"
+              priority
             />
             <Image
               src="/images/landing-page/analyze.png"
               alt="hero image"
               fill
-              sizes="80vw"
-              className="block lg:hidden"
+              sizes="100vw"
+              className="block md:hidden"
+              priority
             />
           </div>
         </div>
-        <div className="absolute bottom-2 left-0 right-0 flex items-center justify-center gap-2 md:bottom-6">
-          <Image
-            src="/images/landing-page/yc.png"
-            alt="y-combinator"
-            width={200}
-            height={200 * (399 / 1400)}
-            className="w-[150px] md:w-[200px]"
-          />
-          <div className="text-muted-foreground">
-            <span className="mr-1">gave us money</span> <span>🤑</span>
+        <div className="absolute bottom-2 left-0 right-0 flex items-center justify-center">
+          <div className="-mx-2 -my-1 flex items-center gap-2 rounded-md bg-background px-2 py-1">
+            <Image
+              src="/images/landing-page/yc.png"
+              alt="y-combinator"
+              width={200}
+              height={200 * (399 / 1400)}
+              className="w-[150px] md:w-[200px]"
+            />
+            <div className="text-muted-foreground">
+              <span className="mr-1">gave us money</span> <span>🤑</span>
+            </div>
           </div>
         </div>
       </div>
@@ -86,7 +98,7 @@ export default function LandingPage() {
               <div className="text-2xl font-medium">1. import agent 🕵️‍♀️</div>
               <div className="text-muted-foreground">
                 give us your system prompt and we will generate test cases for
-                you !
+                you.
               </div>
             </div>
             <div className="shrink-1 max-w-[400px] lg:w-[550px] lg:max-w-none">
@@ -143,7 +155,7 @@ export default function LandingPage() {
             <div className="flex max-w-[400px] flex-col gap-4 lg:w-[400px] lg:max-w-none">
               <div className="text-2xl font-medium">3. analyze calls 🧐</div>
               <div className="text-muted-foreground">
-                pinpoint exactly where errors occur in the audio.
+                pinpoint exactly where errors occur in both dev and prod.
               </div>
             </div>
             <div className="rounded-md border border-border bg-background p-2 shadow-sm">
@@ -155,14 +167,31 @@ export default function LandingPage() {
               />
             </div>
           </div>
+          <div className="flex flex-col-reverse items-center gap-8 lg:flex-row">
+            <SuggestedChange
+              removed={["ALWAYS address the user by the user's name"]}
+              added={[
+                "only address the user by name if they have",
+                "provided it to you",
+              ]}
+            />
+            <div className="flex flex-row items-center"></div>
+            <div className="flex max-w-[400px] flex-col gap-4 lg:w-[400px] lg:max-w-none">
+              <div className="text-2xl font-medium">4. fix bugs 🛠️</div>
+              <div className="text-muted-foreground">
+                fixa suggests actionable changes to your prompt to reduce
+                errors.
+              </div>
+            </div>
+          </div>
         </div>
       </div>
       <div className="dark bg-background py-16 text-foreground">
         <div className="container mx-auto flex flex-col items-center gap-8 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex flex-col items-center gap-4 sm:items-start">
-            <div className="text-2xl font-medium">pixa.</div>
+            <div className="text-2xl font-medium">fixa.</div>
             <div className="text-center text-lg sm:text-left">
-              sentry for AI voice agents :)
+              fix AI voice agents faster.
             </div>
           </div>
           <div className="flex flex-col gap-4">
