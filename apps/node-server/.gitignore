@@ -1,3 +1,4 @@
-.env
+.env.production
+.env.development
 gcp-credentials.json
 node_modules/
