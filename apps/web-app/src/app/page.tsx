@@ -54,7 +54,7 @@ export default function LandingPage() {
           </div>
         </div>
         <div className="shrink-1 flex w-full items-center justify-center">
-          <div className="relative aspect-square w-full max-w-[500px] overflow-hidden rounded-md border border-border bg-background object-contain shadow-sm md:aspect-[1806/1044] md:max-w-[900px]">
+          <div className="relative aspect-square w-full max-w-[min(500px,70vh)] overflow-hidden rounded-md border border-border bg-background object-contain shadow-sm md:aspect-[1806/1044] md:max-w-[min(900px,80vh)]">
             <Image
               src="/images/landing-page/hero.png"
               alt="hero image"
@@ -73,16 +73,18 @@ export default function LandingPage() {
             />
           </div>
         </div>
-        <div className="absolute bottom-2 left-0 right-0 flex items-center justify-center gap-2 md:bottom-6">
-          <Image
-            src="/images/landing-page/yc.png"
-            alt="y-combinator"
-            width={200}
-            height={200 * (399 / 1400)}
-            className="w-[150px] md:w-[200px]"
-          />
-          <div className="text-muted-foreground">
-            <span className="mr-1">gave us money</span> <span>🤑</span>
+        <div className="absolute bottom-2 left-0 right-0 flex items-center justify-center">
+          <div className="flex items-center gap-2 rounded-md bg-background px-4 py-1">
+            <Image
+              src="/images/landing-page/yc.png"
+              alt="y-combinator"
+              width={200}
+              height={200 * (399 / 1400)}
+              className="w-[150px] md:w-[200px]"
+            />
+            <div className="text-muted-foreground">
+              <span className="mr-1">gave us money</span> <span>🤑</span>
+            </div>
           </div>
         </div>
       </div>
