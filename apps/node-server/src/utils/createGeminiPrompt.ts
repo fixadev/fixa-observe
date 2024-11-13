@@ -21,11 +21,9 @@ export const createGeminiPrompt = (
         - for example, if the transcript indicates an imcomplete response from the main agent, but the audio indicates that the main agent was interrupted mid-sentence by the test agent, you should remove the error
         - if the transcript indicates a missing word -- but the audio indicates that the main agent did not miss a word, there must have been a transcription error and you should remove the error
       - if the errors are valid, you should keep them
-      - if they are missatributed, you should reattribute them. 
-    - the failure reason
-      - you should determine if the failure reason is valid or not based off of the audio of the call
-      - if the failure reason is not valid, you should modify it
-      - if the failure reason is valid, you should keep it
+      - your modification should be modifications that can only be made based off of the audio of the call.
+      - do not remove errors that are factual errors -- only remove errors that are based off of a misunderstanding of the audio.
+
 
     You will be provided:
       1. a call transcript between two AI agents. The main agent will be labeled as "user" and the test agent will be labeled as "bot".

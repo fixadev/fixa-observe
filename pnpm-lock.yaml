@@ -20,6 +20,9 @@ importers:
 
   apps/node-server:
     dependencies:
+      '@aws-sdk/client-s3':
+        specifier: ^3.556.0
+        version: 3.658.1
       '@google-cloud/storage':
         specifier: ^7.13.0
         version: 7.13.0

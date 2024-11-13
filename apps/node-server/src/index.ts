@@ -5,6 +5,7 @@ import { handleVapiCallEnded } from "./services/handleVapiCallEnded";
 import { handleTranscriptUpdate } from "./services/handleTranscriptUpdate";
 import { handleAnalysisStarted } from "./services/handleAnalysisStarted";
 import { db } from "./db";
+import { uploadCallToDB } from "./services/uploadCallToDB";
 const app = express();
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
@@ -93,6 +94,17 @@ app.post("/vapi", async (req: Request, res: Response) => {
     }
   }
   res.json({ success: true });
+});
+
+app.post("/upload-call", async (req: Request, res: Response) => {
+  try {
+    const { callId, location } = req.body;
+    const result = await uploadCallToDB(callId, location);
+    res.json({ success: true });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, error: (error as Error).message });
+  }
 });
 
 app.post("/message/:userId", (req: Request, res: Response) => {

@@ -142,3 +142,8 @@ enum CallStatus {
   analyzing
   completed
 }
+
+model CallRecording {
+  id       String @id
+  audioUrl String
+}
