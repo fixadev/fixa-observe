@@ -4,6 +4,7 @@ import { Server } from "socket.io";
 import { handleVapiCallEnded } from "./services/handleVapiCallEnded";
 import { handleTranscriptUpdate } from "./services/handleTranscriptUpdate";
 import { handleAnalysisStarted } from "./services/handleAnalysisStarted";
+import { db } from "./db";
 const app = express();
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
@@ -74,17 +75,10 @@ app.post("/vapi", async (req: Request, res: Response) => {
       }
     }
   } else if (message.type === "transcript") {
-    console.log("Received transcript update for call", message.call.id);
     const result = await handleTranscriptUpdate(message);
     if (result) {
       const userSocket = connectedUsers.get(result.userId);
       if (userSocket) {
-        console.log(
-          "Emitting messages updated event for callId",
-          result.callId,
-          "to user",
-          result.userId,
-        );
         userSocket.emit("message", {
           type: "messages-updated",
           data: {
@@ -93,6 +87,8 @@ app.post("/vapi", async (req: Request, res: Response) => {
             messages: result.messages,
           },
         });
+      } else {
+        console.error("No user socket found for userId", result.userId);
       }
     }
   }
@@ -109,6 +105,11 @@ app.post("/message/:userId", (req: Request, res: Response) => {
   } else {
     res.status(404).json({ error: "User not connected" });
   }
+});
+
+app.get("/db", async (_, res: Response) => {
+  const result = await db.testAgent.findMany();
+  res.json({ result });
 });
 
 // Server setup with unified cleanup

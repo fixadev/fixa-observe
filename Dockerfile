@@ -34,5 +34,5 @@ RUN pnpm build
 # Expose port
 EXPOSE 3003
 
-# Start the server
-CMD ["node", "dist/index.js"]  
+# Start the server with NODE_ENV set
+CMD ["sh", "-c", "NODE_ENV=production node dist/index.js"]  

@@ -49,18 +49,18 @@ async function main() {
     // },
   ];
 
-  // TODO: Add editing and deleting that works
-  const oldAssistants = await prisma.testAgent.findMany({
-    where: { ownerId: "SYSTEM" },
-  });
-  const assistantIdsToDelete = oldAssistants.filter(
-    (assistant) => !testAgents.some((agent) => agent.name === assistant.name),
-  );
+  // // TODO: Add editing and deleting that works
+  // const oldAssistants = await prisma.testAgent.findMany({
+  //   where: { ownerId: "SYSTEM" },
+  // });
+  // const assistantIdsToDelete = oldAssistants.filter(
+  //   (assistant) => !testAgents.some((agent) => agent.name === assistant.name),
+  // );
 
-  for (const assistant of assistantIdsToDelete) {
-    await deleteVapiAssistantById(assistant.id);
-    await prisma.testAgent.delete({ where: { id: assistant.id } });
-  }
+  // for (const assistant of assistantIdsToDelete) {
+  //   await deleteVapiAssistantById(assistant.id);
+  //   await prisma.testAgent.delete({ where: { id: assistant.id } });
+  // }
 
   for (const agent of testAgents) {
     // await deleteVapiAssistantById(agent.id);

@@ -1,9 +1,12 @@
-import { type ServerMessageEndOfCallReport } from "@vapi-ai/server-sdk/api";
+import {
+  ServerMessageTranscript,
+  type ServerMessageEndOfCallReport,
+} from "@vapi-ai/server-sdk/api";
 import { db } from "../db";
 import { Message, Role } from "@prisma/client";
 
 export const handleTranscriptUpdate = async (
-  report: ServerMessageEndOfCallReport,
+  report: ServerMessageTranscript,
 ): Promise<
   | { userId: string; callId: string; testId: string; messages: Message[] }
   | undefined
@@ -17,11 +20,11 @@ export const handleTranscriptUpdate = async (
 
   const userId = call?.ownerId;
   if (!call || !userId || !call.test) {
-    console.error("No call or userId", report);
+    console.error("No call, test or userId", call);
     return;
   }
 
-  const messagesToEmit = report.artifact.messages
+  const messagesToEmit = report.artifact?.messages
     ?.map((message, index) => {
       const baseMessage = {
         id: `${call.id}-${index}`,
