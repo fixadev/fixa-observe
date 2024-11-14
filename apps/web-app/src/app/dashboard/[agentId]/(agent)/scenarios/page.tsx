@@ -1,9 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { IntentCard } from "~/app/_components/IntentCard";
 import { Button } from "~/components/ui/button";
-import { Input } from "~/components/ui/input";
-import { Label } from "~/components/ui/label";
 import { type AgentWithIncludes } from "~/lib/types";
 import { api } from "~/trpc/react";
 
@@ -24,10 +23,27 @@ export default function AgentSettingsPage({
 
   if (!agent) return null;
 
+  const addScenario = () => {
+    setAgent({
+      ...agent,
+      intents: [
+        ...agent.intents,
+        {
+          id: "new",
+          name: "",
+          instructions: "",
+          successCriteria: "",
+          agentId: agent.id,
+          isNew: true,
+        },
+      ],
+    });
+  };
+
   return (
     <div className="flex flex-col">
       <div className="container flex items-center justify-between py-8">
-        <div className="text-2xl font-medium">settings</div>
+        <div className="text-2xl font-medium">scenarios</div>
         <Button
           disabled={JSON.stringify(agent) === JSON.stringify(agentData)}
           onClick={() => {
@@ -38,14 +54,22 @@ export default function AgentSettingsPage({
         </Button>
       </div>
       <div className="h-px w-full bg-input" />
-      <div className="container flex flex-col gap-6 p-8">
-        <div className="flex flex-col gap-2">
-          <Label>Agent Name</Label>
-          <Input value={agent.name} />
-        </div>
-        <div className="flex flex-col gap-2">
-          <Label>Agent Phone Number</Label>
-          <Input value={agent.phoneNumber} />
+      <div className="container flex flex-col gap-4 p-8">
+        {agent.intents.map((intent, index) => (
+          <IntentCard
+            index={index}
+            key={intent.id}
+            intent={intent}
+            agent={agent}
+            setAgent={(updatedAgent) =>
+              setAgent(updatedAgent as AgentWithIncludes)
+            }
+          />
+        ))}
+        <div className="flex flex-row justify-end">
+          <Button variant="outline" onClick={addScenario}>
+            Add Scenario
+          </Button>
         </div>
       </div>
     </div>

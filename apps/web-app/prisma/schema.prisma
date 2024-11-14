@@ -76,9 +76,10 @@ model Intent {
   instructions    String
   successCriteria String @default("")
 
-  agent   Agent  @relation(fields: [agentId], references: [id], onDelete: Cascade)
+  agent   Agent   @relation(fields: [agentId], references: [id], onDelete: Cascade)
   agentId String
   calls   Call[]
+  isNew   Boolean @default(false)
 }
 
 model Call {
@@ -91,12 +92,12 @@ model Call {
   startedAt          String?
   endedAt            String?
 
-  test        Test      @relation(fields: [testId], references: [id], onDelete: Cascade)
-  testId      String
-  testAgent   TestAgent @relation(fields: [testAgentId], references: [id], onDelete: Cascade)
-  testAgentId String
-  intent      Intent    @relation(fields: [intentId], references: [id], onDelete: Cascade)
-  intentId    String
+  test        Test?      @relation(fields: [testId], references: [id], onDelete: Cascade)
+  testId      String?
+  testAgent   TestAgent? @relation(fields: [testAgentId], references: [id], onDelete: Cascade)
+  testAgentId String?
+  intent      Intent?    @relation(fields: [intentId], references: [id], onDelete: Cascade)
+  intentId    String?
 
   messages Message[]
   errors   CallError[]
@@ -151,4 +152,5 @@ model CallRecording {
   id        String   @id
   audioUrl  String
   createdAt DateTime @default(now())
+  processed Boolean  @default(false)
 }

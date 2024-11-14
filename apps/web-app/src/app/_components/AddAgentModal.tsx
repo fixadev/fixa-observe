@@ -34,7 +34,7 @@ interface InputWithLabelProps {
 function InputWithLabel({ label, value, onChange }: InputWithLabelProps) {
   return (
     <div className="flex flex-col gap-2">
-      <Label>{label}</Label>
+      <Label className="text-md">{label}</Label>
       <Input value={value} onChange={(e) => onChange(e.target.value)} />
     </div>
   );
@@ -48,7 +48,7 @@ function TextAreaWithLabel({
 }: InputWithLabelProps) {
   return (
     <div className="flex h-48 flex-col gap-2">
-      <Label>{label}</Label>
+      <Label className="text-md">{label}</Label>
       <Textarea
         value={value}
         onChange={(e) => onChange(e.target.value)}
@@ -60,7 +60,7 @@ function TextAreaWithLabel({
 }
 
 const loadingMessages = [
-  "generating intents",
+  "generating scenarios",
   "analyzing system prompt",
   "crafting agent behaviors",
   "finalizing intent structure",
@@ -68,7 +68,7 @@ const loadingMessages = [
 
 export function AddAgentModal({ children, refetchAgents }: AddAgentModalProps) {
   const [isGeneratingIntents, setIsGeneratingIntents] = useState(false);
-  const [loadingText, setLoadingText] = useState("generating intents");
+  const [loadingText, setLoadingText] = useState("generating scenarios");
   const [modalOpen, setModalOpen] = useState(false);
 
   useEffect(() => {
@@ -104,6 +104,7 @@ export function AddAgentModal({ children, refetchAgents }: AddAgentModalProps) {
         name: "",
         instructions: "",
         successCriteria: "",
+        isNew: true,
       },
     ],
   });
@@ -113,7 +114,7 @@ export function AddAgentModal({ children, refetchAgents }: AddAgentModalProps) {
       ...agent,
       intents: [
         ...agent.intents,
-        { name: "", instructions: "", successCriteria: "" },
+        { name: "", instructions: "", successCriteria: "", isNew: true },
       ],
     });
   };
@@ -146,16 +147,12 @@ export function AddAgentModal({ children, refetchAgents }: AddAgentModalProps) {
     console.log("isGeneratingIntents", isGeneratingIntents);
   }, [isGeneratingIntents]);
 
-  useEffect(() => {
-    console.log("modalOpen", modalOpen);
-  }, [modalOpen]);
-
   return (
     <Dialog open={modalOpen} onOpenChange={setModalOpen}>
       <DialogTrigger asChild>{children}</DialogTrigger>
-      <DialogContent className="flex h-[80vh] w-[50vw] min-w-[600px] max-w-screen-xl flex-col p-0">
+      <DialogContent className="flex h-[80vh] w-[50vw] min-w-[600px] max-w-screen-sm flex-col p-0">
         <DialogTitle className="p-6 pb-2">new agent</DialogTitle>
-        <div className="flex-1 space-y-4 overflow-y-auto p-6 pt-2">
+        <div className="flex flex-1 flex-col space-y-4 overflow-y-auto p-6 pt-2">
           <InputWithLabel
             label="name"
             value={agent?.name ?? ""}
@@ -166,26 +163,28 @@ export function AddAgentModal({ children, refetchAgents }: AddAgentModalProps) {
             value={agent?.phoneNumber ?? ""}
             onChange={(value) => setAgent({ ...agent, phoneNumber: value })}
           />
-          <InputWithLabel
-            label="github repo url"
-            value={agent?.githubRepoUrl ?? ""}
-            onChange={(value) => setAgent({ ...agent, githubRepoUrl: value })}
-          />
           <TextAreaWithLabel
-            label="system prompt"
+            label="agent prompt"
             value={agent?.systemPrompt ?? ""}
             onChange={(value) => setAgent({ ...agent, systemPrompt: value })}
-            onBlur={() => handleGenerateIntents(agent.systemPrompt)}
           />
-          <div className="flex flex-col gap-2">
-            <Label>intents</Label>
+          <div className="flex w-full flex-1 flex-grow flex-col gap-2">
+            <div className="flex w-full flex-row items-center justify-between gap-2">
+              <Label className="text-lg">scenarios</Label>
+              <Button
+                variant="outline"
+                onClick={() => handleGenerateIntents(agent.systemPrompt)}
+              >
+                generate from prompt
+              </Button>
+            </div>
             {isGeneratingIntents ? (
-              <div className="flex h-[150px] w-full flex-col items-center justify-center gap-2 rounded-md bg-gray-100 p-4">
+              <div className="flex w-full flex-1 flex-grow flex-col items-center justify-center gap-2 rounded-md bg-gray-100 p-4">
                 <Spinner className="size-8" />
                 <p className="text-sm text-gray-500">{loadingText}</p>
               </div>
             ) : (
-              <div className="flex flex-col gap-2">
+              <div className="flex w-full flex-col gap-2">
                 {agent.intents.map((intent, index) => (
                   <IntentCard
                     key={index}
@@ -193,11 +192,10 @@ export function AddAgentModal({ children, refetchAgents }: AddAgentModalProps) {
                     index={index}
                     agent={agent}
                     setAgent={setAgent}
-                    modalOpen={modalOpen}
                   />
                 ))}
                 <Button variant="outline" onClick={addIntent}>
-                  add intent
+                  add scenario
                 </Button>
               </div>
             )}
