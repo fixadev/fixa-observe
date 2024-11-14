@@ -53,9 +53,14 @@ export const handleVapiCallEnded = async (
     return;
   }
 
+  if (!call.intent) {
+    console.error("No success criteria found for intent");
+    return;
+  }
+
   const analysis = await analyzeCall(
     agent.systemPrompt,
-    testAgent?.prompt,
+    call.intent.instructions,
     call.intent.successCriteria,
     report.call,
     report.artifact.messages,
@@ -66,7 +71,7 @@ export const handleVapiCallEnded = async (
   const geminiPrompt = createGeminiPrompt(
     report.artifact.messages,
     agent.systemPrompt,
-    testAgent?.prompt,
+    call.intent.instructions,
     call.intent.successCriteria,
     analysis,
   );
@@ -135,7 +140,7 @@ export const handleVapiCallEnded = async (
 
   return {
     ownerId,
-    testId: test.id,
+    testId: test?.id,
     callId,
     call: updatedCall,
   };
