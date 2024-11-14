@@ -64,6 +64,7 @@ export default function AgentScenariosPage({
             index={index}
             key={intent.id}
             intent={intent}
+            intentId={intent.id}
             intents={intents}
             setIntents={saveIntents}
           />

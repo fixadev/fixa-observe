@@ -10,6 +10,7 @@ import { useEffect, useState } from "react";
 
 interface IntentCardProps {
   intent: IntentWithoutId;
+  intentId?: string;
   index: number;
   intents: Array<Intent | IntentWithoutId>;
   setIntents: (intents: Array<Intent | IntentWithoutId>) => void;
@@ -17,6 +18,7 @@ interface IntentCardProps {
 
 export function IntentCard({
   intent,
+  intentId,
   index,
   intents,
   setIntents,
@@ -102,11 +104,16 @@ export function IntentCard({
       ) : (
         <div className="flex w-full flex-col items-center gap-2">
           <div className="flex w-full flex-row justify-between gap-2">
-            <Label
-              className={`text-lg ${intent.name.length > 0 ? "" : "text-muted-foreground"}`}
-            >
-              {intent.name.length > 0 ? intent.name : "untitled "}
-            </Label>
+            <div className="flex flex-row items-baseline gap-4">
+              <Label
+                className={`text-lg ${intent.name.length > 0 ? "" : "text-muted-foreground"}`}
+              >
+                {intent.name.length > 0 ? intent.name : "untitled "}
+              </Label>
+              {intentId && (
+                <div className="text-sm text-muted-foreground">{intentId}</div>
+              )}
+            </div>
             <Button variant="ghost" onClick={() => setEditMode(true)}>
               <PencilIcon className="size-5 text-muted-foreground" />
             </Button>
