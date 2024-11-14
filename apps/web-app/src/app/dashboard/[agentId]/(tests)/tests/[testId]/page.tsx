@@ -22,6 +22,7 @@ import {
   PopoverTrigger,
 } from "~/components/ui/popover";
 import { InformationCircleIcon } from "@heroicons/react/24/solid";
+import { CallStatus } from "@prisma/client";
 
 // type CallType = "error" | "no-errors" | "all";
 
@@ -41,9 +42,6 @@ function TestPage({ params }: { params: { agentId: string; testId: string } }) {
   // const [selectedCallType] = useState<CallType>("error");
   const [selectedCallId, setSelectedCallId] = useState<string | null>(null);
   const [test, setTest] = useState<TestWithIncludes | null>(null);
-  const [callsBeingAnalyzed, setCallsBeingAnalyzed] = useState<Set<string>>(
-    new Set(),
-  );
   const { play, pause, seek, isPlaying } = useAudio();
   const { data: _test, isLoading } = api.test.get.useQuery({
     id: params.testId,
@@ -90,11 +88,18 @@ function TestPage({ params }: { params: { agentId: string; testId: string } }) {
         } else if (message.type === "analysis-started") {
           const data = message.data as AnalysisStartedData;
           if (test?.id === data.testId) {
-            setCallsBeingAnalyzed((prev) => {
-              const newSet = new Set(prev);
-              newSet.add(data.callId);
-              return newSet;
-            });
+            setTest((prev) =>
+              prev
+                ? {
+                    ...prev,
+                    calls: prev.calls.map((call) =>
+                      call.id === data.callId
+                        ? { ...call, status: CallStatus.analyzing }
+                        : call,
+                    ),
+                  }
+                : prev,
+            );
           }
         }
       },
@@ -267,7 +272,6 @@ function TestPage({ params }: { params: { agentId: string; testId: string } }) {
                 key={selectedCallId}
                 call={test.calls.find((call) => call.id === selectedCallId)!}
                 agent={agent}
-                isBeingAnalyzed={callsBeingAnalyzed.has(selectedCallId)}
               />
             </div>
           )}

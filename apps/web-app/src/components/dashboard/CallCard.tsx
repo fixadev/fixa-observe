@@ -58,7 +58,7 @@ export default function CallCard({
             {call.intent?.name}
           </div>
 
-          {call.status !== CallStatus.in_progress && (
+          {call.status === CallStatus.completed && (
             <div className="flex shrink-0 items-center text-xs text-muted-foreground">
               {formatDistanceToNow(startedAt, { addSuffix: true }).replace(
                 "about ",
@@ -78,7 +78,8 @@ export default function CallCard({
             <div
               className={cn(
                 "w-fit rounded-full px-2 py-1 text-xs",
-                call.status === CallStatus.in_progress
+                call.status === CallStatus.in_progress ||
+                  call.status === CallStatus.analyzing
                   ? "bg-yellow-100"
                   : call.result === "failure"
                     ? "bg-red-100"
@@ -87,22 +88,23 @@ export default function CallCard({
             >
               {call.status === CallStatus.in_progress
                 ? "in progress"
-                : call.result === "failure"
-                  ? "failed"
-                  : "succeeded"}
+                : call.status === CallStatus.analyzing
+                  ? "analyzing"
+                  : call.result === "failure"
+                    ? "failed"
+                    : "succeeded"}
             </div>
 
-            {call.status !== CallStatus.in_progress &&
-              call.errors.length > 0 && (
-                <div className="flex gap-0.5">
-                  <ExclamationCircleIcon className="size-4 shrink-0 text-red-500" />
-                  <div className="mt-px text-xs text-muted-foreground">
-                    {call.errors?.length}
-                  </div>
+            {call.status === CallStatus.completed && call.errors.length > 0 && (
+              <div className="flex gap-0.5">
+                <ExclamationCircleIcon className="size-4 shrink-0 text-red-500" />
+                <div className="mt-px text-xs text-muted-foreground">
+                  {call.errors?.length}
                 </div>
-              )}
+              </div>
+            )}
           </div>
-          {call.status !== CallStatus.in_progress && (
+          {call.status === CallStatus.completed && (
             <div className="flex shrink-0 items-center text-xs text-muted-foreground">
               {formatDurationHoursMinutesSeconds(duration)}
               {/* <div className="ml-2 size-2 shrink-0"></div> */}
