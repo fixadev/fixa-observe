@@ -26,11 +26,10 @@ const outputSchema = z.object({
   failureReason: z.string().nullable(),
 });
 
-export const analyzeCall = async (
+export const analyzeCallWitho1 = async (
   agentPrompt: string,
   testAgentPrompt: string,
   successCriteria: string,
-  call: Call,
   messages: ArtifactMessagesItem[],
 ): Promise<CallResult> => {
   const basePrompt = `
@@ -62,7 +61,7 @@ export const analyzeCall = async (
   - any tool call messages you see are being made by the test agent, not the main agent. so if they are made erroneously, that's not an error (it is an error in the test agent, not the main agent)
   `;
 
-  const prompt = `${basePrompt}\n\nMain Agent Prompt: ${agentPrompt}\n\nSuccess Criteria: ${successCriteria}\n\nTest Agent Prompt: ${testAgentPrompt}\n\nCall Transcript: ${JSON.stringify(
+  const prompt = `${basePrompt}\n\nMain Agent Prompt: ${agentPrompt}\n\nTest Agent Prompt: ${testAgentPrompt}\n\nSuccess Criteria: ${successCriteria}\n\nCall Transcript: ${JSON.stringify(
     messages,
   )}`;
 

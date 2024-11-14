@@ -5,7 +5,7 @@ import { Socket } from "socket.io";
 
 export const handleAnalysisStarted = async (
   report: ServerMessageEndOfCallReport,
-  connectedUsers?: Map<string, Socket>,
+  userSocket?: Socket,
 ) => {
   try {
     const callId = report?.call?.id;
@@ -26,15 +26,11 @@ export const handleAnalysisStarted = async (
     });
 
     const userId = updatedCall.ownerId;
-
-    if (userId && connectedUsers) {
-      const socket = connectedUsers?.get(userId);
-      if (socket) {
-        socket.emit("message", {
-          type: "analysis-started",
-          data: { testId: updatedCall.testId, callId },
-        });
-      }
+    if (userSocket) {
+      userSocket.emit("message", {
+        type: "analysis-started",
+        data: { testId: updatedCall.testId, callId },
+      });
     } else {
       console.log("No connected user found for call", callId);
     }

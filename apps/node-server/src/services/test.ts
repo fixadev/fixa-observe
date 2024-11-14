@@ -1,5 +1,5 @@
 import vapiClient from "../utils/vapiClient";
-import { analyzeCall } from "./findLLMErrors";
+import { analyzeCallWitho1 } from "./findLLMErrors";
 import { db } from "../db";
 import { CallStatus, Role } from "@prisma/client";
 import { CallResult } from "@prisma/client";
@@ -9,7 +9,7 @@ import { createGeminiPrompt } from "../utils/createGeminiPrompt";
 
 const main = async () => {
   const test = await db.test.findFirst({
-    where: { id: "cm3gww3qm0002ogyqoy5hq0se" },
+    where: { id: "cm3h0it4800034u42zdkpat5v" },
     include: {
       calls: { include: { intent: true, testAgent: true, messages: true } },
       agent: true,
@@ -42,11 +42,10 @@ const main = async () => {
     const agent = test?.agent;
     const testAgent = dbCall?.testAgent;
 
-    const analysis = await analyzeCall(
+    const analysis = await analyzeCallWitho1(
       agent?.systemPrompt ?? "",
       testAgent?.prompt ?? "",
       dbCall?.intent?.successCriteria ?? "",
-      vapiCall,
       vapiCall.artifact?.messages ?? [],
     );
 
@@ -88,6 +87,9 @@ const main = async () => {
         },
         result: success ? CallResult.success : CallResult.failure,
         failureReason,
+        stereoRecordingUrl: vapiCall.artifact?.stereoRecordingUrl,
+        startedAt: vapiCall.startedAt,
+        endedAt: vapiCall.endedAt,
         messages: {
           deleteMany: {},
           create: vapiCall.artifact?.messages

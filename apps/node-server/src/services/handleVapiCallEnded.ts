@@ -1,51 +1,36 @@
-import { CallResult, CallStatus, Role } from "@prisma/client";
+import {
+  Agent,
+  Call,
+  CallResult,
+  CallStatus,
+  Intent,
+  Role,
+  Test,
+} from "@prisma/client";
 import { db } from "../db";
 import { type ServerMessageEndOfCallReport } from "@vapi-ai/server-sdk/api";
-import { analyzeCall } from "./findLLMErrors";
+import { analyzeCallWitho1 } from "./findLLMErrors";
 import { createGeminiPrompt } from "../utils/createGeminiPrompt";
 import { analyzeCallWithGemini } from "./geminiAnalyzeAudio";
 import { formatOutput } from "./formatOutput";
-import { Socket } from "node:net";
+import { Socket } from "socket.io";
 
-export const handleVapiCallEnded = async (
-  report: ServerMessageEndOfCallReport,
-  connectedUsers?: Map<string, Socket>,
-) => {
+export const handleVapiCallEnded = async ({
+  report,
+  call,
+  agent,
+  test,
+  intent,
+  userSocket,
+}: {
+  report: ServerMessageEndOfCallReport;
+  call: Call;
+  agent: Agent;
+  test: Test;
+  intent: Intent;
+  userSocket?: Socket;
+}) => {
   try {
-    const callId = report?.call?.id;
-    if (!callId) {
-      console.error("No call ID found in Vapi call ended report");
-      return;
-    }
-    const call = await db.call.findFirst({
-      where: { id: callId },
-      include: {
-        testAgent: true,
-        intent: true,
-        test: { include: { agent: true } },
-      },
-    });
-
-    if (!call) {
-      console.error("No call found in DB for call ID", callId);
-      return;
-    }
-
-    const test = call.test;
-    const agent = test?.agent;
-    const testAgent = call?.testAgent;
-
-    const ownerId = agent?.ownerId;
-
-    if (!ownerId) {
-      console.error("No owner ID found for agent");
-      return;
-    }
-    if (!agent?.systemPrompt || !testAgent?.prompt) {
-      console.error("No agent or test agent prompt found");
-      return;
-    }
-
     if (!report.call || !report.artifact.messages) {
       console.error("No artifact messages found");
       return;
@@ -56,16 +41,10 @@ export const handleVapiCallEnded = async (
       return;
     }
 
-    if (!call.intent) {
-      console.error("No success criteria found for intent");
-      return;
-    }
-
-    const analysis = await analyzeCall(
+    const analysis = await analyzeCallWitho1(
       agent.systemPrompt,
-      call.intent.instructions,
-      call.intent.successCriteria,
-      report.call,
+      intent.instructions,
+      intent.successCriteria,
       report.artifact.messages,
     );
 
@@ -74,8 +53,8 @@ export const handleVapiCallEnded = async (
     const geminiPrompt = createGeminiPrompt(
       report.artifact.messages,
       agent.systemPrompt,
-      call.intent.instructions,
-      call.intent.successCriteria,
+      intent.instructions,
+      intent.successCriteria,
       analysis,
     );
 
@@ -92,10 +71,8 @@ export const handleVapiCallEnded = async (
 
     console.log("FORMATTED OUTPUT", errors, success, failureReason);
 
-    // console.log("MESSAGES", report.artifact.messages);
-
     const updatedCall = await db.call.update({
-      where: { id: callId },
+      where: { id: call.id },
       data: {
         status: CallStatus.completed,
         errors: {
@@ -141,22 +118,12 @@ export const handleVapiCallEnded = async (
       },
     });
 
-    if (connectedUsers) {
-      const socket = connectedUsers.get(ownerId);
-      if (socket) {
-        socket.emit("message", {
-          type: "call-ended",
-          data: { testId: test?.id, callId, call: updatedCall },
-        });
-      }
+    if (userSocket) {
+      userSocket.emit("message", {
+        type: "call-ended",
+        data: { testId: test?.id, callId: call.id, call: updatedCall },
+      });
     }
-
-    return {
-      ownerId,
-      testId: test?.id,
-      callId,
-      call: updatedCall,
-    };
   } catch (error) {
     console.error("Error handling Vapi call ended", error);
     return null;

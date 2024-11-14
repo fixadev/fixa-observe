@@ -6,6 +6,7 @@ import { handleTranscriptUpdate } from "./services/handleTranscriptUpdate";
 import { handleAnalysisStarted } from "./services/handleAnalysisStarted";
 import { db } from "./db";
 import { uploadCallToDB } from "./services/uploadCallToDB";
+import { getContext } from "./services/getContext";
 const app = express();
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
@@ -23,20 +24,18 @@ const connectedUsers = new Map();
 
 // Socket.IO connection handling
 io.on("connection", (socket) => {
-  console.log("Client connected");
-
   let userId: string | null = null;
 
   socket.on("register", (newUserId) => {
     userId = newUserId;
     connectedUsers.set(userId, socket);
-    console.log(`User ${userId} registered`);
+    // console.log(`User ${userId} registered`);
   });
 
   socket.on("disconnect", () => {
     if (userId) {
       connectedUsers.delete(userId);
-      console.log(`User ${userId} disconnected`);
+      // console.log(`User ${userId} disconnected`);
     }
   });
 });
@@ -48,17 +47,33 @@ app.use(express.json());
 app.get("/health", (_, res: Response) => res.json({ status: "ok" }));
 
 app.post("/vapi", async (req: Request, res: Response) => {
-  const { message } = req.body;
-  if (message.type === "end-of-call-report") {
-    console.log("Received end of call report for call", message.call.id);
-    await handleAnalysisStarted(message, connectedUsers);
-    console.log("Handling Vapi call ended");
-    await handleVapiCallEnded(message, connectedUsers);
-    console.log("Done handling Vapi call ended");
-  } else if (message.type === "transcript") {
-    await handleTranscriptUpdate(message, connectedUsers);
+  try {
+    const { message } = req.body;
+    if (message.type === "end-of-call-report") {
+      console.log("Received end of call report for call", message.call.id);
+      const context = await getContext(message.call.id, connectedUsers);
+      if (!context) {
+        console.error("No context found for call", message.call.id);
+        return;
+      }
+      const { userSocket, agent, intent, test, call } = context;
+      await handleAnalysisStarted(message, userSocket);
+      await handleVapiCallEnded({
+        report: message,
+        call,
+        agent,
+        test,
+        intent,
+        userSocket,
+      });
+    } else if (message.type === "transcript") {
+      await handleTranscriptUpdate(message, connectedUsers);
+    }
+    res.json({ success: true });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, error: (error as Error).message });
   }
-  res.json({ success: true });
 });
 
 app.post("/upload-call", async (req: Request, res: Response) => {
