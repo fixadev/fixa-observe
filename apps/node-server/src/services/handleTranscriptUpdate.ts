@@ -4,9 +4,11 @@ import {
 } from "@vapi-ai/server-sdk/api";
 import { db } from "../db";
 import { Message, Role } from "@prisma/client";
+import { Socket } from "socket.io";
 
 export const handleTranscriptUpdate = async (
   report: ServerMessageTranscript,
+  connectedUsers?: Map<string, Socket>,
 ): Promise<
   | { userId: string; callId: string; testId: string; messages: Message[] }
   | undefined
@@ -54,6 +56,20 @@ export const handleTranscriptUpdate = async (
   if (!messagesToEmit) {
     console.error("No messages to emit", report);
     return;
+  }
+
+  if (connectedUsers) {
+    const socket = connectedUsers.get(userId);
+    if (socket) {
+      socket.emit("message", {
+        type: "messages-updated",
+        data: {
+          callId: call.id,
+          testId: call.test.id,
+          messages: messagesToEmit,
+        },
+      });
+    }
   }
 
   return {

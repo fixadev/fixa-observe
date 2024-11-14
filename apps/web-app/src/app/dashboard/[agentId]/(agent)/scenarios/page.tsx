@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { IntentCard } from "~/app/_components/IntentCard";
+import Spinner from "~/components/Spinner";
 import { Button } from "~/components/ui/button";
 import { type AgentWithIncludes } from "~/lib/types";
 import { api } from "~/trpc/react";
@@ -13,7 +14,8 @@ export default function AgentSettingsPage({
 }) {
   const [agent, setAgent] = useState<AgentWithIncludes | null>(null);
   const { data: agentData } = api.agent.get.useQuery({ id: params.agentId });
-  const { mutate: updateAgentIntents } = api.agent.updateIntents.useMutation();
+  const { mutate: updateAgentIntents, isPending: isUpdatingIntents } =
+    api.agent.updateIntents.useMutation();
 
   useEffect(() => {
     if (agentData) {
@@ -45,12 +47,20 @@ export default function AgentSettingsPage({
       <div className="container flex items-center justify-between py-8">
         <div className="text-2xl font-medium">scenarios</div>
         <Button
+          className="flex w-32 items-center gap-2"
           disabled={JSON.stringify(agent) === JSON.stringify(agentData)}
           onClick={() => {
             updateAgentIntents({ id: agent.id, intents: agent.intents });
           }}
         >
-          Save Changes
+          {isUpdatingIntents ? (
+            <>
+              <span className="text-sm">Updating</span>
+              <Spinner className="size-4" />
+            </>
+          ) : (
+            "Save Changes"
+          )}
         </Button>
       </div>
       <div className="h-px w-full bg-input" />

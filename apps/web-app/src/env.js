@@ -37,6 +37,7 @@ export const env = createEnv({
     NEXT_PUBLIC_CLERK_SIGN_IN_URL: z.string(),
     NEXT_PUBLIC_CLERK_SIGN_UP_URL: z.string(),
     NEXT_PUBLIC_SOCKET_URL: z.string(),
+    NEXT_PUBLIC_VAPI_SERVER_URL: z.string(),
   },
 
   /**
@@ -63,6 +64,7 @@ export const env = createEnv({
     RETELL_API_KEY: process.env.RETELL_API_KEY,
     VAPI_API_KEY: process.env.VAPI_API_KEY,
     NEXT_PUBLIC_SOCKET_URL: process.env.NEXT_PUBLIC_SOCKET_URL,
+    NEXT_PUBLIC_VAPI_SERVER_URL: process.env.NEXT_PUBLIC_VAPI_SERVER_URL,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially
