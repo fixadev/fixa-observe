@@ -1,3 +1,4 @@
+import { env } from "~/env";
 import { vapi } from "~/server/utils/vapiClient";
 
 // export const editVapiAssistant = async (
@@ -107,6 +108,7 @@ export const initiateVapiCall = async (
         number: phoneNumber,
       },
       assistantOverrides: {
+        serverUrl: env.NEXT_PUBLIC_VAPI_SERVER_URL,
         model: {
           provider: "openai",
           model: "gpt-4o",

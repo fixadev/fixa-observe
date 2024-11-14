@@ -49,52 +49,14 @@ app.get("/health", (_, res: Response) => res.json({ status: "ok" }));
 
 app.post("/vapi", async (req: Request, res: Response) => {
   const { message } = req.body;
-  // console.log("Received message", message);
   if (message.type === "end-of-call-report") {
-    const analysisStarted = await handleAnalysisStarted(message);
-    if (analysisStarted) {
-      const userSocket = connectedUsers.get(analysisStarted.userId);
-      if (userSocket) {
-        userSocket.emit("message", {
-          type: "analysis-started",
-          data: {
-            testId: analysisStarted.testId,
-            callId: analysisStarted.callId,
-          },
-        });
-      }
-    }
-    const result = await handleVapiCallEnded(message);
-    if (result) {
-      const userSocket = connectedUsers.get(result.ownerId);
-      if (userSocket) {
-        userSocket.emit("message", {
-          type: "call-ended",
-          data: {
-            testId: result.testId,
-            callId: result.callId,
-            call: result.call,
-          },
-        });
-      }
-    }
+    console.log("Received end of call report for call", message.call.id);
+    await handleAnalysisStarted(message, connectedUsers);
+    console.log("Handling Vapi call ended");
+    await handleVapiCallEnded(message, connectedUsers);
+    console.log("Done handling Vapi call ended");
   } else if (message.type === "transcript") {
-    const result = await handleTranscriptUpdate(message);
-    if (result) {
-      const userSocket = connectedUsers.get(result.userId);
-      if (userSocket) {
-        userSocket.emit("message", {
-          type: "messages-updated",
-          data: {
-            callId: result.callId,
-            testId: result.testId,
-            messages: result.messages,
-          },
-        });
-      } else {
-        console.error("No user socket found for userId", result.userId);
-      }
-    }
+    await handleTranscriptUpdate(message, connectedUsers);
   }
   res.json({ success: true });
 });
