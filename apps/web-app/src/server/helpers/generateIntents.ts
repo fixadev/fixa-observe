@@ -36,7 +36,8 @@ export const generateIntentsFromPrompt = async (
     outboundResult
       ? generateOutboundIntentsPrompt
       : generateInboundIntentsPrompt
-  }\n\n AGENT PROMPT: ${prompt}`;
+  }\n\n AGENT PROMPT: ${prompt}
+  \n\nmake sure to set the isNew field to false for all intents`;
 
   const completion = await openai.beta.chat.completions.parse({
     model: "gpt-4o",

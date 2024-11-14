@@ -189,7 +189,7 @@ export default function CallDetails({
         <div className="flex items-center gap-4 pb-4">
           <div className="size-[48px] shrink-0">
             <Image
-              src={call.testAgent.headshotUrl}
+              src={call.testAgent?.headshotUrl ?? ""}
               alt="agent avatar"
               width={48}
               height={48}
@@ -198,7 +198,7 @@ export default function CallDetails({
           </div>
           <div className="flex flex-col gap-2">
             <div className="flex items-center gap-2">
-              <div className="text-sm font-medium">{call.intent.name}</div>
+              <div className="text-sm font-medium">{call.intent?.name}</div>
               {call.status !== CallStatus.in_progress && (
                 <div
                   className={cn(
@@ -313,7 +313,7 @@ export default function CallDetails({
                 >
                   <div className="text-xs font-medium">
                     {message.role === Role.bot
-                      ? call.testAgent.name
+                      ? call.testAgent?.name
                       : message.role === Role.user
                         ? agent.name
                         : ""}

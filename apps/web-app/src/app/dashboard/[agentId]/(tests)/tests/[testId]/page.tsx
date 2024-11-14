@@ -168,14 +168,14 @@ function TestPage({ params }: { params: { agentId: string; testId: string } }) {
               <div className="text-sm font-medium">scenarios</div>
               {test &&
                 Array.from(
-                  new Set(test.calls.map((call) => call.intent.name)),
+                  new Set(test.calls.map((call) => call.intent?.name)),
                 ).map((intentName) => {
                   const intent = test.calls.find(
-                    (call) => call.intent.name === intentName,
+                    (call) => call.intent?.name === intentName,
                   )?.intent;
                   if (!intent) return null;
                   const callsWithIntent = test.calls.filter(
-                    (call) => call.intent.name === intentName,
+                    (call) => call.intent?.name === intentName,
                   );
                   const successCount = callsWithIntent.filter(
                     (call) => call.result === "success",
