@@ -8,6 +8,11 @@ import { Label } from "~/components/ui/label";
 import { api } from "~/trpc/react";
 import { useToast } from "~/hooks/use-toast";
 import { type Agent } from "~/lib/agent";
+import {
+  checkForValidPhoneNumber,
+  displayPhoneNumberNicely,
+  formatPhoneNumber,
+} from "~/helpers/phoneNumberUtils";
 
 export default function AgentSettingsPage({
   params,
@@ -38,31 +43,6 @@ export default function AgentSettingsPage({
   }, [agentData]);
 
   if (!agent) return null;
-
-  const formatPhoneNumber = (phoneNumber: string) => {
-    const cleaned = phoneNumber.replace(/\D/g, "");
-    const truncated = cleaned.slice(0, 11);
-    if (!truncated.startsWith("1")) {
-      return "+1" + truncated;
-    }
-    return "+" + truncated;
-  };
-
-  const displayPhoneNumberNicely = (phoneNumber: string) => {
-    const formatted = formatPhoneNumber(phoneNumber);
-    const numbers = formatted.slice(2); // Remove +1
-    if (numbers.length === 0) return "+1";
-    if (numbers.length <= 3) return `+1 (${numbers}`;
-    if (numbers.length <= 6)
-      return `+1 (${numbers.slice(0, 3)}) ${numbers.slice(3)}`;
-    return `+1 (${numbers.slice(0, 3)}) ${numbers.slice(3, 6)}-${numbers.slice(6)}`;
-  };
-
-  const checkForValidPhoneNumber = (phoneNumber: string) => {
-    const formatted = formatPhoneNumber(phoneNumber);
-    const numbers = formatted.slice(2); // Remove +1
-    return numbers.length === 10;
-  };
 
   const handleSave = () => {
     if (!checkForValidPhoneNumber(agent.phoneNumber)) {

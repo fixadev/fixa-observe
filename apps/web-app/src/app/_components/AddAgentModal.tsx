@@ -17,6 +17,12 @@ import { Textarea } from "~/components/ui/textarea";
 import { api } from "~/trpc/react";
 import { IntentCard } from "./IntentCard";
 import Spinner from "~/components/Spinner";
+import {
+  checkForValidPhoneNumber,
+  formatPhoneNumber,
+  displayPhoneNumberNicely,
+} from "~/helpers/phoneNumberUtils";
+import { useToast } from "~/hooks/use-toast";
 
 interface AddAgentModalProps {
   children: React.ReactNode;
@@ -69,6 +75,7 @@ export function AddAgentModal({ children, refetchAgents }: AddAgentModalProps) {
   const [isGeneratingIntents, setIsGeneratingIntents] = useState(false);
   const [loadingText, setLoadingText] = useState("generating scenarios");
   const [modalOpen, setModalOpen] = useState(false);
+  const { toast } = useToast();
 
   useEffect(() => {
     if (!isGeneratingIntents) return;
@@ -118,12 +125,13 @@ export function AddAgentModal({ children, refetchAgents }: AddAgentModalProps) {
     });
   };
 
-  const { mutate: createAgent } = api.agent.create.useMutation({
-    onSuccess: () => {
-      setModalOpen(false);
-      refetchAgents();
-    },
-  });
+  const { mutate: createAgent, isPending: isCreatingAgent } =
+    api.agent.create.useMutation({
+      onSuccess: () => {
+        setModalOpen(false);
+        refetchAgents();
+      },
+    });
 
   const { mutate: generateIntents } =
     api.agent.generateIntentsFromPrompt.useMutation({
@@ -142,9 +150,18 @@ export function AddAgentModal({ children, refetchAgents }: AddAgentModalProps) {
     }
   };
 
-  useEffect(() => {
-    console.log("isGeneratingIntents", isGeneratingIntents);
-  }, [isGeneratingIntents]);
+  const handleCreateAgent = () => {
+    if (!checkForValidPhoneNumber(agent.phoneNumber)) {
+      toast({
+        title: "Invalid phone number",
+        variant: "destructive",
+        description: "Please enter a valid phone number",
+      });
+      return;
+    } else {
+      createAgent(agent);
+    }
+  };
 
   const setAgentIntents = (intents: IntentWithoutId[]) => {
     setAgent({ ...agent, intents });
@@ -163,8 +180,10 @@ export function AddAgentModal({ children, refetchAgents }: AddAgentModalProps) {
           />
           <InputWithLabel
             label="phone number"
-            value={agent?.phoneNumber ?? ""}
-            onChange={(value) => setAgent({ ...agent, phoneNumber: value })}
+            value={displayPhoneNumberNicely(agent?.phoneNumber ?? "")}
+            onChange={(value) =>
+              setAgent({ ...agent, phoneNumber: formatPhoneNumber(value) })
+            }
           />
           <TextAreaWithLabel
             label="agent prompt"
@@ -205,7 +224,20 @@ export function AddAgentModal({ children, refetchAgents }: AddAgentModalProps) {
           </div>
         </div>
         <div className="flex justify-end border-t p-4">
-          <Button onClick={() => createAgent(agent)}>create agent</Button>
+          <Button
+            className="flex w-32 items-center gap-2"
+            onClick={handleCreateAgent}
+            disabled={isCreatingAgent}
+          >
+            {isCreatingAgent ? (
+              <>
+                creating...
+                <Spinner className="size-4" />
+              </>
+            ) : (
+              "create agent"
+            )}
+          </Button>
         </div>
       </DialogContent>
       <DialogFooter></DialogFooter>
