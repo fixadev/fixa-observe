@@ -12,8 +12,7 @@ import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 
 import { useEffect, useState } from "react";
-import { cn } from "~/lib/utils";
-import { type Agent, type CreateAgentSchema } from "~/lib/agent";
+import { type IntentWithoutId, type CreateAgentSchema } from "~/lib/agent";
 import { Textarea } from "~/components/ui/textarea";
 import { api } from "~/trpc/react";
 import { IntentCard } from "./IntentCard";
@@ -147,6 +146,10 @@ export function AddAgentModal({ children, refetchAgents }: AddAgentModalProps) {
     console.log("isGeneratingIntents", isGeneratingIntents);
   }, [isGeneratingIntents]);
 
+  const setAgentIntents = (intents: IntentWithoutId[]) => {
+    setAgent({ ...agent, intents });
+  };
+
   return (
     <Dialog open={modalOpen} onOpenChange={setModalOpen}>
       <DialogTrigger asChild>{children}</DialogTrigger>
@@ -190,8 +193,8 @@ export function AddAgentModal({ children, refetchAgents }: AddAgentModalProps) {
                     key={index}
                     intent={intent}
                     index={index}
-                    agent={agent}
-                    setAgent={setAgent}
+                    intents={agent.intents}
+                    setIntents={setAgentIntents}
                   />
                 ))}
                 <Button variant="outline" onClick={addIntent}>

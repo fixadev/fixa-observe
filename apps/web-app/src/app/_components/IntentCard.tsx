@@ -1,46 +1,38 @@
 "use client";
 
-import { type IntentWithoutId, type AgentWithoutId } from "~/lib/agent";
+import { type IntentWithoutId, type Intent } from "~/lib/agent";
 import { Input } from "~/components/ui/input";
 import { Button } from "~/components/ui/button";
 import { PencilIcon, TrashIcon } from "@heroicons/react/24/solid";
 import { Label } from "~/components/ui/label";
 import { Textarea } from "~/components/ui/textarea";
 import { useEffect, useState } from "react";
-import { type AgentWithIncludes } from "~/lib/types";
 
 interface IntentCardProps {
   intent: IntentWithoutId;
   index: number;
-  agent: AgentWithoutId | AgentWithIncludes;
-  setAgent: (agent: AgentWithoutId | AgentWithIncludes) => void;
+  intents: Array<Intent | IntentWithoutId>;
+  setIntents: (intents: Array<Intent | IntentWithoutId>) => void;
 }
 
 export function IntentCard({
   intent,
   index,
-  agent,
-  setAgent,
+  intents,
+  setIntents,
 }: IntentCardProps) {
   const [editMode, setEditMode] = useState(intent.isNew);
+  const [localIntent, setLocalIntent] = useState(intent);
 
   const removeIntent = (index: number) => {
-    setAgent({
-      ...agent,
-      intents: agent.intents.filter((_, iIndex) => iIndex !== index),
-    });
+    setIntents(intents.filter((_, iIndex) => iIndex !== index));
   };
 
   useEffect(() => {
     if (intent.isNew) {
-      setAgent({
-        ...agent,
-        intents: agent.intents.map((i, iIndex) =>
-          iIndex === index ? { ...i, isNew: false } : i,
-        ),
-      });
+      setLocalIntent({ ...intent, isNew: false });
     }
-  }, [intent.isNew, agent, index, setAgent]);
+  }, [intent.isNew, index, setLocalIntent, intent]);
 
   return (
     <div className="flex w-full flex-col items-center gap-2 rounded-md border-2 border-gray-300 p-2">
@@ -48,15 +40,10 @@ export function IntentCard({
         <div className="flex w-full flex-col gap-2">
           <Label>name</Label>
           <Input
-            value={intent.name}
+            value={localIntent.name}
             placeholder="donut ordering flow"
             onChange={(e) =>
-              setAgent({
-                ...agent,
-                intents: agent.intents.map((i, iIndex) =>
-                  iIndex === index ? { ...i, name: e.target.value } : i,
-                ),
-              })
+              setLocalIntent({ ...localIntent, name: e.target.value })
             }
           />
           <div className="flex flex-col gap-2">
@@ -65,16 +52,12 @@ export function IntentCard({
             </div>
             <Textarea
               className="h-[125px] overflow-y-auto"
-              value={intent.instructions}
+              value={localIntent.instructions}
               placeholder="order a dozen donuts with sprinkles, ask for a receipt as well as a coffee"
               onChange={(e) =>
-                setAgent({
-                  ...agent,
-                  intents: agent.intents.map((i, iIndex) =>
-                    iIndex === index
-                      ? { ...i, instructions: e.target.value }
-                      : i,
-                  ),
+                setLocalIntent({
+                  ...localIntent,
+                  instructions: e.target.value,
                 })
               }
             />
@@ -83,16 +66,12 @@ export function IntentCard({
             </div>
             <Textarea
               className="h-[125px] overflow-y-auto"
-              value={intent.successCriteria}
+              value={localIntent.successCriteria}
               placeholder="the agent successfully orders a dozen donuts with sprinkles and a coffee"
               onChange={(e) =>
-                setAgent({
-                  ...agent,
-                  intents: agent.intents.map((i, iIndex) =>
-                    iIndex === index
-                      ? { ...i, successCriteria: e.target.value }
-                      : i,
-                  ),
+                setLocalIntent({
+                  ...localIntent,
+                  successCriteria: e.target.value,
                 })
               }
             />
@@ -108,6 +87,11 @@ export function IntentCard({
               <Button
                 onClick={() => {
                   setEditMode(false);
+                  setIntents(
+                    intents.map((i, iIndex) =>
+                      iIndex === index ? localIntent : i,
+                    ),
+                  );
                 }}
               >
                 save
