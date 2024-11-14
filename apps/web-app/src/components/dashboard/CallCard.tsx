@@ -45,7 +45,7 @@ export default function CallCard({
       ></div>
       <div className="flex size-[48px] shrink-0 items-center">
         <Image
-          src={call.testAgent.headshotUrl}
+          src={call.testAgent?.headshotUrl ?? ""}
           alt="agent avatar"
           width={48}
           height={48}
@@ -54,7 +54,9 @@ export default function CallCard({
       </div>
       <div className="flex min-w-0 flex-1 flex-col gap-1">
         <div className="flex items-center justify-between gap-4">
-          <div className="truncate text-sm font-medium">{call.intent.name}</div>
+          <div className="truncate text-sm font-medium">
+            {call.intent?.name}
+          </div>
 
           {call.status !== CallStatus.in_progress && (
             <div className="flex shrink-0 items-center text-xs text-muted-foreground">
