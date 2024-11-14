@@ -35,6 +35,18 @@ export const agentRouter = createTRPCRouter({
       );
     }),
 
+  updateSettings: protectedProcedure
+    .input(
+      z.object({
+        id: z.string(),
+        phoneNumber: z.string(),
+        name: z.string(),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      return await agentServiceInstance.updateAgentSettings(input);
+    }),
+
   getAll: protectedProcedure.query(async ({ ctx }) => {
     return await agentServiceInstance.getAllAgents(ctx.user.id);
   }),
