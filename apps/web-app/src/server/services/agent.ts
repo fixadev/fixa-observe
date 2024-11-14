@@ -111,17 +111,50 @@ export class AgentService {
     }
   }
 
-  async updateAgentIntents(id: string, intents: Intent[]) {
+  async updateAgentIntents(
+    id: string,
+    intents: Array<Intent | IntentWithoutId>,
+  ) {
+    const existingIntents = intents.filter((i): i is Intent => "id" in i);
+    const newIntents = intents.filter(
+      (i): i is IntentWithoutId => !("id" in i),
+    );
+
+    const currentIntents = await db.intent.findMany({
+      where: { agentId: id },
+      select: { id: true },
+    });
+
+    const intentsToDelete = currentIntents
+      .map((i) => i.id)
+      .filter((currentId) => !existingIntents.find((i) => i.id === currentId));
+
     return await db.agent.update({
       where: { id },
       data: {
         intents: {
-          upsert: intents.map(({ agentId, ...intent }) => ({
+          updateMany: existingIntents.map((intent) => ({
             where: { id: intent.id },
-            update: intent,
-            create: intent,
+            data: {
+              name: intent.name,
+              instructions: intent.instructions,
+              successCriteria: intent.successCriteria,
+            },
           })),
+          createMany: {
+            data: newIntents.map((intent) => ({
+              name: intent.name,
+              instructions: intent.instructions,
+              successCriteria: intent.successCriteria,
+            })),
+          },
+          deleteMany: {
+            id: { in: intentsToDelete },
+          },
         },
+      },
+      include: {
+        intents: true,
       },
     });
   }
