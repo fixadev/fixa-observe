@@ -35,7 +35,7 @@ export function IntentCard({
   }, [intent.isNew, index, setLocalIntent, intent]);
 
   return (
-    <div className="flex w-full flex-col items-center gap-2 rounded-md border-2 border-gray-300 p-2">
+    <div className="shawdow-sm flex w-full flex-col items-center gap-2 rounded-md border border-input p-6">
       {editMode ? (
         <div className="flex w-full flex-col gap-2">
           <Label>name</Label>
@@ -100,7 +100,7 @@ export function IntentCard({
           </div>
         </div>
       ) : (
-        <div className="flex w-full flex-col items-center gap-2 p-2">
+        <div className="flex w-full flex-col items-center gap-2">
           <div className="flex w-full flex-row justify-between gap-2">
             <Label
               className={`text-lg ${intent.name.length > 0 ? "" : "text-muted-foreground"}`}

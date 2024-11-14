@@ -158,4 +158,15 @@ export class AgentService {
       },
     });
   }
+
+  async updateAgentSettings(input: {
+    id: string;
+    phoneNumber: string;
+    name: string;
+  }) {
+    return await db.agent.update({
+      where: { id: input.id },
+      data: input,
+    });
+  }
 }
