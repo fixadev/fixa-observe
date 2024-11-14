@@ -19,8 +19,8 @@ export const testRouter = createTRPCRouter({
     }),
 
   run: protectedProcedure
-    .input(z.object({ agentId: z.string() }))
+    .input(z.object({ agentId: z.string(), intentIds: z.array(z.string()) }))
     .mutation(async ({ input }) => {
-      return await testServiceInstance.run(input.agentId);
+      return await testServiceInstance.run(input.agentId, input.intentIds);
     }),
 });
