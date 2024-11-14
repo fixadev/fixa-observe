@@ -44,18 +44,20 @@ export class TestService {
     });
   }
 
-  async run(agentId: string) {
+  async run(agentId: string, intentIds: string[]) {
     const agent = await agentServiceInstance.getAgent(agentId);
     if (!agent) {
       throw new Error("Agent not found");
     }
     const tests = agent.enabledTestAgents.flatMap((testAgent) =>
-      agent.intents.map((intent) => ({
-        testAgentVapiId: testAgent.id,
-        intentId: intent.id,
-        testAgentPrompt: testAgent.prompt,
-        intentPrompt: intent.instructions,
-      })),
+      agent.intents
+        .filter((intent) => intentIds.includes(intent.id))
+        .map((intent) => ({
+          testAgentVapiId: testAgent.id,
+          intentId: intent.id,
+          testAgentPrompt: testAgent.prompt,
+          intentPrompt: intent.instructions,
+        })),
     );
 
     console.log("TESTS", tests);

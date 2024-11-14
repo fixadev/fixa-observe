@@ -25,11 +25,12 @@ import { motion, AnimatePresence } from "framer-motion";
 import { type CallEndedData, type SocketMessage } from "~/lib/agent";
 import { type TestWithCalls } from "~/lib/types";
 import Spinner from "~/components/Spinner";
+import { Label } from "~/components/ui/label";
 
 export default function AgentPage({ params }: { params: { agentId: string } }) {
   const [tests, setTests] = useState<TestWithCalls[]>([]);
-  const [testInitializing, setTestInitializing] = useState(false);
   const [testAgentsModalOpen, setTestAgentsModalOpen] = useState(false);
+  const [runTestModalOpen, setRunTestModalOpen] = useState(false);
   const { toast } = useToast();
   const { user } = useUser();
 
@@ -62,14 +63,14 @@ export default function AgentPage({ params }: { params: { agentId: string } }) {
   const { data: _tests } = api.test.getAll.useQuery({
     agentId: params.agentId,
   });
-  const { mutate: runTest } = api.test.run.useMutation({
+
+  const { mutateAsync: runTest } = api.test.run.useMutation({
     onSuccess: (data) => {
       setTests((prev) => [data, ...prev]);
       toast({
         title: "Test initiated successfully",
         duration: 2000,
       });
-      setTestInitializing(false);
     },
   });
 
@@ -79,10 +80,18 @@ export default function AgentPage({ params }: { params: { agentId: string } }) {
     }
   }, [_tests]);
 
-  const handleRunTest = useCallback(() => {
-    setTestInitializing(true);
-    runTest({ agentId: params.agentId });
-  }, [params.agentId, runTest, setTestInitializing]);
+  // const handleRunTest = useCallback(() => {
+  //   setRunTestModalOpen(true);
+  // }, []);
+
+  const handleRunTest = useCallback(
+    async (intentIds: string[]) => {
+      // await new Promise((resolve) => setTimeout(resolve, 1000));
+      // throw new Error("test failed");
+      await runTest({ agentId: params.agentId, intentIds });
+    },
+    [params.agentId, runTest],
+  );
 
   return (
     <div>
@@ -100,19 +109,9 @@ export default function AgentPage({ params }: { params: { agentId: string } }) {
           <Button
             size="lg"
             className="flex min-w-[160px] items-center gap-2"
-            disabled={testInitializing}
-            onClick={handleRunTest}
+            onClick={() => setRunTestModalOpen(true)}
           >
-            {testInitializing ? (
-              <>
-                initializing
-                <Spinner className="size-4" />
-              </>
-            ) : (
-              <>
-                run test <RocketLaunchIcon className="size-4" />
-              </>
-            )}
+            run test <RocketLaunchIcon className="size-4" />
           </Button>
         </div>
       </div>
@@ -144,11 +143,19 @@ export default function AgentPage({ params }: { params: { agentId: string } }) {
         </div>
       )}
       {agent && (
-        <TestAgentsModal
-          agent={agent}
-          open={testAgentsModalOpen}
-          onOpenChange={setTestAgentsModalOpen}
-        />
+        <>
+          <TestAgentsModal
+            agent={agent}
+            open={testAgentsModalOpen}
+            onOpenChange={setTestAgentsModalOpen}
+          />
+          <RunTestModal
+            agent={agent}
+            open={runTestModalOpen}
+            onOpenChange={setRunTestModalOpen}
+            onRunTest={handleRunTest}
+          />
+        </>
       )}
     </div>
   );
@@ -231,6 +238,96 @@ function TestAgentsModal({
             <PlusIcon className="size-4" />
             <span>create custom test agent</span>
           </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function RunTestModal({
+  agent,
+  open,
+  onOpenChange,
+  onRunTest,
+}: {
+  agent: AgentWithIncludes;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onRunTest: (intentIds: string[]) => Promise<void>;
+}) {
+  const { toast } = useToast();
+
+  const [selectedIntents, setSelectedIntents] = useState<Set<string>>(
+    new Set(agent.intents.map((intent) => intent.id)),
+  );
+
+  const toggleIntent = useCallback((intentId: string) => {
+    setSelectedIntents((prev) => {
+      const next = new Set(prev);
+      if (next.has(intentId)) {
+        next.delete(intentId);
+      } else {
+        next.add(intentId);
+      }
+      return next;
+    });
+  }, []);
+
+  const [loading, setLoading] = useState(false);
+  const handleRunTest = useCallback(async () => {
+    setLoading(true);
+    try {
+      await onRunTest(Array.from(selectedIntents));
+      onOpenChange(false);
+    } catch (error) {
+      toast({
+        title: "Error running test",
+        description: "Please try again later.",
+        duration: 2000,
+        variant: "destructive",
+      });
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  }, [onRunTest, selectedIntents, onOpenChange, toast]);
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>run test</DialogTitle>
+        </DialogHeader>
+        <div className="flex flex-col gap-4">
+          <div className="text-sm text-muted-foreground">
+            select the scenarios to test.
+          </div>
+          {agent.intents.map((intent) => (
+            <div key={intent.id} className="flex items-center gap-2">
+              <Switch
+                id={intent.id}
+                checked={selectedIntents.has(intent.id)}
+                onCheckedChange={() => toggleIntent(intent.id)}
+              />
+              <Label htmlFor={intent.id} className="text-sm font-medium">
+                {intent.name}
+              </Label>
+            </div>
+          ))}
+          <Button
+            onClick={handleRunTest}
+            disabled={loading}
+            className="flex items-center gap-2"
+          >
+            {loading ? (
+              <>
+                initializing
+                <Spinner className="size-4" />
+              </>
+            ) : (
+              "run test"
+            )}
+          </Button>
         </div>
       </DialogContent>
     </Dialog>
