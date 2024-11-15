@@ -27,6 +27,12 @@ import { type TestWithCalls } from "~/lib/types";
 import Spinner from "~/components/Spinner";
 import { Label } from "~/components/ui/label";
 import { useAgent } from "~/app/contexts/UseAgent";
+import {
+  Accordion,
+  AccordionItem,
+  AccordionContent,
+  AccordionTrigger,
+} from "~/components/ui/accordion";
 
 export default function AgentPage({ params }: { params: { agentId: string } }) {
   const [tests, setTests] = useState<TestWithCalls[]>([]);
@@ -156,11 +162,6 @@ export default function AgentPage({ params }: { params: { agentId: string } }) {
       )}
       {agent && (
         <>
-          <TestAgentsModal
-            agent={agent}
-            open={testAgentsModalOpen}
-            onOpenChange={setTestAgentsModalOpen}
-          />
           <RunTestModal
             agent={agent}
             open={runTestModalOpen}
@@ -170,89 +171,6 @@ export default function AgentPage({ params }: { params: { agentId: string } }) {
         </>
       )}
     </div>
-  );
-}
-
-function TestAgentsModal({
-  agent,
-  open,
-  onOpenChange,
-}: {
-  agent: AgentWithIncludes;
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-}) {
-  const { data: testAgents } = api.agent.getTestAgents.useQuery();
-  const { mutate: toggleTestAgentEnabled } =
-    api.agent.toggleTestAgentEnabled.useMutation();
-
-  const [enabledAgents, setEnabledAgents] = useState<Set<string>>(
-    new Set(agent.enabledTestAgents.map((agent) => agent.id)),
-  );
-
-  useEffect(() => {
-    setEnabledAgents(new Set(agent.enabledTestAgents.map((agent) => agent.id)));
-  }, [agent.enabledTestAgents]);
-
-  const toggleAgent = (testAgentId: string) => {
-    setEnabledAgents((prev) => {
-      const next = new Set(prev);
-      if (next.has(testAgentId)) {
-        next.delete(testAgentId);
-      } else {
-        next.add(testAgentId);
-      }
-      return next;
-    });
-    toggleTestAgentEnabled({
-      agentId: agent.id,
-      testAgentId,
-      enabled: !enabledAgents.has(testAgentId),
-    });
-  };
-
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[800px] lg:max-w-[1000px]">
-        <DialogHeader>
-          <DialogTitle>test agents</DialogTitle>
-          <DialogDescription>
-            configure the test agents that will interact with your agent.
-          </DialogDescription>
-        </DialogHeader>
-
-        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3">
-          {testAgents?.map((agent) => (
-            <div
-              key={agent.id}
-              onClick={() => toggleAgent(agent.id)}
-              className="flex cursor-pointer items-center gap-4 rounded-md border border-input p-4 hover:bg-muted"
-            >
-              <div className="shrink-0">
-                <Image
-                  src={agent.headshotUrl}
-                  alt={agent.name}
-                  width={48}
-                  height={48}
-                  className="rounded-full"
-                />
-              </div>
-              <div className="flex flex-1 flex-col">
-                <div className="text-sm font-medium">{agent.name}</div>
-                <div className="text-xs text-muted-foreground">
-                  {agent.description}
-                </div>
-              </div>
-              <Switch checked={enabledAgents.has(agent.id)} />
-            </div>
-          ))}
-          <div className="flex h-full cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-muted/50 p-4 text-sm text-muted-foreground hover:bg-muted">
-            <PlusIcon className="size-4" />
-            <span>create custom test agent</span>
-          </div>
-        </div>
-      </DialogContent>
-    </Dialog>
   );
 }
 
@@ -285,6 +203,35 @@ function RunTestModal({
     });
   }, []);
 
+  const { data: testAgents } = api.agent.getTestAgents.useQuery();
+  const { mutate: toggleTestAgentEnabled } =
+    api.agent.toggleTestAgentEnabled.useMutation();
+
+  const [enabledAgents, setEnabledAgents] = useState<Set<string>>(
+    new Set(agent.enabledTestAgents.map((agent) => agent.id)),
+  );
+
+  useEffect(() => {
+    setEnabledAgents(new Set(agent.enabledTestAgents.map((agent) => agent.id)));
+  }, [agent.enabledTestAgents]);
+
+  const toggleAgent = (testAgentId: string) => {
+    setEnabledAgents((prev) => {
+      const next = new Set(prev);
+      if (next.has(testAgentId)) {
+        next.delete(testAgentId);
+      } else {
+        next.add(testAgentId);
+      }
+      return next;
+    });
+    toggleTestAgentEnabled({
+      agentId: agent.id,
+      testAgentId,
+      enabled: !enabledAgents.has(testAgentId),
+    });
+  };
+
   const [loading, setLoading] = useState(false);
   const handleRunTest = useCallback(async () => {
     setLoading(true);
@@ -306,6 +253,7 @@ function RunTestModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
+      {/* <DialogContent className="sm:max-w-[800px]"> */}
       <DialogContent>
         <DialogHeader>
           <DialogTitle>run test</DialogTitle>
@@ -326,6 +274,43 @@ function RunTestModal({
               </Label>
             </div>
           ))}
+          <Accordion type="single" collapsible>
+            <AccordionItem value="test-agents" className="-mx-6 border-none">
+              <AccordionTrigger className="px-6">test agents</AccordionTrigger>
+              <AccordionContent className="h-[300px] overflow-y-auto px-6">
+                <div className="grid grid-cols-1 gap-2">
+                  {testAgents?.map((agent) => (
+                    <div
+                      key={agent.id}
+                      onClick={() => toggleAgent(agent.id)}
+                      className="flex cursor-pointer items-center gap-4 rounded-md border border-input p-4 hover:bg-muted"
+                    >
+                      <div className="shrink-0">
+                        <Image
+                          src={agent.headshotUrl}
+                          alt={agent.name}
+                          width={48}
+                          height={48}
+                          className="rounded-full"
+                        />
+                      </div>
+                      <div className="flex flex-1 flex-col">
+                        <div className="text-sm font-medium">{agent.name}</div>
+                        <div className="text-xs text-muted-foreground">
+                          {agent.description}
+                        </div>
+                      </div>
+                      <Switch checked={enabledAgents.has(agent.id)} />
+                    </div>
+                  ))}
+                  <div className="flex h-full cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-muted/50 p-4 text-sm text-muted-foreground hover:bg-muted">
+                    <PlusIcon className="size-4" />
+                    <span>create custom test agent</span>
+                  </div>
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
           <Button
             onClick={handleRunTest}
             disabled={loading}
