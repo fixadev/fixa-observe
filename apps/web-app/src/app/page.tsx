@@ -3,13 +3,17 @@
 import { Button } from "~/components/ui/button";
 import Link from "next/link";
 import Image from "next/image";
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import { LinkedInLogoIcon } from "@radix-ui/react-icons";
 import TopBar from "./_components/TopBar";
 import { SuggestedChange } from "./_components/SuggestedChange";
+import { PlayCircleIcon } from "@heroicons/react/24/solid";
+import { Dialog, DialogContent } from "~/components/ui/dialog";
 
 // 420 69 🍆
 export default function LandingPage() {
+  const [videoModalOpen, setVideoModalOpen] = useState(false);
+
   const scrollToHowItWorks = useCallback(() => {
     const howItWorksSection = document.getElementById("how-it-works");
     if (howItWorksSection) {
@@ -20,6 +24,10 @@ export default function LandingPage() {
         yOffset;
       window.scrollTo({ top: y, behavior: "smooth" });
     }
+  }, []);
+
+  const openVideoModal = useCallback(() => {
+    setVideoModalOpen(true);
   }, []);
 
   return (
@@ -47,10 +55,10 @@ export default function LandingPage() {
             <Button
               size="lg"
               variant="ghost"
-              className="w-fit"
-              onClick={scrollToHowItWorks}
+              className="flex w-fit items-center gap-2"
+              onClick={openVideoModal}
             >
-              how it works
+              <PlayCircleIcon className="size-5" /> watch video
             </Button>
           </div>
         </div>
@@ -221,6 +229,39 @@ export default function LandingPage() {
           </div>
         </div>
       </div>
+      <VideoModal open={videoModalOpen} onOpenChange={setVideoModalOpen} />
     </>
+  );
+}
+
+function VideoModal({
+  open,
+  onOpenChange,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}) {
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-screen-lg rounded-none border-none bg-transparent p-0">
+        <div className="aspect-video w-full">
+          {/* <iframe
+            src="https://www.youtube.com/embed/Cnhf3Vs5Dcw?si=--oSyCyh2NZsVYgN"
+            title="YouTube video player"
+          /> */}
+          <iframe
+            // width="974"
+            // height="548"
+            className="h-full w-full"
+            src="https://www.youtube.com/embed/Cnhf3Vs5Dcw?iv_load_policy=3&rel=0&modestbranding=1&playsinline=1&autoplay=1&color=white"
+            title="YouTube video player"
+            frameBorder="0"
+            allow="presentation; fullscreen; accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
+            referrerPolicy="strict-origin-when-cross-origin"
+            allowFullScreen
+          ></iframe>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }
