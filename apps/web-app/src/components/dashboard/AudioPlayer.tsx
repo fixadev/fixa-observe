@@ -68,8 +68,8 @@ const AudioPlayer = forwardRef<
     setAudioUrl,
   } = useAudio();
   useEffect(() => {
-    setAudioUrl(call.stereoRecordingUrl);
-  }, [call.stereoRecordingUrl, setAudioUrl]);
+    setAudioUrl(call.monoRecordingUrl ?? call.stereoRecordingUrl);
+  }, [call.monoRecordingUrl, call.stereoRecordingUrl, setAudioUrl]);
 
   const [loaded, setLoaded] = useState(false);
   useEffect(() => {
