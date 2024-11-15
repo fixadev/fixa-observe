@@ -97,7 +97,18 @@ export default function AgentPage({ params }: { params: { agentId: string } }) {
   return (
     <div>
       {/* header */}
-      <div className="container flex items-center justify-between py-8">
+      <div className="flex h-14 items-center justify-between border-b border-input bg-muted/40 px-4 lg:h-[60px]">
+        <Link href={`/dashboard/${params.agentId}`}>
+          <div className="font-medium">test history</div>
+        </Link>
+        <Button
+          className="flex min-w-[160px] items-center gap-2"
+          onClick={() => setRunTestModalOpen(true)}
+        >
+          run test <RocketLaunchIcon className="size-4" />
+        </Button>
+      </div>
+      {/* <div className="container flex items-center justify-between py-8">
         <div className="text-2xl font-medium">tests</div>
         <div className="flex gap-2">
           <Button
@@ -116,11 +127,11 @@ export default function AgentPage({ params }: { params: { agentId: string } }) {
           </Button>
         </div>
       </div>
-      <div className="h-px w-full bg-input" />
+      <div className="h-px w-full bg-input" /> */}
 
       {/* content */}
       {tests.length > 0 && (
-        <div className="container py-8">
+        <div className="p-4">
           <div className="rounded-t-md border-x border-t border-input shadow-sm">
             <AnimatePresence mode="popLayout">
               {tests?.map((test) => (

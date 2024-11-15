@@ -141,7 +141,7 @@ export default function AgentLayout({
         </div>
       </div>
       <div className="flex flex-col overflow-hidden">
-        <header className="flex h-14 items-center gap-4 border-b bg-muted/40 px-4 lg:h-[60px] lg:px-6">
+        {/* <header className="flex h-14 items-center gap-4 border-b bg-muted/40 px-4 lg:h-[60px] lg:px-6">
           <Sheet>
             <SheetTrigger asChild>
               <Button
@@ -172,12 +172,12 @@ export default function AgentLayout({
                 ))}
               </nav>
             </SheetContent>
-          </Sheet>
-          {/* <div className="flex flex-1 items-center justify-between">
+          </Sheet> */}
+        {/* <div className="flex flex-1 items-center justify-between">
             <span className="text-sm font-medium">{survey?.name}</span>
             <UserButton />
           </div> */}
-        </header>
+        {/* </header> */}
         {/* <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6"> */}
         <main className="flex-1 overflow-hidden">{children}</main>
       </div>

@@ -26,12 +26,12 @@ export default function TestLayout({
 
   return (
     <div>
-      <LayoutHeader
+      {/* <LayoutHeader
         tabValue={tabValue}
         tabs={tabs}
         agentId={params.agentId}
         testId={params.testId}
-      />
+      /> */}
       {children}
     </div>
   );
