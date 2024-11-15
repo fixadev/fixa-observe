@@ -3,7 +3,7 @@
 import { PlusIcon } from "@heroicons/react/24/solid";
 import { Button } from "~/components/ui/button";
 import AgentCard from "~/components/dashboard/AgentCard";
-import { AddAgentModal } from "~/app/_components/AddAgentModal";
+import { AddAgentModal } from "./_components/AddAgentModal";
 import { api } from "~/trpc/react";
 
 export default function DashboardPage() {

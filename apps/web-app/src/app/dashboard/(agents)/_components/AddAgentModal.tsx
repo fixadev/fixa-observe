@@ -15,7 +15,7 @@ import { useEffect, useState } from "react";
 import { type IntentWithoutId, type CreateAgentSchema } from "~/lib/agent";
 import { Textarea } from "~/components/ui/textarea";
 import { api } from "~/trpc/react";
-import { IntentCard } from "./IntentCard";
+import { IntentCard } from "../../../_components/IntentCard";
 import Spinner from "~/components/Spinner";
 import {
   checkForValidPhoneNumber,

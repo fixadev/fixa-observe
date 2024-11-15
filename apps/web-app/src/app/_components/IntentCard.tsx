@@ -7,6 +7,7 @@ import { PencilIcon, TrashIcon } from "@heroicons/react/24/solid";
 import { Label } from "~/components/ui/label";
 import { Textarea } from "~/components/ui/textarea";
 import { useEffect, useState } from "react";
+import { Card } from "~/components/ui/card";
 
 interface IntentCardProps {
   intent: IntentWithoutId;
@@ -37,11 +38,12 @@ export function IntentCard({
   }, [intent.isNew, index, setLocalIntent, intent]);
 
   return (
-    <div className="flex w-full cursor-pointer flex-col items-center gap-2 rounded-md border border-input shadow-sm">
+    <Card>
       {editMode ? (
         <div className="flex w-full flex-col gap-2 p-6">
           <Label>name</Label>
           <Input
+            autoFocus={localIntent.name === ""}
             value={localIntent.name}
             placeholder="donut ordering flow"
             onChange={(e) =>
@@ -79,8 +81,12 @@ export function IntentCard({
             />
           </div>
           <div className="flex w-full flex-row items-center justify-between gap-2">
-            <Button variant="ghost" onClick={() => removeIntent(index)}>
-              <TrashIcon className="size-5 text-red-600" />
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => removeIntent(index)}
+            >
+              <TrashIcon className="size-5" />
             </Button>
             <div className="flex flex-row items-center gap-2">
               <Button variant="outline" onClick={() => setEditMode(false)}>
@@ -132,6 +138,6 @@ export function IntentCard({
           </div>
         </div>
       )}
-    </div>
+    </Card>
   );
 }
