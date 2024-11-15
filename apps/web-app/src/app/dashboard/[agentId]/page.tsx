@@ -6,7 +6,6 @@ import Link from "next/link";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "~/components/ui/dialog";
@@ -36,7 +35,6 @@ import {
 
 export default function AgentPage({ params }: { params: { agentId: string } }) {
   const [tests, setTests] = useState<TestWithCalls[]>([]);
-  const [testAgentsModalOpen, setTestAgentsModalOpen] = useState(false);
   const [runTestModalOpen, setRunTestModalOpen] = useState(false);
   const { toast } = useToast();
   const { user } = useUser();
@@ -103,7 +101,7 @@ export default function AgentPage({ params }: { params: { agentId: string } }) {
   return (
     <div>
       {/* header */}
-      <div className="flex h-14 items-center justify-between border-b border-input bg-muted/40 px-4 lg:h-[60px]">
+      <div className="z-20 flex h-14 items-center justify-between border-b border-input bg-muted/40 px-4 lg:h-[60px]">
         <Link href={`/dashboard/${params.agentId}`}>
           <div className="font-medium">test history</div>
         </Link>

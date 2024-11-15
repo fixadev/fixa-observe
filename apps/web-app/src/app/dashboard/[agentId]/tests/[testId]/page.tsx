@@ -117,7 +117,7 @@ function TestPage({ params }: { params: { agentId: string; testId: string } }) {
   return (
     <div>
       {/* header */}
-      <div className="flex h-14 items-center justify-between border-b border-input bg-muted/40 px-4 lg:h-[60px]">
+      <div className="sticky top-0 z-20 flex h-14 w-full items-center justify-between border-b border-input bg-[#FAFBFC] px-4 lg:h-[60px]">
         <div className="flex items-center gap-2">
           <Link href={`/dashboard/${params.agentId}`}>
             <div className="font-medium">test history</div>
@@ -155,7 +155,7 @@ function TestPage({ params }: { params: { agentId: string; testId: string } }) {
             }
           }}
         >
-          <div className="sticky top-[2.5rem] flex h-[calc(100vh-2.5rem-1px)] w-80 shrink-0 flex-col border-r border-input">
+          <div className="sticky top-[3.5rem] flex h-[calc(100vh-3.5rem-1px)] w-80 shrink-0 flex-col border-r border-input">
             {/* <div className="flex items-center gap-2 border-b border-input p-2">
               <div className="text-sm">show</div>
               <Select
