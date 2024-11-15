@@ -83,7 +83,7 @@ export const handleVapiCallEnded = async ({
         result: success ? CallResult.success : CallResult.failure,
         failureReason,
         stereoRecordingUrl: report.artifact.stereoRecordingUrl,
-        monoRecordingUrl: report.artifact.monoRecordingUrl,
+        monoRecordingUrl: report.artifact.recordingUrl,
         messages: {
           create: report.artifact.messages
             .map((message) => {
