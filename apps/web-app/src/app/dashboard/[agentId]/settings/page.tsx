@@ -15,7 +15,6 @@ import {
 } from "~/helpers/phoneNumberUtils";
 import { useAgent } from "~/app/contexts/UseAgent";
 import Link from "next/link";
-import { RocketLaunchIcon } from "@heroicons/react/24/outline";
 
 export default function AgentSettingsPage({
   params,

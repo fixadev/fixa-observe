@@ -61,7 +61,7 @@ export default function CallDetails({
       const isBelowViewport = elementRect.bottom > window.innerHeight;
 
       if (isAboveViewport || isBelowViewport) {
-        const headerTopOffset = 41;
+        const headerTopOffset = 57;
         const scrollPosition =
           window.scrollY + elementRect.top - header.height - headerTopOffset;
         window.scrollTo({
