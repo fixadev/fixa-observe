@@ -60,8 +60,24 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
     });
     setSound(howl);
 
+    // Add MediaSession API listener
+    if ("mediaSession" in navigator) {
+      navigator.mediaSession.setActionHandler("pause", () => {
+        setIsPlaying(false);
+        howl.pause();
+      });
+      navigator.mediaSession.setActionHandler("play", () => {
+        setIsPlaying(true);
+        howl.play();
+      });
+    }
+
     return () => {
       howl.unload();
+      if ("mediaSession" in navigator) {
+        navigator.mediaSession.setActionHandler("pause", null);
+        navigator.mediaSession.setActionHandler("play", null);
+      }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [audioUrl]);
