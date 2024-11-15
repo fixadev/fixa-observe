@@ -10,6 +10,7 @@ import {
 
 export const generateIntentsFromPrompt = async (
   prompt: string,
+  numberOfIntents: number,
 ): Promise<IntentWithoutId[]> => {
   const outputSchema = z.object({
     intents: z.array(IntentSchemaWithoutId),
@@ -34,10 +35,11 @@ export const generateIntentsFromPrompt = async (
 
   const combinedPrompt = `${
     outboundResult
-      ? generateOutboundIntentsPrompt
-      : generateInboundIntentsPrompt
+      ? generateOutboundIntentsPrompt(numberOfIntents)
+      : generateInboundIntentsPrompt(numberOfIntents)
   }\n\n AGENT PROMPT: ${prompt}
-  \n\nmake sure to set the isNew field to false for all intents`;
+  \n\nmake sure to set the isNew field to false for all intents
+  \n\nmake sure to generate ${numberOfIntents} intents`;
 
   const completion = await openai.beta.chat.completions.parse({
     model: "gpt-4o",

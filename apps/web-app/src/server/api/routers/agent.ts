@@ -81,9 +81,13 @@ export const agentRouter = createTRPCRouter({
     .input(
       z.object({
         prompt: z.string(),
+        numberOfIntents: z.number(),
       }),
     )
     .mutation(async ({ input }) => {
-      return await generateIntentsFromPrompt(input.prompt);
+      return await generateIntentsFromPrompt(
+        input.prompt,
+        input.numberOfIntents,
+      );
     }),
 });

@@ -23,6 +23,13 @@ import {
   displayPhoneNumberNicely,
 } from "~/helpers/phoneNumberUtils";
 import { useToast } from "~/hooks/use-toast";
+import {
+  Select,
+  SelectValue,
+  SelectTrigger,
+  SelectContent,
+  SelectItem,
+} from "~/components/ui/select";
 
 interface AddAgentModalProps {
   children: React.ReactNode;
@@ -75,6 +82,7 @@ export function AddAgentModal({ children, refetchAgents }: AddAgentModalProps) {
   const [isGeneratingIntents, setIsGeneratingIntents] = useState(false);
   const [loadingText, setLoadingText] = useState("generating scenarios");
   const [modalOpen, setModalOpen] = useState(false);
+  const [numberOfIntents, setNumberOfIntents] = useState(3);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -105,14 +113,7 @@ export function AddAgentModal({ children, refetchAgents }: AddAgentModalProps) {
     updatedAt: new Date(),
     githubRepoUrl: "",
     ownerId: "",
-    intents: [
-      {
-        name: "",
-        instructions: "",
-        successCriteria: "",
-        isNew: true,
-      },
-    ],
+    intents: [],
   });
 
   const addIntent = () => {
@@ -136,17 +137,22 @@ export function AddAgentModal({ children, refetchAgents }: AddAgentModalProps) {
   const { mutate: generateIntents } =
     api.agent.generateIntentsFromPrompt.useMutation({
       onSuccess: (data) => {
-        setAgent({ ...agent, intents: data });
+        setAgent({ ...agent, intents: [...agent.intents, ...data] });
         setIsGeneratingIntents(false);
       },
     });
 
   const handleGenerateIntents = (prompt: string) => {
-    if (prompt.length > 0 && agent.intents.length === 1) {
+    if (prompt.length > 0) {
       setIsGeneratingIntents(true);
-      console.log("setGeneratingIntents to true");
-      generateIntents({ prompt });
+      console.log("generating number of intents", numberOfIntents);
+      generateIntents({ prompt, numberOfIntents });
       console.log("setGeneratingIntents to false");
+    } else {
+      toast({
+        title: "Please enter a prompt to generate scenarios",
+        variant: "destructive",
+      });
     }
   };
 
@@ -193,12 +199,34 @@ export function AddAgentModal({ children, refetchAgents }: AddAgentModalProps) {
           <div className="flex w-full flex-1 flex-grow flex-col gap-2">
             <div className="flex w-full flex-row items-center justify-between gap-2">
               <Label className="text-lg">scenarios</Label>
-              <Button
-                variant="outline"
-                onClick={() => handleGenerateIntents(agent.systemPrompt)}
-              >
-                generate from prompt
-              </Button>
+              <div className="flex gap-2">
+                <Select
+                  value={numberOfIntents.toString()}
+                  onValueChange={(value) => setNumberOfIntents(parseInt(value))}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="3" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="1">1</SelectItem>
+                    <SelectItem value="2">2</SelectItem>
+                    <SelectItem value="3">3</SelectItem>
+                    <SelectItem value="4">4</SelectItem>
+                    <SelectItem value="5">5</SelectItem>
+                    <SelectItem value="6">6</SelectItem>
+                    <SelectItem value="7">7</SelectItem>
+                    <SelectItem value="8">8</SelectItem>
+                    <SelectItem value="9">9</SelectItem>
+                    <SelectItem value="10">10</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Button
+                  variant="outline"
+                  onClick={() => handleGenerateIntents(agent.systemPrompt)}
+                >
+                  generate from prompt
+                </Button>
+              </div>
             </div>
             {isGeneratingIntents ? (
               <div className="flex w-full flex-1 flex-grow flex-col items-center justify-center gap-2 rounded-md bg-gray-100 p-4">

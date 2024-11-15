@@ -37,9 +37,9 @@ export function IntentCard({
   }, [intent.isNew, index, setLocalIntent, intent]);
 
   return (
-    <div className="shawdow-sm flex w-full flex-col items-center gap-2 rounded-md border border-input p-6">
+    <div className="flex w-full cursor-pointer flex-col items-center gap-2 rounded-md border border-input shadow-sm">
       {editMode ? (
-        <div className="flex w-full flex-col gap-2">
+        <div className="flex w-full flex-col gap-2 p-6">
           <Label>name</Label>
           <Input
             value={localIntent.name}
@@ -102,7 +102,10 @@ export function IntentCard({
           </div>
         </div>
       ) : (
-        <div className="flex w-full flex-col items-center gap-2">
+        <div
+          className="group flex w-full cursor-pointer flex-col items-center gap-2 p-6 hover:bg-muted"
+          onClick={() => setEditMode(true)}
+        >
           <div className="flex w-full flex-row justify-between gap-2">
             <div className="flex flex-row items-baseline gap-4">
               <Label
@@ -114,9 +117,8 @@ export function IntentCard({
                 <div className="text-sm text-muted-foreground">{intentId}</div>
               )}
             </div>
-            <Button variant="ghost" onClick={() => setEditMode(true)}>
-              <PencilIcon className="size-5 text-muted-foreground" />
-            </Button>
+
+            <PencilIcon className="invisible mt-[-8px] size-5 group-hover:visible group-hover:text-muted-foreground" />
           </div>
           <div className="flex w-full flex-row gap-2">
             <Label className="whitespace-nowrap text-sm">prompt</Label>

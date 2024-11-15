@@ -1,8 +1,10 @@
-export const generateInboundIntentsPrompt = `your job is to create intents to test an inbound AI phone agent. 
+export const generateInboundIntentsPrompt = (
+  numberOfIntents: number,
+) => `your job is to create ${numberOfIntents} intents to test an inbound AI phone agent. 
   
   you will be given a system prompt for the phone agent. 
   
-  you will use this information to create three intents that will be used to create other agents that will be used to test the phone agent. 
+  you will use this information to create ${numberOfIntents} intents that will be used to create other agents that will be used to test the phone agent. 
   your response will be an array of JSON objects with the following properties:
 
   - name: the name of the intent -- don't use underscores or other special characters
@@ -29,11 +31,13 @@ export const generateInboundIntentsPrompt = `your job is to create intents to te
   }
   `;
 
-export const generateOutboundIntentsPrompt = `your job is to create intents to test an outbound AI phone agent. 
+export const generateOutboundIntentsPrompt = (
+  numberOfIntents: number,
+) => `your job is to create ${numberOfIntents} intents to test an outbound AI phone agent. 
   
   you will be given a system prompt for the phone agent. 
   
-  you will use this information to create three intents that will be used to create other agents that answer calls from the outboundphone agent. 
+  you will use this information to create ${numberOfIntents} intents that will be used to create other agents that answer calls from the outboundphone agent. 
   your response will be an array of JSON objects with the following properties:
 
   - name: the name of the intent -- don't use underscores or other special characters
