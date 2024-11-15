@@ -21,8 +21,9 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "~/components/ui/popover";
-import { InformationCircleIcon } from "@heroicons/react/24/solid";
+import { InformationCircleIcon, SlashIcon } from "@heroicons/react/24/solid";
 import { CallStatus } from "@prisma/client";
+import Link from "next/link";
 
 // type CallType = "error" | "no-errors" | "all";
 
@@ -116,6 +117,16 @@ function TestPage({ params }: { params: { agentId: string; testId: string } }) {
   return (
     <div>
       {/* header */}
+      <div className="sticky top-0 z-20 flex h-14 w-full items-center justify-between border-b border-input bg-[#FAFBFC] px-4 lg:h-[60px]">
+        <div className="flex items-center gap-2">
+          <Link href={`/dashboard/${params.agentId}`}>
+            <div className="font-medium">test history</div>
+          </Link>
+          <SlashIcon className="size-4 text-muted-foreground" />
+          <div className="text-sm text-muted-foreground">{test?.id}</div>
+        </div>
+      </div>
+
       <div className="container flex items-center justify-between py-4">
         {isLoading || !test ? (
           <Skeleton className="h-20 w-full text-muted-foreground" />
@@ -144,7 +155,7 @@ function TestPage({ params }: { params: { agentId: string; testId: string } }) {
             }
           }}
         >
-          <div className="sticky top-[2.5rem] flex h-[calc(100vh-2.5rem-1px)] w-80 shrink-0 flex-col border-r border-input">
+          <div className="sticky top-[3.5rem] flex h-[calc(100vh-3.5rem-1px)] w-80 shrink-0 flex-col border-r border-input">
             {/* <div className="flex items-center gap-2 border-b border-input p-2">
               <div className="text-sm">show</div>
               <Select

@@ -61,7 +61,7 @@ export default function CallDetails({
       const isBelowViewport = elementRect.bottom > window.innerHeight;
 
       if (isAboveViewport || isBelowViewport) {
-        const headerTopOffset = 41;
+        const headerTopOffset = 57;
         const scrollPosition =
           window.scrollY + elementRect.top - header.height - headerTopOffset;
         window.scrollTo({
@@ -181,7 +181,7 @@ export default function CallDetails({
     <div className="flex w-full flex-col rounded-md bg-background px-4 outline-none">
       <div
         ref={headerRef}
-        className="sticky top-[calc(2.5rem+1px)] z-20 bg-background py-4"
+        className="sticky top-[calc(3.5rem+1px)] bg-background py-4"
       >
         {/* CALL ID: {call.id} */}
         <div className="flex items-center gap-4 pb-4">

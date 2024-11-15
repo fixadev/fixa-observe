@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState, useEffect } from "react";
 import { IntentCard } from "~/app/_components/IntentCard";
 import { useAgent } from "~/app/contexts/UseAgent";
@@ -14,7 +15,7 @@ export default function AgentScenariosPage({
   params: { agentId: string };
 }) {
   const [intents, setIntents] = useState<Intent[]>([]);
-  const { agent, setAgent, refetch } = useAgent(params.agentId);
+  const { agent, refetch } = useAgent(params.agentId);
   const { toast } = useToast();
   useEffect(() => {
     if (agent) {
@@ -67,12 +68,16 @@ export default function AgentScenariosPage({
   };
 
   return (
-    <div className="flex flex-col">
-      <div className="container flex items-center justify-between py-8">
-        <div className="text-2xl font-medium">scenarios</div>
+    <div>
+      <div className="sticky top-0 z-20 flex h-14 w-full items-center justify-between border-b border-input bg-[#FAFBFC] px-4 lg:h-[60px]">
+        <Link href={`/dashboard/${params.agentId}/scenarios`}>
+          <div className="font-medium">scenarios</div>
+        </Link>
       </div>
-      <div className="h-px w-full bg-input" />
-      <div className="container flex flex-col gap-4 p-8">
+      {/* <div className="container flex items-center justify-between py-8">
+        <div className="text-2xl font-medium">scenarios</div>
+      </div> */}
+      <div className="container flex flex-col gap-4 p-4">
         {intents.map((intent, index) => (
           <IntentCard
             index={index}

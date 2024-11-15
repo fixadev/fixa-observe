@@ -5,6 +5,10 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+export function removeTrailingSlash(path: string) {
+  return path.replace(/\/+$/, "");
+}
+
 export function formatDurationHoursMinutesSeconds(numSeconds: number): string {
   const hours = Math.floor(numSeconds / 3600);
   const minutes = Math.floor((numSeconds % 3600) / 60);
