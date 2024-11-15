@@ -85,6 +85,7 @@ model Call {
   result             CallResult?
   failureReason      String?
   stereoRecordingUrl String
+  monoRecordingUrl   String?
   startedAt          String?
   endedAt            String?
 
