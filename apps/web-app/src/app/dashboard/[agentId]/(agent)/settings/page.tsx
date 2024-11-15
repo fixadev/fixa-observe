@@ -13,39 +13,38 @@ import {
   displayPhoneNumberNicely,
   formatPhoneNumber,
 } from "~/helpers/phoneNumberUtils";
+import { useAgent } from "~/app/contexts/UseAgent";
 
 export default function AgentSettingsPage({
   params,
 }: {
   params: { agentId: string };
 }) {
-  const { toast } = useToast();
-  const [agent, setAgent] = useState<Agent | null>(null);
+  const [agentState, setAgentState] = useState<Agent | null>(null);
 
-  const { data: agentData, refetch: refetchAgent } = api.agent.get.useQuery({
-    id: params.agentId,
-  });
+  const { toast } = useToast();
+  const { agent, refetch } = useAgent(params.agentId);
 
   const { mutate: updateAgentSettings, isPending: isUpdatingSettings } =
     api.agent.updateSettings.useMutation({
-      onSuccess: (data) => {
+      onSuccess: () => {
         toast({
           title: "Settings saved",
         });
-        void refetchAgent();
+        void refetch();
       },
     });
 
   useEffect(() => {
-    if (agentData) {
-      setAgent(agentData);
+    if (agent) {
+      setAgentState(agent);
     }
-  }, [agentData]);
+  }, [agent]);
 
-  if (!agent) return null;
+  if (!agentState) return null;
 
   const handleSave = () => {
-    if (!checkForValidPhoneNumber(agent.phoneNumber)) {
+    if (!checkForValidPhoneNumber(agentState.phoneNumber)) {
       toast({
         variant: "destructive",
         title: "Invalid phone number",
@@ -53,9 +52,9 @@ export default function AgentSettingsPage({
       return;
     }
     updateAgentSettings({
-      id: agent.id,
-      phoneNumber: agent.phoneNumber,
-      name: agent.name,
+      id: agentState.id,
+      phoneNumber: agentState.phoneNumber,
+      name: agentState.name,
     });
   };
 
@@ -66,7 +65,7 @@ export default function AgentSettingsPage({
         <Button
           className="flex w-32 items-center gap-2"
           disabled={
-            JSON.stringify(agent) === JSON.stringify(agentData) ||
+            JSON.stringify(agent) === JSON.stringify(agentState) ||
             isUpdatingSettings
           }
           onClick={handleSave}
@@ -86,19 +85,19 @@ export default function AgentSettingsPage({
         <div className="flex flex-col gap-2">
           <Label>Agent Name</Label>
           <Input
-            value={agent.name}
+            value={agentState.name}
             onChange={(e) => {
-              setAgent({ ...agent, name: e.target.value });
+              setAgentState({ ...agentState, name: e.target.value });
             }}
           />
         </div>
         <div className="flex flex-col gap-2">
           <Label>Agent Phone Number</Label>
           <Input
-            value={displayPhoneNumberNicely(agent.phoneNumber)}
+            value={displayPhoneNumberNicely(agentState.phoneNumber)}
             onChange={(e) => {
-              setAgent({
-                ...agent,
+              setAgentState({
+                ...agentState,
                 phoneNumber: formatPhoneNumber(e.target.value),
               });
             }}
