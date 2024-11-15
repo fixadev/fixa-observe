@@ -17,13 +17,12 @@ export default function ChildrenWrapper({
     if (isLoaded) {
       if (isSignedIn && user) {
         const email = user.primaryEmailAddress?.emailAddress;
-        posthog.identify(email, {
+        posthog.identify(user.id, {
           email,
+          username: user.username,
           firstName: user.firstName,
           lastName: user.lastName,
         });
-      } else {
-        posthog.reset();
       }
     }
   }, [isLoaded, isSignedIn, user, posthog]);
