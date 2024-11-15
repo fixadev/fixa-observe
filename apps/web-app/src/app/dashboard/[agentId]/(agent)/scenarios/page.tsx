@@ -2,7 +2,9 @@
 
 import { useState, useEffect } from "react";
 import { IntentCard } from "~/app/_components/IntentCard";
+import { useAgent } from "~/app/contexts/UseAgent";
 import { Button } from "~/components/ui/button";
+import { useToast } from "~/hooks/use-toast";
 import { type IntentWithoutId, type Intent } from "~/lib/agent";
 import { api } from "~/trpc/react";
 
@@ -12,20 +14,28 @@ export default function AgentScenariosPage({
   params: { agentId: string };
 }) {
   const [intents, setIntents] = useState<Intent[]>([]);
-  const { data: agentData } = api.agent.get.useQuery({ id: params.agentId });
+  const { agent, setAgent, refetch } = useAgent(params.agentId);
+  const { toast } = useToast();
+  useEffect(() => {
+    if (agent) {
+      setIntents(agent.intents);
+    }
+  }, [agent]);
+
   const { mutate: updateAgentIntents } = api.agent.updateIntents.useMutation({
     onSuccess: (data) => {
       setIntents(data.intents);
+      if (data) {
+        void refetch();
+        toast({
+          title: "Scenarios updated!",
+          duration: 2000,
+        });
+      }
     },
   });
 
-  useEffect(() => {
-    if (agentData) {
-      setIntents(agentData.intents);
-    }
-  }, [agentData]);
-
-  if (!agentData) return null;
+  if (!agent) return null;
 
   const addScenario = () => {
     setIntents([
@@ -35,21 +45,25 @@ export default function AgentScenariosPage({
         name: "",
         instructions: "",
         successCriteria: "",
-        agentId: agentData.id,
+        agentId: agent.id,
         isNew: true,
       },
     ]);
   };
 
   const saveIntents = (intents: Array<Intent | IntentWithoutId>) => {
+    toast({
+      title: "Updating scenarios...",
+      duration: 3000,
+    });
     setIntents(
       intents.map((intent) => ({
         ...intent,
         id: "id" in intent ? intent.id : "temp",
-        agentId: agentData.id,
+        agentId: agent.id,
       })),
     );
-    updateAgentIntents({ id: agentData.id, intents });
+    updateAgentIntents({ id: agent.id, intents });
   };
 
   return (

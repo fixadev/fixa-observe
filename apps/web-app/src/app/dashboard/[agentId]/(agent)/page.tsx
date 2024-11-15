@@ -26,6 +26,7 @@ import { type CallEndedData, type SocketMessage } from "~/lib/agent";
 import { type TestWithCalls } from "~/lib/types";
 import Spinner from "~/components/Spinner";
 import { Label } from "~/components/ui/label";
+import { useAgent } from "~/app/contexts/UseAgent";
 
 export default function AgentPage({ params }: { params: { agentId: string } }) {
   const [tests, setTests] = useState<TestWithCalls[]>([]);
@@ -58,7 +59,7 @@ export default function AgentPage({ params }: { params: { agentId: string } }) {
     ),
   );
 
-  const { data: agent } = api.agent.get.useQuery({ id: params.agentId });
+  const { agent } = useAgent(params.agentId);
 
   const { data: _tests } = api.test.getAll.useQuery({
     agentId: params.agentId,
