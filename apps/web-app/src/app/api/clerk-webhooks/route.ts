@@ -65,28 +65,30 @@ export async function POST(req: Request) {
   }
   switch (eventType) {
     case "user.created": {
-      const { first_name, last_name, email_addresses } = evt.data;
+      const { first_name, last_name, email_addresses, username } = evt.data;
       const email = email_addresses?.[0]?.email_address;
-      if (!email) {
-        return new Response("User has no email", { status: 400 });
-      }
+      // if (!email) {
+      //   return new Response("User has no email", { status: 400 });
+      // }
 
-      await upsertUser(userId, email, first_name, last_name);
+      await upsertUser(userId, email ?? null, first_name, last_name, username);
 
       try {
-        await addSubscriber(email, first_name, last_name);
+        if (email) {
+          await addSubscriber(email, first_name, last_name);
+        }
       } catch (e) {
         // console.error("Error adding subscriber", e);
       }
       break;
     }
     case "user.updated": {
-      const { first_name, last_name, email_addresses } = evt.data;
+      const { first_name, last_name, email_addresses, username } = evt.data;
       const email = email_addresses?.[0]?.email_address;
-      if (!email) {
-        return new Response("User has no email", { status: 400 });
-      }
-      await upsertUser(userId, email, first_name, last_name);
+      // if (!email) {
+      //   return new Response("User has no email", { status: 400 });
+      // }
+      await upsertUser(userId, email ?? null, first_name, last_name, username);
       break;
     }
     case "user.deleted": {
@@ -100,14 +102,15 @@ export async function POST(req: Request) {
 
 const upsertUser = async (
   userId: string,
-  email: string,
+  email: string | null,
   firstName: string | null,
   lastName: string | null,
+  username: string | null,
 ) => {
   return await db.user.upsert({
     where: { id: userId },
-    update: { email, firstName, lastName },
-    create: { id: userId, email, firstName, lastName },
+    update: { email, firstName, lastName, username },
+    create: { id: userId, email, firstName, lastName, username },
   });
 };
 
