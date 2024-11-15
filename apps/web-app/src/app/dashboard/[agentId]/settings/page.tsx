@@ -14,6 +14,8 @@ import {
   formatPhoneNumber,
 } from "~/helpers/phoneNumberUtils";
 import { useAgent } from "~/app/contexts/UseAgent";
+import Link from "next/link";
+import { RocketLaunchIcon } from "@heroicons/react/24/outline";
 
 export default function AgentSettingsPage({
   params,
@@ -59,8 +61,30 @@ export default function AgentSettingsPage({
   };
 
   return (
-    <div className="flex flex-col">
-      <div className="container flex items-center justify-between py-8">
+    <div>
+      <div className="sticky top-0 z-20 flex h-14 w-full items-center justify-between border-b border-input bg-[#FAFBFC] px-4 lg:h-[60px]">
+        <Link href={`/dashboard/${params.agentId}/settings`}>
+          <div className="font-medium">settings</div>
+        </Link>
+        <Button
+          className="flex w-32 items-center gap-2"
+          disabled={
+            JSON.stringify(agent) === JSON.stringify(agentState) ||
+            isUpdatingSettings
+          }
+          onClick={handleSave}
+        >
+          {isUpdatingSettings ? (
+            <>
+              <span>saving...</span>
+              <Spinner />
+            </>
+          ) : (
+            "save changes"
+          )}
+        </Button>
+      </div>
+      {/* <div className="container flex items-center justify-between py-8">
         <div className="text-2xl font-medium">settings</div>
         <Button
           className="flex w-32 items-center gap-2"
@@ -80,10 +104,10 @@ export default function AgentSettingsPage({
           )}
         </Button>
       </div>
-      <div className="h-px w-full bg-input" />
-      <div className="container flex flex-col gap-6 p-8">
+      <div className="h-px w-full bg-input" /> */}
+      <div className="container flex flex-col gap-6 p-4">
         <div className="flex flex-col gap-2">
-          <Label>Agent Name</Label>
+          <Label>agent name</Label>
           <Input
             value={agentState.name}
             onChange={(e) => {
@@ -92,7 +116,7 @@ export default function AgentSettingsPage({
           />
         </div>
         <div className="flex flex-col gap-2">
-          <Label>Agent Phone Number</Label>
+          <Label>agent phone number</Label>
           <Input
             value={displayPhoneNumberNicely(agentState.phoneNumber)}
             onChange={(e) => {

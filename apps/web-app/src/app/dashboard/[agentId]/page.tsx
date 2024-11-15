@@ -101,7 +101,7 @@ export default function AgentPage({ params }: { params: { agentId: string } }) {
   return (
     <div>
       {/* header */}
-      <div className="z-20 flex h-14 items-center justify-between border-b border-input bg-muted/40 px-4 lg:h-[60px]">
+      <div className="sticky top-0 z-20 flex h-14 w-full items-center justify-between border-b border-input bg-[#FAFBFC] px-4 lg:h-[60px]">
         <Link href={`/dashboard/${params.agentId}`}>
           <div className="font-medium">test history</div>
         </Link>
