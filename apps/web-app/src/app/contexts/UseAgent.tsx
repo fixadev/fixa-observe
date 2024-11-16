@@ -41,6 +41,7 @@ export function useAgent(agentId?: string) {
     throw new Error("useAgent must be used within an AgentProvider");
   }
 
+  const utils = api.useUtils();
   const { data: fetchedAgent, refetch: refetchAgent } = api.agent.get.useQuery(
     { id: agentId ?? "" },
     {
@@ -49,7 +50,10 @@ export function useAgent(agentId?: string) {
   );
 
   useEffect(() => {
-    if (fetchedAgent && !context.agent) {
+    if (agentId !== context.agent?.id && fetchedAgent) {
+      // console.log("invalidating agent", context.agent?.id);
+      // void utils.agent.get.invalidate({ id: context.agent?.id ?? "" });
+      void utils.agent.get.reset();
       console.log("setting agent", fetchedAgent);
       context.setAgent(fetchedAgent);
     }
