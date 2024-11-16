@@ -10,9 +10,9 @@ export async function GET(
 ) {
   try {
     const testId = params.testId;
-    const status = await testService.getStatus(testId);
+    const statusResult = await testService.getStatus(testId);
 
-    return NextResponse.json({ status });
+    return NextResponse.json(statusResult);
   } catch (error) {
     console.error("Error fetching test status:", error);
     return NextResponse.json(
