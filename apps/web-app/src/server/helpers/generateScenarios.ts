@@ -1,19 +1,19 @@
 import { openai } from "~/server/utils/OpenAIClient";
 import { z } from "zod";
 import { zodResponseFormat } from "openai/helpers/zod";
-import { IntentSchemaWithoutId, type IntentWithoutId } from "~/lib/agent";
+import { CreateScenarioSchema } from "~/lib/agent";
 import {
-  generateOutboundIntentsPrompt,
-  generateInboundIntentsPrompt,
+  generateOutboundScenariosPrompt,
+  generateInboundScenariosPrompt,
   generateCheckIfOutboundPrompt,
 } from "./prompts";
 
-export const generateIntentsFromPrompt = async (
+export const generateScenariosFromPrompt = async (
   prompt: string,
-  numberOfIntents: number,
-): Promise<IntentWithoutId[]> => {
+  numberOfScenarios: number,
+): Promise<CreateScenarioSchema[]> => {
   const outputSchema = z.object({
-    intents: z.array(IntentSchemaWithoutId),
+    scenarios: z.array(CreateScenarioSchema),
   });
 
   const outboundSchema = z.object({
@@ -35,16 +35,16 @@ export const generateIntentsFromPrompt = async (
 
   const combinedPrompt = `${
     outboundResult
-      ? generateOutboundIntentsPrompt(numberOfIntents)
-      : generateInboundIntentsPrompt(numberOfIntents)
+      ? generateOutboundScenariosPrompt(numberOfScenarios)
+      : generateInboundScenariosPrompt(numberOfScenarios)
   }\n\n AGENT PROMPT: ${prompt}
-  \n\nmake sure to set the isNew field to false for all intents
-  \n\nmake sure to generate ${numberOfIntents} intents`;
+  \n\nmake sure to set the isNew field to false for all scenarios
+  \n\nmake sure to generate ${numberOfScenarios} scenarios`;
 
   const completion = await openai.beta.chat.completions.parse({
     model: "gpt-4o",
     messages: [{ role: "system", content: combinedPrompt }],
-    response_format: zodResponseFormat(outputSchema, "intents"),
+    response_format: zodResponseFormat(outputSchema, "scenarios"),
   });
 
   const parsedResponse = completion.choices[0]?.message.parsed;
@@ -55,5 +55,5 @@ export const generateIntentsFromPrompt = async (
 
   console.log("parsedResponse", parsedResponse);
 
-  return parsedResponse.intents;
+  return parsedResponse.scenarios;
 };

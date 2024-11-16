@@ -7,6 +7,7 @@ import { handleAnalysisStarted } from "./services/handleAnalysisStarted";
 import { db } from "./db";
 import { uploadCallToDB } from "./services/uploadCallToDB";
 import { getContext } from "./services/getContext";
+import { env } from "./env";
 const app = express();
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
@@ -56,14 +57,14 @@ app.post("/vapi", async (req: Request, res: Response) => {
         console.error("No context found for call", message.call.id);
         return;
       }
-      const { userSocket, agent, intent, test, call } = context;
+      const { userSocket, agent, scenario, test, call } = context;
       await handleAnalysisStarted(message, userSocket);
       await handleVapiCallEnded({
         report: message,
         call,
         agent,
         test,
-        intent,
+        scenario,
         userSocket,
       });
     } else if (message.type === "transcript") {

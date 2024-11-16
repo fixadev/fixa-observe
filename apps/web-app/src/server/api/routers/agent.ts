@@ -1,10 +1,13 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { AgentService } from "~/server/services/agent";
-import { CreateAgentSchema, IntentSchemaWithoutId } from "~/lib/agent";
+import {
+  CreateAgentSchema,
+  CreateScenarioSchema,
+  ScenarioWithEvals,
+} from "~/lib/agent";
 import { db } from "~/server/db";
-import { generateIntentsFromPrompt } from "~/server/helpers/generateIntents";
-import { IntentSchema } from "prisma/generated/zod";
+import { generateScenariosFromPrompt } from "~/server/helpers/generateScenarios";
 
 const agentServiceInstance = new AgentService(db);
 
@@ -16,40 +19,10 @@ export const agentRouter = createTRPCRouter({
         input.phoneNumber,
         input.name,
         input.systemPrompt,
-        input.intents,
+        input.scenarios,
         ctx.user.id,
       );
     }),
-
-  updateIntents: protectedProcedure
-    .input(
-      z.object({
-        id: z.string(),
-        intents: z.array(IntentSchema.or(IntentSchemaWithoutId)),
-      }),
-    )
-    .mutation(async ({ input }) => {
-      return await agentServiceInstance.updateAgentIntents(
-        input.id,
-        input.intents,
-      );
-    }),
-
-  updateSettings: protectedProcedure
-    .input(
-      z.object({
-        id: z.string(),
-        phoneNumber: z.string(),
-        name: z.string(),
-      }),
-    )
-    .mutation(async ({ input }) => {
-      return await agentServiceInstance.updateAgentSettings(input);
-    }),
-
-  getAll: protectedProcedure.query(async ({ ctx }) => {
-    return await agentServiceInstance.getAllAgents(ctx.user.id);
-  }),
 
   get: protectedProcedure
     .input(z.object({ id: z.string() }))
@@ -77,17 +50,54 @@ export const agentRouter = createTRPCRouter({
       );
     }),
 
-  generateIntentsFromPrompt: protectedProcedure
+  generateScenariosFromPrompt: protectedProcedure
     .input(
       z.object({
         prompt: z.string(),
-        numberOfIntents: z.number(),
+        numberOfScenarios: z.number(),
       }),
     )
     .mutation(async ({ input }) => {
-      return await generateIntentsFromPrompt(
+      return await generateScenariosFromPrompt(
         input.prompt,
-        input.numberOfIntents,
+        input.numberOfScenarios,
       );
     }),
+
+  createScenario: protectedProcedure
+    .input(z.object({ agentId: z.string(), scenario: CreateScenarioSchema }))
+    .mutation(async ({ input }) => {
+      return await agentServiceInstance.createScenario(
+        input.agentId,
+        input.scenario,
+      );
+    }),
+
+  updateScenario: protectedProcedure
+    .input(z.object({ scenario: ScenarioWithEvals }))
+    .mutation(async ({ input }) => {
+      return await agentServiceInstance.updateScenario(input.scenario);
+    }),
+
+  deleteScenario: protectedProcedure
+    .input(z.object({ id: z.string() }))
+    .mutation(async ({ input }) => {
+      return await agentServiceInstance.deleteScenario(input.id);
+    }),
+
+  updateSettings: protectedProcedure
+    .input(
+      z.object({
+        id: z.string(),
+        phoneNumber: z.string(),
+        name: z.string(),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      return await agentServiceInstance.updateAgentSettings(input);
+    }),
+
+  getAll: protectedProcedure.query(async ({ ctx }) => {
+    return await agentServiceInstance.getAllAgents(ctx.user.id);
+  }),
 });

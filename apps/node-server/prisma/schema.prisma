@@ -15,15 +15,16 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
-model User {
-  id        String   @id // Should be the clerkId
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+// model User {
+//   id        String   @id // Should be the clerkId
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
 
-  email     String  @unique
-  firstName String?
-  lastName  String?
-}
+//   email     String? @unique
+//   username  String? @unique
+//   firstName String?
+//   lastName  String?
+// }
 
 model Agent {
   id        String   @id
@@ -37,7 +38,7 @@ model Agent {
   systemPrompt  String
 
   enabledTestAgents TestAgent[]
-  intents           Intent[]
+  scenarios         Scenario[]
   tests             Test[]
 }
 
@@ -66,20 +67,8 @@ model TestAgent {
   calls  Call[]
 }
 
-model Intent {
-  id              String @id @default(cuid())
-  name            String
-  instructions    String
-  successCriteria String @default("")
-
-  agent   Agent   @relation(fields: [agentId], references: [id], onDelete: Cascade)
-  agentId String
-  calls   Call[]
-  isNew   Boolean @default(false)
-}
-
 model Call {
-  id                 String      @id @default(cuid())
+  id                 String       @id @default(cuid())
   ownerId            String?
   status             CallStatus
   result             CallResult?
@@ -88,13 +77,14 @@ model Call {
   monoRecordingUrl   String?
   startedAt          String?
   endedAt            String?
+  evalResults        EvalResult[]
 
   test        Test?      @relation(fields: [testId], references: [id], onDelete: Cascade)
   testId      String?
   testAgent   TestAgent? @relation(fields: [testAgentId], references: [id], onDelete: Cascade)
   testAgentId String?
-  intent      Intent?    @relation(fields: [intentId], references: [id], onDelete: Cascade)
-  intentId    String?
+  scenario    Scenario?  @relation(fields: [scenarioId], references: [id], onDelete: Cascade)
+  scenarioId  String?
 
   messages Message[]
   errors   CallError[]
@@ -150,4 +140,58 @@ model CallRecording {
   audioUrl  String
   createdAt DateTime @default(now())
   processed Boolean  @default(false)
+}
+
+model Scenario {
+  id      String @id @default(cuid())
+  agent   Agent  @relation(fields: [agentId], references: [id], onDelete: Cascade)
+  agentId String
+
+  name            String
+  instructions    String
+  successCriteria String @default("")
+
+  isNew Boolean @default(false)
+
+  calls Call[]
+  evals Eval[]
+
+  @@map("Intent")
+}
+
+model Eval {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+
+  name        String
+  description String
+  scenario    Scenario? @relation(fields: [scenarioId], references: [id])
+  scenarioId  String?
+
+  type        EvalType
+  evalResults EvalResult[]
+}
+
+model EvalResult {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+
+  call   Call?   @relation(fields: [callId], references: [id])
+  callId String?
+
+  eval   Eval   @relation(fields: [evalId], references: [id], onDelete: Cascade)
+  evalId String
+
+  result           String
+  passed           Boolean
+  secondsFromStart Float
+  duration         Float
+  type             String?
+  description      String
+}
+
+enum EvalType {
+  boolean
+  number
+  percentage
 }

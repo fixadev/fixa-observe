@@ -2,6 +2,7 @@ import { AgentService } from "./agent";
 import { db } from "../db";
 import { CallStatus, type PrismaClient } from "@prisma/client";
 import { initiateVapiCall } from "../helpers/vapiHelpers";
+import { type TestAgent } from "prisma/generated/zod";
 
 const agentServiceInstance = new AgentService(db);
 
@@ -23,7 +24,7 @@ export class TestService {
               },
             },
             errors: true,
-            intent: true,
+            scenario: true,
           },
         },
       },
@@ -44,20 +45,62 @@ export class TestService {
     });
   }
 
-  async run(agentId: string, intentIds?: string[]) {
+  async getStatus(testId: string) {
+    const test = await db.test.findUnique({
+      where: { id: testId },
+      select: {
+        calls: {
+          select: {
+            id: true,
+            result: true,
+            status: true,
+          },
+        },
+      },
+    });
+
+    if (!test) {
+      return { status: "not_found" };
+    }
+
+    const isCompleted = test.calls.every(
+      (call) => call.status === CallStatus.completed,
+    );
+
+    return isCompleted
+      ? { status: CallStatus.completed, calls: test.calls }
+      : { status: CallStatus.in_progress, calls: test.calls };
+  }
+
+  async run(agentId: string, scenarioIds?: string[], testAgentIds?: string[]) {
     const agent = await agentServiceInstance.getAgent(agentId);
     if (!agent) {
       throw new Error("Agent not found");
     }
-    const tests = agent.enabledTestAgents.flatMap((testAgent) =>
-      (intentIds && intentIds.length > 0
-        ? agent.intents.filter((intent) => intentIds.includes(intent.id))
-        : agent.intents
-      ).map((intent) => ({
+
+    let enabledTestAgents: TestAgent[] = [];
+    if (testAgentIds && testAgentIds.length > 0) {
+      const testAgents = await agentServiceInstance.getTestAgents(
+        agent.ownerId,
+      );
+      enabledTestAgents = testAgents.filter((testAgent) =>
+        testAgentIds.includes(testAgent.id),
+      );
+    } else {
+      enabledTestAgents = agent.enabledTestAgents;
+    }
+
+    const tests = enabledTestAgents.flatMap((testAgent) =>
+      (scenarioIds && scenarioIds.length > 0
+        ? agent.scenarios.filter((scenario) =>
+            scenarioIds.includes(scenario.id),
+          )
+        : agent.scenarios
+      ).map((scenario) => ({
         testAgentVapiId: testAgent.id,
-        intentId: intent.id,
+        scenarioId: scenario.id,
         testAgentPrompt: testAgent.prompt,
-        intentPrompt: intent.instructions,
+        scenarioPrompt: scenario.instructions,
       })),
     );
 
@@ -69,7 +112,7 @@ export class TestService {
           test.testAgentVapiId,
           agent.phoneNumber,
           test.testAgentPrompt,
-          test.intentPrompt,
+          test.scenarioPrompt,
         );
 
         console.log("VAPI CALL INITIATED", vapiCall);
@@ -79,7 +122,7 @@ export class TestService {
         return {
           id: callId,
           testAgentVapiId: test.testAgentVapiId,
-          intentId: test.intentId,
+          scenarioId: test.scenarioId,
           status: CallStatus.in_progress,
         };
       }),
@@ -92,7 +135,7 @@ export class TestService {
     ) as PromiseFulfilledResult<{
       id: string;
       testAgentVapiId: string;
-      intentId: string;
+      scenarioId: string;
       status: CallStatus;
     }>[];
 
@@ -106,7 +149,7 @@ export class TestService {
               status: call.value.status,
               stereoRecordingUrl: "",
               testAgentId: call.value.testAgentVapiId,
-              intentId: call.value.intentId,
+              scenarioId: call.value.scenarioId,
               ownerId: agent.ownerId,
             })),
           },

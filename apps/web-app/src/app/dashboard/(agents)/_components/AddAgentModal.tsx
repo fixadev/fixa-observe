@@ -12,10 +12,14 @@ import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 
 import { useEffect, useState } from "react";
-import { type IntentWithoutId, type CreateAgentSchema } from "~/lib/agent";
+import {
+  type CreateScenarioSchema,
+  type CreateAgentSchema,
+  type ScenarioWithEvals,
+} from "~/lib/agent";
 import { Textarea } from "~/components/ui/textarea";
 import { api } from "~/trpc/react";
-import { IntentCard } from "../../../_components/IntentCard";
+import { ScenarioCard } from "../../../_components/ScenarioCard";
 import Spinner from "~/components/Spinner";
 import {
   checkForValidPhoneNumber,
@@ -75,18 +79,18 @@ const loadingMessages = [
   "generating scenarios",
   "analyzing system prompt",
   "crafting agent behaviors",
-  "finalizing intent structure",
+  "finalizing scenario structure",
 ];
 
 export function AddAgentModal({ children, refetchAgents }: AddAgentModalProps) {
-  const [isGeneratingIntents, setIsGeneratingIntents] = useState(false);
+  const [isGeneratingScenarios, setIsGeneratingScenarios] = useState(false);
   const [loadingText, setLoadingText] = useState("generating scenarios");
   const [modalOpen, setModalOpen] = useState(false);
-  const [numberOfIntents, setNumberOfIntents] = useState(3);
+  const [numberOfScenarios, setNumberOfScenarios] = useState(3);
   const { toast } = useToast();
 
   useEffect(() => {
-    if (!isGeneratingIntents) return;
+    if (!isGeneratingScenarios) return;
 
     let messageIndex = 0;
     let dotCount = 0;
@@ -103,7 +107,7 @@ export function AddAgentModal({ children, refetchAgents }: AddAgentModalProps) {
     }, 500); // Dots animate every 500ms
 
     return () => clearInterval(interval);
-  }, [isGeneratingIntents]);
+  }, [isGeneratingScenarios]);
 
   const [agent, setAgent] = useState<CreateAgentSchema>({
     name: "",
@@ -113,15 +117,21 @@ export function AddAgentModal({ children, refetchAgents }: AddAgentModalProps) {
     updatedAt: new Date(),
     githubRepoUrl: "",
     ownerId: "",
-    intents: [],
+    scenarios: [],
   });
 
-  const addIntent = () => {
+  const addScenario = () => {
     setAgent({
       ...agent,
-      intents: [
-        ...agent.intents,
-        { name: "", instructions: "", successCriteria: "", isNew: true },
+      scenarios: [
+        ...agent.scenarios,
+        {
+          name: "",
+          instructions: "",
+          successCriteria: "",
+          isNew: true,
+          evals: [],
+        },
       ],
     });
   };
@@ -134,20 +144,18 @@ export function AddAgentModal({ children, refetchAgents }: AddAgentModalProps) {
       },
     });
 
-  const { mutate: generateIntents } =
-    api.agent.generateIntentsFromPrompt.useMutation({
+  const { mutate: generateScenarios } =
+    api.agent.generateScenariosFromPrompt.useMutation({
       onSuccess: (data) => {
-        setAgent({ ...agent, intents: [...agent.intents, ...data] });
-        setIsGeneratingIntents(false);
+        setAgent({ ...agent, scenarios: [...agent.scenarios, ...data] });
+        setIsGeneratingScenarios(false);
       },
     });
 
-  const handleGenerateIntents = (prompt: string) => {
+  const handleGenerateScenarios = (prompt: string) => {
     if (prompt.length > 0) {
-      setIsGeneratingIntents(true);
-      console.log("generating number of intents", numberOfIntents);
-      generateIntents({ prompt, numberOfIntents });
-      console.log("setGeneratingIntents to false");
+      setIsGeneratingScenarios(true);
+      generateScenarios({ prompt, numberOfScenarios });
     } else {
       toast({
         title: "Please enter a prompt to generate scenarios",
@@ -169,14 +177,27 @@ export function AddAgentModal({ children, refetchAgents }: AddAgentModalProps) {
     }
   };
 
-  const setAgentIntents = (intents: IntentWithoutId[]) => {
-    setAgent({ ...agent, intents });
+  const deleteScenario = (index: number) => {
+    setAgent({
+      ...agent,
+      scenarios: agent.scenarios.filter((_, i) => i !== index),
+    });
+  };
+
+  const handleSaveScenario = (
+    scenario: CreateScenarioSchema | ScenarioWithEvals,
+    index: number,
+  ) => {
+    setAgent({
+      ...agent,
+      scenarios: agent.scenarios.map((s, i) => (i === index ? scenario : s)),
+    });
   };
 
   return (
     <Dialog open={modalOpen} onOpenChange={setModalOpen}>
       <DialogTrigger asChild>{children}</DialogTrigger>
-      <DialogContent className="flex h-[80vh] w-[50vw] min-w-[600px] max-w-screen-sm flex-col p-0">
+      <DialogContent className="flex h-[95vh] w-[95vw] min-w-[95vw] flex-col p-0">
         <DialogTitle className="p-6 pb-2">new agent</DialogTitle>
         <div className="flex flex-1 flex-col space-y-4 overflow-y-auto p-6 pt-2">
           <InputWithLabel
@@ -201,8 +222,10 @@ export function AddAgentModal({ children, refetchAgents }: AddAgentModalProps) {
               <Label className="text-lg">scenarios</Label>
               <div className="flex gap-2">
                 <Select
-                  value={numberOfIntents.toString()}
-                  onValueChange={(value) => setNumberOfIntents(parseInt(value))}
+                  value={numberOfScenarios.toString()}
+                  onValueChange={(value) =>
+                    setNumberOfScenarios(parseInt(value))
+                  }
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="3" />
@@ -222,29 +245,29 @@ export function AddAgentModal({ children, refetchAgents }: AddAgentModalProps) {
                 </Select>
                 <Button
                   variant="outline"
-                  onClick={() => handleGenerateIntents(agent.systemPrompt)}
+                  onClick={() => handleGenerateScenarios(agent.systemPrompt)}
                 >
                   generate from prompt
                 </Button>
               </div>
             </div>
-            {isGeneratingIntents ? (
+            {isGeneratingScenarios ? (
               <div className="flex w-full flex-1 flex-grow flex-col items-center justify-center gap-2 rounded-md bg-gray-100 p-4">
                 <Spinner className="size-8" />
                 <p className="text-sm text-gray-500">{loadingText}</p>
               </div>
             ) : (
               <div className="flex w-full flex-col gap-2">
-                {agent.intents.map((intent, index) => (
-                  <IntentCard
+                {agent.scenarios.map((scenario, index) => (
+                  <ScenarioCard
                     key={index}
-                    intent={intent}
+                    scenario={scenario}
                     index={index}
-                    intents={agent.intents}
-                    setIntents={setAgentIntents}
+                    deleteScenario={deleteScenario}
+                    handleSaveScenario={handleSaveScenario}
                   />
                 ))}
-                <Button variant="outline" onClick={addIntent}>
+                <Button variant="outline" onClick={addScenario}>
                   add scenario
                 </Button>
               </div>

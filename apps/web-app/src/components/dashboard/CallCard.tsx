@@ -55,7 +55,7 @@ export default function CallCard({
       <div className="flex min-w-0 flex-1 flex-col gap-1">
         <div className="flex items-center justify-between gap-4">
           <div className="truncate text-sm font-medium">
-            {call.intent?.name}
+            {call.scenario?.name}
           </div>
 
           {call.status === CallStatus.completed && (

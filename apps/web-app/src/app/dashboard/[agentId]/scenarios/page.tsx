@@ -2,11 +2,11 @@
 
 import Link from "next/link";
 import { useState, useEffect } from "react";
-import { IntentCard } from "~/app/_components/IntentCard";
+import { ScenarioCard } from "~/app/_components/ScenarioCard";
 import { useAgent } from "~/app/contexts/UseAgent";
 import { Button } from "~/components/ui/button";
 import { useToast } from "~/hooks/use-toast";
-import { type IntentWithoutId, type Intent } from "~/lib/agent";
+import { type CreateScenarioSchema, type ScenarioWithEvals } from "~/lib/agent";
 import { api } from "~/trpc/react";
 
 export default function AgentScenariosPage({
@@ -14,33 +14,73 @@ export default function AgentScenariosPage({
 }: {
   params: { agentId: string };
 }) {
-  const [intents, setIntents] = useState<Intent[]>([]);
+  const [scenarios, setScenarios] = useState<ScenarioWithEvals[]>([]);
   const { agent, refetch } = useAgent(params.agentId);
   const { toast } = useToast();
   useEffect(() => {
     if (agent) {
-      setIntents(agent.intents);
+      setScenarios(agent.scenarios);
     }
   }, [agent]);
 
-  const { mutate: updateAgentIntents } = api.agent.updateIntents.useMutation({
+  const { mutate: createScenario } = api.agent.createScenario.useMutation({
     onSuccess: (data) => {
-      setIntents(data.intents);
-      if (data) {
-        void refetch();
-        toast({
-          title: "Scenarios updated!",
-          duration: 2000,
-        });
-      }
+      setScenarios([...scenarios.slice(0, -1), data]);
+      void refetch();
+      toast({
+        title: "Scenario created",
+        description: "Scenario created successfully",
+      });
     },
   });
+
+  const { mutate: updateScenario } = api.agent.updateScenario.useMutation({
+    onSuccess: (data) => {
+      toast({
+        title: "Scenario updated",
+        description: "Scenario updated successfully",
+      });
+    },
+  });
+
+  const handleSaveScenario = (
+    scenario: CreateScenarioSchema | ScenarioWithEvals,
+    index: number,
+  ) => {
+    if ("id" in scenario && scenario.id !== "new") {
+      setScenarios(scenarios.map((s) => (s.id === scenario.id ? scenario : s)));
+      updateScenario({ scenario });
+    } else {
+      setScenarios([
+        ...scenarios.slice(0, -1),
+        { ...scenario, id: "new", agentId: agent?.id ?? "" },
+      ]);
+      createScenario({ agentId: agent?.id ?? "", scenario });
+    }
+  };
+
+  const { mutate: deleteScenario } = api.agent.deleteScenario.useMutation({
+    onSuccess: () => {
+      void refetch();
+      toast({
+        title: "Scenario deleted",
+        description: "Scenario deleted successfully",
+      });
+    },
+  });
+
+  const handleDeleteScenario = (index: number) => {
+    setScenarios(scenarios.filter((_, i) => i !== index));
+    if (scenarios[index]?.id) {
+      deleteScenario({ id: scenarios[index].id });
+    }
+  };
 
   if (!agent) return null;
 
   const addScenario = () => {
-    setIntents([
-      ...intents,
+    setScenarios([
+      ...scenarios,
       {
         id: "new",
         name: "",
@@ -48,23 +88,9 @@ export default function AgentScenariosPage({
         successCriteria: "",
         agentId: agent.id,
         isNew: true,
+        evals: [],
       },
     ]);
-  };
-
-  const saveIntents = (intents: Array<Intent | IntentWithoutId>) => {
-    toast({
-      title: "Updating scenarios...",
-      duration: 3000,
-    });
-    setIntents(
-      intents.map((intent) => ({
-        ...intent,
-        id: "id" in intent ? intent.id : "temp",
-        agentId: agent.id,
-      })),
-    );
-    updateAgentIntents({ id: agent.id, intents });
   };
 
   return (
@@ -78,14 +104,13 @@ export default function AgentScenariosPage({
         <div className="text-2xl font-medium">scenarios</div>
       </div> */}
       <div className="container flex flex-col gap-4 p-4">
-        {intents.map((intent, index) => (
-          <IntentCard
+        {scenarios.map((scenario, index) => (
+          <ScenarioCard
             index={index}
-            key={intent.id}
-            intent={intent}
-            intentId={intent.id}
-            intents={intents}
-            setIntents={saveIntents}
+            key={scenario.id}
+            scenario={scenario}
+            handleSaveScenario={handleSaveScenario}
+            deleteScenario={handleDeleteScenario}
           />
         ))}
         <div className="flex flex-row justify-end">

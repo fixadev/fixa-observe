@@ -8,6 +8,7 @@ const testService = new TestService(db);
 const inputSchema = z.object({
   agentId: z.string(),
   scenarioIds: z.array(z.string()).optional(),
+  testAgentIds: z.array(z.string()).optional(),
 });
 
 export async function POST(req: NextRequest) {
@@ -32,8 +33,12 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const result = await testService.run(input.agentId, input.scenarioIds);
-    return Response.json({ success: true, data: result });
+    const result = await testService.run(
+      input.agentId,
+      input.scenarioIds,
+      input.testAgentIds,
+    );
+    return Response.json({ success: true, data: { testId: result.id } });
   } catch (error) {
     console.error("Error running test:", error);
     return Response.json(

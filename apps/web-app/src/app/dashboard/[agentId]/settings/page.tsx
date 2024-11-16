@@ -15,6 +15,7 @@ import {
 } from "~/helpers/phoneNumberUtils";
 import { useAgent } from "~/app/contexts/UseAgent";
 import Link from "next/link";
+import { CopyText } from "~/components/dashboard/CopyText";
 
 export default function AgentSettingsPage({
   params,
@@ -83,28 +84,11 @@ export default function AgentSettingsPage({
           )}
         </Button>
       </div>
-      {/* <div className="container flex items-center justify-between py-8">
-        <div className="text-2xl font-medium">settings</div>
-        <Button
-          className="flex w-32 items-center gap-2"
-          disabled={
-            JSON.stringify(agent) === JSON.stringify(agentState) ||
-            isUpdatingSettings
-          }
-          onClick={handleSave}
-        >
-          {isUpdatingSettings ? (
-            <>
-              <span>Saving...</span>
-              <Spinner />
-            </>
-          ) : (
-            "Save Changes"
-          )}
-        </Button>
-      </div>
-      <div className="h-px w-full bg-input" /> */}
       <div className="container flex flex-col gap-6 p-4">
+        <div className="flex flex-col gap-2">
+          <Label>agent id</Label>
+          <CopyText text={agentState.id} />
+        </div>
         <div className="flex flex-col gap-2">
           <Label>agent name</Label>
           <Input

@@ -13,7 +13,7 @@ import { type AgentWithIncludes } from "~/lib/types";
 
 interface AgentContextType {
   agent: AgentWithIncludes | null;
-  setAgent: (agent: AgentWithIncludes) => void;
+  setAgent: React.Dispatch<React.SetStateAction<AgentWithIncludes | null>>;
 }
 
 const AgentContext = createContext<AgentContextType | undefined>(undefined);
@@ -21,9 +21,12 @@ const AgentContext = createContext<AgentContextType | undefined>(undefined);
 export function AgentProvider({ children }: { children: ReactNode }) {
   const [agent, setAgentState] = useState<AgentWithIncludes | null>(null);
 
-  const setAgent = useCallback((newAgent: AgentWithIncludes) => {
-    setAgentState(newAgent);
-  }, []);
+  const setAgent = useCallback(
+    (newAgent: React.SetStateAction<AgentWithIncludes | null>) => {
+      setAgentState(newAgent);
+    },
+    [],
+  );
 
   return (
     <AgentContext.Provider value={{ agent, setAgent }}>
@@ -46,10 +49,12 @@ export function useAgent(agentId?: string) {
   );
 
   useEffect(() => {
-    if (fetchedAgent) {
+    if (fetchedAgent && !context.agent) {
+      console.log("setting agent", fetchedAgent);
       context.setAgent(fetchedAgent);
     }
-  }, [fetchedAgent, context]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fetchedAgent]);
 
   const refetch = useCallback(async () => {
     await refetchAgent();

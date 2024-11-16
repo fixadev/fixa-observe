@@ -1,18 +1,42 @@
 # See https://fly.io/docs/app-guides/continuous-deployment-with-github-actions/
 
 name: Fly Deploy
+
 on:
   push:
     branches:
       - main
+      - dev
+
 jobs:
   deploy:
-    name: Deploy app
     runs-on: ubuntu-latest
-    concurrency: deploy-group    # optional: ensure only one action runs at a time
     steps:
       - uses: actions/checkout@v4
       - uses: superfly/flyctl-actions/setup-flyctl@master
-      - run: flyctl deploy --remote-only
+      - run: |
+          export FLY_APP_NAME=${{ github.ref == 'refs/heads/main' && 'pixa-observe' || 'pixa-observe-staging' }}
+          ./generate-fly-toml.sh
+          # Create .env file with secrets
+          cat << EOF > apps/node-server/.env
+          OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}
+          VAPI_API_KEY=${{ secrets.VAPI_API_KEY }}
+          AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          DEEPGRAM_API_KEY=${{ secrets.DEEPGRAM_API_KEY }}
+          DATABASE_URL=${{ github.ref == 'refs/heads/main' && secrets.PROD_DATABASE_URL || secrets.DEV_DATABASE_URL }}
+          DIRECT_URL=${{ github.ref == 'refs/heads/main' && secrets.PROD_DIRECT_URL || secrets.DEV_DIRECT_URL }}
+          GCP_CREDENTIALS=${{ secrets.GCP_CREDENTIALS }}
+          HOST=0.0.0.0
+          PORT=3003
+          ENVIRONMENT=development
+          DEBUG=true
+          AWS_BUCKET_NAME=newmark
+          AWS_BUCKET_REGION=us-east-1
+          AUDIO_SERVICE_URL=https://api.pixa.dev
+          GOOGLE_CLOUD_BUCKET_NAME=pixa-audio
+          EOF
+          # Deploy the application
+          flyctl deploy --remote-only
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}

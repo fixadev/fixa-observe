@@ -3,7 +3,7 @@ import {
   Call,
   CallResult,
   CallStatus,
-  Intent,
+  Scenario,
   Role,
   Test,
 } from "@prisma/client";
@@ -20,14 +20,14 @@ export const handleVapiCallEnded = async ({
   call,
   agent,
   test,
-  intent,
+  scenario,
   userSocket,
 }: {
   report: ServerMessageEndOfCallReport;
   call: Call;
   agent: Agent;
   test: Test;
-  intent: Intent;
+  scenario: Scenario;
   userSocket?: Socket;
 }) => {
   try {
@@ -43,8 +43,8 @@ export const handleVapiCallEnded = async ({
 
     const analysis = await analyzeCallWitho1(
       agent.systemPrompt,
-      intent.instructions,
-      intent.successCriteria,
+      scenario.instructions,
+      scenario.successCriteria,
       report.artifact.messages,
     );
 
@@ -53,8 +53,8 @@ export const handleVapiCallEnded = async ({
     const geminiPrompt = createGeminiPrompt(
       report.artifact.messages,
       agent.systemPrompt,
-      intent.instructions,
-      intent.successCriteria,
+      scenario.instructions,
+      scenario.successCriteria,
       analysis,
     );
 
@@ -114,7 +114,7 @@ export const handleVapiCallEnded = async ({
       include: {
         messages: true,
         testAgent: true,
-        intent: true,
+        scenario: true,
         errors: true,
       },
     });

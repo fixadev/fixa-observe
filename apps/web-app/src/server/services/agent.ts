@@ -1,8 +1,7 @@
 import { db } from "../db";
-import { type Intent, type IntentWithoutId } from "~/lib/agent";
+import { type ScenarioWithEvals, type CreateScenarioSchema } from "~/lib/agent";
 import { v4 as uuidv4 } from "uuid";
 import { type PrismaClient } from "@prisma/client";
-import { generateIntentsFromPrompt } from "../helpers/generateIntents";
 // import { createVapiAssistant } from "../helpers/vapiHelpers";
 
 export class AgentService {
@@ -11,7 +10,7 @@ export class AgentService {
     phoneNumber: string,
     name: string,
     systemPrompt: string,
-    intents: IntentWithoutId[],
+    scenarios: CreateScenarioSchema[],
     ownerId: string,
   ) {
     const testAgents = await db.testAgent.findMany({
@@ -26,9 +25,9 @@ export class AgentService {
         phoneNumber,
         name,
         systemPrompt,
-        intents: {
+        scenarios: {
           createMany: {
-            data: intents,
+            data: scenarios,
           },
         },
         enabledTestAgents: {
@@ -45,7 +44,11 @@ export class AgentService {
     return await db.agent.findUnique({
       where: { id },
       include: {
-        intents: true,
+        scenarios: {
+          include: {
+            evals: true,
+          },
+        },
         enabledTestAgents: true,
       },
     });
@@ -54,6 +57,21 @@ export class AgentService {
   async getAllAgents(ownerId: string) {
     // return await db.agent.findMany({ where: {} });
     return await db.agent.findMany({ where: { ownerId } });
+  }
+
+  async updateAgentSettings({
+    id,
+    phoneNumber,
+    name,
+  }: {
+    id: string;
+    phoneNumber: string;
+    name: string;
+  }) {
+    return await db.agent.update({
+      where: { id },
+      data: { phoneNumber, name },
+    });
   }
 
   // async createTestAgent(
@@ -111,62 +129,44 @@ export class AgentService {
     }
   }
 
-  async updateAgentIntents(
-    id: string,
-    intents: Array<Intent | IntentWithoutId>,
-  ) {
-    const existingIntents = intents.filter((i): i is Intent => "id" in i);
-    const newIntents = intents.filter(
-      (i): i is IntentWithoutId => !("id" in i),
-    );
-
-    const currentIntents = await db.intent.findMany({
-      where: { agentId: id },
-      select: { id: true },
-    });
-
-    const intentsToDelete = currentIntents
-      .map((i) => i.id)
-      .filter((currentId) => !existingIntents.find((i) => i.id === currentId));
-
-    return await db.agent.update({
-      where: { id },
+  async createScenario(agentId: string, scenario: CreateScenarioSchema) {
+    return await db.scenario.create({
       data: {
-        intents: {
-          updateMany: existingIntents.map((intent) => ({
-            where: { id: intent.id },
-            data: {
-              name: intent.name,
-              instructions: intent.instructions,
-              successCriteria: intent.successCriteria,
-            },
-          })),
+        agentId,
+        name: scenario.name,
+        instructions: scenario.instructions,
+        successCriteria: scenario.successCriteria,
+        evals: {
           createMany: {
-            data: newIntents.map((intent) => ({
-              name: intent.name,
-              instructions: intent.instructions,
-              successCriteria: intent.successCriteria,
-            })),
-          },
-          deleteMany: {
-            id: { in: intentsToDelete },
+            data: scenario.evals,
           },
         },
       },
       include: {
-        intents: true,
+        evals: true,
       },
     });
   }
 
-  async updateAgentSettings(input: {
-    id: string;
-    phoneNumber: string;
-    name: string;
-  }) {
-    return await db.agent.update({
-      where: { id: input.id },
-      data: input,
+  async updateScenario(scenario: ScenarioWithEvals) {
+    return await db.scenario.update({
+      where: { id: scenario.id },
+      data: {
+        name: scenario.name,
+        instructions: scenario.instructions,
+        successCriteria: scenario.successCriteria,
+        evals: {
+          deleteMany: {},
+          createMany: { data: scenario.evals },
+        },
+      },
+      include: {
+        evals: true,
+      },
     });
+  }
+
+  async deleteScenario(id: string) {
+    return await db.scenario.delete({ where: { id } });
   }
 }
