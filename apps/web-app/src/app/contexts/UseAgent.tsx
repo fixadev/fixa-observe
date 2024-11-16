@@ -53,6 +53,7 @@ export function useAgent(agentId?: string) {
       console.log("setting agent", fetchedAgent);
       context.setAgent(fetchedAgent);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fetchedAgent]);
 
   const refetch = useCallback(async () => {

@@ -7,6 +7,7 @@ import { Switch } from "~/components/ui/switch";
 import { api } from "~/trpc/react";
 import Image from "next/image";
 import { PlusIcon } from "@heroicons/react/24/solid";
+import { CopyText } from "~/components/dashboard/CopyText";
 
 export default function TestAgentsPage({
   params,
@@ -65,12 +66,12 @@ export default function TestAgentsPage({
         </Link>
       </div>
       <div className="container flex flex-col gap-4 p-4">
-        <div className="grid grid-cols-1 gap-2 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-2 lg:grid-cols-3">
           {testAgents?.map((agent) => (
             <div
               key={agent.id}
               onClick={() => toggleAgent(agent.id)}
-              className="flex cursor-pointer items-center gap-4 rounded-md border border-input p-4 hover:bg-muted"
+              className="flex cursor-pointer items-center gap-4 rounded-md border border-input p-4 hover:bg-muted/40"
             >
               <div className="shrink-0">
                 <Image
@@ -86,6 +87,7 @@ export default function TestAgentsPage({
                 <div className="text-xs text-muted-foreground">
                   {agent.description}
                 </div>
+                <CopyText size="xs" className="mt-2" text={agent.id} />
               </div>
               <Switch checked={enabledAgents.has(agent.id)} />
             </div>
