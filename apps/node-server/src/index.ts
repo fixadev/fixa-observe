@@ -56,14 +56,14 @@ app.post("/vapi", async (req: Request, res: Response) => {
         console.error("No context found for call", message.call.id);
         return;
       }
-      const { userSocket, agent, intent, test, call } = context;
+      const { userSocket, agent, scenario, test, call } = context;
       await handleAnalysisStarted(message, userSocket);
       await handleVapiCallEnded({
         report: message,
         call,
         agent,
         test,
-        intent,
+        scenario,
         userSocket,
       });
     } else if (message.type === "transcript") {

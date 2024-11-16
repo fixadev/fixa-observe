@@ -1,10 +1,10 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { AgentService } from "~/server/services/agent";
-import { CreateAgentSchema, IntentSchemaWithoutId } from "~/lib/agent";
+import { CreateAgentSchema, ScenarioSchemaWithoutId } from "~/lib/agent";
 import { db } from "~/server/db";
-import { generateIntentsFromPrompt } from "~/server/helpers/generateIntents";
-import { IntentSchema } from "prisma/generated/zod";
+import { generateScenariosFromPrompt } from "~/server/helpers/generateScenarios";
+import { ScenarioSchema } from "prisma/generated/zod";
 
 const agentServiceInstance = new AgentService(db);
 
@@ -16,22 +16,22 @@ export const agentRouter = createTRPCRouter({
         input.phoneNumber,
         input.name,
         input.systemPrompt,
-        input.intents,
+        input.scenarios,
         ctx.user.id,
       );
     }),
 
-  updateIntents: protectedProcedure
+  updateScenarios: protectedProcedure
     .input(
       z.object({
         id: z.string(),
-        intents: z.array(IntentSchema.or(IntentSchemaWithoutId)),
+        scenarios: z.array(ScenarioSchema.or(ScenarioSchemaWithoutId)),
       }),
     )
     .mutation(async ({ input }) => {
-      return await agentServiceInstance.updateAgentIntents(
+      return await agentServiceInstance.updateAgentScenarios(
         input.id,
-        input.intents,
+        input.scenarios,
       );
     }),
 
@@ -77,17 +77,17 @@ export const agentRouter = createTRPCRouter({
       );
     }),
 
-  generateIntentsFromPrompt: protectedProcedure
+  generateScenariosFromPrompt: protectedProcedure
     .input(
       z.object({
         prompt: z.string(),
-        numberOfIntents: z.number(),
+        numberOfScenarios: z.number(),
       }),
     )
     .mutation(async ({ input }) => {
-      return await generateIntentsFromPrompt(
+      return await generateScenariosFromPrompt(
         input.prompt,
-        input.numberOfIntents,
+        input.numberOfScenarios,
       );
     }),
 });

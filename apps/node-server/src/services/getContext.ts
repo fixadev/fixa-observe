@@ -10,7 +10,7 @@ export const getContext = async (
       where: { id: callId },
       include: {
         testAgent: true,
-        intent: true,
+        scenario: true,
         test: { include: { agent: true } },
       },
     });
@@ -19,15 +19,15 @@ export const getContext = async (
       console.error("No call found in DB for call ID", callId);
       return;
     }
-    const { test, intent } = call;
+    const { test, scenario } = call;
     const agent = test?.agent;
     const ownerId = agent?.ownerId;
     if (!ownerId) {
       console.error("No owner ID found for agentId", agent?.id);
       return;
     }
-    if (!intent) {
-      console.error("No intent found for call", callId);
+    if (!scenario) {
+      console.error("No scenario found for call", callId);
       return;
     }
     if (!test) {
@@ -38,7 +38,7 @@ export const getContext = async (
     return {
       userSocket,
       agent,
-      intent,
+      scenario,
       call,
       test,
     };

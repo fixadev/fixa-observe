@@ -196,7 +196,7 @@ export default function CallDetails({
           </div>
           <div className="flex flex-col gap-2">
             <div className="flex items-center gap-2">
-              <div className="text-sm font-medium">{call.intent?.name}</div>
+              <div className="text-sm font-medium">{call.scenario?.name}</div>
               {call.status === CallStatus.completed && (
                 <div
                   className={cn(

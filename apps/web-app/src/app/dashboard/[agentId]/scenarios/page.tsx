@@ -2,11 +2,11 @@
 
 import Link from "next/link";
 import { useState, useEffect } from "react";
-import { IntentCard } from "~/app/_components/IntentCard";
+import { ScenarioCard } from "~/app/_components/ScenarioCard";
 import { useAgent } from "~/app/contexts/UseAgent";
 import { Button } from "~/components/ui/button";
 import { useToast } from "~/hooks/use-toast";
-import { type IntentWithoutId, type Intent } from "~/lib/agent";
+import { type ScenarioWithoutId, type Scenario } from "~/lib/agent";
 import { api } from "~/trpc/react";
 
 export default function AgentScenariosPage({
@@ -14,33 +14,34 @@ export default function AgentScenariosPage({
 }: {
   params: { agentId: string };
 }) {
-  const [intents, setIntents] = useState<Intent[]>([]);
+  const [scenarios, setScenarios] = useState<Scenario[]>([]);
   const { agent, refetch } = useAgent(params.agentId);
   const { toast } = useToast();
   useEffect(() => {
     if (agent) {
-      setIntents(agent.intents);
+      setScenarios(agent.scenarios);
     }
   }, [agent]);
 
-  const { mutate: updateAgentIntents } = api.agent.updateIntents.useMutation({
-    onSuccess: (data) => {
-      setIntents(data.intents);
-      if (data) {
-        void refetch();
-        toast({
-          title: "Scenarios updated!",
-          duration: 2000,
-        });
-      }
-    },
-  });
+  const { mutate: updateAgentScenarios } =
+    api.agent.updateScenarios.useMutation({
+      onSuccess: (data) => {
+        setScenarios(data.scenarios);
+        if (data) {
+          void refetch();
+          toast({
+            title: "Scenarios updated!",
+            duration: 2000,
+          });
+        }
+      },
+    });
 
   if (!agent) return null;
 
   const addScenario = () => {
-    setIntents([
-      ...intents,
+    setScenarios([
+      ...scenarios,
       {
         id: "new",
         name: "",
@@ -52,19 +53,19 @@ export default function AgentScenariosPage({
     ]);
   };
 
-  const saveIntents = (intents: Array<Intent | IntentWithoutId>) => {
+  const saveScenarios = (scenarios: Array<Scenario | ScenarioWithoutId>) => {
     toast({
       title: "Updating scenarios...",
       duration: 3000,
     });
-    setIntents(
-      intents.map((intent) => ({
-        ...intent,
-        id: "id" in intent ? intent.id : "temp",
+    setScenarios(
+      scenarios.map((scenario) => ({
+        ...scenario,
+        id: "id" in scenario ? scenario.id : "temp",
         agentId: agent.id,
       })),
     );
-    updateAgentIntents({ id: agent.id, intents });
+    updateAgentScenarios({ id: agent.id, scenarios });
   };
 
   return (
@@ -78,14 +79,14 @@ export default function AgentScenariosPage({
         <div className="text-2xl font-medium">scenarios</div>
       </div> */}
       <div className="container flex flex-col gap-4 p-4">
-        {intents.map((intent, index) => (
-          <IntentCard
+        {scenarios.map((scenario, index) => (
+          <ScenarioCard
             index={index}
-            key={intent.id}
-            intent={intent}
-            intentId={intent.id}
-            intents={intents}
-            setIntents={saveIntents}
+            key={scenario.id}
+            scenario={scenario}
+            scenarioId={scenario.id}
+            scenarios={scenarios}
+            setScenarios={saveScenarios}
           />
         ))}
         <div className="flex flex-row justify-end">

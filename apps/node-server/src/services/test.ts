@@ -11,7 +11,7 @@ const main = async () => {
   const test = await db.test.findFirst({
     where: { id: "cm3h0it4800034u42zdkpat5v" },
     include: {
-      calls: { include: { intent: true, testAgent: true, messages: true } },
+      calls: { include: { scenario: true, testAgent: true, messages: true } },
       agent: true,
     },
   });
@@ -45,15 +45,15 @@ const main = async () => {
     const analysis = await analyzeCallWitho1(
       agent?.systemPrompt ?? "",
       testAgent?.prompt ?? "",
-      dbCall?.intent?.successCriteria ?? "",
+      dbCall?.scenario?.successCriteria ?? "",
       vapiCall.artifact?.messages ?? [],
     );
 
     const geminiPrompt = createGeminiPrompt(
       vapiCall.artifact?.messages ?? [],
       agent?.systemPrompt ?? "",
-      dbCall?.intent?.instructions ?? "",
-      dbCall?.intent?.successCriteria ?? "",
+      dbCall?.scenario?.instructions ?? "",
+      dbCall?.scenario?.successCriteria ?? "",
       analysis,
     );
 
@@ -121,7 +121,7 @@ const main = async () => {
       include: {
         messages: true,
         testAgent: true,
-        intent: true,
+        scenario: true,
         errors: true,
       },
     });

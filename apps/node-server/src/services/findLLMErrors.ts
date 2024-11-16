@@ -39,7 +39,7 @@ export const analyzeCallWitho1 = async (
 
   You will be provided the following information:
   - The main agent's prompt
-  - The test agent's prompt / intent
+  - The test agent's prompt / scenario
   - The success criteria for the call
   - The call transcript. In this, the main agent will be labeled as "user" and the test agent will be labeled as "bot".
 

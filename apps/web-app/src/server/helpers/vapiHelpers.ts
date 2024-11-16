@@ -98,7 +98,7 @@ export const initiateVapiCall = async (
   assistantId: string,
   phoneNumber: string,
   testAgentPrompt?: string,
-  intentPrompt?: string,
+  scenarioPrompt?: string,
 ) => {
   try {
     return await vapi.calls.create({
@@ -119,7 +119,7 @@ export const initiateVapiCall = async (
             },
             {
               role: "system",
-              content: intentPrompt,
+              content: scenarioPrompt,
             },
           ],
         },
