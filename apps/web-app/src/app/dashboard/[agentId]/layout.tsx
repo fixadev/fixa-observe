@@ -1,59 +1,19 @@
 "use client";
 
-// export default function AgentLayout({
-//   params,
-//   children,
-// }: {
-//   params: { agentId: string };
-//   children: React.ReactNode;
-// }) {
-//   const pathname = usePathname();
-//   const tabValue = useMemo(() => {
-//     if (pathname.endsWith("/settings")) return "settings";
-//     if (pathname.endsWith("/scenarios")) return "scenarios";
-//     return "tests";
-//   }, [pathname]);
-//   const tabs = useMemo(() => {
-//     return [
-//       { value: "tests", label: "tests", href: `/dashboard/${params.agentId}` },
-//       {
-//         value: "scenarios",
-//         label: "scenarios",
-//         href: `/dashboard/${params.agentId}/scenarios`,
-//       },
-//       {
-//         value: "settings",
-//         label: "settings",
-//         href: `/dashboard/${params.agentId}/settings`,
-//       },
-//     ];
-//   }, [params.agentId]);
-
-//   return (
-//     <div>
-//       <LayoutHeader tabValue={tabValue} tabs={tabs} agentId={params.agentId} />
-//       {children}
-//     </div>
-//   );
-// }
-
-"use client";
-
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+// import { Button } from "@/components/ui/button";
+// import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import {
-  Bars3Icon,
+  // Bars3Icon,
   ChatBubbleOvalLeftIcon,
   Cog6ToothIcon,
 } from "@heroicons/react/24/outline";
-import { UserButton } from "@clerk/nextjs";
-import { useCallback } from "react";
+// import { UserButton } from "@clerk/nextjs";
+import { useCallback, useMemo } from "react";
 import { removeTrailingSlash } from "~/lib/utils";
 import Logo from "~/components/Logo";
 import { CounterClockwiseClockIcon } from "@radix-ui/react-icons";
-import {} from "@heroicons/react/24/solid";
 import { api } from "~/trpc/react";
 import {
   Select,
@@ -62,6 +22,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
+import { type Agent } from "prisma/generated/zod";
 // import { SurveyProvider, useSurvey } from "~/hooks/useSurvey";
 
 const navItems = [
@@ -91,6 +52,15 @@ export default function AgentLayout({
   );
 
   const { data: agents } = api.agent.getAll.useQuery();
+  const agentsMap = useMemo(() => {
+    return agents?.reduce(
+      (acc, agent) => {
+        acc[agent.id] = agent;
+        return acc;
+      },
+      {} as Record<string, Agent>,
+    );
+  }, [agents]);
 
   return (
     <div className="flex min-h-screen w-full">
@@ -100,7 +70,7 @@ export default function AgentLayout({
             <Logo href="/dashboard" />
           </div>
           <div className="flex-1">
-            <nav className="grid items-start px-2 text-sm font-medium lg:px-4">
+            <nav className="flex flex-col px-2 text-sm font-medium lg:px-4">
               <Select
                 value={params.agentId}
                 onValueChange={(value) => {
@@ -108,12 +78,16 @@ export default function AgentLayout({
                 }}
               >
                 <SelectTrigger className="mb-2 bg-background">
-                  <SelectValue placeholder="Select an agent" />
+                  <SelectValue placeholder="Select an agent" asChild>
+                    <div className="w-[120px] cursor-pointer truncate text-left">
+                      {agentsMap?.[params.agentId]?.name}
+                    </div>
+                  </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   {agents?.map((agent) => (
                     <SelectItem
-                      className="cursor-pointer"
+                      className="cursor-pointer truncate"
                       key={agent.id}
                       value={agent.id}
                     >
