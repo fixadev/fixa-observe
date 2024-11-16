@@ -23,19 +23,42 @@ export default function AgentScenariosPage({
     }
   }, [agent]);
 
-  const { mutate: updateAgentScenarios } =
-    api.agent.updateScenarios.useMutation({
-      onSuccess: (data) => {
-        setScenarios(data.scenarios);
-        if (data) {
-          void refetch();
-          toast({
-            title: "Scenarios updated!",
-            duration: 2000,
-          });
-        }
-      },
-    });
+  const { mutate: createScenario } = api.agent.createScenario.useMutation({
+    onSuccess: (data) => {
+      setScenarios([...scenarios.slice(0, -1), data]);
+      void refetch();
+    },
+  });
+
+  const handleCreateScenario = (scenario: CreateScenarioSchema) => {
+    createScenario({ agentId: agent?.id ?? "", scenario });
+  };
+
+  const { mutate: updateScenario } = api.agent.updateScenario.useMutation({
+    onSuccess: (data) => {
+      setScenarios(scenarios.map((s) => (s.id === data.id ? data : s)));
+    },
+  });
+
+  const handleUpdateScenario = (
+    scenario: Omit<ScenarioWithEvals, "agentId">,
+    index: number,
+  ) => {
+    updateScenario({ scenario: { ...scenario, agentId: agent?.id ?? "" } });
+  };
+
+  const { mutate: deleteScenario } = api.agent.deleteScenario.useMutation({
+    onSuccess: () => {
+      void refetch();
+    },
+  });
+
+  const handleDeleteScenario = (index: number) => {
+    setScenarios(scenarios.filter((_, i) => i !== index));
+    if (scenarios[index]?.id) {
+      deleteScenario({ id: scenarios[index].id });
+    }
+  };
 
   if (!agent) return null;
 
@@ -54,23 +77,6 @@ export default function AgentScenariosPage({
     ]);
   };
 
-  const saveScenarios = (
-    scenarios: Array<ScenarioWithEvals | CreateScenarioSchema>,
-  ) => {
-    toast({
-      title: "Updating scenarios...",
-      duration: 3000,
-    });
-    setScenarios(
-      scenarios.map((scenario) => ({
-        ...scenario,
-        id: "id" in scenario ? scenario.id : "temp",
-        agentId: agent.id,
-      })),
-    );
-    updateAgentScenarios({ id: agent.id, scenarios });
-  };
-
   return (
     <div>
       <div className="sticky top-0 z-20 flex h-14 w-full items-center justify-between border-b border-input bg-[#FAFBFC] px-4 lg:h-[60px]">
@@ -87,9 +93,9 @@ export default function AgentScenariosPage({
             index={index}
             key={scenario.id}
             scenario={scenario}
-            scenarioId={scenario.id}
-            scenarios={scenarios}
-            setScenarios={saveScenarios}
+            createScenario={handleCreateScenario}
+            updateScenario={handleUpdateScenario}
+            deleteScenario={handleDeleteScenario}
           />
         ))}
         <div className="flex flex-row justify-end">

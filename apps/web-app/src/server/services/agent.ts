@@ -114,81 +114,44 @@ export class AgentService {
     }
   }
 
-  async updateAgentScenarios(
-    id: string,
-    scenarios: Array<ScenarioWithEvals | CreateScenarioSchema>,
-  ) {
-    const existingScenarios = scenarios.filter(
-      (s): s is ScenarioWithEvals => "id" in s,
-    );
-    const newScenarios = scenarios.filter(
-      (s): s is CreateScenarioSchema => !("id" in s),
-    );
-
-    const currentScenarios = await db.scenario.findMany({
-      where: { agentId: id },
-      select: { id: true },
-    });
-
-    const scenariosToDelete = currentScenarios
-      .map((s) => s.id)
-      .filter(
-        (currentId) => !existingScenarios.find((s) => s.id === currentId),
-      );
-
-    return await db.agent.update({
-      where: { id },
+  async createScenario(agentId: string, scenario: CreateScenarioSchema) {
+    return await db.scenario.create({
       data: {
-        scenarios: {
-          updateMany: existingScenarios.map((scenario) => ({
-            where: { id: scenario.id },
-            data: {
-              name: scenario.name,
-              instructions: scenario.instructions,
-              successCriteria: scenario.successCriteria,
-              evals: {
-                deleteMany: {},
-                createMany: {
-                  data: scenario.evals,
-                },
-              },
-            },
-          })),
+        agentId,
+        name: scenario.name,
+        instructions: scenario.instructions,
+        successCriteria: scenario.successCriteria,
+        evals: {
           createMany: {
-            data: newScenarios.map((scenario) => ({
-              name: scenario.name,
-              instructions: scenario.instructions,
-              successCriteria: scenario.successCriteria,
-              evals: {
-                createMany: {
-                  data: scenario.evals,
-                },
-              },
-            })),
-          },
-          deleteMany: {
-            id: { in: scenariosToDelete },
+            data: scenario.evals,
           },
         },
       },
       include: {
-        scenarios: {
-          include: {
-            evals: true,
-          },
-        },
+        evals: true,
       },
     });
   }
 
-  async updateAgentSettings(input: {
-    id: string;
-    phoneNumber: string;
-    name: string;
-  }) {
-    return await db.agent.update({
-      where: { id: input.id },
-      data: input,
+  async updateScenario(scenario: ScenarioWithEvals) {
+    return await db.scenario.update({
+      where: { id: scenario.id },
+      data: {
+        name: scenario.name,
+        instructions: scenario.instructions,
+        successCriteria: scenario.successCriteria,
+        evals: {
+          deleteMany: {},
+          createMany: { data: scenario.evals },
+        },
+      },
+      include: {
+        evals: true,
+      },
     });
+  }
+
+  async deleteScenario(id: string) {
+    return await db.scenario.delete({ where: { id } });
   }
 }

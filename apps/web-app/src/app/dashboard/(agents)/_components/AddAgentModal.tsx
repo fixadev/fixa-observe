@@ -173,8 +173,18 @@ export function AddAgentModal({ children, refetchAgents }: AddAgentModalProps) {
     }
   };
 
-  const setAgentScenarios = (scenarios: CreateScenarioSchema[]) => {
-    setAgent({ ...agent, scenarios });
+  const deleteScenario = (index: number) => {
+    setAgent({
+      ...agent,
+      scenarios: agent.scenarios.filter((_, i) => i !== index),
+    });
+  };
+
+  const updateScenario = (scenario: CreateScenarioSchema, index: numbe) => {
+    setAgent({
+      ...agent,
+      scenarios: agent.scenarios.map((s, i) => (i === index ? scenario : s)),
+    });
   };
 
   return (
@@ -246,8 +256,11 @@ export function AddAgentModal({ children, refetchAgents }: AddAgentModalProps) {
                     key={index}
                     scenario={scenario}
                     index={index}
-                    scenarios={agent.scenarios}
-                    setScenarios={setAgentScenarios}
+                    deleteScenario={deleteScenario}
+                    createScenario={updateScenario}
+                    updateScenario={(updatedScenario) =>
+                      updateScenario(updatedScenario, index)
+                    }
                   />
                 ))}
                 <Button variant="outline" onClick={addScenario}>

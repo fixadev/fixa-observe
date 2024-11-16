@@ -24,36 +24,6 @@ export const agentRouter = createTRPCRouter({
       );
     }),
 
-  updateScenarios: protectedProcedure
-    .input(
-      z.object({
-        id: z.string(),
-        scenarios: z.array(ScenarioWithEvals.or(CreateScenarioSchema)),
-      }),
-    )
-    .mutation(async ({ input }) => {
-      return await agentServiceInstance.updateAgentScenarios(
-        input.id,
-        input.scenarios,
-      );
-    }),
-
-  updateSettings: protectedProcedure
-    .input(
-      z.object({
-        id: z.string(),
-        phoneNumber: z.string(),
-        name: z.string(),
-      }),
-    )
-    .mutation(async ({ input }) => {
-      return await agentServiceInstance.updateAgentSettings(input);
-    }),
-
-  getAll: protectedProcedure.query(async ({ ctx }) => {
-    return await agentServiceInstance.getAllAgents(ctx.user.id);
-  }),
-
   get: protectedProcedure
     .input(z.object({ id: z.string() }))
     .query(async ({ input }) => {
@@ -93,4 +63,41 @@ export const agentRouter = createTRPCRouter({
         input.numberOfScenarios,
       );
     }),
+
+  createScenario: protectedProcedure
+    .input(z.object({ agentId: z.string(), scenario: CreateScenarioSchema }))
+    .mutation(async ({ input }) => {
+      return await agentServiceInstance.createScenario(
+        input.agentId,
+        input.scenario,
+      );
+    }),
+
+  updateScenario: protectedProcedure
+    .input(z.object({ scenario: ScenarioWithEvals }))
+    .mutation(async ({ input }) => {
+      return await agentServiceInstance.updateScenario(input.scenario);
+    }),
+
+  deleteScenario: protectedProcedure
+    .input(z.object({ id: z.string() }))
+    .mutation(async ({ input }) => {
+      return await agentServiceInstance.deleteScenario(input.id);
+    }),
+
+  updateSettings: protectedProcedure
+    .input(
+      z.object({
+        id: z.string(),
+        phoneNumber: z.string(),
+        name: z.string(),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      return await agentServiceInstance.updateAgentSettings(input);
+    }),
+
+  getAll: protectedProcedure.query(async ({ ctx }) => {
+    return await agentServiceInstance.getAllAgents(ctx.user.id);
+  }),
 });
