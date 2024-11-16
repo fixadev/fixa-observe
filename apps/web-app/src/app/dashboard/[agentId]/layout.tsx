@@ -8,6 +8,7 @@ import {
   // Bars3Icon,
   ChatBubbleOvalLeftIcon,
   Cog6ToothIcon,
+  UsersIcon,
 } from "@heroicons/react/24/outline";
 // import { UserButton } from "@clerk/nextjs";
 import { useCallback, useMemo } from "react";
@@ -28,6 +29,11 @@ import { type Agent } from "prisma/generated/zod";
 const navItems = [
   { href: "/", icon: CounterClockwiseClockIcon, label: "test history" },
   { href: "/scenarios", icon: ChatBubbleOvalLeftIcon, label: "scenarios" },
+  {
+    href: "/test-agents",
+    icon: UsersIcon,
+    label: "test agents",
+  },
   { href: "/settings", icon: Cog6ToothIcon, label: "settings" },
 ];
 

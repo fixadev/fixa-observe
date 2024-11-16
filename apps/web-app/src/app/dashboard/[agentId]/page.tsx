@@ -112,26 +112,6 @@ export default function AgentPage({ params }: { params: { agentId: string } }) {
           run test <RocketLaunchIcon className="size-4" />
         </Button>
       </div>
-      {/* <div className="container flex items-center justify-between py-8">
-        <div className="text-2xl font-medium">tests</div>
-        <div className="flex gap-2">
-          <Button
-            variant="outline"
-            size="lg"
-            onClick={() => setTestAgentsModalOpen(true)}
-          >
-            configure test agents
-          </Button>
-          <Button
-            size="lg"
-            className="flex min-w-[160px] items-center gap-2"
-            onClick={() => setRunTestModalOpen(true)}
-          >
-            run test <RocketLaunchIcon className="size-4" />
-          </Button>
-        </div>
-      </div>
-      <div className="h-px w-full bg-input" /> */}
 
       {/* content */}
       {tests.length > 0 && (
