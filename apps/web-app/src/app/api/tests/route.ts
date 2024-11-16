@@ -33,8 +33,12 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const result = await testService.run(input.agentId, input.scenarioIds);
-    return Response.json({ success: true, data: result });
+    const result = await testService.run(
+      input.agentId,
+      input.scenarioIds,
+      input.testAgentIds,
+    );
+    return Response.json({ success: true, data: { testId: result.id } });
   } catch (error) {
     console.error("Error running test:", error);
     return Response.json(

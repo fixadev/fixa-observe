@@ -51,17 +51,25 @@ export class TestService {
       select: {
         calls: {
           select: {
+            id: true,
+            result: true,
             status: true,
           },
         },
       },
     });
 
-    if (!test) return "not_found";
+    if (!test) {
+      return { status: "not_found" };
+    }
 
-    return test.calls.every((call) => call.status === CallStatus.completed)
-      ? CallStatus.completed
-      : CallStatus.in_progress;
+    const isCompleted = test.calls.every(
+      (call) => call.status === CallStatus.completed,
+    );
+
+    return isCompleted
+      ? { status: CallStatus.completed, calls: test.calls }
+      : { status: CallStatus.in_progress, calls: test.calls };
   }
 
   async run(agentId: string, scenarioIds?: string[], testAgentIds?: string[]) {
