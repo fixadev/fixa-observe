@@ -3,11 +3,13 @@
 import { type ScenarioWithEvals, type CreateScenarioSchema } from "~/lib/agent";
 import { Input } from "~/components/ui/input";
 import { Button } from "~/components/ui/button";
-import { PencilIcon, TrashIcon } from "@heroicons/react/24/solid";
+import { TrashIcon } from "@heroicons/react/24/solid";
 import { Label } from "~/components/ui/label";
 import { Textarea } from "~/components/ui/textarea";
 import { useState } from "react";
 import { Card } from "~/components/ui/card";
+import { CopyText } from "~/components/dashboard/CopyText";
+import { cn } from "~/lib/utils";
 
 interface ScenarioCardProps {
   scenario: CreateScenarioSchema | ScenarioWithEvals;
@@ -104,24 +106,27 @@ export function ScenarioCard({
         </div>
       ) : (
         <div
-          className="group flex w-full cursor-pointer flex-col items-center gap-2 p-6 hover:bg-muted"
+          className="flex w-full cursor-pointer flex-col items-center gap-2 p-6 hover:bg-muted/40"
           onClick={() => setEditMode(true)}
         >
           <div className="flex w-full flex-row justify-between gap-2">
             <div className="flex flex-row items-baseline gap-4">
               <Label
-                className={`text-lg ${scenario.name.length > 0 ? "" : "text-muted-foreground"}`}
+                className={cn("shrink-0 text-lg", {
+                  "text-muted-foreground": scenario.name.length === 0,
+                })}
               >
                 {scenario.name.length > 0 ? scenario.name : "untitled "}
               </Label>
               {"id" in scenario && (
-                <div className="text-sm text-muted-foreground">
-                  {scenario.id}
+                <div onClick={(e) => e.stopPropagation()}>
+                  <CopyText
+                    className="hover:bg-background"
+                    text={scenario.id}
+                  />
                 </div>
               )}
             </div>
-
-            <PencilIcon className="invisible mt-[-8px] size-5 group-hover:visible group-hover:text-muted-foreground" />
           </div>
           <div className="flex w-full flex-row gap-2">
             <Label className="whitespace-nowrap text-sm">prompt</Label>
