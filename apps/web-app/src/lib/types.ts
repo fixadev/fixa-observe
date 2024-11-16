@@ -16,7 +16,7 @@ export type CallWithIncludes = Prisma.CallGetPayload<{
   include: {
     messages: true;
     errors: true;
-    intent: true;
+    scenario: true;
     testAgent: true;
   };
 }>;
@@ -27,7 +27,7 @@ export type TestWithIncludes = Prisma.TestGetPayload<{
       include: {
         messages: true;
         errors: true;
-        intent: true;
+        scenario: true;
         testAgent: true;
       };
     };
@@ -38,7 +38,7 @@ export type TestWithCalls = Test & { calls: Call[] };
 
 export type AgentWithIncludes = Prisma.AgentGetPayload<{
   include: {
-    intents: true;
+    scenarios: true;
     enabledTestAgents: true;
   };
 }>;

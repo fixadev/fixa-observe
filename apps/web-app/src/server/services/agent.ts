@@ -1,8 +1,7 @@
 import { db } from "../db";
-import { type Intent, type IntentWithoutId } from "~/lib/agent";
+import { type Scenario, type ScenarioWithoutId } from "~/lib/agent";
 import { v4 as uuidv4 } from "uuid";
 import { type PrismaClient } from "@prisma/client";
-import { generateIntentsFromPrompt } from "../helpers/generateIntents";
 // import { createVapiAssistant } from "../helpers/vapiHelpers";
 
 export class AgentService {
@@ -11,7 +10,7 @@ export class AgentService {
     phoneNumber: string,
     name: string,
     systemPrompt: string,
-    intents: IntentWithoutId[],
+    scenarios: ScenarioWithoutId[],
     ownerId: string,
   ) {
     const testAgents = await db.testAgent.findMany({
@@ -26,9 +25,9 @@ export class AgentService {
         phoneNumber,
         name,
         systemPrompt,
-        intents: {
+        scenarios: {
           createMany: {
-            data: intents,
+            data: scenarios,
           },
         },
         enabledTestAgents: {
@@ -45,7 +44,7 @@ export class AgentService {
     return await db.agent.findUnique({
       where: { id },
       include: {
-        intents: true,
+        scenarios: true,
         enabledTestAgents: true,
       },
     });
@@ -111,50 +110,52 @@ export class AgentService {
     }
   }
 
-  async updateAgentIntents(
+  async updateAgentScenarios(
     id: string,
-    intents: Array<Intent | IntentWithoutId>,
+    scenarios: Array<Scenario | ScenarioWithoutId>,
   ) {
-    const existingIntents = intents.filter((i): i is Intent => "id" in i);
-    const newIntents = intents.filter(
-      (i): i is IntentWithoutId => !("id" in i),
+    const existingScenarios = scenarios.filter((s): s is Scenario => "id" in s);
+    const newScenarios = scenarios.filter(
+      (s): s is ScenarioWithoutId => !("id" in s),
     );
 
-    const currentIntents = await db.intent.findMany({
+    const currentScenarios = await db.scenario.findMany({
       where: { agentId: id },
       select: { id: true },
     });
 
-    const intentsToDelete = currentIntents
-      .map((i) => i.id)
-      .filter((currentId) => !existingIntents.find((i) => i.id === currentId));
+    const scenariosToDelete = currentScenarios
+      .map((s) => s.id)
+      .filter(
+        (currentId) => !existingScenarios.find((s) => s.id === currentId),
+      );
 
     return await db.agent.update({
       where: { id },
       data: {
-        intents: {
-          updateMany: existingIntents.map((intent) => ({
-            where: { id: intent.id },
+        scenarios: {
+          updateMany: existingScenarios.map((scenario) => ({
+            where: { id: scenario.id },
             data: {
-              name: intent.name,
-              instructions: intent.instructions,
-              successCriteria: intent.successCriteria,
+              name: scenario.name,
+              instructions: scenario.instructions,
+              successCriteria: scenario.successCriteria,
             },
           })),
           createMany: {
-            data: newIntents.map((intent) => ({
-              name: intent.name,
-              instructions: intent.instructions,
-              successCriteria: intent.successCriteria,
+            data: newScenarios.map((scenario) => ({
+              name: scenario.name,
+              instructions: scenario.instructions,
+              successCriteria: scenario.successCriteria,
             })),
           },
           deleteMany: {
-            id: { in: intentsToDelete },
+            id: { in: scenariosToDelete },
           },
         },
       },
       include: {
-        intents: true,
+        scenarios: true,
       },
     });
   }

@@ -1,6 +1,6 @@
 "use client";
 
-import { type IntentWithoutId, type Intent } from "~/lib/agent";
+import { type ScenarioWithoutId, type Scenario } from "~/lib/agent";
 import { Input } from "~/components/ui/input";
 import { Button } from "~/components/ui/button";
 import { PencilIcon, TrashIcon } from "@heroicons/react/24/solid";
@@ -9,33 +9,33 @@ import { Textarea } from "~/components/ui/textarea";
 import { useEffect, useState } from "react";
 import { Card } from "~/components/ui/card";
 
-interface IntentCardProps {
-  intent: IntentWithoutId;
-  intentId?: string;
+interface ScenarioCardProps {
+  scenario: ScenarioWithoutId;
+  scenarioId?: string;
   index: number;
-  intents: Array<Intent | IntentWithoutId>;
-  setIntents: (intents: Array<Intent | IntentWithoutId>) => void;
+  scenarios: Array<Scenario | ScenarioWithoutId>;
+  setScenarios: (scenarios: Array<Scenario | ScenarioWithoutId>) => void;
 }
 
-export function IntentCard({
-  intent,
-  intentId,
+export function ScenarioCard({
+  scenario,
+  scenarioId,
   index,
-  intents,
-  setIntents,
-}: IntentCardProps) {
-  const [editMode, setEditMode] = useState(intent.isNew);
-  const [localIntent, setLocalIntent] = useState(intent);
+  scenarios,
+  setScenarios,
+}: ScenarioCardProps) {
+  const [editMode, setEditMode] = useState(scenario.isNew);
+  const [localScenario, setLocalScenario] = useState(scenario);
 
-  const removeIntent = (index: number) => {
-    setIntents(intents.filter((_, iIndex) => iIndex !== index));
+  const removeScenario = (index: number) => {
+    setScenarios(scenarios.filter((_, iIndex) => iIndex !== index));
   };
 
   useEffect(() => {
-    if (intent.isNew) {
-      setLocalIntent({ ...intent, isNew: false });
+    if (scenario.isNew) {
+      setLocalScenario({ ...scenario, isNew: false });
     }
-  }, [intent.isNew, index, setLocalIntent, intent]);
+  }, [scenario.isNew, index, setLocalScenario, scenario]);
 
   return (
     <Card>
@@ -43,11 +43,11 @@ export function IntentCard({
         <div className="flex w-full flex-col gap-2 p-6">
           <Label>name</Label>
           <Input
-            autoFocus={localIntent.name === ""}
-            value={localIntent.name}
+            autoFocus={localScenario.name === ""}
+            value={localScenario.name}
             placeholder="donut ordering flow"
             onChange={(e) =>
-              setLocalIntent({ ...localIntent, name: e.target.value })
+              setLocalScenario({ ...localScenario, name: e.target.value })
             }
           />
           <div className="flex flex-col gap-2">
@@ -56,11 +56,11 @@ export function IntentCard({
             </div>
             <Textarea
               className="h-[125px] overflow-y-auto"
-              value={localIntent.instructions}
+              value={localScenario.instructions}
               placeholder="order a dozen donuts with sprinkles, ask for a receipt as well as a coffee"
               onChange={(e) =>
-                setLocalIntent({
-                  ...localIntent,
+                setLocalScenario({
+                  ...localScenario,
                   instructions: e.target.value,
                 })
               }
@@ -70,11 +70,11 @@ export function IntentCard({
             </div>
             <Textarea
               className="h-[125px] overflow-y-auto"
-              value={localIntent.successCriteria}
+              value={localScenario.successCriteria}
               placeholder="the agent successfully orders a dozen donuts with sprinkles and a coffee"
               onChange={(e) =>
-                setLocalIntent({
-                  ...localIntent,
+                setLocalScenario({
+                  ...localScenario,
                   successCriteria: e.target.value,
                 })
               }
@@ -84,7 +84,7 @@ export function IntentCard({
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => removeIntent(index)}
+              onClick={() => removeScenario(index)}
             >
               <TrashIcon className="size-5" />
             </Button>
@@ -95,9 +95,9 @@ export function IntentCard({
               <Button
                 onClick={() => {
                   setEditMode(false);
-                  setIntents(
-                    intents.map((i, iIndex) =>
-                      iIndex === index ? localIntent : i,
+                  setScenarios(
+                    scenarios.map((i, iIndex) =>
+                      iIndex === index ? localScenario : i,
                     ),
                   );
                 }}
@@ -115,12 +115,14 @@ export function IntentCard({
           <div className="flex w-full flex-row justify-between gap-2">
             <div className="flex flex-row items-baseline gap-4">
               <Label
-                className={`text-lg ${intent.name.length > 0 ? "" : "text-muted-foreground"}`}
+                className={`text-lg ${scenario.name.length > 0 ? "" : "text-muted-foreground"}`}
               >
-                {intent.name.length > 0 ? intent.name : "untitled "}
+                {scenario.name.length > 0 ? scenario.name : "untitled "}
               </Label>
-              {intentId && (
-                <div className="text-sm text-muted-foreground">{intentId}</div>
+              {scenarioId && (
+                <div className="text-sm text-muted-foreground">
+                  {scenarioId}
+                </div>
               )}
             </div>
 
@@ -128,13 +130,13 @@ export function IntentCard({
           </div>
           <div className="flex w-full flex-row gap-2">
             <Label className="whitespace-nowrap text-sm">prompt</Label>
-            <p className="truncate text-sm">{intent.instructions}</p>
+            <p className="truncate text-sm">{scenario.instructions}</p>
           </div>
           <div className="flex w-full flex-row gap-2">
             <Label className="whitespace-nowrap text-sm">
               success criteria
             </Label>
-            <p className="truncate text-sm">{intent.successCriteria}</p>
+            <p className="truncate text-sm">{scenario.successCriteria}</p>
           </div>
         </div>
       )}

@@ -90,10 +90,10 @@ export default function AgentPage({ params }: { params: { agentId: string } }) {
   // }, []);
 
   const handleRunTest = useCallback(
-    async (intentIds: string[]) => {
+    async (scenarioIds: string[]) => {
       // await new Promise((resolve) => setTimeout(resolve, 1000));
       // throw new Error("test failed");
-      await runTest({ agentId: params.agentId, intentIds });
+      await runTest({ agentId: params.agentId, scenarioIds });
     },
     [params.agentId, runTest],
   );
@@ -181,21 +181,21 @@ function RunTestModal({
   agent: AgentWithIncludes;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onRunTest: (intentIds: string[]) => Promise<void>;
+  onRunTest: (scenarioIds: string[]) => Promise<void>;
 }) {
   const { toast } = useToast();
 
-  const [selectedIntents, setSelectedIntents] = useState<Set<string>>(
-    new Set(agent.intents.map((intent) => intent.id)),
+  const [selectedScenarios, setSelectedScenarios] = useState<Set<string>>(
+    new Set(agent.scenarios.map((scenario) => scenario.id)),
   );
 
-  const toggleIntent = useCallback((intentId: string) => {
-    setSelectedIntents((prev) => {
+  const toggleScenario = useCallback((scenarioId: string) => {
+    setSelectedScenarios((prev) => {
       const next = new Set(prev);
-      if (next.has(intentId)) {
-        next.delete(intentId);
+      if (next.has(scenarioId)) {
+        next.delete(scenarioId);
       } else {
-        next.add(intentId);
+        next.add(scenarioId);
       }
       return next;
     });
@@ -234,7 +234,7 @@ function RunTestModal({
   const handleRunTest = useCallback(async () => {
     setLoading(true);
     try {
-      await onRunTest(Array.from(selectedIntents));
+      await onRunTest(Array.from(selectedScenarios));
       onOpenChange(false);
     } catch (error) {
       toast({
@@ -247,7 +247,7 @@ function RunTestModal({
     } finally {
       setLoading(false);
     }
-  }, [onRunTest, selectedIntents, onOpenChange, toast]);
+  }, [onRunTest, selectedScenarios, onOpenChange, toast]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -260,15 +260,15 @@ function RunTestModal({
           <div className="text-sm text-muted-foreground">
             select the scenarios to test.
           </div>
-          {agent.intents.map((intent) => (
-            <div key={intent.id} className="flex items-center gap-2">
+          {agent.scenarios.map((scenario) => (
+            <div key={scenario.id} className="flex items-center gap-2">
               <Switch
-                id={intent.id}
-                checked={selectedIntents.has(intent.id)}
-                onCheckedChange={() => toggleIntent(intent.id)}
+                id={scenario.id}
+                checked={selectedScenarios.has(scenario.id)}
+                onCheckedChange={() => toggleScenario(scenario.id)}
               />
-              <Label htmlFor={intent.id} className="text-sm font-medium">
-                {intent.name}
+              <Label htmlFor={scenario.id} className="text-sm font-medium">
+                {scenario.name}
               </Label>
             </div>
           ))}

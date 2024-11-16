@@ -184,29 +184,29 @@ function TestPage({ params }: { params: { agentId: string; testId: string } }) {
               <div className="text-sm font-medium">scenarios</div>
               {test &&
                 Array.from(
-                  new Set(test.calls.map((call) => call.intent?.name)),
-                ).map((intentName) => {
-                  const intent = test.calls.find(
-                    (call) => call.intent?.name === intentName,
-                  )?.intent;
-                  if (!intent) return null;
-                  const callsWithIntent = test.calls.filter(
-                    (call) => call.intent?.name === intentName,
+                  new Set(test.calls.map((call) => call.scenario?.name)),
+                ).map((scenarioName) => {
+                  const scenario = test.calls.find(
+                    (call) => call.scenario?.name === scenarioName,
+                  )?.scenario;
+                  if (!scenario) return null;
+                  const callsWithScenario = test.calls.filter(
+                    (call) => call.scenario?.name === scenarioName,
                   );
-                  const successCount = callsWithIntent.filter(
+                  const successCount = callsWithScenario.filter(
                     (call) => call.result === "success",
                   ).length;
-                  const totalCount = callsWithIntent.length;
+                  const totalCount = callsWithScenario.length;
                   const successRate = (successCount / totalCount) * 100;
 
                   return (
                     <div
-                      key={String(intentName)}
+                      key={String(scenarioName)}
                       className="flex flex-col gap-1"
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-1 text-xs font-medium">
-                          {intentName}
+                          {scenarioName}
                           <Popover>
                             <PopoverTrigger>
                               {/* <EllipsisHorizontalCircleIcon className="size-5 shrink-0 text-muted-foreground" /> */}
@@ -217,13 +217,13 @@ function TestPage({ params }: { params: { agentId: string; testId: string } }) {
                                 instructions
                               </div>
                               <div className="mb-1 text-xs text-muted-foreground">
-                                {intent.instructions}
+                                {scenario.instructions}
                               </div>
                               <div className="text-xs font-medium">
                                 success criteria
                               </div>
                               <div className="text-xs text-muted-foreground">
-                                {intent.successCriteria}
+                                {scenario.successCriteria}
                               </div>
                             </PopoverContent>
                           </Popover>

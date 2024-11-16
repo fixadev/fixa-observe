@@ -1,19 +1,19 @@
-export const generateInboundIntentsPrompt = (
-  numberOfIntents: number,
-) => `your job is to create ${numberOfIntents} intents to test an inbound AI phone agent. 
+export const generateInboundScenariosPrompt = (
+  numberOfScenarios: number,
+) => `your job is to create ${numberOfScenarios} scenarios to test an inbound AI phone agent. 
   
   you will be given a system prompt for the phone agent. 
   
-  you will use this information to create ${numberOfIntents} intents that will be used to create other agents that will be used to test the phone agent. 
+  you will use this information to create ${numberOfScenarios} scenarios that will be used to create other agents that will be used to test the phone agent. 
   your response will be an array of JSON objects with the following properties:
 
-  - name: the name of the intent -- don't use underscores or other special characters
-  - instructions: the instructions for the intent
-  - successCriteria: what criteria need to be met for a conversation with this intent to be considered successful -- make this as specific as possible
+  - name: the name of the scenario -- don't use underscores or other special characters
+  - instructions: the instructions for the scenario
+  - successCriteria: what criteria need to be met for a conversation with this scenario to be considered successful -- make this as specific as possible
 
   i.e. if the system prompt is "your are an assistant that answers the phone at a restaurant", 
   
-  you might create the following intents:
+  you might create the following scenarios:
   {
     "name": "make a reservation",
     "instructions": "make a reservation, specifically ask for a reservation at 8pm on Friday, and ask about the cancellation policy",
@@ -31,22 +31,22 @@ export const generateInboundIntentsPrompt = (
   }
   `;
 
-export const generateOutboundIntentsPrompt = (
-  numberOfIntents: number,
-) => `your job is to create ${numberOfIntents} intents to test an outbound AI phone agent. 
+export const generateOutboundScenariosPrompt = (
+  numberOfScenarios: number,
+) => `your job is to create ${numberOfScenarios} scenarios to test an outbound AI phone agent. 
   
   you will be given a system prompt for the phone agent. 
   
-  you will use this information to create ${numberOfIntents} intents that will be used to create other agents that answer calls from the outboundphone agent. 
+  you will use this information to create ${numberOfScenarios} scenarios that will be used to create other agents that answer calls from the outboundphone agent. 
   your response will be an array of JSON objects with the following properties:
 
-  - name: the name of the intent -- don't use underscores or other special characters
+  - name: the name of the scenario -- don't use underscores or other special characters
   - instructions: the instructions for test agent. in this case the test agent will be answering a call from the outbound phone agent
-  - successCriteria: what criteria need to be met for a conversation with this intent to be considered successful -- make this as specific as possible
+  - successCriteria: what criteria need to be met for a conversation with this scenario to be considered successful -- make this as specific as possible
 
   i.e. if the system prompt is "your are an sales agent that calls potential customers to sell a product", 
   
-  you might create the following intents:
+  you might create the following scenarios:
   {
     "name": "ask about the product",
     "instructions": "ask about the product, specifically ask about the features and the benefits",
