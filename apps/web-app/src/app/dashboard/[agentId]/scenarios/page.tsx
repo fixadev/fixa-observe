@@ -42,6 +42,7 @@ export default function AgentScenariosPage({
 
   const handleUpdateScenario = (
     scenario: Omit<ScenarioWithEvals, "agentId">,
+    index: number,
   ) => {
     updateScenario({ scenario: { ...scenario, agentId: agent?.id ?? "" } });
   };
@@ -59,20 +60,6 @@ export default function AgentScenariosPage({
     }
   };
 
-  const { mutate: updateAgentScenarios } =
-    api.agent.updateScenarios.useMutation({
-      onSuccess: (data) => {
-        setScenarios(data.scenarios);
-        if (data) {
-          void refetch();
-          toast({
-            title: "Scenarios updated!",
-            duration: 2000,
-          });
-        }
-      },
-    });
-
   if (!agent) return null;
 
   const addScenario = () => {
@@ -88,23 +75,6 @@ export default function AgentScenariosPage({
         evals: [],
       },
     ]);
-  };
-
-  const saveScenarios = (
-    scenarios: Array<ScenarioWithEvals | CreateScenarioSchema>,
-  ) => {
-    toast({
-      title: "Updating scenarios...",
-      duration: 3000,
-    });
-    setScenarios(
-      scenarios.map((scenario) => ({
-        ...scenario,
-        id: "id" in scenario ? scenario.id : "temp",
-        agentId: agent.id,
-      })),
-    );
-    updateAgentScenarios({ id: agent.id, scenarios });
   };
 
   return (

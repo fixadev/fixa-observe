@@ -64,20 +64,6 @@ export const agentRouter = createTRPCRouter({
       );
     }),
 
-  updateScenarios: protectedProcedure
-    .input(
-      z.object({
-        id: z.string(),
-        scenarios: z.array(ScenarioWithEvals.or(CreateScenarioSchema)),
-      }),
-    )
-    .mutation(async ({ input }) => {
-      return await agentServiceInstance.updateAgentScenarios(
-        input.id,
-        input.scenarios,
-      );
-    }),
-
   createScenario: protectedProcedure
     .input(z.object({ agentId: z.string(), scenario: CreateScenarioSchema }))
     .mutation(async ({ input }) => {

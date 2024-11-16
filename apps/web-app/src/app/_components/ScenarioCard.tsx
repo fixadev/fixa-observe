@@ -14,7 +14,10 @@ interface ScenarioCardProps {
   index: number;
   deleteScenario: (index: number) => void;
   createScenario: (scenario: CreateScenarioSchema) => void;
-  updateScenario: (scenario: Omit<ScenarioWithEvals, "agentId">) => void;
+  updateScenario: (
+    scenario: Omit<ScenarioWithEvals, "agentId">,
+    index: number,
+  ) => void;
 }
 
 export function ScenarioCard({
@@ -96,7 +99,10 @@ export function ScenarioCard({
                   if (scenario.isNew) {
                     createScenario(localScenario);
                   } else if ("id" in scenario) {
-                    updateScenario({ ...localScenario, id: scenario.id });
+                    updateScenario(
+                      { ...localScenario, id: scenario.id },
+                      index,
+                    );
                   }
                 }}
               >
