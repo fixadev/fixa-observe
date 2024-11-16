@@ -12,7 +12,11 @@ import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 
 import { useEffect, useState } from "react";
-import { type CreateScenarioSchema, type CreateAgentSchema } from "~/lib/agent";
+import {
+  type CreateScenarioSchema,
+  type CreateAgentSchema,
+  type ScenarioWithEvals,
+} from "~/lib/agent";
 import { Textarea } from "~/components/ui/textarea";
 import { api } from "~/trpc/react";
 import { ScenarioCard } from "../../../_components/ScenarioCard";
@@ -180,7 +184,10 @@ export function AddAgentModal({ children, refetchAgents }: AddAgentModalProps) {
     });
   };
 
-  const updateScenario = (scenario: CreateScenarioSchema, index: numbe) => {
+  const handleSaveScenario = (
+    scenario: CreateScenarioSchema | ScenarioWithEvals,
+    index: number,
+  ) => {
     setAgent({
       ...agent,
       scenarios: agent.scenarios.map((s, i) => (i === index ? scenario : s)),
@@ -257,10 +264,7 @@ export function AddAgentModal({ children, refetchAgents }: AddAgentModalProps) {
                     scenario={scenario}
                     index={index}
                     deleteScenario={deleteScenario}
-                    createScenario={updateScenario}
-                    updateScenario={(updatedScenario) =>
-                      updateScenario(updatedScenario, index)
-                    }
+                    handleSaveScenario={handleSaveScenario}
                   />
                 ))}
                 <Button variant="outline" onClick={addScenario}>

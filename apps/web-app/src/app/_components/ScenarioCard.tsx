@@ -15,9 +15,8 @@ interface ScenarioCardProps {
   scenario: CreateScenarioSchema | ScenarioWithEvals;
   index: number;
   deleteScenario: (index: number) => void;
-  createScenario: (scenario: CreateScenarioSchema) => void;
-  updateScenario: (
-    scenario: Omit<ScenarioWithEvals, "agentId">,
+  handleSaveScenario: (
+    scenario: CreateScenarioSchema | ScenarioWithEvals,
     index: number,
   ) => void;
 }
@@ -25,8 +24,7 @@ interface ScenarioCardProps {
 export function ScenarioCard({
   scenario,
   index,
-  createScenario,
-  updateScenario,
+  handleSaveScenario,
   deleteScenario,
 }: ScenarioCardProps) {
   const [editMode, setEditMode] = useState(scenario.isNew);
@@ -98,14 +96,7 @@ export function ScenarioCard({
               <Button
                 onClick={() => {
                   setEditMode(false);
-                  if (scenario.isNew) {
-                    createScenario(localScenario);
-                  } else if ("id" in scenario) {
-                    updateScenario(
-                      { ...localScenario, id: scenario.id },
-                      index,
-                    );
-                  }
+                  handleSaveScenario({ ...localScenario, isNew: false }, index);
                 }}
               >
                 save

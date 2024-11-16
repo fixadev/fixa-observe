@@ -25,29 +25,45 @@ export default function AgentScenariosPage({
     onSuccess: (data) => {
       setScenarios([...scenarios.slice(0, -1), data]);
       void refetch();
+      toast({
+        title: "Scenario created",
+        description: "Scenario created successfully",
+      });
     },
   });
-
-  const handleCreateScenario = (scenario: CreateScenarioSchema) => {
-    createScenario({ agentId: agent?.id ?? "", scenario });
-  };
 
   const { mutate: updateScenario } = api.agent.updateScenario.useMutation({
     onSuccess: (data) => {
-      setScenarios(scenarios.map((s) => (s.id === data.id ? data : s)));
+      toast({
+        title: "Scenario updated",
+        description: "Scenario updated successfully",
+      });
     },
   });
 
-  const handleUpdateScenario = (
-    scenario: Omit<ScenarioWithEvals, "agentId">,
+  const handleSaveScenario = (
+    scenario: CreateScenarioSchema | ScenarioWithEvals,
     index: number,
   ) => {
-    updateScenario({ scenario: { ...scenario, agentId: agent?.id ?? "" } });
+    if ("id" in scenario && scenario.id !== "new") {
+      setScenarios(scenarios.map((s) => (s.id === scenario.id ? scenario : s)));
+      updateScenario({ scenario });
+    } else {
+      setScenarios([
+        ...scenarios.slice(0, -1),
+        { ...scenario, id: "new", agentId: agent?.id ?? "" },
+      ]);
+      createScenario({ agentId: agent?.id ?? "", scenario });
+    }
   };
 
   const { mutate: deleteScenario } = api.agent.deleteScenario.useMutation({
     onSuccess: () => {
       void refetch();
+      toast({
+        title: "Scenario deleted",
+        description: "Scenario deleted successfully",
+      });
     },
   });
 
@@ -91,8 +107,7 @@ export default function AgentScenariosPage({
             index={index}
             key={scenario.id}
             scenario={scenario}
-            createScenario={handleCreateScenario}
-            updateScenario={handleUpdateScenario}
+            handleSaveScenario={handleSaveScenario}
             deleteScenario={handleDeleteScenario}
           />
         ))}

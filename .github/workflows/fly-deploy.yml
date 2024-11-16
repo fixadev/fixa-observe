@@ -15,7 +15,6 @@ jobs:
       - uses: actions/checkout@v4
       - uses: superfly/flyctl-actions/setup-flyctl@master
       - run: |
-          echo ${{ secrets.GCP_CREDENTIALS }} > ./apps/node-server/gcp-credentials.json
           export FLY_APP_NAME=${{ github.ref == 'refs/heads/main' && 'pixa-observe' || 'pixa-observe-staging' }}
           ./generate-fly-toml.sh
           # Create .env file with secrets
@@ -27,6 +26,7 @@ jobs:
           DEEPGRAM_API_KEY=${{ secrets.DEEPGRAM_API_KEY }}
           DATABASE_URL=${{ github.ref == 'refs/heads/main' && secrets.PROD_DATABASE_URL || secrets.DEV_DATABASE_URL }}
           DIRECT_URL=${{ github.ref == 'refs/heads/main' && secrets.PROD_DIRECT_URL || secrets.DEV_DIRECT_URL }}
+          GCP_CREDENTIALS=${{ secrets.GCP_CREDENTIALS }}
           HOST=0.0.0.0
           PORT=3003
           ENVIRONMENT=development
@@ -34,7 +34,6 @@ jobs:
           AWS_BUCKET_NAME=newmark
           AWS_BUCKET_REGION=us-east-1
           AUDIO_SERVICE_URL=https://api.pixa.dev
-          GOOGLE_APPLICATION_CREDENTIALS=./gcp-credentials.json
           GOOGLE_CLOUD_BUCKET_NAME=pixa-audio
           EOF
           # Deploy the application

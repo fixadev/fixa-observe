@@ -26,6 +26,8 @@ const envSchema = z.object({
   AWS_SECRET_ACCESS_KEY: z.string().min(1),
   DEEPGRAM_API_KEY: z.string().min(1),
   AUDIO_SERVICE_URL: z.string().min(1),
+  GCP_CREDENTIALS: z.string().min(1),
+  GOOGLE_CLOUD_BUCKET_NAME: z.string().min(1),
 });
 
 // Validate and transform environment variables
