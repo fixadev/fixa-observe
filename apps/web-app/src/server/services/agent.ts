@@ -59,6 +59,21 @@ export class AgentService {
     return await db.agent.findMany({ where: { ownerId } });
   }
 
+  async updateAgentSettings({
+    id,
+    phoneNumber,
+    name,
+  }: {
+    id: string;
+    phoneNumber: string;
+    name: string;
+  }) {
+    return await db.agent.update({
+      where: { id },
+      data: { phoneNumber, name },
+    });
+  }
+
   // async createTestAgent(
   //   name: string,
   //   prompt: string,
