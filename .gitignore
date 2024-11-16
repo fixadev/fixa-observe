@@ -38,3 +38,5 @@ yarn-error.log*
 *.pem
 .venv/
 apps/backend/preprocessed_code.txt
+
+fly.toml
