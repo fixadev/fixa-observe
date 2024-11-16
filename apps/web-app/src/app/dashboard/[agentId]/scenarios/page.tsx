@@ -23,6 +23,42 @@ export default function AgentScenariosPage({
     }
   }, [agent]);
 
+  const { mutate: createScenario } = api.agent.createScenario.useMutation({
+    onSuccess: (data) => {
+      setScenarios([...scenarios.slice(0, -1), data]);
+      void refetch();
+    },
+  });
+
+  const handleCreateScenario = (scenario: CreateScenarioSchema) => {
+    createScenario({ agentId: agent?.id ?? "", scenario });
+  };
+
+  const { mutate: updateScenario } = api.agent.updateScenario.useMutation({
+    onSuccess: (data) => {
+      setScenarios(scenarios.map((s) => (s.id === data.id ? data : s)));
+    },
+  });
+
+  const handleUpdateScenario = (
+    scenario: Omit<ScenarioWithEvals, "agentId">,
+  ) => {
+    updateScenario({ scenario: { ...scenario, agentId: agent?.id ?? "" } });
+  };
+
+  const { mutate: deleteScenario } = api.agent.deleteScenario.useMutation({
+    onSuccess: () => {
+      void refetch();
+    },
+  });
+
+  const handleDeleteScenario = (index: number) => {
+    setScenarios(scenarios.filter((_, i) => i !== index));
+    if (scenarios[index]?.id) {
+      deleteScenario({ id: scenarios[index].id });
+    }
+  };
+
   const { mutate: updateAgentScenarios } =
     api.agent.updateScenarios.useMutation({
       onSuccess: (data) => {
@@ -87,9 +123,9 @@ export default function AgentScenariosPage({
             index={index}
             key={scenario.id}
             scenario={scenario}
-            scenarioId={scenario.id}
-            scenarios={scenarios}
-            setScenarios={saveScenarios}
+            createScenario={handleCreateScenario}
+            updateScenario={handleUpdateScenario}
+            deleteScenario={handleDeleteScenario}
           />
         ))}
         <div className="flex flex-row justify-end">

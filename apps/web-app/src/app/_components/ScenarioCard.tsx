@@ -6,38 +6,34 @@ import { Button } from "~/components/ui/button";
 import { PencilIcon, TrashIcon } from "@heroicons/react/24/solid";
 import { Label } from "~/components/ui/label";
 import { Textarea } from "~/components/ui/textarea";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Card } from "~/components/ui/card";
 
 interface ScenarioCardProps {
-  scenario: CreateScenarioSchema;
-  scenarioId?: string;
+  scenario: CreateScenarioSchema | ScenarioWithEvals;
   index: number;
-  scenarios: Array<ScenarioWithEvals | CreateScenarioSchema>;
-  setScenarios: (
-    scenarios: Array<ScenarioWithEvals | CreateScenarioSchema>,
-  ) => void;
+  deleteScenario: (index: number) => void;
+  createScenario: (scenario: CreateScenarioSchema) => void;
+  updateScenario: (scenario: Omit<ScenarioWithEvals, "agentId">) => void;
 }
 
 export function ScenarioCard({
   scenario,
-  scenarioId,
   index,
-  scenarios,
-  setScenarios,
+  createScenario,
+  updateScenario,
+  deleteScenario,
 }: ScenarioCardProps) {
   const [editMode, setEditMode] = useState(scenario.isNew);
-  const [localScenario, setLocalScenario] = useState(scenario);
+  const [localScenario, setLocalScenario] = useState<
+    CreateScenarioSchema | ScenarioWithEvals
+  >(scenario);
 
-  const removeScenario = (index: number) => {
-    setScenarios(scenarios.filter((_, iIndex) => iIndex !== index));
-  };
-
-  useEffect(() => {
-    if (scenario.isNew) {
-      setLocalScenario({ ...scenario, isNew: false });
-    }
-  }, [scenario.isNew, index, setLocalScenario, scenario]);
+  // useEffect(() => {
+  //   if (scenario.isNew) {
+  //     setLocalScenario({ ...scenario, isNew: false });
+  //   }
+  // }, [scenario.isNew, index, setLocalScenario, scenario]);
 
   return (
     <Card>
@@ -86,7 +82,7 @@ export function ScenarioCard({
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => removeScenario(index)}
+              onClick={() => deleteScenario(index)}
             >
               <TrashIcon className="size-5" />
             </Button>
@@ -97,11 +93,11 @@ export function ScenarioCard({
               <Button
                 onClick={() => {
                   setEditMode(false);
-                  setScenarios(
-                    scenarios.map((i, iIndex) =>
-                      iIndex === index ? localScenario : i,
-                    ),
-                  );
+                  if (scenario.isNew) {
+                    createScenario(localScenario);
+                  } else if ("id" in scenario) {
+                    updateScenario({ ...localScenario, id: scenario.id });
+                  }
                 }}
               >
                 save
@@ -121,9 +117,9 @@ export function ScenarioCard({
               >
                 {scenario.name.length > 0 ? scenario.name : "untitled "}
               </Label>
-              {scenarioId && (
+              {"id" in scenario && (
                 <div className="text-sm text-muted-foreground">
-                  {scenarioId}
+                  {scenario.id}
                 </div>
               )}
             </div>
