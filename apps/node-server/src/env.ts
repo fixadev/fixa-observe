@@ -20,7 +20,6 @@ const envSchema = z.object({
   PORT: z.string().transform((val) => parseInt(val)),
   ENVIRONMENT: z.enum(["development", "production", "test"]),
   DEBUG: z.string().transform((val) => val === "true"),
-  FAL_API_KEY: z.string().min(1),
   AWS_BUCKET_NAME: z.string().min(1),
   AWS_BUCKET_REGION: z.string().min(1),
   AWS_ACCESS_KEY_ID: z.string().min(1),

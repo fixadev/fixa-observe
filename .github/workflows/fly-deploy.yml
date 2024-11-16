@@ -15,8 +15,26 @@ jobs:
       - uses: actions/checkout@v4
       - uses: superfly/flyctl-actions/setup-flyctl@master
       - run: |
+          echo ${{ secrets.GCP_CREDENTIALS_JSON }} > gcp-credentials.json
           export FLY_APP_NAME=${{ github.ref == 'refs/heads/main' && 'pixa-observe' || 'pixa-observe-staging' }}
           ./generate-fly-toml.sh
           flyctl deploy --remote-only
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          VAPI_API_KEY: ${{ secrets.VAPI_API_KEY }}
+          HOST: "0.0.0.0"
+          PORT: "3003"
+          ENVIRONMENT: "development"
+          DEBUG: "true"
+          AWS_BUCKET_NAME: "newmark"
+          AWS_BUCKET_REGION: "us-east-1"
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          DEEPGRAM_API_KEY: ${{ secrets.DEEPGRAM_API_KEY }}
+          AUDIO_SERVICE_URL: "https://api.pixa.dev"
+          GOOGLE_APPLICATION_CREDENTIALS: "./gcp-credentials.json"
+          GOOGLE_CLOUD_BUCKET_NAME: "pixa-audio"
+
+          DATABASE_URL: ${{ github.ref == 'refs/heads/main' && secrets.PROD_DATABASE_URL || secrets.DEV_DATABASE_URL }}
+          DIRECT_URL: ${{ github.ref == 'refs/heads/main' && secrets.PROD_DIRECT_URL || secrets.DEV_DIRECT_URL }}
