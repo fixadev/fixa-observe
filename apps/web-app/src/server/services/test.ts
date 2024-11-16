@@ -79,7 +79,7 @@ export class TestService {
     }
 
     let enabledTestAgents: TestAgent[] = [];
-    if (testAgentIds) {
+    if (testAgentIds && testAgentIds.length > 0) {
       const testAgents = await agentServiceInstance.getTestAgents(
         agent.ownerId,
       );
