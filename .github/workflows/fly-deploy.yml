@@ -18,6 +18,8 @@ jobs:
           echo ${{ secrets.GCP_CREDENTIALS }} > gcp-credentials.json
           export FLY_APP_NAME=${{ github.ref == 'refs/heads/main' && 'pixa-observe' || 'pixa-observe-staging' }}
           ./generate-fly-toml.sh
+          echo "ENVIRONMENT VARIABLES:"
+          env | grep -E 'FLY_APP_NAME|FLY_API_TOKEN|OPENAI_API_KEY|VAPI_API_KEY|HOST|PORT|ENVIRONMENT|DEBUG|AWS_BUCKET_NAME|AWS_BUCKET_REGION|AWS_ACCESS_KEY_ID|AWS_SECRET_ACCESS_KEY|DEEPGRAM_API_KEY|AUDIO_SERVICE_URL|GOOGLE_APPLICATION_CREDENTIALS|GOOGLE_CLOUD_BUCKET_NAME|DATABASE_URL|DIRECT_URL'
           flyctl deploy --remote-only
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
