@@ -2,6 +2,7 @@ import { AgentService } from "./agent";
 import { db } from "../db";
 import { CallStatus, type PrismaClient } from "@prisma/client";
 import { initiateVapiCall } from "../helpers/vapiHelpers";
+import { type TestAgent } from "prisma/generated/zod";
 
 const agentServiceInstance = new AgentService(db);
 
@@ -44,12 +45,44 @@ export class TestService {
     });
   }
 
-  async run(agentId: string, intentIds?: string[]) {
+  async getStatus(testId: string) {
+    const test = await db.test.findUnique({
+      where: { id: testId },
+      select: {
+        calls: {
+          select: {
+            status: true,
+          },
+        },
+      },
+    });
+
+    if (!test) return "not_found";
+
+    return test.calls.every((call) => call.status === CallStatus.completed)
+      ? CallStatus.completed
+      : CallStatus.in_progress;
+  }
+
+  async run(agentId: string, intentIds?: string[], testAgentIds?: string[]) {
     const agent = await agentServiceInstance.getAgent(agentId);
     if (!agent) {
       throw new Error("Agent not found");
     }
-    const tests = agent.enabledTestAgents.flatMap((testAgent) =>
+
+    let enabledTestAgents: TestAgent[] = [];
+    if (testAgentIds) {
+      const testAgents = await agentServiceInstance.getTestAgents(
+        agent.ownerId,
+      );
+      enabledTestAgents = testAgents.filter((testAgent) =>
+        testAgentIds.includes(testAgent.id),
+      );
+    } else {
+      enabledTestAgents = agent.enabledTestAgents;
+    }
+
+    const tests = enabledTestAgents.flatMap((testAgent) =>
       (intentIds && intentIds.length > 0
         ? agent.intents.filter((intent) => intentIds.includes(intent.id))
         : agent.intents
