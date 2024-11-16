@@ -8,6 +8,7 @@ const testService = new TestService(db);
 const inputSchema = z.object({
   agentId: z.string(),
   scenarioIds: z.array(z.string()).optional(),
+  testAgentIds: z.array(z.string()).optional(),
 });
 
 export async function POST(req: NextRequest) {
