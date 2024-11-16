@@ -38,7 +38,11 @@ export type TestWithCalls = Test & { calls: Call[] };
 
 export type AgentWithIncludes = Prisma.AgentGetPayload<{
   include: {
-    scenarios: true;
+    scenarios: {
+      include: {
+        evals: true;
+      };
+    };
     enabledTestAgents: true;
   };
 }>;

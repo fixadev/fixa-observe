@@ -12,7 +12,7 @@ import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 
 import { useEffect, useState } from "react";
-import { type ScenarioWithoutId, type CreateAgentSchema } from "~/lib/agent";
+import { type CreateScenarioSchema, type CreateAgentSchema } from "~/lib/agent";
 import { Textarea } from "~/components/ui/textarea";
 import { api } from "~/trpc/react";
 import { ScenarioCard } from "../../../_components/ScenarioCard";
@@ -121,7 +121,13 @@ export function AddAgentModal({ children, refetchAgents }: AddAgentModalProps) {
       ...agent,
       scenarios: [
         ...agent.scenarios,
-        { name: "", instructions: "", successCriteria: "", isNew: true },
+        {
+          name: "",
+          instructions: "",
+          successCriteria: "",
+          isNew: true,
+          evals: [],
+        },
       ],
     });
   };
@@ -167,14 +173,14 @@ export function AddAgentModal({ children, refetchAgents }: AddAgentModalProps) {
     }
   };
 
-  const setAgentScenarios = (scenarios: ScenarioWithoutId[]) => {
+  const setAgentScenarios = (scenarios: CreateScenarioSchema[]) => {
     setAgent({ ...agent, scenarios });
   };
 
   return (
     <Dialog open={modalOpen} onOpenChange={setModalOpen}>
       <DialogTrigger asChild>{children}</DialogTrigger>
-      <DialogContent className="flex h-[80vh] w-[50vw] min-w-[600px] max-w-screen-sm flex-col p-0">
+      <DialogContent className="flex h-[95vh] w-[95vw] min-w-[95vw] flex-col p-0">
         <DialogTitle className="p-6 pb-2">new agent</DialogTitle>
         <div className="flex flex-1 flex-col space-y-4 overflow-y-auto p-6 pt-2">
           <InputWithLabel

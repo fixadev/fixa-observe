@@ -3,26 +3,32 @@ import {
   type TestAgentSchema,
   ScenarioSchema,
   type Message,
+  EvalSchema,
 } from "prisma/generated/zod";
 import { z } from "zod";
 import { type CallWithIncludes } from "./types";
 
 export type Agent = z.infer<typeof AgentSchema>;
 export type AgentWithoutId = Omit<Agent, "id"> & {
-  scenarios: ScenarioWithoutId[];
+  scenarios: CreateScenarioSchema[];
 };
 
-export type ScenarioWithoutId = Omit<Scenario, "id" | "agentId">;
-export type Scenario = z.infer<typeof ScenarioSchema>;
+export type ScenarioWithEvals = z.infer<typeof ScenarioWithEvals>;
+export const ScenarioWithEvals = ScenarioSchema.extend({
+  evals: z.array(EvalSchema),
+});
 
-export const ScenarioSchemaWithoutId = ScenarioSchema.omit({
+export type CreateScenarioSchema = z.infer<typeof CreateScenarioSchema>;
+export const CreateScenarioSchema = ScenarioSchema.omit({
   id: true,
   agentId: true,
+}).extend({
+  evals: z.array(EvalSchema),
 });
 
 export type CreateAgentSchema = z.infer<typeof CreateAgentSchema>;
 export const CreateAgentSchema = AgentSchema.omit({ id: true }).extend({
-  scenarios: z.array(ScenarioSchemaWithoutId),
+  scenarios: z.array(CreateScenarioSchema),
 });
 
 export type TestAgent = z.infer<typeof TestAgentSchema>;

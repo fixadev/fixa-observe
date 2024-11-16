@@ -6,7 +6,7 @@ import { ScenarioCard } from "~/app/_components/ScenarioCard";
 import { useAgent } from "~/app/contexts/UseAgent";
 import { Button } from "~/components/ui/button";
 import { useToast } from "~/hooks/use-toast";
-import { type ScenarioWithoutId, type Scenario } from "~/lib/agent";
+import { type CreateScenarioSchema, type ScenarioWithEvals } from "~/lib/agent";
 import { api } from "~/trpc/react";
 
 export default function AgentScenariosPage({
@@ -14,7 +14,7 @@ export default function AgentScenariosPage({
 }: {
   params: { agentId: string };
 }) {
-  const [scenarios, setScenarios] = useState<Scenario[]>([]);
+  const [scenarios, setScenarios] = useState<ScenarioWithEvals[]>([]);
   const { agent, refetch } = useAgent(params.agentId);
   const { toast } = useToast();
   useEffect(() => {
@@ -49,11 +49,14 @@ export default function AgentScenariosPage({
         successCriteria: "",
         agentId: agent.id,
         isNew: true,
+        evals: [],
       },
     ]);
   };
 
-  const saveScenarios = (scenarios: Array<Scenario | ScenarioWithoutId>) => {
+  const saveScenarios = (
+    scenarios: Array<ScenarioWithEvals | CreateScenarioSchema>,
+  ) => {
     toast({
       title: "Updating scenarios...",
       duration: 3000,

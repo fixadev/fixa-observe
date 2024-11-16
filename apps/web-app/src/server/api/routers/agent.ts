@@ -1,10 +1,13 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { AgentService } from "~/server/services/agent";
-import { CreateAgentSchema, ScenarioSchemaWithoutId } from "~/lib/agent";
+import {
+  CreateAgentSchema,
+  CreateScenarioSchema,
+  ScenarioWithEvals,
+} from "~/lib/agent";
 import { db } from "~/server/db";
 import { generateScenariosFromPrompt } from "~/server/helpers/generateScenarios";
-import { ScenarioSchema } from "prisma/generated/zod";
 
 const agentServiceInstance = new AgentService(db);
 
@@ -25,7 +28,7 @@ export const agentRouter = createTRPCRouter({
     .input(
       z.object({
         id: z.string(),
-        scenarios: z.array(ScenarioSchema.or(ScenarioSchemaWithoutId)),
+        scenarios: z.array(ScenarioWithEvals.or(CreateScenarioSchema)),
       }),
     )
     .mutation(async ({ input }) => {

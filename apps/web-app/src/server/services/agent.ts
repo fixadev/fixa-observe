@@ -1,5 +1,5 @@
 import { db } from "../db";
-import { type Scenario, type ScenarioWithoutId } from "~/lib/agent";
+import { type ScenarioWithEvals, type CreateScenarioSchema } from "~/lib/agent";
 import { v4 as uuidv4 } from "uuid";
 import { type PrismaClient } from "@prisma/client";
 // import { createVapiAssistant } from "../helpers/vapiHelpers";
@@ -10,7 +10,7 @@ export class AgentService {
     phoneNumber: string,
     name: string,
     systemPrompt: string,
-    scenarios: ScenarioWithoutId[],
+    scenarios: CreateScenarioSchema[],
     ownerId: string,
   ) {
     const testAgents = await db.testAgent.findMany({
@@ -44,7 +44,11 @@ export class AgentService {
     return await db.agent.findUnique({
       where: { id },
       include: {
-        scenarios: true,
+        scenarios: {
+          include: {
+            evals: true,
+          },
+        },
         enabledTestAgents: true,
       },
     });
@@ -112,11 +116,13 @@ export class AgentService {
 
   async updateAgentScenarios(
     id: string,
-    scenarios: Array<Scenario | ScenarioWithoutId>,
+    scenarios: Array<ScenarioWithEvals | CreateScenarioSchema>,
   ) {
-    const existingScenarios = scenarios.filter((s): s is Scenario => "id" in s);
+    const existingScenarios = scenarios.filter(
+      (s): s is ScenarioWithEvals => "id" in s,
+    );
     const newScenarios = scenarios.filter(
-      (s): s is ScenarioWithoutId => !("id" in s),
+      (s): s is CreateScenarioSchema => !("id" in s),
     );
 
     const currentScenarios = await db.scenario.findMany({
@@ -140,6 +146,12 @@ export class AgentService {
               name: scenario.name,
               instructions: scenario.instructions,
               successCriteria: scenario.successCriteria,
+              evals: {
+                deleteMany: {},
+                createMany: {
+                  data: scenario.evals,
+                },
+              },
             },
           })),
           createMany: {
@@ -147,6 +159,11 @@ export class AgentService {
               name: scenario.name,
               instructions: scenario.instructions,
               successCriteria: scenario.successCriteria,
+              evals: {
+                createMany: {
+                  data: scenario.evals,
+                },
+              },
             })),
           },
           deleteMany: {
@@ -155,7 +172,11 @@ export class AgentService {
         },
       },
       include: {
-        scenarios: true,
+        scenarios: {
+          include: {
+            evals: true,
+          },
+        },
       },
     });
   }

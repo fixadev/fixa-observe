@@ -1,7 +1,7 @@
 import { openai } from "~/server/utils/OpenAIClient";
 import { z } from "zod";
 import { zodResponseFormat } from "openai/helpers/zod";
-import { ScenarioSchemaWithoutId, type ScenarioWithoutId } from "~/lib/agent";
+import { CreateScenarioSchema } from "~/lib/agent";
 import {
   generateOutboundScenariosPrompt,
   generateInboundScenariosPrompt,
@@ -11,9 +11,9 @@ import {
 export const generateScenariosFromPrompt = async (
   prompt: string,
   numberOfScenarios: number,
-): Promise<ScenarioWithoutId[]> => {
+): Promise<CreateScenarioSchema[]> => {
   const outputSchema = z.object({
-    scenarios: z.array(ScenarioSchemaWithoutId),
+    scenarios: z.array(CreateScenarioSchema),
   });
 
   const outboundSchema = z.object({

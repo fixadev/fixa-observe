@@ -1,6 +1,6 @@
 "use client";
 
-import { type ScenarioWithoutId, type Scenario } from "~/lib/agent";
+import { type ScenarioWithEvals, type CreateScenarioSchema } from "~/lib/agent";
 import { Input } from "~/components/ui/input";
 import { Button } from "~/components/ui/button";
 import { PencilIcon, TrashIcon } from "@heroicons/react/24/solid";
@@ -10,11 +10,13 @@ import { useEffect, useState } from "react";
 import { Card } from "~/components/ui/card";
 
 interface ScenarioCardProps {
-  scenario: ScenarioWithoutId;
+  scenario: CreateScenarioSchema;
   scenarioId?: string;
   index: number;
-  scenarios: Array<Scenario | ScenarioWithoutId>;
-  setScenarios: (scenarios: Array<Scenario | ScenarioWithoutId>) => void;
+  scenarios: Array<ScenarioWithEvals | CreateScenarioSchema>;
+  setScenarios: (
+    scenarios: Array<ScenarioWithEvals | CreateScenarioSchema>,
+  ) => void;
 }
 
 export function ScenarioCard({
