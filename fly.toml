@@ -3,7 +3,7 @@
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 #
 
-app = "${FLY_APP_NAME}"
+app = "APP_NAME_PLACEHOLDER"
 primary_region = 'sjc'
 
 [build]
