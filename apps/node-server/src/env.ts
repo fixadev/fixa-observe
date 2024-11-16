@@ -37,7 +37,26 @@ const validateEnv = () => {
   const result = envSchema.safeParse(process.env);
 
   if (!result.success) {
-    console.error("❌ Invalid environment variables:", result.error.format());
+    console.error("❌ Invalid environment variables:");
+
+    // Get all required env vars
+    const requiredVars = Object.keys(envSchema.shape);
+
+    // Check which ones are missing or invalid
+    requiredVars.forEach((varName) => {
+      if (!(varName in process.env)) {
+        console.error(`Missing ${varName}`);
+      } else if (
+        result.error.formErrors.fieldErrors[
+          varName as keyof typeof envSchema.shape
+        ]
+      ) {
+        console.error(
+          `Invalid ${varName}: ${result.error.formErrors.fieldErrors[varName as keyof typeof envSchema.shape]}`,
+        );
+      }
+    });
+
     throw new Error("Invalid environment variables");
   }
 
