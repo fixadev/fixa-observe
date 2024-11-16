@@ -30,21 +30,21 @@ export default function AgentScenariosPage({
     },
   });
 
-  const handleCreateScenario = (scenario: CreateScenarioSchema) => {
-    createScenario({ agentId: agent?.id ?? "", scenario });
-  };
-
   const { mutate: updateScenario } = api.agent.updateScenario.useMutation({
     onSuccess: (data) => {
       setScenarios(scenarios.map((s) => (s.id === data.id ? data : s)));
     },
   });
 
-  const handleUpdateScenario = (
-    scenario: Omit<ScenarioWithEvals, "agentId">,
+  const handleSaveScenario = (
+    scenario: CreateScenarioSchema | ScenarioWithEvals,
     index: number,
   ) => {
-    updateScenario({ scenario: { ...scenario, agentId: agent?.id ?? "" } });
+    if ("id" in scenario && scenario.id !== "new") {
+      updateScenario({ scenario });
+    } else {
+      createScenario({ agentId: agent?.id ?? "", scenario });
+    }
   };
 
   const { mutate: deleteScenario } = api.agent.deleteScenario.useMutation({
@@ -93,8 +93,7 @@ export default function AgentScenariosPage({
             index={index}
             key={scenario.id}
             scenario={scenario}
-            createScenario={handleCreateScenario}
-            updateScenario={handleUpdateScenario}
+            handleSaveScenario={handleSaveScenario}
             deleteScenario={handleDeleteScenario}
           />
         ))}
