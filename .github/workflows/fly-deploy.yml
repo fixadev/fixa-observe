@@ -18,14 +18,32 @@ jobs:
           echo ${{ secrets.GCP_CREDENTIALS }} > gcp-credentials.json
           export FLY_APP_NAME=${{ github.ref == 'refs/heads/main' && 'pixa-observe' || 'pixa-observe-staging' }}
           ./generate-fly-toml.sh
-          # Deploy the application with build secrets
-          flyctl deploy --remote-only \
-            --build-secret OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }} \
-            --build-secret VAPI_API_KEY=${{ secrets.VAPI_API_KEY }} \
-            --build-secret AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }} \
-            --build-secret AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }} \
-            --build-secret DEEPGRAM_API_KEY=${{ secrets.DEEPGRAM_API_KEY }} \
-            --build-secret DATABASE_URL=${{ github.ref == 'refs/heads/main' && secrets.PROD_DATABASE_URL || secrets.DEV_DATABASE_URL }} \
-            --build-secret DIRECT_URL=${{ github.ref == 'refs/heads/main' && secrets.PROD_DIRECT_URL || secrets.DEV_DIRECT_URL }}
+          flyctl secrets set FLY_API_TOKEN=${{ secrets.FLY_API_TOKEN }}
+          flyctl secrets set OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}
+          flyctl secrets set VAPI_API_KEY=${{ secrets.VAPI_API_KEY }}
+          flyctl secrets set AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}
+          flyctl secrets set AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          flyctl secrets set DEEPGRAM_API_KEY=${{ secrets.DEEPGRAM_API_KEY }}
+          flyctl secrets set DATABASE_URL=${{ github.ref == 'refs/heads/main' && secrets.PROD_DATABASE_URL || secrets.DEV_DATABASE_URL }}
+          flyctl secrets set DIRECT_URL=${{ github.ref == 'refs/heads/main' && secrets.PROD_DIRECT_URL || secrets.DEV_DIRECT_URL }}
+          # Deploy the application
+          flyctl deploy --remote-only
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+          # OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          # VAPI_API_KEY: ${{ secrets.VAPI_API_KEY }}
+          # HOST: "0.0.0.0"
+          # PORT: "3003"
+          # ENVIRONMENT: "development"
+          # DEBUG: "true"
+          # AWS_BUCKET_NAME: "newmark"
+          # AWS_BUCKET_REGION: "us-east-1"
+          # AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          # AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          # DEEPGRAM_API_KEY: ${{ secrets.DEEPGRAM_API_KEY }}
+          # AUDIO_SERVICE_URL: "https://api.pixa.dev"
+          # GOOGLE_APPLICATION_CREDENTIALS: "./gcp-credentials.json"
+          # GOOGLE_CLOUD_BUCKET_NAME: "pixa-audio"
+
+          # DATABASE_URL: ${{ github.ref == 'refs/heads/main' && secrets.PROD_DATABASE_URL || secrets.DEV_DATABASE_URL }}
+          # DIRECT_URL: ${{ github.ref == 'refs/heads/main' && secrets.PROD_DIRECT_URL || secrets.DEV_DIRECT_URL }}
