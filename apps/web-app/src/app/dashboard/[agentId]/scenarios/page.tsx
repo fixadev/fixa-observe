@@ -27,12 +27,19 @@ export default function AgentScenariosPage({
     onSuccess: (data) => {
       setScenarios([...scenarios.slice(0, -1), data]);
       void refetch();
+      toast({
+        title: "Scenario created",
+        description: "Scenario created successfully",
+      });
     },
   });
 
   const { mutate: updateScenario } = api.agent.updateScenario.useMutation({
     onSuccess: (data) => {
-      setScenarios(scenarios.map((s) => (s.id === data.id ? data : s)));
+      toast({
+        title: "Scenario updated",
+        description: "Scenario updated successfully",
+      });
     },
   });
 
@@ -41,8 +48,13 @@ export default function AgentScenariosPage({
     index: number,
   ) => {
     if ("id" in scenario && scenario.id !== "new") {
+      setScenarios(scenarios.map((s) => (s.id === scenario.id ? scenario : s)));
       updateScenario({ scenario });
     } else {
+      setScenarios([
+        ...scenarios.slice(0, -1),
+        { ...scenario, id: "new", agentId: agent?.id ?? "" },
+      ]);
       createScenario({ agentId: agent?.id ?? "", scenario });
     }
   };
@@ -50,6 +62,10 @@ export default function AgentScenariosPage({
   const { mutate: deleteScenario } = api.agent.deleteScenario.useMutation({
     onSuccess: () => {
       void refetch();
+      toast({
+        title: "Scenario deleted",
+        description: "Scenario deleted successfully",
+      });
     },
   });
 

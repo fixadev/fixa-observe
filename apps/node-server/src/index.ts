@@ -7,6 +7,7 @@ import { handleAnalysisStarted } from "./services/handleAnalysisStarted";
 import { db } from "./db";
 import { uploadCallToDB } from "./services/uploadCallToDB";
 import { getContext } from "./services/getContext";
+import { env } from "./env";
 const app = express();
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
