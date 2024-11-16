@@ -3,7 +3,7 @@
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 #
 
-app = 'pixa-observe'
+app = "APP_NAME_PLACEHOLDER"
 primary_region = 'sjc'
 
 [build]
@@ -17,6 +17,6 @@ primary_region = 'sjc'
   processes = ['app']
 
 [[vm]]
-  memory = '1gb'
-  cpu_kind = 'shared'
-  cpus = 1
+  size = 'performance-2x'
+  memory = '4gb'
+  cpus = 2
