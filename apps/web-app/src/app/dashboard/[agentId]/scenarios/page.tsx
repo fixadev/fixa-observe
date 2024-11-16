@@ -5,6 +5,7 @@ import { useState, useEffect } from "react";
 import { ScenarioCard } from "~/app/_components/ScenarioCard";
 import { useAgent } from "~/app/contexts/UseAgent";
 import { Button } from "~/components/ui/button";
+import { useToast } from "~/hooks/use-toast";
 import { type CreateScenarioSchema, type ScenarioWithEvals } from "~/lib/agent";
 import { api } from "~/trpc/react";
 
@@ -15,6 +16,7 @@ export default function AgentScenariosPage({
 }) {
   const [scenarios, setScenarios] = useState<ScenarioWithEvals[]>([]);
   const { agent, refetch } = useAgent(params.agentId);
+  const { toast } = useToast();
   useEffect(() => {
     if (agent) {
       setScenarios(agent.scenarios);
