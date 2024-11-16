@@ -1,11 +1,12 @@
 import { VertexAI, type Part } from "@google-cloud/vertexai";
 import { Storage } from "@google-cloud/storage";
 import { uploadFile } from "../helpers/gcpUpload";
+import { env } from "../env";
 
 const storage = new Storage({
-  credentials: JSON.parse(process.env.GCP_CREDENTIALS ?? "{}"),
+  credentials: JSON.parse(env.GCP_CREDENTIALS ?? "{}"),
 });
-const bucket = storage.bucket(process.env.GOOGLE_CLOUD_BUCKET_NAME ?? "");
+const bucket = storage.bucket(env.GOOGLE_CLOUD_BUCKET_NAME ?? "");
 
 export async function analyzeCallWithGemini(
   recordingUrl: string | undefined,
@@ -40,7 +41,7 @@ export async function analyzeAudio(
     const vertexai = new VertexAI({
       project: "pixa-website",
       googleAuthOptions: {
-        credentials: JSON.parse(process.env.GCP_CREDENTIALS ?? "{}"),
+        credentials: JSON.parse(env.GCP_CREDENTIALS ?? "{}"),
       },
     });
     const model = vertexai.getGenerativeModel({
