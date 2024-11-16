@@ -6,7 +6,7 @@ on:
   push:
     branches:
       - main
-      - dev # Add the dev branch to trigger the workflow
+      - dev
 
 jobs:
   deploy-main:
@@ -16,9 +16,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: superfly/flyctl-actions/setup-flyctl@master
-      - run: flyctl deploy --remote-only --app pixa-observe
+      - run: flyctl deploy --remote-only
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+          FLY_APP_NAME: pixa-observe
 
   deploy-dev:
     name: Deploy to Staging
@@ -27,6 +28,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: superfly/flyctl-actions/setup-flyctl@master
-      - run: flyctl deploy --remote-only --app pixa-observe-staging
+      - run: flyctl deploy --remote-only
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+          FLY_APP_NAME: pixa-observe-staging
