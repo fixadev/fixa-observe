@@ -14,18 +14,18 @@ import { cn } from "~/lib/utils";
 interface ScenarioCardProps {
   scenario: CreateScenarioSchema | ScenarioWithEvals;
   index: number;
-  deleteScenario: (index: number) => void;
-  handleSaveScenario: (
-    scenario: CreateScenarioSchema | ScenarioWithEvals,
-    index: number,
-  ) => void;
+  // deleteScenario: (index: number) => void;
+  // handleSaveScenario: (
+  //   scenario: CreateScenarioSchema | ScenarioWithEvals,
+  //   index: number,
+  // ) => void;
 }
 
 export function ScenarioCard({
   scenario,
   index,
-  handleSaveScenario,
-  deleteScenario,
+  // handleSaveScenario,
+  // deleteScenario,
 }: ScenarioCardProps) {
   const [editMode, setEditMode] = useState(scenario.isNew);
   const [localScenario, setLocalScenario] = useState<
@@ -40,7 +40,7 @@ export function ScenarioCard({
 
   return (
     <Card>
-      {editMode ? (
+      {/* {editMode ? (
         <div className="flex w-full flex-col gap-2 p-6">
           <Label>name</Label>
           <Input
@@ -104,42 +104,34 @@ export function ScenarioCard({
             </div>
           </div>
         </div>
-      ) : (
-        <div
-          className="flex w-full cursor-pointer flex-col items-center gap-2 p-6 hover:bg-muted/40"
-          onClick={() => setEditMode(true)}
-        >
-          <div className="flex w-full flex-row justify-between gap-2">
-            <div className="flex flex-row items-baseline gap-4">
-              <Label
-                className={cn("shrink-0 text-lg", {
-                  "text-muted-foreground": scenario.name.length === 0,
-                })}
-              >
-                {scenario.name.length > 0 ? scenario.name : "untitled "}
-              </Label>
-              {"id" in scenario && (
-                <div onClick={(e) => e.stopPropagation()}>
-                  <CopyText
-                    className="hover:bg-background"
-                    text={scenario.id}
-                  />
-                </div>
-              )}
-            </div>
-          </div>
-          <div className="flex w-full flex-row gap-2">
-            <Label className="whitespace-nowrap text-sm">prompt</Label>
-            <p className="truncate text-sm">{scenario.instructions}</p>
-          </div>
-          <div className="flex w-full flex-row gap-2">
-            <Label className="whitespace-nowrap text-sm">
-              success criteria
+      ) : ( */}
+      <div className="flex w-full cursor-pointer flex-col items-center gap-2 p-6 hover:bg-muted/40">
+        <div className="flex w-full flex-row justify-between gap-2">
+          <div className="flex flex-row items-baseline gap-4">
+            <Label
+              className={cn("shrink-0 text-lg", {
+                "text-muted-foreground": scenario.name.length === 0,
+              })}
+            >
+              {scenario.name.length > 0 ? scenario.name : "untitled "}
             </Label>
-            <p className="truncate text-sm">{scenario.successCriteria}</p>
+            {"id" in scenario && (
+              <div onClick={(e) => e.stopPropagation()}>
+                <CopyText className="hover:bg-background" text={scenario.id} />
+              </div>
+            )}
           </div>
         </div>
-      )}
+        <div className="flex w-full flex-row gap-2">
+          <Label className="whitespace-nowrap text-sm">prompt</Label>
+          <p className="truncate text-sm">{scenario.instructions}</p>
+        </div>
+        <div className="flex w-full flex-row gap-2">
+          <Label className="whitespace-nowrap text-sm">success criteria</Label>
+          <p className="truncate text-sm">{scenario.successCriteria}</p>
+        </div>
+      </div>
+      {/* )} */}
     </Card>
   );
 }

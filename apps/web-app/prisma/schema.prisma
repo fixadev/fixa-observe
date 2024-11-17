@@ -174,8 +174,9 @@ model Eval {
   scenario    Scenario? @relation(fields: [scenarioId], references: [id])
   scenarioId  String?
 
-  type        EvalType
-  resultType  EvalResultType
+  type       EvalType
+  resultType EvalResultType
+
   evalResults EvalResult[]
 
   agent   Agent?  @relation(fields: [agentId], references: [id])
