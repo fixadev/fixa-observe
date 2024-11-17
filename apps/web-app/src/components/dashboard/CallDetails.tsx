@@ -228,7 +228,7 @@ export default function CallDetails({
         case "failure":
           return "border-red-500";
         case "both":
-          return "border-input";
+          return "border-muted-foreground/50";
       }
     },
     [],
@@ -282,6 +282,8 @@ export default function CallDetails({
                     evalResult.success
                       ? "border-green-500 bg-green-100 text-green-500 hover:bg-green-200"
                       : "border-red-500 bg-red-100 text-red-500 hover:bg-red-200",
+                    activeEvalResultId === evalResult.id &&
+                      (evalResult.success ? "bg-green-200" : "bg-red-200"),
                   )}
                   onMouseEnter={() => {
                     setActiveEvalResultId(evalResult.id);
@@ -416,6 +418,10 @@ export default function CallDetails({
                             (evalResult.success
                               ? "hover:bg-green-500/30"
                               : "hover:bg-red-500/30"),
+                          activeEvalResultId === evalResult.id &&
+                            (evalResult.success
+                              ? "bg-green-500/30"
+                              : "bg-red-500/30"),
                         )}
                         onMouseEnter={() => {
                           setActiveEvalResultId(evalResult.id);
