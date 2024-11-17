@@ -6,8 +6,6 @@ import {
   Role,
   Test,
   Eval,
-  EvalResultType,
-  EvalType,
 } from "@prisma/client";
 import { db } from "../db";
 import { type ServerMessageEndOfCallReport } from "@vapi-ai/server-sdk/api";
