@@ -22,7 +22,11 @@ export type CallWithIncludes = Prisma.CallGetPayload<{
   include: {
     messages: true;
     errors: true;
-    scenario: true;
+    scenario: {
+      include: {
+        evals: true;
+      };
+    };
     testAgent: true;
     evalResults: {
       include: {
@@ -38,7 +42,11 @@ export type TestWithIncludes = Prisma.TestGetPayload<{
       include: {
         messages: true;
         errors: true;
-        scenario: true;
+        scenario: {
+          include: {
+            evals: true;
+          };
+        };
         testAgent: true;
         evalResults: {
           include: {

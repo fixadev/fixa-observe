@@ -1,7 +1,7 @@
 "use client";
 
 import TestCard from "~/components/dashboard/TestCard";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import CallCard from "~/components/dashboard/CallCard";
 import type { TestWithIncludes } from "~/lib/types";
 import CallDetails from "~/components/dashboard/CallDetails";
@@ -108,8 +108,19 @@ function TestPage({ params }: { params: { agentId: string; testId: string } }) {
     ),
   );
 
+  // Add new state to track expanded scenarios
+  const [expandedScenarios, setExpandedScenarios] = useState<Set<string>>(
+    new Set(),
+  );
+
+  const sortedCalls = useMemo(() => {
+    return test?.calls.sort(
+      (a, b) => a.scenario?.name?.localeCompare(b.scenario?.name ?? "") ?? 0,
+    );
+  }, [test?.calls]);
+
   // useEffect(() => {
-  //   setTest(TEST_TESTS[0]);
+  //   setTest(TEST_TESTS[0]!);
   // }, []);
   useEffect(() => {
     if (_test) {
@@ -184,8 +195,8 @@ function TestPage({ params }: { params: { agentId: string; testId: string } }) {
                 </SelectContent>
               </Select>
             </div> */}
-            <div className="flex flex-col gap-2 border-b border-input p-2">
-              <div className="text-sm font-medium">scenarios</div>
+            <div className="flex flex-col border-b border-input">
+              <div className="p-2 text-sm font-medium">scenarios</div>
               {test &&
                 Array.from(
                   new Set(test.calls.map((call) => call.scenario?.name)),
@@ -203,17 +214,31 @@ function TestPage({ params }: { params: { agentId: string; testId: string } }) {
                   const totalCount = callsWithScenario.length;
                   const successRate = (successCount / totalCount) * 100;
 
+                  const isExpanded = expandedScenarios.has(
+                    String(scenarioName),
+                  );
+
                   return (
                     <div
                       key={String(scenarioName)}
-                      className="flex flex-col gap-1"
+                      className="flex cursor-pointer flex-col gap-1 p-2 hover:bg-muted/50"
+                      onClick={() => {
+                        const newExpanded = new Set(expandedScenarios);
+                        if (isExpanded) {
+                          newExpanded.delete(String(scenarioName));
+                        } else {
+                          newExpanded.add(String(scenarioName));
+                        }
+                        setExpandedScenarios(newExpanded);
+                      }}
                     >
-                      <div className="flex items-center justify-between">
+                      <div className="flex items-center justify-between rounded-sm p-1">
                         <div className="flex items-center gap-1 text-xs font-medium">
                           {scenarioName}
                           <Popover>
-                            <PopoverTrigger>
-                              {/* <EllipsisHorizontalCircleIcon className="size-5 shrink-0 text-muted-foreground" /> */}
+                            <PopoverTrigger
+                              onClick={(e) => e.stopPropagation()}
+                            >
                               <InformationCircleIcon className="size-5 shrink-0 text-muted-foreground opacity-80" />
                             </PopoverTrigger>
                             <PopoverContent className="flex flex-col gap-1">
@@ -236,6 +261,8 @@ function TestPage({ params }: { params: { agentId: string; testId: string } }) {
                           {Math.round(successRate)}%
                         </div>
                       </div>
+
+                      {/* Progress bars */}
                       <div className="flex h-1.5 w-full overflow-hidden rounded-full bg-muted">
                         <div
                           className="bg-green-500"
@@ -254,38 +281,82 @@ function TestPage({ params }: { params: { agentId: string; testId: string } }) {
                         <span>{successCount} succeeded</span>
                         <span>{totalCount - successCount} failed</span>
                       </div>
+
+                      {/* Expanded eval details */}
+                      {isExpanded && (
+                        <div className="/*bg-muted flex gap-3 pl-1 pt-2">
+                          <div className="w-px bg-input" />
+                          <div className="flex flex-1 flex-col gap-2">
+                            {scenario.evals?.map((evaluation) => {
+                              const evalSuccessCount = callsWithScenario.filter(
+                                (call) =>
+                                  // Check if any evalResult for this eval name is successful
+                                  call.evalResults?.some(
+                                    (result) =>
+                                      result.evalId === evaluation.id &&
+                                      result.success,
+                                  ),
+                              ).length;
+                              const evalSuccessRate =
+                                (evalSuccessCount / totalCount) * 100;
+
+                              return (
+                                <div
+                                  key={evaluation.name}
+                                  className="flex flex-col gap-1"
+                                >
+                                  <div className="flex items-center justify-between">
+                                    <div className="text-xs text-muted-foreground">
+                                      {evaluation.name}
+                                    </div>
+                                    <div className="text-xs">
+                                      {Math.round(evalSuccessRate)}%
+                                    </div>
+                                  </div>
+                                  <div className="flex h-1 w-full overflow-hidden rounded-full bg-muted">
+                                    <div
+                                      className="bg-green-500"
+                                      style={{
+                                        width: `${evalSuccessRate}%`,
+                                      }}
+                                    />
+                                    <div
+                                      className="bg-red-500"
+                                      style={{
+                                        width: `${100 - evalSuccessRate}%`,
+                                      }}
+                                    />
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   );
                 })}
             </div>
             <div className="flex flex-col overflow-y-auto">
-              {test?.calls
-                // .filter((call) => {
-                //   if (selectedCallType === "error")
-                //     return call.errors !== undefined;
-                //   if (selectedCallType === "no-errors")
-                //     return call.errors === undefined;
-                //   return true;
-                // })
-                .map((call) => (
-                  <CallCard
-                    key={call.id}
-                    className="shrink-0"
-                    call={call}
-                    selectedCallId={selectedCallId}
-                    onSelect={(callId) => {
-                      setSelectedCallId(callId);
-                      seek(0);
-                    }}
-                  />
-                ))}
+              {sortedCalls?.map((call) => (
+                <CallCard
+                  key={call.id}
+                  className="shrink-0"
+                  call={call}
+                  selectedCallId={selectedCallId}
+                  onSelect={(callId) => {
+                    setSelectedCallId(callId);
+                    seek(0);
+                  }}
+                />
+              ))}
             </div>
           </div>
-          {selectedCallId && agent && test && (
+          {selectedCallId && agent && test && sortedCalls && (
             <div className="min-h-screen flex-1">
               <CallDetails
                 key={selectedCallId}
-                call={test.calls.find((call) => call.id === selectedCallId)!}
+                call={sortedCalls.find((call) => call.id === selectedCallId)!}
                 agent={agent}
               />
             </div>
