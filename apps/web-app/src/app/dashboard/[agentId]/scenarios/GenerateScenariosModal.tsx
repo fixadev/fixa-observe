@@ -11,7 +11,7 @@ import { Label } from "~/components/ui/label";
 import { api } from "~/trpc/react";
 import { type AgentWithIncludes } from "~/lib/types";
 import { type ReactNode, useState } from "react";
-import { useToast } from "~/hooks/use-toast";
+import { useToast } from "~/components/hooks/use-toast";
 import {
   Select,
   SelectItem,
