@@ -2,7 +2,6 @@ import vapiClient from "../utils/vapiClient";
 import { analyzeCallWitho1 } from "./findLLMErrors";
 import { db } from "../db";
 import { CallStatus, Role } from "@prisma/client";
-import { CallResult } from "@prisma/client";
 import { analyzeCallWithGemini } from "./geminiAnalyzeAudio";
 import { formatOutput } from "./formatOutput";
 import { createGeminiPrompt } from "../utils/createGeminiPrompt";
@@ -11,8 +10,14 @@ const main = async () => {
   const test = await db.test.findFirst({
     where: { id: "cm3h0it4800034u42zdkpat5v" },
     include: {
-      calls: { include: { scenario: true, testAgent: true, messages: true } },
-      agent: true,
+      calls: {
+        include: {
+          scenario: { include: { evals: true } },
+          testAgent: true,
+          messages: true,
+        },
+      },
+      agent: { include: { enabledGeneralEvals: true } },
     },
   });
 
@@ -40,20 +45,19 @@ const main = async () => {
     const dbCall = test?.calls.find((c) => c.id === call.id);
 
     const agent = test?.agent;
-    const testAgent = dbCall?.testAgent;
 
     const analysis = await analyzeCallWitho1(
-      agent?.systemPrompt ?? "",
-      testAgent?.prompt ?? "",
-      dbCall?.scenario?.successCriteria ?? "",
       vapiCall.artifact?.messages ?? [],
+      dbCall?.scenario?.instructions ?? "",
+      dbCall?.scenario?.evals ?? [],
+      agent?.enabledGeneralEvals ?? [],
     );
 
     const geminiPrompt = createGeminiPrompt(
       vapiCall.artifact?.messages ?? [],
-      agent?.systemPrompt ?? "",
       dbCall?.scenario?.instructions ?? "",
-      dbCall?.scenario?.successCriteria ?? "",
+      dbCall?.scenario?.evals ?? [],
+      agent?.enabledGeneralEvals ?? [],
       analysis,
     );
 
@@ -65,28 +69,24 @@ const main = async () => {
     console.log("GEMINI RESULT");
     console.log(geminiResult);
 
-    const { cleanedResult } = geminiResult;
-    if (!cleanedResult) {
+    const { parsedResult } = geminiResult;
+    if (!parsedResult) {
       console.error("No cleaned result found for call ID", call.id);
       return;
     }
 
-    const cleanedResultJson = await formatOutput(cleanedResult);
+    // const cleanedResultJson = await formatOutput(parsedResult);
 
-    console.log("FORMATTED OUTPUT", cleanedResultJson);
-
-    const { errors, success, failureReason } = cleanedResultJson;
+    const { scenarioEvalResults, generalEvalResults } = parsedResult;
 
     const updatedCall = await db.call.update({
       where: { id: call.id },
       data: {
         status: CallStatus.completed,
-        errors: {
+        evalResults: {
           deleteMany: {},
-          create: errors,
+          create: [...scenarioEvalResults, ...generalEvalResults],
         },
-        result: success ? CallResult.success : CallResult.failure,
-        failureReason,
         stereoRecordingUrl: vapiCall.artifact?.stereoRecordingUrl,
         startedAt: vapiCall.startedAt,
         endedAt: vapiCall.endedAt,

@@ -115,6 +115,19 @@ export const handleVapiCallEnded = async ({
       },
     });
 
+    const updatedTest = await db.test.findUnique({
+      where: { id: test.id },
+      include: {
+        calls: true,
+      },
+    });
+
+    if (
+      updatedTest?.calls.every((call) => call.status === CallStatus.completed)
+    ) {
+      // TODO: Hit slack webhook
+    }
+
     if (userSocket) {
       userSocket.emit("message", {
         type: "call-ended",
