@@ -1,12 +1,16 @@
 import type { CallWithIncludes, EvalResultWithIncludes } from "~/lib/types";
 import AudioPlayer, { type AudioPlayerRef } from "./AudioPlayer";
 import { useMemo, useRef, useState, useEffect, useCallback } from "react";
-import { cn, formatDurationHoursMinutesSeconds } from "~/lib/utils";
+import {
+  cn,
+  didCallSucceed,
+  formatDurationHoursMinutesSeconds,
+} from "~/lib/utils";
 import { useAudio } from "~/hooks/useAudio";
 import { type Agent } from "prisma/generated/zod";
 import { CheckCircleIcon, XCircleIcon } from "@heroicons/react/24/solid";
 import Image from "next/image";
-import { CallResult, CallStatus, Role } from "@prisma/client";
+import { CallStatus, Role } from "@prisma/client";
 import Spinner from "../Spinner";
 
 export default function CallDetails({
@@ -254,12 +258,10 @@ export default function CallDetails({
                 <div
                   className={cn(
                     "w-fit rounded-full px-2 py-1 text-xs",
-                    call.result === CallResult.failure
-                      ? "bg-red-100"
-                      : "bg-green-100",
+                    didCallSucceed(call) ? "bg-green-100" : "bg-red-100",
                   )}
                 >
-                  {call.result === CallResult.failure ? "failed" : "succeeded"}
+                  {didCallSucceed(call) ? "succeeded" : "failed"}
                 </div>
               )}
             </div>

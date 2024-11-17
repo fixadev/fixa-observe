@@ -1,6 +1,7 @@
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
-import { type CallsWithEvalResults } from "./types";
+import { CallResult } from "@prisma/client";
+import { type Call } from "prisma/generated/zod";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -10,8 +11,8 @@ export function removeTrailingSlash(path: string) {
   return path.replace(/\/+$/, "");
 }
 
-export function didCallSucceed(call: CallsWithEvalResults) {
-  return call.evalResults.every((result) => result.success);
+export function didCallSucceed(call: Call) {
+  return call.result === CallResult.success;
 }
 
 export function formatDurationHoursMinutesSeconds(numSeconds: number): string {
