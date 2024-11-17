@@ -4,13 +4,7 @@ import { useMemo, useRef, useState, useEffect, useCallback } from "react";
 import { cn, formatDurationHoursMinutesSeconds } from "~/lib/utils";
 import { useAudio } from "~/hooks/useAudio";
 import { type Agent } from "prisma/generated/zod";
-import {
-  CheckCircleIcon,
-  // CheckIcon,
-  ExclamationCircleIcon,
-  XCircleIcon,
-  // WrenchIcon,
-} from "@heroicons/react/24/solid";
+import { CheckCircleIcon, XCircleIcon } from "@heroicons/react/24/solid";
 import Image from "next/image";
 import { CallResult, CallStatus, Role } from "@prisma/client";
 import Spinner from "../Spinner";
@@ -150,17 +144,7 @@ export default function CallDetails({
       { firstMessageIndex: number; lastMessageIndex: number }
     >();
 
-    // First collect all message -> evalResults mappings
-    messagesFiltered.forEach((_, messageIndex) => {
-      const overlappingEvals = call.evalResults.filter((evalResult) =>
-        doesEvalOverlapMessage(evalResult, messageIndex),
-      );
-      if (overlappingEvals.length > 0) {
-        messageMap.set(messageIndex, overlappingEvals);
-      }
-    });
-
-    // Then find ranges for each evalResult
+    // First find initial ranges for each evalResult
     call.evalResults?.forEach((evalResult) => {
       let firstMessageIndex = Infinity;
       let lastMessageIndex = -1;
@@ -177,6 +161,55 @@ export default function CallDetails({
           firstMessageIndex,
           lastMessageIndex,
         });
+      }
+    });
+
+    // Merge overlapping ranges
+    call.evalResults?.forEach((evalResult) => {
+      const currentRange = rangesMap.get(evalResult.id);
+      if (!currentRange) return;
+
+      call.evalResults?.forEach((otherEval) => {
+        if (evalResult.id === otherEval.id) return;
+        const otherRange = rangesMap.get(otherEval.id);
+        if (!otherRange) return;
+
+        // Check if ranges overlap
+        if (
+          currentRange.firstMessageIndex <= otherRange.lastMessageIndex &&
+          currentRange.lastMessageIndex >= otherRange.firstMessageIndex
+        ) {
+          // Merge ranges
+          const mergedFirst = Math.min(
+            currentRange.firstMessageIndex,
+            otherRange.firstMessageIndex,
+          );
+          const mergedLast = Math.max(
+            currentRange.lastMessageIndex,
+            otherRange.lastMessageIndex,
+          );
+
+          // Update both ranges to the merged range
+          rangesMap.set(evalResult.id, {
+            firstMessageIndex: mergedFirst,
+            lastMessageIndex: mergedLast,
+          });
+          rangesMap.set(otherEval.id, {
+            firstMessageIndex: mergedFirst,
+            lastMessageIndex: mergedLast,
+          });
+        }
+      });
+    });
+
+    // Now build messageMap using the merged ranges
+    call.evalResults?.forEach((evalResult) => {
+      const range = rangesMap.get(evalResult.id);
+      if (!range) return;
+
+      for (let i = range.firstMessageIndex; i <= range.lastMessageIndex; i++) {
+        const existing = messageMap.get(i) ?? [];
+        messageMap.set(i, [...existing, evalResult]);
       }
     });
 
