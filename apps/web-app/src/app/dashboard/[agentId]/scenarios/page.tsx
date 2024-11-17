@@ -52,7 +52,7 @@ export default function AgentScenariosPage({
   params: { agentId: string };
 }) {
   const [scenarios, setScenarios] = useState<ScenarioWithEvals[]>([]);
-  const { agent, refetch } = useAgent(params.agentId);
+  const { agent, setAgent, refetch } = useAgent(params.agentId);
   const { toast } = useToast();
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [selectedScenario, setSelectedScenario] =
@@ -67,7 +67,12 @@ export default function AgentScenariosPage({
   const { mutate: createScenario } = api.agent.createScenario.useMutation({
     onSuccess: (data) => {
       setScenarios([...scenarios.slice(0, -1), data]);
-      void refetch();
+      if (agent && data) {
+        setAgent({
+          ...agent,
+          scenarios: [...agent.scenarios, data],
+        });
+      }
       toast({
         title: "Scenario created",
         description: "Scenario created successfully",
