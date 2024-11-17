@@ -32,6 +32,7 @@ import {
   AccordionContent,
   AccordionTrigger,
 } from "~/components/ui/accordion";
+import { SidebarTrigger } from "~/components/ui/sidebar";
 
 export default function AgentPage({ params }: { params: { agentId: string } }) {
   const [tests, setTests] = useState<TestWithCalls[]>([]);
@@ -102,9 +103,12 @@ export default function AgentPage({ params }: { params: { agentId: string } }) {
     <div>
       {/* header */}
       <div className="sticky top-0 z-20 flex h-14 w-full items-center justify-between border-b border-input bg-[#FAFBFC] px-4 lg:h-[60px]">
-        <Link href={`/dashboard/${params.agentId}`}>
-          <div className="font-medium">test history</div>
-        </Link>
+        <div className="flex items-center gap-2">
+          <SidebarTrigger />
+          <Link href={`/dashboard/${params.agentId}`}>
+            <div className="font-medium">test history</div>
+          </Link>
+        </div>
         <Button
           className="flex min-w-[160px] items-center gap-2"
           onClick={() => setRunTestModalOpen(true)}

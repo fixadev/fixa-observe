@@ -45,13 +45,14 @@ import {
   AlertDialogTitle,
 } from "~/components/ui/alert-dialog";
 import { GenerateScenariosModal } from "./GenerateScenariosModal";
+import { SidebarTrigger } from "~/components/ui/sidebar";
 
 export default function AgentScenariosPage({
   params,
 }: {
   params: { agentId: string };
 }) {
-  const { agent, setAgent, refetch } = useAgent(params.agentId);
+  const { agent, setAgent } = useAgent(params.agentId);
   const { toast } = useToast();
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [selectedScenario, setSelectedScenario] =
@@ -173,9 +174,12 @@ export default function AgentScenariosPage({
   return (
     <div>
       <div className="sticky top-0 z-20 flex h-14 w-full items-center justify-between border-b border-input bg-[#FAFBFC] px-4 lg:h-[60px]">
-        <Link href={`/dashboard/${params.agentId}/scenarios`}>
-          <div className="font-medium">scenarios</div>
-        </Link>
+        <div className="flex flex-1 items-center gap-2">
+          <SidebarTrigger />
+          <Link href={`/dashboard/${params.agentId}/scenarios`}>
+            <div className="font-medium">scenarios</div>
+          </Link>
+        </div>
       </div>
       {/* <div className="container flex items-center justify-between py-8">
         <div className="text-2xl font-medium">scenarios</div>

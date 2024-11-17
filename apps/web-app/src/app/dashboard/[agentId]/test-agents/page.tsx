@@ -8,6 +8,7 @@ import { api } from "~/trpc/react";
 import Image from "next/image";
 import { PlusIcon } from "@heroicons/react/24/solid";
 import { CopyText } from "~/components/dashboard/CopyText";
+import { SidebarTrigger } from "~/components/ui/sidebar";
 
 export default function TestAgentsPage({
   params,
@@ -61,9 +62,12 @@ export default function TestAgentsPage({
   return (
     <div>
       <div className="sticky top-0 z-20 flex h-14 w-full items-center justify-between border-b border-input bg-[#FAFBFC] px-4 lg:h-[60px]">
-        <Link href={`/dashboard/${params.agentId}/test-agents`}>
-          <div className="font-medium">test agents</div>
-        </Link>
+        <div className="flex flex-1 items-center gap-2">
+          <SidebarTrigger />
+          <Link href={`/dashboard/${params.agentId}/test-agents`}>
+            <div className="font-medium">test agents</div>
+          </Link>
+        </div>
       </div>
       <div className="container flex flex-col gap-4 p-4">
         <div className="grid grid-cols-1 gap-2 lg:grid-cols-3">

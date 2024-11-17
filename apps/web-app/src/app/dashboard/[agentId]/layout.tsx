@@ -24,7 +24,7 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { type Agent } from "prisma/generated/zod";
-import { SidebarProvider, SidebarTrigger } from "~/components/ui/sidebar";
+import { SidebarProvider } from "~/components/ui/sidebar";
 import DashboardSidebar from "~/components/dashboard/DashboardSidebar";
 // import { SurveyProvider, useSurvey } from "~/hooks/useSurvey";
 

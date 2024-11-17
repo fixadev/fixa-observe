@@ -3,7 +3,6 @@
 import {
   Sidebar,
   SidebarContent,
-  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
@@ -13,6 +12,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarRail,
+  SidebarTrigger,
 } from "../ui/sidebar";
 import {
   CounterClockwiseClockIcon,
@@ -84,9 +84,8 @@ export default function DashboardSidebar({
 
   return (
     <Sidebar>
-      {/* <SidebarHeader /> */}
       <SidebarHeader>
-        <div className="-m-2 flex h-14 items-center border-b px-4 lg:h-[60px]">
+        <div className="-m-2 flex h-14 items-center justify-between border-b px-4 lg:h-[60px]">
           <Logo href="/dashboard" />
         </div>
       </SidebarHeader>

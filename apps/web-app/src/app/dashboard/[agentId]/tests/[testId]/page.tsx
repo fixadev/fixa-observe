@@ -22,6 +22,7 @@ import Link from "next/link";
 // import { TEST_TESTS } from "~/lib/test-data";
 import TestScenarios from "~/components/dashboard/TestScenarios";
 import { didCallSucceed } from "~/lib/utils";
+import { SidebarTrigger } from "~/components/ui/sidebar";
 
 // type CallType = "error" | "no-errors" | "all";
 
@@ -151,6 +152,7 @@ function TestPage({ params }: { params: { agentId: string; testId: string } }) {
       {/* header */}
       <div className="sticky top-0 z-20 flex h-14 w-full items-center justify-between border-b border-input bg-[#FAFBFC] px-4 lg:h-[60px]">
         <div className="flex items-center gap-2">
+          <SidebarTrigger />
           <Link href={`/dashboard/${params.agentId}`}>
             <div className="font-medium">test history</div>
           </Link>

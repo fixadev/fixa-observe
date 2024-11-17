@@ -19,6 +19,7 @@ import { CopyText } from "~/components/dashboard/CopyText";
 import { env } from "~/env";
 import { useUser } from "@clerk/nextjs";
 import { CheckCircleIcon } from "@heroicons/react/24/solid";
+import { SidebarTrigger } from "~/components/ui/sidebar";
 
 export default function AgentSettingsPage({
   params,
@@ -66,27 +67,30 @@ export default function AgentSettingsPage({
 
   return (
     <div>
-      <div className="sticky top-0 z-20 flex h-14 w-full items-center justify-between border-b border-input bg-[#FAFBFC] px-4 lg:h-[60px]">
-        <Link href={`/dashboard/${params.agentId}/settings`}>
-          <div className="font-medium">settings</div>
-        </Link>
-        <Button
-          className="flex w-32 items-center gap-2"
-          disabled={
-            JSON.stringify(agent) === JSON.stringify(agentState) ||
-            isUpdatingSettings
-          }
-          onClick={handleSave}
-        >
-          {isUpdatingSettings ? (
-            <>
-              <span>saving...</span>
-              <Spinner />
-            </>
-          ) : (
-            "save changes"
-          )}
-        </Button>
+      <div className="sticky top-0 z-20 flex h-14 w-full items-center gap-2 border-b border-input bg-[#FAFBFC] px-4 lg:h-[60px]">
+        <SidebarTrigger />
+        <div className="flex flex-1 items-center justify-between">
+          <Link href={`/dashboard/${params.agentId}/settings`}>
+            <div className="font-medium">settings</div>
+          </Link>
+          <Button
+            className="flex w-32 items-center gap-2"
+            disabled={
+              JSON.stringify(agent) === JSON.stringify(agentState) ||
+              isUpdatingSettings
+            }
+            onClick={handleSave}
+          >
+            {isUpdatingSettings ? (
+              <>
+                <span>saving...</span>
+                <Spinner />
+              </>
+            ) : (
+              "save changes"
+            )}
+          </Button>
+        </div>
       </div>
       <div className="container flex flex-col gap-6 p-4">
         <div className="flex flex-col gap-2">
