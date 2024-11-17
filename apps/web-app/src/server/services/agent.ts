@@ -156,6 +156,32 @@ export class AgentService {
     });
   }
 
+  async createScenarios(agentId: string, scenarios: CreateScenarioSchema[]) {
+    const transactions = scenarios.map((scenario) => {
+      return db.scenario.create({
+        data: {
+          id: uuidv4(),
+          agentId,
+          name: scenario.name,
+          instructions: scenario.instructions,
+          successCriteria: scenario.successCriteria,
+          evals: {
+            createMany: {
+              data: scenario.evals.map((evaluation) => ({
+                ...evaluation,
+                id: uuidv4(),
+              })),
+            },
+          },
+        },
+        include: {
+          evals: true,
+        },
+      });
+    });
+    return await db.$transaction(transactions);
+  }
+
   async updateScenario(scenario: UpdateScenarioSchema) {
     return await db.scenario.update({
       where: { id: scenario.id },

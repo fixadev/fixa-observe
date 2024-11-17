@@ -56,12 +56,17 @@ export const agentRouter = createTRPCRouter({
       z.object({
         prompt: z.string(),
         numberOfScenarios: z.number(),
+        agentId: z.string(),
       }),
     )
     .mutation(async ({ input }) => {
-      return await generateScenariosFromPrompt(
+      const scenarios = await generateScenariosFromPrompt(
         input.prompt,
         input.numberOfScenarios,
+      );
+      return await agentServiceInstance.createScenarios(
+        input.agentId,
+        scenarios,
       );
     }),
 

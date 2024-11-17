@@ -2,7 +2,6 @@
 import {
   Dialog,
   DialogContent,
-  DialogFooter,
   DialogTitle,
   DialogTrigger,
 } from "~/components/ui/dialog";
@@ -20,6 +19,7 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { Textarea } from "~/components/ui/textarea";
+import Spinner from "~/components/Spinner";
 
 export const GenerateScenariosModal = ({
   agent,
@@ -30,6 +30,7 @@ export const GenerateScenariosModal = ({
   setAgent: (agent: AgentWithIncludes) => void;
   children: ReactNode;
 }) => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [isGeneratingScenarios, setIsGeneratingScenarios] = useState(false);
   const [numberOfScenarios, setNumberOfScenarios] = useState(3);
   const [prompt, setPrompt] = useState("");
@@ -43,13 +44,19 @@ export const GenerateScenariosModal = ({
           scenarios: [...agent.scenarios, ...data],
         });
         setIsGeneratingScenarios(false);
+        toast({
+          title: "Scenarios generated",
+          description: "Scenarios generated successfully",
+        });
+        setIsModalOpen(false);
+        setPrompt("");
       },
     });
 
   const handleGenerateScenarios = (prompt: string) => {
     if (prompt.length > 0) {
       setIsGeneratingScenarios(true);
-      generateScenarios({ prompt, numberOfScenarios });
+      generateScenarios({ prompt, numberOfScenarios, agentId: agent.id });
     } else {
       toast({
         title: "Please enter a prompt to generate scenarios",
@@ -58,7 +65,7 @@ export const GenerateScenariosModal = ({
     }
   };
   return (
-    <Dialog>
+    <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
       <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent>
         <DialogTitle>Generate Scenarios</DialogTitle>
@@ -102,8 +109,16 @@ export const GenerateScenariosModal = ({
           <Button
             variant="default"
             onClick={() => handleGenerateScenarios(agent.systemPrompt)}
+            disabled={isGeneratingScenarios}
           >
-            generate
+            {isGeneratingScenarios ? (
+              <div className="flex flex-row items-center gap-2">
+                generating...
+                <Spinner />
+              </div>
+            ) : (
+              "generate"
+            )}
           </Button>
         </div>
       </DialogContent>
