@@ -5,6 +5,7 @@ import {
   CreateAgentSchema,
   CreateScenarioSchema,
   ScenarioWithEvals,
+  UpdateScenarioSchema,
 } from "~/lib/agent";
 import { db } from "~/server/db";
 import { generateScenariosFromPrompt } from "~/server/helpers/generateScenarios";
@@ -74,7 +75,7 @@ export const agentRouter = createTRPCRouter({
     }),
 
   updateScenario: protectedProcedure
-    .input(z.object({ scenario: ScenarioWithEvals }))
+    .input(z.object({ scenario: UpdateScenarioSchema }))
     .mutation(async ({ input }) => {
       return await agentServiceInstance.updateScenario(input.scenario);
     }),

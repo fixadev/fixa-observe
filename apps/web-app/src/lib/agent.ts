@@ -16,9 +16,12 @@ export type AgentWithoutId = Omit<Agent, "id"> & {
   scenarios: CreateScenarioSchema[];
 };
 
+export type EvalWithoutScenarioId = z.infer<typeof EvalWithoutScenarioId>;
+export const EvalWithoutScenarioId = EvalSchema.omit({ scenarioId: true });
+
 export type ScenarioWithEvals = z.infer<typeof ScenarioWithEvals>;
 export const ScenarioWithEvals = ScenarioSchema.extend({
-  evals: z.array(EvalSchema),
+  evals: z.array(EvalWithoutScenarioId),
 });
 
 export const CreateScenarioEvalSchema = z.object({
@@ -27,9 +30,13 @@ export const CreateScenarioEvalSchema = z.object({
   id: z.string(),
   name: z.string(),
   description: z.string(),
-  scenarioId: z.string().nullable(),
   agentId: z.string().nullable(),
   ownerId: z.string().nullable(),
+});
+
+export type UpdateScenarioSchema = z.infer<typeof UpdateScenarioSchema>;
+export const UpdateScenarioSchema = ScenarioSchema.extend({
+  evals: z.array(z.union([EvalWithoutScenarioId, CreateScenarioEvalSchema])),
 });
 
 export type CreateScenarioSchema = z.infer<typeof CreateScenarioSchema>;
