@@ -26,7 +26,7 @@ import {
 } from "~/lib/utils";
 import { debounce } from "lodash";
 import useSWR from "swr";
-import { useAudio } from "~/hooks/useAudio";
+import { useAudio } from "~/components/hooks/useAudio";
 
 export type AudioPlayerRef = {
   setActiveEvalResult: (evalResult: EvalResultWithIncludes | null) => void;

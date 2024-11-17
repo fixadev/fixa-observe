@@ -5,7 +5,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import CallCard from "~/components/dashboard/CallCard";
 import type { TestWithIncludes } from "~/lib/types";
 import CallDetails from "~/components/dashboard/CallDetails";
-import { AudioProvider, useAudio } from "~/hooks/useAudio";
+import { AudioProvider, useAudio } from "~/components/hooks/useAudio";
 import { api } from "~/trpc/react";
 import { Skeleton } from "~/components/ui/skeleton";
 import useSocketMessage from "~/app/_components/UseSocketMessage";
