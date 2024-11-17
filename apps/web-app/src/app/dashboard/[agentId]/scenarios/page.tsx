@@ -87,10 +87,17 @@ export default function AgentScenariosPage({
       setScenarios(scenarios.map((s) => (s.id === scenario.id ? scenario : s)));
       updateScenario({ scenario });
     } else {
-      setScenarios([
-        ...scenarios.slice(0, -1),
-        { ...scenario, id: "new", agentId: agent?.id ?? "" },
-      ]);
+      const newScenario = {
+        ...scenario,
+        id: "new",
+        agentId: agent?.id ?? "",
+        evals: scenario.evals.map((e) => ({
+          ...e,
+          createdAt: new Date(),
+        })),
+      };
+      setScenarios([...scenarios.slice(0, -1), newScenario]);
+
       createScenario({ agentId: agent?.id ?? "", scenario });
     }
   };

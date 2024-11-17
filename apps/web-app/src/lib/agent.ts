@@ -22,8 +22,8 @@ export const ScenarioWithEvals = ScenarioSchema.extend({
 });
 
 export const CreateScenarioEvalSchema = z.object({
-  type: z.enum(["scenario"]),
-  resultType: z.enum(["boolean"]),
+  type: z.enum(["scenario", "general"]),
+  resultType: z.enum(["boolean", "number", "percentage"]),
   id: z.string(),
   name: z.string(),
   description: z.string(),
