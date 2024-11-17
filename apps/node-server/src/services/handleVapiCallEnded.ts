@@ -6,6 +6,8 @@ import {
   Role,
   Test,
   Eval,
+  EvalResultType,
+  EvalType,
 } from "@prisma/client";
 import { db } from "../db";
 import { type ServerMessageEndOfCallReport } from "@vapi-ai/server-sdk/api";
@@ -66,9 +68,9 @@ export const handleVapiCallEnded = async ({
 
     console.log("GEMINI RESULT", parsedResult);
 
-    const { scenarioEvalResults, generalEvalResults } = parsedResult;
+    const cleanedResultJson = await formatOutput(JSON.stringify(parsedResult));
 
-    console.log("FORMATTED OUTPUT", scenarioEvalResults, generalEvalResults);
+    const { scenarioEvalResults, generalEvalResults } = cleanedResultJson;
 
     const updatedCall = await db.call.update({
       where: { id: call.id },

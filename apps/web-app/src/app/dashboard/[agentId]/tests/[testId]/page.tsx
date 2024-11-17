@@ -110,13 +110,10 @@ function TestPage({ params }: { params: { agentId: string; testId: string } }) {
   );
 
   useEffect(() => {
-    setTest(TEST_TESTS[0]!);
-  }, []);
-  // useEffect(() => {
-  //   if (_test) {
-  //     setTest(_test);
-  //   }
-  // }, [_test]);
+    if (_test) {
+      setTest(_test);
+    }
+  }, [_test]);
 
   return (
     <div>

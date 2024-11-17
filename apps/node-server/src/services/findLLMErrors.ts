@@ -1,23 +1,21 @@
 import { openai } from "../utils/OpenAIClient";
 import { z } from "zod";
 import { ArtifactMessagesItem, Call } from "@vapi-ai/server-sdk/api";
-import { Eval, EvalResult } from "@prisma/client";
+import { Eval, EvalResult, EvalResultType } from "@prisma/client";
 
 type CallResult = {
-  scenarioEvalResults: EvalResult[];
-  generalEvalResults: EvalResult[];
+  scenarioEvalResults: EvalResultSchema[];
+  generalEvalResults: EvalResultSchema[];
 };
 
+export type EvalResultSchema = z.infer<typeof EvalResultSchema>;
 const EvalResultSchema = z.object({
-  id: z.string().cuid(),
-  createdAt: z.coerce.date(),
-  callId: z.string().nullable(),
   evalId: z.string(),
   result: z.string(),
   success: z.boolean(),
   secondsFromStart: z.number(),
   duration: z.number(),
-  type: z.string().nullable(),
+  type: z.nativeEnum(EvalResultType),
   details: z.string(),
 });
 
@@ -31,7 +29,7 @@ export const analyzeCallWitho1 = async (
   testAgentPrompt: string,
   scenarioEvals: Eval[],
   generalEvals: Eval[],
-): Promise<CallResult> => {
+): Promise<{ cleanedResult: string }> => {
   const basePrompt = `
   Your job to to analyze a call transcript between an AI agent (the main agent) and a test AI agent (the test agent), and determine how the main agent performed.
 
@@ -104,12 +102,9 @@ export const analyzeCallWitho1 = async (
     throw new Error("No result from LLM");
   }
 
-  const jsonResult = JSON.parse(cleanedResult);
-
-  const parsedResponse = outputSchema.parse(jsonResult);
+  console.log("CLEANED RESULT", cleanedResult);
 
   return {
-    scenarioEvalResults: parsedResponse.scenarioEvalResults,
-    generalEvalResults: parsedResponse.generalEvalResults,
+    cleanedResult,
   };
 };
