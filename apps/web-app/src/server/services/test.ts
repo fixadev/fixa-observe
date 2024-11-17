@@ -25,6 +25,11 @@ export class TestService {
             },
             errors: true,
             scenario: true,
+            evalResults: {
+              include: {
+                eval: true,
+              },
+            },
           },
         },
       },

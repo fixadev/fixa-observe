@@ -12,6 +12,12 @@ export const transcriptionErrorSchema = z.object({
 });
 export type TranscriptionError = z.infer<typeof transcriptionErrorSchema>;
 
+export type EvalResultWithIncludes = Prisma.EvalResultGetPayload<{
+  include: {
+    eval: true;
+  };
+}>;
+
 export type CallWithIncludes = Prisma.CallGetPayload<{
   include: {
     messages: true;
