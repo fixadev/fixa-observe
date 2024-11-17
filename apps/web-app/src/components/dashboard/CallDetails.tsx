@@ -5,8 +5,10 @@ import { cn, formatDurationHoursMinutesSeconds } from "~/lib/utils";
 import { useAudio } from "~/hooks/useAudio";
 import { type Agent } from "prisma/generated/zod";
 import {
+  CheckCircleIcon,
   // CheckIcon,
   ExclamationCircleIcon,
+  XCircleIcon,
   // WrenchIcon,
 } from "@heroicons/react/24/solid";
 import Image from "next/image";
@@ -181,6 +183,20 @@ export default function CallDetails({
     return { messageEvalsMap: messageMap, evalRangesMap: rangesMap };
   }, [call.evalResults, messagesFiltered, doesEvalOverlapMessage]);
 
+  const getBorderColorClass = useCallback(
+    (evalResultState: "success" | "failure" | "both") => {
+      switch (evalResultState) {
+        case "success":
+          return "border-green-500";
+        case "failure":
+          return "border-red-500";
+        case "both":
+          return "border-input";
+      }
+    },
+    [],
+  );
+
   return (
     <div className="flex w-full flex-col rounded-md bg-background px-4 outline-none">
       <div
@@ -226,7 +242,12 @@ export default function CallDetails({
               {call.evalResults?.map((evalResult) => (
                 <div
                   key={evalResult.id}
-                  className="flex cursor-pointer items-start gap-1 border-l-2 border-red-500 bg-red-100 p-1 pl-1 text-xs text-red-500 hover:bg-red-200"
+                  className={cn(
+                    "flex cursor-pointer items-start gap-1 border-l-2 p-1 pl-1 text-xs",
+                    evalResult.success
+                      ? "border-green-500 bg-green-100 text-green-500 hover:bg-green-200"
+                      : "border-red-500 bg-red-100 text-red-500 hover:bg-red-200",
+                  )}
                   onMouseEnter={() => {
                     setActiveEvalResultId(evalResult.id);
                     audioPlayerRef.current?.setHoveredEvalResult(evalResult.id);
@@ -240,7 +261,11 @@ export default function CallDetails({
                     play();
                   }}
                 >
-                  <ExclamationCircleIcon className="size-4 shrink-0 text-red-500" />
+                  {evalResult.success ? (
+                    <CheckCircleIcon className="size-4 shrink-0 text-green-500" />
+                  ) : (
+                    <XCircleIcon className="size-4 shrink-0 text-red-500" />
+                  )}
                   {evalResult.eval.name}
                 </div>
               ))}
@@ -262,6 +287,13 @@ export default function CallDetails({
       <div ref={scrollContainerRef} className="-mx-4 flex flex-1 flex-col px-4">
         {messagesFiltered.map((message, index) => {
           const evalResults = messageEvalsMap.get(index) ?? [];
+          const evalResultState = evalResults.every(
+            (evalResult) => evalResult.success,
+          )
+            ? "success"
+            : evalResults.every((evalResult) => !evalResult.success)
+              ? "failure"
+              : "both";
           const isFirstEvalMessage = evalResults.some(
             (evalResult) =>
               evalRangesMap.get(evalResult.id)?.firstMessageIndex === index,
@@ -303,13 +335,13 @@ export default function CallDetails({
                       ? "bg-muted hover:bg-muted"
                       : "",
                     evalResults.length > 0
-                      ? "rounded-none border-x border-red-500"
+                      ? `rounded-none border-x ${getBorderColorClass(evalResultState)}`
                       : "",
                     evalResults.length > 0 && isActiveEvalMessage
                       ? "-mx-px border-x-2"
                       : "",
                     isFirstEvalMessage
-                      ? "mt-px rounded-t-md border-t border-red-500"
+                      ? `mt-px rounded-t-md border-t ${getBorderColorClass(evalResultState)}`
                       : "",
                     isFirstEvalMessage && isActiveEvalMessage
                       ? "mt-0 border-t-2"
@@ -330,7 +362,8 @@ export default function CallDetails({
                 {isLastEvalMessage && (
                   <div
                     className={cn(
-                      "flex cursor-pointer flex-col items-start rounded-b-md border-x border-b border-red-500 bg-red-500/20 px-1 py-1.5 text-sm text-red-500",
+                      "flex cursor-pointer flex-col items-start rounded-b-md border-x border-b text-sm",
+                      getBorderColorClass(evalResultState),
                       isActiveEvalMessage
                         ? "z-10 -mx-px -mb-px border-x-2 border-b-2 shadow-lg"
                         : "",
@@ -340,8 +373,14 @@ export default function CallDetails({
                       <div
                         key={evalResult.id}
                         className={cn(
-                          "flex w-full items-start gap-1 py-0.5",
-                          evalResults.length > 1 && "hover:bg-red-500/20",
+                          "flex w-full items-start gap-1 px-1 py-1",
+                          evalResult.success
+                            ? "border-green-500 bg-green-500/20 text-green-500"
+                            : "border-red-500 bg-red-500/20 text-red-500",
+                          evalResults.length > 1 &&
+                            (evalResult.success
+                              ? "hover:bg-green-500/30"
+                              : "hover:bg-red-500/30"),
                         )}
                         onMouseEnter={() => {
                           setActiveEvalResultId(evalResult.id);
@@ -360,8 +399,17 @@ export default function CallDetails({
                           play();
                         }}
                       >
-                        <ExclamationCircleIcon className="size-5 shrink-0" />
-                        {evalResult.details}
+                        {evalResult.success ? (
+                          <CheckCircleIcon className="size-5 shrink-0" />
+                        ) : (
+                          <XCircleIcon className="size-5 shrink-0" />
+                        )}
+                        <div className="flex flex-col gap-0.5 text-sm">
+                          <div className="font-medium">
+                            {evalResult.eval.name}
+                          </div>
+                          <div className="text-xs">{evalResult.details}</div>
+                        </div>
                       </div>
                     ))}
                   </div>
