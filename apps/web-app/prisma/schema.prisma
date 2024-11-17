@@ -199,7 +199,7 @@ model EvalResult {
   success          Boolean
   secondsFromStart Float
   duration         Float
-  type             String?
+  type             EvalResultType
   details          String
 }
 

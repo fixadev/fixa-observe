@@ -4,6 +4,7 @@
 //   CallWithIncludes,
 //   AgentWithIncludes,
 // } from "./types";
+// import { EvalResultType } from "@prisma/client";
 
 // export const TEST_TEST_AGENTS: TestAgent[] = [
 //   {
@@ -327,6 +328,19 @@
 //     result: call.result,
 //     toolCalls: [],
 //     callId: call.id,
+//   })),
+//   evalResults: call.scenario.evals.map((_eval, i) => ({
+//     id: crypto.randomUUID(),
+//     createdAt: new Date(),
+//     callId: call.id,
+//     eval: _eval,
+//     evalId: _eval.id,
+//     result: "",
+//     success: Math.random() > 0.5,
+//     secondsFromStart: i * 10 + 9.599999 - 1.675,
+//     duration: 3.12 + 1.675,
+//     type: EvalResultType.boolean,
+//     details: "this is the reason that it failed or succeeded",
 //   })),
 //   errors:
 //     call.result !== "success"
