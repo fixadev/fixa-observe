@@ -1,11 +1,11 @@
 import {
   Agent,
   Call,
-  CallResult,
   CallStatus,
   Scenario,
   Role,
   Test,
+  Eval,
 } from "@prisma/client";
 import { db } from "../db";
 import { type ServerMessageEndOfCallReport } from "@vapi-ai/server-sdk/api";
@@ -25,9 +25,9 @@ export const handleVapiCallEnded = async ({
 }: {
   report: ServerMessageEndOfCallReport;
   call: Call;
-  agent: Agent;
+  agent: Agent & { enabledGeneralEvals: Eval[] };
   test: Test;
-  scenario: Scenario;
+  scenario: Scenario & { evals: Eval[] };
   userSocket?: Socket;
 }) => {
   try {
@@ -41,49 +41,45 @@ export const handleVapiCallEnded = async ({
       return;
     }
 
-    const analysis = await analyzeCallWitho1(
-      agent.systemPrompt,
-      scenario.instructions,
-      scenario.successCriteria,
+    const o1Analysis = await analyzeCallWitho1(
       report.artifact.messages,
+      scenario.instructions,
+      scenario.evals,
+      agent.enabledGeneralEvals,
     );
 
-    console.log("O1 ANALYSIS", analysis);
+    console.log("O1 ANALYSIS", o1Analysis);
 
     const geminiPrompt = createGeminiPrompt(
       report.artifact.messages,
-      agent.systemPrompt,
       scenario.instructions,
-      scenario.successCriteria,
-      analysis,
+      scenario.evals,
+      agent.enabledGeneralEvals,
+      o1Analysis,
     );
 
-    const { cleanedResult } = await analyzeCallWithGemini(
+    const { parsedResult } = await analyzeCallWithGemini(
       report.artifact.stereoRecordingUrl,
       geminiPrompt,
     );
 
-    console.log("GEMINI RESULT", cleanedResult);
+    console.log("GEMINI RESULT", parsedResult);
 
-    const { errors, success, failureReason } = await formatOutput(
-      cleanedResult ?? "",
-    );
+    const { scenarioEvalResults, generalEvalResults } = parsedResult;
 
-    console.log("FORMATTED OUTPUT", errors, success, failureReason);
+    console.log("FORMATTED OUTPUT", scenarioEvalResults, generalEvalResults);
 
     const updatedCall = await db.call.update({
       where: { id: call.id },
       data: {
         status: CallStatus.completed,
-        errors: {
-          create: errors,
-        },
         startedAt: report.startedAt,
         endedAt: report.endedAt,
-        result: success ? CallResult.success : CallResult.failure,
-        failureReason,
         stereoRecordingUrl: report.artifact.stereoRecordingUrl,
         monoRecordingUrl: report.artifact.recordingUrl,
+        evalResults: {
+          create: [...scenarioEvalResults, ...generalEvalResults],
+        },
         messages: {
           create: report.artifact.messages
             .map((message) => {

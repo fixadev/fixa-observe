@@ -37,6 +37,8 @@ model Agent {
   githubRepoUrl String?
   systemPrompt  String
 
+  enabledGeneralEvals Eval[]
+
   enabledTestAgents TestAgent[]
   scenarios         Scenario[]
   tests             Test[]
@@ -169,7 +171,13 @@ model Eval {
   scenarioId  String?
 
   type        EvalType
+  resultType  EvalResultType
   evalResults EvalResult[]
+
+  agent   Agent?  @relation(fields: [agentId], references: [id])
+  agentId String?
+
+  ownerId String?
 }
 
 model EvalResult {
@@ -183,14 +191,19 @@ model EvalResult {
   evalId String
 
   result           String
-  passed           Boolean
+  success          Boolean
   secondsFromStart Float
   duration         Float
   type             String?
-  description      String
+  details          String
 }
 
 enum EvalType {
+  scenario
+  general
+}
+
+enum EvalResultType {
   boolean
   number
   percentage

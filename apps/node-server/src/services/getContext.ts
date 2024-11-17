@@ -1,5 +1,6 @@
 import { Socket } from "socket.io";
 import { db } from "../db";
+import { EvalType } from "@prisma/client";
 
 export const getContext = async (
   callId: string,
@@ -10,8 +11,14 @@ export const getContext = async (
       where: { id: callId },
       include: {
         testAgent: true,
-        scenario: true,
-        test: { include: { agent: true } },
+        scenario: {
+          include: {
+            evals: true,
+          },
+        },
+        test: {
+          include: { agent: { include: { enabledGeneralEvals: true } } },
+        },
       },
     });
 
@@ -34,6 +41,7 @@ export const getContext = async (
       console.error("No test found for call", callId);
       return;
     }
+
     const userSocket = connectedUsers.get(ownerId);
     return {
       userSocket,

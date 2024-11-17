@@ -4,6 +4,7 @@ import {
   ScenarioSchema,
   type Message,
   EvalSchema,
+  type EvalResultSchema,
 } from "prisma/generated/zod";
 import { z } from "zod";
 import { type CallWithIncludes } from "./types";
@@ -55,3 +56,7 @@ export type AnalysisStartedData = {
   testId: string;
   callId: string;
 };
+
+export type Eval = z.infer<typeof EvalSchema>;
+
+export type EvalResult = z.infer<typeof EvalResultSchema>;

@@ -1,8 +1,10 @@
+import { Eval } from "@prisma/client";
+
 export const createGeminiPrompt = (
   messages: Array<any>,
-  agentPrompt: string,
-  testAgentPrompt: string,
-  successCriteria: string,
+  testAgentInstructions: string,
+  scenarioEvals: Eval[],
+  generalEvals: Eval[],
   analysis: any,
 ) => {
   return `
@@ -52,11 +54,15 @@ export const createGeminiPrompt = (
 
       TRANSCRIPT: ${messages}
 
-      MAIN AGENT PROMPT: ${agentPrompt}
+      TEST AGENT PROMPT: ${testAgentInstructions}
 
-      TEST AGENT PROMPT: ${testAgentPrompt}
+      MAIN AGENT GENERAL SUCCESS CRITERIA: ${generalEvals
+        .map((evaluation) => evaluation.name)
+        .join(", ")}
 
-      SUCCESS CRITERIA: ${successCriteria}
+      MAIN AGENT SCENARIO SUCCESS CRITERIA: ${scenarioEvals
+        .map((evaluation) => evaluation.name)
+        .join(", ")}
 
       JUNIOR ANALYST'S ANALYSIS: ${JSON.stringify(analysis, null, 2)}
     `;

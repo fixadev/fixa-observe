@@ -1,67 +1,85 @@
 import { openai } from "../utils/OpenAIClient";
 import { z } from "zod";
 import { ArtifactMessagesItem, Call } from "@vapi-ai/server-sdk/api";
+import { Eval, EvalResult } from "@prisma/client";
 
 type CallResult = {
-  errors: {
-    type: string;
-    description: string;
-    secondsFromStart: number;
-    duration: number;
-  }[];
-  success: boolean;
-  failureReason: string;
+  scenarioEvalResults: EvalResult[];
+  generalEvalResults: EvalResult[];
 };
 
-const outputSchema = z.object({
-  errors: z.array(
-    z.object({
-      type: z.string(),
-      description: z.string(),
-      secondsFromStart: z.number(),
-      duration: z.number(),
-    }),
-  ),
+const EvalResultSchema = z.object({
+  id: z.string().cuid(),
+  createdAt: z.coerce.date(),
+  callId: z.string().nullable(),
+  evalId: z.string(),
+  result: z.string(),
   success: z.boolean(),
-  failureReason: z.string().nullable(),
+  secondsFromStart: z.number(),
+  duration: z.number(),
+  type: z.string().nullable(),
+  details: z.string(),
+});
+
+export const outputSchema = z.object({
+  scenarioEvalResults: z.array(EvalResultSchema),
+  generalEvalResults: z.array(EvalResultSchema),
 });
 
 export const analyzeCallWitho1 = async (
-  agentPrompt: string,
-  testAgentPrompt: string,
-  successCriteria: string,
   messages: ArtifactMessagesItem[],
+  testAgentPrompt: string,
+  scenarioEvals: Eval[],
+  generalEvals: Eval[],
 ): Promise<CallResult> => {
   const basePrompt = `
-  Your job to to analyze a call transcript between an AI agent (the main agent) and a test AI agent (the test agent), and determine where the main agent made errors, and what those errors were, if any.
-
-  Some main agents will be outbound agents (i.e. an agent that makes a sale to a human), and some will be inbound agents (i.e. an agent that answers questions about a product or service or helps a human book an appointment).
+  Your job to to analyze a call transcript between an AI agent (the main agent) and a test AI agent (the test agent), and determine how the main agent performed.
 
   You will be provided the following information:
-  - The main agent's prompt
-  - The test agent's prompt / scenario
-  - The success criteria for the call
-  - The call transcript. In this, the main agent will be labeled as "user" and the test agent will be labeled as "bot".
+  - testAgentPrompt: The test agent's instructions
+  - scenarioEvals: An array of evaluation criteria objects specific to this scenario. Each evaluation criteria object has the following properties:
+    - id: The id of the evaluation criteria
+    - name: A string describing the evaluation criteria
+    - description: A string describing the evaluation criteria
+    - type: A string describing the type of evaluation criteria ("boolean", "string", "number", "array")
+  
+  - generalEvals: An array of evaluation criteria objects that are general to all scenarios. Each evaluation criteria object has the following properties:
+    - id: The id of the evaluation criteria
+    - name: A string describing the evaluation criteria
+    - description: A string describing the evaluation criteria
+    - type: A string describing the type of evaluation criteria ("boolean", "string", "number", "array")
+   
+  - transcript: A list of messages from the call transcript. In this, the main agent will be labeled as "user" and the test agent will be labeled as "bot".
+  
+  Some main agents will be outbound agents (i.e. an agent that makes a sale to a human), and some will be inbound agents (i.e. an agent that answers questions about a product or service or helps a human book an appointment).
 
   You will output a JSON object with the following fields:
-  - success: A boolean indicating if the call was successful. The call is successful if the main agent achieves the success criteria.
-  - failureReason: A short sentence CONCISELY describing the primary failure reason, if any -- else return null
-  - errors: An array of objects, each representing an error that the main agent made. Each error object will have the following fields:
-    - type: A string describing the type of error
-    - description: A string describing the error - refer to the main agent only as "agent"
-    - secondsFromStart: The start time of the error in seconds (use the secondsFromStart for this)
-    - duration: The duration of the error in seconds (use duration for this)
+  
+  - scenarioEvalResults: An array of objects, one for the result of each scenario evaluation criteria. Each evaluation result object will have the following fields:
+    - evalId: The id of the evaluation criteria object that was used to evaluate the call.
+    - success: A boolean indicating if the call was successful. The call is successful if the main agent achieves the success criteria.
+    - details: A short sentence CONCISELY describing the details of the evaluation result refer to the main agent only as "agent".
+    - secondsFromStart: The start time of the evaluation result in seconds (use the secondsFromStart for this)
+    - duration: The duration of the evaluation result in seconds (use duration for this)
+    
+  - generalEvalResults: An array of objects, one for the result of each general evaluation criteria. Each evaluation result object will have the following fields:
+    - evalId: The id of the evaluation criteria object that was used to evaluate the call.
+    - success: A boolean indicating if the call was successful. The call is successful if the main agent achieves the success criteria.
+    - details: A short sentence CONCISELY describing the details of the evaluation result refer to the main agent only as "agent".
+    - secondsFromStart: The start time of the evaluation result in seconds (use the secondsFromStart for this)
+    - duration: The duration of the evaluation result in seconds (use duration for this)
 
   OUTPUT ONLY THE JSON - do not include backticks like \`\`\`json or any other formatting
 
   Keep the following in mind:
   - secondsFromStart and duration should only encompass the specific portion of the call where the error occurred. It should not be very long (10 seconds is a good max), unless it makes sense for it to be longer.
-  - errors should not overlap.
-  - flag an error if the main agent repeats the same phrase multiple times in a row, even though it doesn't make sense for the main agent to do so.
+  - scenarioEvalResults and generalEvalResults should not overlap.
   - any tool call messages you see are being made by the test agent, not the main agent. so if they are made erroneously, that's not an error (it is an error in the test agent, not the main agent)
   `;
 
-  const prompt = `${basePrompt}\n\nMain Agent Prompt: ${agentPrompt}\n\nTest Agent Prompt: ${testAgentPrompt}\n\nSuccess Criteria: ${successCriteria}\n\nCall Transcript: ${JSON.stringify(
+  const prompt = `${basePrompt}\n\n\n\nTest Agent Prompt: ${testAgentPrompt}\n\nScenario Evaluation Criteria: ${JSON.stringify(
+    scenarioEvals,
+  )}\n\nGeneral Evaluation Criteria: ${JSON.stringify(generalEvals)}\n\nCall Transcript: ${JSON.stringify(
     messages,
   )}`;
 
@@ -91,8 +109,7 @@ export const analyzeCallWitho1 = async (
   const parsedResponse = outputSchema.parse(jsonResult);
 
   return {
-    errors: parsedResponse.errors,
-    success: parsedResponse.success,
-    failureReason: parsedResponse.failureReason ?? "",
+    scenarioEvalResults: parsedResponse.scenarioEvalResults,
+    generalEvalResults: parsedResponse.generalEvalResults,
   };
 };
