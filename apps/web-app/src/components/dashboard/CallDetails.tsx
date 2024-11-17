@@ -4,11 +4,7 @@ import { useMemo, useRef, useState, useEffect, useCallback } from "react";
 import { cn, formatDurationHoursMinutesSeconds } from "~/lib/utils";
 import { useAudio } from "~/hooks/useAudio";
 import { type Agent } from "prisma/generated/zod";
-import {
-  // CheckIcon,
-  ExclamationCircleIcon,
-  // WrenchIcon,
-} from "@heroicons/react/24/solid";
+import { CheckCircleIcon, XCircleIcon } from "@heroicons/react/24/solid";
 import Image from "next/image";
 import { CallResult, CallStatus, Role } from "@prisma/client";
 import Spinner from "../Spinner";
@@ -148,17 +144,7 @@ export default function CallDetails({
       { firstMessageIndex: number; lastMessageIndex: number }
     >();
 
-    // First collect all message -> evalResults mappings
-    messagesFiltered.forEach((_, messageIndex) => {
-      const overlappingEvals = call.evalResults.filter((evalResult) =>
-        doesEvalOverlapMessage(evalResult, messageIndex),
-      );
-      if (overlappingEvals.length > 0) {
-        messageMap.set(messageIndex, overlappingEvals);
-      }
-    });
-
-    // Then find ranges for each evalResult
+    // First find initial ranges for each evalResult
     call.evalResults?.forEach((evalResult) => {
       let firstMessageIndex = Infinity;
       let lastMessageIndex = -1;
@@ -178,8 +164,71 @@ export default function CallDetails({
       }
     });
 
+    // Merge overlapping ranges
+    call.evalResults?.forEach((evalResult) => {
+      const currentRange = rangesMap.get(evalResult.id);
+      if (!currentRange) return;
+
+      call.evalResults?.forEach((otherEval) => {
+        if (evalResult.id === otherEval.id) return;
+        const otherRange = rangesMap.get(otherEval.id);
+        if (!otherRange) return;
+
+        // Check if ranges overlap
+        if (
+          currentRange.firstMessageIndex <= otherRange.lastMessageIndex &&
+          currentRange.lastMessageIndex >= otherRange.firstMessageIndex
+        ) {
+          // Merge ranges
+          const mergedFirst = Math.min(
+            currentRange.firstMessageIndex,
+            otherRange.firstMessageIndex,
+          );
+          const mergedLast = Math.max(
+            currentRange.lastMessageIndex,
+            otherRange.lastMessageIndex,
+          );
+
+          // Update both ranges to the merged range
+          rangesMap.set(evalResult.id, {
+            firstMessageIndex: mergedFirst,
+            lastMessageIndex: mergedLast,
+          });
+          rangesMap.set(otherEval.id, {
+            firstMessageIndex: mergedFirst,
+            lastMessageIndex: mergedLast,
+          });
+        }
+      });
+    });
+
+    // Now build messageMap using the merged ranges
+    call.evalResults?.forEach((evalResult) => {
+      const range = rangesMap.get(evalResult.id);
+      if (!range) return;
+
+      for (let i = range.firstMessageIndex; i <= range.lastMessageIndex; i++) {
+        const existing = messageMap.get(i) ?? [];
+        messageMap.set(i, [...existing, evalResult]);
+      }
+    });
+
     return { messageEvalsMap: messageMap, evalRangesMap: rangesMap };
   }, [call.evalResults, messagesFiltered, doesEvalOverlapMessage]);
+
+  const getBorderColorClass = useCallback(
+    (evalResultState: "success" | "failure" | "both") => {
+      switch (evalResultState) {
+        case "success":
+          return "border-green-500";
+        case "failure":
+          return "border-red-500";
+        case "both":
+          return "border-input";
+      }
+    },
+    [],
+  );
 
   return (
     <div className="flex w-full flex-col rounded-md bg-background px-4 outline-none">
@@ -226,7 +275,12 @@ export default function CallDetails({
               {call.evalResults?.map((evalResult) => (
                 <div
                   key={evalResult.id}
-                  className="flex cursor-pointer items-start gap-1 border-l-2 border-red-500 bg-red-100 p-1 pl-1 text-xs text-red-500 hover:bg-red-200"
+                  className={cn(
+                    "flex cursor-pointer items-start gap-1 border-l-2 p-1 pl-1 text-xs",
+                    evalResult.success
+                      ? "border-green-500 bg-green-100 text-green-500 hover:bg-green-200"
+                      : "border-red-500 bg-red-100 text-red-500 hover:bg-red-200",
+                  )}
                   onMouseEnter={() => {
                     setActiveEvalResultId(evalResult.id);
                     audioPlayerRef.current?.setHoveredEvalResult(evalResult.id);
@@ -240,7 +294,11 @@ export default function CallDetails({
                     play();
                   }}
                 >
-                  <ExclamationCircleIcon className="size-4 shrink-0 text-red-500" />
+                  {evalResult.success ? (
+                    <CheckCircleIcon className="size-4 shrink-0 text-green-500" />
+                  ) : (
+                    <XCircleIcon className="size-4 shrink-0 text-red-500" />
+                  )}
                   {evalResult.eval.name}
                 </div>
               ))}
@@ -262,6 +320,13 @@ export default function CallDetails({
       <div ref={scrollContainerRef} className="-mx-4 flex flex-1 flex-col px-4">
         {messagesFiltered.map((message, index) => {
           const evalResults = messageEvalsMap.get(index) ?? [];
+          const evalResultState = evalResults.every(
+            (evalResult) => evalResult.success,
+          )
+            ? "success"
+            : evalResults.every((evalResult) => !evalResult.success)
+              ? "failure"
+              : "both";
           const isFirstEvalMessage = evalResults.some(
             (evalResult) =>
               evalRangesMap.get(evalResult.id)?.firstMessageIndex === index,
@@ -303,13 +368,13 @@ export default function CallDetails({
                       ? "bg-muted hover:bg-muted"
                       : "",
                     evalResults.length > 0
-                      ? "rounded-none border-x border-red-500"
+                      ? `rounded-none border-x ${getBorderColorClass(evalResultState)}`
                       : "",
                     evalResults.length > 0 && isActiveEvalMessage
                       ? "-mx-px border-x-2"
                       : "",
                     isFirstEvalMessage
-                      ? "mt-px rounded-t-md border-t border-red-500"
+                      ? `mt-px rounded-t-md border-t ${getBorderColorClass(evalResultState)}`
                       : "",
                     isFirstEvalMessage && isActiveEvalMessage
                       ? "mt-0 border-t-2"
@@ -330,7 +395,8 @@ export default function CallDetails({
                 {isLastEvalMessage && (
                   <div
                     className={cn(
-                      "flex cursor-pointer flex-col items-start rounded-b-md border-x border-b border-red-500 bg-red-500/20 px-1 py-1.5 text-sm text-red-500",
+                      "flex cursor-pointer flex-col items-start rounded-b-md border-x border-b text-sm",
+                      getBorderColorClass(evalResultState),
                       isActiveEvalMessage
                         ? "z-10 -mx-px -mb-px border-x-2 border-b-2 shadow-lg"
                         : "",
@@ -340,8 +406,14 @@ export default function CallDetails({
                       <div
                         key={evalResult.id}
                         className={cn(
-                          "flex w-full items-start gap-1 py-0.5",
-                          evalResults.length > 1 && "hover:bg-red-500/20",
+                          "flex w-full items-start gap-1 px-1 py-1",
+                          evalResult.success
+                            ? "border-green-500 bg-green-500/20 text-green-500"
+                            : "border-red-500 bg-red-500/20 text-red-500",
+                          evalResults.length > 1 &&
+                            (evalResult.success
+                              ? "hover:bg-green-500/30"
+                              : "hover:bg-red-500/30"),
                         )}
                         onMouseEnter={() => {
                           setActiveEvalResultId(evalResult.id);
@@ -360,8 +432,17 @@ export default function CallDetails({
                           play();
                         }}
                       >
-                        <ExclamationCircleIcon className="size-5 shrink-0" />
-                        {evalResult.details}
+                        {evalResult.success ? (
+                          <CheckCircleIcon className="size-5 shrink-0" />
+                        ) : (
+                          <XCircleIcon className="size-5 shrink-0" />
+                        )}
+                        <div className="flex flex-col gap-0.5 text-sm">
+                          <div className="font-medium">
+                            {evalResult.eval.name}
+                          </div>
+                          <div className="text-xs">{evalResult.details}</div>
+                        </div>
                       </div>
                     ))}
                   </div>

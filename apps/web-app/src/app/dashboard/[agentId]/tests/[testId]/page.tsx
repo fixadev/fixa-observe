@@ -24,7 +24,6 @@ import {
 import { InformationCircleIcon, SlashIcon } from "@heroicons/react/24/solid";
 import { CallStatus } from "@prisma/client";
 import Link from "next/link";
-import { TEST_TESTS } from "~/lib/test-data";
 
 // type CallType = "error" | "no-errors" | "all";
 
@@ -112,6 +111,7 @@ function TestPage({ params }: { params: { agentId: string; testId: string } }) {
   useEffect(() => {
     if (_test) {
       setTest(_test);
+      setSelectedCallId(_test.calls[0]?.id ?? null);
     }
   }, [_test]);
 

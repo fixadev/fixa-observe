@@ -309,8 +309,12 @@ const AudioPlayer = forwardRef<
             >
               <div
                 className={cn(
-                  "size-full cursor-pointer border border-red-500 bg-red-500/20 hover:bg-red-500/50",
-                  hoveredEvalResult === evalResult.id && "bg-red-500/50",
+                  "size-full cursor-pointer border-l-2",
+                  evalResult.success
+                    ? "border-green-500 bg-green-500/20 hover:bg-green-500/50"
+                    : "border-red-500 bg-red-500/20 hover:bg-red-500/50",
+                  hoveredEvalResult === evalResult.id &&
+                    (evalResult.success ? "bg-green-500/50" : "bg-red-500/50"),
                 )}
                 onMouseEnter={() => onEvalResultHover?.(evalResult.id)}
                 onMouseLeave={() => onEvalResultHover?.(null)}
