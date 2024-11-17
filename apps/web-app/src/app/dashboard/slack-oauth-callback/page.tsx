@@ -1,8 +1,7 @@
 "use client";
 
-import axios from "axios";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import Spinner from "~/components/Spinner";
 import { api } from "~/trpc/react";
 
