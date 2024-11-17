@@ -150,7 +150,7 @@ function TestPage({ params }: { params: { agentId: string; testId: string } }) {
   return (
     <div>
       {/* header */}
-      <div className="sticky top-0 z-20 flex h-14 w-full items-center justify-between border-b border-input bg-[#FAFBFC] px-4 lg:h-[60px]">
+      <div className="sticky top-0 z-20 flex h-14 w-full items-center justify-between border-b border-input bg-sidebar px-4 lg:h-[60px]">
         <div className="flex items-center gap-2">
           <SidebarTrigger />
           <Link href={`/dashboard/${params.agentId}`}>

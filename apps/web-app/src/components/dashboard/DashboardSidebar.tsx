@@ -11,8 +11,6 @@ import {
   SidebarMenuBadge,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarRail,
-  SidebarTrigger,
 } from "../ui/sidebar";
 import {
   CounterClockwiseClockIcon,
@@ -63,6 +61,12 @@ export default function DashboardSidebar({
 
   const isCurrentPath = useCallback(
     (path: string) => {
+      if (path === "/") {
+        return (
+          removeTrailingSlash(pathname) === `/dashboard/${params.agentId}` ||
+          pathname.startsWith(`/dashboard/${params.agentId}/tests`)
+        );
+      }
       return (
         removeTrailingSlash(pathname) ===
         removeTrailingSlash(`/dashboard/${params.agentId}${path}`)
@@ -139,7 +143,10 @@ export default function DashboardSidebar({
           <SidebarGroupContent>
             <SidebarMenu>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild>
+                <SidebarMenuButton
+                  asChild
+                  isActive={isCurrentPath("/api-keys")}
+                >
                   <Link href={`/dashboard/${params.agentId}/api-keys`}>
                     <KeyIcon />
                     <span>API keys</span>
@@ -162,7 +169,6 @@ export default function DashboardSidebar({
         </SidebarGroup>
       </SidebarContent>
       {/* <SidebarFooter /> */}
-      <SidebarRail />
     </Sidebar>
   );
 }
