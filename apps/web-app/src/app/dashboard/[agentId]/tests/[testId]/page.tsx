@@ -114,6 +114,7 @@ function TestPage({ params }: { params: { agentId: string; testId: string } }) {
   useEffect(() => {
     if (_test) {
       setTest(_test);
+      setSelectedCallId(_test.calls[0]?.id ?? null);
     }
   }, [_test]);
 
