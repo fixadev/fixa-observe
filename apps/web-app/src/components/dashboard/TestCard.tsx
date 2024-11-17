@@ -3,12 +3,12 @@ import {
   WrenchIcon,
   XCircleIcon,
 } from "@heroicons/react/24/solid";
-import { CallResult, CallStatus } from "@prisma/client";
+import { CallStatus } from "@prisma/client";
 import { formatDistanceToNow } from "date-fns";
 import { useMemo } from "react";
 import { ibmPlexMono } from "~/app/fonts";
 import { type TestWithCalls } from "~/lib/types";
-import { cn } from "~/lib/utils";
+import { cn, didCallSucceed } from "~/lib/utils";
 import Spinner from "../Spinner";
 
 export default function TestCard({
@@ -19,12 +19,12 @@ export default function TestCard({
   className?: string;
 }) {
   const callsSucceeded = useMemo(
-    () => test.calls.filter((call) => call.result === CallResult.success),
+    () => test.calls.filter((call) => didCallSucceed(call)),
     [test.calls],
   );
 
   const callsFailed = useMemo(
-    () => test.calls.filter((call) => call.result === CallResult.failure),
+    () => test.calls.filter((call) => !didCallSucceed(call)),
     [test.calls],
   );
 

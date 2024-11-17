@@ -46,7 +46,11 @@ export class TestService {
         agentId,
       },
       include: {
-        calls: true,
+        calls: {
+          include: {
+            evalResults: true,
+          },
+        },
       },
       orderBy: {
         createdAt: "desc",
@@ -165,7 +169,11 @@ export class TestService {
         },
       },
       include: {
-        calls: true,
+        calls: {
+          include: {
+            evalResults: true,
+          },
+        },
       },
     });
   }
