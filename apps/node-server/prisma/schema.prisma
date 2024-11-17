@@ -45,7 +45,7 @@ model Agent {
 }
 
 model Test {
-  id        String   @id @default(cuid())
+  id        String   @id @default(uuid())
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -58,7 +58,7 @@ model Test {
 }
 
 model TestAgent {
-  id          String  @id @default(cuid())
+  id          String  @id @default(uuid())
   ownerId     String?
   name        String
   headshotUrl String
@@ -70,7 +70,7 @@ model TestAgent {
 }
 
 model Call {
-  id                 String       @id @default(cuid())
+  id                 String       @id @default(uuid())
   ownerId            String?
   status             CallStatus
   result             CallResult?
@@ -93,7 +93,7 @@ model Call {
 }
 
 model Message {
-  id               String @id @default(cuid())
+  id               String @id @default(uuid())
   role             Role
   message          String @default("")
   time             Float  @default(0)
@@ -109,7 +109,7 @@ model Message {
 }
 
 model CallError {
-  id               String  @id @default(cuid())
+  id               String  @id @default(uuid())
   secondsFromStart Float
   duration         Float
   type             String?
@@ -145,7 +145,7 @@ model CallRecording {
 }
 
 model Scenario {
-  id      String @id @default(cuid())
+  id      String @id @default(uuid())
   agent   Agent  @relation(fields: [agentId], references: [id], onDelete: Cascade)
   agentId String
 
@@ -162,7 +162,7 @@ model Scenario {
 }
 
 model Eval {
-  id        String   @id @default(cuid())
+  id        String   @id @default(uuid())
   createdAt DateTime @default(now())
 
   name        String
@@ -170,8 +170,9 @@ model Eval {
   scenario    Scenario? @relation(fields: [scenarioId], references: [id])
   scenarioId  String?
 
-  type        EvalType
-  resultType  EvalResultType
+  type       EvalType
+  resultType EvalResultType
+
   evalResults EvalResult[]
 
   agent   Agent?  @relation(fields: [agentId], references: [id])
@@ -181,7 +182,7 @@ model Eval {
 }
 
 model EvalResult {
-  id        String   @id @default(cuid())
+  id        String   @id @default(uuid())
   createdAt DateTime @default(now())
 
   call   Call?   @relation(fields: [callId], references: [id])
@@ -194,7 +195,7 @@ model EvalResult {
   success          Boolean
   secondsFromStart Float
   duration         Float
-  type             String?
+  type             EvalResultType
   details          String
 }
 

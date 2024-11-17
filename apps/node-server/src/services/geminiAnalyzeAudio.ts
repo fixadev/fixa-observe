@@ -12,19 +12,6 @@ const bucket = storage.bucket(env.GOOGLE_CLOUD_BUCKET_NAME ?? "");
 const evalResultSchema = {
   type: SchemaType.OBJECT,
   properties: {
-    id: {
-      type: SchemaType.STRING,
-      description: "CUID identifier",
-    },
-    createdAt: {
-      type: SchemaType.STRING,
-      description: "Creation date",
-    },
-    callId: {
-      type: SchemaType.STRING,
-      description: "Call identifier",
-      nullable: true,
-    },
     evalId: {
       type: SchemaType.STRING,
       description: "Evaluation identifier",
@@ -56,8 +43,6 @@ const evalResultSchema = {
     },
   },
   required: [
-    "id",
-    "createdAt",
     "evalId",
     "result",
     "success",
