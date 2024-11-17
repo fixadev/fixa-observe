@@ -120,21 +120,21 @@ export function AddAgentModal({ children, refetchAgents }: AddAgentModalProps) {
     scenarios: [],
   });
 
-  const addScenario = () => {
-    setAgent({
-      ...agent,
-      scenarios: [
-        ...agent.scenarios,
-        {
-          name: "",
-          instructions: "",
-          successCriteria: "",
-          isNew: true,
-          evals: [],
-        },
-      ],
-    });
-  };
+  // const addScenario = () => {
+  //   setAgent({
+  //     ...agent,
+  //     scenarios: [
+  //       ...agent.scenarios,
+  //       {
+  //         name: "",
+  //         instructions: "",
+  //         successCriteria: "",
+  //         isNew: true,
+  //         evals: [],
+  //       },
+  //     ],
+  //   });
+  // };
 
   const { mutate: createAgent, isPending: isCreatingAgent } =
     api.agent.create.useMutation({
@@ -144,25 +144,25 @@ export function AddAgentModal({ children, refetchAgents }: AddAgentModalProps) {
       },
     });
 
-  const { mutate: generateScenarios } =
-    api.agent.generateScenariosFromPrompt.useMutation({
-      onSuccess: (data) => {
-        setAgent({ ...agent, scenarios: [...agent.scenarios, ...data] });
-        setIsGeneratingScenarios(false);
-      },
-    });
+  // const { mutate: generateScenarios } =
+  //   api.agent.generateScenariosFromPrompt.useMutation({
+  //     onSuccess: (data) => {
+  //       setAgent({ ...agent, scenarios: [...agent.scenarios, ...data] });
+  //       setIsGeneratingScenarios(false);
+  //     },
+  //   });
 
-  const handleGenerateScenarios = (prompt: string) => {
-    if (prompt.length > 0) {
-      setIsGeneratingScenarios(true);
-      generateScenarios({ prompt, numberOfScenarios });
-    } else {
-      toast({
-        title: "Please enter a prompt to generate scenarios",
-        variant: "destructive",
-      });
-    }
-  };
+  // const handleGenerateScenarios = (prompt: string) => {
+  //   if (prompt.length > 0) {
+  //     setIsGeneratingScenarios(true);
+  //     generateScenarios({ prompt, numberOfScenarios });
+  //   } else {
+  //     toast({
+  //       title: "Please enter a prompt to generate scenarios",
+  //       variant: "destructive",
+  //     });
+  //   }
+  // };
 
   const handleCreateAgent = () => {
     if (!checkForValidPhoneNumber(agent.phoneNumber)) {
@@ -177,27 +177,27 @@ export function AddAgentModal({ children, refetchAgents }: AddAgentModalProps) {
     }
   };
 
-  const deleteScenario = (index: number) => {
-    setAgent({
-      ...agent,
-      scenarios: agent.scenarios.filter((_, i) => i !== index),
-    });
-  };
+  // const deleteScenario = (index: number) => {
+  //   setAgent({
+  //     ...agent,
+  //     scenarios: agent.scenarios.filter((_, i) => i !== index),
+  //   });
+  // };
 
-  const handleSaveScenario = (
-    scenario: CreateScenarioSchema | ScenarioWithEvals,
-    index: number,
-  ) => {
-    setAgent({
-      ...agent,
-      scenarios: agent.scenarios.map((s, i) => (i === index ? scenario : s)),
-    });
-  };
+  // const handleSaveScenario = (
+  //   scenario: CreateScenarioSchema | ScenarioWithEvals,
+  //   index: number,
+  // ) => {
+  //   setAgent({
+  //     ...agent,
+  //     scenarios: agent.scenarios.map((s, i) => (i === index ? scenario : s)),
+  //   });
+  // };
 
   return (
     <Dialog open={modalOpen} onOpenChange={setModalOpen}>
       <DialogTrigger asChild>{children}</DialogTrigger>
-      <DialogContent className="flex h-[95vh] w-[95vw] min-w-[95vw] flex-col p-0">
+      <DialogContent className="h-100 flex w-[50vw] flex-col p-0">
         <DialogTitle className="p-6 pb-2">new agent</DialogTitle>
         <div className="flex flex-1 flex-col space-y-4 overflow-y-auto p-6 pt-2">
           <InputWithLabel
@@ -212,12 +212,7 @@ export function AddAgentModal({ children, refetchAgents }: AddAgentModalProps) {
               setAgent({ ...agent, phoneNumber: formatPhoneNumber(value) })
             }
           />
-          <TextAreaWithLabel
-            label="agent prompt"
-            value={agent?.systemPrompt ?? ""}
-            onChange={(value) => setAgent({ ...agent, systemPrompt: value })}
-          />
-          <div className="flex w-full flex-1 flex-grow flex-col gap-2">
+          {/* <div className="flex w-full flex-1 flex-grow flex-col gap-2">
             <div className="flex w-full flex-row items-center justify-between gap-2">
               <Label className="text-lg">scenarios</Label>
               <div className="flex gap-2">
@@ -272,7 +267,7 @@ export function AddAgentModal({ children, refetchAgents }: AddAgentModalProps) {
                 </Button>
               </div>
             )}
-          </div>
+          </div> */}
         </div>
         <div className="flex justify-end border-t p-4">
           <Button
