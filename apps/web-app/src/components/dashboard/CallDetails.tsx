@@ -1,12 +1,16 @@
 import type { CallWithIncludes, EvalResultWithIncludes } from "~/lib/types";
 import AudioPlayer, { type AudioPlayerRef } from "./AudioPlayer";
 import { useMemo, useRef, useState, useEffect, useCallback } from "react";
-import { cn, formatDurationHoursMinutesSeconds } from "~/lib/utils";
+import {
+  cn,
+  didCallSucceed,
+  formatDurationHoursMinutesSeconds,
+} from "~/lib/utils";
 import { useAudio } from "~/hooks/useAudio";
 import { type Agent } from "prisma/generated/zod";
 import { CheckCircleIcon, XCircleIcon } from "@heroicons/react/24/solid";
 import Image from "next/image";
-import { CallResult, CallStatus, Role } from "@prisma/client";
+import { CallStatus, Role } from "@prisma/client";
 import Spinner from "../Spinner";
 
 export default function CallDetails({
@@ -224,7 +228,7 @@ export default function CallDetails({
         case "failure":
           return "border-red-500";
         case "both":
-          return "border-input";
+          return "border-muted-foreground/50";
       }
     },
     [],
@@ -254,12 +258,10 @@ export default function CallDetails({
                 <div
                   className={cn(
                     "w-fit rounded-full px-2 py-1 text-xs",
-                    call.result === CallResult.failure
-                      ? "bg-red-100"
-                      : "bg-green-100",
+                    didCallSucceed(call) ? "bg-green-100" : "bg-red-100",
                   )}
                 >
-                  {call.result === CallResult.failure ? "failed" : "succeeded"}
+                  {didCallSucceed(call) ? "succeeded" : "failed"}
                 </div>
               )}
             </div>
@@ -280,6 +282,8 @@ export default function CallDetails({
                     evalResult.success
                       ? "border-green-500 bg-green-100 text-green-500 hover:bg-green-200"
                       : "border-red-500 bg-red-100 text-red-500 hover:bg-red-200",
+                    activeEvalResultId === evalResult.id &&
+                      (evalResult.success ? "bg-green-200" : "bg-red-200"),
                   )}
                   onMouseEnter={() => {
                     setActiveEvalResultId(evalResult.id);
@@ -414,6 +418,10 @@ export default function CallDetails({
                             (evalResult.success
                               ? "hover:bg-green-500/30"
                               : "hover:bg-red-500/30"),
+                          activeEvalResultId === evalResult.id &&
+                            (evalResult.success
+                              ? "bg-green-500/30"
+                              : "bg-red-500/30"),
                         )}
                         onMouseEnter={() => {
                           setActiveEvalResultId(evalResult.id);
