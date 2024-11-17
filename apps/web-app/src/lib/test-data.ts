@@ -1,4 +1,4 @@
-// import type { Intent, RoleType, TestAgent } from "prisma/generated/zod";
+// import type { RoleType, TestAgent } from "prisma/generated/zod";
 // import type {
 //   TestWithIncludes,
 //   CallWithIncludes,
@@ -32,45 +32,7 @@
 //   },
 // ];
 
-// export const TEST_AGENT: AgentWithIncludes = {
-//   id: "1",
-//   ownerId: "1",
-//   createdAt: new Date(),
-//   updatedAt: new Date(),
-//   intents: [
-//     {
-//       id: "1",
-//       name: "make reservation",
-//       instructions:
-//         "Help the customer place a food order. Get specific items, quantities, any special requests or dietary restrictions.",
-//       successCriteria: "Order was placed successfully",
-//       agentId: "1",
-//     },
-//     {
-//       id: "2",
-//       name: "order takeout",
-//       instructions:
-//         "Help the customer place a food order. Get specific items, quantities, any special requests or dietary restrictions.",
-//       successCriteria: "Order was placed successfully",
-//       agentId: "1",
-//     },
-//     {
-//       id: "3",
-//       name: "ask about menu",
-//       instructions:
-//         "Help the customer place a food order. Get specific items, quantities, any special requests or dietary restrictions.",
-//       successCriteria: "Order was placed successfully",
-//       agentId: "1",
-//     },
-//   ],
-//   name: "Test Agent",
-//   phoneNumber: "+1 (234) 567-8901",
-//   githubRepoUrl: "https://github.com/pixa-dev/pixa-drive-thru",
-//   systemPrompt: "Test system prompt",
-//   enabledTestAgents: [TEST_TEST_AGENTS[0]!, TEST_TEST_AGENTS[1]!],
-// };
-
-// export const TEST_INTENTS: Intent[] = [
+// export const TEST_SCENARIOS: AgentWithIncludes["scenarios"] = [
 //   {
 //     id: "2",
 //     name: "make reservation",
@@ -78,6 +40,32 @@
 //       "Assist in making a restaurant reservation. Collect date, time, party size, and any special accommodations needed.",
 //     successCriteria: "Reservation was made successfully",
 //     agentId: "test-agent-1",
+//     isNew: false,
+//     evals: [
+//       {
+//         id: crypto.randomUUID(),
+//         ownerId: null,
+//         name: "Reservation Details Completion",
+//         description:
+//           "Checks if all required reservation details were collected",
+//         type: "scenario" as const,
+//         createdAt: new Date(),
+//         agentId: null,
+//         scenarioId: null,
+//         resultType: "boolean" as const,
+//       },
+//       {
+//         id: crypto.randomUUID(),
+//         ownerId: null,
+//         name: "Accommodation Handling",
+//         description: "Evaluates how well special requests were handled",
+//         type: "scenario" as const,
+//         createdAt: new Date(),
+//         agentId: null,
+//         scenarioId: null,
+//         resultType: "boolean" as const,
+//       },
+//     ],
 //   },
 //   {
 //     id: "1",
@@ -86,6 +74,32 @@
 //       "Help the customer place a food order. Get specific items, quantities, any special requests or dietary restrictions.",
 //     successCriteria: "Order was placed successfully",
 //     agentId: "test-agent-1",
+//     isNew: false,
+//     evals: [
+//       {
+//         id: crypto.randomUUID(),
+//         ownerId: null,
+//         name: "Order Accuracy Check",
+//         description:
+//           "Verifies if all order items and modifications were correctly captured",
+//         type: "scenario" as const,
+//         createdAt: new Date(),
+//         agentId: null,
+//         scenarioId: null,
+//         resultType: "boolean" as const,
+//       },
+//       {
+//         id: crypto.randomUUID(),
+//         ownerId: null,
+//         name: "Dietary Restrictions Handling",
+//         description: "Assesses handling of dietary requirements and allergies",
+//         type: "scenario" as const,
+//         createdAt: new Date(),
+//         agentId: null,
+//         scenarioId: null,
+//         resultType: "boolean" as const,
+//       },
+//     ],
 //   },
 //   {
 //     id: "3",
@@ -94,6 +108,31 @@
 //       "Answer general questions about the restaurant including hours, location, menu items, or policies.",
 //     successCriteria: "Reservation was made successfully",
 //     agentId: "test-agent-1",
+//     isNew: false,
+//     evals: [
+//       {
+//         id: crypto.randomUUID(),
+//         ownerId: null,
+//         name: "Menu Knowledge",
+//         description: "Evaluates accuracy of menu item descriptions and pricing",
+//         type: "scenario" as const,
+//         createdAt: new Date(),
+//         agentId: null,
+//         scenarioId: null,
+//         resultType: "boolean" as const,
+//       },
+//       {
+//         id: crypto.randomUUID(),
+//         ownerId: null,
+//         name: "Policy Communication",
+//         description: "Assesses clarity in explaining restaurant policies",
+//         type: "scenario" as const,
+//         createdAt: new Date(),
+//         agentId: null,
+//         scenarioId: null,
+//         resultType: "boolean" as const,
+//       },
+//     ],
 //   },
 // ];
 
@@ -104,8 +143,8 @@
 //     result: "success" as const,
 //     failureReason: null,
 //     testId: "1",
-//     intentId: TEST_INTENTS[0]!.id,
-//     intent: TEST_INTENTS[0]!,
+//     scenarioId: TEST_SCENARIOS[0]!.id,
+//     scenario: TEST_SCENARIOS[0]!,
 //   },
 //   {
 //     id: crypto.randomUUID(),
@@ -113,8 +152,8 @@
 //     result: "failure" as const,
 //     failureReason: null,
 //     testId: "1",
-//     intentId: TEST_INTENTS[1]!.id,
-//     intent: TEST_INTENTS[1]!,
+//     scenarioId: TEST_SCENARIOS[1]!.id,
+//     scenario: TEST_SCENARIOS[1]!,
 //   },
 //   {
 //     id: crypto.randomUUID(),
@@ -122,8 +161,8 @@
 //     result: "success" as const,
 //     failureReason: "Technical difficulties during call",
 //     testId: "1",
-//     intentId: TEST_INTENTS[2]!.id,
-//     intent: TEST_INTENTS[2]!,
+//     scenarioId: TEST_SCENARIOS[2]!.id,
+//     scenario: TEST_SCENARIOS[2]!,
 //   },
 //   {
 //     id: crypto.randomUUID(),
@@ -131,8 +170,8 @@
 //     result: "success" as const,
 //     failureReason: null,
 //     testId: "1",
-//     intentId: TEST_INTENTS[0]!.id,
-//     intent: TEST_INTENTS[0]!,
+//     scenarioId: TEST_SCENARIOS[0]!.id,
+//     scenario: TEST_SCENARIOS[0]!,
 //   },
 //   {
 //     id: crypto.randomUUID(),
@@ -140,8 +179,8 @@
 //     result: "failure" as const,
 //     failureReason: "Call disconnected",
 //     testId: "1",
-//     intentId: TEST_INTENTS[1]!.id,
-//     intent: TEST_INTENTS[1]!,
+//     scenarioId: TEST_SCENARIOS[1]!.id,
+//     scenario: TEST_SCENARIOS[1]!,
 //   },
 //   {
 //     id: crypto.randomUUID(),
@@ -149,8 +188,8 @@
 //     result: "success" as const,
 //     failureReason: null,
 //     testId: "1",
-//     intentId: TEST_INTENTS[0]!.id,
-//     intent: TEST_INTENTS[0]!,
+//     scenarioId: TEST_SCENARIOS[0]!.id,
+//     scenario: TEST_SCENARIOS[0]!,
 //   },
 //   {
 //     id: crypto.randomUUID(),
@@ -158,8 +197,8 @@
 //     result: "failure" as const,
 //     failureReason: "System error during payment",
 //     testId: "1",
-//     intentId: TEST_INTENTS[2]!.id,
-//     intent: TEST_INTENTS[2]!,
+//     scenarioId: TEST_SCENARIOS[2]!.id,
+//     scenario: TEST_SCENARIOS[2]!,
 //   },
 //   {
 //     id: crypto.randomUUID(),
@@ -167,8 +206,8 @@
 //     result: "success" as const,
 //     failureReason: null,
 //     testId: "1",
-//     intentId: TEST_INTENTS[0]!.id,
-//     intent: TEST_INTENTS[0]!,
+//     scenarioId: TEST_SCENARIOS[0]!.id,
+//     scenario: TEST_SCENARIOS[0]!,
 //   },
 //   {
 //     id: crypto.randomUUID(),
@@ -176,8 +215,8 @@
 //     result: "failure" as const,
 //     failureReason: "Audio quality issues",
 //     testId: "1",
-//     intentId: TEST_INTENTS[1]!.id,
-//     intent: TEST_INTENTS[1]!,
+//     scenarioId: TEST_SCENARIOS[1]!.id,
+//     scenario: TEST_SCENARIOS[1]!,
 //   },
 //   {
 //     id: crypto.randomUUID(),
@@ -185,8 +224,8 @@
 //     result: "success" as const,
 //     failureReason: null,
 //     testId: "1",
-//     intentId: TEST_INTENTS[0]!.id,
-//     intent: TEST_INTENTS[0]!,
+//     scenarioId: TEST_SCENARIOS[0]!.id,
+//     scenario: TEST_SCENARIOS[0]!,
 //   },
 // ].map((call, index) => ({
 //   ...call,
@@ -305,6 +344,8 @@
 //       : [],
 //   stereoRecordingUrl:
 //     "https://jtuyprjjgxbgmtjiykoa.supabase.co/storage/v1/object/public/recordings/52d458bc-1a46-4daa-9678-55123364a468-1731547327741-79ac2ff8-1cf9-4247-a05c-e9b23b615c91-stereo.wav",
+//   monoRecordingUrl:
+//     "https://jtuyprjjgxbgmtjiykoa.supabase.co/storage/v1/object/public/recordings/52d458bc-1a46-4daa-9678-55123364a468-1731547327741-79ac2ff8-1cf9-4247-a05c-e9b23b615c91-mono.wav",
 // }));
 
 // export const TEST_TESTS: TestWithIncludes[] = [
@@ -318,3 +359,16 @@
 //     gitCommit: null,
 //   },
 // ];
+
+// export const TEST_AGENT: AgentWithIncludes = {
+//   id: "1",
+//   ownerId: "1",
+//   createdAt: new Date(),
+//   updatedAt: new Date(),
+//   scenarios: TEST_SCENARIOS,
+//   name: "Test Agent",
+//   phoneNumber: "+1 (234) 567-8901",
+//   githubRepoUrl: "https://github.com/pixa-dev/pixa-drive-thru",
+//   systemPrompt: "Test system prompt",
+//   enabledTestAgents: [TEST_TEST_AGENTS[0]!, TEST_TEST_AGENTS[1]!],
+// };
