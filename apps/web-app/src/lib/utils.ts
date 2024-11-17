@@ -1,5 +1,6 @@
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
+import { type CallWithIncludes } from "./types";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -7,6 +8,10 @@ export function cn(...inputs: ClassValue[]) {
 
 export function removeTrailingSlash(path: string) {
   return path.replace(/\/+$/, "");
+}
+
+export function didCallSucceed(call: CallWithIncludes) {
+  return call.evalResults.every((result) => result.success);
 }
 
 export function formatDurationHoursMinutesSeconds(numSeconds: number): string {

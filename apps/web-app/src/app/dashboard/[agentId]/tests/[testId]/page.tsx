@@ -16,14 +16,12 @@ import {
   type AnalysisStartedData,
 } from "~/lib/agent";
 import { useUser } from "@clerk/nextjs";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "~/components/ui/popover";
-import { InformationCircleIcon, SlashIcon } from "@heroicons/react/24/solid";
+import { SlashIcon } from "@heroicons/react/24/solid";
 import { CallStatus } from "@prisma/client";
 import Link from "next/link";
+// import { TEST_TESTS } from "~/lib/test-data";
+import TestScenarios from "~/components/dashboard/TestScenarios";
+import { didCallSucceed } from "~/lib/utils";
 
 // type CallType = "error" | "no-errors" | "all";
 
@@ -40,7 +38,6 @@ export default function TestPageWithProvider({
 }
 
 function TestPage({ params }: { params: { agentId: string; testId: string } }) {
-  // const [selectedCallType] = useState<CallType>("error");
   const [selectedCallId, setSelectedCallId] = useState<string | null>(null);
   const [test, setTest] = useState<TestWithIncludes | null>(null);
   const { play, pause, seek, isPlaying } = useAudio();
@@ -109,15 +106,36 @@ function TestPage({ params }: { params: { agentId: string; testId: string } }) {
   );
 
   // Add new state to track expanded scenarios
-  const [expandedScenarios, setExpandedScenarios] = useState<Set<string>>(
-    new Set(),
-  );
+  const [selectedScenario, setSelectedScenario] = useState<string | null>(null);
 
-  const sortedCalls = useMemo(() => {
-    return test?.calls.sort(
-      (a, b) => a.scenario?.name?.localeCompare(b.scenario?.name ?? "") ?? 0,
-    );
-  }, [test?.calls]);
+  const filteredCalls = useMemo(() => {
+    return test?.calls
+      .filter(
+        (call) => !selectedScenario || call.scenario?.id === selectedScenario,
+      )
+      .sort((a, b) => {
+        // Sort by scenario name first
+        const scenarioCompare =
+          a.scenario?.id?.localeCompare(b.scenario?.id ?? "") ?? 0;
+        if (scenarioCompare !== 0) {
+          return scenarioCompare;
+        }
+        // Then sort succeeded after failed within each scenario
+        const aSucceeded = didCallSucceed(a);
+        const bSucceeded = didCallSucceed(b);
+        return aSucceeded === bSucceeded ? 0 : aSucceeded ? 1 : -1;
+      });
+  }, [selectedScenario, test?.calls]);
+
+  const selectedCall = useMemo(() => {
+    return filteredCalls?.find((call) => call.id === selectedCallId);
+  }, [filteredCalls, selectedCallId]);
+
+  useEffect(() => {
+    if (filteredCalls?.length) {
+      setSelectedCallId(filteredCalls[0]!.id);
+    }
+  }, [filteredCalls]);
 
   // useEffect(() => {
   //   setTest(TEST_TESTS[0]!);
@@ -125,7 +143,6 @@ function TestPage({ params }: { params: { agentId: string; testId: string } }) {
   useEffect(() => {
     if (_test) {
       setTest(_test);
-      setSelectedCallId(_test.calls[0]?.id ?? null);
     }
   }, [_test]);
 
@@ -171,174 +188,15 @@ function TestPage({ params }: { params: { agentId: string; testId: string } }) {
           }}
         >
           <div className="sticky top-[3.5rem] flex h-[calc(100vh-3.5rem-1px)] w-80 shrink-0 flex-col border-r border-input">
-            {/* <div className="flex items-center gap-2 border-b border-input p-2">
-              <div className="text-sm">show</div>
-              <Select
-                value={selectedCallType}
-                onValueChange={(value) =>
-                  setSelectedCallType(value as CallType)
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="call type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="error" className="cursor-pointer">
-                    calls with errors
-                  </SelectItem>
-                  <SelectItem value="no-errors" className="cursor-pointer">
-                    calls without errors
-                  </SelectItem>
-                  <SelectItem value="all" className="cursor-pointer">
-                    all calls
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-            </div> */}
-            <div className="flex flex-col border-b border-input">
-              <div className="p-2 text-sm font-medium">scenarios</div>
-              {test &&
-                Array.from(
-                  new Set(test.calls.map((call) => call.scenario?.name)),
-                ).map((scenarioName) => {
-                  const scenario = test.calls.find(
-                    (call) => call.scenario?.name === scenarioName,
-                  )?.scenario;
-                  if (!scenario) return null;
-                  const callsWithScenario = test.calls.filter(
-                    (call) => call.scenario?.name === scenarioName,
-                  );
-                  const successCount = callsWithScenario.filter(
-                    (call) => call.result === "success",
-                  ).length;
-                  const totalCount = callsWithScenario.length;
-                  const successRate = (successCount / totalCount) * 100;
-
-                  const isExpanded = expandedScenarios.has(
-                    String(scenarioName),
-                  );
-
-                  return (
-                    <div
-                      key={String(scenarioName)}
-                      className="flex cursor-pointer flex-col gap-1 p-2 hover:bg-muted/50"
-                      onClick={() => {
-                        const newExpanded = new Set(expandedScenarios);
-                        if (isExpanded) {
-                          newExpanded.delete(String(scenarioName));
-                        } else {
-                          newExpanded.add(String(scenarioName));
-                        }
-                        setExpandedScenarios(newExpanded);
-                      }}
-                    >
-                      <div className="flex items-center justify-between rounded-sm p-1">
-                        <div className="flex items-center gap-1 text-xs font-medium">
-                          {scenarioName}
-                          <Popover>
-                            <PopoverTrigger
-                              onClick={(e) => e.stopPropagation()}
-                            >
-                              <InformationCircleIcon className="size-5 shrink-0 text-muted-foreground opacity-80" />
-                            </PopoverTrigger>
-                            <PopoverContent className="flex flex-col gap-1">
-                              <div className="text-xs font-medium">
-                                instructions
-                              </div>
-                              <div className="mb-1 text-xs text-muted-foreground">
-                                {scenario.instructions}
-                              </div>
-                              <div className="text-xs font-medium">
-                                success criteria
-                              </div>
-                              <div className="text-xs text-muted-foreground">
-                                {scenario.successCriteria}
-                              </div>
-                            </PopoverContent>
-                          </Popover>
-                        </div>
-                        <div className="text-xs">
-                          {Math.round(successRate)}%
-                        </div>
-                      </div>
-
-                      {/* Progress bars */}
-                      <div className="flex h-1.5 w-full overflow-hidden rounded-full bg-muted">
-                        <div
-                          className="bg-green-500"
-                          style={{
-                            width: `${successRate}%`,
-                          }}
-                        />
-                        <div
-                          className="bg-red-500"
-                          style={{
-                            width: `${100 - successRate}%`,
-                          }}
-                        />
-                      </div>
-                      <div className="flex justify-between text-xs text-muted-foreground">
-                        <span>{successCount} succeeded</span>
-                        <span>{totalCount - successCount} failed</span>
-                      </div>
-
-                      {/* Expanded eval details */}
-                      {isExpanded && (
-                        <div className="/*bg-muted flex gap-3 pl-1 pt-2">
-                          <div className="w-px bg-input" />
-                          <div className="flex flex-1 flex-col gap-2">
-                            {scenario.evals?.map((evaluation) => {
-                              const evalSuccessCount = callsWithScenario.filter(
-                                (call) =>
-                                  // Check if any evalResult for this eval name is successful
-                                  call.evalResults?.some(
-                                    (result) =>
-                                      result.evalId === evaluation.id &&
-                                      result.success,
-                                  ),
-                              ).length;
-                              const evalSuccessRate =
-                                (evalSuccessCount / totalCount) * 100;
-
-                              return (
-                                <div
-                                  key={evaluation.name}
-                                  className="flex flex-col gap-1"
-                                >
-                                  <div className="flex items-center justify-between">
-                                    <div className="text-xs text-muted-foreground">
-                                      {evaluation.name}
-                                    </div>
-                                    <div className="text-xs">
-                                      {Math.round(evalSuccessRate)}%
-                                    </div>
-                                  </div>
-                                  <div className="flex h-1 w-full overflow-hidden rounded-full bg-muted">
-                                    <div
-                                      className="bg-green-500"
-                                      style={{
-                                        width: `${evalSuccessRate}%`,
-                                      }}
-                                    />
-                                    <div
-                                      className="bg-red-500"
-                                      style={{
-                                        width: `${100 - evalSuccessRate}%`,
-                                      }}
-                                    />
-                                  </div>
-                                </div>
-                              );
-                            })}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
-            </div>
+            {test && (
+              <TestScenarios
+                test={test}
+                selectedScenario={selectedScenario}
+                setSelectedScenario={setSelectedScenario}
+              />
+            )}
             <div className="flex flex-col overflow-y-auto">
-              {sortedCalls?.map((call) => (
+              {filteredCalls?.map((call) => (
                 <CallCard
                   key={call.id}
                   className="shrink-0"
@@ -352,13 +210,9 @@ function TestPage({ params }: { params: { agentId: string; testId: string } }) {
               ))}
             </div>
           </div>
-          {selectedCallId && agent && test && sortedCalls && (
+          {selectedCall && agent && (
             <div className="min-h-screen flex-1">
-              <CallDetails
-                key={selectedCallId}
-                call={sortedCalls.find((call) => call.id === selectedCallId)!}
-                agent={agent}
-              />
+              <CallDetails call={selectedCall} agent={agent} />
             </div>
           )}
         </div>
