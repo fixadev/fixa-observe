@@ -14,7 +14,7 @@ import { Switch } from "~/components/ui/switch";
 import { PlusIcon, RocketLaunchIcon } from "@heroicons/react/24/solid";
 import TestCard from "~/components/dashboard/TestCard";
 import { api } from "~/trpc/react";
-import { useToast } from "~/hooks/use-toast";
+import { useToast } from "~/components/hooks/use-toast";
 
 import useSocketMessage from "~/app/_components/UseSocketMessage";
 import { type AgentWithIncludes } from "~/lib/types";

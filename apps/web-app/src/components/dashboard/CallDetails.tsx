@@ -6,7 +6,7 @@ import {
   didCallSucceed,
   formatDurationHoursMinutesSeconds,
 } from "~/lib/utils";
-import { useAudio } from "~/hooks/useAudio";
+import { useAudio } from "~/components/hooks/useAudio";
 import { type Agent } from "prisma/generated/zod";
 import { CheckCircleIcon, XCircleIcon } from "@heroicons/react/24/solid";
 import Image from "next/image";

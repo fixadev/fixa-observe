@@ -24,6 +24,8 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { type Agent } from "prisma/generated/zod";
+import { SidebarProvider, SidebarTrigger } from "~/components/ui/sidebar";
+import DashboardSidebar from "~/components/dashboard/DashboardSidebar";
 // import { SurveyProvider, useSurvey } from "~/hooks/useSurvey";
 
 const navItems = [
@@ -36,8 +38,22 @@ const navItems = [
   },
   { href: "/settings", icon: Cog6ToothIcon, label: "settings" },
 ];
-
 export default function AgentLayout({
+  children,
+  params,
+}: {
+  params: { agentId: string };
+  children: React.ReactNode;
+}) {
+  return (
+    <SidebarProvider>
+      <DashboardSidebar params={params} />
+      <main className="flex-1">{children}</main>
+    </SidebarProvider>
+  );
+}
+
+function OldAgentLayout({
   children,
   params,
 }: {

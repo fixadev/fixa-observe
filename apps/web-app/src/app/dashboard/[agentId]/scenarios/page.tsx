@@ -5,7 +5,7 @@ import { useState, useEffect, useMemo, useCallback } from "react";
 import { ScenarioCard } from "~/app/_components/ScenarioCard";
 import { useAgent } from "~/app/contexts/UseAgent";
 import { Button } from "~/components/ui/button";
-import { useToast } from "~/hooks/use-toast";
+import { useToast } from "~/components/hooks/use-toast";
 import {
   type UpdateScenarioSchema,
   type CreateScenarioSchema,

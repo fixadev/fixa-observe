@@ -6,7 +6,7 @@ import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { api } from "~/trpc/react";
-import { useToast } from "~/hooks/use-toast";
+import { useToast } from "~/components/hooks/use-toast";
 import { type Agent } from "~/lib/agent";
 import {
   checkForValidPhoneNumber,
