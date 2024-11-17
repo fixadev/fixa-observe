@@ -1,5 +1,9 @@
 import { db } from "../db";
-import { type ScenarioWithEvals, type CreateScenarioSchema } from "~/lib/agent";
+import {
+  type ScenarioWithEvals,
+  type CreateScenarioSchema,
+  type UpdateScenarioSchema,
+} from "~/lib/agent";
 import { v4 as uuidv4 } from "uuid";
 import { type PrismaClient } from "@prisma/client";
 // import { createVapiAssistant } from "../helpers/vapiHelpers";
@@ -132,13 +136,17 @@ export class AgentService {
   async createScenario(agentId: string, scenario: CreateScenarioSchema) {
     return await db.scenario.create({
       data: {
+        id: uuidv4(),
         agentId,
         name: scenario.name,
         instructions: scenario.instructions,
         successCriteria: scenario.successCriteria,
         evals: {
           createMany: {
-            data: scenario.evals,
+            data: scenario.evals.map((evaluation) => ({
+              ...evaluation,
+              id: uuidv4(),
+            })),
           },
         },
       },
@@ -148,7 +156,7 @@ export class AgentService {
     });
   }
 
-  async updateScenario(scenario: ScenarioWithEvals) {
+  async updateScenario(scenario: UpdateScenarioSchema) {
     return await db.scenario.update({
       where: { id: scenario.id },
       data: {

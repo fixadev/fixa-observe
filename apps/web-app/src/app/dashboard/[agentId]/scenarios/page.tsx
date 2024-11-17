@@ -6,7 +6,12 @@ import { ScenarioCard } from "~/app/_components/ScenarioCard";
 import { useAgent } from "~/app/contexts/UseAgent";
 import { Button } from "~/components/ui/button";
 import { useToast } from "~/hooks/use-toast";
-import { type CreateScenarioSchema, type ScenarioWithEvals } from "~/lib/agent";
+import {
+  type UpdateScenarioSchema,
+  type CreateScenarioSchema,
+  type ScenarioWithEvals,
+  type EvalWithoutScenarioId,
+} from "~/lib/agent";
 import { api } from "~/trpc/react";
 import {
   Sheet,
@@ -47,7 +52,7 @@ export default function AgentScenariosPage({
   params: { agentId: string };
 }) {
   const [scenarios, setScenarios] = useState<ScenarioWithEvals[]>([]);
-  const { agent, refetch } = useAgent(params.agentId);
+  const { agent, setAgent, refetch } = useAgent(params.agentId);
   const { toast } = useToast();
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [selectedScenario, setSelectedScenario] =
@@ -62,10 +67,16 @@ export default function AgentScenariosPage({
   const { mutate: createScenario } = api.agent.createScenario.useMutation({
     onSuccess: (data) => {
       setScenarios([...scenarios.slice(0, -1), data]);
-      void refetch();
+      if (agent && data) {
+        setAgent({
+          ...agent,
+          scenarios: [...agent.scenarios, data],
+        });
+      }
       toast({
         title: "Scenario created",
         description: "Scenario created successfully",
+        duration: 1000,
       });
     },
   });
@@ -75,13 +86,13 @@ export default function AgentScenariosPage({
       toast({
         title: "Scenario updated",
         description: "Scenario updated successfully",
+        duration: 1000,
       });
     },
   });
 
   const handleSaveScenario = (
     scenario: CreateScenarioSchema | ScenarioWithEvals,
-    index: number,
   ) => {
     if ("id" in scenario && scenario.id !== "new") {
       setScenarios(scenarios.map((s) => (s.id === scenario.id ? scenario : s)));
@@ -94,12 +105,13 @@ export default function AgentScenariosPage({
         evals: scenario.evals.map((e) => ({
           ...e,
           createdAt: new Date(),
+          scenarioId: undefined,
         })),
       };
-      setScenarios([...scenarios.slice(0, -1), newScenario]);
-
-      createScenario({ agentId: agent?.id ?? "", scenario });
+      setScenarios([...scenarios, newScenario]);
+      createScenario({ agentId: agent?.id ?? "", scenario: newScenario });
     }
+    setIsDrawerOpen(false);
   };
 
   const { mutate: deleteScenario } = api.agent.deleteScenario.useMutation({
@@ -108,32 +120,24 @@ export default function AgentScenariosPage({
       toast({
         title: "Scenario deleted",
         description: "Scenario deleted successfully",
+        duration: 1000,
       });
     },
   });
 
-  const handleDeleteScenario = (index: number) => {
-    setScenarios(scenarios.filter((_, i) => i !== index));
-    if (scenarios[index]?.id) {
-      deleteScenario({ id: scenarios[index].id });
+  const handleDeleteScenario = (id: string) => {
+    setScenarios(scenarios.filter((s) => s.id !== id));
+    if (!scenarios.find((s) => s.id === id)?.isNew) {
+      deleteScenario({ id });
     }
+    setIsDrawerOpen(false);
   };
 
   if (!agent) return null;
 
   const addScenario = () => {
-    setScenarios([
-      ...scenarios,
-      {
-        id: "new",
-        name: "",
-        instructions: "",
-        successCriteria: "",
-        agentId: agent.id,
-        isNew: true,
-        evals: [],
-      },
-    ]);
+    setSelectedScenario(null);
+    setIsDrawerOpen(true);
   };
 
   return (
@@ -169,6 +173,8 @@ export default function AgentScenariosPage({
         selectedScenario={selectedScenario}
         isDrawerOpen={isDrawerOpen}
         setIsDrawerOpen={setIsDrawerOpen}
+        saveScenario={handleSaveScenario}
+        deleteScenario={handleDeleteScenario}
       />
     </div>
   );
@@ -178,12 +184,16 @@ function ScenarioSheet({
   selectedScenario,
   isDrawerOpen,
   setIsDrawerOpen,
+  saveScenario,
+  deleteScenario,
 }: {
   selectedScenario: ScenarioWithEvals | null;
   isDrawerOpen: boolean;
   setIsDrawerOpen: (open: boolean) => void;
+  saveScenario: (scenario: UpdateScenarioSchema) => void;
+  deleteScenario: (id: string) => void;
 }) {
-  const emptyEval = useMemo<Eval>(() => {
+  const emptyEval = useMemo<EvalWithoutScenarioId>(() => {
     return {
       id: "",
       name: "",
@@ -213,11 +223,21 @@ function ScenarioSheet({
   }, [emptyEval]);
 
   const handleUpdateEval = useCallback(
-    (evaluation: Eval) => {
+    (evaluation: EvalWithoutScenarioId) => {
       setEvals(evals.map((e) => (e.id === evaluation.id ? evaluation : e)));
     },
     [evals],
   );
+
+  useEffect(() => {
+    setName(selectedScenario?.name ?? "");
+    setInstructions(selectedScenario?.instructions ?? "");
+    setEvals(
+      selectedScenario?.evals && selectedScenario.evals.length > 0
+        ? selectedScenario.evals
+        : [emptyEval],
+    );
+  }, [selectedScenario, emptyEval]);
 
   const handleDeleteEval = useCallback((id: string) => {
     setEvals((prev) => prev.filter((e) => e.id !== id));
@@ -295,7 +315,9 @@ function ScenarioSheet({
               </AlertDialogHeader>
               <AlertDialogFooter>
                 <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction onClick={() => setIsDrawerOpen(false)}>
+                <AlertDialogAction
+                  onClick={() => deleteScenario(selectedScenario?.id ?? "")}
+                >
                   Delete
                 </AlertDialogAction>
               </AlertDialogFooter>
@@ -305,7 +327,28 @@ function ScenarioSheet({
           <Button variant="outline" onClick={() => setIsDrawerOpen(false)}>
             cancel
           </Button>
-          <Button>save</Button>
+          <Button
+            onClick={() =>
+              selectedScenario
+                ? saveScenario({
+                    ...selectedScenario,
+                    name,
+                    instructions,
+                    evals,
+                  })
+                : saveScenario({
+                    id: "new",
+                    name,
+                    instructions,
+                    evals,
+                    agentId: "",
+                    successCriteria: "",
+                    isNew: false,
+                  })
+            }
+          >
+            save
+          </Button>
         </SheetFooter>
       </SheetContent>
     </Sheet>
@@ -317,8 +360,8 @@ function EvalCard({
   onUpdate,
   onDelete,
 }: {
-  evaluation: Eval;
-  onUpdate: (evaluation: Eval) => void;
+  evaluation: EvalWithoutScenarioId;
+  onUpdate: (evaluation: EvalWithoutScenarioId) => void;
   onDelete: (id: string) => void;
 }) {
   return (
