@@ -8,8 +8,6 @@ import {
 } from "prisma/generated/zod";
 import { z } from "zod";
 import { type CallWithIncludes } from "./types";
-import { EvalType } from "@prisma/client";
-import { EvalResultType } from "@prisma/client";
 
 export type Agent = z.infer<typeof AgentSchema>;
 export type AgentWithoutId = Omit<Agent, "id"> & {
