@@ -44,32 +44,25 @@ import {
   AlertDialogTrigger,
   AlertDialogTitle,
 } from "~/components/ui/alert-dialog";
+import { GenerateScenariosModal } from "./GenerateScenariosModal";
 
 export default function AgentScenariosPage({
   params,
 }: {
   params: { agentId: string };
 }) {
-  const [scenarios, setScenarios] = useState<ScenarioWithEvals[]>([]);
   const { agent, setAgent, refetch } = useAgent(params.agentId);
   const { toast } = useToast();
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [selectedScenario, setSelectedScenario] =
     useState<ScenarioWithEvals | null>(null);
 
-  useEffect(() => {
-    if (agent) {
-      setScenarios(agent.scenarios);
-    }
-  }, [agent]);
-
   const { mutate: createScenario } = api.agent.createScenario.useMutation({
     onSuccess: (data) => {
-      setScenarios([...scenarios.slice(0, -1), data]);
       if (agent && data) {
         setAgent({
           ...agent,
-          scenarios: [...agent.scenarios, data],
+          scenarios: [...agent.scenarios.slice(0, -1), data],
         });
       }
       toast({
@@ -82,6 +75,12 @@ export default function AgentScenariosPage({
 
   const { mutate: updateScenario } = api.agent.updateScenario.useMutation({
     onSuccess: (data) => {
+      if (agent && data) {
+        setAgent({
+          ...agent,
+          scenarios: agent.scenarios.map((s) => (s.id === data.id ? data : s)),
+        });
+      }
       toast({
         title: "Scenario updated",
         description: "Scenario updated successfully",
@@ -90,32 +89,8 @@ export default function AgentScenariosPage({
     },
   });
 
-  const handleSaveScenario = (
-    scenario: CreateScenarioSchema | ScenarioWithEvals,
-  ) => {
-    if ("id" in scenario && scenario.id !== "new") {
-      setScenarios(scenarios.map((s) => (s.id === scenario.id ? scenario : s)));
-      updateScenario({ scenario });
-    } else {
-      const newScenario = {
-        ...scenario,
-        id: "new",
-        agentId: agent?.id ?? "",
-        evals: scenario.evals.map((e) => ({
-          ...e,
-          createdAt: new Date(),
-          scenarioId: undefined,
-        })),
-      };
-      setScenarios([...scenarios, newScenario]);
-      createScenario({ agentId: agent?.id ?? "", scenario: newScenario });
-    }
-    setIsDrawerOpen(false);
-  };
-
   const { mutate: deleteScenario } = api.agent.deleteScenario.useMutation({
     onSuccess: () => {
-      void refetch();
       toast({
         title: "Scenario deleted",
         description: "Scenario deleted successfully",
@@ -124,10 +99,66 @@ export default function AgentScenariosPage({
     },
   });
 
+  const handleSaveScenario = (
+    scenario: CreateScenarioSchema | ScenarioWithEvals,
+  ) => {
+    if (agent?.scenarios.length) {
+      if ("id" in scenario && scenario.id !== "new") {
+        setAgent({
+          ...agent,
+          scenarios: agent.scenarios.map((s) =>
+            s.id === scenario.id
+              ? {
+                  ...scenario,
+                  evals: scenario.evals.map((e) => ({
+                    ...e,
+                    scenarioId: scenario.id,
+                  })),
+                }
+              : s,
+          ),
+        });
+        updateScenario({ scenario });
+      } else {
+        const newScenario = {
+          ...scenario,
+          id: "new",
+          agentId: agent?.id ?? "",
+          evals: scenario.evals.map((e) => ({
+            ...e,
+            createdAt: new Date(),
+            scenarioId: undefined,
+          })),
+        };
+        setAgent({
+          ...agent,
+          scenarios: [
+            ...agent.scenarios,
+            {
+              ...newScenario,
+              evals: newScenario.evals.map((e) => ({
+                ...e,
+                scenarioId: newScenario.id,
+              })),
+            },
+          ],
+        });
+        createScenario({ agentId: agent?.id ?? "", scenario: newScenario });
+      }
+      setIsDrawerOpen(false);
+    }
+  };
+
   const handleDeleteScenario = (id: string) => {
-    setScenarios(scenarios.filter((s) => s.id !== id));
-    if (!scenarios.find((s) => s.id === id)?.isNew) {
+    const scenario = agent?.scenarios.find((s) => s.id === id);
+    if (!scenario?.isNew) {
       deleteScenario({ id });
+    }
+    if (agent && scenario) {
+      setAgent({
+        ...agent,
+        scenarios: agent.scenarios.filter((s) => s.id !== id),
+      });
     }
     setIsDrawerOpen(false);
   };
@@ -150,7 +181,7 @@ export default function AgentScenariosPage({
         <div className="text-2xl font-medium">scenarios</div>
       </div> */}
       <div className="container flex flex-col gap-4 p-4">
-        {scenarios.map((scenario, index) => (
+        {agent.scenarios.map((scenario, index) => (
           <div
             key={scenario.id}
             onClick={() => {
@@ -161,9 +192,13 @@ export default function AgentScenariosPage({
             <ScenarioCard index={index} scenario={scenario} />
           </div>
         ))}
-        <div className="flex flex-row justify-end">
+        <div className="flex flex-row justify-end gap-4">
+          <GenerateScenariosModal agent={agent} setAgent={setAgent}>
+            <Button variant="outline">generate from prompt</Button>
+          </GenerateScenariosModal>
+
           <Button variant="outline" onClick={addScenario}>
-            add scenario
+            add manually
           </Button>
         </div>
       </div>
@@ -206,6 +241,8 @@ function ScenarioSheet({
     };
   }, []);
 
+  const { toast } = useToast();
+
   const [name, setName] = useState(selectedScenario?.name ?? "");
   const [instructions, setInstructions] = useState(
     selectedScenario?.instructions ?? "",
@@ -241,6 +278,48 @@ function ScenarioSheet({
   const handleDeleteEval = useCallback((id: string) => {
     setEvals((prev) => prev.filter((e) => e.id !== id));
   }, []);
+
+  const handleSave = () => {
+    if (name.length === 0 || instructions.length === 0) {
+      toast({
+        title: "please enter a name and instructions",
+        description: "name and instructions are required",
+        variant: "destructive",
+        duration: 1500,
+      });
+      return;
+    }
+    if (evals.some((e) => e.name.length === 0 || e.description.length === 0)) {
+      toast({
+        title:
+          "please enter a name and description for each evaluation criteria",
+        description: "name and description are required",
+        variant: "destructive",
+        duration: 1500,
+      });
+      return;
+    }
+
+    selectedScenario
+      ? saveScenario({
+          ...selectedScenario,
+          name,
+          instructions,
+          evals,
+        })
+      : saveScenario({
+          id: "new",
+          name,
+          instructions,
+          evals,
+          agentId: "",
+          successCriteria: "",
+          isNew: false,
+        });
+    setInstructions("");
+    setName("");
+    setEvals([emptyEval]);
+  };
 
   return (
     <Sheet open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
@@ -326,28 +405,7 @@ function ScenarioSheet({
           <Button variant="outline" onClick={() => setIsDrawerOpen(false)}>
             cancel
           </Button>
-          <Button
-            onClick={() =>
-              selectedScenario
-                ? saveScenario({
-                    ...selectedScenario,
-                    name,
-                    instructions,
-                    evals,
-                  })
-                : saveScenario({
-                    id: "new",
-                    name,
-                    instructions,
-                    evals,
-                    agentId: "",
-                    successCriteria: "",
-                    isNew: false,
-                  })
-            }
-          >
-            save
-          </Button>
+          <Button onClick={handleSave}>save</Button>
         </SheetFooter>
       </SheetContent>
     </Sheet>
