@@ -45,6 +45,7 @@ import {
   AlertDialogTrigger,
   AlertDialogTitle,
 } from "~/components/ui/alert-dialog";
+import { GenerateScenariosModal } from "./GenerateScenariosModal";
 
 export default function AgentScenariosPage({
   params,
@@ -130,6 +131,12 @@ export default function AgentScenariosPage({
     if (!scenarios.find((s) => s.id === id)?.isNew) {
       deleteScenario({ id });
     }
+    if (agent && agent.scenarios.some((s) => s.id === id)) {
+      setAgent({
+        ...agent,
+        scenarios: agent.scenarios.filter((s) => s.id !== id),
+      });
+    }
     setIsDrawerOpen(false);
   };
 
@@ -162,9 +169,13 @@ export default function AgentScenariosPage({
             <ScenarioCard index={index} scenario={scenario} />
           </div>
         ))}
-        <div className="flex flex-row justify-end">
+        <div className="flex flex-row justify-end gap-4">
+          <GenerateScenariosModal agent={agent} setAgent={setAgent}>
+            <Button variant="outline">generate from prompt</Button>
+          </GenerateScenariosModal>
+
           <Button variant="outline" onClick={addScenario}>
-            add scenario
+            add manually
           </Button>
         </div>
       </div>
@@ -207,6 +218,8 @@ function ScenarioSheet({
     };
   }, []);
 
+  const { toast } = useToast();
+
   const [name, setName] = useState(selectedScenario?.name ?? "");
   const [instructions, setInstructions] = useState(
     selectedScenario?.instructions ?? "",
@@ -242,6 +255,48 @@ function ScenarioSheet({
   const handleDeleteEval = useCallback((id: string) => {
     setEvals((prev) => prev.filter((e) => e.id !== id));
   }, []);
+
+  const handleSave = () => {
+    if (name.length === 0 || instructions.length === 0) {
+      toast({
+        title: "please enter a name and instructions",
+        description: "name and instructions are required",
+        variant: "destructive",
+        duration: 1500,
+      });
+      return;
+    }
+    if (evals.some((e) => e.name.length === 0 || e.description.length === 0)) {
+      toast({
+        title:
+          "please enter a name and description for each evaluation criteria",
+        description: "name and description are required",
+        variant: "destructive",
+        duration: 1500,
+      });
+      return;
+    }
+
+    selectedScenario
+      ? saveScenario({
+          ...selectedScenario,
+          name,
+          instructions,
+          evals,
+        })
+      : saveScenario({
+          id: "new",
+          name,
+          instructions,
+          evals,
+          agentId: "",
+          successCriteria: "",
+          isNew: false,
+        });
+    setInstructions("");
+    setName("");
+    setEvals([emptyEval]);
+  };
 
   return (
     <Sheet open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
@@ -327,28 +382,7 @@ function ScenarioSheet({
           <Button variant="outline" onClick={() => setIsDrawerOpen(false)}>
             cancel
           </Button>
-          <Button
-            onClick={() =>
-              selectedScenario
-                ? saveScenario({
-                    ...selectedScenario,
-                    name,
-                    instructions,
-                    evals,
-                  })
-                : saveScenario({
-                    id: "new",
-                    name,
-                    instructions,
-                    evals,
-                    agentId: "",
-                    successCriteria: "",
-                    isNew: false,
-                  })
-            }
-          >
-            save
-          </Button>
+          <Button onClick={handleSave}>save</Button>
         </SheetFooter>
       </SheetContent>
     </Sheet>
