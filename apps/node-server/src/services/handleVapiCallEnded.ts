@@ -6,6 +6,7 @@ import {
   Role,
   Test,
   Eval,
+  CallResult,
 } from "@prisma/client";
 import { db } from "../db";
 import { type ServerMessageEndOfCallReport } from "@vapi-ai/server-sdk/api";
@@ -70,6 +71,9 @@ export const handleVapiCallEnded = async ({
 
     const { scenarioEvalResults, generalEvalResults } = cleanedResultJson;
 
+    const evalResultsToCreate = [...scenarioEvalResults, ...generalEvalResults];
+    const success = evalResultsToCreate.every((result) => result.success);
+
     const updatedCall = await db.call.update({
       where: { id: call.id },
       data: {
@@ -78,8 +82,9 @@ export const handleVapiCallEnded = async ({
         endedAt: report.endedAt,
         stereoRecordingUrl: report.artifact.stereoRecordingUrl,
         monoRecordingUrl: report.artifact.recordingUrl,
+        result: success ? CallResult.success : CallResult.failure,
         evalResults: {
-          create: [...scenarioEvalResults, ...generalEvalResults],
+          create: evalResultsToCreate,
         },
         messages: {
           create: report.artifact.messages
