@@ -23,6 +23,7 @@ export const env = createEnv({
     GCLOUD_CREDS: z.string(),
     RETELL_API_KEY: z.string(),
     VAPI_API_KEY: z.string(),
+    SLACK_CLIENT_SECRET: z.string(),
   },
 
   /**
@@ -39,6 +40,8 @@ export const env = createEnv({
     NEXT_PUBLIC_CLERK_SIGN_UP_FORCE_REDIRECT_URL: z.string(),
     NEXT_PUBLIC_SOCKET_URL: z.string(),
     NEXT_PUBLIC_VAPI_SERVER_URL: z.string(),
+    NEXT_PUBLIC_SLACK_CLIENT_ID: z.string(),
+    NEXT_PUBLIC_SLACK_REDIRECT_URI: z.string(),
   },
 
   /**
@@ -70,6 +73,9 @@ export const env = createEnv({
     VAPI_API_KEY: process.env.VAPI_API_KEY,
     NEXT_PUBLIC_SOCKET_URL: process.env.NEXT_PUBLIC_SOCKET_URL,
     NEXT_PUBLIC_VAPI_SERVER_URL: process.env.NEXT_PUBLIC_VAPI_SERVER_URL,
+    NEXT_PUBLIC_SLACK_CLIENT_ID: process.env.NEXT_PUBLIC_SLACK_CLIENT_ID,
+    NEXT_PUBLIC_SLACK_REDIRECT_URI: process.env.NEXT_PUBLIC_SLACK_REDIRECT_URI,
+    SLACK_CLIENT_SECRET: process.env.SLACK_CLIENT_SECRET,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially
