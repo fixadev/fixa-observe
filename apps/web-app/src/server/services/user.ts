@@ -2,11 +2,11 @@ import { clerkClient, type User } from "@clerk/nextjs/server";
 
 type MetadataType = "public" | "private";
 
-interface PrivateMetadata {
+export interface PrivateMetadata {
   slackAccessToken?: string;
 }
 
-interface PublicMetadata {
+export interface PublicMetadata {
   slackWebhookUrl?: string;
 }
 

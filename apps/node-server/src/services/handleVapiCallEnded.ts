@@ -14,6 +14,7 @@ import { createGeminiPrompt } from "../utils/createGeminiPrompt";
 import { analyzeCallWithGemini } from "./geminiAnalyzeAudio";
 import { formatOutput } from "./formatOutput";
 import { Socket } from "socket.io";
+import { sendTestCompletedSlackMessage } from "./sendSlackMessage";
 
 export const handleVapiCallEnded = async ({
   report,
@@ -125,7 +126,14 @@ export const handleVapiCallEnded = async ({
     if (
       updatedTest?.calls.every((call) => call.status === CallStatus.completed)
     ) {
-      // TODO: Hit slack webhook
+      try {
+        await sendTestCompletedSlackMessage({
+          userId: agent.ownerId,
+          test: updatedTest,
+        });
+      } catch (error) {
+        console.error("Error sending test completed slack message", error);
+      }
     }
 
     if (userSocket) {

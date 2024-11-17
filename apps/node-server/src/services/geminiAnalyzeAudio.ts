@@ -121,7 +121,7 @@ export async function analyzeAudio(
       },
     });
     const model = vertexai.getGenerativeModel({
-      model: "gemini-1.5-pro-latest",
+      model: "gemini-1.5-pro-001",
       generationConfig: {
         responseMimeType: "application/json",
         responseSchema: geminiOutputSchema,

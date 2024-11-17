@@ -2,7 +2,7 @@ import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { env } from "~/env";
 import axios from "axios";
-import { userService } from "~/server/services/user";
+import { type PublicMetadata, userService } from "~/server/services/user";
 
 export const slackRouter = createTRPCRouter({
   exchangeCode: protectedProcedure
@@ -56,7 +56,7 @@ export const slackRouter = createTRPCRouter({
   sendMessage: protectedProcedure
     .input(z.object({ message: z.any() }))
     .mutation(async ({ input, ctx }) => {
-      const webhookUrl = (await userService.getPublicMetadata(ctx.user.id))
+      const webhookUrl = (ctx.user.publicMetadata as PublicMetadata)
         .slackWebhookUrl;
       if (!webhookUrl) {
         throw new Error("Slack webhook URL not found");

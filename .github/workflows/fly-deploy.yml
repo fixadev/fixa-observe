@@ -27,6 +27,8 @@ jobs:
           DATABASE_URL=${{ github.ref == 'refs/heads/main' && secrets.PROD_DATABASE_URL || secrets.DEV_DATABASE_URL }}
           DIRECT_URL=${{ github.ref == 'refs/heads/main' && secrets.PROD_DIRECT_URL || secrets.DEV_DIRECT_URL }}
           GCP_CREDENTIALS=${{ secrets.GCP_CREDENTIALS }}
+          NEXT_BASE_URL=${{ secrets.NEXT_BASE_URL }}
+          CLERK_SECRET_KEY=${{ github.ref == 'refs/heads/main' && secrets.PROD_CLERK_SECRET_KEY || secrets.DEV_CLERK_SECRET_KEY }}
           HOST=0.0.0.0
           PORT=3003
           ENVIRONMENT=development
