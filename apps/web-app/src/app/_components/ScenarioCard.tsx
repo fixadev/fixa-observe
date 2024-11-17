@@ -21,23 +21,7 @@ interface ScenarioCardProps {
   // ) => void;
 }
 
-export function ScenarioCard({
-  scenario,
-  index,
-  // handleSaveScenario,
-  // deleteScenario,
-}: ScenarioCardProps) {
-  const [editMode, setEditMode] = useState(scenario.isNew);
-  const [localScenario, setLocalScenario] = useState<
-    CreateScenarioSchema | ScenarioWithEvals
-  >(scenario);
-
-  // useEffect(() => {
-  //   if (scenario.isNew) {
-  //     setLocalScenario({ ...scenario, isNew: false });
-  //   }
-  // }, [scenario.isNew, index, setLocalScenario, scenario]);
-
+export function ScenarioCard({ scenario }: ScenarioCardProps) {
   return (
     <Card>
       {/* {editMode ? (
@@ -123,12 +107,25 @@ export function ScenarioCard({
           </div>
         </div>
         <div className="flex w-full flex-row gap-2">
-          <Label className="whitespace-nowrap text-sm">prompt</Label>
+          <Label className="whitespace-nowrap text-sm">
+            test agent instructions
+          </Label>
           <p className="truncate text-sm">{scenario.instructions}</p>
         </div>
-        <div className="flex w-full flex-row gap-2">
-          <Label className="whitespace-nowrap text-sm">success criteria</Label>
-          <p className="truncate text-sm">{scenario.successCriteria}</p>
+        <div className="flex w-full flex-row items-center gap-2">
+          <Label className="whitespace-nowrap text-sm">
+            evaluation criteria
+          </Label>
+          {scenario.evals.map((evaluation) => (
+            <div
+              key={evaluation.id}
+              className="flex flex-row rounded-sm border border-input p-2 text-muted-foreground shadow-sm"
+            >
+              <p key={evaluation.id} className="truncate text-sm">
+                {evaluation.name}
+              </p>
+            </div>
+          ))}
         </div>
       </div>
       {/* )} */}
