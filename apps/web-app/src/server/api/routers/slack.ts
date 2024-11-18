@@ -34,6 +34,8 @@ export const slackRouter = createTRPCRouter({
           },
         );
 
+        console.log("================= RESPONSE ==============", response.data);
+
         if (!response.data.ok) {
           throw new Error("Failed to exchange code");
         }
