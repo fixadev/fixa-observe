@@ -26,6 +26,7 @@ export const slackRouter = createTRPCRouter({
             code: input.code,
             client_id: env.NEXT_PUBLIC_SLACK_CLIENT_ID,
             client_secret: env.SLACK_CLIENT_SECRET,
+            redirect_uri: env.NEXT_PUBLIC_SLACK_REDIRECT_URI,
           }).toString(),
           {
             headers: {
