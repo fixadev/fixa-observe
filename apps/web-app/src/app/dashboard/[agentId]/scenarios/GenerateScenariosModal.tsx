@@ -9,7 +9,7 @@ import { Button } from "~/components/ui/button";
 import { Label } from "~/components/ui/label";
 import { api } from "~/trpc/react";
 import { type AgentWithIncludes } from "~/lib/types";
-import { type ReactNode, useState } from "react";
+import { type ReactNode, useEffect, useState } from "react";
 import { useToast } from "~/components/hooks/use-toast";
 import {
   Select,
@@ -53,13 +53,18 @@ export const GenerateScenariosModal = ({
       },
     });
 
-  const handleGenerateScenarios = (prompt: string) => {
+  useEffect(() => {
+    console.log("PROMPT", prompt);
+  }, [prompt]);
+
+  const handleGenerateScenarios = () => {
+    console.log("PROMPT", prompt);
     if (prompt.length > 0) {
       setIsGeneratingScenarios(true);
       generateScenarios({ prompt, numberOfScenarios, agentId: agent.id });
     } else {
       toast({
-        title: "Please enter a prompt to generate scenarios",
+        title: "please enter a prompt to generate scenarios",
         variant: "destructive",
       });
     }
@@ -108,7 +113,7 @@ export const GenerateScenariosModal = ({
           </div>
           <Button
             variant="default"
-            onClick={() => handleGenerateScenarios(agent.systemPrompt)}
+            onClick={() => handleGenerateScenarios()}
             disabled={isGeneratingScenarios}
           >
             {isGeneratingScenarios ? (

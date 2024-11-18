@@ -183,9 +183,6 @@ export default function AgentScenariosPage({
           </Link>
         </div>
       </div>
-      {/* <div className="container flex items-center justify-between py-8">
-        <div className="text-2xl font-medium">scenarios</div>
-      </div> */}
       <div className="container flex flex-col gap-4 p-4">
         {agent.scenarios.map((scenario, index) => (
           <div
