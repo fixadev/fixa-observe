@@ -66,7 +66,7 @@ export default function AgentPage({ params }: { params: { agentId: string } }) {
     ),
   );
 
-  const { data: _tests } = api.test.getAll.useQuery({
+  const { data: _tests, isLoading } = api.test.getAll.useQuery({
     agentId: params.agentId,
   });
 
@@ -124,11 +124,11 @@ export default function AgentPage({ params }: { params: { agentId: string } }) {
       </div>
 
       {/* content */}
-      {tests.length > 0 ? (
+      {isLoading ? null : tests.length > 0 ? (
         <div className="container mx-auto p-4">
           <div className="rounded-t-md border-x border-t border-input shadow-sm">
-            <AnimatePresence mode="popLayout">
-              {tests?.map((test) => (
+            <AnimatePresence mode="popLayout" initial={false}>
+              {tests.map((test) => (
                 <motion.div
                   key={test.id}
                   initial={{ opacity: 0, height: 0 }}

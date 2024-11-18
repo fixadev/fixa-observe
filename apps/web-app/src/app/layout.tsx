@@ -6,7 +6,6 @@ import { TRPCReactProvider } from "~/trpc/react";
 import { ibmPlexSans } from "./fonts";
 import { CSPostHogProvider } from "./providers";
 import { ClerkProvider } from "@clerk/nextjs";
-import { AgentProvider } from "./contexts/UseAgent";
 
 // import { dark } from "@clerk/themes";
 import ChildrenWrapper from "./_components/ChildrenWrapper";
@@ -40,14 +39,12 @@ export default function RootLayout({
               disableTransitionOnChange
             > */}
             <TRPCReactProvider>
-              <AgentProvider>
-                <TooltipProvider delayDuration={100}>
-                  <ChildrenWrapper>
-                    {children}
-                    <Toaster />
-                  </ChildrenWrapper>
-                </TooltipProvider>
-              </AgentProvider>
+              <TooltipProvider delayDuration={100}>
+                <ChildrenWrapper>
+                  {children}
+                  <Toaster />
+                </ChildrenWrapper>
+              </TooltipProvider>
             </TRPCReactProvider>
             {/* </ThemeProvider> */}
           </body>

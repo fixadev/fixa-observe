@@ -39,6 +39,7 @@ import { api } from "~/trpc/react";
 import { type Agent } from "prisma/generated/zod";
 import Logo from "../Logo";
 import { SlackIcon } from "lucide-react";
+import { Skeleton } from "../ui/skeleton";
 
 const navItems = [
   { href: "/", icon: CounterClockwiseClockIcon, label: "test history" },
@@ -76,7 +77,7 @@ export default function DashboardSidebar({
     [pathname, params.agentId],
   );
 
-  const { data: agents } = api.agent.getAll.useQuery();
+  const { data: agents, isLoading } = api.agent.getAll.useQuery();
   const agentsMap = useMemo(() => {
     return agents?.reduce(
       (acc, agent) => {
@@ -106,8 +107,12 @@ export default function DashboardSidebar({
               >
                 <SelectTrigger className="bg-background">
                   <SelectValue placeholder="Select an agent" asChild>
-                    <div className="w-[120px] cursor-pointer truncate text-left">
-                      {agentsMap?.[params.agentId]?.name}
+                    <div className="w-[140px] cursor-pointer truncate text-left">
+                      {isLoading ? (
+                        <Skeleton className="h-4 w-full" />
+                      ) : (
+                        agentsMap?.[params.agentId]?.name
+                      )}
                     </div>
                   </SelectValue>
                 </SelectTrigger>

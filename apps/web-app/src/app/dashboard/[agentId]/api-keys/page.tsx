@@ -5,6 +5,7 @@ import { useEffect } from "react";
 import { CopyText } from "~/components/dashboard/CopyText";
 import { Label } from "~/components/ui/label";
 import { SidebarTrigger } from "~/components/ui/sidebar";
+import { Skeleton } from "~/components/ui/skeleton";
 import { api } from "~/trpc/react";
 
 export default function ApiKeysPage({
@@ -13,7 +14,8 @@ export default function ApiKeysPage({
   params: { agentId: string };
 }) {
   const { data: apiKey, refetch, isLoading } = api.user.getApiKey.useQuery();
-  const { mutateAsync: generateApiKey } = api.user.generateApiKey.useMutation();
+  const { mutateAsync: generateApiKey, isPending: isGeneratingApiKey } =
+    api.user.generateApiKey.useMutation();
 
   useEffect(() => {
     const generateKey = async () => {
@@ -39,7 +41,11 @@ export default function ApiKeysPage({
       <div className="container flex flex-col gap-4 p-4">
         <div className="flex flex-col gap-2">
           <Label>API key</Label>
-          <CopyText text={apiKey?.apiKey ?? ""} sensitive />
+          {isGeneratingApiKey || isLoading ? (
+            <Skeleton className="h-8 w-full" />
+          ) : (
+            <CopyText text={apiKey?.apiKey ?? ""} sensitive />
+          )}
         </div>
       </div>
     </div>

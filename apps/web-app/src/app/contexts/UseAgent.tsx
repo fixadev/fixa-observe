@@ -42,7 +42,11 @@ export function useAgent(agentId?: string) {
   }
 
   const utils = api.useUtils();
-  const { data: fetchedAgent, refetch: refetchAgent } = api.agent.get.useQuery(
+  const {
+    data: fetchedAgent,
+    isLoading,
+    refetch: refetchAgent,
+  } = api.agent.get.useQuery(
     { id: agentId ?? "" },
     {
       enabled: !!agentId,
@@ -53,7 +57,6 @@ export function useAgent(agentId?: string) {
     if (agentId !== context.agent?.id && fetchedAgent) {
       // console.log("invalidating agent", context.agent?.id);
       // void utils.agent.get.invalidate({ id: context.agent?.id ?? "" });
-      context.setAgent(null);
       void utils.agent.get.reset();
       console.log("setting agent", fetchedAgent);
       context.setAgent(fetchedAgent);
@@ -67,7 +70,8 @@ export function useAgent(agentId?: string) {
 
   return {
     agent: context.agent ?? fetchedAgent,
-    refetch,
     setAgent: context.setAgent,
+    refetch,
+    isLoading,
   };
 }

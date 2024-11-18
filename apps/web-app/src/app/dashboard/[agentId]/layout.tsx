@@ -2,6 +2,7 @@
 
 import { SidebarProvider } from "~/components/ui/sidebar";
 import DashboardSidebar from "~/components/dashboard/DashboardSidebar";
+import { AgentProvider } from "~/app/contexts/UseAgent";
 
 export default function AgentLayout({
   children,
@@ -11,9 +12,11 @@ export default function AgentLayout({
   children: React.ReactNode;
 }) {
   return (
-    <SidebarProvider>
-      <DashboardSidebar params={params} />
-      <main className="flex-1">{children}</main>
-    </SidebarProvider>
+    <AgentProvider>
+      <SidebarProvider>
+        <DashboardSidebar params={params} />
+        <main className="flex-1">{children}</main>
+      </SidebarProvider>
+    </AgentProvider>
   );
 }
