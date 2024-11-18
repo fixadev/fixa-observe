@@ -247,7 +247,10 @@ function DeleteAgentDialog({ agentId }: { agentId: string }) {
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button className="w-fit" variant="destructive">
+        <Button
+          className="w-fit text-destructive hover:text-destructive"
+          variant="outline"
+        >
           delete agent
         </Button>
       </DialogTrigger>
