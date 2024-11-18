@@ -25,6 +25,12 @@ export const agentRouter = createTRPCRouter({
       );
     }),
 
+  createTestAgent: protectedProcedure
+    .input(CreateTestAgentSchema)
+    .mutation(async ({ input, ctx }) => {
+      return await agentServiceInstance.createTestAgent(input);
+    }),
+
   get: protectedProcedure
     .input(z.object({ id: z.string() }))
     .query(async ({ input }) => {
