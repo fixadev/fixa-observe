@@ -41,6 +41,7 @@ export type CreateScenarioSchema = z.infer<typeof CreateScenarioSchema>;
 export const CreateScenarioSchema = ScenarioSchema.omit({
   id: true,
   agentId: true,
+  createdAt: true,
 }).extend({
   evals: z.array(CreateScenarioEvalSchema),
 });
