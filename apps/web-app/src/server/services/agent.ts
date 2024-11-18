@@ -48,7 +48,7 @@ export class AgentService {
       include: {
         scenarios: {
           include: {
-            evals: true,
+            evals: { orderBy: { createdAt: "asc" } },
           },
         },
         tests: {
@@ -153,7 +153,7 @@ export class AgentService {
         },
       },
       include: {
-        evals: true,
+        evals: { orderBy: { createdAt: "asc" } },
       },
     });
   }
@@ -178,7 +178,7 @@ export class AgentService {
           },
         },
         include: {
-          evals: true,
+          evals: { orderBy: { createdAt: "asc" } },
         },
       });
     });
@@ -186,6 +186,26 @@ export class AgentService {
   }
 
   async updateScenario(scenario: UpdateScenarioSchema) {
+    const priorEvals = await db.eval.findMany({
+      where: { scenarioId: scenario.id },
+    });
+
+    const evaluationsToDelete = priorEvals.filter(
+      (evaluation) =>
+        !scenario.evals.some(
+          (scenarioEval) => scenarioEval.id === evaluation.id,
+        ),
+    );
+
+    const evaluationsToUpdate = scenario.evals.filter((evaluation) =>
+      priorEvals.some((priorEval) => priorEval.id === evaluation.id),
+    );
+
+    const evaluationsToCreate = scenario.evals.filter(
+      (evaluation) =>
+        !priorEvals.some((priorEval) => priorEval.id === evaluation.id),
+    );
+
     return await db.scenario.update({
       where: { id: scenario.id },
       data: {
@@ -193,12 +213,23 @@ export class AgentService {
         instructions: scenario.instructions,
         successCriteria: scenario.successCriteria,
         evals: {
-          deleteMany: {},
-          createMany: { data: scenario.evals },
+          deleteMany: {
+            id: { in: evaluationsToDelete.map((evaluation) => evaluation.id) },
+          },
+          updateMany: evaluationsToUpdate.map((evaluation) => ({
+            where: { id: evaluation.id },
+            data: evaluation,
+          })),
+          createMany: {
+            data: evaluationsToCreate.map((evaluation) => ({
+              ...evaluation,
+              id: uuidv4(),
+            })),
+          },
         },
       },
       include: {
-        evals: true,
+        evals: { orderBy: { createdAt: "asc" } },
       },
     });
   }

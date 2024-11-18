@@ -119,10 +119,8 @@ export default function AgentScenariosPage({
             : s,
         ),
       });
-      console.log("UPDATING SCENARIO: ", scenario);
       updateScenario({ scenario });
     } else {
-      console.log("CREATING SCENARIO: ", scenario);
       const newScenario = {
         ...scenario,
         id: "new",
@@ -268,7 +266,7 @@ function ScenarioSheet({
 }) {
   const emptyEval = useMemo<EvalWithoutScenarioId>(() => {
     return {
-      id: "",
+      id: crypto.randomUUID(),
       name: "",
       description: "",
       type: EvalType.scenario,
