@@ -1,11 +1,28 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 
-// const isPublicRoute = createRouteMatcher([
-//   "/sign-in(.*)",
-//   "/sign-up(.*)",
-//   "/api(.*)",
-//   "/",
-// ]);
+import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
+
+// export function validateBearerToken(request: NextRequest) {
+//   const authHeader = request.headers.get('authorization');
+//   if (!authHeader?.startsWith('Bearer ')) {
+//     return NextResponse.json(
+//       { error: 'Unauthorized' },
+//       { status: 401 }
+//     );
+//   }
+
+//   const token = authHeader.substring(7); // Remove 'Bearer ' prefix
+//   if (token !== process.env.API_KEY) {
+//     return NextResponse.json(
+//       { error: 'Unauthorized' },
+//       { status: 401 }
+//     );
+//   }
+
+//   return null; // Authentication successful
+// }
+
 const isPrivateRoute = createRouteMatcher(["/dashboard(.*)"]);
 
 export default clerkMiddleware((auth, request) => {
