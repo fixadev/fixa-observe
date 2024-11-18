@@ -125,6 +125,7 @@ export default function AgentScenariosPage({
           ...scenario,
           id: "new",
           agentId: agent?.id ?? "",
+          createdAt: new Date(),
           evals: scenario.evals.map((e) => ({
             ...e,
             createdAt: new Date(),
