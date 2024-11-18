@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { TestService } from "~/server/services/test";
 import { db } from "~/server/db";
+import { getUserIdFromApiKey } from "~/lib/server-utils";
 
 const testService = new TestService(db);
 
@@ -8,7 +9,7 @@ export async function GET(
   req: NextRequest,
   { params }: { params: { testId: string } },
 ) {
-  const userId = req.userId;
+  const userId = await getUserIdFromApiKey(req);
   if (!userId) {
     return NextResponse.json(
       { success: false, error: "Unauthorized" },

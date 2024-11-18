@@ -2,6 +2,7 @@ import { db } from "~/server/db";
 import { TestService } from "~/server/services/test";
 import { z } from "zod";
 import { type NextRequest } from "next/server";
+import { getUserIdFromApiKey } from "~/lib/server-utils";
 
 const testService = new TestService(db);
 
@@ -12,7 +13,7 @@ const inputSchema = z.object({
 });
 
 export async function POST(req: NextRequest) {
-  const userId = req.userId;
+  const userId = await getUserIdFromApiKey(req);
   if (!userId) {
     return Response.json(
       { success: false, error: "Unauthorized" },
