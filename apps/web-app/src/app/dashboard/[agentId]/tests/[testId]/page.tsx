@@ -122,8 +122,8 @@ function TestPage({ params }: { params: { agentId: string; testId: string } }) {
           return scenarioCompare;
         }
         // Then sort succeeded after failed within each scenario
-        const aSucceeded = a.result === CallResult.succeeded;
-        const bSucceeded = b.result === CallResult.succeeded;
+        const aSucceeded = a.result === CallResult.success;
+        const bSucceeded = b.result === CallResult.success;
         return aSucceeded === bSucceeded ? 0 : aSucceeded ? 1 : -1;
       });
   }, [selectedScenario, test?.calls]);
