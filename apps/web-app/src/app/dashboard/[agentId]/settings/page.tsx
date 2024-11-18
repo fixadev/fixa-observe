@@ -20,6 +20,13 @@ import { env } from "~/env";
 import { useUser } from "@clerk/nextjs";
 import { CheckCircleIcon } from "@heroicons/react/24/solid";
 import { SidebarTrigger } from "~/components/ui/sidebar";
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogTrigger,
+} from "~/components/ui/dialog";
+import { useRouter } from "next/navigation";
 
 export default function AgentSettingsPage({
   params,
@@ -127,6 +134,12 @@ export default function AgentSettingsPage({
           </div>
           <InstallSlackAppButton agentId={params.agentId} />
         </div>
+        <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-1">
+            <Label>danger zone</Label>
+          </div>
+          <DeleteAgentDialog agentId={params.agentId} />
+        </div>
       </div>
     </div>
   );
@@ -202,5 +215,63 @@ function InstallSlackAppButton({ agentId }: { agentId: string }) {
         )}
       </a>
     </Button>
+  );
+}
+
+function DeleteAgentDialog({ agentId }: { agentId: string }) {
+  const [isOpen, setIsOpen] = useState(false);
+  const { toast } = useToast();
+  const router = useRouter();
+
+  const utils = api.useUtils();
+
+  const { mutate: deleteAgent, isPending } = api.agent.delete.useMutation({
+    onSuccess: () => {
+      console.log("invalidating agents");
+      void utils.agent.getAll.invalidate();
+      router.push("/dashboard");
+      toast({
+        title: "Agent deleted",
+        description: "Agent has been deleted successfully",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to delete agent",
+        variant: "destructive",
+      });
+    },
+  });
+
+  return (
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <DialogTrigger asChild>
+        <Button className="w-fit" variant="destructive">
+          delete agent
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogTitle>delete agent</DialogTitle>
+        <div className="flex flex-col gap-4">
+          <p className="text-sm text-muted-foreground">
+            are you sure you want to delete this agent? this action cannot be
+            undone.
+          </p>
+          <div className="flex justify-end gap-2">
+            <Button variant="outline" onClick={() => setIsOpen(false)}>
+              cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() => deleteAgent({ id: agentId })}
+              disabled={isPending}
+            >
+              {isPending ? <Spinner /> : "delete"}
+            </Button>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }

@@ -199,4 +199,8 @@ export class AgentService {
   async deleteScenario(id: string) {
     return await db.scenario.delete({ where: { id } });
   }
+
+  async deleteAgent(id: string) {
+    return await db.agent.delete({ where: { id } });
+  }
 }

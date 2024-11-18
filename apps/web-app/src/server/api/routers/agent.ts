@@ -106,4 +106,10 @@ export const agentRouter = createTRPCRouter({
   getAll: protectedProcedure.query(async ({ ctx }) => {
     return await agentServiceInstance.getAllAgents(ctx.user.id);
   }),
+
+  delete: protectedProcedure
+    .input(z.object({ id: z.string() }))
+    .mutation(async ({ input }) => {
+      return await agentServiceInstance.deleteAgent(input.id);
+    }),
 });
