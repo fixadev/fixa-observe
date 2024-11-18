@@ -1,11 +1,31 @@
+"use client";
+
 import Link from "next/link";
+import { useEffect } from "react";
+import { CopyText } from "~/components/dashboard/CopyText";
+import { Label } from "~/components/ui/label";
 import { SidebarTrigger } from "~/components/ui/sidebar";
+import { api } from "~/trpc/react";
 
 export default function ApiKeysPage({
   params,
 }: {
   params: { agentId: string };
 }) {
+  const { data: apiKey, refetch, isLoading } = api.user.getApiKey.useQuery();
+  const { mutateAsync: generateApiKey } = api.user.generateApiKey.useMutation();
+
+  useEffect(() => {
+    const generateKey = async () => {
+      await generateApiKey();
+      await refetch();
+    };
+
+    if (!apiKey && !isLoading) {
+      void generateKey();
+    }
+  }, [generateApiKey, apiKey, refetch, isLoading]);
+
   return (
     <div>
       <div className="sticky top-0 z-20 flex h-14 w-full items-center justify-between border-b border-input bg-sidebar px-4 lg:h-[60px]">
@@ -14,6 +34,12 @@ export default function ApiKeysPage({
           <Link href={`/dashboard/${params.agentId}/api-keys`}>
             <div className="font-medium">API keys</div>
           </Link>
+        </div>
+      </div>
+      <div className="container flex flex-col gap-4 p-4">
+        <div className="flex flex-col gap-2">
+          <Label>API key</Label>
+          <CopyText text={apiKey?.apiKey ?? ""} sensitive />
         </div>
       </div>
     </div>

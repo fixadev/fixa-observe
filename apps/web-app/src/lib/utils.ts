@@ -88,3 +88,7 @@ export function createWavBlob(
 
   return new Blob([buffer], { type: "audio/wav" });
 }
+
+export function generateApiKey() {
+  return `fx_${crypto.randomUUID()}`;
+}

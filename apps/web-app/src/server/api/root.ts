@@ -3,6 +3,7 @@ import { s3Router } from "./routers/s3";
 import { agentRouter } from "./routers/agent";
 import { testRouter } from "./routers/test";
 import { slackRouter } from "./routers/slack";
+import { userRouter } from "./routers/user";
 
 /*  *
  * This is the primary router for your server.
@@ -14,6 +15,7 @@ export const appRouter = createTRPCRouter({
   agent: agentRouter,
   slack: slackRouter,
   test: testRouter,
+  user: userRouter,
 });
 
 // export type definition of API

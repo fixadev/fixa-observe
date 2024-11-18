@@ -3,6 +3,7 @@
 import {
   Sidebar,
   SidebarContent,
+  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
@@ -138,6 +139,8 @@ export default function DashboardSidebar({
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
+      </SidebarContent>
+      <SidebarFooter>
         <SidebarGroup>
           <SidebarGroupLabel>API</SidebarGroupLabel>
           <SidebarGroupContent>
@@ -167,8 +170,7 @@ export default function DashboardSidebar({
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
-      </SidebarContent>
-      {/* <SidebarFooter /> */}
+      </SidebarFooter>
     </Sidebar>
   );
 }

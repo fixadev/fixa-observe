@@ -4,6 +4,7 @@ type MetadataType = "public" | "private";
 
 export interface PrivateMetadata {
   slackAccessToken?: string;
+  apiKey?: string;
 }
 
 export interface PublicMetadata {
