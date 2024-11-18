@@ -40,7 +40,9 @@ export const generateScenariosFromPrompt = async (
   }\n\n AGENT PROMPT: ${prompt}
   \n\nmake sure to set the isNew field to false for all scenarios
   \n\nmake sure to generate ${numberOfScenarios} scenarios
-  \n\nmake sure to set type to scenario for all evals`;
+  \n\nmake sure to set type to scenario for all evals
+  \n\nmake the evals granular and precise
+  \n\ngenerate at least 3 evals for each scenario`;
 
   const completion = await openai.beta.chat.completions.parse({
     model: "gpt-4o",
