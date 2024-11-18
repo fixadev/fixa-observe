@@ -103,53 +103,53 @@ export default function AgentScenariosPage({
   const handleSaveScenario = (
     scenario: CreateScenarioSchema | ScenarioWithEvals,
   ) => {
-    if (agent?.scenarios.length) {
-      if ("id" in scenario && scenario.id !== "new") {
-        setAgent({
-          ...agent,
-          scenarios: agent.scenarios.map((s) =>
-            s.id === scenario.id
-              ? {
-                  ...scenario,
-                  evals: scenario.evals.map((e) => ({
-                    ...e,
-                    scenarioId: scenario.id,
-                  })),
-                }
-              : s,
-          ),
-        });
-        console.log("UPDATING SCENARIO: ", scenario);
-        updateScenario({ scenario });
-      } else {
-        const newScenario = {
-          ...scenario,
-          id: "new",
-          agentId: agent?.id ?? "",
+    if (!agent) return;
+    if ("id" in scenario && scenario.id !== "new") {
+      setAgent({
+        ...agent,
+        scenarios: agent.scenarios.map((s) =>
+          s.id === scenario.id
+            ? {
+                ...scenario,
+                evals: scenario.evals.map((e) => ({
+                  ...e,
+                  scenarioId: scenario.id,
+                })),
+              }
+            : s,
+        ),
+      });
+      console.log("UPDATING SCENARIO: ", scenario);
+      updateScenario({ scenario });
+    } else {
+      console.log("CREATING SCENARIO: ", scenario);
+      const newScenario = {
+        ...scenario,
+        id: "new",
+        agentId: agent?.id ?? "",
+        createdAt: new Date(),
+        evals: scenario.evals.map((e) => ({
+          ...e,
           createdAt: new Date(),
-          evals: scenario.evals.map((e) => ({
-            ...e,
-            createdAt: new Date(),
-            scenarioId: undefined,
-          })),
-        };
-        setAgent({
-          ...agent,
-          scenarios: [
-            ...agent.scenarios,
-            {
-              ...newScenario,
-              evals: newScenario.evals.map((e) => ({
-                ...e,
-                scenarioId: newScenario.id,
-              })),
-            },
-          ],
-        });
-        createScenario({ agentId: agent?.id ?? "", scenario: newScenario });
-      }
-      setIsDrawerOpen(false);
+          scenarioId: undefined,
+        })),
+      };
+      setAgent({
+        ...agent,
+        scenarios: [
+          ...agent.scenarios,
+          {
+            ...newScenario,
+            evals: newScenario.evals.map((e) => ({
+              ...e,
+              scenarioId: newScenario.id,
+            })),
+          },
+        ],
+      });
+      createScenario({ agentId: agent?.id ?? "", scenario: newScenario });
     }
+    setIsDrawerOpen(false);
   };
 
   const handleDeleteScenario = (id: string) => {

@@ -27,6 +27,7 @@ import {
   displayPhoneNumberNicely,
 } from "~/helpers/phoneNumberUtils";
 import { useToast } from "~/components/hooks/use-toast";
+import { useRouter } from "next/navigation";
 
 interface AddAgentModalProps {
   children: React.ReactNode;
@@ -52,6 +53,7 @@ function InputWithLabel({ label, value, onChange }: InputWithLabelProps) {
 export function AddAgentModal({ children, refetchAgents }: AddAgentModalProps) {
   const [modalOpen, setModalOpen] = useState(false);
   const { toast } = useToast();
+  const router = useRouter();
 
   const [agent, setAgent] = useState<CreateAgentSchema>({
     name: "",
@@ -66,9 +68,10 @@ export function AddAgentModal({ children, refetchAgents }: AddAgentModalProps) {
 
   const { mutate: createAgent, isPending: isCreatingAgent } =
     api.agent.create.useMutation({
-      onSuccess: () => {
+      onSuccess: (newAgent) => {
         setModalOpen(false);
         refetchAgents();
+        router.push(`/dashboard/${newAgent.id}/scenarios`);
       },
     });
 
