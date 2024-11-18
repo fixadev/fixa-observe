@@ -27,13 +27,6 @@ import {
   displayPhoneNumberNicely,
 } from "~/helpers/phoneNumberUtils";
 import { useToast } from "~/components/hooks/use-toast";
-import {
-  Select,
-  SelectValue,
-  SelectTrigger,
-  SelectContent,
-  SelectItem,
-} from "~/components/ui/select";
 
 interface AddAgentModalProps {
   children: React.ReactNode;
@@ -56,58 +49,9 @@ function InputWithLabel({ label, value, onChange }: InputWithLabelProps) {
   );
 }
 
-function TextAreaWithLabel({
-  label,
-  value,
-  onChange,
-  onBlur,
-}: InputWithLabelProps) {
-  return (
-    <div className="flex h-48 flex-col gap-2">
-      <Label className="text-md">{label}</Label>
-      <Textarea
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className="h-full"
-        onBlur={onBlur}
-      />
-    </div>
-  );
-}
-
-const loadingMessages = [
-  "generating scenarios",
-  "analyzing system prompt",
-  "crafting agent behaviors",
-  "finalizing scenario structure",
-];
-
 export function AddAgentModal({ children, refetchAgents }: AddAgentModalProps) {
-  const [isGeneratingScenarios, setIsGeneratingScenarios] = useState(false);
-  const [loadingText, setLoadingText] = useState("generating scenarios");
   const [modalOpen, setModalOpen] = useState(false);
-  const [numberOfScenarios, setNumberOfScenarios] = useState(3);
   const { toast } = useToast();
-
-  useEffect(() => {
-    if (!isGeneratingScenarios) return;
-
-    let messageIndex = 0;
-    let dotCount = 0;
-
-    const interval = setInterval(() => {
-      dotCount = (dotCount + 1) % 4;
-
-      if (dotCount === 0) {
-        messageIndex = (messageIndex + 1) % loadingMessages.length;
-      }
-
-      const dots = ".".repeat(dotCount);
-      setLoadingText(`${loadingMessages[messageIndex]}${dots}`);
-    }, 500); // Dots animate every 500ms
-
-    return () => clearInterval(interval);
-  }, [isGeneratingScenarios]);
 
   const [agent, setAgent] = useState<CreateAgentSchema>({
     name: "",
