@@ -1,6 +1,5 @@
 import { db } from "../db";
 import {
-  type ScenarioWithEvals,
   type CreateScenarioSchema,
   type UpdateScenarioSchema,
 } from "~/lib/agent";

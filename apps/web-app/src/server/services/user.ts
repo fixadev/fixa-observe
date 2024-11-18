@@ -1,4 +1,6 @@
 import { clerkClient, type User } from "@clerk/nextjs/server";
+import { db } from "../db";
+import { generateApiKey } from "~/lib/utils";
 
 type MetadataType = "public" | "private";
 
@@ -12,6 +14,21 @@ export interface PublicMetadata {
 }
 
 export class UserService {
+  async createApiKey(userId: string) {
+    const apiKey = generateApiKey();
+    return await db.apiKey.upsert({
+      where: { userId },
+      create: { apiKey, userId },
+      update: { apiKey },
+    });
+  }
+
+  async getApiKey(userId: string) {
+    return await db.apiKey.findFirst({
+      where: { userId },
+    });
+  }
+
   /**
    * Generic function to update user metadata
    */

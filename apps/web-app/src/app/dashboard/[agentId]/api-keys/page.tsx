@@ -21,7 +21,7 @@ export default function ApiKeysPage({
       await refetch();
     };
 
-    if (!apiKey && !isLoading) {
+    if (!apiKey?.apiKey && !isLoading) {
       void generateKey();
     }
   }, [generateApiKey, apiKey, refetch, isLoading]);

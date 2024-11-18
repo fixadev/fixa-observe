@@ -30,6 +30,11 @@ datasource db {
 //   lastName  String?
 // }
 
+model ApiKey {
+  userId String @id
+  apiKey String
+}
+
 model Agent {
   id        String   @id
   createdAt DateTime @default(now())
