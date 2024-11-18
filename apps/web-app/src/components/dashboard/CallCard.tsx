@@ -32,6 +32,10 @@ export default function CallCard({
     return Math.ceil(diff / 1000);
   }, [call.endedAt, startedAt]);
 
+  const numErrors = useMemo(() => {
+    return call.evalResults.filter((evalResult) => !evalResult.success).length;
+  }, [call.evalResults]);
+
   return (
     <div
       className={cn(
@@ -99,11 +103,11 @@ export default function CallCard({
                     : "failed"}
             </div>
 
-            {call.status === CallStatus.completed && call.errors.length > 0 && (
+            {call.status === CallStatus.completed && numErrors > 0 && (
               <div className="flex gap-0.5">
                 <ExclamationCircleIcon className="size-4 shrink-0 text-red-500" />
                 <div className="mt-px text-xs text-muted-foreground">
-                  {call.errors?.length}
+                  {numErrors}
                 </div>
               </div>
             )}
