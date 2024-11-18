@@ -97,10 +97,14 @@ export default function AgentPage({ params }: { params: { agentId: string } }) {
   // }, []);
 
   const handleRunTest = useCallback(
-    async (scenarioIds: string[]) => {
+    async (scenarioIds: string[], testAgentIds: string[]) => {
       // await new Promise((resolve) => setTimeout(resolve, 1000));
       // throw new Error("test failed");
-      await runTest({ agentId: params.agentId, scenarioIds });
+      await runTest({
+        agentId: params.agentId,
+        scenarioIds,
+        testAgentIds,
+      });
     },
     [params.agentId, runTest],
   );
@@ -188,7 +192,7 @@ function RunTestModal({
   agent: AgentWithIncludes;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onRunTest: (scenarioIds: string[]) => Promise<void>;
+  onRunTest: (scenarioIds: string[], testAgentIds: string[]) => Promise<void>;
 }) {
   const { toast } = useToast();
 
@@ -241,7 +245,7 @@ function RunTestModal({
   const handleRunTest = useCallback(async () => {
     setLoading(true);
     try {
-      await onRunTest(Array.from(selectedScenarios));
+      await onRunTest(Array.from(selectedScenarios), Array.from(enabledAgents));
       onOpenChange(false);
     } catch (error) {
       toast({
@@ -254,7 +258,7 @@ function RunTestModal({
     } finally {
       setLoading(false);
     }
-  }, [onRunTest, selectedScenarios, onOpenChange, toast]);
+  }, [onRunTest, selectedScenarios, enabledAgents, onOpenChange, toast]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
