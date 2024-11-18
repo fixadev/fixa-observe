@@ -51,6 +51,11 @@ export class AgentService {
             evals: true,
           },
         },
+        tests: {
+          include: {
+            calls: true,
+          },
+        },
         enabledTestAgents: true,
       },
     });

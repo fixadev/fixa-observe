@@ -69,6 +69,11 @@ export type AgentWithIncludes = Prisma.AgentGetPayload<{
         evals: true;
       };
     };
+    tests: {
+      include: {
+        calls: true;
+      };
+    };
     enabledTestAgents: true;
   };
 }>;

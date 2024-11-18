@@ -39,6 +39,7 @@ export default function AgentPage({ params }: { params: { agentId: string } }) {
   const [runTestModalOpen, setRunTestModalOpen] = useState(false);
   const { toast } = useToast();
   const { user } = useUser();
+  const { agent, setAgent } = useAgent(params.agentId);
 
   useSocketMessage(
     user?.id,
@@ -64,8 +65,6 @@ export default function AgentPage({ params }: { params: { agentId: string } }) {
     ),
   );
 
-  const { agent } = useAgent(params.agentId);
-
   const { data: _tests } = api.test.getAll.useQuery({
     agentId: params.agentId,
   });
@@ -73,6 +72,12 @@ export default function AgentPage({ params }: { params: { agentId: string } }) {
   const { mutateAsync: runTest } = api.test.run.useMutation({
     onSuccess: (data) => {
       setTests((prev) => [data, ...prev]);
+      if (agent) {
+        setAgent({
+          ...agent,
+          tests: [...agent.tests, data],
+        });
+      }
       toast({
         title: "Test initiated successfully",
         duration: 2000,
@@ -102,7 +107,7 @@ export default function AgentPage({ params }: { params: { agentId: string } }) {
   return (
     <div>
       {/* header */}
-      <div className="bg-sidebar sticky top-0 z-20 flex h-14 w-full items-center justify-between border-b border-input px-4 lg:h-[60px]">
+      <div className="sticky top-0 z-20 flex h-14 w-full items-center justify-between border-b border-input bg-sidebar px-4 lg:h-[60px]">
         <div className="flex items-center gap-2">
           <SidebarTrigger />
           <Link href={`/dashboard/${params.agentId}`}>
