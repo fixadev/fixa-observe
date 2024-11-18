@@ -1,15 +1,35 @@
-import { NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 import { TestService } from "~/server/services/test";
 import { db } from "~/server/db";
 
 const testService = new TestService(db);
 
 export async function GET(
-  request: Request,
+  req: NextRequest,
   { params }: { params: { testId: string } },
 ) {
+  const userId = req.userId;
+  if (!userId) {
+    return NextResponse.json(
+      { success: false, error: "Unauthorized" },
+      { status: 401 },
+    );
+  }
+
   try {
     const testId = params.testId;
+
+    // Check that the user has access to the test
+    const test = await db.test.findFirst({
+      where: { id: testId, agent: { ownerId: userId } },
+    });
+    if (!test) {
+      return NextResponse.json(
+        { success: false, error: "Unauthorized" },
+        { status: 401 },
+      );
+    }
+
     const statusResult = await testService.getStatus(testId);
 
     return NextResponse.json(statusResult);
