@@ -3,6 +3,7 @@ import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { env } from "~/env";
 import axios from "axios";
 import { type PublicMetadata, userService } from "~/server/services/user";
+import { currentUser } from "@clerk/nextjs/server";
 
 export const slackRouter = createTRPCRouter({
   exchangeCode: protectedProcedure
@@ -49,14 +50,16 @@ export const slackRouter = createTRPCRouter({
 
         return response.data;
       } catch (error) {
+        console.error("Error exchanging code:", error);
         throw new Error("Failed to exchange code");
       }
     }),
 
   sendMessage: protectedProcedure
     .input(z.object({ message: z.any() }))
-    .mutation(async ({ input, ctx }) => {
-      const webhookUrl = (ctx.user.publicMetadata as PublicMetadata)
+    .mutation(async ({ input }) => {
+      const user = await currentUser();
+      const webhookUrl = (user?.publicMetadata as PublicMetadata)
         .slackWebhookUrl;
       if (!webhookUrl) {
         throw new Error("Slack webhook URL not found");

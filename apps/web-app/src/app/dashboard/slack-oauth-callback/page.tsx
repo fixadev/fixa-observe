@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import Spinner from "~/components/Spinner";
 import { api } from "~/trpc/react";
 
@@ -27,15 +27,22 @@ export default function SlackOAuthCallback({
     return parsedState.agentId;
   }, [state]);
 
+  const isExchangingCode = useRef(false);
   useEffect(() => {
     const exchangeCodeAsync = async () => {
-      if (code) {
+      if (code && !isExchangingCode.current) {
+        isExchangingCode.current = true;
         try {
+          console.log("exchanging code", code);
           await exchangeCode({ code });
+          console.log("exchanged code", code);
+          console.log("sending message");
           await sendMessage({ message: { text: "hello from fixa :3" } });
+          console.log("sent message");
         } catch (error) {
           console.error("Error exchanging code:", error);
         } finally {
+          isExchangingCode.current = false;
           router.push(`/dashboard/${agentId}/settings`);
         }
       } else {
