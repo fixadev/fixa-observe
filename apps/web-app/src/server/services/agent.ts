@@ -134,6 +134,7 @@ export class AgentService {
       data: {
         id: uuidv4(),
         agentId,
+        createdAt: new Date(),
         name: scenario.name,
         instructions: scenario.instructions,
         successCriteria: scenario.successCriteria,
@@ -158,6 +159,7 @@ export class AgentService {
         data: {
           id: uuidv4(),
           agentId,
+          createdAt: new Date(),
           name: scenario.name,
           instructions: scenario.instructions,
           successCriteria: scenario.successCriteria,
