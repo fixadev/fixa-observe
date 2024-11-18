@@ -17,7 +17,7 @@ import {
 } from "~/lib/agent";
 import { useUser } from "@clerk/nextjs";
 import { SlashIcon } from "@heroicons/react/24/solid";
-import { CallStatus } from "@prisma/client";
+import { CallResult, CallStatus } from "@prisma/client";
 import Link from "next/link";
 // import { TEST_TESTS } from "~/lib/test-data";
 import TestScenarios from "~/components/dashboard/TestScenarios";
@@ -122,8 +122,8 @@ function TestPage({ params }: { params: { agentId: string; testId: string } }) {
           return scenarioCompare;
         }
         // Then sort succeeded after failed within each scenario
-        const aSucceeded = didCallSucceed(a);
-        const bSucceeded = didCallSucceed(b);
+        const aSucceeded = a.result === CallResult.success;
+        const bSucceeded = b.result === CallResult.success;
         return aSucceeded === bSucceeded ? 0 : aSucceeded ? 1 : -1;
       });
   }, [selectedScenario, test?.calls]);
@@ -150,7 +150,7 @@ function TestPage({ params }: { params: { agentId: string; testId: string } }) {
   return (
     <div>
       {/* header */}
-      <div className="sticky top-0 z-20 flex h-14 w-full items-center justify-between border-b border-input bg-sidebar px-4 lg:h-[60px]">
+      <div className="bg-sidebar sticky top-0 z-20 flex h-14 w-full items-center justify-between border-b border-input px-4 lg:h-[60px]">
         <div className="flex items-center gap-2">
           <SidebarTrigger />
           <Link href={`/dashboard/${params.agentId}`}>
