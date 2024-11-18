@@ -132,10 +132,9 @@ function TestPage({ params }: { params: { agentId: string; testId: string } }) {
   }, [filteredCalls, selectedCallId]);
 
   useEffect(() => {
-    if (filteredCalls?.length) {
-      setSelectedCallId(filteredCalls[0]!.id);
-    }
-  }, [filteredCalls]);
+    setSelectedCallId(filteredCalls?.[0]?.id ?? null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedScenario]);
 
   // useEffect(() => {
   //   setTest(TEST_TESTS[0]!);
@@ -143,6 +142,7 @@ function TestPage({ params }: { params: { agentId: string; testId: string } }) {
   useEffect(() => {
     if (_test) {
       setTest(_test);
+      setSelectedCallId(_test.calls[0]?.id ?? null);
     }
   }, [_test]);
 

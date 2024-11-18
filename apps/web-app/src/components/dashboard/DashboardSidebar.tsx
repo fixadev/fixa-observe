@@ -6,7 +6,6 @@ import {
   SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
-  SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuBadge,
@@ -39,6 +38,7 @@ import { removeTrailingSlash } from "~/lib/utils";
 import { api } from "~/trpc/react";
 import { type Agent } from "prisma/generated/zod";
 import Logo from "../Logo";
+import { SlackIcon } from "lucide-react";
 
 const navItems = [
   { href: "/", icon: CounterClockwiseClockIcon, label: "test history" },
@@ -142,9 +142,19 @@ export default function DashboardSidebar({
       </SidebarContent>
       <SidebarFooter>
         <SidebarGroup>
-          <SidebarGroupLabel>API</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  asChild
+                  isActive={isCurrentPath("/slack-app")}
+                >
+                  <Link href={`/dashboard/${params.agentId}/slack-app`}>
+                    <SlackIcon />
+                    <span>slack app</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton
                   asChild
