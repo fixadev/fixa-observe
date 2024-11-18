@@ -14,7 +14,7 @@ import { Switch } from "~/components/ui/switch";
 import { PlusIcon, RocketLaunchIcon } from "@heroicons/react/24/solid";
 import TestCard from "~/components/dashboard/TestCard";
 import { api } from "~/trpc/react";
-import { useToast } from "~/hooks/use-toast";
+import { useToast } from "~/components/hooks/use-toast";
 
 import useSocketMessage from "~/app/_components/UseSocketMessage";
 import { type AgentWithIncludes } from "~/lib/types";
@@ -32,6 +32,7 @@ import {
   AccordionContent,
   AccordionTrigger,
 } from "~/components/ui/accordion";
+import { SidebarTrigger } from "~/components/ui/sidebar";
 
 export default function AgentPage({ params }: { params: { agentId: string } }) {
   const [tests, setTests] = useState<TestWithCalls[]>([]);
@@ -101,10 +102,13 @@ export default function AgentPage({ params }: { params: { agentId: string } }) {
   return (
     <div>
       {/* header */}
-      <div className="sticky top-0 z-20 flex h-14 w-full items-center justify-between border-b border-input bg-[#FAFBFC] px-4 lg:h-[60px]">
-        <Link href={`/dashboard/${params.agentId}`}>
-          <div className="font-medium">test history</div>
-        </Link>
+      <div className="bg-sidebar sticky top-0 z-20 flex h-14 w-full items-center justify-between border-b border-input px-4 lg:h-[60px]">
+        <div className="flex items-center gap-2">
+          <SidebarTrigger />
+          <Link href={`/dashboard/${params.agentId}`}>
+            <div className="font-medium">test history</div>
+          </Link>
+        </div>
         <Button
           className="flex min-w-[160px] items-center gap-2"
           onClick={() => setRunTestModalOpen(true)}
@@ -281,10 +285,10 @@ function RunTestModal({
                       <Switch checked={enabledAgents.has(agent.id)} />
                     </div>
                   ))}
-                  <div className="flex h-full cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-muted/50 p-4 text-sm text-muted-foreground hover:bg-muted">
+                  {/* <div className="flex h-full cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-muted/50 p-4 text-sm text-muted-foreground hover:bg-muted">
                     <PlusIcon className="size-4" />
                     <span>create custom test agent</span>
-                  </div>
+                  </div> */}
                 </div>
               </AccordionContent>
             </AccordionItem>

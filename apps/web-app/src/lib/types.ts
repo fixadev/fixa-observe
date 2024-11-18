@@ -1,4 +1,4 @@
-import { type Test, type Call, type Prisma } from "@prisma/client";
+import { type Prisma } from "@prisma/client";
 import { z } from "zod";
 
 export type PlatformOptions = z.infer<typeof platformOptions>;
@@ -12,12 +12,27 @@ export const transcriptionErrorSchema = z.object({
 });
 export type TranscriptionError = z.infer<typeof transcriptionErrorSchema>;
 
+export type EvalResultWithIncludes = Prisma.EvalResultGetPayload<{
+  include: {
+    eval: true;
+  };
+}>;
+
 export type CallWithIncludes = Prisma.CallGetPayload<{
   include: {
     messages: true;
     errors: true;
-    scenario: true;
+    scenario: {
+      include: {
+        evals: true;
+      };
+    };
     testAgent: true;
+    evalResults: {
+      include: {
+        eval: true;
+      };
+    };
   };
 }>;
 
@@ -27,14 +42,27 @@ export type TestWithIncludes = Prisma.TestGetPayload<{
       include: {
         messages: true;
         errors: true;
-        scenario: true;
+        scenario: {
+          include: {
+            evals: true;
+          };
+        };
         testAgent: true;
+        evalResults: {
+          include: {
+            eval: true;
+          };
+        };
       };
     };
   };
 }>;
 
-export type TestWithCalls = Test & { calls: Call[] };
+export type TestWithCalls = Prisma.TestGetPayload<{
+  include: {
+    calls: true;
+  };
+}>;
 
 export type AgentWithIncludes = Prisma.AgentGetPayload<{
   include: {

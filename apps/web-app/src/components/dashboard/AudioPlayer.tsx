@@ -18,8 +18,7 @@ import {
   SelectContent,
   SelectTrigger,
 } from "~/components/ui/select";
-import type { CallWithIncludes } from "~/lib/types";
-import { type CallError } from "prisma/generated/zod";
+import type { CallWithIncludes, EvalResultWithIncludes } from "~/lib/types";
 import {
   cn,
   createWavBlob,
@@ -27,11 +26,11 @@ import {
 } from "~/lib/utils";
 import { debounce } from "lodash";
 import useSWR from "swr";
-import { useAudio } from "~/hooks/useAudio";
+import { useAudio } from "~/components/hooks/useAudio";
 
 export type AudioPlayerRef = {
-  setActiveError: (error: CallError | null) => void;
-  setHoveredError: (errorId: string | null) => void;
+  setActiveEvalResult: (evalResult: EvalResultWithIncludes | null) => void;
+  setHoveredEvalResult: (evalResultId: string | null) => void;
 };
 
 const AudioPlayer = forwardRef<
@@ -39,16 +38,19 @@ const AudioPlayer = forwardRef<
   {
     call: CallWithIncludes;
     offsetFromStart?: number;
-    onErrorHover?: (errorId: string | null) => void;
+    onEvalResultHover?: (evalId: string | null) => void;
   }
->(function AudioPlayer({ call, offsetFromStart = 0, onErrorHover }, ref) {
+>(function AudioPlayer({ call, offsetFromStart = 0, onEvalResultHover }, ref) {
   const [containerWidth, setContainerWidth] = useState(0);
   const [playheadHoverX, setPlayheadHoverX] = useState<number | null>(null);
   const [playheadX, setPlayheadX] = useState<number | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
-  const [activeError, setActiveError] = useState<CallError | null>(null);
-  const [hoveredError, setHoveredError] = useState<string | null>(null);
+  const [activeEvalResult, setActiveEvalResult] =
+    useState<EvalResultWithIncludes | null>(null);
+  const [hoveredEvalResult, setHoveredEvalResult] = useState<string | null>(
+    null,
+  );
   const [key, setKey] = useState(0);
   const { data: stereoRecordingBlob } = useSWR<Blob>(
     call.stereoRecordingUrl,
@@ -99,24 +101,26 @@ const AudioPlayer = forwardRef<
     void processAudio();
   }, [stereoRecordingBlob, setAudioUrl]);
 
-  // Check if we need to stop playback due to reaching error end
+  // Check if we need to stop playback due to reaching eval end
   useEffect(() => {
     if (
-      activeError &&
+      activeEvalResult &&
       currentTime >=
-        activeError.secondsFromStart + activeError.duration - offsetFromStart
+        activeEvalResult.secondsFromStart +
+          activeEvalResult.duration -
+          offsetFromStart
     ) {
       pause();
-      setActiveError(null);
+      setActiveEvalResult(null);
     }
-  }, [activeError, currentTime, offsetFromStart, pause]);
+  }, [activeEvalResult, currentTime, offsetFromStart, pause]);
 
-  // Get rid of active error if we pause in the middle of it playing
+  // Get rid of active eval if we pause in the middle of it playing
   useEffect(() => {
-    if (!isPlaying && activeError) {
-      setActiveError(null);
+    if (!isPlaying && activeEvalResult) {
+      setActiveEvalResult(null);
     }
-  }, [activeError, isPlaying]);
+  }, [activeEvalResult, isPlaying]);
 
   // Seek to a specific x position
   const seekToX = useCallback(
@@ -125,7 +129,7 @@ const AudioPlayer = forwardRef<
       const percentage = x / containerWidth;
       const seekTime = percentage * duration;
       seek(seekTime);
-      setActiveError(null);
+      setActiveEvalResult(null);
     },
     [containerWidth, duration, seek],
   );
@@ -200,24 +204,24 @@ const AudioPlayer = forwardRef<
   useImperativeHandle(
     ref,
     () => ({
-      setActiveError: (error: CallError | null) => {
-        setActiveError(error);
-        if (error) {
-          seek(error.secondsFromStart - offsetFromStart);
+      setActiveEvalResult: (evalResult: EvalResultWithIncludes | null) => {
+        setActiveEvalResult(evalResult);
+        if (evalResult) {
+          seek(evalResult.secondsFromStart - offsetFromStart);
         }
       },
-      setHoveredError: (errorId: string | null) => {
-        setHoveredError(errorId);
+      setHoveredEvalResult: (evalResultId: string | null) => {
+        setHoveredEvalResult(evalResultId);
       },
     }),
     [seek, offsetFromStart],
   );
 
-  const handleErrorClick = useCallback(
-    (error: CallError) => {
-      seek(error.secondsFromStart - offsetFromStart);
+  const handleEvalResultClick = useCallback(
+    (evalResult: EvalResultWithIncludes) => {
+      seek(evalResult.secondsFromStart - offsetFromStart);
       play();
-      setActiveError(error);
+      setActiveEvalResult(evalResult);
     },
     [play, seek, offsetFromStart],
   );
@@ -272,17 +276,22 @@ const AudioPlayer = forwardRef<
           className="absolute left-0 top-0 h-full w-0.5 bg-primary"
           style={{ left: `${playheadX}px` }}
         />
-        {call.errors?.map((error, index) => {
+        {call.evalResults?.map((evalResult, index) => {
           if (!containerWidth || !duration) return null;
           const startPercentage = Math.min(
             1,
-            Math.max(0, (error.secondsFromStart - offsetFromStart) / duration),
+            Math.max(
+              0,
+              (evalResult.secondsFromStart - offsetFromStart) / duration,
+            ),
           );
           const endPercentage = Math.min(
             1,
             Math.max(
               0,
-              (error.secondsFromStart + error.duration - offsetFromStart) /
+              (evalResult.secondsFromStart +
+                evalResult.duration -
+                offsetFromStart) /
                 duration,
             ),
           );
@@ -300,14 +309,18 @@ const AudioPlayer = forwardRef<
             >
               <div
                 className={cn(
-                  "size-full cursor-pointer border border-red-500 bg-red-500/20 hover:bg-red-500/50",
-                  hoveredError === error.id && "bg-red-500/50",
+                  "size-full cursor-pointer border-l-2",
+                  evalResult.success
+                    ? "border-green-500 bg-green-500/20 hover:bg-green-500/50"
+                    : "border-red-500 bg-red-500/20 hover:bg-red-500/50",
+                  hoveredEvalResult === evalResult.id &&
+                    (evalResult.success ? "bg-green-500/50" : "bg-red-500/50"),
                 )}
-                onMouseEnter={() => onErrorHover?.(error.id)}
-                onMouseLeave={() => onErrorHover?.(null)}
+                onMouseEnter={() => onEvalResultHover?.(evalResult.id)}
+                onMouseLeave={() => onEvalResultHover?.(null)}
                 onClick={(e) => {
                   e.stopPropagation();
-                  handleErrorClick(error);
+                  handleEvalResultClick(evalResult);
                 }}
                 onMouseDown={(e) => {
                   e.stopPropagation();
@@ -325,7 +338,7 @@ const AudioPlayer = forwardRef<
           size="icon"
           onClick={() => {
             isPlaying ? pause() : play();
-            setActiveError(null);
+            setActiveEvalResult(null);
           }}
         >
           {isPlaying ? (

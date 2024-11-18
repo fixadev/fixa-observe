@@ -1,8 +1,10 @@
 import { db } from "../db";
-import { type ScenarioWithEvals, type CreateScenarioSchema } from "~/lib/agent";
+import {
+  type CreateScenarioSchema,
+  type UpdateScenarioSchema,
+} from "~/lib/agent";
 import { v4 as uuidv4 } from "uuid";
 import { type PrismaClient } from "@prisma/client";
-// import { createVapiAssistant } from "../helpers/vapiHelpers";
 
 export class AgentService {
   constructor(private db: PrismaClient) {}
@@ -74,26 +76,24 @@ export class AgentService {
     });
   }
 
-  // async createTestAgent(
-  //   name: string,
-  //   prompt: string,
-  //   ownerId: string,
-  //   headshotUrl: string,
-  //   description: string,
-  // ) {
-  //   const agent = await createVapiAssistant(prompt, name);
-
-  //   return await db.testAgent.create({
-  //     data: {
-  //       id: agent.id,
-  //       name,
-  //       prompt,
-  //       ownerId,
-  //       headshotUrl,
-  //       description,
-  //     },
-  //   });
-  // }
+  async createTestAgent(
+    name: string,
+    prompt: string,
+    ownerId: string,
+    headshotUrl: string,
+    description: string,
+  ) {
+    return await db.testAgent.create({
+      data: {
+        id: uuidv4(),
+        name,
+        prompt,
+        ownerId,
+        headshotUrl,
+        description,
+      },
+    });
+  }
 
   async getTestAgents(ownerId: string) {
     return await db.testAgent.findMany({
@@ -132,13 +132,18 @@ export class AgentService {
   async createScenario(agentId: string, scenario: CreateScenarioSchema) {
     return await db.scenario.create({
       data: {
+        id: uuidv4(),
         agentId,
+        createdAt: new Date(),
         name: scenario.name,
         instructions: scenario.instructions,
         successCriteria: scenario.successCriteria,
         evals: {
           createMany: {
-            data: scenario.evals,
+            data: scenario.evals.map((evaluation) => ({
+              ...evaluation,
+              id: uuidv4(),
+            })),
           },
         },
       },
@@ -148,7 +153,34 @@ export class AgentService {
     });
   }
 
-  async updateScenario(scenario: ScenarioWithEvals) {
+  async createScenarios(agentId: string, scenarios: CreateScenarioSchema[]) {
+    const transactions = scenarios.map((scenario) => {
+      return db.scenario.create({
+        data: {
+          id: uuidv4(),
+          agentId,
+          createdAt: new Date(),
+          name: scenario.name,
+          instructions: scenario.instructions,
+          successCriteria: scenario.successCriteria,
+          evals: {
+            createMany: {
+              data: scenario.evals.map((evaluation) => ({
+                ...evaluation,
+                id: uuidv4(),
+              })),
+            },
+          },
+        },
+        include: {
+          evals: true,
+        },
+      });
+    });
+    return await db.$transaction(transactions);
+  }
+
+  async updateScenario(scenario: UpdateScenarioSchema) {
     return await db.scenario.update({
       where: { id: scenario.id },
       data: {
@@ -168,5 +200,9 @@ export class AgentService {
 
   async deleteScenario(id: string) {
     return await db.scenario.delete({ where: { id } });
+  }
+
+  async deleteAgent(id: string) {
+    return await db.agent.delete({ where: { id } });
   }
 }

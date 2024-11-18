@@ -28,6 +28,8 @@ const envSchema = z.object({
   AUDIO_SERVICE_URL: z.string().min(1),
   GCP_CREDENTIALS: z.string().min(1),
   GOOGLE_CLOUD_BUCKET_NAME: z.string().min(1),
+  NEXT_BASE_URL: z.string().min(1),
+  CLERK_SECRET_KEY: z.string().min(1),
 });
 
 // Validate and transform environment variables

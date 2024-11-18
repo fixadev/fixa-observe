@@ -1,19 +1,6 @@
-import { z } from "zod";
 import { openai } from "../utils/OpenAIClient";
 import { zodResponseFormat } from "openai/helpers/zod";
-
-export const outputSchema = z.object({
-  errors: z.array(
-    z.object({
-      type: z.string(),
-      description: z.string(),
-      secondsFromStart: z.number(),
-      duration: z.number(),
-    }),
-  ),
-  success: z.boolean(),
-  failureReason: z.string().nullable(),
-});
+import { outputSchema } from "./findLLMErrors";
 
 export const formatOutput = async (output: string) => {
   const prompt = `
@@ -40,8 +27,7 @@ export const formatOutput = async (output: string) => {
   }
 
   return {
-    errors: parsedResponse.errors,
-    success: parsedResponse.success,
-    failureReason: parsedResponse.failureReason,
+    scenarioEvalResults: parsedResponse.scenarioEvalResults,
+    generalEvalResults: parsedResponse.generalEvalResults,
   };
 };

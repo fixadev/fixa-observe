@@ -30,6 +30,11 @@ datasource db {
 //   lastName  String?
 // }
 
+model ApiKey {
+  userId String @id
+  apiKey String
+}
+
 model Agent {
   id        String   @id
   createdAt DateTime @default(now())
@@ -41,13 +46,15 @@ model Agent {
   githubRepoUrl String?
   systemPrompt  String
 
+  enabledGeneralEvals Eval[]
+
   enabledTestAgents TestAgent[]
   scenarios         Scenario[]
   tests             Test[]
 }
 
 model Test {
-  id        String   @id @default(cuid())
+  id        String   @id @default(uuid())
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -60,7 +67,7 @@ model Test {
 }
 
 model TestAgent {
-  id          String  @id @default(cuid())
+  id          String  @id @default(uuid())
   ownerId     String?
   name        String
   headshotUrl String
@@ -72,7 +79,7 @@ model TestAgent {
 }
 
 model Call {
-  id                 String       @id @default(cuid())
+  id                 String       @id @default(uuid())
   ownerId            String?
   status             CallStatus
   result             CallResult?
@@ -95,7 +102,7 @@ model Call {
 }
 
 model Message {
-  id               String @id @default(cuid())
+  id               String @id @default(uuid())
   role             Role
   message          String @default("")
   time             Float  @default(0)
@@ -111,7 +118,7 @@ model Message {
 }
 
 model CallError {
-  id               String  @id @default(cuid())
+  id               String  @id @default(uuid())
   secondsFromStart Float
   duration         Float
   type             String?
@@ -147,9 +154,10 @@ model CallRecording {
 }
 
 model Scenario {
-  id      String @id @default(cuid())
-  agent   Agent  @relation(fields: [agentId], references: [id], onDelete: Cascade)
-  agentId String
+  id        String   @id @default(uuid())
+  agent     Agent    @relation(fields: [agentId], references: [id], onDelete: Cascade)
+  agentId   String
+  createdAt DateTime @default(now())
 
   name            String
   instructions    String
@@ -164,7 +172,7 @@ model Scenario {
 }
 
 model Eval {
-  id        String   @id @default(cuid())
+  id        String   @id @default(uuid())
   createdAt DateTime @default(now())
 
   name        String
@@ -172,12 +180,19 @@ model Eval {
   scenario    Scenario? @relation(fields: [scenarioId], references: [id])
   scenarioId  String?
 
-  type        EvalType
+  type       EvalType
+  resultType EvalResultType
+
   evalResults EvalResult[]
+
+  agent   Agent?  @relation(fields: [agentId], references: [id])
+  agentId String?
+
+  ownerId String?
 }
 
 model EvalResult {
-  id        String   @id @default(cuid())
+  id        String   @id @default(uuid())
   createdAt DateTime @default(now())
 
   call   Call?   @relation(fields: [callId], references: [id])
@@ -187,14 +202,19 @@ model EvalResult {
   evalId String
 
   result           String
-  passed           Boolean
+  success          Boolean
   secondsFromStart Float
   duration         Float
-  type             String?
-  description      String
+  type             EvalResultType
+  details          String
 }
 
 enum EvalType {
+  scenario
+  general
+}
+
+enum EvalResultType {
   boolean
   number
   percentage

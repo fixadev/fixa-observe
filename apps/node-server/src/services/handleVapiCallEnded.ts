@@ -1,11 +1,12 @@
 import {
   Agent,
   Call,
-  CallResult,
   CallStatus,
   Scenario,
   Role,
   Test,
+  Eval,
+  CallResult,
 } from "@prisma/client";
 import { db } from "../db";
 import { type ServerMessageEndOfCallReport } from "@vapi-ai/server-sdk/api";
@@ -14,6 +15,7 @@ import { createGeminiPrompt } from "../utils/createGeminiPrompt";
 import { analyzeCallWithGemini } from "./geminiAnalyzeAudio";
 import { formatOutput } from "./formatOutput";
 import { Socket } from "socket.io";
+import { sendTestCompletedSlackMessage } from "./sendSlackMessage";
 
 export const handleVapiCallEnded = async ({
   report,
@@ -25,9 +27,9 @@ export const handleVapiCallEnded = async ({
 }: {
   report: ServerMessageEndOfCallReport;
   call: Call;
-  agent: Agent;
+  agent: Agent & { enabledGeneralEvals: Eval[] };
   test: Test;
-  scenario: Scenario;
+  scenario: Scenario & { evals: Eval[] };
   userSocket?: Socket;
 }) => {
   try {
@@ -41,49 +43,49 @@ export const handleVapiCallEnded = async ({
       return;
     }
 
-    const analysis = await analyzeCallWitho1(
-      agent.systemPrompt,
-      scenario.instructions,
-      scenario.successCriteria,
+    const o1Analysis = await analyzeCallWitho1(
       report.artifact.messages,
+      scenario.instructions,
+      scenario.evals,
+      agent.enabledGeneralEvals,
     );
 
-    console.log("O1 ANALYSIS", analysis);
+    console.log("O1 ANALYSIS", o1Analysis);
 
     const geminiPrompt = createGeminiPrompt(
       report.artifact.messages,
-      agent.systemPrompt,
       scenario.instructions,
-      scenario.successCriteria,
-      analysis,
+      scenario.evals,
+      agent.enabledGeneralEvals,
+      o1Analysis,
     );
 
-    const { cleanedResult } = await analyzeCallWithGemini(
+    const { parsedResult } = await analyzeCallWithGemini(
       report.artifact.stereoRecordingUrl,
       geminiPrompt,
     );
 
-    console.log("GEMINI RESULT", cleanedResult);
+    console.log("GEMINI RESULT", parsedResult);
 
-    const { errors, success, failureReason } = await formatOutput(
-      cleanedResult ?? "",
-    );
+    const cleanedResultJson = await formatOutput(JSON.stringify(parsedResult));
 
-    console.log("FORMATTED OUTPUT", errors, success, failureReason);
+    const { scenarioEvalResults, generalEvalResults } = cleanedResultJson;
+
+    const evalResultsToCreate = [...scenarioEvalResults, ...generalEvalResults];
+    const success = evalResultsToCreate.every((result) => result.success);
 
     const updatedCall = await db.call.update({
       where: { id: call.id },
       data: {
         status: CallStatus.completed,
-        errors: {
-          create: errors,
-        },
         startedAt: report.startedAt,
         endedAt: report.endedAt,
-        result: success ? CallResult.success : CallResult.failure,
-        failureReason,
         stereoRecordingUrl: report.artifact.stereoRecordingUrl,
         monoRecordingUrl: report.artifact.recordingUrl,
+        result: success ? CallResult.success : CallResult.failure,
+        evalResults: {
+          create: evalResultsToCreate,
+        },
         messages: {
           create: report.artifact.messages
             .map((message) => {
@@ -114,10 +116,30 @@ export const handleVapiCallEnded = async ({
       include: {
         messages: true,
         testAgent: true,
-        scenario: true,
+        scenario: { include: { evals: true } },
         errors: true,
       },
     });
+
+    const updatedTest = await db.test.findUnique({
+      where: { id: test.id },
+      include: {
+        calls: true,
+      },
+    });
+
+    if (
+      updatedTest?.calls.every((call) => call.status === CallStatus.completed)
+    ) {
+      try {
+        await sendTestCompletedSlackMessage({
+          userId: agent.ownerId,
+          test: updatedTest,
+        });
+      } catch (error) {
+        console.error("Error sending test completed slack message", error);
+      }
+    }
 
     if (userSocket) {
       userSocket.emit("message", {

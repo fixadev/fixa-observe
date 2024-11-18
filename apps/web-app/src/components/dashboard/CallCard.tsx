@@ -1,5 +1,9 @@
 import { formatDistanceToNow } from "date-fns";
-import { cn, formatDurationHoursMinutesSeconds } from "~/lib/utils";
+import {
+  cn,
+  didCallSucceed,
+  formatDurationHoursMinutesSeconds,
+} from "~/lib/utils";
 import type { CallWithIncludes } from "~/lib/types";
 import { useMemo } from "react";
 import Image from "next/image";
@@ -81,18 +85,18 @@ export default function CallCard({
                 call.status === CallStatus.in_progress ||
                   call.status === CallStatus.analyzing
                   ? "bg-yellow-100"
-                  : call.result === "failure"
-                    ? "bg-red-100"
-                    : "bg-green-100",
+                  : didCallSucceed(call)
+                    ? "bg-green-100"
+                    : "bg-red-100",
               )}
             >
               {call.status === CallStatus.in_progress
                 ? "in progress"
                 : call.status === CallStatus.analyzing
                   ? "analyzing"
-                  : call.result === "failure"
-                    ? "failed"
-                    : "succeeded"}
+                  : didCallSucceed(call)
+                    ? "succeeded"
+                    : "failed"}
             </div>
 
             {call.status === CallStatus.completed && call.errors.length > 0 && (

@@ -16,18 +16,51 @@ export const generateInboundScenariosPrompt = (
   you might create the following scenarios:
   {
     "name": "make a reservation",
-    "instructions": "make a reservation, specifically ask for a reservation at 8pm on Friday, and ask about the cancellation policy",
-    "successCriteria": "the reservation is successfully booked"
+    "instructions": "make a reservation, specifically ask for a reservation at 8pm on Friday for 2 people under the name John Smith, and ask about the cancellation policy",
+    "evals": [
+      {
+        "name": "book reservation",
+        "description": "the agent successfully books a reservation at 8pm on Friday for 2 people under the name John Smith",
+        "type": "boolean"
+      },
+      {
+        "name": "describe cancellation policy",
+        "description": "the agent successfully describes the cancellation policy",
+        "type": "boolean"
+      }
+    ]
   },
   {
     "name": "ask about the menu",
     "instructions": "ask about the menu, specifically ask about the specials and the vegetarian options",
-    "successCriteria": "the menu is successfully described -- including the specials and the vegetarian options"
+    "evals": [
+      {
+        "name": "describe specials",
+        "description": "the agent successfully describes the daily specials",
+        "type": "boolean"
+      },
+      {
+        "name": "describe vegetarian options", 
+        "description": "the agent successfully describes the vegetarian menu options",
+        "type": "boolean"
+      }
+    ]
   },
   {
     "name": "order delivery",
     "instructions": "place an order for delivery, add a special request for extra pickles on the burger",
-    "successCriteria": "the order is successfully placed -- including the special request for extra pickles on the burger"
+    "evals": [
+      {
+        "name": "place order",
+        "description": "the agent successfully takes the delivery order",
+        "type": "boolean"
+      },
+      {
+        "name": "special request",
+        "description": "the agent correctly notes the special request for extra pickles on the burger",
+        "type": "boolean"
+      }
+    ]
   }
   `;
 
@@ -37,30 +70,76 @@ export const generateOutboundScenariosPrompt = (
   
   you will be given a system prompt for the phone agent. 
   
-  you will use this information to create ${numberOfScenarios} scenarios that will be used to create other agents that answer calls from the outboundphone agent. 
+  you will use this information to create ${numberOfScenarios} scenarios that will be used to create other agents that answer calls from the outbound phone agent. 
   your response will be an array of JSON objects with the following properties:
 
   - name: the name of the scenario -- don't use underscores or other special characters
   - instructions: the instructions for test agent. in this case the test agent will be answering a call from the outbound phone agent
-  - successCriteria: what criteria need to be met for a conversation with this scenario to be considered successful -- make this as specific as possible
+  - evals: an array of eval objects. that specify criteria for the agent to pass. each eval object has the following properties:
+    - name: the name of the eval
+    - description: a description of the eval
+    - type: the type of eval. set this to boolean
 
-  i.e. if the system prompt is "your are an sales agent that calls potential customers to sell a product", 
+  i.e. if the system prompt is "your are an sales agent that calls potential customers to sell CRM software", 
   
   you might create the following scenarios:
   {
     "name": "ask about the product",
     "instructions": "ask about the product, specifically ask about the features and the benefits",
-    "successCriteria": "the agent successfully describes the product -- including the features and the benefits"
+    "evals": [
+      {
+        "name": "describe CRM",
+        "description": "the agent successfully describes the CRM, including it's industry leading use of AI to automate sales tasks",
+        "type": "boolean"
+      }, 
+      {
+        "name": "close sale",
+        "description": "the agent successfully closes the sale",
+        "type": "boolean"
+      }
+    ]
   },
   {
     "name": "be skeptical of the product quality",
     "instructions": "ask about the quality of the product, specifically ask about the quality and the durability",
-    "successCriteria": "the agent successfully describes the quality of the product -- including the quality and the durability"
+    "evals": [
+      {
+        "name": "address quality concerns",
+        "description": "the agent successfully addresses concerns about product quality and durability with specific examples and evidence",
+        "type": "boolean"
+      },
+      {
+        "name": "build confidence", 
+        "description": "the agent builds customer confidence in the product's reliability and longevity",
+        "type": "boolean"
+      },
+      {
+        "name": "schedule a demo",
+        "description": "the agent successfully schedules a demo with the customer",
+        "type": "boolean"
+      }
+    ]
   },
   {
     "name": "ask about the price",
     "instructions": "ask about the price, specifically ask about the price and the payment options",
-    "successCriteria": "the agent successfully describes the price and the payment options -- and persuades the customer to buy the product"
+    "evals": [
+      {
+        "name": "explain pricing",
+        "description": "the agent clearly explains the pricing structure and available payment options",
+        "type": "boolean"
+      },
+      {
+        "name": "demonstrate value",
+        "description": "the agent successfully demonstrates the value proposition and justifies the price point",
+        "type": "boolean"
+      },
+      {
+        "name": "close sale",
+        "description": "the agent overcomes price objections and persuades the customer to make a purchase",
+        "type": "boolean"
+      }
+    ]
   }
   `;
 

@@ -5,6 +5,7 @@ import {
   CreateAgentSchema,
   CreateScenarioSchema,
   ScenarioWithEvals,
+  UpdateScenarioSchema,
 } from "~/lib/agent";
 import { db } from "~/server/db";
 import { generateScenariosFromPrompt } from "~/server/helpers/generateScenarios";
@@ -55,12 +56,17 @@ export const agentRouter = createTRPCRouter({
       z.object({
         prompt: z.string(),
         numberOfScenarios: z.number(),
+        agentId: z.string(),
       }),
     )
     .mutation(async ({ input }) => {
-      return await generateScenariosFromPrompt(
+      const scenarios = await generateScenariosFromPrompt(
         input.prompt,
         input.numberOfScenarios,
+      );
+      return await agentServiceInstance.createScenarios(
+        input.agentId,
+        scenarios,
       );
     }),
 
@@ -74,8 +80,9 @@ export const agentRouter = createTRPCRouter({
     }),
 
   updateScenario: protectedProcedure
-    .input(z.object({ scenario: ScenarioWithEvals }))
+    .input(z.object({ scenario: UpdateScenarioSchema }))
     .mutation(async ({ input }) => {
+      console.log("INPUT: ", input.scenario);
       return await agentServiceInstance.updateScenario(input.scenario);
     }),
 
@@ -100,4 +107,10 @@ export const agentRouter = createTRPCRouter({
   getAll: protectedProcedure.query(async ({ ctx }) => {
     return await agentServiceInstance.getAllAgents(ctx.user.id);
   }),
+
+  delete: protectedProcedure
+    .input(z.object({ id: z.string() }))
+    .mutation(async ({ input }) => {
+      return await agentServiceInstance.deleteAgent(input.id);
+    }),
 });
