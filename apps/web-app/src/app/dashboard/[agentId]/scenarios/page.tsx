@@ -119,6 +119,7 @@ export default function AgentScenariosPage({
               : s,
           ),
         });
+        console.log("UPDATING SCENARIO: ", scenario);
         updateScenario({ scenario });
       } else {
         const newScenario = {

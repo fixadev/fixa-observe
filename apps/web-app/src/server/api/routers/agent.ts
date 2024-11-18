@@ -82,6 +82,7 @@ export const agentRouter = createTRPCRouter({
   updateScenario: protectedProcedure
     .input(z.object({ scenario: UpdateScenarioSchema }))
     .mutation(async ({ input }) => {
+      console.log("INPUT: ", input.scenario);
       return await agentServiceInstance.updateScenario(input.scenario);
     }),
 
