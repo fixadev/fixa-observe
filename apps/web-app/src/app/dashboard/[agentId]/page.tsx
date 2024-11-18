@@ -6,12 +6,13 @@ import Link from "next/link";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "~/components/ui/dialog";
 import { Button } from "~/components/ui/button";
 import { Switch } from "~/components/ui/switch";
-import { PlusIcon, RocketLaunchIcon } from "@heroicons/react/24/solid";
+import { RocketLaunchIcon } from "@heroicons/react/24/solid";
 import TestCard from "~/components/dashboard/TestCard";
 import { api } from "~/trpc/react";
 import { useToast } from "~/components/hooks/use-toast";
@@ -105,7 +106,7 @@ export default function AgentPage({ params }: { params: { agentId: string } }) {
   );
 
   return (
-    <div>
+    <div className="h-full">
       {/* header */}
       <div className="sticky top-0 z-20 flex h-14 w-full items-center justify-between border-b border-input bg-sidebar px-4 lg:h-[60px]">
         <div className="flex items-center gap-2">
@@ -123,8 +124,8 @@ export default function AgentPage({ params }: { params: { agentId: string } }) {
       </div>
 
       {/* content */}
-      {tests.length > 0 && (
-        <div className="p-4">
+      {tests.length > 0 ? (
+        <div className="container mx-auto p-4">
           <div className="rounded-t-md border-x border-t border-input shadow-sm">
             <AnimatePresence mode="popLayout">
               {tests?.map((test) => (
@@ -144,6 +145,23 @@ export default function AgentPage({ params }: { params: { agentId: string } }) {
                 </motion.div>
               ))}
             </AnimatePresence>
+          </div>
+        </div>
+      ) : (
+        <div className="container mx-auto flex h-full items-center justify-center p-4">
+          <div className="flex flex-col gap-4">
+            <div>
+              <div className="text-lg font-medium">no tests yet.</div>
+              <div className="text-sm text-muted-foreground">
+                run a test to get started
+              </div>
+            </div>
+            <Button
+              className="flex min-w-[216px] shrink-0 items-center gap-2"
+              onClick={() => setRunTestModalOpen(true)}
+            >
+              run test <RocketLaunchIcon className="size-4" />
+            </Button>
           </div>
         </div>
       )}
@@ -244,23 +262,33 @@ function RunTestModal({
       <DialogContent>
         <DialogHeader>
           <DialogTitle>run test</DialogTitle>
+          <DialogDescription>select the scenarios to test.</DialogDescription>
         </DialogHeader>
         <div className="flex flex-col gap-4">
-          <div className="text-sm text-muted-foreground">
-            select the scenarios to test.
-          </div>
-          {agent.scenarios.map((scenario) => (
-            <div key={scenario.id} className="flex items-center gap-2">
-              <Switch
-                id={scenario.id}
-                checked={selectedScenarios.has(scenario.id)}
-                onCheckedChange={() => toggleScenario(scenario.id)}
-              />
-              <Label htmlFor={scenario.id} className="text-sm font-medium">
-                {scenario.name}
-              </Label>
+          {agent.scenarios.length > 0 ? (
+            agent.scenarios.map((scenario) => (
+              <div key={scenario.id} className="flex items-center gap-2">
+                <Switch
+                  id={scenario.id}
+                  checked={selectedScenarios.has(scenario.id)}
+                  onCheckedChange={() => toggleScenario(scenario.id)}
+                />
+                <Label htmlFor={scenario.id} className="text-sm font-medium">
+                  {scenario.name}
+                </Label>
+              </div>
+            ))
+          ) : (
+            <div className="flex h-32 w-fit flex-col items-start justify-center self-center">
+              <div className="text-base font-medium">no scenarios yet.</div>
+              <Link
+                href={`/dashboard/${agent.id}/scenarios`}
+                className="text-sm text-muted-foreground underline"
+              >
+                go to scenarios page
+              </Link>
             </div>
-          ))}
+          )}
           <Accordion type="single" collapsible>
             <AccordionItem value="test-agents" className="-mx-6 border-none">
               <AccordionTrigger className="px-6">test agents</AccordionTrigger>
@@ -300,7 +328,7 @@ function RunTestModal({
           </Accordion>
           <Button
             onClick={handleRunTest}
-            disabled={loading}
+            disabled={loading || selectedScenarios.size === 0}
             className="flex items-center gap-2"
           >
             {loading ? (

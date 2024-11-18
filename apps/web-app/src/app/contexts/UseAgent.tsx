@@ -53,6 +53,7 @@ export function useAgent(agentId?: string) {
     if (agentId !== context.agent?.id && fetchedAgent) {
       // console.log("invalidating agent", context.agent?.id);
       // void utils.agent.get.invalidate({ id: context.agent?.id ?? "" });
+      context.setAgent(null);
       void utils.agent.get.reset();
       console.log("setting agent", fetchedAgent);
       context.setAgent(fetchedAgent);

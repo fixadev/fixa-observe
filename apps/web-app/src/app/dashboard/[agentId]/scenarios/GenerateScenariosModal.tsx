@@ -44,10 +44,10 @@ export const GenerateScenariosModal = ({
           scenarios: [...agent.scenarios, ...data],
         });
         setIsGeneratingScenarios(false);
-        toast({
-          title: "Scenarios generated",
-          description: "Scenarios generated successfully",
-        });
+        // toast({
+        //   title: "Scenarios generated",
+        //   description: "Scenarios generated successfully",
+        // });
         setIsModalOpen(false);
         setPrompt("");
       },

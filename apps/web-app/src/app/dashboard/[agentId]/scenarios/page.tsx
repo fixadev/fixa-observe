@@ -31,7 +31,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
-import { Card } from "~/components/ui/card";
+import { Card, CardTitle, CardHeader } from "~/components/ui/card";
 import { TrashIcon, XMarkIcon } from "@heroicons/react/24/solid";
 import {
   AlertDialog,
@@ -174,7 +174,7 @@ export default function AgentScenariosPage({
   };
 
   return (
-    <div className="flex max-w-full flex-col">
+    <div className="h-full max-w-full">
       <div className="sticky top-0 z-20 flex h-14 w-full items-center justify-between border-b border-input bg-sidebar px-4 lg:h-[60px]">
         <div className="flex flex-1 items-center gap-2">
           <SidebarTrigger />
@@ -183,7 +183,7 @@ export default function AgentScenariosPage({
           </Link>
         </div>
       </div>
-      <div className="container flex flex-col gap-4 p-4">
+      <div className="container flex h-full flex-col gap-4 p-4">
         {agent.scenarios.map((scenario, index) => (
           <div
             key={scenario.id}
@@ -195,16 +195,52 @@ export default function AgentScenariosPage({
             <ScenarioCard index={index} scenario={scenario} />
           </div>
         ))}
-        <div className="flex flex-row justify-end gap-4">
-          <GenerateScenariosModal agent={agent} setAgent={setAgent}>
-            <Button variant="outline">generate from prompt</Button>
-          </GenerateScenariosModal>
+        {agent.scenarios.length > 0 ? (
+          <div className="flex flex-row justify-end gap-4">
+            <GenerateScenariosModal agent={agent} setAgent={setAgent}>
+              <Button variant="outline">generate from prompt</Button>
+            </GenerateScenariosModal>
 
-          <Button variant="outline" onClick={addScenario}>
-            add manually
-          </Button>
-        </div>
+            <Button variant="outline" onClick={addScenario}>
+              add manually
+            </Button>
+          </div>
+        ) : (
+          <>
+            <div className="flex h-full items-center justify-center p-4">
+              <div className="flex flex-col gap-4">
+                <div>
+                  <div className="text-lg font-medium">no scenarios yet.</div>
+                  <div className="text-sm text-muted-foreground">
+                    create scenarios to test your agent
+                  </div>
+                </div>
+                <div className="flex flex-col gap-2">
+                  <GenerateScenariosModal agent={agent} setAgent={setAgent}>
+                    <Button>generate from prompt</Button>
+                  </GenerateScenariosModal>
+                  <Button variant="outline" onClick={addScenario}>
+                    add manually
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </>
+        )}
       </div>
+
+      {agent.scenarios.length > 0 && agent.tests.length === 0 && (
+        <Card className="animate-slide-up fixed bottom-4 right-4">
+          <CardHeader className="flex flex-col gap-2">
+            <CardTitle>ready to run your first test?</CardTitle>
+            <Button className="w-full" asChild>
+              <Link href={`/dashboard/${params.agentId}`}>
+                go to tests page
+              </Link>
+            </Button>
+          </CardHeader>
+        </Card>
+      )}
 
       <ScenarioSheet
         selectedScenario={selectedScenario}
