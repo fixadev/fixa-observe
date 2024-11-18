@@ -58,7 +58,7 @@ export async function POST(req: NextRequest) {
       input.scenarioIds,
       input.testAgentIds,
     );
-    return Response.json({ success: true, data: { testId: result.id } });
+    return Response.json({ testId: result.id });
   } catch (error) {
     console.error("Error running test:", error);
     return Response.json(
