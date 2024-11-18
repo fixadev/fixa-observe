@@ -5,7 +5,6 @@ import { Button } from "~/components/ui/button";
 import AgentCard from "~/components/dashboard/AgentCard";
 import { AddAgentModal } from "./_components/AddAgentModal";
 import { api } from "~/trpc/react";
-import Link from "next/link";
 
 export default function DashboardPage() {
   const { data: agents, refetch: refetchAgents } = api.agent.getAll.useQuery();
@@ -15,11 +14,11 @@ export default function DashboardPage() {
       <div className="container flex items-center justify-between">
         <div className="text-2xl font-medium">agents.</div>
         <div>
-          <Link href="/dashboard/create">
+          <AddAgentModal refetchAgents={refetchAgents}>
             <Button className="flex items-center gap-2">
               <PlusIcon className="size-4" /> create agent
             </Button>
-          </Link>
+          </AddAgentModal>
         </div>
       </div>
       <div className="flex-1 overflow-y-auto pb-8">

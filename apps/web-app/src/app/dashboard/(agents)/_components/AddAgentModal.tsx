@@ -120,22 +120,6 @@ export function AddAgentModal({ children, refetchAgents }: AddAgentModalProps) {
     scenarios: [],
   });
 
-  // const addScenario = () => {
-  //   setAgent({
-  //     ...agent,
-  //     scenarios: [
-  //       ...agent.scenarios,
-  //       {
-  //         name: "",
-  //         instructions: "",
-  //         successCriteria: "",
-  //         isNew: true,
-  //         evals: [],
-  //       },
-  //     ],
-  //   });
-  // };
-
   const { mutate: createAgent, isPending: isCreatingAgent } =
     api.agent.create.useMutation({
       onSuccess: () => {
@@ -143,26 +127,6 @@ export function AddAgentModal({ children, refetchAgents }: AddAgentModalProps) {
         refetchAgents();
       },
     });
-
-  // const { mutate: generateScenarios } =
-  //   api.agent.generateScenariosFromPrompt.useMutation({
-  //     onSuccess: (data) => {
-  //       setAgent({ ...agent, scenarios: [...agent.scenarios, ...data] });
-  //       setIsGeneratingScenarios(false);
-  //     },
-  //   });
-
-  // const handleGenerateScenarios = (prompt: string) => {
-  //   if (prompt.length > 0) {
-  //     setIsGeneratingScenarios(true);
-  //     generateScenarios({ prompt, numberOfScenarios });
-  //   } else {
-  //     toast({
-  //       title: "Please enter a prompt to generate scenarios",
-  //       variant: "destructive",
-  //     });
-  //   }
-  // };
 
   const handleCreateAgent = () => {
     if (!checkForValidPhoneNumber(agent.phoneNumber)) {
@@ -176,23 +140,6 @@ export function AddAgentModal({ children, refetchAgents }: AddAgentModalProps) {
       createAgent(agent);
     }
   };
-
-  // const deleteScenario = (index: number) => {
-  //   setAgent({
-  //     ...agent,
-  //     scenarios: agent.scenarios.filter((_, i) => i !== index),
-  //   });
-  // };
-
-  // const handleSaveScenario = (
-  //   scenario: CreateScenarioSchema | ScenarioWithEvals,
-  //   index: number,
-  // ) => {
-  //   setAgent({
-  //     ...agent,
-  //     scenarios: agent.scenarios.map((s, i) => (i === index ? scenario : s)),
-  //   });
-  // };
 
   return (
     <Dialog open={modalOpen} onOpenChange={setModalOpen}>
@@ -212,62 +159,6 @@ export function AddAgentModal({ children, refetchAgents }: AddAgentModalProps) {
               setAgent({ ...agent, phoneNumber: formatPhoneNumber(value) })
             }
           />
-          {/* <div className="flex w-full flex-1 flex-grow flex-col gap-2">
-            <div className="flex w-full flex-row items-center justify-between gap-2">
-              <Label className="text-lg">scenarios</Label>
-              <div className="flex gap-2">
-                <Select
-                  value={numberOfScenarios.toString()}
-                  onValueChange={(value) =>
-                    setNumberOfScenarios(parseInt(value))
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="3" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="1">1</SelectItem>
-                    <SelectItem value="2">2</SelectItem>
-                    <SelectItem value="3">3</SelectItem>
-                    <SelectItem value="4">4</SelectItem>
-                    <SelectItem value="5">5</SelectItem>
-                    <SelectItem value="6">6</SelectItem>
-                    <SelectItem value="7">7</SelectItem>
-                    <SelectItem value="8">8</SelectItem>
-                    <SelectItem value="9">9</SelectItem>
-                    <SelectItem value="10">10</SelectItem>
-                  </SelectContent>
-                </Select>
-                <Button
-                  variant="outline"
-                  onClick={() => handleGenerateScenarios(agent.systemPrompt)}
-                >
-                  generate from prompt
-                </Button>
-              </div>
-            </div>
-            {isGeneratingScenarios ? (
-              <div className="flex w-full flex-1 flex-grow flex-col items-center justify-center gap-2 rounded-md bg-gray-100 p-4">
-                <Spinner className="size-8" />
-                <p className="text-sm text-gray-500">{loadingText}</p>
-              </div>
-            ) : (
-              <div className="flex w-full flex-col gap-2">
-                {agent.scenarios.map((scenario, index) => (
-                  <ScenarioCard
-                    key={index}
-                    scenario={scenario}
-                    index={index}
-                    deleteScenario={deleteScenario}
-                    handleSaveScenario={handleSaveScenario}
-                  />
-                ))}
-                <Button variant="outline" onClick={addScenario}>
-                  add scenario
-                </Button>
-              </div>
-            )}
-          </div> */}
         </div>
         <div className="flex justify-end border-t p-4">
           <Button
