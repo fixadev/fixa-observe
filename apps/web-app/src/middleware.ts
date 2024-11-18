@@ -7,10 +7,18 @@ import { db } from "./server/db";
 const isPrivateRoute = createRouteMatcher(["/dashboard(.*)"]);
 const isApiKeyRoute = createRouteMatcher(["/api/tests(.*)"]);
 
-export async function middleware(request: NextRequest) {
+export default clerkMiddleware((auth, req) => {
+  if (isPrivateRoute(req)) {
+    auth().protect();
+  }
+
+  return apiMiddleware(req);
+});
+
+async function apiMiddleware(req: NextRequest): Promise<NextResponse> {
   // If the request is for the tests API, validate the API key
-  if (isApiKeyRoute(request)) {
-    const authHeader = request.headers.get("authorization");
+  if (isApiKeyRoute(req)) {
+    const authHeader = req.headers.get("authorization");
     if (!authHeader) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -29,17 +37,12 @@ export async function middleware(request: NextRequest) {
     }
 
     // Augment the request object with userId
-    request.userId = apiKeyRecord.userId;
+    req.userId = apiKeyRecord.userId;
 
     return NextResponse.next();
   }
 
-  // Otherwise, use clerk middleware
-  return clerkMiddleware((auth, request) => {
-    if (isPrivateRoute(request)) {
-      auth().protect();
-    }
-  });
+  return NextResponse.next();
 }
 
 export const config = {
