@@ -90,5 +90,5 @@ export function createWavBlob(
 }
 
 export function generateApiKey() {
-  return `fx_${crypto.randomUUID()}`;
+  return `fx-${crypto.randomUUID()}`;
 }
