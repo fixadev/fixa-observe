@@ -443,7 +443,7 @@ function EvalCard({
             <Input
               value={evaluation.name}
               className="w-full"
-              placeholder="agent got the order correct"
+              placeholder="place correct order"
               onChange={(e) =>
                 onUpdate({ ...evaluation, name: e.target.value })
               }
@@ -465,7 +465,7 @@ function EvalCard({
           <Label>description</Label>
           <Textarea
             value={evaluation.description}
-            placeholder="whether the agent correctly ordered a dozen donuts with sprinkles and a coffee"
+            placeholder="the agent correctly ordered a dozen donuts with sprinkles and a coffee"
             className="min-h-[100px]"
             onChange={(e) =>
               onUpdate({ ...evaluation, description: e.target.value })
