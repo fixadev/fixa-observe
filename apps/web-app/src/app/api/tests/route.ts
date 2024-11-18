@@ -12,6 +12,14 @@ const inputSchema = z.object({
 });
 
 export async function POST(req: NextRequest) {
+  const userId = req.userId;
+  if (!userId) {
+    return Response.json(
+      { success: false, error: "Unauthorized" },
+      { status: 401 },
+    );
+  }
+
   try {
     const body: unknown = await req.json();
     let input: z.infer<typeof inputSchema>;
@@ -30,6 +38,17 @@ export async function POST(req: NextRequest) {
               : "Invalid input format",
         },
         { status: 400 },
+      );
+    }
+
+    // Check that the user has access to the agent
+    const agent = await db.agent.findFirst({
+      where: { id: input.agentId, ownerId: userId },
+    });
+    if (!agent) {
+      return Response.json(
+        { success: false, error: "Unauthorized" },
+        { status: 401 },
       );
     }
 
