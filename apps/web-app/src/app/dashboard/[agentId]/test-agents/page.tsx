@@ -61,7 +61,7 @@ export default function TestAgentsPage({
 
   return (
     <div>
-      <div className="sticky top-0 z-20 flex h-14 w-full items-center justify-between border-b border-input bg-sidebar px-4 lg:h-[60px]">
+      <div className="bg-sidebar sticky top-0 z-20 flex h-14 w-full items-center justify-between border-b border-input px-4 lg:h-[60px]">
         <div className="flex flex-1 items-center gap-2">
           <SidebarTrigger />
           <Link href={`/dashboard/${params.agentId}/test-agents`}>
@@ -96,10 +96,10 @@ export default function TestAgentsPage({
               <Switch checked={enabledAgents.has(agent.id)} />
             </div>
           ))}
-          <div className="flex h-full cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-muted/50 p-4 text-sm text-muted-foreground hover:bg-muted">
+          {/* <div className="flex h-full cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-muted/50 p-4 text-sm text-muted-foreground hover:bg-muted">
             <PlusIcon className="size-4" />
             <span>create custom test agent</span>
-          </div>
+          </div> */}
         </div>
       </div>
     </div>

@@ -82,6 +82,38 @@ export const createOrUpdateVapiAssistant = async (
   });
 };
 
+export const createVapiTestAssistant = async (
+  prompt: string,
+  name: string,
+  endCallEnabled: boolean,
+  voiceId: string,
+) => {
+  return await vapi.assistants.create({
+    name,
+    voice: {
+      provider: "11labs",
+      voiceId,
+    },
+    model: {
+      provider: "openai",
+      model: "gpt-4o",
+      messages: [
+        {
+          role: "system",
+          content: prompt,
+        },
+      ],
+      tools: endCallEnabled
+        ? [
+            {
+              type: "endCall",
+            },
+          ]
+        : [],
+    },
+  });
+};
+
 export const deleteVapiAssistantById = async (assistantId: string) => {
   return await vapi.assistants.delete(assistantId);
 };

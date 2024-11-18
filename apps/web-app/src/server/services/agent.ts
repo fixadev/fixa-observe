@@ -6,7 +6,6 @@ import {
 } from "~/lib/agent";
 import { v4 as uuidv4 } from "uuid";
 import { type PrismaClient } from "@prisma/client";
-// import { createVapiAssistant } from "../helpers/vapiHelpers";
 
 export class AgentService {
   constructor(private db: PrismaClient) {}
@@ -78,26 +77,24 @@ export class AgentService {
     });
   }
 
-  // async createTestAgent(
-  //   name: string,
-  //   prompt: string,
-  //   ownerId: string,
-  //   headshotUrl: string,
-  //   description: string,
-  // ) {
-  //   const agent = await createVapiAssistant(prompt, name);
-
-  //   return await db.testAgent.create({
-  //     data: {
-  //       id: agent.id,
-  //       name,
-  //       prompt,
-  //       ownerId,
-  //       headshotUrl,
-  //       description,
-  //     },
-  //   });
-  // }
+  async createTestAgent(
+    name: string,
+    prompt: string,
+    ownerId: string,
+    headshotUrl: string,
+    description: string,
+  ) {
+    return await db.testAgent.create({
+      data: {
+        id: uuidv4(),
+        name,
+        prompt,
+        ownerId,
+        headshotUrl,
+        description,
+      },
+    });
+  }
 
   async getTestAgents(ownerId: string) {
     return await db.testAgent.findMany({
