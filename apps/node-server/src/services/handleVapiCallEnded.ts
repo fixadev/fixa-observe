@@ -117,7 +117,7 @@ export const handleVapiCallEnded = async ({
         messages: true,
         testAgent: true,
         scenario: { include: { evals: true } },
-        errors: true,
+        evalResults: { include: { eval: true } },
       },
     });
 

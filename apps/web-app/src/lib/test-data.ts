@@ -36,6 +36,7 @@ export const TEST_TEST_AGENTS: TestAgent[] = [
 export const TEST_SCENARIOS: AgentWithIncludes["scenarios"] = [
   {
     id: "2",
+    createdAt: new Date(),
     name: "make reservation",
     instructions:
       "Assist in making a restaurant reservation. Collect date, time, party size, and any special accommodations needed.",
@@ -71,6 +72,7 @@ export const TEST_SCENARIOS: AgentWithIncludes["scenarios"] = [
   {
     id: "1",
     name: "order takeout",
+    createdAt: new Date(),
     instructions:
       "Help the customer place a food order. Get specific items, quantities, any special requests or dietary restrictions.",
     successCriteria: "Order was placed successfully",
@@ -105,6 +107,7 @@ export const TEST_SCENARIOS: AgentWithIncludes["scenarios"] = [
   {
     id: "3",
     name: "ask about menu",
+    createdAt: new Date(),
     instructions:
       "Answer general questions about the restaurant including hours, location, menu items, or policies.",
     successCriteria: "Reservation was made successfully",
