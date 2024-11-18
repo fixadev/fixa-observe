@@ -1,6 +1,7 @@
 import { z } from "zod";
 import dotenv from "dotenv";
 
+console.log("Loading environment variables for", process.env.NODE_ENV);
 dotenv.config({
   path:
     process.env.NODE_ENV === "production"
@@ -30,6 +31,8 @@ const envSchema = z.object({
   GOOGLE_CLOUD_BUCKET_NAME: z.string().min(1),
   NEXT_BASE_URL: z.string().min(1),
   CLERK_SECRET_KEY: z.string().min(1),
+  DATABASE_URL: z.string().min(1),
+  DIRECT_URL: z.string().min(1),
 });
 
 // Validate and transform environment variables

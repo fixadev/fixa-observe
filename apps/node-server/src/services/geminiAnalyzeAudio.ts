@@ -139,5 +139,3 @@ export async function analyzeAudio(
     throw error;
   }
 }
-
-console.log(env.GCP_CREDENTIALS);

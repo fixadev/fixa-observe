@@ -50,7 +50,7 @@ export const handleVapiCallEnded = async ({
       agent.enabledGeneralEvals,
     );
 
-    console.log("O1 ANALYSIS", o1Analysis);
+    console.log("O1 ANALYSIS for call", call.id, o1Analysis);
 
     const geminiPrompt = createGeminiPrompt(
       report.artifact.messages,
@@ -65,14 +65,15 @@ export const handleVapiCallEnded = async ({
       geminiPrompt,
     );
 
-    console.log("GEMINI RESULT", parsedResult);
+    console.log("GEMINI RESULT for call", call.id, parsedResult);
 
     const cleanedResultJson = await formatOutput(JSON.stringify(parsedResult));
-
     const { scenarioEvalResults, generalEvalResults } = cleanedResultJson;
-
-    const evalResultsToCreate = [...scenarioEvalResults, ...generalEvalResults];
-    const success = evalResultsToCreate.every((result) => result.success);
+    const evalResults = [...scenarioEvalResults, ...generalEvalResults];
+    const evalResultsWithValidEvals = evalResults.filter((evalResult) =>
+      scenario.evals?.some((evaluation) => evaluation.id === evalResult.evalId),
+    );
+    const success = evalResultsWithValidEvals.every((result) => result.success);
 
     const updatedCall = await db.call.update({
       where: { id: call.id },
@@ -84,7 +85,7 @@ export const handleVapiCallEnded = async ({
         monoRecordingUrl: report.artifact.recordingUrl,
         result: success ? CallResult.success : CallResult.failure,
         evalResults: {
-          create: evalResultsToCreate,
+          create: evalResultsWithValidEvals,
         },
         messages: {
           create: report.artifact.messages
@@ -148,7 +149,7 @@ export const handleVapiCallEnded = async ({
       });
     }
   } catch (error) {
-    console.error("Error handling Vapi call ended", error);
+    console.error("Error handling Vapi call ended for call", call.id, error);
     return null;
   }
 };
