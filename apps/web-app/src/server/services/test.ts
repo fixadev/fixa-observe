@@ -81,7 +81,17 @@ export class TestService {
       : { status: CallStatus.in_progress, calls: test.calls };
   }
 
-  async run(agentId: string, scenarioIds?: string[], testAgentIds?: string[]) {
+  async run({
+    agentId,
+    scenarioIds,
+    testAgentIds,
+    runFromApi = false,
+  }: {
+    agentId: string;
+    scenarioIds?: string[];
+    testAgentIds?: string[];
+    runFromApi?: boolean;
+  }) {
     const agent = await agentServiceInstance.getAgent(agentId);
     if (!agent) {
       throw new Error("Agent not found");
@@ -151,6 +161,7 @@ export class TestService {
     return await db.test.create({
       data: {
         agentId,
+        runFromApi,
         calls: {
           createMany: {
             data: fulfilledCalls.map((call) => ({

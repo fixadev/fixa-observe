@@ -53,11 +53,12 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const result = await testService.run(
-      input.agentId,
-      input.scenarioIds,
-      input.testAgentIds,
-    );
+    const result = await testService.run({
+      agentId: input.agentId,
+      scenarioIds: input.scenarioIds,
+      testAgentIds: input.testAgentIds,
+      runFromApi: true,
+    });
     return Response.json({ testId: result.id });
   } catch (error) {
     console.error("Error running test:", error);

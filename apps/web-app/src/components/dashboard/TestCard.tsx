@@ -1,5 +1,6 @@
 import {
   CheckCircleIcon,
+  CodeBracketIcon,
   WrenchIcon,
   XCircleIcon,
 } from "@heroicons/react/24/solid";
@@ -89,6 +90,10 @@ export default function TestCard({
               {test.gitCommit}
             </div>
           </div>
+        </div>
+      ) : test.runFromApi ? (
+        <div className="flex items-center gap-2 py-4 text-sm text-muted-foreground">
+          <CodeBracketIcon className="size-4" /> run via API
         </div>
       ) : (
         <div className="flex items-center gap-2 py-4 text-sm text-muted-foreground">

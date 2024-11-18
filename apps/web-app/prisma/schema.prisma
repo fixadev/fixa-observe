@@ -62,8 +62,9 @@ model Test {
   agentId String
   calls   Call[]
 
-  gitBranch String?
-  gitCommit String?
+  gitBranch  String?
+  gitCommit  String?
+  runFromApi Boolean @default(false) // If true, the test was run via the API
 }
 
 model TestAgent {

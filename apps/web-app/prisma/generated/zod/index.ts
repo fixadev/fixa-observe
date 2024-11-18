@@ -60,7 +60,7 @@ export const ApiKeyScalarFieldEnumSchema = z.enum(['userId','apiKey']);
 
 export const AgentScalarFieldEnumSchema = z.enum(['id','createdAt','updatedAt','ownerId','name','phoneNumber','githubRepoUrl','systemPrompt']);
 
-export const TestScalarFieldEnumSchema = z.enum(['id','createdAt','updatedAt','agentId','gitBranch','gitCommit']);
+export const TestScalarFieldEnumSchema = z.enum(['id','createdAt','updatedAt','agentId','gitBranch','gitCommit','runFromApi']);
 
 export const TestAgentScalarFieldEnumSchema = z.enum(['id','ownerId','name','headshotUrl','description','prompt']);
 
@@ -151,6 +151,7 @@ export const TestSchema = z.object({
   agentId: z.string(),
   gitBranch: z.string().nullable(),
   gitCommit: z.string().nullable(),
+  runFromApi: z.boolean(),
 })
 
 export type Test = z.infer<typeof TestSchema>
@@ -376,6 +377,7 @@ export const TestSelectSchema: z.ZodType<Prisma.TestSelect> = z.object({
   agentId: z.boolean().optional(),
   gitBranch: z.boolean().optional(),
   gitCommit: z.boolean().optional(),
+  runFromApi: z.boolean().optional(),
   agent: z.union([z.boolean(),z.lazy(() => AgentArgsSchema)]).optional(),
   calls: z.union([z.boolean(),z.lazy(() => CallFindManyArgsSchema)]).optional(),
   _count: z.union([z.boolean(),z.lazy(() => TestCountOutputTypeArgsSchema)]).optional(),
@@ -767,6 +769,7 @@ export const TestWhereInputSchema: z.ZodType<Prisma.TestWhereInput> = z.object({
   agentId: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   gitBranch: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
   gitCommit: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
+  runFromApi: z.union([ z.lazy(() => BoolFilterSchema),z.boolean() ]).optional(),
   agent: z.union([ z.lazy(() => AgentRelationFilterSchema),z.lazy(() => AgentWhereInputSchema) ]).optional(),
   calls: z.lazy(() => CallListRelationFilterSchema).optional()
 }).strict();
@@ -778,6 +781,7 @@ export const TestOrderByWithRelationInputSchema: z.ZodType<Prisma.TestOrderByWit
   agentId: z.lazy(() => SortOrderSchema).optional(),
   gitBranch: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
   gitCommit: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
+  runFromApi: z.lazy(() => SortOrderSchema).optional(),
   agent: z.lazy(() => AgentOrderByWithRelationInputSchema).optional(),
   calls: z.lazy(() => CallOrderByRelationAggregateInputSchema).optional()
 }).strict();
@@ -795,6 +799,7 @@ export const TestWhereUniqueInputSchema: z.ZodType<Prisma.TestWhereUniqueInput> 
   agentId: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   gitBranch: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
   gitCommit: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
+  runFromApi: z.union([ z.lazy(() => BoolFilterSchema),z.boolean() ]).optional(),
   agent: z.union([ z.lazy(() => AgentRelationFilterSchema),z.lazy(() => AgentWhereInputSchema) ]).optional(),
   calls: z.lazy(() => CallListRelationFilterSchema).optional()
 }).strict());
@@ -806,6 +811,7 @@ export const TestOrderByWithAggregationInputSchema: z.ZodType<Prisma.TestOrderBy
   agentId: z.lazy(() => SortOrderSchema).optional(),
   gitBranch: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
   gitCommit: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
+  runFromApi: z.lazy(() => SortOrderSchema).optional(),
   _count: z.lazy(() => TestCountOrderByAggregateInputSchema).optional(),
   _max: z.lazy(() => TestMaxOrderByAggregateInputSchema).optional(),
   _min: z.lazy(() => TestMinOrderByAggregateInputSchema).optional()
@@ -821,6 +827,7 @@ export const TestScalarWhereWithAggregatesInputSchema: z.ZodType<Prisma.TestScal
   agentId: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
   gitBranch: z.union([ z.lazy(() => StringNullableWithAggregatesFilterSchema),z.string() ]).optional().nullable(),
   gitCommit: z.union([ z.lazy(() => StringNullableWithAggregatesFilterSchema),z.string() ]).optional().nullable(),
+  runFromApi: z.union([ z.lazy(() => BoolWithAggregatesFilterSchema),z.boolean() ]).optional(),
 }).strict();
 
 export const TestAgentWhereInputSchema: z.ZodType<Prisma.TestAgentWhereInput> = z.object({
@@ -1582,6 +1589,7 @@ export const TestCreateInputSchema: z.ZodType<Prisma.TestCreateInput> = z.object
   updatedAt: z.coerce.date().optional(),
   gitBranch: z.string().optional().nullable(),
   gitCommit: z.string().optional().nullable(),
+  runFromApi: z.boolean().optional(),
   agent: z.lazy(() => AgentCreateNestedOneWithoutTestsInputSchema),
   calls: z.lazy(() => CallCreateNestedManyWithoutTestInputSchema).optional()
 }).strict();
@@ -1593,6 +1601,7 @@ export const TestUncheckedCreateInputSchema: z.ZodType<Prisma.TestUncheckedCreat
   agentId: z.string(),
   gitBranch: z.string().optional().nullable(),
   gitCommit: z.string().optional().nullable(),
+  runFromApi: z.boolean().optional(),
   calls: z.lazy(() => CallUncheckedCreateNestedManyWithoutTestInputSchema).optional()
 }).strict();
 
@@ -1602,6 +1611,7 @@ export const TestUpdateInputSchema: z.ZodType<Prisma.TestUpdateInput> = z.object
   updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   gitBranch: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   gitCommit: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  runFromApi: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   agent: z.lazy(() => AgentUpdateOneRequiredWithoutTestsNestedInputSchema).optional(),
   calls: z.lazy(() => CallUpdateManyWithoutTestNestedInputSchema).optional()
 }).strict();
@@ -1613,6 +1623,7 @@ export const TestUncheckedUpdateInputSchema: z.ZodType<Prisma.TestUncheckedUpdat
   agentId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   gitBranch: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   gitCommit: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  runFromApi: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   calls: z.lazy(() => CallUncheckedUpdateManyWithoutTestNestedInputSchema).optional()
 }).strict();
 
@@ -1622,7 +1633,8 @@ export const TestCreateManyInputSchema: z.ZodType<Prisma.TestCreateManyInput> = 
   updatedAt: z.coerce.date().optional(),
   agentId: z.string(),
   gitBranch: z.string().optional().nullable(),
-  gitCommit: z.string().optional().nullable()
+  gitCommit: z.string().optional().nullable(),
+  runFromApi: z.boolean().optional()
 }).strict();
 
 export const TestUpdateManyMutationInputSchema: z.ZodType<Prisma.TestUpdateManyMutationInput> = z.object({
@@ -1631,6 +1643,7 @@ export const TestUpdateManyMutationInputSchema: z.ZodType<Prisma.TestUpdateManyM
   updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   gitBranch: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   gitCommit: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  runFromApi: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
 }).strict();
 
 export const TestUncheckedUpdateManyInputSchema: z.ZodType<Prisma.TestUncheckedUpdateManyInput> = z.object({
@@ -1640,6 +1653,7 @@ export const TestUncheckedUpdateManyInputSchema: z.ZodType<Prisma.TestUncheckedU
   agentId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   gitBranch: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   gitCommit: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  runFromApi: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
 }).strict();
 
 export const TestAgentCreateInputSchema: z.ZodType<Prisma.TestAgentCreateInput> = z.object({
@@ -2471,6 +2485,11 @@ export const StringNullableWithAggregatesFilterSchema: z.ZodType<Prisma.StringNu
   _max: z.lazy(() => NestedStringNullableFilterSchema).optional()
 }).strict();
 
+export const BoolFilterSchema: z.ZodType<Prisma.BoolFilter> = z.object({
+  equals: z.boolean().optional(),
+  not: z.union([ z.boolean(),z.lazy(() => NestedBoolFilterSchema) ]).optional(),
+}).strict();
+
 export const AgentRelationFilterSchema: z.ZodType<Prisma.AgentRelationFilter> = z.object({
   is: z.lazy(() => AgentWhereInputSchema).optional(),
   isNot: z.lazy(() => AgentWhereInputSchema).optional()
@@ -2492,7 +2511,8 @@ export const TestCountOrderByAggregateInputSchema: z.ZodType<Prisma.TestCountOrd
   updatedAt: z.lazy(() => SortOrderSchema).optional(),
   agentId: z.lazy(() => SortOrderSchema).optional(),
   gitBranch: z.lazy(() => SortOrderSchema).optional(),
-  gitCommit: z.lazy(() => SortOrderSchema).optional()
+  gitCommit: z.lazy(() => SortOrderSchema).optional(),
+  runFromApi: z.lazy(() => SortOrderSchema).optional()
 }).strict();
 
 export const TestMaxOrderByAggregateInputSchema: z.ZodType<Prisma.TestMaxOrderByAggregateInput> = z.object({
@@ -2501,7 +2521,8 @@ export const TestMaxOrderByAggregateInputSchema: z.ZodType<Prisma.TestMaxOrderBy
   updatedAt: z.lazy(() => SortOrderSchema).optional(),
   agentId: z.lazy(() => SortOrderSchema).optional(),
   gitBranch: z.lazy(() => SortOrderSchema).optional(),
-  gitCommit: z.lazy(() => SortOrderSchema).optional()
+  gitCommit: z.lazy(() => SortOrderSchema).optional(),
+  runFromApi: z.lazy(() => SortOrderSchema).optional()
 }).strict();
 
 export const TestMinOrderByAggregateInputSchema: z.ZodType<Prisma.TestMinOrderByAggregateInput> = z.object({
@@ -2510,7 +2531,16 @@ export const TestMinOrderByAggregateInputSchema: z.ZodType<Prisma.TestMinOrderBy
   updatedAt: z.lazy(() => SortOrderSchema).optional(),
   agentId: z.lazy(() => SortOrderSchema).optional(),
   gitBranch: z.lazy(() => SortOrderSchema).optional(),
-  gitCommit: z.lazy(() => SortOrderSchema).optional()
+  gitCommit: z.lazy(() => SortOrderSchema).optional(),
+  runFromApi: z.lazy(() => SortOrderSchema).optional()
+}).strict();
+
+export const BoolWithAggregatesFilterSchema: z.ZodType<Prisma.BoolWithAggregatesFilter> = z.object({
+  equals: z.boolean().optional(),
+  not: z.union([ z.boolean(),z.lazy(() => NestedBoolWithAggregatesFilterSchema) ]).optional(),
+  _count: z.lazy(() => NestedIntFilterSchema).optional(),
+  _min: z.lazy(() => NestedBoolFilterSchema).optional(),
+  _max: z.lazy(() => NestedBoolFilterSchema).optional()
 }).strict();
 
 export const AgentListRelationFilterSchema: z.ZodType<Prisma.AgentListRelationFilter> = z.object({
@@ -2849,11 +2879,6 @@ export const CallErrorSumOrderByAggregateInputSchema: z.ZodType<Prisma.CallError
   duration: z.lazy(() => SortOrderSchema).optional()
 }).strict();
 
-export const BoolFilterSchema: z.ZodType<Prisma.BoolFilter> = z.object({
-  equals: z.boolean().optional(),
-  not: z.union([ z.boolean(),z.lazy(() => NestedBoolFilterSchema) ]).optional(),
-}).strict();
-
 export const CallRecordingCountOrderByAggregateInputSchema: z.ZodType<Prisma.CallRecordingCountOrderByAggregateInput> = z.object({
   id: z.lazy(() => SortOrderSchema).optional(),
   audioUrl: z.lazy(() => SortOrderSchema).optional(),
@@ -2873,14 +2898,6 @@ export const CallRecordingMinOrderByAggregateInputSchema: z.ZodType<Prisma.CallR
   audioUrl: z.lazy(() => SortOrderSchema).optional(),
   createdAt: z.lazy(() => SortOrderSchema).optional(),
   processed: z.lazy(() => SortOrderSchema).optional()
-}).strict();
-
-export const BoolWithAggregatesFilterSchema: z.ZodType<Prisma.BoolWithAggregatesFilter> = z.object({
-  equals: z.boolean().optional(),
-  not: z.union([ z.boolean(),z.lazy(() => NestedBoolWithAggregatesFilterSchema) ]).optional(),
-  _count: z.lazy(() => NestedIntFilterSchema).optional(),
-  _min: z.lazy(() => NestedBoolFilterSchema).optional(),
-  _max: z.lazy(() => NestedBoolFilterSchema).optional()
 }).strict();
 
 export const ScenarioCountOrderByAggregateInputSchema: z.ZodType<Prisma.ScenarioCountOrderByAggregateInput> = z.object({
@@ -3243,6 +3260,10 @@ export const CallUncheckedCreateNestedManyWithoutTestInputSchema: z.ZodType<Pris
   connect: z.union([ z.lazy(() => CallWhereUniqueInputSchema),z.lazy(() => CallWhereUniqueInputSchema).array() ]).optional(),
 }).strict();
 
+export const BoolFieldUpdateOperationsInputSchema: z.ZodType<Prisma.BoolFieldUpdateOperationsInput> = z.object({
+  set: z.boolean().optional()
+}).strict();
+
 export const AgentUpdateOneRequiredWithoutTestsNestedInputSchema: z.ZodType<Prisma.AgentUpdateOneRequiredWithoutTestsNestedInput> = z.object({
   create: z.union([ z.lazy(() => AgentCreateWithoutTestsInputSchema),z.lazy(() => AgentUncheckedCreateWithoutTestsInputSchema) ]).optional(),
   connectOrCreate: z.lazy(() => AgentCreateOrConnectWithoutTestsInputSchema).optional(),
@@ -3581,10 +3602,6 @@ export const CallUpdateOneRequiredWithoutErrorsNestedInputSchema: z.ZodType<Pris
   update: z.union([ z.lazy(() => CallUpdateToOneWithWhereWithoutErrorsInputSchema),z.lazy(() => CallUpdateWithoutErrorsInputSchema),z.lazy(() => CallUncheckedUpdateWithoutErrorsInputSchema) ]).optional(),
 }).strict();
 
-export const BoolFieldUpdateOperationsInputSchema: z.ZodType<Prisma.BoolFieldUpdateOperationsInput> = z.object({
-  set: z.boolean().optional()
-}).strict();
-
 export const AgentCreateNestedOneWithoutScenariosInputSchema: z.ZodType<Prisma.AgentCreateNestedOneWithoutScenariosInput> = z.object({
   create: z.union([ z.lazy(() => AgentCreateWithoutScenariosInputSchema),z.lazy(() => AgentUncheckedCreateWithoutScenariosInputSchema) ]).optional(),
   connectOrCreate: z.lazy(() => AgentCreateOrConnectWithoutScenariosInputSchema).optional(),
@@ -3904,6 +3921,19 @@ export const NestedIntNullableFilterSchema: z.ZodType<Prisma.NestedIntNullableFi
   not: z.union([ z.number(),z.lazy(() => NestedIntNullableFilterSchema) ]).optional().nullable(),
 }).strict();
 
+export const NestedBoolFilterSchema: z.ZodType<Prisma.NestedBoolFilter> = z.object({
+  equals: z.boolean().optional(),
+  not: z.union([ z.boolean(),z.lazy(() => NestedBoolFilterSchema) ]).optional(),
+}).strict();
+
+export const NestedBoolWithAggregatesFilterSchema: z.ZodType<Prisma.NestedBoolWithAggregatesFilter> = z.object({
+  equals: z.boolean().optional(),
+  not: z.union([ z.boolean(),z.lazy(() => NestedBoolWithAggregatesFilterSchema) ]).optional(),
+  _count: z.lazy(() => NestedIntFilterSchema).optional(),
+  _min: z.lazy(() => NestedBoolFilterSchema).optional(),
+  _max: z.lazy(() => NestedBoolFilterSchema).optional()
+}).strict();
+
 export const NestedEnumCallStatusFilterSchema: z.ZodType<Prisma.NestedEnumCallStatusFilter> = z.object({
   equals: z.lazy(() => CallStatusSchema).optional(),
   in: z.lazy(() => CallStatusSchema).array().optional(),
@@ -3996,19 +4026,6 @@ export const NestedJsonFilterSchema: z.ZodType<Prisma.NestedJsonFilter> = z.obje
   gt: InputJsonValueSchema.optional(),
   gte: InputJsonValueSchema.optional(),
   not: InputJsonValueSchema.optional()
-}).strict();
-
-export const NestedBoolFilterSchema: z.ZodType<Prisma.NestedBoolFilter> = z.object({
-  equals: z.boolean().optional(),
-  not: z.union([ z.boolean(),z.lazy(() => NestedBoolFilterSchema) ]).optional(),
-}).strict();
-
-export const NestedBoolWithAggregatesFilterSchema: z.ZodType<Prisma.NestedBoolWithAggregatesFilter> = z.object({
-  equals: z.boolean().optional(),
-  not: z.union([ z.boolean(),z.lazy(() => NestedBoolWithAggregatesFilterSchema) ]).optional(),
-  _count: z.lazy(() => NestedIntFilterSchema).optional(),
-  _min: z.lazy(() => NestedBoolFilterSchema).optional(),
-  _max: z.lazy(() => NestedBoolFilterSchema).optional()
 }).strict();
 
 export const NestedEnumEvalTypeFilterSchema: z.ZodType<Prisma.NestedEnumEvalTypeFilter> = z.object({
@@ -4142,6 +4159,7 @@ export const TestCreateWithoutAgentInputSchema: z.ZodType<Prisma.TestCreateWitho
   updatedAt: z.coerce.date().optional(),
   gitBranch: z.string().optional().nullable(),
   gitCommit: z.string().optional().nullable(),
+  runFromApi: z.boolean().optional(),
   calls: z.lazy(() => CallCreateNestedManyWithoutTestInputSchema).optional()
 }).strict();
 
@@ -4151,6 +4169,7 @@ export const TestUncheckedCreateWithoutAgentInputSchema: z.ZodType<Prisma.TestUn
   updatedAt: z.coerce.date().optional(),
   gitBranch: z.string().optional().nullable(),
   gitCommit: z.string().optional().nullable(),
+  runFromApi: z.boolean().optional(),
   calls: z.lazy(() => CallUncheckedCreateNestedManyWithoutTestInputSchema).optional()
 }).strict();
 
@@ -4278,6 +4297,7 @@ export const TestScalarWhereInputSchema: z.ZodType<Prisma.TestScalarWhereInput> 
   agentId: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   gitBranch: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
   gitCommit: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
+  runFromApi: z.union([ z.lazy(() => BoolFilterSchema),z.boolean() ]).optional(),
 }).strict();
 
 export const AgentCreateWithoutTestsInputSchema: z.ZodType<Prisma.AgentCreateWithoutTestsInput> = z.object({
@@ -4593,6 +4613,7 @@ export const TestCreateWithoutCallsInputSchema: z.ZodType<Prisma.TestCreateWitho
   updatedAt: z.coerce.date().optional(),
   gitBranch: z.string().optional().nullable(),
   gitCommit: z.string().optional().nullable(),
+  runFromApi: z.boolean().optional(),
   agent: z.lazy(() => AgentCreateNestedOneWithoutTestsInputSchema)
 }).strict();
 
@@ -4602,7 +4623,8 @@ export const TestUncheckedCreateWithoutCallsInputSchema: z.ZodType<Prisma.TestUn
   updatedAt: z.coerce.date().optional(),
   agentId: z.string(),
   gitBranch: z.string().optional().nullable(),
-  gitCommit: z.string().optional().nullable()
+  gitCommit: z.string().optional().nullable(),
+  runFromApi: z.boolean().optional()
 }).strict();
 
 export const TestCreateOrConnectWithoutCallsInputSchema: z.ZodType<Prisma.TestCreateOrConnectWithoutCallsInput> = z.object({
@@ -4773,6 +4795,7 @@ export const TestUpdateWithoutCallsInputSchema: z.ZodType<Prisma.TestUpdateWitho
   updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   gitBranch: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   gitCommit: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  runFromApi: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   agent: z.lazy(() => AgentUpdateOneRequiredWithoutTestsNestedInputSchema).optional()
 }).strict();
 
@@ -4783,6 +4806,7 @@ export const TestUncheckedUpdateWithoutCallsInputSchema: z.ZodType<Prisma.TestUn
   agentId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   gitBranch: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   gitCommit: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  runFromApi: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
 }).strict();
 
 export const TestAgentUpsertWithoutCallsInputSchema: z.ZodType<Prisma.TestAgentUpsertWithoutCallsInput> = z.object({
@@ -5615,7 +5639,8 @@ export const TestCreateManyAgentInputSchema: z.ZodType<Prisma.TestCreateManyAgen
   createdAt: z.coerce.date().optional(),
   updatedAt: z.coerce.date().optional(),
   gitBranch: z.string().optional().nullable(),
-  gitCommit: z.string().optional().nullable()
+  gitCommit: z.string().optional().nullable(),
+  runFromApi: z.boolean().optional()
 }).strict();
 
 export const EvalUpdateWithoutAgentInputSchema: z.ZodType<Prisma.EvalUpdateWithoutAgentInput> = z.object({
@@ -5719,6 +5744,7 @@ export const TestUpdateWithoutAgentInputSchema: z.ZodType<Prisma.TestUpdateWitho
   updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   gitBranch: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   gitCommit: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  runFromApi: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   calls: z.lazy(() => CallUpdateManyWithoutTestNestedInputSchema).optional()
 }).strict();
 
@@ -5728,6 +5754,7 @@ export const TestUncheckedUpdateWithoutAgentInputSchema: z.ZodType<Prisma.TestUn
   updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   gitBranch: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   gitCommit: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  runFromApi: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   calls: z.lazy(() => CallUncheckedUpdateManyWithoutTestNestedInputSchema).optional()
 }).strict();
 
@@ -5737,6 +5764,7 @@ export const TestUncheckedUpdateManyWithoutAgentInputSchema: z.ZodType<Prisma.Te
   updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   gitBranch: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   gitCommit: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  runFromApi: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
 }).strict();
 
 export const CallCreateManyTestInputSchema: z.ZodType<Prisma.CallCreateManyTestInput> = z.object({
