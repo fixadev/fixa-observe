@@ -40,26 +40,31 @@ const main = async () => {
       }
 
       const dbCall = test?.calls.find((c) => c.id === call.id);
+      if (!dbCall?.scenario) {
+        console.error("No scenario found for call ID", call.id);
+        return;
+      }
 
       const agent = test?.agent;
 
-      const analysis = await analyzeCallWitho1(
-        vapiCall.artifact?.messages ?? [],
-        dbCall?.scenario?.instructions ?? "",
-        dbCall?.scenario?.evals ?? [],
-        agent?.enabledGeneralEvals ?? [],
-      );
+      const analysis = await analyzeCallWitho1({
+        callStartedAt: vapiCall.startedAt,
+        messages: vapiCall.artifact.messages,
+        testAgentPrompt: dbCall.scenario.instructions,
+        scenario: dbCall.scenario,
+        agent,
+      });
 
       const geminiPrompt = createGeminiPrompt(
-        vapiCall.artifact?.messages ?? [],
-        dbCall?.scenario?.instructions ?? "",
-        dbCall?.scenario?.evals ?? [],
-        agent?.enabledGeneralEvals ?? [],
+        vapiCall.artifact.messages,
+        dbCall.scenario.instructions,
+        dbCall.scenario.evals,
+        agent.enabledGeneralEvals,
         analysis,
       );
 
       const geminiResult = await analyzeCallWithGemini(
-        vapiCall.artifact?.stereoRecordingUrl,
+        vapiCall.artifact.stereoRecordingUrl,
         geminiPrompt,
       );
 

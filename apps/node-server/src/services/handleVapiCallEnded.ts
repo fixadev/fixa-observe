@@ -43,12 +43,14 @@ export const handleVapiCallEnded = async ({
       return;
     }
 
-    const o1Analysis = await analyzeCallWitho1(
-      report.artifact.messages,
-      scenario.instructions,
-      scenario.evals,
-      agent.enabledGeneralEvals,
-    );
+    report.startedAt;
+    const o1Analysis = await analyzeCallWitho1({
+      callStartedAt: report.startedAt,
+      messages: report.artifact.messages,
+      testAgentPrompt: scenario.instructions,
+      scenario,
+      agent,
+    });
 
     console.log("O1 ANALYSIS for call", call.id, o1Analysis);
 

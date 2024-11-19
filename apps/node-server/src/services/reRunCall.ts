@@ -17,7 +17,7 @@ const main = async () => {
   // const agents = await db.agent.findMany();
   // console.log("AGENTS", agents);
 
-  const callId = "68212e2e-b391-4e04-9449-dcae25620723";
+  const callId = "dd72d9df-2813-420d-a116-8e1774f294e4";
 
   const call = await db.call.findFirst({
     where: { id: callId },
@@ -34,6 +34,11 @@ const main = async () => {
     return;
   }
 
+  if (!call.scenario) {
+    console.error("No scenario found for call ID", call.id);
+    return;
+  }
+
   const vapiCall = await vapiClient.calls.get(call.id);
   const agent = call.test?.agent;
 
@@ -47,12 +52,13 @@ const main = async () => {
     return;
   }
 
-  const analysis = await analyzeCallWitho1(
-    vapiCall.artifact?.messages ?? [],
-    call.scenario?.instructions ?? "",
-    call.scenario?.evals ?? [],
-    agent?.enabledGeneralEvals ?? [],
-  );
+  const analysis = await analyzeCallWitho1({
+    callStartedAt: vapiCall.startedAt,
+    messages: vapiCall.artifact.messages,
+    testAgentPrompt: call.scenario.instructions,
+    scenario: call.scenario,
+    agent,
+  });
 
   const geminiPrompt = createGeminiPrompt(
     vapiCall.artifact?.messages ?? [],
