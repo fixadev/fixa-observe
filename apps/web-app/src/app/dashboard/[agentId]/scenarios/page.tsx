@@ -46,6 +46,8 @@ import {
 } from "~/components/ui/alert-dialog";
 import { GenerateScenariosModal } from "./GenerateScenariosModal";
 import { SidebarTrigger } from "~/components/ui/sidebar";
+import { Switch } from "~/components/ui/switch";
+import { useTimezoneSelect } from "react-timezone-select";
 
 export default function AgentScenariosPage({
   params,
@@ -228,7 +230,7 @@ export default function AgentScenariosPage({
       </div>
 
       {agent.scenarios.length > 0 && agent.tests.length === 0 && (
-        <Card className="animate-slide-up fixed bottom-4 right-4">
+        <Card className="fixed bottom-4 right-4 animate-slide-up">
           <CardHeader className="flex flex-col gap-2">
             <CardTitle>ready to run your first test?</CardTitle>
             <Button className="w-full" asChild>
@@ -359,9 +361,14 @@ function ScenarioSheet({
     setEvals([emptyEval]);
   };
 
+  const { options, parseTimezone } = useTimezoneSelect({});
+  const [timezone, setTimezone] = useState(
+    parseTimezone(Intl.DateTimeFormat().resolvedOptions().timeZone),
+  );
+
   return (
     <Sheet open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
-      <SheetContent className="flex flex-col sm:max-w-[500px]">
+      <SheetContent className="flex flex-col sm:max-w-[700px]">
         <SheetHeader>
           <SheetTitle>
             {selectedScenario ? "edit scenario" : "new scenario"}
@@ -388,6 +395,33 @@ function ScenarioSheet({
                 onChange={(e) => setInstructions(e.target.value)}
                 className="min-h-[100px]"
               />
+            </div>
+
+            <div>
+              <Label className="text-base">context</Label>
+              <div className="mb-2 text-sm text-muted-foreground">
+                additional context that will be provided to the evaluator
+              </div>
+              <div className="flex items-center gap-2">
+                <Switch id="current-date-time" />
+                <Label htmlFor="current-date-time">current date / time</Label>
+                <div className="flex-1" />
+                <Select
+                  value={timezone.value}
+                  onValueChange={(val) => setTimezone(parseTimezone(val))}
+                >
+                  <SelectTrigger className="w-[200px]">
+                    <SelectValue placeholder="Select a timezone" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {options.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
 
             <div>

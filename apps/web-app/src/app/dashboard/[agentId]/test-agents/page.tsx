@@ -6,7 +6,6 @@ import { useAgent } from "~/app/contexts/UseAgent";
 import { Switch } from "~/components/ui/switch";
 import { api } from "~/trpc/react";
 import Image from "next/image";
-import { PlusIcon } from "@heroicons/react/24/solid";
 import { CopyText } from "~/components/dashboard/CopyText";
 import { SidebarTrigger } from "~/components/ui/sidebar";
 
@@ -61,7 +60,7 @@ export default function TestAgentsPage({
 
   return (
     <div>
-      <div className="bg-sidebar sticky top-0 z-20 flex h-14 w-full items-center justify-between border-b border-input px-4 lg:h-[60px]">
+      <div className="sticky top-0 z-20 flex h-14 w-full items-center justify-between border-b border-input bg-sidebar px-4 lg:h-[60px]">
         <div className="flex flex-1 items-center gap-2">
           <SidebarTrigger />
           <Link href={`/dashboard/${params.agentId}/test-agents`}>
