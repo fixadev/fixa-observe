@@ -17,6 +17,8 @@ const EvalResultSchema = z.object({
   duration: z.number(),
   type: z.nativeEnum(EvalResultType),
   details: z.string(),
+  wordIndexStart: z.number(),
+  wordIndexEnd: z.number(),
 });
 
 export const outputSchema = z.object({
@@ -59,13 +61,17 @@ export const analyzeCallWitho1 = async (
     - details: A short sentence CONCISELY describing the details of the evaluation result refer to the main agent only as "agent".
     - secondsFromStart: The start time of the evaluation result in seconds (use the secondsFromStart for this)
     - duration: The duration of the evaluation result in seconds (use duration for this)
-    
+    - wordIndexStart: The start word index of the evaluation result, calculated from the beginning of the call based on the messages in the transcript (use wordIndexStart for this)
+    - wordIndexEnd: The end word index of the evaluation result, calculated from the beginning of the call based on the messages in the transcript (use wordIndexEnd for this)
+
   - generalEvalResults: An array of objects, one for the result of each general evaluation criteria. Each evaluation result object will have the following fields:
     - evalId: The id of the evaluation criteria object that was used to evaluate the call.
     - success: A boolean indicating if the call was successful. The call is successful if the main agent achieves the success criteria.
     - details: A short sentence CONCISELY describing the details of the evaluation result refer to the main agent only as "agent".
     - secondsFromStart: The start time of the evaluation result in seconds (use the secondsFromStart for this)
     - duration: The duration of the evaluation result in seconds (use duration for this)
+    - wordIndexStart: The start word index of the evaluation result, calculated from the beginning of the call based on the messages in the transcript (use wordIndexStart for this)
+    - wordIndexEnd: The end word index of the evaluation result, calculated from the beginning of the call based on the messages in the transcript (use wordIndexEnd for this)
 
   OUTPUT ONLY THE JSON - do not include backticks like \`\`\`json or any other formatting
 

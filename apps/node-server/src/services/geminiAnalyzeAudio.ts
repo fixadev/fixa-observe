@@ -41,6 +41,14 @@ const evalResultSchema = {
       type: SchemaType.STRING,
       description: "Detailed evaluation information",
     },
+    wordIndexStart: {
+      type: SchemaType.NUMBER,
+      description: "Start word index of the evaluation result",
+    },
+    wordIndexEnd: {
+      type: SchemaType.NUMBER,
+      description: "End word index of the evaluation result",
+    },
   },
   required: [
     "evalId",

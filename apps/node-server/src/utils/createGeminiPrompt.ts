@@ -44,6 +44,8 @@ export const createGeminiPrompt = (
             - description: A string describing the error - refer to the main agent only as "agent"
             - secondsFromStart: The start time of the error in seconds (use the secondsFromStart for this)
             - duration: The duration of the error in seconds (use duration for this)
+            - wordIndexStart: The start word index of the error, calculated from the beginning of the call based on the messages in the transcript (use wordIndexStart for this)
+            - wordIndexEnd: The end word index of the error, calculated from the beginning of the call based on the messages in the transcript (use wordIndexEnd for this)
       6. the audio of the call
 
       Return the modified analysis as a JSON object with the same format as the junior analyst's analysis.
