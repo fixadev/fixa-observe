@@ -137,12 +137,10 @@ export class AgentService {
   async createScenario(agentId: string, scenario: CreateScenarioSchema) {
     return await db.scenario.create({
       data: {
+        ...scenario,
         id: uuidv4(),
         agentId,
         createdAt: new Date(),
-        name: scenario.name,
-        instructions: scenario.instructions,
-        successCriteria: scenario.successCriteria,
         evals: {
           createMany: {
             data: scenario.evals.map((evaluation) => ({
@@ -162,12 +160,10 @@ export class AgentService {
     const transactions = scenarios.map((scenario) => {
       return db.scenario.create({
         data: {
+          ...scenario,
           id: uuidv4(),
           agentId,
           createdAt: new Date(),
-          name: scenario.name,
-          instructions: scenario.instructions,
-          successCriteria: scenario.successCriteria,
           evals: {
             createMany: {
               data: scenario.evals.map((evaluation) => ({
@@ -209,9 +205,7 @@ export class AgentService {
     return await db.scenario.update({
       where: { id: scenario.id },
       data: {
-        name: scenario.name,
-        instructions: scenario.instructions,
-        successCriteria: scenario.successCriteria,
+        ...scenario,
         evals: {
           deleteMany: {
             id: { in: evaluationsToDelete.map((evaluation) => evaluation.id) },

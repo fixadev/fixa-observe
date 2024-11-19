@@ -293,6 +293,13 @@ function ScenarioSheet({
       : [emptyEval],
   );
 
+  // Include date/time stuff
+  const { options, parseTimezone } = useTimezoneSelect({});
+  const [timezone, setTimezone] = useState(
+    parseTimezone(Intl.DateTimeFormat().resolvedOptions().timeZone),
+  );
+  const [includeDateTime, setIncludeDateTime] = useState(false);
+
   const addEval = useCallback(() => {
     setEvals((prev) => [...prev, { ...emptyEval, id: crypto.randomUUID() }]);
   }, [emptyEval]);
@@ -305,6 +312,7 @@ function ScenarioSheet({
   );
 
   useEffect(() => {
+    console.log("selectedScenario", selectedScenario);
     setName(selectedScenario?.name ?? "");
     setInstructions(selectedScenario?.instructions ?? "");
     setEvals(
@@ -312,18 +320,19 @@ function ScenarioSheet({
         ? selectedScenario.evals
         : [emptyEval],
     );
+    setIncludeDateTime(selectedScenario?.includeDateTime ?? false);
+    setTimezone(
+      parseTimezone(
+        selectedScenario?.timezone ??
+          Intl.DateTimeFormat().resolvedOptions().timeZone,
+      ),
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedScenario, emptyEval]);
 
   const handleDeleteEval = useCallback((id: string) => {
     setEvals((prev) => prev.filter((e) => e.id !== id));
   }, []);
-
-  // Include date/time stuff
-  const { options, parseTimezone } = useTimezoneSelect({});
-  const [timezone, setTimezone] = useState(
-    parseTimezone(Intl.DateTimeFormat().resolvedOptions().timeZone),
-  );
-  const [includeDateTime, setIncludeDateTime] = useState(false);
 
   const handleSave = useCallback(() => {
     if (name.length === 0 || instructions.length === 0) {
