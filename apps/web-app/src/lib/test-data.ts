@@ -376,7 +376,10 @@ export const TEST_CALLS: CallWithIncludes[] = [
     duration: 3.12 + 1.675,
     type: EvalResultType.boolean,
     details: "this is the reason that it failed or succeeded",
-    wordIndexRange: [24 * i + 2, 24 * i + 7],
+    // wordIndexStart: null,
+    // wordIndexEnd: null,
+    wordIndexStart: 24 * i + 2,
+    wordIndexEnd: 24 * i + 7,
   })),
   errors:
     call.result !== "success"

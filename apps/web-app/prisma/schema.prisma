@@ -208,6 +208,9 @@ model EvalResult {
   duration         Float
   type             EvalResultType
   details          String
+
+  wordIndexStart Int?
+  wordIndexEnd   Int?
 }
 
 enum EvalType {

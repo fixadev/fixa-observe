@@ -14,11 +14,6 @@ import { CallStatus, Role } from "@prisma/client";
 import Spinner from "../Spinner";
 import { EvalResultCard } from "./EvalResultCard";
 
-type EvalResultWithWordIndex = EvalResultWithIncludes & {
-  wordIndexRange: [number, number];
-  messageIndex: number;
-};
-
 export default function CallDetails({
   call,
   agent,
@@ -99,13 +94,10 @@ export default function CallDetails({
 
       // Check if the eval's word range overlaps with this message
       if (
-        // TODO: REMOVE THESE TS EXPECT ERRORS
-        // @ts-expect-error hello
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        activeEval.wordIndexRange[0] < messageEndWord &&
-        // @ts-expect-error hello
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        activeEval.wordIndexRange[1] >= messageStartWord
+        activeEval.wordIndexStart &&
+        activeEval.wordIndexEnd &&
+        activeEval.wordIndexStart < messageEndWord &&
+        activeEval.wordIndexEnd >= messageStartWord
       ) {
         overlappingIndices.add(index);
       }
@@ -114,7 +106,7 @@ export default function CallDetails({
     });
 
     return overlappingIndices;
-  }, [call.evalResults, activeEvalResultId, messagesFiltered]);
+  }, [activeEvalResultId, call, messagesFiltered]);
 
   // Scroll to the active eval message if it has changed
   useEffect(() => {
@@ -140,10 +132,10 @@ export default function CallDetails({
 
   const messageEvalsMap = useMemo(() => {
     if (!call.evalResults) {
-      return new Map<number, EvalResultWithWordIndex[]>();
+      return new Map<number, EvalResultWithIncludes[]>();
     }
 
-    const messageMap = new Map<number, EvalResultWithWordIndex[]>();
+    const messageMap = new Map<number, EvalResultWithIncludes[]>();
     let wordCount = 0;
 
     // First pass: calculate cumulative word count for each message
@@ -155,9 +147,7 @@ export default function CallDetails({
 
     // Process each eval result to create word-level mappings
     call.evalResults?.forEach((evalResult) => {
-      const evalWithIndex = evalResult as EvalResultWithWordIndex;
       // Find which message(s) this eval spans
-      const [startWordIndex, endWordIndex] = evalWithIndex.wordIndexRange;
 
       // Find which messages this eval result belongs to
       messagesFiltered.forEach((message, messageIndex) => {
@@ -169,25 +159,27 @@ export default function CallDetails({
 
         // Check if this eval result overlaps with this message
         if (
-          startWordIndex < messageEndWord &&
-          endWordIndex >= messageStartWord
+          evalResult.wordIndexStart &&
+          evalResult.wordIndexEnd &&
+          evalResult.wordIndexStart < messageEndWord &&
+          evalResult.wordIndexEnd >= messageStartWord
         ) {
           const existing = messageMap.get(messageIndex) ?? [];
-          messageMap.set(messageIndex, [...existing, evalWithIndex]);
+          messageMap.set(messageIndex, [...existing, evalResult]);
         }
       });
     });
 
     return messageMap;
-  }, [call.evalResults, messagesFiltered]);
+  }, [call, messagesFiltered]);
 
   // Update the splitMessageByEvals function to account for global word indices
   const splitMessageByEvals = useCallback(
     (
       message: string,
-      evalResults: EvalResultWithWordIndex[],
+      evalResults: EvalResultWithIncludes[],
       messageIndex: number,
-    ): { word: string; evalResult?: EvalResultWithWordIndex }[] => {
+    ): { word: string; evalResult?: EvalResultWithIncludes }[] => {
       if (!evalResults.length)
         return message.split(" ").map((word) => ({ word }));
 
@@ -197,14 +189,17 @@ export default function CallDetails({
       });
 
       const words = message.split(" ");
-      const result: { word: string; evalResult?: EvalResultWithWordIndex }[] =
+      const result: { word: string; evalResult?: EvalResultWithIncludes }[] =
         words.map((word, idx) => {
           const globalWordIndex = wordOffset + idx;
-          const matchingEval = evalResults.find(
-            (evalResult) =>
-              globalWordIndex >= evalResult.wordIndexRange[0] &&
-              globalWordIndex <= evalResult.wordIndexRange[1],
-          );
+          const matchingEval = evalResults.find((evalResult) => {
+            if (!evalResult.wordIndexStart || !evalResult.wordIndexEnd)
+              return false;
+            return (
+              globalWordIndex >= evalResult.wordIndexStart &&
+              globalWordIndex <= evalResult.wordIndexEnd
+            );
+          });
           return { word, evalResult: matchingEval };
         });
 

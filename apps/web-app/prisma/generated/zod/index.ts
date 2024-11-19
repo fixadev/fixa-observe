@@ -76,7 +76,7 @@ export const ScenarioScalarFieldEnumSchema = z.enum(['id','agentId','createdAt',
 
 export const EvalScalarFieldEnumSchema = z.enum(['id','createdAt','name','description','scenarioId','type','resultType','agentId','ownerId']);
 
-export const EvalResultScalarFieldEnumSchema = z.enum(['id','createdAt','callId','evalId','result','success','secondsFromStart','duration','type','details']);
+export const EvalResultScalarFieldEnumSchema = z.enum(['id','createdAt','callId','evalId','result','success','secondsFromStart','duration','type','details','wordIndexStart','wordIndexEnd']);
 
 export const SortOrderSchema = z.enum(['asc','desc']);
 
@@ -289,6 +289,8 @@ export const EvalResultSchema = z.object({
   secondsFromStart: z.number(),
   duration: z.number(),
   details: z.string(),
+  wordIndexStart: z.number().int().nullable(),
+  wordIndexEnd: z.number().int().nullable(),
 })
 
 export type EvalResult = z.infer<typeof EvalResultSchema>
@@ -628,6 +630,8 @@ export const EvalResultSelectSchema: z.ZodType<Prisma.EvalResultSelect> = z.obje
   duration: z.boolean().optional(),
   type: z.boolean().optional(),
   details: z.boolean().optional(),
+  wordIndexStart: z.boolean().optional(),
+  wordIndexEnd: z.boolean().optional(),
   call: z.union([z.boolean(),z.lazy(() => CallArgsSchema)]).optional(),
   eval: z.union([z.boolean(),z.lazy(() => EvalArgsSchema)]).optional(),
 }).strict()
@@ -1381,6 +1385,8 @@ export const EvalResultWhereInputSchema: z.ZodType<Prisma.EvalResultWhereInput> 
   duration: z.union([ z.lazy(() => FloatFilterSchema),z.number() ]).optional(),
   type: z.union([ z.lazy(() => EnumEvalResultTypeFilterSchema),z.lazy(() => EvalResultTypeSchema) ]).optional(),
   details: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
+  wordIndexStart: z.union([ z.lazy(() => IntNullableFilterSchema),z.number() ]).optional().nullable(),
+  wordIndexEnd: z.union([ z.lazy(() => IntNullableFilterSchema),z.number() ]).optional().nullable(),
   call: z.union([ z.lazy(() => CallNullableRelationFilterSchema),z.lazy(() => CallWhereInputSchema) ]).optional().nullable(),
   eval: z.union([ z.lazy(() => EvalRelationFilterSchema),z.lazy(() => EvalWhereInputSchema) ]).optional(),
 }).strict();
@@ -1396,6 +1402,8 @@ export const EvalResultOrderByWithRelationInputSchema: z.ZodType<Prisma.EvalResu
   duration: z.lazy(() => SortOrderSchema).optional(),
   type: z.lazy(() => SortOrderSchema).optional(),
   details: z.lazy(() => SortOrderSchema).optional(),
+  wordIndexStart: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
+  wordIndexEnd: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
   call: z.lazy(() => CallOrderByWithRelationInputSchema).optional(),
   eval: z.lazy(() => EvalOrderByWithRelationInputSchema).optional()
 }).strict();
@@ -1417,6 +1425,8 @@ export const EvalResultWhereUniqueInputSchema: z.ZodType<Prisma.EvalResultWhereU
   duration: z.union([ z.lazy(() => FloatFilterSchema),z.number() ]).optional(),
   type: z.union([ z.lazy(() => EnumEvalResultTypeFilterSchema),z.lazy(() => EvalResultTypeSchema) ]).optional(),
   details: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
+  wordIndexStart: z.union([ z.lazy(() => IntNullableFilterSchema),z.number().int() ]).optional().nullable(),
+  wordIndexEnd: z.union([ z.lazy(() => IntNullableFilterSchema),z.number().int() ]).optional().nullable(),
   call: z.union([ z.lazy(() => CallNullableRelationFilterSchema),z.lazy(() => CallWhereInputSchema) ]).optional().nullable(),
   eval: z.union([ z.lazy(() => EvalRelationFilterSchema),z.lazy(() => EvalWhereInputSchema) ]).optional(),
 }).strict());
@@ -1432,6 +1442,8 @@ export const EvalResultOrderByWithAggregationInputSchema: z.ZodType<Prisma.EvalR
   duration: z.lazy(() => SortOrderSchema).optional(),
   type: z.lazy(() => SortOrderSchema).optional(),
   details: z.lazy(() => SortOrderSchema).optional(),
+  wordIndexStart: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
+  wordIndexEnd: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
   _count: z.lazy(() => EvalResultCountOrderByAggregateInputSchema).optional(),
   _avg: z.lazy(() => EvalResultAvgOrderByAggregateInputSchema).optional(),
   _max: z.lazy(() => EvalResultMaxOrderByAggregateInputSchema).optional(),
@@ -1453,6 +1465,8 @@ export const EvalResultScalarWhereWithAggregatesInputSchema: z.ZodType<Prisma.Ev
   duration: z.union([ z.lazy(() => FloatWithAggregatesFilterSchema),z.number() ]).optional(),
   type: z.union([ z.lazy(() => EnumEvalResultTypeWithAggregatesFilterSchema),z.lazy(() => EvalResultTypeSchema) ]).optional(),
   details: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
+  wordIndexStart: z.union([ z.lazy(() => IntNullableWithAggregatesFilterSchema),z.number() ]).optional().nullable(),
+  wordIndexEnd: z.union([ z.lazy(() => IntNullableWithAggregatesFilterSchema),z.number() ]).optional().nullable(),
 }).strict();
 
 export const ApiKeyCreateInputSchema: z.ZodType<Prisma.ApiKeyCreateInput> = z.object({
@@ -2221,6 +2235,8 @@ export const EvalResultCreateInputSchema: z.ZodType<Prisma.EvalResultCreateInput
   duration: z.number(),
   type: z.lazy(() => EvalResultTypeSchema),
   details: z.string(),
+  wordIndexStart: z.number().int().optional().nullable(),
+  wordIndexEnd: z.number().int().optional().nullable(),
   call: z.lazy(() => CallCreateNestedOneWithoutEvalResultsInputSchema).optional(),
   eval: z.lazy(() => EvalCreateNestedOneWithoutEvalResultsInputSchema)
 }).strict();
@@ -2235,7 +2251,9 @@ export const EvalResultUncheckedCreateInputSchema: z.ZodType<Prisma.EvalResultUn
   secondsFromStart: z.number(),
   duration: z.number(),
   type: z.lazy(() => EvalResultTypeSchema),
-  details: z.string()
+  details: z.string(),
+  wordIndexStart: z.number().int().optional().nullable(),
+  wordIndexEnd: z.number().int().optional().nullable()
 }).strict();
 
 export const EvalResultUpdateInputSchema: z.ZodType<Prisma.EvalResultUpdateInput> = z.object({
@@ -2247,6 +2265,8 @@ export const EvalResultUpdateInputSchema: z.ZodType<Prisma.EvalResultUpdateInput
   duration: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
   type: z.union([ z.lazy(() => EvalResultTypeSchema),z.lazy(() => EnumEvalResultTypeFieldUpdateOperationsInputSchema) ]).optional(),
   details: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  wordIndexStart: z.union([ z.number().int(),z.lazy(() => NullableIntFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  wordIndexEnd: z.union([ z.number().int(),z.lazy(() => NullableIntFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   call: z.lazy(() => CallUpdateOneWithoutEvalResultsNestedInputSchema).optional(),
   eval: z.lazy(() => EvalUpdateOneRequiredWithoutEvalResultsNestedInputSchema).optional()
 }).strict();
@@ -2262,6 +2282,8 @@ export const EvalResultUncheckedUpdateInputSchema: z.ZodType<Prisma.EvalResultUn
   duration: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
   type: z.union([ z.lazy(() => EvalResultTypeSchema),z.lazy(() => EnumEvalResultTypeFieldUpdateOperationsInputSchema) ]).optional(),
   details: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  wordIndexStart: z.union([ z.number().int(),z.lazy(() => NullableIntFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  wordIndexEnd: z.union([ z.number().int(),z.lazy(() => NullableIntFieldUpdateOperationsInputSchema) ]).optional().nullable(),
 }).strict();
 
 export const EvalResultCreateManyInputSchema: z.ZodType<Prisma.EvalResultCreateManyInput> = z.object({
@@ -2274,7 +2296,9 @@ export const EvalResultCreateManyInputSchema: z.ZodType<Prisma.EvalResultCreateM
   secondsFromStart: z.number(),
   duration: z.number(),
   type: z.lazy(() => EvalResultTypeSchema),
-  details: z.string()
+  details: z.string(),
+  wordIndexStart: z.number().int().optional().nullable(),
+  wordIndexEnd: z.number().int().optional().nullable()
 }).strict();
 
 export const EvalResultUpdateManyMutationInputSchema: z.ZodType<Prisma.EvalResultUpdateManyMutationInput> = z.object({
@@ -2286,6 +2310,8 @@ export const EvalResultUpdateManyMutationInputSchema: z.ZodType<Prisma.EvalResul
   duration: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
   type: z.union([ z.lazy(() => EvalResultTypeSchema),z.lazy(() => EnumEvalResultTypeFieldUpdateOperationsInputSchema) ]).optional(),
   details: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  wordIndexStart: z.union([ z.number().int(),z.lazy(() => NullableIntFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  wordIndexEnd: z.union([ z.number().int(),z.lazy(() => NullableIntFieldUpdateOperationsInputSchema) ]).optional().nullable(),
 }).strict();
 
 export const EvalResultUncheckedUpdateManyInputSchema: z.ZodType<Prisma.EvalResultUncheckedUpdateManyInput> = z.object({
@@ -2299,6 +2325,8 @@ export const EvalResultUncheckedUpdateManyInputSchema: z.ZodType<Prisma.EvalResu
   duration: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
   type: z.union([ z.lazy(() => EvalResultTypeSchema),z.lazy(() => EnumEvalResultTypeFieldUpdateOperationsInputSchema) ]).optional(),
   details: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  wordIndexStart: z.union([ z.number().int(),z.lazy(() => NullableIntFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  wordIndexEnd: z.union([ z.number().int(),z.lazy(() => NullableIntFieldUpdateOperationsInputSchema) ]).optional().nullable(),
 }).strict();
 
 export const StringFilterSchema: z.ZodType<Prisma.StringFilter> = z.object({
@@ -3005,6 +3033,17 @@ export const EnumEvalResultTypeWithAggregatesFilterSchema: z.ZodType<Prisma.Enum
   _max: z.lazy(() => NestedEnumEvalResultTypeFilterSchema).optional()
 }).strict();
 
+export const IntNullableFilterSchema: z.ZodType<Prisma.IntNullableFilter> = z.object({
+  equals: z.number().optional().nullable(),
+  in: z.number().array().optional().nullable(),
+  notIn: z.number().array().optional().nullable(),
+  lt: z.number().optional(),
+  lte: z.number().optional(),
+  gt: z.number().optional(),
+  gte: z.number().optional(),
+  not: z.union([ z.number(),z.lazy(() => NestedIntNullableFilterSchema) ]).optional().nullable(),
+}).strict();
+
 export const CallNullableRelationFilterSchema: z.ZodType<Prisma.CallNullableRelationFilter> = z.object({
   is: z.lazy(() => CallWhereInputSchema).optional().nullable(),
   isNot: z.lazy(() => CallWhereInputSchema).optional().nullable()
@@ -3025,12 +3064,16 @@ export const EvalResultCountOrderByAggregateInputSchema: z.ZodType<Prisma.EvalRe
   secondsFromStart: z.lazy(() => SortOrderSchema).optional(),
   duration: z.lazy(() => SortOrderSchema).optional(),
   type: z.lazy(() => SortOrderSchema).optional(),
-  details: z.lazy(() => SortOrderSchema).optional()
+  details: z.lazy(() => SortOrderSchema).optional(),
+  wordIndexStart: z.lazy(() => SortOrderSchema).optional(),
+  wordIndexEnd: z.lazy(() => SortOrderSchema).optional()
 }).strict();
 
 export const EvalResultAvgOrderByAggregateInputSchema: z.ZodType<Prisma.EvalResultAvgOrderByAggregateInput> = z.object({
   secondsFromStart: z.lazy(() => SortOrderSchema).optional(),
-  duration: z.lazy(() => SortOrderSchema).optional()
+  duration: z.lazy(() => SortOrderSchema).optional(),
+  wordIndexStart: z.lazy(() => SortOrderSchema).optional(),
+  wordIndexEnd: z.lazy(() => SortOrderSchema).optional()
 }).strict();
 
 export const EvalResultMaxOrderByAggregateInputSchema: z.ZodType<Prisma.EvalResultMaxOrderByAggregateInput> = z.object({
@@ -3043,7 +3086,9 @@ export const EvalResultMaxOrderByAggregateInputSchema: z.ZodType<Prisma.EvalResu
   secondsFromStart: z.lazy(() => SortOrderSchema).optional(),
   duration: z.lazy(() => SortOrderSchema).optional(),
   type: z.lazy(() => SortOrderSchema).optional(),
-  details: z.lazy(() => SortOrderSchema).optional()
+  details: z.lazy(() => SortOrderSchema).optional(),
+  wordIndexStart: z.lazy(() => SortOrderSchema).optional(),
+  wordIndexEnd: z.lazy(() => SortOrderSchema).optional()
 }).strict();
 
 export const EvalResultMinOrderByAggregateInputSchema: z.ZodType<Prisma.EvalResultMinOrderByAggregateInput> = z.object({
@@ -3056,12 +3101,32 @@ export const EvalResultMinOrderByAggregateInputSchema: z.ZodType<Prisma.EvalResu
   secondsFromStart: z.lazy(() => SortOrderSchema).optional(),
   duration: z.lazy(() => SortOrderSchema).optional(),
   type: z.lazy(() => SortOrderSchema).optional(),
-  details: z.lazy(() => SortOrderSchema).optional()
+  details: z.lazy(() => SortOrderSchema).optional(),
+  wordIndexStart: z.lazy(() => SortOrderSchema).optional(),
+  wordIndexEnd: z.lazy(() => SortOrderSchema).optional()
 }).strict();
 
 export const EvalResultSumOrderByAggregateInputSchema: z.ZodType<Prisma.EvalResultSumOrderByAggregateInput> = z.object({
   secondsFromStart: z.lazy(() => SortOrderSchema).optional(),
-  duration: z.lazy(() => SortOrderSchema).optional()
+  duration: z.lazy(() => SortOrderSchema).optional(),
+  wordIndexStart: z.lazy(() => SortOrderSchema).optional(),
+  wordIndexEnd: z.lazy(() => SortOrderSchema).optional()
+}).strict();
+
+export const IntNullableWithAggregatesFilterSchema: z.ZodType<Prisma.IntNullableWithAggregatesFilter> = z.object({
+  equals: z.number().optional().nullable(),
+  in: z.number().array().optional().nullable(),
+  notIn: z.number().array().optional().nullable(),
+  lt: z.number().optional(),
+  lte: z.number().optional(),
+  gt: z.number().optional(),
+  gte: z.number().optional(),
+  not: z.union([ z.number(),z.lazy(() => NestedIntNullableWithAggregatesFilterSchema) ]).optional().nullable(),
+  _count: z.lazy(() => NestedIntNullableFilterSchema).optional(),
+  _avg: z.lazy(() => NestedFloatNullableFilterSchema).optional(),
+  _sum: z.lazy(() => NestedIntNullableFilterSchema).optional(),
+  _min: z.lazy(() => NestedIntNullableFilterSchema).optional(),
+  _max: z.lazy(() => NestedIntNullableFilterSchema).optional()
 }).strict();
 
 export const StringFieldUpdateOperationsInputSchema: z.ZodType<Prisma.StringFieldUpdateOperationsInput> = z.object({
@@ -3794,6 +3859,14 @@ export const EvalCreateNestedOneWithoutEvalResultsInputSchema: z.ZodType<Prisma.
   connect: z.lazy(() => EvalWhereUniqueInputSchema).optional()
 }).strict();
 
+export const NullableIntFieldUpdateOperationsInputSchema: z.ZodType<Prisma.NullableIntFieldUpdateOperationsInput> = z.object({
+  set: z.number().optional().nullable(),
+  increment: z.number().optional(),
+  decrement: z.number().optional(),
+  multiply: z.number().optional(),
+  divide: z.number().optional()
+}).strict();
+
 export const CallUpdateOneWithoutEvalResultsNestedInputSchema: z.ZodType<Prisma.CallUpdateOneWithoutEvalResultsNestedInput> = z.object({
   create: z.union([ z.lazy(() => CallCreateWithoutEvalResultsInputSchema),z.lazy(() => CallUncheckedCreateWithoutEvalResultsInputSchema) ]).optional(),
   connectOrCreate: z.lazy(() => CallCreateOrConnectWithoutEvalResultsInputSchema).optional(),
@@ -4060,6 +4133,33 @@ export const NestedEnumEvalResultTypeWithAggregatesFilterSchema: z.ZodType<Prism
   _count: z.lazy(() => NestedIntFilterSchema).optional(),
   _min: z.lazy(() => NestedEnumEvalResultTypeFilterSchema).optional(),
   _max: z.lazy(() => NestedEnumEvalResultTypeFilterSchema).optional()
+}).strict();
+
+export const NestedIntNullableWithAggregatesFilterSchema: z.ZodType<Prisma.NestedIntNullableWithAggregatesFilter> = z.object({
+  equals: z.number().optional().nullable(),
+  in: z.number().array().optional().nullable(),
+  notIn: z.number().array().optional().nullable(),
+  lt: z.number().optional(),
+  lte: z.number().optional(),
+  gt: z.number().optional(),
+  gte: z.number().optional(),
+  not: z.union([ z.number(),z.lazy(() => NestedIntNullableWithAggregatesFilterSchema) ]).optional().nullable(),
+  _count: z.lazy(() => NestedIntNullableFilterSchema).optional(),
+  _avg: z.lazy(() => NestedFloatNullableFilterSchema).optional(),
+  _sum: z.lazy(() => NestedIntNullableFilterSchema).optional(),
+  _min: z.lazy(() => NestedIntNullableFilterSchema).optional(),
+  _max: z.lazy(() => NestedIntNullableFilterSchema).optional()
+}).strict();
+
+export const NestedFloatNullableFilterSchema: z.ZodType<Prisma.NestedFloatNullableFilter> = z.object({
+  equals: z.number().optional().nullable(),
+  in: z.number().array().optional().nullable(),
+  notIn: z.number().array().optional().nullable(),
+  lt: z.number().optional(),
+  lte: z.number().optional(),
+  gt: z.number().optional(),
+  gte: z.number().optional(),
+  not: z.union([ z.number(),z.lazy(() => NestedFloatNullableFilterSchema) ]).optional().nullable(),
 }).strict();
 
 export const EvalCreateWithoutAgentInputSchema: z.ZodType<Prisma.EvalCreateWithoutAgentInput> = z.object({
@@ -4582,6 +4682,8 @@ export const EvalResultCreateWithoutCallInputSchema: z.ZodType<Prisma.EvalResult
   duration: z.number(),
   type: z.lazy(() => EvalResultTypeSchema),
   details: z.string(),
+  wordIndexStart: z.number().int().optional().nullable(),
+  wordIndexEnd: z.number().int().optional().nullable(),
   eval: z.lazy(() => EvalCreateNestedOneWithoutEvalResultsInputSchema)
 }).strict();
 
@@ -4594,7 +4696,9 @@ export const EvalResultUncheckedCreateWithoutCallInputSchema: z.ZodType<Prisma.E
   secondsFromStart: z.number(),
   duration: z.number(),
   type: z.lazy(() => EvalResultTypeSchema),
-  details: z.string()
+  details: z.string(),
+  wordIndexStart: z.number().int().optional().nullable(),
+  wordIndexEnd: z.number().int().optional().nullable()
 }).strict();
 
 export const EvalResultCreateOrConnectWithoutCallInputSchema: z.ZodType<Prisma.EvalResultCreateOrConnectWithoutCallInput> = z.object({
@@ -4776,6 +4880,8 @@ export const EvalResultScalarWhereInputSchema: z.ZodType<Prisma.EvalResultScalar
   duration: z.union([ z.lazy(() => FloatFilterSchema),z.number() ]).optional(),
   type: z.union([ z.lazy(() => EnumEvalResultTypeFilterSchema),z.lazy(() => EvalResultTypeSchema) ]).optional(),
   details: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
+  wordIndexStart: z.union([ z.lazy(() => IntNullableFilterSchema),z.number() ]).optional().nullable(),
+  wordIndexEnd: z.union([ z.lazy(() => IntNullableFilterSchema),z.number() ]).optional().nullable(),
 }).strict();
 
 export const TestUpsertWithoutCallsInputSchema: z.ZodType<Prisma.TestUpsertWithoutCallsInput> = z.object({
@@ -5320,6 +5426,8 @@ export const EvalResultCreateWithoutEvalInputSchema: z.ZodType<Prisma.EvalResult
   duration: z.number(),
   type: z.lazy(() => EvalResultTypeSchema),
   details: z.string(),
+  wordIndexStart: z.number().int().optional().nullable(),
+  wordIndexEnd: z.number().int().optional().nullable(),
   call: z.lazy(() => CallCreateNestedOneWithoutEvalResultsInputSchema).optional()
 }).strict();
 
@@ -5332,7 +5440,9 @@ export const EvalResultUncheckedCreateWithoutEvalInputSchema: z.ZodType<Prisma.E
   secondsFromStart: z.number(),
   duration: z.number(),
   type: z.lazy(() => EvalResultTypeSchema),
-  details: z.string()
+  details: z.string(),
+  wordIndexStart: z.number().int().optional().nullable(),
+  wordIndexEnd: z.number().int().optional().nullable()
 }).strict();
 
 export const EvalResultCreateOrConnectWithoutEvalInputSchema: z.ZodType<Prisma.EvalResultCreateOrConnectWithoutEvalInput> = z.object({
@@ -5939,7 +6049,9 @@ export const EvalResultCreateManyCallInputSchema: z.ZodType<Prisma.EvalResultCre
   secondsFromStart: z.number(),
   duration: z.number(),
   type: z.lazy(() => EvalResultTypeSchema),
-  details: z.string()
+  details: z.string(),
+  wordIndexStart: z.number().int().optional().nullable(),
+  wordIndexEnd: z.number().int().optional().nullable()
 }).strict();
 
 export const MessageCreateManyCallInputSchema: z.ZodType<Prisma.MessageCreateManyCallInput> = z.object({
@@ -5972,6 +6084,8 @@ export const EvalResultUpdateWithoutCallInputSchema: z.ZodType<Prisma.EvalResult
   duration: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
   type: z.union([ z.lazy(() => EvalResultTypeSchema),z.lazy(() => EnumEvalResultTypeFieldUpdateOperationsInputSchema) ]).optional(),
   details: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  wordIndexStart: z.union([ z.number().int(),z.lazy(() => NullableIntFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  wordIndexEnd: z.union([ z.number().int(),z.lazy(() => NullableIntFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   eval: z.lazy(() => EvalUpdateOneRequiredWithoutEvalResultsNestedInputSchema).optional()
 }).strict();
 
@@ -5985,6 +6099,8 @@ export const EvalResultUncheckedUpdateWithoutCallInputSchema: z.ZodType<Prisma.E
   duration: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
   type: z.union([ z.lazy(() => EvalResultTypeSchema),z.lazy(() => EnumEvalResultTypeFieldUpdateOperationsInputSchema) ]).optional(),
   details: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  wordIndexStart: z.union([ z.number().int(),z.lazy(() => NullableIntFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  wordIndexEnd: z.union([ z.number().int(),z.lazy(() => NullableIntFieldUpdateOperationsInputSchema) ]).optional().nullable(),
 }).strict();
 
 export const EvalResultUncheckedUpdateManyWithoutCallInputSchema: z.ZodType<Prisma.EvalResultUncheckedUpdateManyWithoutCallInput> = z.object({
@@ -5997,6 +6113,8 @@ export const EvalResultUncheckedUpdateManyWithoutCallInputSchema: z.ZodType<Pris
   duration: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
   type: z.union([ z.lazy(() => EvalResultTypeSchema),z.lazy(() => EnumEvalResultTypeFieldUpdateOperationsInputSchema) ]).optional(),
   details: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  wordIndexStart: z.union([ z.number().int(),z.lazy(() => NullableIntFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  wordIndexEnd: z.union([ z.number().int(),z.lazy(() => NullableIntFieldUpdateOperationsInputSchema) ]).optional().nullable(),
 }).strict();
 
 export const MessageUpdateWithoutCallInputSchema: z.ZodType<Prisma.MessageUpdateWithoutCallInput> = z.object({
@@ -6179,7 +6297,9 @@ export const EvalResultCreateManyEvalInputSchema: z.ZodType<Prisma.EvalResultCre
   secondsFromStart: z.number(),
   duration: z.number(),
   type: z.lazy(() => EvalResultTypeSchema),
-  details: z.string()
+  details: z.string(),
+  wordIndexStart: z.number().int().optional().nullable(),
+  wordIndexEnd: z.number().int().optional().nullable()
 }).strict();
 
 export const EvalResultUpdateWithoutEvalInputSchema: z.ZodType<Prisma.EvalResultUpdateWithoutEvalInput> = z.object({
@@ -6191,6 +6311,8 @@ export const EvalResultUpdateWithoutEvalInputSchema: z.ZodType<Prisma.EvalResult
   duration: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
   type: z.union([ z.lazy(() => EvalResultTypeSchema),z.lazy(() => EnumEvalResultTypeFieldUpdateOperationsInputSchema) ]).optional(),
   details: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  wordIndexStart: z.union([ z.number().int(),z.lazy(() => NullableIntFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  wordIndexEnd: z.union([ z.number().int(),z.lazy(() => NullableIntFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   call: z.lazy(() => CallUpdateOneWithoutEvalResultsNestedInputSchema).optional()
 }).strict();
 
@@ -6204,6 +6326,8 @@ export const EvalResultUncheckedUpdateWithoutEvalInputSchema: z.ZodType<Prisma.E
   duration: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
   type: z.union([ z.lazy(() => EvalResultTypeSchema),z.lazy(() => EnumEvalResultTypeFieldUpdateOperationsInputSchema) ]).optional(),
   details: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  wordIndexStart: z.union([ z.number().int(),z.lazy(() => NullableIntFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  wordIndexEnd: z.union([ z.number().int(),z.lazy(() => NullableIntFieldUpdateOperationsInputSchema) ]).optional().nullable(),
 }).strict();
 
 export const EvalResultUncheckedUpdateManyWithoutEvalInputSchema: z.ZodType<Prisma.EvalResultUncheckedUpdateManyWithoutEvalInput> = z.object({
@@ -6216,6 +6340,8 @@ export const EvalResultUncheckedUpdateManyWithoutEvalInputSchema: z.ZodType<Pris
   duration: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
   type: z.union([ z.lazy(() => EvalResultTypeSchema),z.lazy(() => EnumEvalResultTypeFieldUpdateOperationsInputSchema) ]).optional(),
   details: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  wordIndexStart: z.union([ z.number().int(),z.lazy(() => NullableIntFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  wordIndexEnd: z.union([ z.number().int(),z.lazy(() => NullableIntFieldUpdateOperationsInputSchema) ]).optional().nullable(),
 }).strict();
 
 /////////////////////////////////////////
