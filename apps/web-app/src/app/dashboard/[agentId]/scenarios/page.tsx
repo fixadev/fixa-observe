@@ -318,7 +318,14 @@ function ScenarioSheet({
     setEvals((prev) => prev.filter((e) => e.id !== id));
   }, []);
 
-  const handleSave = () => {
+  // Include date/time stuff
+  const { options, parseTimezone } = useTimezoneSelect({});
+  const [timezone, setTimezone] = useState(
+    parseTimezone(Intl.DateTimeFormat().resolvedOptions().timeZone),
+  );
+  const [includeDateTime, setIncludeDateTime] = useState(false);
+
+  const handleSave = useCallback(() => {
     if (name.length === 0 || instructions.length === 0) {
       toast({
         title: "please enter a name and instructions",
@@ -345,6 +352,8 @@ function ScenarioSheet({
           name,
           instructions,
           evals,
+          includeDateTime,
+          timezone: includeDateTime ? timezone.value : null,
         })
       : saveScenario({
           id: "new",
@@ -355,16 +364,23 @@ function ScenarioSheet({
           agentId: "",
           successCriteria: "",
           isNew: false,
+          includeDateTime,
+          timezone: includeDateTime ? timezone.value : null,
         });
     setInstructions("");
     setName("");
     setEvals([emptyEval]);
-  };
-
-  const { options, parseTimezone } = useTimezoneSelect({});
-  const [timezone, setTimezone] = useState(
-    parseTimezone(Intl.DateTimeFormat().resolvedOptions().timeZone),
-  );
+  }, [
+    name,
+    instructions,
+    evals,
+    selectedScenario,
+    saveScenario,
+    includeDateTime,
+    timezone.value,
+    emptyEval,
+    toast,
+  ]);
 
   return (
     <Sheet open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
@@ -403,7 +419,11 @@ function ScenarioSheet({
                 additional context that will be provided to the evaluator
               </div>
               <div className="flex items-center gap-2">
-                <Switch id="current-date-time" />
+                <Switch
+                  id="current-date-time"
+                  checked={includeDateTime}
+                  onCheckedChange={setIncludeDateTime}
+                />
                 <Label htmlFor="current-date-time">current date / time</Label>
                 <div className="flex-1" />
                 <Select
