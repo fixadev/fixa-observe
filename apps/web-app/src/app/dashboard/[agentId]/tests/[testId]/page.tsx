@@ -22,6 +22,7 @@ import Link from "next/link";
 // import { TEST_TESTS } from "~/lib/test-data";
 import TestScenarios from "~/components/dashboard/TestScenarios";
 import { SidebarTrigger } from "~/components/ui/sidebar";
+import { TEST_TESTS } from "~/lib/test-data";
 
 // type CallType = "error" | "no-errors" | "all";
 
@@ -136,15 +137,15 @@ function TestPage({ params }: { params: { agentId: string; testId: string } }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedScenario]);
 
-  // useEffect(() => {
-  //   setTest(TEST_TESTS[0]!);
-  // }, []);
   useEffect(() => {
-    if (_test) {
-      setTest(_test);
-      setSelectedCallId(_test.calls[0]?.id ?? null);
-    }
-  }, [_test]);
+    setTest(TEST_TESTS[0]!);
+  }, []);
+  // useEffect(() => {
+  //   if (_test) {
+  //     setTest(_test);
+  //     setSelectedCallId(_test.calls[0]?.id ?? null);
+  //   }
+  // }, [_test]);
 
   return (
     <div>

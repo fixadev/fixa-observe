@@ -12,6 +12,12 @@ import { CheckCircleIcon, XCircleIcon } from "@heroicons/react/24/solid";
 import Image from "next/image";
 import { CallStatus, Role } from "@prisma/client";
 import Spinner from "../Spinner";
+import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
+
+type EvalResultWithWordIndex = EvalResultWithIncludes & {
+  wordIndexRange: [number, number];
+  messageIndex: number;
+};
 
 export default function CallDetails({
   call,
@@ -119,119 +125,105 @@ export default function CallDetails({
     }
   }, [activeMessageIndex, scrollMessageIntoView]);
 
-  const doesEvalOverlapMessage = useCallback(
-    (evalResult: EvalResultWithIncludes, messageIndex: number) => {
-      return (
-        evalResult.secondsFromStart <
-          (messagesFiltered[messageIndex + 1]?.secondsFromStart ?? Infinity) &&
-        evalResult.secondsFromStart + evalResult.duration >
-          (messagesFiltered[messageIndex]?.secondsFromStart ?? 0)
-      );
-    },
-    [messagesFiltered],
-  );
-
-  const { messageEvalsMap, evalRangesMap: evalRangesMap } = useMemo(() => {
+  const messageEvalsMap = useMemo(() => {
     if (!call.evalResults) {
-      return {
-        messageEvalsMap: new Map<number, EvalResultWithIncludes[]>(),
-        evalRangesMap: new Map<
-          string,
-          { firstMessageIndex: number; lastMessageIndex: number }
-        >(),
-      };
+      return new Map<number, EvalResultWithWordIndex[]>();
     }
 
-    const messageMap = new Map<number, EvalResultWithIncludes[]>();
-    const rangesMap = new Map<
-      string,
-      { firstMessageIndex: number; lastMessageIndex: number }
-    >();
+    const messageMap = new Map<number, EvalResultWithWordIndex[]>();
+    let wordCount = 0;
 
-    // First find initial ranges for each evalResult
+    // First pass: calculate cumulative word count for each message
+    const messageWordOffsets = messagesFiltered.map((message) => {
+      const currentOffset = wordCount;
+      wordCount += message.message.split(" ").length;
+      return currentOffset;
+    });
+
+    // Process each eval result to create word-level mappings
     call.evalResults?.forEach((evalResult) => {
-      let firstMessageIndex = Infinity;
-      let lastMessageIndex = -1;
+      const evalWithIndex = evalResult as EvalResultWithWordIndex;
+      // Find which message(s) this eval spans
+      const [startWordIndex, endWordIndex] = evalWithIndex.wordIndexRange;
 
-      messagesFiltered.forEach((_, messageIndex) => {
-        if (doesEvalOverlapMessage(evalResult, messageIndex)) {
-          firstMessageIndex = Math.min(firstMessageIndex, messageIndex);
-          lastMessageIndex = Math.max(lastMessageIndex, messageIndex);
+      // Find which messages this eval result belongs to
+      messagesFiltered.forEach((message, messageIndex) => {
+        const messageStartWord = messageWordOffsets[messageIndex]!;
+        const messageEndWord =
+          messageIndex < messageWordOffsets.length - 1
+            ? messageWordOffsets[messageIndex + 1]!
+            : wordCount;
+
+        // Check if this eval result overlaps with this message
+        if (
+          startWordIndex < messageEndWord &&
+          endWordIndex >= messageStartWord
+        ) {
+          const existing = messageMap.get(messageIndex) ?? [];
+          messageMap.set(messageIndex, [...existing, evalWithIndex]);
         }
       });
+    });
 
-      if (lastMessageIndex !== -1) {
-        rangesMap.set(evalResult.id, {
-          firstMessageIndex,
-          lastMessageIndex,
+    return messageMap;
+  }, [call.evalResults, messagesFiltered]);
+
+  // Update the splitMessageByEvals function to account for global word indices
+  const splitMessageByEvals = useCallback(
+    (
+      message: string,
+      evalResults: EvalResultWithWordIndex[],
+      messageIndex: number,
+    ): { text: string; evalResult?: EvalResultWithWordIndex }[] => {
+      if (!evalResults.length) return [{ text: message }];
+
+      let wordOffset = 0;
+      messagesFiltered.slice(0, messageIndex).forEach((msg) => {
+        wordOffset += msg.message.split(" ").length;
+      });
+
+      const words = message.split(" ");
+      const segments: { text: string; evalResult?: EvalResultWithWordIndex }[] =
+        [];
+      let currentIndex = 0;
+
+      const relevantEvals = evalResults
+        .filter((evalResult) => {
+          const [start, end] = evalResult.wordIndexRange;
+          const messageStart = wordOffset;
+          const messageEnd = wordOffset + words.length;
+          return start < messageEnd && end >= messageStart;
+        })
+        .sort((a, b) => a.wordIndexRange[0] - b.wordIndexRange[0]);
+
+      relevantEvals.forEach((evalResult) => {
+        const [start, end] = evalResult.wordIndexRange;
+        const relativeStart = Math.max(0, start - wordOffset);
+        const relativeEnd = Math.min(words.length - 1, end - wordOffset);
+
+        if (relativeStart > currentIndex) {
+          segments.push({
+            text: words.slice(currentIndex, relativeStart).join(" "),
+          });
+        }
+
+        segments.push({
+          text: words.slice(relativeStart, relativeEnd + 1).join(" "),
+          evalResult,
+        });
+
+        currentIndex = relativeEnd + 1;
+      });
+
+      if (currentIndex < words.length) {
+        segments.push({
+          text: words.slice(currentIndex).join(" "),
         });
       }
-    });
 
-    // Merge overlapping ranges
-    call.evalResults?.forEach((evalResult) => {
-      const currentRange = rangesMap.get(evalResult.id);
-      if (!currentRange) return;
-
-      call.evalResults?.forEach((otherEval) => {
-        if (evalResult.id === otherEval.id) return;
-        const otherRange = rangesMap.get(otherEval.id);
-        if (!otherRange) return;
-
-        // Check if ranges overlap
-        if (
-          currentRange.firstMessageIndex <= otherRange.lastMessageIndex &&
-          currentRange.lastMessageIndex >= otherRange.firstMessageIndex
-        ) {
-          // Merge ranges
-          const mergedFirst = Math.min(
-            currentRange.firstMessageIndex,
-            otherRange.firstMessageIndex,
-          );
-          const mergedLast = Math.max(
-            currentRange.lastMessageIndex,
-            otherRange.lastMessageIndex,
-          );
-
-          // Update both ranges to the merged range
-          rangesMap.set(evalResult.id, {
-            firstMessageIndex: mergedFirst,
-            lastMessageIndex: mergedLast,
-          });
-          rangesMap.set(otherEval.id, {
-            firstMessageIndex: mergedFirst,
-            lastMessageIndex: mergedLast,
-          });
-        }
-      });
-    });
-
-    // Now build messageMap using the merged ranges
-    call.evalResults?.forEach((evalResult) => {
-      const range = rangesMap.get(evalResult.id);
-      if (!range) return;
-
-      for (let i = range.firstMessageIndex; i <= range.lastMessageIndex; i++) {
-        const existing = messageMap.get(i) ?? [];
-        messageMap.set(i, [...existing, evalResult]);
-      }
-    });
-
-    return { messageEvalsMap: messageMap, evalRangesMap: rangesMap };
-  }, [call.evalResults, messagesFiltered, doesEvalOverlapMessage]);
-
-  const getBorderColorClass = useCallback(
-    (evalResultState: "success" | "failure" | "both") => {
-      switch (evalResultState) {
-        case "success":
-          return "border-green-500";
-        case "failure":
-          return "border-red-500";
-        case "both":
-          return "border-muted-foreground/50";
-      }
+      return segments;
     },
-    [],
+    [messagesFiltered],
   );
 
   return (
@@ -323,24 +315,6 @@ export default function CallDetails({
 
       <div ref={scrollContainerRef} className="-mx-4 flex flex-1 flex-col px-4">
         {messagesFiltered.map((message, index) => {
-          const evalResults = messageEvalsMap.get(index) ?? [];
-          const evalResultState = evalResults.every(
-            (evalResult) => evalResult.success,
-          )
-            ? "success"
-            : evalResults.every((evalResult) => !evalResult.success)
-              ? "failure"
-              : "both";
-          const isFirstEvalMessage = evalResults.some(
-            (evalResult) =>
-              evalRangesMap.get(evalResult.id)?.firstMessageIndex === index,
-          );
-          const isLastEvalMessage = evalResults.some(
-            (evalResult) =>
-              evalRangesMap.get(evalResult.id)?.lastMessageIndex === index,
-          );
-          const isActiveEvalMessage = activeEvalMessageIndices.has(index);
-
           return (
             <div key={index} className="flex gap-2">
               <div className="mt-2 w-8 shrink-0 text-xs text-muted-foreground">
@@ -371,18 +345,6 @@ export default function CallDetails({
                     activeMessageIndex === index
                       ? "bg-muted hover:bg-muted"
                       : "",
-                    evalResults.length > 0
-                      ? `rounded-none border-x ${getBorderColorClass(evalResultState)}`
-                      : "",
-                    evalResults.length > 0 && isActiveEvalMessage
-                      ? "-mx-px border-x-2"
-                      : "",
-                    isFirstEvalMessage
-                      ? `mt-px rounded-t-md border-t ${getBorderColorClass(evalResultState)}`
-                      : "",
-                    isFirstEvalMessage && isActiveEvalMessage
-                      ? "mt-0 border-t-2"
-                      : "",
                   )}
                 >
                   <div className="text-xs font-medium">
@@ -393,68 +355,22 @@ export default function CallDetails({
                         : ""}
                   </div>
                   <div className="mt-1 text-sm text-muted-foreground">
-                    {message.message}
-                  </div>
-                </div>
-                {isLastEvalMessage && (
-                  <div
-                    className={cn(
-                      "flex cursor-pointer flex-col items-start rounded-b-md border-x border-b text-sm",
-                      getBorderColorClass(evalResultState),
-                      isActiveEvalMessage
-                        ? "z-10 -mx-px -mb-px border-x-2 border-b-2 shadow-lg"
-                        : "",
-                    )}
-                  >
-                    {evalResults.map((evalResult) => (
-                      <div
-                        key={evalResult.id}
-                        className={cn(
-                          "flex w-full items-start gap-1 px-1 py-1",
-                          evalResult.success
-                            ? "border-green-500 bg-green-500/20 text-green-500"
-                            : "border-red-500 bg-red-500/20 text-red-500",
-                          evalResults.length > 1 &&
-                            (evalResult.success
-                              ? "hover:bg-green-500/30"
-                              : "hover:bg-red-500/30"),
-                          activeEvalResultId === evalResult.id &&
-                            (evalResult.success
-                              ? "bg-green-500/30"
-                              : "bg-red-500/30"),
-                        )}
-                        onMouseEnter={() => {
-                          setActiveEvalResultId(evalResult.id);
-                          audioPlayerRef.current?.setHoveredEvalResult(
-                            evalResult.id,
-                          );
-                        }}
-                        onMouseLeave={() => {
-                          setActiveEvalResultId(null);
-                          audioPlayerRef.current?.setHoveredEvalResult(null);
-                        }}
-                        onClick={() => {
-                          audioPlayerRef.current?.setActiveEvalResult(
-                            evalResult,
-                          );
-                          play();
-                        }}
-                      >
-                        {evalResult.success ? (
-                          <CheckCircleIcon className="size-5 shrink-0" />
-                        ) : (
-                          <XCircleIcon className="size-5 shrink-0" />
-                        )}
-                        <div className="flex flex-col gap-0.5 text-sm">
-                          <div className="font-medium">
-                            {evalResult.eval.name}
-                          </div>
-                          <div className="text-xs">{evalResult.details}</div>
-                        </div>
-                      </div>
+                    {splitMessageByEvals(
+                      message.message,
+                      messageEvalsMap.get(index) ?? [],
+                      index,
+                    ).map((segment, i) => (
+                      <Words
+                        key={i}
+                        words={segment.text}
+                        evalResult={segment.evalResult}
+                        activeEvalResultId={activeEvalResultId}
+                        setActiveEvalResultId={setActiveEvalResultId}
+                        audioPlayerRef={audioPlayerRef}
+                      />
                     ))}
                   </div>
-                )}
+                </div>
               </div>
             </div>
           );
@@ -462,5 +378,87 @@ export default function CallDetails({
         <div className="h-10 shrink-0" />
       </div>
     </div>
+  );
+}
+
+function Words({
+  words,
+  evalResult,
+  activeEvalResultId,
+  setActiveEvalResultId,
+  audioPlayerRef,
+}: {
+  words: string;
+  evalResult?: EvalResultWithIncludes;
+  activeEvalResultId: string | null;
+  setActiveEvalResultId: (evalResultId: string | null) => void;
+  audioPlayerRef: React.RefObject<AudioPlayerRef>;
+}) {
+  const { play } = useAudio();
+  const [isTooltipOpen, setIsTooltipOpen] = useState(false);
+
+  if (!evalResult) {
+    return <span>{words} </span>;
+  }
+
+  return (
+    <Tooltip open={evalResult.id === activeEvalResultId || isTooltipOpen}>
+      <TooltipTrigger
+        asChild
+        disabled
+        onClick={(e) => {
+          e.stopPropagation();
+          audioPlayerRef.current?.setActiveEvalResult(evalResult);
+          play();
+        }}
+      >
+        <span>
+          <span
+            onMouseEnter={() => {
+              setIsTooltipOpen(true);
+              setActiveEvalResultId(evalResult.id);
+              audioPlayerRef.current?.setHoveredEvalResult(evalResult.id);
+            }}
+            onMouseLeave={() => {
+              setIsTooltipOpen(false);
+              setActiveEvalResultId(null);
+              audioPlayerRef.current?.setHoveredEvalResult(null);
+            }}
+            className={cn(
+              "inline-block self-end bg-red-500/10 text-red-500 underline decoration-red-500 decoration-solid decoration-2 underline-offset-4 hover:bg-red-500/20",
+              evalResult.id === activeEvalResultId &&
+                (evalResult.success ? "bg-green-500/20" : "bg-red-500/20"),
+            )}
+          >
+            {words}
+          </span>{" "}
+        </span>
+      </TooltipTrigger>
+      <TooltipContent asChild side="right">
+        <div
+          className={cn(
+            "flex items-start gap-1 px-1 py-1",
+            evalResult.success
+              ? "border-green-500 bg-green-500/20 text-green-500"
+              : "border-red-500 bg-red-500/20 text-red-500",
+            evalResult.success
+              ? "hover:bg-green-500/30"
+              : "hover:bg-red-500/30",
+            activeEvalResultId === evalResult.id &&
+              (evalResult.success ? "bg-green-500/30" : "bg-red-500/30"),
+          )}
+        >
+          {evalResult.success ? (
+            <CheckCircleIcon className="size-5 shrink-0" />
+          ) : (
+            <XCircleIcon className="size-5 shrink-0" />
+          )}
+          <div className="flex flex-col gap-0.5 text-sm">
+            <div className="font-medium">{evalResult.eval.name}</div>
+            <div className="text-xs">{evalResult.details}</div>
+          </div>
+        </div>
+      </TooltipContent>
+    </Tooltip>
   );
 }
