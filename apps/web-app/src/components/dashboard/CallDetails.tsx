@@ -12,7 +12,7 @@ import { CheckCircleIcon, XCircleIcon } from "@heroicons/react/24/solid";
 import Image from "next/image";
 import { CallStatus, Role } from "@prisma/client";
 import Spinner from "../Spinner";
-import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
+import { EvalResultCard } from "./EvalResultCard";
 
 type EvalResultWithWordIndex = EvalResultWithIncludes & {
   wordIndexRange: [number, number];
@@ -69,7 +69,7 @@ export default function CallDetails({
       const isBelowViewport = elementRect.bottom > window.innerHeight;
 
       if (isAboveViewport || isBelowViewport) {
-        const headerTopOffset = 57;
+        const headerTopOffset = 60;
         const scrollPosition =
           window.scrollY + elementRect.top - header.height - headerTopOffset;
         window.scrollTo({
@@ -89,15 +89,28 @@ export default function CallDetails({
     if (!activeEval) return new Set<number>();
 
     const overlappingIndices = new Set<number>();
+    let wordCount = 0;
+
+    // Calculate word offsets for each message
     messagesFiltered.forEach((message, index) => {
+      const messageWordCount = message.message.split(" ").length;
+      const messageStartWord = wordCount;
+      const messageEndWord = wordCount + messageWordCount;
+
+      // Check if the eval's word range overlaps with this message
       if (
-        activeEval.secondsFromStart <
-          (messagesFiltered[index + 1]?.secondsFromStart ?? Infinity) &&
-        activeEval.secondsFromStart + activeEval.duration >
-          message.secondsFromStart
+        // TODO: REMOVE THESE TS EXPECT ERRORS
+        // @ts-expect-error hello
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        activeEval.wordIndexRange[0] < messageEndWord &&
+        // @ts-expect-error hello
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        activeEval.wordIndexRange[1] >= messageStartWord
       ) {
         overlappingIndices.add(index);
       }
+
+      wordCount += messageWordCount;
     });
 
     return overlappingIndices;
@@ -174,8 +187,9 @@ export default function CallDetails({
       message: string,
       evalResults: EvalResultWithWordIndex[],
       messageIndex: number,
-    ): { text: string; evalResult?: EvalResultWithWordIndex }[] => {
-      if (!evalResults.length) return [{ text: message }];
+    ): { word: string; evalResult?: EvalResultWithWordIndex }[] => {
+      if (!evalResults.length)
+        return message.split(" ").map((word) => ({ word }));
 
       let wordOffset = 0;
       messagesFiltered.slice(0, messageIndex).forEach((msg) => {
@@ -183,45 +197,18 @@ export default function CallDetails({
       });
 
       const words = message.split(" ");
-      const segments: { text: string; evalResult?: EvalResultWithWordIndex }[] =
-        [];
-      let currentIndex = 0;
-
-      const relevantEvals = evalResults
-        .filter((evalResult) => {
-          const [start, end] = evalResult.wordIndexRange;
-          const messageStart = wordOffset;
-          const messageEnd = wordOffset + words.length;
-          return start < messageEnd && end >= messageStart;
-        })
-        .sort((a, b) => a.wordIndexRange[0] - b.wordIndexRange[0]);
-
-      relevantEvals.forEach((evalResult) => {
-        const [start, end] = evalResult.wordIndexRange;
-        const relativeStart = Math.max(0, start - wordOffset);
-        const relativeEnd = Math.min(words.length - 1, end - wordOffset);
-
-        if (relativeStart > currentIndex) {
-          segments.push({
-            text: words.slice(currentIndex, relativeStart).join(" "),
-          });
-        }
-
-        segments.push({
-          text: words.slice(relativeStart, relativeEnd + 1).join(" "),
-          evalResult,
+      const result: { word: string; evalResult?: EvalResultWithWordIndex }[] =
+        words.map((word, idx) => {
+          const globalWordIndex = wordOffset + idx;
+          const matchingEval = evalResults.find(
+            (evalResult) =>
+              globalWordIndex >= evalResult.wordIndexRange[0] &&
+              globalWordIndex <= evalResult.wordIndexRange[1],
+          );
+          return { word, evalResult: matchingEval };
         });
 
-        currentIndex = relativeEnd + 1;
-      });
-
-      if (currentIndex < words.length) {
-        segments.push({
-          text: words.slice(currentIndex).join(" "),
-        });
-      }
-
-      return segments;
+      return result;
     },
     [messagesFiltered],
   );
@@ -362,7 +349,7 @@ export default function CallDetails({
                     ).map((segment, i) => (
                       <Words
                         key={i}
-                        words={segment.text}
+                        word={segment.word}
                         evalResult={segment.evalResult}
                         activeEvalResultId={activeEvalResultId}
                         setActiveEvalResultId={setActiveEvalResultId}
@@ -377,88 +364,71 @@ export default function CallDetails({
         })}
         <div className="h-10 shrink-0" />
       </div>
+
+      <EvalResultCard
+        evalResult={call.evalResults?.find((e) => e.id === activeEvalResultId)}
+      />
     </div>
   );
 }
 
 function Words({
-  words,
+  word,
   evalResult,
   activeEvalResultId,
   setActiveEvalResultId,
   audioPlayerRef,
 }: {
-  words: string;
+  word: string;
   evalResult?: EvalResultWithIncludes;
   activeEvalResultId: string | null;
   setActiveEvalResultId: (evalResultId: string | null) => void;
   audioPlayerRef: React.RefObject<AudioPlayerRef>;
 }) {
   const { play } = useAudio();
-  const [isTooltipOpen, setIsTooltipOpen] = useState(false);
+
+  const handleClick = useCallback(
+    (e: React.MouseEvent<HTMLSpanElement>) => {
+      e.stopPropagation();
+      if (evalResult) {
+        audioPlayerRef.current?.setActiveEvalResult(evalResult);
+        play();
+      }
+    },
+    [audioPlayerRef, evalResult, play],
+  );
+
+  const handleMouseEnter = useCallback(() => {
+    if (evalResult) {
+      setActiveEvalResultId(evalResult.id);
+      audioPlayerRef.current?.setHoveredEvalResult(evalResult.id);
+    }
+  }, [audioPlayerRef, evalResult, setActiveEvalResultId]);
+
+  const handleMouseLeave = useCallback(() => {
+    setActiveEvalResultId(null);
+    audioPlayerRef.current?.setHoveredEvalResult(null);
+  }, [audioPlayerRef, setActiveEvalResultId]);
 
   if (!evalResult) {
-    return <span>{words} </span>;
+    return <span>{word} </span>;
   }
 
   return (
-    <Tooltip open={evalResult.id === activeEvalResultId || isTooltipOpen}>
-      <TooltipTrigger
-        asChild
-        disabled
-        onClick={(e) => {
-          e.stopPropagation();
-          audioPlayerRef.current?.setActiveEvalResult(evalResult);
-          play();
-        }}
-      >
-        <span>
-          <span
-            onMouseEnter={() => {
-              setIsTooltipOpen(true);
-              setActiveEvalResultId(evalResult.id);
-              audioPlayerRef.current?.setHoveredEvalResult(evalResult.id);
-            }}
-            onMouseLeave={() => {
-              setIsTooltipOpen(false);
-              setActiveEvalResultId(null);
-              audioPlayerRef.current?.setHoveredEvalResult(null);
-            }}
-            className={cn(
-              "inline-block self-end bg-red-500/10 text-red-500 underline decoration-red-500 decoration-solid decoration-2 underline-offset-4 hover:bg-red-500/20",
-              evalResult.id === activeEvalResultId &&
-                (evalResult.success ? "bg-green-500/20" : "bg-red-500/20"),
-            )}
-          >
-            {words}
-          </span>{" "}
-        </span>
-      </TooltipTrigger>
-      <TooltipContent asChild side="right">
-        <div
-          className={cn(
-            "flex items-start gap-1 px-1 py-1",
-            evalResult.success
-              ? "border-green-500 bg-green-500/20 text-green-500"
-              : "border-red-500 bg-red-500/20 text-red-500",
-            evalResult.success
-              ? "hover:bg-green-500/30"
-              : "hover:bg-red-500/30",
-            activeEvalResultId === evalResult.id &&
-              (evalResult.success ? "bg-green-500/30" : "bg-red-500/30"),
-          )}
-        >
-          {evalResult.success ? (
-            <CheckCircleIcon className="size-5 shrink-0" />
-          ) : (
-            <XCircleIcon className="size-5 shrink-0" />
-          )}
-          <div className="flex flex-col gap-0.5 text-sm">
-            <div className="font-medium">{evalResult.eval.name}</div>
-            <div className="text-xs">{evalResult.details}</div>
-          </div>
-        </div>
-      </TooltipContent>
-    </Tooltip>
+    <span
+      onClick={handleClick}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+      className={cn(
+        "underline decoration-solid decoration-2 underline-offset-4",
+        evalResult.success
+          ? "bg-green-500/10 text-green-500 decoration-green-500 hover:bg-green-500/20"
+          : "bg-red-500/10 text-red-500 decoration-red-500 hover:bg-red-500/20",
+        activeEvalResultId === evalResult.id &&
+          (evalResult.success ? "bg-green-500/20" : "bg-red-500/20"),
+      )}
+    >
+      <span>{word}</span>{" "}
+    </span>
   );
 }
