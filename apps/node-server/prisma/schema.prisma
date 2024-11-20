@@ -42,6 +42,8 @@ model Agent {
   githubRepoUrl String?
   systemPrompt  String
 
+  enableSlackNotifications Boolean @default(true)
+
   enabledGeneralEvals Eval[]
 
   enabledTestAgents TestAgent[]
@@ -70,6 +72,9 @@ model TestAgent {
   headshotUrl String
   description String
   prompt      String
+
+  enabled Boolean @default(true)
+  order   Int     @default(0)
 
   agents Agent[]
   calls  Call[]

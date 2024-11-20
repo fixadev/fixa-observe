@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import Spinner from "~/components/Spinner";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
@@ -24,6 +24,9 @@ import {
   DialogTrigger,
 } from "~/components/ui/dialog";
 import { useRouter } from "next/navigation";
+import { Switch } from "~/components/ui/switch";
+import { useUser } from "@clerk/nextjs";
+import { cn } from "~/lib/utils";
 
 export default function AgentSettingsPage({
   params,
@@ -34,6 +37,12 @@ export default function AgentSettingsPage({
 
   const { toast } = useToast();
   const { agent, refetch } = useAgent(params.agentId);
+  const { user } = useUser();
+
+  const isSlackAppInstalled = useMemo(
+    () => Boolean(user?.publicMetadata.slackWebhookUrl),
+    [user],
+  );
 
   const { mutate: updateAgentSettings, isPending: isUpdatingSettings } =
     api.agent.updateSettings.useMutation({
@@ -64,6 +73,7 @@ export default function AgentSettingsPage({
       id: agentState.id,
       phoneNumber: agentState.phoneNumber,
       name: agentState.name,
+      enableSlackNotifications: agentState.enableSlackNotifications,
     });
   }, [agentState, toast, updateAgentSettings]);
 
@@ -121,6 +131,41 @@ export default function AgentSettingsPage({
               });
             }}
           />
+        </div>
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center gap-2">
+            <Label>slack app</Label>
+            {!isSlackAppInstalled && (
+              <Link
+                className="text-sm text-muted-foreground underline"
+                href={`/dashboard/${params.agentId}/slack-app`}
+              >
+                install now
+              </Link>
+            )}
+          </div>
+          <div
+            className={cn(
+              "flex items-center gap-2",
+              !isSlackAppInstalled && "pointer-events-none opacity-50",
+            )}
+          >
+            <Switch
+              id="enableSlackNotifications"
+              checked={
+                isSlackAppInstalled && agentState.enableSlackNotifications
+              }
+              onCheckedChange={(checked) => {
+                setAgentState({
+                  ...agentState,
+                  enableSlackNotifications: checked,
+                });
+              }}
+            />
+            <Label className="font-normal" htmlFor="enableSlackNotifications">
+              enable slack notifications
+            </Label>
+          </div>
         </div>
         <div className="flex flex-col gap-2">
           <div className="flex flex-col gap-1">

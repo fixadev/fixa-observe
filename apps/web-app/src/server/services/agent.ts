@@ -72,14 +72,16 @@ export class AgentService {
     id,
     phoneNumber,
     name,
+    enableSlackNotifications,
   }: {
     id: string;
     phoneNumber: string;
     name: string;
+    enableSlackNotifications: boolean;
   }) {
     return await db.agent.update({
       where: { id },
-      data: { phoneNumber, name },
+      data: { phoneNumber, name, enableSlackNotifications },
     });
   }
 
