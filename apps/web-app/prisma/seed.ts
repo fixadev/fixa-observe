@@ -13,8 +13,9 @@ async function main() {
       headshotUrl: "/images/agent-avatars/lily.jpeg",
       description: "a young woman who says like a lot",
       prompt: "You are lily smith, a young woman who says like a lot. ", // end the call only when it is clear the conversation is over -- i.e. 'have a great day, bye or goodbye' or other indicators of the conversation being over.
-      voiceId: "cgSgspJ2msm6clMCkdW9",
+      voiceId: "cgSgspJ2msm6clMCkdW9", // jessica voice
       enabled: true,
+      defaultSelected: true,
     },
     {
       name: "steve",
@@ -25,6 +26,7 @@ async function main() {
       voiceId: "steve",
       // voiceId: "R99XgMGAPM4Bdpv1FJs2", // better voice id
       enabled: true,
+      defaultSelected: true,
     },
     {
       name: "marge",
@@ -35,6 +37,7 @@ async function main() {
       voiceId: "matilda",
       // voiceId: "6zi9hbRGFbPJXunIKqJ4", // better voice id
       enabled: true,
+      defaultSelected: true,
     },
     {
       name: "daryl",
@@ -45,56 +48,69 @@ async function main() {
       voiceId: "joseph",
       // voiceId: "7NERWC0HfmjQak4YqWff", // better voice id
       enabled: true,
+      defaultSelected: false,
     },
-    // {
-    //   name: "maria",
-    //   headshotUrl: "/images/agent-avatars/maria.jpeg",
-    //   description: "A woman who prefers speaking in short, direct sentences",
-    //   prompt:
-    //     "You are Maria Garcia, a 31-year-old nurse who works long shifts. you speak in short, direct sentences.",
-    //   voiceId: "5S3VJEI4yXXfOSBrTB3q",
-    //   enabled: false,
-    // },
-    // {
-    //   name: "jose",
-    //   headshotUrl: "/images/agent-avatars/jose.jpeg",
-    //   description: "a native spanish speaker",
-    //   prompt: "You are jose, a native spanish speaker.",
-    //   voiceId: "3l9iCMrNSRR0w51JvFB0",
-    //   enabled: false,
-    // },
-    // {
-    //   name: "raj",
-    //   headshotUrl: "/images/agent-avatars/raj.jpeg",
-    //   description: "man with an indian accent",
-    //   prompt: "You are raj, a man with an indian accent.",
-    //   voiceId: "mCQMfsqGDT6IDkEKR20a",
-    //   enabled: false,
-    // },
-    // {
-    //   name: "klaus",
-    //   headshotUrl: "/images/agent-avatars/klaus.jpeg",
-    //   description: "man with a german accent",
-    //   prompt: "You are klaus, a man with a german accent.",
-    //   voiceId: "IokmXfIsrOE3umjiwHWz",
-    //   enabled: false,
-    // },
-    // {
-    //   name: "deng",
-    //   headshotUrl: "/images/agent-avatars/deng.jpeg",
-    //   description: "man with a chinese accent",
-    //   prompt: "You are deng, a man with a chinese accent.",
-    //   voiceId: "gAMZphRyrWJnLMDnom6H",
-    //   enabled: false,
-    // },
-    // {
-    //   name: "talia",
-    //   headshotUrl: "/images/agent-avatars/talia.jpeg",
-    //   description: "woman with a russian accent",
-    //   prompt: "You are talia, a woman with a russian accent.",
-    //   voiceId: "GCPLhb1XrVwcoKUJYcvz",
-    //   enabled: false,
-    // },
+    {
+      name: "maria",
+      headshotUrl: "/images/agent-avatars/maria.jpeg",
+      description: "A woman who prefers speaking in short, direct sentences",
+      prompt:
+        "You are Maria Garcia, a 31-year-old nurse who works long shifts. you speak in short, direct sentences.",
+      voiceId: "cgSgspJ2msm6clMCkdW9", // jessica voice
+      // voiceId: "5S3VJEI4yXXfOSBrTB3q",
+      enabled: true,
+      defaultSelected: false,
+    },
+    {
+      name: "jose",
+      headshotUrl: "/images/agent-avatars/jose.jpeg",
+      description: "a native spanish speaker",
+      prompt: "You are jose, a native spanish speaker.",
+      voiceId: "cgSgspJ2msm6clMCkdW9", // jessica voice
+      // voiceId: "3l9iCMrNSRR0w51JvFB0",
+      enabled: true,
+      defaultSelected: false,
+    },
+    {
+      name: "raj",
+      headshotUrl: "/images/agent-avatars/raj.jpeg",
+      description: "man with an indian accent",
+      prompt: "You are raj, a man with an indian accent.",
+      voiceId: "cgSgspJ2msm6clMCkdW9", // jessica voice
+      // voiceId: "mCQMfsqGDT6IDkEKR20a",
+      enabled: true,
+      defaultSelected: false,
+    },
+    {
+      name: "klaus",
+      headshotUrl: "/images/agent-avatars/klaus.jpeg",
+      description: "man with a german accent",
+      prompt: "You are klaus, a man with a german accent.",
+      voiceId: "cgSgspJ2msm6clMCkdW9", // jessica voice
+      // voiceId: "IokmXfIsrOE3umjiwHWz",
+      enabled: true,
+      defaultSelected: false,
+    },
+    {
+      name: "deng",
+      headshotUrl: "/images/agent-avatars/deng.jpeg",
+      description: "man with a chinese accent",
+      prompt: "You are deng, a man with a chinese accent.",
+      voiceId: "cgSgspJ2msm6clMCkdW9", // jessica voice
+      // voiceId: "gAMZphRyrWJnLMDnom6H",
+      enabled: true,
+      defaultSelected: false,
+    },
+    {
+      name: "talia",
+      headshotUrl: "/images/agent-avatars/talia.jpeg",
+      description: "woman with a russian accent",
+      prompt: "You are talia, a woman with a russian accent.",
+      voiceId: "cgSgspJ2msm6clMCkdW9", // jessica voice
+      // voiceId: "GCPLhb1XrVwcoKUJYcvz",
+      enabled: true,
+      defaultSelected: false,
+    },
   ];
 
   // hello
@@ -128,6 +144,7 @@ async function main() {
         description: agent.description,
         prompt: agent.prompt,
         enabled: agent.enabled,
+        defaultSelected: agent.defaultSelected,
         order: i,
         ownerId: "SYSTEM",
       },
@@ -138,6 +155,7 @@ async function main() {
         description: agent.description,
         prompt: agent.prompt,
         enabled: agent.enabled,
+        defaultSelected: agent.defaultSelected,
         order: i,
         ownerId: "SYSTEM",
       },

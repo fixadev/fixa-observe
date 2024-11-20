@@ -18,6 +18,8 @@ export class AgentService {
     const testAgents = await db.testAgent.findMany({
       where: {
         OR: [{ ownerId }, { ownerId: "SYSTEM" }],
+        defaultSelected: true,
+        enabled: true,
       },
     });
 
