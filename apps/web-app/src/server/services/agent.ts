@@ -104,7 +104,9 @@ export class AgentService {
     return await db.testAgent.findMany({
       where: {
         OR: [{ ownerId }, { ownerId: "SYSTEM" }],
+        enabled: true,
       },
+      orderBy: { order: "asc" },
     });
   }
 

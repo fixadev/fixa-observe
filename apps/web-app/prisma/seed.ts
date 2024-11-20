@@ -14,6 +14,7 @@ async function main() {
       description: "a young woman who says like a lot",
       prompt: "You are lily smith, a young woman who says like a lot. ", // end the call only when it is clear the conversation is over -- i.e. 'have a great day, bye or goodbye' or other indicators of the conversation being over.
       voiceId: "cgSgspJ2msm6clMCkdW9",
+      enabled: true,
     },
     {
       name: "steve",
@@ -22,6 +23,7 @@ async function main() {
       prompt:
         "You are steve wozniak, an irritable man who had a bad day. You are not very patient and get frustrated easily.",
       voiceId: "R99XgMGAPM4Bdpv1FJs2",
+      enabled: true,
     },
     {
       name: "marge",
@@ -30,6 +32,7 @@ async function main() {
       prompt:
         "you are marge simpson, a friendly elderly lady who loves to talk and sometimes gets carried away.",
       voiceId: "6zi9hbRGFbPJXunIKqJ4",
+      enabled: true,
     },
     {
       name: "daryl",
@@ -38,6 +41,7 @@ async function main() {
       prompt:
         "You are daryl williams, a 72-year-old retiree who is not comfortable with technology. You sometimes need things repeated and explained very slowly. You appreciate when people are patient with you.",
       voiceId: "7NERWC0HfmjQak4YqWff",
+      enabled: true,
     },
     {
       name: "maria",
@@ -46,6 +50,7 @@ async function main() {
       prompt:
         "You are Maria Garcia, a 31-year-old nurse who works long shifts. you speak in short, direct sentences.",
       voiceId: "5S3VJEI4yXXfOSBrTB3q",
+      enabled: false,
     },
     {
       name: "jose",
@@ -53,6 +58,7 @@ async function main() {
       description: "a native spanish speaker",
       prompt: "You are jose, a native spanish speaker.",
       voiceId: "3l9iCMrNSRR0w51JvFB0",
+      enabled: false,
     },
     {
       name: "raj",
@@ -60,6 +66,7 @@ async function main() {
       description: "man with an indian accent",
       prompt: "You are raj, a man with an indian accent.",
       voiceId: "mCQMfsqGDT6IDkEKR20a",
+      enabled: false,
     },
     {
       name: "klaus",
@@ -67,6 +74,7 @@ async function main() {
       description: "man with a german accent",
       prompt: "You are klaus, a man with a german accent.",
       voiceId: "IokmXfIsrOE3umjiwHWz",
+      enabled: false,
     },
     {
       name: "deng",
@@ -74,6 +82,7 @@ async function main() {
       description: "man with a chinese accent",
       prompt: "You are deng, a man with a chinese accent.",
       voiceId: "gAMZphRyrWJnLMDnom6H",
+      enabled: false,
     },
     {
       name: "talia",
@@ -81,6 +90,7 @@ async function main() {
       description: "woman with a russian accent",
       prompt: "You are talia, a woman with a russian accent.",
       voiceId: "GCPLhb1XrVwcoKUJYcvz",
+      enabled: false,
     },
   ];
 
@@ -98,7 +108,8 @@ async function main() {
   //   await prisma.testAgent.delete({ where: { id: assistant.id } });
   // }
 
-  for (const agent of testAgents) {
+  for (let i = 0; i < testAgents.length; i++) {
+    const agent = testAgents[i]!;
     // await deleteVapiAssistantById(agent.id);
     const vapiAssistant = await createOrUpdateVapiAssistant(
       agent.prompt,
@@ -113,6 +124,8 @@ async function main() {
         headshotUrl: agent.headshotUrl,
         description: agent.description,
         prompt: agent.prompt,
+        enabled: agent.enabled,
+        order: i,
         ownerId: "SYSTEM",
       },
       create: {
@@ -121,6 +134,8 @@ async function main() {
         headshotUrl: agent.headshotUrl,
         description: agent.description,
         prompt: agent.prompt,
+        enabled: agent.enabled,
+        order: i,
         ownerId: "SYSTEM",
       },
     });

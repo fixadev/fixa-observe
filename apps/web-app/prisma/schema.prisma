@@ -75,6 +75,9 @@ model TestAgent {
   description String
   prompt      String
 
+  enabled Boolean @default(true)
+  order   Int     @default(0)
+
   agents Agent[]
   calls  Call[]
 }

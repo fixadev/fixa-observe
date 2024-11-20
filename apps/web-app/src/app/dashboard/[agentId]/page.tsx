@@ -225,6 +225,11 @@ function RunTestModal({
   }, [agent.enabledTestAgents]);
 
   const toggleAgent = (testAgentId: string) => {
+    toggleTestAgentEnabled({
+      agentId: agent.id,
+      testAgentId,
+      enabled: !enabledAgents.has(testAgentId),
+    });
     setEnabledAgents((prev) => {
       const next = new Set(prev);
       if (next.has(testAgentId)) {
@@ -233,11 +238,6 @@ function RunTestModal({
         next.add(testAgentId);
       }
       return next;
-    });
-    toggleTestAgentEnabled({
-      agentId: agent.id,
-      testAgentId,
-      enabled: !enabledAgents.has(testAgentId),
     });
   };
 

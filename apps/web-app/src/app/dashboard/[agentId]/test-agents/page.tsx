@@ -31,6 +31,12 @@ export default function TestAgentsPage({
 
   const toggleAgent = useCallback(
     (testAgentId: string) => {
+      toggleTestAgentEnabled({
+        agentId: agent?.id ?? "",
+        testAgentId,
+        enabled: !enabledAgents.has(testAgentId),
+      });
+
       const newEnabledAgents = new Set(enabledAgents);
       if (newEnabledAgents.has(testAgentId)) {
         newEnabledAgents.delete(testAgentId);
@@ -38,11 +44,6 @@ export default function TestAgentsPage({
         newEnabledAgents.add(testAgentId);
       }
       setEnabledAgents(newEnabledAgents);
-      toggleTestAgentEnabled({
-        agentId: agent?.id ?? "",
-        testAgentId,
-        enabled: !enabledAgents.has(testAgentId),
-      });
       if (agent && testAgents) {
         const updatedTestAgents = testAgents.filter((testAgent) =>
           newEnabledAgents.has(testAgent.id),
