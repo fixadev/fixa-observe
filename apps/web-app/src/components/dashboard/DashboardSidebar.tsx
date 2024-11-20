@@ -21,6 +21,7 @@ import {
   Cog6ToothIcon,
   DocumentTextIcon,
   KeyIcon,
+  PlusIcon,
   UsersIcon,
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
@@ -32,14 +33,15 @@ import {
   SelectValue,
 } from "../ui/select";
 import { usePathname, useRouter } from "next/navigation";
-import { useMemo } from "react";
 import { useCallback } from "react";
 import { removeTrailingSlash } from "~/lib/utils";
 import { api } from "~/trpc/react";
-import { type Agent } from "prisma/generated/zod";
 import Logo from "../Logo";
 import { SlackIcon } from "lucide-react";
 import { Skeleton } from "../ui/skeleton";
+import { Button } from "../ui/button";
+import { AddAgentModal } from "~/app/dashboard/(agents)/_components/AddAgentModal";
+import { useAgent } from "~/app/contexts/UseAgent";
 
 const navItems = [
   { href: "/", icon: CounterClockwiseClockIcon, label: "test history" },
@@ -77,16 +79,9 @@ export default function DashboardSidebar({
     [pathname, params.agentId],
   );
 
-  const { data: agents, isLoading } = api.agent.getAll.useQuery();
-  const agentsMap = useMemo(() => {
-    return agents?.reduce(
-      (acc, agent) => {
-        acc[agent.id] = agent;
-        return acc;
-      },
-      {} as Record<string, Agent>,
-    );
-  }, [agents]);
+  const { data: agents, refetch: refetchAgents } = api.agent.getAll.useQuery();
+
+  const { agent } = useAgent();
 
   return (
     <Sidebar>
@@ -108,24 +103,39 @@ export default function DashboardSidebar({
                 <SelectTrigger className="bg-background">
                   <SelectValue placeholder="Select an agent" asChild>
                     <div className="w-[140px] cursor-pointer truncate text-left">
-                      {isLoading ? (
+                      {!agent ? (
                         <Skeleton className="h-4 w-full" />
                       ) : (
-                        agentsMap?.[params.agentId]?.name
+                        agent?.name
                       )}
                     </div>
                   </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
-                  {agents?.map((agent) => (
-                    <SelectItem
-                      className="cursor-pointer truncate"
-                      key={agent.id}
-                      value={agent.id}
-                    >
-                      {agent.name}
-                    </SelectItem>
-                  ))}
+                  <div className="flex max-h-[300px] flex-col">
+                    <div className="flex-1 overflow-y-auto">
+                      {agents?.map((agent) => (
+                        <SelectItem
+                          className="cursor-pointer truncate"
+                          key={agent.id}
+                          value={agent.id}
+                        >
+                          {agent.name}
+                        </SelectItem>
+                      ))}
+                    </div>
+                    <div className="border-t">
+                      <AddAgentModal refetchAgents={refetchAgents}>
+                        <Button
+                          variant="ghost"
+                          className="flex w-full items-center justify-start px-2"
+                        >
+                          <PlusIcon className="mr-2 size-4" />
+                          <span>new agent</span>
+                        </Button>
+                      </AddAgentModal>
+                    </div>
+                  </div>
                 </SelectContent>
               </Select>
               {navItems.map((item) => (
