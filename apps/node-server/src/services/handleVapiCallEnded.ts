@@ -150,7 +150,7 @@ export const handleVapiCallEnded = async ({
           test: updatedTest,
         });
       } catch (error) {
-        console.error("Error sending test completed slack message", error);
+        // console.error("Error sending test completed slack message", error);
       }
     }
 
