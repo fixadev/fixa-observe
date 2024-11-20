@@ -295,7 +295,7 @@ function RunTestModal({
           )}
           <Accordion type="single" collapsible>
             <AccordionItem value="test-agents" className="-mx-6 border-none">
-              <AccordionTrigger className="px-6">test agents</AccordionTrigger>
+              <AccordionTrigger className="px-6">personas</AccordionTrigger>
               <AccordionContent className="h-[300px] overflow-y-auto px-6">
                 <div className="grid grid-cols-1 gap-2">
                   {testAgents?.map((agent) => (

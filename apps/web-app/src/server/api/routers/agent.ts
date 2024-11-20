@@ -4,7 +4,6 @@ import { AgentService } from "~/server/services/agent";
 import {
   CreateAgentSchema,
   CreateScenarioSchema,
-  ScenarioWithEvals,
   UpdateScenarioSchema,
 } from "~/lib/agent";
 import { db } from "~/server/db";

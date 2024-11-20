@@ -43,31 +43,43 @@ export const handleVapiCallEnded = async ({
       return;
     }
 
-    const o1Analysis = await analyzeCallWitho1(
-      report.artifact.messages,
-      scenario.instructions,
-      scenario.evals,
-      agent.enabledGeneralEvals,
-    );
-
+    const o1Analysis = await analyzeCallWitho1({
+      callStartedAt: report.startedAt,
+      messages: report.artifact.messages,
+      testAgentPrompt: scenario.instructions,
+      scenario,
+      agent,
+    });
     console.log("O1 ANALYSIS for call", call.id, o1Analysis);
 
-    const geminiPrompt = createGeminiPrompt(
-      report.artifact.messages,
-      scenario.instructions,
-      scenario.evals,
-      agent.enabledGeneralEvals,
-      o1Analysis,
-    );
+    let parsedResult: string;
+    const useGemini = !scenario.includeDateTime;
+    if (!useGemini) {
+      parsedResult = o1Analysis.cleanedResult;
+    } else {
+      const geminiPrompt = createGeminiPrompt({
+        callStartedAt: report.startedAt,
+        messages: report.artifact.messages,
+        testAgentPrompt: scenario.instructions,
+        scenario,
+        agent,
+        analysis: o1Analysis,
+      });
 
-    const { parsedResult } = await analyzeCallWithGemini(
-      report.artifact.stereoRecordingUrl,
-      geminiPrompt,
-    );
+      const geminiResult = await analyzeCallWithGemini(
+        report.artifact.stereoRecordingUrl,
+        geminiPrompt,
+      );
+      parsedResult = JSON.stringify(geminiResult.parsedResult);
 
-    console.log("GEMINI RESULT for call", call.id, parsedResult);
+      console.log(
+        "GEMINI RESULT for call",
+        call.id,
+        JSON.stringify(geminiResult.parsedResult, null, 2),
+      );
+    }
 
-    const cleanedResultJson = await formatOutput(JSON.stringify(parsedResult));
+    const cleanedResultJson = await formatOutput(parsedResult);
     const { scenarioEvalResults, generalEvalResults } = cleanedResultJson;
     const evalResults = [...scenarioEvalResults, ...generalEvalResults];
     const evalResultsWithValidEvals = evalResults.filter((evalResult) =>
@@ -138,7 +150,7 @@ export const handleVapiCallEnded = async ({
           test: updatedTest,
         });
       } catch (error) {
-        console.error("Error sending test completed slack message", error);
+        // console.error("Error sending test completed slack message", error);
       }
     }
 

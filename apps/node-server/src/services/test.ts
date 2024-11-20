@@ -40,33 +40,47 @@ const main = async () => {
       }
 
       const dbCall = test?.calls.find((c) => c.id === call.id);
+      if (!dbCall?.scenario) {
+        console.error("No scenario found for call ID", call.id);
+        return;
+      }
 
       const agent = test?.agent;
 
-      const analysis = await analyzeCallWitho1(
-        vapiCall.artifact?.messages ?? [],
-        dbCall?.scenario?.instructions ?? "",
-        dbCall?.scenario?.evals ?? [],
-        agent?.enabledGeneralEvals ?? [],
-      );
+      const analysis = await analyzeCallWitho1({
+        callStartedAt: vapiCall.startedAt,
+        messages: vapiCall.artifact.messages,
+        testAgentPrompt: dbCall.scenario.instructions,
+        scenario: dbCall.scenario,
+        agent,
+      });
 
-      const geminiPrompt = createGeminiPrompt(
-        vapiCall.artifact?.messages ?? [],
-        dbCall?.scenario?.instructions ?? "",
-        dbCall?.scenario?.evals ?? [],
-        agent?.enabledGeneralEvals ?? [],
-        analysis,
-      );
+      let parsedResult: string;
+      const useGemini = !dbCall.scenario.includeDateTime;
+      if (!useGemini) {
+        parsedResult = analysis.cleanedResult;
+      } else {
+        const geminiPrompt = createGeminiPrompt({
+          callStartedAt: vapiCall.startedAt,
+          messages: vapiCall.artifact.messages,
+          testAgentPrompt: dbCall.scenario.instructions,
+          scenario: dbCall.scenario,
+          agent,
+          analysis,
+        });
 
-      const geminiResult = await analyzeCallWithGemini(
-        vapiCall.artifact?.stereoRecordingUrl,
-        geminiPrompt,
-      );
+        const geminiResult = await analyzeCallWithGemini(
+          vapiCall.artifact.stereoRecordingUrl,
+          geminiPrompt,
+        );
+        parsedResult = JSON.stringify(geminiResult.parsedResult);
 
-      console.log("GEMINI RESULT");
-      console.log(geminiResult);
-
-      const { parsedResult } = geminiResult;
+        console.log(
+          "GEMINI RESULT for call",
+          call.id,
+          JSON.stringify(parsedResult, null, 2),
+        );
+      }
       if (!parsedResult) {
         console.error("No cleaned result found for call ID", call.id);
         return;

@@ -164,6 +164,9 @@ model Scenario {
   instructions    String
   successCriteria String @default("")
 
+  includeDateTime Boolean @default(false)
+  timezone        String?
+
   isNew Boolean @default(false)
 
   calls Call[]

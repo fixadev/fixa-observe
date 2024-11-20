@@ -47,7 +47,7 @@ const navItems = [
   {
     href: "/test-agents",
     icon: UsersIcon,
-    label: "test agents",
+    label: "personas",
   },
   { href: "/settings", icon: Cog6ToothIcon, label: "settings" },
 ];

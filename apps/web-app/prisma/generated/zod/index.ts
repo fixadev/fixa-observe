@@ -72,7 +72,7 @@ export const CallErrorScalarFieldEnumSchema = z.enum(['id','secondsFromStart','d
 
 export const CallRecordingScalarFieldEnumSchema = z.enum(['id','audioUrl','createdAt','processed']);
 
-export const ScenarioScalarFieldEnumSchema = z.enum(['id','agentId','createdAt','name','instructions','successCriteria','isNew']);
+export const ScenarioScalarFieldEnumSchema = z.enum(['id','agentId','createdAt','name','instructions','successCriteria','includeDateTime','timezone','isNew']);
 
 export const EvalScalarFieldEnumSchema = z.enum(['id','createdAt','name','description','scenarioId','type','resultType','agentId','ownerId']);
 
@@ -251,6 +251,8 @@ export const ScenarioSchema = z.object({
   name: z.string(),
   instructions: z.string(),
   successCriteria: z.string(),
+  includeDateTime: z.boolean(),
+  timezone: z.string().nullable(),
   isNew: z.boolean(),
 })
 
@@ -558,6 +560,8 @@ export const ScenarioSelectSchema: z.ZodType<Prisma.ScenarioSelect> = z.object({
   name: z.boolean().optional(),
   instructions: z.boolean().optional(),
   successCriteria: z.boolean().optional(),
+  includeDateTime: z.boolean().optional(),
+  timezone: z.boolean().optional(),
   isNew: z.boolean().optional(),
   agent: z.union([z.boolean(),z.lazy(() => AgentArgsSchema)]).optional(),
   calls: z.union([z.boolean(),z.lazy(() => CallFindManyArgsSchema)]).optional(),
@@ -1219,6 +1223,8 @@ export const ScenarioWhereInputSchema: z.ZodType<Prisma.ScenarioWhereInput> = z.
   name: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   instructions: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   successCriteria: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
+  includeDateTime: z.union([ z.lazy(() => BoolFilterSchema),z.boolean() ]).optional(),
+  timezone: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
   isNew: z.union([ z.lazy(() => BoolFilterSchema),z.boolean() ]).optional(),
   agent: z.union([ z.lazy(() => AgentRelationFilterSchema),z.lazy(() => AgentWhereInputSchema) ]).optional(),
   calls: z.lazy(() => CallListRelationFilterSchema).optional(),
@@ -1232,6 +1238,8 @@ export const ScenarioOrderByWithRelationInputSchema: z.ZodType<Prisma.ScenarioOr
   name: z.lazy(() => SortOrderSchema).optional(),
   instructions: z.lazy(() => SortOrderSchema).optional(),
   successCriteria: z.lazy(() => SortOrderSchema).optional(),
+  includeDateTime: z.lazy(() => SortOrderSchema).optional(),
+  timezone: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
   isNew: z.lazy(() => SortOrderSchema).optional(),
   agent: z.lazy(() => AgentOrderByWithRelationInputSchema).optional(),
   calls: z.lazy(() => CallOrderByRelationAggregateInputSchema).optional(),
@@ -1251,6 +1259,8 @@ export const ScenarioWhereUniqueInputSchema: z.ZodType<Prisma.ScenarioWhereUniqu
   name: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   instructions: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   successCriteria: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
+  includeDateTime: z.union([ z.lazy(() => BoolFilterSchema),z.boolean() ]).optional(),
+  timezone: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
   isNew: z.union([ z.lazy(() => BoolFilterSchema),z.boolean() ]).optional(),
   agent: z.union([ z.lazy(() => AgentRelationFilterSchema),z.lazy(() => AgentWhereInputSchema) ]).optional(),
   calls: z.lazy(() => CallListRelationFilterSchema).optional(),
@@ -1264,6 +1274,8 @@ export const ScenarioOrderByWithAggregationInputSchema: z.ZodType<Prisma.Scenari
   name: z.lazy(() => SortOrderSchema).optional(),
   instructions: z.lazy(() => SortOrderSchema).optional(),
   successCriteria: z.lazy(() => SortOrderSchema).optional(),
+  includeDateTime: z.lazy(() => SortOrderSchema).optional(),
+  timezone: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
   isNew: z.lazy(() => SortOrderSchema).optional(),
   _count: z.lazy(() => ScenarioCountOrderByAggregateInputSchema).optional(),
   _max: z.lazy(() => ScenarioMaxOrderByAggregateInputSchema).optional(),
@@ -1280,6 +1292,8 @@ export const ScenarioScalarWhereWithAggregatesInputSchema: z.ZodType<Prisma.Scen
   name: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
   instructions: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
   successCriteria: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
+  includeDateTime: z.union([ z.lazy(() => BoolWithAggregatesFilterSchema),z.boolean() ]).optional(),
+  timezone: z.union([ z.lazy(() => StringNullableWithAggregatesFilterSchema),z.string() ]).optional().nullable(),
   isNew: z.union([ z.lazy(() => BoolWithAggregatesFilterSchema),z.boolean() ]).optional(),
 }).strict();
 
@@ -2055,6 +2069,8 @@ export const ScenarioCreateInputSchema: z.ZodType<Prisma.ScenarioCreateInput> = 
   name: z.string(),
   instructions: z.string(),
   successCriteria: z.string().optional(),
+  includeDateTime: z.boolean().optional(),
+  timezone: z.string().optional().nullable(),
   isNew: z.boolean().optional(),
   agent: z.lazy(() => AgentCreateNestedOneWithoutScenariosInputSchema),
   calls: z.lazy(() => CallCreateNestedManyWithoutScenarioInputSchema).optional(),
@@ -2068,6 +2084,8 @@ export const ScenarioUncheckedCreateInputSchema: z.ZodType<Prisma.ScenarioUnchec
   name: z.string(),
   instructions: z.string(),
   successCriteria: z.string().optional(),
+  includeDateTime: z.boolean().optional(),
+  timezone: z.string().optional().nullable(),
   isNew: z.boolean().optional(),
   calls: z.lazy(() => CallUncheckedCreateNestedManyWithoutScenarioInputSchema).optional(),
   evals: z.lazy(() => EvalUncheckedCreateNestedManyWithoutScenarioInputSchema).optional()
@@ -2079,6 +2097,8 @@ export const ScenarioUpdateInputSchema: z.ZodType<Prisma.ScenarioUpdateInput> = 
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   instructions: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   successCriteria: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  includeDateTime: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
+  timezone: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   isNew: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   agent: z.lazy(() => AgentUpdateOneRequiredWithoutScenariosNestedInputSchema).optional(),
   calls: z.lazy(() => CallUpdateManyWithoutScenarioNestedInputSchema).optional(),
@@ -2092,6 +2112,8 @@ export const ScenarioUncheckedUpdateInputSchema: z.ZodType<Prisma.ScenarioUnchec
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   instructions: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   successCriteria: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  includeDateTime: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
+  timezone: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   isNew: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   calls: z.lazy(() => CallUncheckedUpdateManyWithoutScenarioNestedInputSchema).optional(),
   evals: z.lazy(() => EvalUncheckedUpdateManyWithoutScenarioNestedInputSchema).optional()
@@ -2104,6 +2126,8 @@ export const ScenarioCreateManyInputSchema: z.ZodType<Prisma.ScenarioCreateManyI
   name: z.string(),
   instructions: z.string(),
   successCriteria: z.string().optional(),
+  includeDateTime: z.boolean().optional(),
+  timezone: z.string().optional().nullable(),
   isNew: z.boolean().optional()
 }).strict();
 
@@ -2113,6 +2137,8 @@ export const ScenarioUpdateManyMutationInputSchema: z.ZodType<Prisma.ScenarioUpd
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   instructions: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   successCriteria: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  includeDateTime: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
+  timezone: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   isNew: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
 }).strict();
 
@@ -2123,6 +2149,8 @@ export const ScenarioUncheckedUpdateManyInputSchema: z.ZodType<Prisma.ScenarioUn
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   instructions: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   successCriteria: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  includeDateTime: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
+  timezone: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   isNew: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
 }).strict();
 
@@ -2907,6 +2935,8 @@ export const ScenarioCountOrderByAggregateInputSchema: z.ZodType<Prisma.Scenario
   name: z.lazy(() => SortOrderSchema).optional(),
   instructions: z.lazy(() => SortOrderSchema).optional(),
   successCriteria: z.lazy(() => SortOrderSchema).optional(),
+  includeDateTime: z.lazy(() => SortOrderSchema).optional(),
+  timezone: z.lazy(() => SortOrderSchema).optional(),
   isNew: z.lazy(() => SortOrderSchema).optional()
 }).strict();
 
@@ -2917,6 +2947,8 @@ export const ScenarioMaxOrderByAggregateInputSchema: z.ZodType<Prisma.ScenarioMa
   name: z.lazy(() => SortOrderSchema).optional(),
   instructions: z.lazy(() => SortOrderSchema).optional(),
   successCriteria: z.lazy(() => SortOrderSchema).optional(),
+  includeDateTime: z.lazy(() => SortOrderSchema).optional(),
+  timezone: z.lazy(() => SortOrderSchema).optional(),
   isNew: z.lazy(() => SortOrderSchema).optional()
 }).strict();
 
@@ -2927,6 +2959,8 @@ export const ScenarioMinOrderByAggregateInputSchema: z.ZodType<Prisma.ScenarioMi
   name: z.lazy(() => SortOrderSchema).optional(),
   instructions: z.lazy(() => SortOrderSchema).optional(),
   successCriteria: z.lazy(() => SortOrderSchema).optional(),
+  includeDateTime: z.lazy(() => SortOrderSchema).optional(),
+  timezone: z.lazy(() => SortOrderSchema).optional(),
   isNew: z.lazy(() => SortOrderSchema).optional()
 }).strict();
 
@@ -4127,6 +4161,8 @@ export const ScenarioCreateWithoutAgentInputSchema: z.ZodType<Prisma.ScenarioCre
   name: z.string(),
   instructions: z.string(),
   successCriteria: z.string().optional(),
+  includeDateTime: z.boolean().optional(),
+  timezone: z.string().optional().nullable(),
   isNew: z.boolean().optional(),
   calls: z.lazy(() => CallCreateNestedManyWithoutScenarioInputSchema).optional(),
   evals: z.lazy(() => EvalCreateNestedManyWithoutScenarioInputSchema).optional()
@@ -4138,6 +4174,8 @@ export const ScenarioUncheckedCreateWithoutAgentInputSchema: z.ZodType<Prisma.Sc
   name: z.string(),
   instructions: z.string(),
   successCriteria: z.string().optional(),
+  includeDateTime: z.boolean().optional(),
+  timezone: z.string().optional().nullable(),
   isNew: z.boolean().optional(),
   calls: z.lazy(() => CallUncheckedCreateNestedManyWithoutScenarioInputSchema).optional(),
   evals: z.lazy(() => EvalUncheckedCreateNestedManyWithoutScenarioInputSchema).optional()
@@ -4268,6 +4306,8 @@ export const ScenarioScalarWhereInputSchema: z.ZodType<Prisma.ScenarioScalarWher
   name: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   instructions: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   successCriteria: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
+  includeDateTime: z.union([ z.lazy(() => BoolFilterSchema),z.boolean() ]).optional(),
+  timezone: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
   isNew: z.union([ z.lazy(() => BoolFilterSchema),z.boolean() ]).optional(),
 }).strict();
 
@@ -4663,6 +4703,8 @@ export const ScenarioCreateWithoutCallsInputSchema: z.ZodType<Prisma.ScenarioCre
   name: z.string(),
   instructions: z.string(),
   successCriteria: z.string().optional(),
+  includeDateTime: z.boolean().optional(),
+  timezone: z.string().optional().nullable(),
   isNew: z.boolean().optional(),
   agent: z.lazy(() => AgentCreateNestedOneWithoutScenariosInputSchema),
   evals: z.lazy(() => EvalCreateNestedManyWithoutScenarioInputSchema).optional()
@@ -4675,6 +4717,8 @@ export const ScenarioUncheckedCreateWithoutCallsInputSchema: z.ZodType<Prisma.Sc
   name: z.string(),
   instructions: z.string(),
   successCriteria: z.string().optional(),
+  includeDateTime: z.boolean().optional(),
+  timezone: z.string().optional().nullable(),
   isNew: z.boolean().optional(),
   evals: z.lazy(() => EvalUncheckedCreateNestedManyWithoutScenarioInputSchema).optional()
 }).strict();
@@ -4857,6 +4901,8 @@ export const ScenarioUpdateWithoutCallsInputSchema: z.ZodType<Prisma.ScenarioUpd
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   instructions: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   successCriteria: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  includeDateTime: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
+  timezone: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   isNew: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   agent: z.lazy(() => AgentUpdateOneRequiredWithoutScenariosNestedInputSchema).optional(),
   evals: z.lazy(() => EvalUpdateManyWithoutScenarioNestedInputSchema).optional()
@@ -4869,6 +4915,8 @@ export const ScenarioUncheckedUpdateWithoutCallsInputSchema: z.ZodType<Prisma.Sc
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   instructions: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   successCriteria: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  includeDateTime: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
+  timezone: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   isNew: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   evals: z.lazy(() => EvalUncheckedUpdateManyWithoutScenarioNestedInputSchema).optional()
 }).strict();
@@ -5290,6 +5338,8 @@ export const ScenarioCreateWithoutEvalsInputSchema: z.ZodType<Prisma.ScenarioCre
   name: z.string(),
   instructions: z.string(),
   successCriteria: z.string().optional(),
+  includeDateTime: z.boolean().optional(),
+  timezone: z.string().optional().nullable(),
   isNew: z.boolean().optional(),
   agent: z.lazy(() => AgentCreateNestedOneWithoutScenariosInputSchema),
   calls: z.lazy(() => CallCreateNestedManyWithoutScenarioInputSchema).optional()
@@ -5302,6 +5352,8 @@ export const ScenarioUncheckedCreateWithoutEvalsInputSchema: z.ZodType<Prisma.Sc
   name: z.string(),
   instructions: z.string(),
   successCriteria: z.string().optional(),
+  includeDateTime: z.boolean().optional(),
+  timezone: z.string().optional().nullable(),
   isNew: z.boolean().optional(),
   calls: z.lazy(() => CallUncheckedCreateNestedManyWithoutScenarioInputSchema).optional()
 }).strict();
@@ -5395,6 +5447,8 @@ export const ScenarioUpdateWithoutEvalsInputSchema: z.ZodType<Prisma.ScenarioUpd
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   instructions: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   successCriteria: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  includeDateTime: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
+  timezone: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   isNew: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   agent: z.lazy(() => AgentUpdateOneRequiredWithoutScenariosNestedInputSchema).optional(),
   calls: z.lazy(() => CallUpdateManyWithoutScenarioNestedInputSchema).optional()
@@ -5407,6 +5461,8 @@ export const ScenarioUncheckedUpdateWithoutEvalsInputSchema: z.ZodType<Prisma.Sc
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   instructions: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   successCriteria: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  includeDateTime: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
+  timezone: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   isNew: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   calls: z.lazy(() => CallUncheckedUpdateManyWithoutScenarioNestedInputSchema).optional()
 }).strict();
@@ -5631,6 +5687,8 @@ export const ScenarioCreateManyAgentInputSchema: z.ZodType<Prisma.ScenarioCreate
   name: z.string(),
   instructions: z.string(),
   successCriteria: z.string().optional(),
+  includeDateTime: z.boolean().optional(),
+  timezone: z.string().optional().nullable(),
   isNew: z.boolean().optional()
 }).strict();
 
@@ -5713,6 +5771,8 @@ export const ScenarioUpdateWithoutAgentInputSchema: z.ZodType<Prisma.ScenarioUpd
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   instructions: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   successCriteria: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  includeDateTime: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
+  timezone: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   isNew: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   calls: z.lazy(() => CallUpdateManyWithoutScenarioNestedInputSchema).optional(),
   evals: z.lazy(() => EvalUpdateManyWithoutScenarioNestedInputSchema).optional()
@@ -5724,6 +5784,8 @@ export const ScenarioUncheckedUpdateWithoutAgentInputSchema: z.ZodType<Prisma.Sc
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   instructions: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   successCriteria: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  includeDateTime: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
+  timezone: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   isNew: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   calls: z.lazy(() => CallUncheckedUpdateManyWithoutScenarioNestedInputSchema).optional(),
   evals: z.lazy(() => EvalUncheckedUpdateManyWithoutScenarioNestedInputSchema).optional()
@@ -5735,6 +5797,8 @@ export const ScenarioUncheckedUpdateManyWithoutAgentInputSchema: z.ZodType<Prism
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   instructions: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   successCriteria: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  includeDateTime: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
+  timezone: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   isNew: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
 }).strict();
 

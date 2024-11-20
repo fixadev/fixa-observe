@@ -11,15 +11,9 @@ import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 
-import { useEffect, useState } from "react";
-import {
-  type CreateScenarioSchema,
-  type CreateAgentSchema,
-  type ScenarioWithEvals,
-} from "~/lib/agent";
-import { Textarea } from "~/components/ui/textarea";
+import { useState } from "react";
+import { type CreateAgentSchema } from "~/lib/agent";
 import { api } from "~/trpc/react";
-import { ScenarioCard } from "../../../_components/ScenarioCard";
 import Spinner from "~/components/Spinner";
 import {
   checkForValidPhoneNumber,
