@@ -1,12 +1,25 @@
-import { Eval } from "@prisma/client";
+import { Agent, Eval, Scenario } from "@prisma/client";
+import { ArtifactMessagesItem } from "@vapi-ai/server-sdk/api";
+import { getDateTimeAtTimezone } from "./utils";
 
-export const createGeminiPrompt = (
-  messages: Array<any>,
-  testAgentInstructions: string,
-  scenarioEvals: Eval[],
-  generalEvals: Eval[],
-  analysis: any,
-) => {
+export const createGeminiPrompt = ({
+  callStartedAt,
+  messages,
+  testAgentPrompt,
+  scenario,
+  agent,
+  analysis,
+}: {
+  callStartedAt?: string;
+  messages: ArtifactMessagesItem[];
+  testAgentPrompt: string;
+  scenario: Scenario & { evals: Eval[] };
+  agent: Agent & { enabledGeneralEvals: Eval[] };
+  analysis: any;
+}) => {
+  const scenarioEvals = scenario.evals;
+  const generalEvals = agent.enabledGeneralEvals;
+
   return `
     You are an expert call analyst. Your job is to review the analysis of a junior analyst and make modifications if necessary.
 
@@ -54,7 +67,16 @@ export const createGeminiPrompt = (
 
       TRANSCRIPT: ${messages}
 
-      TEST AGENT PROMPT: ${testAgentInstructions}
+      TEST AGENT PROMPT: ${testAgentPrompt}
+
+      ${
+        scenario.includeDateTime && scenario.timezone && callStartedAt
+          ? `The call occurred at ${getDateTimeAtTimezone(
+              new Date(callStartedAt),
+              scenario.timezone,
+            )}. Use this as context for your evaluation, if the evaluation criteria is dependent on the current date or time, or if it mentions phrases like 'right now' or 'today', etc.`
+          : ""
+      }
 
       MAIN AGENT GENERAL SUCCESS CRITERIA: ${generalEvals
         .map((evaluation) => evaluation.name)

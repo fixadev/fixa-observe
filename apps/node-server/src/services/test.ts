@@ -5,6 +5,7 @@ import { CallStatus, Role } from "@prisma/client";
 import { analyzeCallWithGemini } from "./geminiAnalyzeAudio";
 import { formatOutput } from "./formatOutput";
 import { createGeminiPrompt } from "../utils/createGeminiPrompt";
+import { USE_GEMINI } from "../utils/constants";
 
 const main = async () => {
   try {
@@ -55,23 +56,31 @@ const main = async () => {
         agent,
       });
 
-      const geminiPrompt = createGeminiPrompt(
-        vapiCall.artifact.messages,
-        dbCall.scenario.instructions,
-        dbCall.scenario.evals,
-        agent.enabledGeneralEvals,
-        analysis,
-      );
+      let parsedResult: string;
+      if (!USE_GEMINI) {
+        parsedResult = analysis.cleanedResult;
+      } else {
+        const geminiPrompt = createGeminiPrompt({
+          callStartedAt: vapiCall.startedAt,
+          messages: vapiCall.artifact.messages,
+          testAgentPrompt: dbCall.scenario.instructions,
+          scenario: dbCall.scenario,
+          agent,
+          analysis,
+        });
 
-      const geminiResult = await analyzeCallWithGemini(
-        vapiCall.artifact.stereoRecordingUrl,
-        geminiPrompt,
-      );
+        const geminiResult = await analyzeCallWithGemini(
+          vapiCall.artifact.stereoRecordingUrl,
+          geminiPrompt,
+        );
+        parsedResult = JSON.stringify(geminiResult.parsedResult);
 
-      console.log("GEMINI RESULT");
-      console.log(geminiResult);
-
-      const { parsedResult } = geminiResult;
+        console.log(
+          "GEMINI RESULT for call",
+          call.id,
+          JSON.stringify(parsedResult, null, 2),
+        );
+      }
       if (!parsedResult) {
         console.error("No cleaned result found for call ID", call.id);
         return;

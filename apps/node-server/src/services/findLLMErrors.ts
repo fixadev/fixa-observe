@@ -49,14 +49,6 @@ export const analyzeCallWitho1 = async ({
 
   const basePrompt = `
   Your job to to analyze a call transcript between an AI agent (the main agent) and a test AI agent (the test agent), and determine how the main agent performed.
-  ${
-    scenario.includeDateTime && scenario.timezone && callStartedAt
-      ? `The call occurred at ${getDateTimeAtTimezone(
-          new Date(callStartedAt),
-          scenario.timezone,
-        )}. Use this as context for your evaluation.`
-      : ""
-  }
 
   You will be provided the following information:
   - testAgentPrompt: The test agent's instructions
@@ -100,14 +92,20 @@ export const analyzeCallWitho1 = async ({
   - any tool call messages you see are being made by the test agent, not the main agent. so if they are made erroneously, that's not an error (it is an error in the test agent, not the main agent)
   `;
 
-  const prompt = `${basePrompt}\n\n\n\nTest Agent Prompt: ${testAgentPrompt}\n\nScenario Evaluation Criteria: ${JSON.stringify(
-    scenarioEvals,
-  )}\n\nGeneral Evaluation Criteria: ${JSON.stringify(generalEvals)}\n\nCall Transcript: ${JSON.stringify(
+  const prompt = `${basePrompt}\n\n\n\nTest Agent Prompt: ${testAgentPrompt}\n\n${
+    scenario.includeDateTime && scenario.timezone && callStartedAt
+      ? `The call occurred at ${getDateTimeAtTimezone(
+          new Date(callStartedAt),
+          scenario.timezone,
+        )}. Use this as context for your evaluation, if the evaluation criteria is dependent on the current date or time, or if it mentions phrases like 'right now' or 'today', etc.`
+      : ""
+  }\n\nScenario Evaluation Criteria: ${JSON.stringify(scenarioEvals)}
+  \n\nGeneral Evaluation Criteria: ${JSON.stringify(generalEvals)}\n\nCall Transcript: ${JSON.stringify(
     messages,
   )}`;
-  console.log("========================= O1 PROMPT =========================");
-  console.log(prompt);
-  console.log("========================= END O1 PROMPT ======================");
+  // console.log("========================= O1 PROMPT =========================");
+  // console.log(prompt);
+  // console.log("========================= END O1 PROMPT ======================");
 
   const completion = await openai.chat.completions.create({
     model: "o1-preview",

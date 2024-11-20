@@ -7,6 +7,7 @@ import { analyzeCallWitho1 } from "./findLLMErrors";
 import { formatOutput } from "./formatOutput";
 import { analyzeCallWithGemini } from "./geminiAnalyzeAudio";
 import { env } from "../env";
+import { USE_GEMINI } from "../utils/constants";
 
 const main = async () => {
   console.log("RE-RUNNING CALL");
@@ -60,23 +61,33 @@ const main = async () => {
     agent,
   });
 
-  const geminiPrompt = createGeminiPrompt(
-    vapiCall.artifact?.messages ?? [],
-    call.scenario?.instructions ?? "",
-    call.scenario?.evals ?? [],
-    agent?.enabledGeneralEvals ?? [],
-    analysis,
-  );
+  let parsedResult: string;
+  if (!USE_GEMINI) {
+    parsedResult = analysis.cleanedResult;
+  } else {
+    const geminiPrompt = createGeminiPrompt({
+      callStartedAt: vapiCall.startedAt,
+      messages: vapiCall.artifact.messages,
+      testAgentPrompt: call.scenario.instructions,
+      scenario: call.scenario,
+      agent,
+      analysis,
+    });
 
-  const geminiResult = await analyzeCallWithGemini(
-    vapiCall.artifact?.stereoRecordingUrl,
-    geminiPrompt,
-  );
+    const geminiResult = await analyzeCallWithGemini(
+      vapiCall.artifact.stereoRecordingUrl,
+      geminiPrompt,
+    );
+    parsedResult = JSON.stringify(geminiResult.parsedResult);
 
-  console.log("GEMINI RESULT");
-  console.log(geminiResult);
+    console.log(
+      "GEMINI RESULT for call",
+      call.id,
+      JSON.stringify(geminiResult.parsedResult, null, 2),
+    );
+  }
 
-  const { parsedResult } = geminiResult;
+  // const { parsedResult } = geminiResult;
   if (!parsedResult) {
     console.error("No cleaned result found for call ID", call.id);
     return;
@@ -139,6 +150,7 @@ const main = async () => {
     include: {
       messages: true,
       testAgent: true,
+      evalResults: true,
       scenario: true,
       errors: true,
     },
