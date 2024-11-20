@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -260,6 +260,11 @@ function RunTestModal({
     }
   }, [onRunTest, selectedScenarios, enabledAgents, onOpenChange, toast]);
 
+  const numTestCalls = useMemo(
+    () => selectedScenarios.size * enabledAgents.size,
+    [selectedScenarios, enabledAgents],
+  );
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       {/* <DialogContent className="sm:max-w-[800px]"> */}
@@ -332,7 +337,7 @@ function RunTestModal({
           </Accordion>
           <Button
             onClick={handleRunTest}
-            disabled={loading || selectedScenarios.size === 0}
+            disabled={loading || numTestCalls === 0}
             className="flex items-center gap-2"
           >
             {loading ? (
@@ -340,8 +345,10 @@ function RunTestModal({
                 initializing
                 <Spinner className="size-4" />
               </>
-            ) : (
+            ) : numTestCalls === 0 ? (
               "run test"
+            ) : (
+              `run ${numTestCalls} test call${numTestCalls > 1 ? "s" : ""}`
             )}
           </Button>
         </div>

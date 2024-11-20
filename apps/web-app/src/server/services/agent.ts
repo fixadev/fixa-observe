@@ -56,7 +56,9 @@ export class AgentService {
             calls: true,
           },
         },
-        enabledTestAgents: true,
+        enabledTestAgents: {
+          where: { enabled: true },
+        },
       },
     });
   }
