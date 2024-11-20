@@ -64,7 +64,7 @@ export default function TestAgentsPage({
         <div className="flex flex-1 items-center gap-2">
           <SidebarTrigger />
           <Link href={`/dashboard/${params.agentId}/test-agents`}>
-            <div className="font-medium">test agents</div>
+            <div className="font-medium">personas</div>
           </Link>
         </div>
       </div>
