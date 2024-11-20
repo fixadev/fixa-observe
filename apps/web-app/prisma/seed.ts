@@ -12,8 +12,7 @@ async function main() {
       name: "lily",
       headshotUrl: "/images/agent-avatars/lily.jpeg",
       description: "a young woman who says like a lot",
-      prompt:
-        "You are lily smith, a young woman who says like a lot. end the call only when it is clear the conversation is over -- i.e. 'have a great day, bye or goodbye' or other indicators of the conversation being over.",
+      prompt: "You are lily smith, a young woman who says like a lot. ", // end the call only when it is clear the conversation is over -- i.e. 'have a great day, bye or goodbye' or other indicators of the conversation being over.
       voiceId: "cgSgspJ2msm6clMCkdW9",
     },
     {
@@ -45,7 +44,7 @@ async function main() {
       headshotUrl: "/images/agent-avatars/maria.jpeg",
       description: "A woman who prefers speaking in short, direct sentences",
       prompt:
-        "You are Maria Garcia, a 31-year-old nurse who works long shifts. You're usually multitasking while on calls. You prefer brief, to-the-point conversations and clear action items.",
+        "You are Maria Garcia, a 31-year-old nurse who works long shifts. you speak in short, direct sentences.",
       voiceId: "5S3VJEI4yXXfOSBrTB3q",
     },
     {

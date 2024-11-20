@@ -4,7 +4,7 @@ import {
   WrenchIcon,
   XCircleIcon,
 } from "@heroicons/react/24/solid";
-import { CallStatus } from "@prisma/client";
+import { CallResult, CallStatus } from "@prisma/client";
 import { formatDistanceToNow } from "date-fns";
 import { useMemo } from "react";
 import { ibmPlexMono } from "~/app/fonts";
@@ -25,12 +25,17 @@ export default function TestCard({
   );
 
   const callsFailed = useMemo(
-    () => test.calls.filter((call) => !didCallSucceed(call)),
+    () => test.calls.filter((call) => call.result === CallResult.failure),
     [test.calls],
   );
 
   const callsInProgress = useMemo(
-    () => test.calls.filter((call) => call.status === CallStatus.in_progress),
+    () =>
+      test.calls.filter(
+        (call) =>
+          call.status === CallStatus.in_progress ||
+          call.status === CallStatus.analyzing,
+      ),
     [test.calls],
   );
 
