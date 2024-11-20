@@ -16,7 +16,6 @@ import { analyzeCallWithGemini } from "./geminiAnalyzeAudio";
 import { formatOutput } from "./formatOutput";
 import { Socket } from "socket.io";
 import { sendTestCompletedSlackMessage } from "./sendSlackMessage";
-import { USE_GEMINI } from "../utils/constants";
 
 export const handleVapiCallEnded = async ({
   report,
@@ -54,7 +53,8 @@ export const handleVapiCallEnded = async ({
     console.log("O1 ANALYSIS for call", call.id, o1Analysis);
 
     let parsedResult: string;
-    if (!USE_GEMINI) {
+    const useGemini = !scenario.includeDateTime;
+    if (!useGemini) {
       parsedResult = o1Analysis.cleanedResult;
     } else {
       const geminiPrompt = createGeminiPrompt({

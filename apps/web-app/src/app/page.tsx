@@ -14,17 +14,17 @@ import { Dialog, DialogContent } from "~/components/ui/dialog";
 export default function LandingPage() {
   const [videoModalOpen, setVideoModalOpen] = useState(false);
 
-  const scrollToHowItWorks = useCallback(() => {
-    const howItWorksSection = document.getElementById("how-it-works");
-    if (howItWorksSection) {
-      const yOffset = -70; // Scroll to 100px above the section
-      const y =
-        howItWorksSection.getBoundingClientRect().top +
-        window.scrollY +
-        yOffset;
-      window.scrollTo({ top: y, behavior: "smooth" });
-    }
-  }, []);
+  // const scrollToHowItWorks = useCallback(() => {
+  //   const howItWorksSection = document.getElementById("how-it-works");
+  //   if (howItWorksSection) {
+  //     const yOffset = -70; // Scroll to 100px above the section
+  //     const y =
+  //       howItWorksSection.getBoundingClientRect().top +
+  //       window.scrollY +
+  //       yOffset;
+  //     window.scrollTo({ top: y, behavior: "smooth" });
+  //   }
+  // }, []);
 
   const openVideoModal = useCallback(() => {
     setVideoModalOpen(true);

@@ -5,7 +5,6 @@ import { CallStatus, Role } from "@prisma/client";
 import { analyzeCallWithGemini } from "./geminiAnalyzeAudio";
 import { formatOutput } from "./formatOutput";
 import { createGeminiPrompt } from "../utils/createGeminiPrompt";
-import { USE_GEMINI } from "../utils/constants";
 
 const main = async () => {
   try {
@@ -57,7 +56,8 @@ const main = async () => {
       });
 
       let parsedResult: string;
-      if (!USE_GEMINI) {
+      const useGemini = !dbCall.scenario.includeDateTime;
+      if (!useGemini) {
         parsedResult = analysis.cleanedResult;
       } else {
         const geminiPrompt = createGeminiPrompt({

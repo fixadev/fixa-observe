@@ -7,7 +7,6 @@ import { analyzeCallWitho1 } from "./findLLMErrors";
 import { formatOutput } from "./formatOutput";
 import { analyzeCallWithGemini } from "./geminiAnalyzeAudio";
 import { env } from "../env";
-import { USE_GEMINI } from "../utils/constants";
 
 const main = async () => {
   console.log("RE-RUNNING CALL");
@@ -62,7 +61,8 @@ const main = async () => {
   });
 
   let parsedResult: string;
-  if (!USE_GEMINI) {
+  const useGemini = !call.scenario.includeDateTime;
+  if (!useGemini) {
     parsedResult = analysis.cleanedResult;
   } else {
     const geminiPrompt = createGeminiPrompt({
