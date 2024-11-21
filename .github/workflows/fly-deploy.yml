@@ -16,7 +16,7 @@ jobs:
       - uses: superfly/flyctl-actions/setup-flyctl@master
       - run: |
           export FLY_APP_NAME=${{ github.ref == 'refs/heads/main' && 'pixa-observe' || 'pixa-observe-staging' }}
-          ./generate-fly-toml.sh
+          # ./generate-fly-toml.sh
           # Create .env file with secrets for node-server
           cat << EOF > apps/node-server/.env
           OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}
@@ -39,7 +39,7 @@ jobs:
           GOOGLE_CLOUD_BUCKET_NAME=pixa-audio
           EOF
           # Deploy the node-server application
-          flyctl deploy --remote-only
+          flyctl deploy --remote-only --app $FLY_APP_NAME
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
 
