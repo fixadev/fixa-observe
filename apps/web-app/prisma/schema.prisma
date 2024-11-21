@@ -46,6 +46,8 @@ model Agent {
   githubRepoUrl String?
   systemPrompt  String
 
+  enableSlackNotifications Boolean @default(true)
+
   enabledGeneralEvals Eval[]
 
   enabledTestAgents TestAgent[]
@@ -74,6 +76,10 @@ model TestAgent {
   headshotUrl String
   description String
   prompt      String
+
+  enabled         Boolean @default(true)
+  defaultSelected Boolean @default(false)
+  order           Int     @default(0)
 
   agents Agent[]
   calls  Call[]
@@ -164,6 +170,9 @@ model Scenario {
   name            String
   instructions    String
   successCriteria String @default("")
+
+  includeDateTime Boolean @default(false)
+  timezone        String?
 
   isNew Boolean @default(false)
 

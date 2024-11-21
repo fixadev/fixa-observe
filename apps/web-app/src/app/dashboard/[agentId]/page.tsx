@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -225,6 +225,11 @@ function RunTestModal({
   }, [agent.enabledTestAgents]);
 
   const toggleAgent = (testAgentId: string) => {
+    toggleTestAgentEnabled({
+      agentId: agent.id,
+      testAgentId,
+      enabled: !enabledAgents.has(testAgentId),
+    });
     setEnabledAgents((prev) => {
       const next = new Set(prev);
       if (next.has(testAgentId)) {
@@ -233,11 +238,6 @@ function RunTestModal({
         next.add(testAgentId);
       }
       return next;
-    });
-    toggleTestAgentEnabled({
-      agentId: agent.id,
-      testAgentId,
-      enabled: !enabledAgents.has(testAgentId),
     });
   };
 
@@ -259,6 +259,11 @@ function RunTestModal({
       setLoading(false);
     }
   }, [onRunTest, selectedScenarios, enabledAgents, onOpenChange, toast]);
+
+  const numTestCalls = useMemo(
+    () => selectedScenarios.size * enabledAgents.size,
+    [selectedScenarios, enabledAgents],
+  );
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -295,7 +300,7 @@ function RunTestModal({
           )}
           <Accordion type="single" collapsible>
             <AccordionItem value="test-agents" className="-mx-6 border-none">
-              <AccordionTrigger className="px-6">test agents</AccordionTrigger>
+              <AccordionTrigger className="px-6">personas</AccordionTrigger>
               <AccordionContent className="h-[300px] overflow-y-auto px-6">
                 <div className="grid grid-cols-1 gap-2">
                   {testAgents?.map((agent) => (
@@ -332,7 +337,7 @@ function RunTestModal({
           </Accordion>
           <Button
             onClick={handleRunTest}
-            disabled={loading || selectedScenarios.size === 0}
+            disabled={loading || numTestCalls === 0}
             className="flex items-center gap-2"
           >
             {loading ? (
@@ -340,8 +345,10 @@ function RunTestModal({
                 initializing
                 <Spinner className="size-4" />
               </>
-            ) : (
+            ) : numTestCalls === 0 ? (
               "run test"
+            ) : (
+              `run ${numTestCalls} test call${numTestCalls > 1 ? "s" : ""}`
             )}
           </Button>
         </div>
