@@ -1,5 +1,6 @@
 import axios from "axios";
 import { db } from "../db";
+import { v4 as uuidv4 } from "uuid";
 import { CallStatus, Role } from "@prisma/client";
 
 export const transcribeAndSaveCall = async (
@@ -26,8 +27,9 @@ export const transcribeAndSaveCall = async (
 
     return await db.call.create({
       data: {
-        id: callId,
+        id: uuidv4(),
         ownerId: "11x",
+        customerCallId: callId,
         messages: {
           create: transcript.map((message) => ({
             role: message.role === "user" ? Role.user : Role.bot,
