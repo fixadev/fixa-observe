@@ -14,6 +14,7 @@ RUN python -m venv .venv
 COPY requirements.txt ./
 RUN .venv/bin/pip install -r requirements.txt
 
+# fun comment 
 FROM python:3.11-slim
 WORKDIR /app
 COPY --from=builder /app/.venv .venv/
