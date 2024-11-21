@@ -1,8 +1,9 @@
-import { useCallback, useState } from "react";
-import { Check, Copy, Eye, EyeOff } from "lucide-react";
+import { useState } from "react";
+import { Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
+import { CopyButton } from "./CopyButton";
 
 interface CopyTextProps {
   text: string;
@@ -17,18 +18,7 @@ export function CopyText({
   size = "sm",
   className,
 }: CopyTextProps) {
-  const [copied, setCopied] = useState(false);
   const [showSensitive, setShowSensitive] = useState(false);
-
-  const handleCopy = useCallback(
-    async (e: React.MouseEvent<HTMLButtonElement>) => {
-      e.stopPropagation();
-      await navigator.clipboard.writeText(text);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    },
-    [text],
-  );
 
   return (
     <div className={cn("relative flex w-full items-center", className)}>
@@ -62,29 +52,7 @@ export function CopyText({
           </span>
         </Button>
       )}
-      <Button
-        size="icon"
-        variant="ghost"
-        onClick={handleCopy}
-        className={cn(
-          "absolute right-1 h-8 w-8 text-muted-foreground",
-          size === "xs" && "size-6",
-        )}
-      >
-        {copied ? (
-          <Check
-            className={cn(
-              "text-green-500",
-              size === "xs" ? "h-3 w-3" : "h-4 w-4",
-            )}
-          />
-        ) : (
-          <Copy className={cn(size === "xs" ? "h-3 w-3" : "h-4 w-4")} />
-        )}
-        <span className="sr-only">
-          {copied ? "Copied" : "Copy to clipboard"}
-        </span>
-      </Button>
+      <CopyButton text={text} size={size} className="absolute right-1" />
     </div>
   );
 }

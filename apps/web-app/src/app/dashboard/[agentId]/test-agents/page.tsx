@@ -6,7 +6,7 @@ import { useAgent } from "~/app/contexts/UseAgent";
 import { Switch } from "~/components/ui/switch";
 import { api } from "~/trpc/react";
 import Image from "next/image";
-import { CopyText } from "~/components/dashboard/CopyText";
+import { CopyText } from "~/components/CopyText";
 import { SidebarTrigger } from "~/components/ui/sidebar";
 
 export default function TestAgentsPage({

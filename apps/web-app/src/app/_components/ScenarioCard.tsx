@@ -8,7 +8,7 @@ import { Label } from "~/components/ui/label";
 import { Textarea } from "~/components/ui/textarea";
 import { useState } from "react";
 import { Card } from "~/components/ui/card";
-import { CopyText } from "~/components/dashboard/CopyText";
+import { CopyText } from "~/components/CopyText";
 import { cn } from "~/lib/utils";
 
 interface ScenarioCardProps {
