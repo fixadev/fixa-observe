@@ -191,9 +191,9 @@ export class AgentService {
     });
 
     const evaluationsToDelete = priorEvals.filter(
-      (evaluation) =>
+      (priorEvaluation) =>
         !scenario.evals.some(
-          (scenarioEval) => scenarioEval.id === evaluation.id,
+          (newEvaluation) => newEvaluation.id === priorEvaluation.id,
         ),
     );
 

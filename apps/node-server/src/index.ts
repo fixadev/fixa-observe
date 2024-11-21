@@ -7,6 +7,7 @@ import { handleAnalysisStarted } from "./services/handleAnalysisStarted";
 import { db } from "./db";
 import { uploadCallToDB } from "./services/uploadCallToDB";
 import { getContext } from "./services/getContext";
+import { transcribeAndSaveCall } from "./services/transcribeAndSaveCall";
 
 const app = express();
 const httpServer = createServer(app);
@@ -81,7 +82,9 @@ app.post("/upload-call", async (req: Request, res: Response) => {
   try {
     const { callId, location } = req.body;
     const result = await uploadCallToDB(callId, location);
-    res.json({ success: true, muizz: "the man" });
+    const newCall = await transcribeAndSaveCall(callId, result.audioUrl);
+    console.log("newCall", newCall);
+    res.json({ success: true, newCall });
   } catch (error) {
     console.error(error);
     res.status(500).json({ success: false, error: (error as Error).message });
