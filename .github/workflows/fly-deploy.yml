@@ -9,15 +9,15 @@ on:
       - dev
 
 jobs:
-  deploy:
+  deploy-node-server:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: superfly/flyctl-actions/setup-flyctl@master
       - run: |
           export FLY_APP_NAME=${{ github.ref == 'refs/heads/main' && 'pixa-observe' || 'pixa-observe-staging' }}
-          ./generate-fly-toml.sh
-          # Create .env file with secrets
+          # ./generate-fly-toml.sh
+          # Create .env file with secrets for node-server
           cat << EOF > apps/node-server/.env
           OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}
           VAPI_API_KEY=${{ secrets.VAPI_API_KEY }}
@@ -35,10 +35,28 @@ jobs:
           DEBUG=true
           AWS_BUCKET_NAME=newmark
           AWS_BUCKET_REGION=us-east-1
-          AUDIO_SERVICE_URL=https://api.pixa.dev
+          AUDIO_SERVICE_URL=${{ github.ref == 'refs/heads/main' && 'https://fixa-transcription-service.fly.dev' || 'https://fixa-transcription-service-staging.fly.dev' }}
           GOOGLE_CLOUD_BUCKET_NAME=pixa-audio
           EOF
-          # Deploy the application
-          flyctl deploy --remote-only
+          # Deploy the node-server application
+          flyctl deploy --remote-only --app $FLY_APP_NAME
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+
+  deploy-transcription-service:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: superfly/flyctl-actions/setup-flyctl@master
+      - run: |
+          export FLY_APP_NAME=${{ github.ref == 'refs/heads/main' && 'fixa-transcription-service' || 'fixa-transcription-service-staging' }}
+          # Navigate to the transcription-service directory
+          cd apps/transcription-service
+          # Create .env file with secrets for transcription-service
+          cat << EOF > .env
+          DEEPGRAM_API_KEY=${{ secrets.DEEPGRAM_API_KEY }}
+          EOF
+          # Deploy the transcription-service application
+          flyctl deploy --remote-only --app $FLY_APP_NAME
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
