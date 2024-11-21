@@ -25,7 +25,7 @@ export const transcribeAndSaveCall = async (
     );
     const transcript = response.data.transcript;
 
-    return await db.call.create({
+    const newCall = await db.call.create({
       data: {
         id: uuidv4(),
         ownerId: "11x",
@@ -42,6 +42,14 @@ export const transcribeAndSaveCall = async (
         stereoRecordingUrl: audioUrl,
       },
     });
+
+    await db.callRecording.update({
+      where: { id: callId },
+      data: {
+        processed: true,
+      },
+    });
+    return newCall;
   } catch (error) {
     console.error("Error in transcribeAndSaveCall:", error);
     throw error;
