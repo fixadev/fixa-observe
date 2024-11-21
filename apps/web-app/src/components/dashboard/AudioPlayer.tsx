@@ -353,11 +353,28 @@ const AudioPlayer = forwardRef<
           return (
             <div
               key={index}
-              className="absolute top-0 h-full"
+              className="absolute top-0 h-full cursor-pointer"
               style={{
                 left: `${startPosition}px`,
                 width: `${width}px`,
-                background: getLatencyBlockColor(latencyBlock),
+                background:
+                  hoveredEvalResult === latencyBlock.id
+                    ? getLatencyBlockColor(latencyBlock, 0.5)
+                    : getLatencyBlockColor(latencyBlock),
+                border: `1px solid ${getLatencyBlockColor(latencyBlock, 1)}`,
+              }}
+              onClick={(e) => {
+                e.stopPropagation();
+                seek(latencyBlock.secondsFromStart);
+                play();
+              }}
+              onMouseEnter={() => {
+                setHoveredEvalResult(latencyBlock.id);
+                onEvalResultHover?.(latencyBlock.id);
+              }}
+              onMouseLeave={() => {
+                setHoveredEvalResult(null);
+                onEvalResultHover?.(null);
               }}
             />
           );

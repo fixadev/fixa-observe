@@ -40,10 +40,30 @@ export default function CallDetails({
   const headerRef = useRef<HTMLDivElement>(null);
 
   const messagesFiltered = useMemo(() => {
-    return call.messages
+    const ret = call.messages
       .filter((m) => m.role !== "system")
       .sort((a, b) => a.secondsFromStart - b.secondsFromStart);
+    return ret;
   }, [call.messages]);
+
+  const messageToLatencyMap = useMemo(() => {
+    if (!call.latencyBlocks || !call.messages) return {};
+
+    const map: Record<string, LatencyBlock> = {};
+
+    for (const message of call.messages) {
+      // Find the latency block that comes directly before this message
+      const precedingBlock = call.latencyBlocks
+        .filter((block) => block.secondsFromStart <= message.secondsFromStart)
+        .sort((a, b) => b.secondsFromStart - a.secondsFromStart)[0];
+
+      if (precedingBlock) {
+        map[message.id] = precedingBlock;
+      }
+    }
+
+    return map;
+  }, [call.latencyBlocks, call.messages]);
 
   // Offset from the start of the call to the first message
   const offsetFromStart = useMemo(() => {
@@ -54,14 +74,26 @@ export default function CallDetails({
   const activeMessageIndex = useMemo(() => {
     return messagesFiltered.findIndex((message, index) => {
       const messageStart = message.secondsFromStart - offsetFromStart;
+      const messageEnd = messageStart + message.duration;
+      const prevMessageEnd = messagesFiltered[index - 1]
+        ? messagesFiltered[index - 1]!.secondsFromStart - offsetFromStart
+        : 0;
       const nextMessage = messagesFiltered[index + 1];
       const nextMessageStart = nextMessage?.secondsFromStart
         ? nextMessage.secondsFromStart - offsetFromStart
         : Infinity;
 
-      return currentTime >= messageStart && currentTime < nextMessageStart;
+      if (type === "test") {
+        return currentTime >= messageStart && currentTime < nextMessageStart;
+      } else {
+        return (
+          (currentTime >= prevMessageEnd || currentTime >= messageStart) &&
+          currentTime < messageEnd &&
+          currentTime < nextMessageStart
+        );
+      }
     });
-  }, [currentTime, messagesFiltered, offsetFromStart]);
+  }, [currentTime, messagesFiltered, offsetFromStart, type]);
 
   const scrollMessageIntoView = useCallback(
     (messageIndex: number) => {
@@ -95,11 +127,15 @@ export default function CallDetails({
     const activeEval = call.evalResults.find(
       (evalResult) => evalResult.id === activeEvalResultId,
     );
-    if (!activeEval) return new Set<number>();
+    const activeLatencyBlock = call.latencyBlocks.find(
+      (block) => block.id === activeEvalResultId,
+    );
+    if (!activeEval && !activeLatencyBlock) return new Set<number>();
 
     const overlappingIndices = new Set<number>();
     messagesFiltered.forEach((message, index) => {
       if (
+        activeEval &&
         activeEval.secondsFromStart <
           (messagesFiltered[index + 1]?.secondsFromStart ?? Infinity) &&
         activeEval.secondsFromStart + activeEval.duration >
@@ -107,10 +143,24 @@ export default function CallDetails({
       ) {
         overlappingIndices.add(index);
       }
+      if (
+        activeLatencyBlock &&
+        activeLatencyBlock.secondsFromStart <
+          (messagesFiltered[index + 1]?.secondsFromStart ?? Infinity) &&
+        activeLatencyBlock.secondsFromStart + activeLatencyBlock.duration >
+          message.secondsFromStart
+      ) {
+        overlappingIndices.add(index);
+      }
     });
 
     return overlappingIndices;
-  }, [call.evalResults, activeEvalResultId, messagesFiltered]);
+  }, [
+    activeEvalResultId,
+    call.evalResults,
+    call.latencyBlocks,
+    messagesFiltered,
+  ]);
 
   // Scroll to the active eval message if it has changed
   useEffect(() => {
@@ -249,25 +299,6 @@ export default function CallDetails({
     [],
   );
 
-  const messageToLatencyMap = useMemo(() => {
-    if (!call.latencyBlocks || !call.messages) return {};
-
-    const map: Record<string, LatencyBlock> = {};
-
-    for (const message of call.messages) {
-      // Find the latency block that comes directly after this message
-      const followingBlock = call.latencyBlocks.find(
-        (block) => block.secondsFromStart >= message.secondsFromStart,
-      );
-
-      if (followingBlock) {
-        map[message.id] = followingBlock;
-      }
-    }
-
-    return map;
-  }, [call.latencyBlocks, call.messages]);
-
   return (
     <div className="flex w-full flex-col rounded-md bg-background px-4 outline-none">
       <div
@@ -368,40 +399,40 @@ export default function CallDetails({
                       : "",
                   )}
                 >
-                  <div className="text-xs font-medium">
+                  <div className="mb-1 text-xs font-medium">
                     {message.role === Role.bot
                       ? botName // call.testAgent?.name
                       : message.role === Role.user
                         ? userName
                         : ""}
                   </div>
-                  <div className="mt-1 text-sm text-muted-foreground">
+                  {messageToLatencyMap[message.id] && (
+                    <div
+                      className="mb-1 w-fit rounded-md p-1 text-xs font-medium"
+                      style={{
+                        background: getLatencyBlockColor(
+                          messageToLatencyMap[message.id]!,
+                        ),
+                        border: `1px solid ${getLatencyBlockColor(
+                          messageToLatencyMap[message.id]!,
+                          1,
+                        )}`,
+                        color: getLatencyBlockColor(
+                          messageToLatencyMap[message.id]!,
+                          1,
+                        ),
+                      }}
+                    >
+                      {Math.round(
+                        messageToLatencyMap[message.id]!.duration * 1000,
+                      )}
+                      ms - time to agent response
+                    </div>
+                  )}
+                  <div className="text-sm text-muted-foreground">
                     {message.message}
                   </div>
                 </div>
-                {messageToLatencyMap[message.id] && (
-                  <div
-                    className="w-full rounded-md p-2 text-xs font-medium"
-                    style={{
-                      background: getLatencyBlockColor(
-                        messageToLatencyMap[message.id]!,
-                      ),
-                      border: `1px solid ${getLatencyBlockColor(
-                        messageToLatencyMap[message.id]!,
-                        1,
-                      )}`,
-                      color: getLatencyBlockColor(
-                        messageToLatencyMap[message.id]!,
-                        1,
-                      ),
-                    }}
-                  >
-                    {Math.round(
-                      messageToLatencyMap[message.id]!.duration * 1000,
-                    )}
-                    ms - time to agent response
-                  </div>
-                )}
                 {isLastEvalMessage && (
                   <div
                     className={cn(
