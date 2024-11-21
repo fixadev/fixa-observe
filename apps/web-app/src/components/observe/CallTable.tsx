@@ -1,3 +1,4 @@
+import { useRouter } from "next/navigation";
 import { DataTable } from "../DataTable";
 import { columns } from "./call-table/columns";
 
@@ -86,5 +87,13 @@ const calls = [
 ];
 
 export default function CallTable() {
-  return <DataTable columns={columns} data={calls} />;
+  const router = useRouter();
+
+  return (
+    <DataTable
+      onRowClick={(call) => router.push(`/observe/calls/${call.id}`)}
+      columns={columns}
+      data={calls}
+    />
+  );
 }

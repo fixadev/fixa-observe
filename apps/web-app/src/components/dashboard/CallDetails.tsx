@@ -1,3 +1,5 @@
+"use client";
+
 import type { CallWithIncludes, EvalResultWithIncludes } from "~/lib/types";
 import AudioPlayer, { type AudioPlayerRef } from "./AudioPlayer";
 import { useMemo, useRef, useState, useEffect, useCallback } from "react";
@@ -7,7 +9,6 @@ import {
   formatDurationHoursMinutesSeconds,
 } from "~/lib/utils";
 import { useAudio } from "~/components/hooks/useAudio";
-import { type Agent } from "prisma/generated/zod";
 import { CheckCircleIcon, XCircleIcon } from "@heroicons/react/24/solid";
 import Image from "next/image";
 import { CallStatus, Role } from "@prisma/client";
@@ -15,10 +16,16 @@ import Spinner from "../Spinner";
 
 export default function CallDetails({
   call,
-  agent,
+  userName,
+  botName,
+  avatarUrl,
+  headerHeight = 60,
 }: {
   call: CallWithIncludes;
-  agent: Agent;
+  userName: string;
+  botName: string;
+  avatarUrl: string;
+  headerHeight?: number;
 }) {
   const audioPlayerRef = useRef<AudioPlayerRef>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -53,28 +60,31 @@ export default function CallDetails({
     });
   }, [currentTime, messagesFiltered, offsetFromStart]);
 
-  const scrollMessageIntoView = useCallback((messageIndex: number) => {
-    if (!scrollContainerRef.current || !headerRef.current) return;
-    const messageElements = scrollContainerRef.current.children;
-    const activeElement = messageElements[messageIndex];
+  const scrollMessageIntoView = useCallback(
+    (messageIndex: number) => {
+      if (!scrollContainerRef.current || !headerRef.current) return;
+      const messageElements = scrollContainerRef.current.children;
+      const activeElement = messageElements[messageIndex];
 
-    if (activeElement) {
-      const elementRect = activeElement.getBoundingClientRect();
-      const header = headerRef.current.getBoundingClientRect();
-      const isAboveViewport = elementRect.top < header.bottom;
-      const isBelowViewport = elementRect.bottom > window.innerHeight;
+      if (activeElement) {
+        const elementRect = activeElement.getBoundingClientRect();
+        const header = headerRef.current.getBoundingClientRect();
+        const isAboveViewport = elementRect.top < header.bottom;
+        const isBelowViewport = elementRect.bottom > window.innerHeight;
 
-      if (isAboveViewport || isBelowViewport) {
-        const headerTopOffset = 57;
-        const scrollPosition =
-          window.scrollY + elementRect.top - header.height - headerTopOffset;
-        window.scrollTo({
-          top: scrollPosition,
-          behavior: "smooth",
-        });
+        if (isAboveViewport || isBelowViewport) {
+          const headerTopOffset = headerHeight;
+          const scrollPosition =
+            window.scrollY + elementRect.top - header.height - headerTopOffset;
+          window.scrollTo({
+            top: scrollPosition,
+            behavior: "smooth",
+          });
+        }
       }
-    }
-  }, []);
+    },
+    [headerHeight],
+  );
 
   const activeEvalMessageIndices = useMemo(() => {
     if (!activeEvalResultId || !call.evalResults) return new Set<number>();
@@ -240,13 +250,14 @@ export default function CallDetails({
     <div className="flex w-full flex-col rounded-md bg-background px-4 outline-none">
       <div
         ref={headerRef}
-        className="sticky top-[calc(3.5rem+1px)] bg-background py-4"
+        className="sticky bg-background py-4"
+        style={{ top: `${headerHeight + 1}px` }}
       >
         {/* CALL ID: {call.id} */}
         <div className="flex items-center gap-4 pb-4">
           <div className="size-[48px] shrink-0">
             <Image
-              src={call.testAgent?.headshotUrl ?? ""}
+              src={avatarUrl}
               alt="agent avatar"
               width={48}
               height={48}
@@ -256,7 +267,7 @@ export default function CallDetails({
           <div className="flex flex-col gap-2">
             <div className="flex items-center gap-2">
               <div className="text-sm font-medium">{call.scenario?.name}</div>
-              {call.status === CallStatus.completed && (
+              {call.status === CallStatus.completed && call.result && (
                 <div
                   className={cn(
                     "w-fit rounded-full px-2 py-1 text-xs",
@@ -389,9 +400,9 @@ export default function CallDetails({
                 >
                   <div className="text-xs font-medium">
                     {message.role === Role.bot
-                      ? call.testAgent?.name
+                      ? botName // call.testAgent?.name
                       : message.role === Role.user
-                        ? agent.name
+                        ? userName
                         : ""}
                   </div>
                   <div className="mt-1 text-sm text-muted-foreground">
