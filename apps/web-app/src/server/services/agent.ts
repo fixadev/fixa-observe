@@ -18,6 +18,8 @@ export class AgentService {
     const testAgents = await db.testAgent.findMany({
       where: {
         OR: [{ ownerId }, { ownerId: "SYSTEM" }],
+        defaultSelected: true,
+        enabled: true,
       },
     });
 
@@ -56,7 +58,9 @@ export class AgentService {
             calls: true,
           },
         },
-        enabledTestAgents: true,
+        enabledTestAgents: {
+          where: { enabled: true },
+        },
       },
     });
   }
@@ -70,14 +74,16 @@ export class AgentService {
     id,
     phoneNumber,
     name,
+    enableSlackNotifications,
   }: {
     id: string;
     phoneNumber: string;
     name: string;
+    enableSlackNotifications: boolean;
   }) {
     return await db.agent.update({
       where: { id },
-      data: { phoneNumber, name },
+      data: { phoneNumber, name, enableSlackNotifications },
     });
   }
 
@@ -104,7 +110,9 @@ export class AgentService {
     return await db.testAgent.findMany({
       where: {
         OR: [{ ownerId }, { ownerId: "SYSTEM" }],
+        enabled: true,
       },
+      orderBy: { order: "asc" },
     });
   }
 
@@ -137,12 +145,10 @@ export class AgentService {
   async createScenario(agentId: string, scenario: CreateScenarioSchema) {
     return await db.scenario.create({
       data: {
+        ...scenario,
         id: uuidv4(),
         agentId,
         createdAt: new Date(),
-        name: scenario.name,
-        instructions: scenario.instructions,
-        successCriteria: scenario.successCriteria,
         evals: {
           createMany: {
             data: scenario.evals.map((evaluation) => ({
@@ -162,12 +168,10 @@ export class AgentService {
     const transactions = scenarios.map((scenario) => {
       return db.scenario.create({
         data: {
+          ...scenario,
           id: uuidv4(),
           agentId,
           createdAt: new Date(),
-          name: scenario.name,
-          instructions: scenario.instructions,
-          successCriteria: scenario.successCriteria,
           evals: {
             createMany: {
               data: scenario.evals.map((evaluation) => ({
@@ -209,9 +213,7 @@ export class AgentService {
     return await db.scenario.update({
       where: { id: scenario.id },
       data: {
-        name: scenario.name,
-        instructions: scenario.instructions,
-        successCriteria: scenario.successCriteria,
+        ...scenario,
         evals: {
           deleteMany: {
             id: { in: evaluationsToDelete.map((evaluation) => evaluation.id) },

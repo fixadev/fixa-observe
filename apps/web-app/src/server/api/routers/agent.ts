@@ -4,7 +4,6 @@ import { AgentService } from "~/server/services/agent";
 import {
   CreateAgentSchema,
   CreateScenarioSchema,
-  ScenarioWithEvals,
   UpdateScenarioSchema,
 } from "~/lib/agent";
 import { db } from "~/server/db";
@@ -98,6 +97,7 @@ export const agentRouter = createTRPCRouter({
         id: z.string(),
         phoneNumber: z.string(),
         name: z.string(),
+        enableSlackNotifications: z.boolean(),
       }),
     )
     .mutation(async ({ input }) => {
