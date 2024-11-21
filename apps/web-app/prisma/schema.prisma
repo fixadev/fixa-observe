@@ -88,6 +88,7 @@ model TestAgent {
 model Call {
   id                 String       @id @default(uuid())
   ownerId            String?
+  customerCallId     String?
   status             CallStatus
   result             CallResult?
   failureReason      String?

@@ -42,7 +42,7 @@ export function ScenarioCard({ scenario }: ScenarioCardProps) {
       </div>
       <div className="flex w-full flex-col flex-wrap gap-2 overflow-hidden">
         <Label className="truncate whitespace-nowrap text-sm">
-          test agent instructions
+          test persona instructions
         </Label>
         <p className="line-clamp-2 min-w-0 overflow-hidden text-sm text-muted-foreground">
           {scenario.instructions}

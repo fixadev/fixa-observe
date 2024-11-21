@@ -410,9 +410,9 @@ function ScenarioSheet({
               />
             </div>
             <div>
-              <Label className="text-base">test agent instructions</Label>
+              <Label className="text-base">test persona instructions</Label>
               <div className="mb-2 text-sm text-muted-foreground">
-                what our test agent will do when it calls your agent
+                what our test persona will do when it calls your agent
               </div>
               <Textarea
                 placeholder="order a dozen donuts with sprinkles and a coffee"
