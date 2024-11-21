@@ -35,7 +35,7 @@ jobs:
           DEBUG=true
           AWS_BUCKET_NAME=newmark
           AWS_BUCKET_REGION=us-east-1
-          AUDIO_SERVICE_URL=https://api.pixa.dev
+          AUDIO_SERVICE_URL=${{ github.ref == 'refs/heads/main' && 'https://fixa-transcription-service.fly.dev' || 'https://fixa-transcription-service-staging.fly.dev' }}
           GOOGLE_CLOUD_BUCKET_NAME=pixa-audio
           EOF
           # Deploy the node-server application
