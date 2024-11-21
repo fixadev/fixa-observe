@@ -23,6 +23,7 @@ import {
   cn,
   createWavBlob,
   formatDurationHoursMinutesSeconds,
+  getLatencyBlockColor,
 } from "~/lib/utils";
 import { debounce } from "lodash";
 import useSWR from "swr";
@@ -330,6 +331,35 @@ const AudioPlayer = forwardRef<
                 }}
               />
             </div>
+          );
+        })}
+        {call.latencyBlocks?.map((latencyBlock, index) => {
+          if (!containerWidth || !duration) return null;
+          const startPercentage = Math.min(
+            1,
+            Math.max(0, latencyBlock.secondsFromStart / duration),
+          );
+          const endPercentage = Math.min(
+            1,
+            Math.max(
+              0,
+              (latencyBlock.secondsFromStart + latencyBlock.duration) /
+                duration,
+            ),
+          );
+          const startPosition = startPercentage * containerWidth;
+          const width = (endPercentage - startPercentage) * containerWidth;
+
+          return (
+            <div
+              key={index}
+              className="absolute top-0 h-full"
+              style={{
+                left: `${startPosition}px`,
+                width: `${width}px`,
+                background: getLatencyBlockColor(latencyBlock),
+              }}
+            />
           );
         })}
       </div>

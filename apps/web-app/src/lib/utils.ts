@@ -1,8 +1,7 @@
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
-import { CallResult, type Role } from "@prisma/client";
-import { type Call, type Message } from "prisma/generated/zod";
-import { type LatencyBlock } from "./types";
+import { CallResult } from "@prisma/client";
+import { type Call, type LatencyBlock } from "prisma/generated/zod";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -92,4 +91,38 @@ export function createWavBlob(
 
 export function generateApiKey() {
   return `fx-${crypto.randomUUID()}`;
+}
+
+export function getLatencyBlockColor(
+  latencyBlock: LatencyBlock,
+  opacity = 0.2,
+) {
+  // Convert duration to a percentage (assuming 3 seconds is 100% red)
+  const percentage = Math.min(latencyBlock.duration / 3, 1);
+
+  // Interpolate between green and red based on duration
+  const red = Math.round(percentage * 255);
+  const green = Math.round((1 - percentage) * 255);
+
+  return `rgba(${red}, ${green}, 0, ${opacity})`;
+}
+
+export function calculateLatencyPercentiles(durations: number[]) {
+  if (durations.length === 0) {
+    return { p50: 0, p90: 0, p95: 0 };
+  }
+
+  // Sort durations in ascending order
+  const sortedDurations = [...durations].sort((a, b) => a - b);
+
+  // Calculate indices for percentiles
+  const p50Index = Math.floor(sortedDurations.length * 0.5);
+  const p90Index = Math.floor(sortedDurations.length * 0.9);
+  const p95Index = Math.floor(sortedDurations.length * 0.95);
+
+  return {
+    p50: sortedDurations[p50Index] ?? 0,
+    p90: sortedDurations[p90Index] ?? 0,
+    p95: sortedDurations[p95Index] ?? 0,
+  };
 }

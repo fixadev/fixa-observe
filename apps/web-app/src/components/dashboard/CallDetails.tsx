@@ -3,10 +3,14 @@
 import type { CallWithIncludes, EvalResultWithIncludes } from "~/lib/types";
 import AudioPlayer, { type AudioPlayerRef } from "./AudioPlayer";
 import { useMemo, useRef, useState, useEffect, useCallback } from "react";
-import { cn, formatDurationHoursMinutesSeconds } from "~/lib/utils";
+import {
+  cn,
+  formatDurationHoursMinutesSeconds,
+  getLatencyBlockColor,
+} from "~/lib/utils";
 import { useAudio } from "~/components/hooks/useAudio";
 import { CheckCircleIcon, XCircleIcon } from "@heroicons/react/24/solid";
-import { CallStatus, Role } from "@prisma/client";
+import { CallStatus, type LatencyBlock, Role } from "@prisma/client";
 import { LatencyCallHeader, TestCallHeader } from "./CallHeader";
 
 export type CallDetailsType = "test" | "latency";
@@ -245,6 +249,25 @@ export default function CallDetails({
     [],
   );
 
+  const messageToLatencyMap = useMemo(() => {
+    if (!call.latencyBlocks || !call.messages) return {};
+
+    const map: Record<string, LatencyBlock> = {};
+
+    for (const message of call.messages) {
+      // Find the latency block that comes directly after this message
+      const followingBlock = call.latencyBlocks.find(
+        (block) => block.secondsFromStart >= message.secondsFromStart,
+      );
+
+      if (followingBlock) {
+        map[message.id] = followingBlock;
+      }
+    }
+
+    return map;
+  }, [call.latencyBlocks, call.messages]);
+
   return (
     <div className="flex w-full flex-col rounded-md bg-background px-4 outline-none">
       <div
@@ -356,6 +379,29 @@ export default function CallDetails({
                     {message.message}
                   </div>
                 </div>
+                {messageToLatencyMap[message.id] && (
+                  <div
+                    className="w-full rounded-md p-2 text-xs font-medium"
+                    style={{
+                      background: getLatencyBlockColor(
+                        messageToLatencyMap[message.id]!,
+                      ),
+                      border: `1px solid ${getLatencyBlockColor(
+                        messageToLatencyMap[message.id]!,
+                        1,
+                      )}`,
+                      color: getLatencyBlockColor(
+                        messageToLatencyMap[message.id]!,
+                        1,
+                      ),
+                    }}
+                  >
+                    {Math.round(
+                      messageToLatencyMap[message.id]!.duration * 1000,
+                    )}
+                    ms - time to agent response
+                  </div>
+                )}
                 {isLastEvalMessage && (
                   <div
                     className={cn(
