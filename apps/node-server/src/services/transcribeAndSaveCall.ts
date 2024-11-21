@@ -39,14 +39,15 @@ export const transcribeAndSaveCall = async (
         id: uuidv4(),
         ownerId: "11x",
         customerCallId: callId,
+        startedAt: new Date().toISOString(),
+        status: CallStatus.completed,
+        stereoRecordingUrl: audioUrl,
         messages: {
           create: messages,
         },
         latencyBlocks: {
           create: latencyBlocks,
         },
-        status: CallStatus.completed,
-        stereoRecordingUrl: audioUrl,
       },
     });
 
