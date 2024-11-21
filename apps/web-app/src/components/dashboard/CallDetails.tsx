@@ -53,9 +53,12 @@ export default function CallDetails({
 
     for (const message of call.messages) {
       // Find the latency block that comes directly before this message
-      const precedingBlock = call.latencyBlocks
-        .filter((block) => block.secondsFromStart <= message.secondsFromStart)
-        .sort((a, b) => b.secondsFromStart - a.secondsFromStart)[0];
+      const precedingBlock = call.latencyBlocks.filter((block) => {
+        // Check if block ends exactly when message starts
+        return (
+          block.secondsFromStart + block.duration === message.secondsFromStart
+        );
+      })[0];
 
       if (precedingBlock) {
         map[message.id] = precedingBlock;
@@ -143,13 +146,8 @@ export default function CallDetails({
       ) {
         overlappingIndices.add(index);
       }
-      if (
-        activeLatencyBlock &&
-        activeLatencyBlock.secondsFromStart <
-          (messagesFiltered[index + 1]?.secondsFromStart ?? Infinity) &&
-        activeLatencyBlock.secondsFromStart + activeLatencyBlock.duration >
-          message.secondsFromStart
-      ) {
+      const latencyBlock = messageToLatencyMap[message.id];
+      if (latencyBlock && latencyBlock.id === activeEvalResultId) {
         overlappingIndices.add(index);
       }
     });
@@ -159,6 +157,7 @@ export default function CallDetails({
     activeEvalResultId,
     call.evalResults,
     call.latencyBlocks,
+    messageToLatencyMap,
     messagesFiltered,
   ]);
 
@@ -410,9 +409,16 @@ export default function CallDetails({
                     <div
                       className="mb-1 w-fit rounded-md p-1 text-xs font-medium"
                       style={{
-                        background: getLatencyBlockColor(
-                          messageToLatencyMap[message.id]!,
-                        ),
+                        background:
+                          activeEvalResultId ===
+                          messageToLatencyMap[message.id]!.id
+                            ? getLatencyBlockColor(
+                                messageToLatencyMap[message.id]!,
+                                0.5,
+                              )
+                            : getLatencyBlockColor(
+                                messageToLatencyMap[message.id]!,
+                              ),
                         border: `1px solid ${getLatencyBlockColor(
                           messageToLatencyMap[message.id]!,
                           1,
