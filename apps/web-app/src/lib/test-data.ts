@@ -164,6 +164,7 @@ export const TEST_CALLS: CallWithIncludes[] = [
     testId: "1",
     scenarioId: TEST_SCENARIOS[0]!.id,
     scenario: TEST_SCENARIOS[0]!,
+    customerCallId: "call.2mLTbvbnQZ785c96meHH1p",
   },
   {
     id: crypto.randomUUID(),
@@ -173,6 +174,7 @@ export const TEST_CALLS: CallWithIncludes[] = [
     testId: "1",
     scenarioId: TEST_SCENARIOS[1]!.id,
     scenario: TEST_SCENARIOS[1]!,
+    customerCallId: "call.2mLTbvbnQZ785c96meHH1p",
   },
   {
     id: crypto.randomUUID(),
@@ -182,6 +184,7 @@ export const TEST_CALLS: CallWithIncludes[] = [
     testId: "1",
     scenarioId: TEST_SCENARIOS[2]!.id,
     scenario: TEST_SCENARIOS[2]!,
+    customerCallId: "call.2mLTbvbnQZ785c96meHH1p",
   },
   {
     id: crypto.randomUUID(),
@@ -191,6 +194,7 @@ export const TEST_CALLS: CallWithIncludes[] = [
     testId: "1",
     scenarioId: TEST_SCENARIOS[0]!.id,
     scenario: TEST_SCENARIOS[0]!,
+    customerCallId: "call.2mLTbvbnQZ785c96meHH1p",
   },
   {
     id: crypto.randomUUID(),
@@ -200,6 +204,7 @@ export const TEST_CALLS: CallWithIncludes[] = [
     testId: "1",
     scenarioId: TEST_SCENARIOS[1]!.id,
     scenario: TEST_SCENARIOS[1]!,
+    customerCallId: "call.2mLTbvbnQZ785c96meHH1p",
   },
   {
     id: crypto.randomUUID(),
@@ -209,6 +214,7 @@ export const TEST_CALLS: CallWithIncludes[] = [
     testId: "1",
     scenarioId: TEST_SCENARIOS[0]!.id,
     scenario: TEST_SCENARIOS[0]!,
+    customerCallId: "call.2mLTbvbnQZ785c96meHH1p",
   },
   {
     id: crypto.randomUUID(),
@@ -218,6 +224,7 @@ export const TEST_CALLS: CallWithIncludes[] = [
     testId: "1",
     scenarioId: TEST_SCENARIOS[2]!.id,
     scenario: TEST_SCENARIOS[2]!,
+    customerCallId: "call.2mLTbvbnQZ785c96meHH1p",
   },
   {
     id: crypto.randomUUID(),
@@ -227,6 +234,7 @@ export const TEST_CALLS: CallWithIncludes[] = [
     testId: "1",
     scenarioId: TEST_SCENARIOS[0]!.id,
     scenario: TEST_SCENARIOS[0]!,
+    customerCallId: "call.2mLTbvbnQZ785c96meHH1p",
   },
   {
     id: crypto.randomUUID(),
@@ -236,6 +244,7 @@ export const TEST_CALLS: CallWithIncludes[] = [
     testId: "1",
     scenarioId: TEST_SCENARIOS[1]!.id,
     scenario: TEST_SCENARIOS[1]!,
+    customerCallId: "call.2mLTbvbnQZ785c96meHH1p",
   },
   {
     id: crypto.randomUUID(),
@@ -245,6 +254,7 @@ export const TEST_CALLS: CallWithIncludes[] = [
     testId: "1",
     scenarioId: TEST_SCENARIOS[0]!.id,
     scenario: TEST_SCENARIOS[0]!,
+    customerCallId: "call.2mLTbvbnQZ785c96meHH1p",
   },
 ].map((call, index) => ({
   ...call,

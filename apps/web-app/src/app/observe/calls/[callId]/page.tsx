@@ -11,6 +11,7 @@ export default function CallPage({ params }: { params: { callId: string } }) {
         userName="caller"
         headerHeight={0}
         avatarUrl="/images/agent-avatars/jordan.png"
+        type="latency"
       />
     </AudioProvider>
   );

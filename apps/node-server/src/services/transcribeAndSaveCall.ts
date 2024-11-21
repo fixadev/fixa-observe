@@ -1,7 +1,8 @@
 import axios from "axios";
 import { db } from "../db";
 import { v4 as uuidv4 } from "uuid";
-import { CallStatus, Role } from "@prisma/client";
+import { CallStatus, Message, Role } from "@prisma/client";
+import { computeLatencyBlocks } from "../utils/utils";
 
 export const transcribeAndSaveCall = async (
   callId: string,
@@ -25,18 +26,24 @@ export const transcribeAndSaveCall = async (
     );
     const transcript = response.data.transcript;
 
+    const messages = transcript.map((message) => ({
+      role: message.role === "user" ? Role.user : Role.bot,
+      message: message.text,
+      secondsFromStart: message.start,
+      duration: message.end - message.start,
+    }));
+    const latencyBlocks = computeLatencyBlocks(messages);
+
     const newCall = await db.call.create({
       data: {
         id: uuidv4(),
         ownerId: "11x",
         customerCallId: callId,
         messages: {
-          create: transcript.map((message) => ({
-            role: message.role === "user" ? Role.user : Role.bot,
-            message: message.text,
-            secondsFromStart: message.start,
-            duration: message.end - message.start,
-          })),
+          create: messages,
+        },
+        latencyBlocks: {
+          create: latencyBlocks,
         },
         status: CallStatus.completed,
         stereoRecordingUrl: audioUrl,

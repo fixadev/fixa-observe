@@ -105,8 +105,10 @@ model Call {
   scenario    Scenario?  @relation(fields: [scenarioId], references: [id], onDelete: Cascade)
   scenarioId  String?
 
-  messages Message[]
-  errors   CallError[]
+  messages      Message[]
+  latencyBlocks LatencyBlock[]
+
+  errors CallError[]
 }
 
 model Message {
@@ -229,4 +231,12 @@ enum EvalResultType {
   boolean
   number
   percentage
+}
+
+model LatencyBlock {
+  id               String @id @default(uuid())
+  secondsFromStart Float
+  duration         Float
+  call             Call   @relation(fields: [callId], references: [id], onDelete: Cascade)
+  callId           String
 }
