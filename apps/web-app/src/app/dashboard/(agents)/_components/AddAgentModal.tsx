@@ -58,6 +58,7 @@ export function AddAgentModal({ children, refetchAgents }: AddAgentModalProps) {
     githubRepoUrl: "",
     ownerId: "",
     scenarios: [],
+    enableSlackNotifications: false,
   });
 
   const { mutate: createAgent, isPending: isCreatingAgent } =

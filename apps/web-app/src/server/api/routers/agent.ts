@@ -97,6 +97,7 @@ export const agentRouter = createTRPCRouter({
         id: z.string(),
         phoneNumber: z.string(),
         name: z.string(),
+        enableSlackNotifications: z.boolean(),
       }),
     )
     .mutation(async ({ input }) => {

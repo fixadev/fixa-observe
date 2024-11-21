@@ -42,6 +42,8 @@ model Agent {
   githubRepoUrl String?
   systemPrompt  String
 
+  enableSlackNotifications Boolean @default(true)
+
   enabledGeneralEvals Eval[]
 
   enabledTestAgents TestAgent[]
@@ -71,6 +73,10 @@ model TestAgent {
   description String
   prompt      String
 
+  enabled         Boolean @default(true)
+  defaultSelected Boolean @default(false)
+  order           Int     @default(0)
+
   agents Agent[]
   calls  Call[]
 }
@@ -78,6 +84,7 @@ model TestAgent {
 model Call {
   id                 String       @id @default(uuid())
   ownerId            String?
+  customerCallId     String?
   status             CallStatus
   result             CallResult?
   failureReason      String?

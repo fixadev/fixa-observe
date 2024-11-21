@@ -27,6 +27,10 @@ export const createOrUpdateVapiAssistant = async (
         provider: "11labs",
         voiceId,
       },
+      startSpeakingPlan: {
+        smartEndpointingEnabled: true,
+        waitSeconds: 0.4,
+      },
       model: {
         provider: "openai",
         model: "gpt-4o",
@@ -73,7 +77,7 @@ export const createOrUpdateVapiAssistant = async (
     },
     startSpeakingPlan: {
       smartEndpointingEnabled: true,
-      waitSeconds: 0.7,
+      waitSeconds: 0.4,
     },
     metadata: {
       owner: systemTemplate ? "SYSTEM" : "USER",

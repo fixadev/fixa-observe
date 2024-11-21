@@ -30,7 +30,9 @@ export default function CallDetails({
   const headerRef = useRef<HTMLDivElement>(null);
 
   const messagesFiltered = useMemo(() => {
-    return call.messages.filter((m) => m.role !== "system");
+    return call.messages
+      .filter((m) => m.role !== "system")
+      .sort((a, b) => a.secondsFromStart - b.secondsFromStart);
   }, [call.messages]);
 
   // Offset from the start of the call to the first message

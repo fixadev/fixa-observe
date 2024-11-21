@@ -18,6 +18,8 @@ export class AgentService {
     const testAgents = await db.testAgent.findMany({
       where: {
         OR: [{ ownerId }, { ownerId: "SYSTEM" }],
+        defaultSelected: true,
+        enabled: true,
       },
     });
 
@@ -56,7 +58,9 @@ export class AgentService {
             calls: true,
           },
         },
-        enabledTestAgents: true,
+        enabledTestAgents: {
+          where: { enabled: true },
+        },
       },
     });
   }
@@ -70,14 +74,16 @@ export class AgentService {
     id,
     phoneNumber,
     name,
+    enableSlackNotifications,
   }: {
     id: string;
     phoneNumber: string;
     name: string;
+    enableSlackNotifications: boolean;
   }) {
     return await db.agent.update({
       where: { id },
-      data: { phoneNumber, name },
+      data: { phoneNumber, name, enableSlackNotifications },
     });
   }
 
@@ -104,7 +110,9 @@ export class AgentService {
     return await db.testAgent.findMany({
       where: {
         OR: [{ ownerId }, { ownerId: "SYSTEM" }],
+        enabled: true,
       },
+      orderBy: { order: "asc" },
     });
   }
 
@@ -187,9 +195,9 @@ export class AgentService {
     });
 
     const evaluationsToDelete = priorEvals.filter(
-      (evaluation) =>
+      (priorEvaluation) =>
         !scenario.evals.some(
-          (scenarioEval) => scenarioEval.id === evaluation.id,
+          (newEvaluation) => newEvaluation.id === priorEvaluation.id,
         ),
     );
 

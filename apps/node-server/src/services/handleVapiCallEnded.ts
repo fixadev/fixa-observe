@@ -142,6 +142,7 @@ export const handleVapiCallEnded = async ({
     });
 
     if (
+      agent.enableSlackNotifications &&
       updatedTest?.calls.every((call) => call.status === CallStatus.completed)
     ) {
       try {
