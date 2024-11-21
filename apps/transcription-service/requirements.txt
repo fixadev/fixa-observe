@@ -1,0 +1,9 @@
+fastapi
+pydantic
+requests
+pathlib
+python-dotenv
+deepgram-sdk
+pydub
+uvicorn
+
