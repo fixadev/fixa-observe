@@ -8,10 +8,15 @@ import {
 } from "~/lib/utils";
 import { useAudio } from "~/components/hooks/useAudio";
 import { type Agent } from "prisma/generated/zod";
-import { CheckCircleIcon, XCircleIcon } from "@heroicons/react/24/solid";
+import {
+  CheckCircleIcon,
+  PencilIcon,
+  XCircleIcon,
+} from "@heroicons/react/24/solid";
 import Image from "next/image";
 import { CallStatus, Role } from "@prisma/client";
 import Spinner from "../Spinner";
+import Link from "next/link";
 
 export default function CallDetails({
   call,
@@ -280,7 +285,7 @@ export default function CallDetails({
                 <div
                   key={evalResult.id}
                   className={cn(
-                    "flex cursor-pointer items-start gap-1 border-l-2 p-1 pl-1 text-xs",
+                    "group flex cursor-pointer items-start gap-1 border-l-2 p-1 pl-1 text-xs",
                     evalResult.success
                       ? "border-green-500 bg-green-100 text-green-500 hover:bg-green-200"
                       : "border-red-500 bg-red-100 text-red-500 hover:bg-red-200",
@@ -306,6 +311,22 @@ export default function CallDetails({
                     <XCircleIcon className="size-4 shrink-0 text-red-500" />
                   )}
                   {evalResult.eval.name}
+                  <Link
+                    href={`/dashboard/${agent.id}/scenarios?scenarioId=${call.scenarioId}&evalId=${evalResult.eval.id}`}
+                  >
+                    <PencilIcon
+                      onClick={(e) => {
+                        e.stopPropagation();
+                      }}
+                      onMouseEnter={(e) => {
+                        e.stopPropagation();
+                      }}
+                      onMouseLeave={(e) => {
+                        e.stopPropagation();
+                      }}
+                      className="size-4 shrink-0 cursor-pointer text-muted-foreground/70 opacity-0 transition-opacity hover:text-muted-foreground group-hover:opacity-100"
+                    />
+                  </Link>
                 </div>
               ))}
             </div>

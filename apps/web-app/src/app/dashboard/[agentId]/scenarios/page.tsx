@@ -48,6 +48,7 @@ import { GenerateScenariosModal } from "./GenerateScenariosModal";
 import { SidebarTrigger } from "~/components/ui/sidebar";
 import { Switch } from "~/components/ui/switch";
 import { useTimezoneSelect } from "react-timezone-select";
+import { useSearchParams } from "next/navigation";
 
 export default function AgentScenariosPage({
   params,
@@ -59,6 +60,8 @@ export default function AgentScenariosPage({
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [selectedScenario, setSelectedScenario] =
     useState<ScenarioWithEvals | null>(null);
+  const searchParams = useSearchParams();
+  const scenarioId = searchParams.get("scenarioId");
 
   const { mutate: createScenario } = api.agent.createScenario.useMutation({
     onSuccess: (data) => {
@@ -102,76 +105,91 @@ export default function AgentScenariosPage({
     },
   });
 
-  const handleSaveScenario = (
-    scenario: CreateScenarioSchema | ScenarioWithEvals,
-  ) => {
-    if (!agent) return;
-    if ("id" in scenario && scenario.id !== "new") {
-      setAgent({
-        ...agent,
-        scenarios: agent.scenarios.map((s) =>
-          s.id === scenario.id
-            ? {
-                ...scenario,
-                evals: scenario.evals.map((e) => ({
-                  ...e,
-                  scenarioId: scenario.id,
-                })),
-              }
-            : s,
-        ),
-      });
-      updateScenario({ scenario });
-    } else {
-      const newScenario = {
-        ...scenario,
-        id: "new",
-        agentId: agent?.id ?? "",
-        createdAt: new Date(),
-        evals: scenario.evals.map((e) => ({
-          ...e,
+  const handleSaveScenario = useCallback(
+    (scenario: CreateScenarioSchema | ScenarioWithEvals) => {
+      if (!agent) return;
+      if ("id" in scenario && scenario.id !== "new") {
+        setAgent({
+          ...agent,
+          scenarios: agent.scenarios.map((s) =>
+            s.id === scenario.id
+              ? {
+                  ...scenario,
+                  evals: scenario.evals.map((e) => ({
+                    ...e,
+                    scenarioId: scenario.id,
+                  })),
+                }
+              : s,
+          ),
+        });
+        updateScenario({ scenario });
+      } else {
+        const newScenario = {
+          ...scenario,
+          id: "new",
+          agentId: agent?.id ?? "",
           createdAt: new Date(),
-          scenarioId: undefined,
-        })),
-      };
-      setAgent({
-        ...agent,
-        scenarios: [
-          ...agent.scenarios,
-          {
-            ...newScenario,
-            evals: newScenario.evals.map((e) => ({
-              ...e,
-              scenarioId: newScenario.id,
-            })),
-          },
-        ],
-      });
-      createScenario({ agentId: agent?.id ?? "", scenario: newScenario });
-    }
-    setIsDrawerOpen(false);
-  };
+          evals: scenario.evals.map((e) => ({
+            ...e,
+            createdAt: new Date(),
+            scenarioId: undefined,
+          })),
+        };
+        setAgent({
+          ...agent,
+          scenarios: [
+            ...agent.scenarios,
+            {
+              ...newScenario,
+              evals: newScenario.evals.map((e) => ({
+                ...e,
+                scenarioId: newScenario.id,
+              })),
+            },
+          ],
+        });
+        createScenario({ agentId: agent?.id ?? "", scenario: newScenario });
+      }
+      setIsDrawerOpen(false);
+    },
+    [agent, createScenario, setAgent, setIsDrawerOpen, updateScenario],
+  );
 
-  const handleDeleteScenario = (id: string) => {
-    const scenario = agent?.scenarios.find((s) => s.id === id);
-    if (!scenario?.isNew) {
-      deleteScenario({ id });
-    }
-    if (agent && scenario) {
-      setAgent({
-        ...agent,
-        scenarios: agent.scenarios.filter((s) => s.id !== id),
-      });
-    }
-    setIsDrawerOpen(false);
-  };
+  const handleDeleteScenario = useCallback(
+    (id: string) => {
+      const scenario = agent?.scenarios.find((s) => s.id === id);
+      if (!scenario?.isNew) {
+        deleteScenario({ id });
+      }
+      if (agent && scenario) {
+        setAgent({
+          ...agent,
+          scenarios: agent.scenarios.filter((s) => s.id !== id),
+        });
+      }
+      setIsDrawerOpen(false);
+    },
+    [agent, deleteScenario, setAgent, setIsDrawerOpen],
+  );
 
-  if (!agent) return null;
-
-  const addScenario = () => {
+  const addScenario = useCallback(() => {
     setSelectedScenario(null);
     setIsDrawerOpen(true);
-  };
+  }, [setSelectedScenario, setIsDrawerOpen]);
+
+  // Add effect to handle initial scenario opening
+  useEffect(() => {
+    if (scenarioId && agent) {
+      const scenario = agent.scenarios.find((s) => s.id === scenarioId);
+      if (scenario) {
+        setSelectedScenario(scenario);
+        setIsDrawerOpen(true);
+      }
+    }
+  }, [scenarioId, agent]);
+
+  if (!agent) return null;
 
   return (
     <div className="h-full max-w-full">
@@ -522,6 +540,27 @@ function EvalCard({
   onUpdate: (evaluation: EvalWithoutScenarioId) => void;
   onDelete: (id: string) => void;
 }) {
+  const searchParams = useSearchParams();
+  const evalId = searchParams.get("evalId");
+
+  // Add effect to scroll to and highlight eval
+  useEffect(() => {
+    if (evalId) {
+      const evalElement = document.getElementById(
+        `eval-${evalId}`,
+      ) as HTMLTextAreaElement;
+      console.log("evalElement", evalElement);
+      if (evalElement) {
+        evalElement.scrollIntoView({ behavior: "smooth", block: "center" });
+        evalElement.focus();
+        evalElement.setSelectionRange(
+          evalElement.value.length,
+          evalElement.value.length,
+        );
+      }
+    }
+  }, [evalId]);
+
   return (
     <Card className="relative">
       <div
@@ -558,6 +597,7 @@ function EvalCard({
         <div>
           <Label>description</Label>
           <Textarea
+            id={`eval-${evaluation.id}`}
             value={evaluation.description}
             placeholder="the agent correctly ordered a dozen donuts with sprinkles and a coffee"
             className="min-h-[100px]"
