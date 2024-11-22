@@ -76,13 +76,31 @@ export const callService = {
   }: {
     ownerId: string;
     lookbackPeriod: number;
-  }): Promise<{ p50: number; p90: number; p95: number }> => {
+  }): Promise<{ hour: string; p50: number; p90: number; p95: number }[]> => {
     const calls = await callService.getCalls({ ownerId, lookbackPeriod });
 
-    const durations = calls.flatMap((call) =>
-      call.latencyBlocks.map((block) => block.duration),
+    // Group calls by hour
+    const callsByHour = calls.reduce(
+      (acc, call) => {
+        if (!call.startedAt) return acc;
+        const hour = new Date(call.startedAt).toISOString().slice(0, 13); // Format: "2024-03-20T15"
+        acc[hour] = acc[hour] ?? [];
+        acc[hour].push(call);
+        return acc;
+      },
+      {} as Record<string, CallWithIncludes[]>,
     );
 
-    return calculateLatencyPercentiles(durations);
+    // Calculate percentiles for each hour
+    return Object.entries(callsByHour).map(([hour, hourCalls]) => {
+      const durations = hourCalls.flatMap((call) =>
+        call.latencyBlocks.map((block) => block.duration),
+      );
+
+      return {
+        hour,
+        ...calculateLatencyPercentiles(durations),
+      };
+    });
   },
 };

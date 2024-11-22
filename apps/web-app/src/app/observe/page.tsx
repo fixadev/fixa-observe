@@ -76,7 +76,7 @@ export default function ObservePage() {
           <CardTitle>Latency</CardTitle>
         </CardHeader>
         <CardContent>
-          <LatencyChart />
+          <LatencyChart data={latencyPercentiles ?? []} />
         </CardContent>
       </Card>
       <CallTable onRowClick={(call) => setSelectedCallId(call.id)} />
