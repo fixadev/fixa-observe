@@ -28,4 +28,13 @@ export const callRouter = createTRPCRouter({
     .query(async ({ input }) => {
       return await callService.getCalls(input);
     }),
+
+  getLatencyPercentiles: protectedProcedure
+    .input(z.object({ lookbackPeriod: z.number() })) // in milliseconds
+    .query(async ({ input, ctx }) => {
+      return await callService.getLatencyPercentiles({
+        ownerId: ctx.user.id,
+        lookbackPeriod: input.lookbackPeriod,
+      });
+    }),
 });

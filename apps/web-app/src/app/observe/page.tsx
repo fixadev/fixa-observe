@@ -16,17 +16,18 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { TEST_OBSERVE_CALLS } from "~/lib/test-data";
+import { api } from "~/trpc/react";
 
 type LookbackPeriod = {
   label: string;
-  value: string;
+  value: number;
 };
 
 const lookbackPeriods: LookbackPeriod[] = [
-  { label: "24 hours", value: "24h" },
-  { label: "2 days", value: "2d" },
-  { label: "7 days", value: "7d" },
-  { label: "30 days", value: "30d" },
+  { label: "24 hours", value: 24 * 60 * 60 * 1000 },
+  { label: "2 days", value: 2 * 24 * 60 * 60 * 1000 },
+  { label: "7 days", value: 7 * 24 * 60 * 60 * 1000 },
+  { label: "30 days", value: 30 * 24 * 60 * 60 * 1000 },
 ];
 
 export default function ObservePage() {
@@ -40,13 +41,21 @@ export default function ObservePage() {
 
   const { play, pause, isPlaying } = useAudio();
 
+  const { data: latencyPercentiles } = api._call.getLatencyPercentiles.useQuery(
+    {
+      lookbackPeriod: lookbackPeriod.value,
+    },
+  );
+
   return (
     <div className="container">
       <div className="flex justify-between">
         <Select
-          value={lookbackPeriod.value}
+          value={lookbackPeriod.value.toString()}
           onValueChange={(value) => {
-            setLookbackPeriod(lookbackPeriods.find((p) => p.value === value)!);
+            setLookbackPeriod(
+              lookbackPeriods.find((p) => p.value === parseInt(value))!,
+            );
           }}
         >
           <SelectTrigger>
@@ -54,7 +63,7 @@ export default function ObservePage() {
           </SelectTrigger>
           <SelectContent>
             {lookbackPeriods.map((period) => (
-              <SelectItem key={period.value} value={period.value}>
+              <SelectItem key={period.value} value={period.value.toString()}>
                 {period.label}
               </SelectItem>
             ))}

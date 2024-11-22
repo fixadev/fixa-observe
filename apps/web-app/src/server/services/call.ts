@@ -1,4 +1,5 @@
 import { type CallWithIncludes } from "~/lib/types";
+import { calculateLatencyPercentiles } from "~/lib/utils";
 import { db } from "~/server/db";
 
 export const callService = {
@@ -23,19 +24,29 @@ export const callService = {
     });
   },
 
-  getCalls: async (params: {
+  getCalls: async ({
+    ownerId,
+    testId,
+    scenarioId,
+    lookbackPeriod,
+    limit = 50,
+  }: {
     ownerId?: string;
     testId?: string;
     scenarioId?: string;
+    lookbackPeriod?: number;
     limit?: number;
   }): Promise<CallWithIncludes[]> => {
-    const { ownerId, testId, scenarioId, limit = 50 } = params;
-
     return await db.call.findMany({
       where: {
         ownerId,
         testId,
         scenarioId,
+        startedAt: {
+          gte: lookbackPeriod
+            ? new Date(Date.now() - lookbackPeriod).toISOString()
+            : undefined,
+        },
       },
       include: {
         messages: true,
@@ -57,5 +68,21 @@ export const callService = {
       },
       take: limit,
     });
+  },
+
+  getLatencyPercentiles: async ({
+    ownerId,
+    lookbackPeriod,
+  }: {
+    ownerId: string;
+    lookbackPeriod: number;
+  }): Promise<{ p50: number; p90: number; p95: number }> => {
+    const calls = await callService.getCalls({ ownerId, lookbackPeriod });
+
+    const durations = calls.flatMap((call) =>
+      call.latencyBlocks.map((block) => block.duration),
+    );
+
+    return calculateLatencyPercentiles(durations);
   },
 };
