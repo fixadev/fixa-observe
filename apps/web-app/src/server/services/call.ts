@@ -37,6 +37,10 @@ export const callService = {
     lookbackPeriod?: number;
     limit?: number;
   }): Promise<CallWithIncludes[]> => {
+    console.log("GET CALLS", ownerId, testId, scenarioId, lookbackPeriod);
+    if (lookbackPeriod) {
+      console.log("DATE", new Date(Date.now() - lookbackPeriod));
+    }
     return await db.call.findMany({
       where: {
         ownerId,
@@ -77,7 +81,12 @@ export const callService = {
     ownerId: string;
     lookbackPeriod: number;
   }): Promise<{ hour: string; p50: number; p90: number; p95: number }[]> => {
-    const calls = await callService.getCalls({ ownerId, lookbackPeriod });
+    const calls = await callService.getCalls({
+      ownerId: "11x",
+      lookbackPeriod,
+    });
+
+    console.log("CALLS", calls);
 
     // Group calls by hour
     const callsByHour = calls.reduce(
@@ -90,6 +99,8 @@ export const callService = {
       },
       {} as Record<string, CallWithIncludes[]>,
     );
+
+    console.log("CALLS BY HOUR", callsByHour);
 
     // Calculate percentiles for each hour
     return Object.entries(callsByHour).map(([hour, hourCalls]) => {

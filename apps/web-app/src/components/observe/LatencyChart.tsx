@@ -84,17 +84,20 @@ export default function LatencyChart({
           dataKey="hour"
           tickFormatter={(value: string) => {
             const date = new Date(value + ":00:00Z");
-            return date.toLocaleDateString("en-US", {
-              month: "short",
-              day: "numeric",
-              year: "numeric",
+            return date.toLocaleTimeString("en-US", {
+              hour: "2-digit",
+              minute: "2-digit",
             });
           }}
         />
         <YAxis tickFormatter={(value) => `${value}ms`} />
         <ChartTooltip
           content={
-            <ChartTooltipContent valueFormatter={(value) => `${value}ms`} />
+            <ChartTooltipContent
+              valueFormatter={(value) =>
+                `${Math.round(parseFloat(value) * 1000)}ms`
+              }
+            />
           }
         />
         <ChartLegend content={<ChartLegendContent />} />

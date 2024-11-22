@@ -1,13 +1,12 @@
 import { DataTable } from "../DataTable";
 import { columns } from "./call-table/columns";
 import { type CallWithIncludes } from "~/lib/types";
-import { TEST_OBSERVE_CALLS } from "~/lib/test-data";
-
-const calls = TEST_OBSERVE_CALLS;
 
 export default function CallTable({
+  calls,
   onRowClick,
 }: {
+  calls: CallWithIncludes[];
   onRowClick?: (call: CallWithIncludes) => void;
 }) {
   return (

@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import CallDetails from "~/components/dashboard/CallDetails";
 import { useAudio } from "~/components/hooks/useAudio";
 import CallTable from "~/components/observe/CallTable";
@@ -46,6 +46,14 @@ export default function ObservePage() {
       lookbackPeriod: lookbackPeriod.value,
     },
   );
+  const { data: calls } = api._call.getCalls.useQuery({
+    ownerId: "11x",
+  });
+
+  const selectedCall = useMemo(
+    () => calls?.find((call) => call.id === selectedCallId),
+    [calls, selectedCallId],
+  );
 
   return (
     <div className="container">
@@ -79,48 +87,53 @@ export default function ObservePage() {
           <LatencyChart data={latencyPercentiles ?? []} />
         </CardContent>
       </Card>
-      <CallTable onRowClick={(call) => setSelectedCallId(call.id)} />
-      <Dialog
-        open={!!selectedCallId}
-        onOpenChange={(open) => {
-          if (!open) {
-            setSelectedCallId(null);
-          }
-        }}
-      >
-        <DialogContent className="max-h-[90vh] max-w-[90vw] p-0">
-          {/* <DialogHeader>
+      <CallTable
+        calls={calls ?? []}
+        onRowClick={(call) => setSelectedCallId(call.id)}
+      />
+      {selectedCall && (
+        <Dialog
+          open={!!selectedCallId}
+          onOpenChange={(open) => {
+            if (!open) {
+              setSelectedCallId(null);
+            }
+          }}
+        >
+          <DialogContent className="max-h-[90vh] max-w-[90vw] p-0">
+            {/* <DialogHeader>
             <DialogTitle>Call Details</DialogTitle>
           </DialogHeader> */}
-          <div
-            className="h-[90vh] w-[90vw] overflow-hidden overflow-y-auto rounded-md focus:outline-none"
-            ref={containerRef}
-            autoFocus
-            tabIndex={0}
-            onKeyDown={(e) => {
-              if (e.key === " ") {
-                e.preventDefault();
-                if (isPlaying) {
-                  pause();
-                } else {
-                  play();
+            <div
+              className="h-[90vh] w-[90vw] overflow-hidden overflow-y-auto rounded-md focus:outline-none"
+              ref={containerRef}
+              autoFocus
+              tabIndex={0}
+              onKeyDown={(e) => {
+                if (e.key === " ") {
+                  e.preventDefault();
+                  if (isPlaying) {
+                    pause();
+                  } else {
+                    play();
+                  }
                 }
-              }
-            }}
-          >
-            <CallDetails
-              call={TEST_OBSERVE_CALLS[0]!}
-              botName="jordan"
-              userName="caller"
-              headerHeight={44}
-              includeHeaderTop={false}
-              avatarUrl="/images/agent-avatars/jordan.png"
-              type="latency"
-              containerRef={containerRef}
-            />
-          </div>
-        </DialogContent>
-      </Dialog>
+              }}
+            >
+              <CallDetails
+                call={selectedCall}
+                botName="jordan"
+                userName="caller"
+                headerHeight={44}
+                includeHeaderTop={false}
+                avatarUrl="/images/agent-avatars/jordan.png"
+                type="latency"
+                containerRef={containerRef}
+              />
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   );
 }
