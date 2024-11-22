@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import CallDetails from "~/components/dashboard/CallDetails";
+import { useAudio } from "~/components/hooks/useAudio";
 import CallTable from "~/components/observe/CallTable";
 import LatencyChart from "~/components/observe/LatencyChart";
 import { Button } from "~/components/ui/button";
@@ -34,6 +35,10 @@ export default function ObservePage() {
   );
 
   const [selectedCallId, setSelectedCallId] = useState<string | null>(null);
+
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  const { play, pause, isPlaying } = useAudio();
 
   return (
     <div className="container">
@@ -78,14 +83,31 @@ export default function ObservePage() {
           {/* <DialogHeader>
             <DialogTitle>Call Details</DialogTitle>
           </DialogHeader> */}
-          <div className="h-[90vh] w-[90vw] overflow-y-auto">
+          <div
+            className="h-[90vh] w-[90vw] overflow-hidden overflow-y-auto rounded-md focus:outline-none"
+            ref={containerRef}
+            autoFocus
+            tabIndex={0}
+            onKeyDown={(e) => {
+              if (e.key === " ") {
+                e.preventDefault();
+                if (isPlaying) {
+                  pause();
+                } else {
+                  play();
+                }
+              }
+            }}
+          >
             <CallDetails
               call={TEST_OBSERVE_CALLS[0]!}
               botName="jordan"
               userName="caller"
-              headerHeight={0}
+              headerHeight={44}
+              includeHeaderTop={false}
               avatarUrl="/images/agent-avatars/jordan.png"
               type="latency"
+              containerRef={containerRef}
             />
           </div>
         </DialogContent>

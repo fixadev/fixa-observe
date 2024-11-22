@@ -21,16 +21,18 @@ export default function CallDetails({
   botName,
   avatarUrl,
   type = "test",
-  fullHeight = true,
+  containerRef = null,
   headerHeight = 60,
+  includeHeaderTop = true,
 }: {
   call: CallWithIncludes;
   userName: string;
   botName: string;
   avatarUrl: string;
   type?: CallDetailsType;
-  fullHeight?: boolean;
+  containerRef?: React.RefObject<HTMLDivElement> | null;
   headerHeight?: number;
+  includeHeaderTop?: boolean;
 }) {
   const audioPlayerRef = useRef<AudioPlayerRef>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -107,23 +109,27 @@ export default function CallDetails({
       const activeElement = messageElements[messageIndex];
 
       if (activeElement) {
+        const container = containerRef?.current ?? window;
+        const height =
+          containerRef?.current?.clientHeight ?? window.innerHeight;
         const elementRect = activeElement.getBoundingClientRect();
         const header = headerRef.current.getBoundingClientRect();
         const isAboveViewport = elementRect.top < header.bottom;
-        const isBelowViewport = elementRect.bottom > window.innerHeight;
+        const isBelowViewport = elementRect.bottom > height;
+        const scrollY = containerRef?.current?.scrollTop ?? window.scrollY;
 
         if (isAboveViewport || isBelowViewport) {
           const headerTopOffset = headerHeight;
           const scrollPosition =
-            window.scrollY + elementRect.top - header.height - headerTopOffset;
-          window.scrollTo({
+            scrollY + elementRect.top - header.height - headerTopOffset;
+          container.scrollTo({
             top: scrollPosition,
             behavior: "smooth",
           });
         }
       }
     },
-    [headerHeight],
+    [containerRef, headerHeight],
   );
 
   const activeEvalMessageIndices = useMemo(() => {
@@ -305,7 +311,9 @@ export default function CallDetails({
       <div
         ref={headerRef}
         className="sticky bg-background py-4"
-        style={{ top: `${headerHeight}px` }}
+        style={{
+          top: includeHeaderTop ? `${headerHeight}px` : "0px",
+        }}
       >
         {type === "test" ? (
           <TestCallHeader
