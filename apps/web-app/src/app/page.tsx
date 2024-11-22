@@ -202,6 +202,14 @@ export default function LandingPage() {
               fix AI voice agents faster.
             </div>
           </div>
+          <a href="https://elevenlabs.io/text-to-speech">
+            <Image
+              src="https://storage.googleapis.com/eleven-public-cdn/images/elevenlabs_grants_white.png"
+              alt="Text to Speech"
+              width={250}
+              height={29}
+            />
+          </a>
           <div className="flex flex-col gap-4">
             <Button size="lg" asChild className="w-fit">
               <Link

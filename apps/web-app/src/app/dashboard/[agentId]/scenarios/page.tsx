@@ -549,7 +549,6 @@ function EvalCard({
       const evalElement = document.getElementById(
         `eval-${evalId}`,
       ) as HTMLTextAreaElement;
-      console.log("evalElement", evalElement);
       if (evalElement) {
         evalElement.scrollIntoView({ behavior: "smooth", block: "center" });
         evalElement.focus();

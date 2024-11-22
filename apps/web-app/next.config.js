@@ -50,10 +50,17 @@ const config = {
         protocol: "https",
         hostname: "newmark.s3.us-east-1.amazonaws.com",
       },
+      {
+        protocol: "https",
+        hostname: "storage.googleapis.com",
+      },
     ],
   },
   experimental: {
-    serverComponentsExternalPackages: ["@react-pdf/renderer", "@resvg/resvg-js"],
+    serverComponentsExternalPackages: [
+      "@react-pdf/renderer",
+      "@resvg/resvg-js",
+    ],
     outputFileTracingIncludes: {
       "/api/map-pin": ["./public/fonts/**/*"],
     },
