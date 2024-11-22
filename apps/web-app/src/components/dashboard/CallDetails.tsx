@@ -21,6 +21,7 @@ export default function CallDetails({
   botName,
   avatarUrl,
   type = "test",
+  fullHeight = true,
   headerHeight = 60,
 }: {
   call: CallWithIncludes;
@@ -28,6 +29,7 @@ export default function CallDetails({
   botName: string;
   avatarUrl: string;
   type?: CallDetailsType;
+  fullHeight?: boolean;
   headerHeight?: number;
 }) {
   const audioPlayerRef = useRef<AudioPlayerRef>(null);
@@ -303,7 +305,7 @@ export default function CallDetails({
       <div
         ref={headerRef}
         className="sticky bg-background py-4"
-        style={{ top: `${headerHeight + 1}px` }}
+        style={{ top: `${headerHeight}px` }}
       >
         {type === "test" ? (
           <TestCallHeader

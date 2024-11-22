@@ -2,6 +2,8 @@ import { type ColumnDef } from "@tanstack/react-table";
 import { formatDistanceToNow } from "date-fns";
 import Image from "next/image";
 import { CopyButton } from "~/components/CopyButton";
+import { type CallWithIncludes } from "~/lib/types";
+import { calculateLatencyPercentiles } from "~/lib/utils";
 
 export type CallWithLatency = {
   id: string;
@@ -13,7 +15,7 @@ export type CallWithLatency = {
   p99: number;
 };
 
-export const columns: ColumnDef<CallWithLatency>[] = [
+export const columns: ColumnDef<CallWithIncludes>[] = [
   {
     id: "agent-picture",
     // header: () => <div className="w-[1%]" />,
@@ -38,10 +40,12 @@ export const columns: ColumnDef<CallWithLatency>[] = [
       const call = row.original;
       return (
         <div className="flex flex-col">
-          <div className="text-sm font-medium">{call.name}</div>
+          {/* <div className="text-sm font-medium">{call.name}</div> */}
           <div className="flex items-center gap-1">
-            <div className="text-xs text-muted-foreground">{call.callId}</div>
-            <CopyButton text={call.callId} size="xs" />
+            <div className="text-sm font-medium">
+              {call.customerCallId ?? "unknown"}
+            </div>
+            <CopyButton text={call.customerCallId ?? ""} size="xs" />
           </div>
         </div>
       );
@@ -52,7 +56,14 @@ export const columns: ColumnDef<CallWithLatency>[] = [
     header: "p50",
     cell: ({ row }) => {
       const call = row.original;
-      return <div className="font-medium text-green-500">{call.p50}ms</div>;
+      const { p50 } = calculateLatencyPercentiles(
+        call.latencyBlocks.map((block) => block.duration),
+      );
+      return (
+        <div className="font-medium text-green-500">
+          {Math.round(p50 * 1000)}ms
+        </div>
+      );
     },
   },
   {
@@ -60,8 +71,13 @@ export const columns: ColumnDef<CallWithLatency>[] = [
     header: "p95",
     cell: ({ row }) => {
       const call = row.original;
+      const { p90 } = calculateLatencyPercentiles(
+        call.latencyBlocks.map((block) => block.duration),
+      );
       return (
-        <div className="font-medium text-muted-foreground">{call.p95}ms</div>
+        <div className="font-medium text-muted-foreground">
+          {Math.round(p90 * 1000)}ms
+        </div>
       );
     },
   },
@@ -70,7 +86,14 @@ export const columns: ColumnDef<CallWithLatency>[] = [
     header: "p99",
     cell: ({ row }) => {
       const call = row.original;
-      return <div className="font-medium text-red-500">{call.p99}ms</div>;
+      const { p95 } = calculateLatencyPercentiles(
+        call.latencyBlocks.map((block) => block.duration),
+      );
+      return (
+        <div className="font-medium text-red-500">
+          {Math.round(p95 * 1000)}ms
+        </div>
+      );
     },
   },
   {
@@ -80,7 +103,7 @@ export const columns: ColumnDef<CallWithLatency>[] = [
       const call = row.original;
       return (
         <div className="text-xs text-muted-foreground">
-          {formatDistanceToNow(call.createdAt, { addSuffix: true })}
+          {formatDistanceToNow(new Date(), { addSuffix: true })}
         </div>
       );
     },

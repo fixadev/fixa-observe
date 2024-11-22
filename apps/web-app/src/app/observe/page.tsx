@@ -1,10 +1,12 @@
 "use client";
 
 import { useState } from "react";
+import CallDetails from "~/components/dashboard/CallDetails";
 import CallTable from "~/components/observe/CallTable";
 import LatencyChart from "~/components/observe/LatencyChart";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
+import { Dialog, DialogContent } from "~/components/ui/dialog";
 import {
   Select,
   SelectContent,
@@ -12,6 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
+import { TEST_OBSERVE_CALLS } from "~/lib/test-data";
 
 type LookbackPeriod = {
   label: string;
@@ -29,6 +32,8 @@ export default function ObservePage() {
   const [lookbackPeriod, setLookbackPeriod] = useState<LookbackPeriod>(
     lookbackPeriods[0]!,
   );
+
+  const [selectedCallId, setSelectedCallId] = useState<string | null>(null);
 
   return (
     <div className="container">
@@ -60,7 +65,31 @@ export default function ObservePage() {
           <LatencyChart />
         </CardContent>
       </Card>
-      <CallTable />
+      <CallTable onRowClick={(call) => setSelectedCallId(call.id)} />
+      <Dialog
+        open={!!selectedCallId}
+        onOpenChange={(open) => {
+          if (!open) {
+            setSelectedCallId(null);
+          }
+        }}
+      >
+        <DialogContent className="max-h-[90vh] max-w-[90vw] p-0">
+          {/* <DialogHeader>
+            <DialogTitle>Call Details</DialogTitle>
+          </DialogHeader> */}
+          <div className="h-[90vh] w-[90vw] overflow-y-auto">
+            <CallDetails
+              call={TEST_OBSERVE_CALLS[0]!}
+              botName="jordan"
+              userName="caller"
+              headerHeight={0}
+              avatarUrl="/images/agent-avatars/jordan.png"
+              type="latency"
+            />
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

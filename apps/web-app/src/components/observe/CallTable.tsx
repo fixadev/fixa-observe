@@ -1,97 +1,18 @@
-import { useRouter } from "next/navigation";
 import { DataTable } from "../DataTable";
 import { columns } from "./call-table/columns";
+import { type CallWithIncludes } from "~/lib/types";
+import { TEST_OBSERVE_CALLS } from "~/lib/test-data";
 
-const calls = [
-  {
-    id: "1",
-    createdAt: new Date(1716268800000),
-    callId: "call.2mLTbvbnQZ785c96meHH1p",
-    name: "airtable inbound",
-    p50: 700,
-    p95: 800,
-    p99: 5000,
-  },
-  {
-    id: "1",
-    createdAt: new Date(1716268800000),
-    callId: "call.2mLTbvbnQZ785c96meHH1p",
-    name: "airtable inbound",
-    p50: 700,
-    p95: 800,
-    p99: 5000,
-  },
-  {
-    id: "1",
-    createdAt: new Date(1716268800000),
-    callId: "call.2mLTbvbnQZ785c96meHH1p",
-    name: "airtable inbound",
-    p50: 700,
-    p95: 800,
-    p99: 5000,
-  },
-  {
-    id: "1",
-    createdAt: new Date(1716268800000),
-    callId: "call.2mLTbvbnQZ785c96meHH1p",
-    name: "airtable inbound",
-    p50: 700,
-    p95: 800,
-    p99: 5000,
-  },
-  {
-    id: "1",
-    createdAt: new Date(1716268800000),
-    callId: "call.2mLTbvbnQZ785c96meHH1p",
-    name: "airtable inbound",
-    p50: 700,
-    p95: 800,
-    p99: 5000,
-  },
-  {
-    id: "1",
-    createdAt: new Date(1716268800000),
-    callId: "call.2mLTbvbnQZ785c96meHH1p",
-    name: "airtable inbound",
-    p50: 700,
-    p95: 800,
-    p99: 5000,
-  },
-  {
-    id: "1",
-    createdAt: new Date(1716268800000),
-    callId: "call.2mLTbvbnQZ785c96meHH1p",
-    name: "airtable inbound",
-    p50: 700,
-    p95: 800,
-    p99: 5000,
-  },
-  {
-    id: "1",
-    createdAt: new Date(1716268800000),
-    callId: "call.2mLTbvbnQZ785c96meHH1p",
-    name: "airtable inbound",
-    p50: 700,
-    p95: 800,
-    p99: 5000,
-  },
-  {
-    id: "1",
-    createdAt: new Date(1716268800000),
-    callId: "call.2mLTbvbnQZ785c96meHH1p",
-    name: "airtable inbound",
-    p50: 700,
-    p95: 800,
-    p99: 5000,
-  },
-];
+const calls = TEST_OBSERVE_CALLS;
 
-export default function CallTable() {
-  const router = useRouter();
-
+export default function CallTable({
+  onRowClick,
+}: {
+  onRowClick?: (call: CallWithIncludes) => void;
+}) {
   return (
     <DataTable
-      onRowClick={(call) => router.push(`/observe/calls/${call.id}`)}
+      onRowClick={onRowClick ?? undefined}
       columns={columns}
       data={calls}
     />
