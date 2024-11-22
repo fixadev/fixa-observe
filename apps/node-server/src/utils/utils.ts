@@ -1,11 +1,11 @@
-import { LatencyBlock, Message } from "@prisma/client";
+import { LatencyBlock, Message, Role } from "@prisma/client";
 
 export const getDateTimeAtTimezone = (date: Date, timezone: string) => {
   return date.toLocaleString("en-US", { timeZone: timezone });
 };
 
 export function computeLatencyBlocks(
-  messages: { secondsFromStart: number; duration: number }[],
+  messages: { secondsFromStart: number; duration: number; role: Role }[],
 ): Omit<LatencyBlock, "id" | "callId">[] {
   const latencyBlocks: Omit<LatencyBlock, "id" | "callId">[] = [];
 
@@ -19,6 +19,9 @@ export function computeLatencyBlocks(
     const nextMessage = sortedMessages[i + 1];
 
     if (!currentMessage || !nextMessage) continue;
+
+    if (!(currentMessage.role === Role.user && nextMessage.role === Role.bot))
+      continue;
 
     // Calculate the gap between current message end and next message start
     const latencyStart =
