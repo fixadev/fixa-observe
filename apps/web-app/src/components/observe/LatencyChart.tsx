@@ -71,15 +71,19 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
-export default function LatencyChart() {
+export default function LatencyChart({
+  data,
+}: {
+  data: { hour: string; p50: number; p90: number; p95: number }[];
+}) {
   return (
     <ChartContainer config={chartConfig} className="h-[300px] w-full">
-      <AreaChart accessibilityLayer data={chartData}>
+      <AreaChart accessibilityLayer data={data}>
         <CartesianGrid strokeDasharray="3 3" />
         <XAxis
-          dataKey="name"
+          dataKey="hour"
           tickFormatter={(value: string) => {
-            const date = new Date(value);
+            const date = new Date(value + ":00:00Z");
             return date.toLocaleDateString("en-US", {
               month: "short",
               day: "numeric",
