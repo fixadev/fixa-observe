@@ -52,6 +52,7 @@ export type TestWithIncludes = Prisma.TestGetPayload<{
             eval: true;
           };
         };
+        latencyBlocks: true;
       };
     };
   };

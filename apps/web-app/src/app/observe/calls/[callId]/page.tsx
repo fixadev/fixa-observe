@@ -12,7 +12,6 @@ export function CallPage({ params }: { params: { callId: string } }) {
   const { play, pause, isPlaying } = useAudio();
   return (
     <div
-      className="h-screen w-screen"
       autoFocus
       tabIndex={0}
       onKeyDown={(e) => {

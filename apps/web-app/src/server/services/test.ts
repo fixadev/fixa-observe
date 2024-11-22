@@ -3,13 +3,14 @@ import { db } from "../db";
 import { CallStatus, type PrismaClient } from "@prisma/client";
 import { initiateVapiCall } from "../helpers/vapiHelpers";
 import { type TestAgent } from "prisma/generated/zod";
+import { type TestWithIncludes } from "~/lib/types";
 
 const agentServiceInstance = new AgentService(db);
 
 export class TestService {
   constructor(private db: PrismaClient) {}
 
-  async get(id: string) {
+  async get(id: string): Promise<TestWithIncludes | null> {
     return await db.test.findUnique({
       where: {
         id,
@@ -34,6 +35,7 @@ export class TestService {
                 eval: true,
               },
             },
+            latencyBlocks: true,
           },
         },
       },
