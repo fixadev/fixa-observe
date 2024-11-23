@@ -16,15 +16,19 @@ const transcribePastCalls = async () => {
 
     let count = 0;
     for (const callRecording of callRecordings) {
-      console.log(`Transcribing call ${callRecording.id}`);
-      await transcribeAndSaveCall(
-        callRecording.id,
-        callRecording.audioUrl,
-        callRecording.createdAt,
-      );
-      console.log(`Transcribed call ${callRecording.id}`);
-      console.log(`${count}/${callRecordings.length}`);
-      count++;
+      try {
+        console.log(`Transcribing call ${callRecording.id}`);
+        await transcribeAndSaveCall(
+          callRecording.id,
+          callRecording.audioUrl,
+          callRecording.createdAt,
+        );
+        console.log(`Transcribed call ${callRecording.id}`);
+        console.log(`${count}/${callRecordings.length}`);
+        count++;
+      } catch (error) {
+        console.error(error);
+      }
     }
     console.log(`Transcribed ${count} calls`);
   } catch (error) {
