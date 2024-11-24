@@ -24,7 +24,7 @@ import {
 import { useEffect, useState } from "react";
 import { DataTablePagination } from "../../DataTablePagination";
 import { cn } from "~/lib/utils";
-import { CallWithIncludes } from "~/lib/types";
+import { type CallWithIncludes } from "~/lib/types";
 import AudioPlayer from "../../dashboard/AudioPlayer";
 
 interface DataTableProps<TData, TValue> {

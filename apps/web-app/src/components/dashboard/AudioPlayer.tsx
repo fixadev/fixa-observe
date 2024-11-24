@@ -9,7 +9,7 @@ import {
   forwardRef,
   useImperativeHandle,
 } from "react";
-import { AudioVisualizer } from "react-audio-visualize";
+// import { AudioVisualizer } from "react-audio-visualize";
 import { Button } from "~/components/ui/button";
 import {
   Select,
@@ -28,6 +28,13 @@ import {
 import { debounce } from "lodash";
 import useSWR from "swr";
 import { useAudio } from "~/components/hooks/useAudio";
+import dynamic from "next/dynamic";
+
+// Dynamically import AudioVisualizer with no SSR
+const AudioVisualizer = dynamic(
+  () => import("react-audio-visualize").then((mod) => mod.AudioVisualizer),
+  { ssr: false },
+);
 
 export type AudioPlayerRef = {
   setActiveEvalResult: (evalResult: EvalResultWithIncludes | null) => void;

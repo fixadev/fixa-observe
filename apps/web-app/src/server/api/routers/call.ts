@@ -29,10 +29,10 @@ export const callRouter = createTRPCRouter({
       return await callService.getCalls(input);
     }),
 
-  getLatencyPercentiles: protectedProcedure
+  getLatencyInterruptionPercentiles: protectedProcedure
     .input(z.object({ lookbackPeriod: z.number() })) // in milliseconds
     .query(async ({ input, ctx }) => {
-      return await callService.getLatencyPercentiles({
+      return await callService.getLatencyInterruptionPercentiles({
         ownerId: "11x",
         lookbackPeriod: input.lookbackPeriod,
       });

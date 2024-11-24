@@ -76,15 +76,24 @@ export const callService = {
     });
   },
 
-  getLatencyPercentiles: async ({
+  getLatencyInterruptionPercentiles: async ({
     ownerId,
     lookbackPeriod,
   }: {
     ownerId: string;
     lookbackPeriod: number;
-  }): Promise<{ hour: string; p50: number; p90: number; p95: number }[]> => {
+  }): Promise<{
+    latency: {
+      byHour: { hour: string; p50: number; p90: number; p95: number }[];
+      average: { p50: number; p90: number; p95: number };
+    };
+    interruptions: {
+      byHour: { hour: string; p50: number; p90: number; p95: number }[];
+      average: { p50: number; p90: number; p95: number };
+    };
+  }> => {
     const calls = await callService.getCalls({
-      ownerId: "11x",
+      ownerId,
       lookbackPeriod,
     });
 
@@ -105,15 +114,55 @@ export const callService = {
     console.log("CALLS BY HOUR", callsByHour);
 
     // Calculate percentiles for each hour
-    return Object.entries(callsByHour).map(([hour, hourCalls]) => {
-      const durations = hourCalls.flatMap((call) =>
+    const latencyByHour: {
+      hour: string;
+      p50: number;
+      p90: number;
+      p95: number;
+    }[] = [];
+    const interruptionsByHour: {
+      hour: string;
+      p50: number;
+      p90: number;
+      p95: number;
+    }[] = [];
+    Object.entries(callsByHour).forEach(([hour, hourCalls]) => {
+      const latencyDurations = hourCalls.flatMap((call) =>
         call.latencyBlocks.map((block) => block.duration),
       );
+      const interruptionDurations = hourCalls.flatMap((call) =>
+        call.interruptions.map((interruption) => interruption.duration),
+      );
 
-      return {
+      latencyByHour.push({
         hour,
-        ...calculateLatencyPercentiles(durations),
-      };
+        ...calculateLatencyPercentiles(latencyDurations),
+      });
+      interruptionsByHour.push({
+        hour,
+        ...calculateLatencyPercentiles(interruptionDurations),
+      });
     });
+
+    const average = {
+      latency: calculateLatencyPercentiles(
+        calls.flatMap((call) =>
+          call.latencyBlocks.map((block) => block.duration),
+        ),
+      ),
+      interruptions: calculateLatencyPercentiles(
+        calls.flatMap((call) =>
+          call.interruptions.map((interruption) => interruption.duration),
+        ),
+      ),
+    };
+
+    return {
+      latency: { byHour: latencyByHour, average: average.latency },
+      interruptions: {
+        byHour: interruptionsByHour,
+        average: average.interruptions,
+      },
+    };
   },
 };

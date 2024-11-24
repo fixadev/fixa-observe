@@ -35,7 +35,7 @@ export default function ObservePage() {
 
   const { play, pause, isPlaying } = useAudio();
 
-  // const { data: latencyPercentiles } = api._call.getLatencyPercentiles.useQuery(
+  // const { data: latencyPercentiles } = api._call.getLatencyInterruptionPercentiles.useQuery(
   //   {
   //     lookbackPeriod: lookbackPeriod.value,
   //   },
@@ -45,6 +45,7 @@ export default function ObservePage() {
   }, []);
   const calls = useMemo(() => {
     return TEST_OBSERVE_CALLS.slice(0, 2);
+    // return TEST_OBSERVE_CALLS;
   }, []);
   // const { data: calls } = api._call.getCalls.useQuery({
   //   ownerId: "11x",
