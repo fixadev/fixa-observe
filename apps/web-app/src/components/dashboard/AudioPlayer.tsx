@@ -60,7 +60,6 @@ const _AudioPlayer = forwardRef<
     play,
     pause,
     seek,
-    duration,
     currentTime,
     playbackSpeed,
     setPlaybackSpeed,
@@ -69,6 +68,7 @@ const _AudioPlayer = forwardRef<
   useEffect(() => {
     setAudioUrl(call.monoRecordingUrl ?? call.stereoRecordingUrl);
   }, [call.monoRecordingUrl, call.stereoRecordingUrl, setAudioUrl]);
+  const [duration, setDuration] = useState<number>(0);
 
   // Check if we need to stop playback due to reaching eval end
   useEffect(() => {
@@ -100,7 +100,7 @@ const _AudioPlayer = forwardRef<
       seek(seekTime);
       setActiveEvalResult(null);
     },
-    [duration, seek],
+    [seek, duration],
   );
 
   const handleMouseMove = useCallback(
@@ -181,6 +181,9 @@ const _AudioPlayer = forwardRef<
         ],
         interact: false,
       });
+      wavesurfer.on("ready", (_duration) => {
+        setDuration(_duration);
+      });
       return () => {
         wavesurfer.destroy();
       };
@@ -227,36 +230,33 @@ const _AudioPlayer = forwardRef<
           />
           {call.evalResults?.map((evalResult, index) => {
             if (!containerRef.current || !duration) return null;
-            const startPercentage = Math.min(
-              1,
-              Math.max(
-                0,
-                (evalResult.secondsFromStart - offsetFromStart) / duration,
-              ),
-            );
-            const endPercentage = Math.min(
-              1,
-              Math.max(
-                0,
-                (evalResult.secondsFromStart +
-                  evalResult.duration -
-                  offsetFromStart) /
-                  duration,
-              ),
-            );
-            const startPosition =
-              startPercentage * containerRef.current.offsetWidth;
-            const width =
-              (endPercentage - startPercentage) *
-              containerRef.current.offsetWidth;
+            const startPercentage =
+              Math.min(
+                1,
+                Math.max(
+                  0,
+                  (evalResult.secondsFromStart - offsetFromStart) / duration,
+                ),
+              ) * 100;
+            const endPercentage =
+              Math.min(
+                1,
+                Math.max(
+                  0,
+                  (evalResult.secondsFromStart +
+                    evalResult.duration -
+                    offsetFromStart) /
+                    duration,
+                ),
+              ) * 100;
 
             return (
               <div
                 key={index}
                 className="absolute top-0 h-full"
                 style={{
-                  left: `${startPosition}px`,
-                  width: `${width}px`,
+                  left: `${startPercentage}%`,
+                  width: `${endPercentage - startPercentage}%`,
                 }}
               >
                 <div
@@ -288,31 +288,28 @@ const _AudioPlayer = forwardRef<
           })}
           {call.latencyBlocks?.map((latencyBlock, index) => {
             if (!containerRef.current || !duration) return null;
-            const startPercentage = Math.min(
-              1,
-              Math.max(0, latencyBlock.secondsFromStart / duration),
-            );
-            const endPercentage = Math.min(
-              1,
-              Math.max(
-                0,
-                (latencyBlock.secondsFromStart + latencyBlock.duration) /
-                  duration,
-              ),
-            );
-            const startPosition =
-              startPercentage * containerRef.current.offsetWidth;
-            const width =
-              (endPercentage - startPercentage) *
-              containerRef.current.offsetWidth;
+            const startPercentage =
+              Math.min(
+                1,
+                Math.max(0, latencyBlock.secondsFromStart / duration),
+              ) * 100;
+            const endPercentage =
+              Math.min(
+                1,
+                Math.max(
+                  0,
+                  (latencyBlock.secondsFromStart + latencyBlock.duration) /
+                    duration,
+                ),
+              ) * 100;
 
             return (
               <div
                 key={index}
                 className="absolute top-0 h-full cursor-pointer"
                 style={{
-                  left: `${startPosition}px`,
-                  width: `${width}px`,
+                  left: `${startPercentage}%`,
+                  width: `${endPercentage - startPercentage}%`,
                   background:
                     hoveredEvalResult === latencyBlock.id
                       ? getLatencyBlockColor(latencyBlock, 0.5)
@@ -337,23 +334,20 @@ const _AudioPlayer = forwardRef<
           })}
           {call.interruptions?.map((interruption, index) => {
             if (!containerRef.current || !duration) return null;
-            const startPercentage = Math.min(
-              1,
-              Math.max(0, interruption.secondsFromStart / duration),
-            );
-            const endPercentage = Math.min(
-              1,
-              Math.max(
-                0,
-                (interruption.secondsFromStart + interruption.duration) /
-                  duration,
-              ),
-            );
-            const startPosition =
-              startPercentage * containerRef.current.offsetWidth;
-            const width =
-              (endPercentage - startPercentage) *
-              containerRef.current.offsetWidth;
+            const startPercentage =
+              Math.min(
+                1,
+                Math.max(0, interruption.secondsFromStart / duration),
+              ) * 100;
+            const endPercentage =
+              Math.min(
+                1,
+                Math.max(
+                  0,
+                  (interruption.secondsFromStart + interruption.duration) /
+                    duration,
+                ),
+              ) * 100;
 
             return (
               <div
@@ -362,8 +356,8 @@ const _AudioPlayer = forwardRef<
                 style={{
                   top: "50%",
                   height: "50%",
-                  left: `${startPosition}px`,
-                  width: `${width}px`,
+                  left: `${startPercentage}%`,
+                  width: `${endPercentage - startPercentage}%`,
                   background:
                     hoveredEvalResult === interruption.id
                       ? getInterruptionColor(0.5)
