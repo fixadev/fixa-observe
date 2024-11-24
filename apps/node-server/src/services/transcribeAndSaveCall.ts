@@ -7,6 +7,7 @@ import { computeLatencyBlocks } from "../utils/utils";
 export const transcribeAndSaveCall = async (
   callId: string,
   audioUrl: string,
+  createdAt: Date,
 ) => {
   try {
     interface TranscribeResponse {
@@ -39,7 +40,7 @@ export const transcribeAndSaveCall = async (
         id: uuidv4(),
         ownerId: "11x",
         customerCallId: callId,
-        startedAt: new Date().toISOString(),
+        startedAt: createdAt.toISOString(),
         status: CallStatus.completed,
         stereoRecordingUrl: audioUrl,
         messages: {

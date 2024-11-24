@@ -83,7 +83,11 @@ app.post("/upload-call", async (req: Request, res: Response) => {
     const { callId, location } = req.body;
     res.json({ success: true, muizz: "the man" });
     const result = await uploadCallToDB(callId, location);
-    const newCall = await transcribeAndSaveCall(callId, result.audioUrl);
+    const newCall = await transcribeAndSaveCall(
+      callId,
+      result.audioUrl,
+      result.createdAt,
+    );
   } catch (error) {
     console.error(error);
     res.status(500).json({ success: false, error: (error as Error).message });
