@@ -25,8 +25,7 @@ async def transcribe(request: TranscribeRequest):
     try: 
         user_audio_path, agent_audio_path = split_channels(request.stereo_audio_url)
         transcriptions = transcribe_with_deepgram([user_audio_path, agent_audio_path])
-        transcript = create_transcript_from_deepgram(transcriptions[0], transcriptions[1])
-        return transcript
+        return create_transcript_from_deepgram(transcriptions[0], transcriptions[1])
         
     except Exception as e:
         logger.error(f"Deepgram transcription failed: {str(e)}")

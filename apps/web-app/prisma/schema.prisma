@@ -248,4 +248,5 @@ model Interruption {
   duration         Float
   call             Call   @relation(fields: [callId], references: [id], onDelete: Cascade)
   callId           String
+  text             String
 }
