@@ -21,7 +21,6 @@ export type EvalResultWithIncludes = Prisma.EvalResultGetPayload<{
 export type CallWithIncludes = Prisma.CallGetPayload<{
   include: {
     messages: true;
-    latencyBlocks: true;
     scenario: {
       include: {
         evals: true;
@@ -33,6 +32,8 @@ export type CallWithIncludes = Prisma.CallGetPayload<{
         eval: true;
       };
     };
+    latencyBlocks: true;
+    interruptions: true;
   };
 }>;
 
@@ -53,6 +54,7 @@ export type TestWithIncludes = Prisma.TestGetPayload<{
           };
         };
         latencyBlocks: true;
+        interruptions: true;
       };
     };
   };

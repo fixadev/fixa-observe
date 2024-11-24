@@ -107,9 +107,9 @@ model Call {
 
   messages      Message[]
   latencyBlocks LatencyBlock[]
+  interruptions Interruption[]
 
-  errors       CallError[]
-  Interruption Interruption[]
+  errors CallError[]
 }
 
 model Message {

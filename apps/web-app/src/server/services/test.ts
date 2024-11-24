@@ -36,6 +36,7 @@ export class TestService {
               },
             },
             latencyBlocks: true,
+            interruptions: true,
           },
         },
       },

@@ -8,7 +8,6 @@ export const callService = {
       where: { id },
       include: {
         messages: true,
-        latencyBlocks: true,
         scenario: {
           include: {
             evals: true,
@@ -20,6 +19,8 @@ export const callService = {
             eval: true,
           },
         },
+        latencyBlocks: true,
+        interruptions: true,
       },
     });
   },
@@ -54,7 +55,6 @@ export const callService = {
       },
       include: {
         messages: true,
-        latencyBlocks: true,
         scenario: {
           include: {
             evals: true,
@@ -66,6 +66,8 @@ export const callService = {
             eval: true,
           },
         },
+        latencyBlocks: true,
+        interruptions: true,
       },
       orderBy: {
         startedAt: "desc",

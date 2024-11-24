@@ -620,6 +620,26 @@ export const TEST_CALLS: CallWithIncludes[] = [
       callId: "e12e3552-df06-4254-a725-00d9c80f48a3",
     },
   ],
+  interruptions: [
+    {
+      id: "2aa676ab-ee93-445e-aac0-48d2ab891ab8",
+      secondsFromStart: 4.02,
+      duration: 2.140000000000001,
+      callId: "e12e3552-df06-4254-a725-00d9c80f48a3",
+    },
+    {
+      id: "9b9bf2e7-b88e-46c1-8a1c-4fee2c486622",
+      secondsFromStart: 8.26,
+      duration: 1.259999500000001,
+      callId: "e12e3552-df06-4254-a725-00d9c80f48a3",
+    },
+    {
+      id: "67b63e08-1fcd-439a-af85-e4975f9ae138",
+      secondsFromStart: 20.035,
+      duration: 2.149999999999999,
+      callId: "e12e3552-df06-4254-a725-00d9c80f48a3",
+    },
+  ],
   // errors:
   //   call.result !== "success"
   //     ? [
