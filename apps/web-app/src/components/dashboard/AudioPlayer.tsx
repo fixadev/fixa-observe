@@ -206,183 +206,187 @@ const _AudioPlayer = forwardRef<
         onMouseLeave={handleMouseLeave}
       >
         <div id={audioVisualizerId} className="size-full" />
-        <div
-          className="absolute right-0 top-0 h-full bg-primary/10"
-          style={{
-            width: `${
-              (containerRef.current?.offsetWidth ?? 0) - (playheadX ?? 0) - 2
-            }px`,
-          }}
-        />
-        {playheadHoverX !== null && (
+        <div className="absolute left-0 top-0 z-10 size-full">
           <div
-            className="absolute top-0 h-full w-[1px] bg-muted-foreground"
-            style={{ left: `${playheadHoverX}px` }}
+            className="absolute right-0 top-0 h-full bg-primary/10"
+            style={{
+              width: `${
+                (containerRef.current?.offsetWidth ?? 0) - (playheadX ?? 0) - 2
+              }px`,
+            }}
           />
-        )}
-        <div
-          className="absolute left-0 top-0 h-full w-0.5 bg-primary"
-          style={{ left: `${playheadX}px` }}
-        />
-        {call.evalResults?.map((evalResult, index) => {
-          if (!containerRef.current || !duration) return null;
-          const startPercentage = Math.min(
-            1,
-            Math.max(
-              0,
-              (evalResult.secondsFromStart - offsetFromStart) / duration,
-            ),
-          );
-          const endPercentage = Math.min(
-            1,
-            Math.max(
-              0,
-              (evalResult.secondsFromStart +
-                evalResult.duration -
-                offsetFromStart) /
-                duration,
-            ),
-          );
-          const startPosition =
-            startPercentage * containerRef.current.offsetWidth;
-          const width =
-            (endPercentage - startPercentage) *
-            containerRef.current.offsetWidth;
-
-          return (
+          {playheadHoverX !== null && (
             <div
-              key={index}
-              className="absolute top-0 h-full"
-              style={{
-                left: `${startPosition}px`,
-                width: `${width}px`,
-              }}
-            >
+              className="absolute top-0 h-full w-[1px] bg-muted-foreground"
+              style={{ left: `${playheadHoverX}px` }}
+            />
+          )}
+          <div
+            className="absolute left-0 top-0 h-full w-0.5 bg-primary"
+            style={{ left: `${playheadX}px` }}
+          />
+          {call.evalResults?.map((evalResult, index) => {
+            if (!containerRef.current || !duration) return null;
+            const startPercentage = Math.min(
+              1,
+              Math.max(
+                0,
+                (evalResult.secondsFromStart - offsetFromStart) / duration,
+              ),
+            );
+            const endPercentage = Math.min(
+              1,
+              Math.max(
+                0,
+                (evalResult.secondsFromStart +
+                  evalResult.duration -
+                  offsetFromStart) /
+                  duration,
+              ),
+            );
+            const startPosition =
+              startPercentage * containerRef.current.offsetWidth;
+            const width =
+              (endPercentage - startPercentage) *
+              containerRef.current.offsetWidth;
+
+            return (
               <div
-                className={cn(
-                  "size-full cursor-pointer border-l-2",
-                  evalResult.success
-                    ? "border-green-500 bg-green-500/20 hover:bg-green-500/50"
-                    : "border-red-500 bg-red-500/20 hover:bg-red-500/50",
-                  hoveredEvalResult === evalResult.id &&
-                    (evalResult.success ? "bg-green-500/50" : "bg-red-500/50"),
-                )}
-                onMouseEnter={() => onEvalResultHover?.(evalResult.id)}
-                onMouseLeave={() => onEvalResultHover?.(null)}
+                key={index}
+                className="absolute top-0 h-full"
+                style={{
+                  left: `${startPosition}px`,
+                  width: `${width}px`,
+                }}
+              >
+                <div
+                  className={cn(
+                    "size-full cursor-pointer border-l-2",
+                    evalResult.success
+                      ? "border-green-500 bg-green-500/20 hover:bg-green-500/50"
+                      : "border-red-500 bg-red-500/20 hover:bg-red-500/50",
+                    hoveredEvalResult === evalResult.id &&
+                      (evalResult.success
+                        ? "bg-green-500/50"
+                        : "bg-red-500/50"),
+                  )}
+                  onMouseEnter={() => onEvalResultHover?.(evalResult.id)}
+                  onMouseLeave={() => onEvalResultHover?.(null)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleEvalResultClick(evalResult);
+                  }}
+                  onMouseDown={(e) => {
+                    e.stopPropagation();
+                  }}
+                  onMouseUp={(e) => {
+                    e.stopPropagation();
+                  }}
+                />
+              </div>
+            );
+          })}
+          {call.latencyBlocks?.map((latencyBlock, index) => {
+            if (!containerRef.current || !duration) return null;
+            const startPercentage = Math.min(
+              1,
+              Math.max(0, latencyBlock.secondsFromStart / duration),
+            );
+            const endPercentage = Math.min(
+              1,
+              Math.max(
+                0,
+                (latencyBlock.secondsFromStart + latencyBlock.duration) /
+                  duration,
+              ),
+            );
+            const startPosition =
+              startPercentage * containerRef.current.offsetWidth;
+            const width =
+              (endPercentage - startPercentage) *
+              containerRef.current.offsetWidth;
+
+            return (
+              <div
+                key={index}
+                className="absolute top-0 h-full cursor-pointer"
+                style={{
+                  left: `${startPosition}px`,
+                  width: `${width}px`,
+                  background:
+                    hoveredEvalResult === latencyBlock.id
+                      ? getLatencyBlockColor(latencyBlock, 0.5)
+                      : getLatencyBlockColor(latencyBlock),
+                  border: `1px solid ${getLatencyBlockColor(latencyBlock, 1)}`,
+                }}
                 onClick={(e) => {
                   e.stopPropagation();
-                  handleEvalResultClick(evalResult);
+                  seek(latencyBlock.secondsFromStart);
+                  play();
                 }}
-                onMouseDown={(e) => {
-                  e.stopPropagation();
+                onMouseEnter={() => {
+                  setHoveredEvalResult(latencyBlock.id);
+                  onEvalResultHover?.(latencyBlock.id);
                 }}
-                onMouseUp={(e) => {
-                  e.stopPropagation();
+                onMouseLeave={() => {
+                  setHoveredEvalResult(null);
+                  onEvalResultHover?.(null);
                 }}
               />
-            </div>
-          );
-        })}
-        {call.latencyBlocks?.map((latencyBlock, index) => {
-          if (!containerRef.current || !duration) return null;
-          const startPercentage = Math.min(
-            1,
-            Math.max(0, latencyBlock.secondsFromStart / duration),
-          );
-          const endPercentage = Math.min(
-            1,
-            Math.max(
-              0,
-              (latencyBlock.secondsFromStart + latencyBlock.duration) /
-                duration,
-            ),
-          );
-          const startPosition =
-            startPercentage * containerRef.current.offsetWidth;
-          const width =
-            (endPercentage - startPercentage) *
-            containerRef.current.offsetWidth;
+            );
+          })}
+          {call.interruptions?.map((interruption, index) => {
+            if (!containerRef.current || !duration) return null;
+            const startPercentage = Math.min(
+              1,
+              Math.max(0, interruption.secondsFromStart / duration),
+            );
+            const endPercentage = Math.min(
+              1,
+              Math.max(
+                0,
+                (interruption.secondsFromStart + interruption.duration) /
+                  duration,
+              ),
+            );
+            const startPosition =
+              startPercentage * containerRef.current.offsetWidth;
+            const width =
+              (endPercentage - startPercentage) *
+              containerRef.current.offsetWidth;
 
-          return (
-            <div
-              key={index}
-              className="absolute top-0 h-full cursor-pointer"
-              style={{
-                left: `${startPosition}px`,
-                width: `${width}px`,
-                background:
-                  hoveredEvalResult === latencyBlock.id
-                    ? getLatencyBlockColor(latencyBlock, 0.5)
-                    : getLatencyBlockColor(latencyBlock),
-                border: `1px solid ${getLatencyBlockColor(latencyBlock, 1)}`,
-              }}
-              onClick={(e) => {
-                e.stopPropagation();
-                seek(latencyBlock.secondsFromStart);
-                play();
-              }}
-              onMouseEnter={() => {
-                setHoveredEvalResult(latencyBlock.id);
-                onEvalResultHover?.(latencyBlock.id);
-              }}
-              onMouseLeave={() => {
-                setHoveredEvalResult(null);
-                onEvalResultHover?.(null);
-              }}
-            />
-          );
-        })}
-        {call.interruptions?.map((interruption, index) => {
-          if (!containerRef.current || !duration) return null;
-          const startPercentage = Math.min(
-            1,
-            Math.max(0, interruption.secondsFromStart / duration),
-          );
-          const endPercentage = Math.min(
-            1,
-            Math.max(
-              0,
-              (interruption.secondsFromStart + interruption.duration) /
-                duration,
-            ),
-          );
-          const startPosition =
-            startPercentage * containerRef.current.offsetWidth;
-          const width =
-            (endPercentage - startPercentage) *
-            containerRef.current.offsetWidth;
-
-          return (
-            <div
-              key={index}
-              className="absolute top-0 h-full cursor-pointer"
-              style={{
-                top: "50%",
-                height: "50%",
-                left: `${startPosition}px`,
-                width: `${width}px`,
-                background:
-                  hoveredEvalResult === interruption.id
-                    ? getInterruptionColor(0.5)
-                    : getInterruptionColor(),
-                border: `1px solid ${getInterruptionColor(1)}`,
-              }}
-              onClick={(e) => {
-                e.stopPropagation();
-                seek(interruption.secondsFromStart);
-                play();
-              }}
-              onMouseEnter={() => {
-                setHoveredEvalResult(interruption.id);
-                onEvalResultHover?.(interruption.id);
-              }}
-              onMouseLeave={() => {
-                setHoveredEvalResult(null);
-                onEvalResultHover?.(null);
-              }}
-            />
-          );
-        })}
+            return (
+              <div
+                key={index}
+                className="absolute top-0 h-full cursor-pointer"
+                style={{
+                  top: "50%",
+                  height: "50%",
+                  left: `${startPosition}px`,
+                  width: `${width}px`,
+                  background:
+                    hoveredEvalResult === interruption.id
+                      ? getInterruptionColor(0.5)
+                      : getInterruptionColor(),
+                  border: `1px solid ${getInterruptionColor(1)}`,
+                }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  seek(interruption.secondsFromStart);
+                  play();
+                }}
+                onMouseEnter={() => {
+                  setHoveredEvalResult(interruption.id);
+                  onEvalResultHover?.(interruption.id);
+                }}
+                onMouseLeave={() => {
+                  setHoveredEvalResult(null);
+                  onEvalResultHover?.(null);
+                }}
+              />
+            );
+          })}
+        </div>
       </div>
       <div className="flex items-center gap-4">
         <Button
