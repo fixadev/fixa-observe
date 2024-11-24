@@ -14,6 +14,7 @@ import { Switch } from "../ui/switch";
 import { cn } from "~/lib/utils";
 import { Input } from "../ui/input";
 import { Slider } from "../ui/slider";
+import { CalendarIcon, UserIcon } from "@heroicons/react/24/solid";
 
 export type Filter = {
   lookbackPeriod: LookbackPeriod;
@@ -79,7 +80,8 @@ export default function Filters({
             });
           }}
         >
-          <SelectTrigger className="bg-background">
+          <SelectTrigger className="gap-2 bg-background">
+            <CalendarIcon className="size-4 shrink-0" />
             <SelectValue placeholder="time range" />
           </SelectTrigger>
           <SelectContent>
@@ -91,7 +93,8 @@ export default function Filters({
           </SelectContent>
         </Select>
         <Select>
-          <SelectTrigger className="bg-background">
+          <SelectTrigger className="gap-2 bg-background">
+            <UserIcon className="size-4 shrink-0" />
             <SelectValue placeholder="agent" />
           </SelectTrigger>
           <SelectContent>
@@ -124,7 +127,7 @@ export default function Filters({
           }}
         />
         <SwitchWithValue
-          prefix="interruption &gt;= "
+          prefix="interruptions &gt;= "
           suffix="ms"
           value={filter.interruptionThreshold.value}
           setValue={(value) => {
@@ -190,7 +193,7 @@ function SwitchWithValue({
       </PopoverTrigger>
       <PopoverContent className="flex flex-col gap-2 text-sm">
         <div className="flex items-center gap-2">
-          <div className="shrink-0">latency &gt;=</div>
+          <div className="shrink-0">{prefix}</div>
           <Input
             type="number"
             value={_value}
@@ -198,7 +201,7 @@ function SwitchWithValue({
               _setValue(parseInt(e.target.value));
             }}
           />
-          <div>ms</div>
+          <div>{suffix}</div>
         </div>
         <Slider
           max={3000}
