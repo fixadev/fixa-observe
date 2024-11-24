@@ -136,8 +136,10 @@ export const columns: ColumnDef<CallWithIncludes>[] = [
 const ActionCell = ({ call }: { call: CallWithIncludes }) => {
   const { setSelectedCallId } = useObserveState();
   return (
-    <Button variant="ghost" onClick={() => setSelectedCallId(call.id)}>
-      view details
-    </Button>
+    <div className="flex w-full justify-end">
+      <Button variant="ghost" onClick={() => setSelectedCallId(call.id)}>
+        view details
+      </Button>
+    </div>
   );
 };
