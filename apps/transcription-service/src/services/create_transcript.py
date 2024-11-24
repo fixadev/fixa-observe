@@ -43,8 +43,8 @@ def create_transcript_from_deepgram(user_words, agent_words):
         current_text.append(word['punctuated_word'])
         current_end = word['end']
        
-        # Check for gap with previous word
-        if i < len(agent_words) - 1 and (agent_words[i+1]['start'] - word['end']) > 1:
+        # Check for gap with previous word (new utterance)
+        if i < len(agent_words) - 1 and (agent_words[i+1]['start'] - word['end']) > 1 and agent_words[i+1]['punctuated_word'][0].isupper():
             print(f"gap found for {word['punctuated_word']}")
             print(f"current text is {current_text}")
             # Create chunk for previous text if exists
