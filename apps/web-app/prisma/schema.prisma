@@ -108,7 +108,8 @@ model Call {
   messages      Message[]
   latencyBlocks LatencyBlock[]
 
-  errors CallError[]
+  errors       CallError[]
+  Interruption Interruption[]
 }
 
 model Message {
@@ -234,6 +235,14 @@ enum EvalResultType {
 }
 
 model LatencyBlock {
+  id               String @id @default(uuid())
+  secondsFromStart Float
+  duration         Float
+  call             Call   @relation(fields: [callId], references: [id], onDelete: Cascade)
+  callId           String
+}
+
+model Interruption {
   id               String @id @default(uuid())
   secondsFromStart Float
   duration         Float

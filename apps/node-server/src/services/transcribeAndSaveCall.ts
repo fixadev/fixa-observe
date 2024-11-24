@@ -3,6 +3,7 @@ import { db } from "../db";
 import { v4 as uuidv4 } from "uuid";
 import { CallStatus, Message, Role } from "@prisma/client";
 import { computeLatencyBlocks } from "../utils/utils";
+import { env } from "../env";
 
 export const transcribeAndSaveCall = async (
   callId: string,
@@ -20,7 +21,7 @@ export const transcribeAndSaveCall = async (
     }
 
     const response = await axios.post<TranscribeResponse>(
-      "https://api.pixa.dev/transcribe-deepgram",
+      `${env.AUDIO_SERVICE_URL}/transcribe-deepgram`,
       {
         stereo_audio_url: audioUrl,
       },
