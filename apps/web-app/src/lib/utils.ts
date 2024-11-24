@@ -97,6 +97,8 @@ export function getLatencyBlockColor(
   latencyBlock: LatencyBlock,
   opacity = 0.2,
 ) {
+  return `rgba(230, 118, 14, ${opacity})`;
+  // return `rgba(255, 0, 0, ${opacity})`;
   // Convert duration to a percentage (assuming 3 seconds is 100% red)
   const percentage = Math.min(latencyBlock.duration / 3, 1);
 
@@ -105,6 +107,10 @@ export function getLatencyBlockColor(
   const green = Math.round((1 - percentage) * 255);
 
   return `rgba(${red}, ${green}, 0, ${opacity})`;
+}
+
+export function getInterruptionColor(opacity = 0.2) {
+  return `rgba(255, 0, 0, ${opacity})`;
 }
 
 export function calculateLatencyPercentiles(durations: number[]) {
