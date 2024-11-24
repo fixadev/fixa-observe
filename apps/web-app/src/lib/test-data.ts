@@ -157,7 +157,7 @@ export const TEST_SCENARIOS: AgentWithIncludes["scenarios"] = [
 
 export const TEST_CALLS: CallWithIncludes[] = [
   {
-    id: crypto.randomUUID(),
+    id: "1",
     status: "completed" as const,
     result: "success" as const,
     failureReason: null,
@@ -167,7 +167,7 @@ export const TEST_CALLS: CallWithIncludes[] = [
     customerCallId: "call.2mLTbvbnQZ785c96meHH1p",
   },
   {
-    id: crypto.randomUUID(),
+    id: "2",
     status: "completed" as const,
     result: "failure" as const,
     failureReason: null,
@@ -177,7 +177,7 @@ export const TEST_CALLS: CallWithIncludes[] = [
     customerCallId: "call.2mLTbvbnQZ785c96meHH1p",
   },
   {
-    id: crypto.randomUUID(),
+    id: "3",
     status: "completed" as const,
     result: "success" as const,
     failureReason: "Technical difficulties during call",
@@ -187,7 +187,7 @@ export const TEST_CALLS: CallWithIncludes[] = [
     customerCallId: "call.2mLTbvbnQZ785c96meHH1p",
   },
   {
-    id: crypto.randomUUID(),
+    id: "4",
     status: "completed" as const,
     result: "success" as const,
     failureReason: null,
@@ -197,7 +197,7 @@ export const TEST_CALLS: CallWithIncludes[] = [
     customerCallId: "call.2mLTbvbnQZ785c96meHH1p",
   },
   {
-    id: crypto.randomUUID(),
+    id: "5",
     status: "completed" as const,
     result: "failure" as const,
     failureReason: "Call disconnected",
@@ -207,7 +207,7 @@ export const TEST_CALLS: CallWithIncludes[] = [
     customerCallId: "call.2mLTbvbnQZ785c96meHH1p",
   },
   {
-    id: crypto.randomUUID(),
+    id: "6",
     status: "completed" as const,
     result: "success" as const,
     failureReason: null,
@@ -217,7 +217,7 @@ export const TEST_CALLS: CallWithIncludes[] = [
     customerCallId: "call.2mLTbvbnQZ785c96meHH1p",
   },
   {
-    id: crypto.randomUUID(),
+    id: "7",
     status: "completed" as const,
     result: "failure" as const,
     failureReason: "System error during payment",
@@ -227,7 +227,7 @@ export const TEST_CALLS: CallWithIncludes[] = [
     customerCallId: "call.2mLTbvbnQZ785c96meHH1p",
   },
   {
-    id: crypto.randomUUID(),
+    id: "8",
     status: "completed" as const,
     result: "success" as const,
     failureReason: null,
@@ -237,7 +237,7 @@ export const TEST_CALLS: CallWithIncludes[] = [
     customerCallId: "call.2mLTbvbnQZ785c96meHH1p",
   },
   {
-    id: crypto.randomUUID(),
+    id: "9",
     status: "completed" as const,
     result: "failure" as const,
     failureReason: "Audio quality issues",
@@ -247,7 +247,7 @@ export const TEST_CALLS: CallWithIncludes[] = [
     customerCallId: "call.2mLTbvbnQZ785c96meHH1p",
   },
   {
-    id: crypto.randomUUID(),
+    id: "10",
     status: "completed" as const,
     result: "success" as const,
     failureReason: null,
