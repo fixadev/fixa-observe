@@ -140,7 +140,8 @@ export function DataTable<TData, TValue>({
                     key={row.id}
                     data-state={row.getIsSelected() && "selected"}
                     onClick={() => onRowClick?.(row.original)}
-                    className={cn("border-b-0", onRowClick && "cursor-pointer")}
+                    // className={cn("border-b-0", onRowClick && "cursor-pointer")}
+                    className={cn(onRowClick && "cursor-pointer")}
                   >
                     {row.getVisibleCells().map((cell) => (
                       <TableCell key={cell.id}>
@@ -151,14 +152,14 @@ export function DataTable<TData, TValue>({
                       </TableCell>
                     ))}
                   </TableRow>
-                  <TableRow>
+                  {/* <TableRow>
                     <TableCell colSpan={columns.length}>
                       <AudioPlayer
                         call={row.original as CallWithIncludes}
                         small
                       />
                     </TableCell>
-                  </TableRow>
+                  </TableRow> */}
                 </>
               ))
             ) : (

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import CallDetails from "~/components/dashboard/CallDetails";
 import { useAudio } from "~/components/hooks/useAudio";
 import { useObserveState } from "~/components/hooks/useObserveState";
@@ -56,8 +56,27 @@ export default function ObservePage() {
     [calls, selectedCallId],
   );
 
+  const playPauseAudio = useCallback(() => {
+    console.log("play pause!!");
+  }, []);
+
   return (
-    <div className="relative h-full bg-muted/30">
+    <div
+      className="relative h-full bg-muted/30"
+      autoFocus
+      tabIndex={0}
+      onKeyDown={(e) => {
+        if (e.key === " ") {
+          e.preventDefault();
+          playPauseAudio();
+          // if (isPlaying) {
+          //   pause();
+          // } else {
+          //   play();
+          // }
+        }
+      }}
+    >
       <Filters filter={filter} setFilter={setFilter} />
       <div className="flex flex-col gap-4 p-4">
         <div className="flex w-full gap-4">
@@ -160,18 +179,6 @@ export default function ObservePage() {
               <div
                 className="h-[90vh] w-[90vw] overflow-hidden overflow-y-auto rounded-md focus:outline-none"
                 ref={containerRef}
-                autoFocus
-                tabIndex={0}
-                onKeyDown={(e) => {
-                  if (e.key === " ") {
-                    e.preventDefault();
-                    if (isPlaying) {
-                      pause();
-                    } else {
-                      play();
-                    }
-                  }
-                }}
               >
                 <CallDetails
                   call={selectedCall}

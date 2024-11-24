@@ -90,7 +90,7 @@ export const columns: ColumnDef<CallWithIncludes>[] = [
         call.latencyBlocks.map((block) => block.duration),
       );
       // const numInterruptions = Math.floor(Math.random() * 7);
-      const numInterruptions = 6;
+      const numInterruptions = call.interruptions.length;
       return (
         <div className="flex w-full justify-between gap-2 px-4">
           <div className="w-12 text-center text-xs">
