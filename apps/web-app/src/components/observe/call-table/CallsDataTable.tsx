@@ -22,8 +22,10 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useEffect, useState } from "react";
-import { DataTablePagination } from "./DataTablePagination";
+import { DataTablePagination } from "../../DataTablePagination";
 import { cn } from "~/lib/utils";
+import { CallWithIncludes } from "~/lib/types";
+import AudioPlayer from "../../dashboard/AudioPlayer";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -133,21 +135,31 @@ export function DataTable<TData, TValue>({
           <TableBody>
             {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
-                <TableRow
-                  key={row.id}
-                  data-state={row.getIsSelected() && "selected"}
-                  onClick={() => onRowClick?.(row.original)}
-                  className={cn(onRowClick && "cursor-pointer")}
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext(),
-                      )}
+                <>
+                  <TableRow
+                    key={row.id}
+                    data-state={row.getIsSelected() && "selected"}
+                    onClick={() => onRowClick?.(row.original)}
+                    className={cn("border-b-0", onRowClick && "cursor-pointer")}
+                  >
+                    {row.getVisibleCells().map((cell) => (
+                      <TableCell key={cell.id}>
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext(),
+                        )}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                  <TableRow>
+                    <TableCell colSpan={columns.length}>
+                      <AudioPlayer
+                        call={row.original as CallWithIncludes}
+                        small
+                      />
                     </TableCell>
-                  ))}
-                </TableRow>
+                  </TableRow>
+                </>
               ))
             ) : (
               <TableRow>

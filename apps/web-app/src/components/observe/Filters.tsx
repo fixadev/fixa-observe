@@ -67,7 +67,7 @@ export default function Filters({
   }, [filter]);
 
   return (
-    <div className="sticky top-0 flex justify-between gap-2 bg-gray-200/70 p-4">
+    <div className="sticky top-0 flex justify-between gap-2 border-b bg-background p-4">
       <div className="flex gap-2">
         <Select
           value={filter.lookbackPeriod.value.toString()}
@@ -177,18 +177,22 @@ function SwitchWithValue({
   return (
     <Popover onOpenChange={() => setValue(_value)}>
       <PopoverTrigger asChild>
-        <Button
-          variant="outline"
-          className={cn("gap-2", !checked && "opacity-50")}
-        >
-          <Switch
-            onClick={(e) => e.stopPropagation()}
-            checked={checked}
-            onCheckedChange={onCheckedChange}
-          />
-          {prefix}
-          {isNaN(_value) ? 0 : _value}
-          {suffix}
+        <Button variant="outline" asChild>
+          <div
+            className={cn(
+              "flex cursor-pointer items-center gap-2",
+              !checked && "opacity-50",
+            )}
+          >
+            <Switch
+              onClick={(e) => e.stopPropagation()}
+              checked={checked}
+              onCheckedChange={onCheckedChange}
+            />
+            {prefix}
+            {isNaN(_value) ? 0 : _value}
+            {suffix}
+          </div>
         </Button>
       </PopoverTrigger>
       <PopoverContent className="flex flex-col gap-2 text-sm">

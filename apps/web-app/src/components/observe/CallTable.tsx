@@ -1,4 +1,4 @@
-import { DataTable } from "../DataTable";
+import { DataTable } from "./call-table/CallsDataTable";
 import { columns } from "./call-table/columns";
 import { type CallWithIncludes } from "~/lib/types";
 

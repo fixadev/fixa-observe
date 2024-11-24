@@ -26,14 +26,14 @@ export const columns: ColumnDef<CallWithIncludes>[] = [
     },
     size: 50,
   },
-  {
-    header: "audio",
-    cell: ({ row }) => {
-      const call = row.original;
-      return <AudioPlayer call={call} small />;
-    },
-    size: 300,
-  },
+  // {
+  //   header: "audio",
+  //   cell: ({ row }) => {
+  //     const call = row.original;
+  //     return <AudioPlayer call={call} small />;
+  //   },
+  //   size: 300,
+  // },
   {
     id: "latency",
     header: () => {
@@ -89,7 +89,8 @@ export const columns: ColumnDef<CallWithIncludes>[] = [
       const { p50, p90, p95 } = calculateLatencyPercentiles(
         call.latencyBlocks.map((block) => block.duration),
       );
-      const numInterruptions = Math.floor(Math.random() * 7);
+      // const numInterruptions = Math.floor(Math.random() * 7);
+      const numInterruptions = 6;
       return (
         <div className="flex w-full justify-between gap-2 px-4">
           <div className="w-12 text-center text-xs">
