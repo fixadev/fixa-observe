@@ -12,11 +12,16 @@ export const transcribeAndSaveCall = async (
 ) => {
   try {
     interface TranscribeResponse {
-      transcript: Array<{
+      segments: Array<{
         start: number;
         end: number;
         text: string;
         role: "user" | "agent";
+      }>;
+      interruptions: Array<{
+        secondsFromStart: number;
+        duration: number;
+        text: string;
       }>;
     }
 
@@ -26,14 +31,19 @@ export const transcribeAndSaveCall = async (
         stereo_audio_url: audioUrl,
       },
     );
-    const transcript = response.data.transcript;
 
-    const messages = transcript.map((message) => ({
-      role: message.role === "user" ? Role.user : Role.bot,
-      message: message.text,
-      secondsFromStart: message.start,
-      duration: message.end - message.start,
+    console.log("response.data");
+    console.log(response.data);
+
+    const { segments, interruptions } = response.data;
+
+    const messages = segments.map((segment) => ({
+      role: segment.role === "user" ? Role.user : Role.bot,
+      message: segment.text,
+      secondsFromStart: segment.start,
+      duration: segment.end - segment.start,
     }));
+
     const latencyBlocks = computeLatencyBlocks(messages);
 
     const newCall = await db.call.create({
@@ -49,6 +59,9 @@ export const transcribeAndSaveCall = async (
         },
         latencyBlocks: {
           create: latencyBlocks,
+        },
+        interruptions: {
+          create: interruptions,
         },
       },
     });
