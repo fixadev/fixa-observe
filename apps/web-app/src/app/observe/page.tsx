@@ -43,13 +43,13 @@ export default function ObservePage() {
   const latencyPercentiles = useMemo(() => {
     return [];
   }, []);
-  const calls = useMemo(() => {
-    return TEST_OBSERVE_CALLS.slice(0, 2);
-    // return TEST_OBSERVE_CALLS;
-  }, []);
-  // const { data: calls } = api._call.getCalls.useQuery({
-  //   ownerId: "11x",
-  // });
+  // const calls = useMemo(() => {
+  //   return TEST_OBSERVE_CALLS.slice(0, 2);
+  //   // return TEST_OBSERVE_CALLS;
+  // }, []);
+  const { data: calls } = api._call.getCalls.useQuery({
+    ownerId: "11x",
+  });
 
   const selectedCall = useMemo(
     () => calls?.find((call) => call.id === selectedCallId),
