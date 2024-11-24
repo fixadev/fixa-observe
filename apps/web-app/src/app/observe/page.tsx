@@ -3,6 +3,7 @@
 import { useMemo, useRef, useState } from "react";
 import CallDetails from "~/components/dashboard/CallDetails";
 import { useAudio } from "~/components/hooks/useAudio";
+import { useObserveState } from "~/components/hooks/useObserveState";
 import CallTable from "~/components/observe/CallTable";
 import Filters, {
   type Filter,
@@ -28,7 +29,7 @@ export default function ObservePage() {
     },
   });
 
-  const [selectedCallId, setSelectedCallId] = useState<string | null>(null);
+  const { selectedCallId, setSelectedCallId } = useObserveState();
 
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -61,7 +62,35 @@ export default function ObservePage() {
         <div className="flex w-full gap-4">
           <Card>
             <CardHeader>
-              <CardTitle>Latency</CardTitle>
+              <CardTitle className="mb-2">latency</CardTitle>
+              <div className="flex gap-4 border-l-2 border-primary pl-4">
+                <div className="flex flex-col gap-1">
+                  <div className="text-xs font-medium text-muted-foreground">
+                    average
+                  </div>
+                  <div className="text-sm">
+                    last {filter.lookbackPeriod.label}
+                  </div>
+                </div>
+                <div className="flex flex-col gap-1">
+                  <div className="text-xs font-medium text-muted-foreground">
+                    50%
+                  </div>
+                  <div className="text-sm">400ms</div>
+                </div>
+                <div className="flex flex-col gap-1">
+                  <div className="text-xs font-medium text-muted-foreground">
+                    90%
+                  </div>
+                  <div className="text-sm">1000ms</div>
+                </div>
+                <div className="flex flex-col gap-1">
+                  <div className="text-xs font-medium text-muted-foreground">
+                    95%
+                  </div>
+                  <div className="text-sm">1500ms</div>
+                </div>
+              </div>
             </CardHeader>
             <CardContent>
               <LatencyChart
@@ -72,7 +101,35 @@ export default function ObservePage() {
           </Card>
           <Card>
             <CardHeader>
-              <CardTitle>Latency</CardTitle>
+              <CardTitle className="mb-2">interruptions</CardTitle>
+              <div className="flex gap-4 border-l-2 border-primary pl-4">
+                <div className="flex flex-col gap-1">
+                  <div className="text-xs font-medium text-muted-foreground">
+                    average
+                  </div>
+                  <div className="text-sm">
+                    last {filter.lookbackPeriod.label}
+                  </div>
+                </div>
+                <div className="flex flex-col gap-1">
+                  <div className="text-xs font-medium text-muted-foreground">
+                    50%
+                  </div>
+                  <div className="text-sm">400ms</div>
+                </div>
+                <div className="flex flex-col gap-1">
+                  <div className="text-xs font-medium text-muted-foreground">
+                    90%
+                  </div>
+                  <div className="text-sm">1000ms</div>
+                </div>
+                <div className="flex flex-col gap-1">
+                  <div className="text-xs font-medium text-muted-foreground">
+                    95%
+                  </div>
+                  <div className="text-sm">1500ms</div>
+                </div>
+              </div>
             </CardHeader>
             <CardContent>
               <LatencyChart

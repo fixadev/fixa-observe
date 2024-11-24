@@ -1,20 +1,11 @@
 import { type ColumnDef } from "@tanstack/react-table";
 import { formatDistanceToNow } from "date-fns";
-import Image from "next/image";
 import { CopyButton } from "~/components/CopyButton";
 import AudioPlayer from "~/components/dashboard/AudioPlayer";
+import { useObserveState } from "~/components/hooks/useObserveState";
+import { Button } from "~/components/ui/button";
 import { type CallWithIncludes } from "~/lib/types";
 import { calculateLatencyPercentiles } from "~/lib/utils";
-
-export type CallWithLatency = {
-  id: string;
-  createdAt: Date;
-  callId: string;
-  name: string;
-  p50: number;
-  p95: number;
-  p99: number;
-};
 
 export const columns: ColumnDef<CallWithIncludes>[] = [
   {
@@ -117,7 +108,6 @@ export const columns: ColumnDef<CallWithIncludes>[] = [
     size: 50,
   },
   {
-    accessorKey: "createdAt",
     header: "created at",
     cell: ({ row }) => {
       const call = row.original;
@@ -132,4 +122,21 @@ export const columns: ColumnDef<CallWithIncludes>[] = [
     },
     size: 50,
   },
+  {
+    id: "actions",
+    cell: ({ row }) => {
+      const call = row.original;
+      return <ActionCell call={call} />;
+    },
+    size: 50,
+  },
 ];
+
+const ActionCell = ({ call }: { call: CallWithIncludes }) => {
+  const { setSelectedCallId } = useObserveState();
+  return (
+    <Button variant="ghost" onClick={() => setSelectedCallId(call.id)}>
+      view details
+    </Button>
+  );
+};
