@@ -98,6 +98,21 @@ def create_transcript_from_deepgram(user_words, agent_words):
                 'end': current_chunks[-1]['timestamp'][1]
             })
 
+        # Find latency blocks
+        latency_blocks = []
+        for i in range(len(segments)-1):
+            current_segment = segments[i]
+            next_segment = segments[i+1]
+        
+            if current_segment['role'] == 'user' and next_segment['role'] == 'agent':
+                latency_duration = next_segment['start'] - current_segment['end']
+                # Only add latency blocks with positive duration
+                if latency_duration > 0:
+                    latency_blocks.append({
+                        'secondsFromStart': current_segment['end'],
+                        'duration': latency_duration
+                    })
+       
         # Find interruptions
         interruptions = []
         for agent_segment in segments:
@@ -132,8 +147,16 @@ def create_transcript_from_deepgram(user_words, agent_words):
                     })
                     break  # Only count one interruption per agent segment
         
-        return {'segments': segments, 'interruptions': interruptions}
+        return {
+            'segments': segments, 
+            'interruptions': interruptions,
+            'latencyBlocks': latency_blocks
+        }
 
     except Exception as e:
         print(e)
-        return {'segments': [], 'interruptions': []}
+        return {
+            'segments': [], 
+            'interruptions': [],
+            'latencyBlocks': []
+        }
