@@ -3,6 +3,7 @@
 import { useMemo, useRef, useState } from "react";
 import CallDetails from "~/components/dashboard/CallDetails";
 import { useAudio } from "~/components/hooks/useAudio";
+import { useObserveState } from "~/components/hooks/useObserveState";
 import CallTable from "~/components/observe/CallTable";
 import Filters, {
   type Filter,
@@ -28,7 +29,7 @@ export default function ObservePage() {
     },
   });
 
-  const [selectedCallId, setSelectedCallId] = useState<string | null>(null);
+  const { selectedCallId, setSelectedCallId } = useObserveState();
 
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -62,7 +63,7 @@ export default function ObservePage() {
           <Card>
             <CardHeader>
               <CardTitle className="mb-2">latency</CardTitle>
-              <div className="flex gap-4 border-l-4 border-primary pl-2">
+              <div className="flex gap-4 border-l-2 border-primary pl-4">
                 <div className="flex flex-col gap-1">
                   <div className="text-xs font-medium text-muted-foreground">
                     average
@@ -101,7 +102,7 @@ export default function ObservePage() {
           <Card>
             <CardHeader>
               <CardTitle className="mb-2">interruptions</CardTitle>
-              <div className="flex gap-4 border-l-4 border-primary pl-2">
+              <div className="flex gap-4 border-l-2 border-primary pl-4">
                 <div className="flex flex-col gap-1">
                   <div className="text-xs font-medium text-muted-foreground">
                     average
