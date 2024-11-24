@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import { Area, AreaChart, CartesianGrid, YAxis } from "recharts";
 import { XAxis } from "recharts";
 import {
@@ -73,9 +74,66 @@ const chartConfig = {
 
 export default function LatencyChart({
   data,
+  lookbackPeriod,
 }: {
   data: { hour: string; p50: number; p90: number; p95: number }[];
+  lookbackPeriod: number;
 }) {
+  // const formattedData = useMemo(() => {
+  //   // Generate array of hours from now to lookback period
+  //   const now = new Date();
+  //   const hours = Array.from(
+  //     { length: Math.ceil(lookbackPeriod / (60 * 60 * 1000)) },
+  //     (_, i) => {
+  //       const date = new Date(now);
+  //       date.setHours(date.getHours() - i);
+  //       return date.toISOString().slice(0, 13);
+  //     },
+  //   );
+
+  //   // Create a map of existing data points
+  //   const dataMap = new Map(
+  //     data.map((item) => [new Date(item.hour).getTime(), item]),
+  //   );
+
+  //   // Merge existing data with empty hours
+  //   return hours
+  //     .map((hour) => {
+  //       const timestamp = new Date(hour + ":00:00Z").getTime();
+  //       return (
+  //         dataMap.get(timestamp) ?? {
+  //           hour,
+  //           p50: 0,
+  //           p90: 0,
+  //           p95: 0,
+  //         }
+  //       );
+  //     })
+  //     .map((item) => ({
+  //       ...item,
+  //     }));
+  // }, [data, lookbackPeriod]);
+
+  // const formattedData = useMemo(() => {
+  //   const ret = [...data];
+
+  //   const hourSet = new Set<string>();
+  //   for (const item of data) {
+  //     hourSet.add(item.hour);
+  //   }
+
+  //   const now = Date.now();
+
+  //   for (let i = now; i >= now - lookbackPeriod; ++i) {
+  //     const hour = new Date(i).toISOString().slice(0, 13);
+  //     if (!hourSet.has(hour)) {
+  //       ret.push({ hour, p50: 0, p90: 0, p95: 0 });
+  //     }
+  //   }
+
+  //   return ret;
+  // }, [data, lookbackPeriod]);
+
   return (
     <ChartContainer config={chartConfig} className="h-[300px] w-full">
       <AreaChart accessibilityLayer data={data}>

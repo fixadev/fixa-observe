@@ -634,8 +634,9 @@ export const TEST_CALLS: CallWithIncludes[] = [
   //         },
   //       ]
   //     : [],
-  stereoRecordingUrl:
-    "https://jtuyprjjgxbgmtjiykoa.supabase.co/storage/v1/object/public/recordings/1a9a9108-95c4-4fd9-befc-a27cfb5eff69-1730766982390-c7218bd2-42b9-47e4-9ce1-9c6dcf62e8d0-stereo.wav",
+  // stereoRecordingUrl:
+  //   "https://jtuyprjjgxbgmtjiykoa.supabase.co/storage/v1/object/public/recordings/1a9a9108-95c4-4fd9-befc-a27cfb5eff69-1730766982390-c7218bd2-42b9-47e4-9ce1-9c6dcf62e8d0-stereo.wav",
+  stereoRecordingUrl: "/test_call.wav",
   monoRecordingUrl: null,
 }));
 

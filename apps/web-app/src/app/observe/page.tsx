@@ -41,14 +41,20 @@ export default function ObservePage() {
 
   const { play, pause, isPlaying } = useAudio();
 
-  const { data: latencyPercentiles } = api._call.getLatencyPercentiles.useQuery(
-    {
-      lookbackPeriod: lookbackPeriod.value,
-    },
-  );
-  const { data: calls } = api._call.getCalls.useQuery({
-    ownerId: "11x",
-  });
+  // const { data: latencyPercentiles } = api._call.getLatencyPercentiles.useQuery(
+  //   {
+  //     lookbackPeriod: lookbackPeriod.value,
+  //   },
+  // );
+  const latencyPercentiles = useMemo(() => {
+    return [];
+  }, []);
+  const calls = useMemo(() => {
+    return TEST_OBSERVE_CALLS.slice(0, 2);
+  }, []);
+  // const { data: calls } = api._call.getCalls.useQuery({
+  //   ownerId: "11x",
+  // });
 
   const selectedCall = useMemo(
     () => calls?.find((call) => call.id === selectedCallId),
@@ -84,7 +90,10 @@ export default function ObservePage() {
           <CardTitle>Latency</CardTitle>
         </CardHeader>
         <CardContent>
-          <LatencyChart data={latencyPercentiles ?? []} />
+          <LatencyChart
+            lookbackPeriod={lookbackPeriod.value}
+            data={latencyPercentiles ?? []}
+          />
         </CardContent>
       </Card>
       <CallTable

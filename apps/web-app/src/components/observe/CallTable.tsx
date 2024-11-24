@@ -11,7 +11,7 @@ export default function CallTable({
 }) {
   return (
     <DataTable
-      onRowClick={onRowClick ?? undefined}
+      // onRowClick={onRowClick ?? undefined}
       columns={columns}
       data={calls}
     />

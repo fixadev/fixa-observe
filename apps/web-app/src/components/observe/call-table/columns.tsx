@@ -2,6 +2,7 @@ import { type ColumnDef } from "@tanstack/react-table";
 import { formatDistanceToNow } from "date-fns";
 import Image from "next/image";
 import { CopyButton } from "~/components/CopyButton";
+import AudioPlayer from "~/components/dashboard/AudioPlayer";
 import { type CallWithIncludes } from "~/lib/types";
 import { calculateLatencyPercentiles } from "~/lib/utils";
 
@@ -17,25 +18,7 @@ export type CallWithLatency = {
 
 export const columns: ColumnDef<CallWithIncludes>[] = [
   {
-    id: "agent-picture",
-    // header: () => <div className="w-[1%]" />,
-    cell: () => {
-      return (
-        <div className="flex size-full items-center justify-center">
-          <Image
-            className="size-[32px] shrink-0 rounded-full"
-            src="/images/agent-avatars/jordan.png"
-            alt="Jordan"
-            width={32}
-            height={32}
-          />
-        </div>
-      );
-    },
-    size: 32,
-  },
-  {
-    header: "details",
+    header: "id",
     cell: ({ row }) => {
       const call = row.original;
       return (
@@ -50,60 +33,101 @@ export const columns: ColumnDef<CallWithIncludes>[] = [
         </div>
       );
     },
+    size: 100,
   },
   {
-    accessorKey: "p50",
-    header: "p50",
+    header: "audio",
     cell: ({ row }) => {
       const call = row.original;
-      const { p50 } = calculateLatencyPercentiles(
-        call.latencyBlocks.map((block) => block.duration),
-      );
+      return <AudioPlayer call={call} small />;
+    },
+    size: 300,
+  },
+  {
+    id: "latency",
+    header: () => {
       return (
-        <div className="font-medium text-green-500">
-          {Math.round(p50 * 1000)}ms
+        <div className="flex w-full flex-col items-center gap-1 px-4">
+          <div className="text-base font-medium">latency</div>
+          <div className="flex w-full justify-between gap-2">
+            <div className="w-12 text-center text-xs">50%</div>
+            <div className="w-12 text-center text-xs">90%</div>
+            <div className="w-12 text-center text-xs">95%</div>
+          </div>
         </div>
       );
     },
-  },
-  {
-    accessorKey: "p95",
-    header: "p95",
     cell: ({ row }) => {
       const call = row.original;
-      const { p90 } = calculateLatencyPercentiles(
+      const { p50, p90, p95 } = calculateLatencyPercentiles(
         call.latencyBlocks.map((block) => block.duration),
       );
       return (
-        <div className="font-medium text-muted-foreground">
-          {Math.round(p90 * 1000)}ms
+        <div className="flex w-full justify-between gap-2 px-4">
+          <div className="w-12 text-center text-xs">
+            {Math.round(p50 * 1000)}ms
+          </div>
+          <div className="w-12 text-center text-xs">
+            {Math.round(p90 * 1000)}ms
+          </div>
+          <div className="w-12 text-center text-xs">
+            {Math.round(p95 * 1000)}ms
+          </div>
         </div>
       );
     },
+    size: 50,
   },
   {
-    accessorKey: "p99",
-    header: "p99",
+    id: "interruptions",
+    header: () => {
+      return (
+        <div className="flex w-full flex-col items-center gap-1 px-4">
+          <div className="text-base font-medium">interruptions</div>
+          <div className="flex w-full justify-between gap-2">
+            <div className="w-12 text-center text-xs">50%</div>
+            <div className="w-12 text-center text-xs">90%</div>
+            <div className="w-12 text-center text-xs">95%</div>
+            <div className="w-12 text-center text-xs">total</div>
+          </div>
+        </div>
+      );
+    },
     cell: ({ row }) => {
       const call = row.original;
-      const { p95 } = calculateLatencyPercentiles(
+      const { p50, p90, p95 } = calculateLatencyPercentiles(
         call.latencyBlocks.map((block) => block.duration),
       );
       return (
-        <div className="font-medium text-red-500">
-          {Math.round(p95 * 1000)}ms
+        <div className="flex w-full justify-between gap-2 px-4">
+          <div className="w-12 text-center text-xs">
+            {Math.round(p50 * 1000)}ms
+          </div>
+          <div className="w-12 text-center text-xs">
+            {Math.round(p90 * 1000)}ms
+          </div>
+          <div className="w-12 text-center text-xs">
+            {Math.round(p95 * 1000)}ms
+          </div>
+          <div className="w-12 text-center text-xs">
+            {Math.floor(Math.random() * 7)}
+          </div>
         </div>
       );
     },
+    size: 50,
   },
   {
     accessorKey: "createdAt",
     header: "created at",
     cell: ({ row }) => {
       const call = row.original;
+      if (!call.startedAt) {
+        return null;
+      }
       return (
         <div className="text-xs text-muted-foreground">
-          {formatDistanceToNow(new Date(), { addSuffix: true })}
+          {formatDistanceToNow(new Date(call.startedAt), { addSuffix: true })}
         </div>
       );
     },

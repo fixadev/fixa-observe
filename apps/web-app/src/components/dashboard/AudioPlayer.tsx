@@ -38,10 +38,14 @@ const AudioPlayer = forwardRef<
   AudioPlayerRef,
   {
     call: CallWithIncludes;
+    small?: boolean;
     offsetFromStart?: number;
     onEvalResultHover?: (evalId: string | null) => void;
   }
->(function AudioPlayer({ call, offsetFromStart = 0, onEvalResultHover }, ref) {
+>(function AudioPlayer(
+  { call, small = false, offsetFromStart = 0, onEvalResultHover },
+  ref,
+) {
   const [containerWidth, setContainerWidth] = useState(0);
   const [playheadHoverX, setPlayheadHoverX] = useState<number | null>(null);
   const [playheadX, setPlayheadX] = useState<number | null>(null);
@@ -228,9 +232,17 @@ const AudioPlayer = forwardRef<
   );
 
   return (
-    <div className="flex w-full flex-col gap-4">
+    <div
+      className={cn(
+        "flex w-full gap-4",
+        small ? "flex-row-reverse" : "flex-col",
+      )}
+    >
       <div
-        className="relative h-[100px] w-full rounded-md border border-input shadow-sm"
+        className={cn(
+          "relative w-full rounded-md border border-input shadow-sm",
+          small ? "h-[50px]" : "h-[100px]",
+        )}
         ref={containerRef}
         onMouseDown={handleMouseDown}
         onMouseUp={handleMouseUp}
@@ -243,7 +255,7 @@ const AudioPlayer = forwardRef<
               <AudioVisualizer
                 key={`bot-${key}`}
                 width={containerWidth}
-                height={50}
+                height={small ? 25 : 50}
                 blob={botAudioBlob}
                 currentTime={currentTime}
                 barPlayedColor="rgba(0, 0, 0, 0.5)"
@@ -253,7 +265,7 @@ const AudioPlayer = forwardRef<
               <AudioVisualizer
                 key={`user-${key}`}
                 width={containerWidth}
-                height={50}
+                height={small ? 25 : 50}
                 blob={userAudioBlob}
                 currentTime={currentTime}
                 barPlayedColor="rgba(0, 0, 0, 0.5)"
@@ -395,26 +407,30 @@ const AudioPlayer = forwardRef<
           )}
         </Button>
 
-        <div className="text-sm text-muted-foreground">
-          {formatDurationHoursMinutesSeconds(currentTime)} /{" "}
-          {formatDurationHoursMinutesSeconds(duration)}
-        </div>
+        {!small && (
+          <>
+            <div className="text-sm text-muted-foreground">
+              {formatDurationHoursMinutesSeconds(currentTime)} /{" "}
+              {formatDurationHoursMinutesSeconds(duration)}
+            </div>
 
-        <div className="flex-1" />
+            <div className="flex-1" />
 
-        <Select
-          value={playbackSpeed.toString()}
-          onValueChange={(value) => setPlaybackSpeed(parseFloat(value))}
-        >
-          <SelectTrigger className="w-20">
-            <SelectValue placeholder="Speed" />
-          </SelectTrigger>
-          <SelectContent className="w-20">
-            <SelectItem value="1">1x</SelectItem>
-            <SelectItem value="2">2x</SelectItem>
-            <SelectItem value="4">4x</SelectItem>
-          </SelectContent>
-        </Select>
+            <Select
+              value={playbackSpeed.toString()}
+              onValueChange={(value) => setPlaybackSpeed(parseFloat(value))}
+            >
+              <SelectTrigger className="w-20">
+                <SelectValue placeholder="Speed" />
+              </SelectTrigger>
+              <SelectContent className="w-20">
+                <SelectItem value="1">1x</SelectItem>
+                <SelectItem value="2">2x</SelectItem>
+                <SelectItem value="4">4x</SelectItem>
+              </SelectContent>
+            </Select>
+          </>
+        )}
       </div>
     </div>
   );
