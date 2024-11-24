@@ -1,4 +1,6 @@
 def create_transcript_from_deepgram(user_words, agent_words):
+    # print(user_words)
+    print(agent_words)
     """Create segments representing conversation turns between user and agent from Deepgram word alignments."""
     # Convert alignments to common format
     all_chunks = []
@@ -34,14 +36,28 @@ def create_transcript_from_deepgram(user_words, agent_words):
     current_text = []
     current_start = None
     current_end = None
-    
-    for word in agent_words:
+
+    for i, word in enumerate(agent_words):
         if not current_start:
             current_start = word['start']
         current_text.append(word['punctuated_word'])
         current_end = word['end']
+       
+        # Check for gap with previous word (new utterance)
+        if i < len(agent_words) - 1 and (agent_words[i+1]['start'] - word['end']) > 1 and agent_words[i+1]['punctuated_word'][0].isupper():
+            print(f"gap found for {word['punctuated_word']}")
+            print(f"current text is {current_text}")
+            # Create chunk for previous text if exists
+            if current_text:
+                all_chunks.append(({
+                    'timestamp': [current_start, current_end],
+                    'text': ' '.join(current_text)
+                }, 'agent'))
+                current_text = []
+                current_start = None
+            continue
         
-        # If word ends with punctuation, create a new chunk
+        # If word ends with punctuation
         if word['punctuated_word'][-1] in '.?!':
             all_chunks.append(({
                 'timestamp': [current_start, current_end],
@@ -49,6 +65,7 @@ def create_transcript_from_deepgram(user_words, agent_words):
             }, 'agent'))
             current_text = []
             current_start = None
+            continue
     
     # Add remaining agent text if any
     if current_text:
@@ -65,8 +82,9 @@ def create_transcript_from_deepgram(user_words, agent_words):
     current_speaker = all_chunks[0][1] if all_chunks else None
     
     for chunk, speaker in all_chunks:
-        if speaker != current_speaker:
-            # Speaker changed, create new segment
+
+        # splits new utterances
+        if speaker != current_speaker or (current_chunks and (chunk['timestamp'][0] - current_chunks[-1]['timestamp'][1]) > 1 and chunk['text'][0].isupper()):
             if current_chunks:
                 segments.append({
                     'role': current_speaker,

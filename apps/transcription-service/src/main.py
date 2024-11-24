@@ -26,14 +26,14 @@ async def transcribe(request: TranscribeRequest):
         user_audio_path, agent_audio_path = split_channels(request.stereo_audio_url)
         transcriptions = transcribe_with_deepgram([user_audio_path, agent_audio_path])
         transcript = create_transcript_from_deepgram(transcriptions[0], transcriptions[1])
-        return {"transcript": transcript}
+        return transcript
         
     except Exception as e:
         logger.error(f"Deepgram transcription failed: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
     
-
+    
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run("main:app", host="0.0.0.0", port=8080, reload=True)
