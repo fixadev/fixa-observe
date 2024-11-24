@@ -1,8 +1,7 @@
 import axios from "axios";
 import { db } from "../db";
 import { v4 as uuidv4 } from "uuid";
-import { CallStatus, Message, Role } from "@prisma/client";
-import { computeLatencyBlocks } from "../utils/utils";
+import { CallStatus, Role } from "@prisma/client";
 import { env } from "../env";
 
 export const transcribeAndSaveCall = async (
@@ -23,6 +22,10 @@ export const transcribeAndSaveCall = async (
         duration: number;
         text: string;
       }>;
+      latencyBlocks: Array<{
+        secondsFromStart: number;
+        duration: number;
+      }>;
     }
 
     const response = await axios.post<TranscribeResponse>(
@@ -32,10 +35,7 @@ export const transcribeAndSaveCall = async (
       },
     );
 
-    console.log("response.data");
-    console.log(response.data);
-
-    const { segments, interruptions } = response.data;
+    const { segments, interruptions, latencyBlocks } = response.data;
 
     const messages = segments.map((segment) => ({
       role: segment.role === "user" ? Role.user : Role.bot,
@@ -43,8 +43,6 @@ export const transcribeAndSaveCall = async (
       secondsFromStart: segment.start,
       duration: segment.end - segment.start,
     }));
-
-    const latencyBlocks = computeLatencyBlocks(messages);
 
     const newCall = await db.call.create({
       data: {
