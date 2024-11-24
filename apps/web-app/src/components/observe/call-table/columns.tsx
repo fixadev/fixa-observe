@@ -33,7 +33,7 @@ export const columns: ColumnDef<CallWithIncludes>[] = [
         </div>
       );
     },
-    size: 100,
+    size: 50,
   },
   {
     header: "audio",
@@ -98,6 +98,7 @@ export const columns: ColumnDef<CallWithIncludes>[] = [
       const { p50, p90, p95 } = calculateLatencyPercentiles(
         call.latencyBlocks.map((block) => block.duration),
       );
+      const numInterruptions = Math.floor(Math.random() * 7);
       return (
         <div className="flex w-full justify-between gap-2 px-4">
           <div className="w-12 text-center text-xs">
@@ -109,9 +110,7 @@ export const columns: ColumnDef<CallWithIncludes>[] = [
           <div className="w-12 text-center text-xs">
             {Math.round(p95 * 1000)}ms
           </div>
-          <div className="w-12 text-center text-xs">
-            {Math.floor(Math.random() * 7)}
-          </div>
+          <div className="w-12 text-center text-xs">{numInterruptions}</div>
         </div>
       );
     },

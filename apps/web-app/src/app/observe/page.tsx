@@ -4,36 +4,29 @@ import { useMemo, useRef, useState } from "react";
 import CallDetails from "~/components/dashboard/CallDetails";
 import { useAudio } from "~/components/hooks/useAudio";
 import CallTable from "~/components/observe/CallTable";
+import Filters, {
+  type Filter,
+  lookbackPeriods,
+} from "~/components/observe/Filters";
 import LatencyChart from "~/components/observe/LatencyChart";
-import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Dialog, DialogContent } from "~/components/ui/dialog";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "~/components/ui/select";
 import { TEST_OBSERVE_CALLS } from "~/lib/test-data";
 import { api } from "~/trpc/react";
 
-type LookbackPeriod = {
-  label: string;
-  value: number;
-};
-
-const lookbackPeriods: LookbackPeriod[] = [
-  { label: "24 hours", value: 24 * 60 * 60 * 1000 },
-  { label: "2 days", value: 2 * 24 * 60 * 60 * 1000 },
-  { label: "7 days", value: 7 * 24 * 60 * 60 * 1000 },
-  { label: "30 days", value: 30 * 24 * 60 * 60 * 1000 },
-];
-
 export default function ObservePage() {
-  const [lookbackPeriod, setLookbackPeriod] = useState<LookbackPeriod>(
-    lookbackPeriods[0]!,
-  );
+  const [filter, setFilter] = useState<Filter>({
+    lookbackPeriod: lookbackPeriods[0]!,
+    agentId: "agent1",
+    latencyThreshold: {
+      enabled: true,
+      value: 1000,
+    },
+    interruptionThreshold: {
+      enabled: true,
+      value: 1000,
+    },
+  });
 
   const [selectedCallId, setSelectedCallId] = useState<string | null>(null);
 
@@ -62,87 +55,81 @@ export default function ObservePage() {
   );
 
   return (
-    <div className="container">
-      <div className="flex justify-between">
-        <Select
-          value={lookbackPeriod.value.toString()}
-          onValueChange={(value) => {
-            setLookbackPeriod(
-              lookbackPeriods.find((p) => p.value === parseInt(value))!,
-            );
-          }}
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="time range" />
-          </SelectTrigger>
-          <SelectContent>
-            {lookbackPeriods.map((period) => (
-              <SelectItem key={period.value} value={period.value.toString()}>
-                {period.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        <Button variant="outline">refresh</Button>
-      </div>
-      <Card className="mb-4">
-        <CardHeader>
-          <CardTitle>Latency</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <LatencyChart
-            lookbackPeriod={lookbackPeriod.value}
-            data={latencyPercentiles ?? []}
-          />
-        </CardContent>
-      </Card>
-      <CallTable
-        calls={calls ?? []}
-        onRowClick={(call) => setSelectedCallId(call.id)}
-      />
-      {selectedCall && (
-        <Dialog
-          open={!!selectedCallId}
-          onOpenChange={(open) => {
-            if (!open) {
-              setSelectedCallId(null);
-            }
-          }}
-        >
-          <DialogContent className="max-h-[90vh] max-w-[90vw] p-0">
-            {/* <DialogHeader>
+    <div className="relative h-full bg-muted/30">
+      <Filters filter={filter} setFilter={setFilter} />
+      <div className="flex flex-col gap-4 p-4">
+        <div className="flex w-full gap-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Latency</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <LatencyChart
+                lookbackPeriod={filter.lookbackPeriod.value}
+                data={latencyPercentiles ?? []}
+              />
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader>
+              <CardTitle>Latency</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <LatencyChart
+                lookbackPeriod={filter.lookbackPeriod.value}
+                data={latencyPercentiles ?? []}
+              />
+            </CardContent>
+          </Card>
+        </div>
+        <CallTable
+          calls={calls ?? []}
+          onRowClick={(call) => setSelectedCallId(call.id)}
+        />
+        {selectedCall && (
+          <Dialog
+            open={!!selectedCallId}
+            onOpenChange={(open) => {
+              if (!open) {
+                setSelectedCallId(null);
+              }
+            }}
+          >
+            <DialogContent className="max-h-[90vh] max-w-[90vw] p-0">
+              {/* <DialogHeader>
             <DialogTitle>Call Details</DialogTitle>
           </DialogHeader> */}
-            <div
-              className="h-[90vh] w-[90vw] overflow-hidden overflow-y-auto rounded-md focus:outline-none"
-              ref={containerRef}
-              autoFocus
-              tabIndex={0}
-              onKeyDown={(e) => {
-                if (e.key === " ") {
-                  e.preventDefault();
-                  if (isPlaying) {
-                    pause();
-                  } else {
-                    play();
+              <div
+                className="h-[90vh] w-[90vw] overflow-hidden overflow-y-auto rounded-md focus:outline-none"
+                ref={containerRef}
+                autoFocus
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === " ") {
+                    e.preventDefault();
+                    if (isPlaying) {
+                      pause();
+                    } else {
+                      play();
+                    }
                   }
-                }
-              }}
-            >
-              <CallDetails
-                call={selectedCall}
-                botName="jordan"
-                userName="caller"
-                headerHeight={44}
-                includeHeaderTop={false}
-                avatarUrl="/images/agent-avatars/jordan.png"
-                type="latency"
-                containerRef={containerRef}
-              />
-            </div>
-          </DialogContent>
-        </Dialog>
-      )}
+                }}
+              >
+                <CallDetails
+                  call={selectedCall}
+                  botName="jordan"
+                  userName="caller"
+                  headerHeight={44}
+                  includeHeaderTop={false}
+                  avatarUrl="/images/agent-avatars/jordan.png"
+                  type="latency"
+                  containerRef={containerRef}
+                />
+              </div>
+            </DialogContent>
+          </Dialog>
+        )}
+      </div>
     </div>
   );
 }
