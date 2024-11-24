@@ -61,7 +61,35 @@ export default function ObservePage() {
         <div className="flex w-full gap-4">
           <Card>
             <CardHeader>
-              <CardTitle>Latency</CardTitle>
+              <CardTitle className="mb-2">latency</CardTitle>
+              <div className="flex gap-4 border-l-4 border-primary pl-2">
+                <div className="flex flex-col gap-1">
+                  <div className="text-xs font-medium text-muted-foreground">
+                    average
+                  </div>
+                  <div className="text-sm">
+                    last {filter.lookbackPeriod.label}
+                  </div>
+                </div>
+                <div className="flex flex-col gap-1">
+                  <div className="text-xs font-medium text-muted-foreground">
+                    50%
+                  </div>
+                  <div className="text-sm">400ms</div>
+                </div>
+                <div className="flex flex-col gap-1">
+                  <div className="text-xs font-medium text-muted-foreground">
+                    90%
+                  </div>
+                  <div className="text-sm">1000ms</div>
+                </div>
+                <div className="flex flex-col gap-1">
+                  <div className="text-xs font-medium text-muted-foreground">
+                    95%
+                  </div>
+                  <div className="text-sm">1500ms</div>
+                </div>
+              </div>
             </CardHeader>
             <CardContent>
               <LatencyChart
@@ -72,7 +100,35 @@ export default function ObservePage() {
           </Card>
           <Card>
             <CardHeader>
-              <CardTitle>Latency</CardTitle>
+              <CardTitle className="mb-2">interruptions</CardTitle>
+              <div className="flex gap-4 border-l-4 border-primary pl-2">
+                <div className="flex flex-col gap-1">
+                  <div className="text-xs font-medium text-muted-foreground">
+                    average
+                  </div>
+                  <div className="text-sm">
+                    last {filter.lookbackPeriod.label}
+                  </div>
+                </div>
+                <div className="flex flex-col gap-1">
+                  <div className="text-xs font-medium text-muted-foreground">
+                    50%
+                  </div>
+                  <div className="text-sm">400ms</div>
+                </div>
+                <div className="flex flex-col gap-1">
+                  <div className="text-xs font-medium text-muted-foreground">
+                    90%
+                  </div>
+                  <div className="text-sm">1000ms</div>
+                </div>
+                <div className="flex flex-col gap-1">
+                  <div className="text-xs font-medium text-muted-foreground">
+                    95%
+                  </div>
+                  <div className="text-sm">1500ms</div>
+                </div>
+              </div>
             </CardHeader>
             <CardContent>
               <LatencyChart
