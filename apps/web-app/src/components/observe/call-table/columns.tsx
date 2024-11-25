@@ -180,7 +180,13 @@ const ActionCell = ({ call }: { call: CallWithIncludes }) => {
   const { setSelectedCallId } = useObserveState();
   return (
     <div className="flex w-full justify-end">
-      <Button variant="ghost" onClick={() => setSelectedCallId(call.id)}>
+      <Button
+        variant="ghost"
+        onClick={(e) => {
+          e.stopPropagation();
+          setSelectedCallId(call.id);
+        }}
+      >
         view details
       </Button>
     </div>
