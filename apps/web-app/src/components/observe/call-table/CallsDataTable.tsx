@@ -30,9 +30,6 @@ interface DataTableProps<TData, TValue> {
   data: TData[];
   initialSorting?: SortingState;
   onSortingChange?: (sorting: SortingState) => void;
-  hasNextPage?: boolean;
-  fetchNextPage: () => void;
-  isFetchingNextPage: boolean;
   onRowClick?: (row: TData) => void;
 }
 
@@ -40,24 +37,12 @@ export function DataTable<TData, TValue>({
   columns,
   data,
   initialSorting,
-  onSortingChange,
-  hasNextPage,
-  fetchNextPage,
-  isFetchingNextPage,
   onRowClick,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = useState<SortingState>(initialSorting ?? []);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = useState({});
-
-  const { ref, inView } = useInView();
-
-  useEffect(() => {
-    if (inView && hasNextPage && !isFetchingNextPage) {
-      fetchNextPage();
-    }
-  }, [inView, hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   const table = useReactTable({
     data,
@@ -122,16 +107,6 @@ export function DataTable<TData, TValue>({
                     ))}
                   </TableRow>
                 ))}
-                {hasNextPage && (
-                  <TableRow ref={ref}>
-                    <TableCell
-                      colSpan={columns.length}
-                      className="p-4 text-center"
-                    >
-                      {isFetchingNextPage ? "Loading more..." : "Load more"}
-                    </TableCell>
-                  </TableRow>
-                )}
               </>
             ) : (
               <TableRow>

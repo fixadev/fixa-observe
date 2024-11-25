@@ -86,7 +86,7 @@ model TestAgent {
 }
 
 model Call {
-  id                 String       @id @default(uuid())
+  id                 String      @id @default(uuid())
   ownerId            String?
   customerCallId     String?
   status             CallStatus
@@ -96,7 +96,10 @@ model Call {
   monoRecordingUrl   String?
   startedAt          String?
   endedAt            String?
-  evalResults        EvalResult[]
+  regionId           String?
+  agentId            String?
+
+  evalResults EvalResult[]
 
   test        Test?      @relation(fields: [testId], references: [id], onDelete: Cascade)
   testId      String?
@@ -163,6 +166,7 @@ model CallRecording {
   createdAt DateTime @default(now())
   processed Boolean  @default(false)
   agentId   String?
+  regionId  String?
 }
 
 model Scenario {

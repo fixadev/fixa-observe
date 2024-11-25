@@ -80,8 +80,8 @@ app.post("/vapi", async (req: Request, res: Response) => {
 
 app.post("/upload-call", async (req: Request, res: Response) => {
   try {
-    const { callId, location, agentId } = req.body;
-    const result = await uploadCallToDB(callId, location);
+    const { callId, location, agentId, regionId } = req.body;
+    const result = await uploadCallToDB(callId, location, agentId, regionId);
     const newCall = await transcribeAndSaveCall(
       callId,
       result.audioUrl,

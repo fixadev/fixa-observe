@@ -20,11 +20,10 @@ const resetProcessedStatus = async () => {
 const transcribePastCalls = async () => {
   try {
     // await resetProcessedStatus();
-
     const callRecordings = await db.callRecording.findMany({
       where: {
-        // processed: false,
-        id: "call.QjhWk6hTZQhFXhR3CVk1ha",
+        processed: false,
+        // id: "call.QjhWk6hTZQhFXhR3CVk1ha",
       },
       orderBy: {
         createdAt: "desc",

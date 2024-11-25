@@ -253,7 +253,11 @@ export default function ObservePage() {
         <CallTable calls={calls} />
         {/* Invisible marker for infinite scroll */}
         <div ref={loadMoreRef} className="h-1" />
-        {isFetchingNextPage && <Spinner />}
+        {isFetchingNextPage && (
+          <div className="flex justify-center">
+            <Spinner />
+          </div>
+        )}
         {selectedCall && (
           <Dialog
             open={!!selectedCallId}
