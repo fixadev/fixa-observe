@@ -14,7 +14,6 @@ import Spinner from "~/components/Spinner";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Dialog, DialogContent } from "~/components/ui/dialog";
 import { Skeleton } from "~/components/ui/skeleton";
-import { TEST_OBSERVE_CALLS } from "~/lib/test-data";
 import { cn, getColors, getLatencyColor } from "~/lib/utils";
 import { api } from "~/trpc/react";
 
