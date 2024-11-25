@@ -3,13 +3,11 @@
 import {
   type ColumnDef,
   type ColumnFiltersState,
-  type PaginationState,
   type SortingState,
   type VisibilityState,
   flexRender,
   getCoreRowModel,
   getFilteredRowModel,
-  getPaginationRowModel,
   useReactTable,
 } from "@tanstack/react-table";
 
@@ -22,22 +20,19 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useEffect, useState } from "react";
-import { DataTablePagination } from "../../DataTablePagination";
 import { cn } from "~/lib/utils";
 import { type CallWithIncludes } from "~/lib/types";
 import AudioPlayer from "../../dashboard/AudioPlayer";
+import { useInView } from "react-intersection-observer";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
   initialSorting?: SortingState;
   onSortingChange?: (sorting: SortingState) => void;
-  initialPagination?: {
-    pageIndex: number;
-    pageSize: number;
-  };
-  onPaginationChange?: (pagination: PaginationState) => void;
-  rowCount?: number;
+  hasNextPage?: boolean;
+  fetchNextPage: () => void;
+  isFetchingNextPage: boolean;
   onRowClick?: (row: TData) => void;
 }
 
@@ -46,44 +41,30 @@ export function DataTable<TData, TValue>({
   data,
   initialSorting,
   onSortingChange,
-  initialPagination,
-  onPaginationChange,
-  rowCount,
+  hasNextPage,
+  fetchNextPage,
+  isFetchingNextPage,
   onRowClick,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = useState<SortingState>(initialSorting ?? []);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = useState({});
-  const [pagination, setPagination] = useState<PaginationState>(
-    initialPagination ?? {
-      pageIndex: 0,
-      pageSize: 10,
-    },
-  );
+
+  const { ref, inView } = useInView();
 
   useEffect(() => {
-    onSortingChange?.(sorting);
-  }, [onSortingChange, sorting]);
-
-  useEffect(() => {
-    onPaginationChange?.(pagination);
-  }, [onPaginationChange, pagination]);
+    if (inView && hasNextPage && !isFetchingNextPage) {
+      fetchNextPage();
+    }
+  }, [inView, hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   const table = useReactTable({
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
-
-    onPaginationChange: setPagination,
-    getPaginationRowModel: getPaginationRowModel(),
-    // manualPagination: true,
-    rowCount,
-
     onSortingChange: setSorting,
-    // getSortedRowModel: getSortedRowModel(),
     manualSorting: true,
-
     onColumnFiltersChange: setColumnFilters,
     getFilteredRowModel: getFilteredRowModel(),
     onColumnVisibilityChange: setColumnVisibility,
@@ -93,22 +74,11 @@ export function DataTable<TData, TValue>({
       columnFilters,
       columnVisibility,
       rowSelection,
-      pagination,
     },
   });
 
   return (
     <div>
-      {/* <div className="flex items-center py-4">
-        <Input
-          placeholder="Filter..."
-          value={(table.getColumn("id")?.getFilterValue() as string) ?? ""}
-          onChange={(event) =>
-            table.getColumn("id")?.setFilterValue(event.target.value)
-          }
-          className="max-w-sm"
-        />
-      </div> */}
       <div className="rounded-md border bg-background">
         <Table>
           <TableHeader>
@@ -134,13 +104,12 @@ export function DataTable<TData, TValue>({
           </TableHeader>
           <TableBody>
             {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
-                <>
+              <>
+                {table.getRowModel().rows.map((row) => (
                   <TableRow
                     key={row.id}
                     data-state={row.getIsSelected() && "selected"}
                     onClick={() => onRowClick?.(row.original)}
-                    // className={cn("border-b-0", onRowClick && "cursor-pointer")}
                     className={cn(onRowClick && "cursor-pointer")}
                   >
                     {row.getVisibleCells().map((cell) => (
@@ -152,16 +121,18 @@ export function DataTable<TData, TValue>({
                       </TableCell>
                     ))}
                   </TableRow>
-                  {/* <TableRow>
-                    <TableCell colSpan={columns.length}>
-                      <AudioPlayer
-                        call={row.original as CallWithIncludes}
-                        small
-                      />
+                ))}
+                {hasNextPage && (
+                  <TableRow ref={ref}>
+                    <TableCell
+                      colSpan={columns.length}
+                      className="p-4 text-center"
+                    >
+                      {isFetchingNextPage ? "Loading more..." : "Load more"}
                     </TableCell>
-                  </TableRow> */}
-                </>
-              ))
+                  </TableRow>
+                )}
+              </>
             ) : (
               <TableRow>
                 <TableCell
@@ -174,9 +145,6 @@ export function DataTable<TData, TValue>({
             )}
           </TableBody>
         </Table>
-      </div>
-      <div className="py-4">
-        <DataTablePagination table={table} />
       </div>
     </div>
   );

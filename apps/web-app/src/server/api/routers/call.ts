@@ -22,11 +22,22 @@ export const callRouter = createTRPCRouter({
         ownerId: z.string().optional(),
         testId: z.string().optional(),
         scenarioId: z.string().optional(),
+        lookbackPeriod: z.number().optional(),
         limit: z.number().optional(),
+        cursor: z.string().optional(),
       }),
     )
     .query(async ({ input }) => {
-      return await callService.getCalls(input);
+      const limit = input.limit ?? 50;
+      const result = await callService.getCalls({
+        ...input,
+        limit,
+      });
+
+      return {
+        calls: result.items,
+        nextCursor: result.nextCursor,
+      };
     }),
 
   getLatencyInterruptionPercentiles: protectedProcedure

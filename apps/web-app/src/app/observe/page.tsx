@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState, useEffect } from "react";
 import CallDetails from "~/components/dashboard/CallDetails";
 import { useAudio } from "~/components/hooks/useAudio";
 import { useObserveState } from "~/components/hooks/useObserveState";
@@ -10,6 +10,7 @@ import Filters, {
   lookbackPeriods,
 } from "~/components/observe/Filters";
 import LatencyChart from "~/components/observe/LatencyChart";
+import Spinner from "~/components/Spinner";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Dialog, DialogContent } from "~/components/ui/dialog";
 import { Skeleton } from "~/components/ui/skeleton";
@@ -48,10 +49,50 @@ export default function ObservePage() {
   //   return TEST_OBSERVE_CALLS.slice(0, 2);
   //   // return TEST_OBSERVE_CALLS;
   // }, []);
-  const { data: calls } = api._call.getCalls.useQuery({
-    ownerId: "11x",
-    limit: 50,
-  });
+
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } =
+    api._call.getCalls.useInfiniteQuery(
+      {
+        ownerId: "11x",
+        limit: 10,
+      },
+      {
+        getNextPageParam: (lastPage) => lastPage.nextCursor,
+      },
+    );
+
+  // Automatically fetch next page in background
+  // useEffect(() => {
+  //   if (hasNextPage && !isFetchingNextPage) {
+  //     void fetchNextPage();
+  //   }
+  // }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+
+  // Combine all pages
+  const calls = useMemo(
+    () => data?.pages.flatMap((page) => page.calls) ?? [],
+    [data],
+  );
+
+  // Optional: Add intersection observer for infinite scroll
+  const loadMoreRef = useRef(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting && hasNextPage) {
+          void fetchNextPage();
+        }
+      },
+      { threshold: 0.1 },
+    );
+
+    if (loadMoreRef.current) {
+      observer.observe(loadMoreRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, [fetchNextPage, hasNextPage]);
 
   const selectedCall = useMemo(
     () => calls?.find((call) => call.id === selectedCallId),
@@ -209,10 +250,10 @@ export default function ObservePage() {
             </>
           )}
         </div>
-        <CallTable
-          calls={calls ?? []}
-          onRowClick={(call) => setSelectedCallId(call.id)}
-        />
+        <CallTable calls={calls} />
+        {/* Invisible marker for infinite scroll */}
+        <div ref={loadMoreRef} className="h-1" />
+        {isFetchingNextPage && <Spinner />}
         {selectedCall && (
           <Dialog
             open={!!selectedCallId}

@@ -31,19 +31,19 @@ export const callService = {
     scenarioId,
     lookbackPeriod,
     limit,
+    cursor,
   }: {
     ownerId?: string;
     testId?: string;
     scenarioId?: string;
     lookbackPeriod?: number;
     limit?: number;
-  }): Promise<CallWithIncludes[]> => {
-    console.log("GET CALLS", ownerId, testId, scenarioId, lookbackPeriod);
-    if (lookbackPeriod) {
-      console.log("DATE", new Date(Date.now() - lookbackPeriod));
-    }
-    console.log("lookbackPeriod", lookbackPeriod);
-    return await db.call.findMany({
+    cursor?: string;
+  }): Promise<{
+    items: CallWithIncludes[];
+    nextCursor: string | undefined;
+  }> => {
+    const items = await db.call.findMany({
       where: {
         ownerId,
         testId,
@@ -73,8 +73,20 @@ export const callService = {
       orderBy: {
         startedAt: "desc",
       },
-      take: limit,
+      take: limit ? limit + 1 : undefined, // Take one extra to determine if there's a next page
+      ...(cursor ? { cursor: { id: cursor }, skip: 1 } : {}), // Use ID as cursor
     });
+
+    let nextCursor: string | undefined = undefined;
+    if (limit && items.length > limit) {
+      const nextItem = items.pop(); // Remove the extra item
+      nextCursor = nextItem?.id;
+    }
+
+    return {
+      items,
+      nextCursor,
+    };
   },
 
   getLatencyInterruptionPercentiles: async ({
@@ -97,17 +109,17 @@ export const callService = {
       ownerId,
       lookbackPeriod,
     });
-    calls.sort((a, b) => {
+    calls.items.sort((a, b) => {
       return (
         new Date(a.startedAt ?? "").getTime() -
         new Date(b.startedAt ?? "").getTime()
       );
     });
 
-    console.log("TOTAL CALLS", calls.length);
+    console.log("TOTAL CALLS", calls.items.length);
 
     // Group calls by hour
-    const callsByHour = calls.reduce(
+    const callsByHour = calls.items.reduce(
       (acc, call) => {
         if (!call.startedAt) return acc;
         const hour = new Date(call.startedAt).toISOString().slice(0, 13); // Format: "2024-03-20T15"
@@ -153,12 +165,12 @@ export const callService = {
 
     const average = {
       latency: calculateLatencyPercentiles(
-        calls.flatMap((call) =>
+        calls.items.flatMap((call) =>
           call.latencyBlocks.map((block) => block.duration),
         ),
       ),
       interruptions: calculateLatencyPercentiles(
-        calls.flatMap((call) =>
+        calls.items.flatMap((call) =>
           call.interruptions.map((interruption) => interruption.duration),
         ),
       ),
@@ -171,5 +183,30 @@ export const callService = {
         average: average.interruptions,
       },
     };
+  },
+
+  getCallsCount: async ({
+    ownerId,
+    testId,
+    scenarioId,
+    lookbackPeriod,
+  }: {
+    ownerId?: string;
+    testId?: string;
+    scenarioId?: string;
+    lookbackPeriod?: number;
+  }): Promise<number> => {
+    return await db.call.count({
+      where: {
+        ownerId,
+        testId,
+        scenarioId,
+        startedAt: {
+          gte: lookbackPeriod
+            ? new Date(Date.now() - lookbackPeriod).toISOString()
+            : undefined,
+        },
+      },
+    });
   },
 };
