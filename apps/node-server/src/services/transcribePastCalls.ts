@@ -19,7 +19,7 @@ const resetProcessedStatus = async () => {
 
 const transcribePastCalls = async () => {
   try {
-    // await resetProcessedStatus();
+    await resetProcessedStatus();
     const callRecordings = await db.callRecording.findMany({
       where: {
         processed: false,
@@ -36,10 +36,16 @@ const transcribePastCalls = async () => {
     for (const callRecording of callRecordings) {
       try {
         console.log(`Transcribing call ${callRecording.id}`);
+
+        const regionId = count % 2 === 0 ? "US" : "UK";
+        const agentId = count % 2 === 0 ? "agent 1" : "agent 2";
+
         await transcribeAndSaveCall(
           callRecording.id,
           callRecording.audioUrl,
           callRecording.createdAt,
+          agentId,
+          regionId,
         );
         console.log(`Transcribed call ${callRecording.id}`);
         console.log(`${count}/${callRecordings.length}`);

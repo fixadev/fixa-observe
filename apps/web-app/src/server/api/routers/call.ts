@@ -25,6 +25,8 @@ export const callRouter = createTRPCRouter({
         lookbackPeriod: z.number().optional(),
         limit: z.number().optional(),
         cursor: z.string().optional(),
+        agentId: z.string().optional(),
+        regionId: z.string().optional(),
       }),
     )
     .query(async ({ input }) => {

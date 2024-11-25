@@ -21,7 +21,8 @@ import { api } from "~/trpc/react";
 export default function ObservePage() {
   const [filter, setFilter] = useState<Filter>({
     lookbackPeriod: lookbackPeriods[2]!,
-    agentId: "agent1",
+    agentId: "all agents",
+    regionId: "all regions",
     latencyThreshold: {
       enabled: true,
       value: 1000,
@@ -61,17 +62,19 @@ export default function ObservePage() {
       },
     );
 
-  // Automatically fetch next page in background
-  // useEffect(() => {
-  //   if (hasNextPage && !isFetchingNextPage) {
-  //     void fetchNextPage();
-  //   }
-  // }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
-
   // Combine all pages
   const calls = useMemo(
-    () => data?.pages.flatMap((page) => page.calls) ?? [],
-    [data],
+    () =>
+      data?.pages
+        .flatMap((page) => page.calls)
+        .filter(
+          (call) =>
+            (filter.agentId === "all agents" ||
+              call.agentId === filter.agentId) &&
+            (filter.regionId === "all regions" ||
+              call.regionId === filter.regionId),
+        ) ?? [],
+    [data, filter.agentId, filter.regionId],
   );
 
   // Optional: Add intersection observer for infinite scroll

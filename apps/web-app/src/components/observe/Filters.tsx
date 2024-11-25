@@ -14,11 +14,12 @@ import { Switch } from "../ui/switch";
 import { cn } from "~/lib/utils";
 import { Input } from "../ui/input";
 import { Slider } from "../ui/slider";
-import { CalendarIcon, UserIcon } from "@heroicons/react/24/solid";
+import { CalendarIcon, MapIcon, UserIcon } from "@heroicons/react/24/solid";
 
 export type Filter = {
   lookbackPeriod: LookbackPeriod;
   agentId: string;
+  regionId: string;
   latencyThreshold: {
     enabled: boolean;
     value: number;
@@ -105,6 +106,19 @@ export default function Filters({
             {agents.map((agent) => (
               <SelectItem key={agent.id} value={agent.id}>
                 {agent.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <Select>
+          <SelectTrigger className="gap-2 bg-background">
+            <MapIcon className="size-4 shrink-0" />
+            <SelectValue placeholder="all regions" />
+          </SelectTrigger>
+          <SelectContent>
+            {["all regions", "US", "UK"].map((region) => (
+              <SelectItem key={region} value={region}>
+                {region}
               </SelectItem>
             ))}
           </SelectContent>
