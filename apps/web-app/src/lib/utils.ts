@@ -150,17 +150,17 @@ export function getLatencyColor(ms: number): string {
   // Yellow/orange zone (3000-4000ms)
   if (ms <= 4000) {
     const percentage = (ms - 3000) / 1000;
-    if (percentage <= 0.33) return "text-yellow-500";
-    if (percentage <= 0.66) return "text-yellow-600";
-    return "text-orange-500";
+    if (percentage <= 0.33) return "font-medium text-yellow-500";
+    if (percentage <= 0.66) return "font-medium text-yellow-600";
+    return "font-medium text-orange-500";
   }
 
   // Red zone (4000-6000+ms)
   const percentage = Math.min((ms - 4000) / 2000, 1);
-  if (percentage <= 0.25) return "text-red-500";
-  if (percentage <= 0.5) return "text-red-500";
-  if (percentage <= 0.75) return "text-red-500";
-  return "text-red-600";
+  if (percentage <= 0.25) return "font-bold text-red-500";
+  if (percentage <= 0.5) return "font-bold text-red-500";
+  if (percentage <= 0.75) return "font-bold text-red-500";
+  return "font-bold text-red-600";
 }
 
 export function getInterruptionsColor(numInterruptions: number): string {

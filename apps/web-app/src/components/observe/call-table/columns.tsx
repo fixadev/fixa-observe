@@ -28,7 +28,7 @@ export const columns: ColumnDef<CallWithIncludes>[] = [
         </div>
       );
     },
-    size: 50,
+    size: 10,
   },
   // {
   //   header: "audio",
@@ -61,7 +61,7 @@ export const columns: ColumnDef<CallWithIncludes>[] = [
         <div className="flex w-full justify-between gap-2 px-4">
           <div
             className={cn(
-              "w-12 text-center text-xs",
+              "w-12 text-center text-sm",
               getLatencyColor(p50 * 1000),
             )}
           >
@@ -69,7 +69,7 @@ export const columns: ColumnDef<CallWithIncludes>[] = [
           </div>
           <div
             className={cn(
-              "w-12 text-center text-xs",
+              "w-12 text-center text-sm",
               getLatencyColor(p90 * 1000),
             )}
           >
@@ -77,7 +77,7 @@ export const columns: ColumnDef<CallWithIncludes>[] = [
           </div>
           <div
             className={cn(
-              "w-12 text-center text-xs",
+              "w-12 text-center text-sm",
               getLatencyColor(p95 * 1000),
             )}
           >
@@ -116,7 +116,7 @@ export const columns: ColumnDef<CallWithIncludes>[] = [
         <div className="flex w-full justify-between gap-2 px-4">
           <div
             className={cn(
-              "w-12 text-center text-xs",
+              "w-12 text-center text-sm",
               getLatencyColor(p50 * 1000),
             )}
           >
@@ -124,7 +124,7 @@ export const columns: ColumnDef<CallWithIncludes>[] = [
           </div>
           <div
             className={cn(
-              "w-12 text-center text-xs",
+              "w-12 text-center text-sm",
               getLatencyColor(p90 * 1000),
             )}
           >
@@ -132,7 +132,7 @@ export const columns: ColumnDef<CallWithIncludes>[] = [
           </div>
           <div
             className={cn(
-              "w-12 text-center text-xs",
+              "w-12 text-center text-sm",
               getLatencyColor(p95 * 1000),
             )}
           >
@@ -140,7 +140,7 @@ export const columns: ColumnDef<CallWithIncludes>[] = [
           </div>
           <div
             className={cn(
-              "w-12 text-center text-xs",
+              "w-12 text-center text-sm",
               getInterruptionsColor(numInterruptions),
             )}
           >
