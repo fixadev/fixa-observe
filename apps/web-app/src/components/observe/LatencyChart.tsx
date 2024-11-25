@@ -1,7 +1,7 @@
 "use client";
 
-import { useMemo } from "react";
-import { Area, AreaChart, CartesianGrid, YAxis } from "recharts";
+import { useCallback, useMemo, useState } from "react";
+import { Area, AreaChart, CartesianGrid, ReferenceArea, YAxis } from "recharts";
 import { XAxis } from "recharts";
 import {
   ChartContainer,
@@ -11,51 +11,6 @@ import {
   ChartTooltipContent,
   type ChartConfig,
 } from "~/components/ui/chart";
-
-const chartData = [
-  {
-    name: "2024-11-18",
-    p50: 600,
-    p90: 1200,
-    p95: 1500,
-  },
-  {
-    name: "2024-11-19",
-    p50: 700,
-    p90: 1300,
-    p95: 1600,
-  },
-  {
-    name: "2024-11-20",
-    p50: 650,
-    p90: 1250,
-    p95: 1550,
-  },
-  {
-    name: "2024-11-21",
-    p50: 800,
-    p90: 1400,
-    p95: 1700,
-  },
-  {
-    name: "2024-11-22",
-    p50: 750,
-    p90: 1350,
-    p95: 1650,
-  },
-  {
-    name: "2024-11-23",
-    p50: 550,
-    p90: 1150,
-    p95: 1450,
-  },
-  {
-    name: "2024-11-24",
-    p50: 500,
-    p90: 1100,
-    p95: 1400,
-  },
-];
 
 const chartConfig = {
   p50: {
@@ -79,41 +34,6 @@ export default function LatencyChart({
   data: { hour: string; p50: number; p90: number; p95: number }[];
   lookbackPeriod: number;
 }) {
-  // const formattedData = useMemo(() => {
-  //   // Generate array of hours from now to lookback period
-  //   const now = new Date();
-  //   const hours = Array.from(
-  //     { length: Math.ceil(lookbackPeriod / (60 * 60 * 1000)) },
-  //     (_, i) => {
-  //       const date = new Date(now);
-  //       date.setHours(date.getHours() - i);
-  //       return date.toISOString().slice(0, 13);
-  //     },
-  //   );
-
-  //   // Create a map of existing data points
-  //   const dataMap = new Map(
-  //     data.map((item) => [new Date(item.hour).getTime(), item]),
-  //   );
-
-  //   // Merge existing data with empty hours
-  //   return hours
-  //     .map((hour) => {
-  //       const timestamp = new Date(hour + ":00:00Z").getTime();
-  //       return (
-  //         dataMap.get(timestamp) ?? {
-  //           hour,
-  //           p50: 0,
-  //           p90: 0,
-  //           p95: 0,
-  //         }
-  //       );
-  //     })
-  //     .map((item) => ({
-  //       ...item,
-  //     }));
-  // }, [data, lookbackPeriod]);
-
   const formattedData = useMemo(() => {
     const ret = [...data];
 
@@ -131,26 +51,87 @@ export default function LatencyChart({
       }
     }
 
-    ret.sort((a, b) => a.hour.localeCompare(b.hour));
+    const ret2 = ret
+      .map((d) => ({
+        ...d,
+        hour: new Date(d.hour + ":00:00Z").getTime(),
+      }))
+      .sort((a, b) => a.hour - b.hour);
 
-    return ret;
+    return ret2;
   }, [data, lookbackPeriod]);
 
+  const [refAreaLeft, setRefAreaLeft] = useState<string>("");
+  const [refAreaRight, setRefAreaRight] = useState<string>("");
+  const [left, setLeft] = useState<string>("dataMin");
+  const [right, setRight] = useState<string>("dataMax");
+
+  const zoom = useCallback(() => {
+    if (
+      refAreaLeft === refAreaRight ||
+      refAreaLeft === "" ||
+      refAreaRight === ""
+    ) {
+      setRefAreaLeft("");
+      setRefAreaRight("");
+      return;
+    }
+
+    let _left, _right;
+    if (refAreaLeft > refAreaRight) {
+      _left = refAreaRight;
+      _right = refAreaLeft;
+    } else {
+      _left = refAreaLeft;
+      _right = refAreaRight;
+    }
+
+    setLeft(_left);
+    setRight(_right);
+
+    setRefAreaLeft("");
+    setRefAreaRight("");
+  }, [refAreaLeft, refAreaRight]);
+
+  const zoomOut = useCallback(() => {
+    setLeft("dataMin");
+    setRight("dataMax");
+  }, []);
+
   return (
-    <ChartContainer config={chartConfig} className="h-[300px] w-full">
-      <AreaChart accessibilityLayer data={formattedData}>
+    <ChartContainer
+      config={chartConfig}
+      className="h-[300px] w-full select-none"
+    >
+      <AreaChart
+        accessibilityLayer
+        data={formattedData}
+        onMouseDown={(e) => {
+          setRefAreaLeft(e.activeLabel ?? "");
+        }}
+        onMouseMove={(e) => {
+          if (!refAreaLeft) return;
+          setRefAreaRight(e.activeLabel ?? "");
+        }}
+        onMouseUp={zoom}
+      >
         <CartesianGrid strokeDasharray="3 3" />
         <XAxis
+          allowDataOverflow
+          domain={[left, right]}
           dataKey="hour"
-          tickFormatter={(value: string) => {
-            const date = new Date(value + ":00:00Z");
+          tickFormatter={(value: number) => {
+            // const date = new Date(value + ":00:00Z");
+            const date = new Date(value);
             return date.toLocaleTimeString("en-US", {
               hour: "2-digit",
               minute: "2-digit",
             });
           }}
+          type="number"
         />
         <YAxis
+          allowDataOverflow
           tickFormatter={(value: string) =>
             `${Math.round(parseFloat(value) * 1000)}ms`
           }
@@ -158,9 +139,16 @@ export default function LatencyChart({
         <ChartTooltip
           content={
             <ChartTooltipContent
-              labelFormatter={(label: string) =>
-                `${label.substring(0, 10)} ${label.substring(11)}:00`
-              }
+              labelKey="hour"
+              labelFormatter={(time: number) => {
+                const date = new Date(time);
+                return date.toLocaleString("en-US", {
+                  month: "short",
+                  day: "numeric",
+                  hour: "2-digit",
+                  minute: "2-digit",
+                });
+              }}
               valueFormatter={(value: string) =>
                 `${Math.round(parseFloat(value) * 1000)}ms`
               }
@@ -189,6 +177,14 @@ export default function LatencyChart({
           fillOpacity={0.4}
           stroke="var(--color-p95)"
         />
+
+        {refAreaLeft && refAreaRight && (
+          <ReferenceArea
+            x1={refAreaLeft}
+            x2={refAreaRight}
+            strokeOpacity={0.3}
+          />
+        )}
       </AreaChart>
     </ChartContainer>
   );

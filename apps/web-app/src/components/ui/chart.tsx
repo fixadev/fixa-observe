@@ -142,12 +142,13 @@ const ChartTooltipContent = React.forwardRef<
       }
 
       const [item] = payload;
-      const key = `${labelKey || item?.dataKey || item?.name || "value"}`;
-      const itemConfig = getPayloadConfigFromPayload(config, item, key);
+      // const key = `${labelKey || item?.dataKey || item?.name || "value"}`;
+      // const itemConfig = getPayloadConfigFromPayload(config, item, key);
       const value =
         !labelKey && typeof label === "string"
           ? config[label]?.label || label
-          : itemConfig?.label;
+          : // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+            (item?.payload?.[labelKey!] as string);
 
       if (labelFormatter) {
         return (
