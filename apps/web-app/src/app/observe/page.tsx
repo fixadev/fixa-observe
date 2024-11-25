@@ -1,42 +1,21 @@
 "use client";
 
-import { useCallback, useMemo, useRef, useState, useEffect } from "react";
+import { useCallback, useMemo, useRef, useEffect } from "react";
 import CallDetails from "~/components/dashboard/CallDetails";
-import { useAudio } from "~/components/hooks/useAudio";
 import { useObserveState } from "~/components/hooks/useObserveState";
 import CallTable from "~/components/observe/CallTable";
-import Filters, {
-  type Filter,
-  lookbackPeriods,
-} from "~/components/observe/Filters";
-import LatencyChart from "~/components/observe/LatencyChart";
+import Filters from "~/components/observe/Filters";
 import Spinner from "~/components/Spinner";
-import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Dialog, DialogContent } from "~/components/ui/dialog";
-import { Skeleton } from "~/components/ui/skeleton";
-import { cn, getColors, getLatencyColor } from "~/lib/utils";
 import { api } from "~/trpc/react";
+import { Skeleton } from "~/components/ui/skeleton";
+import ChartCard from "~/components/observe/ChartCard";
 
 export default function ObservePage() {
-  const [filter, setFilter] = useState<Filter>({
-    lookbackPeriod: lookbackPeriods[2]!,
-    agentId: "all agents",
-    regionId: "all regions",
-    latencyThreshold: {
-      enabled: true,
-      value: 1000,
-    },
-    interruptionThreshold: {
-      enabled: true,
-      value: 1000,
-    },
-  });
-
-  const { selectedCallId, setSelectedCallId } = useObserveState();
+  const { selectedCallId, setSelectedCallId, filter, setFilter } =
+    useObserveState();
 
   const containerRef = useRef<HTMLDivElement>(null);
-
-  const { play, pause, isPlaying } = useAudio();
 
   const { data: percentiles } =
     api._call.getLatencyInterruptionPercentiles.useQuery({
@@ -105,8 +84,6 @@ export default function ObservePage() {
     console.log("play pause!!");
   }, []);
 
-  const colors = useMemo(() => getColors(), []);
-
   return (
     <div
       className="relative h-full bg-muted/30 pt-16"
@@ -116,11 +93,6 @@ export default function ObservePage() {
         if (e.key === " ") {
           e.preventDefault();
           playPauseAudio();
-          // if (isPlaying) {
-          //   pause();
-          // } else {
-          //   play();
-          // }
         }
       }}
     >
@@ -134,163 +106,16 @@ export default function ObservePage() {
             </>
           ) : (
             <>
-              <Card className="flex-1">
-                <CardHeader>
-                  <CardTitle className="mb-2">latency</CardTitle>
-                  <div className="flex gap-4 border-l-2 border-primary pl-4">
-                    <div className="flex flex-col gap-1">
-                      <div className="text-xs font-medium">average</div>
-                      <div className="text-sm">
-                        last {filter.lookbackPeriod.label}
-                      </div>
-                    </div>
-                    <div className="flex flex-col gap-1">
-                      <div
-                        className={cn(
-                          "text-xs font-medium",
-                          `text-${colors[0]}`,
-                        )}
-                      >
-                        50%
-                      </div>
-                      <div
-                        className={cn(
-                          "text-sm",
-                          getLatencyColor(
-                            percentiles.latency.average.p50 * 1000,
-                          ),
-                        )}
-                      >
-                        {Math.round(percentiles.latency.average.p50 * 1000)}
-                        ms
-                      </div>
-                    </div>
-                    <div className="flex flex-col gap-1">
-                      <div
-                        className={cn(
-                          "text-xs font-medium",
-                          `text-${colors[1]}`,
-                        )}
-                      >
-                        90%
-                      </div>
-                      <div
-                        className={cn(
-                          "text-sm",
-                          getLatencyColor(
-                            percentiles.latency.average.p90 * 1000,
-                          ),
-                        )}
-                      >
-                        {Math.round(percentiles.latency.average.p90 * 1000)}
-                        ms
-                      </div>
-                    </div>
-                    <div className="flex flex-col gap-1">
-                      <div
-                        className={cn(
-                          "text-xs font-medium",
-                          `text-${colors[2]}`,
-                        )}
-                      >
-                        95%
-                      </div>
-                      <div
-                        className={cn(
-                          "text-sm",
-                          getLatencyColor(
-                            percentiles.latency.average.p95 * 1000,
-                          ),
-                        )}
-                      >
-                        {Math.round(percentiles.latency.average.p95 * 1000)}
-                        ms
-                      </div>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <LatencyChart
-                    lookbackPeriod={filter.lookbackPeriod.value}
-                    data={percentiles.latency.byHour}
-                  />
-                </CardContent>
-              </Card>
-              <Card className="flex-1">
-                <CardHeader>
-                  <CardTitle className="mb-2">interruptions</CardTitle>
-                  <div className="flex gap-4 border-l-2 border-primary pl-4">
-                    <div className="flex flex-col gap-1">
-                      <div className="text-xs font-medium text-muted-foreground">
-                        average
-                      </div>
-                      <div className="text-sm">
-                        last {filter.lookbackPeriod.label}
-                      </div>
-                    </div>
-                    <div className="flex flex-col gap-1">
-                      <div className="text-xs font-medium text-muted-foreground">
-                        50%
-                      </div>
-                      <div
-                        className={cn(
-                          "text-sm",
-                          getLatencyColor(
-                            percentiles.interruptions.average.p50 * 1000,
-                          ),
-                        )}
-                      >
-                        {Math.round(
-                          percentiles.interruptions.average.p50 * 1000,
-                        )}
-                        ms
-                      </div>
-                    </div>
-                    <div className="flex flex-col gap-1">
-                      <div className="text-xs font-medium text-muted-foreground">
-                        90%
-                      </div>
-                      <div
-                        className={cn(
-                          "text-sm",
-                          getLatencyColor(
-                            percentiles.interruptions.average.p90 * 1000,
-                          ),
-                        )}
-                      >
-                        {Math.round(
-                          percentiles.interruptions.average.p90 * 1000,
-                        )}
-                        ms
-                      </div>
-                    </div>
-                    <div className="flex flex-col gap-1">
-                      <div className="text-xs font-medium text-muted-foreground">
-                        95%
-                      </div>
-                      <div
-                        className={cn(
-                          "text-sm",
-                          getLatencyColor(
-                            percentiles.interruptions.average.p95 * 1000,
-                          ),
-                        )}
-                      >
-                        {Math.round(
-                          percentiles.interruptions.average.p95 * 1000,
-                        )}
-                        ms
-                      </div>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <LatencyChart
-                    lookbackPeriod={filter.lookbackPeriod.value}
-                    data={percentiles.interruptions.byHour}
-                  />
-                </CardContent>
-              </Card>
+              <ChartCard
+                title="latency"
+                average={percentiles.latency.average}
+                byHour={percentiles.latency.byHour}
+              />
+              <ChartCard
+                title="interruptions"
+                average={percentiles.interruptions.average}
+                byHour={percentiles.interruptions.byHour}
+              />
             </>
           )}
         </div>

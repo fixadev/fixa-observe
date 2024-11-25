@@ -15,32 +15,7 @@ import { cn } from "~/lib/utils";
 import { Input } from "../ui/input";
 import { Slider } from "../ui/slider";
 import { CalendarIcon, MapIcon, UserIcon } from "@heroicons/react/24/solid";
-
-export type Filter = {
-  lookbackPeriod: LookbackPeriod;
-  agentId: string;
-  regionId: string;
-  latencyThreshold: {
-    enabled: boolean;
-    value: number;
-  };
-  interruptionThreshold: {
-    enabled: boolean;
-    value: number;
-  };
-};
-
-export type LookbackPeriod = {
-  label: string;
-  value: number;
-};
-
-export const lookbackPeriods: LookbackPeriod[] = [
-  { label: "24 hours", value: 24 * 60 * 60 * 1000 },
-  { label: "2 days", value: 2 * 24 * 60 * 60 * 1000 },
-  { label: "7 days", value: 7 * 24 * 60 * 60 * 1000 },
-  { label: "30 days", value: 30 * 24 * 60 * 60 * 1000 },
-];
+import { lookbackPeriods, type Filter } from "../hooks/useObserveState";
 
 export default function Filters({
   filter,
@@ -67,9 +42,9 @@ export default function Filters({
     ];
   }, []);
 
-  useEffect(() => {
-    console.log(filter);
-  }, [filter]);
+  // useEffect(() => {
+  //   console.log(filter);
+  // }, [filter]);
 
   return (
     <div className="fixed top-0 z-50 flex h-16 w-screen items-center justify-between gap-2 border-b bg-background p-4">

@@ -11,6 +11,7 @@ import {
   ChartTooltipContent,
   type ChartConfig,
 } from "~/components/ui/chart";
+import { useObserveState } from "../hooks/useObserveState";
 
 const chartConfig = {
   p50: {
@@ -29,11 +30,11 @@ const chartConfig = {
 
 export default function LatencyChart({
   data,
-  lookbackPeriod,
 }: {
   data: { hour: string; p50: number; p90: number; p95: number }[];
-  lookbackPeriod: number;
 }) {
+  const { filter } = useObserveState();
+
   const formattedData = useMemo(() => {
     const ret = [...data];
 
@@ -44,7 +45,11 @@ export default function LatencyChart({
 
     const now = Date.now();
 
-    for (let i = now - lookbackPeriod; i <= now; i += 60 * 60 * 1000) {
+    for (
+      let i = now - filter.lookbackPeriod.value;
+      i <= now;
+      i += 60 * 60 * 1000
+    ) {
       const hour = new Date(i).toISOString().slice(0, 13);
       if (!hourSet.has(hour)) {
         ret.push({ hour, p50: 0, p90: 0, p95: 0 });
@@ -59,7 +64,7 @@ export default function LatencyChart({
       .sort((a, b) => a.hour - b.hour);
 
     return ret2;
-  }, [data, lookbackPeriod]);
+  }, [data, filter.lookbackPeriod.value]);
 
   const [refAreaLeft, setRefAreaLeft] = useState<string>("");
   const [refAreaRight, setRefAreaRight] = useState<string>("");
