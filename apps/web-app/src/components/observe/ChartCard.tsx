@@ -1,8 +1,13 @@
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import LatencyChart from "./LatencyChart";
-import { cn, getLatencyColor } from "~/lib/utils";
+import {
+  calculateLatencyPercentiles,
+  cn,
+  formatDateTime,
+  getLatencyColor,
+} from "~/lib/utils";
 import { useObserveState } from "~/components/hooks/useObserveState";
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
 import { Button } from "../ui/button";
 
 interface PercentileData {
@@ -41,7 +46,14 @@ export default function ChartCard({ title, average, byHour }: ChartCardProps) {
             <div className={cn("text-xs font-medium text-muted-foreground")}>
               average
             </div>
-            <div className="text-sm">last {filter.lookbackPeriod.label}</div>
+            {filter.timeRange ? (
+              <div className="text-xs">
+                <div>{formatDateTime(new Date(filter.timeRange.start))} -</div>
+                <div>{formatDateTime(new Date(filter.timeRange.end))}</div>
+              </div>
+            ) : (
+              <div className="text-sm">last {filter.lookbackPeriod.label}</div>
+            )}
           </div>
           <div className="flex flex-col gap-1">
             <div className={cn("text-xs font-medium text-muted-foreground")}>

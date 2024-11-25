@@ -11,7 +11,7 @@ import {
 } from "../ui/select";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { Switch } from "../ui/switch";
-import { cn } from "~/lib/utils";
+import { cn, formatDateTime } from "~/lib/utils";
 import { Input } from "../ui/input";
 import { Slider } from "../ui/slider";
 import { CalendarIcon, MapIcon, UserIcon } from "@heroicons/react/24/solid";
@@ -57,12 +57,20 @@ export default function Filters({
               lookbackPeriod: lookbackPeriods.find(
                 (p) => p.value === parseInt(value),
               )!,
+              timeRange: undefined,
             });
           }}
         >
           <SelectTrigger className="gap-2 bg-background">
             <CalendarIcon className="size-4 shrink-0" />
-            <SelectValue placeholder="time range" />
+            {filter.timeRange ? (
+              <SelectValue>
+                {formatDateTime(new Date(filter.timeRange.start))} -{" "}
+                {formatDateTime(new Date(filter.timeRange.end))}
+              </SelectValue>
+            ) : (
+              <SelectValue placeholder="time range" />
+            )}
           </SelectTrigger>
           <SelectContent>
             {lookbackPeriods.map((period) => (

@@ -168,3 +168,12 @@ export function getInterruptionsColor(numInterruptions: number): string {
   if (numInterruptions < 4) return "text-yellow-500";
   return "text-red-500";
 }
+
+export function formatDateTime(date: Date): string {
+  return date.toLocaleString("en-US", {
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
