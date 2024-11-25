@@ -52,6 +52,10 @@ export default function Filters({
   const agents = useMemo(() => {
     return [
       {
+        id: "all agents",
+        name: "all agents",
+      },
+      {
         id: "agent1",
         name: "agent 1",
       },
@@ -95,7 +99,7 @@ export default function Filters({
         <Select>
           <SelectTrigger className="gap-2 bg-background">
             <UserIcon className="size-4 shrink-0" />
-            <SelectValue placeholder="agent" />
+            <SelectValue placeholder="all agents" />
           </SelectTrigger>
           <SelectContent>
             {agents.map((agent) => (
@@ -105,7 +109,7 @@ export default function Filters({
             ))}
           </SelectContent>
         </Select>
-        <SwitchWithValue
+        {/* <SwitchWithValue
           prefix="latency &gt;= "
           suffix="ms"
           value={filter.latencyThreshold.value}
@@ -146,7 +150,7 @@ export default function Filters({
               },
             });
           }}
-        />
+        /> */}
       </div>
       <Button variant="outline">refresh</Button>
     </div>

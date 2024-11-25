@@ -1,4 +1,6 @@
 def create_transcript_from_deepgram(user_words, agent_words):
+    # print(user_words)
+    # print(agent_words)
     try: 
         """Create segments representing conversation turns between user and agent from Deepgram word alignments."""
         all_chunks = []
@@ -6,7 +8,7 @@ def create_transcript_from_deepgram(user_words, agent_words):
         current_start = None
         current_end = None
         
-        for word in user_words:
+        for i, word in enumerate(user_words):
             if not current_start:
                 current_start = word['start']
             current_text.append(word['punctuated_word'])
@@ -14,6 +16,16 @@ def create_transcript_from_deepgram(user_words, agent_words):
             
             # If word ends with punctuation, create a new chunk
             if word['punctuated_word'][-1] in '.?!':
+                all_chunks.append(({
+                    'timestamp': [current_start, current_end],
+                    'text': ' '.join(current_text)
+                }, 'user'))
+                current_text = []
+                current_start = None
+                continue
+            
+            # If word ends with punctuation, create a new chunk
+            if i < len(user_words) - 1 and (user_words[i+1]['start'] - word['end']) > 2 and user_words[i+1]['punctuated_word'][0].isupper():
                 all_chunks.append(({
                     'timestamp': [current_start, current_end],
                     'text': ' '.join(current_text)
@@ -40,7 +52,7 @@ def create_transcript_from_deepgram(user_words, agent_words):
             current_end = word['end']
         
             # Check for gap with previous word (new utterance)
-            if i < len(agent_words) - 1 and (agent_words[i+1]['start'] - word['end']) > 1 and agent_words[i+1]['punctuated_word'][0].isupper():
+            if i < len(agent_words) - 1 and (agent_words[i+1]['start'] - word['end']) > 1 and agent_words[i+1]['punctuated_word'][0].isupper() or (i < len(agent_words) - 1 and (agent_words[i+1]['start'] - word['end']) > 2):
                 # Create chunk for previous text if exists
                 if current_text:
                     all_chunks.append(({
@@ -77,7 +89,7 @@ def create_transcript_from_deepgram(user_words, agent_words):
         
         for chunk, speaker in all_chunks:
             # splits new utterances
-            if speaker != current_speaker or (current_chunks and (chunk['timestamp'][0] - current_chunks[-1]['timestamp'][1]) > 1 and chunk['text'][0].isupper()):
+            if speaker != current_speaker or (current_chunks and (chunk['timestamp'][0] - current_chunks[-1]['timestamp'][1]) > 1 and chunk['text'][0].isupper()) or (current_chunks and (chunk['timestamp'][0] - current_chunks[-1]['timestamp'][1] > 2)):
                 if current_chunks:
                     segments.append({
                         'role': current_speaker,
@@ -140,6 +152,7 @@ def create_transcript_from_deepgram(user_words, agent_words):
                         if word['start'] >= overlap_start and word['start'] < agent_end:
                             overlap_words.append(word['punctuated_word'])
                     
+                    # if agent_end - overlap_start > 2:
                     interruptions.append({
                         'secondsFromStart': overlap_start,
                         'duration': agent_end - overlap_start,

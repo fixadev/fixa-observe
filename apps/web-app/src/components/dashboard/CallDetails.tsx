@@ -72,9 +72,11 @@ export default function CallDetails({
     return map;
   }, [call.latencyBlocks, call.messages]);
 
+  // TODO: fix this
   // Offset from the start of the call to the first message
   const offsetFromStart = useMemo(() => {
-    return messagesFiltered[0]?.secondsFromStart ?? 0;
+    // return messagesFiltered[0]?.secondsFromStart ?? 0;
+    return 0;
   }, [messagesFiltered]);
 
   // Index of the currently active message

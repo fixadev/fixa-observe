@@ -132,3 +132,39 @@ export function calculateLatencyPercentiles(durations: number[]) {
     p95: sortedDurations[p95Index] ?? 0,
   };
 }
+
+export function getColors() {
+  return ["sky-800", "sky-500", "sky-300"];
+}
+
+export function getLatencyColor(ms: number): string {
+  // Green zone (0-3000ms)
+  if (ms <= 3000) {
+    const percentage = ms / 3000;
+    if (percentage <= 0.25) return "text-green-400";
+    if (percentage <= 0.5) return "text-green-500";
+    if (percentage <= 0.75) return "text-green-600";
+    return "text-green-700";
+  }
+
+  // Yellow/orange zone (3000-4000ms)
+  if (ms <= 4000) {
+    const percentage = (ms - 3000) / 1000;
+    if (percentage <= 0.33) return "text-yellow-500";
+    if (percentage <= 0.66) return "text-yellow-600";
+    return "text-orange-500";
+  }
+
+  // Red zone (4000-6000+ms)
+  const percentage = Math.min((ms - 4000) / 2000, 1);
+  if (percentage <= 0.25) return "text-red-500";
+  if (percentage <= 0.5) return "text-red-500";
+  if (percentage <= 0.75) return "text-red-500";
+  return "text-red-600";
+}
+
+export function getInterruptionsColor(numInterruptions: number): string {
+  if (numInterruptions < 2) return "text-green-500";
+  if (numInterruptions < 4) return "text-yellow-500";
+  return "text-red-500";
+}

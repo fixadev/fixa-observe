@@ -1,11 +1,30 @@
 import { db } from "../db";
 import { transcribeAndSaveCall } from "./transcribeAndSaveCall";
 
+const resetProcessedStatus = async () => {
+  try {
+    await db.callRecording.updateMany({
+      where: {
+        processed: true, // find all processed ones
+      },
+      data: {
+        processed: false, // set them to false
+      },
+    });
+    console.log("Reset all calls to unprocessed");
+  } catch (error) {
+    console.error("Error resetting processed status:", error);
+  }
+};
+
 const transcribePastCalls = async () => {
   try {
+    // await resetProcessedStatus();
+
     const callRecordings = await db.callRecording.findMany({
       where: {
-        processed: false,
+        // processed: false,
+        id: "call.QjhWk6hTZQhFXhR3CVk1ha",
       },
       orderBy: {
         createdAt: "desc",

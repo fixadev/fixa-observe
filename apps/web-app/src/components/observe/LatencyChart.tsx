@@ -169,11 +169,11 @@ export default function LatencyChart({
         />
         <ChartLegend content={<ChartLegendContent />} />
         <Area
-          dataKey="p95"
+          dataKey="p50"
           type="natural"
-          fill="var(--color-p95)"
+          fill="var(--color-p50)"
           fillOpacity={0.4}
-          stroke="var(--color-p95)"
+          stroke="var(--color-p50)"
         />
         <Area
           dataKey="p90"
@@ -183,11 +183,11 @@ export default function LatencyChart({
           stroke="var(--color-p90)"
         />
         <Area
-          dataKey="p50"
+          dataKey="p95"
           type="natural"
-          fill="var(--color-p50)"
+          fill="var(--color-p95)"
           fillOpacity={0.4}
-          stroke="var(--color-p50)"
+          stroke="var(--color-p95)"
         />
       </AreaChart>
     </ChartContainer>

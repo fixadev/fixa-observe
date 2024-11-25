@@ -30,7 +30,7 @@ export const callService = {
     testId,
     scenarioId,
     lookbackPeriod,
-    limit = 50,
+    limit,
   }: {
     ownerId?: string;
     testId?: string;
@@ -42,6 +42,7 @@ export const callService = {
     if (lookbackPeriod) {
       console.log("DATE", new Date(Date.now() - lookbackPeriod));
     }
+    console.log("lookbackPeriod", lookbackPeriod);
     return await db.call.findMany({
       where: {
         ownerId,
@@ -103,7 +104,7 @@ export const callService = {
       );
     });
 
-    console.log("CALLS", calls);
+    console.log("TOTAL CALLS", calls.length);
 
     // Group calls by hour
     const callsByHour = calls.reduce(
@@ -117,7 +118,7 @@ export const callService = {
       {} as Record<string, CallWithIncludes[]>,
     );
 
-    console.log("CALLS BY HOUR", callsByHour);
+    // console.log("CALLS BY HOUR", callsByHour);
 
     // Calculate percentiles for each hour
     const latencyByHour: {

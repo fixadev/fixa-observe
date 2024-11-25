@@ -4,7 +4,12 @@ import { CopyButton } from "~/components/CopyButton";
 import { useObserveState } from "~/components/hooks/useObserveState";
 import { Button } from "~/components/ui/button";
 import { type CallWithIncludes } from "~/lib/types";
-import { calculateLatencyPercentiles } from "~/lib/utils";
+import {
+  calculateLatencyPercentiles,
+  cn,
+  getInterruptionsColor,
+  getLatencyColor,
+} from "~/lib/utils";
 
 export const columns: ColumnDef<CallWithIncludes>[] = [
   {
@@ -54,13 +59,28 @@ export const columns: ColumnDef<CallWithIncludes>[] = [
       );
       return (
         <div className="flex w-full justify-between gap-2 px-4">
-          <div className="w-12 text-center text-xs">
+          <div
+            className={cn(
+              "w-12 text-center text-xs",
+              getLatencyColor(p50 * 1000),
+            )}
+          >
             {Math.round(p50 * 1000)}ms
           </div>
-          <div className="w-12 text-center text-xs">
+          <div
+            className={cn(
+              "w-12 text-center text-xs",
+              getLatencyColor(p90 * 1000),
+            )}
+          >
             {Math.round(p90 * 1000)}ms
           </div>
-          <div className="w-12 text-center text-xs">
+          <div
+            className={cn(
+              "w-12 text-center text-xs",
+              getLatencyColor(p95 * 1000),
+            )}
+          >
             {Math.round(p95 * 1000)}ms
           </div>
         </div>
@@ -73,12 +93,12 @@ export const columns: ColumnDef<CallWithIncludes>[] = [
     header: () => {
       return (
         <div className="flex w-full flex-col items-center gap-1 px-4">
-          <div className="text-base font-medium">interruptions</div>
+          <div className="text-center text-base font-medium">interruptions</div>
           <div className="flex w-full justify-between gap-2">
             <div className="w-12 text-center text-xs">50%</div>
             <div className="w-12 text-center text-xs">90%</div>
             <div className="w-12 text-center text-xs">95%</div>
-            <div className="w-12 text-center text-xs">total</div>
+            <div className="w-14 text-center text-xs">{"total > 2s"}</div>
           </div>
         </div>
       );
@@ -86,22 +106,46 @@ export const columns: ColumnDef<CallWithIncludes>[] = [
     cell: ({ row }) => {
       const call = row.original;
       const { p50, p90, p95 } = calculateLatencyPercentiles(
-        call.latencyBlocks.map((block) => block.duration),
+        call.interruptions.map((interruption) => interruption.duration),
       );
       // const numInterruptions = Math.floor(Math.random() * 7);
-      const numInterruptions = call.interruptions.length;
+      const numInterruptions = call.interruptions.filter(
+        (interruption) => interruption.duration > 2,
+      ).length;
       return (
         <div className="flex w-full justify-between gap-2 px-4">
-          <div className="w-12 text-center text-xs">
+          <div
+            className={cn(
+              "w-12 text-center text-xs",
+              getLatencyColor(p50 * 1000),
+            )}
+          >
             {Math.round(p50 * 1000)}ms
           </div>
-          <div className="w-12 text-center text-xs">
+          <div
+            className={cn(
+              "w-12 text-center text-xs",
+              getLatencyColor(p90 * 1000),
+            )}
+          >
             {Math.round(p90 * 1000)}ms
           </div>
-          <div className="w-12 text-center text-xs">
+          <div
+            className={cn(
+              "w-12 text-center text-xs",
+              getLatencyColor(p95 * 1000),
+            )}
+          >
             {Math.round(p95 * 1000)}ms
           </div>
-          <div className="w-12 text-center text-xs">{numInterruptions}</div>
+          <div
+            className={cn(
+              "w-12 text-center text-xs",
+              getInterruptionsColor(numInterruptions),
+            )}
+          >
+            {numInterruptions}
+          </div>
         </div>
       );
     },

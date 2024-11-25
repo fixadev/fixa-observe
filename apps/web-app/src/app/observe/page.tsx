@@ -14,6 +14,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Dialog, DialogContent } from "~/components/ui/dialog";
 import { Skeleton } from "~/components/ui/skeleton";
 import { TEST_OBSERVE_CALLS } from "~/lib/test-data";
+import { cn, getColors } from "~/lib/utils";
 import { api } from "~/trpc/react";
 
 export default function ObservePage() {
@@ -49,6 +50,7 @@ export default function ObservePage() {
   // }, []);
   const { data: calls } = api._call.getCalls.useQuery({
     ownerId: "11x",
+    limit: 50,
   });
 
   const selectedCall = useMemo(
@@ -59,6 +61,8 @@ export default function ObservePage() {
   const playPauseAudio = useCallback(() => {
     console.log("play pause!!");
   }, []);
+
+  const colors = useMemo(() => getColors(), []);
 
   return (
     <div
@@ -92,15 +96,18 @@ export default function ObservePage() {
                   <CardTitle className="mb-2">latency</CardTitle>
                   <div className="flex gap-4 border-l-2 border-primary pl-4">
                     <div className="flex flex-col gap-1">
-                      <div className="text-xs font-medium text-muted-foreground">
-                        average
-                      </div>
+                      <div className="text-xs font-medium">average</div>
                       <div className="text-sm">
                         last {filter.lookbackPeriod.label}
                       </div>
                     </div>
                     <div className="flex flex-col gap-1">
-                      <div className="text-xs font-medium text-muted-foreground">
+                      <div
+                        className={cn(
+                          "text-xs font-medium",
+                          `text-${colors[0]}`,
+                        )}
+                      >
                         50%
                       </div>
                       <div className="text-sm">
@@ -109,7 +116,12 @@ export default function ObservePage() {
                       </div>
                     </div>
                     <div className="flex flex-col gap-1">
-                      <div className="text-xs font-medium text-muted-foreground">
+                      <div
+                        className={cn(
+                          "text-xs font-medium",
+                          `text-${colors[1]}`,
+                        )}
+                      >
                         90%
                       </div>
                       <div className="text-sm">
@@ -118,7 +130,12 @@ export default function ObservePage() {
                       </div>
                     </div>
                     <div className="flex flex-col gap-1">
-                      <div className="text-xs font-medium text-muted-foreground">
+                      <div
+                        className={cn(
+                          "text-xs font-medium",
+                          `text-${colors[2]}`,
+                        )}
+                      >
                         95%
                       </div>
                       <div className="text-sm">

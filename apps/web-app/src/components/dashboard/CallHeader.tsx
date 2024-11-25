@@ -1,7 +1,12 @@
 "use client";
 
 import { type CallWithIncludes } from "~/lib/types";
-import { calculateLatencyPercentiles, cn, didCallSucceed } from "~/lib/utils";
+import {
+  calculateLatencyPercentiles,
+  cn,
+  didCallSucceed,
+  getLatencyColor,
+} from "~/lib/utils";
 import Image from "next/image";
 import { CheckCircleIcon, XCircleIcon } from "@heroicons/react/24/solid";
 import Spinner from "../Spinner";
@@ -125,19 +130,34 @@ export function LatencyCallHeader({ call, avatarUrl }: CallHeaderProps) {
         <div className="flex items-center gap-4 text-muted-foreground">
           <div>
             <div className="text-xs font-medium">50%</div>
-            <div className="text-base font-medium text-green-500">
+            <div
+              className={cn(
+                "text-base font-medium",
+                getLatencyColor(p50 * 1000),
+              )}
+            >
               {Math.round(p50 * 1000)}ms
             </div>
           </div>
           <div>
             <div className="text-xs font-medium">90%</div>
-            <div className="text-base font-medium text-yellow-500">
+            <div
+              className={cn(
+                "text-base font-medium",
+                getLatencyColor(p90 * 1000),
+              )}
+            >
               {Math.round(p90 * 1000)}ms
             </div>
           </div>
           <div>
             <div className="text-xs font-medium">95%</div>
-            <div className="text-base font-medium text-red-500">
+            <div
+              className={cn(
+                "text-base font-medium",
+                getLatencyColor(p95 * 1000),
+              )}
+            >
               {Math.round(p95 * 1000)}ms
             </div>
           </div>
