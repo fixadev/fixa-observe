@@ -3,6 +3,7 @@
 import {
   type ColumnDef,
   type ColumnFiltersState,
+  type RowData,
   type SortingState,
   type VisibilityState,
   flexRender,
@@ -20,11 +21,19 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Fragment, useEffect, useState } from "react";
+import { Fragment, useState } from "react";
 import { cn } from "~/lib/utils";
 import { type CallWithIncludes } from "~/lib/types";
 import AudioPlayer from "../../dashboard/AudioPlayer";
-import { useInView } from "react-intersection-observer";
+
+// Add this type declaration at the top of the file
+declare module "@tanstack/react-table" {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  interface ColumnMeta<TData extends RowData, TValue> {
+    headerClassName?: string;
+    cellClassName?: string;
+  }
+}
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -74,14 +83,23 @@ export function DataTable<TData, TValue>({
     <div>
       <div className="rounded-md border bg-background">
         <Table>
-          <TableHeader>
+          <TableHeader className="sticky top-16 z-20 border-b bg-background">
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
+                  const meta = header.column.columnDef.meta;
                   return (
                     <TableHead
                       key={header.id}
-                      style={{ width: `${header.getSize()}px` }}
+                      style={{
+                        // flex: `0 0 ${header.getSize()}px`,
+                        width: `${header.getSize()}px`,
+                        // maxWidth: "1%",
+                        // width: "1%",
+                      }}
+                      className={cn(meta?.headerClassName)}
+                      // className="sticky top-0 z-10 bg-background"
+                      // className="sticky top-[64px] z-10 bg-background"
                     >
                       {header.isPlaceholder
                         ? null
@@ -108,14 +126,20 @@ export function DataTable<TData, TValue>({
                       onClick={row.getToggleExpandedHandler()}
                       className="cursor-pointer"
                     >
-                      {row.getVisibleCells().map((cell) => (
-                        <TableCell key={cell.id}>
-                          {flexRender(
-                            cell.column.columnDef.cell,
-                            cell.getContext(),
-                          )}
-                        </TableCell>
-                      ))}
+                      {row.getVisibleCells().map((cell) => {
+                        const meta = cell.column.columnDef.meta;
+                        return (
+                          <TableCell
+                            key={cell.id}
+                            className={cn(meta?.cellClassName)}
+                          >
+                            {flexRender(
+                              cell.column.columnDef.cell,
+                              cell.getContext(),
+                            )}
+                          </TableCell>
+                        );
+                      })}
                     </TableRow>
                     {row.getIsExpanded() && (
                       <TableRow>

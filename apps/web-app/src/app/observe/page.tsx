@@ -15,7 +15,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Dialog, DialogContent } from "~/components/ui/dialog";
 import { Skeleton } from "~/components/ui/skeleton";
 import { TEST_OBSERVE_CALLS } from "~/lib/test-data";
-import { cn, getColors } from "~/lib/utils";
+import { cn, getColors, getLatencyColor } from "~/lib/utils";
 import { api } from "~/trpc/react";
 
 export default function ObservePage() {
@@ -110,7 +110,7 @@ export default function ObservePage() {
 
   return (
     <div
-      className="relative h-full bg-muted/30"
+      className="relative h-full bg-muted/30 pt-16"
       autoFocus
       tabIndex={0}
       onKeyDown={(e) => {
@@ -154,7 +154,14 @@ export default function ObservePage() {
                       >
                         50%
                       </div>
-                      <div className="text-sm">
+                      <div
+                        className={cn(
+                          "text-sm",
+                          getLatencyColor(
+                            percentiles.latency.average.p50 * 1000,
+                          ),
+                        )}
+                      >
                         {Math.round(percentiles.latency.average.p50 * 1000)}
                         ms
                       </div>
@@ -168,7 +175,14 @@ export default function ObservePage() {
                       >
                         90%
                       </div>
-                      <div className="text-sm">
+                      <div
+                        className={cn(
+                          "text-sm",
+                          getLatencyColor(
+                            percentiles.latency.average.p90 * 1000,
+                          ),
+                        )}
+                      >
                         {Math.round(percentiles.latency.average.p90 * 1000)}
                         ms
                       </div>
@@ -182,7 +196,14 @@ export default function ObservePage() {
                       >
                         95%
                       </div>
-                      <div className="text-sm">
+                      <div
+                        className={cn(
+                          "text-sm",
+                          getLatencyColor(
+                            percentiles.latency.average.p95 * 1000,
+                          ),
+                        )}
+                      >
                         {Math.round(percentiles.latency.average.p95 * 1000)}
                         ms
                       </div>
@@ -212,7 +233,14 @@ export default function ObservePage() {
                       <div className="text-xs font-medium text-muted-foreground">
                         50%
                       </div>
-                      <div className="text-sm">
+                      <div
+                        className={cn(
+                          "text-sm",
+                          getLatencyColor(
+                            percentiles.interruptions.average.p50 * 1000,
+                          ),
+                        )}
+                      >
                         {Math.round(
                           percentiles.interruptions.average.p50 * 1000,
                         )}
@@ -223,7 +251,14 @@ export default function ObservePage() {
                       <div className="text-xs font-medium text-muted-foreground">
                         90%
                       </div>
-                      <div className="text-sm">
+                      <div
+                        className={cn(
+                          "text-sm",
+                          getLatencyColor(
+                            percentiles.interruptions.average.p90 * 1000,
+                          ),
+                        )}
+                      >
                         {Math.round(
                           percentiles.interruptions.average.p90 * 1000,
                         )}
@@ -234,7 +269,14 @@ export default function ObservePage() {
                       <div className="text-xs font-medium text-muted-foreground">
                         95%
                       </div>
-                      <div className="text-sm">
+                      <div
+                        className={cn(
+                          "text-sm",
+                          getLatencyColor(
+                            percentiles.interruptions.average.p95 * 1000,
+                          ),
+                        )}
+                      >
                         {Math.round(
                           percentiles.interruptions.average.p95 * 1000,
                         )}

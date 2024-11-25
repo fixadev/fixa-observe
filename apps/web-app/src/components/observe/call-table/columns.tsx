@@ -52,6 +52,10 @@ export const columns: ColumnDef<CallWithIncludes>[] = [
         </div>
       );
     },
+    meta: {
+      headerClassName: "border-x",
+      cellClassName: "border-x",
+    },
     cell: ({ row }) => {
       const call = row.original;
       const { p50, p90, p95 } = calculateLatencyPercentiles(
@@ -90,6 +94,10 @@ export const columns: ColumnDef<CallWithIncludes>[] = [
   },
   {
     id: "interruptions",
+    meta: {
+      headerClassName: "border-r",
+      cellClassName: "border-r",
+    },
     header: () => {
       return (
         <div className="flex w-full flex-col items-center gap-1 px-4">
