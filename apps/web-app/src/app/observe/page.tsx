@@ -12,12 +12,13 @@ import Filters, {
 import LatencyChart from "~/components/observe/LatencyChart";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Dialog, DialogContent } from "~/components/ui/dialog";
+import { Skeleton } from "~/components/ui/skeleton";
 import { TEST_OBSERVE_CALLS } from "~/lib/test-data";
 import { api } from "~/trpc/react";
 
 export default function ObservePage() {
   const [filter, setFilter] = useState<Filter>({
-    lookbackPeriod: lookbackPeriods[0]!,
+    lookbackPeriod: lookbackPeriods[2]!,
     agentId: "agent1",
     latencyThreshold: {
       enabled: true,
@@ -35,14 +36,13 @@ export default function ObservePage() {
 
   const { play, pause, isPlaying } = useAudio();
 
-  // const { data: latencyPercentiles } = api._call.getLatencyInterruptionPercentiles.useQuery(
-  //   {
-  //     lookbackPeriod: lookbackPeriod.value,
-  //   },
-  // );
-  const latencyPercentiles = useMemo(() => {
-    return [];
-  }, []);
+  const { data: percentiles } =
+    api._call.getLatencyInterruptionPercentiles.useQuery({
+      lookbackPeriod: filter.lookbackPeriod.value,
+    });
+  // const latencyPercentiles = useMemo(() => {
+  //   return [];
+  // }, []);
   // const calls = useMemo(() => {
   //   return TEST_OBSERVE_CALLS.slice(0, 2);
   //   // return TEST_OBSERVE_CALLS;
@@ -80,84 +80,117 @@ export default function ObservePage() {
       <Filters filter={filter} setFilter={setFilter} />
       <div className="flex flex-col gap-4 p-4">
         <div className="flex w-full gap-4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="mb-2">latency</CardTitle>
-              <div className="flex gap-4 border-l-2 border-primary pl-4">
-                <div className="flex flex-col gap-1">
-                  <div className="text-xs font-medium text-muted-foreground">
-                    average
+          {!percentiles ? (
+            <>
+              <Skeleton className="h-[500px] flex-1" />
+              <Skeleton className="h-[500px] flex-1" />
+            </>
+          ) : (
+            <>
+              <Card className="flex-1">
+                <CardHeader>
+                  <CardTitle className="mb-2">latency</CardTitle>
+                  <div className="flex gap-4 border-l-2 border-primary pl-4">
+                    <div className="flex flex-col gap-1">
+                      <div className="text-xs font-medium text-muted-foreground">
+                        average
+                      </div>
+                      <div className="text-sm">
+                        last {filter.lookbackPeriod.label}
+                      </div>
+                    </div>
+                    <div className="flex flex-col gap-1">
+                      <div className="text-xs font-medium text-muted-foreground">
+                        50%
+                      </div>
+                      <div className="text-sm">
+                        {Math.round(percentiles.latency.average.p50 * 1000)}
+                        ms
+                      </div>
+                    </div>
+                    <div className="flex flex-col gap-1">
+                      <div className="text-xs font-medium text-muted-foreground">
+                        90%
+                      </div>
+                      <div className="text-sm">
+                        {Math.round(percentiles.latency.average.p90 * 1000)}
+                        ms
+                      </div>
+                    </div>
+                    <div className="flex flex-col gap-1">
+                      <div className="text-xs font-medium text-muted-foreground">
+                        95%
+                      </div>
+                      <div className="text-sm">
+                        {Math.round(percentiles.latency.average.p95 * 1000)}
+                        ms
+                      </div>
+                    </div>
                   </div>
-                  <div className="text-sm">
-                    last {filter.lookbackPeriod.label}
+                </CardHeader>
+                <CardContent>
+                  <LatencyChart
+                    lookbackPeriod={filter.lookbackPeriod.value}
+                    data={percentiles.latency.byHour}
+                  />
+                </CardContent>
+              </Card>
+              <Card className="flex-1">
+                <CardHeader>
+                  <CardTitle className="mb-2">interruptions</CardTitle>
+                  <div className="flex gap-4 border-l-2 border-primary pl-4">
+                    <div className="flex flex-col gap-1">
+                      <div className="text-xs font-medium text-muted-foreground">
+                        average
+                      </div>
+                      <div className="text-sm">
+                        last {filter.lookbackPeriod.label}
+                      </div>
+                    </div>
+                    <div className="flex flex-col gap-1">
+                      <div className="text-xs font-medium text-muted-foreground">
+                        50%
+                      </div>
+                      <div className="text-sm">
+                        {Math.round(
+                          percentiles.interruptions.average.p50 * 1000,
+                        )}
+                        ms
+                      </div>
+                    </div>
+                    <div className="flex flex-col gap-1">
+                      <div className="text-xs font-medium text-muted-foreground">
+                        90%
+                      </div>
+                      <div className="text-sm">
+                        {Math.round(
+                          percentiles.interruptions.average.p90 * 1000,
+                        )}
+                        ms
+                      </div>
+                    </div>
+                    <div className="flex flex-col gap-1">
+                      <div className="text-xs font-medium text-muted-foreground">
+                        95%
+                      </div>
+                      <div className="text-sm">
+                        {Math.round(
+                          percentiles.interruptions.average.p95 * 1000,
+                        )}
+                        ms
+                      </div>
+                    </div>
                   </div>
-                </div>
-                <div className="flex flex-col gap-1">
-                  <div className="text-xs font-medium text-muted-foreground">
-                    50%
-                  </div>
-                  <div className="text-sm">400ms</div>
-                </div>
-                <div className="flex flex-col gap-1">
-                  <div className="text-xs font-medium text-muted-foreground">
-                    90%
-                  </div>
-                  <div className="text-sm">1000ms</div>
-                </div>
-                <div className="flex flex-col gap-1">
-                  <div className="text-xs font-medium text-muted-foreground">
-                    95%
-                  </div>
-                  <div className="text-sm">1500ms</div>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <LatencyChart
-                lookbackPeriod={filter.lookbackPeriod.value}
-                data={latencyPercentiles ?? []}
-              />
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader>
-              <CardTitle className="mb-2">interruptions</CardTitle>
-              <div className="flex gap-4 border-l-2 border-primary pl-4">
-                <div className="flex flex-col gap-1">
-                  <div className="text-xs font-medium text-muted-foreground">
-                    average
-                  </div>
-                  <div className="text-sm">
-                    last {filter.lookbackPeriod.label}
-                  </div>
-                </div>
-                <div className="flex flex-col gap-1">
-                  <div className="text-xs font-medium text-muted-foreground">
-                    50%
-                  </div>
-                  <div className="text-sm">400ms</div>
-                </div>
-                <div className="flex flex-col gap-1">
-                  <div className="text-xs font-medium text-muted-foreground">
-                    90%
-                  </div>
-                  <div className="text-sm">1000ms</div>
-                </div>
-                <div className="flex flex-col gap-1">
-                  <div className="text-xs font-medium text-muted-foreground">
-                    95%
-                  </div>
-                  <div className="text-sm">1500ms</div>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <LatencyChart
-                lookbackPeriod={filter.lookbackPeriod.value}
-                data={latencyPercentiles ?? []}
-              />
-            </CardContent>
-          </Card>
+                </CardHeader>
+                <CardContent>
+                  <LatencyChart
+                    lookbackPeriod={filter.lookbackPeriod.value}
+                    data={percentiles.interruptions.byHour}
+                  />
+                </CardContent>
+              </Card>
+            </>
+          )}
         </div>
         <CallTable
           calls={calls ?? []}

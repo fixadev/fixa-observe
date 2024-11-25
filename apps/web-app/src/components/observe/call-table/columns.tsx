@@ -1,7 +1,6 @@
 import { type ColumnDef } from "@tanstack/react-table";
 import { formatDistanceToNow } from "date-fns";
 import { CopyButton } from "~/components/CopyButton";
-import AudioPlayer from "~/components/dashboard/AudioPlayer";
 import { useObserveState } from "~/components/hooks/useObserveState";
 import { Button } from "~/components/ui/button";
 import { type CallWithIncludes } from "~/lib/types";
