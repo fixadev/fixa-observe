@@ -96,6 +96,12 @@ export const callService = {
       ownerId,
       lookbackPeriod,
     });
+    calls.sort((a, b) => {
+      return (
+        new Date(a.startedAt ?? "").getTime() -
+        new Date(b.startedAt ?? "").getTime()
+      );
+    });
 
     console.log("CALLS", calls);
 

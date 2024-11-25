@@ -114,29 +114,31 @@ export default function LatencyChart({
   //     }));
   // }, [data, lookbackPeriod]);
 
-  // const formattedData = useMemo(() => {
-  //   const ret = [...data];
+  const formattedData = useMemo(() => {
+    const ret = [...data];
 
-  //   const hourSet = new Set<string>();
-  //   for (const item of data) {
-  //     hourSet.add(item.hour);
-  //   }
+    const hourSet = new Set<string>();
+    for (const item of data) {
+      hourSet.add(item.hour);
+    }
 
-  //   const now = Date.now();
+    const now = Date.now();
 
-  //   for (let i = now; i >= now - lookbackPeriod; ++i) {
-  //     const hour = new Date(i).toISOString().slice(0, 13);
-  //     if (!hourSet.has(hour)) {
-  //       ret.push({ hour, p50: 0, p90: 0, p95: 0 });
-  //     }
-  //   }
+    for (let i = now - lookbackPeriod; i <= now; i += 60 * 60 * 1000) {
+      const hour = new Date(i).toISOString().slice(0, 13);
+      if (!hourSet.has(hour)) {
+        ret.push({ hour, p50: 0, p90: 0, p95: 0 });
+      }
+    }
 
-  //   return ret;
-  // }, [data, lookbackPeriod]);
+    ret.sort((a, b) => a.hour.localeCompare(b.hour));
+
+    return ret;
+  }, [data, lookbackPeriod]);
 
   return (
     <ChartContainer config={chartConfig} className="h-[300px] w-full">
-      <AreaChart accessibilityLayer data={data}>
+      <AreaChart accessibilityLayer data={formattedData}>
         <CartesianGrid strokeDasharray="3 3" />
         <XAxis
           dataKey="hour"
@@ -148,11 +150,18 @@ export default function LatencyChart({
             });
           }}
         />
-        <YAxis tickFormatter={(value) => `${value}ms`} />
+        <YAxis
+          tickFormatter={(value: string) =>
+            `${Math.round(parseFloat(value) * 1000)}ms`
+          }
+        />
         <ChartTooltip
           content={
             <ChartTooltipContent
-              valueFormatter={(value) =>
+              labelFormatter={(label: string) =>
+                `${label.substring(0, 10)} ${label.substring(11)}:00`
+              }
+              valueFormatter={(value: string) =>
                 `${Math.round(parseFloat(value) * 1000)}ms`
               }
             />

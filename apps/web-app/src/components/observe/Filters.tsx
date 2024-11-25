@@ -67,7 +67,7 @@ export default function Filters({
   }, [filter]);
 
   return (
-    <div className="sticky top-0 flex justify-between gap-2 border-b bg-background p-4">
+    <div className="sticky top-0 z-20 flex justify-between gap-2 border-b bg-background p-4">
       <div className="flex gap-2">
         <Select
           value={filter.lookbackPeriod.value.toString()}
