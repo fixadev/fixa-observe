@@ -2,6 +2,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import LatencyChart from "./LatencyChart";
 import { cn, getLatencyColor } from "~/lib/utils";
 import { useObserveState } from "~/components/hooks/useObserveState";
+import { useCallback } from "react";
+import { Button } from "../ui/button";
 
 interface PercentileData {
   p50: number;
@@ -21,7 +23,14 @@ interface ChartCardProps {
 }
 
 export default function ChartCard({ title, average, byHour }: ChartCardProps) {
-  const { filter } = useObserveState();
+  const { filter, setFilter } = useObserveState();
+
+  const resetZoom = useCallback(() => {
+    setFilter({
+      ...filter,
+      timeRange: undefined,
+    });
+  }, [filter, setFilter]);
 
   return (
     <Card className="flex-1">
@@ -58,6 +67,12 @@ export default function ChartCard({ title, average, byHour }: ChartCardProps) {
               {Math.round(average.p95 * 1000)}ms
             </div>
           </div>
+          <div className="flex-1" />
+          {filter.timeRange && (
+            <Button variant="outline" onClick={resetZoom}>
+              reset zoom
+            </Button>
+          )}
         </div>
       </CardHeader>
       <CardContent>

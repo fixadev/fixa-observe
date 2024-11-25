@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Area, AreaChart, CartesianGrid, ReferenceArea, YAxis } from "recharts";
 import { XAxis } from "recharts";
 import {
@@ -33,7 +33,7 @@ export default function LatencyChart({
 }: {
   data: { hour: string; p50: number; p90: number; p95: number }[];
 }) {
-  const { filter } = useObserveState();
+  const { filter, setFilter } = useObserveState();
 
   const formattedData = useMemo(() => {
     const ret = [...data];
@@ -68,8 +68,18 @@ export default function LatencyChart({
 
   const [refAreaLeft, setRefAreaLeft] = useState<string>("");
   const [refAreaRight, setRefAreaRight] = useState<string>("");
-  const [left, setLeft] = useState<string>("dataMin");
-  const [right, setRight] = useState<string>("dataMax");
+  const [left, setLeft] = useState<string | number>("dataMin");
+  const [right, setRight] = useState<string | number>("dataMax");
+
+  useEffect(() => {
+    if (filter.timeRange) {
+      setLeft(filter.timeRange.start);
+      setRight(filter.timeRange.end);
+    } else {
+      setLeft("dataMin");
+      setRight("dataMax");
+    }
+  }, [filter.timeRange]);
 
   const zoom = useCallback(() => {
     if (
@@ -91,17 +101,17 @@ export default function LatencyChart({
       _right = refAreaRight;
     }
 
-    setLeft(_left);
-    setRight(_right);
+    setFilter({
+      ...filter,
+      timeRange: {
+        start: parseInt(_left),
+        end: parseInt(_right),
+      },
+    });
 
     setRefAreaLeft("");
     setRefAreaRight("");
-  }, [refAreaLeft, refAreaRight]);
-
-  const zoomOut = useCallback(() => {
-    setLeft("dataMin");
-    setRight("dataMax");
-  }, []);
+  }, [refAreaLeft, refAreaRight, filter, setFilter]);
 
   return (
     <ChartContainer
@@ -167,6 +177,7 @@ export default function LatencyChart({
           fill="var(--color-p50)"
           fillOpacity={0.4}
           stroke="var(--color-p50)"
+          animationDuration={300}
         />
         <Area
           dataKey="p90"
@@ -174,6 +185,7 @@ export default function LatencyChart({
           fill="var(--color-p90)"
           fillOpacity={0.4}
           stroke="var(--color-p90)"
+          animationDuration={300}
         />
         <Area
           dataKey="p95"
@@ -181,6 +193,7 @@ export default function LatencyChart({
           fill="var(--color-p95)"
           fillOpacity={0.4}
           stroke="var(--color-p95)"
+          animationDuration={300}
         />
 
         {refAreaLeft && refAreaRight && (
