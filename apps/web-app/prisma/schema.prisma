@@ -162,6 +162,7 @@ model CallRecording {
   audioUrl  String
   createdAt DateTime @default(now())
   processed Boolean  @default(false)
+  agentId   String?
 }
 
 model Scenario {

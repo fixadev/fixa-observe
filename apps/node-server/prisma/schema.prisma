@@ -158,6 +158,7 @@ model CallRecording {
   audioUrl  String
   createdAt DateTime @default(now())
   processed Boolean  @default(false)
+  agentId   String?
 }
 
 model Scenario {
@@ -244,4 +245,5 @@ model Interruption {
   duration         Float
   call             Call   @relation(fields: [callId], references: [id], onDelete: Cascade)
   callId           String
+  text             String
 }

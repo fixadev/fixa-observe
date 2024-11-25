@@ -8,6 +8,7 @@ export const transcribeAndSaveCall = async (
   callId: string,
   audioUrl: string,
   createdAt: Date,
+  agentId?: string,
 ) => {
   try {
     interface TranscribeResponse {
