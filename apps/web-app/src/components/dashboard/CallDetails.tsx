@@ -20,6 +20,7 @@ export default function CallDetails({
   userName,
   botName,
   avatarUrl,
+  agentId = "",
   type = "test",
   containerRef = null,
   headerHeight = 60,
@@ -29,6 +30,7 @@ export default function CallDetails({
   userName: string;
   botName: string;
   avatarUrl: string;
+  agentId?: string;
   type?: CallDetailsType;
   containerRef?: React.RefObject<HTMLDivElement> | null;
   headerHeight?: number;
@@ -77,7 +79,7 @@ export default function CallDetails({
   const offsetFromStart = useMemo(() => {
     // return messagesFiltered[0]?.secondsFromStart ?? 0;
     return 0;
-  }, [messagesFiltered]);
+  }, []);
 
   // Index of the currently active message
   const activeMessageIndex = useMemo(() => {
@@ -320,6 +322,7 @@ export default function CallDetails({
         {type === "test" ? (
           <TestCallHeader
             call={call}
+            agentId={agentId}
             avatarUrl={avatarUrl}
             audioPlayerRef={audioPlayerRef}
             activeEvalResultId={activeEvalResultId}

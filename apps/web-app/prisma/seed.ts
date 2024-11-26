@@ -23,8 +23,8 @@ async function main() {
       description: "an irritable man who had a bad day",
       prompt:
         "You are steve wozniak, an irritable man who had a bad day. You are not very patient and get frustrated easily.",
-      voiceId: "steve",
-      // voiceId: "R99XgMGAPM4Bdpv1FJs2", // better voice id
+      // voiceId: "steve",
+      voiceId: "R99XgMGAPM4Bdpv1FJs2", // better voice id
       enabled: true,
       defaultSelected: true,
     },
@@ -34,8 +34,8 @@ async function main() {
       description: "elderly lady who sometimes gets carried away",
       prompt:
         "you are marge simpson, a friendly elderly lady who loves to talk and sometimes gets carried away.",
-      voiceId: "matilda",
-      // voiceId: "6zi9hbRGFbPJXunIKqJ4", // better voice id
+      // voiceId: "matilda",
+      voiceId: "6zi9hbRGFbPJXunIKqJ4", // better voice id
       enabled: true,
       defaultSelected: true,
     },
@@ -45,8 +45,8 @@ async function main() {
       description: "An elderly man who may need extra patience",
       prompt:
         "You are daryl williams, a 72-year-old retiree who is not comfortable with technology. You sometimes need things repeated and explained very slowly. You appreciate when people are patient with you.",
-      voiceId: "joseph",
-      // voiceId: "7NERWC0HfmjQak4YqWff", // better voice id
+      // voiceId: "joseph",
+      voiceId: "7NERWC0HfmjQak4YqWff", // better voice id
       enabled: true,
       defaultSelected: false,
     },
@@ -56,8 +56,8 @@ async function main() {
       description: "A woman who prefers speaking in short, direct sentences",
       prompt:
         "You are Maria Garcia, a 31-year-old nurse who works long shifts. you speak in short, direct sentences.",
-      voiceId: "cgSgspJ2msm6clMCkdW9", // jessica voice
-      // voiceId: "5S3VJEI4yXXfOSBrTB3q",
+      // voiceId: "cgSgspJ2msm6clMCkdW9", // jessica voice
+      voiceId: "5S3VJEI4yXXfOSBrTB3q",
       enabled: true,
       defaultSelected: false,
     },
@@ -66,8 +66,8 @@ async function main() {
       headshotUrl: "/images/agent-avatars/jose.jpeg",
       description: "a native spanish speaker",
       prompt: "You are jose, a native spanish speaker.",
-      voiceId: "cgSgspJ2msm6clMCkdW9", // jessica voice
-      // voiceId: "3l9iCMrNSRR0w51JvFB0",
+      // voiceId: "cgSgspJ2msm6clMCkdW9", // jessica voice
+      voiceId: "3l9iCMrNSRR0w51JvFB0",
       enabled: true,
       defaultSelected: false,
     },
@@ -76,8 +76,8 @@ async function main() {
       headshotUrl: "/images/agent-avatars/raj.jpeg",
       description: "man with an indian accent",
       prompt: "You are raj, a man with an indian accent.",
-      voiceId: "cgSgspJ2msm6clMCkdW9", // jessica voice
-      // voiceId: "mCQMfsqGDT6IDkEKR20a",
+      // voiceId: "cgSgspJ2msm6clMCkdW9", // jessica voice
+      voiceId: "mCQMfsqGDT6IDkEKR20a",
       enabled: true,
       defaultSelected: false,
     },
@@ -86,8 +86,8 @@ async function main() {
       headshotUrl: "/images/agent-avatars/klaus.jpeg",
       description: "man with a german accent",
       prompt: "You are klaus, a man with a german accent.",
-      voiceId: "cgSgspJ2msm6clMCkdW9", // jessica voice
-      // voiceId: "IokmXfIsrOE3umjiwHWz",
+      // voiceId: "cgSgspJ2msm6clMCkdW9", // jessica voice
+      voiceId: "IokmXfIsrOE3umjiwHWz",
       enabled: true,
       defaultSelected: false,
     },
@@ -96,8 +96,8 @@ async function main() {
       headshotUrl: "/images/agent-avatars/deng.jpeg",
       description: "man with a chinese accent",
       prompt: "You are deng, a man with a chinese accent.",
-      voiceId: "cgSgspJ2msm6clMCkdW9", // jessica voice
-      // voiceId: "gAMZphRyrWJnLMDnom6H",
+      // voiceId: "cgSgspJ2msm6clMCkdW9", // jessica voice
+      voiceId: "gAMZphRyrWJnLMDnom6H",
       enabled: true,
       defaultSelected: false,
     },
@@ -106,8 +106,8 @@ async function main() {
       headshotUrl: "/images/agent-avatars/talia.jpeg",
       description: "woman with a russian accent",
       prompt: "You are talia, a woman with a russian accent.",
-      voiceId: "cgSgspJ2msm6clMCkdW9", // jessica voice
-      // voiceId: "GCPLhb1XrVwcoKUJYcvz",
+      // voiceId: "cgSgspJ2msm6clMCkdW9", // jessica voice
+      voiceId: "GCPLhb1XrVwcoKUJYcvz",
       enabled: true,
       defaultSelected: false,
     },
