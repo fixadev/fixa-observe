@@ -27,6 +27,7 @@ import {
 } from "~/lib/utils";
 import dynamic from "next/dynamic";
 import WaveSurfer from "wavesurfer.js";
+import { Skeleton } from "../ui/skeleton";
 
 export type AudioPlayerRef = {
   setActiveEvalResult: (evalResult: EvalResultWithIncludes | null) => void;
@@ -63,14 +64,13 @@ const _AudioPlayer = forwardRef<
   const [isPlaying, setIsPlaying] = useState(false);
   const pause = useCallback(() => {
     wavesurfer?.pause();
-    setIsPlaying(false);
   }, [wavesurfer]);
   const play = useCallback(() => {
     void wavesurfer?.play();
-    setIsPlaying(true);
   }, [wavesurfer]);
   const [currentTime, setCurrentTime] = useState(0);
   const [playbackSpeed, setPlaybackSpeed] = useState(1);
+  const [audioLoaded, setAudioLoaded] = useState(false);
 
   const audioVisualizerId = useMemo(() => {
     return `audio-visualizer-${crypto.randomUUID()}`;
@@ -92,9 +92,19 @@ const _AudioPlayer = forwardRef<
       });
       _wavesurfer.on("ready", (_duration) => {
         setDuration(_duration);
+        setAudioLoaded(true);
       });
       _wavesurfer.on("timeupdate", (time) => {
         setCurrentTime(time);
+      });
+      _wavesurfer.on("finish", () => {
+        setIsPlaying(false);
+      });
+      _wavesurfer.on("play", () => {
+        setIsPlaying(true);
+      });
+      _wavesurfer.on("pause", () => {
+        setIsPlaying(false);
       });
       setWavesurfer(_wavesurfer);
       return () => {
@@ -164,6 +174,9 @@ const _AudioPlayer = forwardRef<
         ref={containerRef}
       >
         <div id={audioVisualizerId} className="size-full" />
+        {!audioLoaded && (
+          <Skeleton className="absolute left-0 top-0 size-full" />
+        )}
         {call.evalResults?.map((evalResult, index) => {
           if (!containerRef.current || !duration) return null;
           const startPercentage =
