@@ -62,7 +62,7 @@ export const columns: ColumnDef<CallWithIncludes>[] = [
                 getLatencyColor(call.latencyP90 ?? 0),
               )}
             >
-              {call.latencyP50 ?? 0}ms
+              {call.latencyP90 ?? 0}ms
             </div>
           </div>
         </div>
@@ -84,7 +84,7 @@ export const columns: ColumnDef<CallWithIncludes>[] = [
                 getLatencyColor(call.latencyP95 ?? 0),
               )}
             >
-              {call.latencyP50 ?? 0}ms
+              {call.latencyP95 ?? 0}ms
             </div>
           </div>
         </div>
