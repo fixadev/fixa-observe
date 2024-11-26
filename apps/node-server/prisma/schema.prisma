@@ -100,6 +100,7 @@ model Call {
   interruptionP50    Float?
   interruptionP90    Float?
   interruptionP95    Float?
+  numInterruptions   Int?
 
   evalResults EvalResult[]
 

@@ -158,6 +158,96 @@ export const columns: ColumnDef<CallWithIncludes>[] = [
   //   },
   //   size: 10,
   // },
+
+  // {
+  //   id: "interruptions",
+  //   meta: {
+  //     headerClassName: "border-r",
+  //     cellClassName: "border-r",
+  //   },
+  //   header: () => {
+  //     return (
+  //       <div className="flex w-full flex-col items-center gap-1 px-4">
+  //         <div className="text-center text-base font-medium">interruptions</div>
+  //         <div className="flex w-full justify-between gap-2">
+  //           <div className="w-12 text-center text-xs">50%</div>
+  //           <div className="w-12 text-center text-xs">90%</div>
+  //           <div className="w-12 text-center text-xs">95%</div>
+  //           <div className="w-14 text-center text-xs">{"total > 2s"}</div>
+  //         </div>
+  //       </div>
+  //     );
+  //   },
+  //   cell: ({ row }) => {
+  //     const call = row.original;
+  //     // const numInterruptions = Math.floor(Math.random() * 7);
+  //     const numInterruptions = call.interruptions.filter(
+  //       (interruption) => interruption.duration > 2,
+  //     ).length;
+  //     return (
+  //       <div className="flex w-full justify-between gap-2 px-4">
+  //         <div
+  //           className={cn(
+  //             "w-12 text-center text-sm",
+  //             getLatencyColor(call.latencyP50 ?? 0),
+  //           )}
+  //         >
+  //           {Math.round(call.latencyP50 ?? 0)}ms
+  //         </div>
+  //         <div
+  //           className={cn(
+  //             "w-12 text-center text-sm",
+  //             getLatencyColor(call.latencyP90 ?? 0),
+  //           )}
+  //         >
+  //           {Math.round(call.latencyP90 ?? 0)}ms
+  //         </div>
+  //         <div
+  //           className={cn(
+  //             "w-12 text-center text-sm",
+  //             getLatencyColor(call.latencyP95 ?? 0),
+  //           )}
+  //         >
+  //           {Math.round(call.latencyP95 ?? 0)}ms
+  //         </div>
+  //         <div
+  //           className={cn(
+  //             "w-12 text-center text-sm",
+  //             getInterruptionsColor(numInterruptions),
+  //           )}
+  //         >
+  //           {numInterruptions}
+  //         </div>
+  //       </div>
+  //     );
+  //   },
+  //   size: 50,
+  // },
+
+  {
+    header: ({ column }) => (
+      <SortButton column={column} title="interruptions" />
+    ),
+    accessorKey: "numInterruptions",
+    cell: ({ row }) => {
+      const call = row.original;
+      return (
+        <div className="flex flex-col">
+          <div className="flex items-center gap-1">
+            <div
+              className={cn(
+                "text-sm font-medium",
+                getInterruptionsColor(call.numInterruptions ?? 0),
+              )}
+            >
+              {call.numInterruptions ?? 0}
+            </div>
+          </div>
+        </div>
+      );
+    },
+    size: 10,
+  },
   {
     header: ({ column }) => <SortButton column={column} title="created at" />,
     accessorKey: "startedAt",

@@ -20,35 +20,28 @@ const resetProcessedStatus = async () => {
 const transcribePastCalls = async () => {
   try {
     // await resetProcessedStatus();
-    const callRecordings = await db.callRecording.findMany({
+    const calls = await db.call.findMany({
       where: {
-        processed: false,
-        // id: "call.QjhWk6hTZQhFXhR3CVk1ha",
+        ownerId: "11x",
       },
-      orderBy: {
-        createdAt: "desc",
+      include: {
+        interruptions: true,
       },
     });
 
-    console.log(`Transcribing ${callRecordings.length} calls`);
+    console.log(`updating ${calls.length} calls`);
 
     let count = 0;
-    for (const callRecording of callRecordings) {
+    for (const call of calls) {
       try {
-        console.log(`Transcribing call ${callRecording.id}`);
-
-        const regionId = count % 2 === 0 ? "US" : "UK";
-        const agentId = count % 2 === 0 ? "agent 1" : "agent 2";
-
-        await transcribeAndSaveCall(
-          callRecording.id,
-          callRecording.audioUrl,
-          callRecording.createdAt,
-          agentId,
-          regionId,
-        );
-        console.log(`Transcribed call ${callRecording.id}`);
-        console.log(`${count}/${callRecordings.length}`);
+        const numInterruptions = call.interruptions.filter(
+          (interruption) => interruption.duration > 2,
+        ).length;
+        await db.call.update({
+          where: { id: call.id },
+          data: { numInterruptions },
+        });
+        console.log(`updated call ${call.id}`);
         count++;
       } catch (error) {
         console.error(error);

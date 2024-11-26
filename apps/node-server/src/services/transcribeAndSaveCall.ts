@@ -63,6 +63,10 @@ export const transcribeAndSaveCall = async (
       duration: segment.end - segment.start,
     }));
 
+    const numberOfInterruptionsGreaterThan2Seconds = interruptions.filter(
+      (interruption) => interruption.duration > 2,
+    ).length;
+
     const newCall = await db.call.create({
       data: {
         id: uuidv4(),
