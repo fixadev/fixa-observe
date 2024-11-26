@@ -106,14 +106,6 @@ export function TestCallHeader({
 }
 
 export function LatencyCallHeader({ call, avatarUrl }: CallHeaderProps) {
-  const { p50, p90, p95 } = useMemo(
-    () =>
-      calculateLatencyPercentiles(
-        call.latencyBlocks.map((block) => block.duration),
-      ),
-    [call.latencyBlocks],
-  );
-
   return (
     <div className="flex items-center gap-4 pb-4">
       <div className="size-[48px] shrink-0">
@@ -133,10 +125,10 @@ export function LatencyCallHeader({ call, avatarUrl }: CallHeaderProps) {
             <div
               className={cn(
                 "text-base font-medium",
-                getLatencyColor(p50 * 1000),
+                getLatencyColor(call.latencyP50 ?? 0),
               )}
             >
-              {Math.round(p50 * 1000)}ms
+              {Math.round(call.latencyP50 ?? 0)}ms
             </div>
           </div>
           <div>
@@ -144,10 +136,10 @@ export function LatencyCallHeader({ call, avatarUrl }: CallHeaderProps) {
             <div
               className={cn(
                 "text-base font-medium",
-                getLatencyColor(p90 * 1000),
+                getLatencyColor(call.latencyP90 ?? 0),
               )}
             >
-              {Math.round(p90 * 1000)}ms
+              {Math.round(call.latencyP90 ?? 0)}ms
             </div>
           </div>
           <div>
@@ -155,10 +147,10 @@ export function LatencyCallHeader({ call, avatarUrl }: CallHeaderProps) {
             <div
               className={cn(
                 "text-base font-medium",
-                getLatencyColor(p95 * 1000),
+                getLatencyColor(call.latencyP95 ?? 0),
               )}
             >
-              {Math.round(p95 * 1000)}ms
+              {Math.round(call.latencyP95 ?? 0)}ms
             </div>
           </div>
         </div>

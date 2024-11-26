@@ -94,6 +94,12 @@ model Call {
   endedAt            String?
   regionId           String?
   agentId            String?
+  latencyP50         Float?
+  latencyP90         Float?
+  latencyP95         Float?
+  interruptionP50    Float?
+  interruptionP90    Float?
+  interruptionP95    Float?
 
   evalResults EvalResult[]
 

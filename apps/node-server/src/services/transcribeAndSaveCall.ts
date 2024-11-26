@@ -3,6 +3,7 @@ import { db } from "../db";
 import { v4 as uuidv4 } from "uuid";
 import { CallStatus, Role } from "@prisma/client";
 import { env } from "../env";
+import { calculateLatencyPercentiles } from "../utils/calculateLatencyPercentiles";
 
 export const transcribeAndSaveCall = async (
   callId: string,
@@ -39,6 +40,22 @@ export const transcribeAndSaveCall = async (
 
     const { segments, interruptions, latencyBlocks } = response.data;
 
+    const {
+      p50: latencyP50,
+      p90: latencyP90,
+      p95: latencyP95,
+    } = calculateLatencyPercentiles(
+      latencyBlocks.map((block) => block.duration),
+    );
+
+    const {
+      p50: interruptionP50,
+      p90: interruptionP90,
+      p95: interruptionP95,
+    } = calculateLatencyPercentiles(
+      interruptions.map((interruption) => interruption.duration),
+    );
+
     const messages = segments.map((segment) => ({
       role: segment.role === "user" ? Role.user : Role.bot,
       message: segment.text,
@@ -56,6 +73,12 @@ export const transcribeAndSaveCall = async (
         stereoRecordingUrl: audioUrl,
         agentId,
         regionId,
+        latencyP50,
+        latencyP90,
+        latencyP95,
+        interruptionP50,
+        interruptionP90,
+        interruptionP95,
         messages: {
           create: messages,
         },
