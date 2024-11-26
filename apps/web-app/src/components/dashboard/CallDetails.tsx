@@ -1,29 +1,39 @@
+"use client";
+
 import type { CallWithIncludes, EvalResultWithIncludes } from "~/lib/types";
 import AudioPlayer, { type AudioPlayerRef } from "./AudioPlayer";
 import { useMemo, useRef, useState, useEffect, useCallback } from "react";
 import {
   cn,
-  didCallSucceed,
   formatDurationHoursMinutesSeconds,
+  getLatencyBlockColor,
 } from "~/lib/utils";
-import { useAudio } from "~/components/hooks/useAudio";
-import { type Agent } from "prisma/generated/zod";
-import {
-  CheckCircleIcon,
-  PencilIcon,
-  XCircleIcon,
-} from "@heroicons/react/24/solid";
-import Image from "next/image";
-import { CallStatus, Role } from "@prisma/client";
-import Spinner from "../Spinner";
-import Link from "next/link";
+import { CheckCircleIcon, XCircleIcon } from "@heroicons/react/24/solid";
+import { CallStatus, type LatencyBlock, Role } from "@prisma/client";
+import { LatencyCallHeader, TestCallHeader } from "./CallHeader";
+
+export type CallDetailsType = "test" | "latency";
 
 export default function CallDetails({
   call,
-  agent,
+  userName,
+  botName,
+  avatarUrl,
+  agentId = "",
+  type = "test",
+  containerRef = null,
+  headerHeight = 60,
+  includeHeaderTop = true,
 }: {
   call: CallWithIncludes;
-  agent: Agent;
+  userName: string;
+  botName: string;
+  avatarUrl: string;
+  agentId?: string;
+  type?: CallDetailsType;
+  containerRef?: React.RefObject<HTMLDivElement> | null;
+  headerHeight?: number;
+  includeHeaderTop?: boolean;
 }) {
   const audioPlayerRef = useRef<AudioPlayerRef>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -31,55 +41,109 @@ export default function CallDetails({
   const [activeEvalResultId, setActiveEvalResultId] = useState<string | null>(
     null,
   );
-  const { play, seek, currentTime } = useAudio();
   const headerRef = useRef<HTMLDivElement>(null);
 
+  const [currentTime, setCurrentTime] = useState(0);
+  const play = useCallback(() => {
+    audioPlayerRef.current?.play();
+  }, [audioPlayerRef]);
+  const seek = useCallback((time: number) => {
+    audioPlayerRef.current?.seek(time);
+  }, []);
+
   const messagesFiltered = useMemo(() => {
-    return call.messages
+    const ret = call.messages
       .filter((m) => m.role !== "system")
       .sort((a, b) => a.secondsFromStart - b.secondsFromStart);
+    return ret;
   }, [call.messages]);
 
+  const messageToLatencyMap = useMemo(() => {
+    if (!call.latencyBlocks || !call.messages) return {};
+
+    const map: Record<string, LatencyBlock> = {};
+
+    for (const message of call.messages) {
+      // Find the latency block that comes directly before this message
+      const precedingBlock = call.latencyBlocks.filter((block) => {
+        // Check if block ends exactly when message starts
+        return (
+          block.secondsFromStart + block.duration === message.secondsFromStart
+        );
+      })[0];
+
+      if (precedingBlock) {
+        map[message.id] = precedingBlock;
+      }
+    }
+
+    return map;
+  }, [call.latencyBlocks, call.messages]);
+
+  // TODO: fix this
   // Offset from the start of the call to the first message
   const offsetFromStart = useMemo(() => {
+    // If this is a customer call, we transcribe the messages ourselves so the offset is 0
+    if (call.customerCallId) {
+      return 0;
+    }
     return messagesFiltered[0]?.secondsFromStart ?? 0;
-  }, [messagesFiltered]);
+  }, [messagesFiltered, call.customerCallId]);
 
   // Index of the currently active message
   const activeMessageIndex = useMemo(() => {
     return messagesFiltered.findIndex((message, index) => {
       const messageStart = message.secondsFromStart - offsetFromStart;
+      const messageEnd = messageStart + message.duration;
+      const prevMessageEnd = messagesFiltered[index - 1]
+        ? messagesFiltered[index - 1]!.secondsFromStart - offsetFromStart
+        : 0;
       const nextMessage = messagesFiltered[index + 1];
       const nextMessageStart = nextMessage?.secondsFromStart
         ? nextMessage.secondsFromStart - offsetFromStart
         : Infinity;
 
-      return currentTime >= messageStart && currentTime < nextMessageStart;
-    });
-  }, [currentTime, messagesFiltered, offsetFromStart]);
-
-  const scrollMessageIntoView = useCallback((messageIndex: number) => {
-    if (!scrollContainerRef.current || !headerRef.current) return;
-    const messageElements = scrollContainerRef.current.children;
-    const activeElement = messageElements[messageIndex];
-
-    if (activeElement) {
-      const elementRect = activeElement.getBoundingClientRect();
-      const header = headerRef.current.getBoundingClientRect();
-      const isAboveViewport = elementRect.top < header.bottom;
-      const isBelowViewport = elementRect.bottom > window.innerHeight;
-
-      if (isAboveViewport || isBelowViewport) {
-        const headerTopOffset = 57;
-        const scrollPosition =
-          window.scrollY + elementRect.top - header.height - headerTopOffset;
-        window.scrollTo({
-          top: scrollPosition,
-          behavior: "smooth",
-        });
+      if (type === "test") {
+        return currentTime >= messageStart && currentTime < nextMessageStart;
+      } else {
+        return (
+          (currentTime >= prevMessageEnd || currentTime >= messageStart) &&
+          currentTime < messageEnd &&
+          currentTime < nextMessageStart
+        );
       }
-    }
-  }, []);
+    });
+  }, [currentTime, messagesFiltered, offsetFromStart, type]);
+
+  const scrollMessageIntoView = useCallback(
+    (messageIndex: number) => {
+      if (!scrollContainerRef.current || !headerRef.current) return;
+      const messageElements = scrollContainerRef.current.children;
+      const activeElement = messageElements[messageIndex];
+
+      if (activeElement) {
+        const container = containerRef?.current ?? window;
+        const height =
+          containerRef?.current?.clientHeight ?? window.innerHeight;
+        const elementRect = activeElement.getBoundingClientRect();
+        const header = headerRef.current.getBoundingClientRect();
+        const isAboveViewport = elementRect.top < header.bottom;
+        const isBelowViewport = elementRect.bottom > height;
+        const scrollY = containerRef?.current?.scrollTop ?? window.scrollY;
+
+        if (isAboveViewport || isBelowViewport) {
+          const headerTopOffset = headerHeight;
+          const scrollPosition =
+            scrollY + elementRect.top - header.height - headerTopOffset;
+          container.scrollTo({
+            top: scrollPosition,
+            behavior: "smooth",
+          });
+        }
+      }
+    },
+    [containerRef, headerHeight],
+  );
 
   const activeEvalMessageIndices = useMemo(() => {
     if (!activeEvalResultId || !call.evalResults) return new Set<number>();
@@ -87,11 +151,15 @@ export default function CallDetails({
     const activeEval = call.evalResults.find(
       (evalResult) => evalResult.id === activeEvalResultId,
     );
-    if (!activeEval) return new Set<number>();
+    const activeLatencyBlock = call.latencyBlocks.find(
+      (block) => block.id === activeEvalResultId,
+    );
+    if (!activeEval && !activeLatencyBlock) return new Set<number>();
 
     const overlappingIndices = new Set<number>();
     messagesFiltered.forEach((message, index) => {
       if (
+        activeEval &&
         activeEval.secondsFromStart <
           (messagesFiltered[index + 1]?.secondsFromStart ?? Infinity) &&
         activeEval.secondsFromStart + activeEval.duration >
@@ -99,10 +167,20 @@ export default function CallDetails({
       ) {
         overlappingIndices.add(index);
       }
+      const latencyBlock = messageToLatencyMap[message.id];
+      if (latencyBlock && latencyBlock.id === activeEvalResultId) {
+        overlappingIndices.add(index);
+      }
     });
 
     return overlappingIndices;
-  }, [call.evalResults, activeEvalResultId, messagesFiltered]);
+  }, [
+    activeEvalResultId,
+    call.evalResults,
+    call.latencyBlocks,
+    messageToLatencyMap,
+    messagesFiltered,
+  ]);
 
   // Scroll to the active eval message if it has changed
   useEffect(() => {
@@ -245,93 +323,29 @@ export default function CallDetails({
     <div className="flex w-full flex-col rounded-md bg-background px-4 outline-none">
       <div
         ref={headerRef}
-        className="sticky top-[calc(3.5rem+1px)] bg-background py-4"
+        className="sticky bg-background py-4"
+        style={{
+          top: includeHeaderTop ? `${headerHeight}px` : "0px",
+        }}
       >
-        {/* CALL ID: {call.id} */}
-        <div className="flex items-center gap-4 pb-4">
-          <div className="size-[48px] shrink-0">
-            <Image
-              src={call.testAgent?.headshotUrl ?? ""}
-              alt="agent avatar"
-              width={48}
-              height={48}
-              className="rounded-full"
-            />
-          </div>
-          <div className="flex flex-col gap-2">
-            <div className="flex items-center gap-2">
-              <div className="text-sm font-medium">{call.scenario?.name}</div>
-              {call.status === CallStatus.completed && (
-                <div
-                  className={cn(
-                    "w-fit rounded-full px-2 py-1 text-xs",
-                    didCallSucceed(call) ? "bg-green-100" : "bg-red-100",
-                  )}
-                >
-                  {didCallSucceed(call) ? "succeeded" : "failed"}
-                </div>
-              )}
-            </div>
-            {call.status !== CallStatus.completed && (
-              <div className="-mt-1 flex items-center gap-2 text-sm italic text-muted-foreground">
-                <Spinner className="size-4" />{" "}
-                {call.status === CallStatus.analyzing
-                  ? "analyzing call..."
-                  : "call in progress..."}
-              </div>
-            )}
-            <div className="flex w-fit flex-row flex-wrap gap-2">
-              {call.evalResults?.map((evalResult) => (
-                <div
-                  key={evalResult.id}
-                  className={cn(
-                    "group flex cursor-pointer items-start gap-1 border-l-2 p-1 pl-1 text-xs",
-                    evalResult.success
-                      ? "border-green-500 bg-green-100 text-green-500 hover:bg-green-200"
-                      : "border-red-500 bg-red-100 text-red-500 hover:bg-red-200",
-                    activeEvalResultId === evalResult.id &&
-                      (evalResult.success ? "bg-green-200" : "bg-red-200"),
-                  )}
-                  onMouseEnter={() => {
-                    setActiveEvalResultId(evalResult.id);
-                    audioPlayerRef.current?.setHoveredEvalResult(evalResult.id);
-                  }}
-                  onMouseLeave={() => {
-                    setActiveEvalResultId(null);
-                    audioPlayerRef.current?.setHoveredEvalResult(null);
-                  }}
-                  onClick={() => {
-                    audioPlayerRef.current?.setActiveEvalResult(evalResult);
-                    play();
-                  }}
-                >
-                  {evalResult.success ? (
-                    <CheckCircleIcon className="size-4 shrink-0 text-green-500" />
-                  ) : (
-                    <XCircleIcon className="size-4 shrink-0 text-red-500" />
-                  )}
-                  {evalResult.eval.name}
-                  <Link
-                    href={`/dashboard/${agent.id}/scenarios?scenarioId=${call.scenarioId}&evalId=${evalResult.eval.id}`}
-                  >
-                    <PencilIcon
-                      onClick={(e) => {
-                        e.stopPropagation();
-                      }}
-                      onMouseEnter={(e) => {
-                        e.stopPropagation();
-                      }}
-                      onMouseLeave={(e) => {
-                        e.stopPropagation();
-                      }}
-                      className="size-4 shrink-0 cursor-pointer text-muted-foreground/70 opacity-0 transition-opacity hover:text-muted-foreground group-hover:opacity-100"
-                    />
-                  </Link>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
+        {type === "test" ? (
+          <TestCallHeader
+            call={call}
+            agentId={agentId}
+            avatarUrl={avatarUrl}
+            audioPlayerRef={audioPlayerRef}
+            activeEvalResultId={activeEvalResultId}
+            setActiveEvalResultId={setActiveEvalResultId}
+          />
+        ) : (
+          <LatencyCallHeader
+            call={call}
+            avatarUrl={avatarUrl}
+            audioPlayerRef={audioPlayerRef}
+            activeEvalResultId={activeEvalResultId}
+            setActiveEvalResultId={setActiveEvalResultId}
+          />
+        )}
         {call.status === CallStatus.completed && (
           <AudioPlayer
             ref={audioPlayerRef}
@@ -340,6 +354,7 @@ export default function CallDetails({
             onEvalResultHover={(evalId) => {
               setActiveEvalResultId(evalId);
             }}
+            onTimeUpdate={setCurrentTime}
           />
         )}
       </div>
@@ -408,14 +423,44 @@ export default function CallDetails({
                       : "",
                   )}
                 >
-                  <div className="text-xs font-medium">
+                  <div className="mb-1 text-xs font-medium">
                     {message.role === Role.bot
-                      ? call.testAgent?.name
+                      ? botName // call.testAgent?.name
                       : message.role === Role.user
-                        ? agent.name
+                        ? userName
                         : ""}
                   </div>
-                  <div className="mt-1 text-sm text-muted-foreground">
+                  {messageToLatencyMap[message.id] && (
+                    <div
+                      className="mb-1 w-fit rounded-md p-1 text-xs font-medium"
+                      style={{
+                        background:
+                          activeEvalResultId ===
+                          messageToLatencyMap[message.id]!.id
+                            ? getLatencyBlockColor(
+                                messageToLatencyMap[message.id]!,
+                                0.5,
+                              )
+                            : getLatencyBlockColor(
+                                messageToLatencyMap[message.id]!,
+                              ),
+                        border: `1px solid ${getLatencyBlockColor(
+                          messageToLatencyMap[message.id]!,
+                          1,
+                        )}`,
+                        color: getLatencyBlockColor(
+                          messageToLatencyMap[message.id]!,
+                          1,
+                        ),
+                      }}
+                    >
+                      {Math.round(
+                        messageToLatencyMap[message.id]!.duration * 1000,
+                      )}
+                      ms - time to agent response
+                    </div>
+                  )}
+                  <div className="text-sm text-muted-foreground">
                     {message.message}
                   </div>
                 </div>

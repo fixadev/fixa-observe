@@ -82,7 +82,7 @@ model TestAgent {
 }
 
 model Call {
-  id                 String       @id @default(uuid())
+  id                 String      @id @default(uuid())
   ownerId            String?
   customerCallId     String?
   status             CallStatus
@@ -92,7 +92,17 @@ model Call {
   monoRecordingUrl   String?
   startedAt          String?
   endedAt            String?
-  evalResults        EvalResult[]
+  regionId           String?
+  agentId            String?
+  latencyP50         Float?
+  latencyP90         Float?
+  latencyP95         Float?
+  interruptionP50    Float?
+  interruptionP90    Float?
+  interruptionP95    Float?
+  numInterruptions   Int?
+
+  evalResults EvalResult[]
 
   test        Test?      @relation(fields: [testId], references: [id], onDelete: Cascade)
   testId      String?
@@ -101,8 +111,11 @@ model Call {
   scenario    Scenario?  @relation(fields: [scenarioId], references: [id], onDelete: Cascade)
   scenarioId  String?
 
-  messages Message[]
-  errors   CallError[]
+  messages      Message[]
+  latencyBlocks LatencyBlock[]
+  interruptions Interruption[]
+
+  errors CallError[]
 }
 
 model Message {
@@ -155,6 +168,8 @@ model CallRecording {
   audioUrl  String
   createdAt DateTime @default(now())
   processed Boolean  @default(false)
+  agentId   String?
+  regionId  String?
 }
 
 model Scenario {
@@ -225,4 +240,21 @@ enum EvalResultType {
   boolean
   number
   percentage
+}
+
+model LatencyBlock {
+  id               String @id @default(uuid())
+  secondsFromStart Float
+  duration         Float
+  call             Call   @relation(fields: [callId], references: [id], onDelete: Cascade)
+  callId           String
+}
+
+model Interruption {
+  id               String @id @default(uuid())
+  secondsFromStart Float
+  duration         Float
+  call             Call   @relation(fields: [callId], references: [id], onDelete: Cascade)
+  callId           String
+  text             String
 }

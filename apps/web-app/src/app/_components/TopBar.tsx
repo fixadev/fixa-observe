@@ -16,7 +16,7 @@ export default function TopBar() {
           <Logo />
           <div className="flex items-center gap-2">
             <SignedOut>
-              <SignInButton>
+              <SignInButton mode="modal">
                 <Button variant="ghost">sign in</Button>
               </SignInButton>
               {/* <Button size="lg" variant="outline" asChild>

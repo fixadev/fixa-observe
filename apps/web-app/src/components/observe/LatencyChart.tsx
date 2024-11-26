@@ -1,0 +1,204 @@
+"use client";
+
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { Area, AreaChart, CartesianGrid, ReferenceArea, YAxis } from "recharts";
+import { XAxis } from "recharts";
+import {
+  ChartContainer,
+  ChartLegendContent,
+  ChartLegend,
+  ChartTooltip,
+  ChartTooltipContent,
+  type ChartConfig,
+} from "~/components/ui/chart";
+import { useObserveState } from "../hooks/useObserveState";
+
+const chartConfig = {
+  p50: {
+    label: "p50",
+    color: "hsl(var(--chart-3))",
+  },
+  p90: {
+    label: "p90",
+    color: "hsl(var(--chart-2))",
+  },
+  p95: {
+    label: "p95",
+    color: "hsl(var(--chart-1))",
+  },
+} satisfies ChartConfig;
+
+export default function LatencyChart({
+  data,
+}: {
+  data: { timestamp: number; p50: number; p90: number; p95: number }[];
+}) {
+  const { filter, setFilter } = useObserveState();
+
+  const formattedData = useMemo(() => {
+    const ret = [...data];
+
+    const hourSet = new Set<number>();
+    for (const item of data) {
+      hourSet.add(item.timestamp);
+    }
+
+    const now = new Date(
+      new Date().toISOString().substring(0, 13) + ":00:00Z",
+    ).getTime();
+
+    for (
+      let i = now - filter.lookbackPeriod.value;
+      i <= now;
+      i += 60 * 60 * 1000
+    ) {
+      if (!hourSet.has(i)) {
+        ret.push({ timestamp: i, p50: 0, p90: 0, p95: 0 });
+      }
+    }
+
+    ret.sort((a, b) => a.timestamp - b.timestamp);
+
+    return ret;
+  }, [data, filter.lookbackPeriod.value]);
+
+  const [refAreaLeft, setRefAreaLeft] = useState<string>("");
+  const [refAreaRight, setRefAreaRight] = useState<string>("");
+  const [left, setLeft] = useState<string | number>("dataMin");
+  const [right, setRight] = useState<string | number>("dataMax");
+
+  useEffect(() => {
+    if (filter.timeRange) {
+      setLeft(filter.timeRange.start);
+      setRight(filter.timeRange.end);
+    } else {
+      setLeft("dataMin");
+      setRight("dataMax");
+    }
+  }, [filter.timeRange]);
+
+  const zoom = useCallback(() => {
+    if (
+      refAreaLeft === refAreaRight ||
+      refAreaLeft === "" ||
+      refAreaRight === ""
+    ) {
+      setRefAreaLeft("");
+      setRefAreaRight("");
+      return;
+    }
+
+    let _left, _right;
+    if (refAreaLeft > refAreaRight) {
+      _left = refAreaRight;
+      _right = refAreaLeft;
+    } else {
+      _left = refAreaLeft;
+      _right = refAreaRight;
+    }
+
+    setFilter({
+      ...filter,
+      timeRange: {
+        start: parseInt(_left),
+        end: parseInt(_right),
+      },
+    });
+
+    setRefAreaLeft("");
+    setRefAreaRight("");
+  }, [refAreaLeft, refAreaRight, filter, setFilter]);
+
+  return (
+    <ChartContainer
+      config={chartConfig}
+      className="h-[300px] w-full select-none"
+    >
+      <AreaChart
+        accessibilityLayer
+        data={formattedData}
+        onMouseDown={(e) => {
+          setRefAreaLeft(e.activeLabel ?? "");
+        }}
+        onMouseMove={(e) => {
+          if (!refAreaLeft) return;
+          setRefAreaRight(e.activeLabel ?? "");
+        }}
+        onMouseUp={zoom}
+      >
+        <CartesianGrid strokeDasharray="3 3" />
+        <XAxis
+          allowDataOverflow
+          domain={[left, right]}
+          dataKey="timestamp"
+          tickFormatter={(value: number) => {
+            const date = new Date(value);
+            return date.toLocaleTimeString("en-US", {
+              hour: "2-digit",
+              minute: "2-digit",
+            });
+          }}
+          type="number"
+        />
+        <YAxis
+          allowDataOverflow
+          tickFormatter={(value: string) =>
+            `${Math.round(parseFloat(value) * 1000)}ms`
+          }
+        />
+        <ChartTooltip
+          content={
+            <ChartTooltipContent
+              labelKey="timestamp"
+              labelFormatter={(time: number) => {
+                const date = new Date(time);
+                return date.toLocaleString("en-US", {
+                  month: "short",
+                  day: "numeric",
+                  hour: "2-digit",
+                  minute: "2-digit",
+                });
+              }}
+              valueFormatter={(value: string) =>
+                `${Math.round(parseFloat(value) * 1000)}ms`
+              }
+            />
+          }
+        />
+        <ChartLegend content={<ChartLegendContent />} />
+        <Area
+          dataKey="p50"
+          type="natural"
+          fill="var(--color-p50)"
+          fillOpacity={0.4}
+          stroke="var(--color-p50)"
+          animationDuration={300}
+        />
+        <Area
+          dataKey="p90"
+          type="natural"
+          fill="var(--color-p90)"
+          fillOpacity={0.4}
+          stroke="var(--color-p90)"
+          animationDuration={300}
+        />
+        <Area
+          dataKey="p95"
+          type="natural"
+          fill="var(--color-p95)"
+          fillOpacity={0.4}
+          stroke="var(--color-p95)"
+          animationDuration={300}
+        />
+
+        {refAreaLeft && refAreaRight && (
+          <ReferenceArea
+            x1={refAreaLeft}
+            x2={refAreaRight}
+            strokeOpacity={0.3}
+          />
+        )}
+      </AreaChart>
+    </ChartContainer>
+  );
+}

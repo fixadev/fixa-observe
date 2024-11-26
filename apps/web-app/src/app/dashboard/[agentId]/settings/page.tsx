@@ -14,7 +14,7 @@ import {
 } from "~/helpers/phoneNumberUtils";
 import { useAgent } from "~/app/contexts/UseAgent";
 import Link from "next/link";
-import { CopyText } from "~/components/dashboard/CopyText";
+import { CopyText } from "~/components/CopyText";
 import { SidebarTrigger } from "~/components/ui/sidebar";
 import {
   Dialog,

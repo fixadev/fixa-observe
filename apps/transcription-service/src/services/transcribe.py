@@ -1,4 +1,5 @@
 import os
+import json
 from typing import List
 from dotenv import load_dotenv
 
@@ -29,6 +30,7 @@ def transcribe_with_deepgram(audio_paths: List[str]):
             )
 
             response = deepgram_client.listen.rest.v("1").transcribe_file(payload, options)
+            
             responses.append(response.results.channels[0].alternatives[0].words)
 
         return responses

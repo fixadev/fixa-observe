@@ -213,7 +213,13 @@ function TestPage({ params }: { params: { agentId: string; testId: string } }) {
           </div>
           {selectedCall && agent && (
             <div className="min-h-screen flex-1">
-              <CallDetails call={selectedCall} agent={agent} />
+              <CallDetails
+                call={selectedCall}
+                agentId={params.agentId}
+                botName={selectedCall.testAgent?.name ?? ""}
+                userName={agent.name}
+                avatarUrl={selectedCall.testAgent?.headshotUrl ?? ""}
+              />
             </div>
           )}
         </div>
