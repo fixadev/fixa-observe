@@ -22,7 +22,13 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Fragment, useState } from "react";
+import {
+  type Dispatch,
+  Fragment,
+  type SetStateAction,
+  useEffect,
+  useState,
+} from "react";
 import { cn } from "~/lib/utils";
 import { type CallWithIncludes } from "~/lib/types";
 import AudioPlayer from "../../dashboard/AudioPlayer";
@@ -39,18 +45,16 @@ declare module "@tanstack/react-table" {
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
-  initialSorting?: SortingState;
-  onSortingChange?: (sorting: SortingState) => void;
-  onRowClick?: (row: TData) => void;
+  sorting?: SortingState;
+  onSortingChange?: Dispatch<SetStateAction<SortingState>>;
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
-  initialSorting,
-  onRowClick,
+  sorting,
+  onSortingChange,
 }: DataTableProps<TData, TValue>) {
-  const [sorting, setSorting] = useState<SortingState>(initialSorting ?? []);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = useState({});
@@ -62,7 +66,7 @@ export function DataTable<TData, TValue>({
     getSortedRowModel: getSortedRowModel(),
     enableSorting: true,
 
-    onSortingChange: setSorting,
+    onSortingChange: onSortingChange ?? undefined,
     manualSorting: true,
 
     onColumnFiltersChange: setColumnFilters,

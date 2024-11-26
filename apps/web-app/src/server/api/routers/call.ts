@@ -2,7 +2,7 @@ import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { callService } from "~/server/services/call";
 import { TRPCError } from "@trpc/server";
-import { FilterSchema } from "~/lib/types";
+import { FilterSchema, OrderBySchema } from "~/lib/types";
 
 export const callRouter = createTRPCRouter({
   getCall: protectedProcedure.input(z.string()).query(async ({ input }) => {
@@ -26,6 +26,7 @@ export const callRouter = createTRPCRouter({
         limit: z.number().optional(),
         cursor: z.string().optional(),
         filter: FilterSchema,
+        orderBy: OrderBySchema.optional(),
       }),
     )
     .query(async ({ input }) => {

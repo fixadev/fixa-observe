@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useContext, useState } from "react";
-import { type LookbackPeriod, type Filter } from "~/lib/types";
+import { type LookbackPeriod, type Filter, type OrderBy } from "~/lib/types";
 export const lookbackPeriods: LookbackPeriod[] = [
   { label: "24 hours", value: 24 * 60 * 60 * 1000 },
   { label: "2 days", value: 2 * 24 * 60 * 60 * 1000 },
@@ -14,6 +14,8 @@ interface ObserveStateContextType {
   setSelectedCallId: (callId: string | null) => void;
   filter: Filter;
   setFilter: (filter: Filter) => void;
+  orderBy: OrderBy | undefined;
+  setOrderBy: (orderBy: OrderBy | undefined) => void;
 }
 
 const ObserveStateContext = createContext<ObserveStateContextType | undefined>(
@@ -29,6 +31,7 @@ export function ObserveStateProvider({
   const [filter, setFilter] = useState<Filter>({
     lookbackPeriod: lookbackPeriods[2]!,
   });
+  const [orderBy, setOrderBy] = useState<OrderBy | undefined>();
 
   return (
     <ObserveStateContext.Provider
@@ -37,6 +40,8 @@ export function ObserveStateProvider({
         setSelectedCallId,
         filter,
         setFilter,
+        orderBy,
+        setOrderBy,
       }}
     >
       {children}

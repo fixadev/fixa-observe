@@ -1,5 +1,5 @@
 import { type Prisma } from "@prisma/client";
-import { type Filter } from "~/lib/types";
+import { type OrderBy, type Filter } from "~/lib/types";
 import { type CallWithIncludes } from "~/lib/types";
 import { calculateLatencyPercentiles } from "~/lib/utils";
 import { db } from "~/server/db";
@@ -34,6 +34,7 @@ export const callService = {
     limit,
     cursor,
     filter,
+    orderBy,
   }: {
     ownerId?: string;
     testId?: string;
@@ -41,6 +42,7 @@ export const callService = {
     limit?: number;
     cursor?: string;
     filter?: Filter;
+    orderBy?: OrderBy;
   }): Promise<{
     items: CallWithIncludes[];
     nextCursor: string | undefined;
@@ -63,6 +65,15 @@ export const callService = {
       if (filter.regionId) {
         filterWhere.regionId = filter.regionId;
       }
+    }
+
+    const orderByObject: Prisma.CallOrderByWithRelationInput = {};
+    if (orderBy) {
+      orderByObject[
+        orderBy.property as keyof Prisma.CallOrderByWithRelationInput
+      ] = orderBy.direction;
+    } else {
+      orderByObject.startedAt = "desc";
     }
 
     const items = await db.call.findMany({
@@ -88,9 +99,7 @@ export const callService = {
         latencyBlocks: true,
         interruptions: true,
       },
-      orderBy: {
-        startedAt: "desc",
-      },
+      orderBy: orderByObject,
       take: limit ? limit + 1 : undefined, // Take one extra to determine if there's a next page
       ...(cursor ? { cursor: { id: cursor }, skip: 1 } : {}), // Use ID as cursor
     });

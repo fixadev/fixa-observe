@@ -82,6 +82,7 @@ export type AgentWithIncludes = Prisma.AgentGetPayload<{
   };
 }>;
 
+export type Filter = z.infer<typeof FilterSchema>;
 export const FilterSchema = z.object({
   lookbackPeriod: z.object({
     label: z.string(),
@@ -105,9 +106,13 @@ export const FilterSchema = z.object({
   // }),
 });
 
-export type Filter = z.infer<typeof FilterSchema>;
-
 export type LookbackPeriod = {
   label: string;
   value: number;
 };
+
+export type OrderBy = z.infer<typeof OrderBySchema>;
+export const OrderBySchema = z.object({
+  property: z.string(),
+  direction: z.enum(["asc", "desc"]),
+});

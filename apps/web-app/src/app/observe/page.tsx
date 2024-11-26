@@ -12,7 +12,7 @@ import { Skeleton } from "~/components/ui/skeleton";
 import ChartCard from "~/components/observe/ChartCard";
 
 export default function ObservePage() {
-  const { selectedCallId, setSelectedCallId, filter, setFilter } =
+  const { selectedCallId, setSelectedCallId, filter, setFilter, orderBy } =
     useObserveState();
 
   const containerRef = useRef<HTMLDivElement>(null);
@@ -40,6 +40,7 @@ export default function ObservePage() {
       ownerId: "11x",
       limit: 10,
       filter,
+      orderBy,
     },
     {
       getNextPageParam: (lastPage) => lastPage.nextCursor,
