@@ -8,7 +8,6 @@ import {
   formatDurationHoursMinutesSeconds,
   getLatencyBlockColor,
 } from "~/lib/utils";
-import { useAudio } from "~/components/hooks/useAudio";
 import { CheckCircleIcon, XCircleIcon } from "@heroicons/react/24/solid";
 import { CallStatus, type LatencyBlock, Role } from "@prisma/client";
 import { LatencyCallHeader, TestCallHeader } from "./CallHeader";
@@ -42,8 +41,15 @@ export default function CallDetails({
   const [activeEvalResultId, setActiveEvalResultId] = useState<string | null>(
     null,
   );
-  const { play, seek, currentTime } = useAudio();
   const headerRef = useRef<HTMLDivElement>(null);
+
+  const [currentTime, setCurrentTime] = useState(0);
+  const play = useCallback(() => {
+    audioPlayerRef.current?.play();
+  }, [audioPlayerRef]);
+  const seek = useCallback((time: number) => {
+    audioPlayerRef.current?.seek(time);
+  }, []);
 
   const messagesFiltered = useMemo(() => {
     const ret = call.messages
@@ -77,9 +83,12 @@ export default function CallDetails({
   // TODO: fix this
   // Offset from the start of the call to the first message
   const offsetFromStart = useMemo(() => {
-    // return messagesFiltered[0]?.secondsFromStart ?? 0;
-    return 0;
-  }, []);
+    // If this is a customer call, we transcribe the messages ourselves so the offset is 0
+    if (call.customerCallId) {
+      return 0;
+    }
+    return messagesFiltered[0]?.secondsFromStart ?? 0;
+  }, [messagesFiltered, call.customerCallId]);
 
   // Index of the currently active message
   const activeMessageIndex = useMemo(() => {
@@ -345,6 +354,7 @@ export default function CallDetails({
             onEvalResultHover={(evalId) => {
               setActiveEvalResultId(evalId);
             }}
+            onTimeUpdate={setCurrentTime}
           />
         )}
       </div>

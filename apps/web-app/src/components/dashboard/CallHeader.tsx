@@ -11,9 +11,9 @@ import {
 import Spinner from "../Spinner";
 import { type AudioPlayerRef } from "./AudioPlayer";
 import { CallStatus } from "@prisma/client";
-import { useAudio } from "../hooks/useAudio";
 import { formatDistanceToNow } from "date-fns";
 import Link from "next/link";
+import { useCallback } from "react";
 
 interface CallHeaderProps {
   call: CallWithIncludes;
@@ -32,7 +32,9 @@ export function TestCallHeader({
   setActiveEvalResultId,
   agentId,
 }: CallHeaderProps) {
-  const { play } = useAudio();
+  const play = useCallback(() => {
+    audioPlayerRef.current?.play();
+  }, [audioPlayerRef]);
 
   return (
     <div className="flex items-center gap-4 pb-4">

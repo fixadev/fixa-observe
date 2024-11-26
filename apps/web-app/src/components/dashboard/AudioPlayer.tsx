@@ -25,13 +25,15 @@ import {
   getInterruptionColor,
   getLatencyBlockColor,
 } from "~/lib/utils";
-import dynamic from "next/dynamic";
 import WaveSurfer from "wavesurfer.js";
 import { Skeleton } from "../ui/skeleton";
 
 export type AudioPlayerRef = {
   setActiveEvalResult: (evalResult: EvalResultWithIncludes | null) => void;
   setHoveredEvalResult: (evalResultId: string | null) => void;
+  play: () => void;
+  pause: () => void;
+  seek: (time: number) => void;
 };
 
 const _AudioPlayer = forwardRef<
@@ -41,9 +43,10 @@ const _AudioPlayer = forwardRef<
     small?: boolean;
     offsetFromStart?: number;
     onEvalResultHover?: (evalId: string | null) => void;
+    onTimeUpdate?: (time: number) => void;
   }
 >(function AudioPlayer(
-  { call, small = false, offsetFromStart = 0, onEvalResultHover },
+  { call, small = false, offsetFromStart = 0, onEvalResultHover, onTimeUpdate },
   ref,
 ) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -71,11 +74,11 @@ const _AudioPlayer = forwardRef<
   const [currentTime, setCurrentTime] = useState(0);
   const [playbackSpeed, setPlaybackSpeed] = useState(1);
   const [audioLoaded, setAudioLoaded] = useState(false);
-
   const audioVisualizerId = useMemo(() => {
     return `audio-visualizer-${crypto.randomUUID()}`;
   }, []);
 
+  // Load the audio visualizer
   useEffect(() => {
     const audioVisualizer = document.getElementById(audioVisualizerId);
     if (audioVisualizer) {
@@ -113,6 +116,11 @@ const _AudioPlayer = forwardRef<
     }
   }, [audioVisualizerId, call.stereoRecordingUrl, small]);
 
+  // Update the time
+  useEffect(() => {
+    onTimeUpdate?.(currentTime);
+  }, [currentTime, onTimeUpdate]);
+
   // Check if we need to stop playback due to reaching eval end
   useEffect(() => {
     if (
@@ -146,8 +154,11 @@ const _AudioPlayer = forwardRef<
       setHoveredEvalResult: (evalResultId: string | null) => {
         setHoveredEvalResult(evalResultId);
       },
+      seek,
+      play,
+      pause,
     }),
-    [seek, offsetFromStart],
+    [seek, offsetFromStart, play, pause],
   );
 
   const handleEvalResultClick = useCallback(
@@ -367,4 +378,8 @@ const _AudioPlayer = forwardRef<
     </div>
   );
 });
-export default dynamic(() => Promise.resolve(_AudioPlayer), { ssr: false });
+export default _AudioPlayer;
+// export default dynamic(() => Promise.resolve(_AudioPlayer), {
+//   ssr: false,
+//   loading: () => <div>Loading...</div>,
+// });
