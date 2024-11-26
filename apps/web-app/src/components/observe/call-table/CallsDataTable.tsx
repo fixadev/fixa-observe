@@ -11,6 +11,7 @@ import {
   getExpandedRowModel,
   getFilteredRowModel,
   useReactTable,
+  getSortedRowModel,
 } from "@tanstack/react-table";
 
 import {
@@ -58,6 +59,8 @@ export function DataTable<TData, TValue>({
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    enableSorting: true,
 
     onSortingChange: setSorting,
     manualSorting: true,

@@ -10,15 +10,16 @@ import {
   getInterruptionsColor,
   getLatencyColor,
 } from "~/lib/utils";
+import { SortButton } from "./SortButton";
 
 export const columns: ColumnDef<CallWithIncludes>[] = [
   {
-    header: "id",
+    header: ({ column }) => <SortButton column={column} title="id" />,
+    accessorKey: "customerCallId",
     cell: ({ row }) => {
       const call = row.original;
       return (
         <div className="flex flex-col">
-          {/* <div className="text-sm font-medium">{call.name}</div> */}
           <div className="flex items-center gap-1">
             <div className="text-sm font-medium">
               {call.customerCallId ?? "unknown"}
@@ -30,14 +31,6 @@ export const columns: ColumnDef<CallWithIncludes>[] = [
     },
     size: 10,
   },
-  // {
-  //   header: "audio",
-  //   cell: ({ row }) => {
-  //     const call = row.original;
-  //     return <AudioPlayer call={call} small />;
-  //   },
-  //   size: 300,
-  // },
   {
     id: "latency",
     header: () => {
@@ -160,7 +153,8 @@ export const columns: ColumnDef<CallWithIncludes>[] = [
     size: 50,
   },
   {
-    header: "created at",
+    header: ({ column }) => <SortButton column={column} title="created at" />,
+    accessorKey: "startedAt",
     cell: ({ row }) => {
       const call = row.original;
       if (!call.startedAt) {

@@ -12,6 +12,7 @@ export default function CallTable({
   return (
     <DataTable
       // onRowClick={onRowClick ?? undefined}
+      initialSorting={[{ id: "startedAt", desc: true }]}
       columns={columns}
       data={calls}
     />
