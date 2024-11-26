@@ -14,6 +14,7 @@ export const uploadCallToDB = async (
       audioUrl: url,
       createdAt: new Date(),
       agentId,
+      regionId,
     },
   });
 };
