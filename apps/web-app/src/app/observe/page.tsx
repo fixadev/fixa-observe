@@ -29,31 +29,27 @@ export default function ObservePage() {
   //   // return TEST_OBSERVE_CALLS;
   // }, []);
 
-  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } =
-    api._call.getCalls.useInfiniteQuery(
-      {
-        ownerId: "11x",
-        limit: 100,
-        filter,
-      },
-      {
-        getNextPageParam: (lastPage) => lastPage.nextCursor,
-      },
-    );
+  const {
+    data: _calls,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isLoading,
+  } = api._call.getCalls.useInfiniteQuery(
+    {
+      ownerId: "11x",
+      limit: 10,
+      filter,
+    },
+    {
+      getNextPageParam: (lastPage) => lastPage.nextCursor,
+    },
+  );
 
   // Combine all pages
   const calls = useMemo(
-    () =>
-      data?.pages
-        .flatMap((page) => page.calls)
-        .filter(
-          (call) =>
-            (filter.agentId === "all agents" ||
-              call.agentId === filter.agentId) &&
-            (filter.regionId === "all regions" ||
-              call.regionId === filter.regionId),
-        ) ?? [],
-    [data, filter.agentId, filter.regionId],
+    () => _calls?.pages.flatMap((page) => page.calls) ?? [],
+    [_calls],
   );
 
   // Optional: Add intersection observer for infinite scroll
@@ -118,7 +114,7 @@ export default function ObservePage() {
         <CallTable calls={calls} />
         {/* Invisible marker for infinite scroll */}
         <div ref={loadMoreRef} className="h-1" />
-        {isFetchingNextPage && (
+        {(isFetchingNextPage || isLoading) && (
           <div className="flex justify-center">
             <Spinner />
           </div>

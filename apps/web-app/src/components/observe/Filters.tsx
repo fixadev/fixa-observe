@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 import { Button } from "../ui/button";
 import {
   Select,
@@ -9,11 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
-import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
-import { Switch } from "../ui/switch";
-import { cn, formatDateTime } from "~/lib/utils";
-import { Input } from "../ui/input";
-import { Slider } from "../ui/slider";
+import { formatDateTime } from "~/lib/utils";
 import { CalendarIcon, MapIcon, UserIcon } from "@heroicons/react/24/solid";
 import { lookbackPeriods } from "../hooks/useObserveState";
 import { type Filter } from "~/lib/types";
@@ -29,16 +25,33 @@ export default function Filters({
   const agents = useMemo(() => {
     return [
       {
-        id: "all agents",
+        id: "all",
         name: "all agents",
       },
       {
-        id: "agent1",
+        id: "agent 1",
         name: "agent 1",
       },
       {
-        id: "agent2",
+        id: "agent 2",
         name: "agent 2",
+      },
+    ];
+  }, []);
+
+  const regions = useMemo(() => {
+    return [
+      {
+        id: "all",
+        name: "all regions",
+      },
+      {
+        id: "US",
+        name: "US",
+      },
+      {
+        id: "UK",
+        name: "UK",
       },
     ];
   }, []);
@@ -81,7 +94,15 @@ export default function Filters({
             ))}
           </SelectContent>
         </Select>
-        <Select>
+        <Select
+          value={filter.agentId ?? "all"}
+          onValueChange={(value) => {
+            setFilter({
+              ...filter,
+              agentId: value === "all" ? undefined : value,
+            });
+          }}
+        >
           <SelectTrigger className="gap-2 bg-background">
             <UserIcon className="size-4 shrink-0" />
             <SelectValue placeholder="all agents" />
@@ -94,15 +115,23 @@ export default function Filters({
             ))}
           </SelectContent>
         </Select>
-        <Select>
+        <Select
+          value={filter.regionId ?? "all"}
+          onValueChange={(value) => {
+            setFilter({
+              ...filter,
+              regionId: value === "all" ? undefined : value,
+            });
+          }}
+        >
           <SelectTrigger className="gap-2 bg-background">
             <MapIcon className="size-4 shrink-0" />
             <SelectValue placeholder="all regions" />
           </SelectTrigger>
           <SelectContent>
-            {["all regions", "US", "UK"].map((region) => (
-              <SelectItem key={region} value={region}>
-                {region}
+            {regions.map((region) => (
+              <SelectItem key={region.id} value={region.id}>
+                {region.name}
               </SelectItem>
             ))}
           </SelectContent>
@@ -155,71 +184,71 @@ export default function Filters({
   );
 }
 
-function SwitchWithValue({
-  prefix,
-  suffix,
-  value,
-  setValue,
-  checked,
-  onCheckedChange,
-}: {
-  prefix: string;
-  suffix: string;
-  value: number;
-  setValue: (value: number) => void;
-  checked: boolean;
-  onCheckedChange: (checked: boolean) => void;
-}) {
-  const [_value, _setValue] = useState(value);
+// function SwitchWithValue({
+//   prefix,
+//   suffix,
+//   value,
+//   setValue,
+//   checked,
+//   onCheckedChange,
+// }: {
+//   prefix: string;
+//   suffix: string;
+//   value: number;
+//   setValue: (value: number) => void;
+//   checked: boolean;
+//   onCheckedChange: (checked: boolean) => void;
+// }) {
+//   const [_value, _setValue] = useState(value);
 
-  useEffect(() => {
-    _setValue(value);
-  }, [value]);
+//   useEffect(() => {
+//     _setValue(value);
+//   }, [value]);
 
-  return (
-    <Popover onOpenChange={() => setValue(_value)}>
-      <PopoverTrigger asChild>
-        <Button variant="outline" asChild>
-          <div
-            className={cn(
-              "flex cursor-pointer items-center gap-2",
-              !checked && "opacity-50",
-            )}
-          >
-            <Switch
-              onClick={(e) => e.stopPropagation()}
-              checked={checked}
-              onCheckedChange={onCheckedChange}
-            />
-            {prefix}
-            {isNaN(_value) ? 0 : _value}
-            {suffix}
-          </div>
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent className="flex flex-col gap-2 text-sm">
-        <div className="flex items-center gap-2">
-          <div className="shrink-0">{prefix}</div>
-          <Input
-            type="number"
-            value={_value}
-            onChange={(e) => {
-              _setValue(parseInt(e.target.value));
-            }}
-          />
-          <div>{suffix}</div>
-        </div>
-        <Slider
-          max={3000}
-          step={10}
-          value={[_value]}
-          onValueChange={([value]) => {
-            if (value !== undefined) {
-              _setValue(value);
-            }
-          }}
-        />
-      </PopoverContent>
-    </Popover>
-  );
-}
+//   return (
+//     <Popover onOpenChange={() => setValue(_value)}>
+//       <PopoverTrigger asChild>
+//         <Button variant="outline" asChild>
+//           <div
+//             className={cn(
+//               "flex cursor-pointer items-center gap-2",
+//               !checked && "opacity-50",
+//             )}
+//           >
+//             <Switch
+//               onClick={(e) => e.stopPropagation()}
+//               checked={checked}
+//               onCheckedChange={onCheckedChange}
+//             />
+//             {prefix}
+//             {isNaN(_value) ? 0 : _value}
+//             {suffix}
+//           </div>
+//         </Button>
+//       </PopoverTrigger>
+//       <PopoverContent className="flex flex-col gap-2 text-sm">
+//         <div className="flex items-center gap-2">
+//           <div className="shrink-0">{prefix}</div>
+//           <Input
+//             type="number"
+//             value={_value}
+//             onChange={(e) => {
+//               _setValue(parseInt(e.target.value));
+//             }}
+//           />
+//           <div>{suffix}</div>
+//         </div>
+//         <Slider
+//           max={3000}
+//           step={10}
+//           value={[_value]}
+//           onValueChange={([value]) => {
+//             if (value !== undefined) {
+//               _setValue(value);
+//             }
+//           }}
+//         />
+//       </PopoverContent>
+//     </Popover>
+//   );
+// }

@@ -44,7 +44,6 @@ export const callRouter = createTRPCRouter({
   getLatencyInterruptionPercentiles: protectedProcedure
     .input(z.object({ filter: FilterSchema }))
     .query(async ({ input, ctx }) => {
-      console.log("GET LATENCY INTERRUPTION PERCENTILES", input);
       return await callService.getLatencyInterruptionPercentiles({
         ownerId: "11x",
         filter: input.filter,

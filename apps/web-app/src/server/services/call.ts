@@ -1,3 +1,4 @@
+import { type Prisma } from "@prisma/client";
 import { type Filter } from "~/lib/types";
 import { type CallWithIncludes } from "~/lib/types";
 import { calculateLatencyPercentiles } from "~/lib/utils";
@@ -39,21 +40,37 @@ export const callService = {
     scenarioId?: string;
     limit?: number;
     cursor?: string;
-    filter: Filter;
+    filter?: Filter;
   }): Promise<{
     items: CallWithIncludes[];
     nextCursor: string | undefined;
   }> => {
+    const filterWhere: Prisma.CallWhereInput = {};
+    if (filter) {
+      if (filter.timeRange) {
+        filterWhere.startedAt = {
+          gte: new Date(filter.timeRange.start).toISOString(),
+          lte: new Date(filter.timeRange.end).toISOString(),
+        };
+      } else {
+        filterWhere.startedAt = {
+          gte: new Date(Date.now() - filter.lookbackPeriod.value).toISOString(),
+        };
+      }
+      if (filter.agentId) {
+        filterWhere.agentId = filter.agentId;
+      }
+      if (filter.regionId) {
+        filterWhere.regionId = filter.regionId;
+      }
+    }
+
     const items = await db.call.findMany({
       where: {
         ownerId,
         testId,
         scenarioId,
-        startedAt: {
-          gte: filter.lookbackPeriod.value
-            ? new Date(Date.now() - filter.lookbackPeriod.value).toISOString()
-            : undefined,
-        },
+        ...filterWhere,
       },
       include: {
         messages: true,
@@ -152,7 +169,6 @@ export const callService = {
         call.interruptions.map((interruption) => interruption.duration),
       );
       const timestamp = new Date(hour + ":00:00Z").getTime();
-      console.log("HOUR", hour, "TIMESTAMP", timestamp);
 
       latencyByHour.push({
         timestamp,
