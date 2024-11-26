@@ -1,20 +1,19 @@
 "use client";
 
 import { type CallWithIncludes } from "~/lib/types";
-import {
-  calculateLatencyPercentiles,
-  cn,
-  didCallSucceed,
-  getLatencyColor,
-} from "~/lib/utils";
+import { cn, didCallSucceed, getLatencyColor } from "~/lib/utils";
 import Image from "next/image";
-import { CheckCircleIcon, XCircleIcon } from "@heroicons/react/24/solid";
+import {
+  CheckCircleIcon,
+  PencilIcon,
+  XCircleIcon,
+} from "@heroicons/react/24/solid";
 import Spinner from "../Spinner";
 import { type AudioPlayerRef } from "./AudioPlayer";
 import { CallStatus } from "@prisma/client";
 import { useAudio } from "../hooks/useAudio";
-import { useMemo } from "react";
 import { formatDistanceToNow } from "date-fns";
+import Link from "next/link";
 
 interface CallHeaderProps {
   call: CallWithIncludes;
@@ -22,6 +21,7 @@ interface CallHeaderProps {
   audioPlayerRef: React.RefObject<AudioPlayerRef>;
   activeEvalResultId: string | null;
   setActiveEvalResultId: (id: string | null) => void;
+  agentId?: string;
 }
 
 export function TestCallHeader({
@@ -30,6 +30,7 @@ export function TestCallHeader({
   audioPlayerRef,
   activeEvalResultId,
   setActiveEvalResultId,
+  agentId,
 }: CallHeaderProps) {
   const { play } = useAudio();
 
@@ -71,7 +72,7 @@ export function TestCallHeader({
             <div
               key={evalResult.id}
               className={cn(
-                "flex cursor-pointer items-start gap-1 border-l-2 p-1 pl-1 text-xs",
+                "group flex cursor-pointer items-start gap-1 border-l-2 p-1 pl-1 text-xs",
                 evalResult.success
                   ? "border-green-500 bg-green-100 text-green-500 hover:bg-green-200"
                   : "border-red-500 bg-red-100 text-red-500 hover:bg-red-200",
@@ -97,6 +98,22 @@ export function TestCallHeader({
                 <XCircleIcon className="size-4 shrink-0 text-red-500" />
               )}
               {evalResult.eval.name}
+              <Link
+                href={`/dashboard/${agentId}/scenarios?scenarioId=${call.scenarioId}&evalId=${evalResult.eval.id}`}
+              >
+                <PencilIcon
+                  onClick={(e) => {
+                    e.stopPropagation();
+                  }}
+                  onMouseEnter={(e) => {
+                    e.stopPropagation();
+                  }}
+                  onMouseLeave={(e) => {
+                    e.stopPropagation();
+                  }}
+                  className="size-4 shrink-0 cursor-pointer text-muted-foreground/70 opacity-0 transition-opacity hover:text-muted-foreground group-hover:opacity-100"
+                />
+              </Link>
             </div>
           ))}
         </div>
