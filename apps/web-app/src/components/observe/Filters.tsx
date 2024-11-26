@@ -15,7 +15,8 @@ import { cn, formatDateTime } from "~/lib/utils";
 import { Input } from "../ui/input";
 import { Slider } from "../ui/slider";
 import { CalendarIcon, MapIcon, UserIcon } from "@heroicons/react/24/solid";
-import { lookbackPeriods, type Filter } from "../hooks/useObserveState";
+import { lookbackPeriods } from "../hooks/useObserveState";
+import { type Filter } from "~/lib/types";
 
 export default function Filters({
   filter,

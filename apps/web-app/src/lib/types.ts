@@ -81,3 +81,33 @@ export type AgentWithIncludes = Prisma.AgentGetPayload<{
     enabledTestAgents: true;
   };
 }>;
+
+export const FilterSchema = z.object({
+  lookbackPeriod: z.object({
+    label: z.string(),
+    value: z.number(),
+  }),
+  timeRange: z
+    .object({
+      start: z.number(),
+      end: z.number(),
+    })
+    .optional(),
+  agentId: z.string().optional(),
+  regionId: z.string().optional(),
+  // latencyThreshold: z.object({
+  //   enabled: z.boolean(),
+  //   value: z.number(),
+  // }),
+  // interruptionThreshold: z.object({
+  //   enabled: z.boolean(),
+  //   value: z.number(),
+  // }),
+});
+
+export type Filter = z.infer<typeof FilterSchema>;
+
+export type LookbackPeriod = {
+  label: string;
+  value: number;
+};

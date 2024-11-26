@@ -19,7 +19,7 @@ export default function ObservePage() {
 
   const { data: percentiles } =
     api._call.getLatencyInterruptionPercentiles.useQuery({
-      lookbackPeriod: filter.lookbackPeriod.value,
+      filter: { ...filter, timeRange: undefined }, // don't refetch when timerange changes
     });
   // const latencyPercentiles = useMemo(() => {
   //   return [];
@@ -33,7 +33,8 @@ export default function ObservePage() {
     api._call.getCalls.useInfiniteQuery(
       {
         ownerId: "11x",
-        limit: 10,
+        limit: 100,
+        filter,
       },
       {
         getNextPageParam: (lastPage) => lastPage.nextCursor,
@@ -106,14 +107,9 @@ export default function ObservePage() {
             </>
           ) : (
             <>
-              <ChartCard
-                title="latency"
-                average={percentiles.latency.average}
-                byHour={percentiles.latency.byHour}
-              />
+              <ChartCard title="latency" byHour={percentiles.latency.byHour} />
               <ChartCard
                 title="interruptions"
-                average={percentiles.interruptions.average}
                 byHour={percentiles.interruptions.byHour}
               />
             </>

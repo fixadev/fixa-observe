@@ -2,6 +2,7 @@ import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { callService } from "~/server/services/call";
 import { TRPCError } from "@trpc/server";
+import { FilterSchema } from "~/lib/types";
 
 export const callRouter = createTRPCRouter({
   getCall: protectedProcedure.input(z.string()).query(async ({ input }) => {
@@ -22,11 +23,9 @@ export const callRouter = createTRPCRouter({
         ownerId: z.string().optional(),
         testId: z.string().optional(),
         scenarioId: z.string().optional(),
-        lookbackPeriod: z.number().optional(),
         limit: z.number().optional(),
         cursor: z.string().optional(),
-        agentId: z.string().optional(),
-        regionId: z.string().optional(),
+        filter: FilterSchema,
       }),
     )
     .query(async ({ input }) => {
@@ -43,11 +42,12 @@ export const callRouter = createTRPCRouter({
     }),
 
   getLatencyInterruptionPercentiles: protectedProcedure
-    .input(z.object({ lookbackPeriod: z.number() })) // in milliseconds
+    .input(z.object({ filter: FilterSchema }))
     .query(async ({ input, ctx }) => {
+      console.log("GET LATENCY INTERRUPTION PERCENTILES", input);
       return await callService.getLatencyInterruptionPercentiles({
         ownerId: "11x",
-        lookbackPeriod: input.lookbackPeriod,
+        filter: input.filter,
       });
     }),
 });

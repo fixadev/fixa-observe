@@ -31,39 +31,35 @@ const chartConfig = {
 export default function LatencyChart({
   data,
 }: {
-  data: { hour: string; p50: number; p90: number; p95: number }[];
+  data: { timestamp: number; p50: number; p90: number; p95: number }[];
 }) {
   const { filter, setFilter } = useObserveState();
 
   const formattedData = useMemo(() => {
     const ret = [...data];
 
-    const hourSet = new Set<string>();
+    const hourSet = new Set<number>();
     for (const item of data) {
-      hourSet.add(item.hour);
+      hourSet.add(item.timestamp);
     }
 
-    const now = Date.now();
+    const now = new Date(
+      new Date().toISOString().substring(0, 13) + ":00:00Z",
+    ).getTime();
 
     for (
       let i = now - filter.lookbackPeriod.value;
       i <= now;
       i += 60 * 60 * 1000
     ) {
-      const hour = new Date(i).toISOString().slice(0, 13);
-      if (!hourSet.has(hour)) {
-        ret.push({ hour, p50: 0, p90: 0, p95: 0 });
+      if (!hourSet.has(i)) {
+        ret.push({ timestamp: i, p50: 0, p90: 0, p95: 0 });
       }
     }
 
-    const ret2 = ret
-      .map((d) => ({
-        ...d,
-        hour: new Date(d.hour + ":00:00Z").getTime(),
-      }))
-      .sort((a, b) => a.hour - b.hour);
+    ret.sort((a, b) => a.timestamp - b.timestamp);
 
-    return ret2;
+    return ret;
   }, [data, filter.lookbackPeriod.value]);
 
   const [refAreaLeft, setRefAreaLeft] = useState<string>("");
@@ -134,9 +130,8 @@ export default function LatencyChart({
         <XAxis
           allowDataOverflow
           domain={[left, right]}
-          dataKey="hour"
+          dataKey="timestamp"
           tickFormatter={(value: number) => {
-            // const date = new Date(value + ":00:00Z");
             const date = new Date(value);
             return date.toLocaleTimeString("en-US", {
               hour: "2-digit",
@@ -154,7 +149,7 @@ export default function LatencyChart({
         <ChartTooltip
           content={
             <ChartTooltipContent
-              labelKey="hour"
+              labelKey="timestamp"
               labelFormatter={(time: number) => {
                 const date = new Date(time);
                 return date.toLocaleString("en-US", {

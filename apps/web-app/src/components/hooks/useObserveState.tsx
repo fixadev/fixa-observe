@@ -1,30 +1,7 @@
 "use client";
 
 import { createContext, useContext, useState } from "react";
-
-export type Filter = {
-  lookbackPeriod: LookbackPeriod;
-  timeRange?: {
-    start: number;
-    end: number;
-  };
-  agentId: string;
-  regionId: string;
-  latencyThreshold: {
-    enabled: boolean;
-    value: number;
-  };
-  interruptionThreshold: {
-    enabled: boolean;
-    value: number;
-  };
-};
-
-export type LookbackPeriod = {
-  label: string;
-  value: number;
-};
-
+import { type LookbackPeriod, type Filter } from "~/lib/types";
 export const lookbackPeriods: LookbackPeriod[] = [
   { label: "24 hours", value: 24 * 60 * 60 * 1000 },
   { label: "2 days", value: 2 * 24 * 60 * 60 * 1000 },
@@ -51,16 +28,6 @@ export function ObserveStateProvider({
   const [selectedCallId, setSelectedCallId] = useState<string | null>(null);
   const [filter, setFilter] = useState<Filter>({
     lookbackPeriod: lookbackPeriods[2]!,
-    agentId: "all agents",
-    regionId: "all regions",
-    latencyThreshold: {
-      enabled: true,
-      value: 1000,
-    },
-    interruptionThreshold: {
-      enabled: true,
-      value: 1000,
-    },
   });
 
   return (

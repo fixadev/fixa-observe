@@ -1,3 +1,4 @@
+import { type Filter } from "~/lib/types";
 import { type CallWithIncludes } from "~/lib/types";
 import { calculateLatencyPercentiles } from "~/lib/utils";
 import { db } from "~/server/db";
@@ -29,16 +30,16 @@ export const callService = {
     ownerId,
     testId,
     scenarioId,
-    lookbackPeriod,
     limit,
     cursor,
+    filter,
   }: {
     ownerId?: string;
     testId?: string;
     scenarioId?: string;
-    lookbackPeriod?: number;
     limit?: number;
     cursor?: string;
+    filter: Filter;
   }): Promise<{
     items: CallWithIncludes[];
     nextCursor: string | undefined;
@@ -49,8 +50,8 @@ export const callService = {
         testId,
         scenarioId,
         startedAt: {
-          gte: lookbackPeriod
-            ? new Date(Date.now() - lookbackPeriod).toISOString()
+          gte: filter.lookbackPeriod.value
+            ? new Date(Date.now() - filter.lookbackPeriod.value).toISOString()
             : undefined,
         },
       },
@@ -91,23 +92,21 @@ export const callService = {
 
   getLatencyInterruptionPercentiles: async ({
     ownerId,
-    lookbackPeriod,
+    filter,
   }: {
     ownerId: string;
-    lookbackPeriod: number;
+    filter: Filter;
   }): Promise<{
     latency: {
-      byHour: { hour: string; p50: number; p90: number; p95: number }[];
-      average: { p50: number; p90: number; p95: number };
+      byHour: { timestamp: number; p50: number; p90: number; p95: number }[];
     };
     interruptions: {
-      byHour: { hour: string; p50: number; p90: number; p95: number }[];
-      average: { p50: number; p90: number; p95: number };
+      byHour: { timestamp: number; p50: number; p90: number; p95: number }[];
     };
   }> => {
     const calls = await callService.getCalls({
       ownerId,
-      lookbackPeriod,
+      filter,
     });
     calls.items.sort((a, b) => {
       return (
@@ -134,13 +133,13 @@ export const callService = {
 
     // Calculate percentiles for each hour
     const latencyByHour: {
-      hour: string;
+      timestamp: number;
       p50: number;
       p90: number;
       p95: number;
     }[] = [];
     const interruptionsByHour: {
-      hour: string;
+      timestamp: number;
       p50: number;
       p90: number;
       p95: number;
@@ -152,35 +151,36 @@ export const callService = {
       const interruptionDurations = hourCalls.flatMap((call) =>
         call.interruptions.map((interruption) => interruption.duration),
       );
+      const timestamp = new Date(hour + ":00:00Z").getTime();
+      console.log("HOUR", hour, "TIMESTAMP", timestamp);
 
       latencyByHour.push({
-        hour,
+        timestamp,
         ...calculateLatencyPercentiles(latencyDurations),
       });
       interruptionsByHour.push({
-        hour,
+        timestamp,
         ...calculateLatencyPercentiles(interruptionDurations),
       });
     });
 
-    const average = {
-      latency: calculateLatencyPercentiles(
-        calls.items.flatMap((call) =>
-          call.latencyBlocks.map((block) => block.duration),
-        ),
-      ),
-      interruptions: calculateLatencyPercentiles(
-        calls.items.flatMap((call) =>
-          call.interruptions.map((interruption) => interruption.duration),
-        ),
-      ),
-    };
+    // const average = {
+    //   latency: calculateLatencyPercentiles(
+    //     calls.items.flatMap((call) =>
+    //       call.latencyBlocks.map((block) => block.duration),
+    //     ),
+    //   ),
+    //   interruptions: calculateLatencyPercentiles(
+    //     calls.items.flatMap((call) =>
+    //       call.interruptions.map((interruption) => interruption.duration),
+    //     ),
+    //   ),
+    // };
 
     return {
-      latency: { byHour: latencyByHour, average: average.latency },
+      latency: { byHour: latencyByHour },
       interruptions: {
         byHour: interruptionsByHour,
-        average: average.interruptions,
       },
     };
   },
