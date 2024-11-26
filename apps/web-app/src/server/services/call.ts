@@ -234,4 +234,20 @@ export const callService = {
       },
     });
   },
+
+  getAgentIds: async (ownerId: string): Promise<string[]> => {
+    const result = await db.call.groupBy({
+      by: ["agentId"],
+      where: { ownerId },
+    });
+    return result.filter((r) => r.agentId !== null).map((r) => r.agentId!);
+  },
+
+  getRegionIds: async (ownerId: string): Promise<string[]> => {
+    const result = await db.call.groupBy({
+      by: ["regionId"],
+      where: { ownerId },
+    });
+    return result.filter((r) => r.regionId !== null).map((r) => r.regionId!);
+  },
 };

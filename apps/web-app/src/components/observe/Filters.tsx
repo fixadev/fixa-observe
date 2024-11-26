@@ -13,6 +13,7 @@ import { formatDateTime } from "~/lib/utils";
 import { CalendarIcon, MapIcon, UserIcon } from "@heroicons/react/24/solid";
 import { lookbackPeriods } from "../hooks/useObserveState";
 import { type Filter } from "~/lib/types";
+import { api } from "~/trpc/react";
 
 export default function Filters({
   filter,
@@ -21,6 +22,8 @@ export default function Filters({
   filter: Filter;
   setFilter: (filter: Filter) => void;
 }) {
+  const { data: agentIds } = api._call.getAgentIds.useQuery();
+  const { data: regionIds } = api._call.getRegionIds.useQuery();
   // TODO: replace with api call
   const agents = useMemo(() => {
     return [
@@ -28,16 +31,12 @@ export default function Filters({
         id: "all",
         name: "all agents",
       },
-      {
-        id: "agent 1",
-        name: "agent 1",
-      },
-      {
-        id: "agent 2",
-        name: "agent 2",
-      },
+      ...(agentIds ?? []).map((id) => ({
+        id,
+        name: id,
+      })),
     ];
-  }, []);
+  }, [agentIds]);
 
   const regions = useMemo(() => {
     return [
@@ -45,16 +44,12 @@ export default function Filters({
         id: "all",
         name: "all regions",
       },
-      {
-        id: "US",
-        name: "US",
-      },
-      {
-        id: "UK",
-        name: "UK",
-      },
+      ...(regionIds ?? []).map((id) => ({
+        id,
+        name: id,
+      })),
     ];
-  }, []);
+  }, [regionIds]);
 
   // useEffect(() => {
   //   console.log(filter);

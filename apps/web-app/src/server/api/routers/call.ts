@@ -50,4 +50,12 @@ export const callRouter = createTRPCRouter({
         filter: input.filter,
       });
     }),
+
+  getAgentIds: protectedProcedure.query(async ({ ctx }) => {
+    return await callService.getAgentIds("11x");
+  }),
+
+  getRegionIds: protectedProcedure.query(async ({ ctx }) => {
+    return await callService.getRegionIds("11x");
+  }),
 });
