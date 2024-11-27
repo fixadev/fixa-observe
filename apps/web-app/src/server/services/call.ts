@@ -47,7 +47,7 @@ export const callService = {
     items: CallWithIncludes[];
     nextCursor: string | undefined;
   }> => {
-    const filterWhere: Prisma.CallWhereInput = {};
+    let filterWhere: Prisma.CallWhereInput = {};
     if (filter) {
       if (filter.timeRange) {
         filterWhere.startedAt = {
@@ -64,6 +64,16 @@ export const callService = {
       }
       if (filter.regionId) {
         filterWhere.regionId = filter.regionId;
+      }
+
+      // If customerCallId is set, filter for calls where customerCallId contains the search string (case insensitive)
+      if (filter.customerCallId) {
+        filterWhere = {
+          customerCallId: {
+            contains: filter.customerCallId,
+            mode: "insensitive",
+          },
+        };
       }
     }
 

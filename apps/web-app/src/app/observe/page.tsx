@@ -22,7 +22,11 @@ export default function ObservePage() {
     isLoading: isLoadingPercentiles,
     isRefetching: isRefetchingPercentiles,
   } = api._call.getLatencyInterruptionPercentiles.useQuery({
-    filter: { ...filter, timeRange: undefined }, // don't refetch when timerange changes
+    filter: {
+      ...filter,
+      timeRange: undefined,
+      customerCallId: undefined,
+    },
   });
 
   const {
@@ -37,7 +41,7 @@ export default function ObservePage() {
     {
       ownerId: "11x",
       limit: 10,
-      filter: { ...filter, chartPeriod: undefined }, // don't refetch when chart period changes
+      filter: { ...filter, chartPeriod: undefined },
       orderBy,
     },
     {

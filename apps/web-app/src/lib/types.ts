@@ -97,6 +97,7 @@ export const FilterSchema = z.object({
   agentId: z.string().optional(),
   regionId: z.string().optional(),
   chartPeriod: z.number(),
+  customerCallId: z.string().optional(),
   // latencyThreshold: z.object({
   //   enabled: z.boolean(),
   //   value: z.number(),
