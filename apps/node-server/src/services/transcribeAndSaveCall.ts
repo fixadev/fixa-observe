@@ -19,16 +19,16 @@ export const transcribeAndSaveCall = async (
         end: number;
         text: string;
         role: "user" | "agent";
-      }>;
+      }> | null;
       interruptions: Array<{
         secondsFromStart: number;
         duration: number;
         text: string;
-      }>;
+      }> | null;
       latencyBlocks: Array<{
         secondsFromStart: number;
         duration: number;
-      }>;
+      }> | null;
     }
 
     const response = await axios.post<TranscribeResponse>(
@@ -45,7 +45,7 @@ export const transcribeAndSaveCall = async (
       p90: latencyP90,
       p95: latencyP95,
     } = calculateLatencyPercentiles(
-      latencyBlocks.map((block) => block.duration),
+      latencyBlocks?.map((block) => block.duration) || [],
     );
 
     const {
@@ -53,17 +53,17 @@ export const transcribeAndSaveCall = async (
       p90: interruptionP90,
       p95: interruptionP95,
     } = calculateLatencyPercentiles(
-      interruptions.map((interruption) => interruption.duration),
+      interruptions?.map((interruption) => interruption.duration) || [],
     );
 
-    const messages = segments.map((segment) => ({
+    const messages = segments?.map((segment) => ({
       role: segment.role === "user" ? Role.user : Role.bot,
       message: segment.text,
       secondsFromStart: segment.start,
       duration: segment.end - segment.start,
     }));
 
-    const numberOfInterruptionsGreaterThan2Seconds = interruptions.filter(
+    const numberOfInterruptionsGreaterThan2Seconds = interruptions?.filter(
       (interruption) => interruption.duration > 2,
     ).length;
 
@@ -83,14 +83,22 @@ export const transcribeAndSaveCall = async (
         interruptionP50,
         interruptionP90,
         interruptionP95,
+        numInterruptions: numberOfInterruptionsGreaterThan2Seconds,
         messages: {
           create: messages,
         },
         latencyBlocks: {
-          create: latencyBlocks,
+          create: latencyBlocks?.map((block) => ({
+            secondsFromStart: block.secondsFromStart,
+            duration: block.duration,
+          })),
         },
         interruptions: {
-          create: interruptions,
+          create: interruptions?.map((interruption) => ({
+            secondsFromStart: interruption.secondsFromStart,
+            duration: interruption.duration,
+            text: interruption.text,
+          })),
         },
       },
     });
