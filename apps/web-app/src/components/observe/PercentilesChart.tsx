@@ -11,7 +11,15 @@ import {
   ChartTooltipContent,
   type ChartConfig,
 } from "~/components/ui/chart";
-import { useObserveState } from "../hooks/useObserveState";
+import { chartPeriods, useObserveState } from "../hooks/useObserveState";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../ui/select";
+import { Label } from "../ui/label";
 
 const chartConfig = {
   p50: {
@@ -28,31 +36,31 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
-export default function LatencyChart({
+export default function PercentilesChart({
   data,
 }: {
   data: { timestamp: number; p50: number; p90: number; p95: number }[];
 }) {
   const { filter, setFilter } = useObserveState();
 
+  // Fill in missing timestamps, based on the chart period
   const formattedData = useMemo(() => {
     const ret = [...data];
 
-    const hourSet = new Set<number>();
+    const periodSet = new Set<number>();
     for (const item of data) {
-      hourSet.add(item.timestamp);
+      periodSet.add(item.timestamp);
     }
 
-    const now = new Date(
-      new Date().toISOString().substring(0, 13) + ":00:00Z",
-    ).getTime();
+    const nowRounded =
+      Math.floor(Date.now() / filter.chartPeriod) * filter.chartPeriod;
 
     for (
-      let i = now - filter.lookbackPeriod.value;
-      i <= now;
-      i += 60 * 60 * 1000
+      let i = nowRounded - filter.lookbackPeriod.value;
+      i <= nowRounded;
+      i += filter.chartPeriod
     ) {
-      if (!hourSet.has(i)) {
+      if (!periodSet.has(i)) {
         ret.push({ timestamp: i, p50: 0, p90: 0, p95: 0 });
       }
     }
@@ -60,7 +68,7 @@ export default function LatencyChart({
     ret.sort((a, b) => a.timestamp - b.timestamp);
 
     return ret;
-  }, [data, filter.lookbackPeriod.value]);
+  }, [data, filter.lookbackPeriod.value, filter.chartPeriod]);
 
   const [refAreaLeft, setRefAreaLeft] = useState<string>("");
   const [refAreaRight, setRefAreaRight] = useState<string>("");
@@ -97,17 +105,17 @@ export default function LatencyChart({
       _right = refAreaRight;
     }
 
-    setFilter({
-      ...filter,
+    setFilter((prev) => ({
+      ...prev,
       timeRange: {
         start: parseInt(_left),
         end: parseInt(_right),
       },
-    });
+    }));
 
     setRefAreaLeft("");
     setRefAreaRight("");
-  }, [refAreaLeft, refAreaRight, filter, setFilter]);
+  }, [refAreaLeft, refAreaRight, setFilter]);
 
   return (
     <ChartContainer
@@ -165,7 +173,39 @@ export default function LatencyChart({
             />
           }
         />
-        <ChartLegend content={<ChartLegendContent />} />
+        <ChartLegend
+          content={(props) => (
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Label>period</Label>
+                <Select
+                  value={filter.chartPeriod.toString()}
+                  onValueChange={(value) => {
+                    setFilter((prev) => ({
+                      ...prev,
+                      chartPeriod: parseInt(value),
+                    }));
+                  }}
+                >
+                  <SelectTrigger className="w-fit">
+                    <SelectValue placeholder="Select a fruit" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {chartPeriods.map((item) => (
+                      <SelectItem
+                        key={item.value}
+                        value={item.value.toString()}
+                      >
+                        {item.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <ChartLegendContent className="p-0" payload={props.payload} />
+            </div>
+          )}
+        />
         <Area
           dataKey="p50"
           type="natural"

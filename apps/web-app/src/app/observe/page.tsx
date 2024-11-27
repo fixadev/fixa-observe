@@ -8,7 +8,6 @@ import Filters from "~/components/observe/Filters";
 import Spinner from "~/components/Spinner";
 import { Dialog, DialogContent } from "~/components/ui/dialog";
 import { api } from "~/trpc/react";
-import { Skeleton } from "~/components/ui/skeleton";
 import ChartCard from "~/components/observe/ChartCard";
 
 export default function ObservePage() {
@@ -21,13 +20,6 @@ export default function ObservePage() {
     api._call.getLatencyInterruptionPercentiles.useQuery({
       filter: { ...filter, timeRange: undefined }, // don't refetch when timerange changes
     });
-  // const latencyPercentiles = useMemo(() => {
-  //   return [];
-  // }, []);
-  // const calls = useMemo(() => {
-  //   return TEST_OBSERVE_CALLS.slice(0, 2);
-  //   // return TEST_OBSERVE_CALLS;
-  // }, []);
 
   const {
     data: _calls,
@@ -39,7 +31,7 @@ export default function ObservePage() {
     {
       ownerId: "11x",
       limit: 10,
-      filter,
+      filter: { ...filter, chartPeriod: undefined }, // don't refetch when chart period changes
       orderBy,
     },
     {
@@ -97,20 +89,8 @@ export default function ObservePage() {
       <Filters filter={filter} setFilter={setFilter} />
       <div className="flex flex-col gap-4 p-4">
         <div className="flex w-full gap-4">
-          {!percentiles ? (
-            <>
-              <Skeleton className="h-[500px] flex-1" />
-              <Skeleton className="h-[500px] flex-1" />
-            </>
-          ) : (
-            <>
-              <ChartCard title="latency" byHour={percentiles.latency.byHour} />
-              <ChartCard
-                title="interruptions"
-                byHour={percentiles.interruptions.byHour}
-              />
-            </>
-          )}
+          <ChartCard title="latency" data={percentiles?.latency} />
+          <ChartCard title="interruptions" data={percentiles?.interruptions} />
         </div>
         <CallTable calls={calls} />
         {/* Invisible marker for infinite scroll */}

@@ -41,7 +41,7 @@ export const callService = {
     scenarioId?: string;
     limit?: number;
     cursor?: string;
-    filter?: Filter;
+    filter?: Partial<Filter>;
     orderBy?: OrderBy;
   }): Promise<{
     items: CallWithIncludes[];
@@ -54,7 +54,7 @@ export const callService = {
           gte: new Date(filter.timeRange.start).toISOString(),
           lte: new Date(filter.timeRange.end).toISOString(),
         };
-      } else {
+      } else if (filter.lookbackPeriod) {
         filterWhere.startedAt = {
           gte: new Date(Date.now() - filter.lookbackPeriod.value).toISOString(),
         };
@@ -121,15 +121,17 @@ export const callService = {
     filter,
   }: {
     ownerId: string;
-    filter: Filter;
+    filter: Partial<Filter>;
   }): Promise<{
-    latency: {
-      byHour: { timestamp: number; p50: number; p90: number; p95: number }[];
-    };
+    latency: { timestamp: number; p50: number; p90: number; p95: number }[];
     interruptions: {
-      byHour: { timestamp: number; p50: number; p90: number; p95: number }[];
-    };
+      timestamp: number;
+      p50: number;
+      p90: number;
+      p95: number;
+    }[];
   }> => {
+    // Get all calls within filters
     const calls = await callService.getCalls({
       ownerId,
       filter,
@@ -141,50 +143,53 @@ export const callService = {
       );
     });
 
-    console.log("TOTAL CALLS", calls.items.length);
+    const chartPeriod = filter.chartPeriod ?? 60 * 60 * 1000; // Default to 1 hour
 
-    // Group calls by hour
-    const callsByHour = calls.items.reduce(
+    // Group calls by period
+    const callsByPeriod = calls.items.reduce(
       (acc, call) => {
         if (!call.startedAt) return acc;
-        const hour = new Date(call.startedAt).toISOString().slice(0, 13); // Format: "2024-03-20T15"
-        acc[hour] = acc[hour] ?? [];
-        acc[hour].push(call);
+        // Round timestamp down to nearest chartPeriod interval
+        const timestamp = new Date(call.startedAt).getTime();
+        const periodStart = Math.floor(timestamp / chartPeriod) * chartPeriod;
+        const key = new Date(periodStart).getTime();
+
+        acc[key] = acc[key] ?? [];
+        acc[key].push(call);
         return acc;
       },
-      {} as Record<string, CallWithIncludes[]>,
+      {} as Record<number, CallWithIncludes[]>,
     );
 
     // console.log("CALLS BY HOUR", callsByHour);
 
     // Calculate percentiles for each hour
-    const latencyByHour: {
+    const latencyByPeriod: {
       timestamp: number;
       p50: number;
       p90: number;
       p95: number;
     }[] = [];
-    const interruptionsByHour: {
+    const interruptionsByPeriod: {
       timestamp: number;
       p50: number;
       p90: number;
       p95: number;
     }[] = [];
-    Object.entries(callsByHour).forEach(([hour, hourCalls]) => {
-      const latencyDurations = hourCalls.flatMap((call) =>
+    Object.entries(callsByPeriod).forEach(([timestamp, periodCalls]) => {
+      const latencyDurations = periodCalls.flatMap((call) =>
         call.latencyBlocks.map((block) => block.duration),
       );
-      const interruptionDurations = hourCalls.flatMap((call) =>
+      const interruptionDurations = periodCalls.flatMap((call) =>
         call.interruptions.map((interruption) => interruption.duration),
       );
-      const timestamp = new Date(hour + ":00:00Z").getTime();
 
-      latencyByHour.push({
-        timestamp,
+      latencyByPeriod.push({
+        timestamp: parseInt(timestamp),
         ...calculateLatencyPercentiles(latencyDurations),
       });
-      interruptionsByHour.push({
-        timestamp,
+      interruptionsByPeriod.push({
+        timestamp: parseInt(timestamp),
         ...calculateLatencyPercentiles(interruptionDurations),
       });
     });
@@ -203,10 +208,8 @@ export const callService = {
     // };
 
     return {
-      latency: { byHour: latencyByHour },
-      interruptions: {
-        byHour: interruptionsByHour,
-      },
+      latency: latencyByPeriod,
+      interruptions: interruptionsByPeriod,
     };
   },
 

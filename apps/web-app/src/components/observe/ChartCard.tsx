@@ -1,24 +1,14 @@
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
-import LatencyChart from "./LatencyChart";
-import {
-  calculateLatencyPercentiles,
-  cn,
-  formatDateTime,
-  getLatencyColor,
-} from "~/lib/utils";
+import PercentilesChart from "./PercentilesChart";
+import { cn, getLatencyColor } from "~/lib/utils";
 import { useObserveState } from "~/components/hooks/useObserveState";
 import { useCallback, useMemo } from "react";
 import { Button } from "../ui/button";
-
-interface PercentileData {
-  p50: number;
-  p90: number;
-  p95: number;
-}
+import { Skeleton } from "../ui/skeleton";
 
 interface ChartCardProps {
   title: string;
-  byHour: {
+  data?: {
     timestamp: number;
     p50: number;
     p90: number;
@@ -26,7 +16,7 @@ interface ChartCardProps {
   }[];
 }
 
-export default function ChartCard({ title, byHour }: ChartCardProps) {
+export default function ChartCard({ title, data }: ChartCardProps) {
   const { filter, setFilter } = useObserveState();
 
   const resetZoom = useCallback(() => {
@@ -37,9 +27,11 @@ export default function ChartCard({ title, byHour }: ChartCardProps) {
   }, [filter, setFilter]);
 
   const average = useMemo(() => {
-    let byHourFiltered = byHour;
+    if (!data) return { p50: 0, p90: 0, p95: 0 };
+
+    let filteredData = [...data];
     if (filter.timeRange) {
-      byHourFiltered = byHour.filter(
+      filteredData = data.filter(
         (h) =>
           h.timestamp >= filter.timeRange!.start &&
           h.timestamp <= filter.timeRange!.end,
@@ -47,16 +39,13 @@ export default function ChartCard({ title, byHour }: ChartCardProps) {
     }
     return {
       p50:
-        byHourFiltered.reduce((acc, h) => acc + h.p50, 0) /
-        byHourFiltered.length,
+        filteredData.reduce((acc, h) => acc + h.p50, 0) / filteredData.length,
       p90:
-        byHourFiltered.reduce((acc, h) => acc + h.p90, 0) /
-        byHourFiltered.length,
+        filteredData.reduce((acc, h) => acc + h.p90, 0) / filteredData.length,
       p95:
-        byHourFiltered.reduce((acc, h) => acc + h.p95, 0) /
-        byHourFiltered.length,
+        filteredData.reduce((acc, h) => acc + h.p95, 0) / filteredData.length,
     };
-  }, [byHour, filter.timeRange]);
+  }, [data, filter.timeRange]);
 
   return (
     <Card className="flex-1">
@@ -77,25 +66,43 @@ export default function ChartCard({ title, byHour }: ChartCardProps) {
             <div className={cn("text-xs font-medium text-muted-foreground")}>
               50%
             </div>
-            <div className={cn("text-sm", getLatencyColor(average.p50 * 1000))}>
-              {Math.round(average.p50 * 1000)}ms
-            </div>
+            {!data ? (
+              <Skeleton className="h-4 w-full" />
+            ) : (
+              <div
+                className={cn("text-sm", getLatencyColor(average.p50 * 1000))}
+              >
+                {Math.round(average.p50 * 1000)}ms
+              </div>
+            )}
           </div>
           <div className="flex flex-col gap-1">
             <div className={cn("text-xs font-medium text-muted-foreground")}>
               90%
             </div>
-            <div className={cn("text-sm", getLatencyColor(average.p90 * 1000))}>
-              {Math.round(average.p90 * 1000)}ms
-            </div>
+            {!data ? (
+              <Skeleton className="h-4 w-full" />
+            ) : (
+              <div
+                className={cn("text-sm", getLatencyColor(average.p90 * 1000))}
+              >
+                {Math.round(average.p90 * 1000)}ms
+              </div>
+            )}
           </div>
           <div className="flex flex-col gap-1">
             <div className={cn("text-xs font-medium text-muted-foreground")}>
               95%
             </div>
-            <div className={cn("text-sm", getLatencyColor(average.p95 * 1000))}>
-              {Math.round(average.p95 * 1000)}ms
-            </div>
+            {!data ? (
+              <Skeleton className="h-4 w-full" />
+            ) : (
+              <div
+                className={cn("text-sm", getLatencyColor(average.p95 * 1000))}
+              >
+                {Math.round(average.p95 * 1000)}ms
+              </div>
+            )}
           </div>
           <div className="flex-1" />
           {filter.timeRange && (
@@ -105,8 +112,12 @@ export default function ChartCard({ title, byHour }: ChartCardProps) {
           )}
         </div>
       </CardHeader>
-      <CardContent>
-        <LatencyChart data={byHour} />
+      <CardContent className="relative">
+        {!data ? (
+          <Skeleton className="h-[300px] w-full" />
+        ) : (
+          <PercentilesChart data={data} />
+        )}
       </CardContent>
     </Card>
   );
