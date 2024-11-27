@@ -17,7 +17,7 @@ export async function startQueueConsumer() {
         for (const message of response.Messages) {
           // Process message
           const data = JSON.parse(message.Body || "{}");
-          const { callId, location, agentId, regionId } = data;
+          const { callId, location, agentId, regionId, createdAt } = data;
           if (!callId || !location || !agentId || !regionId) {
             console.error("Missing required fields in message:", data);
             throw new Error("Missing required fields");
@@ -28,6 +28,7 @@ export async function startQueueConsumer() {
             location,
             agentId,
             regionId,
+            createdAt,
           );
 
           const newCall = await transcribeAndSaveCall(

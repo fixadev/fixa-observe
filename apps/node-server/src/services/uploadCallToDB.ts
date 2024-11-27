@@ -4,9 +4,9 @@ import { uploadFromPresignedUrl } from "./uploadFromPresignedUrl";
 export const uploadCallToDB = async (
   callId: string,
   audioUrl: string,
-  agentId?: string,
-  regionId?: string,
-  createdAt?: Date,
+  agentId: string,
+  regionId: string,
+  createdAt: Date,
 ) => {
   const { url } = await uploadFromPresignedUrl(callId, audioUrl);
   return await db.callRecording.upsert({
@@ -16,7 +16,7 @@ export const uploadCallToDB = async (
     create: {
       id: callId,
       audioUrl: url,
-      createdAt: createdAt || new Date(),
+      createdAt: createdAt,
       agentId,
       regionId,
     },
