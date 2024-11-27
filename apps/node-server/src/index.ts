@@ -81,10 +81,16 @@ app.post("/vapi", async (req: Request, res: Response) => {
 app.post("/upload-call", async (req: Request, res: Response) => {
   try {
     const { callId, location, agentId, regionId } = req.body;
-    if (!callId || !location || !agentId || !regionId) {
-      return res
-        .status(400)
-        .json({ success: false, error: "Missing required fields" });
+    const missingFields = [];
+    if (!callId) missingFields.push("callId");
+    if (!location) missingFields.push("location");
+    if (!agentId) missingFields.push("agentId");
+    if (!regionId) missingFields.push("regionId");
+    if (missingFields.length > 0) {
+      return res.status(400).json({
+        success: false,
+        error: `Missing required fields: ${missingFields.join(", ")}`,
+      });
     }
     await addCallToQueue({
       callId,
