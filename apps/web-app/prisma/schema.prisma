@@ -36,15 +36,16 @@ model ApiKey {
 }
 
 model Agent {
-  id        String   @id
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id              String   @id
+  customerAgentId String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 
   ownerId       String
   name          String
-  phoneNumber   String
+  phoneNumber   String  @default("")
   githubRepoUrl String?
-  systemPrompt  String
+  systemPrompt  String  @default("")
 
   enableSlackNotifications Boolean @default(true)
 
