@@ -1,11 +1,11 @@
+import { env } from "../env";
 import { transcribeAndSaveCall } from "../services/transcribeAndSaveCall";
 import { uploadCallToDB } from "../services/uploadCallToDB";
 import { sqs } from "../utils/s3Client";
 
 export async function startQueueConsumer() {
   while (true) {
-    const queueUrl =
-      "https://sqs.us-east-1.amazonaws.com/195275634305/fixa-observe-prod";
+    const queueUrl = env.SQS_QUEUE_URL;
     try {
       const response = await sqs.receiveMessage({
         QueueUrl: queueUrl,

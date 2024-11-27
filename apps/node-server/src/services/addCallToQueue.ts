@@ -1,6 +1,5 @@
+import { env } from "../env";
 import { sqs } from "../utils/s3Client";
-const queueUrl =
-  "https://sqs.us-east-1.amazonaws.com/195275634305/fixa-observe-prod";
 
 interface AddCallToQueueProps {
   callId: string;
@@ -14,7 +13,7 @@ export const addCallToQueue = async (input: AddCallToQueueProps) => {
   // Send message
   await sqs
     .sendMessage({
-      QueueUrl: queueUrl,
+      QueueUrl: env.SQS_QUEUE_URL,
       MessageBody: JSON.stringify(input),
     })
     .then((res) => {

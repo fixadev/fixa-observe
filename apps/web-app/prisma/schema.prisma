@@ -105,6 +105,7 @@ model Call {
   interruptionP90    Float?
   interruptionP95    Float?
   numInterruptions   Int?
+  duration           Float?
 
   evalResults EvalResult[]
 
@@ -174,6 +175,7 @@ model CallRecording {
   processed Boolean  @default(false)
   agentId   String?
   regionId  String?
+  duration  Float?
 }
 
 model Scenario {
