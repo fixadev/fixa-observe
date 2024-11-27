@@ -81,6 +81,11 @@ app.post("/vapi", async (req: Request, res: Response) => {
 app.post("/upload-call", async (req: Request, res: Response) => {
   try {
     const { callId, location, agentId, regionId } = req.body;
+    if (!callId || !location || !agentId || !regionId) {
+      return res
+        .status(400)
+        .json({ success: false, error: "Missing required fields" });
+    }
     const result = await uploadCallToDB(callId, location, agentId, regionId);
     const newCall = await transcribeAndSaveCall(
       callId,
