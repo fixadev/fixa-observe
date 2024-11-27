@@ -19,7 +19,7 @@ export const chartPeriods: SelectItem[] = [
 // Mapping from duration to chart period
 export const defaultDurationToChartPeriod: Record<number, number> = {
   [60 * 60 * 1000]: chartPeriods[0]!.value,
-  [24 * 60 * 60 * 1000]: chartPeriods[2]!.value,
+  [2 * 24 * 60 * 60 * 1000]: chartPeriods[2]!.value,
   [7 * 24 * 60 * 60 * 1000]: chartPeriods[4]!.value,
   [30 * 24 * 60 * 60 * 1000]: chartPeriods[5]!.value,
 };
