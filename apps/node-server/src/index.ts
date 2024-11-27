@@ -8,6 +8,7 @@ import { db } from "./db";
 import { uploadCallToDB } from "./services/uploadCallToDB";
 import { getContext } from "./services/getContext";
 import { transcribeAndSaveCall } from "./services/transcribeAndSaveCall";
+import { addCallToQueue } from "./services/addCallToQueue";
 
 const app = express();
 const httpServer = createServer(app);
@@ -81,6 +82,7 @@ app.post("/vapi", async (req: Request, res: Response) => {
 app.post("/upload-call", async (req: Request, res: Response) => {
   try {
     const { callId, location, agentId, regionId } = req.body;
+    await addCallToQueue({ callId, location, agentId, regionId });
     const result = await uploadCallToDB(callId, location, agentId, regionId);
     const newCall = await transcribeAndSaveCall(
       callId,
