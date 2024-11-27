@@ -34,7 +34,8 @@ export const transcribeAndSaveCall = async (
     console.log("calling audio service", env.AUDIO_SERVICE_URL);
 
     const response = await axios.post<TranscribeResponse>(
-      `${env.AUDIO_SERVICE_URL}/transcribe-deepgram`,
+      // `${env.AUDIO_SERVICE_URL}/transcribe-deepgram`,
+      `https://fixa-transcription-service.fly.dev/transcribe-deepgram`,
       {
         stereo_audio_url: audioUrl,
       },
