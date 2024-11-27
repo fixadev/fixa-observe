@@ -96,6 +96,7 @@ export const FilterSchema = z.object({
     .optional(),
   agentId: z.string().optional(),
   regionId: z.string().optional(),
+  chartPeriod: z.number(),
   // latencyThreshold: z.object({
   //   enabled: z.boolean(),
   //   value: z.number(),
@@ -106,7 +107,7 @@ export const FilterSchema = z.object({
   // }),
 });
 
-export type LookbackPeriod = {
+export type SelectItem = {
   label: string;
   value: number;
 };

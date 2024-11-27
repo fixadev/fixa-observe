@@ -11,7 +11,15 @@ import {
   ChartTooltipContent,
   type ChartConfig,
 } from "~/components/ui/chart";
-import { useObserveState } from "../hooks/useObserveState";
+import { chartPeriods, useObserveState } from "../hooks/useObserveState";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../ui/select";
+import { Label } from "../ui/label";
 
 const chartConfig = {
   p50: {
@@ -165,7 +173,39 @@ export default function LatencyChart({
             />
           }
         />
-        <ChartLegend content={<ChartLegendContent />} />
+        <ChartLegend
+          content={(props) => (
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Label>period</Label>
+                <Select
+                  value={filter.chartPeriod.toString()}
+                  onValueChange={(value) => {
+                    setFilter((prev) => ({
+                      ...prev,
+                      chartPeriod: parseInt(value),
+                    }));
+                  }}
+                >
+                  <SelectTrigger className="w-fit">
+                    <SelectValue placeholder="Select a fruit" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {chartPeriods.map((item) => (
+                      <SelectItem
+                        key={item.value}
+                        value={item.value.toString()}
+                      >
+                        {item.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <ChartLegendContent className="p-0" payload={props.payload} />
+            </div>
+          )}
+        />
         <Area
           dataKey="p50"
           type="natural"
