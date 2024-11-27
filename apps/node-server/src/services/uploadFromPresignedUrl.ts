@@ -1,7 +1,7 @@
 import { s3 } from "../utils/s3Client";
 import { PutObjectCommand } from "@aws-sdk/client-s3";
 import { env } from "../env";
-import getAudioDuration from "get-audio-duration";
+import { getAudioDuration } from "./getAudioDuration";
 
 export const uploadFromPresignedUrl = async (
   callId: string,
@@ -44,7 +44,7 @@ export const uploadFromPresignedUrl = async (
     readableStream.push(Buffer.from(buffer));
     readableStream.push(null);
 
-    const duration = await getAudioDuration(readableStream);
+    const duration = await getAudioDuration(recordingUrl);
 
     // Upload to S3
     const uploadParams = {

@@ -5,6 +5,7 @@ import { sqs } from "../utils/s3Client";
 
 export async function startQueueConsumer() {
   while (true) {
+    console.log("queueUrl", env.SQS_QUEUE_URL);
     const queueUrl = env.SQS_QUEUE_URL;
     try {
       const response = await sqs.receiveMessage({
