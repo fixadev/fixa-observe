@@ -81,6 +81,7 @@ app.post("/vapi", async (req: Request, res: Response) => {
 app.post("/upload-call", async (req: Request, res: Response) => {
   try {
     const { callId, location, agentId, regionId } = req.body;
+    console.log("Uploading call", callId);
     if (!callId || !location || !agentId || !regionId) {
       return res
         .status(400)
