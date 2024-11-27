@@ -16,10 +16,14 @@ export default function ObservePage() {
 
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const { data: percentiles } =
-    api._call.getLatencyInterruptionPercentiles.useQuery({
-      filter: { ...filter, timeRange: undefined }, // don't refetch when timerange changes
-    });
+  const {
+    data: percentiles,
+    refetch: refetchPercentiles,
+    isLoading: isLoadingPercentiles,
+    isRefetching: isRefetchingPercentiles,
+  } = api._call.getLatencyInterruptionPercentiles.useQuery({
+    filter: { ...filter, timeRange: undefined }, // don't refetch when timerange changes
+  });
 
   const {
     data: _calls,
@@ -27,6 +31,8 @@ export default function ObservePage() {
     hasNextPage,
     isFetchingNextPage,
     isLoading,
+    isRefetching,
+    refetch: refetchCalls,
   } = api._call.getCalls.useInfiniteQuery(
     {
       ownerId: "11x",
@@ -38,6 +44,11 @@ export default function ObservePage() {
       getNextPageParam: (lastPage) => lastPage.nextCursor,
     },
   );
+
+  const refetch = useCallback(() => {
+    void refetchCalls();
+    void refetchPercentiles();
+  }, [refetchCalls, refetchPercentiles]);
 
   // Combine all pages
   const calls = useMemo(
@@ -86,13 +97,21 @@ export default function ObservePage() {
         }
       }}
     >
-      <Filters filter={filter} setFilter={setFilter} />
+      <Filters filter={filter} setFilter={setFilter} refetch={refetch} />
       <div className="flex flex-col gap-4 p-4">
         <div className="flex w-full gap-4">
-          <ChartCard title="latency" data={percentiles?.latency} />
-          <ChartCard title="interruptions" data={percentiles?.interruptions} />
+          <ChartCard
+            title="latency"
+            data={percentiles?.latency}
+            isLoading={isLoadingPercentiles || isRefetchingPercentiles}
+          />
+          <ChartCard
+            title="interruptions"
+            data={percentiles?.interruptions}
+            isLoading={isLoadingPercentiles || isRefetchingPercentiles}
+          />
         </div>
-        <CallTable calls={calls} />
+        <CallTable isLoading={isLoading || isRefetching} calls={calls} />
         {/* Invisible marker for infinite scroll */}
         <div ref={loadMoreRef} className="h-1" />
         {(isFetchingNextPage || isLoading) && (

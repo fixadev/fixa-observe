@@ -18,9 +18,11 @@ import { api } from "~/trpc/react";
 export default function Filters({
   filter,
   setFilter,
+  refetch,
 }: {
   filter: Filter;
   setFilter: (filter: Filter) => void;
+  refetch: () => void;
 }) {
   const { data: agentIds } = api._call.getAgentIds.useQuery();
   const { data: regionIds } = api._call.getRegionIds.useQuery();
@@ -174,7 +176,9 @@ export default function Filters({
           }}
         /> */}
       </div>
-      <Button variant="outline">refresh</Button>
+      <Button variant="outline" onClick={refetch}>
+        refresh
+      </Button>
     </div>
   );
 }

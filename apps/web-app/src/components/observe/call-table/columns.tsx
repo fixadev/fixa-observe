@@ -6,6 +6,8 @@ import { Button } from "~/components/ui/button";
 import { type CallWithIncludes } from "~/lib/types";
 import { cn, getInterruptionsColor, getLatencyColor } from "~/lib/utils";
 import { SortButton } from "./SortButton";
+import { ArrowTopRightOnSquareIcon } from "@heroicons/react/24/solid";
+import Link from "next/link";
 
 export const columns: ColumnDef<CallWithIncludes>[] = [
   {
@@ -14,13 +16,22 @@ export const columns: ColumnDef<CallWithIncludes>[] = [
     cell: ({ row }) => {
       const call = row.original;
       return (
-        <div className="flex flex-col">
+        <div className="flex items-center justify-between">
           <div className="flex items-center gap-1">
             <div className="text-sm font-medium">
               {call.customerCallId ?? "unknown"}
             </div>
             <CopyButton text={call.customerCallId ?? ""} size="xs" />
           </div>
+          <Button
+            variant="ghost"
+            className="gap-2 text-xs text-muted-foreground"
+            asChild
+          >
+            <Link href={`/observe/calls/${call.id}`} target="_blank">
+              direct link <ArrowTopRightOnSquareIcon className="size-4" />
+            </Link>
+          </Button>
         </div>
       );
     },

@@ -4,8 +4,16 @@ import { columns } from "./call-table/columns";
 import { type CallWithIncludes } from "~/lib/types";
 import { useObserveState } from "../hooks/useObserveState";
 import { useCallback, useEffect, useState } from "react";
+import { Input } from "../ui/input";
+import { Skeleton } from "../ui/skeleton";
 
-export default function CallTable({ calls }: { calls: CallWithIncludes[] }) {
+export default function CallTable({
+  calls,
+  isLoading,
+}: {
+  calls: CallWithIncludes[];
+  isLoading?: boolean;
+}) {
   const { setOrderBy } = useObserveState();
 
   const [sorting, setSorting] = useState<SortingState>([
@@ -33,11 +41,25 @@ export default function CallTable({ calls }: { calls: CallWithIncludes[] }) {
   }, [handleSortingChange, sorting]);
 
   return (
-    <DataTable
-      sorting={sorting}
-      onSortingChange={setSorting}
-      columns={columns}
-      data={calls}
-    />
+    <div className="flex flex-col gap-2">
+      {/* <Input className="max-w-md" placeholder="search for call ID" /> */}
+      {(isLoading ?? !calls) ? (
+        <div className="flex flex-col gap-1">
+          <Skeleton className="h-[50px] w-full" />
+          <Skeleton className="h-[50px] w-full" />
+          <Skeleton className="h-[50px] w-full" />
+          <Skeleton className="h-[50px] w-full" />
+          <Skeleton className="h-[50px] w-full" />
+          <Skeleton className="h-[50px] w-full" />
+        </div>
+      ) : (
+        <DataTable
+          sorting={sorting}
+          onSortingChange={setSorting}
+          columns={columns}
+          data={calls}
+        />
+      )}
+    </div>
   );
 }

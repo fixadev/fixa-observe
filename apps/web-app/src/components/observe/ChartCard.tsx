@@ -14,9 +14,10 @@ interface ChartCardProps {
     p90: number;
     p95: number;
   }[];
+  isLoading?: boolean;
 }
 
-export default function ChartCard({ title, data }: ChartCardProps) {
+export default function ChartCard({ title, data, isLoading }: ChartCardProps) {
   const { filter, setFilter } = useObserveState();
 
   const resetZoom = useCallback(() => {
@@ -66,7 +67,7 @@ export default function ChartCard({ title, data }: ChartCardProps) {
             <div className={cn("text-xs font-medium text-muted-foreground")}>
               50%
             </div>
-            {!data ? (
+            {(isLoading ?? !data) ? (
               <Skeleton className="h-4 w-full" />
             ) : (
               <div
@@ -80,7 +81,7 @@ export default function ChartCard({ title, data }: ChartCardProps) {
             <div className={cn("text-xs font-medium text-muted-foreground")}>
               90%
             </div>
-            {!data ? (
+            {(isLoading ?? !data) ? (
               <Skeleton className="h-4 w-full" />
             ) : (
               <div
@@ -94,7 +95,7 @@ export default function ChartCard({ title, data }: ChartCardProps) {
             <div className={cn("text-xs font-medium text-muted-foreground")}>
               95%
             </div>
-            {!data ? (
+            {(isLoading ?? !data) ? (
               <Skeleton className="h-4 w-full" />
             ) : (
               <div
@@ -113,7 +114,7 @@ export default function ChartCard({ title, data }: ChartCardProps) {
         </div>
       </CardHeader>
       <CardContent className="relative">
-        {!data ? (
+        {(isLoading ?? !data) ? (
           <Skeleton className="h-[300px] w-full" />
         ) : (
           <PercentilesChart data={data} />
