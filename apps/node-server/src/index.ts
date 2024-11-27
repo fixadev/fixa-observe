@@ -81,7 +81,13 @@ app.post("/vapi", async (req: Request, res: Response) => {
 app.post("/upload-call", async (req: Request, res: Response) => {
   try {
     const { callId, location, agentId, regionId } = req.body;
-    await addCallToQueue({ callId, location, agentId, regionId });
+    await addCallToQueue({
+      callId,
+      location,
+      agentId,
+      regionId,
+      createdAt: new Date(),
+    });
     res.json({ success: true, muizz: "the man" });
   } catch (error) {
     console.error(error);

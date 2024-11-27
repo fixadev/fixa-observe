@@ -4,11 +4,13 @@ import { sqs } from "../utils/s3Client";
 
 export async function startQueueConsumer() {
   while (true) {
+    const queueUrl =
+      "https://sqs.us-east-1.amazonaws.com/195275634305/fixa-observe-prod";
     try {
       const response = await sqs.receiveMessage({
-        QueueUrl: process.env.SQS_QUEUE_URL,
+        QueueUrl: queueUrl,
         MaxNumberOfMessages: 5,
-        WaitTimeSeconds: 20,
+        WaitTimeSeconds: 5,
       });
 
       if (response.Messages) {
@@ -17,6 +19,7 @@ export async function startQueueConsumer() {
           const data = JSON.parse(message.Body || "{}");
           const { callId, location, agentId, regionId } = data;
           if (!callId || !location || !agentId || !regionId) {
+            console.error("Missing required fields in message:", data);
             throw new Error("Missing required fields");
           }
           // Add your processing logic here
@@ -26,6 +29,7 @@ export async function startQueueConsumer() {
             agentId,
             regionId,
           );
+
           const newCall = await transcribeAndSaveCall(
             callId,
             result.audioUrl,
@@ -33,13 +37,15 @@ export async function startQueueConsumer() {
             agentId,
             regionId,
           );
+          console.log("Transcription completed:", newCall);
 
-          // Delete message after processing
           await sqs.deleteMessage({
-            QueueUrl: process.env.SQS_QUEUE_URL,
+            QueueUrl: queueUrl,
             ReceiptHandle: message.ReceiptHandle!,
           });
         }
+      } else {
+        console.log("No messages in queue");
       }
     } catch (error) {
       console.error("Error processing queue:", error);
