@@ -87,6 +87,7 @@ app.post("/upload-call", async (req: Request, res: Response) => {
       result.audioUrl,
       result.createdAt,
       agentId,
+      regionId,
     );
     res.json({ success: true, muizz: "the man" });
   } catch (error) {
