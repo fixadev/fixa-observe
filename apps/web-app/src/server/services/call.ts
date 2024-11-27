@@ -123,12 +123,13 @@ export const callService = {
     ownerId: string;
     filter: Partial<Filter>;
   }): Promise<{
-    latency: {
-      byHour: { timestamp: number; p50: number; p90: number; p95: number }[];
-    };
+    latency: { timestamp: number; p50: number; p90: number; p95: number }[];
     interruptions: {
-      byHour: { timestamp: number; p50: number; p90: number; p95: number }[];
-    };
+      timestamp: number;
+      p50: number;
+      p90: number;
+      p95: number;
+    }[];
   }> => {
     // Get all calls within filters
     const calls = await callService.getCalls({
@@ -207,10 +208,8 @@ export const callService = {
     // };
 
     return {
-      latency: { byHour: latencyByPeriod },
-      interruptions: {
-        byHour: interruptionsByPeriod,
-      },
+      latency: latencyByPeriod,
+      interruptions: interruptionsByPeriod,
     };
   },
 

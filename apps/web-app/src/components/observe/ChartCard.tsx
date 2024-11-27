@@ -1,24 +1,13 @@
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import LatencyChart from "./LatencyChart";
-import {
-  calculateLatencyPercentiles,
-  cn,
-  formatDateTime,
-  getLatencyColor,
-} from "~/lib/utils";
+import { cn, getLatencyColor } from "~/lib/utils";
 import { useObserveState } from "~/components/hooks/useObserveState";
 import { useCallback, useMemo } from "react";
 import { Button } from "../ui/button";
 
-interface PercentileData {
-  p50: number;
-  p90: number;
-  p95: number;
-}
-
 interface ChartCardProps {
   title: string;
-  byHour: {
+  data: {
     timestamp: number;
     p50: number;
     p90: number;
@@ -26,7 +15,7 @@ interface ChartCardProps {
   }[];
 }
 
-export default function ChartCard({ title, byHour }: ChartCardProps) {
+export default function ChartCard({ title, data }: ChartCardProps) {
   const { filter, setFilter } = useObserveState();
 
   const resetZoom = useCallback(() => {
@@ -37,9 +26,9 @@ export default function ChartCard({ title, byHour }: ChartCardProps) {
   }, [filter, setFilter]);
 
   const average = useMemo(() => {
-    let byHourFiltered = byHour;
+    let byHourFiltered = data;
     if (filter.timeRange) {
-      byHourFiltered = byHour.filter(
+      byHourFiltered = data.filter(
         (h) =>
           h.timestamp >= filter.timeRange!.start &&
           h.timestamp <= filter.timeRange!.end,
@@ -56,7 +45,7 @@ export default function ChartCard({ title, byHour }: ChartCardProps) {
         byHourFiltered.reduce((acc, h) => acc + h.p95, 0) /
         byHourFiltered.length,
     };
-  }, [byHour, filter.timeRange]);
+  }, [data, filter.timeRange]);
 
   return (
     <Card className="flex-1">
@@ -106,7 +95,7 @@ export default function ChartCard({ title, byHour }: ChartCardProps) {
         </div>
       </CardHeader>
       <CardContent>
-        <LatencyChart data={byHour} />
+        <LatencyChart data={data} />
       </CardContent>
     </Card>
   );

@@ -97,10 +97,10 @@ export default function ObservePage() {
             </>
           ) : (
             <>
-              <ChartCard title="latency" byHour={percentiles.latency.byHour} />
+              <ChartCard title="latency" data={percentiles.latency} />
               <ChartCard
                 title="interruptions"
-                byHour={percentiles.interruptions.byHour}
+                data={percentiles.interruptions}
               />
             </>
           )}
