@@ -31,6 +31,8 @@ export const transcribeAndSaveCall = async (
       }> | null;
     }
 
+    console.log("calling audio service", env.AUDIO_SERVICE_URL);
+
     const response = await axios.post<TranscribeResponse>(
       `${env.AUDIO_SERVICE_URL}/transcribe-deepgram`,
       {
