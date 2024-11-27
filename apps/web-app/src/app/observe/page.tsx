@@ -90,20 +90,8 @@ export default function ObservePage() {
       <Filters filter={filter} setFilter={setFilter} />
       <div className="flex flex-col gap-4 p-4">
         <div className="flex w-full gap-4">
-          {!percentiles ? (
-            <>
-              <Skeleton className="h-[500px] flex-1" />
-              <Skeleton className="h-[500px] flex-1" />
-            </>
-          ) : (
-            <>
-              <ChartCard title="latency" data={percentiles.latency} />
-              <ChartCard
-                title="interruptions"
-                data={percentiles.interruptions}
-              />
-            </>
-          )}
+          <ChartCard title="latency" data={percentiles?.latency} />
+          <ChartCard title="interruptions" data={percentiles?.interruptions} />
         </div>
         <CallTable calls={calls} />
         {/* Invisible marker for infinite scroll */}

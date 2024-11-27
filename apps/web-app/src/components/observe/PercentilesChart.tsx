@@ -36,7 +36,7 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
-export default function LatencyChart({
+export default function PercentilesChart({
   data,
 }: {
   data: { timestamp: number; p50: number; p90: number; p95: number }[];
