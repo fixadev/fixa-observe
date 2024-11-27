@@ -8,7 +8,6 @@ import Filters from "~/components/observe/Filters";
 import Spinner from "~/components/Spinner";
 import { Dialog, DialogContent } from "~/components/ui/dialog";
 import { api } from "~/trpc/react";
-import { Skeleton } from "~/components/ui/skeleton";
 import ChartCard from "~/components/observe/ChartCard";
 
 export default function ObservePage() {
