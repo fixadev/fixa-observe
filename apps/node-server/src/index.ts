@@ -5,10 +5,9 @@ import { handleVapiCallEnded } from "./services/handleVapiCallEnded";
 import { handleTranscriptUpdate } from "./services/handleTranscriptUpdate";
 import { handleAnalysisStarted } from "./services/handleAnalysisStarted";
 import { db } from "./db";
-import { uploadCallToDB } from "./services/uploadCallToDB";
 import { getContext } from "./services/getContext";
-import { transcribeAndSaveCall } from "./services/transcribeAndSaveCall";
 import { addCallToQueue } from "./services/addCallToQueue";
+import { startQueueConsumer } from "./workers/queueConsumer";
 
 const app = express();
 const httpServer = createServer(app);
@@ -83,14 +82,6 @@ app.post("/upload-call", async (req: Request, res: Response) => {
   try {
     const { callId, location, agentId, regionId } = req.body;
     await addCallToQueue({ callId, location, agentId, regionId });
-    const result = await uploadCallToDB(callId, location, agentId, regionId);
-    const newCall = await transcribeAndSaveCall(
-      callId,
-      result.audioUrl,
-      result.createdAt,
-      agentId,
-      regionId,
-    );
     res.json({ success: true, muizz: "the man" });
   } catch (error) {
     console.error(error);
@@ -130,4 +121,5 @@ const cleanup = () => {
 
 httpServer.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
+  startQueueConsumer();
 });
