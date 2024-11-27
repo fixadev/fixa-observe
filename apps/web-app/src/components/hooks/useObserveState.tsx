@@ -74,6 +74,7 @@ export function ObserveStateProvider({
           return;
         }
       }
+      setFilter((prev) => ({ ...prev, chartPeriod: chartPeriods[5]!.value }));
     }
   }, [filter.lookbackPeriod.value, filter.timeRange]);
 

@@ -21,13 +21,6 @@ export default function ObservePage() {
     api._call.getLatencyInterruptionPercentiles.useQuery({
       filter: { ...filter, timeRange: undefined }, // don't refetch when timerange changes
     });
-  // const latencyPercentiles = useMemo(() => {
-  //   return [];
-  // }, []);
-  // const calls = useMemo(() => {
-  //   return TEST_OBSERVE_CALLS.slice(0, 2);
-  //   // return TEST_OBSERVE_CALLS;
-  // }, []);
 
   const {
     data: _calls,
@@ -39,7 +32,7 @@ export default function ObservePage() {
     {
       ownerId: "11x",
       limit: 10,
-      filter,
+      filter: { ...filter, chartPeriod: undefined }, // don't refetch when chart period changes
       orderBy,
     },
     {

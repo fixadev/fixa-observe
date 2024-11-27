@@ -43,24 +43,24 @@ export default function LatencyChart({
 }) {
   const { filter, setFilter } = useObserveState();
 
+  // Fill in missing timestamps, based on the chart period
   const formattedData = useMemo(() => {
     const ret = [...data];
 
-    const hourSet = new Set<number>();
+    const periodSet = new Set<number>();
     for (const item of data) {
-      hourSet.add(item.timestamp);
+      periodSet.add(item.timestamp);
     }
 
-    const now = new Date(
-      new Date().toISOString().substring(0, 13) + ":00:00Z",
-    ).getTime();
+    const nowRounded =
+      Math.floor(Date.now() / filter.chartPeriod) * filter.chartPeriod;
 
     for (
-      let i = now - filter.lookbackPeriod.value;
-      i <= now;
-      i += 60 * 60 * 1000
+      let i = nowRounded - filter.lookbackPeriod.value;
+      i <= nowRounded;
+      i += filter.chartPeriod
     ) {
-      if (!hourSet.has(i)) {
+      if (!periodSet.has(i)) {
         ret.push({ timestamp: i, p50: 0, p90: 0, p95: 0 });
       }
     }
@@ -68,7 +68,7 @@ export default function LatencyChart({
     ret.sort((a, b) => a.timestamp - b.timestamp);
 
     return ret;
-  }, [data, filter.lookbackPeriod.value]);
+  }, [data, filter.lookbackPeriod.value, filter.chartPeriod]);
 
   const [refAreaLeft, setRefAreaLeft] = useState<string>("");
   const [refAreaRight, setRefAreaRight] = useState<string>("");
@@ -105,17 +105,17 @@ export default function LatencyChart({
       _right = refAreaRight;
     }
 
-    setFilter({
-      ...filter,
+    setFilter((prev) => ({
+      ...prev,
       timeRange: {
         start: parseInt(_left),
         end: parseInt(_right),
       },
-    });
+    }));
 
     setRefAreaLeft("");
     setRefAreaRight("");
-  }, [refAreaLeft, refAreaRight, filter, setFilter]);
+  }, [refAreaLeft, refAreaRight, setFilter]);
 
   return (
     <ChartContainer
