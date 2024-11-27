@@ -1,4 +1,4 @@
-import s3 from "../utils/s3Client";
+import { s3 } from "../utils/s3Client";
 import { PutObjectCommand } from "@aws-sdk/client-s3";
 import { env } from "../env";
 
