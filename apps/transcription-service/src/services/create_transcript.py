@@ -1,4 +1,6 @@
-def create_transcript_from_deepgram(user_words, agent_words):
+from pydub import AudioSegment
+
+def create_transcript_from_deepgram(user_words, agent_words, user_audio_path, agent_audio_path):
     # print(user_words)
     # print(agent_words)
     try: 
@@ -144,20 +146,34 @@ def create_transcript_from_deepgram(user_words, agent_words):
                 
                 # Check for overlap
                 if agent_start < user_end and agent_end > user_start:
-                    # Find agent words spoken during overlap
                     overlap_start = max(agent_start, user_start)
-                    overlap_words = []
+                    overlap_end = min(agent_end, user_end)
                     
-                    for word in agent_words:
-                        if word['start'] >= overlap_start and word['start'] < agent_end:
-                            overlap_words.append(word['punctuated_word'])
+                    # Load and analyze waveform segments
+                    user_audio = AudioSegment.from_wav(user_audio_path)
+                    agent_audio = AudioSegment.from_wav(agent_audio_path)
                     
-                    # if agent_end - overlap_start > 2:
-                    interruptions.append({
-                        'secondsFromStart': overlap_start,
-                        'duration': agent_end - overlap_start,
-                        'text': ' '.join(overlap_words)
-                    })
+                    # Extract first second of overlapping portions (convert seconds to milliseconds)
+                    overlap_duration = min(1000, (overlap_end - overlap_start) * 1000)  # Cap at 1 second
+                    user_overlap = user_audio[overlap_start*1000:overlap_start*1000 + overlap_duration]
+                    agent_overlap = agent_audio[overlap_start*1000:overlap_start*1000 + overlap_duration]
+
+                    # Get RMS values to check for speech activity
+                    user_rms = user_overlap.rms
+                    agent_rms = agent_overlap.rms
+                    
+                    # Only count as interruption if both speakers have significant audio levels
+                    if user_rms > 20 and agent_rms > 20:  # Adjust these thresholds as needed
+                        overlap_words = []
+                        for word in agent_words:
+                            if word['start'] >= overlap_start and word['start'] < agent_end:
+                                overlap_words.append(word['punctuated_word'])
+                        
+                        interruptions.append({
+                            'secondsFromStart': overlap_start,
+                            'duration': agent_end - overlap_start,
+                            'text': ' '.join(overlap_words)
+                        })
                     break  # Only count one interruption per agent segment
         
         return {
