@@ -6,4 +6,5 @@ python-dotenv
 deepgram-sdk
 pydub
 uvicorn
+numpy
 

@@ -5,6 +5,8 @@ from utils.logger import logger
 from services.transcribe import transcribe_with_deepgram
 from services.split_channels import split_channels
 from services.create_transcript import create_transcript_from_deepgram
+from services.align import w2v_align
+
 if os.getenv('ENVIRONMENT') == 'local-staging':
   from dotenv import load_dotenv
   load_dotenv()
@@ -29,6 +31,18 @@ async def transcribe(request: TranscribeRequest):
         
     except Exception as e:
         logger.error(f"Deepgram transcription failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/transcribe-w2v")
+async def transcribe_w2v(request: TranscribeRequest):
+    try: 
+        user_audio_path, agent_audio_path = split_channels(request.stereo_audio_url)
+        transcriptions = transcribe_with_deepgram([user_audio_path, agent_audio_path])
+        alignments = w2v_align(transcriptions)
+        return create_transcript_from_deepgram(alignments[0], alignments[1])
+        
+    except Exception as e:
+        logger.error(f"Wav2Vec2 transcription failed: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
     
     

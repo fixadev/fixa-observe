@@ -1,2 +1,2 @@
 #!/bin/bash
-docker build -t transcription-service .
+docker build -t transcriber .
