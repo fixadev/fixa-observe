@@ -20,7 +20,15 @@ import {
 import { lookbackPeriods } from "../hooks/useObserveState";
 import { type Filter } from "~/lib/types";
 import { api } from "~/trpc/react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "../ui/dialog";
+import { Input } from "../ui/input";
+import Spinner from "../Spinner";
 
 export default function Filters({
   filter,
@@ -159,7 +167,6 @@ export default function Filters({
       <EditAgentDialog
         open={editAgentDialogOpen}
         setOpen={setEditAgentDialogOpen}
-        agentId={filter.agentId}
       />
     </>
   );
@@ -168,18 +175,60 @@ export default function Filters({
 function EditAgentDialog({
   open,
   setOpen,
-  agentId,
 }: {
   open: boolean;
   setOpen: (open: boolean) => void;
-  agentId: string | undefined;
 }) {
+  const { data: agents } = api.agent.getAll.useQuery();
+  const { mutateAsync: upsertAgent, isPending: isUpserting } =
+    api.agent.upsert.useMutation();
+  const [editedNames, setEditedNames] = useState<Record<string, string>>({});
+
+  const handleSubmit = async () => {
+    for (const [id, name] of Object.entries(editedNames)) {
+      await upsertAgent({ id, name });
+    }
+    setOpen(false);
+  };
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>edit agents</DialogTitle>
         </DialogHeader>
+
+        <div className="-mx-6 flex max-h-[70vh] flex-col gap-4 overflow-y-auto px-6">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="font-medium">agent ID</div>
+            <div className="font-medium">agent name</div>
+          </div>
+
+          {agents?.map((agent) => (
+            <div key={agent.id} className="grid grid-cols-2 gap-4">
+              <Input value={agent.id} readOnly disabled />
+              <Input
+                value={editedNames[agent.id] ?? agent.name}
+                onChange={(e) =>
+                  setEditedNames((prev) => ({
+                    ...prev,
+                    [agent.id]: e.target.value,
+                  }))
+                }
+              />
+            </div>
+          ))}
+        </div>
+
+        <DialogFooter>
+          <Button
+            className="mt-4"
+            onClick={handleSubmit}
+            disabled={isUpserting}
+          >
+            {isUpserting ? <Spinner /> : "save changes"}
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

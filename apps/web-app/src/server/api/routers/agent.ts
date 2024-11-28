@@ -8,6 +8,7 @@ import {
 } from "~/lib/agent";
 import { db } from "~/server/db";
 import { generateScenariosFromPrompt } from "~/server/helpers/generateScenarios";
+import { AgentSchema } from "prisma/generated/zod";
 
 const agentServiceInstance = new AgentService(db);
 
@@ -22,6 +23,12 @@ export const agentRouter = createTRPCRouter({
         input.scenarios,
         ctx.user.id,
       );
+    }),
+
+  upsert: protectedProcedure
+    .input(AgentSchema.partial())
+    .mutation(async ({ input, ctx }) => {
+      return await agentServiceInstance.upsertAgent(input, ctx.user.id);
     }),
 
   get: protectedProcedure
