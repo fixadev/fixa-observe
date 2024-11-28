@@ -3,6 +3,8 @@ import torchaudio
 import torchaudio.functional as F
 from typing import List, Tuple
 from utils.logger import logger
+import os
+from pathlib import Path
 
 # Global model variables
 W2V_MODEL = None
@@ -18,7 +20,7 @@ def load_w2v_model():
         if W2V_MODEL is None:
             logger.info("Loading Wav2Vec2 model from saved file...")
             # Load the saved model
-            checkpoint = torch.load("/models/wav2vec2_model.pt")
+            checkpoint = torch.load("/models/wav2vec2_model.pt", weights_only=True)
             
             # Initialize the bundle and model
             W2V_BUNDLE = torchaudio.pipelines.MMS_FA
@@ -37,7 +39,7 @@ def load_w2v_model():
         raise
 
 def refine_word_alignment(audio_path: str, word: str, start_time: float, end_time: float, 
-                         padding: float = 1) -> Tuple[float, float]:
+                         padding: float = 3) -> Tuple[float, float]:
     """Refines the alignment for a single word using a small audio window around it.
     
     Args:
@@ -53,12 +55,17 @@ def refine_word_alignment(audio_path: str, word: str, start_time: float, end_tim
     try:
         # Ensure model is loaded
         load_w2v_model()
-        
-        # Handle numbers and special characters
+
+         # Handle numbers and special characters
         if word.isdigit() or not any(c.isalnum() for c in word):
             # Return original timestamps for numbers or special characters
             return start_time, end_time
             
+        
+        # Create debug directory
+        debug_dir = Path("debug_audio")
+        debug_dir.mkdir(exist_ok=True)
+        
         # Load full audio
         waveform, sample_rate = torchaudio.load(str(audio_path))
         
@@ -69,13 +76,23 @@ def refine_word_alignment(audio_path: str, word: str, start_time: float, end_tim
         # Extract the relevant audio segment
         segment = waveform[:, start_sample:end_sample]
         
+        # Save original segment
+
+        segment_path = debug_dir / f"{start_time:.2f}_{end_time:.2f}_{word}_original.wav"
+        torchaudio.save(str(segment_path), segment, sample_rate)
+        
         # Resample if needed
         segment = F.resample(segment, sample_rate, W2V_BUNDLE.sample_rate)
+        resampled_path = debug_dir / f"{start_time:.2f}_{end_time:.2f}_{word}_resampled.wav"
+        torchaudio.save(str(resampled_path), segment.cpu(), W2V_BUNDLE.sample_rate)
+        
         segment = segment.to(W2V_DEVICE)
+       
         
         # Get emission probabilities for the segment
         with torch.inference_mode():
             emission, _ = W2V_MODEL(segment)
+        
         
         # Prepare the word for alignment
         cleaned_word = ''.join(c.lower() for c in word if c.isalnum() or c.isspace())
@@ -106,6 +123,8 @@ def refine_word_alignment(audio_path: str, word: str, start_time: float, end_tim
         
         refined_start = segment_start_time + (ratio * token_spans[0].start) / W2V_BUNDLE.sample_rate
         refined_end = segment_start_time + (ratio * token_spans[-1].end) / W2V_BUNDLE.sample_rate
+        
+        print(f"{word}: {refined_start:.3f}s - {refined_end:.3f}s")
         
         return refined_start, refined_end
         
@@ -140,8 +159,8 @@ def refine_deepgram_alignment(audio_path: str,
                 )
                 refined_alignments.append({
                     'word': word,
-                    'start': refined_start,
-                    'end': refined_end,
+                    'start': round(refined_start, 2),
+                    'end': round(refined_end, 2),
                     'punctuated_word': punctuated_word
                 })
                 print(f"{word}: {refined_start:.3f}s - {refined_end:.3f}s")

@@ -5,7 +5,7 @@ from utils.logger import logger
 from services.transcribe import transcribe_with_deepgram
 from services.split_channels import split_channels
 from services.create_transcript import create_transcript_from_deepgram
-from services.align import refine_deepgram_alignment
+from services.align2 import refine_deepgram_alignment
 
 if os.getenv('ENVIRONMENT') == 'local-staging':
   from dotenv import load_dotenv
@@ -40,8 +40,6 @@ async def transcribe_w2v(request: TranscribeRequest):
         transcriptions = transcribe_with_deepgram([user_audio_path, agent_audio_path])
         user_alignments = refine_deepgram_alignment(user_audio_path, transcriptions[0])
         agent_alignments = refine_deepgram_alignment(agent_audio_path, transcriptions[1])
-        print(f"User alignments: {user_alignments}")
-        print(f"Agent alignments: {agent_alignments}")
         return create_transcript_from_deepgram(user_alignments, agent_alignments)
         
     except Exception as e:
