@@ -9,7 +9,7 @@ import { uploadFromPresignedUrl } from "./uploadFromPresignedUrl";
 export const transcribeAndSaveCall = async (
   callId: string,
   audioUrl: string,
-  createdAt: Date,
+  createdAt: string,
   agentId?: string,
   regionId?: string,
   metadata?: Record<string, string>,
@@ -84,7 +84,7 @@ export const transcribeAndSaveCall = async (
         createdAt: new Date(),
         ownerId: "11x",
         customerCallId: callId,
-        startedAt: createdAt.toISOString(),
+        startedAt: createdAt,
         status: CallStatus.completed,
         stereoRecordingUrl: url,
         agentId,
@@ -114,13 +114,6 @@ export const transcribeAndSaveCall = async (
             text: interruption.text,
           })),
         },
-      },
-    });
-
-    await db.callRecording.update({
-      where: { id: callId },
-      data: {
-        processed: true,
       },
     });
     return newCall;

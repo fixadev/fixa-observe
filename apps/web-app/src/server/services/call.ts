@@ -263,4 +263,15 @@ export const callService = {
     });
     return result.filter((r) => r.regionId !== null).map((r) => r.regionId!);
   },
+
+  getMetadata: async (
+    ownerId: string,
+  ): Promise<Array<Record<string, string>>> => {
+    const result = await db.call.findMany({
+      where: { ownerId },
+    });
+    return result
+      .filter((r) => r.metadata !== null)
+      .map((r) => r.metadata as Record<string, string>);
+  },
 };

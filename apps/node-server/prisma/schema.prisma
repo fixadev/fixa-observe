@@ -234,8 +234,8 @@ model EvalResult {
 
   result           String
   success          Boolean
-  secondsFromStart Float
-  duration         Float
+  secondsFromStart Float?
+  duration         Float?
   type             EvalResultType
   details          String
 }

@@ -29,13 +29,10 @@ export async function startQueueConsumer() {
             userId,
             metadata,
           } = data;
-          if (!callId || !location || !agentId || !regionId || !userId) {
+          if (!callId || !location || !userId || !createdAt) {
             console.error("Missing required fields in message:", data);
             throw new Error("Missing required fields");
           }
-
-          // Upsert agent if it doesn't exist
-          const agent = await upsertAgent(agentId, userId);
 
           const {
             regionId: newRegionId,
@@ -43,12 +40,16 @@ export async function startQueueConsumer() {
             metadata: newMetadata,
           } = parseMetadata(metadata);
 
+          // Upsert agent if it doesn't exist
+          const agent = await upsertAgent(agentId || newAgentId, userId);
+
           const newCall = await transcribeAndSaveCall(
             callId,
             location,
             createdAt,
-            agentId || newAgentId,
+            agent.id,
             regionId || newRegionId,
+            newMetadata,
           );
           console.log("Transcription completed:", newCall);
 

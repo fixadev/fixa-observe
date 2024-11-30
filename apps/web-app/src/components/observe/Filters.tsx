@@ -11,12 +11,7 @@ import {
   SelectSeparator,
 } from "../ui/select";
 import { formatDateTime } from "~/lib/utils";
-import {
-  CalendarIcon,
-  MapIcon,
-  PencilIcon,
-  UserIcon,
-} from "@heroicons/react/24/solid";
+import { CalendarIcon, MapIcon, UserIcon } from "@heroicons/react/24/solid";
 import { lookbackPeriods } from "../hooks/useObserveState";
 import { type Filter } from "~/lib/types";
 import { api } from "~/trpc/react";
@@ -42,6 +37,7 @@ export default function Filters({
   const { data: agentIds } = api._call.getAgentIds.useQuery();
   const { data: regionIds } = api._call.getRegionIds.useQuery();
   const { data: _agents } = api.agent.getAll.useQuery();
+  const { data: metadata } = api._call.getMetadata.useQuery();
 
   const [editAgentDialogOpen, setEditAgentDialogOpen] = useState(false);
 
@@ -72,6 +68,24 @@ export default function Filters({
       }),
     ];
   }, [_agents, agentIds]);
+
+  const metadataAttributes = useMemo(() => {
+    const result: Record<string, string[]> = {};
+    const metadataObjects = metadata ?? [];
+
+    metadataObjects.forEach((object) => {
+      Object.entries(object).forEach(([key, val]) => {
+        if (!result[key]) {
+          result[key] = [];
+        }
+        if (!result[key].includes(val)) {
+          result[key].push(val);
+        }
+      });
+    });
+
+    return result;
+  }, [metadata]);
 
   return (
     <>
@@ -159,6 +173,35 @@ export default function Filters({
               ))}
             </SelectContent>
           </Select>
+          {Object.entries(metadataAttributes).map(([key, values]) => (
+            <Select
+              key={key}
+              value={filter.metadata?.[key] ?? "all"}
+              onValueChange={(value) => {
+                setFilter({
+                  ...filter,
+                  metadata: {
+                    ...filter.metadata,
+                    [key]: value === "all" ? undefined : value,
+                  },
+                });
+              }}
+            >
+              <SelectTrigger className="gap-2 bg-background">
+                <SelectValue placeholder={key} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem key="all" value="all">
+                  all
+                </SelectItem>
+                {values.map((value) => (
+                  <SelectItem key={value} value={value}>
+                    {value}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          ))}
         </div>
         <Button variant="outline" onClick={refetch}>
           refresh
