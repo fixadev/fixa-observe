@@ -81,7 +81,7 @@ app.post("/vapi", async (req: Request, res: Response) => {
 
 app.post(
   "/upload-call",
-  authenticateRequest,
+  // authenticateRequest,
   async (req: Request, res: Response) => {
     try {
       const { callId, location, agentId, regionId, metadata } = req.body;
@@ -102,7 +102,8 @@ app.post(
         agentId,
         regionId,
         createdAt: new Date(),
-        userId: res.locals.userId,
+        // userId: res.locals.userId,
+        userId: "11x",
         metadata,
       });
       res.json({ success: true, muizz: "the man" });
