@@ -303,7 +303,7 @@ function EditAgentDialog({
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent className="flex h-[500px] flex-col">
+      <DialogContent className="flex h-[600px] flex-col">
         <DialogHeader>
           <DialogTitle>edit display names</DialogTitle>
         </DialogHeader>
