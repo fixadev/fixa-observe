@@ -43,7 +43,7 @@ const transcribePastCalls = async () => {
         await transcribeAndSaveCall(
           callRecording.id,
           callRecording.audioUrl,
-          callRecording.createdAt,
+          callRecording.createdAt.toISOString(),
           agentId,
           regionId,
         );
