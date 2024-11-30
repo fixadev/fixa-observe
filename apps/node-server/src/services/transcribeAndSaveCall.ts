@@ -4,13 +4,15 @@ import { v4 as uuidv4 } from "uuid";
 import { CallStatus, Role } from "@prisma/client";
 import { env } from "../env";
 import { calculateLatencyPercentiles } from "../utils/calculateLatencyPercentiles";
+import { uploadFromPresignedUrl } from "./uploadFromPresignedUrl";
 
 export const transcribeAndSaveCall = async (
   callId: string,
   audioUrl: string,
-  createdAt: Date,
+  createdAt: string,
   agentId?: string,
   regionId?: string,
+  metadata?: Record<string, string>,
 ) => {
   try {
     interface TranscribeResponse {
@@ -31,6 +33,12 @@ export const transcribeAndSaveCall = async (
       }> | null;
     }
 
+    const { audioUrl: url, duration } = await uploadFromPresignedUrl(
+      callId,
+      audioUrl,
+    );
+
+    // TODO: Figure out why old audio url is cached
     console.log("calling audio service", env.AUDIO_SERVICE_URL);
 
     const response = await axios.post<TranscribeResponse>(
@@ -73,11 +81,12 @@ export const transcribeAndSaveCall = async (
     const newCall = await db.call.create({
       data: {
         id: uuidv4(),
+        createdAt: new Date(),
         ownerId: "11x",
         customerCallId: callId,
-        startedAt: createdAt.toISOString(),
+        startedAt: createdAt,
         status: CallStatus.completed,
-        stereoRecordingUrl: audioUrl,
+        stereoRecordingUrl: url,
         agentId,
         regionId,
         latencyP50,
@@ -87,6 +96,8 @@ export const transcribeAndSaveCall = async (
         interruptionP90,
         interruptionP95,
         numInterruptions: numberOfInterruptionsGreaterThan2Seconds,
+        metadata,
+        duration,
         messages: {
           create: messages,
         },
@@ -103,13 +114,6 @@ export const transcribeAndSaveCall = async (
             text: interruption.text,
           })),
         },
-      },
-    });
-
-    await db.callRecording.update({
-      where: { id: callId },
-      data: {
-        processed: true,
       },
     });
     return newCall;

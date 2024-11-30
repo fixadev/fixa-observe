@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { Button } from "../ui/button";
 import {
   Select,
@@ -8,37 +8,40 @@ import {
   SelectContent,
   SelectTrigger,
   SelectValue,
+  SelectSeparator,
 } from "../ui/select";
 import { formatDateTime } from "~/lib/utils";
 import { CalendarIcon, MapIcon, UserIcon } from "@heroicons/react/24/solid";
 import { lookbackPeriods } from "../hooks/useObserveState";
 import { type Filter } from "~/lib/types";
 import { api } from "~/trpc/react";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "../ui/dialog";
+import { Input } from "../ui/input";
+import Spinner from "../Spinner";
 
 export default function Filters({
+  modalOpen,
+  setModalOpen,
   filter,
   setFilter,
   refetch,
 }: {
+  modalOpen: boolean;
+  setModalOpen: (open: boolean) => void;
   filter: Filter;
   setFilter: (filter: Filter) => void;
   refetch: () => void;
 }) {
   const { data: agentIds } = api._call.getAgentIds.useQuery();
   const { data: regionIds } = api._call.getRegionIds.useQuery();
-  // TODO: replace with api call
-  const agents = useMemo(() => {
-    return [
-      {
-        id: "all",
-        name: "all agents",
-      },
-      ...(agentIds ?? []).map((id) => ({
-        id,
-        name: id,
-      })),
-    ];
-  }, [agentIds]);
+  const { data: _agents, refetch: refetchAgents } = api.agent.getAll.useQuery();
+  const { data: metadata } = api._call.getMetadata.useQuery();
 
   const regions = useMemo(() => {
     return [
@@ -53,133 +56,228 @@ export default function Filters({
     ];
   }, [regionIds]);
 
-  // useEffect(() => {
-  //   console.log(filter);
-  // }, [filter]);
+  const agents = useMemo(() => {
+    return [
+      {
+        id: "all",
+        name: "all agents",
+      },
+      ...(agentIds ?? []).map((id) => {
+        return {
+          id,
+          name: _agents?.find((a) => a.id === id)?.name ?? id,
+        };
+      }),
+    ];
+  }, [_agents, agentIds]);
+
+  const metadataAttributes = useMemo(() => {
+    const result: Record<string, string[]> = {};
+    const metadataObjects = metadata ?? [];
+
+    metadataObjects.forEach((object) => {
+      Object.entries(object).forEach(([key, val]) => {
+        if (!result[key]) {
+          result[key] = [];
+        }
+        if (!result[key].includes(val)) {
+          result[key].push(val);
+        }
+      });
+    });
+
+    return result;
+  }, [metadata]);
 
   return (
-    <div className="fixed top-0 z-50 flex h-16 w-screen items-center justify-between gap-2 border-b bg-background p-4">
-      <div className="flex gap-2">
-        <Select
-          value={filter.lookbackPeriod.value.toString()}
-          onValueChange={(value) => {
-            setFilter({
-              ...filter,
-              lookbackPeriod: lookbackPeriods.find(
-                (p) => p.value === parseInt(value),
-              )!,
-              timeRange: undefined,
-            });
-          }}
-        >
-          <SelectTrigger className="gap-2 bg-background">
-            <CalendarIcon className="size-4 shrink-0" />
-            {filter.timeRange ? (
-              <SelectValue>
-                {formatDateTime(new Date(filter.timeRange.start))} -{" "}
-                {formatDateTime(new Date(filter.timeRange.end))}
-              </SelectValue>
-            ) : (
-              <SelectValue placeholder="time range" />
-            )}
-          </SelectTrigger>
-          <SelectContent>
-            {lookbackPeriods.map((period) => (
-              <SelectItem key={period.value} value={period.value.toString()}>
-                {period.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        <Select
-          value={filter.agentId ?? "all"}
-          onValueChange={(value) => {
-            setFilter({
-              ...filter,
-              agentId: value === "all" ? undefined : value,
-            });
-          }}
-        >
-          <SelectTrigger className="gap-2 bg-background">
-            <UserIcon className="size-4 shrink-0" />
-            <SelectValue placeholder="all agents" />
-          </SelectTrigger>
-          <SelectContent>
-            {agents.map((agent) => (
-              <SelectItem key={agent.id} value={agent.id}>
-                {agent.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        <Select
-          value={filter.regionId ?? "all"}
-          onValueChange={(value) => {
-            setFilter({
-              ...filter,
-              regionId: value === "all" ? undefined : value,
-            });
-          }}
-        >
-          <SelectTrigger className="gap-2 bg-background">
-            <MapIcon className="size-4 shrink-0" />
-            <SelectValue placeholder="all regions" />
-          </SelectTrigger>
-          <SelectContent>
-            {regions.map((region) => (
-              <SelectItem key={region.id} value={region.id}>
-                {region.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        {/* <SwitchWithValue
-          prefix="latency &gt;= "
-          suffix="ms"
-          value={filter.latencyThreshold.value}
-          setValue={(value) => {
-            setFilter({
-              ...filter,
-              latencyThreshold: { ...filter.latencyThreshold, value },
-            });
-          }}
-          checked={filter.latencyThreshold.enabled}
-          onCheckedChange={(checked) => {
-            setFilter({
-              ...filter,
-              latencyThreshold: {
-                ...filter.latencyThreshold,
-                enabled: checked,
-              },
-            });
-          }}
-        />
-        <SwitchWithValue
-          prefix="interruptions &gt;= "
-          suffix="ms"
-          value={filter.interruptionThreshold.value}
-          setValue={(value) => {
-            setFilter({
-              ...filter,
-              interruptionThreshold: { ...filter.interruptionThreshold, value },
-            });
-          }}
-          checked={filter.interruptionThreshold.enabled}
-          onCheckedChange={(checked) => {
-            setFilter({
-              ...filter,
-              interruptionThreshold: {
-                ...filter.interruptionThreshold,
-                enabled: checked,
-              },
-            });
-          }}
-        /> */}
+    <>
+      <div className="fixed top-0 z-50 flex h-16 w-screen items-center justify-between gap-2 border-b bg-background p-4">
+        <div className="flex gap-2">
+          <Select
+            value={filter.lookbackPeriod.value.toString()}
+            onValueChange={(value) => {
+              setFilter({
+                ...filter,
+                lookbackPeriod: lookbackPeriods.find(
+                  (p) => p.value === parseInt(value),
+                )!,
+                timeRange: undefined,
+              });
+            }}
+          >
+            <SelectTrigger className="gap-2 bg-background">
+              <CalendarIcon className="size-4 shrink-0" />
+              {filter.timeRange ? (
+                <SelectValue>
+                  {formatDateTime(new Date(filter.timeRange.start))} -{" "}
+                  {formatDateTime(new Date(filter.timeRange.end))}
+                </SelectValue>
+              ) : (
+                <SelectValue placeholder="time range" />
+              )}
+            </SelectTrigger>
+            <SelectContent>
+              {lookbackPeriods.map((period) => (
+                <SelectItem key={period.value} value={period.value.toString()}>
+                  {period.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Select
+            value={filter.agentId ?? "all"}
+            onValueChange={(value) => {
+              setFilter({
+                ...filter,
+                agentId: value === "all" ? undefined : value,
+              });
+            }}
+          >
+            <SelectTrigger className="gap-2 bg-background">
+              <UserIcon className="size-4 shrink-0" />
+              <SelectValue placeholder="all agents" />
+            </SelectTrigger>
+            <SelectContent>
+              {agents.map((agent) => (
+                <SelectItem key={agent.id} value={agent.id}>
+                  {agent.name}
+                </SelectItem>
+              ))}
+              <SelectSeparator />
+              <Button
+                variant="ghost"
+                size="sm"
+                className="w-full"
+                onClick={() => setModalOpen(true)}
+              >
+                edit display names
+              </Button>
+            </SelectContent>
+          </Select>
+          <Select
+            value={filter.regionId ?? "all"}
+            onValueChange={(value) => {
+              setFilter({
+                ...filter,
+                regionId: value === "all" ? undefined : value,
+              });
+            }}
+          >
+            <SelectTrigger className="gap-2 bg-background">
+              <MapIcon className="size-4 shrink-0" />
+              <SelectValue placeholder="all regions" />
+            </SelectTrigger>
+            <SelectContent>
+              {regions.map((region) => (
+                <SelectItem key={region.id} value={region.id}>
+                  {region.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          {Object.entries(metadataAttributes).map(([key, values]) => (
+            <Select
+              key={key}
+              value={filter.metadata?.[key] ?? "all"}
+              onValueChange={(value) => {
+                setFilter({
+                  ...filter,
+                  metadata: {
+                    ...filter.metadata,
+                    [key]: value === "all" ? undefined : value,
+                  },
+                });
+              }}
+            >
+              <SelectTrigger className="gap-2 bg-background">
+                <SelectValue placeholder={key} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem key="all" value="all">
+                  all
+                </SelectItem>
+                {values.map((value) => (
+                  <SelectItem key={value} value={value}>
+                    {value}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          ))}
+        </div>
+        <Button variant="outline" onClick={refetch}>
+          refresh
+        </Button>
       </div>
-      <Button variant="outline" onClick={refetch}>
-        refresh
-      </Button>
-    </div>
+      <EditAgentDialog
+        open={modalOpen}
+        setOpen={setModalOpen}
+        refetchAgents={refetchAgents}
+      />
+    </>
+  );
+}
+
+function EditAgentDialog({
+  open,
+  setOpen,
+  refetchAgents,
+}: {
+  open: boolean;
+  setOpen: (open: boolean) => void;
+  refetchAgents: () => void;
+}) {
+  const { data: agents } = api.agent.getAll.useQuery();
+
+  const { mutateAsync: updateAgentName, isPending: isUpdating } =
+    api.agent.updateName.useMutation();
+  const [editedNames, setEditedNames] = useState<Record<string, string>>({});
+
+  const handleSubmit = async () => {
+    for (const [id, name] of Object.entries(editedNames)) {
+      await updateAgentName({ id, name });
+    }
+    setOpen(false);
+    void refetchAgents();
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>edit display names</DialogTitle>
+        </DialogHeader>
+
+        <div className="-mx-6 flex max-h-[70vh] flex-col gap-4 overflow-y-auto px-6 py-2">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="font-medium">agent ID</div>
+            <div className="font-medium">agent name</div>
+          </div>
+
+          {agents?.map((agent) => (
+            <div key={agent.id} className="grid grid-cols-2 gap-4">
+              <Input value={agent.id} readOnly disabled />
+              <Input
+                value={editedNames[agent.id] ?? agent.name}
+                onChange={(e) => {
+                  e.stopPropagation();
+                  setEditedNames((prev) => ({
+                    ...prev,
+                    [agent.id]: e.target.value,
+                  }));
+                }}
+              />
+            </div>
+          ))}
+        </div>
+
+        <DialogFooter>
+          <Button className="mt-4" onClick={handleSubmit} disabled={isUpdating}>
+            {isUpdating ? <Spinner /> : "save changes"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
 

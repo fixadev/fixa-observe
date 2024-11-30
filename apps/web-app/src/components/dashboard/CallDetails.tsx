@@ -160,6 +160,8 @@ export default function CallDetails({
     messagesFiltered.forEach((message, index) => {
       if (
         activeEval &&
+        activeEval.secondsFromStart &&
+        activeEval.duration &&
         activeEval.secondsFromStart <
           (messagesFiltered[index + 1]?.secondsFromStart ?? Infinity) &&
         activeEval.secondsFromStart + activeEval.duration >
@@ -206,6 +208,7 @@ export default function CallDetails({
 
   const doesEvalOverlapMessage = useCallback(
     (evalResult: EvalResultWithIncludes, messageIndex: number) => {
+      if (!evalResult.secondsFromStart || !evalResult.duration) return false;
       return (
         evalResult.secondsFromStart <
           (messagesFiltered[messageIndex + 1]?.secondsFromStart ?? Infinity) &&

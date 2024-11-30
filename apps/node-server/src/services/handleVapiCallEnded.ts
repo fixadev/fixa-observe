@@ -13,7 +13,7 @@ import { type ServerMessageEndOfCallReport } from "@vapi-ai/server-sdk/api";
 import { analyzeCallWitho1 } from "./findLLMErrors";
 import { createGeminiPrompt } from "../utils/createGeminiPrompt";
 import { analyzeCallWithGemini } from "./geminiAnalyzeAudio";
-import { formatOutput } from "./formatOutput";
+import { formatOutput } from "../helpers/formatOutput";
 import { Socket } from "socket.io";
 import { sendTestCompletedSlackMessage } from "./sendSlackMessage";
 

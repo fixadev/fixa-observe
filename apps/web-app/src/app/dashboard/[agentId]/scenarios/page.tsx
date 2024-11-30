@@ -23,7 +23,7 @@ import {
 import { Label } from "~/components/ui/label";
 import { Input } from "~/components/ui/input";
 import { Textarea } from "~/components/ui/textarea";
-import { EvalResultType, EvalType } from "@prisma/client";
+import { EvalContentType, EvalResultType, EvalType } from "@prisma/client";
 import {
   Select,
   SelectContent,
@@ -145,6 +145,7 @@ export default function AgentScenariosPage({
               evals: newScenario.evals.map((e) => ({
                 ...e,
                 scenarioId: newScenario.id,
+                contentType: e.contentType ?? EvalContentType.content,
               })),
             },
           ],
@@ -295,6 +296,7 @@ function ScenarioSheet({
       agentId: null,
       scenarioId: null,
       ownerId: null,
+      contentType: EvalContentType.content,
     };
   }, []);
 

@@ -5,6 +5,7 @@ import {
 } from "~/lib/agent";
 import { v4 as uuidv4 } from "uuid";
 import { type PrismaClient } from "@prisma/client";
+import { type Agent, AgentSchema } from "prisma/generated/zod";
 
 export class AgentService {
   constructor(private db: PrismaClient) {}
@@ -42,6 +43,38 @@ export class AgentService {
         ownerId,
       },
     });
+  }
+
+  async updateAgentName(id: string, name: string) {
+    return await db.agent.update({
+      where: { id },
+      data: { name },
+    });
+  }
+
+  async upsertAgent(agent: Partial<Agent>, ownerId: string) {
+    if (agent.id) {
+      return await db.agent.upsert({
+        where: { id: agent.id },
+        update: agent,
+        create: { ...AgentSchema.parse(agent), ownerId },
+      });
+    } else if (agent.customerAgentId) {
+      const existingAgent = await db.agent.findFirst({
+        where: { customerAgentId: agent.customerAgentId, ownerId },
+      });
+
+      if (existingAgent) {
+        return await db.agent.update({
+          where: { id: existingAgent.id },
+          data: agent,
+        });
+      }
+      return await db.agent.create({
+        data: { ...AgentSchema.parse(agent), ownerId },
+      });
+    }
+    throw new Error("Either id or customerAgentId must be provided");
   }
 
   async getAgent(id: string) {

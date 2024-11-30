@@ -1,6 +1,8 @@
 import { env } from "../env";
+import { parseMetadata } from "../helpers/parseMetadata";
 import { transcribeAndSaveCall } from "../services/transcribeAndSaveCall";
-import { uploadCallToDB } from "../services/uploadCallToDB";
+import { uploadCallRecordingToDB } from "../services/uploadCallToDB";
+import { upsertAgent } from "../services/upsertAgent";
 import { sqs } from "../utils/s3Client";
 
 export async function startQueueConsumer() {
@@ -18,26 +20,36 @@ export async function startQueueConsumer() {
         for (const message of response.Messages) {
           // Process message
           const data = JSON.parse(message.Body || "{}");
-          const { callId, location, agentId, regionId, createdAt } = data;
-          if (!callId || !location || !agentId || !regionId) {
-            console.error("Missing required fields in message:", data);
-            throw new Error("Missing required fields");
-          }
-          // Add your processing logic here
-          const result = await uploadCallToDB(
+          const {
             callId,
             location,
             agentId,
             regionId,
             createdAt,
-          );
+            userId,
+            metadata,
+          } = data;
+          if (!callId || !location || !userId || !createdAt) {
+            console.error("Missing required fields in message:", data);
+            throw new Error("Missing required fields");
+          }
+
+          const {
+            regionId: newRegionId,
+            agentId: newAgentId,
+            metadata: newMetadata,
+          } = parseMetadata(metadata);
+
+          // Upsert agent if it doesn't exist
+          const agent = await upsertAgent(agentId || newAgentId, userId);
 
           const newCall = await transcribeAndSaveCall(
             callId,
-            result.audioUrl,
-            result.createdAt,
-            agentId,
-            regionId,
+            location,
+            createdAt,
+            agent.id,
+            regionId || newRegionId,
+            newMetadata,
           );
           console.log("Transcription completed:", newCall);
 

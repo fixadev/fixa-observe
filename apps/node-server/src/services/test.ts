@@ -3,7 +3,7 @@ import { analyzeCallWitho1 } from "./findLLMErrors";
 import { db } from "../db";
 import { CallStatus, Role } from "@prisma/client";
 import { analyzeCallWithGemini } from "./geminiAnalyzeAudio";
-import { formatOutput } from "./formatOutput";
+import { formatOutput } from "../helpers/formatOutput";
 import { createGeminiPrompt } from "../utils/createGeminiPrompt";
 
 const main = async () => {

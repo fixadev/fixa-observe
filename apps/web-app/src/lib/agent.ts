@@ -8,6 +8,7 @@ import {
 } from "prisma/generated/zod";
 import { z } from "zod";
 import { type CallWithIncludes } from "./types";
+import { EvalContentType } from "@prisma/client";
 
 export type Agent = z.infer<typeof AgentSchema>;
 export type AgentWithoutId = Omit<Agent, "id"> & {
@@ -30,6 +31,7 @@ export const CreateScenarioEvalSchema = z.object({
   description: z.string(),
   agentId: z.string().nullable(),
   ownerId: z.string().nullable(),
+  contentType: z.nativeEnum(EvalContentType).optional(),
 });
 
 export type UpdateScenarioSchema = z.infer<typeof UpdateScenarioSchema>;
