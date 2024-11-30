@@ -66,8 +66,6 @@ export const callService = {
         filterWhere.regionId = filter.regionId;
       }
 
-      console.log("FILTER", filter);
-
       if (filter.metadata) {
         const metadataFilters = Object.entries(filter.metadata).map(
           ([key, value]) => ({
