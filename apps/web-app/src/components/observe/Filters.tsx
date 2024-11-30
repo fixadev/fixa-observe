@@ -303,7 +303,7 @@ function EditAgentDialog({
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent className="flex h-[600px] flex-col">
+      <DialogContent className="flex h-[600px] min-w-[600px] flex-col">
         <DialogHeader>
           <DialogTitle>edit display names</DialogTitle>
         </DialogHeader>
@@ -317,7 +317,7 @@ function EditAgentDialog({
           />
         </div>
 
-        <div className="-mx-6 flex max-h-[70vh] flex-col gap-4 overflow-y-auto px-6 py-2">
+        <div className="flex max-h-[70vh] flex-col gap-4 overflow-y-auto py-2">
           <div className="grid grid-cols-2 gap-4">
             <div className="font-medium">agent ID</div>
             <div className="font-medium">display name</div>
@@ -325,8 +325,9 @@ function EditAgentDialog({
 
           {filteredAgents.map((agent) => (
             <div key={agent.id} className="grid grid-cols-2 gap-4">
-              <Input value={agent.id} readOnly disabled />
+              <Input className="w-full" value={agent.id} readOnly disabled />
               <Input
+                className="w-full"
                 value={editedNames[agent.id] ?? agent.name}
                 onChange={(e) => {
                   e.stopPropagation();
