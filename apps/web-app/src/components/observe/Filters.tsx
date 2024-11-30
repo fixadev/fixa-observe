@@ -40,7 +40,7 @@ export default function Filters({
 }) {
   const { data: agentIds } = api._call.getAgentIds.useQuery();
   const { data: regionIds } = api._call.getRegionIds.useQuery();
-  const { data: _agents } = api.agent.getAll.useQuery();
+  const { data: _agents, refetch: refetchAgents } = api.agent.getAll.useQuery();
   const { data: metadata } = api._call.getMetadata.useQuery();
 
   const regions = useMemo(() => {
@@ -150,7 +150,7 @@ export default function Filters({
                 className="w-full"
                 onClick={() => setModalOpen(true)}
               >
-                edit agents
+                edit display names
               </Button>
             </SelectContent>
           </Select>
@@ -209,7 +209,11 @@ export default function Filters({
           refresh
         </Button>
       </div>
-      <EditAgentDialog open={modalOpen} setOpen={setModalOpen} />
+      <EditAgentDialog
+        open={modalOpen}
+        setOpen={setModalOpen}
+        refetchAgents={refetchAgents}
+      />
     </>
   );
 }
@@ -217,9 +221,11 @@ export default function Filters({
 function EditAgentDialog({
   open,
   setOpen,
+  refetchAgents,
 }: {
   open: boolean;
   setOpen: (open: boolean) => void;
+  refetchAgents: () => void;
 }) {
   const { data: agents } = api.agent.getAll.useQuery();
 
@@ -232,13 +238,14 @@ function EditAgentDialog({
       await updateAgentName({ id, name });
     }
     setOpen(false);
+    void refetchAgents();
   };
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>edit agents</DialogTitle>
+          <DialogTitle>edit display names</DialogTitle>
         </DialogHeader>
 
         <div className="-mx-6 flex max-h-[70vh] flex-col gap-4 overflow-y-auto px-6 py-2">
