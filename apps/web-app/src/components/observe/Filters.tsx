@@ -320,7 +320,7 @@ function EditAgentDialog({
         <div className="-mx-6 flex max-h-[70vh] flex-col gap-4 overflow-y-auto px-6 py-2">
           <div className="grid grid-cols-2 gap-4">
             <div className="font-medium">agent ID</div>
-            <div className="font-medium">agent name</div>
+            <div className="font-medium">display name</div>
           </div>
 
           {filteredAgents.map((agent) => (
