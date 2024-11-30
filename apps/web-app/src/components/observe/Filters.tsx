@@ -11,7 +11,12 @@ import {
   SelectSeparator,
 } from "../ui/select";
 import { formatDateTime } from "~/lib/utils";
-import { CalendarIcon, MapIcon, UserIcon } from "@heroicons/react/24/solid";
+import {
+  CalendarIcon,
+  MapIcon,
+  PencilIcon,
+  UserIcon,
+} from "@heroicons/react/24/solid";
 import { lookbackPeriods } from "../hooks/useObserveState";
 import { type Filter } from "~/lib/types";
 import { api } from "~/trpc/react";
@@ -24,6 +29,18 @@ import {
 } from "../ui/dialog";
 import { Input } from "../ui/input";
 import Spinner from "../Spinner";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+  CommandSeparator,
+} from "../ui/command";
+import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
+import { Check, ChevronsUpDown } from "lucide-react";
+import { cn } from "~/lib/utils";
 
 export default function Filters({
   modalOpen,
@@ -89,6 +106,8 @@ export default function Filters({
     return result;
   }, [metadata]);
 
+  const [open, setOpen] = useState(false);
+
   return (
     <>
       <div className="fixed top-0 z-50 flex h-16 w-screen items-center justify-between gap-2 border-b bg-background p-4">
@@ -124,36 +143,65 @@ export default function Filters({
               ))}
             </SelectContent>
           </Select>
-          <Select
-            value={filter.agentId ?? "all"}
-            onValueChange={(value) => {
-              setFilter({
-                ...filter,
-                agentId: value === "all" ? undefined : value,
-              });
-            }}
-          >
-            <SelectTrigger className="gap-2 bg-background">
-              <UserIcon className="size-4 shrink-0" />
-              <SelectValue placeholder="all agents" />
-            </SelectTrigger>
-            <SelectContent>
-              {agents.map((agent) => (
-                <SelectItem key={agent.id} value={agent.id}>
-                  {agent.name}
-                </SelectItem>
-              ))}
-              <SelectSeparator />
+          <Popover open={open} onOpenChange={setOpen}>
+            <PopoverTrigger asChild>
               <Button
-                variant="ghost"
-                size="sm"
-                className="w-full"
-                onClick={() => setModalOpen(true)}
+                variant="outline"
+                className="w-[220px] justify-between gap-2 bg-background"
               >
-                edit display names
+                <div className="flex items-center gap-2">
+                  <UserIcon className="size-4 shrink-0" />
+                  <span>
+                    {agents?.find((a) => a.id === filter.agentId)?.name ??
+                      "all agents"}
+                  </span>
+                </div>
+                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
               </Button>
-            </SelectContent>
-          </Select>
+            </PopoverTrigger>
+            <PopoverContent className="w-[220px] p-0">
+              <Command>
+                <CommandInput placeholder="Search agents..." />
+                <CommandList>
+                  <CommandEmpty>No agent found.</CommandEmpty>
+                  <CommandGroup>
+                    {(agents ?? []).map((agent) => (
+                      <CommandItem
+                        key={agent.id}
+                        value={agent.id}
+                        onSelect={(value) => {
+                          setFilter({
+                            ...filter,
+                            agentId: value === "all" ? undefined : value,
+                          });
+                          setOpen(false);
+                        }}
+                      >
+                        <Check
+                          className={cn(
+                            "mr-2 h-4 w-4",
+                            filter.agentId === agent.id
+                              ? "opacity-100"
+                              : "opacity-0",
+                          )}
+                        />
+                        {agent.name}
+                      </CommandItem>
+                    ))}
+                  </CommandGroup>
+                </CommandList>
+                <CommandSeparator />
+                <CommandGroup>
+                  <CommandItem
+                    onSelect={() => setModalOpen(true)}
+                    className="flex w-full cursor-pointer flex-col items-center text-center font-medium"
+                  >
+                    edit display names
+                  </CommandItem>
+                </CommandGroup>
+              </Command>
+            </PopoverContent>
+          </Popover>
           <Select
             value={filter.regionId ?? "all"}
             onValueChange={(value) => {
