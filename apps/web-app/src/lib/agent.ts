@@ -8,12 +8,14 @@ import {
 } from "prisma/generated/zod";
 import { z } from "zod";
 import { type CallWithIncludes } from "./types";
-import { EvalContentType } from "@prisma/client";
+import { EvalContentType, EvalResultType, EvalType } from "@prisma/client";
 
 export type Agent = z.infer<typeof AgentSchema>;
 export type AgentWithoutId = Omit<Agent, "id"> & {
   scenarios: CreateScenarioSchema[];
 };
+
+export type EvalSchema = z.infer<typeof EvalSchema>;
 
 export type EvalWithoutScenarioId = z.infer<typeof EvalWithoutScenarioId>;
 export const EvalWithoutScenarioId = EvalSchema.omit({ scenarioId: true });
@@ -23,20 +25,32 @@ export const ScenarioWithEvals = ScenarioSchema.extend({
   evals: z.array(EvalWithoutScenarioId),
 });
 
-export const CreateScenarioEvalSchema = z.object({
-  type: z.enum(["scenario", "general"]),
-  resultType: z.enum(["boolean", "number", "percentage"]),
+// export const CreateEvalSchema = EvalSchema.omit({
+//   id: true,
+//   scenarioId: true,
+// });
+
+export const CreateEvalSchema = z.object({
+  type: z.nativeEnum(EvalType),
+  resultType: z.nativeEnum(EvalResultType),
+  contentType: z.nativeEnum(EvalContentType),
   id: z.string(),
+  createdAt: z.coerce.date(),
   name: z.string(),
   description: z.string(),
+  scenarioId: z.string().optional(),
   agentId: z.string().nullable(),
   ownerId: z.string().nullable(),
-  contentType: z.nativeEnum(EvalContentType).optional(),
 });
+
+export type UpdateEvalsSchema = z.infer<typeof updateEvalsSchema>;
+export const updateEvalsSchema = z.array(
+  z.union([EvalWithoutScenarioId, CreateEvalSchema]),
+);
 
 export type UpdateScenarioSchema = z.infer<typeof UpdateScenarioSchema>;
 export const UpdateScenarioSchema = ScenarioSchema.extend({
-  evals: z.array(z.union([EvalWithoutScenarioId, CreateScenarioEvalSchema])),
+  evals: updateEvalsSchema,
 });
 
 export type CreateScenarioSchema = z.infer<typeof CreateScenarioSchema>;
@@ -45,7 +59,7 @@ export const CreateScenarioSchema = ScenarioSchema.omit({
   agentId: true,
   createdAt: true,
 }).extend({
-  evals: z.array(CreateScenarioEvalSchema),
+  evals: z.array(CreateEvalSchema),
 });
 
 export type CreateAgentSchema = z.infer<typeof CreateAgentSchema>;

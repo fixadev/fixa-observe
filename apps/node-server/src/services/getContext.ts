@@ -42,6 +42,18 @@ export const getContext = async (
       return;
     }
 
+    const generalEvals = await db.eval.findMany({
+      where: {
+        AND: [{ ownerId }, { type: EvalType.general }],
+      },
+    });
+
+    const evalOverrides = await db.evalOverride.findMany({
+      where: {
+        AND: [{ scenarioId: scenario.id }, { enabled: true }],
+      },
+    });
+
     const userSocket = connectedUsers.get(ownerId);
     return {
       userSocket,
@@ -49,6 +61,7 @@ export const getContext = async (
       scenario,
       call,
       test,
+      generalEvals,
     };
   } catch (error) {
     console.error("Error getting context", error);

@@ -37,15 +37,16 @@ export const analyzeCallWitho1 = async ({
   testAgentPrompt,
   scenario,
   agent,
+  generalEvals,
 }: {
   callStartedAt?: string;
   messages: ArtifactMessagesItem[];
   testAgentPrompt: string;
   scenario: Scenario & { evals: Eval[] };
   agent: Agent & { enabledGeneralEvals: Eval[] };
+  generalEvals: Eval[];
 }): Promise<{ cleanedResult: string }> => {
   const scenarioEvals = scenario.evals;
-  const generalEvals = agent.enabledGeneralEvals;
 
   const basePrompt = `
   Your job to to analyze a call transcript between an AI agent (the main agent) and a test AI agent (the test agent), and determine how the main agent performed.

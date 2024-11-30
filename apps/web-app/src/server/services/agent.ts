@@ -1,10 +1,13 @@
 import { db } from "../db";
 import {
+  type UpdateEvalsSchema,
   type CreateScenarioSchema,
   type UpdateScenarioSchema,
+  type EvalSchema,
+  type EvalWithoutScenarioId,
 } from "~/lib/agent";
 import { v4 as uuidv4 } from "uuid";
-import { type PrismaClient } from "@prisma/client";
+import { EvalType, type PrismaClient } from "@prisma/client";
 import { type Agent, AgentSchema } from "prisma/generated/zod";
 
 export class AgentService {
@@ -198,28 +201,31 @@ export class AgentService {
   }
 
   async createScenarios(agentId: string, scenarios: CreateScenarioSchema[]) {
-    const transactions = scenarios.map((scenario) => {
-      return db.scenario.create({
-        data: {
-          ...scenario,
-          id: uuidv4(),
-          agentId,
-          createdAt: new Date(),
-          evals: {
-            createMany: {
-              data: scenario.evals.map((evaluation) => ({
-                ...evaluation,
-                id: uuidv4(),
-              })),
+    return await db.$transaction(async (tx) => {
+      return await Promise.all(
+        scenarios.map((scenario) =>
+          tx.scenario.create({
+            data: {
+              ...scenario,
+              id: uuidv4(),
+              agentId,
+              createdAt: new Date(),
+              evals: {
+                createMany: {
+                  data: scenario.evals.map((evaluation) => ({
+                    ...evaluation,
+                    id: uuidv4(),
+                  })),
+                },
+              },
             },
-          },
-        },
-        include: {
-          evals: { orderBy: { createdAt: "asc" } },
-        },
-      });
+            include: {
+              evals: { orderBy: { createdAt: "asc" } },
+            },
+          }),
+        ),
+      );
     });
-    return await db.$transaction(transactions);
   }
 
   async updateScenario(scenario: UpdateScenarioSchema) {
@@ -269,6 +275,22 @@ export class AgentService {
     });
   }
 
+  async addGeneralEval(userId: string, evaluation: EvalWithoutScenarioId) {
+    return await db.eval.create({
+      data: { ...evaluation, id: uuidv4(), ownerId: userId },
+    });
+  }
+
+  async updateGeneralEval(evaluation: EvalWithoutScenarioId) {
+    return await db.eval.update({
+      where: { id: evaluation.id },
+      data: evaluation,
+    });
+  }
+
+  async deleteGeneralEval(id: string) {
+    return await db.eval.delete({ where: { id } });
+  }
   async deleteScenario(id: string) {
     return await db.scenario.delete({ where: { id } });
   }

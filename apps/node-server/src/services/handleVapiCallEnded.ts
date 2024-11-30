@@ -23,6 +23,7 @@ export const handleVapiCallEnded = async ({
   agent,
   test,
   scenario,
+  generalEvals,
   userSocket,
 }: {
   report: ServerMessageEndOfCallReport;
@@ -30,6 +31,7 @@ export const handleVapiCallEnded = async ({
   agent: Agent & { enabledGeneralEvals: Eval[] };
   test: Test;
   scenario: Scenario & { evals: Eval[] };
+  generalEvals: Eval[];
   userSocket?: Socket;
 }) => {
   try {
@@ -49,6 +51,7 @@ export const handleVapiCallEnded = async ({
       testAgentPrompt: scenario.instructions,
       scenario,
       agent,
+      generalEvals,
     });
     console.log("O1 ANALYSIS for call", call.id, o1Analysis);
 

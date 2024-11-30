@@ -207,6 +207,7 @@ model Scenario {
 model Eval {
   id        String   @id @default(uuid())
   createdAt DateTime @default(now())
+  enabled   Boolean  @default(true)
 
   name        String
   description String
@@ -245,15 +246,13 @@ model EvalResult {
 }
 
 model EvalOverride {
-  id        String   @id @default(uuid())
-  createdAt DateTime @default(now())
-
+  id         String   @id @default(uuid())
+  createdAt  DateTime @default(now())
   scenario   Scenario @relation(fields: [scenarioId], references: [id], onDelete: Cascade)
   scenarioId String
-
-  evalId  String
-  eval    Eval    @relation(fields: [evalId], references: [id], onDelete: Cascade)
-  enabled Boolean
+  evalId     String
+  eval       Eval     @relation(fields: [evalId], references: [id], onDelete: Cascade)
+  enabled    Boolean
 }
 
 enum EvalType {
