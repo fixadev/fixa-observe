@@ -125,6 +125,8 @@ const _AudioPlayer = forwardRef<
   useEffect(() => {
     if (
       activeEvalResult &&
+      activeEvalResult.secondsFromStart &&
+      activeEvalResult.duration &&
       currentTime >=
         activeEvalResult.secondsFromStart +
           activeEvalResult.duration -
@@ -147,7 +149,7 @@ const _AudioPlayer = forwardRef<
     () => ({
       setActiveEvalResult: (evalResult: EvalResultWithIncludes | null) => {
         setActiveEvalResult(evalResult);
-        if (evalResult) {
+        if (evalResult && evalResult.secondsFromStart && evalResult.duration) {
           seek(evalResult.secondsFromStart - offsetFromStart);
         }
       },
@@ -163,6 +165,7 @@ const _AudioPlayer = forwardRef<
 
   const handleEvalResultClick = useCallback(
     (evalResult: EvalResultWithIncludes) => {
+      if (!evalResult.secondsFromStart || !evalResult.duration) return;
       seek(evalResult.secondsFromStart - offsetFromStart);
       play();
       setActiveEvalResult(evalResult);
@@ -189,7 +192,13 @@ const _AudioPlayer = forwardRef<
           <Skeleton className="absolute left-0 top-0 size-full" />
         )}
         {call.evalResults?.map((evalResult, index) => {
-          if (!containerRef.current || !duration) return null;
+          if (
+            !containerRef.current ||
+            !duration ||
+            !evalResult.secondsFromStart ||
+            !evalResult.duration
+          )
+            return null;
           const startPercentage =
             Math.min(
               1,
