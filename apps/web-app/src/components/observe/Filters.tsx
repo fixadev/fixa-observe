@@ -79,6 +79,7 @@ export default function Filters({
         id: "all",
         name: "all agents",
       },
+      // ...(_agents ?? []),
       ...(agentIds ?? []).map((id) => {
         return {
           id,
@@ -276,10 +277,20 @@ function EditAgentDialog({
   refetchAgents: () => void;
 }) {
   const { data: agents } = api.agent.getAll.useQuery();
+  const [search, setSearch] = useState("");
 
   const { mutateAsync: updateAgentName, isPending: isUpdating } =
     api.agent.updateName.useMutation();
   const [editedNames, setEditedNames] = useState<Record<string, string>>({});
+
+  const filteredAgents = useMemo(() => {
+    if (!agents) return [];
+    return agents.filter(
+      (agent) =>
+        agent.id.toLowerCase().includes(search.toLowerCase()) ||
+        agent.name.toLowerCase().includes(search.toLowerCase()),
+    );
+  }, [agents, search]);
 
   const handleSubmit = async () => {
     for (const [id, name] of Object.entries(editedNames)) {
@@ -291,10 +302,19 @@ function EditAgentDialog({
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent>
+      <DialogContent className="flex min-h-[400px] flex-col">
         <DialogHeader>
           <DialogTitle>edit display names</DialogTitle>
         </DialogHeader>
+
+        <div className="flex flex-col gap-4">
+          <Input
+            placeholder="Search agents..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full"
+          />
+        </div>
 
         <div className="-mx-6 flex max-h-[70vh] flex-col gap-4 overflow-y-auto px-6 py-2">
           <div className="grid grid-cols-2 gap-4">
@@ -302,7 +322,7 @@ function EditAgentDialog({
             <div className="font-medium">agent name</div>
           </div>
 
-          {agents?.map((agent) => (
+          {filteredAgents.map((agent) => (
             <div key={agent.id} className="grid grid-cols-2 gap-4">
               <Input value={agent.id} readOnly disabled />
               <Input
@@ -319,7 +339,7 @@ function EditAgentDialog({
           ))}
         </div>
 
-        <DialogFooter>
+        <DialogFooter className="mt-auto">
           <Button className="mt-4" onClick={handleSubmit} disabled={isUpdating}>
             {isUpdating ? <Spinner /> : "save changes"}
           </Button>
