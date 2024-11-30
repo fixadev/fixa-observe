@@ -147,7 +147,7 @@ export default function Filters({
             <PopoverTrigger asChild>
               <Button
                 variant="outline"
-                className="w-[220px] justify-between gap-2 bg-background"
+                className="justify-between gap-2 bg-background"
               >
                 <div className="flex items-center gap-2">
                   <UserIcon className="size-4 shrink-0" />
@@ -159,7 +159,7 @@ export default function Filters({
                 <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-[220px] p-0">
+            <PopoverContent className="p-1">
               <Command>
                 <CommandInput placeholder="Search agents..." />
                 <CommandList>
