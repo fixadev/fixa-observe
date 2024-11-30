@@ -117,6 +117,26 @@ export default function PercentilesChart({
     setRefAreaRight("");
   }, [refAreaLeft, refAreaRight, setFilter]);
 
+  // Add this new function to calculate max Y value
+  const getMaxY = useCallback(() => {
+    const visibleData = formattedData.filter((item) => {
+      const timestamp = item.timestamp;
+      if (left === "dataMin" || right === "dataMax") {
+        return true;
+      }
+      if (typeof left === "number" && typeof right === "number") {
+        return timestamp >= left && timestamp <= right;
+      } else {
+        return (
+          timestamp >= parseInt(left as string) &&
+          timestamp <= parseInt(right as string)
+        );
+      }
+    });
+
+    return Math.max(...visibleData.map((item) => item.p95)) + 1;
+  }, [formattedData, left, right]);
+
   return (
     <ChartContainer
       config={chartConfig}
@@ -153,6 +173,7 @@ export default function PercentilesChart({
           tickFormatter={(value: string) =>
             `${Math.round(parseFloat(value) * 1000)}ms`
           }
+          domain={[0, getMaxY()]}
         />
         <ChartTooltip
           content={
