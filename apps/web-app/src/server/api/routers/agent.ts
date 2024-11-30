@@ -31,6 +31,12 @@ export const agentRouter = createTRPCRouter({
       return await agentServiceInstance.upsertAgent(input, ctx.user.id);
     }),
 
+  updateName: protectedProcedure
+    .input(z.object({ id: z.string(), name: z.string() }))
+    .mutation(async ({ input }) => {
+      return await agentServiceInstance.updateAgentName(input.id, input.name);
+    }),
+
   get: protectedProcedure
     .input(z.object({ id: z.string() }))
     .query(async ({ input }) => {
@@ -112,6 +118,7 @@ export const agentRouter = createTRPCRouter({
     }),
 
   getAll: protectedProcedure.query(async ({ ctx }) => {
+    // test w 11x as ownerId
     return await agentServiceInstance.getAllAgents(ctx.user.id);
   }),
 

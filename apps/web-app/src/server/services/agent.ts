@@ -45,6 +45,13 @@ export class AgentService {
     });
   }
 
+  async updateAgentName(id: string, name: string) {
+    return await db.agent.update({
+      where: { id },
+      data: { name },
+    });
+  }
+
   async upsertAgent(agent: Partial<Agent>, ownerId: string) {
     if (agent.id) {
       return await db.agent.upsert({

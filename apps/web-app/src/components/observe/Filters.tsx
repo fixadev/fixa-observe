@@ -26,10 +26,14 @@ import { Input } from "../ui/input";
 import Spinner from "../Spinner";
 
 export default function Filters({
+  modalOpen,
+  setModalOpen,
   filter,
   setFilter,
   refetch,
 }: {
+  modalOpen: boolean;
+  setModalOpen: (open: boolean) => void;
   filter: Filter;
   setFilter: (filter: Filter) => void;
   refetch: () => void;
@@ -38,8 +42,6 @@ export default function Filters({
   const { data: regionIds } = api._call.getRegionIds.useQuery();
   const { data: _agents } = api.agent.getAll.useQuery();
   const { data: metadata } = api._call.getMetadata.useQuery();
-
-  const [editAgentDialogOpen, setEditAgentDialogOpen] = useState(false);
 
   const regions = useMemo(() => {
     return [
@@ -146,7 +148,7 @@ export default function Filters({
                 variant="ghost"
                 size="sm"
                 className="w-full"
-                onClick={() => setEditAgentDialogOpen(true)}
+                onClick={() => setModalOpen(true)}
               >
                 edit agents
               </Button>
@@ -207,10 +209,7 @@ export default function Filters({
           refresh
         </Button>
       </div>
-      <EditAgentDialog
-        open={editAgentDialogOpen}
-        setOpen={setEditAgentDialogOpen}
-      />
+      <EditAgentDialog open={modalOpen} setOpen={setModalOpen} />
     </>
   );
 }
@@ -224,13 +223,13 @@ function EditAgentDialog({
 }) {
   const { data: agents } = api.agent.getAll.useQuery();
 
-  const { mutateAsync: upsertAgent, isPending: isUpserting } =
-    api.agent.upsert.useMutation();
+  const { mutateAsync: updateAgentName, isPending: isUpdating } =
+    api.agent.updateName.useMutation();
   const [editedNames, setEditedNames] = useState<Record<string, string>>({});
 
   const handleSubmit = async () => {
     for (const [id, name] of Object.entries(editedNames)) {
-      await upsertAgent({ id, name });
+      await updateAgentName({ id, name });
     }
     setOpen(false);
   };
@@ -242,7 +241,7 @@ function EditAgentDialog({
           <DialogTitle>edit agents</DialogTitle>
         </DialogHeader>
 
-        <div className="-mx-6 flex max-h-[70vh] flex-col gap-4 overflow-y-auto px-6">
+        <div className="-mx-6 flex max-h-[70vh] flex-col gap-4 overflow-y-auto px-6 py-2">
           <div className="grid grid-cols-2 gap-4">
             <div className="font-medium">agent ID</div>
             <div className="font-medium">agent name</div>
@@ -253,24 +252,21 @@ function EditAgentDialog({
               <Input value={agent.id} readOnly disabled />
               <Input
                 value={editedNames[agent.id] ?? agent.name}
-                onChange={(e) =>
+                onChange={(e) => {
+                  e.stopPropagation();
                   setEditedNames((prev) => ({
                     ...prev,
                     [agent.id]: e.target.value,
-                  }))
-                }
+                  }));
+                }}
               />
             </div>
           ))}
         </div>
 
         <DialogFooter>
-          <Button
-            className="mt-4"
-            onClick={handleSubmit}
-            disabled={isUpserting}
-          >
-            {isUpserting ? <Spinner /> : "save changes"}
+          <Button className="mt-4" onClick={handleSubmit} disabled={isUpdating}>
+            {isUpdating ? <Spinner /> : "save changes"}
           </Button>
         </DialogFooter>
       </DialogContent>

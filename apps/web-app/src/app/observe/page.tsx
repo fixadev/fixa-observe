@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useRef, useEffect } from "react";
+import { useCallback, useMemo, useRef, useEffect, useState } from "react";
 import CallDetails from "~/components/dashboard/CallDetails";
 import { useObserveState } from "~/components/hooks/useObserveState";
 import CallTable from "~/components/observe/CallTable";
@@ -85,6 +85,8 @@ export default function ObservePage() {
     [calls, selectedCallId],
   );
 
+  const [modalOpen, setModalOpen] = useState(false);
+
   const playPauseAudio = useCallback(() => {
     console.log("play pause!!");
   }, []);
@@ -95,13 +97,19 @@ export default function ObservePage() {
       autoFocus
       tabIndex={0}
       onKeyDown={(e) => {
-        if (e.key === " ") {
+        if (e.key === " " && !modalOpen) {
           e.preventDefault();
           playPauseAudio();
         }
       }}
     >
-      <Filters filter={filter} setFilter={setFilter} refetch={refetch} />
+      <Filters
+        modalOpen={modalOpen}
+        setModalOpen={setModalOpen}
+        filter={filter}
+        setFilter={setFilter}
+        refetch={refetch}
+      />
       <div className="flex flex-col gap-4 p-4">
         <div className="flex w-full gap-4">
           <ChartCard
