@@ -66,6 +66,24 @@ export const callService = {
         filterWhere.regionId = filter.regionId;
       }
 
+      console.log("FILTER", filter);
+
+      if (filter.metadata) {
+        const metadataFilters = Object.entries(filter.metadata).map(
+          ([key, value]) => ({
+            metadata: {
+              path: [key],
+              string_contains: value,
+            },
+          }),
+        );
+
+        filterWhere.AND = [
+          ...(Array.isArray(filterWhere.AND) ? filterWhere.AND : []),
+          ...metadataFilters,
+        ];
+      }
+
       // If customerCallId is set, filter for calls where customerCallId contains the search string (case insensitive)
       if (filter.customerCallId) {
         filterWhere = {
