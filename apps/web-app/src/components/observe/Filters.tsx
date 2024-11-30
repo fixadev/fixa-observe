@@ -227,6 +227,7 @@ export default function Filters({
           {Object.entries(metadataAttributes).map(([key, values]) => (
             <Select
               key={key}
+              defaultValue="all"
               value={filter.metadata?.[key] ?? "all"}
               onValueChange={(value) => {
                 setFilter({
@@ -243,7 +244,7 @@ export default function Filters({
               </SelectTrigger>
               <SelectContent>
                 <SelectItem key="all" value="all">
-                  all
+                  all {key}s
                 </SelectItem>
                 {values.map((value) => (
                   <SelectItem key={value} value={value}>
@@ -302,7 +303,7 @@ function EditAgentDialog({
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent className="flex min-h-[400px] flex-col">
+      <DialogContent className="flex h-[500px] flex-col">
         <DialogHeader>
           <DialogTitle>edit display names</DialogTitle>
         </DialogHeader>
