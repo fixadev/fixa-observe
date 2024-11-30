@@ -4,7 +4,7 @@ import { db } from "../db";
 import { createGeminiPrompt } from "../utils/createGeminiPrompt";
 import vapiClient from "../utils/vapiClient";
 import { analyzeCallWitho1 } from "./findLLMErrors";
-import { formatOutput } from "./formatOutput";
+import { formatOutput } from "../helpers/formatOutput";
 import { analyzeCallWithGemini } from "./geminiAnalyzeAudio";
 import { env } from "../env";
 

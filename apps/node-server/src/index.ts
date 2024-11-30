@@ -8,6 +8,7 @@ import { db } from "./db";
 import { getContext } from "./services/getContext";
 import { addCallToQueue } from "./services/addCallToQueue";
 import { startQueueConsumer } from "./workers/queueConsumer";
+import { authenticateRequest } from "./middlewares/auth";
 
 const app = express();
 const httpServer = createServer(app);
@@ -78,33 +79,39 @@ app.post("/vapi", async (req: Request, res: Response) => {
   }
 });
 
-app.post("/upload-call", async (req: Request, res: Response) => {
-  try {
-    const { callId, location, agentId, regionId } = req.body;
-    const missingFields = [];
-    if (!callId) missingFields.push("callId");
-    if (!location) missingFields.push("location");
-    if (!agentId) missingFields.push("agentId");
-    if (!regionId) missingFields.push("regionId");
-    if (missingFields.length > 0) {
-      return res.status(400).json({
-        success: false,
-        error: `Missing required fields: ${missingFields.join(", ")}`,
+app.post(
+  "/upload-call",
+  authenticateRequest,
+  async (req: Request, res: Response) => {
+    try {
+      const { callId, location, agentId, regionId, metadata } = req.body;
+      const missingFields = [];
+      if (!callId) missingFields.push("callId");
+      if (!location) missingFields.push("location");
+      // if (!agentId) missingFields.push("agentId");
+      // if (!regionId) missingFields.push("regionId");
+      if (missingFields.length > 0) {
+        return res.status(400).json({
+          success: false,
+          error: `Missing required fields: ${missingFields.join(", ")}`,
+        });
+      }
+      await addCallToQueue({
+        callId,
+        location,
+        agentId,
+        regionId,
+        createdAt: new Date(),
+        userId: res.locals.userId,
+        metadata,
       });
+      res.json({ success: true, muizz: "the man" });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ success: false, error: (error as Error).message });
     }
-    await addCallToQueue({
-      callId,
-      location,
-      agentId,
-      regionId,
-      createdAt: new Date(),
-    });
-    res.json({ success: true, muizz: "the man" });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ success: false, error: (error as Error).message });
-  }
-});
+  },
+);
 
 app.post("/message/:userId", (req: Request, res: Response) => {
   const { userId } = req.params;

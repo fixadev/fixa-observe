@@ -87,8 +87,10 @@ model TestAgent {
 }
 
 model Call {
-  id                 String      @id @default(uuid())
-  ownerId            String?
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  ownerId   String?
+
   customerCallId     String?
   status             CallStatus
   result             CallResult?
@@ -99,6 +101,7 @@ model Call {
   endedAt            String?
   regionId           String?
   agentId            String?
+  metadata           Json?
   latencyP50         Float?
   latencyP90         Float?
   latencyP95         Float?
@@ -185,9 +188,10 @@ model Scenario {
   agentId   String
   createdAt DateTime @default(now())
 
-  name            String
-  instructions    String
-  successCriteria String @default("")
+  name                 String
+  instructions         String
+  successCriteria      String         @default("")
+  generalEvalOverrides EvalOverride[]
 
   includeDateTime Boolean @default(false)
   timezone        String?
@@ -209,15 +213,17 @@ model Eval {
   scenario    Scenario? @relation(fields: [scenarioId], references: [id])
   scenarioId  String?
 
-  type       EvalType
-  resultType EvalResultType
+  type        EvalType
+  resultType  EvalResultType
+  contentType EvalContentType @default(content)
 
   evalResults EvalResult[]
 
   agent   Agent?  @relation(fields: [agentId], references: [id])
   agentId String?
 
-  ownerId String?
+  ownerId      String?
+  EvalOverride EvalOverride[]
 }
 
 model EvalResult {
@@ -238,6 +244,18 @@ model EvalResult {
   details          String
 }
 
+model EvalOverride {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+
+  scenario   Scenario @relation(fields: [scenarioId], references: [id], onDelete: Cascade)
+  scenarioId String
+
+  evalId  String
+  eval    Eval    @relation(fields: [evalId], references: [id], onDelete: Cascade)
+  enabled Boolean
+}
+
 enum EvalType {
   scenario
   general
@@ -247,6 +265,11 @@ enum EvalResultType {
   boolean
   number
   percentage
+}
+
+enum EvalContentType {
+  tool
+  content
 }
 
 model LatencyBlock {

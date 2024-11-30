@@ -57,7 +57,7 @@ export const uploadFromPresignedUrl = async (
     await s3.send(new PutObjectCommand(uploadParams));
 
     return {
-      url: `https://${env.AWS_BUCKET_NAME}.s3.amazonaws.com/${uploadParams.Key}`,
+      audioUrl: `https://${env.AWS_BUCKET_NAME}.s3.amazonaws.com/${uploadParams.Key}`,
       duration,
     };
   } catch (error) {

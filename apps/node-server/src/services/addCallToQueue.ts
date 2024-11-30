@@ -7,6 +7,8 @@ interface AddCallToQueueProps {
   agentId: string;
   regionId: string;
   createdAt: Date;
+  userId: string;
+  metadata: Record<string, string>;
 }
 
 export const addCallToQueue = async (input: AddCallToQueueProps) => {

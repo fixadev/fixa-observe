@@ -180,6 +180,7 @@ function EditAgentDialog({
   setOpen: (open: boolean) => void;
 }) {
   const { data: agents } = api.agent.getAll.useQuery();
+
   const { mutateAsync: upsertAgent, isPending: isUpserting } =
     api.agent.upsert.useMutation();
   const [editedNames, setEditedNames] = useState<Record<string, string>>({});
