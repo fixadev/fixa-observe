@@ -262,6 +262,7 @@ export class AgentService {
       where: { scenarioId: scenario.id },
     });
 
+    // TODO: fix this
     const evalOverridesToDelete = scenario.generalEvalOverrides.filter(
       (override) =>
         !priorOverrides.some(
