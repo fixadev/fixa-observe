@@ -5,6 +5,7 @@ import {
   type Message,
   type EvalResultSchema,
   EvalSchema,
+  EvalOverrideSchema,
 } from "prisma/generated/zod";
 import { z } from "zod";
 import { type CallWithIncludes } from "./types";
@@ -25,11 +26,6 @@ export const ScenarioWithEvals = ScenarioSchema.extend({
   evals: z.array(EvalWithoutScenarioId),
 });
 
-// export const CreateEvalSchema = EvalSchema.omit({
-//   id: true,
-//   scenarioId: true,
-// });
-
 export const CreateEvalSchema = z.object({
   type: z.nativeEnum(EvalType),
   resultType: z.nativeEnum(EvalResultType),
@@ -48,9 +44,20 @@ export const updateEvalsSchema = z.array(
   z.union([EvalWithoutScenarioId, CreateEvalSchema]),
 );
 
+export const CreateEvalOverrideSchema = EvalOverrideSchema.omit({ id: true });
+export const EvalOverrideWithoutScenarioId = EvalOverrideSchema.omit({
+  scenarioId: true,
+});
+
+export type UpdateOverridesSchema = z.infer<typeof UpdateOverridesSchema>;
+export const UpdateOverridesSchema = z.array(
+  z.union([CreateEvalOverrideSchema, EvalOverrideWithoutScenarioId]),
+);
+
 export type UpdateScenarioSchema = z.infer<typeof UpdateScenarioSchema>;
 export const UpdateScenarioSchema = ScenarioSchema.extend({
   evals: updateEvalsSchema,
+  generalEvalOverrides: UpdateOverridesSchema,
 });
 
 export type CreateScenarioSchema = z.infer<typeof CreateScenarioSchema>;
@@ -60,6 +67,7 @@ export const CreateScenarioSchema = ScenarioSchema.omit({
   createdAt: true,
 }).extend({
   evals: z.array(CreateEvalSchema),
+  generalEvalOverrides: z.array(EvalOverrideSchema),
 });
 
 export type CreateAgentSchema = z.infer<typeof CreateAgentSchema>;

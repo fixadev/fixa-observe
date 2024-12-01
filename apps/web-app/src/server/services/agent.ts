@@ -193,6 +193,14 @@ export class AgentService {
             })),
           },
         },
+        generalEvalOverrides: {
+          createMany: {
+            data: scenario.generalEvalOverrides.map((override) => ({
+              ...override,
+              id: uuidv4(),
+            })),
+          },
+        },
       },
       include: {
         evals: { orderBy: { createdAt: "asc" } },
@@ -218,6 +226,7 @@ export class AgentService {
                   })),
                 },
               },
+              generalEvalOverrides: {},
             },
             include: {
               evals: { orderBy: { createdAt: "asc" } },
@@ -249,6 +258,31 @@ export class AgentService {
         !priorEvals.some((priorEval) => priorEval.id === evaluation.id),
     );
 
+    const priorOverrides = await db.evalOverride.findMany({
+      where: { scenarioId: scenario.id },
+    });
+
+    const evalOverridesToDelete = scenario.generalEvalOverrides.filter(
+      (override) =>
+        !priorOverrides.some(
+          (priorOverride) => priorOverride.id === override.id,
+        ),
+    );
+
+    const evalOverridesToUpdate = scenario.generalEvalOverrides.filter(
+      (override) =>
+        priorOverrides.some(
+          (priorOverride) => priorOverride.id === override.id,
+        ),
+    );
+
+    const evalOverridesToCreate = scenario.generalEvalOverrides.filter(
+      (override) =>
+        !priorOverrides.some(
+          (priorOverride) => priorOverride.id === override.id,
+        ),
+    );
+
     return await db.scenario.update({
       where: { id: scenario.id },
       data: {
@@ -264,6 +298,21 @@ export class AgentService {
           createMany: {
             data: evaluationsToCreate.map((evaluation) => ({
               ...evaluation,
+              id: uuidv4(),
+            })),
+          },
+        },
+        generalEvalOverrides: {
+          deleteMany: {
+            id: { in: evalOverridesToDelete.map((override) => override.id) },
+          },
+          updateMany: evalOverridesToUpdate.map((override) => ({
+            where: { id: override.id },
+            data: override,
+          })),
+          createMany: {
+            data: evalOverridesToCreate.map((override) => ({
+              ...override,
               id: uuidv4(),
             })),
           },
