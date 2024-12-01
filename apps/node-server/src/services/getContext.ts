@@ -54,6 +54,15 @@ export const getContext = async (
       },
     });
 
+    const filteredGeneralEvals = generalEvals.filter(
+      (evaluation) =>
+        evalOverrides.find((override) => override.evalId === evaluation.id)
+          ?.enabled ||
+        (evaluation.enabled &&
+          !evalOverrides.find((override) => override.evalId === evaluation.id)
+            ?.enabled),
+    );
+
     const userSocket = connectedUsers.get(ownerId);
     return {
       userSocket,
@@ -61,7 +70,7 @@ export const getContext = async (
       scenario,
       call,
       test,
-      generalEvals,
+      generalEvals: filteredGeneralEvals,
     };
   } catch (error) {
     console.error("Error getting context", error);
