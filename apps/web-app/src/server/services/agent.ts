@@ -5,9 +5,11 @@ import {
   type UpdateScenarioSchema,
   type EvalSchema,
   type EvalWithoutScenarioId,
+  type EvalOverrideWithoutScenarioId,
+  type CreateEvalOverrideSchema,
 } from "~/lib/agent";
 import { v4 as uuidv4 } from "uuid";
-import { EvalType, type PrismaClient } from "@prisma/client";
+import { type PrismaClient } from "@prisma/client";
 import { type Agent, AgentSchema } from "prisma/generated/zod";
 
 export class AgentService {
@@ -265,24 +267,23 @@ export class AgentService {
     // TODO: fix this
     const evalOverridesToDelete = scenario.generalEvalOverrides.filter(
       (override) =>
-        !priorOverrides.some(
-          (priorOverride) => priorOverride.id === override.id,
-        ),
-    );
-
-    const evalOverridesToUpdate = scenario.generalEvalOverrides.filter(
-      (override) =>
+        "id" in override &&
         priorOverrides.some(
           (priorOverride) => priorOverride.id === override.id,
         ),
-    );
+    ) as EvalOverrideWithoutScenarioId[];
 
-    const evalOverridesToCreate = scenario.generalEvalOverrides.filter(
+    const evalOverridesToUpdate = scenario.generalEvalOverrides.filter(
       (override) =>
-        !priorOverrides.some(
+        "id" in override &&
+        priorOverrides.some(
           (priorOverride) => priorOverride.id === override.id,
         ),
-    );
+    ) as EvalOverrideWithoutScenarioId[];
+
+    const evalOverridesToCreate = scenario.generalEvalOverrides.filter(
+      (override) => !("id" in override),
+    ) as CreateEvalOverrideSchema[];
 
     return await db.scenario.update({
       where: { id: scenario.id },

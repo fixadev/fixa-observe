@@ -44,7 +44,12 @@ export const updateEvalsSchema = z.array(
   z.union([EvalWithoutScenarioId, CreateEvalSchema]),
 );
 
+export type CreateEvalOverrideSchema = z.infer<typeof CreateEvalOverrideSchema>;
 export const CreateEvalOverrideSchema = EvalOverrideSchema.omit({ id: true });
+
+export type EvalOverrideWithoutScenarioId = z.infer<
+  typeof EvalOverrideWithoutScenarioId
+>;
 export const EvalOverrideWithoutScenarioId = EvalOverrideSchema.omit({
   scenarioId: true,
 });
