@@ -28,7 +28,7 @@ export const handleVapiCallEnded = async ({
 }: {
   report: ServerMessageEndOfCallReport;
   call: Call;
-  agent: Agent & { enabledGeneralEvals: Eval[] };
+  agent: Agent;
   test: Test;
   scenario: Scenario & { evals: Eval[] };
   generalEvals: Eval[];
@@ -50,7 +50,6 @@ export const handleVapiCallEnded = async ({
       messages: report.artifact.messages,
       testAgentPrompt: scenario.instructions,
       scenario,
-      agent,
       generalEvals,
     });
     console.log("O1 ANALYSIS for call", call.id, o1Analysis);
@@ -65,8 +64,8 @@ export const handleVapiCallEnded = async ({
         messages: report.artifact.messages,
         testAgentPrompt: scenario.instructions,
         scenario,
-        agent,
         analysis: o1Analysis,
+        generalEvals,
       });
 
       const geminiResult = await analyzeCallWithGemini(
@@ -83,12 +82,15 @@ export const handleVapiCallEnded = async ({
     }
 
     const cleanedResultJson = await formatOutput(parsedResult);
-    const { scenarioEvalResults, generalEvalResults } = cleanedResultJson;
-    const evalResults = [...scenarioEvalResults, ...generalEvalResults];
-    const evalResultsWithValidEvals = evalResults.filter((evalResult) =>
-      scenario.evals?.some((evaluation) => evaluation.id === evalResult.evalId),
+    const { evalResults } = cleanedResultJson;
+
+    const validEvalResults = evalResults.filter((evalResult) =>
+      [...scenario.evals, ...generalEvals]?.some(
+        (evaluation) => evaluation.id === evalResult.evalId,
+      ),
     );
-    const success = evalResultsWithValidEvals.every((result) => result.success);
+
+    const success = validEvalResults.every((result) => result.success);
 
     const updatedCall = await db.call.update({
       where: { id: call.id },
@@ -100,7 +102,7 @@ export const handleVapiCallEnded = async ({
         monoRecordingUrl: report.artifact.recordingUrl,
         result: success ? CallResult.success : CallResult.failure,
         evalResults: {
-          create: evalResultsWithValidEvals,
+          create: validEvalResults,
         },
         messages: {
           create: report.artifact.messages

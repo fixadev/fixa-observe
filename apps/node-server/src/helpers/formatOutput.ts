@@ -1,6 +1,6 @@
 import { openai } from "../utils/OpenAIClient";
 import { zodResponseFormat } from "openai/helpers/zod";
-import { outputSchema } from "../services/findLLMErrors";
+import { findLLMErrorsOutputSchema } from "../services/findLLMErrors";
 
 export const formatOutput = async (output: string) => {
   const prompt = `
@@ -17,7 +17,10 @@ export const formatOutput = async (output: string) => {
   const completion = await openai.beta.chat.completions.parse({
     model: "gpt-4o",
     messages: [{ role: "system", content: prompt }],
-    response_format: zodResponseFormat(outputSchema, "intents"),
+    response_format: zodResponseFormat(
+      findLLMErrorsOutputSchema,
+      "evalResults",
+    ),
   });
 
   const parsedResponse = completion.choices[0]?.message.parsed;
@@ -27,7 +30,6 @@ export const formatOutput = async (output: string) => {
   }
 
   return {
-    scenarioEvalResults: parsedResponse.scenarioEvalResults,
-    generalEvalResults: parsedResponse.generalEvalResults,
+    evalResults: parsedResponse.evalResults,
   };
 };
