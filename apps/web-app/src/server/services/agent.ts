@@ -89,6 +89,7 @@ export class AgentService {
         scenarios: {
           include: {
             evals: { orderBy: { createdAt: "asc" } },
+            generalEvalOverrides: true,
           },
         },
         tests: {
@@ -206,6 +207,7 @@ export class AgentService {
       },
       include: {
         evals: { orderBy: { createdAt: "asc" } },
+        generalEvalOverrides: { orderBy: { createdAt: "asc" } },
       },
     });
   }
@@ -232,6 +234,7 @@ export class AgentService {
             },
             include: {
               evals: { orderBy: { createdAt: "asc" } },
+              generalEvalOverrides: { orderBy: { createdAt: "asc" } },
             },
           }),
         ),
@@ -322,6 +325,7 @@ export class AgentService {
       },
       include: {
         evals: { orderBy: { createdAt: "asc" } },
+        generalEvalOverrides: { orderBy: { createdAt: "asc" } },
       },
     });
   }

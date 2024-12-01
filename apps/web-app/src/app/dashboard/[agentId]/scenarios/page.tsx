@@ -118,7 +118,14 @@ export default function AgentScenariosPage({
                   evals: scenario.evals.map((e) => ({
                     ...e,
                     scenarioId: scenario.id,
+                    enabled: true,
                   })),
+                  generalEvalOverrides: scenario.generalEvalOverrides.map(
+                    (e) => ({
+                      ...e,
+                      scenarioId: scenario.id,
+                    }),
+                  ),
                 }
               : s,
           ),
@@ -135,6 +142,10 @@ export default function AgentScenariosPage({
             createdAt: new Date(),
             scenarioId: undefined,
           })),
+          generalEvalOverrides: scenario.generalEvalOverrides.map((e) => ({
+            ...e,
+            createdAt: new Date(),
+          })),
         };
         setAgent({
           ...agent,
@@ -147,6 +158,13 @@ export default function AgentScenariosPage({
                 scenarioId: newScenario.id,
                 contentType: e.contentType ?? EvalContentType.content,
               })),
+              generalEvalOverrides: newScenario.generalEvalOverrides.map(
+                (e) => ({
+                  ...e,
+                  id: "creating...",
+                  scenarioId: newScenario.id,
+                }),
+              ),
             },
           ],
         });
@@ -297,6 +315,7 @@ function ScenarioSheet({
       scenarioId: null,
       ownerId: null,
       contentType: EvalContentType.content,
+      enabled: true,
     };
   }, []);
 
@@ -395,6 +414,7 @@ function ScenarioSheet({
           isNew: false,
           includeDateTime,
           timezone: includeDateTime ? timezone.value : null,
+          generalEvalOverrides: [],
         });
     setInstructions("");
     setName("");
