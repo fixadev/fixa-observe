@@ -8,7 +8,7 @@ import {
 import { Button } from "~/components/ui/button";
 import { Label } from "~/components/ui/label";
 import { api } from "~/trpc/react";
-import { type ReactNode, useEffect, useState } from "react";
+import { type ReactNode, useState } from "react";
 import { useToast } from "~/components/hooks/use-toast";
 import {
   Select,
@@ -23,14 +23,17 @@ import { TextAreaWithLabel } from "~/app/_components/TextAreaWithLabel";
 
 export const CreateGeneralEvalModal = ({
   existingEval,
-  setExistingEval,
+  setEvaluations,
+  isModalOpen,
+  setIsModalOpen,
   children,
 }: {
   existingEval: EvalSchema | null;
-  setExistingEval: React.Dispatch<React.SetStateAction<EvalSchema | null>>;
+  setEvaluations: React.Dispatch<React.SetStateAction<EvalSchema[]>>;
+  isModalOpen: boolean;
+  setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
   children: ReactNode;
 }) => {
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [evaluation, setEvaluation] = useState<
     EvalSchema | EvalWithoutScenarioId
   >(
@@ -41,9 +44,9 @@ export const CreateGeneralEvalModal = ({
       description: "",
       type: "general",
       resultType: "number",
-      contentType: "tool",
+      contentType: "content",
       enabled: true,
-      scenarioId: null,
+      scenarioId: undefined,
       agentId: null,
       ownerId: null,
     },
@@ -56,23 +59,34 @@ export const CreateGeneralEvalModal = ({
         title: "eval created",
         description: "eval created successfully",
       });
-      setExistingEval(data);
+      setEvaluations((evaluations) => [
+        ...evaluations.slice(0, -1),
+        data as EvalSchema,
+      ]);
+      setIsModalOpen(false);
     },
   });
 
   const { mutate: updateGeneralEval } = api.eval.updateGeneralEval.useMutation({
-    onSuccess: () => {
+    onSuccess: (data) => {
       toast({
         title: "eval updated",
         description: "eval updated successfully",
       });
+      setEvaluations((evaluations) =>
+        evaluations.map((e: EvalSchema) => (e.id === data.id ? data : e)),
+      );
     },
   });
 
   const handleSave = () => {
     if (existingEval) {
-      updateGeneralEval(evaluation);
+      updateGeneralEval(evaluation as EvalSchema);
     } else {
+      setEvaluations((evaluations) => [
+        ...evaluations,
+        evaluation as EvalSchema,
+      ]);
       createGeneralEval(evaluation as EvalWithoutScenarioId);
     }
   };
@@ -103,20 +117,20 @@ export const CreateGeneralEvalModal = ({
                 <SelectValue defaultValue="content" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem id="tool" value="tool">
-                  tool
-                </SelectItem>
                 <SelectItem id="content" value="content">
                   content
+                </SelectItem>
+                <SelectItem id="tool" value="tool">
+                  tool
                 </SelectItem>
               </SelectContent>
             </Select>
           </div>
           <div className="flex flex-col gap-2">
             <Label>result type</Label>
-            <Select disabled={evaluation.resultType === "boolean"}>
+            <Select disabled>
               <SelectTrigger>
-                <SelectValue placeholder="result type" />
+                <SelectValue placeholder="boolean" />
               </SelectTrigger>
             </Select>
           </div>

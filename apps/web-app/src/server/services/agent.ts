@@ -330,6 +330,13 @@ export class AgentService {
     });
   }
 
+  async getGeneralEvals(userId: string) {
+    return await db.eval.findMany({
+      where: { ownerId: userId },
+      orderBy: { createdAt: "asc" },
+    });
+  }
+
   async createGeneralEval(userId: string, evaluation: EvalWithoutScenarioId) {
     return await db.eval.create({
       data: { ...evaluation, id: uuidv4(), ownerId: userId },

@@ -8,6 +8,9 @@ import { z } from "zod";
 const agentServiceInstance = new AgentService(db);
 
 export const evalRouter = createTRPCRouter({
+  getGeneralEvals: protectedProcedure.query(async ({ ctx }) => {
+    return await agentServiceInstance.getGeneralEvals(ctx.user.id);
+  }),
   createGeneralEval: protectedProcedure
     .input(CreateEvalSchema)
     .mutation(async ({ input, ctx }) => {
