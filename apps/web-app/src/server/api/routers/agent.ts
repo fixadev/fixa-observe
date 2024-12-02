@@ -119,8 +119,15 @@ export const agentRouter = createTRPCRouter({
 
   getAll: protectedProcedure.query(async ({ ctx }) => {
     // test w 11x as ownerId
-    return await agentServiceInstance.getAllAgents("11x");
+    return await agentServiceInstance.getAllAgents(ctx.user.id);
   }),
+
+  getAllFor11x: protectedProcedure
+    .input(z.object({ ownerId: z.string() }))
+    .query(async ({ ctx, input }) => {
+      // test w 11x as ownerId
+      return await agentServiceInstance.getAllAgents("11x");
+    }),
 
   delete: protectedProcedure
     .input(z.object({ id: z.string() }))
