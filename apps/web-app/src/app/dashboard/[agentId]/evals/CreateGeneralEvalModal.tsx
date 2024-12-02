@@ -1,14 +1,9 @@
 "use client";
-import {
-  Dialog,
-  DialogContent,
-  DialogTitle,
-  DialogTrigger,
-} from "~/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "~/components/ui/dialog";
 import { Button } from "~/components/ui/button";
 import { Label } from "~/components/ui/label";
 import { api } from "~/trpc/react";
-import { type ReactNode, useState } from "react";
+import { useEffect, useState } from "react";
 import { useToast } from "~/components/hooks/use-toast";
 import {
   Select,
@@ -26,13 +21,11 @@ export const CreateGeneralEvalModal = ({
   setEvaluations,
   isModalOpen,
   setIsModalOpen,
-  children,
 }: {
   existingEval: EvalSchema | null;
   setEvaluations: React.Dispatch<React.SetStateAction<EvalSchema[]>>;
   isModalOpen: boolean;
   setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  children: ReactNode;
 }) => {
   const [evaluation, setEvaluation] = useState<
     EvalSchema | EvalWithoutScenarioId
@@ -51,6 +44,7 @@ export const CreateGeneralEvalModal = ({
       ownerId: null,
     },
   );
+
   const { toast } = useToast();
 
   const { mutate: createGeneralEval } = api.eval.createGeneralEval.useMutation({
@@ -59,10 +53,7 @@ export const CreateGeneralEvalModal = ({
         title: "eval created",
         description: "eval created successfully",
       });
-      setEvaluations((evaluations) => [
-        ...evaluations.slice(0, -1),
-        data as EvalSchema,
-      ]);
+      setEvaluations((evaluations) => [...evaluations.slice(0, -1)]);
       setIsModalOpen(false);
     },
   });
@@ -79,6 +70,26 @@ export const CreateGeneralEvalModal = ({
     },
   });
 
+  useEffect(() => {
+    if (existingEval) {
+      setEvaluation(existingEval);
+    } else {
+      setEvaluation({
+        id: crypto.randomUUID(),
+        createdAt: new Date(),
+        name: "",
+        description: "",
+        type: "general",
+        resultType: "number",
+        contentType: "content",
+        enabled: true,
+        scenarioId: undefined,
+        agentId: null,
+        ownerId: null,
+      });
+    }
+  }, [existingEval]);
+
   const handleSave = () => {
     if (existingEval) {
       updateGeneralEval(evaluation as EvalSchema);
@@ -93,7 +104,6 @@ export const CreateGeneralEvalModal = ({
 
   return (
     <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-      <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent>
         <DialogTitle>create general eval</DialogTitle>
         <div className="flex w-full flex-row justify-between gap-4">

@@ -33,7 +33,7 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { Card, CardTitle, CardHeader } from "~/components/ui/card";
-import { TrashIcon, XMarkIcon } from "@heroicons/react/24/solid";
+import { PencilIcon, TrashIcon, XMarkIcon } from "@heroicons/react/24/solid";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -50,8 +50,7 @@ import { SidebarTrigger } from "~/components/ui/sidebar";
 import { Switch } from "~/components/ui/switch";
 import { useTimezoneSelect } from "react-timezone-select";
 import { useSearchParams } from "next/navigation";
-import { CreateGeneralEvalModal } from "./CreateGeneralEvalModal";
-import { Toggle } from "~/components/ui/toggle";
+import { CreateGeneralEvalModal } from "../evals/CreateGeneralEvalModal";
 
 export default function AgentScenariosPage({
   params,
@@ -63,9 +62,7 @@ export default function AgentScenariosPage({
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [selectedScenario, setSelectedScenario] =
     useState<ScenarioWithEvals | null>(null);
-  const [isEvalModalOpen, setIsEvalModalOpen] = useState(false);
-  const [selectedEval, setSelectedEval] = useState<EvalSchema | null>(null);
-  const [generalEvals, setGeneralEvals] = useState<EvalSchema[]>([]);
+
   const searchParams = useSearchParams();
   const scenarioId = searchParams.get("scenarioId");
 
@@ -80,24 +77,6 @@ export default function AgentScenariosPage({
       toast({
         title: "Scenario created",
         description: "Scenario created successfully",
-        duration: 1000,
-      });
-    },
-  });
-
-  const { data: evaluations } = api.eval.getGeneralEvals.useQuery();
-
-  useEffect(() => {
-    if (evaluations) {
-      setGeneralEvals(evaluations);
-    }
-  }, [evaluations]);
-
-  const { mutate: updateEval } = api.eval.updateGeneralEval.useMutation({
-    onSuccess: () => {
-      toast({
-        title: "Evaluation updated",
-        description: "Default evaluation updated successfully",
         duration: 1000,
       });
     },
@@ -245,70 +224,6 @@ export default function AgentScenariosPage({
         </div>
       </div>
       <div className="container flex h-full flex-col gap-4 p-4">
-        <div className="flex flex-row justify-between">
-          <div>
-            <div className="text-lg font-medium">
-              general evaluation criteria
-            </div>
-            <div className="text-sm text-muted-foreground">
-              the criteria used to evaluate all scenarios. can be overridden on
-              a per-scenario basis.
-            </div>
-          </div>
-          <CreateGeneralEvalModal
-            existingEval={null}
-            setEvaluations={setGeneralEvals}
-            isModalOpen={isEvalModalOpen}
-            setIsModalOpen={setIsEvalModalOpen}
-          >
-            <Button variant="outline">create general eval</Button>
-          </CreateGeneralEvalModal>
-        </div>
-        <div className="flex flex-col gap-3">
-          {generalEvals.map((evaluation) => (
-            <div key={evaluation.id}>
-              <Card
-                onClick={() => {
-                  setSelectedEval(evaluation);
-                  setIsEvalModalOpen(true);
-                }}
-                className="flex w-full cursor-pointer flex-row items-center justify-between gap-2 overflow-hidden p-4 hover:bg-muted/40"
-              >
-                <div className="flex flex-row items-center gap-8 font-medium">
-                  <Switch
-                    checked={evaluation.enabled}
-                    onCheckedChange={(checked) => {
-                      setGeneralEvals(
-                        generalEvals.map((e) =>
-                          e.id === evaluation.id
-                            ? { ...e, enabled: checked }
-                            : e,
-                        ),
-                      );
-                      updateEval({
-                        ...evaluation,
-                        enabled: checked,
-                      });
-                    }}
-                  />
-                  {evaluation.name}
-                </div>
-                <div className="flex flex-row items-center gap-3 text-sm text-muted-foreground">
-                  {evaluation.resultType}
-                  <div
-                    className={`rounded-2xl bg-muted/70 px-3 py-1.5 text-xs text-black ${
-                      evaluation.contentType === EvalContentType.content
-                        ? "bg-blue-200"
-                        : "bg-gray-200"
-                    }`}
-                  >
-                    {evaluation.contentType}
-                  </div>
-                </div>
-              </Card>
-            </div>
-          ))}
-        </div>
         <div>
           <div className="text-lg font-medium">scenarios</div>
           <div className="text-sm text-muted-foreground">
@@ -445,7 +360,6 @@ function ScenarioSheet({
   );
 
   useEffect(() => {
-    console.log("selectedScenario", selectedScenario);
     setName(selectedScenario?.name ?? "");
     setInstructions(selectedScenario?.instructions ?? "");
     setEvals(
@@ -589,7 +503,9 @@ function ScenarioSheet({
             </div>
 
             <div>
-              <Label className="text-base">evaluation criteria</Label>
+              <Label className="text-base">
+                scenario-specific evaluation criteria
+              </Label>
               <div className="mb-2 text-sm text-muted-foreground">
                 the criteria on which we evaluate your agent
               </div>
