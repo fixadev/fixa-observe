@@ -24,16 +24,12 @@ export const analyzeCallWitho1 = async ({
   messages,
   testAgentPrompt,
   scenario,
-  generalEvals,
 }: {
   callStartedAt?: string;
   messages: ArtifactMessagesItem[];
   testAgentPrompt: string;
   scenario: Scenario & { evals: Eval[] };
-  generalEvals: Eval[];
 }): Promise<{ cleanedResult: string }> => {
-  const scenarioEvals = scenario.evals;
-
   const basePrompt = `
   Your job to to analyze a call transcript between an AI agent (the main agent) and a test AI agent (the test agent), and determine how the main agent performed.
 
@@ -75,10 +71,8 @@ export const analyzeCallWitho1 = async ({
           scenario.timezone,
         )}. Use this as context for your evaluation, if the evaluation criteria is dependent on the current date or time, or if it mentions phrases like 'right now' or 'today', etc.`
       : ""
-  }\n\nScenario Evaluation Criteria: ${JSON.stringify(scenarioEvals)}
-  \n\nGeneral Evaluation Criteria: ${JSON.stringify(generalEvals)}\n\nCall Transcript: ${JSON.stringify(
-    messages,
-  )}`;
+  }\n\nScenario Evaluation Criteria: ${JSON.stringify(scenario.evals)}
+  \n\nCall Transcript: ${JSON.stringify(messages)}`;
   // console.log("========================= O1 PROMPT =========================");
   // console.log(prompt);
   // console.log("========================= END O1 PROMPT ======================");

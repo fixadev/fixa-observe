@@ -128,14 +128,10 @@ export async function analyzeAudio(
     };
 
     const response = await model.generateContent(request);
-    const result =
+    const textResult =
       response?.response?.candidates?.[0]?.content?.parts?.[0]?.text;
 
-    const parsedResult: z.infer<typeof findLLMErrorsOutputSchema> = JSON.parse(
-      result ?? "",
-    );
-
-    return { parsedResult, fileUrl };
+    return { textResult, fileUrl };
   } catch (error) {
     console.error("Error analyzing audio:", error);
     throw error;

@@ -8,17 +8,13 @@ export const createGeminiPrompt = ({
   testAgentPrompt,
   scenario,
   analysis,
-  generalEvals,
 }: {
   callStartedAt?: string;
   messages: ArtifactMessagesItem[];
   testAgentPrompt: string;
   scenario: Scenario & { evals: Eval[] };
   analysis: any;
-  generalEvals: Eval[];
 }) => {
-  const scenarioEvals = scenario.evals;
-
   return `
     You are an expert call analyst. Your job is to review the analysis of a junior analyst and make modifications if necessary.
 
@@ -77,10 +73,7 @@ export const createGeminiPrompt = ({
           : ""
       }
 
-      MAIN AGENT GENERAL SUCCESS CRITERIA: ${[
-        ...scenario.evals,
-        ...generalEvals,
-      ]
+      MAIN AGENT GENERAL SUCCESS CRITERIA: ${[...scenario.evals]
         .map((evaluation) => evaluation.name)
         .join(", ")}
 

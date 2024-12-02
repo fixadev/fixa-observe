@@ -74,7 +74,7 @@ export const CallRecordingScalarFieldEnumSchema = z.enum(['id','audioUrl','creat
 
 export const ScenarioScalarFieldEnumSchema = z.enum(['id','agentId','createdAt','name','instructions','successCriteria','includeDateTime','timezone','isNew']);
 
-export const EvalScalarFieldEnumSchema = z.enum(['id','createdAt','enabled','name','description','scenarioId','type','resultType','contentType','agentId','ownerId']);
+export const EvalScalarFieldEnumSchema = z.enum(['id','createdAt','enabled','name','description','scenarioId','type','resultType','contentType','toolCallExpectedResult','agentId','ownerId']);
 
 export const EvalResultScalarFieldEnumSchema = z.enum(['id','createdAt','callId','evalId','result','success','secondsFromStart','duration','type','details']);
 
@@ -305,6 +305,7 @@ export const EvalSchema = z.object({
   name: z.string(),
   description: z.string(),
   scenarioId: z.string().nullable(),
+  toolCallExpectedResult: z.string(),
   agentId: z.string().nullable(),
   ownerId: z.string().nullable(),
 })
@@ -710,6 +711,7 @@ export const EvalSelectSchema: z.ZodType<Prisma.EvalSelect> = z.object({
   type: z.boolean().optional(),
   resultType: z.boolean().optional(),
   contentType: z.boolean().optional(),
+  toolCallExpectedResult: z.boolean().optional(),
   agentId: z.boolean().optional(),
   ownerId: z.boolean().optional(),
   scenario: z.union([z.boolean(),z.lazy(() => ScenarioArgsSchema)]).optional(),
@@ -1605,6 +1607,7 @@ export const EvalWhereInputSchema: z.ZodType<Prisma.EvalWhereInput> = z.object({
   type: z.union([ z.lazy(() => EnumEvalTypeFilterSchema),z.lazy(() => EvalTypeSchema) ]).optional(),
   resultType: z.union([ z.lazy(() => EnumEvalResultTypeFilterSchema),z.lazy(() => EvalResultTypeSchema) ]).optional(),
   contentType: z.union([ z.lazy(() => EnumEvalContentTypeFilterSchema),z.lazy(() => EvalContentTypeSchema) ]).optional(),
+  toolCallExpectedResult: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   agentId: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
   ownerId: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
   scenario: z.union([ z.lazy(() => ScenarioNullableRelationFilterSchema),z.lazy(() => ScenarioWhereInputSchema) ]).optional().nullable(),
@@ -1623,6 +1626,7 @@ export const EvalOrderByWithRelationInputSchema: z.ZodType<Prisma.EvalOrderByWit
   type: z.lazy(() => SortOrderSchema).optional(),
   resultType: z.lazy(() => SortOrderSchema).optional(),
   contentType: z.lazy(() => SortOrderSchema).optional(),
+  toolCallExpectedResult: z.lazy(() => SortOrderSchema).optional(),
   agentId: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
   ownerId: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
   scenario: z.lazy(() => ScenarioOrderByWithRelationInputSchema).optional(),
@@ -1647,6 +1651,7 @@ export const EvalWhereUniqueInputSchema: z.ZodType<Prisma.EvalWhereUniqueInput> 
   type: z.union([ z.lazy(() => EnumEvalTypeFilterSchema),z.lazy(() => EvalTypeSchema) ]).optional(),
   resultType: z.union([ z.lazy(() => EnumEvalResultTypeFilterSchema),z.lazy(() => EvalResultTypeSchema) ]).optional(),
   contentType: z.union([ z.lazy(() => EnumEvalContentTypeFilterSchema),z.lazy(() => EvalContentTypeSchema) ]).optional(),
+  toolCallExpectedResult: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   agentId: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
   ownerId: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
   scenario: z.union([ z.lazy(() => ScenarioNullableRelationFilterSchema),z.lazy(() => ScenarioWhereInputSchema) ]).optional().nullable(),
@@ -1665,6 +1670,7 @@ export const EvalOrderByWithAggregationInputSchema: z.ZodType<Prisma.EvalOrderBy
   type: z.lazy(() => SortOrderSchema).optional(),
   resultType: z.lazy(() => SortOrderSchema).optional(),
   contentType: z.lazy(() => SortOrderSchema).optional(),
+  toolCallExpectedResult: z.lazy(() => SortOrderSchema).optional(),
   agentId: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
   ownerId: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
   _count: z.lazy(() => EvalCountOrderByAggregateInputSchema).optional(),
@@ -1685,6 +1691,7 @@ export const EvalScalarWhereWithAggregatesInputSchema: z.ZodType<Prisma.EvalScal
   type: z.union([ z.lazy(() => EnumEvalTypeWithAggregatesFilterSchema),z.lazy(() => EvalTypeSchema) ]).optional(),
   resultType: z.union([ z.lazy(() => EnumEvalResultTypeWithAggregatesFilterSchema),z.lazy(() => EvalResultTypeSchema) ]).optional(),
   contentType: z.union([ z.lazy(() => EnumEvalContentTypeWithAggregatesFilterSchema),z.lazy(() => EvalContentTypeSchema) ]).optional(),
+  toolCallExpectedResult: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
   agentId: z.union([ z.lazy(() => StringNullableWithAggregatesFilterSchema),z.string() ]).optional().nullable(),
   ownerId: z.union([ z.lazy(() => StringNullableWithAggregatesFilterSchema),z.string() ]).optional().nullable(),
 }).strict();
@@ -2806,6 +2813,7 @@ export const EvalCreateInputSchema: z.ZodType<Prisma.EvalCreateInput> = z.object
   type: z.lazy(() => EvalTypeSchema),
   resultType: z.lazy(() => EvalResultTypeSchema),
   contentType: z.lazy(() => EvalContentTypeSchema).optional(),
+  toolCallExpectedResult: z.string().optional(),
   ownerId: z.string().optional().nullable(),
   scenario: z.lazy(() => ScenarioCreateNestedOneWithoutEvalsInputSchema).optional(),
   evalResults: z.lazy(() => EvalResultCreateNestedManyWithoutEvalInputSchema).optional(),
@@ -2823,6 +2831,7 @@ export const EvalUncheckedCreateInputSchema: z.ZodType<Prisma.EvalUncheckedCreat
   type: z.lazy(() => EvalTypeSchema),
   resultType: z.lazy(() => EvalResultTypeSchema),
   contentType: z.lazy(() => EvalContentTypeSchema).optional(),
+  toolCallExpectedResult: z.string().optional(),
   agentId: z.string().optional().nullable(),
   ownerId: z.string().optional().nullable(),
   evalResults: z.lazy(() => EvalResultUncheckedCreateNestedManyWithoutEvalInputSchema).optional(),
@@ -2838,6 +2847,7 @@ export const EvalUpdateInputSchema: z.ZodType<Prisma.EvalUpdateInput> = z.object
   type: z.union([ z.lazy(() => EvalTypeSchema),z.lazy(() => EnumEvalTypeFieldUpdateOperationsInputSchema) ]).optional(),
   resultType: z.union([ z.lazy(() => EvalResultTypeSchema),z.lazy(() => EnumEvalResultTypeFieldUpdateOperationsInputSchema) ]).optional(),
   contentType: z.union([ z.lazy(() => EvalContentTypeSchema),z.lazy(() => EnumEvalContentTypeFieldUpdateOperationsInputSchema) ]).optional(),
+  toolCallExpectedResult: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   ownerId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   scenario: z.lazy(() => ScenarioUpdateOneWithoutEvalsNestedInputSchema).optional(),
   evalResults: z.lazy(() => EvalResultUpdateManyWithoutEvalNestedInputSchema).optional(),
@@ -2855,6 +2865,7 @@ export const EvalUncheckedUpdateInputSchema: z.ZodType<Prisma.EvalUncheckedUpdat
   type: z.union([ z.lazy(() => EvalTypeSchema),z.lazy(() => EnumEvalTypeFieldUpdateOperationsInputSchema) ]).optional(),
   resultType: z.union([ z.lazy(() => EvalResultTypeSchema),z.lazy(() => EnumEvalResultTypeFieldUpdateOperationsInputSchema) ]).optional(),
   contentType: z.union([ z.lazy(() => EvalContentTypeSchema),z.lazy(() => EnumEvalContentTypeFieldUpdateOperationsInputSchema) ]).optional(),
+  toolCallExpectedResult: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   agentId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   ownerId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   evalResults: z.lazy(() => EvalResultUncheckedUpdateManyWithoutEvalNestedInputSchema).optional(),
@@ -2871,6 +2882,7 @@ export const EvalCreateManyInputSchema: z.ZodType<Prisma.EvalCreateManyInput> = 
   type: z.lazy(() => EvalTypeSchema),
   resultType: z.lazy(() => EvalResultTypeSchema),
   contentType: z.lazy(() => EvalContentTypeSchema).optional(),
+  toolCallExpectedResult: z.string().optional(),
   agentId: z.string().optional().nullable(),
   ownerId: z.string().optional().nullable()
 }).strict();
@@ -2884,6 +2896,7 @@ export const EvalUpdateManyMutationInputSchema: z.ZodType<Prisma.EvalUpdateManyM
   type: z.union([ z.lazy(() => EvalTypeSchema),z.lazy(() => EnumEvalTypeFieldUpdateOperationsInputSchema) ]).optional(),
   resultType: z.union([ z.lazy(() => EvalResultTypeSchema),z.lazy(() => EnumEvalResultTypeFieldUpdateOperationsInputSchema) ]).optional(),
   contentType: z.union([ z.lazy(() => EvalContentTypeSchema),z.lazy(() => EnumEvalContentTypeFieldUpdateOperationsInputSchema) ]).optional(),
+  toolCallExpectedResult: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   ownerId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
 }).strict();
 
@@ -2897,6 +2910,7 @@ export const EvalUncheckedUpdateManyInputSchema: z.ZodType<Prisma.EvalUncheckedU
   type: z.union([ z.lazy(() => EvalTypeSchema),z.lazy(() => EnumEvalTypeFieldUpdateOperationsInputSchema) ]).optional(),
   resultType: z.union([ z.lazy(() => EvalResultTypeSchema),z.lazy(() => EnumEvalResultTypeFieldUpdateOperationsInputSchema) ]).optional(),
   contentType: z.union([ z.lazy(() => EvalContentTypeSchema),z.lazy(() => EnumEvalContentTypeFieldUpdateOperationsInputSchema) ]).optional(),
+  toolCallExpectedResult: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   agentId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   ownerId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
 }).strict();
@@ -4063,6 +4077,7 @@ export const EvalCountOrderByAggregateInputSchema: z.ZodType<Prisma.EvalCountOrd
   type: z.lazy(() => SortOrderSchema).optional(),
   resultType: z.lazy(() => SortOrderSchema).optional(),
   contentType: z.lazy(() => SortOrderSchema).optional(),
+  toolCallExpectedResult: z.lazy(() => SortOrderSchema).optional(),
   agentId: z.lazy(() => SortOrderSchema).optional(),
   ownerId: z.lazy(() => SortOrderSchema).optional()
 }).strict();
@@ -4077,6 +4092,7 @@ export const EvalMaxOrderByAggregateInputSchema: z.ZodType<Prisma.EvalMaxOrderBy
   type: z.lazy(() => SortOrderSchema).optional(),
   resultType: z.lazy(() => SortOrderSchema).optional(),
   contentType: z.lazy(() => SortOrderSchema).optional(),
+  toolCallExpectedResult: z.lazy(() => SortOrderSchema).optional(),
   agentId: z.lazy(() => SortOrderSchema).optional(),
   ownerId: z.lazy(() => SortOrderSchema).optional()
 }).strict();
@@ -4091,6 +4107,7 @@ export const EvalMinOrderByAggregateInputSchema: z.ZodType<Prisma.EvalMinOrderBy
   type: z.lazy(() => SortOrderSchema).optional(),
   resultType: z.lazy(() => SortOrderSchema).optional(),
   contentType: z.lazy(() => SortOrderSchema).optional(),
+  toolCallExpectedResult: z.lazy(() => SortOrderSchema).optional(),
   agentId: z.lazy(() => SortOrderSchema).optional(),
   ownerId: z.lazy(() => SortOrderSchema).optional()
 }).strict();
@@ -5629,6 +5646,7 @@ export const EvalCreateWithoutAgentInputSchema: z.ZodType<Prisma.EvalCreateWitho
   type: z.lazy(() => EvalTypeSchema),
   resultType: z.lazy(() => EvalResultTypeSchema),
   contentType: z.lazy(() => EvalContentTypeSchema).optional(),
+  toolCallExpectedResult: z.string().optional(),
   ownerId: z.string().optional().nullable(),
   scenario: z.lazy(() => ScenarioCreateNestedOneWithoutEvalsInputSchema).optional(),
   evalResults: z.lazy(() => EvalResultCreateNestedManyWithoutEvalInputSchema).optional(),
@@ -5645,6 +5663,7 @@ export const EvalUncheckedCreateWithoutAgentInputSchema: z.ZodType<Prisma.EvalUn
   type: z.lazy(() => EvalTypeSchema),
   resultType: z.lazy(() => EvalResultTypeSchema),
   contentType: z.lazy(() => EvalContentTypeSchema).optional(),
+  toolCallExpectedResult: z.string().optional(),
   ownerId: z.string().optional().nullable(),
   evalResults: z.lazy(() => EvalResultUncheckedCreateNestedManyWithoutEvalInputSchema).optional(),
   EvalOverride: z.lazy(() => EvalOverrideUncheckedCreateNestedManyWithoutEvalInputSchema).optional()
@@ -5788,6 +5807,7 @@ export const EvalScalarWhereInputSchema: z.ZodType<Prisma.EvalScalarWhereInput> 
   type: z.union([ z.lazy(() => EnumEvalTypeFilterSchema),z.lazy(() => EvalTypeSchema) ]).optional(),
   resultType: z.union([ z.lazy(() => EnumEvalResultTypeFilterSchema),z.lazy(() => EvalResultTypeSchema) ]).optional(),
   contentType: z.union([ z.lazy(() => EnumEvalContentTypeFilterSchema),z.lazy(() => EvalContentTypeSchema) ]).optional(),
+  toolCallExpectedResult: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   agentId: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
   ownerId: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
 }).strict();
@@ -7159,6 +7179,7 @@ export const EvalCreateWithoutScenarioInputSchema: z.ZodType<Prisma.EvalCreateWi
   type: z.lazy(() => EvalTypeSchema),
   resultType: z.lazy(() => EvalResultTypeSchema),
   contentType: z.lazy(() => EvalContentTypeSchema).optional(),
+  toolCallExpectedResult: z.string().optional(),
   ownerId: z.string().optional().nullable(),
   evalResults: z.lazy(() => EvalResultCreateNestedManyWithoutEvalInputSchema).optional(),
   agent: z.lazy(() => AgentCreateNestedOneWithoutEnabledGeneralEvalsInputSchema).optional(),
@@ -7174,6 +7195,7 @@ export const EvalUncheckedCreateWithoutScenarioInputSchema: z.ZodType<Prisma.Eva
   type: z.lazy(() => EvalTypeSchema),
   resultType: z.lazy(() => EvalResultTypeSchema),
   contentType: z.lazy(() => EvalContentTypeSchema).optional(),
+  toolCallExpectedResult: z.string().optional(),
   agentId: z.string().optional().nullable(),
   ownerId: z.string().optional().nullable(),
   evalResults: z.lazy(() => EvalResultUncheckedCreateNestedManyWithoutEvalInputSchema).optional(),
@@ -7612,6 +7634,7 @@ export const EvalCreateWithoutEvalResultsInputSchema: z.ZodType<Prisma.EvalCreat
   type: z.lazy(() => EvalTypeSchema),
   resultType: z.lazy(() => EvalResultTypeSchema),
   contentType: z.lazy(() => EvalContentTypeSchema).optional(),
+  toolCallExpectedResult: z.string().optional(),
   ownerId: z.string().optional().nullable(),
   scenario: z.lazy(() => ScenarioCreateNestedOneWithoutEvalsInputSchema).optional(),
   agent: z.lazy(() => AgentCreateNestedOneWithoutEnabledGeneralEvalsInputSchema).optional(),
@@ -7628,6 +7651,7 @@ export const EvalUncheckedCreateWithoutEvalResultsInputSchema: z.ZodType<Prisma.
   type: z.lazy(() => EvalTypeSchema),
   resultType: z.lazy(() => EvalResultTypeSchema),
   contentType: z.lazy(() => EvalContentTypeSchema).optional(),
+  toolCallExpectedResult: z.string().optional(),
   agentId: z.string().optional().nullable(),
   ownerId: z.string().optional().nullable(),
   EvalOverride: z.lazy(() => EvalOverrideUncheckedCreateNestedManyWithoutEvalInputSchema).optional()
@@ -7733,6 +7757,7 @@ export const EvalUpdateWithoutEvalResultsInputSchema: z.ZodType<Prisma.EvalUpdat
   type: z.union([ z.lazy(() => EvalTypeSchema),z.lazy(() => EnumEvalTypeFieldUpdateOperationsInputSchema) ]).optional(),
   resultType: z.union([ z.lazy(() => EvalResultTypeSchema),z.lazy(() => EnumEvalResultTypeFieldUpdateOperationsInputSchema) ]).optional(),
   contentType: z.union([ z.lazy(() => EvalContentTypeSchema),z.lazy(() => EnumEvalContentTypeFieldUpdateOperationsInputSchema) ]).optional(),
+  toolCallExpectedResult: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   ownerId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   scenario: z.lazy(() => ScenarioUpdateOneWithoutEvalsNestedInputSchema).optional(),
   agent: z.lazy(() => AgentUpdateOneWithoutEnabledGeneralEvalsNestedInputSchema).optional(),
@@ -7749,6 +7774,7 @@ export const EvalUncheckedUpdateWithoutEvalResultsInputSchema: z.ZodType<Prisma.
   type: z.union([ z.lazy(() => EvalTypeSchema),z.lazy(() => EnumEvalTypeFieldUpdateOperationsInputSchema) ]).optional(),
   resultType: z.union([ z.lazy(() => EvalResultTypeSchema),z.lazy(() => EnumEvalResultTypeFieldUpdateOperationsInputSchema) ]).optional(),
   contentType: z.union([ z.lazy(() => EvalContentTypeSchema),z.lazy(() => EnumEvalContentTypeFieldUpdateOperationsInputSchema) ]).optional(),
+  toolCallExpectedResult: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   agentId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   ownerId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   EvalOverride: z.lazy(() => EvalOverrideUncheckedUpdateManyWithoutEvalNestedInputSchema).optional()
@@ -7796,6 +7822,7 @@ export const EvalCreateWithoutEvalOverrideInputSchema: z.ZodType<Prisma.EvalCrea
   type: z.lazy(() => EvalTypeSchema),
   resultType: z.lazy(() => EvalResultTypeSchema),
   contentType: z.lazy(() => EvalContentTypeSchema).optional(),
+  toolCallExpectedResult: z.string().optional(),
   ownerId: z.string().optional().nullable(),
   scenario: z.lazy(() => ScenarioCreateNestedOneWithoutEvalsInputSchema).optional(),
   evalResults: z.lazy(() => EvalResultCreateNestedManyWithoutEvalInputSchema).optional(),
@@ -7812,6 +7839,7 @@ export const EvalUncheckedCreateWithoutEvalOverrideInputSchema: z.ZodType<Prisma
   type: z.lazy(() => EvalTypeSchema),
   resultType: z.lazy(() => EvalResultTypeSchema),
   contentType: z.lazy(() => EvalContentTypeSchema).optional(),
+  toolCallExpectedResult: z.string().optional(),
   agentId: z.string().optional().nullable(),
   ownerId: z.string().optional().nullable(),
   evalResults: z.lazy(() => EvalResultUncheckedCreateNestedManyWithoutEvalInputSchema).optional()
@@ -7881,6 +7909,7 @@ export const EvalUpdateWithoutEvalOverrideInputSchema: z.ZodType<Prisma.EvalUpda
   type: z.union([ z.lazy(() => EvalTypeSchema),z.lazy(() => EnumEvalTypeFieldUpdateOperationsInputSchema) ]).optional(),
   resultType: z.union([ z.lazy(() => EvalResultTypeSchema),z.lazy(() => EnumEvalResultTypeFieldUpdateOperationsInputSchema) ]).optional(),
   contentType: z.union([ z.lazy(() => EvalContentTypeSchema),z.lazy(() => EnumEvalContentTypeFieldUpdateOperationsInputSchema) ]).optional(),
+  toolCallExpectedResult: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   ownerId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   scenario: z.lazy(() => ScenarioUpdateOneWithoutEvalsNestedInputSchema).optional(),
   evalResults: z.lazy(() => EvalResultUpdateManyWithoutEvalNestedInputSchema).optional(),
@@ -7897,6 +7926,7 @@ export const EvalUncheckedUpdateWithoutEvalOverrideInputSchema: z.ZodType<Prisma
   type: z.union([ z.lazy(() => EvalTypeSchema),z.lazy(() => EnumEvalTypeFieldUpdateOperationsInputSchema) ]).optional(),
   resultType: z.union([ z.lazy(() => EvalResultTypeSchema),z.lazy(() => EnumEvalResultTypeFieldUpdateOperationsInputSchema) ]).optional(),
   contentType: z.union([ z.lazy(() => EvalContentTypeSchema),z.lazy(() => EnumEvalContentTypeFieldUpdateOperationsInputSchema) ]).optional(),
+  toolCallExpectedResult: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   agentId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   ownerId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   evalResults: z.lazy(() => EvalResultUncheckedUpdateManyWithoutEvalNestedInputSchema).optional()
@@ -8200,6 +8230,7 @@ export const EvalCreateManyAgentInputSchema: z.ZodType<Prisma.EvalCreateManyAgen
   type: z.lazy(() => EvalTypeSchema),
   resultType: z.lazy(() => EvalResultTypeSchema),
   contentType: z.lazy(() => EvalContentTypeSchema).optional(),
+  toolCallExpectedResult: z.string().optional(),
   ownerId: z.string().optional().nullable()
 }).strict();
 
@@ -8232,6 +8263,7 @@ export const EvalUpdateWithoutAgentInputSchema: z.ZodType<Prisma.EvalUpdateWitho
   type: z.union([ z.lazy(() => EvalTypeSchema),z.lazy(() => EnumEvalTypeFieldUpdateOperationsInputSchema) ]).optional(),
   resultType: z.union([ z.lazy(() => EvalResultTypeSchema),z.lazy(() => EnumEvalResultTypeFieldUpdateOperationsInputSchema) ]).optional(),
   contentType: z.union([ z.lazy(() => EvalContentTypeSchema),z.lazy(() => EnumEvalContentTypeFieldUpdateOperationsInputSchema) ]).optional(),
+  toolCallExpectedResult: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   ownerId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   scenario: z.lazy(() => ScenarioUpdateOneWithoutEvalsNestedInputSchema).optional(),
   evalResults: z.lazy(() => EvalResultUpdateManyWithoutEvalNestedInputSchema).optional(),
@@ -8248,6 +8280,7 @@ export const EvalUncheckedUpdateWithoutAgentInputSchema: z.ZodType<Prisma.EvalUn
   type: z.union([ z.lazy(() => EvalTypeSchema),z.lazy(() => EnumEvalTypeFieldUpdateOperationsInputSchema) ]).optional(),
   resultType: z.union([ z.lazy(() => EvalResultTypeSchema),z.lazy(() => EnumEvalResultTypeFieldUpdateOperationsInputSchema) ]).optional(),
   contentType: z.union([ z.lazy(() => EvalContentTypeSchema),z.lazy(() => EnumEvalContentTypeFieldUpdateOperationsInputSchema) ]).optional(),
+  toolCallExpectedResult: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   ownerId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   evalResults: z.lazy(() => EvalResultUncheckedUpdateManyWithoutEvalNestedInputSchema).optional(),
   EvalOverride: z.lazy(() => EvalOverrideUncheckedUpdateManyWithoutEvalNestedInputSchema).optional()
@@ -8263,6 +8296,7 @@ export const EvalUncheckedUpdateManyWithoutAgentInputSchema: z.ZodType<Prisma.Ev
   type: z.union([ z.lazy(() => EvalTypeSchema),z.lazy(() => EnumEvalTypeFieldUpdateOperationsInputSchema) ]).optional(),
   resultType: z.union([ z.lazy(() => EvalResultTypeSchema),z.lazy(() => EnumEvalResultTypeFieldUpdateOperationsInputSchema) ]).optional(),
   contentType: z.union([ z.lazy(() => EvalContentTypeSchema),z.lazy(() => EnumEvalContentTypeFieldUpdateOperationsInputSchema) ]).optional(),
+  toolCallExpectedResult: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   ownerId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
 }).strict();
 
@@ -8880,6 +8914,7 @@ export const EvalCreateManyScenarioInputSchema: z.ZodType<Prisma.EvalCreateManyS
   type: z.lazy(() => EvalTypeSchema),
   resultType: z.lazy(() => EvalResultTypeSchema),
   contentType: z.lazy(() => EvalContentTypeSchema).optional(),
+  toolCallExpectedResult: z.string().optional(),
   agentId: z.string().optional().nullable(),
   ownerId: z.string().optional().nullable()
 }).strict();
@@ -9005,6 +9040,7 @@ export const EvalUpdateWithoutScenarioInputSchema: z.ZodType<Prisma.EvalUpdateWi
   type: z.union([ z.lazy(() => EvalTypeSchema),z.lazy(() => EnumEvalTypeFieldUpdateOperationsInputSchema) ]).optional(),
   resultType: z.union([ z.lazy(() => EvalResultTypeSchema),z.lazy(() => EnumEvalResultTypeFieldUpdateOperationsInputSchema) ]).optional(),
   contentType: z.union([ z.lazy(() => EvalContentTypeSchema),z.lazy(() => EnumEvalContentTypeFieldUpdateOperationsInputSchema) ]).optional(),
+  toolCallExpectedResult: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   ownerId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   evalResults: z.lazy(() => EvalResultUpdateManyWithoutEvalNestedInputSchema).optional(),
   agent: z.lazy(() => AgentUpdateOneWithoutEnabledGeneralEvalsNestedInputSchema).optional(),
@@ -9020,6 +9056,7 @@ export const EvalUncheckedUpdateWithoutScenarioInputSchema: z.ZodType<Prisma.Eva
   type: z.union([ z.lazy(() => EvalTypeSchema),z.lazy(() => EnumEvalTypeFieldUpdateOperationsInputSchema) ]).optional(),
   resultType: z.union([ z.lazy(() => EvalResultTypeSchema),z.lazy(() => EnumEvalResultTypeFieldUpdateOperationsInputSchema) ]).optional(),
   contentType: z.union([ z.lazy(() => EvalContentTypeSchema),z.lazy(() => EnumEvalContentTypeFieldUpdateOperationsInputSchema) ]).optional(),
+  toolCallExpectedResult: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   agentId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   ownerId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   evalResults: z.lazy(() => EvalResultUncheckedUpdateManyWithoutEvalNestedInputSchema).optional(),
@@ -9035,6 +9072,7 @@ export const EvalUncheckedUpdateManyWithoutScenarioInputSchema: z.ZodType<Prisma
   type: z.union([ z.lazy(() => EvalTypeSchema),z.lazy(() => EnumEvalTypeFieldUpdateOperationsInputSchema) ]).optional(),
   resultType: z.union([ z.lazy(() => EvalResultTypeSchema),z.lazy(() => EnumEvalResultTypeFieldUpdateOperationsInputSchema) ]).optional(),
   contentType: z.union([ z.lazy(() => EvalContentTypeSchema),z.lazy(() => EnumEvalContentTypeFieldUpdateOperationsInputSchema) ]).optional(),
+  toolCallExpectedResult: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   agentId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   ownerId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
 }).strict();

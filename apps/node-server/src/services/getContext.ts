@@ -1,6 +1,5 @@
 import { Socket } from "socket.io";
 import { db } from "../db";
-import { EvalType } from "@prisma/client";
 
 export const getContext = async (
   callId: string,
@@ -42,13 +41,13 @@ export const getContext = async (
       return;
     }
 
-    const generalEvals = agent?.enabledGeneralEvals;
-
     const evalOverrides = await db.evalOverride.findMany({
       where: {
         AND: [{ scenarioId: scenario.id }, { enabled: true }],
       },
     });
+
+    const generalEvals = agent?.enabledGeneralEvals;
 
     const filteredGeneralEvals = generalEvals.filter(
       (evaluation) =>
@@ -59,14 +58,28 @@ export const getContext = async (
             ?.enabled),
     );
 
+    const allEvals = [...scenario.evals, ...filteredGeneralEvals];
+
+    const preparedEvals = allEvals.map((evaluation) => ({
+      ...evaluation,
+      description:
+        evaluation.contentType === "tool"
+          ? "this tool should be called whenever: " + evaluation.description
+          : evaluation.description,
+    }));
+
+    const scenarioWithGeneralEvals = {
+      ...scenario,
+      evals: preparedEvals,
+    };
+
     const userSocket = connectedUsers.get(ownerId);
     return {
       userSocket,
       agent,
-      scenario,
+      scenario: scenarioWithGeneralEvals,
       call,
       test,
-      generalEvals: filteredGeneralEvals,
     };
   } catch (error) {
     console.error("Error getting context", error);

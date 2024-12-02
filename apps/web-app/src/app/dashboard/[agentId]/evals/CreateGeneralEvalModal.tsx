@@ -15,6 +15,7 @@ import {
 import { type EvalWithoutScenarioId, type EvalSchema } from "~/lib/agent";
 import { InputWithLabel } from "~/app/_components/InputWithLabel";
 import { TextAreaWithLabel } from "~/app/_components/TextAreaWithLabel";
+import { TrashIcon } from "@heroicons/react/24/solid";
 
 export const CreateGeneralEvalModal = ({
   existingEval,
@@ -42,6 +43,7 @@ export const CreateGeneralEvalModal = ({
       scenarioId: undefined,
       agentId: null,
       ownerId: null,
+      toolCallExpectedResult: "",
     },
   );
 
@@ -84,6 +86,7 @@ export const CreateGeneralEvalModal = ({
         contentType: "content",
         enabled: true,
         scenarioId: undefined,
+        toolCallExpectedResult: "",
         agentId: null,
         ownerId: null,
       });
@@ -155,14 +158,11 @@ export const CreateGeneralEvalModal = ({
               onChange={(e) => setEvaluation({ ...evaluation, description: e })}
             />
             <TextAreaWithLabel
-              label="parameters"
-              value={evaluation.description}
-              onChange={(e) => setEvaluation({ ...evaluation, description: e })}
-            />
-            <TextAreaWithLabel
-              label="expected result of tool call"
-              value={evaluation.description}
-              onChange={(e) => setEvaluation({ ...evaluation, description: e })}
+              label="expected result?"
+              value={evaluation.toolCallExpectedResult}
+              onChange={(e) =>
+                setEvaluation({ ...evaluation, toolCallExpectedResult: e })
+              }
             />
           </div>
         ) : (
@@ -175,11 +175,16 @@ export const CreateGeneralEvalModal = ({
           </div>
         )}
 
-        <div className="flex flex-row justify-end gap-2">
-          <Button variant="outline" onClick={() => setIsModalOpen(false)}>
-            cancel
+        <div className="flex flex-row justify-between gap-2">
+          <Button variant="ghost" onClick={() => setIsModalOpen(false)}>
+            <TrashIcon className="size-6 text-black" />
           </Button>
-          <Button onClick={handleSave}>save</Button>
+          <div className="flex flex-row gap-2">
+            <Button variant="outline" onClick={() => setIsModalOpen(false)}>
+              cancel
+            </Button>
+            <Button onClick={handleSave}>save</Button>
+          </div>
         </div>
       </DialogContent>
     </Dialog>

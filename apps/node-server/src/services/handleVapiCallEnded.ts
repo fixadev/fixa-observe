@@ -23,7 +23,6 @@ export const handleVapiCallEnded = async ({
   agent,
   test,
   scenario,
-  generalEvals,
   userSocket,
 }: {
   report: ServerMessageEndOfCallReport;
@@ -31,7 +30,6 @@ export const handleVapiCallEnded = async ({
   agent: Agent;
   test: Test;
   scenario: Scenario & { evals: Eval[] };
-  generalEvals: Eval[];
   userSocket?: Socket;
 }) => {
   try {
@@ -50,14 +48,13 @@ export const handleVapiCallEnded = async ({
       messages: report.artifact.messages,
       testAgentPrompt: scenario.instructions,
       scenario,
-      generalEvals,
     });
     console.log("O1 ANALYSIS for call", call.id, o1Analysis);
 
-    let parsedResult: string;
+    let unparsedResult: string;
     const useGemini = !scenario.includeDateTime;
     if (!useGemini) {
-      parsedResult = o1Analysis.cleanedResult;
+      unparsedResult = o1Analysis.cleanedResult;
     } else {
       const geminiPrompt = createGeminiPrompt({
         callStartedAt: report.startedAt,
@@ -65,27 +62,21 @@ export const handleVapiCallEnded = async ({
         testAgentPrompt: scenario.instructions,
         scenario,
         analysis: o1Analysis,
-        generalEvals,
       });
 
       const geminiResult = await analyzeCallWithGemini(
         report.artifact.stereoRecordingUrl,
         geminiPrompt,
       );
-      parsedResult = JSON.stringify(geminiResult.parsedResult);
 
-      console.log(
-        "GEMINI RESULT for call",
-        call.id,
-        JSON.stringify(geminiResult.parsedResult, null, 2),
-      );
+      console.log("GEMINI RESULT for call", call.id, geminiResult.textResult);
+      unparsedResult = geminiResult.textResult ?? "";
     }
 
-    const cleanedResultJson = await formatOutput(parsedResult);
-    const { evalResults } = cleanedResultJson;
+    const { evalResults } = await formatOutput(unparsedResult);
 
     const validEvalResults = evalResults.filter((evalResult) =>
-      [...scenario.evals, ...generalEvals]?.some(
+      [...scenario.evals]?.some(
         (evaluation) => evaluation.id === evalResult.evalId,
       ),
     );

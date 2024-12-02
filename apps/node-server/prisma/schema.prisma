@@ -214,6 +214,8 @@ model Eval {
   resultType  EvalResultType
   contentType EvalContentType @default(content)
 
+  toolCallExpectedResult String @default("")
+
   evalResults EvalResult[]
 
   agent   Agent?  @relation(fields: [agentId], references: [id])
