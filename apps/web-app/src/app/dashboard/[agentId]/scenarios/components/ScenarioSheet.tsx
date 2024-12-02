@@ -20,6 +20,7 @@ import {
   AlertDialogTitle,
 } from "~/components/ui/alert-dialog";
 import {
+  type EvalOverrideWithoutScenarioId,
   type EvalWithoutScenarioId,
   type UpdateScenarioSchema,
 } from "~/lib/agent";
@@ -38,7 +39,8 @@ import { Input } from "~/components/ui/input";
 import { Textarea } from "~/components/ui/textarea";
 import { EvalCard } from "./EvalCard";
 import { Button } from "~/components/ui/button";
-import { TrashIcon } from "@heroicons/react/24/solid";
+import { PlusIcon, TrashIcon } from "@heroicons/react/24/solid";
+import { type EvalOverride } from "prisma/generated/zod";
 
 export function ScenarioSheet({
   selectedScenario,
@@ -82,6 +84,10 @@ export function ScenarioSheet({
       : [emptyEval],
   );
 
+  const [evalOverrides, setEvalOverrides] = useState<
+    EvalOverrideWithoutScenarioId[]
+  >(selectedScenario?.generalEvalOverrides ?? []);
+
   // Include date/time stuff
   const { options, parseTimezone } = useTimezoneSelect({});
   const [timezone, setTimezone] = useState(
@@ -101,6 +107,7 @@ export function ScenarioSheet({
   );
 
   useEffect(() => {
+    setEvalOverrides(selectedScenario?.generalEvalOverrides ?? []);
     setName(selectedScenario?.name ?? "");
     setInstructions(selectedScenario?.instructions ?? "");
     setEvals(
@@ -180,6 +187,22 @@ export function ScenarioSheet({
     toast,
   ]);
 
+  const emptyEvalOverride = useMemo<EvalOverrideWithoutScenarioId>(() => {
+    return {
+      id: crypto.randomUUID(),
+      createdAt: new Date(),
+      enabled: true,
+      evalId: "",
+    };
+  }, []);
+
+  const addEvalOverride = useCallback(() => {
+    setEvalOverrides((prev) => [
+      ...prev,
+      { ...emptyEvalOverride, id: crypto.randomUUID() },
+    ]);
+  }, [emptyEvalOverride]);
+
   return (
     <Sheet open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
       <SheetContent className="flex flex-col sm:max-w-[700px]">
@@ -242,7 +265,30 @@ export function ScenarioSheet({
                 </Select>
               </div>
             </div>
-
+            {/* <div className="flex flex-row justify-between">
+              <div>
+                <Label className="text-base">general evaluation criteria</Label>
+                {evalOverrides.length > 0 ? (
+                  <div className="text-sm text-muted-foreground">
+                    {`${evalOverrides.length} override${
+                      evalOverrides.length === 1 ? "" : "s"
+                    }`}
+                  </div>
+                ) : (
+                  <div className="text-sm text-muted-foreground">
+                    currently using defaults
+                  </div>
+                )}
+              </div>
+              <Button
+                variant="outline"
+                className="gap-2"
+                onClick={addEvalOverride}
+              >
+                <PlusIcon className="size-4" />
+                add override
+              </Button>
+            </div> */}
             <div>
               <Label className="text-base">
                 scenario-specific evaluation criteria

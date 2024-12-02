@@ -42,11 +42,7 @@ export const getContext = async (
       return;
     }
 
-    const generalEvals = await db.eval.findMany({
-      where: {
-        AND: [{ ownerId }, { type: EvalType.general }],
-      },
-    });
+    const generalEvals = agent?.enabledGeneralEvals;
 
     const evalOverrides = await db.evalOverride.findMany({
       where: {
