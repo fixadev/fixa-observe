@@ -68,6 +68,7 @@ export function ScenarioSheet({
       ownerId: null,
       contentType: EvalContentType.content,
       enabled: true,
+      toolCallExpectedResult: "",
     };
   }, []);
 
