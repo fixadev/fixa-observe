@@ -91,6 +91,7 @@ app.post(
       if (!location) missingFields.push("location");
       // if (!agentId) missingFields.push("agentId");
       // if (!regionId) missingFields.push("regionId");
+      // add comment to redeploy
       if (missingFields.length > 0) {
         return res.status(400).json({
           success: false,
