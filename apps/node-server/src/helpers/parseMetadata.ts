@@ -1,8 +1,8 @@
-export function parseMetadata(metadata: Record<string, string>) {
-  const { regionId, agentId, ...rest } = metadata;
+export function parseMetadata(metadata?: Record<string, string>) {
+  const { regionId, agentId, ...rest } = metadata ?? {};
   return {
-    regionId,
-    agentId,
+    regionId: regionId || undefined,
+    agentId: agentId || undefined,
     metadata: rest,
   };
 }
