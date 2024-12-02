@@ -1,5 +1,4 @@
 import os
-import json
 from typing import List
 from dotenv import load_dotenv
 
@@ -11,12 +10,16 @@ from deepgram import (
     FileSource,
 )
 
-def transcribe_with_deepgram(audio_paths: List[str]):
+def transcribe_with_deepgram(audio_paths: List[str | None]):
     try:
         deepgram_client = DeepgramClient(os.getenv("DEEPGRAM_API_KEY"))
         responses = []
         
         for audio_path in audio_paths[:2]:  # Process first two audio files
+            if not audio_path or not os.path.exists(audio_path):
+                print(f"Audio file does not exist: {audio_path}")
+                responses.append([])
+                continue
             with open(audio_path, "rb") as audio_file:
                 buffer_data = audio_file.read()
 
