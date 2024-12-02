@@ -105,7 +105,9 @@ export const CreateGeneralEvalModal = ({
   return (
     <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
       <DialogContent>
-        <DialogTitle>create general eval</DialogTitle>
+        <DialogTitle>
+          {existingEval ? "update eval" : "create eval"}
+        </DialogTitle>
         <div className="flex w-full flex-row justify-between gap-4">
           <InputWithLabel
             label="name"

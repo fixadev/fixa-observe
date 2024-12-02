@@ -100,6 +100,7 @@ export class AgentService {
         enabledTestAgents: {
           where: { enabled: true },
         },
+        enabledGeneralEvals: true,
       },
     });
   }
@@ -348,6 +349,36 @@ export class AgentService {
       where: { id: evaluation.id },
       data: evaluation,
     });
+  }
+
+  async toggleGeneralEval({
+    id,
+    agentId,
+    enabled,
+  }: {
+    id: string;
+    agentId: string;
+    enabled: boolean;
+  }) {
+    if (enabled) {
+      return await db.agent.update({
+        where: { id: agentId },
+        data: {
+          enabledGeneralEvals: {
+            connect: { id },
+          },
+        },
+      });
+    } else {
+      return await db.agent.update({
+        where: { id: agentId },
+        data: {
+          enabledGeneralEvals: {
+            disconnect: { id },
+          },
+        },
+      });
+    }
   }
 
   async deleteGeneralEval(id: string) {

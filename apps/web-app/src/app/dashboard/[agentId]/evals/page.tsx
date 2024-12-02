@@ -12,8 +12,10 @@ import { CreateGeneralEvalModal } from "./CreateGeneralEvalModal";
 import { type EvalSchema } from "~/lib/agent";
 import { EvalContentType } from "@prisma/client";
 import { PencilIcon } from "@heroicons/react/24/outline";
+import { useAgent } from "~/app/contexts/UseAgent";
 
 export default function EvalsPage({ params }: { params: { agentId: string } }) {
+  const { agent, setAgent } = useAgent(params.agentId);
   const [isEvalModalOpen, setIsEvalModalOpen] = useState(false);
   const [selectedEval, setSelectedEval] = useState<EvalSchema | null>(null);
   const [generalEvals, setGeneralEvals] = useState<EvalSchema[]>([]);
@@ -28,16 +30,15 @@ export default function EvalsPage({ params }: { params: { agentId: string } }) {
     }
   }, [evaluations]);
 
-  const { mutate: updateEval } = api.eval.updateGeneralEval.useMutation({
+  const { mutate: toggleEval } = api.eval.toggleGeneralEval.useMutation({
     onSuccess: () => {
       toast({
-        title: "Evaluation updated",
-        description: "Default evaluation updated successfully",
+        title: "Default settings updated",
+        description: "Default evaluation settings updated successfully",
         duration: 1000,
       });
     },
   });
-
   return (
     <div className="h-full max-w-full">
       <div className="sticky top-0 z-20 flex h-14 w-full items-center justify-between border-b border-input bg-sidebar px-4 lg:h-[60px]">
@@ -81,19 +82,31 @@ export default function EvalsPage({ params }: { params: { agentId: string } }) {
               <Card className="flex w-full cursor-pointer flex-row items-center justify-between gap-2 overflow-hidden p-4 hover:bg-muted/40">
                 <div className="flex flex-row items-center gap-8 font-medium">
                   <Switch
-                    checked={evaluation.enabled}
+                    checked={agent?.enabledGeneralEvals.some(
+                      (e) => e.id === evaluation.id,
+                    )}
                     onCheckedChange={(checked) => {
-                      setGeneralEvals(
-                        generalEvals.map((e) =>
-                          e.id === evaluation.id
-                            ? { ...e, enabled: checked }
-                            : e,
-                        ),
-                      );
-                      updateEval({
-                        ...evaluation,
+                      toggleEval({
+                        id: evaluation.id,
+                        agentId: params.agentId,
                         enabled: checked,
                       });
+                      if (checked && agent) {
+                        setAgent({
+                          ...agent,
+                          enabledGeneralEvals: [
+                            ...agent.enabledGeneralEvals,
+                            evaluation,
+                          ],
+                        });
+                      } else if (!checked && agent) {
+                        setAgent({
+                          ...agent,
+                          enabledGeneralEvals: agent.enabledGeneralEvals.filter(
+                            (e) => e.id !== evaluation.id,
+                          ),
+                        });
+                      }
                     }}
                   />
                   {evaluation.name}

@@ -80,6 +80,7 @@ export type AgentWithIncludes = Prisma.AgentGetPayload<{
       };
     };
     enabledTestAgents: true;
+    enabledGeneralEvals: true;
   };
 }>;
 

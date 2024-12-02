@@ -23,6 +23,14 @@ export const evalRouter = createTRPCRouter({
       return await agentServiceInstance.updateGeneralEval(input);
     }),
 
+  toggleGeneralEval: protectedProcedure
+    .input(
+      z.object({ id: z.string(), agentId: z.string(), enabled: z.boolean() }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      return await agentServiceInstance.toggleGeneralEval(input);
+    }),
+
   deleteGeneralEval: protectedProcedure
     .input(z.object({ id: z.string() }))
     .mutation(async ({ input, ctx }) => {
