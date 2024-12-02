@@ -85,12 +85,14 @@ app.post(
   // authenticateRequest,
   async (req: Request, res: Response) => {
     try {
-      const { callId, location, agentId, regionId, metadata } = req.body;
+      const { callId, location, agentId, regionId, metadata, createdAt } =
+        req.body;
       const missingFields = [];
       if (!callId) missingFields.push("callId");
       if (!location) missingFields.push("location");
       // if (!agentId) missingFields.push("agentId");
       // if (!regionId) missingFields.push("regionId");
+      // add comment to redeploy
       if (missingFields.length > 0) {
         return res.status(400).json({
           success: false,
@@ -102,7 +104,7 @@ app.post(
         location,
         agentId,
         regionId,
-        createdAt: new Date(),
+        createdAt: createdAt ? new Date(createdAt) : new Date(),
         // userId: res.locals.userId,
         userId: "11x",
         metadata,

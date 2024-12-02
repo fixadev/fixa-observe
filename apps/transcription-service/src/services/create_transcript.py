@@ -1,6 +1,6 @@
 from pydub import AudioSegment
 
-def create_transcript_from_deepgram(user_words, agent_words, user_audio_path, agent_audio_path):
+def create_transcript_from_deepgram(user_words: list[dict], agent_words: list[dict], user_audio_path: str | None, agent_audio_path: str | None):
     # print(user_words)
     # print(agent_words)
     try: 
@@ -145,7 +145,7 @@ def create_transcript_from_deepgram(user_words, agent_words, user_audio_path, ag
                 user_end = user_segment['end']
                 
                 # Check for overlap
-                if agent_start < user_end and agent_end > user_start:
+                if agent_start < user_end and agent_end > user_start and user_audio_path and agent_audio_path:
                     overlap_start = max(agent_start, user_start)
                     overlap_end = min(agent_end, user_end)
                     
