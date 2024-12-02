@@ -43,6 +43,7 @@ export const CreateEvalSchema = z.object({
   createdAt: z.coerce.date(),
   name: z.string(),
   description: z.string(),
+  toolCallExpectedResult: z.string(),
   scenarioId: z.string().optional(),
   agentId: z.string().nullable(),
   ownerId: z.string().nullable(),
