@@ -84,7 +84,8 @@ app.post(
   // authenticateRequest,
   async (req: Request, res: Response) => {
     try {
-      const { callId, location, agentId, regionId, metadata } = req.body;
+      const { callId, location, agentId, regionId, metadata, createdAt } =
+        req.body;
       const missingFields = [];
       if (!callId) missingFields.push("callId");
       if (!location) missingFields.push("location");
@@ -101,7 +102,7 @@ app.post(
         location,
         agentId,
         regionId,
-        createdAt: new Date(),
+        createdAt: createdAt ? new Date(createdAt) : new Date(),
         // userId: res.locals.userId,
         userId: "11x",
         metadata,
