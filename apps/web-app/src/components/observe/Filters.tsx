@@ -278,9 +278,7 @@ function EditAgentDialog({
   setOpen: (open: boolean) => void;
   refetchAgents: () => void;
 }) {
-  const { data: agents } = api.agent.getAllFor11x.useQuery({
-    ownerId: "11x",
-  });
+  const { data: agents } = api.agent.getAllFor11x.useQuery();
   const [search, setSearch] = useState("");
 
   const { mutateAsync: updateAgentName, isPending: isUpdating } =
