@@ -49,6 +49,7 @@ import { SidebarTrigger } from "~/components/ui/sidebar";
 import { Switch } from "~/components/ui/switch";
 import { useTimezoneSelect } from "react-timezone-select";
 import { useSearchParams } from "next/navigation";
+import { CreateGeneralEvalModal } from "./CreateGeneralEvalModal";
 
 export default function AgentScenariosPage({
   params,
@@ -221,6 +222,14 @@ export default function AgentScenariosPage({
         </div>
       </div>
       <div className="container flex h-full flex-col gap-4 p-4">
+        <>
+          <CreateGeneralEvalModal
+            existingEval={null}
+            setExistingEval={() => {}}
+          >
+            <Button variant="outline">create general eval</Button>
+          </CreateGeneralEvalModal>
+        </>
         {agent.scenarios.map((scenario, index) => (
           <div
             key={scenario.id}

@@ -330,13 +330,13 @@ export class AgentService {
     });
   }
 
-  async addGeneralEval(userId: string, evaluation: EvalWithoutScenarioId) {
+  async createGeneralEval(userId: string, evaluation: EvalWithoutScenarioId) {
     return await db.eval.create({
       data: { ...evaluation, id: uuidv4(), ownerId: userId },
     });
   }
 
-  async updateGeneralEval(evaluation: EvalWithoutScenarioId) {
+  async updateGeneralEval(evaluation: EvalSchema) {
     return await db.eval.update({
       where: { id: evaluation.id },
       data: evaluation,
