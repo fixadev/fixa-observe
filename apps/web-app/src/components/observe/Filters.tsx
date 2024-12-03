@@ -170,11 +170,11 @@ export default function Filters({
                     {(agents ?? []).map((agent) => (
                       <CommandItem
                         key={agent.id}
-                        value={agent.id}
+                        value={`${agent.id} ${agent.name}`}
                         onSelect={(value) => {
                           setFilter({
                             ...filter,
-                            agentId: value === "all" ? undefined : value,
+                            agentId: agent.id === "all" ? undefined : agent.id,
                           });
                           setOpen(false);
                         }}
