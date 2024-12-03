@@ -47,18 +47,15 @@ export const getContext = async (
       },
     });
 
-    const generalEvals = agent?.enabledGeneralEvals;
+    const agentGeneralEvals = agent?.enabledGeneralEvals;
 
-    const filteredGeneralEvals = generalEvals.filter(
+    const filteredAgentGeneralEvals = agentGeneralEvals.filter(
       (evaluation) =>
-        evalOverrides.find((override) => override.evalId === evaluation.id)
-          ?.enabled ||
-        (evaluation.enabled &&
-          !evalOverrides.find((override) => override.evalId === evaluation.id)
-            ?.enabled),
+        !evalOverrides.find((override) => override.evalId === evaluation.id)
+          ?.enabled === false,
     );
 
-    const allEvals = [...scenario.evals, ...filteredGeneralEvals];
+    const allEvals = [...scenario.evals, ...filteredAgentGeneralEvals];
 
     const preparedEvals = allEvals.map((evaluation) => ({
       ...evaluation,
