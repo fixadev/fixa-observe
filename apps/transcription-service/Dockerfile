@@ -8,8 +8,9 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y \
     libsndfile1 \
     ffmpeg \
+    python3-pyaudio \
     # portaudio19-dev python3-pyaudio \
-    libasound-dev portaudio19-dev libportaudio2 libportaudiocpp0 python3-pyaudio python3-all-dev \
+    # libasound-dev portaudio19-dev libportaudio2 libportaudiocpp0 python3-pyaudio python3-all-dev \
     # libportaudio0 libportaudio2 libportaudiocpp0 portaudio19-dev python3-pyaudio \
     && rm -rf /var/lib/apt/lists/*
 
