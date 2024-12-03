@@ -120,6 +120,11 @@ export const agentRouter = createTRPCRouter({
 
   getAll: protectedProcedure.query(async ({ ctx }) => {
     // test w 11x as ownerId
+    return await agentServiceInstance.getAllAgents(ctx.user.id);
+  }),
+
+  getAllFor11x: protectedProcedure.query(async ({ ctx }) => {
+    // test w 11x as ownerId
     return await agentServiceInstance.getAllAgents("11x");
   }),
 
