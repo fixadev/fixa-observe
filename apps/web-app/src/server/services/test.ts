@@ -183,4 +183,11 @@ export class TestService {
       },
     });
   }
+
+  async getLastTest(agentId: string) {
+    return await db.test.findFirst({
+      where: { agentId },
+      orderBy: { createdAt: "desc" },
+    });
+  }
 }
