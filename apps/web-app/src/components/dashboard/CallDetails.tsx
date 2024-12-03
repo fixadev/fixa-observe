@@ -637,9 +637,9 @@ function ToolCallResult({
           <div>
             {status === "success" ? (
               <CheckCircleIcon className="size-5 shrink-0 text-green-500" />
-            ) : (
+            ) : status === "failure" ? (
               <XCircleIcon className="size-5 shrink-0 text-red-500" />
-            )}
+            ) : null}
           </div>
         </div>
       </DialogTrigger>
