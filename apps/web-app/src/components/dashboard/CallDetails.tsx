@@ -15,6 +15,7 @@ import {
 } from "@heroicons/react/24/solid";
 import { CallStatus, type LatencyBlock, Role } from "@prisma/client";
 import { LatencyCallHeader, TestCallHeader } from "./CallHeader";
+import { type Message } from "prisma/generated/zod";
 
 export type CallDetailsType = "test" | "latency";
 
@@ -327,6 +328,17 @@ export default function CallDetails({
     [],
   );
 
+  const timeToEvalResultMap = useMemo(() => {
+    return call.evalResults?.reduce(
+      (acc, evalResult) => {
+        if (!evalResult.secondsFromStart) return acc;
+        acc[evalResult.secondsFromStart] = evalResult;
+        return acc;
+      },
+      {} as Record<number, EvalResultWithIncludes>,
+    );
+  }, [call.evalResults]);
+
   return (
     <div className="flex w-full flex-col rounded-md bg-background px-4 outline-none">
       <div
@@ -431,11 +443,12 @@ export default function CallDetails({
                   )}
                 >
                   {message.role === Role.tool_call_result &&
-                  message.name !== "endCall" ? (
-                    <div className="flex items-center gap-2 text-sm italic text-muted-foreground">
-                      <WrenchIcon className="size-4 shrink-0" />
-                      <div>tool call: {message.result}</div>
-                    </div>
+                  message.name !== "endCall" &&
+                  timeToEvalResultMap ? (
+                    <ToolCallResult
+                      message={message}
+                      timeToEvalResultMap={timeToEvalResultMap}
+                    />
                   ) : (
                     <>
                       <div className="mb-1 text-xs font-medium">
@@ -545,6 +558,42 @@ export default function CallDetails({
           );
         })}
         <div className="h-10 shrink-0" />
+      </div>
+    </div>
+  );
+}
+
+function ToolCallResult({
+  message,
+  timeToEvalResultMap,
+}: {
+  message: Message;
+  timeToEvalResultMap: Record<number, EvalResultWithIncludes>;
+}) {
+  const status = useMemo(() => {
+    const evalResult = timeToEvalResultMap[message.secondsFromStart];
+    if (!evalResult) return "unknown";
+    return evalResult.success ? "success" : "failure";
+    // return "failure";
+  }, [message.secondsFromStart, timeToEvalResultMap]);
+
+  return (
+    <div
+      className={cn(
+        "flex items-center justify-between rounded-md p-2",
+        status === "failure" && "border-red-500 bg-red-500/20",
+      )}
+    >
+      <div className="flex items-center gap-2 text-sm italic text-muted-foreground">
+        <WrenchIcon className="size-4 shrink-0" />
+        <div>tool call: {message.result}</div>
+      </div>
+      <div>
+        {status === "success" ? (
+          <CheckCircleIcon className="size-5 shrink-0 text-green-500" />
+        ) : (
+          <XCircleIcon className="size-5 shrink-0 text-red-500" />
+        )}
       </div>
     </div>
   );
