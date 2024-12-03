@@ -29,8 +29,6 @@ export class AgentService {
       },
     });
 
-    console.log("create agent");
-
     return await db.agent.create({
       data: {
         id: uuidv4(),
@@ -48,7 +46,6 @@ export class AgentService {
           })),
         },
         ownerId,
-        extraProperties: {},
       },
     });
   }

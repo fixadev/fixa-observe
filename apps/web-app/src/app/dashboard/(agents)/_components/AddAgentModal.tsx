@@ -60,6 +60,7 @@ export function AddAgentModal({ children, refetchAgents }: AddAgentModalProps) {
     scenarios: [],
     enableSlackNotifications: false,
     customerAgentId: null,
+    extraProperties: {},
   });
 
   const { mutate: createAgent, isPending: isCreatingAgent } =
