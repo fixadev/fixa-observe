@@ -136,6 +136,7 @@ export class TestService {
       status: CallStatus;
     }>[] = [];
     if (
+      agent.extraProperties &&
       (agent.extraProperties as Record<string, unknown>).type === "ofone-kiosk"
     ) {
       calls = await Promise.allSettled(

@@ -9,7 +9,7 @@ import {
   type CreateEvalOverrideSchema,
 } from "~/lib/agent";
 import { v4 as uuidv4 } from "uuid";
-import { type PrismaClient } from "@prisma/client";
+import { Prisma, type PrismaClient } from "@prisma/client";
 import { type Agent, AgentSchema } from "prisma/generated/zod";
 
 export class AgentService {
@@ -61,8 +61,15 @@ export class AgentService {
     if (agent.id) {
       return await db.agent.upsert({
         where: { id: agent.id },
-        update: agent,
-        create: { ...AgentSchema.parse(agent), ownerId },
+        update: {
+          ...agent,
+          extraProperties: agent.extraProperties ?? Prisma.JsonNull,
+        },
+        create: {
+          ...AgentSchema.parse(agent),
+          extraProperties: agent.extraProperties ?? Prisma.JsonNull,
+          ownerId,
+        },
       });
     } else if (agent.customerAgentId) {
       const existingAgent = await db.agent.findFirst({
@@ -72,11 +79,18 @@ export class AgentService {
       if (existingAgent) {
         return await db.agent.update({
           where: { id: existingAgent.id },
-          data: agent,
+          data: {
+            ...agent,
+            extraProperties: agent.extraProperties ?? Prisma.JsonNull,
+          },
         });
       }
       return await db.agent.create({
-        data: { ...AgentSchema.parse(agent), ownerId },
+        data: {
+          ...AgentSchema.parse(agent),
+          extraProperties: agent.extraProperties ?? Prisma.JsonNull,
+          ownerId,
+        },
       });
     }
     throw new Error("Either id or customerAgentId must be provided");
