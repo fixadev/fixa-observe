@@ -1,14 +1,9 @@
 "use client";
 
 import { type ScenarioWithEvals, type CreateScenarioSchema } from "~/lib/agent";
-import { Input } from "~/components/ui/input";
-import { Button } from "~/components/ui/button";
-import { TrashIcon } from "@heroicons/react/24/solid";
 import { Label } from "~/components/ui/label";
-import { Textarea } from "~/components/ui/textarea";
-import { useState } from "react";
 import { Card } from "~/components/ui/card";
-import { CopyText } from "~/components/dashboard/CopyText";
+import { CopyText } from "~/components/CopyText";
 import { cn } from "~/lib/utils";
 
 interface ScenarioCardProps {
@@ -42,7 +37,7 @@ export function ScenarioCard({ scenario }: ScenarioCardProps) {
       </div>
       <div className="flex w-full flex-col flex-wrap gap-2 overflow-hidden">
         <Label className="truncate whitespace-nowrap text-sm">
-          test agent instructions
+          test persona instructions
         </Label>
         <p className="line-clamp-2 min-w-0 overflow-hidden text-sm text-muted-foreground">
           {scenario.instructions}

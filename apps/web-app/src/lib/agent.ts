@@ -5,36 +5,76 @@ import {
   type Message,
   type EvalResultSchema,
   EvalSchema,
+  EvalOverrideSchema,
 } from "prisma/generated/zod";
 import { z } from "zod";
 import { type CallWithIncludes } from "./types";
+import { EvalContentType, EvalResultType, EvalType } from "@prisma/client";
 
 export type Agent = z.infer<typeof AgentSchema>;
 export type AgentWithoutId = Omit<Agent, "id"> & {
   scenarios: CreateScenarioSchema[];
 };
 
+export type EvalSchema = z.infer<typeof EvalSchema>;
+
 export type EvalWithoutScenarioId = z.infer<typeof EvalWithoutScenarioId>;
 export const EvalWithoutScenarioId = EvalSchema.omit({ scenarioId: true });
+
+export type EvalOverrideWithoutScenarioId = z.infer<
+  typeof EvalOverrideWithoutScenarioId
+>;
+export const EvalOverrideWithoutScenarioId = EvalOverrideSchema.omit({
+  scenarioId: true,
+});
 
 export type ScenarioWithEvals = z.infer<typeof ScenarioWithEvals>;
 export const ScenarioWithEvals = ScenarioSchema.extend({
   evals: z.array(EvalWithoutScenarioId),
+  generalEvalOverrides: z.array(EvalOverrideWithoutScenarioId),
 });
 
-export const CreateScenarioEvalSchema = z.object({
-  type: z.enum(["scenario", "general"]),
-  resultType: z.enum(["boolean", "number", "percentage"]),
+export const CreateEvalSchema = z.object({
+  type: z.nativeEnum(EvalType),
+  resultType: z.nativeEnum(EvalResultType),
+  contentType: z.nativeEnum(EvalContentType),
   id: z.string(),
+  createdAt: z.coerce.date(),
   name: z.string(),
   description: z.string(),
+  toolCallExpectedResult: z.string(),
+  scenarioId: z.string().optional(),
   agentId: z.string().nullable(),
   ownerId: z.string().nullable(),
 });
 
+export type CreateGeneralEvalSchema = z.infer<typeof CreateGeneralEvalSchema>;
+export const CreateGeneralEvalSchema = CreateEvalSchema.omit({
+  scenarioId: true,
+  agentId: true,
+  ownerId: true,
+});
+
+export type UpdateEvalsSchema = z.infer<typeof updateEvalsSchema>;
+export const updateEvalsSchema = z.array(
+  z.union([EvalWithoutScenarioId, CreateEvalSchema]),
+);
+
+export type CreateEvalOverrideSchema = z.infer<typeof CreateEvalOverrideSchema>;
+export const CreateEvalOverrideSchema = EvalOverrideSchema.omit({
+  id: true,
+  scenarioId: true,
+});
+
+export type UpdateOverridesSchema = z.infer<typeof UpdateOverridesSchema>;
+export const UpdateOverridesSchema = z.array(
+  z.union([CreateEvalOverrideSchema, EvalOverrideWithoutScenarioId]),
+);
+
 export type UpdateScenarioSchema = z.infer<typeof UpdateScenarioSchema>;
 export const UpdateScenarioSchema = ScenarioSchema.extend({
-  evals: z.array(z.union([EvalWithoutScenarioId, CreateScenarioEvalSchema])),
+  evals: updateEvalsSchema,
+  generalEvalOverrides: UpdateOverridesSchema,
 });
 
 export type CreateScenarioSchema = z.infer<typeof CreateScenarioSchema>;
@@ -43,7 +83,8 @@ export const CreateScenarioSchema = ScenarioSchema.omit({
   agentId: true,
   createdAt: true,
 }).extend({
-  evals: z.array(CreateScenarioEvalSchema),
+  evals: z.array(CreateEvalSchema),
+  generalEvalOverrides: z.array(CreateEvalOverrideSchema),
 });
 
 export type CreateAgentSchema = z.infer<typeof CreateAgentSchema>;

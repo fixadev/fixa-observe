@@ -6,4 +6,6 @@ python-dotenv
 deepgram-sdk
 pydub
 uvicorn
+boto3
 
+vapi_python @ git+https://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@github.com/fixadev/websocket-client.git

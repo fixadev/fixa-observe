@@ -32,6 +32,8 @@ export type CallWithIncludes = Prisma.CallGetPayload<{
         eval: true;
       };
     };
+    latencyBlocks: true;
+    interruptions: true;
   };
 }>;
 
@@ -51,6 +53,8 @@ export type TestWithIncludes = Prisma.TestGetPayload<{
             eval: true;
           };
         };
+        latencyBlocks: true;
+        interruptions: true;
       };
     };
   };
@@ -67,6 +71,7 @@ export type AgentWithIncludes = Prisma.AgentGetPayload<{
     scenarios: {
       include: {
         evals: true;
+        generalEvalOverrides: true;
       };
     };
     tests: {
@@ -75,5 +80,44 @@ export type AgentWithIncludes = Prisma.AgentGetPayload<{
       };
     };
     enabledTestAgents: true;
+    enabledGeneralEvals: true;
   };
 }>;
+
+export type Filter = z.infer<typeof FilterSchema>;
+export const FilterSchema = z.object({
+  lookbackPeriod: z.object({
+    label: z.string(),
+    value: z.number(),
+  }),
+  timeRange: z
+    .object({
+      start: z.number(),
+      end: z.number(),
+    })
+    .optional(),
+  agentId: z.string().optional(),
+  regionId: z.string().optional(),
+  chartPeriod: z.number(),
+  customerCallId: z.string().optional(),
+  metadata: z.record(z.string(), z.string().or(z.undefined())).optional(),
+  // latencyThreshold: z.object({
+  //   enabled: z.boolean(),
+  //   value: z.number(),
+  // }),
+  // interruptionThreshold: z.object({
+  //   enabled: z.boolean(),
+  //   value: z.number(),
+  // }),
+});
+
+export type SelectItem = {
+  label: string;
+  value: number;
+};
+
+export type OrderBy = z.infer<typeof OrderBySchema>;
+export const OrderBySchema = z.object({
+  property: z.string(),
+  direction: z.enum(["asc", "desc"]),
+});

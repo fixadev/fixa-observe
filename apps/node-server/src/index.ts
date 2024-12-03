@@ -5,9 +5,11 @@ import { handleVapiCallEnded } from "./services/handleVapiCallEnded";
 import { handleTranscriptUpdate } from "./services/handleTranscriptUpdate";
 import { handleAnalysisStarted } from "./services/handleAnalysisStarted";
 import { db } from "./db";
-import { uploadCallToDB } from "./services/uploadCallToDB";
 import { getContext } from "./services/getContext";
-import { transcribeAndSaveCall } from "./services/transcribeAndSaveCall";
+import { addCallToQueue } from "./services/addCallToQueue";
+import { startQueueConsumer } from "./workers/queueConsumer";
+import { authenticateRequest } from "./middlewares/auth";
+import { scheduleOfOneCalls } from "./services/scheduleOfOneCalls";
 
 const app = express();
 const httpServer = createServer(app);
@@ -78,16 +80,47 @@ app.post("/vapi", async (req: Request, res: Response) => {
   }
 });
 
-app.post("/upload-call", async (req: Request, res: Response) => {
-  try {
-    const { callId, location } = req.body;
-    res.json({ success: true, muizz: "the man" });
-    const result = await uploadCallToDB(callId, location);
-    const newCall = await transcribeAndSaveCall(callId, result.audioUrl);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ success: false, error: (error as Error).message });
-  }
+app.post(
+  "/upload-call",
+  // authenticateRequest,
+  async (req: Request, res: Response) => {
+    try {
+      const { callId, location, agentId, regionId, metadata, createdAt } =
+        req.body;
+      const missingFields = [];
+      if (!callId) missingFields.push("callId");
+      if (!location) missingFields.push("location");
+      // if (!agentId) missingFields.push("agentId");
+      // if (!regionId) missingFields.push("regionId");
+      // add comment to redeploy
+      if (missingFields.length > 0) {
+        return res.status(400).json({
+          success: false,
+          error: `Missing required fields: ${missingFields.join(", ")}`,
+        });
+      }
+      await addCallToQueue({
+        callId,
+        location,
+        agentId,
+        regionId,
+        createdAt: createdAt ? new Date(createdAt) : new Date(),
+        // userId: res.locals.userId,
+        userId: "11x",
+        metadata,
+      });
+      res.json({ success: true, muizz: "the man" });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ success: false, error: (error as Error).message });
+    }
+  },
+);
+
+app.post("/schedule-ofone-calls", async (req: Request, res: Response) => {
+  const { device_ids, callsToStart } = req.body;
+  scheduleOfOneCalls(device_ids, callsToStart);
+  res.json({ success: true });
 });
 
 app.post("/message/:userId", (req: Request, res: Response) => {
@@ -122,4 +155,5 @@ const cleanup = () => {
 
 httpServer.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
+  startQueueConsumer();
 });

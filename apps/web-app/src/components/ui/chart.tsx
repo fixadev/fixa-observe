@@ -112,6 +112,7 @@ const ChartTooltipContent = React.forwardRef<
       indicator?: "line" | "dot" | "dashed";
       nameKey?: string;
       labelKey?: string;
+      valueFormatter?: (value: string) => string;
     }
 >(
   (
@@ -129,6 +130,7 @@ const ChartTooltipContent = React.forwardRef<
       color,
       nameKey,
       labelKey,
+      valueFormatter,
     },
     ref,
   ) => {
@@ -140,12 +142,13 @@ const ChartTooltipContent = React.forwardRef<
       }
 
       const [item] = payload;
-      const key = `${labelKey || item?.dataKey || item?.name || "value"}`;
-      const itemConfig = getPayloadConfigFromPayload(config, item, key);
+      // const key = `${labelKey || item?.dataKey || item?.name || "value"}`;
+      // const itemConfig = getPayloadConfigFromPayload(config, item, key);
       const value =
         !labelKey && typeof label === "string"
           ? config[label]?.label || label
-          : itemConfig?.label;
+          : // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+            (item?.payload?.[labelKey!] as string);
 
       if (labelFormatter) {
         return (
@@ -243,7 +246,9 @@ const ChartTooltipContent = React.forwardRef<
                       </div>
                       {item.value && (
                         <span className="font-mono font-medium tabular-nums text-foreground">
-                          {item.value.toLocaleString()}
+                          {valueFormatter
+                            ? valueFormatter(item.value.toString())
+                            : item.value.toLocaleString()}
                         </span>
                       )}
                     </div>

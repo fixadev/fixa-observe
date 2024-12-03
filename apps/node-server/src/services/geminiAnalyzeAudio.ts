@@ -3,7 +3,7 @@ import { Storage } from "@google-cloud/storage";
 import { uploadFile } from "../helpers/gcpUpload";
 import { env } from "../env";
 import { z } from "zod";
-import { outputSchema } from "./findLLMErrors";
+import { findLLMErrorsOutputSchema } from "./findLLMErrors";
 const storage = new Storage({
   credentials: JSON.parse(env.GCP_CREDENTIALS ?? "{}"),
 });
@@ -128,12 +128,10 @@ export async function analyzeAudio(
     };
 
     const response = await model.generateContent(request);
-    const result =
+    const textResult =
       response?.response?.candidates?.[0]?.content?.parts?.[0]?.text;
 
-    const parsedResult: z.infer<typeof outputSchema> = JSON.parse(result ?? "");
-
-    return { parsedResult, fileUrl };
+    return { textResult, fileUrl };
   } catch (error) {
     console.error("Error analyzing audio:", error);
     throw error;

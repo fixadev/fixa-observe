@@ -7,7 +7,6 @@ import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { api } from "~/trpc/react";
 import { useToast } from "~/components/hooks/use-toast";
-import { type Agent } from "~/lib/agent";
 import {
   checkForValidPhoneNumber,
   displayPhoneNumberNicely,
@@ -15,7 +14,7 @@ import {
 } from "~/helpers/phoneNumberUtils";
 import { useAgent } from "~/app/contexts/UseAgent";
 import Link from "next/link";
-import { CopyText } from "~/components/dashboard/CopyText";
+import { CopyText } from "~/components/CopyText";
 import { SidebarTrigger } from "~/components/ui/sidebar";
 import {
   Dialog,
@@ -27,16 +26,17 @@ import { useRouter } from "next/navigation";
 import { Switch } from "~/components/ui/switch";
 import { useUser } from "@clerk/nextjs";
 import { cn } from "~/lib/utils";
+import { type AgentWithIncludes } from "~/lib/types";
 
 export default function AgentSettingsPage({
   params,
 }: {
   params: { agentId: string };
 }) {
-  const [agentState, setAgentState] = useState<Agent | null>(null);
+  const [agentState, setAgentState] = useState<AgentWithIncludes | null>(null);
 
   const { toast } = useToast();
-  const { agent, refetch } = useAgent(params.agentId);
+  const { agent, refetch, setAgent } = useAgent(params.agentId);
   const { user } = useUser();
 
   const isSlackAppInstalled = useMemo(
@@ -75,7 +75,8 @@ export default function AgentSettingsPage({
       name: agentState.name,
       enableSlackNotifications: agentState.enableSlackNotifications,
     });
-  }, [agentState, toast, updateAgentSettings]);
+    setAgent(agentState);
+  }, [agentState, toast, updateAgentSettings, setAgent]);
 
   if (!agentState) return null;
 

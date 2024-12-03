@@ -27,7 +27,7 @@ export const GenerateScenariosModal = ({
   children,
 }: {
   agent: AgentWithIncludes;
-  setAgent: (agent: AgentWithIncludes) => void;
+  setAgent: React.Dispatch<React.SetStateAction<AgentWithIncludes | null>>;
   children: ReactNode;
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);

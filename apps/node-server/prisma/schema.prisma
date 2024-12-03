@@ -32,15 +32,18 @@ model ApiKey {
 }
 
 model Agent {
-  id        String   @id
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id              String   @id
+  customerAgentId String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 
   ownerId       String
   name          String
-  phoneNumber   String
+  phoneNumber   String  @default("")
   githubRepoUrl String?
-  systemPrompt  String
+  systemPrompt  String  @default("")
+
+  extraProperties Json?
 
   enableSlackNotifications Boolean @default(true)
 
@@ -82,8 +85,10 @@ model TestAgent {
 }
 
 model Call {
-  id                 String       @id @default(uuid())
-  ownerId            String?
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  ownerId   String?
+
   customerCallId     String?
   status             CallStatus
   result             CallResult?
@@ -92,7 +97,19 @@ model Call {
   monoRecordingUrl   String?
   startedAt          String?
   endedAt            String?
-  evalResults        EvalResult[]
+  regionId           String?
+  agentId            String?
+  metadata           Json?
+  latencyP50         Float?
+  latencyP90         Float?
+  latencyP95         Float?
+  interruptionP50    Float?
+  interruptionP90    Float?
+  interruptionP95    Float?
+  numInterruptions   Int?
+  duration           Float?
+
+  evalResults EvalResult[]
 
   test        Test?      @relation(fields: [testId], references: [id], onDelete: Cascade)
   testId      String?
@@ -101,8 +118,11 @@ model Call {
   scenario    Scenario?  @relation(fields: [scenarioId], references: [id], onDelete: Cascade)
   scenarioId  String?
 
-  messages Message[]
-  errors   CallError[]
+  messages      Message[]
+  latencyBlocks LatencyBlock[]
+  interruptions Interruption[]
+
+  errors CallError[]
 }
 
 model Message {
@@ -155,6 +175,9 @@ model CallRecording {
   audioUrl  String
   createdAt DateTime @default(now())
   processed Boolean  @default(false)
+  agentId   String?
+  regionId  String?
+  duration  Float?
 }
 
 model Scenario {
@@ -163,9 +186,10 @@ model Scenario {
   agentId   String
   createdAt DateTime @default(now())
 
-  name            String
-  instructions    String
-  successCriteria String @default("")
+  name                 String
+  instructions         String
+  successCriteria      String         @default("")
+  generalEvalOverrides EvalOverride[]
 
   includeDateTime Boolean @default(false)
   timezone        String?
@@ -187,15 +211,19 @@ model Eval {
   scenario    Scenario? @relation(fields: [scenarioId], references: [id])
   scenarioId  String?
 
-  type       EvalType
-  resultType EvalResultType
+  type        EvalType
+  resultType  EvalResultType
+  contentType EvalContentType @default(content)
+
+  toolCallExpectedResult String @default("")
 
   evalResults EvalResult[]
 
   agent   Agent?  @relation(fields: [agentId], references: [id])
   agentId String?
 
-  ownerId String?
+  ownerId      String?
+  EvalOverride EvalOverride[]
 }
 
 model EvalResult {
@@ -210,10 +238,20 @@ model EvalResult {
 
   result           String
   success          Boolean
-  secondsFromStart Float
-  duration         Float
+  secondsFromStart Float?
+  duration         Float?
   type             EvalResultType
   details          String
+}
+
+model EvalOverride {
+  id         String   @id @default(uuid())
+  createdAt  DateTime @default(now())
+  scenario   Scenario @relation(fields: [scenarioId], references: [id], onDelete: Cascade)
+  scenarioId String
+  evalId     String
+  eval       Eval     @relation(fields: [evalId], references: [id], onDelete: Cascade)
+  enabled    Boolean
 }
 
 enum EvalType {
@@ -225,4 +263,26 @@ enum EvalResultType {
   boolean
   number
   percentage
+}
+
+enum EvalContentType {
+  tool
+  content
+}
+
+model LatencyBlock {
+  id               String @id @default(uuid())
+  secondsFromStart Float
+  duration         Float
+  call             Call   @relation(fields: [callId], references: [id], onDelete: Cascade)
+  callId           String
+}
+
+model Interruption {
+  id               String @id @default(uuid())
+  secondsFromStart Float
+  duration         Float
+  call             Call   @relation(fields: [callId], references: [id], onDelete: Cascade)
+  callId           String
+  text             String
 }

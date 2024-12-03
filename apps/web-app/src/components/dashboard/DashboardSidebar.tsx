@@ -23,6 +23,7 @@ import {
   KeyIcon,
   PlusIcon,
   UsersIcon,
+  CheckIcon,
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import {
@@ -46,6 +47,7 @@ import { useAgent } from "~/app/contexts/UseAgent";
 const navItems = [
   { href: "/", icon: CounterClockwiseClockIcon, label: "test history" },
   { href: "/scenarios", icon: ChatBubbleOvalLeftIcon, label: "scenarios" },
+  { href: "/evals", icon: CheckIcon, label: "evaluation criteria" },
   {
     href: "/test-agents",
     icon: UsersIcon,

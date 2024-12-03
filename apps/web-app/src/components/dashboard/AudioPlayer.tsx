@@ -8,8 +8,8 @@ import {
   useCallback,
   forwardRef,
   useImperativeHandle,
+  useMemo,
 } from "react";
-import { AudioVisualizer } from "react-audio-visualize";
 import { Button } from "~/components/ui/button";
 import {
   Select,
@@ -21,90 +21,112 @@ import {
 import type { CallWithIncludes, EvalResultWithIncludes } from "~/lib/types";
 import {
   cn,
-  createWavBlob,
   formatDurationHoursMinutesSeconds,
+  getInterruptionColor,
+  getLatencyBlockColor,
 } from "~/lib/utils";
-import { debounce } from "lodash";
-import useSWR from "swr";
-import { useAudio } from "~/components/hooks/useAudio";
+import WaveSurfer from "wavesurfer.js";
+import { Skeleton } from "../ui/skeleton";
 
 export type AudioPlayerRef = {
   setActiveEvalResult: (evalResult: EvalResultWithIncludes | null) => void;
   setHoveredEvalResult: (evalResultId: string | null) => void;
+  play: () => void;
+  pause: () => void;
+  seek: (time: number) => void;
 };
 
-const AudioPlayer = forwardRef<
+const _AudioPlayer = forwardRef<
   AudioPlayerRef,
   {
     call: CallWithIncludes;
+    small?: boolean;
     offsetFromStart?: number;
     onEvalResultHover?: (evalId: string | null) => void;
+    onTimeUpdate?: (time: number) => void;
   }
->(function AudioPlayer({ call, offsetFromStart = 0, onEvalResultHover }, ref) {
-  const [containerWidth, setContainerWidth] = useState(0);
-  const [playheadHoverX, setPlayheadHoverX] = useState<number | null>(null);
-  const [playheadX, setPlayheadX] = useState<number | null>(null);
-  const [isDragging, setIsDragging] = useState(false);
+>(function AudioPlayer(
+  { call, small = false, offsetFromStart = 0, onEvalResultHover, onTimeUpdate },
+  ref,
+) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [activeEvalResult, setActiveEvalResult] =
     useState<EvalResultWithIncludes | null>(null);
   const [hoveredEvalResult, setHoveredEvalResult] = useState<string | null>(
     null,
   );
-  const [key, setKey] = useState(0);
-  const { data: stereoRecordingBlob } = useSWR<Blob>(
-    call.stereoRecordingUrl,
-    (url: string) => fetch(url).then((res) => res.blob()),
+  const [wavesurfer, setWavesurfer] = useState<WaveSurfer | null>(null);
+  const [duration, setDuration] = useState<number>(0);
+  const seek = useCallback(
+    (time: number) => {
+      wavesurfer?.setTime(time);
+      setActiveEvalResult(null);
+    },
+    [wavesurfer],
   );
-  const [botAudioBlob, setBotAudioBlob] = useState<Blob | null>(null);
-  const [userAudioBlob, setUserAudioBlob] = useState<Blob | null>(null);
-  const {
-    isPlaying,
-    play,
-    pause,
-    seek,
-    duration,
-    currentTime,
-    playbackSpeed,
-    setPlaybackSpeed,
-    setAudioUrl,
-  } = useAudio();
-  useEffect(() => {
-    setAudioUrl(call.monoRecordingUrl ?? call.stereoRecordingUrl);
-  }, [call.monoRecordingUrl, call.stereoRecordingUrl, setAudioUrl]);
-
-  const [loaded, setLoaded] = useState(false);
-  useEffect(() => {
-    setTimeout(() => {
-      setLoaded(true);
-    }, 600);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const pause = useCallback(() => {
+    wavesurfer?.pause();
+  }, [wavesurfer]);
+  const play = useCallback(() => {
+    void wavesurfer?.play();
+  }, [wavesurfer]);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [playbackSpeed, setPlaybackSpeed] = useState(1);
+  const [audioLoaded, setAudioLoaded] = useState(false);
+  const audioVisualizerId = useMemo(() => {
+    return `audio-visualizer-${crypto.randomUUID()}`;
   }, []);
 
+  // Load the audio visualizer
   useEffect(() => {
-    const processAudio = async () => {
-      if (stereoRecordingBlob) {
-        // Create an audio context to split the stereo channels
-        const audioContext = new AudioContext();
-        const audioArrayBuffer = await stereoRecordingBlob.arrayBuffer();
-        const audioBuffer =
-          await audioContext.decodeAudioData(audioArrayBuffer);
+    const audioVisualizer = document.getElementById(audioVisualizerId);
+    if (audioVisualizer) {
+      const _wavesurfer = WaveSurfer.create({
+        container: `#${audioVisualizerId}`,
+        url: call.stereoRecordingUrl,
+        height: small ? 50 : 100,
+        splitChannels: [
+          { height: small ? 25 : 50 },
+          { height: small ? 25 : 50 },
+        ],
+        // interact: false,
+        dragToSeek: true,
+      });
+      _wavesurfer.on("ready", (_duration) => {
+        setDuration(_duration);
+        setAudioLoaded(true);
+      });
+      _wavesurfer.on("timeupdate", (time) => {
+        setCurrentTime(time);
+      });
+      _wavesurfer.on("finish", () => {
+        setIsPlaying(false);
+      });
+      _wavesurfer.on("play", () => {
+        setIsPlaying(true);
+      });
+      _wavesurfer.on("pause", () => {
+        setIsPlaying(false);
+      });
+      setWavesurfer(_wavesurfer);
+      return () => {
+        _wavesurfer.destroy();
+      };
+    }
+  }, [audioVisualizerId, call.stereoRecordingUrl, small]);
 
-        // Get the left and right channel data and create proper WAV blobs
-        const leftChannel = audioBuffer.getChannelData(0);
-        const rightChannel = audioBuffer.getChannelData(1);
-
-        setBotAudioBlob(createWavBlob(leftChannel, audioBuffer.sampleRate));
-        setUserAudioBlob(createWavBlob(rightChannel, audioBuffer.sampleRate));
-      }
-    };
-
-    void processAudio();
-  }, [stereoRecordingBlob, setAudioUrl]);
+  // Update the time
+  useEffect(() => {
+    onTimeUpdate?.(currentTime);
+  }, [currentTime, onTimeUpdate]);
 
   // Check if we need to stop playback due to reaching eval end
   useEffect(() => {
     if (
       activeEvalResult &&
+      activeEvalResult.secondsFromStart &&
+      activeEvalResult.duration &&
       currentTime >=
         activeEvalResult.secondsFromStart +
           activeEvalResult.duration -
@@ -122,103 +144,28 @@ const AudioPlayer = forwardRef<
     }
   }, [activeEvalResult, isPlaying]);
 
-  // Seek to a specific x position
-  const seekToX = useCallback(
-    (x: number) => {
-      if (!containerRef.current) return;
-      const percentage = x / containerWidth;
-      const seekTime = percentage * duration;
-      seek(seekTime);
-      setActiveEvalResult(null);
-    },
-    [containerWidth, duration, seek],
-  );
-
-  const handleMouseMove = useCallback(
-    (e: React.MouseEvent<HTMLDivElement>) => {
-      if (!containerRef.current) return;
-      const rect = containerRef.current.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      setPlayheadHoverX(x);
-      if (isDragging) {
-        setPlayheadX(x);
-        seekToX(x);
-      }
-    },
-    [isDragging, seekToX],
-  );
-  const handleMouseLeave = useCallback(() => {
-    setPlayheadHoverX(null);
-    setIsDragging(false);
-  }, []);
-  const handleMouseDown = useCallback(() => {
-    setIsDragging(true);
-    setPlayheadX(playheadHoverX);
-  }, [playheadHoverX]);
-  const handleMouseUp = useCallback(() => {
-    setIsDragging(false);
-    if (playheadX !== null) {
-      seekToX(playheadX);
-    }
-  }, [playheadX, seekToX]);
-
-  // Set the container width and update on window resize
-  useEffect(() => {
-    if (!containerRef.current) return;
-
-    const updateWidth = () => {
-      if (containerRef.current) {
-        setContainerWidth(containerRef.current.offsetWidth - 2);
-      }
-    };
-
-    const debouncedSetKey = debounce(() => {
-      setKey((prev) => prev + 1);
-      setLoaded(true);
-    }, 250);
-
-    const handleResize = () => {
-      setLoaded(false);
-      updateWidth();
-      debouncedSetKey();
-    };
-
-    updateWidth(); // Initial width
-    setKey((prev) => prev + 1); // Initial key set
-    window.addEventListener("resize", handleResize);
-
-    return () => {
-      window.removeEventListener("resize", handleResize);
-      debouncedSetKey.cancel(); // Clean up debounce
-    };
-  }, []);
-
-  // Set the playhead position based on the current time
-  useEffect(() => {
-    if (!containerWidth || !duration || isDragging) return;
-    const percentage = currentTime / duration;
-    const position = percentage * containerWidth;
-    setPlayheadX(position);
-  }, [currentTime, containerWidth, duration, isDragging]);
-
   useImperativeHandle(
     ref,
     () => ({
       setActiveEvalResult: (evalResult: EvalResultWithIncludes | null) => {
         setActiveEvalResult(evalResult);
-        if (evalResult) {
+        if (evalResult && evalResult.secondsFromStart && evalResult.duration) {
           seek(evalResult.secondsFromStart - offsetFromStart);
         }
       },
       setHoveredEvalResult: (evalResultId: string | null) => {
         setHoveredEvalResult(evalResultId);
       },
+      seek,
+      play,
+      pause,
     }),
-    [seek, offsetFromStart],
+    [seek, offsetFromStart, play, pause],
   );
 
   const handleEvalResultClick = useCallback(
     (evalResult: EvalResultWithIncludes) => {
+      if (!evalResult.secondsFromStart || !evalResult.duration) return;
       seek(evalResult.secondsFromStart - offsetFromStart);
       play();
       setActiveEvalResult(evalResult);
@@ -227,84 +174,58 @@ const AudioPlayer = forwardRef<
   );
 
   return (
-    <div className="flex w-full flex-col gap-4">
+    <div
+      className={cn(
+        "flex w-full gap-4",
+        small ? "flex-row-reverse" : "flex-col",
+      )}
+    >
       <div
-        className="relative h-[100px] w-full rounded-md border border-input shadow-sm"
+        className={cn(
+          "relative w-full rounded-md border border-input shadow-sm",
+          small ? "h-[50px]" : "h-[100px]",
+        )}
         ref={containerRef}
-        onMouseDown={handleMouseDown}
-        onMouseUp={handleMouseUp}
-        onMouseMove={handleMouseMove}
-        onMouseLeave={handleMouseLeave}
       >
-        {loaded && (
-          <>
-            {botAudioBlob && (
-              <AudioVisualizer
-                key={`bot-${key}`}
-                width={containerWidth}
-                height={50}
-                blob={botAudioBlob}
-                currentTime={currentTime}
-                barPlayedColor="rgba(0, 0, 0, 0.5)"
-              />
-            )}
-            {userAudioBlob && (
-              <AudioVisualizer
-                key={`user-${key}`}
-                width={containerWidth}
-                height={50}
-                blob={userAudioBlob}
-                currentTime={currentTime}
-                barPlayedColor="rgba(0, 0, 0, 0.5)"
-              />
-            )}
-          </>
+        <div id={audioVisualizerId} className="size-full" />
+        {!audioLoaded && (
+          <Skeleton className="absolute left-0 top-0 size-full" />
         )}
-        <div
-          className="absolute right-0 top-0 h-full bg-primary/10"
-          style={{
-            width: `${containerWidth - (playheadX ?? 0) - 2}px`,
-          }}
-        />
-        {playheadHoverX !== null && (
-          <div
-            className="absolute top-0 h-full w-[1px] bg-muted-foreground"
-            style={{ left: `${playheadHoverX}px` }}
-          />
-        )}
-        <div
-          className="absolute left-0 top-0 h-full w-0.5 bg-primary"
-          style={{ left: `${playheadX}px` }}
-        />
         {call.evalResults?.map((evalResult, index) => {
-          if (!containerWidth || !duration) return null;
-          const startPercentage = Math.min(
-            1,
-            Math.max(
-              0,
-              (evalResult.secondsFromStart - offsetFromStart) / duration,
-            ),
-          );
-          const endPercentage = Math.min(
-            1,
-            Math.max(
-              0,
-              (evalResult.secondsFromStart +
-                evalResult.duration -
-                offsetFromStart) /
-                duration,
-            ),
-          );
-          const startPosition = startPercentage * containerWidth;
-          const width = (endPercentage - startPercentage) * containerWidth;
+          if (
+            !containerRef.current ||
+            !duration ||
+            !evalResult.secondsFromStart ||
+            !evalResult.duration
+          )
+            return null;
+          const startPercentage =
+            Math.min(
+              1,
+              Math.max(
+                0,
+                (evalResult.secondsFromStart - offsetFromStart) / duration,
+              ),
+            ) * 100;
+          const endPercentage =
+            Math.min(
+              1,
+              Math.max(
+                0,
+                (evalResult.secondsFromStart +
+                  evalResult.duration -
+                  offsetFromStart) /
+                  duration,
+              ),
+            ) * 100;
 
           return (
             <div
               key={index}
-              className="absolute top-0 h-full"
+              className="absolute top-0 z-10 h-full"
               style={{
-                left: `${startPosition}px`,
-                width: `${width}px`,
+                left: `${startPercentage}%`,
+                width: `${endPercentage - startPercentage}%`,
               }}
             >
               <div
@@ -332,6 +253,96 @@ const AudioPlayer = forwardRef<
             </div>
           );
         })}
+        {call.latencyBlocks?.map((latencyBlock, index) => {
+          if (!containerRef.current || !duration) return null;
+          const startPercentage =
+            Math.min(1, Math.max(0, latencyBlock.secondsFromStart / duration)) *
+            100;
+          const endPercentage =
+            Math.min(
+              1,
+              Math.max(
+                0,
+                (latencyBlock.secondsFromStart + latencyBlock.duration) /
+                  duration,
+              ),
+            ) * 100;
+
+          return (
+            <div
+              key={index}
+              className="absolute top-0 z-10 h-full cursor-pointer"
+              style={{
+                left: `${startPercentage}%`,
+                width: `${endPercentage - startPercentage}%`,
+                background:
+                  hoveredEvalResult === latencyBlock.id
+                    ? getLatencyBlockColor(latencyBlock, 0.5)
+                    : getLatencyBlockColor(latencyBlock),
+                border: `1px solid ${getLatencyBlockColor(latencyBlock, 1)}`,
+              }}
+              onClick={(e) => {
+                e.stopPropagation();
+                seek(latencyBlock.secondsFromStart);
+                play();
+              }}
+              onMouseEnter={() => {
+                setHoveredEvalResult(latencyBlock.id);
+                onEvalResultHover?.(latencyBlock.id);
+              }}
+              onMouseLeave={() => {
+                setHoveredEvalResult(null);
+                onEvalResultHover?.(null);
+              }}
+            />
+          );
+        })}
+        {call.interruptions?.map((interruption, index) => {
+          if (!containerRef.current || !duration) return null;
+          const startPercentage =
+            Math.min(1, Math.max(0, interruption.secondsFromStart / duration)) *
+            100;
+          const endPercentage =
+            Math.min(
+              1,
+              Math.max(
+                0,
+                (interruption.secondsFromStart + interruption.duration) /
+                  duration,
+              ),
+            ) * 100;
+
+          return (
+            <div
+              key={index}
+              className="absolute top-0 z-10 h-full cursor-pointer"
+              style={{
+                top: "50%",
+                height: "50%",
+                left: `${startPercentage}%`,
+                width: `${endPercentage - startPercentage}%`,
+                background:
+                  hoveredEvalResult === interruption.id
+                    ? getInterruptionColor(0.5)
+                    : getInterruptionColor(),
+                border: `1px solid ${getInterruptionColor(1)}`,
+              }}
+              onClick={(e) => {
+                e.stopPropagation();
+                seek(interruption.secondsFromStart);
+                play();
+              }}
+              onMouseEnter={() => {
+                setHoveredEvalResult(interruption.id);
+                onEvalResultHover?.(interruption.id);
+              }}
+              onMouseLeave={() => {
+                setHoveredEvalResult(null);
+                onEvalResultHover?.(null);
+              }}
+            />
+          );
+        })}
       </div>
       <div className="flex items-center gap-4">
         <Button
@@ -348,28 +359,36 @@ const AudioPlayer = forwardRef<
           )}
         </Button>
 
-        <div className="text-sm text-muted-foreground">
-          {formatDurationHoursMinutesSeconds(currentTime)} /{" "}
-          {formatDurationHoursMinutesSeconds(duration)}
-        </div>
+        {!small && (
+          <>
+            <div className="text-sm text-muted-foreground">
+              {formatDurationHoursMinutesSeconds(currentTime)} /{" "}
+              {formatDurationHoursMinutesSeconds(duration)}
+            </div>
 
-        <div className="flex-1" />
+            <div className="flex-1" />
 
-        <Select
-          value={playbackSpeed.toString()}
-          onValueChange={(value) => setPlaybackSpeed(parseFloat(value))}
-        >
-          <SelectTrigger className="w-20">
-            <SelectValue placeholder="Speed" />
-          </SelectTrigger>
-          <SelectContent className="w-20">
-            <SelectItem value="1">1x</SelectItem>
-            <SelectItem value="2">2x</SelectItem>
-            <SelectItem value="4">4x</SelectItem>
-          </SelectContent>
-        </Select>
+            <Select
+              value={playbackSpeed.toString()}
+              onValueChange={(value) => setPlaybackSpeed(parseFloat(value))}
+            >
+              <SelectTrigger className="w-20">
+                <SelectValue placeholder="Speed" />
+              </SelectTrigger>
+              <SelectContent className="w-20">
+                <SelectItem value="1">1x</SelectItem>
+                <SelectItem value="2">2x</SelectItem>
+                <SelectItem value="4">4x</SelectItem>
+              </SelectContent>
+            </Select>
+          </>
+        )}
       </div>
     </div>
   );
 });
-export default AudioPlayer;
+export default _AudioPlayer;
+// export default dynamic(() => Promise.resolve(_AudioPlayer), {
+//   ssr: false,
+//   loading: () => <div>Loading...</div>,
+// });
