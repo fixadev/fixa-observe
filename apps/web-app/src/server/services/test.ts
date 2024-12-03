@@ -139,9 +139,13 @@ export class TestService {
       agent.extraProperties &&
       (agent.extraProperties as Record<string, unknown>).type === "ofone-kiosk"
     ) {
+      console.log(
+        " <<<<<<<<<<<<<<<<<<<< running KIOSK TEST >>>>>>>>>>>>>>>>>>>>> ",
+      );
       calls = await Promise.allSettled(
         tests.map(async (test) => {
-          const deviceId = "791bc87d-2f47-45fd-9a32-57e01fb02d37";
+          // const deviceId = "791bc87d-2f47-45fd-9a32-57e01fb02d37"; // staging
+          const deviceId = "6135989e-3b07-49d3-8d92-9fdaab4c4700"; // ceena
           const callId = await initiateOfOneKioskCall(
             deviceId,
             test.testAgentVapiId,

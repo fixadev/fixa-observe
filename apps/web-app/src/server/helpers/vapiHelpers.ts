@@ -178,9 +178,29 @@ export const initiateOfOneKioskCall = async (
     `${env.NEXT_PUBLIC_AUDIO_SERVICE_URL}/websocket-call-ofone`,
     {
       device_id: deviceId,
-      test_agent_vapi_id: assistantId,
-      test_agent_prompt: testAgentPrompt,
-      scenario_prompt: scenarioPrompt,
+      assistant_id: assistantId,
+      assistant_overrides: {
+        serverUrl: env.NEXT_PUBLIC_VAPI_SERVER_URL,
+        model: {
+          provider: "openai",
+          model: "gpt-4o",
+          messages: [
+            {
+              role: "system",
+              content: testAgentPrompt,
+            },
+            {
+              role: "system",
+              content:
+                "end the call when the user says 'please drive forward to the window' or 'bye' or 'have a good day' or something along those lines",
+            },
+            {
+              role: "system",
+              content: scenarioPrompt,
+            },
+          ],
+        },
+      },
     },
   );
   return data.callId;

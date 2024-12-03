@@ -8,6 +8,7 @@ from services.split_channels import split_channels
 from services.create_transcript import create_transcript_from_deepgram
 import time
 import threading
+import asyncio
 
 if os.getenv('ENVIRONMENT') == 'local-staging':
   from dotenv import load_dotenv
@@ -20,9 +21,8 @@ class TranscribeRequest(BaseModel):
 
 class StartWebsocketCallOfOneRequest(BaseModel):
     device_id: str
-    test_agent_vapi_id: str
-    test_agent_prompt: str
-    scenario_prompt: str
+    assistant_id: str
+    assistant_overrides: dict
 
 @app.get("/")
 async def health():
@@ -42,9 +42,10 @@ async def transcribe(request: TranscribeRequest):
 
 @app.post("/websocket-call-ofone")
 async def start_websocket_call_ofone(request: StartWebsocketCallOfOneRequest):
-    client = OfOneClient(request.device_id, request.test_agent_vapi_id, request.test_agent_prompt, request.scenario_prompt)
-    call_id = client.start_call()
-    threading.Thread(target=client.listen_for_check_state_events).start()
+    client = OfOneClient(request.device_id, request.assistant_id, request.assistant_overrides)
+    call_id = await client.start_call()
+    
+    asyncio.create_task(client.listen_for_check_state_events())
     
     return {"callId": call_id}
     
