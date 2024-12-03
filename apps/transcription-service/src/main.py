@@ -19,10 +19,10 @@ class TranscribeRequest(BaseModel):
     stereo_audio_url: str
 
 class StartWebsocketCallOfOneRequest(BaseModel):
+    device_id: str
     test_agent_vapi_id: str
     test_agent_prompt: str
     scenario_prompt: str
-    device_id: str
 
 @app.get("/")
 async def health():
@@ -33,7 +33,7 @@ async def transcribe(request: TranscribeRequest):
     try: 
         user_audio_path, agent_audio_path = await split_channels(request.stereo_audio_url)
         transcriptions = await transcribe_with_deepgram([user_audio_path, agent_audio_path])
-        transcript = await create_transcript_from_deepgram(transcriptions[0], transcriptions[1], user_audio_path, agent_audio_path)
+        transcript = await create_transcript_from_deepgram(transcriptions[0], transcriptions[1], user_audio_path, agent_audio_path) # type: ignore
         return transcript
         
     except Exception as e:

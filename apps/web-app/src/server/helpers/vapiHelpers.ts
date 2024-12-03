@@ -1,3 +1,4 @@
+import axios from "axios";
 import { env } from "~/env";
 import { vapi } from "~/server/utils/vapiClient";
 
@@ -165,4 +166,22 @@ export const initiateVapiCall = async (
     console.error("Error initiating VAPI call", error);
     throw error;
   }
+};
+
+export const initiateOfOneKioskCall = async (
+  deviceId: string,
+  assistantId: string,
+  testAgentPrompt?: string,
+  scenarioPrompt?: string,
+) => {
+  const { data } = await axios.post<{ callId: string }>(
+    `${env.NEXT_PUBLIC_AUDIO_SERVICE_URL}/websocket-call-ofone`,
+    {
+      device_id: deviceId,
+      test_agent_vapi_id: assistantId,
+      test_agent_prompt: testAgentPrompt,
+      scenario_prompt: scenarioPrompt,
+    },
+  );
+  return data.callId;
 };
