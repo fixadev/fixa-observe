@@ -17,9 +17,9 @@ export default function AgentCard({ agent }: { agent: Agent }) {
     return null;
   }, [agent.githubRepoUrl]);
 
-  // const { data: lastTest } = api.test.getLastTest.useQuery({
-  //   agentId: agent.id,
-  // });
+  const { data: lastTest } = api.test.getLastTest.useQuery({
+    agentId: agent.id,
+  });
 
   return (
     <Link href={`/dashboard/${agent.id}`}>
@@ -41,10 +41,12 @@ export default function AgentCard({ agent }: { agent: Agent }) {
             <div className="text-xs">{formattedGithubUrl}</div>
           </div>
         )}
-        {/* <div className="text-sm text-muted-foreground">
+        <div className="text-sm text-muted-foreground">
           last tested{" "}
-          {lastTest ? formatDistanceToNow(lastTest.createdAt) : "never"}
-        </div> */}
+          {lastTest
+            ? formatDistanceToNow(lastTest.createdAt) + " ago"
+            : "never"}
+        </div>
       </div>
     </Link>
   );
