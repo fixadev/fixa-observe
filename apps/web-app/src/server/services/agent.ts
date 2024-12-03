@@ -29,6 +29,8 @@ export class AgentService {
       },
     });
 
+    console.log("create agent");
+
     return await db.agent.create({
       data: {
         id: uuidv4(),
@@ -46,6 +48,7 @@ export class AgentService {
           })),
         },
         ownerId,
+        extraProperties: {},
       },
     });
   }
@@ -63,11 +66,11 @@ export class AgentService {
         where: { id: agent.id },
         update: {
           ...agent,
-          extraProperties: agent.extraProperties ?? Prisma.JsonNull,
+          extraProperties: agent.extraProperties ?? undefined,
         },
         create: {
           ...AgentSchema.parse(agent),
-          extraProperties: agent.extraProperties ?? Prisma.JsonNull,
+          extraProperties: agent.extraProperties ?? undefined,
           ownerId,
         },
       });
@@ -81,14 +84,14 @@ export class AgentService {
           where: { id: existingAgent.id },
           data: {
             ...agent,
-            extraProperties: agent.extraProperties ?? Prisma.JsonNull,
+            extraProperties: agent.extraProperties ?? undefined,
           },
         });
       }
       return await db.agent.create({
         data: {
           ...AgentSchema.parse(agent),
-          extraProperties: agent.extraProperties ?? Prisma.JsonNull,
+          extraProperties: agent.extraProperties ?? undefined,
           ownerId,
         },
       });
