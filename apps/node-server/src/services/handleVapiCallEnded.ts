@@ -77,20 +77,10 @@ export const handleVapiCallEnded = async ({
 
     const { evalResults } = await formatOutput(unparsedResult);
 
-    console.log(
-      "========================parsedEvalResults==============================",
-      evalResults,
-    );
-
     const validEvalResults = evalResults.filter((evalResult) =>
       [...scenario.evals]?.some(
         (evaluation) => evaluation.id === evalResult.evalId,
       ),
-    );
-
-    console.log(
-      "validEvalResults==============================",
-      validEvalResults,
     );
 
     const success = validEvalResults.every((result) => result.success);
