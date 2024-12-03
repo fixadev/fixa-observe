@@ -8,6 +8,7 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y \
     libsndfile1 \
     ffmpeg \
+    python3-pyaudio \
     && rm -rf /var/lib/apt/lists/*
 
 RUN python -m venv .venv
