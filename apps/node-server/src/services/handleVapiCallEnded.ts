@@ -27,7 +27,7 @@ export const handleVapiCallEnded = async ({
 }: {
   report: ServerMessageEndOfCallReport;
   call: Call;
-  agent: Agent & { enabledGeneralEvals: Eval[] };
+  agent: Agent;
   test: Test;
   scenario: Scenario & { evals: Eval[] };
   userSocket?: Socket;
@@ -48,44 +48,42 @@ export const handleVapiCallEnded = async ({
       messages: report.artifact.messages,
       testAgentPrompt: scenario.instructions,
       scenario,
-      agent,
     });
     console.log("O1 ANALYSIS for call", call.id, o1Analysis);
 
-    let parsedResult: string;
-    const useGemini = !scenario.includeDateTime;
-    if (!useGemini) {
-      parsedResult = o1Analysis.cleanedResult;
-    } else {
-      const geminiPrompt = createGeminiPrompt({
-        callStartedAt: report.startedAt,
-        messages: report.artifact.messages,
-        testAgentPrompt: scenario.instructions,
-        scenario,
-        agent,
-        analysis: o1Analysis,
-      });
+    let unparsedResult: string;
+    unparsedResult = o1Analysis.cleanedResult;
 
-      const geminiResult = await analyzeCallWithGemini(
-        report.artifact.stereoRecordingUrl,
-        geminiPrompt,
-      );
-      parsedResult = JSON.stringify(geminiResult.parsedResult);
+    // const useGemini = !scenario.includeDateTime;
+    // if (!useGemini) {
+    //   unparsedResult = o1Analysis.cleanedResult;
+    // } else {
+    //   const geminiPrompt = createGeminiPrompt({
+    //     callStartedAt: report.startedAt,
+    //     messages: report.artifact.messages,
+    //     testAgentPrompt: scenario.instructions,
+    //     scenario,
+    //     analysis: o1Analysis,
+    //   });
 
-      console.log(
-        "GEMINI RESULT for call",
-        call.id,
-        JSON.stringify(geminiResult.parsedResult, null, 2),
-      );
-    }
+    //   const geminiResult = await analyzeCallWithGemini(
+    //     report.artifact.stereoRecordingUrl,
+    //     geminiPrompt,
+    //   );
 
-    const cleanedResultJson = await formatOutput(parsedResult);
-    const { scenarioEvalResults, generalEvalResults } = cleanedResultJson;
-    const evalResults = [...scenarioEvalResults, ...generalEvalResults];
-    const evalResultsWithValidEvals = evalResults.filter((evalResult) =>
-      scenario.evals?.some((evaluation) => evaluation.id === evalResult.evalId),
+    //   console.log("GEMINI RESULT for call", call.id, geminiResult.textResult);
+    //   unparsedResult = geminiResult.textResult ?? "";
+    // }
+
+    const { evalResults } = await formatOutput(unparsedResult);
+
+    const validEvalResults = evalResults.filter((evalResult) =>
+      [...scenario.evals]?.some(
+        (evaluation) => evaluation.id === evalResult.evalId,
+      ),
     );
-    const success = evalResultsWithValidEvals.every((result) => result.success);
+
+    const success = validEvalResults.every((result) => result.success);
 
     const updatedCall = await db.call.update({
       where: { id: call.id },
@@ -97,7 +95,7 @@ export const handleVapiCallEnded = async ({
         monoRecordingUrl: report.artifact.recordingUrl,
         result: success ? CallResult.success : CallResult.failure,
         evalResults: {
-          create: evalResultsWithValidEvals,
+          create: validEvalResults,
         },
         messages: {
           create: report.artifact.messages

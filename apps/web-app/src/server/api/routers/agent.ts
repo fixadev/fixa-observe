@@ -63,6 +63,7 @@ export const agentRouter = createTRPCRouter({
       );
     }),
 
+  // TODO: move all scenario related stuff to scenario router/service
   generateScenariosFromPrompt: protectedProcedure
     .input(
       z.object({

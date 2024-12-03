@@ -1,5 +1,7 @@
 import os
 from typing import List
+import asyncio
+import aiofiles
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -8,39 +10,48 @@ from deepgram import (
     DeepgramClient,
     PrerecordedOptions,
     FileSource,
+    ListenRESTWord,
 )
 
-def transcribe_with_deepgram(audio_paths: List[str | None]):
+async def transcribe_with_deepgram(audio_paths: List[str | None]):
     try:
         deepgram_client = DeepgramClient(os.getenv("DEEPGRAM_API_KEY"))
-        responses = []
+        tasks = []
         
         for audio_path in audio_paths[:2]:  # Process first two audio files
             if not audio_path or not os.path.exists(audio_path):
                 print(f"Audio file does not exist: {audio_path}")
-                responses.append([])
+                tasks.append(asyncio.create_task(asyncio.sleep(0)))  # dummy task
                 continue
-            with open(audio_path, "rb") as audio_file:
-                buffer_data = audio_file.read()
-
-            payload: FileSource = {
-                "buffer": buffer_data,
-            }
-
-            options = PrerecordedOptions(
-                model="nova-2",
-                smart_format=True,
+                
+            tasks.append(
+                asyncio.create_task(
+                    process_single_file(deepgram_client, audio_path)
+                )
             )
 
-            response = deepgram_client.listen.rest.v("1").transcribe_file(payload, options)
-            
-            responses.append(response.results.channels[0].alternatives[0].words)
-
-        return responses
+        responses = await asyncio.gather(*tasks, return_exceptions=True)
+        return [[] if isinstance(r, Exception) else r for r in responses]
 
     except Exception as e:
         print(f"Deepgram transcription failed: {str(e)}")
         raise e
+
+async def process_single_file(deepgram_client: DeepgramClient, audio_path: str):
+    async with aiofiles.open(audio_path, "rb") as audio_file:
+        buffer_data = await audio_file.read()
+
+    payload: FileSource = {
+        "buffer": buffer_data,
+    }
+
+    options = PrerecordedOptions(
+        model="nova-2",
+        smart_format=True,
+    )
+
+    response = await deepgram_client.listen.asyncrest.v("1").transcribe_file(payload, options)   # type: ignore
+    return response.results.channels[0].alternatives[0].words # type: ignore
 
 if __name__ == "__main__":
     paths = [
@@ -49,7 +60,7 @@ if __name__ == "__main__":
     ]
     
     try:
-        results = transcribe_with_deepgram(paths)
+        results = asyncio.run(transcribe_with_deepgram(paths))
         for i, result in enumerate(results):
             print(f"\nTranscription {i+1}:")
             print(result.to_json(indent=4))

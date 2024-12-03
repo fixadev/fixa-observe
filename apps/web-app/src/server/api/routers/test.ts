@@ -33,4 +33,10 @@ export const testRouter = createTRPCRouter({
         testAgentIds: input.testAgentIds,
       });
     }),
+
+  getLastTest: protectedProcedure
+    .input(z.object({ agentId: z.string() }))
+    .query(async ({ input }) => {
+      return await testServiceInstance.getLastTest(input.agentId);
+    }),
 });

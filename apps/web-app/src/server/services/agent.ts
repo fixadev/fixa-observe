@@ -1,10 +1,16 @@
 import { db } from "../db";
 import {
+  type UpdateEvalsSchema,
   type CreateScenarioSchema,
   type UpdateScenarioSchema,
+  type EvalSchema,
+  type EvalWithoutScenarioId,
+  type EvalOverrideWithoutScenarioId,
+  type CreateEvalOverrideSchema,
+  type CreateGeneralEvalSchema,
 } from "~/lib/agent";
 import { v4 as uuidv4 } from "uuid";
-import { type PrismaClient } from "@prisma/client";
+import { Prisma, type PrismaClient } from "@prisma/client";
 import { type Agent, AgentSchema } from "prisma/generated/zod";
 
 export class AgentService {
@@ -56,8 +62,15 @@ export class AgentService {
     if (agent.id) {
       return await db.agent.upsert({
         where: { id: agent.id },
-        update: agent,
-        create: { ...AgentSchema.parse(agent), ownerId },
+        update: {
+          ...agent,
+          extraProperties: agent.extraProperties ?? undefined,
+        },
+        create: {
+          ...AgentSchema.parse(agent),
+          extraProperties: agent.extraProperties ?? undefined,
+          ownerId,
+        },
       });
     } else if (agent.customerAgentId) {
       const existingAgent = await db.agent.findFirst({
@@ -67,11 +80,18 @@ export class AgentService {
       if (existingAgent) {
         return await db.agent.update({
           where: { id: existingAgent.id },
-          data: agent,
+          data: {
+            ...agent,
+            extraProperties: agent.extraProperties ?? undefined,
+          },
         });
       }
       return await db.agent.create({
-        data: { ...AgentSchema.parse(agent), ownerId },
+        data: {
+          ...AgentSchema.parse(agent),
+          extraProperties: agent.extraProperties ?? undefined,
+          ownerId,
+        },
       });
     }
     throw new Error("Either id or customerAgentId must be provided");
@@ -84,6 +104,7 @@ export class AgentService {
         scenarios: {
           include: {
             evals: { orderBy: { createdAt: "asc" } },
+            generalEvalOverrides: true,
           },
         },
         tests: {
@@ -94,6 +115,7 @@ export class AgentService {
         enabledTestAgents: {
           where: { enabled: true },
         },
+        enabledGeneralEvals: true,
       },
     });
   }
@@ -190,36 +212,50 @@ export class AgentService {
             })),
           },
         },
+        generalEvalOverrides: {
+          createMany: {
+            data: scenario.generalEvalOverrides.map((override) => ({
+              ...override,
+              id: uuidv4(),
+            })),
+          },
+        },
       },
       include: {
         evals: { orderBy: { createdAt: "asc" } },
+        generalEvalOverrides: { orderBy: { createdAt: "asc" } },
       },
     });
   }
 
   async createScenarios(agentId: string, scenarios: CreateScenarioSchema[]) {
-    const transactions = scenarios.map((scenario) => {
-      return db.scenario.create({
-        data: {
-          ...scenario,
-          id: uuidv4(),
-          agentId,
-          createdAt: new Date(),
-          evals: {
-            createMany: {
-              data: scenario.evals.map((evaluation) => ({
-                ...evaluation,
-                id: uuidv4(),
-              })),
+    return await db.$transaction(async (tx) => {
+      return await Promise.all(
+        scenarios.map((scenario) =>
+          tx.scenario.create({
+            data: {
+              ...scenario,
+              id: uuidv4(),
+              agentId,
+              createdAt: new Date(),
+              evals: {
+                createMany: {
+                  data: scenario.evals.map((evaluation) => ({
+                    ...evaluation,
+                    id: uuidv4(),
+                  })),
+                },
+              },
+              generalEvalOverrides: {},
             },
-          },
-        },
-        include: {
-          evals: { orderBy: { createdAt: "asc" } },
-        },
-      });
+            include: {
+              evals: { orderBy: { createdAt: "asc" } },
+              generalEvalOverrides: { orderBy: { createdAt: "asc" } },
+            },
+          }),
+        ),
+      );
     });
-    return await db.$transaction(transactions);
   }
 
   async updateScenario(scenario: UpdateScenarioSchema) {
@@ -243,6 +279,31 @@ export class AgentService {
         !priorEvals.some((priorEval) => priorEval.id === evaluation.id),
     );
 
+    const priorOverrides = await db.evalOverride.findMany({
+      where: { scenarioId: scenario.id },
+    });
+
+    // TODO: fix this
+    const evalOverridesToDelete = scenario.generalEvalOverrides.filter(
+      (override) =>
+        "id" in override &&
+        priorOverrides.some(
+          (priorOverride) => priorOverride.id === override.id,
+        ),
+    ) as EvalOverrideWithoutScenarioId[];
+
+    const evalOverridesToUpdate = scenario.generalEvalOverrides.filter(
+      (override) =>
+        "id" in override &&
+        priorOverrides.some(
+          (priorOverride) => priorOverride.id === override.id,
+        ),
+    ) as EvalOverrideWithoutScenarioId[];
+
+    const evalOverridesToCreate = scenario.generalEvalOverrides.filter(
+      (override) => !("id" in override),
+    ) as CreateEvalOverrideSchema[];
+
     return await db.scenario.update({
       where: { id: scenario.id },
       data: {
@@ -262,13 +323,82 @@ export class AgentService {
             })),
           },
         },
+        generalEvalOverrides: {
+          deleteMany: {
+            id: { in: evalOverridesToDelete.map((override) => override.id) },
+          },
+          updateMany: evalOverridesToUpdate.map((override) => ({
+            where: { id: override.id },
+            data: override,
+          })),
+          createMany: {
+            data: evalOverridesToCreate.map((override) => ({
+              ...override,
+              id: uuidv4(),
+            })),
+          },
+        },
       },
       include: {
         evals: { orderBy: { createdAt: "asc" } },
+        generalEvalOverrides: { orderBy: { createdAt: "asc" } },
       },
     });
   }
 
+  async getGeneralEvals(userId: string) {
+    return await db.eval.findMany({
+      where: { ownerId: userId },
+      orderBy: { createdAt: "asc" },
+    });
+  }
+
+  async createGeneralEval(userId: string, evaluation: CreateGeneralEvalSchema) {
+    return await db.eval.create({
+      data: { ...evaluation, id: uuidv4(), ownerId: userId },
+    });
+  }
+
+  async updateGeneralEval(evaluation: EvalSchema) {
+    return await db.eval.update({
+      where: { id: evaluation.id },
+      data: evaluation,
+    });
+  }
+
+  async toggleGeneralEval({
+    id,
+    agentId,
+    enabled,
+  }: {
+    id: string;
+    agentId: string;
+    enabled: boolean;
+  }) {
+    if (enabled) {
+      return await db.agent.update({
+        where: { id: agentId },
+        data: {
+          enabledGeneralEvals: {
+            connect: { id },
+          },
+        },
+      });
+    } else {
+      return await db.agent.update({
+        where: { id: agentId },
+        data: {
+          enabledGeneralEvals: {
+            disconnect: { id },
+          },
+        },
+      });
+    }
+  }
+
+  async deleteGeneralEval(id: string) {
+    return await db.eval.delete({ where: { id } });
+  }
   async deleteScenario(id: string) {
     return await db.scenario.delete({ where: { id } });
   }

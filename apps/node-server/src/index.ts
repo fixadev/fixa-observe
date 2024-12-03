@@ -9,6 +9,7 @@ import { getContext } from "./services/getContext";
 import { addCallToQueue } from "./services/addCallToQueue";
 import { startQueueConsumer } from "./workers/queueConsumer";
 import { authenticateRequest } from "./middlewares/auth";
+import { scheduleOfOneCalls } from "./services/scheduleOfOneCalls";
 
 const app = express();
 const httpServer = createServer(app);
@@ -115,6 +116,12 @@ app.post(
     }
   },
 );
+
+app.post("/schedule-ofone-calls", async (req: Request, res: Response) => {
+  const { device_ids, callsToStart } = req.body;
+  scheduleOfOneCalls(device_ids, callsToStart);
+  res.json({ success: true });
+});
 
 app.post("/message/:userId", (req: Request, res: Response) => {
   const { userId } = req.params;

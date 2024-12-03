@@ -40,3 +40,4 @@ yarn-error.log*
 apps/backend/preprocessed_code.txt
 
 fly.toml
+.conda
