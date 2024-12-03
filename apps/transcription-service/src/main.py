@@ -1,13 +1,11 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 import os
-# from vapi_python import OfOneClient
+from vapi_python import OfOneClient
 from utils.logger import logger
 from services.transcribe import transcribe_with_deepgram
 from services.split_channels import split_channels
 from services.create_transcript import create_transcript_from_deepgram
-import time
-import threading
 import asyncio
 
 if os.getenv('ENVIRONMENT') == 'local-staging':
@@ -41,22 +39,22 @@ async def transcribe(request: TranscribeRequest):
         logger.error(f"Deepgram transcription failed: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
-# @app.post("/websocket-call-ofone")
-# async def start_websocket_call_ofone(request: StartWebsocketCallOfOneRequest):
-#     client_args = {
-#         'device_id': request.device_id,
-#         'assistant_id': request.assistant_id,
-#         'assistant_overrides': request.assistant_overrides
-#     }
-#     if request.env is not None:
-#         client_args['env'] = request.env
+@app.post("/websocket-call-ofone")
+async def start_websocket_call_ofone(request: StartWebsocketCallOfOneRequest):
+    client_args = {
+        'device_id': request.device_id,
+        'assistant_id': request.assistant_id,
+        'assistant_overrides': request.assistant_overrides
+    }
+    if request.env is not None:
+        client_args['env'] = request.env
     
-#     client = OfOneClient(**client_args)
-#     call_id = await client.start_call()
+    client = OfOneClient(**client_args)
+    call_id = await client.start_call()
     
-#     asyncio.create_task(client.listen_for_check_state_events())
+    asyncio.create_task(client.listen_for_check_state_events())
     
-#     return {"callId": call_id}
+    return {"callId": call_id}
     
 if __name__ == "__main__":
     import uvicorn
