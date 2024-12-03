@@ -1,6 +1,9 @@
 from pydub import AudioSegment
+import aiofiles
+import tempfile
+import asyncio
 
-def create_transcript_from_deepgram(user_words: list[dict], agent_words: list[dict], user_audio_path: str | None, agent_audio_path: str | None):
+async def create_transcript_from_deepgram(user_words: list[dict], agent_words: list[dict], user_audio_path: str | None, agent_audio_path: str | None):
     # print(user_words)
     # print(agent_words)
     try: 
@@ -129,52 +132,66 @@ def create_transcript_from_deepgram(user_words: list[dict], agent_words: list[di
        
         # Find interruptions
         interruptions = []
-        for agent_segment in segments:
-            if agent_segment['role'] != 'agent':
-                continue
-                
-            agent_start = agent_segment['start']
-            agent_end = agent_segment['end']
-            
-            # Find overlapping user segments
-            for user_segment in segments:
-                if user_segment['role'] != 'user':
-                    continue
-                    
-                user_start = user_segment['start']
-                user_end = user_segment['end']
-                
-                # Check for overlap
-                if agent_start < user_end and agent_end > user_start and user_audio_path and agent_audio_path:
-                    overlap_start = max(agent_start, user_start)
-                    overlap_end = min(agent_end, user_end)
-                    
-                    # Load and analyze waveform segments
-                    user_audio = AudioSegment.from_wav(user_audio_path)
-                    agent_audio = AudioSegment.from_wav(agent_audio_path)
-                    
-                    # Extract first second of overlapping portions (convert seconds to milliseconds)
-                    overlap_duration = min(1000, (overlap_end - overlap_start) * 1000)  # Cap at 1 second
-                    user_overlap = user_audio[overlap_start*1000:overlap_start*1000 + overlap_duration]
-                    agent_overlap = agent_audio[overlap_start*1000:overlap_start*1000 + overlap_duration]
+        if user_audio_path and agent_audio_path:
+            # Load audio files asynchronously
+            async with aiofiles.open(user_audio_path, 'rb') as user_file, \
+                       aiofiles.open(agent_audio_path, 'rb') as agent_file:
+                user_audio_data = await user_file.read()
+                agent_audio_data = await agent_file.read()
 
-                    # Get RMS values to check for speech activity
-                    user_rms = user_overlap.rms
-                    agent_rms = agent_overlap.rms
+            # Create temporary files for AudioSegment
+            with tempfile.NamedTemporaryFile(suffix='.wav') as user_temp, \
+                 tempfile.NamedTemporaryFile(suffix='.wav') as agent_temp:
+                user_temp.write(user_audio_data)
+                agent_temp.write(agent_audio_data)
+                user_temp.flush()
+                agent_temp.flush()
+
+                user_audio = AudioSegment.from_wav(user_temp.name)
+                agent_audio = AudioSegment.from_wav(agent_temp.name)
+
+                for agent_segment in segments:
+                    if agent_segment['role'] != 'agent':
+                        continue
                     
-                    # Only count as interruption if both speakers have significant audio levels
-                    if user_rms > 20 and agent_rms > 20:  # Adjust these thresholds as needed
-                        overlap_words = []
-                        for word in agent_words:
-                            if word['start'] >= overlap_start and word['start'] < agent_end:
-                                overlap_words.append(word['punctuated_word'])
+                    agent_start = agent_segment['start']
+                    agent_end = agent_segment['end']
+                    
+                    # Find overlapping user segments
+                    for user_segment in segments:
+                        if user_segment['role'] != 'user':
+                            continue
+                            
+                        user_start = user_segment['start']
+                        user_end = user_segment['end']
                         
-                        interruptions.append({
-                            'secondsFromStart': overlap_start,
-                            'duration': agent_end - overlap_start,
-                            'text': ' '.join(overlap_words)
-                        })
-                    break  # Only count one interruption per agent segment
+                        # Check for overlap
+                        if agent_start < user_end and agent_end > user_start:
+                            overlap_start = max(agent_start, user_start)
+                            overlap_end = min(agent_end, user_end)
+                            
+                            # Extract first second of overlapping portions (convert seconds to milliseconds)
+                            overlap_duration = min(1000, (overlap_end - overlap_start) * 1000)  # Cap at 1 second
+                            user_overlap = user_audio[overlap_start*1000:overlap_start*1000 + overlap_duration]
+                            agent_overlap = agent_audio[overlap_start*1000:overlap_start*1000 + overlap_duration]
+
+                            # Get RMS values to check for speech activity
+                            user_rms = user_overlap.rms
+                            agent_rms = agent_overlap.rms
+                            
+                            # Only count as interruption if both speakers have significant audio levels
+                            if user_rms > 20 and agent_rms > 20:  # Adjust these thresholds as needed
+                                overlap_words = []
+                                for word in agent_words:
+                                    if word['start'] >= overlap_start and word['start'] < agent_end:
+                                        overlap_words.append(word['punctuated_word'])
+                                
+                                interruptions.append({
+                                    'secondsFromStart': overlap_start,
+                                    'duration': agent_end - overlap_start,
+                                    'text': ' '.join(overlap_words)
+                                })
+                            break  # Only count one interruption per agent segment
         
         return {
             'segments': segments, 

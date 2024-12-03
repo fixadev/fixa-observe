@@ -3,8 +3,10 @@ import requests
 import tempfile
 from pathlib import Path
 import shutil  # Add this import for cleanup
+import aiohttp
+import aiofiles
 
-def split_channels(stereo_audio_url: str) -> tuple[str, str]:
+async def split_channels(stereo_audio_url: str) -> tuple[str, str]:
     """Split a stereo audio file into separate left and right channel files.
     
     Args:
@@ -19,13 +21,16 @@ def split_channels(stereo_audio_url: str) -> tuple[str, str]:
         tmp_dir = tempfile.mkdtemp()
         tmp_path = Path(tmp_dir)
         
-        # Download audio file
-        response = requests.get(stereo_audio_url)
-        response.raise_for_status()
+        # Download audio file asynchronously
+        async with aiohttp.ClientSession() as session:
+            async with session.get(stereo_audio_url) as response:
+                response.raise_for_status()
+                content = await response.read()
         
         # Save stereo file temporarily
-        stereo_path = tmp_path / "stereo.wav" 
-        stereo_path.write_bytes(response.content)
+        stereo_path = tmp_path / "stereo.wav"
+        async with aiofiles.open(stereo_path, 'wb') as f:
+            await f.write(content)
         
         # Load stereo audio and print debug info
         audio = AudioSegment.from_file(str(stereo_path))
