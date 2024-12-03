@@ -24,6 +24,14 @@ RUN .venv/bin/pip install -r requirements.txt
 # fun comment 
 FROM python:3.11-slim
 WORKDIR /app
+
+# Install required runtime libraries
+RUN apt-get update && apt-get install -y \
+    libportaudio2 \
+    libsndfile1 \
+    ffmpeg \
+    && rm -rf /var/lib/apt/lists/*
+
 COPY --from=builder /app/.venv .venv/
 COPY . .
 CMD ["/app/.venv/bin/python", "src/main.py"]
