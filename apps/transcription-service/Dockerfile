@@ -14,6 +14,8 @@ RUN apt-get update && apt-get install -y \
     # libportaudio0 libportaudio2 libportaudiocpp0 portaudio19-dev python3-pyaudio \
     && rm -rf /var/lib/apt/lists/*
 
+RUN ldconfig
+
 # another comment
 RUN python -m venv .venv
 COPY requirements.txt ./
