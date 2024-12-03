@@ -16,7 +16,8 @@ const addScenarios = async () => {
               agent: {
                 connect: {
                   // id: "8d57e428-c13c-4118-a6f2-ed721662e9b4",
-                  id: "999493f4-8b84-4ea5-af29-14d23eee4130",
+                  // id: "999493f4-8b84-4ea5-af29-14d23eee4130",
+                  id: "ff2e1d70-845b-4d14-9819-c144765fad14",
                 },
               },
               evals: {

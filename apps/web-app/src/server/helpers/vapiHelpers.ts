@@ -184,7 +184,7 @@ export const initiateOfOneKioskCall = async (
         serverUrl: env.NEXT_PUBLIC_VAPI_SERVER_URL,
         model: {
           provider: "openai",
-          model: "gpt-4o",
+          model: "gpt-4o-mini",
           messages: [
             {
               role: "system",
@@ -200,6 +200,10 @@ export const initiateOfOneKioskCall = async (
               content: scenarioPrompt,
             },
           ],
+        },
+        startSpeakingPlan: {
+          smartEndpointingEnabled: true,
+          waitSeconds: 1,
         },
       },
       env: callEnv,
