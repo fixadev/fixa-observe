@@ -48,12 +48,13 @@ export const getContext = async (
     });
 
     const agentGeneralEvals = agent?.enabledGeneralEvals;
+    const filteredAgentGeneralEvals = agentGeneralEvals;
 
-    const filteredAgentGeneralEvals = agentGeneralEvals.filter(
-      (evaluation) =>
-        !evalOverrides.find((override) => override.evalId === evaluation.id)
-          ?.enabled === false,
-    );
+    // const filteredAgentGeneralEvals = agentGeneralEvals.filter(
+    //   (evaluation) =>
+    //     !evalOverrides.find((override) => override.evalId === evaluation.id)
+    //       ?.enabled === false,
+    // );
 
     const allEvals = [...scenario.evals, ...filteredAgentGeneralEvals];
 
