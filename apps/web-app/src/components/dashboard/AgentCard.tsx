@@ -3,6 +3,8 @@ import { type Agent } from "prisma/generated/zod";
 import { Button } from "~/components/ui/button";
 import { useMemo } from "react";
 import Link from "next/link";
+import { formatDistanceToNow } from "date-fns";
+import { api } from "~/trpc/react";
 
 export default function AgentCard({ agent }: { agent: Agent }) {
   const formattedGithubUrl = useMemo(() => {
@@ -14,6 +16,10 @@ export default function AgentCard({ agent }: { agent: Agent }) {
     }
     return null;
   }, [agent.githubRepoUrl]);
+
+  const { data: lastTest } = api.test.getLastTest.useQuery({
+    agentId: agent.id,
+  });
 
   return (
     <Link href={`/dashboard/${agent.id}`}>
@@ -35,7 +41,12 @@ export default function AgentCard({ agent }: { agent: Agent }) {
             <div className="text-xs">{formattedGithubUrl}</div>
           </div>
         )}
-        <div className="text-sm text-muted-foreground">last tested 2h ago</div>
+        <div className="text-sm text-muted-foreground">
+          last tested{" "}
+          {lastTest
+            ? formatDistanceToNow(lastTest.createdAt) + " ago"
+            : "never"}
+        </div>
       </div>
     </Link>
   );

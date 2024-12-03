@@ -57,7 +57,8 @@ export default function Filters({
 }) {
   const { data: agentIds } = api._call.getAgentIds.useQuery();
   const { data: regionIds } = api._call.getRegionIds.useQuery();
-  const { data: _agents, refetch: refetchAgents } = api.agent.getAll.useQuery();
+  const { data: _agents, refetch: refetchAgents } =
+    api.agent.getAllFor11x.useQuery();
   const { data: metadata } = api._call.getMetadata.useQuery();
 
   const regions = useMemo(() => {
@@ -169,11 +170,11 @@ export default function Filters({
                     {(agents ?? []).map((agent) => (
                       <CommandItem
                         key={agent.id}
-                        value={agent.id}
+                        value={`${agent.id} ${agent.name}`}
                         onSelect={(value) => {
                           setFilter({
                             ...filter,
-                            agentId: value === "all" ? undefined : value,
+                            agentId: agent.id === "all" ? undefined : agent.id,
                           });
                           setOpen(false);
                         }}
@@ -277,7 +278,7 @@ function EditAgentDialog({
   setOpen: (open: boolean) => void;
   refetchAgents: () => void;
 }) {
-  const { data: agents } = api.agent.getAll.useQuery();
+  const { data: agents } = api.agent.getAllFor11x.useQuery();
   const [search, setSearch] = useState("");
 
   const { mutateAsync: updateAgentName, isPending: isUpdating } =
