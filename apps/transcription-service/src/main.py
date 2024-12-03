@@ -1,6 +1,7 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 import os
+from vapi_python import OfOneClient
 from utils.logger import logger
 from services.transcribe import transcribe_with_deepgram
 from services.split_channels import split_channels
@@ -14,6 +15,8 @@ app = FastAPI()
 class TranscribeRequest(BaseModel):
     stereo_audio_url: str
 
+class StartWebsocketCallOfOneRequest(BaseModel):
+    device_id: str
 
 @app.get("/")
 async def health():
@@ -30,9 +33,12 @@ async def transcribe(request: TranscribeRequest):
     except Exception as e:
         logger.error(f"Deepgram transcription failed: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
-    
-    
 
+@app.post("/websocket-call-ofone")
+async def start_websocket_call_ofone(request: StartWebsocketCallOfOneRequest):
+    client = OfOneClient(request.device_id)
+    return client.start_call()
+    
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)

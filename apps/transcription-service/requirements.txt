@@ -7,3 +7,4 @@ deepgram-sdk
 pydub
 uvicorn
 
+vapi_python @ git+https://github.com/fixadev/websocket-client.git
