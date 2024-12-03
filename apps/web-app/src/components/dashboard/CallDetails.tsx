@@ -8,7 +8,11 @@ import {
   formatDurationHoursMinutesSeconds,
   getLatencyBlockColor,
 } from "~/lib/utils";
-import { CheckCircleIcon, XCircleIcon } from "@heroicons/react/24/solid";
+import {
+  CheckCircleIcon,
+  WrenchIcon,
+  XCircleIcon,
+} from "@heroicons/react/24/solid";
 import { CallStatus, type LatencyBlock, Role } from "@prisma/client";
 import { LatencyCallHeader, TestCallHeader } from "./CallHeader";
 
@@ -146,7 +150,8 @@ export default function CallDetails({
   );
 
   const activeEvalMessageIndices = useMemo(() => {
-    if (!activeEvalResultId || !call.evalResults) return new Set<number>();
+    if (!activeEvalResultId || !call.evalResults || !call.latencyBlocks)
+      return new Set<number>();
 
     const activeEval = call.evalResults.find(
       (evalResult) => evalResult.id === activeEvalResultId,
@@ -361,7 +366,6 @@ export default function CallDetails({
           />
         )}
       </div>
-
       <div ref={scrollContainerRef} className="-mx-4 flex flex-1 flex-col px-4">
         {messagesFiltered.map((message, index) => {
           const evalResults = messageEvalsMap.get(index) ?? [];
@@ -426,46 +430,56 @@ export default function CallDetails({
                       : "",
                   )}
                 >
-                  <div className="mb-1 text-xs font-medium">
-                    {message.role === Role.bot
-                      ? botName // call.testAgent?.name
-                      : message.role === Role.user
-                        ? userName
-                        : ""}
-                  </div>
-                  {messageToLatencyMap[message.id] && (
-                    <div
-                      className="mb-1 w-fit rounded-md p-1 text-xs font-medium"
-                      style={{
-                        background:
-                          activeEvalResultId ===
-                          messageToLatencyMap[message.id]!.id
-                            ? getLatencyBlockColor(
-                                messageToLatencyMap[message.id]!,
-                                0.5,
-                              )
-                            : getLatencyBlockColor(
-                                messageToLatencyMap[message.id]!,
-                              ),
-                        border: `1px solid ${getLatencyBlockColor(
-                          messageToLatencyMap[message.id]!,
-                          1,
-                        )}`,
-                        color: getLatencyBlockColor(
-                          messageToLatencyMap[message.id]!,
-                          1,
-                        ),
-                      }}
-                    >
-                      {Math.round(
-                        messageToLatencyMap[message.id]!.duration * 1000,
-                      )}
-                      ms - time to agent response
+                  {message.role === Role.tool_call_result &&
+                  message.name !== "endCall" ? (
+                    <div className="flex items-center gap-2 text-sm italic text-muted-foreground">
+                      <WrenchIcon className="size-4 shrink-0" />
+                      <div>tool call: {message.result}</div>
                     </div>
+                  ) : (
+                    <>
+                      <div className="mb-1 text-xs font-medium">
+                        {message.role === Role.bot
+                          ? botName // call.testAgent?.name
+                          : message.role === Role.user
+                            ? userName
+                            : ""}
+                      </div>
+                      {messageToLatencyMap[message.id] && (
+                        <div
+                          className="mb-1 w-fit rounded-md p-1 text-xs font-medium"
+                          style={{
+                            background:
+                              activeEvalResultId ===
+                              messageToLatencyMap[message.id]!.id
+                                ? getLatencyBlockColor(
+                                    messageToLatencyMap[message.id]!,
+                                    0.5,
+                                  )
+                                : getLatencyBlockColor(
+                                    messageToLatencyMap[message.id]!,
+                                  ),
+                            border: `1px solid ${getLatencyBlockColor(
+                              messageToLatencyMap[message.id]!,
+                              1,
+                            )}`,
+                            color: getLatencyBlockColor(
+                              messageToLatencyMap[message.id]!,
+                              1,
+                            ),
+                          }}
+                        >
+                          {Math.round(
+                            messageToLatencyMap[message.id]!.duration * 1000,
+                          )}
+                          ms - time to agent response
+                        </div>
+                      )}
+                      <div className="text-sm text-muted-foreground">
+                        {message.message}
+                      </div>
+                    </>
                   )}
-                  <div className="text-sm text-muted-foreground">
-                    {message.message}
-                  </div>
                 </div>
                 {isLastEvalMessage && (
                   <div
