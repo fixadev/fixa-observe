@@ -8,9 +8,22 @@ import {
   formatDurationHoursMinutesSeconds,
   getLatencyBlockColor,
 } from "~/lib/utils";
-import { CheckCircleIcon, XCircleIcon } from "@heroicons/react/24/solid";
+import {
+  CheckCircleIcon,
+  WrenchIcon,
+  XCircleIcon,
+} from "@heroicons/react/24/solid";
 import { CallStatus, type LatencyBlock, Role } from "@prisma/client";
 import { LatencyCallHeader, TestCallHeader } from "./CallHeader";
+import { type Message } from "prisma/generated/zod";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "~/components/ui/dialog";
+import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 
 export type CallDetailsType = "test" | "latency";
 
@@ -146,7 +159,8 @@ export default function CallDetails({
   );
 
   const activeEvalMessageIndices = useMemo(() => {
-    if (!activeEvalResultId || !call.evalResults) return new Set<number>();
+    if (!activeEvalResultId || !call.evalResults || !call.latencyBlocks)
+      return new Set<number>();
 
     const activeEval = call.evalResults.find(
       (evalResult) => evalResult.id === activeEvalResultId,
@@ -322,6 +336,17 @@ export default function CallDetails({
     [],
   );
 
+  const timeToEvalResultMap = useMemo(() => {
+    return call.evalResults?.reduce(
+      (acc, evalResult) => {
+        if (!evalResult.secondsFromStart) return acc;
+        acc[evalResult.secondsFromStart] = evalResult;
+        return acc;
+      },
+      {} as Record<number, EvalResultWithIncludes>,
+    );
+  }, [call.evalResults]);
+
   return (
     <div className="flex w-full flex-col rounded-md bg-background px-4 outline-none">
       <div
@@ -361,7 +386,6 @@ export default function CallDetails({
           />
         )}
       </div>
-
       <div ref={scrollContainerRef} className="-mx-4 flex flex-1 flex-col px-4">
         {messagesFiltered.map((message, index) => {
           const evalResults = messageEvalsMap.get(index) ?? [];
@@ -426,46 +450,57 @@ export default function CallDetails({
                       : "",
                   )}
                 >
-                  <div className="mb-1 text-xs font-medium">
-                    {message.role === Role.bot
-                      ? botName // call.testAgent?.name
-                      : message.role === Role.user
-                        ? userName
-                        : ""}
-                  </div>
-                  {messageToLatencyMap[message.id] && (
-                    <div
-                      className="mb-1 w-fit rounded-md p-1 text-xs font-medium"
-                      style={{
-                        background:
-                          activeEvalResultId ===
-                          messageToLatencyMap[message.id]!.id
-                            ? getLatencyBlockColor(
-                                messageToLatencyMap[message.id]!,
-                                0.5,
-                              )
-                            : getLatencyBlockColor(
-                                messageToLatencyMap[message.id]!,
-                              ),
-                        border: `1px solid ${getLatencyBlockColor(
-                          messageToLatencyMap[message.id]!,
-                          1,
-                        )}`,
-                        color: getLatencyBlockColor(
-                          messageToLatencyMap[message.id]!,
-                          1,
-                        ),
-                      }}
-                    >
-                      {Math.round(
-                        messageToLatencyMap[message.id]!.duration * 1000,
+                  {message.role === Role.tool_call_result &&
+                  message.name !== "endCall" &&
+                  timeToEvalResultMap ? (
+                    <ToolCallResult
+                      message={message}
+                      timeToEvalResultMap={timeToEvalResultMap}
+                    />
+                  ) : (
+                    <>
+                      <div className="mb-1 text-xs font-medium">
+                        {message.role === Role.bot
+                          ? botName // call.testAgent?.name
+                          : message.role === Role.user
+                            ? userName
+                            : ""}
+                      </div>
+                      {messageToLatencyMap[message.id] && (
+                        <div
+                          className="mb-1 w-fit rounded-md p-1 text-xs font-medium"
+                          style={{
+                            background:
+                              activeEvalResultId ===
+                              messageToLatencyMap[message.id]!.id
+                                ? getLatencyBlockColor(
+                                    messageToLatencyMap[message.id]!,
+                                    0.5,
+                                  )
+                                : getLatencyBlockColor(
+                                    messageToLatencyMap[message.id]!,
+                                  ),
+                            border: `1px solid ${getLatencyBlockColor(
+                              messageToLatencyMap[message.id]!,
+                              1,
+                            )}`,
+                            color: getLatencyBlockColor(
+                              messageToLatencyMap[message.id]!,
+                              1,
+                            ),
+                          }}
+                        >
+                          {Math.round(
+                            messageToLatencyMap[message.id]!.duration * 1000,
+                          )}
+                          ms - time to agent response
+                        </div>
                       )}
-                      ms - time to agent response
-                    </div>
+                      <div className="text-sm text-muted-foreground">
+                        {message.message}
+                      </div>
+                    </>
                   )}
-                  <div className="text-sm text-muted-foreground">
-                    {message.message}
-                  </div>
                 </div>
                 {isLastEvalMessage && (
                   <div
@@ -533,5 +568,99 @@ export default function CallDetails({
         <div className="h-10 shrink-0" />
       </div>
     </div>
+  );
+}
+
+function ToolCallResult({
+  message,
+  timeToEvalResultMap,
+}: {
+  message: Message;
+  timeToEvalResultMap: Record<number, EvalResultWithIncludes>;
+}) {
+  const evalResult = useMemo(() => {
+    return timeToEvalResultMap[message.secondsFromStart];
+  }, [message.secondsFromStart, timeToEvalResultMap]);
+
+  const status = useMemo(() => {
+    if (!evalResult) return "unknown";
+    return evalResult.success ? "success" : "failure";
+  }, [evalResult]);
+
+  const parsedJson = useMemo(() => {
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      return JSON.parse(message.result) as Record<string, never>;
+    } catch {
+      return null;
+    }
+  }, [message.result]);
+
+  const formattedJson = useMemo(() => {
+    try {
+      return JSON.stringify(parsedJson, null, 2);
+    } catch {
+      return message.result;
+    }
+  }, [message.result, parsedJson]);
+
+  const toolType = useMemo(() => {
+    return parsedJson?.type ?? "tool call";
+  }, [parsedJson]);
+
+  const toolDetails = useMemo(() => {
+    if (!parsedJson) return "";
+
+    if (parsedJson.type === "CHECK_STATE_EVENT") {
+      const json = parsedJson as unknown as {
+        type: string;
+        items: { name: string; totalPrice: string }[];
+      };
+      return json.items
+        ?.map((item) => `${item.name} (${item.totalPrice})`)
+        .join(", ");
+    }
+    return "";
+  }, [parsedJson]);
+
+  return (
+    <Dialog>
+      <DialogTrigger asChild>
+        <div
+          className={cn(
+            "flex cursor-pointer items-center justify-between rounded-md p-2 hover:bg-muted/50",
+            status === "failure" &&
+              "border-red-500 bg-red-500/20 hover:bg-red-500/30",
+          )}
+        >
+          <div className="flex items-center gap-2 text-sm italic text-muted-foreground">
+            <WrenchIcon className="size-4 shrink-0" />
+            <div>
+              {toolType}: {toolDetails}
+            </div>
+          </div>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div>
+                {status === "success" ? (
+                  <CheckCircleIcon className="size-5 shrink-0 text-green-500" />
+                ) : status === "failure" ? (
+                  <XCircleIcon className="size-5 shrink-0 text-red-500" />
+                ) : null}
+              </div>
+            </TooltipTrigger>
+            <TooltipContent>{evalResult?.details}</TooltipContent>
+          </Tooltip>
+        </div>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>tool call details</DialogTitle>
+        </DialogHeader>
+        <pre className="max-h-[60vh] overflow-auto whitespace-pre-wrap rounded-md bg-muted p-4 font-mono text-xs">
+          <code>{formattedJson}</code>
+        </pre>
+      </DialogContent>
+    </Dialog>
   );
 }

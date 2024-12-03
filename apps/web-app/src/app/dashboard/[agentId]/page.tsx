@@ -273,20 +273,22 @@ function RunTestModal({
           <DialogTitle>run test</DialogTitle>
           <DialogDescription>select the scenarios to test.</DialogDescription>
         </DialogHeader>
-        <div className="flex flex-col gap-4">
+        <div className="flex max-h-[80vh] flex-col gap-4">
           {agent.scenarios.length > 0 ? (
-            agent.scenarios.map((scenario) => (
-              <div key={scenario.id} className="flex items-center gap-2">
-                <Switch
-                  id={scenario.id}
-                  checked={selectedScenarios.has(scenario.id)}
-                  onCheckedChange={() => toggleScenario(scenario.id)}
-                />
-                <Label htmlFor={scenario.id} className="text-sm font-medium">
-                  {scenario.name}
-                </Label>
-              </div>
-            ))
+            <div className="flex h-[300px] flex-col gap-4 overflow-y-auto">
+              {agent.scenarios.map((scenario) => (
+                <div key={scenario.id} className="flex items-center gap-2">
+                  <Switch
+                    id={scenario.id}
+                    checked={selectedScenarios.has(scenario.id)}
+                    onCheckedChange={() => toggleScenario(scenario.id)}
+                  />
+                  <Label htmlFor={scenario.id} className="text-sm font-medium">
+                    {scenario.name}
+                  </Label>
+                </div>
+              ))}
+            </div>
           ) : (
             <div className="flex h-32 w-fit flex-col items-start justify-center self-center">
               <div className="text-base font-medium">no scenarios yet.</div>
@@ -300,7 +302,9 @@ function RunTestModal({
           )}
           <Accordion type="single" collapsible>
             <AccordionItem value="test-agents" className="-mx-6 border-none">
-              <AccordionTrigger className="px-6">personas</AccordionTrigger>
+              <AccordionTrigger className="px-6 pt-0">
+                personas
+              </AccordionTrigger>
               <AccordionContent className="h-[300px] overflow-y-auto px-6">
                 <div className="grid grid-cols-1 gap-2">
                   {testAgents?.map((agent) => (

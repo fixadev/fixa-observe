@@ -71,6 +71,7 @@ export type AgentWithIncludes = Prisma.AgentGetPayload<{
     scenarios: {
       include: {
         evals: true;
+        generalEvalOverrides: true;
       };
     };
     tests: {
@@ -79,6 +80,7 @@ export type AgentWithIncludes = Prisma.AgentGetPayload<{
       };
     };
     enabledTestAgents: true;
+    enabledGeneralEvals: true;
   };
 }>;
 

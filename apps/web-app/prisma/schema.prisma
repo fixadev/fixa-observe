@@ -47,6 +47,8 @@ model Agent {
   githubRepoUrl String?
   systemPrompt  String  @default("")
 
+  extraProperties Json @default("{}")
+
   enableSlackNotifications Boolean @default(true)
 
   enabledGeneralEvals Eval[]
@@ -217,6 +219,8 @@ model Eval {
   resultType  EvalResultType
   contentType EvalContentType @default(content)
 
+  toolCallExpectedResult String @default("")
+
   evalResults EvalResult[]
 
   agent   Agent?  @relation(fields: [agentId], references: [id])
@@ -245,15 +249,13 @@ model EvalResult {
 }
 
 model EvalOverride {
-  id        String   @id @default(uuid())
-  createdAt DateTime @default(now())
-
+  id         String   @id @default(uuid())
+  createdAt  DateTime @default(now())
   scenario   Scenario @relation(fields: [scenarioId], references: [id], onDelete: Cascade)
   scenarioId String
-
-  evalId  String
-  eval    Eval    @relation(fields: [evalId], references: [id], onDelete: Cascade)
-  enabled Boolean
+  evalId     String
+  eval       Eval     @relation(fields: [evalId], references: [id], onDelete: Cascade)
+  enabled    Boolean
 }
 
 enum EvalType {

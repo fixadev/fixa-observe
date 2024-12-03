@@ -1,12 +1,7 @@
 "use client";
 
 import { type ScenarioWithEvals, type CreateScenarioSchema } from "~/lib/agent";
-import { Input } from "~/components/ui/input";
-import { Button } from "~/components/ui/button";
-import { TrashIcon } from "@heroicons/react/24/solid";
 import { Label } from "~/components/ui/label";
-import { Textarea } from "~/components/ui/textarea";
-import { useState } from "react";
 import { Card } from "~/components/ui/card";
 import { CopyText } from "~/components/CopyText";
 import { cn } from "~/lib/utils";

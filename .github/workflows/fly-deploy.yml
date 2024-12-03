@@ -56,6 +56,8 @@ jobs:
           # Create .env file with secrets for transcription-service
           cat << EOF > .env
           DEEPGRAM_API_KEY=${{ secrets.DEEPGRAM_API_KEY }}
+          AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}
           EOF
           # Deploy the transcription-service application
           flyctl deploy --remote-only --app $FLY_APP_NAME

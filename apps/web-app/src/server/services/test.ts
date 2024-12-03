@@ -1,7 +1,10 @@
 import { AgentService } from "./agent";
 import { db } from "../db";
 import { CallStatus, type PrismaClient } from "@prisma/client";
-import { initiateVapiCall } from "../helpers/vapiHelpers";
+import {
+  initiateOfOneKioskCall,
+  initiateVapiCall,
+} from "../helpers/vapiHelpers";
 import { type TestAgent } from "prisma/generated/zod";
 import { type TestWithIncludes } from "~/lib/types";
 
@@ -126,29 +129,69 @@ export class TestService {
       })),
     );
 
-    console.log("TESTS", tests);
+    let calls: PromiseSettledResult<{
+      id: string;
+      testAgentVapiId: string;
+      scenarioId: string;
+      status: CallStatus;
+    }>[] = [];
+    if (
+      agent.extraProperties &&
+      (agent.extraProperties as Record<string, unknown>).type === "ofone-kiosk"
+    ) {
+      const extraProperties = agent.extraProperties as {
+        type: string;
+        deviceIds: string[];
+        env: "staging" | "production" | undefined;
+      };
+      const deviceIds = extraProperties.deviceIds;
+      console.log(
+        " <<<<<<<<<<<<<<<<<<<< running KIOSK TEST >>>>>>>>>>>>>>>>>>>>> ",
+      );
+      calls = await Promise.allSettled(
+        tests.map(async (test) => {
+          // const deviceId = "791bc87d-2f47-45fd-9a32-57e01fb02d37"; // staging
+          // const deviceId = "6135989e-3b07-49d3-8d92-9fdaab4c4700"; // ceena
+          const deviceId = deviceIds[0]!;
+          const callId = await initiateOfOneKioskCall(
+            deviceId,
+            test.testAgentVapiId,
+            test.testAgentPrompt,
+            test.scenarioPrompt,
+            extraProperties.env,
+          );
 
-    const calls = await Promise.allSettled(
-      tests.map(async (test) => {
-        const vapiCall = await initiateVapiCall(
-          test.testAgentVapiId,
-          agent.phoneNumber,
-          test.testAgentPrompt,
-          test.scenarioPrompt,
-        );
+          return {
+            id: callId,
+            testAgentVapiId: test.testAgentVapiId,
+            scenarioId: test.scenarioId,
+            status: CallStatus.in_progress,
+          };
+        }),
+      );
+    } else {
+      calls = await Promise.allSettled(
+        tests.map(async (test) => {
+          const vapiCall = await initiateVapiCall(
+            test.testAgentVapiId,
+            agent.phoneNumber,
+            test.testAgentPrompt,
+            test.scenarioPrompt,
+          );
 
-        console.log("VAPI CALL INITIATED", vapiCall);
+          console.log("VAPI CALL INITIATED", vapiCall);
 
-        const callId = vapiCall.id;
+          const callId = vapiCall.id;
 
-        return {
-          id: callId,
-          testAgentVapiId: test.testAgentVapiId,
-          scenarioId: test.scenarioId,
-          status: CallStatus.in_progress,
-        };
-      }),
-    );
+          return {
+            id: callId,
+            testAgentVapiId: test.testAgentVapiId,
+            scenarioId: test.scenarioId,
+            status: CallStatus.in_progress,
+          };
+        }),
+      );
+    }
 
     console.log("CALLS", calls);
 
@@ -181,6 +224,13 @@ export class TestService {
       include: {
         calls: true,
       },
+    });
+  }
+
+  async getLastTest(agentId: string) {
+    return await db.test.findFirst({
+      where: { agentId },
+      orderBy: { createdAt: "desc" },
     });
   }
 }
