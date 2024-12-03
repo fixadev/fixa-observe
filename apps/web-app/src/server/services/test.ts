@@ -1,7 +1,10 @@
 import { AgentService } from "./agent";
 import { db } from "../db";
 import { CallStatus, type PrismaClient } from "@prisma/client";
-import { initiateVapiCall } from "../helpers/vapiHelpers";
+import {
+  initiateOfOneKioskCall,
+  initiateVapiCall,
+} from "../helpers/vapiHelpers";
 import { type TestAgent } from "prisma/generated/zod";
 import { type TestWithIncludes } from "~/lib/types";
 
@@ -126,29 +129,56 @@ export class TestService {
       })),
     );
 
-    console.log("TESTS", tests);
+    let calls: PromiseSettledResult<{
+      id: string;
+      testAgentVapiId: string;
+      scenarioId: string;
+      status: CallStatus;
+    }>[] = [];
+    if (
+      (agent.extraProperties as Record<string, unknown>).type === "ofone-kiosk"
+    ) {
+      calls = await Promise.allSettled(
+        tests.map(async (test) => {
+          const deviceId = "791bc87d-2f47-45fd-9a32-57e01fb02d37";
+          const callId = await initiateOfOneKioskCall(
+            deviceId,
+            test.testAgentVapiId,
+            test.testAgentPrompt,
+            test.scenarioPrompt,
+          );
 
-    const calls = await Promise.allSettled(
-      tests.map(async (test) => {
-        const vapiCall = await initiateVapiCall(
-          test.testAgentVapiId,
-          agent.phoneNumber,
-          test.testAgentPrompt,
-          test.scenarioPrompt,
-        );
+          return {
+            id: callId,
+            testAgentVapiId: test.testAgentVapiId,
+            scenarioId: test.scenarioId,
+            status: CallStatus.in_progress,
+          };
+        }),
+      );
+    } else {
+      calls = await Promise.allSettled(
+        tests.map(async (test) => {
+          const vapiCall = await initiateVapiCall(
+            test.testAgentVapiId,
+            agent.phoneNumber,
+            test.testAgentPrompt,
+            test.scenarioPrompt,
+          );
 
-        console.log("VAPI CALL INITIATED", vapiCall);
+          console.log("VAPI CALL INITIATED", vapiCall);
 
-        const callId = vapiCall.id;
+          const callId = vapiCall.id;
 
-        return {
-          id: callId,
-          testAgentVapiId: test.testAgentVapiId,
-          scenarioId: test.scenarioId,
-          status: CallStatus.in_progress,
-        };
-      }),
-    );
+          return {
+            id: callId,
+            testAgentVapiId: test.testAgentVapiId,
+            scenarioId: test.scenarioId,
+            status: CallStatus.in_progress,
+          };
+        }),
+      );
+    }
 
     console.log("CALLS", calls);
 

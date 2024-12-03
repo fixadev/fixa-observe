@@ -47,7 +47,7 @@ model Agent {
   githubRepoUrl String?
   systemPrompt  String  @default("")
 
-  extraProperties Json?
+  extraProperties Json @default("{}")
 
   enableSlackNotifications Boolean @default(true)
 
