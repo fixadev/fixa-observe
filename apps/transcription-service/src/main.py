@@ -23,6 +23,7 @@ class StartWebsocketCallOfOneRequest(BaseModel):
     device_id: str
     assistant_id: str
     assistant_overrides: dict
+    env: str | None = None
 
 @app.get("/")
 async def health():
@@ -42,7 +43,15 @@ async def transcribe(request: TranscribeRequest):
 
 @app.post("/websocket-call-ofone")
 async def start_websocket_call_ofone(request: StartWebsocketCallOfOneRequest):
-    client = OfOneClient(request.device_id, request.assistant_id, request.assistant_overrides)
+    client_args = {
+        'device_id': request.device_id,
+        'assistant_id': request.assistant_id,
+        'assistant_overrides': request.assistant_overrides
+    }
+    if request.env is not None:
+        client_args['env'] = request.env
+    
+    client = OfOneClient(**client_args)
     call_id = await client.start_call()
     
     asyncio.create_task(client.listen_for_check_state_events())

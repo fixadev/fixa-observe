@@ -173,6 +173,7 @@ export const initiateOfOneKioskCall = async (
   assistantId: string,
   testAgentPrompt?: string,
   scenarioPrompt?: string,
+  callEnv: "staging" | "production" = "staging",
 ) => {
   const { data } = await axios.post<{ callId: string }>(
     `${env.NEXT_PUBLIC_AUDIO_SERVICE_URL}/websocket-call-ofone`,
@@ -201,6 +202,7 @@ export const initiateOfOneKioskCall = async (
           ],
         },
       },
+      env: callEnv,
     },
   );
   return data.callId;
