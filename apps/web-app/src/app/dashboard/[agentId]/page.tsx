@@ -273,9 +273,9 @@ function RunTestModal({
           <DialogTitle>run test</DialogTitle>
           <DialogDescription>select the scenarios to test.</DialogDescription>
         </DialogHeader>
-        <div className="flex max-h-[80vh] flex-col gap-4">
+        <div className="flex max-h-[80vh] flex-col gap-4 overflow-hidden">
           {agent.scenarios.length > 0 ? (
-            <div className="flex h-[300px] flex-col gap-4 overflow-y-auto">
+            <div className="flex flex-col gap-4 overflow-y-auto pb-4">
               {agent.scenarios.map((scenario) => (
                 <div key={scenario.id} className="flex items-center gap-2">
                   <Switch
