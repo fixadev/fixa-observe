@@ -1,5 +1,5 @@
 import { createTRPCRouter, protectedProcedure } from "../trpc";
-import { CreateEvalSchema } from "~/lib/agent";
+import { CreateGeneralEvalSchema } from "~/lib/agent";
 import { AgentService } from "~/server/services/agent";
 import { db } from "~/server/db";
 import { EvalSchema } from "prisma/generated/zod";
@@ -12,7 +12,7 @@ export const evalRouter = createTRPCRouter({
     return await agentServiceInstance.getGeneralEvals(ctx.user.id);
   }),
   createGeneralEval: protectedProcedure
-    .input(CreateEvalSchema)
+    .input(CreateGeneralEvalSchema)
     .mutation(async ({ input, ctx }) => {
       return await agentServiceInstance.createGeneralEval(ctx.user.id, input);
     }),

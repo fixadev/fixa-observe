@@ -48,6 +48,13 @@ export const CreateEvalSchema = z.object({
   ownerId: z.string().nullable(),
 });
 
+export type CreateGeneralEvalSchema = z.infer<typeof CreateGeneralEvalSchema>;
+export const CreateGeneralEvalSchema = CreateEvalSchema.omit({
+  scenarioId: true,
+  agentId: true,
+  ownerId: true,
+});
+
 export type UpdateEvalsSchema = z.infer<typeof updateEvalsSchema>;
 export const updateEvalsSchema = z.array(
   z.union([EvalWithoutScenarioId, CreateEvalSchema]),
