@@ -116,6 +116,10 @@ app.post(
   },
 );
 
+app.post("/schedule-ofone-calls", async (req: Request, res: Response) => {
+  const { device_ids, assistants } = req.body;
+});
+
 app.post("/message/:userId", (req: Request, res: Response) => {
   const { userId } = req.params;
   const { event, data } = req.body;
