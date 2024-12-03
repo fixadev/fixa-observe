@@ -9,8 +9,8 @@ RUN apt-get update && apt-get install -y \
     libsndfile1 \
     ffmpeg \
     # portaudio19-dev python3-pyaudio \
-    # libasound-dev portaudio19-dev libportaudio2 libportaudiocpp0 \
-    libportaudio0 libportaudio2 libportaudiocpp0 portaudio19-dev python3-pyaudio \
+    libasound-dev portaudio19-dev libportaudio2 libportaudiocpp0 python3-pyaudio libav-tools \
+    # libportaudio0 libportaudio2 libportaudiocpp0 portaudio19-dev python3-pyaudio \
     && rm -rf /var/lib/apt/lists/*
 
 # another comment
