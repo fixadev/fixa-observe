@@ -57,7 +57,6 @@ const main = async () => {
     messages: vapiCall.artifact.messages,
     testAgentPrompt: call.scenario.instructions,
     scenario: call.scenario,
-    agent,
   });
 
   let parsedResult: string;
@@ -70,7 +69,6 @@ const main = async () => {
       messages: vapiCall.artifact.messages,
       testAgentPrompt: call.scenario.instructions,
       scenario: call.scenario,
-      agent,
       analysis,
     });
 
@@ -78,12 +76,12 @@ const main = async () => {
       vapiCall.artifact.stereoRecordingUrl,
       geminiPrompt,
     );
-    parsedResult = JSON.stringify(geminiResult.parsedResult);
+    parsedResult = JSON.stringify(geminiResult.textResult);
 
     console.log(
       "GEMINI RESULT for call",
       call.id,
-      JSON.stringify(geminiResult.parsedResult, null, 2),
+      JSON.stringify(geminiResult.textResult, null, 2),
     );
   }
 
@@ -95,9 +93,7 @@ const main = async () => {
 
   const cleanedResultJson = await formatOutput(JSON.stringify(parsedResult));
 
-  const { scenarioEvalResults, generalEvalResults } = cleanedResultJson;
-
-  const evalResults = [...scenarioEvalResults, ...generalEvalResults];
+  const { evalResults } = cleanedResultJson;
 
   const evalResultsWithValidEvals = evalResults.filter((evalResult) =>
     call.scenario?.evals?.some(
