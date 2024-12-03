@@ -100,7 +100,7 @@ export const startCall = async ({
       assistant_id: assistantId,
       assistant_overrides: {
         // for now
-        serverUrl: "http://localhost:8000",
+        serverUrl: env.NODE_SERVER_URL + "/vapi",
         model: {
           provider: "openai",
           model: "gpt-4o",

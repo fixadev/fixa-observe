@@ -145,7 +145,7 @@ export const initiateVapiCall = async (
         number: phoneNumber,
       },
       assistantOverrides: {
-        serverUrl: env.NEXT_PUBLIC_VAPI_SERVER_URL,
+        serverUrl: env.NEXT_PUBLIC_SERVER_URL + "/vapi",
         model: {
           provider: "openai",
           model: "gpt-4o",
@@ -180,7 +180,7 @@ export const queueOfOneKioskCalls = async (
 ) => {
   try {
     return await axios.post(
-      `${env.NEXT_PUBLIC_SOCKET_URL}/schedule-ofone-calls`,
+      `${env.NEXT_PUBLIC_SERVER_URL}/schedule-ofone-calls`,
       {
         device_ids: deviceIds,
         callsToStart,
@@ -205,7 +205,7 @@ export const initiateOfOneKioskCall = async (
       device_id: deviceId,
       assistant_id: assistantId,
       assistant_overrides: {
-        serverUrl: env.NEXT_PUBLIC_VAPI_SERVER_URL,
+        serverUrl: env.NEXT_PUBLIC_SERVER_URL + "/vapi",
         model: {
           provider: "openai",
           model: "gpt-4o",
