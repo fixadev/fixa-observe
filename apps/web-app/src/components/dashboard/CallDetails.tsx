@@ -23,6 +23,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "~/components/ui/dialog";
+import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 
 export type CallDetailsType = "test" | "latency";
 
@@ -577,11 +578,14 @@ function ToolCallResult({
   message: Message;
   timeToEvalResultMap: Record<number, EvalResultWithIncludes>;
 }) {
+  const evalResult = useMemo(() => {
+    return timeToEvalResultMap[message.secondsFromStart];
+  }, [message.secondsFromStart, timeToEvalResultMap]);
+
   const status = useMemo(() => {
-    const evalResult = timeToEvalResultMap[message.secondsFromStart];
     if (!evalResult) return "unknown";
     return evalResult.success ? "success" : "failure";
-  }, [message.secondsFromStart, timeToEvalResultMap]);
+  }, [evalResult]);
 
   const parsedJson = useMemo(() => {
     try {
@@ -625,7 +629,8 @@ function ToolCallResult({
         <div
           className={cn(
             "flex cursor-pointer items-center justify-between rounded-md p-2 hover:bg-muted/50",
-            status === "failure" && "border-red-500 bg-red-500/20",
+            status === "failure" &&
+              "border-red-500 bg-red-500/20 hover:bg-red-500/30",
           )}
         >
           <div className="flex items-center gap-2 text-sm italic text-muted-foreground">
@@ -634,13 +639,18 @@ function ToolCallResult({
               {toolType}: {toolDetails}
             </div>
           </div>
-          <div>
-            {status === "success" ? (
-              <CheckCircleIcon className="size-5 shrink-0 text-green-500" />
-            ) : status === "failure" ? (
-              <XCircleIcon className="size-5 shrink-0 text-red-500" />
-            ) : null}
-          </div>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div>
+                {status === "success" ? (
+                  <CheckCircleIcon className="size-5 shrink-0 text-green-500" />
+                ) : status === "failure" ? (
+                  <XCircleIcon className="size-5 shrink-0 text-red-500" />
+                ) : null}
+              </div>
+            </TooltipTrigger>
+            <TooltipContent>{evalResult?.details}</TooltipContent>
+          </Tooltip>
         </div>
       </DialogTrigger>
       <DialogContent>
