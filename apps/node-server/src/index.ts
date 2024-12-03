@@ -118,9 +118,14 @@ app.post(
 );
 
 app.post("/schedule-ofone-calls", async (req: Request, res: Response) => {
-  const { device_ids, callsToStart } = req.body;
-  scheduleOfOneCalls(device_ids, callsToStart);
-  res.json({ success: true });
+  try {
+    const { device_ids, callsToStart } = req.body;
+    const scheduledCalls = await scheduleOfOneCalls(device_ids, callsToStart);
+    res.json({ success: true, scheduledCalls });
+  } catch (error) {
+    console.error("Error scheduling OFONE calls", error);
+    res.status(500).json({ success: false, error: (error as Error).message });
+  }
 });
 
 app.post("/message/:userId", (req: Request, res: Response) => {

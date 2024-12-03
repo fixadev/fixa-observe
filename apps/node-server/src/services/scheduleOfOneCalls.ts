@@ -9,62 +9,60 @@ const deviceUsageMap = new Map<string, boolean>();
 // Queue to store pending calls
 
 interface QueuedCall {
+  callId: string;
   deviceId: string;
-  testId: string;
-  testAgentId: string;
-  scenarioId: string;
-  ownerId: string;
   assistantId: string;
-  testAgentPrompt: string;
-  scenarioPrompt: string;
-}
-
-export interface CallToStart {
-  testId: string;
-  assistantId: string;
-  testAgentPrompt: string;
-  scenarioPrompt: string;
-  testAgentId: string;
-  scenarioId: string;
-  ownerId: string;
+  testAgentPrompt?: string;
+  scenarioPrompt?: string;
+  callEnv: "staging" | "production";
 }
 
 const callQueue: QueuedCall[] = [];
 
 export function scheduleOfOneCalls(
   deviceIds: string[],
-  callsToStart: CallToStart[],
+  callsToStart: QueuedCall[],
 ) {
-  // Initialize devices as available
-  deviceIds.forEach((id) => {
-    if (!deviceUsageMap.has(id)) {
-      deviceUsageMap.set(id, false);
-    }
-  });
+  try {
+    // Initialize devices as available
+    deviceIds.forEach((id) => {
+      if (!deviceUsageMap.has(id)) {
+        deviceUsageMap.set(id, false);
+      }
+    });
 
-  // Try to start calls or queue them
-  for (const call of callsToStart) {
-    const availableDevice = deviceIds.find((id) => !isDeviceInUse(id));
+    // Try to start calls or queue them
+    for (const callDetails of callsToStart) {
+      const availableDevice = deviceIds.find((id) => !isDeviceInUse(id));
 
-    if (availableDevice) {
-      // Start the call immediately if a device is available
-      startCall({
-        deviceId: availableDevice,
-        assistantId: call.assistantId,
-        testAgentPrompt: call.testAgentPrompt,
-        scenarioPrompt: call.scenarioPrompt,
-        testId: call.testId,
-        testAgentId: call.testAgentId,
-        scenarioId: call.scenarioId,
-        ownerId: call.ownerId,
-      });
-    } else {
-      // Queue the call if no device is available
-      callQueue.push({
-        deviceId: deviceIds[0], // You might want a better selection strategy
-        ...call,
-      });
+      if (availableDevice) {
+        // Start the call immediately if a device is available
+        startCall({
+          callId: callDetails.callId,
+          deviceId: availableDevice,
+          assistantId: callDetails.assistantId,
+          testAgentPrompt: callDetails.testAgentPrompt,
+          scenarioPrompt: callDetails.scenarioPrompt,
+          callEnv: callDetails.callEnv,
+        });
+      } else {
+        // Queue the call if no device is available
+        callQueue.push({
+          deviceId: deviceIds[0], // You might want a better selection strategy
+          callId: callDetails.callId,
+          assistantId: callDetails.assistantId,
+          testAgentPrompt: callDetails.testAgentPrompt,
+          scenarioPrompt: callDetails.scenarioPrompt,
+          callEnv: callDetails.callEnv,
+        });
+      }
     }
+    return callsToStart.map((call) => ({
+      id: call.callId,
+    }));
+  } catch (error) {
+    console.error("Error scheduling OFONE calls", error);
+    throw error;
   }
 }
 
@@ -88,14 +86,12 @@ export function isDeviceInUse(deviceId: string): boolean {
 }
 
 export const startCall = async ({
+  callId,
   deviceId,
   assistantId,
   testAgentPrompt,
   scenarioPrompt,
-  testId,
-  testAgentId,
-  scenarioId,
-  ownerId,
+  callEnv = "staging",
 }: QueuedCall) => {
   const { data } = await axios.post<{ callId: string }>(
     `${env.AUDIO_SERVICE_URL}/websocket-call-ofone`,
@@ -125,17 +121,17 @@ export const startCall = async ({
           ],
         },
       },
+      env: callEnv,
     },
   );
-  await db.call.create({
+  await db.call.update({
+    where: {
+      id: callId,
+    },
     data: {
-      id: data.callId,
       status: CallStatus.in_progress,
-      stereoRecordingUrl: "",
-      testId: testId,
-      testAgentId: testAgentId,
-      scenarioId: scenarioId,
-      ownerId: ownerId,
+      vapiCallId: data.callId,
+      ofOneDeviceId: deviceId,
     },
   });
 };

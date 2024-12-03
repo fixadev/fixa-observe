@@ -93,7 +93,9 @@ model Call {
   createdAt DateTime @default(now())
   ownerId   String?
 
+  vapiCallId         String?
   customerCallId     String?
+  ofOneDeviceId      String?
   status             CallStatus
   result             CallResult?
   failureReason      String?
@@ -169,6 +171,7 @@ enum Role {
 }
 
 enum CallStatus {
+  queued
   in_progress
   analyzing
   completed

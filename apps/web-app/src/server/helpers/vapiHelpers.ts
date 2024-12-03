@@ -168,6 +168,30 @@ export const initiateVapiCall = async (
   }
 };
 
+export const queueOfOneKioskCalls = async (
+  deviceIds: string[],
+  callsToStart: {
+    callId: string;
+    assistantId: string;
+    testAgentPrompt: string;
+    scenarioPrompt: string;
+    callEnv: "staging" | "production";
+  }[],
+) => {
+  try {
+    return await axios.post(
+      `${env.NEXT_PUBLIC_SOCKET_URL}/schedule-ofone-calls`,
+      {
+        device_ids: deviceIds,
+        callsToStart,
+      },
+    );
+  } catch (error) {
+    console.error("Error queuing OFONE kiosk calls", error);
+    throw error;
+  }
+};
+
 export const initiateOfOneKioskCall = async (
   deviceId: string,
   assistantId: string,
