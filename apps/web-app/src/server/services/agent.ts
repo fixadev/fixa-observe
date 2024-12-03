@@ -7,6 +7,7 @@ import {
   type EvalWithoutScenarioId,
   type EvalOverrideWithoutScenarioId,
   type CreateEvalOverrideSchema,
+  type CreateGeneralEvalSchema,
 } from "~/lib/agent";
 import { v4 as uuidv4 } from "uuid";
 import { Prisma, type PrismaClient } from "@prisma/client";
@@ -355,7 +356,7 @@ export class AgentService {
     });
   }
 
-  async createGeneralEval(userId: string, evaluation: EvalWithoutScenarioId) {
+  async createGeneralEval(userId: string, evaluation: CreateGeneralEvalSchema) {
     return await db.eval.create({
       data: { ...evaluation, id: uuidv4(), ownerId: userId },
     });

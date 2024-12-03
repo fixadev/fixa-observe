@@ -16,6 +16,17 @@ import { type EvalWithoutScenarioId, type EvalSchema } from "~/lib/agent";
 import { InputWithLabel } from "~/app/_components/InputWithLabel";
 import { TextAreaWithLabel } from "~/app/_components/TextAreaWithLabel";
 import { TrashIcon } from "@heroicons/react/24/solid";
+import {
+  AlertDialog,
+  AlertDialogCancel,
+  AlertDialogFooter,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogTitle,
+  AlertDialogHeader,
+  AlertDialogTrigger,
+  AlertDialogAction,
+} from "~/components/ui/alert-dialog";
 
 export const CreateGeneralEvalModal = ({
   existingEval,
@@ -39,7 +50,6 @@ export const CreateGeneralEvalModal = ({
       type: "general",
       resultType: "number",
       contentType: "content",
-      enabled: true,
       scenarioId: undefined,
       agentId: null,
       ownerId: null,
@@ -55,7 +65,7 @@ export const CreateGeneralEvalModal = ({
         title: "eval created",
         description: "eval created successfully",
       });
-      setEvaluations((evaluations) => [...evaluations.slice(0, -1)]);
+      setEvaluations((evaluations) => [...evaluations.slice(0, -1), data]);
       setIsModalOpen(false);
     },
   });
@@ -72,6 +82,19 @@ export const CreateGeneralEvalModal = ({
     },
   });
 
+  const { mutate: deleteGeneralEval } = api.eval.deleteGeneralEval.useMutation({
+    onSuccess: () => {
+      setEvaluations((evaluations) =>
+        evaluations.filter((e) => e.id !== evaluation.id),
+      );
+      setIsModalOpen(false);
+      toast({
+        title: "eval deleted",
+        description: "eval deleted successfully",
+      });
+    },
+  });
+
   useEffect(() => {
     if (existingEval) {
       setEvaluation(existingEval);
@@ -84,8 +107,7 @@ export const CreateGeneralEvalModal = ({
         type: "general",
         resultType: "number",
         contentType: "content",
-        enabled: true,
-        scenarioId: undefined,
+        scenarioId: null,
         toolCallExpectedResult: "",
         agentId: null,
         ownerId: null,
@@ -176,9 +198,13 @@ export const CreateGeneralEvalModal = ({
         )}
 
         <div className="flex flex-row justify-between gap-2">
-          <Button variant="ghost" onClick={() => setIsModalOpen(false)}>
-            <TrashIcon className="size-6 text-black" />
-          </Button>
+          <DeleteEvalDialog
+            deleteEval={() => deleteGeneralEval({ id: evaluation.id })}
+          >
+            <Button variant="ghost">
+              <TrashIcon className="size-5 text-black" />
+            </Button>
+          </DeleteEvalDialog>
           <div className="flex flex-row gap-2">
             <Button variant="outline" onClick={() => setIsModalOpen(false)}>
               cancel
@@ -190,3 +216,32 @@ export const CreateGeneralEvalModal = ({
     </Dialog>
   );
 };
+
+function DeleteEvalDialog({
+  deleteEval,
+  children,
+}: {
+  deleteEval: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <AlertDialog>
+      <AlertDialogTrigger asChild>{children}</AlertDialogTrigger>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+          <AlertDialogDescription>
+            This action cannot be undone. This will permanently delete this
+            evaluation.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogAction onClick={() => deleteEval()}>
+            Delete
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+}

@@ -11,7 +11,7 @@ import { Switch } from "~/components/ui/switch";
 import { CreateGeneralEvalModal } from "./CreateGeneralEvalModal";
 import { type EvalSchema } from "~/lib/agent";
 import { EvalContentType } from "@prisma/client";
-import { PencilIcon } from "@heroicons/react/24/outline";
+import { PencilIcon } from "@heroicons/react/24/solid";
 import { useAgent } from "~/app/contexts/UseAgent";
 
 export default function EvalsPage({ params }: { params: { agentId: string } }) {
