@@ -6,7 +6,6 @@ import { sqs } from "../utils/s3Client";
 
 export async function startQueueConsumer() {
   while (true) {
-    console.log("queueUrl", env.SQS_QUEUE_URL);
     const queueUrl = env.SQS_QUEUE_URL;
     try {
       const response = await sqs.receiveMessage({
@@ -58,7 +57,7 @@ export async function startQueueConsumer() {
           });
         }
       } else {
-        console.log("No messages in queue");
+        // console.log("No messages in queue");
       }
     } catch (error) {
       console.error("Error processing queue:", error);

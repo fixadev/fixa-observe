@@ -52,33 +52,45 @@ export const handleVapiCallEnded = async ({
     console.log("O1 ANALYSIS for call", call.id, o1Analysis);
 
     let unparsedResult: string;
-    const useGemini = !scenario.includeDateTime;
-    if (!useGemini) {
-      unparsedResult = o1Analysis.cleanedResult;
-    } else {
-      const geminiPrompt = createGeminiPrompt({
-        callStartedAt: report.startedAt,
-        messages: report.artifact.messages,
-        testAgentPrompt: scenario.instructions,
-        scenario,
-        analysis: o1Analysis,
-      });
+    unparsedResult = o1Analysis.cleanedResult;
 
-      const geminiResult = await analyzeCallWithGemini(
-        report.artifact.stereoRecordingUrl,
-        geminiPrompt,
-      );
+    // const useGemini = !scenario.includeDateTime;
+    // if (!useGemini) {
+    //   unparsedResult = o1Analysis.cleanedResult;
+    // } else {
+    //   const geminiPrompt = createGeminiPrompt({
+    //     callStartedAt: report.startedAt,
+    //     messages: report.artifact.messages,
+    //     testAgentPrompt: scenario.instructions,
+    //     scenario,
+    //     analysis: o1Analysis,
+    //   });
 
-      console.log("GEMINI RESULT for call", call.id, geminiResult.textResult);
-      unparsedResult = geminiResult.textResult ?? "";
-    }
+    //   const geminiResult = await analyzeCallWithGemini(
+    //     report.artifact.stereoRecordingUrl,
+    //     geminiPrompt,
+    //   );
+
+    //   console.log("GEMINI RESULT for call", call.id, geminiResult.textResult);
+    //   unparsedResult = geminiResult.textResult ?? "";
+    // }
 
     const { evalResults } = await formatOutput(unparsedResult);
+
+    console.log(
+      "========================parsedEvalResults==============================",
+      evalResults,
+    );
 
     const validEvalResults = evalResults.filter((evalResult) =>
       [...scenario.evals]?.some(
         (evaluation) => evaluation.id === evalResult.evalId,
       ),
+    );
+
+    console.log(
+      "validEvalResults==============================",
+      validEvalResults,
     );
 
     const success = validEvalResults.every((result) => result.success);

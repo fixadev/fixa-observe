@@ -48,6 +48,10 @@ export const getContext = async (
     });
 
     const agentGeneralEvals = agent?.enabledGeneralEvals;
+    console.log(
+      "=============================agentGeneralEvals==============================",
+      agentGeneralEvals,
+    );
     const filteredAgentGeneralEvals = agentGeneralEvals;
 
     // const filteredAgentGeneralEvals = agentGeneralEvals.filter(
