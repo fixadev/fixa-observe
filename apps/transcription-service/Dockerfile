@@ -8,9 +8,8 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y \
     libsndfile1 \
     ffmpeg \
+    portaudio19-dev python3-pyaudio \
     && rm -rf /var/lib/apt/lists/*
-
-RUN apt install portaudio19-dev python3-pyaudio
 
 # another comment
 RUN python -m venv .venv
