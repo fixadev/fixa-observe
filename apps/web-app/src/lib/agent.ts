@@ -38,7 +38,6 @@ export const CreateEvalSchema = z.object({
   type: z.nativeEnum(EvalType),
   resultType: z.nativeEnum(EvalResultType),
   contentType: z.nativeEnum(EvalContentType),
-  enabled: z.boolean(),
   id: z.string(),
   createdAt: z.coerce.date(),
   name: z.string(),

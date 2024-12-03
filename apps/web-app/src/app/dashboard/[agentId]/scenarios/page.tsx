@@ -85,7 +85,6 @@ export default function AgentScenariosPage({
                   evals: scenario.evals.map((e) => ({
                     ...e,
                     scenarioId: scenario.id,
-                    enabled: true,
                   })),
                   generalEvalOverrides: scenario.generalEvalOverrides.map(
                     (e) => ({
