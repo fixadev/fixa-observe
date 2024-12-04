@@ -46,6 +46,7 @@ export const CreateEvalSchema = z.object({
   scenarioId: z.string().optional(),
   agentId: z.string().nullable(),
   ownerId: z.string().nullable(),
+  isCritical: z.boolean(),
 });
 
 export type CreateGeneralEvalSchema = z.infer<typeof CreateGeneralEvalSchema>;
