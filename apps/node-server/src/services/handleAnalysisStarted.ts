@@ -21,7 +21,7 @@ export const handleAnalysisStarted = async (
       return;
     }
     const updatedCall = await db.call.update({
-      where: { id: callId },
+      where: { id: call.id },
       data: { status: CallStatus.analyzing },
     });
 
