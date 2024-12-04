@@ -1,11 +1,7 @@
 import { AgentService } from "./agent";
 import { db } from "../db";
 import { CallStatus, type PrismaClient } from "@prisma/client";
-import {
-  initiateOfOneKioskCall,
-  initiateVapiCall,
-  queueOfOneKioskCalls,
-} from "../helpers/vapiHelpers";
+import { initiateVapiCall, queueOfOneKioskCalls } from "../helpers/vapiHelpers";
 import { type TestAgent } from "prisma/generated/zod";
 import { type TestWithIncludes } from "~/lib/types";
 import { randomUUID } from "crypto";

@@ -180,7 +180,7 @@ export const queueOfOneKioskCalls = async (
 ) => {
   try {
     return await axios.post(
-      `${env.NEXT_PUBLIC_SERVER_URL}/schedule-ofone-calls`,
+      `${env.NEXT_PUBLIC_SERVER_URL}/queue-ofone-kiosk-calls`,
       {
         device_ids: deviceIds,
         callsToStart,

@@ -13,8 +13,8 @@ export const handleAnalysisStarted = async (
       console.error("No call ID found in Vapi call ended report");
       return;
     }
-    const call = await db.call.findUnique({
-      where: { id: callId },
+    const call = await db.call.findFirst({
+      where: { vapiCallId: callId },
     });
     if (!call) {
       console.error("Call not found in database", callId);

@@ -66,7 +66,9 @@ export function TestCallHeader({
             <Spinner className="size-4" />{" "}
             {call.status === CallStatus.analyzing
               ? "analyzing call..."
-              : "call in progress..."}
+              : call.status === CallStatus.in_progress
+                ? "call in progress..."
+                : "call queued..."}
           </div>
         )}
         <div className="flex w-fit flex-row flex-wrap gap-2">

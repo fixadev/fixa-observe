@@ -117,7 +117,7 @@ app.post(
   },
 );
 
-app.post("/schedule-ofone-calls", async (req: Request, res: Response) => {
+app.post("/queue-ofone-kiosk-calls", async (req: Request, res: Response) => {
   try {
     const { device_ids, callsToStart } = req.body;
     const scheduledCalls = await scheduleOfOneCalls(device_ids, callsToStart);

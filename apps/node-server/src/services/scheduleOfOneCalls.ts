@@ -94,6 +94,7 @@ export const startCall = async ({
   callEnv = "staging",
 }: QueuedCall) => {
   try {
+    setDeviceInUse(deviceId);
     console.log(
       "========================Starting OFONE call=========================",
       callId,

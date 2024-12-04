@@ -34,7 +34,8 @@ export default function TestCard({
       test.calls.filter(
         (call) =>
           call.status === CallStatus.in_progress ||
-          call.status === CallStatus.analyzing,
+          call.status === CallStatus.analyzing ||
+          call.status === CallStatus.queued,
       ),
     [test.calls],
   );
