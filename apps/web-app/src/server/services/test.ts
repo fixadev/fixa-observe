@@ -127,13 +127,7 @@ export class TestService {
       })),
     );
 
-    let calls: PromiseSettledResult<{
-      id: string;
-      vapiCallId: string | undefined;
-      testAgentVapiId: string;
-      scenarioId: string;
-      status: CallStatus;
-    }>[] = [];
+    // OFONE KIOSK TEST
     if (
       agent.extraProperties &&
       (agent.extraProperties as Record<string, unknown>).type === "ofone-kiosk"
@@ -178,8 +172,10 @@ export class TestService {
       });
       await queueOfOneKioskCalls(deviceIds, callsToStart);
       return test;
+
+      // NORMAL TEST
     } else {
-      calls = await Promise.allSettled(
+      const calls = await Promise.allSettled(
         tests.map(async (test) => {
           const vapiCall = await initiateVapiCall(
             test.testAgentVapiId,
@@ -187,8 +183,6 @@ export class TestService {
             test.testAgentPrompt,
             test.scenarioPrompt,
           );
-
-          console.log("VAPI CALL INITIATED", vapiCall);
 
           return {
             id: randomUUID(),
@@ -199,7 +193,6 @@ export class TestService {
           };
         }),
       );
-      console.log("CALLS", calls);
 
       const fulfilledCalls = calls.filter(
         (call) => call.status === "fulfilled",
