@@ -121,3 +121,10 @@ export const OrderBySchema = z.object({
   property: z.string(),
   direction: z.enum(["asc", "desc"]),
 });
+
+export type ExtraProperties = z.infer<typeof ExtraPropertiesSchema>;
+export const ExtraPropertiesSchema = z
+  .object({
+    type: z.enum(["ofone-kiosk"]),
+  })
+  .catchall(z.any());

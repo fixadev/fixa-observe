@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import Spinner from "~/components/Spinner";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
@@ -26,7 +26,8 @@ import { useRouter } from "next/navigation";
 import { Switch } from "~/components/ui/switch";
 import { useUser } from "@clerk/nextjs";
 import { cn } from "~/lib/utils";
-import { type AgentWithIncludes } from "~/lib/types";
+import { type ExtraProperties, type AgentWithIncludes } from "~/lib/types";
+import { OfOneKioskSettings } from "./_components/OfOneKioskSettings";
 
 export default function AgentSettingsPage({
   params,
@@ -34,6 +35,7 @@ export default function AgentSettingsPage({
   params: { agentId: string };
 }) {
   const [agentState, setAgentState] = useState<AgentWithIncludes | null>(null);
+  const originalAgentState = useRef<AgentWithIncludes | null>(null);
 
   const { toast } = useToast();
   const { agent, refetch, setAgent } = useAgent(params.agentId);
@@ -44,8 +46,8 @@ export default function AgentSettingsPage({
     [user],
   );
 
-  const { mutate: updateAgentSettings, isPending: isUpdatingSettings } =
-    api.agent.updateSettings.useMutation({
+  const { mutate: updateAgent, isPending: isUpdatingSettings } =
+    api.agent.updateAgent.useMutation({
       onSuccess: () => {
         toast({
           title: "Settings saved",
@@ -57,6 +59,7 @@ export default function AgentSettingsPage({
   useEffect(() => {
     if (agent) {
       setAgentState(agent);
+      originalAgentState.current = agent;
     }
   }, [agent]);
 
@@ -69,14 +72,22 @@ export default function AgentSettingsPage({
       });
       return;
     }
-    updateAgentSettings({
+    console.log("updating agent", agentState.extraProperties);
+    updateAgent({
       id: agentState.id,
-      phoneNumber: agentState.phoneNumber,
-      name: agentState.name,
-      enableSlackNotifications: agentState.enableSlackNotifications,
+      agent: {
+        phoneNumber: agentState.phoneNumber,
+        name: agentState.name,
+        enableSlackNotifications: agentState.enableSlackNotifications,
+        extraProperties: agentState.extraProperties,
+      },
     });
     setAgent(agentState);
-  }, [agentState, toast, updateAgentSettings, setAgent]);
+  }, [agentState, toast, updateAgent, setAgent]);
+
+  const handleDiscardChanges = useCallback(() => {
+    setAgentState(originalAgentState.current);
+  }, [originalAgentState]);
 
   if (!agentState) return null;
 
@@ -89,23 +100,33 @@ export default function AgentSettingsPage({
             <div className="font-medium">settings</div>
           </Link>
         </div>
-        <Button
-          className="flex w-32 items-center gap-2"
-          disabled={
+        <div className="flex items-center gap-2">
+          {!(
             JSON.stringify(agent) === JSON.stringify(agentState) ||
             isUpdatingSettings
-          }
-          onClick={handleSave}
-        >
-          {isUpdatingSettings ? (
-            <>
-              <span>saving...</span>
-              <Spinner />
-            </>
-          ) : (
-            "save changes"
+          ) && (
+            <Button variant="outline" onClick={handleDiscardChanges}>
+              discard
+            </Button>
           )}
-        </Button>
+          <Button
+            className="flex w-32 items-center gap-2"
+            disabled={
+              JSON.stringify(agent) === JSON.stringify(agentState) ||
+              isUpdatingSettings
+            }
+            onClick={handleSave}
+          >
+            {isUpdatingSettings ? (
+              <>
+                <span>saving...</span>
+                <Spinner />
+              </>
+            ) : (
+              "save changes"
+            )}
+          </Button>
+        </div>
       </div>
       <div className="container flex flex-col gap-6 p-4">
         <div className="flex flex-col gap-2">
@@ -133,6 +154,13 @@ export default function AgentSettingsPage({
             }}
           />
         </div>
+        {(agentState?.extraProperties as ExtraProperties)?.type ===
+          "ofone-kiosk" && (
+          <OfOneKioskSettings
+            agentState={agentState}
+            setAgentState={setAgentState}
+          />
+        )}
         <div className="flex flex-col gap-2">
           <div className="flex items-center gap-2">
             <Label>slack app</Label>
