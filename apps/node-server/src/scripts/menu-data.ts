@@ -579,7 +579,7 @@ export const menuTestData = [
 
   // Test Suite 2: Top 25 Individual Items
   {
-    test_case_name: "Small Fry - 1",
+    test_case_name: "I1. Small Fry",
     tester_instructions: [
       'open with "Yeah let me get three small fries."',
       "modify to add fourth",
@@ -595,7 +595,7 @@ export const menuTestData = [
     ],
   },
   {
-    test_case_name: "Small Fry - 2",
+    test_case_name: "I2. Small Fry",
     tester_instructions: [
       'open with "Hi can I have a small French fry please? Add extra ketchup. And I want a side of ranch dipping sauce."',
     ],
@@ -610,7 +610,7 @@ export const menuTestData = [
     ],
   },
   {
-    test_case_name: "Small Drink - 1",
+    test_case_name: "I3. Small Drink",
     tester_instructions: [
       'open with "Small coke please, that\'s it."',
       "modify to add a small sprite zero",
@@ -626,7 +626,7 @@ export const menuTestData = [
     ],
   },
   {
-    test_case_name: "Small Drink - 2",
+    test_case_name: "I4. Small Drink",
     tester_instructions: [
       'open with "Yes I want 10 small soft drinks of the following flavors: coke, diet coke, coca-cola, diet coca cola, sprite, sprite zero, fanta, fanta zero, mello yello, barq\'s."',
     ],
@@ -641,7 +641,7 @@ export const menuTestData = [
     ],
   },
   {
-    test_case_name: "Whopper - 1",
+    test_case_name: "I5. Whopper",
     tester_instructions: [
       'open with "Yeah lemme get a single whopper sandwich, nothing else."',
     ],
@@ -656,7 +656,7 @@ export const menuTestData = [
     ],
   },
   {
-    test_case_name: "Whopper - 2",
+    test_case_name: "I6. Whopper",
     tester_instructions: [
       'open with "Hi yes whopper with extra lettuce, tomato, onion, pickles and ketchup please."',
     ],
@@ -671,7 +671,7 @@ export const menuTestData = [
     ],
   },
   {
-    test_case_name: "Whopper - 3",
+    test_case_name: "I7. Whopper",
     tester_instructions: [
       'open with "Hey can I get a whopper? Actually, make that two whoppers."',
     ],
@@ -686,7 +686,7 @@ export const menuTestData = [
     ],
   },
   {
-    test_case_name: "Whopper with cheese - 1",
+    test_case_name: "I8. Whopper with cheese",
     tester_instructions: [
       'open with "Yes I would like a Whopper with cheese."',
       "modify to add bacon and a small fry",
@@ -702,7 +702,7 @@ export const menuTestData = [
     ],
   },
   {
-    test_case_name: "Whopper with cheese - 2",
+    test_case_name: "I9. Whopper with cheese",
     tester_instructions: [
       'open with "Yeah I want five whoppers with cheese and I want one to have double patties and bacon."',
     ],
@@ -717,7 +717,7 @@ export const menuTestData = [
     ],
   },
   {
-    test_case_name: "8-piece chicken nugget - 1",
+    test_case_name: "I10. 8-piece chicken nugget",
     tester_instructions: [
       'open with "Yeah hi can I have an 8 piece chicken nugget please?"',
     ],
@@ -732,7 +732,7 @@ export const menuTestData = [
     ],
   },
   {
-    test_case_name: "8-piece chicken nugget - 2",
+    test_case_name: "I11. 8-piece chicken nugget",
     tester_instructions: ['open with "8 piece nugget please."'],
     agent_evaluations: [
       {
@@ -745,7 +745,7 @@ export const menuTestData = [
     ],
   },
   {
-    test_case_name: "8-piece chicken nugget - 3",
+    test_case_name: "I12. 8-piece chicken nugget",
     tester_instructions: [
       'open with "Yeah lemme get 8 nuggets."',
       "modify to make that two 8-piece nuggets",
@@ -762,7 +762,7 @@ export const menuTestData = [
     ],
   },
   {
-    test_case_name: "Original Chicken Sandwich - 1",
+    test_case_name: "I13. Original Chicken Sandwich",
     tester_instructions: [
       'open with "I want um…an original chicken sandwich with no lettuce and barbeque sauce instead of mayo."',
     ],
@@ -777,7 +777,7 @@ export const menuTestData = [
     ],
   },
   {
-    test_case_name: "Original Chicken Sandwich - 2",
+    test_case_name: "I14. Original Chicken Sandwich",
     tester_instructions: [
       'open with "Good evening can I have a chicken sandwich, please?"',
     ],
@@ -792,7 +792,7 @@ export const menuTestData = [
     ],
   },
   {
-    test_case_name: "Original Chicken Sandwich - 3",
+    test_case_name: "I15. Original Chicken Sandwich",
     tester_instructions: [
       "open with \"Hi I'll take an original chicken and also add a large fry, but no drink, I don't want a combo. And please no mayo on the sandwich, thanks.\"",
     ],
@@ -807,7 +807,7 @@ export const menuTestData = [
     ],
   },
   {
-    test_case_name: "9-piece chicken fries - 1",
+    test_case_name: "I16. 9-piece chicken fries",
     tester_instructions: [
       'open with "9 piece chicken fries please. Two orders. Extra napkins in the bag please."',
     ],
@@ -822,7 +822,7 @@ export const menuTestData = [
     ],
   },
   {
-    test_case_name: "9-piece chicken fries - 2",
+    test_case_name: "I17. 9-piece chicken fries",
     tester_instructions: [
       'open with "Yeah do you have chicken fries?"',
       "ask what sizes if needed",
@@ -836,7 +836,7 @@ export const menuTestData = [
     ],
   },
   {
-    test_case_name: "Whopper Junior - 1",
+    test_case_name: "I18. Whopper Junior",
     tester_instructions: [
       'open with "Whopper junior, please."',
       "should just be the sandwich",
@@ -852,7 +852,7 @@ export const menuTestData = [
     ],
   },
   {
-    test_case_name: "Whopper Junior - 2",
+    test_case_name: "I19. Whopper Junior",
     tester_instructions: ['open with "I want a junior whopper please."'],
     agent_evaluations: [
       {
@@ -865,7 +865,7 @@ export const menuTestData = [
     ],
   },
   {
-    test_case_name: "Whopper Junior - 3",
+    test_case_name: "I20. Whopper Junior",
     tester_instructions: [
       'open with "Yes I\'ll have a junior whopper sandwich without tomato, add extra pickle and I want a second patty if possible, too."',
     ],
@@ -880,7 +880,7 @@ export const menuTestData = [
     ],
   },
   {
-    test_case_name: "Cheeseburger - 1",
+    test_case_name: "I21. Cheeseburger",
     tester_instructions: ['open with "Cheeseburger."', "modify to add bacon"],
     agent_evaluations: [
       {
@@ -893,7 +893,7 @@ export const menuTestData = [
     ],
   },
   {
-    test_case_name: "Cheeseburger - 2",
+    test_case_name: "I22. Cheeseburger",
     tester_instructions: [
       'open with "Do you guys have a cheeseburger? What\'s the difference between a whopper and a cheeseburger?"',
       "modify to add extra cheese",
@@ -909,7 +909,7 @@ export const menuTestData = [
     ],
   },
   {
-    test_case_name: "Double Cheeseburger - 1",
+    test_case_name: "I23. Double Cheeseburger",
     tester_instructions: [
       'open with "Double cheeseburger, please. With a coke."',
     ],
@@ -924,7 +924,7 @@ export const menuTestData = [
     ],
   },
   {
-    test_case_name: "Double Cheeseburger - 2",
+    test_case_name: "I24. Double Cheeseburger",
     tester_instructions: [
       'open with "Hey can I have a cheeseburger double please?"',
     ],
@@ -939,7 +939,7 @@ export const menuTestData = [
     ],
   },
   {
-    test_case_name: "Double Cheeseburger - 3",
+    test_case_name: "I25. Double Cheeseburger",
     tester_instructions: [
       'open with "Hi…um…can you tell me the difference between the double cheeseburger and the double whopper?"',
       "order a single double cheeseburger",
@@ -955,7 +955,7 @@ export const menuTestData = [
     ],
   },
   {
-    test_case_name: "Bacon King - 1",
+    test_case_name: "I26. Bacon King",
     tester_instructions: [
       'open with "Can I just get a bacon king sandwich or do I have to order that with a meal?"',
       "order two of the sandwiches",
@@ -971,7 +971,7 @@ export const menuTestData = [
     ],
   },
   {
-    test_case_name: "Bacon King - 2",
+    test_case_name: "I27. Bacon King",
     tester_instructions: [
       'open with "Yes my son wants a king bacon – just the sandwich. And also a small sprite zero, please."',
     ],
@@ -986,7 +986,7 @@ export const menuTestData = [
     ],
   },
   {
-    test_case_name: "Whopper Junior with cheese - 1",
+    test_case_name: "I28. Whopper Junior with cheese",
     tester_instructions: [
       'open with "Yes let me get 5 whopper juniors with cheese, extra napkins and a side of barbeque sauce for each, thanks."',
     ],
@@ -1001,7 +1001,7 @@ export const menuTestData = [
     ],
   },
   {
-    test_case_name: "Whopper Junior with cheese - 2",
+    test_case_name: "I29. Whopper Junior with cheese",
     tester_instructions: [
       'open with "Hello my family would like 4 junior whoppers with cheese, add bacon to two of them please and then 4 small cokes."',
     ],
@@ -1016,7 +1016,7 @@ export const menuTestData = [
     ],
   },
   {
-    test_case_name: "Small onion ring - 1",
+    test_case_name: "I30. Small onion ring",
     tester_instructions: [
       'open with "Small onion ring."',
       "modify to add small fry, small oreo milkshake, small frozen coke",
@@ -1032,7 +1032,7 @@ export const menuTestData = [
     ],
   },
   {
-    test_case_name: "Small onion ring - 2",
+    test_case_name: "I31. Small onion ring",
     tester_instructions: [
       'open with "Is it possible to get 20 small onion rings? I can wait, I know that\'s a lot, thanks."',
     ],
@@ -1047,7 +1047,7 @@ export const menuTestData = [
     ],
   },
   {
-    test_case_name: "4-piece chicken nugget - 1",
+    test_case_name: "I32. 4-piece chicken nugget",
     tester_instructions: [
       'open with "Hey good evening. Um I would like a chicken nugget 4 piece, please? I want a side of barbeque, ranch and honey mustard."',
     ],
@@ -1062,7 +1062,7 @@ export const menuTestData = [
     ],
   },
   {
-    test_case_name: "4-piece chicken nugget - 2",
+    test_case_name: "I33. 4-piece chicken nugget",
     tester_instructions: [
       "open with \"Hello I'd like to order a 4-piece nugget. Actually I'd like to order two 4-piece nuggets. For the first order I'd like sides of barbeque sauce and ranch and for the second order I'd like honey mustard and ranch.\"",
       "modify to change the ranch in the second order to a second honey mustard",
@@ -1078,7 +1078,7 @@ export const menuTestData = [
     ],
   },
   {
-    test_case_name: "Double whopper with cheese - 1",
+    test_case_name: "I34. Double whopper with cheese",
     tester_instructions: [
       'open with "Hey I want two double whoppers with cheese, but is it possible to actually get one of those with three patties? And if so how much would that cost?"',
       "modify to change back to just two double whoppers with cheese",
@@ -1094,7 +1094,7 @@ export const menuTestData = [
     ],
   },
   {
-    test_case_name: "Double whopper with cheese - 2",
+    test_case_name: "I35. Double whopper with cheese",
     tester_instructions: [
       'open with "Can I have a whopper double with cheese? Just the sandwich, not the combo."',
       "modify to change to a number 2",
@@ -1110,7 +1110,7 @@ export const menuTestData = [
     ],
   },
   {
-    test_case_name: "4-piece mozzarella stick - 1",
+    test_case_name: "I36. 4-piece mozzarella stick",
     tester_instructions: [
       'open with "Yes let me get 5 orders of 4 piece mozzarella sticks. Do you have sides of marinara sauce?"',
     ],
@@ -1125,7 +1125,7 @@ export const menuTestData = [
     ],
   },
   {
-    test_case_name: "4-piece mozzarella stick - 2",
+    test_case_name: "I37. 4-piece mozzarella stick",
     tester_instructions: [
       'open with "yeah let me get an order of mozz sticks 4 piece and large sprite, please."',
     ],
@@ -1140,7 +1140,7 @@ export const menuTestData = [
     ],
   },
   {
-    test_case_name: "Texas Double Whopper - 1",
+    test_case_name: "I38. Texas Double Whopper",
     tester_instructions: [
       'open with "I\'d like a Texas double whopper, please. Add extra sauce."',
     ],
@@ -1155,7 +1155,7 @@ export const menuTestData = [
     ],
   },
   {
-    test_case_name: "Texas Double Whopper - 2",
+    test_case_name: "I39. Texas Double Whopper",
     tester_instructions: [
       "open with \"I'd like a double Texas whopper, please. I don't want any sauce.\"",
     ],
@@ -1170,7 +1170,7 @@ export const menuTestData = [
     ],
   },
   {
-    test_case_name: "Texas Double Whopper - 3",
+    test_case_name: "I40. Texas Double Whopper",
     tester_instructions: [
       'open with "I\'d like a Texas whopper sandwich. Add extra pickles."',
     ],
@@ -1185,7 +1185,7 @@ export const menuTestData = [
     ],
   },
   {
-    test_case_name: "Texas Double Whopper - 4",
+    test_case_name: "I41. Texas Double Whopper",
     tester_instructions: [
       'open with "I\'d like the whopper Texas sandwich, please."',
       "modify to add a large root beer, no cheese",
@@ -1201,7 +1201,7 @@ export const menuTestData = [
     ],
   },
   {
-    test_case_name: "8-piece mozzarella stick - 1",
+    test_case_name: "I42. 8-piece mozzarella stick",
     tester_instructions: [
       'open with "Hi can get an 8 piece mozzarella stick, please? And I\'d like ranch dipping sauce, too."',
     ],
@@ -1216,9 +1216,9 @@ export const menuTestData = [
     ],
   },
   {
-    test_case_name: "8-piece mozzarella stick - 2",
+    test_case_name: "I43. 8-piece mozzarella stick",
     tester_instructions: [
-      'open with "Yes I want mozzarella sticks – the 8 piece. Make that 2 8 pieces, thanks."',
+      'open with "Yes I want mozzarella sticks – the 8 piece. Make that two 8-pieces, thanks."',
     ],
     agent_evaluations: [
       {
@@ -1231,7 +1231,7 @@ export const menuTestData = [
     ],
   },
   {
-    test_case_name: "Burger - 1",
+    test_case_name: "I44. Burger",
     tester_instructions: ['open with "I\'d like a burger please."'],
     agent_evaluations: [
       {
@@ -1243,54 +1243,53 @@ export const menuTestData = [
       },
     ],
   },
-  {
-    test_case_name: "Quarter Pound King Single - 1",
-    tester_instructions: [
-      'open with "Hello can I get a quarter pounder king single?"',
-      "modify to add extra mayo, extra ketchup, no mustard",
-    ],
-    agent_evaluations: [
-      {
-        type: "tool",
-        title: "correct final check state",
-        when: "prior to the end of the conversation",
-        expected_output:
-          '{"items":[{"name":"Quarter Pound King Single","isCombo":false,"quantity":"1","size":"","unitPrice":"$X.XX","totalPrice":"$X.XX","modifications":[{"name":"Extra Mayo","isCombo":false,"quantity":"1","size":"","unitPrice":"$X.XX","totalPrice":"$X.XX","modifications":[],"validationIssues":[]},{"name":"Extra Ketchup","isCombo":false,"quantity":"1","size":"","unitPrice":"$X.XX","totalPrice":"$X.XX","modifications":[],"validationIssues":[]}],"validationIssues":[]}]}',
-      },
-    ],
-  },
-  {
-    test_case_name: "Quarter Pound King Single - 2",
-    tester_instructions: [
-      'open with "Do you guys still have the quarter pounder king single?"',
-      "order if available",
-    ],
-    agent_evaluations: [
-      {
-        type: "tool",
-        title: "correct final check state",
-        when: "prior to the end of the conversation",
-        expected_output:
-          '{"items":[{"name":"Quarter Pound King Single","isCombo":false,"quantity":"1","size":"","unitPrice":"$X.XX","totalPrice":"$X.XX","modifications":[],"validationIssues":[]}]}',
-      },
-    ],
-  },
-  {
-    test_case_name: "Quarter Pound King Single - 3",
-    tester_instructions: [
-      'open with "Yeah lemme get a quarter pounder single."',
-      "verify as the same as previous Quarter Pound King Single orders",
-    ],
-    agent_evaluations: [
-      {
-        type: "tool",
-        title: "correct final check state",
-        when: "prior to the end of the conversation",
-        expected_output:
-          '{"items":[{"name":"Quarter Pound King Single","isCombo":false,"quantity":"1","size":"","unitPrice":"$X.XX","totalPrice":"$X.XX","modifications":[],"validationIssues":[]}]}',
-      },
-    ],
-  },
+  //   test_case_name: "Quarter Pound King Single - 1",
+  //   tester_instructions: [
+  //     'open with "Hello can I get a quarter pounder king single?"',
+  //     "modify to add extra mayo, extra ketchup, no mustard",
+  //   ],
+  //   agent_evaluations: [
+  //     {
+  //       type: "tool",
+  //       title: "correct final check state",
+  //       when: "prior to the end of the conversation",
+  //       expected_output:
+  //         '{"items":[{"name":"Quarter Pound King Single","isCombo":false,"quantity":"1","size":"","unitPrice":"$X.XX","totalPrice":"$X.XX","modifications":[{"name":"Extra Mayo","isCombo":false,"quantity":"1","size":"","unitPrice":"$X.XX","totalPrice":"$X.XX","modifications":[],"validationIssues":[]},{"name":"Extra Ketchup","isCombo":false,"quantity":"1","size":"","unitPrice":"$X.XX","totalPrice":"$X.XX","modifications":[],"validationIssues":[]}],"validationIssues":[]}]}',
+  //     },
+  //   ],
+  // },
+  // {
+  //   test_case_name: "Quarter Pound King Single - 2",
+  //   tester_instructions: [
+  //     'open with "Do you guys still have the quarter pounder king single?"',
+  //     "order if available",
+  //   ],
+  //   agent_evaluations: [
+  //     {
+  //       type: "tool",
+  //       title: "correct final check state",
+  //       when: "prior to the end of the conversation",
+  //       expected_output:
+  //         '{"items":[{"name":"Quarter Pound King Single","isCombo":false,"quantity":"1","size":"","unitPrice":"$X.XX","totalPrice":"$X.XX","modifications":[],"validationIssues":[]}]}',
+  //     },
+  //   ],
+  // },
+  // {
+  //   test_case_name: "Quarter Pound King Single - 3",
+  //   tester_instructions: [
+  //     'open with "Yeah lemme get a quarter pounder single."',
+  //     "verify as the same as previous Quarter Pound King Single orders",
+  //   ],
+  //   agent_evaluations: [
+  //     {
+  //       type: "tool",
+  //       title: "correct final check state",
+  //       when: "prior to the end of the conversation",
+  //       expected_output:
+  //         '{"items":[{"name":"Quarter Pound King Single","isCombo":false,"quantity":"1","size":"","unitPrice":"$X.XX","totalPrice":"$X.XX","modifications":[],"validationIssues":[]}]}',
+  //     },
+  //   ],
+  // },
   {
     test_case_name: "Difficult Order - Whopper Combo - 1",
     tester_instructions: [

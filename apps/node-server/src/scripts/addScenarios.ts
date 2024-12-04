@@ -20,13 +20,26 @@ const addScenarios = async () => {
                 },
               },
               evals: {
-                create: scenario.agent_evaluations.map((evaluation) => ({
-                  name: evaluation.title,
-                  description: evaluation.instructions,
-                  type: "scenario",
-                  contentType: EvalContentType.content,
-                  resultType: EvalResultType.boolean,
-                })),
+                create: scenario.agent_evaluations.map((evaluation) =>
+                  evaluation.type === "content"
+                    ? {
+                        name: evaluation.title,
+                        description: evaluation.instructions ?? "",
+                        type: "scenario",
+                        contentType: EvalContentType.content,
+                        resultType: EvalResultType.boolean,
+                      }
+                    : {
+                        name: evaluation.title,
+                        description:
+                          "this evaluation should be applied to the last check state in the conversation",
+                        type: "scenario",
+                        toolCallExpectedResult:
+                          evaluation.expected_output ?? "",
+                        contentType: EvalContentType.tool,
+                        resultType: EvalResultType.boolean,
+                      },
+                ),
               },
             },
           });
