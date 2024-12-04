@@ -14,7 +14,7 @@ interface QueuedCall {
   assistantId: string;
   testAgentPrompt?: string;
   scenarioPrompt?: string;
-  callEnv: "staging" | "production";
+  baseUrl: string;
 }
 
 const callQueue: QueuedCall[] = [];
@@ -43,7 +43,7 @@ export function scheduleOfOneCalls(
           assistantId: callDetails.assistantId,
           testAgentPrompt: callDetails.testAgentPrompt,
           scenarioPrompt: callDetails.scenarioPrompt,
-          callEnv: callDetails.callEnv,
+          baseUrl: callDetails.baseUrl,
         });
       } else {
         // Queue the call if no device is available
@@ -53,7 +53,7 @@ export function scheduleOfOneCalls(
           assistantId: callDetails.assistantId,
           testAgentPrompt: callDetails.testAgentPrompt,
           scenarioPrompt: callDetails.scenarioPrompt,
-          callEnv: callDetails.callEnv,
+          baseUrl: callDetails.baseUrl,
         });
       }
     }
@@ -91,7 +91,7 @@ export const startCall = async ({
   assistantId,
   testAgentPrompt,
   scenarioPrompt,
-  callEnv = "staging",
+  baseUrl,
 }: QueuedCall) => {
   try {
     setDeviceInUse(deviceId);
@@ -129,7 +129,7 @@ export const startCall = async ({
             ],
           },
         },
-        env: callEnv,
+        baseUrl,
       },
     );
     await db.call.update({

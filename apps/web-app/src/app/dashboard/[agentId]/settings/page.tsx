@@ -72,7 +72,6 @@ export default function AgentSettingsPage({
       });
       return;
     }
-    console.log("updating agent", agentState.extraProperties);
     updateAgent({
       id: agentState.id,
       agent: {

@@ -3,7 +3,7 @@ import { db } from "../db";
 import { CallStatus, type PrismaClient } from "@prisma/client";
 import { initiateVapiCall, queueOfOneKioskCalls } from "../helpers/vapiHelpers";
 import { type TestAgent } from "prisma/generated/zod";
-import { type TestWithIncludes } from "~/lib/types";
+import { type OfOneKioskProperties, type TestWithIncludes } from "~/lib/types";
 import { randomUUID } from "crypto";
 
 const agentServiceInstance = new AgentService(db);
@@ -138,11 +138,7 @@ export class TestService {
       agent.extraProperties &&
       (agent.extraProperties as Record<string, unknown>).type === "ofone-kiosk"
     ) {
-      const extraProperties = agent.extraProperties as {
-        type: string;
-        deviceIds: string[];
-        env: "staging" | "production" | undefined;
-      };
+      const extraProperties = agent.extraProperties as OfOneKioskProperties;
       const deviceIds = extraProperties.deviceIds;
       console.log(
         " <<<<<<<<<<<<<<<<<<<< running KIOSK TEST >>>>>>>>>>>>>>>>>>>>> ",
@@ -153,7 +149,7 @@ export class TestService {
         assistantId: test.testAgentVapiId,
         testAgentPrompt: test.testAgentPrompt,
         scenarioPrompt: test.scenarioPrompt,
-        callEnv: extraProperties.env ?? "staging",
+        baseUrl: extraProperties.baseUrl,
         scenarioId: test.scenarioId,
       }));
 

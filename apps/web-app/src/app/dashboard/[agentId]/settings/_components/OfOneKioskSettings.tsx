@@ -3,24 +3,18 @@ import { useMemo } from "react";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
-import { type ExtraProperties, type AgentWithIncludes } from "~/lib/types";
+import { type AgentWithIncludes, type OfOneKioskProperties } from "~/lib/types";
 
 interface OfOneKioskSettingsProps {
   agentState: AgentWithIncludes;
   setAgentState: (agent: AgentWithIncludes) => void;
 }
 
-type OfOneProperties = ExtraProperties & {
-  type: "ofone-kiosk";
-  deviceIds: string[];
-  baseUrl: string;
-};
-
 export function OfOneKioskSettings({
   agentState,
   setAgentState,
 }: OfOneKioskSettingsProps) {
-  const ofOneProperties = agentState.extraProperties as OfOneProperties;
+  const ofOneProperties = agentState.extraProperties as OfOneKioskProperties;
 
   const baseUrlDisplay = useMemo(() => {
     if (!ofOneProperties.baseUrl || ofOneProperties.baseUrl.length === 0)

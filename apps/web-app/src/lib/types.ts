@@ -128,3 +128,10 @@ export const ExtraPropertiesSchema = z
     type: z.enum(["ofone-kiosk"]),
   })
   .catchall(z.any());
+
+export type OfOneKioskProperties = z.infer<typeof OfOneKioskPropertiesSchema>;
+export const OfOneKioskPropertiesSchema = ExtraPropertiesSchema.extend({
+  type: z.literal("ofone-kiosk"),
+  deviceIds: z.array(z.string()),
+  baseUrl: z.string(),
+});
