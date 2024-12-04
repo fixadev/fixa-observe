@@ -88,7 +88,14 @@ export const handleVapiCallEnded = async ({
       ),
     );
 
-    const success = validEvalResults.every((result) => result.success);
+    const criticalEvalResults = evalResults.filter((evalResult) =>
+      [...scenario.evals]?.some(
+        (evaluation) =>
+          evaluation.id === evalResult.evalId && evaluation.isCritical,
+      ),
+    );
+
+    const success = criticalEvalResults.every((result) => result.success);
 
     const updatedCall = await db.call.update({
       where: { id: call.id },

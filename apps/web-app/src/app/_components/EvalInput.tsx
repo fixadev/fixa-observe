@@ -7,8 +7,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "~/components/ui/tooltip";
+import { Switch } from "~/components/ui/switch";
 import { TextAreaWithLabel } from "./TextAreaWithLabel";
 import { type EvalWithoutScenarioId, type EvalSchema } from "~/lib/agent";
+import { InformationCircleIcon } from "@heroicons/react/24/solid";
 
 export function EvalInput({
   evaluation,
@@ -85,6 +92,24 @@ export function EvalInput({
           />
         </div>
       )}
+      <div className="flex flex-row items-center gap-2">
+        <Switch
+          id="is-critical"
+          checked={evaluation.isCritical}
+          onCheckedChange={(e) =>
+            setEvaluation({ ...evaluation, isCritical: e })
+          }
+        />
+        <Label htmlFor="is-critical">is critical?</Label>
+        <Tooltip>
+          <TooltipTrigger>
+            <InformationCircleIcon className="h-4 w-4 text-muted-foreground" />
+          </TooltipTrigger>
+          <TooltipContent>
+            if this evaluation fails, the call will be marked as failed
+          </TooltipContent>
+        </Tooltip>
+      </div>
     </div>
   );
 }

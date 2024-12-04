@@ -1,18 +1,9 @@
 import { useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { Card } from "~/components/ui/card";
-import { Label } from "~/components/ui/label";
-import { Input } from "~/components/ui/input";
-import { Textarea } from "~/components/ui/textarea";
 import { type EvalWithoutScenarioId } from "~/lib/agent";
 import { XMarkIcon } from "@heroicons/react/24/solid";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "~/components/ui/select";
+
 import { EvalInput } from "~/app/_components/EvalInput";
 
 export function EvalCard({

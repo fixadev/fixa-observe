@@ -218,11 +218,11 @@ model Eval {
   scenario    Scenario? @relation(fields: [scenarioId], references: [id])
   scenarioId  String?
 
-  type        EvalType
-  resultType  EvalResultType
-  contentType EvalContentType @default(content)
-
-  toolCallExpectedResult String @default("")
+  type                   EvalType
+  resultType             EvalResultType
+  contentType            EvalContentType @default(content)
+  isCritical             Boolean         @default(true)
+  toolCallExpectedResult String          @default("")
 
   evalResults EvalResult[]
 
