@@ -161,41 +161,30 @@ export class TestService {
         scenarioId: test.scenarioId,
       }));
 
-      const calls = await queueOfOneKioskCalls(deviceIds, callsToStart);
-
-      return callsToStart.map((call) => ({
-        id: call.callId,
-        vapiCallId: undefined,
-        testAgentVapiId: call.assistantId,
-        scenarioId: call.scenarioId,
-        status: CallStatus.queued,
-      }));
-
-      // calls = await Promise.allSettled(
-      //   tests.map(async (test) => {
-      //     // const deviceId = "791bc87d-2f47-45fd-9a32-57e01fb02d37"; // staging
-      //     // const deviceId = "6135989e-3b07-49d3-8d92-9fdaab4c4700"; // ceena
-      //     const deviceId = deviceIds[0]!;
-
-      //     const callId = randomUUID();
-
-      //     const call = await initiateOfOneKioskCall(
-      //       callId,
-      //       test.testAgentVapiId,
-      //       test.testAgentPrompt,
-      //       test.scenarioPrompt,
-      //       extraProperties.env,
-      //     );
-
-      //     return {
-      //       id: callId,
-      //       vapiCallId: undefined,
-      //       testAgentVapiId: test.testAgentVapiId,
-      //       scenarioId: test.scenarioId,
-      //       status: CallStatus.in_progress,
-      //     };
-      //   }),
-      // );
+      // create calls first and then queue them
+      const test = await db.test.create({
+        data: {
+          agentId,
+          runFromApi,
+          calls: {
+            createMany: {
+              data: callsToStart.map((call) => ({
+                id: call.callId,
+                status: CallStatus.queued,
+                stereoRecordingUrl: "",
+                testAgentId: call.assistantId,
+                scenarioId: call.scenarioId,
+                ownerId: agent.ownerId,
+              })),
+            },
+          },
+        },
+        include: {
+          calls: true,
+        },
+      });
+      await queueOfOneKioskCalls(deviceIds, callsToStart);
+      return test;
     } else {
       calls = await Promise.allSettled(
         tests.map(async (test) => {
@@ -217,40 +206,39 @@ export class TestService {
           };
         }),
       );
-    }
+      console.log("CALLS", calls);
 
-    console.log("CALLS", calls);
+      const fulfilledCalls = calls.filter(
+        (call) => call.status === "fulfilled",
+      ) as PromiseFulfilledResult<{
+        id: string;
+        testAgentVapiId: string;
+        scenarioId: string;
+        status: CallStatus;
+      }>[];
 
-    const fulfilledCalls = calls.filter(
-      (call) => call.status === "fulfilled",
-    ) as PromiseFulfilledResult<{
-      id: string;
-      testAgentVapiId: string;
-      scenarioId: string;
-      status: CallStatus;
-    }>[];
-
-    return await db.test.create({
-      data: {
-        agentId,
-        runFromApi,
-        calls: {
-          createMany: {
-            data: fulfilledCalls.map((call) => ({
-              id: call.value.id,
-              status: call.value.status,
-              stereoRecordingUrl: "",
-              testAgentId: call.value.testAgentVapiId,
-              scenarioId: call.value.scenarioId,
-              ownerId: agent.ownerId,
-            })),
+      return await db.test.create({
+        data: {
+          agentId,
+          runFromApi,
+          calls: {
+            createMany: {
+              data: fulfilledCalls.map((call) => ({
+                id: call.value.id,
+                status: call.value.status,
+                stereoRecordingUrl: "",
+                testAgentId: call.value.testAgentVapiId,
+                scenarioId: call.value.scenarioId,
+                ownerId: agent.ownerId,
+              })),
+            },
           },
         },
-      },
-      include: {
-        calls: true,
-      },
-    });
+        include: {
+          calls: true,
+        },
+      });
+    }
   }
 
   async getLastTest(agentId: string) {

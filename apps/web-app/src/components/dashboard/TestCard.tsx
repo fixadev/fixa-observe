@@ -20,8 +20,8 @@ export default function TestCard({
   className?: string;
 }) {
   const callsSucceeded = useMemo(
-    () => test.calls.filter((call) => didCallSucceed(call)),
-    [test.calls],
+    () => test?.calls?.filter((call) => didCallSucceed(call)) ?? [],
+    [test?.calls],
   );
 
   const callsFailed = useMemo(

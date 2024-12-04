@@ -93,45 +93,56 @@ export const startCall = async ({
   scenarioPrompt,
   callEnv = "staging",
 }: QueuedCall) => {
-  const { data } = await axios.post<{ callId: string }>(
-    `${env.AUDIO_SERVICE_URL}/websocket-call-ofone`,
-    {
-      device_id: deviceId,
-      assistant_id: assistantId,
-      assistant_overrides: {
-        // for now
-        serverUrl: env.NODE_SERVER_URL + "/vapi",
-        model: {
-          provider: "openai",
-          model: "gpt-4o",
-          messages: [
-            {
-              role: "system",
-              content: testAgentPrompt,
-            },
-            {
-              role: "system",
-              content:
-                "end the call when the user says 'please drive forward to the window' or 'bye' or 'have a good day' or something along those lines",
-            },
-            {
-              role: "system",
-              content: scenarioPrompt,
-            },
-          ],
+  try {
+    console.log(
+      "========================Starting OFONE call=========================",
+      callId,
+      deviceId,
+      assistantId,
+    );
+    const { data } = await axios.post<{ callId: string }>(
+      `${env.AUDIO_SERVICE_URL}/websocket-call-ofone`,
+      {
+        device_id: deviceId,
+        assistant_id: assistantId,
+        assistant_overrides: {
+          // for now
+          serverUrl: env.NODE_SERVER_URL + "/vapi",
+          model: {
+            provider: "openai",
+            model: "gpt-4o",
+            messages: [
+              {
+                role: "system",
+                content: testAgentPrompt,
+              },
+              {
+                role: "system",
+                content:
+                  "end the call when the user says 'please drive forward to the window' or 'bye' or 'have a good day' or something along those lines",
+              },
+              {
+                role: "system",
+                content: scenarioPrompt,
+              },
+            ],
+          },
         },
+        env: callEnv,
       },
-      env: callEnv,
-    },
-  );
-  await db.call.update({
-    where: {
-      id: callId,
-    },
-    data: {
-      status: CallStatus.in_progress,
-      vapiCallId: data.callId,
-      ofOneDeviceId: deviceId,
-    },
-  });
+    );
+    await db.call.update({
+      where: {
+        id: callId,
+      },
+      data: {
+        status: CallStatus.in_progress,
+        vapiCallId: data.callId,
+        ofOneDeviceId: deviceId,
+      },
+    });
+  } catch (error) {
+    console.error("Error starting OFONE call", error);
+    throw error;
+  }
 };

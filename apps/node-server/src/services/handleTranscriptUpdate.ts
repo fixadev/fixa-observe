@@ -13,9 +13,9 @@ export const handleTranscriptUpdate = async (
   | { userId: string; callId: string; testId: string; messages: Message[] }
   | undefined
 > => {
-  const call = await db.call.findUnique({
+  const call = await db.call.findFirst({
     where: {
-      id: report.call?.id,
+      vapiCallId: report.call?.id,
     },
     include: { test: true },
   });
