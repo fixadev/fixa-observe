@@ -55,6 +55,7 @@ export const CreateGeneralEvalModal = ({
       toast({
         title: "eval created",
         description: "eval created successfully",
+        duration: 2000,
       });
       setEvaluations((evaluations) => [...evaluations.slice(0, -1), data]);
       setIsModalOpen(false);
@@ -66,10 +67,12 @@ export const CreateGeneralEvalModal = ({
       toast({
         title: "eval updated",
         description: "eval updated successfully",
+        duration: 2000,
       });
       setEvaluations((evaluations) =>
         evaluations.map((e: EvalSchema) => (e.id === data.id ? data : e)),
       );
+      setIsModalOpen(false);
     },
   });
 
@@ -82,6 +85,7 @@ export const CreateGeneralEvalModal = ({
       toast({
         title: "eval deleted",
         description: "eval deleted successfully",
+        duration: 2000,
       });
     },
   });
