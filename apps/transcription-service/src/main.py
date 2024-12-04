@@ -21,7 +21,7 @@ class StartWebsocketCallOfOneRequest(BaseModel):
     device_id: str
     assistant_id: str
     assistant_overrides: dict
-    env: str | None = None
+    base_url: str
 
 @app.get("/")
 async def health():
@@ -44,11 +44,10 @@ async def start_websocket_call_ofone(request: StartWebsocketCallOfOneRequest):
     try:
         client_args = {
             'device_id': request.device_id,
-        'assistant_id': request.assistant_id,
-            'assistant_overrides': request.assistant_overrides
+            'assistant_id': request.assistant_id,
+            'assistant_overrides': request.assistant_overrides,
+            'base_url': request.base_url
         }
-        if request.env is not None:
-            client_args['env'] = request.env
         
         client = OfOneClient(**client_args)
         call_id = await client.start_call()
