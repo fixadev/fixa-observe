@@ -31,7 +31,8 @@ const addScenarios = async () => {
                       }
                     : {
                         name: evaluation.title,
-                        description: evaluation.when ?? "",
+                        description:
+                          "this evaluation should be applied to the last check state in the conversation",
                         type: "scenario",
                         toolCallExpectedResult:
                           evaluation.expected_output ?? "",
