@@ -97,13 +97,11 @@ export type TestAgentWithoutId = Omit<TestAgent, "id">;
 
 export type SocketMessage = {
   type: "call-ended" | "messages-updated" | "analysis-started";
-  data: CallEndedData | MessagesUpdatedData | AnalysisStartedData;
-};
-
-export type CallEndedData = {
-  testId: string;
-  callId: string;
-  call: CallWithIncludes;
+  data:
+    | CallStartedData
+    | MessagesUpdatedData
+    | AnalysisStartedData
+    | CallEndedData;
 };
 
 export type MessagesUpdatedData = {
@@ -112,9 +110,19 @@ export type MessagesUpdatedData = {
   messages: Message[];
 };
 
+export type CallStartedData = {
+  callId: string;
+};
+
 export type AnalysisStartedData = {
   testId: string;
   callId: string;
+};
+
+export type CallEndedData = {
+  testId: string;
+  callId: string;
+  call: CallWithIncludes;
 };
 
 export type Eval = z.infer<typeof EvalSchema>;

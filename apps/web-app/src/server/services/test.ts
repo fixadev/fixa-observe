@@ -146,6 +146,7 @@ export class TestService {
 
       const callsToStart = tests.map((test) => ({
         callId: randomUUID(),
+        ownerId: agent.ownerId,
         assistantId: test.testAgentVapiId,
         testAgentPrompt: test.testAgentPrompt,
         scenarioPrompt: test.scenarioPrompt,

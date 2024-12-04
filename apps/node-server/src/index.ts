@@ -119,8 +119,12 @@ app.post(
 
 app.post("/queue-ofone-kiosk-calls", async (req: Request, res: Response) => {
   try {
-    const { device_ids, callsToStart } = req.body;
-    const scheduledCalls = await scheduleOfOneCalls(device_ids, callsToStart);
+    const { deviceIds, callsToStart } = req.body;
+    const scheduledCalls = await scheduleOfOneCalls(
+      deviceIds,
+      callsToStart,
+      connectedUsers,
+    );
     res.json({ success: true, scheduledCalls });
   } catch (error) {
     console.error("Error scheduling OFONE calls", error);

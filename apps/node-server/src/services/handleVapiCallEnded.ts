@@ -45,7 +45,7 @@ export const handleVapiCallEnded = async ({
     }
 
     if (call.ofOneDeviceId) {
-      setDeviceAvailable(call.ofOneDeviceId);
+      setDeviceAvailable(call.ofOneDeviceId, userSocket);
     }
 
     const o1Analysis = await analyzeCallWitho1({
