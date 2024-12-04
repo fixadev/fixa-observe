@@ -172,6 +172,7 @@ export const queueOfOneKioskCalls = async (
   deviceIds: string[],
   callsToStart: {
     callId: string;
+    ownerId: string;
     assistantId: string;
     testAgentPrompt: string;
     scenarioPrompt: string;
@@ -182,7 +183,7 @@ export const queueOfOneKioskCalls = async (
     return await axios.post(
       `${env.NEXT_PUBLIC_SERVER_URL}/queue-ofone-kiosk-calls`,
       {
-        device_ids: deviceIds,
+        deviceIds,
         callsToStart,
       },
     );

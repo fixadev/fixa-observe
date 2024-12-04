@@ -2,6 +2,7 @@ import axios from "axios";
 import { env } from "../env";
 import { db } from "../db";
 import { CallStatus } from "@prisma/client";
+import { Socket } from "socket.io";
 
 // Create a Map to store device usage states
 const deviceUsageMap = new Map<string, boolean>();
@@ -10,6 +11,7 @@ const deviceUsageMap = new Map<string, boolean>();
 
 interface QueuedCall {
   callId: string;
+  ownerId: string;
   deviceId: string;
   assistantId: string;
   testAgentPrompt?: string;
@@ -22,6 +24,7 @@ const callQueue: QueuedCall[] = [];
 export function scheduleOfOneCalls(
   deviceIds: string[],
   callsToStart: QueuedCall[],
+  connectedUsers: Map<string, Socket>,
 ) {
   try {
     // Initialize devices as available
@@ -37,19 +40,24 @@ export function scheduleOfOneCalls(
 
       if (availableDevice) {
         // Start the call immediately if a device is available
-        startCall({
-          callId: callDetails.callId,
-          deviceId: availableDevice,
-          assistantId: callDetails.assistantId,
-          testAgentPrompt: callDetails.testAgentPrompt,
-          scenarioPrompt: callDetails.scenarioPrompt,
-          baseUrl: callDetails.baseUrl,
-        });
+        startCall(
+          {
+            callId: callDetails.callId,
+            ownerId: callDetails.ownerId,
+            deviceId: availableDevice,
+            assistantId: callDetails.assistantId,
+            testAgentPrompt: callDetails.testAgentPrompt,
+            scenarioPrompt: callDetails.scenarioPrompt,
+            baseUrl: callDetails.baseUrl,
+          },
+          connectedUsers.get(callDetails.ownerId),
+        );
       } else {
         // Queue the call if no device is available
         callQueue.push({
           deviceId: deviceIds[0], // You might want a better selection strategy
           callId: callDetails.callId,
+          ownerId: callDetails.ownerId,
           assistantId: callDetails.assistantId,
           testAgentPrompt: callDetails.testAgentPrompt,
           scenarioPrompt: callDetails.scenarioPrompt,
@@ -71,13 +79,16 @@ export function setDeviceInUse(deviceId: string): void {
   deviceUsageMap.set(deviceId, true);
 }
 
-export function setDeviceAvailable(deviceId: string): void {
+export function setDeviceAvailable(
+  deviceId: string,
+  userSocket?: Socket,
+): void {
   deviceUsageMap.set(deviceId, false);
 
   // Try to process queued calls when a device becomes available
   if (callQueue.length > 0) {
     const nextCall = callQueue.shift()!;
-    startCall(nextCall);
+    startCall(nextCall, userSocket);
   }
 }
 
@@ -85,14 +96,18 @@ export function isDeviceInUse(deviceId: string): boolean {
   return deviceUsageMap.get(deviceId) ?? false;
 }
 
-export const startCall = async ({
-  callId,
-  deviceId,
-  assistantId,
-  testAgentPrompt,
-  scenarioPrompt,
-  baseUrl,
-}: QueuedCall) => {
+export const startCall = async (
+  {
+    callId,
+    deviceId,
+    assistantId,
+    testAgentPrompt,
+    scenarioPrompt,
+    baseUrl,
+  }: QueuedCall,
+  userSocket?: Socket,
+) => {
+  userSocket?.emit("call-started", { callId });
   try {
     setDeviceInUse(deviceId);
     console.log(
