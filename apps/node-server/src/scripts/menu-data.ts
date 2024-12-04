@@ -825,13 +825,15 @@ export const menuTestData = [
     test_case_name: "I17. 9-piece chicken fries",
     tester_instructions: [
       'open with "Yeah do you have chicken fries?"',
-      "ask what sizes if needed",
       "order 1 order",
     ],
     agent_evaluations: [
       {
-        title: "ask about sizes",
-        instructions: "may need to ask about available sizes",
+        type: "tool",
+        title: "correct final check state",
+        when: "prior to the end of the conversation",
+        expected_output:
+          '{"items":[{"name":"9 Piece Chicken Fries","isCombo":false,"quantity":"1","size":"","unitPrice":"$X.XX","totalPrice":"$X.XX","modifications":[],"validationIssues":[]}]}',
       },
     ],
   },
@@ -1355,6 +1357,13 @@ export const menuTestData = [
         title: "ask for drink",
         instructions: "should confirm drink choice",
       },
+      {
+        type: "tool",
+        title: "correct final check state",
+        when: "prior to the end of the conversation",
+        expected_output:
+          '{"items":[{"name":"Double Whopper Meal","isCombo":true,"quantity":"1","size":"Large","unitPrice":"$X.XX","totalPrice":"$X.XX","modifications":[{"name":"Extra Beef Patty","isCombo":false,"quantity":"1","size":"","unitPrice":"$X.XX","totalPrice":"$X.XX","modifications":[],"validationIssues":[]},{"name":"Coca Cola","isCombo":false,"quantity":"1","size":"Large","unitPrice":"$X.XX","totalPrice":"$X.XX","modifications":[],"validationIssues":[]}],"validationIssues":[]},{"name":"Double Whopper","isCombo":false,"quantity":"1","size":"","unitPrice":"$X.XX","totalPrice":"$X.XX","modifications":[{"name":"No Mayo","isCombo":false,"quantity":"1","size":"","unitPrice":"$X.XX","totalPrice":"$X.XX","modifications":[],"validationIssues":[]}],"validationIssues":[]},{"name":"French Fries","isCombo":false,"quantity":"3","size":"Small","unitPrice":"$X.XX","totalPrice":"$X.XX","modifications":[],"validationIssues":[]},{"name":"Coca Cola","isCombo":false,"quantity":"2","size":"Small","unitPrice":"$X.XX","totalPrice":"$X.XX","modifications":[],"validationIssues":[]},{"name":"Double Whopper Meal","isCombo":true,"quantity":"1","size":"Large","unitPrice":"$X.XX","totalPrice":"$X.XX","modifications":[{"name":"Sprite","isCombo":false,"quantity":"1","size":"Large","unitPrice":"$X.XX","totalPrice":"$X.XX","modifications":[],"validationIssues":[]}],"validationIssues":[]},{"name":"HERSHEY\'S® Sundae Pie","isCombo":false,"quantity":"1","size":"","unitPrice":"$X.XX","totalPrice":"$X.XX","modifications":[],"validationIssues":[]},{"name":"Chocolate Chip Cookies","isCombo":false,"quantity":"1","size":"","unitPrice":"$X.XX","totalPrice":"$X.XX","modifications":[],"validationIssues":[]}]}',
+      },
     ],
   },
   {
@@ -1362,7 +1371,15 @@ export const menuTestData = [
     tester_instructions: [
       "open with \"Hello, good afternoon. I would like to add 5 double whopper meals and I'm going to have specifications for each one so let me just explain meals one through five to you. So meal 1 should be a large with a sprite, a Hershey pie, an large oreo shake, no mayo, no ketchup, no mustard. Meal 2 should be a large with a coke, add an extra fry, remove the onion. Meal 3 should be a large with a fanta zero, add another large fry, 2 hershey pies, 3 orders of cookies and that's it for meal 3. For meal 4 I want a medium, no tomato, extra pickles. Meal 5 actually never mind get rid of meal 5 so just confirm for me what you have for meals one through 4.\"",
     ],
-    agent_evaluations: [],
+    agent_evaluations: [
+      {
+        type: "tool",
+        title: "correct final check state",
+        when: "prior to the end of the conversation",
+        expected_output:
+          '{"items":[{"name":"Double Whopper Meal","isCombo":true,"quantity":"4","size":"","unitPrice":"$X.XX","totalPrice":"$X.XX","modifications":[{"name":"Large","isCombo":false,"quantity":"3","size":"","unitPrice":"$X.XX","totalPrice":"$X.XX","modifications":[],"validationIssues":[]},{"name":"Medium","isCombo":false,"quantity":"1","size":"","unitPrice":"$X.XX","totalPrice":"$X.XX","modifications":[],"validationIssues":[]},{"name":"Sprite","isCombo":false,"quantity":"1","size":"Large","unitPrice":"$X.XX","totalPrice":"$X.XX","modifications":[],"validationIssues":[]},{"name":"Coca Cola","isCombo":false,"quantity":"1","size":"Large","unitPrice":"$X.XX","totalPrice":"$X.XX","modifications":[],"validationIssues":[]},{"name":"Fanta Zero","isCombo":false,"quantity":"1","size":"Large","unitPrice":"$X.XX","totalPrice":"$X.XX","modifications":[],"validationIssues":[]},{"name":"No Mayo","isCombo":false,"quantity":"1","size":"","unitPrice":"$X.XX","totalPrice":"$X.XX","modifications":[],"validationIssues":[]},{"name":"No Ketchup","isCombo":false,"quantity":"1","size":"","unitPrice":"$X.XX","totalPrice":"$X.XX","modifications":[],"validationIssues":[]},{"name":"No Mustard","isCombo":false,"quantity":"1","size":"","unitPrice":"$X.XX","totalPrice":"$X.XX","modifications":[],"validationIssues":[]},{"name":"No Onion","isCombo":false,"quantity":"1","size":"","unitPrice":"$X.XX","totalPrice":"$X.XX","modifications":[],"validationIssues":[]},{"name":"No Tomato","isCombo":false,"quantity":"1","size":"","unitPrice":"$X.XX","totalPrice":"$X.XX","modifications":[],"validationIssues":[]},{"name":"Extra Pickles","isCombo":false,"quantity":"1","size":"","unitPrice":"$X.XX","totalPrice":"$X.XX","modifications":[],"validationIssues":[]}],"validationIssues":[]},{"name":"HERSHEY\'S® Sundae Pie","isCombo":false,"quantity":"3","size":"","unitPrice":"$X.XX","totalPrice":"$X.XX","modifications":[],"validationIssues":[]},{"name":"OREO® Shake","isCombo":false,"quantity":"1","size":"Large","unitPrice":"$X.XX","totalPrice":"$X.XX","modifications":[],"validationIssues":[]},{"name":"French Fries","isCombo":false,"quantity":"2","size":"Large","unitPrice":"$X.XX","totalPrice":"$X.XX","modifications":[],"validationIssues":[]},{"name":"Chocolate Chip Cookies","isCombo":false,"quantity":"3","size":"","unitPrice":"$X.XX","totalPrice":"$X.XX","modifications":[],"validationIssues":[]}]}',
+      },
+    ],
   },
   {
     test_case_name: "Difficult Order - Impossible Whopper - 1",
@@ -1370,7 +1387,15 @@ export const menuTestData = [
       'open with "Hey let me get an impossible whopper but make it a double."',
       "verify it returns an impossible whopper combo with two patties",
     ],
-    agent_evaluations: [],
+    agent_evaluations: [
+      {
+        type: "tool",
+        title: "correct final check state",
+        when: "prior to the end of the conversation",
+        expected_output:
+          '{"items":[{"name":"Impossible™ Whopper","isCombo":false,"quantity":"1","size":"","unitPrice":"$X.XX","totalPrice":"$X.XX","modifications":[{"name":"Extra Impossible™ Patty","isCombo":false,"quantity":"1","size":"","unitPrice":"$X.XX","totalPrice":"$X.XX","modifications":[],"validationIssues":[]}],"validationIssues":[]}]}',
+      },
+    ],
   },
   {
     test_case_name: "Difficult Order - Impossible Whopper - 2",

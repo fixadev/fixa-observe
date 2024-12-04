@@ -207,6 +207,7 @@ export class TestService {
         testAgentVapiId: string;
         scenarioId: string;
         status: CallStatus;
+        vapiCallId: string;
       }>[];
 
       return await db.test.create({
@@ -219,6 +220,7 @@ export class TestService {
                 id: call.value.id,
                 status: call.value.status,
                 stereoRecordingUrl: "",
+                vapiCallId: call.value.vapiCallId,
                 testAgentId: call.value.testAgentVapiId,
                 scenarioId: call.value.scenarioId,
                 ownerId: agent.ownerId,
