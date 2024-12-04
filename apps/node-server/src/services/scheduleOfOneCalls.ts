@@ -55,7 +55,7 @@ export function scheduleOfOneCalls(
       } else {
         // Queue the call if no device is available
         callQueue.push({
-          deviceId: deviceIds[0], // You might want a better selection strategy
+          deviceId: "",
           callId: callDetails.callId,
           ownerId: callDetails.ownerId,
           assistantId: callDetails.assistantId,
@@ -88,7 +88,7 @@ export function setDeviceAvailable(
   // Try to process queued calls when a device becomes available
   if (callQueue.length > 0) {
     const nextCall = callQueue.shift()!;
-    startCall(nextCall, userSocket);
+    startCall({ ...nextCall, deviceId }, userSocket);
   }
 }
 
