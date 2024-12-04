@@ -302,8 +302,8 @@ export function ScenarioSheet({
                   <EvalCard
                     key={evaluation.id}
                     evaluation={evaluation}
-                    onUpdate={handleUpdateEval}
-                    onDelete={handleDeleteEval}
+                    setEval={handleUpdateEval}
+                    deleteEval={handleDeleteEval}
                   />
                 ))}
                 <div
