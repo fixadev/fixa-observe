@@ -129,7 +129,7 @@ export const startCall = async ({
             ],
           },
         },
-        baseUrl,
+        base_url: baseUrl,
       },
     );
     await db.call.update({
