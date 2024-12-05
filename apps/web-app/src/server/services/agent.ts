@@ -339,8 +339,10 @@ export class AgentService {
         },
       },
       include: {
-        evals: { orderBy: { createdAt: "asc" } },
-        generalEvalOverrides: { orderBy: { createdAt: "asc" } },
+        evals: { where: { deleted: false }, orderBy: { createdAt: "asc" } },
+        generalEvalOverrides: {
+          orderBy: { createdAt: "asc" },
+        },
       },
     });
   }

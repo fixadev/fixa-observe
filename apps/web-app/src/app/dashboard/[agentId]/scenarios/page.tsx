@@ -98,7 +98,7 @@ export default function AgentScenariosPage({
         });
         updateScenario({ scenario });
       } else {
-        const newScenario = {
+        const newScenario: ScenarioWithEvals = {
           ...scenario,
           id: "new",
           agentId: agent?.id ?? "",
@@ -107,10 +107,13 @@ export default function AgentScenariosPage({
             ...e,
             createdAt: new Date(),
             scenarioId: undefined,
+            deleted: false,
           })),
           generalEvalOverrides: scenario.generalEvalOverrides.map((e) => ({
             ...e,
+            id: "creating...",
             createdAt: new Date(),
+            deleted: false,
           })),
         };
         setAgent({
@@ -127,7 +130,6 @@ export default function AgentScenariosPage({
               generalEvalOverrides: newScenario.generalEvalOverrides.map(
                 (e) => ({
                   ...e,
-                  id: "creating...",
                   scenarioId: newScenario.id,
                 }),
               ),
