@@ -1,5 +1,6 @@
 import { Socket } from "socket.io";
 import { db } from "../db";
+import { getScenariosWithGeneralEvals } from "./getScenariosWithGeneralEvals";
 
 export const getContext = async (
   callId: string,
@@ -41,39 +42,16 @@ export const getContext = async (
       return;
     }
 
-    const evalOverrides = await db.evalOverride.findMany({
-      where: {
-        AND: [{ scenarioId: scenario.id }, { enabled: true }],
-      },
-    });
+    // const evalOverrides = await db.evalOverride.findMany({
+    //   where: {
+    //     AND: [{ scenarioId: scenario.id }, { enabled: true }],
+    //   },
+    // });
 
-    const agentGeneralEvals = agent?.enabledGeneralEvals;
-    console.log(
-      "=============================agentGeneralEvals==============================",
-      agentGeneralEvals,
+    const scenarioWithGeneralEvals = await getScenariosWithGeneralEvals(
+      agent,
+      scenario,
     );
-    const filteredAgentGeneralEvals = agentGeneralEvals;
-
-    // const filteredAgentGeneralEvals = agentGeneralEvals.filter(
-    //   (evaluation) =>
-    //     !evalOverrides.find((override) => override.evalId === evaluation.id)
-    //       ?.enabled === false,
-    // );
-
-    const allEvals = [...scenario.evals, ...filteredAgentGeneralEvals];
-
-    const preparedEvals = allEvals.map((evaluation) => ({
-      ...evaluation,
-      description:
-        evaluation.contentType === "tool"
-          ? "this tool should be called whenever: " + evaluation.description
-          : evaluation.description,
-    }));
-
-    const scenarioWithGeneralEvals = {
-      ...scenario,
-      evals: preparedEvals,
-    };
 
     const userSocket = connectedUsers.get(ownerId);
     return {

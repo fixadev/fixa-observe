@@ -1,16 +1,14 @@
 import { db } from "../db";
 import {
-  type UpdateEvalsSchema,
   type CreateScenarioSchema,
   type UpdateScenarioSchema,
   type EvalSchema,
-  type EvalWithoutScenarioId,
   type EvalOverrideWithoutScenarioId,
   type CreateEvalOverrideSchema,
   type CreateGeneralEvalSchema,
 } from "~/lib/agent";
 import { v4 as uuidv4 } from "uuid";
-import { Prisma, type PrismaClient } from "@prisma/client";
+import { type PrismaClient } from "@prisma/client";
 import { type Agent, AgentSchema } from "prisma/generated/zod";
 
 export class AgentService {
@@ -102,6 +100,7 @@ export class AgentService {
       where: { id },
       include: {
         scenarios: {
+          orderBy: { createdAt: "asc" },
           include: {
             evals: { orderBy: { createdAt: "asc" } },
             generalEvalOverrides: true,
@@ -349,7 +348,11 @@ export class AgentService {
 
   async createGeneralEval(userId: string, evaluation: CreateGeneralEvalSchema) {
     return await db.eval.create({
-      data: { ...evaluation, id: uuidv4(), ownerId: userId },
+      data: {
+        ...evaluation,
+        id: uuidv4(),
+        ownerId: userId,
+      },
     });
   }
 

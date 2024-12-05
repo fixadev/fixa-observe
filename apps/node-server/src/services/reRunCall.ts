@@ -7,6 +7,7 @@ import { analyzeCallWitho1 } from "./findLLMErrors";
 import { formatOutput } from "../helpers/formatOutput";
 import { analyzeCallWithGemini } from "./geminiAnalyzeAudio";
 import { env } from "../env";
+import { getScenariosWithGeneralEvals } from "./getScenariosWithGeneralEvals";
 
 const main = async () => {
   console.log("RE-RUNNING CALL");
@@ -17,7 +18,6 @@ const main = async () => {
   // const agents = await db.agent.findMany();
   // console.log("AGENTS", agents);
 
-  // const callId = "689027ef-d592-4c20-a7f4-d32a9d789f83";
   const callId = "b24c4a13-53c7-4608-81cf-c299f5a29d56";
 
   const call = await db.call.findFirst({
@@ -56,33 +56,10 @@ const main = async () => {
     return;
   }
 
-  const agentGeneralEvals = agent?.enabledGeneralEvals;
-  console.log(
-    "=============================agentGeneralEvals==============================",
-    agentGeneralEvals,
+  const scenarioWithGeneralEvals = await getScenariosWithGeneralEvals(
+    agent,
+    call.scenario,
   );
-  const filteredAgentGeneralEvals = agentGeneralEvals;
-
-  // const filteredAgentGeneralEvals = agentGeneralEvals.filter(
-  //   (evaluation) =>
-  //     !evalOverrides.find((override) => override.evalId === evaluation.id)
-  //       ?.enabled === false,
-  // );
-
-  const allEvals = [...call.scenario.evals, ...filteredAgentGeneralEvals];
-
-  const preparedEvals = allEvals.map((evaluation) => ({
-    ...evaluation,
-    description:
-      evaluation.contentType === "tool"
-        ? "this tool should be called whenever: " + evaluation.description
-        : evaluation.description,
-  }));
-
-  const scenarioWithGeneralEvals = {
-    ...call.scenario,
-    evals: preparedEvals,
-  };
 
   const analysis = await analyzeCallWitho1({
     callStartedAt: vapiCall.startedAt,
@@ -92,7 +69,6 @@ const main = async () => {
   });
 
   let parsedResult: string;
-  // const useGemini = !call.scenario.includeDateTime;
   const useGemini = false;
   if (!useGemini) {
     parsedResult = analysis.cleanedResult;
@@ -101,7 +77,7 @@ const main = async () => {
       callStartedAt: vapiCall.startedAt,
       messages: vapiCall.artifact.messages,
       testAgentPrompt: call.scenario.instructions,
-      scenario: call.scenario,
+      scenario: scenarioWithGeneralEvals,
       analysis,
     });
 
