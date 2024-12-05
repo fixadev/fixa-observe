@@ -105,7 +105,6 @@ export class AgentService {
             evals: { orderBy: { createdAt: "asc" } },
             generalEvalOverrides: true,
           },
-          orderBy: { createdAt: "asc" },
         },
         tests: {
           include: {
