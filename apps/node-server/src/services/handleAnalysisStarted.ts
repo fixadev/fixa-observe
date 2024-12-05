@@ -8,20 +8,20 @@ export const handleAnalysisStarted = async (
   userSocket?: Socket,
 ) => {
   try {
-    const callId = report?.call?.id;
-    if (!callId) {
+    const vapiCallId = report?.call?.id;
+    if (!vapiCallId) {
       console.error("No call ID found in Vapi call ended report");
       return;
     }
-    const call = await db.call.findUnique({
-      where: { id: callId },
+    const call = await db.call.findFirst({
+      where: { vapiCallId: vapiCallId },
     });
     if (!call) {
-      console.error("Call not found in database", callId);
+      console.error("Call not found in database, vapiCallId: ", vapiCallId);
       return;
     }
     const updatedCall = await db.call.update({
-      where: { id: callId },
+      where: { id: call.id },
       data: { status: CallStatus.analyzing },
     });
 
@@ -29,12 +29,12 @@ export const handleAnalysisStarted = async (
     if (userSocket) {
       userSocket.emit("message", {
         type: "analysis-started",
-        data: { testId: updatedCall.testId, callId },
+        data: { testId: updatedCall.testId, callId: updatedCall.id },
       });
     } else {
-      console.log("No connected user found for call", callId);
+      console.log("No connected user found for call", updatedCall.id);
     }
-    return { userId, testId: updatedCall.testId, callId };
+    return { userId, testId: updatedCall.testId, callId: updatedCall.id };
   } catch (error) {
     console.error("Error handling analysis started", error);
     return null;

@@ -145,7 +145,7 @@ export const initiateVapiCall = async (
         number: phoneNumber,
       },
       assistantOverrides: {
-        serverUrl: env.NEXT_PUBLIC_VAPI_SERVER_URL,
+        serverUrl: env.NEXT_PUBLIC_SERVER_URL + "/vapi",
         model: {
           provider: "openai",
           model: "gpt-4o",
@@ -168,42 +168,27 @@ export const initiateVapiCall = async (
   }
 };
 
-export const initiateOfOneKioskCall = async (
-  deviceId: string,
-  assistantId: string,
-  testAgentPrompt?: string,
-  scenarioPrompt?: string,
-  callEnv: "staging" | "production" = "staging",
+export const queueOfOneKioskCalls = async (
+  deviceIds: string[],
+  callsToStart: {
+    callId: string;
+    ownerId: string;
+    assistantId: string;
+    testAgentPrompt: string;
+    scenarioPrompt: string;
+    baseUrl: string;
+  }[],
 ) => {
-  const { data } = await axios.post<{ callId: string }>(
-    `${env.NEXT_PUBLIC_AUDIO_SERVICE_URL}/websocket-call-ofone`,
-    {
-      device_id: deviceId,
-      assistant_id: assistantId,
-      assistant_overrides: {
-        serverUrl: env.NEXT_PUBLIC_VAPI_SERVER_URL,
-        model: {
-          provider: "openai",
-          model: "gpt-4o",
-          messages: [
-            {
-              role: "system",
-              content: testAgentPrompt,
-            },
-            {
-              role: "system",
-              content:
-                "end the call when the user says 'please drive forward to the window' or 'bye' or 'have a good day' or something along those lines",
-            },
-            {
-              role: "system",
-              content: scenarioPrompt,
-            },
-          ],
-        },
+  try {
+    return await axios.post(
+      `${env.NEXT_PUBLIC_SERVER_URL}/queue-ofone-kiosk-calls`,
+      {
+        deviceIds,
+        callsToStart,
       },
-      env: callEnv,
-    },
-  );
-  return data.callId;
+    );
+  } catch (error) {
+    console.error("Error queuing OFONE kiosk calls", error);
+    throw error;
+  }
 };

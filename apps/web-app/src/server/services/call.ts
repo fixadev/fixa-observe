@@ -142,6 +142,67 @@ export const callService = {
     };
   },
 
+  // // WIP
+  // getLatencyInterruptionPercentiles: async ({
+  //   ownerId,
+  //   filter,
+  // }: {
+  //   ownerId: string;
+  //   filter: Partial<Filter>;
+  // }): Promise<{
+  //   latency: { timestamp: number; p50: number; p90: number; p95: number }[];
+  //   interruptions: {
+  //     timestamp: number;
+  //     p50: number;
+  //     p90: number;
+  //     p95: number;
+  //   }[];
+  // }> => {
+  //   const chartPeriod = filter.chartPeriod ?? 60 * 60 * 1000; // Default to 1 hour
+
+  //   const interval = String(chartPeriod / 1000);
+
+  //   const results = await db.$queryRaw`
+  //     SELECT
+  //       date_bin(interval '${Prisma.raw(interval)}' second, startedAt::timestamp, timestamp '2001-01-01') as period,
+  //       avg(latencyP50) as avg_latencyP50,
+  //       avg(latencyP90) as avg_latencyP90,
+  //       avg(latencyP95) as avg_latencyP95,
+  //       avg(interruptionP50) as avg_interruptionP50,
+  //       avg(interruptionP90) as avg_interruptionP90,
+  //       avg(interruptionP95) as avg_interruptionP95
+  //     FROM "Call"
+  //     WHERE
+  //       "ownerId" = ${ownerId}
+  //       ${
+  //         filter.timeRange
+  //           ? Prisma.sql`AND "startedAt"::timestamp >= ${new Date(filter.timeRange.start).toISOString()}::timestamp
+  //       AND "startedAt"::timestamp <= ${new Date(filter.timeRange.end).toISOString()}::timestamp`
+  //           : Prisma.empty
+  //       }
+  //       ${filter.lookbackPeriod ? Prisma.sql`AND "startedAt"::timestamp >= ${new Date(Date.now() - filter.lookbackPeriod.value).toISOString()}::timestamp` : Prisma.empty}
+  //       ${filter.agentId ? Prisma.sql`AND "agentId" = ${filter.agentId}` : Prisma.empty}
+  //       ${filter.regionId ? Prisma.sql`AND "regionId" = ${filter.regionId}` : Prisma.empty}
+  //     GROUP BY period
+  //     ORDER BY period ASC;
+  //   `;
+
+  //   return {
+  //     latency: results.map((r) => ({
+  //       timestamp: r.period.getTime(),
+  //       p50: r.avg_latencyP50,
+  //       p90: r.avg_latencyP90,
+  //       p95: r.avg_latencyP95,
+  //     })),
+  //     interruptions: results.map((r) => ({
+  //       timestamp: r.period.getTime(),
+  //       p50: r.avg_interruptionP50,
+  //       p90: r.avg_interruptionP90,
+  //       p95: r.avg_interruptionP95,
+  //     })),
+  //   };
+  // },
+
   getLatencyInterruptionPercentiles: async ({
     ownerId,
     filter,

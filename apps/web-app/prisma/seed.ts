@@ -111,6 +111,16 @@ async function main() {
       enabled: true,
       defaultSelected: false,
     },
+    {
+      name: "blank",
+      headshotUrl: "/images/agent-avatars/blank.jpeg",
+      description: "a blank agent",
+      prompt:
+        "You are a blank agent. Do nothing but respond precisely to the instructions given to you.",
+      voiceId: "cgSgspJ2msm6clMCkdW9",
+      enabled: true,
+      defaultSelected: false,
+    },
   ];
 
   // hello

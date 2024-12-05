@@ -7,6 +7,7 @@ import { analyzeCallWitho1 } from "./findLLMErrors";
 import { formatOutput } from "../helpers/formatOutput";
 import { analyzeCallWithGemini } from "./geminiAnalyzeAudio";
 import { env } from "../env";
+import { getScenariosWithGeneralEvals } from "./getScenariosWithGeneralEvals";
 
 const main = async () => {
   console.log("RE-RUNNING CALL");
@@ -17,7 +18,7 @@ const main = async () => {
   // const agents = await db.agent.findMany();
   // console.log("AGENTS", agents);
 
-  const callId = "dd72d9df-2813-420d-a116-8e1774f294e4";
+  const callId = "b24c4a13-53c7-4608-81cf-c299f5a29d56";
 
   const call = await db.call.findFirst({
     where: { id: callId },
@@ -33,13 +34,16 @@ const main = async () => {
     console.error("No call found for ID", callId);
     return;
   }
-
   if (!call.scenario) {
     console.error("No scenario found for call ID", call.id);
     return;
   }
+  if (!call.vapiCallId) {
+    console.error("No vapiCallId found for call ID", call.id);
+    return;
+  }
 
-  const vapiCall = await vapiClient.calls.get(call.id);
+  const vapiCall = await vapiClient.calls.get(call.vapiCallId);
   const agent = call.test?.agent;
 
   if (!vapiCall.artifact?.messages) {
@@ -52,15 +56,20 @@ const main = async () => {
     return;
   }
 
+  const scenarioWithGeneralEvals = await getScenariosWithGeneralEvals(
+    agent,
+    call.scenario,
+  );
+
   const analysis = await analyzeCallWitho1({
     callStartedAt: vapiCall.startedAt,
     messages: vapiCall.artifact.messages,
     testAgentPrompt: call.scenario.instructions,
-    scenario: call.scenario,
+    scenario: scenarioWithGeneralEvals,
   });
 
   let parsedResult: string;
-  const useGemini = !call.scenario.includeDateTime;
+  const useGemini = false;
   if (!useGemini) {
     parsedResult = analysis.cleanedResult;
   } else {
@@ -68,7 +77,7 @@ const main = async () => {
       callStartedAt: vapiCall.startedAt,
       messages: vapiCall.artifact.messages,
       testAgentPrompt: call.scenario.instructions,
-      scenario: call.scenario,
+      scenario: scenarioWithGeneralEvals,
       analysis,
     });
 

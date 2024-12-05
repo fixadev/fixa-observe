@@ -16,6 +16,7 @@ import { analyzeCallWithGemini } from "./geminiAnalyzeAudio";
 import { formatOutput } from "../helpers/formatOutput";
 import { Socket } from "socket.io";
 import { sendTestCompletedSlackMessage } from "./sendSlackMessage";
+import { setDeviceAvailable } from "./scheduleOfOneCalls";
 
 export const handleVapiCallEnded = async ({
   report,
@@ -41,6 +42,10 @@ export const handleVapiCallEnded = async ({
     if (!report.artifact.stereoRecordingUrl) {
       console.error("No stereo recording URL found");
       return;
+    }
+
+    if (call.ofOneDeviceId) {
+      setDeviceAvailable(call.ofOneDeviceId, userSocket);
     }
 
     const o1Analysis = await analyzeCallWitho1({
@@ -83,7 +88,14 @@ export const handleVapiCallEnded = async ({
       ),
     );
 
-    const success = validEvalResults.every((result) => result.success);
+    const criticalEvalResults = evalResults.filter((evalResult) =>
+      [...scenario.evals]?.some(
+        (evaluation) =>
+          evaluation.id === evalResult.evalId && evaluation.isCritical,
+      ),
+    );
+
+    const success = criticalEvalResults.every((result) => result.success);
 
     const updatedCall = await db.call.update({
       where: { id: call.id },

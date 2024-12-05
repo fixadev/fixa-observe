@@ -14,6 +14,7 @@ import {
   type CallEndedData,
   type SocketMessage,
   type AnalysisStartedData,
+  type CallStartedData,
 } from "~/lib/agent";
 import { useUser } from "@clerk/nextjs";
 import { SlashIcon } from "@heroicons/react/24/solid";
@@ -99,6 +100,20 @@ function TestPage({ params }: { params: { agentId: string; testId: string } }) {
                 : prev,
             );
           }
+        } else if (message.type === "call-started") {
+          const data = message.data as CallStartedData;
+          setTest((prev) =>
+            prev
+              ? {
+                  ...prev,
+                  calls: prev.calls.map((call) =>
+                    call.id === data.callId
+                      ? { ...call, status: CallStatus.in_progress }
+                      : call,
+                  ),
+                }
+              : prev,
+          );
         }
       },
       [test?.id, setTest],
