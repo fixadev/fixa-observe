@@ -44,7 +44,7 @@ export function ObserveStateProvider({
 }) {
   const [selectedCallId, setSelectedCallId] = useState<string | null>(null);
   const [filter, setFilter] = useState<Filter>({
-    lookbackPeriod: lookbackPeriods[2]!,
+    lookbackPeriod: lookbackPeriods[1]!,
     chartPeriod: chartPeriods[4]!.value,
   });
   const [orderBy, setOrderBy] = useState<OrderBy | undefined>();
