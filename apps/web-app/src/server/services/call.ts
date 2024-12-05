@@ -142,6 +142,68 @@ export const callService = {
     };
   },
 
+  // WIP
+  // getLatencyInterruptionPercentiles: async ({
+  //   ownerId,
+  //   filter,
+  // }: {
+  //   ownerId: string;
+  //   filter: Partial<Filter>;
+  // }): Promise<{
+  //   latency: { timestamp: number; p50: number; p90: number; p95: number }[];
+  //   interruptions: {
+  //     timestamp: number;
+  //     p50: number;
+  //     p90: number;
+  //     p95: number;
+  //   }[];
+  // }> => {
+  //   const chartPeriod = filter.chartPeriod ?? 60 * 60 * 1000; // Default to 1 hour
+  //   const chartPeriodSeconds = chartPeriod / 1000;
+
+  //   const results = await db.call.groupBy({
+  //     by: ["startedAt"],
+  //     where: {
+  //       ownerId,
+  //       ...(filter.timeRange && {
+  //         startedAt: {
+  //           gte: new Date(filter.timeRange.start).toISOString(),
+  //           lte: new Date(filter.timeRange.end).toISOString(),
+  //         },
+  //       }),
+  //       ...(filter.lookbackPeriod && {
+  //         startedAt: {
+  //           gte: new Date(
+  //             Date.now() - filter.lookbackPeriod.value,
+  //           ).toISOString(),
+  //         },
+  //       }),
+  //       ...(filter.agentId && { agentId: filter.agentId }),
+  //       ...(filter.regionId && { regionId: filter.regionId }),
+  //       ...(filter.metadata && {
+  //         metadata: {
+  //           path: { hasEvery: Object.keys(filter.metadata) },
+  //         },
+  //       }),
+  //     },
+  //     _avg: {
+  //       latencyP50: true,
+  //       latencyP90: true,
+  //       latencyP95: true,
+  //       interruptionP50: true,
+  //       interruptionP90: true,
+  //       interruptionP95: true,
+  //     },
+  //   });
+
+  //   return {
+  //     latency: {
+  //       latencyP50: results.l,
+  //     },
+  //     interruptions,
+  //   };
+  // },
+
   getLatencyInterruptionPercentiles: async ({
     ownerId,
     filter,

@@ -129,6 +129,8 @@ model Call {
   interruptions Interruption[]
 
   errors CallError[]
+
+  @@index([ownerId])
 }
 
 model Message {
