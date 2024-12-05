@@ -3,7 +3,7 @@ import { db } from "../db";
 
 import { menuTestData } from "./menu-data";
 
-const agentId = "79743553-dcfb-41e2-8c10-7a60db52acce";
+const agentId = "ff2e1d70-845b-4d14-9819-c144765fad14";
 
 const addScenarios = async () => {
   await db.agent.update({
@@ -37,7 +37,7 @@ const addScenarios = async () => {
                     ? {
                         name: evaluation.title,
                         description:
-                          "this evaluation should only be applied to the last 'check state' tool_call in the conversation. prices and order of items should be ignored in the comparison.",
+                          "this evaluation should only be applied to the last tool_call_result with type 'check state event' in the conversation. prices and order of items should be ignored in the comparison. be very specific about why the tool call failed if it failed. ",
                         type: "scenario",
                         toolCallExpectedResult:
                           evaluation.expected_output ?? "",

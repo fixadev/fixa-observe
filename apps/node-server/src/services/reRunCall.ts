@@ -17,7 +17,8 @@ const main = async () => {
   // const agents = await db.agent.findMany();
   // console.log("AGENTS", agents);
 
-  const callId = "dd72d9df-2813-420d-a116-8e1774f294e4";
+  // const callId = "689027ef-d592-4c20-a7f4-d32a9d789f83";
+  const callId = "b24c4a13-53c7-4608-81cf-c299f5a29d56";
 
   const call = await db.call.findFirst({
     where: { id: callId },
@@ -33,13 +34,16 @@ const main = async () => {
     console.error("No call found for ID", callId);
     return;
   }
-
   if (!call.scenario) {
     console.error("No scenario found for call ID", call.id);
     return;
   }
+  if (!call.vapiCallId) {
+    console.error("No vapiCallId found for call ID", call.id);
+    return;
+  }
 
-  const vapiCall = await vapiClient.calls.get(call.id);
+  const vapiCall = await vapiClient.calls.get(call.vapiCallId);
   const agent = call.test?.agent;
 
   if (!vapiCall.artifact?.messages) {
@@ -52,15 +56,44 @@ const main = async () => {
     return;
   }
 
+  const agentGeneralEvals = agent?.enabledGeneralEvals;
+  console.log(
+    "=============================agentGeneralEvals==============================",
+    agentGeneralEvals,
+  );
+  const filteredAgentGeneralEvals = agentGeneralEvals;
+
+  // const filteredAgentGeneralEvals = agentGeneralEvals.filter(
+  //   (evaluation) =>
+  //     !evalOverrides.find((override) => override.evalId === evaluation.id)
+  //       ?.enabled === false,
+  // );
+
+  const allEvals = [...call.scenario.evals, ...filteredAgentGeneralEvals];
+
+  const preparedEvals = allEvals.map((evaluation) => ({
+    ...evaluation,
+    description:
+      evaluation.contentType === "tool"
+        ? "this tool should be called whenever: " + evaluation.description
+        : evaluation.description,
+  }));
+
+  const scenarioWithGeneralEvals = {
+    ...call.scenario,
+    evals: preparedEvals,
+  };
+
   const analysis = await analyzeCallWitho1({
     callStartedAt: vapiCall.startedAt,
     messages: vapiCall.artifact.messages,
     testAgentPrompt: call.scenario.instructions,
-    scenario: call.scenario,
+    scenario: scenarioWithGeneralEvals,
   });
 
   let parsedResult: string;
-  const useGemini = !call.scenario.includeDateTime;
+  // const useGemini = !call.scenario.includeDateTime;
+  const useGemini = false;
   if (!useGemini) {
     parsedResult = analysis.cleanedResult;
   } else {
