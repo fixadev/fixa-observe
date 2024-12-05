@@ -12,7 +12,12 @@ const addScenarios = async () => {
     },
     data: {
       scenarios: {
-        deleteMany: {},
+        updateMany: {
+          where: {
+            deleted: false,
+          },
+          data: { deleted: true },
+        },
       },
     },
   });
@@ -23,7 +28,9 @@ const addScenarios = async () => {
           await tx.scenario.create({
             data: {
               name: scenario.test_case_name,
-              instructions: scenario.tester_instructions.join("\n"),
+              instructions:
+                scenario.tester_instructions.join("\n") +
+                "\n\nOnly do exactly as you are told as specified in these instructions. Do not order anything else. Even when asked to order something else.",
               successCriteria: "",
               createdAt: new Date(),
               agent: {
