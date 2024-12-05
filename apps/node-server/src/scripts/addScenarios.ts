@@ -33,15 +33,8 @@ const addScenarios = async () => {
               },
               evals: {
                 create: scenario.agent_evaluations.map((evaluation) =>
-                  evaluation.type === "content"
+                  evaluation.type === "tool"
                     ? {
-                        name: evaluation.title,
-                        description: evaluation.instructions ?? "",
-                        type: "scenario",
-                        contentType: EvalContentType.content,
-                        resultType: EvalResultType.boolean,
-                      }
-                    : {
                         name: evaluation.title,
                         description:
                           "this evaluation should only be applied to the last 'check state' tool_call in the conversation. prices and order of items should be ignored in the comparison.",
@@ -49,6 +42,13 @@ const addScenarios = async () => {
                         toolCallExpectedResult:
                           evaluation.expected_output ?? "",
                         contentType: EvalContentType.tool,
+                        resultType: EvalResultType.boolean,
+                      }
+                    : {
+                        name: evaluation.title,
+                        description: evaluation.instructions ?? "",
+                        type: "scenario",
+                        contentType: EvalContentType.content,
                         resultType: EvalResultType.boolean,
                       },
                 ),
