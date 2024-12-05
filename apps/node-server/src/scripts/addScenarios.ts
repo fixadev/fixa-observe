@@ -3,7 +3,19 @@ import { db } from "../db";
 
 import { menuTestData } from "./menu-data";
 
+const agentId = "ff2e1d70-845b-4d14-9819-c144765fad14";
+
 const addScenarios = async () => {
+  await db.agent.update({
+    where: {
+      id: agentId,
+    },
+    data: {
+      scenarios: {
+        deleteMany: {},
+      },
+    },
+  });
   await db.$transaction(
     async (tx) => {
       for (const scenario of menuTestData) {
@@ -13,21 +25,33 @@ const addScenarios = async () => {
               name: scenario.test_case_name,
               instructions: scenario.tester_instructions.join("\n"),
               successCriteria: "",
+              createdAt: new Date(),
               agent: {
                 connect: {
-                  // id: "8d57e428-c13c-4118-a6f2-ed721662e9b4",
-                  // id: "999493f4-8b84-4ea5-af29-14d23eee4130",
-                  id: "ff2e1d70-845b-4d14-9819-c144765fad14",
+                  id: agentId,
                 },
               },
               evals: {
-                create: scenario.agent_evaluations.map((evaluation) => ({
-                  name: evaluation.title,
-                  description: evaluation.instructions,
-                  type: "scenario",
-                  contentType: EvalContentType.content,
-                  resultType: EvalResultType.boolean,
-                })),
+                create: scenario.agent_evaluations.map((evaluation) =>
+                  evaluation.type === "tool"
+                    ? {
+                        name: evaluation.title,
+                        description:
+                          "this evaluation should only be applied to the last tool_call_result with type 'check state event' in the conversation. prices and order of items should be ignored in the comparison. be very specific about why the tool call failed if it failed. ",
+                        type: "scenario",
+                        toolCallExpectedResult:
+                          evaluation.expected_output ?? "",
+                        contentType: EvalContentType.tool,
+                        resultType: EvalResultType.boolean,
+                      }
+                    : {
+                        name: evaluation.title,
+                        description: evaluation.instructions ?? "",
+                        type: "scenario",
+                        contentType: EvalContentType.content,
+                        resultType: EvalResultType.boolean,
+                      },
+                ),
               },
             },
           });

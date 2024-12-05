@@ -15,7 +15,11 @@ export const TextAreaWithLabel = ({
   return (
     <div className="flex flex-col gap-2">
       <Label>{label}</Label>
-      <Textarea value={value} onChange={(e) => onChange(e.target.value)} />
+      <Textarea
+        className="min-h-[100px]"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+      />
     </div>
   );
 };

@@ -1,20 +1,10 @@
 "use client";
 import { Dialog, DialogContent, DialogTitle } from "~/components/ui/dialog";
 import { Button } from "~/components/ui/button";
-import { Label } from "~/components/ui/label";
 import { api } from "~/trpc/react";
 import { useEffect, useState } from "react";
 import { useToast } from "~/components/hooks/use-toast";
-import {
-  Select,
-  SelectItem,
-  SelectContent,
-  SelectTrigger,
-  SelectValue,
-} from "~/components/ui/select";
 import { type EvalWithoutScenarioId, type EvalSchema } from "~/lib/agent";
-import { InputWithLabel } from "~/app/_components/InputWithLabel";
-import { TextAreaWithLabel } from "~/app/_components/TextAreaWithLabel";
 import { TrashIcon } from "@heroicons/react/24/solid";
 import {
   AlertDialog,
@@ -27,6 +17,7 @@ import {
   AlertDialogTrigger,
   AlertDialogAction,
 } from "~/components/ui/alert-dialog";
+import { EvalInput } from "~/app/_components/EvalInput";
 
 export const CreateGeneralEvalModal = ({
   existingEval,
@@ -54,6 +45,7 @@ export const CreateGeneralEvalModal = ({
       agentId: null,
       ownerId: null,
       toolCallExpectedResult: "",
+      isCritical: true,
     },
   );
 
@@ -64,6 +56,7 @@ export const CreateGeneralEvalModal = ({
       toast({
         title: "eval created",
         description: "eval created successfully",
+        duration: 2000,
       });
       setEvaluations((evaluations) => [...evaluations.slice(0, -1), data]);
       setIsModalOpen(false);
@@ -75,10 +68,12 @@ export const CreateGeneralEvalModal = ({
       toast({
         title: "eval updated",
         description: "eval updated successfully",
+        duration: 2000,
       });
       setEvaluations((evaluations) =>
         evaluations.map((e: EvalSchema) => (e.id === data.id ? data : e)),
       );
+      setIsModalOpen(false);
     },
   });
 
@@ -91,6 +86,7 @@ export const CreateGeneralEvalModal = ({
       toast({
         title: "eval deleted",
         description: "eval deleted successfully",
+        duration: 2000,
       });
     },
   });
@@ -111,6 +107,7 @@ export const CreateGeneralEvalModal = ({
         toolCallExpectedResult: "",
         agentId: null,
         ownerId: null,
+        isCritical: true,
       });
     }
   }, [existingEval]);
@@ -133,70 +130,7 @@ export const CreateGeneralEvalModal = ({
         <DialogTitle>
           {existingEval ? "update eval" : "create eval"}
         </DialogTitle>
-        <div className="flex w-full flex-row justify-between gap-4">
-          <InputWithLabel
-            label="name"
-            value={evaluation.name}
-            onChange={(e) => setEvaluation({ ...evaluation, name: e })}
-          />
-          <div className="flex flex-col gap-2">
-            <Label>type</Label>
-            <Select
-              value={evaluation.contentType}
-              onValueChange={(value) =>
-                setEvaluation({
-                  ...evaluation,
-                  contentType: value as "tool" | "content",
-                })
-              }
-            >
-              <SelectTrigger>
-                <SelectValue defaultValue="content" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem id="content" value="content">
-                  content
-                </SelectItem>
-                <SelectItem id="tool" value="tool">
-                  tool
-                </SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="flex flex-col gap-2">
-            <Label>result type</Label>
-            <Select disabled>
-              <SelectTrigger>
-                <SelectValue placeholder="boolean" />
-              </SelectTrigger>
-            </Select>
-          </div>
-        </div>
-        {evaluation.contentType === "tool" ? (
-          <div className="flex flex-col gap-2">
-            <TextAreaWithLabel
-              label="when should this tool be called?"
-              value={evaluation.description}
-              onChange={(e) => setEvaluation({ ...evaluation, description: e })}
-            />
-            <TextAreaWithLabel
-              label="expected result?"
-              value={evaluation.toolCallExpectedResult}
-              onChange={(e) =>
-                setEvaluation({ ...evaluation, toolCallExpectedResult: e })
-              }
-            />
-          </div>
-        ) : (
-          <div className="flex flex-col gap-2">
-            <TextAreaWithLabel
-              label="success description"
-              value={evaluation.description}
-              onChange={(e) => setEvaluation({ ...evaluation, description: e })}
-            />
-          </div>
-        )}
-
+        <EvalInput evaluation={evaluation} setEvaluation={setEvaluation} />
         <div className="flex flex-row justify-between gap-2">
           <DeleteEvalDialog
             deleteEval={() => deleteGeneralEval({ id: evaluation.id })}

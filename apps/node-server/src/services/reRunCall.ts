@@ -18,7 +18,7 @@ const main = async () => {
   // const agents = await db.agent.findMany();
   // console.log("AGENTS", agents);
 
-  const callId = "1d78d14f-12d9-4af2-a2f7-12142a4163b0";
+  const callId = "b24c4a13-53c7-4608-81cf-c299f5a29d56";
 
   const call = await db.call.findFirst({
     where: { id: callId },
@@ -34,13 +34,16 @@ const main = async () => {
     console.error("No call found for ID", callId);
     return;
   }
-
   if (!call.scenario) {
     console.error("No scenario found for call ID", call.id);
     return;
   }
+  if (!call.vapiCallId) {
+    console.error("No vapiCallId found for call ID", call.id);
+    return;
+  }
 
-  const vapiCall = await vapiClient.calls.get(call.id);
+  const vapiCall = await vapiClient.calls.get(call.vapiCallId);
   const agent = call.test?.agent;
 
   if (!vapiCall.artifact?.messages) {

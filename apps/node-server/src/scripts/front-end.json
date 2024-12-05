@@ -1,0 +1,41 @@
+{
+  "type": "CHECK_STATE_EVENT",
+  "conversationId": "e2ce9e8a-c216-4f95-ae3b-58ddf4ee7564",
+  "items": [
+    {
+      "name": "Whopper Meal",
+      "isCombo": false,
+      "quantity": "1",
+      "size": "",
+      "unitPrice": "$0.00",
+      "totalPrice": "$0.00",
+      "modifications": [
+        {
+          "name": "With Cheese",
+          "isCombo": false,
+          "quantity": "1",
+          "size": "",
+          "unitPrice": "$0.00",
+          "totalPrice": "$0.00",
+          "modifications": [],
+          "validationIssues": []
+        },
+        {
+          "name": "Sprite",
+          "isCombo": false,
+          "quantity": "1",
+          "size": "",
+          "unitPrice": "$0.00",
+          "totalPrice": "$0.00",
+          "modifications": [],
+          "validationIssues": []
+        }
+      ],
+      "validationIssues": []
+    }
+  ],
+  "subtotal": "$0.00",
+  "validationIssues": [],
+  "speakingEvents": [],
+  "requestId": "e2ce9e8a-c216-4f95-ae3b-58ddf4ee7564.0"
+}

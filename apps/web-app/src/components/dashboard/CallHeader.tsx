@@ -1,6 +1,9 @@
 "use client";
 
-import { type CallWithIncludes } from "~/lib/types";
+import {
+  type EvalResultWithIncludes,
+  type CallWithIncludes,
+} from "~/lib/types";
 import { cn, didCallSucceed, getLatencyColor } from "~/lib/utils";
 import Image from "next/image";
 import {
@@ -13,7 +16,7 @@ import { type AudioPlayerRef } from "./AudioPlayer";
 import { CallStatus } from "@prisma/client";
 import { formatDistanceToNow } from "date-fns";
 import Link from "next/link";
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
 
 interface CallHeaderProps {
   call: CallWithIncludes;
@@ -23,6 +26,11 @@ interface CallHeaderProps {
   setActiveEvalResultId: (id: string | null) => void;
   agentId?: string;
 }
+
+type AggregateEvalResult = EvalResultWithIncludes & {
+  numSucceeded: number;
+  total: number;
+};
 
 export function TestCallHeader({
   call,
@@ -35,6 +43,34 @@ export function TestCallHeader({
   const play = useCallback(() => {
     audioPlayerRef.current?.play();
   }, [audioPlayerRef]);
+
+  const aggregateEvalResults = useMemo<AggregateEvalResult[]>(() => {
+    if (!call.evalResults) return [];
+
+    const evalIdToResults = new Map<string, EvalResultWithIncludes[]>();
+    for (const evalResult of call.evalResults) {
+      if (!evalIdToResults.has(evalResult.evalId)) {
+        evalIdToResults.set(evalResult.evalId, [evalResult]);
+      } else {
+        evalIdToResults.get(evalResult.evalId)?.push(evalResult);
+      }
+    }
+
+    return Array.from(evalIdToResults.values()).map((results) => {
+      const details = results.reduce(
+        (acc, curr) => {
+          acc.numSucceeded += curr.success ? 1 : 0;
+          acc.total++;
+          return acc;
+        },
+        { numSucceeded: 0, total: 0 },
+      );
+      return {
+        ...results[0]!,
+        ...details,
+      };
+    });
+  }, [call.evalResults]);
 
   return (
     <div className="flex items-center gap-4 pb-4">
@@ -66,20 +102,24 @@ export function TestCallHeader({
             <Spinner className="size-4" />{" "}
             {call.status === CallStatus.analyzing
               ? "analyzing call..."
-              : "call in progress..."}
+              : call.status === CallStatus.in_progress
+                ? "call in progress..."
+                : "call queued..."}
           </div>
         )}
         <div className="flex w-fit flex-row flex-wrap gap-2">
-          {call.evalResults?.map((evalResult) => (
+          {aggregateEvalResults.map((evalResult) => (
             <div
               key={evalResult.id}
               className={cn(
                 "group flex cursor-pointer items-start gap-1 border-l-2 p-1 pl-1 text-xs",
-                evalResult.success
+                evalResult.numSucceeded === evalResult.total
                   ? "border-green-500 bg-green-100 text-green-500 hover:bg-green-200"
                   : "border-red-500 bg-red-100 text-red-500 hover:bg-red-200",
                 activeEvalResultId === evalResult.id &&
-                  (evalResult.success ? "bg-green-200" : "bg-red-200"),
+                  (evalResult.numSucceeded === evalResult.total
+                    ? "bg-green-200"
+                    : "bg-red-200"),
               )}
               onMouseEnter={() => {
                 setActiveEvalResultId(evalResult.id);
@@ -94,12 +134,17 @@ export function TestCallHeader({
                 play();
               }}
             >
-              {evalResult.success ? (
+              {evalResult.numSucceeded === evalResult.total ? (
                 <CheckCircleIcon className="size-4 shrink-0 text-green-500" />
               ) : (
                 <XCircleIcon className="size-4 shrink-0 text-red-500" />
               )}
               {evalResult.eval.name}
+              {evalResult.total > 1 && (
+                <div className="text-xs">
+                  {evalResult.numSucceeded}/{evalResult.total}
+                </div>
+              )}
               <Link
                 href={`/dashboard/${agentId}/scenarios?scenarioId=${call.scenarioId}&evalId=${evalResult.eval.id}`}
               >

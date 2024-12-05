@@ -1,0 +1,2009 @@
+{
+  "ConversationId:00000001-0000-0000-0000-000000000001": [
+    {
+      "role": "user",
+      "content": "Yeah let me get three small fries."
+    },
+    {
+      "request_id": "ConversationId:00000001-0000-0000-0000-000000000001-1",
+      "role": "assistant",
+      "content": "{\"order\": [{\"FrenchFries\": {\"quantity\": 3, \"modifiers\": [{\"modifier_option_id\": \"SmallFrenchFries\", \"quantity\": 3, \"pre_modifier_id\": null}]}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Sure, three small fries. Anything else?"
+    },
+    {
+      "role": "user",
+      "content": "Actually, make that four."
+    },
+    {
+      "request_id": "ConversationId:00000001-0000-0000-0000-000000000001-2",
+      "role": "assistant",
+      "content": "{\"order\": [{\"FrenchFries\": {\"quantity\": 4, \"modifiers\": [{\"modifier_option_id\": \"SmallFrenchFries\", \"quantity\": 4, \"pre_modifier_id\": null}]}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "No problem, updating to four small fries. Would you like anything else?"
+    },
+    {
+      "role": "user",
+      "content": "No, that's all."
+    },
+    {
+      "request_id": "ConversationId:00000001-0000-0000-0000-000000000001-3",
+      "role": "assistant",
+      "content": "{\"order\": [{\"FrenchFries\": {\"quantity\": 4, \"modifiers\": [{\"modifier_option_id\": \"SmallFrenchFries\", \"quantity\": 4, \"pre_modifier_id\": null}]}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Thank you! Please proceed to the next window."
+    }
+  ],
+  "ConversationId:00000002-0000-0000-0000-000000000002": [
+    {
+      "role": "user",
+      "content": "Hi can I have a small French fry please? Add extra ketchup. And I want a side of ranch dipping sauce."
+    },
+    {
+      "request_id": "ConversationId:00000002-0000-0000-0000-000000000002-1",
+      "role": "assistant",
+      "content": "{\"order\": [{\"FrenchFries\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"SmallFrenchFries\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"KetchupExtra\", \"quantity\": 1, \"pre_modifier_id\": null}]}}, {\"RanchSauce\": {\"quantity\": 1, \"modifiers\": []}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Certainly! One small French fry with extra ketchup and a side of ranch dipping sauce. Anything else?"
+    },
+    {
+      "role": "user",
+      "content": "No, that's it, thank you."
+    },
+    {
+      "request_id": "ConversationId:00000002-0000-0000-0000-000000000002-2",
+      "role": "assistant",
+      "content": "{\"order\": [{\"FrenchFries\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"SmallFrenchFries\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"KetchupExtra\", \"quantity\": 1, \"pre_modifier_id\": null}]}}, {\"RanchSauce\": {\"quantity\": 1, \"modifiers\": []}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "You're welcome! Please drive forward to the next window."
+    }
+  ],
+  "ConversationId:00000003-0000-0000-0000-000000000003": [
+    {
+      "role": "user",
+      "content": "Small coke please, that's it."
+    },
+    {
+      "request_id": "ConversationId:00000003-0000-0000-0000-000000000003-1",
+      "role": "assistant",
+      "content": "{\"order\": [{\"CocaCola\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"SmallSoda\", \"quantity\": 1, \"pre_modifier_id\": null}]}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Sure, one small Coke. Anything else?"
+    },
+    {
+      "role": "user",
+      "content": "Actually, add a small Sprite Zero."
+    },
+    {
+      "request_id": "ConversationId:00000003-0000-0000-0000-000000000003-2",
+      "role": "assistant",
+      "content": "{\"order\": [{\"CocaCola\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"SmallSoda\", \"quantity\": 1, \"pre_modifier_id\": null}]}}, {\"SpriteZero\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"SmallSoda\", \"quantity\": 1, \"pre_modifier_id\": null}]}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "No problem, adding a small Sprite Zero. Anything else?"
+    },
+    {
+      "role": "user",
+      "content": "No, that's all."
+    },
+    {
+      "request_id": "ConversationId:00000003-0000-0000-0000-000000000003-3",
+      "role": "assistant",
+      "content": "{\"order\": [{\"CocaCola\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"SmallSoda\", \"quantity\": 1, \"pre_modifier_id\": null}]}}, {\"SpriteZero\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"SmallSoda\", \"quantity\": 1, \"pre_modifier_id\": null}]}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Thank you! Please proceed to the next window."
+    }
+  ],
+  "ConversationId:00000004-0000-0000-0000-000000000004": [
+    {
+      "role": "user",
+      "content": "Yes I want 10 small soft drinks of the following flavors: coke, diet coke, coca-cola, diet coca cola, sprite, sprite zero, fanta, fanta zero, mello yello, barq\u2019s."
+    },
+    {
+      "request_id": "ConversationId:00000004-0000-0000-0000-000000000004-1",
+      "role": "assistant",
+      "content": "{\"order\": [{\"CocaCola\": {\"quantity\": 2, \"modifiers\": [{\"modifier_option_id\": \"SmallSoda\", \"quantity\": 1, \"pre_modifier_id\": null}]}}, {\"DietCoke\": {\"quantity\": 2, \"modifiers\": [{\"modifier_option_id\": \"SmallSoda\", \"quantity\": 1, \"pre_modifier_id\": null}]}}, {\"Sprite\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"SmallSoda\", \"quantity\": 1, \"pre_modifier_id\": null}]}}, {\"SpriteZero\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"SmallSoda\", \"quantity\": 1, \"pre_modifier_id\": null}]}}, {\"FantaOrange\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"SmallSoda\", \"quantity\": 1, \"pre_modifier_id\": null}]}}, {\"FantaZero\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"SmallSoda\", \"quantity\": 1, \"pre_modifier_id\": null}]}}, {\"MelloYello\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"SmallSoda\", \"quantity\": 1, \"pre_modifier_id\": null}]}}, {\"BarqsRootBeer\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"SmallSoda\", \"quantity\": 1, \"pre_modifier_id\": null}]}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Certainly! That's ten small soft drinks: Coke, Diet Coke, Coca-Cola, Diet Coca-Cola, Sprite, Sprite Zero, Fanta, Fanta Zero, Mello Yello, and Barq's. Anything else?"
+    },
+    {
+      "role": "user",
+      "content": "No, that's it."
+    },
+    {
+      "request_id": "ConversationId:00000004-0000-0000-0000-000000000004-2",
+      "role": "assistant",
+      "content": "{\"order\": [{\"CocaCola\": {\"quantity\": 2, \"modifiers\": [{\"modifier_option_id\": \"SmallSoda\", \"quantity\": 1, \"pre_modifier_id\": null}]}}, {\"DietCoke\": {\"quantity\": 2, \"modifiers\": [{\"modifier_option_id\": \"SmallSoda\", \"quantity\": 1, \"pre_modifier_id\": null}]}}, {\"Sprite\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"SmallSoda\", \"quantity\": 1, \"pre_modifier_id\": null}]}}, {\"SpriteZero\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"SmallSoda\", \"quantity\": 1, \"pre_modifier_id\": null}]}}, {\"FantaOrange\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"SmallSoda\", \"quantity\": 1, \"pre_modifier_id\": null}]}}, {\"FantaZero\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"SmallSoda\", \"quantity\": 1, \"pre_modifier_id\": null}]}}, {\"MelloYello\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"SmallSoda\", \"quantity\": 1, \"pre_modifier_id\": null}]}}, {\"BarqsRootBeer\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"SmallSoda\", \"quantity\": 1, \"pre_modifier_id\": null}]}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Great! Please drive forward to the next window."
+    }
+  ],
+  "ConversationId:00000005-0000-0000-0000-000000000005": [
+    {
+      "role": "user",
+      "content": "Yeah lemme get a single Whopper sandwich, nothing else."
+    },
+    {
+      "request_id": "ConversationId:00000005-0000-0000-0000-000000000005-1",
+      "role": "assistant",
+      "content": "{\"order\": [{\"Whopper\": {\"quantity\": 1, \"modifiers\": []}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Sure, one Whopper sandwich. Anything else?"
+    },
+    {
+      "role": "user",
+      "content": "No, that's it."
+    },
+    {
+      "request_id": "ConversationId:00000005-0000-0000-0000-000000000005-2",
+      "role": "assistant",
+      "content": "{\"order\": [{\"Whopper\": {\"quantity\": 1, \"modifiers\": []}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Thank you! Please proceed to the next window."
+    }
+  ],
+  "ConversationId:00000006-0000-0000-0000-000000000006": [
+    {
+      "role": "user",
+      "content": "Hi yes, Whopper with extra lettuce, tomato, onion, pickles, and ketchup please."
+    },
+    {
+      "request_id": "ConversationId:00000006-0000-0000-0000-000000000006-1",
+      "role": "assistant",
+      "content": "{\"order\": [{\"Whopper\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"LettuceExtra\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"TomatoesExtra\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"OnionsExtra\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"PicklesExtra\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"KetchupExtra\", \"quantity\": 1, \"pre_modifier_id\": null}]}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Certainly! One Whopper with extra lettuce, tomato, onion, pickles, and ketchup. Anything else?"
+    },
+    {
+      "role": "user",
+      "content": "No, that's all, thank you."
+    },
+    {
+      "request_id": "ConversationId:00000006-0000-0000-0000-000000000006-2",
+      "role": "assistant",
+      "content": "{\"order\": [{\"Whopper\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"LettuceExtra\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"TomatoesExtra\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"OnionsExtra\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"PicklesExtra\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"KetchupExtra\", \"quantity\": 1, \"pre_modifier_id\": null}]}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "You're welcome! Please drive forward to the next window."
+    }
+  ],
+  "ConversationId:00000007-0000-0000-0000-000000000007": [
+    {
+      "role": "user",
+      "content": "Hey can I get a Whopper? Actually, make that two Whoppers."
+    },
+    {
+      "request_id": "ConversationId:00000007-0000-0000-0000-000000000007-1",
+      "role": "assistant",
+      "content": "{\"order\": [{\"Whopper\": {\"quantity\": 2, \"modifiers\": []}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Sure, updating your order to two Whoppers. Anything else?"
+    },
+    {
+      "role": "user",
+      "content": "No, that's it."
+    },
+    {
+      "request_id": "ConversationId:00000007-0000-0000-0000-000000000007-2",
+      "role": "assistant",
+      "content": "{\"order\": [{\"Whopper\": {\"quantity\": 2, \"modifiers\": []}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Great! Please proceed to the next window."
+    }
+  ],
+  "ConversationId:00000008-0000-0000-0000-000000000008": [
+    {
+      "role": "user",
+      "content": "Yes I would like a Whopper with cheese."
+    },
+    {
+      "request_id": "ConversationId:00000008-0000-0000-0000-000000000008-1",
+      "role": "assistant",
+      "content": "{\"order\": [{\"Whopper\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"WhopperWithCheese\", \"quantity\": 1, \"pre_modifier_id\": null}]}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Certainly! One Whopper with cheese. Anything else?"
+    },
+    {
+      "role": "user",
+      "content": "Please add bacon and a small fry."
+    },
+    {
+      "request_id": "ConversationId:00000008-0000-0000-0000-000000000008-2",
+      "role": "assistant",
+      "content": "{\"order\": [{\"Whopper\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"WhopperWithBaconAndCheese\", \"quantity\": 1, \"pre_modifier_id\": null}]}}, {\"FrenchFries\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"SmallFrenchFries\", \"quantity\": 1, \"pre_modifier_id\": null}]}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Adding bacon to your Whopper and a small fry. Anything else?"
+    },
+    {
+      "role": "user",
+      "content": "No, that's all, thanks."
+    },
+    {
+      "request_id": "ConversationId:00000008-0000-0000-0000-000000000008-3",
+      "role": "assistant",
+      "content": "{\"order\": [{\"Whopper\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"WhopperWithBaconAndCheese\", \"quantity\": 1, \"pre_modifier_id\": null}]}, \"FrenchFries\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"SmallFrenchFries\", \"quantity\": 1, \"pre_modifier_id\": null}]}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "You're welcome! Please drive forward to the next window."
+    }
+  ],
+  "ConversationId:00000009-0000-0000-0000-000000000009": [
+    {
+      "role": "user",
+      "content": "Yeah I want five Whoppers with cheese and I want one to have double patties and bacon."
+    },
+    {
+      "request_id": "ConversationId:00000009-0000-0000-0000-000000000009-1",
+      "role": "assistant",
+      "content": "{\"order\": [{\"Whopper\": {\"quantity\": 4, \"modifiers\": [{\"modifier_option_id\": \"WhopperWithBaconAndCheese\", \"quantity\": 1, \"pre_modifier_id\": null}]}, \"DoubleWhopper\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"DoubleWhopperWithBacon\", \"quantity\": 1, \"pre_modifier_id\": null}]}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Sure, that's five Whoppers with cheese, one of them with double patties and bacon. Anything else?"
+    },
+    {
+      "role": "user",
+      "content": "No, that's it."
+    },
+    {
+      "request_id": "ConversationId:00000009-0000-0000-0000-000000000009-2",
+      "role": "assistant",
+      "content": "{\"order\": [{\"Whopper\": {\"quantity\": 5, \"modifiers\": [{\"modifier_option_id\": \"WhopperWithCheese\", \"quantity\": 5, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"WhopperWithBacon\", \"quantity\": 1, \"pre_modifier_id\": null}]}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Great! Please proceed to the next window."
+    }
+  ],
+  "ConversationId:00000010-0000-0000-0000-000000000010": [
+    {
+      "role": "user",
+      "content": "Yeah hi can I have an 8-piece chicken nugget please?"
+    },
+    {
+      "request_id": "ConversationId:00000010-0000-0000-0000-000000000010-1",
+      "role": "assistant",
+      "content": "{\"order\": [{\"EightPieceChickenNuggets\": {\"quantity\": 1, \"modifiers\": []}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Certainly! One 8-piece chicken nugget. Would you like any dipping sauces?"
+    },
+    {
+      "role": "user",
+      "content": "No, that's all."
+    },
+    {
+      "request_id": "ConversationId:00000010-0000-0000-0000-000000000010-2",
+      "role": "assistant",
+      "content": "{\"order\": [{\"EightPieceChickenNuggets\": {\"quantity\": 1, \"modifiers\": []}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Alright, please drive forward to the next window."
+    }
+  ],
+  "ConversationId:00000011-0000-0000-0000-000000000011": [
+    {
+      "role": "user",
+      "content": "8-piece nugget please."
+    },
+    {
+      "request_id": "ConversationId:00000011-0000-0000-0000-000000000011-1",
+      "role": "assistant",
+      "content": "{\"order\": [{\"EightPieceChickenNuggets\": {\"quantity\": 1, \"modifiers\": []}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Sure, one 8-piece chicken nugget. Any dipping sauces?"
+    },
+    {
+      "role": "user",
+      "content": "No, thank you."
+    },
+    {
+      "request_id": "ConversationId:00000011-0000-0000-0000-000000000011-2",
+      "role": "assistant",
+      "content": "{\"order\": [{\"EightPieceChickenNuggets\": {\"quantity\": 1, \"modifiers\": []}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Alright, anything else?"
+    },
+    {
+      "role": "user",
+      "content": "No, that's it."
+    },
+    {
+      "request_id": "ConversationId:00000011-0000-0000-0000-000000000011-3",
+      "role": "assistant",
+      "content": "{\"order\": [{\"EightPieceChickenNuggets\": {\"quantity\": 1, \"modifiers\": []}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Thank you! Please proceed to the next window."
+    }
+  ],
+  "ConversationId:00000012-0000-0000-0000-000000000012": [
+    {
+      "role": "user",
+      "content": "Yeah lemme get 8 nuggets."
+    },
+    {
+      "request_id": "ConversationId:00000012-0000-0000-0000-000000000012-1",
+      "role": "assistant",
+      "content": "{\"order\": [{\"EightPieceChickenNuggets\": {\"quantity\": 1, \"modifiers\": []}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Sure, one 8-piece chicken nugget. Would you like any sauces?"
+    },
+    {
+      "role": "user",
+      "content": "Actually, make that two 8-piece nuggets, please."
+    },
+    {
+      "request_id": "ConversationId:00000012-0000-0000-0000-000000000012-2",
+      "role": "assistant",
+      "content": "{\"order\": [{\"EightPieceChickenNuggets\": {\"quantity\": 2, \"modifiers\": []}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "No problem, updating to two 8-piece nuggets. Any dipping sauces with those?"
+    },
+    {
+      "role": "user",
+      "content": "Barbecue sauce, please."
+    },
+    {
+      "request_id": "ConversationId:00000012-0000-0000-0000-000000000012-3",
+      "role": "assistant",
+      "content": "{\"order\": [{\"EightPieceChickenNuggets\": {\"quantity\": 2, \"modifiers\": [{\"modifier_option_id\": \"BbqDippingSauce\", \"quantity\": 2, \"pre_modifier_id\": null}]}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Adding barbecue sauce. Anything else?"
+    },
+    {
+      "role": "user",
+      "content": "No, that's all."
+    },
+    {
+      "request_id": "ConversationId:00000012-0000-0000-0000-000000000012-4",
+      "role": "assistant",
+      "content": "{\"order\": [{\"EightPieceChickenNuggets\": {\"quantity\": 2, \"modifiers\": [{\"modifier_option_id\": \"BbqDippingSauce\", \"quantity\": 2, \"pre_modifier_id\": null}]}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Great! Please drive forward to the next window."
+    }
+  ],
+  "ConversationId:00000013-0000-0000-0000-000000000013": [
+    {
+      "role": "user",
+      "content": "I want um... an Original Chicken Sandwich with no lettuce and barbecue sauce instead of mayo."
+    },
+    {
+      "request_id": "ConversationId:00000013-0000-0000-0000-000000000013-1",
+      "role": "assistant",
+     "content": "{\"order\": [{\"OriginalChickenSandwich\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"LettuceNone\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"BarbecueRegular\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"MayonnaiseNone\", \"quantity\": 1, \"pre_modifier_id\": null}]}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Certainly! One Original Chicken Sandwich with no lettuce and barbecue sauce instead of mayo. Anything else?"
+    },
+    {
+      "role": "user",
+      "content": "No, that's it."
+    },
+    {
+      "request_id": "ConversationId:00000013-0000-0000-0000-000000000013-2",
+      "role": "assistant",
+      "content": "{\"order\": [{\"OriginalChickenSandwich\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"LettuceNone\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"BarbecueRegular\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"MayonnaiseNone\", \"quantity\": 1, \"pre_modifier_id\": null}]}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "You're welcome! Please proceed to the next window."
+    }
+  ],
+  "ConversationId:00000014-0000-0000-0000-000000000014": [
+    {
+      "role": "user",
+      "content": "Good evening, can I have a chicken sandwich, please?"
+    },
+    {
+      "request_id": "ConversationId:00000014-0000-0000-0000-000000000014-1",
+      "role": "assistant",
+      "content": "{\"order\": [{\"OriginalChickenSandwich\": {\"quantity\": 1, \"modifiers\": []}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Certainly! One chicken sandwich. Would you like the Original or the Crispy Chicken Sandwich?"
+    },
+    {
+      "role": "user",
+      "content": "Original, please."
+    },
+    {
+      "request_id": "ConversationId:00000014-0000-0000-0000-000000000014-2",
+      "role": "assistant",
+      "content": "{\"order\": [{\"OriginalChickenSandwich\": {\"quantity\": 1, \"modifiers\": []}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Great! Anything else?"
+    },
+    {
+      "role": "user",
+      "content": "No, that's all, thank you."
+    },
+    {
+      "request_id": "ConversationId:00000014-0000-0000-0000-000000000014-3",
+      "role": "assistant",
+      "content": "{\"order\": [{\"OriginalChickenSandwich\": {\"quantity\": 1, \"modifiers\": []}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Thank you! Please drive forward to the next window."
+    }
+  ],
+  "ConversationId:00000015-0000-0000-0000-000000000015": [
+    {
+      "role": "user",
+      "content": "Hi I'll take an Original Chicken and also add a large fry, but no drink, I don't want a combo. And please no mayo on the sandwich, thanks."
+    },
+    {
+      "request_id": "ConversationId:00000015-0000-0000-0000-000000000015-1",
+      "role": "assistant",
+      "content": "{\"order\": [{\"OriginalChickenSandwich\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"MayonnaiseNone\", \"quantity\": 1, \"pre_modifier_id\": null}]}}, {\"FrenchFries\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"LargeFrenchFries\", \"quantity\": 1, \"pre_modifier_id\": null}]}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Sure, one Original Chicken Sandwich with no mayo and a large fry. Anything else?"
+    },
+    {
+      "role": "user",
+      "content": "No, that's it, thanks."
+    },
+    {
+      "request_id": "ConversationId:00000015-0000-0000-0000-000000000015-2",
+      "role": "assistant",
+      "content": "{\"order\": [{\"OriginalChickenSandwich\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"MayonnaiseNone\", \"quantity\": 1, \"pre_modifier_id\": null}]}}, {\"FrenchFries\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"LargeFrenchFries\", \"quantity\": 1, \"pre_modifier_id\": null}]}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "You're welcome! Please proceed to the next window."
+    }
+  ],
+  "ConversationId:00000016-0000-0000-0000-000000000016": [
+    {
+      "role": "user",
+      "content": "9 piece chicken fries please. Two orders. Extra napkins in the bag please."
+    },
+    {
+      "request_id": "ConversationId:00000016-0000-0000-0000-000000000016-1",
+      "role": "assistant",
+      "content": "{\"order\": [{\"EightPieceChickenFries\": {\"quantity\": 2, \"modifiers\": []}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Certainly! Two orders of 9-piece chicken fries with extra napkins. Anything else?"
+    },
+    {
+      "role": "user",
+      "content": "No, that's all."
+    },
+    {
+      "request_id": "ConversationId:00000016-0000-0000-0000-000000000016-2",
+      "role": "assistant",
+      "content": "{\"order\": [{\"EightPieceChickenFries\": {\"quantity\": 2, \"modifiers\": []}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Thank you! Please proceed to the next window."
+    }
+  ],
+  "ConversationId:00000017-0000-0000-0000-000000000017": [
+    {
+      "role": "user",
+      "content": "Yeah do you have chicken fries?"
+    },
+    {
+      "request_id": "ConversationId:00000017-0000-0000-0000-000000000017-1",
+      "role": "assistant",
+      "content": "{\"order\": []}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Yes, we do! Would you like to order some?"
+    },
+    {
+      "role": "user",
+      "content": "Yes, one order please."
+    },
+    {
+      "request_id": "ConversationId:00000017-0000-0000-0000-000000000017-2",
+      "role": "assistant",
+      "content": "{\"order\": [{\"EightPieceChickenFries\": {\"quantity\": 1, \"modifiers\": []}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Certainly! One order of chicken fries. Anything else?"
+    },
+    {
+      "role": "user",
+      "content": "No, that's it."
+    },
+    {
+      "request_id": "ConversationId:00000017-0000-0000-0000-000000000017-3",
+      "role": "assistant",
+      "content": "{\"order\": [{\"EightPieceChickenFries\": {\"quantity\": 1, \"modifiers\": []}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Thank you! Please proceed to the next window."
+    }
+  ],
+  "ConversationId:00000018-0000-0000-0000-000000000018": [
+    {
+      "role": "user",
+      "content": "Whopper junior, please."
+    },
+    {
+      "request_id": "ConversationId:00000018-0000-0000-0000-000000000018-1",
+      "role": "assistant",
+      "content": "{\"order\": [{\"WhopperJr\": {\"quantity\": 1, \"modifiers\": []}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Sure, one Whopper Junior sandwich. Anything else?"
+    },
+    {
+      "role": "user",
+      "content": "No, that's all."
+    },
+    {
+      "request_id": "ConversationId:00000018-0000-0000-0000-000000000018-2",
+      "role": "assistant",
+      "content": "{\"order\": [{\"WhopperJr\": {\"quantity\": 1, \"modifiers\": []}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Thank you! Please drive forward to the next window."
+    }
+  ],
+  "ConversationId:00000019-0000-0000-0000-000000000019": [
+    {
+      "role": "user",
+      "content": "I want a junior whopper please."
+    },
+    {
+      "request_id": "ConversationId:00000019-0000-0000-0000-000000000019-1",
+      "role": "assistant",
+      "content": "{\"order\": [{\"WhopperJr\": {\"quantity\": 1, \"modifiers\": []}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Certainly! One Whopper Junior sandwich. Anything else?"
+    },
+    {
+      "role": "user",
+      "content": "No, that's it."
+    },
+    {
+      "request_id": "ConversationId:00000019-0000-0000-0000-000000000019-2",
+      "role": "assistant",
+      "content": "{\"order\": [{\"WhopperJr\": {\"quantity\": 1, \"modifiers\": []}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Great! Please proceed to the next window."
+    }
+  ],
+  "ConversationId:00000020-0000-0000-0000-000000000020": [
+    {
+      "role": "user",
+      "content": "Yes I\u2019ll have a junior whopper sandwich without tomato, add extra pickle and I want a second patty if possible, too."
+    },
+    {
+      "request_id": "ConversationId:00000020-0000-0000-0000-000000000020-1",
+      "role": "assistant",
+      "content": "{\"order\": [{\"WhopperJr\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"PicklesExtra\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"TomatoesNone\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"WhopperJrExtraPattyExtra\", \"quantity\": 1, \"pre_modifier_id\": null}]}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Sure, one Whopper Junior without tomato, extra pickle, and an extra patty. Anything else?"
+    },
+    {
+      "role": "user",
+      "content": "No, that's all, thank you."
+    },
+    {
+      "request_id": "ConversationId:00000020-0000-0000-0000-000000000020-2",
+      "role": "assistant",
+      "content": "{\"order\": [{\"WhopperJr\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"PicklesExtra\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"TomatoesNone\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"WhopperJrExtraPattyExtra\", \"quantity\": 1, \"pre_modifier_id\": null}]}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "You're welcome! Please drive forward to the next window."
+    }
+  ],
+  "ConversationId:00000021-0000-0000-0000-000000000021": [
+    {
+      "role": "user",
+      "content": "Cheeseburger."
+    },
+    {
+      "request_id": "ConversationId:00000021-0000-0000-0000-000000000021-1",
+      "role": "assistant",
+      "content": "{\"order\": [{\"Cheeseburger\": {\"quantity\": 1, \"modifiers\": []}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Certainly! One cheeseburger. Anything else?"
+    },
+    {
+      "role": "user",
+      "content": "Please add bacon."
+    },
+    {
+      "request_id": "ConversationId:00000021-0000-0000-0000-000000000021-2",
+      "role": "assistant",
+      "content": "{\"order\": [{\"Cheeseburger\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"BaconRegular\", \"quantity\": 1, \"pre_modifier_id\": null}]}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Adding bacon to your cheeseburger. Anything else?"
+    },
+    {
+      "role": "user",
+      "content": "No, that's it."
+    },
+    {
+      "request_id": "ConversationId:00000021-0000-0000-0000-000000000021-3",
+      "role": "assistant",
+      "content": "{\"order\": [{\"Cheeseburger\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"BaconRegular\", \"quantity\": 1, \"pre_modifier_id\": null}]}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Great! Please proceed to the next window."
+    }
+  ],
+  "ConversationId:00000022-0000-0000-0000-000000000022": [
+    {
+      "role": "user",
+      "content": "Do you guys have a cheeseburger? What's the difference between a Whopper and a cheeseburger?"
+    },
+    {
+      "request_id": "ConversationId:00000022-0000-0000-0000-000000000022-1",
+      "role": "assistant",
+      "content": "{\"order\": []}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Yes, we have cheeseburgers. The Whopper is larger with more toppings, while the cheeseburger is smaller with basic toppings."
+    },
+    {
+      "role": "user",
+      "content": "Okay, I'll take a cheeseburger with extra cheese."
+    },
+    {
+      "request_id": "ConversationId:00000022-0000-0000-0000-000000000022-2",
+      "role": "assistant",
+      "content": "{\"order\": [{\"Cheeseburger\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"AmericanCheeseExtra\", \"quantity\": 1, \"pre_modifier_id\": null}]}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Sure, one cheeseburger with extra cheese. Anything else?"
+    },
+    {
+      "role": "user",
+      "content": "No, that's it, thanks."
+    },
+    {
+      "request_id": "ConversationId:00000022-0000-0000-0000-000000000022-3",
+      "role": "assistant",
+      "content": "{\"order\": [{\"Cheeseburger\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"AmericanCheeseExtra\", \"quantity\": 1, \"pre_modifier_id\": null}]}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "You're welcome! Please drive forward to the next window."
+    }
+  ],
+  "ConversationId:00000023-0000-0000-0000-000000000023": [
+    {
+      "role": "user",
+      "content": "Double cheeseburger, please. With a coke."
+    },
+    {
+      "request_id": "ConversationId:00000023-0000-0000-0000-000000000023-1",
+      "role": "assistant",
+      "content": "{\"order\": [{\"DoubleCheeseburger\": {\"quantity\": 1, \"modifiers\": []}}, {\"CocaCola\": {\"quantity\": 1, \"modifiers\": []}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Certainly! One double cheeseburger and a Coke. Anything else?"
+    },
+    {
+      "role": "user",
+      "content": "No, that's all."
+    },
+    {
+      "request_id": "ConversationId:00000023-0000-0000-0000-000000000023-2",
+      "role": "assistant",
+      "content": "{\"order\": [{\"DoubleCheeseburger\": {\"quantity\": 1, \"modifiers\": []}}, {\"CocaCola\": {\"quantity\": 1, \"modifiers\": []}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Thank you! Please proceed to the next window."
+    }
+  ],
+  "ConversationId:00000024-0000-0000-0000-000000000024": [
+    {
+      "role": "user",
+      "content": "Hey can I have a cheeseburger double please?"
+    },
+    {
+      "request_id": "ConversationId:00000024-0000-0000-0000-000000000024-1",
+      "role": "assistant",
+      "content": "{\"order\": [{\"DoubleCheeseburger\": {\"quantity\": 1, \"modifiers\": []}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Sure, one double cheeseburger. Anything else?"
+    },
+    {
+      "role": "user",
+      "content": "No, that's it, thank you."
+    },
+    {
+      "request_id": "ConversationId:00000024-0000-0000-0000-000000000024-2",
+      "role": "assistant",
+      "content": "{\"order\": [{\"DoubleCheeseburger\": {\"quantity\": 1, \"modifiers\": []}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "You're welcome! Please drive forward to the next window."
+    }
+  ],
+  "ConversationId:00000025-0000-0000-0000-000000000025": [
+    {
+      "role": "user",
+      "content": "Hi... um... can you tell me the difference between the double cheeseburger and the double Whopper?"
+    },
+    {
+      "request_id": "ConversationId:00000025-0000-0000-0000-000000000025-1",
+      "role": "assistant",
+      "content": "{\"order\": []}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Yes, the double Whopper is larger with more toppings, while the double cheeseburger is smaller with basic toppings."
+    },
+    {
+      "role": "user",
+      "content": "Okay, I'll have one double cheeseburger."
+    },
+    {
+      "request_id": "ConversationId:00000025-0000-0000-0000-000000000025-2",
+      "role": "assistant",
+      "content": "{\"order\": [{\"DoubleCheeseburger\": {\"quantity\": 1, \"modifiers\": []}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Certainly! One double cheeseburger. Anything else?"
+    },
+    {
+      "role": "user",
+      "content": "No, that's it."
+    },
+    {
+      "request_id": "ConversationId:00000025-0000-0000-0000-000000000025-3",
+      "role": "assistant",
+      "content": "{\"order\": [{\"DoubleCheeseburger\": {\"quantity\": 1, \"modifiers\": []}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Thank you! Please proceed to the next window."
+    }
+  ],
+  "ConversationId:00000026-0000-0000-0000-000000000026": [
+    {
+      "role": "user",
+      "content": "Can I just get a Bacon King sandwich or do I have to order that with a meal?"
+    },
+    {
+      "request_id": "ConversationId:00000026-0000-0000-0000-000000000026-1",
+      "role": "assistant",
+      "content": "{\"order\": [{\"BaconKing\": {\"quantity\": 1, \"modifiers\": []}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "You can order just the sandwich. Would you like to do that?"
+    },
+    {
+      "role": "user",
+      "content": "Yes, I'll take two of the sandwiches."
+    },
+    {
+      "request_id": "ConversationId:00000026-0000-0000-0000-000000000026-2",
+      "role": "assistant",
+      "content": "{\"order\": [{\"BaconKing\": {\"quantity\": 2, \"modifiers\": []}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Sure, two Bacon King sandwiches. Anything else?"
+    },
+    {
+      "role": "user",
+      "content": "No, that's all."
+    },
+    {
+      "request_id": "ConversationId:00000026-0000-0000-0000-000000000026-3",
+      "role": "assistant",
+      "content": "{\"order\": [{\"BaconKing\": {\"quantity\": 2, \"modifiers\": []}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Great! Please drive forward to the next window."
+    }
+  ],
+  "ConversationId:00000027-0000-0000-0000-000000000027": [
+    {
+      "role": "user",
+      "content": "Yes, my son wants a King Bacon\u2014just the sandwich. And also a small Sprite Zero, please."
+    },
+    {
+      "request_id": "ConversationId:00000027-0000-0000-0000-000000000027-1",
+      "role": "assistant",
+      "content": "{\"order\": [{\"BaconKing\": {\"quantity\": 1, \"modifiers\": []}}, {\"SpriteZero\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"SmallSoda\", \"quantity\": 1, \"pre_modifier_id\": null}]}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Certainly! One Bacon King sandwich and a small Sprite Zero. Anything else?"
+    },
+    {
+      "role": "user",
+      "content": "That's it, thank you."
+    },
+    {
+      "request_id": "ConversationId:00000027-0000-0000-0000-000000000027-2",
+      "role": "assistant",
+      "content": "{\"order\": [{\"BaconKing\": {\"quantity\": 1, \"modifiers\": []}}, {\"SpriteZero\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"SmallSoda\", \"quantity\": 1, \"pre_modifier_id\": null}]}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "You're welcome! Please proceed to the next window."
+    }
+  ],
+  "ConversationId:00000028-0000-0000-0000-000000000028": [
+    {
+      "role": "user",
+      "content": "Yes let me get 5 Whopper Juniors with cheese, extra napkins, and a side of barbecue sauce for each, thanks."
+    },
+    {
+      "request_id": "ConversationId:00000028-0000-0000-0000-000000000028-1",
+      "role": "assistant",
+      "content": "{\"order\": [{\"WhopperJr\": {\"quantity\": 5, \"modifiers\": [{\"modifier_option_id\": \"WhopperJrAddOnsSwissCheese\", \"quantity\": 5, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"BarbecueRegular\", \"quantity\": 5, \"pre_modifier_id\": null}]}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Sure, five Whopper Juniors with cheese, extra napkins, and a side of barbecue sauce with each. Anything else?"
+    },
+    {
+      "role": "user",
+      "content": "No, that's all."
+    },
+    {
+      "request_id": "ConversationId:00000028-0000-0000-0000-000000000028-2",
+      "role": "assistant",
+      "content": "{\"order\": [{\"WhopperJr\": {\"quantity\": 5, \"modifiers\": [{\"modifier_option_id\": \"WhopperJrAddOnsSwissCheese\", \"quantity\": 5, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"BarbecueRegular\", \"quantity\": 5, \"pre_modifier_id\": null}]}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Thank you! Please drive forward to the next window."
+    }
+  ],
+  "ConversationId:00000029-0000-0000-0000-000000000029": [
+    {
+      "role": "user",
+      "content": "Hello, my family would like 4 Junior Whoppers with cheese, add bacon to two of them please, and then 4 small cokes."
+    },
+    {
+      "request_id": "ConversationId:00000029-0000-0000-0000-000000000029-1",
+      "role": "assistant",
+      "content": "{\"order\": [{\"WhopperJr\": {\"quantity\": 2, \"modifiers\": [{\"modifier_option_id\": \"WhopperJrAddOnSwissCheese\", \"quantity\": 2, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"WhopperJrWithBacon\", \"quantity\": 2, \"pre_modifier_id\": null}]}}, {\"WhopperJr\": {\"quantity\": 2, \"modifiers\": [{\"modifier_option_id\": \"WhopperJrAddOnSwissCheese\", \"quantity\": 2, \"pre_modifier_id\": null}]}}, {\"CocaCola\": {\"quantity\": 4, \"modifiers\": [{\"modifier_option_id\": \"SmallSoda\", \"quantity\": 4, \"pre_modifier_id\": null}]}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Certainly! Four Whopper Juniors with cheese, bacon added to two of them, and four small Cokes. Anything else?"
+    },
+    {
+      "role": "user",
+      "content": "That's it, thank you."
+    },
+    {
+      "request_id": "ConversationId:00000029-0000-0000-0000-000000000029-2",
+      "role": "assistant",
+      "content": "{\"order\": [{\"WhopperJr\": {\"quantity\": 2, \"modifiers\": [{\"modifier_option_id\": \"WhopperJrAddOnSwissCheese\", \"quantity\": 2, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"WhopperJrWithBacon\", \"quantity\": 2, \"pre_modifier_id\": null}]}}, {\"WhopperJr\": {\"quantity\": 2, \"modifiers\": [{\"modifier_option_id\": \"WhopperJrAddOnSwissCheese\", \"quantity\": 2, \"pre_modifier_id\": null}]}}, {\"CocaCola\": {\"quantity\": 4, \"modifiers\": [{\"modifier_option_id\": \"SmallSoda\", \"quantity\": 4, \"pre_modifier_id\": null}]}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "You're welcome! Please proceed to the next window."
+    }
+  ],
+  "ConversationId:00000030-0000-0000-0000-000000000030": [
+    {
+      "role": "user",
+      "content": "Small onion ring."
+    },
+    {
+      "request_id": "ConversationId:00000030-0000-0000-0000-000000000030-1",
+      "role": "assistant",
+      "content": "{\"order\": [{\"OnionRings\": {\"quantity\": 1, \"modifiers\": []}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Sure, one small onion ring. Anything else?"
+    },
+    {
+      "role": "user",
+      "content": "Add a small fry, a small Oreo milkshake, and a small frozen Coke."
+    },
+    {
+      "request_id": "ConversationId:00000030-0000-0000-0000-000000000030-2",
+      "role": "assistant",
+      "content": "{\"order\": [{\"OnionRings\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"SmallOnionRings\", \"quantity\": 1, \"pre_modifier_id\": null}]}}, {\"FrenchFries\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"SmallFrenchFries\", \"quantity\": 1, \"pre_modifier_id\": null}]}}, {\"ChocolateOreoShake\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"SmallSoda\", \"quantity\": 1, \"pre_modifier_id\": null}]}}, {\"FrozenCoke\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"SmallSoda\", \"quantity\": 1, \"pre_modifier_id\": null}]}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Certainly! Adding a small fry, a small Oreo milkshake, and a small frozen Coke. Anything else?"
+    },
+    {
+      "role": "user",
+      "content": "No, that's it."
+    },
+    {
+      "request_id": "ConversationId:00000030-0000-0000-0000-000000000030-3",
+      "role": "assistant",
+      "content": "{\"order\": [{\"OnionRings\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"SmallOnionRings\", \"quantity\": 1, \"pre_modifier_id\": null}]}}, {\"FrenchFries\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"SmallFrenchFries\", \"quantity\": 1, \"pre_modifier_id\": null}]}}, {\"ChocolateOreoShake\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"SmallSoda\", \"quantity\": 1, \"pre_modifier_id\": null}]}}, {\"FrozenCoke\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"SmallSoda\", \"quantity\": 1, \"pre_modifier_id\": null}]}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Thank you! Please proceed to the next window."
+    }
+  ],
+  "ConversationId:00000031-0000-0000-0000-000000000031": [
+    {
+      "role": "user",
+      "content": "Is it possible to get 20 small onion rings? I can wait, I know that's a lot, thanks."
+    },
+    {
+      "request_id": "ConversationId:00000031-0000-0000-0000-000000000031-1",
+      "role": "assistant",
+      "content": "{\"order\": [{\"OnionRings\": {\"quantity\": 20, \"modifiers\": [{\"modifier_option_id\": \"SmallOnionRings\", \"quantity\": 20, \"pre_modifier_id\": null}]}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Yes, that's possible! We'll prepare 20 small onion rings for you. Anything else?"
+    },
+    {
+      "role": "user",
+      "content": "No, that's all, thank you."
+    },
+    {
+      "request_id": "ConversationId:00000031-0000-0000-0000-000000000031-2",
+      "role": "assistant",
+      "content": "{\"order\": [{\"OnionRings\": {\"quantity\": 20, \"modifiers\": [{\"modifier_option_id\": \"SmallOnionRings\", \"quantity\": 20, \"pre_modifier_id\": null}]}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "You're welcome! Please proceed to the next window."
+    }
+  ],
+  "ConversationId:00000032-0000-0000-0000-000000000032": [
+    {
+      "role": "user",
+      "content": "Hey good evening. Um I would like a chicken nugget 4 piece, please? I want a side of barbecue, ranch, and honey mustard."
+    },
+    {
+      "request_id": "ConversationId:00000032-0000-0000-0000-000000000032-1",
+      "role": "assistant",
+      "content": "{\"order\": [{\"FourPieceChickenNuggets\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"BbqDippingSauce\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"HiddenValleyRanchDippingSauce\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"HoneyMustardDippingSauce\", \"quantity\": 1, \"pre_modifier_id\": null}]}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Certainly! One 4-piece chicken nugget with sides of barbecue sauce, ranch, and honey mustard. Anything else?"
+    },
+    {
+      "role": "user",
+      "content": "That's it, thank you."
+    },
+    {
+      "request_id": "ConversationId:00000032-0000-0000-0000-000000000032-2",
+      "role": "assistant",
+      "content": "{\"order\": [{\"FourPieceChickenNuggets\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"BbqDippingSauce\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"HiddenValleyRanchDippingSauce\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"HoneyMustardDippingSauce\", \"quantity\": 1, \"pre_modifier_id\": null}]}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Thank you! Please drive forward to the next window."
+    }
+  ],
+  "ConversationId:00000033-0000-0000-0000-000000000033": [
+    {
+      "role": "user",
+      "content": "Hello I'd like to order a 4-piece nugget. Actually, I'd like to order two 4-piece nuggets. For the first order I'd like sides of barbecue sauce and ranch, and for the second order I'd like honey mustard and ranch."
+    },
+    {
+      "request_id": "ConversationId:00000033-0000-0000-0000-000000000033-1",
+      "role": "assistant",
+      "content": "{\"order\": [{\"FourPieceChickenNuggets\": {\"quantity\": 2, \"modifiers\": [{\"modifier_option_id\": \"BarbecueSauce\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"HiddenValleyRanchDippingSauce\", \"quantity\": 1, \"pre_modifier_id\": null}]}}, {\"FourPieceChickenNuggets\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"HoneyMustardDippingSauce\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"HiddenValleyRanchDippingSauce\", \"quantity\": 1, \"pre_modifier_id\": null}]}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Sure, two 4-piece nuggets. First with barbecue sauce and ranch, second with honey mustard and ranch. Anything else?"
+    },
+    {
+      "role": "user",
+      "content": "Actually, change the ranch in the second order to a second honey mustard."
+    },
+    {
+      "request_id": "ConversationId:00000033-0000-0000-0000-000000000033-2",
+      "role": "assistant",
+      "content": "{\"order\": [{\"FourPieceChickenNuggets\": {\"quantity\": 2, \"modifiers\": [{\"modifier_option_id\": \"BarbecueSauce\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"HiddenValleyRanchDippingSauce\", \"quantity\": 1, \"pre_modifier_id\": null}]}}, {\"FourPieceChickenNuggets\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"HoneyMustardDippingSauce\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"HiddenValleyRanchDippingSauce\", \"quantity\": 1, \"pre_modifier_id\": null}]}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "No problem, updating the second order to have two honey mustards. Anything else?"
+    },
+    {
+      "role": "user",
+      "content": "No, that's all, thanks."
+    },
+    {
+      "request_id": "ConversationId:00000033-0000-0000-0000-000000000033-3",
+      "role": "assistant",
+      "content": "{\"order\": [{\"FourPieceChickenNuggets\": {\"quantity\": 2, \"modifiers\": [{\"modifier_option_id\": \"BarbecueSauce\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"HiddenValleyRanchDippingSauce\", \"quantity\": 1, \"pre_modifier_id\": null}]}}, {\"FourPieceChickenNuggets\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"HoneyMustardDippingSauce\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"HiddenValleyRanchDippingSauce\", \"quantity\": 1, \"pre_modifier_id\": null}]}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "You're welcome! Please drive forward to the next window."
+    }
+  ],
+  "ConversationId:00000034-0000-0000-0000-000000000034": [
+    {
+      "role": "user",
+      "content": "Hey I want two double Whoppers with cheese, but is it possible to actually get one of those with three patties? And if so how much would that cost?"
+    },
+    {
+      "request_id": "ConversationId:00000034-0000-0000-0000-000000000034-1",
+      "role": "assistant",
+      "content": "{\"order\": [{\"DoubleWhopper\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"DoubleWhopperWithCheese\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"WhopperJrExtraPatty\", \"quantity\": 1, \"pre_modifier_id\": null}]}}, {\"DoubleWhopper\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"DoubleWhopperWithCheese\", \"quantity\": 1, \"pre_modifier_id\": null}]}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Yes, we can add an extra patty to one of the double Whoppers with cheese for an additional cost. Would you like to proceed with that?"
+    },
+    {
+      "role": "user",
+      "content": "Actually, just make it two double Whoppers with cheese."
+    },
+    {
+      "request_id": "ConversationId:00000034-0000-0000-0000-000000000034-2",
+      "role": "assistant",
+      "content": "{\"order\": [{\"DoubleWhopper\": {\"quantity\": 2, \"modifiers\": [{\"modifier_option_id\": \"DoubleWhopperWithCheese\", \"quantity\": 2, \"pre_modifier_id\": null}]}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "No problem, two double Whoppers with cheese. Anything else?"
+    },
+    {
+      "role": "user",
+      "content": "That's it."
+    },
+    {
+      "request_id": "ConversationId:00000034-0000-0000-0000-000000000034-3",
+      "role": "assistant",
+      "content": "{\"order\": [{\"DoubleWhopper\": {\"quantity\": 2, \"modifiers\": [{\"modifier_option_id\": \"DoubleWhopperWithCheese\", \"quantity\": 2, \"pre_modifier_id\": null}]}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Thank you! Please proceed to the next window."
+    }
+  ],
+  "ConversationId:00000035-0000-0000-0000-000000000035": [
+    {
+      "role": "user",
+      "content": "Can I have a Whopper double with cheese? Just the sandwich, not the combo."
+    },
+    {
+      "request_id": "ConversationId:00000035-0000-0000-0000-000000000035-1",
+      "role": "assistant",
+      "content": "{\"order\": [{\"DoubleWhopper\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"DoubleWhopperWithCheese\", \"quantity\": 1, \"pre_modifier_id\": null}]}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Certainly! One double Whopper with cheese. Anything else?"
+    },
+    {
+      "role": "user",
+      "content": "Actually, make that a number 2 combo."
+    },
+    {
+      "request_id": "ConversationId:00000035-0000-0000-0000-000000000035-2",
+      "role": "assistant",
+      "content": "{\"order\": [{\"DoubleWhopperMeal\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"DoubleWhopperWithCheese\", \"quantity\": 1, \"pre_modifier_id\": null}]}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Sure, changing it to a number 2 combo meal. What size would you like?"
+    },
+    {
+      "role": "user",
+      "content": "Medium, please."
+    },
+    {
+      "request_id": "ConversationId:00000035-0000-0000-0000-000000000035-3",
+      "role": "assistant",
+      "content": "{\"order\": [{\"DoubleWhopperMeal\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"DoubleWhopperMealSizeMedium\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"DoubleWhopperWithCheese\", \"quantity\": 1, \"pre_modifier_id\": null}]}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "And what would you like to drink?"
+    },
+    {
+      "role": "user",
+      "content": "A Coke."
+    },
+    {
+      "request_id": "ConversationId:00000035-0000-0000-0000-000000000035-4",
+      "role": "assistant",
+      "content": "{\"order\": [{\"DoubleWhopperMeal\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"DoubleWhopperMealSizeMedium\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"MealDrinkCocaCola\", \"quantity\": 1, \"pre_modifier_id\": null}]}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Great, a medium number 2 combo with a Coke. Anything else?"
+    },
+    {
+      "role": "user",
+      "content": "That's all, thanks."
+    },
+    {
+      "request_id": "ConversationId:00000035-0000-0000-0000-000000000035-5",
+      "role": "assistant",
+      "content": "{\"order\": [{\"DoubleWhopperMeal\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"DoubleWhopperMealSizeMedium\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"MealDrinkCocaCola\", \"quantity\": 1, \"pre_modifier_id\": null}]}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "You're welcome! Please drive forward to the next window."
+    }
+  ],
+  "ConversationId:00000036-0000-0000-0000-000000000036": [
+    {
+      "role": "user",
+      "content": "Yes let me get 5 orders of 4-piece mozzarella sticks. Do you have sides of marinara sauce?"
+    },
+    {
+      "request_id": "ConversationId:00000036-0000-0000-0000-000000000036-1",
+      "role": "assistant",
+      "content": "{\"order\": [{\"FourPieceMozzarellaFries\": {\"quantity\": 5, \"modifiers\": [{\"modifier_option_id\": \"MarinaraDippingSauce\", \"quantity\": 5, \"pre_modifier_id\": null}]}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Certainly! We do have marinara sauce. Adding five orders of 4-piece mozzarella sticks with marinara sauce. Anything else?"
+    },
+    {
+      "role": "user",
+      "content": "No, that's all."
+    },
+    {
+      "request_id": "ConversationId:00000036-0000-0000-0000-000000000036-2",
+      "role": "assistant",
+      "content": "{\"order\": [{\"FourPieceMozzarellaFries\": {\"quantity\": 5, \"modifiers\": [{\"modifier_option_id\": \"MarinaraDippingSauce\", \"quantity\": 5, \"pre_modifier_id\": null}]}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Thank you! Please proceed to the next window."
+    }
+  ],
+  "ConversationId:00000037-0000-0000-0000-000000000037": [
+    {
+      "role": "user",
+      "content": "Yeah let me get an order of mozz sticks 4-piece and a large Sprite, please."
+    },
+    {
+      "request_id": "ConversationId:00000037-0000-0000-0000-000000000037-1",
+      "role": "assistant",
+      "content": "{\"order\": [{\"FourPieceMozzarellaFries\": {\"quantity\": 1, \"modifiers\": []}}, {\"Sprite\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"LargeSoda\", \"quantity\": 1, \"pre_modifier_id\": null}]}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Sure, one 4-piece mozzarella sticks and a large Sprite. Would you like any dipping sauce with your mozzarella sticks?"
+    },
+    {
+      "role": "user",
+      "content": "Yes, marinara sauce."
+    },
+    {
+      "request_id": "ConversationId:00000037-0000-0000-0000-000000000037-2",
+      "role": "assistant",
+      "content": "{\"order\": [{\"FourPieceMozzarellaFries\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"MarinaraDippingSauce\", \"quantity\": 1, \"pre_modifier_id\": null}]}}, {\"Sprite\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"LargeSoda\", \"quantity\": 1, \"pre_modifier_id\": null}]}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Adding marinara sauce. Anything else?"
+    },
+    {
+      "role": "user",
+      "content": "That's it, thanks."
+    },
+    {
+      "request_id": "ConversationId:00000037-0000-0000-0000-000000000037-3",
+      "role": "assistant",
+      "content": "{\"order\": [{\"FourPieceMozzarellaFries\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"MarinaraDippingSauce\", \"quantity\": 1, \"pre_modifier_id\": null}]}}, {\"Sprite\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"LargeSoda\", \"quantity\": 1, \"pre_modifier_id\": null}]}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "You're welcome! Please drive forward to the next window."
+    }
+  ],
+  "ConversationId:00000038-0000-0000-0000-000000000038": [
+    {
+      "role": "user",
+      "content": "I'd like a Texas double whopper, please. Add extra sauce."
+    },
+    {
+      "request_id": "ConversationId:00000038-0000-0000-0000-000000000038-1",
+      "role": "assistant",
+      "content": "{\"order\": [{\"TexasDoubleWhopper\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"BarbecueExtra\", \"quantity\": 1, \"pre_modifier_id\": null}]}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Certainly! One Texas Double Whopper with extra sauce. Anything else?"
+    },
+    {
+      "role": "user",
+      "content": "No, that's all."
+    },
+    {
+      "request_id": "ConversationId:00000038-0000-0000-0000-000000000038-2",
+      "role": "assistant",
+      "content": "{\"order\": [{\"TexasDoubleWhopper\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"BarbecueExtra\", \"quantity\": 1, \"pre_modifier_id\": null}]}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Thank you! Please proceed to the next window."
+    }
+  ],
+  "ConversationId:00000039-0000-0000-0000-000000000039": [
+    {
+      "role": "user",
+      "content": "I'd like a double Texas whopper, please. I don't want any sauce."
+    },
+    {
+      "request_id": "ConversationId:00000039-0000-0000-0000-000000000039-1",
+      "role": "assistant",
+      "content": "{\"order\": [{\"TexasDoubleWhopper\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"BarbecueNone\", \"quantity\": 1, \"pre_modifier_id\": null}]}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Sure, one Texas Double Whopper with no sauce. Anything else?"
+    },
+    {
+      "role": "user",
+      "content": "That's it, thank you."
+    },
+    {
+      "request_id": "ConversationId:00000039-0000-0000-0000-000000000039-2",
+      "role": "assistant",
+      "content": "{\"order\": [{\"TexasDoubleWhopper\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"BarbecueNone\", \"quantity\": 1, \"pre_modifier_id\": null}]}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "You're welcome! Please drive forward to the next window."
+    }
+  ],
+  "ConversationId:00000040-0000-0000-0000-000000000040": [
+    {
+      "role": "user",
+      "content": "I'd like a Texas whopper sandwich. Add extra pickles."
+    },
+    {
+      "request_id": "ConversationId:00000040-0000-0000-0000-000000000040-1",
+      "role": "assistant",
+      "content": "{\"order\": [{\"TexasDoubleWhopper\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"PicklesExtra\", \"quantity\": 1, \"pre_modifier_id\": null}]}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Certainly! One Texas Whopper with extra pickles. Anything else?"
+    },
+    {
+      "role": "user",
+      "content": "No, that's all."
+    },
+    {
+      "request_id": "ConversationId:00000040-0000-0000-0000-000000000040-2",
+      "role": "assistant",
+      "content": "{\"order\": [{\"TexasDoubleWhopper\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"PicklesExtra\", \"quantity\": 1, \"pre_modifier_id\": null}]}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Thank you! Please proceed to the next window."
+    }
+  ],
+  "ConversationId:00000041-0000-0000-0000-000000000041": [
+    {
+      "role": "user",
+      "content": "I'd like the Whopper Texas sandwich, please."
+    },
+    {
+      "request_id": "ConversationId:00000041-0000-0000-0000-000000000041-1",
+      "role": "assistant",
+      "content": "{\"order\": [{\"TexasDoubleWhopper\": {\"quantity\": 1, \"modifiers\": []}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Sure, one Texas Whopper sandwich. Anything else?"
+    },
+    {
+      "role": "user",
+      "content": "Yes, please add a large root beer, and no cheese."
+    },
+    {
+      "request_id": "ConversationId:00000041-0000-0000-0000-000000000041-2",
+      "role": "assistant",
+      "content": "{\"order\": [{\"TexasDoubleWhopper\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"WhopperWithCheese\", \"quantity\": 1, \"pre_modifier_id\": null}]}}, {\"BarqsRootBeer\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"LargeSoda\", \"quantity\": 1, \"pre_modifier_id\": null}]}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Certainly! Adding a large root beer and no cheese on your sandwich. Anything else?"
+    },
+    {
+      "role": "user",
+      "content": "No, that's it."
+    },
+    {
+      "request_id": "ConversationId:00000041-0000-0000-0000-000000000041-3",
+      "role": "assistant",
+      "content": "{\"order\": [{\"TexasDoubleWhopper\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"WhopperWithCheese\", \"quantity\": 1, \"pre_modifier_id\": null}]}}, {\"BarqsRootBeer\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"LargeSoda\", \"quantity\": 1, \"pre_modifier_id\": null}]}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Thank you! Please drive forward to the next window."
+    }
+  ],
+  "ConversationId:00000042-0000-0000-0000-000000000042": [
+    {
+      "role": "user",
+      "content": "Hi can I get an 8-piece mozzarella stick, please? And I'd like ranch dipping sauce, too."
+    },
+    {
+      "request_id": "ConversationId:00000042-0000-0000-0000-000000000042-1",
+      "role": "assistant",
+      "content": "{\"order\": [{\"EightPieceMozzarellaFries\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"RanchSauce\", \"quantity\": 1, \"pre_modifier_id\": null}]}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Certainly! One 8-piece mozzarella sticks with ranch dipping sauce. Anything else?"
+    },
+    {
+      "role": "user",
+      "content": "No, that's all, thank you."
+    },
+    {
+      "request_id": "ConversationId:00000042-0000-0000-0000-000000000042-2",
+      "role": "assistant",
+      "content": "{\"order\": [{\"EightPieceMozzarellaFries\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"RanchSauce\", \"quantity\": 1, \"pre_modifier_id\": null}]}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "You're welcome! Please proceed to the next window."
+    }
+  ],
+  "ConversationId:00000043-0000-0000-0000-000000000043": [
+    {
+      "role": "user",
+      "content": "Yes I want mozzarella sticks\u2014the 8-piece. Make that two 8-pieces, thanks."
+    },
+    {
+      "request_id": "ConversationId:00000043-0000-0000-0000-000000000043-1",
+      "role": "assistant",
+      "content": "{\"order\": [{\"EightPieceMozzarellaFries\": {\"quantity\": 2, \"modifiers\": []}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Sure, two orders of 8-piece mozzarella sticks. Would you like any dipping sauces?"
+    },
+    {
+      "role": "user",
+      "content": "Yes, marinara sauce, please."
+    },
+    {
+      "request_id": "ConversationId:00000043-0000-0000-0000-000000000043-2",
+      "role": "assistant",
+      "content": "{\"order\": [{\"EightPieceMozzarellaFries\": {\"quantity\": 2, \"modifiers\": [{\"modifier_option_id\": \"MarinaraDippingSauce\", \"quantity\": 2, \"pre_modifier_id\": null}]}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Adding marinara sauce. Anything else?"
+    },
+    {
+      "role": "user",
+      "content": "No, that's it."
+    },
+    {
+      "request_id": "ConversationId:00000043-0000-0000-0000-000000000043-3",
+      "role": "assistant",
+      "content": "{\"order\": [{\"EightPieceMozzarellaFries\": {\"quantity\": 2, \"modifiers\": [{\"modifier_option_id\": \"MarinaraDippingSauce\", \"quantity\": 2, \"pre_modifier_id\": null}]}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Thank you! Please drive forward to the next window."
+    }
+  ],
+  "ConversationId:00000044-0000-0000-0000-000000000044": [
+    {
+      "role": "user",
+      "content": "I'd like a burger please."
+    },
+    {
+      "request_id": "ConversationId:00000044-0000-0000-0000-000000000044-1",
+      "role": "assistant",
+      "content": "{\"order\": [{\"Hamburger\": {\"quantity\": 1, \"modifiers\": []}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Certainly! We have several burgers. Would you like a Whopper, a cheeseburger, or something else?"
+    },
+    {
+      "role": "user",
+      "content": "Just a regular cheeseburger."
+    },
+    {
+      "request_id": "ConversationId:00000044-0000-0000-0000-000000000044-2",
+      "role": "assistant",
+      "content": "{\"order\": [{\"Cheeseburger\": {\"quantity\": 1, \"modifiers\": []}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Sure, one cheeseburger. Anything else?"
+    },
+    {
+      "role": "user",
+      "content": "No, that's all."
+    },
+    {
+      "request_id": "ConversationId:00000044-0000-0000-0000-000000000044-3",
+      "role": "assistant",
+      "content": "{\"order\": [{\"Cheeseburger\": {\"quantity\": 1, \"modifiers\": []}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Thank you! Please proceed to the next window."
+    }
+  ],
+  "ConversationId:00000048-0000-0000-0000-000000000048": [
+    {
+      "role": "user",
+      "content": "Can I please have a bacon double cheeseburger?"
+    },
+    {
+      "request_id": "ConversationId:00000048-0000-0000-0000-000000000048-1",
+      "role": "assistant",
+      "content": "{\"order\": [{\"BaconDoubleCheeseburger\": {\"quantity\": 1, \"modifiers\": []}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Certainly! One Bacon Double Cheeseburger. Anything else?"
+    },
+    {
+      "role": "user",
+      "content": "No, that's it, thank you."
+    },
+    {
+      "request_id": "ConversationId:00000048-0000-0000-0000-000000000048-2",
+      "role": "assistant",
+      "content": "{\"order\": [{\"BaconDoubleCheeseburger\": {\"quantity\": 1, \"modifiers\": []}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "You're welcome! Please drive forward to the next window."
+    }
+  ],
+  "ConversationId:00000049-0000-0000-0000-000000000049": [
+    {
+      "role": "user",
+      "content": "I want a double bacon cheeseburger and a small fry."
+    },
+    {
+      "request_id": "ConversationId:00000049-0000-0000-0000-000000000049-1",
+      "role": "assistant",
+      "content": "{\"order\": [{\"BaconDoubleCheeseburger\": {\"quantity\": 1, \"modifiers\": []}}, {\"FrenchFries\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"SmallFrenchFries\", \"quantity\": 1, \"pre_modifier_id\": null}]}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Sure, one Bacon Double Cheeseburger and a small fry. Anything else?"
+    },
+    {
+      "role": "user",
+      "content": "No, that's all, thanks."
+    },
+    {
+      "request_id": "ConversationId:00000049-0000-0000-0000-000000000049-2",
+      "role": "assistant",
+      "content": "{\"order\": [{\"BaconDoubleCheeseburger\": {\"quantity\": 1, \"modifiers\": []}}, {\"FrenchFries\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"SmallFrenchFries\", \"quantity\": 1, \"pre_modifier_id\": null}]}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Thank you! Please proceed to the next window."
+    }
+  ],
+  "ConversationId:00000050-0000-0000-0000-000000000050": [
+    {
+      "role": "user",
+      "content": "Good afternoon, how are you? I'd like a Rodeo Burger, please."
+    },
+    {
+      "request_id": "ConversationId:00000050-0000-0000-0000-000000000050-1",
+      "role": "assistant",
+      "content": "{\"order\": [{\"RodeoBurger\": {\"quantity\": 1, \"modifiers\": []}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "I'm doing well, thank you! One Rodeo Burger. Anything else?"
+    },
+    {
+      "role": "user",
+      "content": "No, that's it."
+    },
+    {
+      "request_id": "ConversationId:00000050-0000-0000-0000-000000000050-2",
+      "role": "assistant",
+      "content": "{\"order\": [{\"RodeoBurger\": {\"quantity\": 1, \"modifiers\": []}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Great! Please drive forward to the next window."
+    }
+  ],
+  "ConversationId:00000051-0000-0000-0000-000000000051": [
+    {
+      "role": "user",
+      "content": "Medium chocolate shake and a small fry, please."
+    },
+    {
+      "request_id": "ConversationId:00000051-0000-0000-0000-000000000051-1",
+      "role": "assistant",
+      "content": "{\"order\": [{\"ChocolateShake\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"MediumSoda\", \"quantity\": 1, \"pre_modifier_id\": null}]}}, {\"FrenchFries\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"SmallFrenchFries\", \"quantity\": 1, \"pre_modifier_id\": null}]}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Certainly! A medium chocolate shake and a small fry. Anything else?"
+    },
+    {
+      "role": "user",
+      "content": "That's all, thank you."
+    },
+    {
+      "request_id": "ConversationId:00000051-0000-0000-0000-000000000051-2",
+      "role": "assistant",
+      "content": "{\"order\": [{\"ChocolateShake\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"MediumSoda\", \"quantity\": 1, \"pre_modifier_id\": null}]}}, {\"FrenchFries\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"SmallFrenchFries\", \"quantity\": 1, \"pre_modifier_id\": null}]}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "You're welcome! Please proceed to the next window."
+    }
+  ],
+  "ConversationId:00000052-0000-0000-0000-000000000052": [
+    {
+      "role": "user",
+      "content": "I'd like a medium Oreo chocolate shake, please."
+    },
+    {
+      "request_id": "ConversationId:00000052-0000-0000-0000-000000000052-1",
+      "role": "assistant",
+      "content": "{\"order\": [{\"ChocolateOreoShake\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"MediumSoda\", \"quantity\": 1, \"pre_modifier_id\": null}]}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Sure, one medium Oreo chocolate shake. Anything else?"
+    },
+    {
+      "role": "user",
+      "content": "Can you add extra Oreos to that?"
+    },
+    {
+      "request_id": "ConversationId:00000052-0000-0000-0000-000000000052-2",
+      "role": "assistant",
+      "content": "{\"order\": [{\"ChocolateOreoShake\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"MediumSoda\", \"quantity\": 1, \"pre_modifier_id\": null}]}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Certainly! Adding extra Oreos to your shake. Anything else?"
+    },
+    {
+      "role": "user",
+      "content": "No, that's it, thanks."
+    },
+    {
+      "request_id": "ConversationId:00000052-0000-0000-0000-000000000052-3",
+      "role": "assistant",
+      "content": "{\"order\": [{\"ChocolateOreoShake\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"MediumSoda\", \"quantity\": 1, \"pre_modifier_id\": null}]}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Thank you! Please drive forward to the next window."
+    }
+  ],
+  "ConversationId:00000053-0000-0000-0000-000000000053": [
+    {
+      "role": "user",
+      "content": "Yep yep I want a crispy chicken sandwich. Add a second chicken patty to that, please\u2014so a crispy chicken sandwich with two pieces of chicken."
+    },
+    {
+      "request_id": "ConversationId:00000053-0000-0000-0000-000000000053-1",
+      "role": "assistant",
+      "content": "{\"order\": [{\"RoyalCrispyChicken\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"ChickenExtraPatty\", \"quantity\": 1, \"pre_modifier_id\": null}]}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Certainly! One Crispy Chicken Sandwich with an extra chicken patty. Anything else?"
+    },
+    {
+      "role": "user",
+      "content": "No, that's all."
+    },
+    {
+      "request_id": "ConversationId:00000053-0000-0000-0000-000000000053-2",
+      "role": "assistant",
+      "content": "{\"order\": [{\"RoyalCrispyChicken\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"ChickenExtraPatty\", \"quantity\": 1, \"pre_modifier_id\": null}]}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Thank you! Please proceed to the next window."
+    }
+  ],
+  "ConversationId:00000054-0000-0000-0000-000000000054": [
+    {
+      "role": "user",
+      "content": "Hi yes can I get a chicken crispy please? Thanks."
+    },
+    {
+      "request_id": "ConversationId:00000054-0000-0000-0000-000000000054-1",
+      "role": "assistant",
+      "content": "{\"order\": [{\"RoyalCrispyChicken\": {\"quantity\": 1, \"modifiers\": []}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Certainly! One Crispy Chicken Sandwich. Anything else?"
+    },
+    {
+      "role": "user",
+      "content": "Please add barbecue sauce and a large fry."
+    },
+    {
+      "request_id": "ConversationId:00000054-0000-0000-0000-000000000054-2",
+      "role": "assistant",
+      "content": "{\"order\": [{\"RoyalCrispyChicken\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"BarbecueRegular\", \"quantity\": 1, \"pre_modifier_id\": null}]}}, {\"FrenchFries\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"LargeFrenchFries\", \"quantity\": 1, \"pre_modifier_id\": null}]}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Sure, adding barbecue sauce to your sandwich and a large fry. Anything else?"
+    },
+    {
+      "role": "user",
+      "content": "Actually, remove the fry."
+    },
+    {
+      "request_id": "ConversationId:00000054-0000-0000-0000-000000000054-3",
+      "role": "assistant",
+      "content": "{\"order\": [{\"RoyalCrispyChicken\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"BarbecueRegular\", \"quantity\": 1, \"pre_modifier_id\": null}]}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "No problem, removing the large fry. Anything else?"
+    },
+    {
+      "role": "user",
+      "content": "No, that's it."
+    },
+    {
+      "request_id": "ConversationId:00000054-0000-0000-0000-000000000054-4",
+      "role": "assistant",
+      "content": "{\"order\": [{\"RoyalCrispyChicken\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"BarbecueRegular\", \"quantity\": 1, \"pre_modifier_id\": null}]}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Thank you! Please drive forward to the next window."
+    }
+  ]
+}
