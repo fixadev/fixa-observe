@@ -105,6 +105,7 @@ export class AgentService {
             evals: { orderBy: { createdAt: "asc" } },
             generalEvalOverrides: true,
           },
+          orderBy: { createdAt: "asc" },
         },
         tests: {
           include: {
@@ -124,20 +125,13 @@ export class AgentService {
     return await db.agent.findMany({ where: { ownerId } });
   }
 
-  async updateAgentSettings({
-    id,
-    phoneNumber,
-    name,
-    enableSlackNotifications,
-  }: {
-    id: string;
-    phoneNumber: string;
-    name: string;
-    enableSlackNotifications: boolean;
-  }) {
+  async updateAgent({ id, agent }: { id: string; agent: Partial<Agent> }) {
     return await db.agent.update({
       where: { id },
-      data: { phoneNumber, name, enableSlackNotifications },
+      data: {
+        ...agent,
+        extraProperties: agent.extraProperties ?? undefined,
+      },
     });
   }
 

@@ -1,12 +1,10 @@
 import { AgentService } from "./agent";
 import { db } from "../db";
 import { CallStatus, type PrismaClient } from "@prisma/client";
-import {
-  initiateOfOneKioskCall,
-  initiateVapiCall,
-} from "../helpers/vapiHelpers";
+import { initiateVapiCall, queueOfOneKioskCalls } from "../helpers/vapiHelpers";
 import { type TestAgent } from "prisma/generated/zod";
-import { type TestWithIncludes } from "~/lib/types";
+import { type OfOneKioskProperties, type TestWithIncludes } from "~/lib/types";
+import { randomUUID } from "crypto";
 
 const agentServiceInstance = new AgentService(db);
 
@@ -129,48 +127,55 @@ export class TestService {
       })),
     );
 
-    let calls: PromiseSettledResult<{
-      id: string;
-      testAgentVapiId: string;
-      scenarioId: string;
-      status: CallStatus;
-    }>[] = [];
+    // OFONE KIOSK TEST
     if (
       agent.extraProperties &&
       (agent.extraProperties as Record<string, unknown>).type === "ofone-kiosk"
     ) {
-      const extraProperties = agent.extraProperties as {
-        type: string;
-        deviceIds: string[];
-        env: "staging" | "production" | undefined;
-      };
+      const extraProperties = agent.extraProperties as OfOneKioskProperties;
       const deviceIds = extraProperties.deviceIds;
       console.log(
         " <<<<<<<<<<<<<<<<<<<< running KIOSK TEST >>>>>>>>>>>>>>>>>>>>> ",
       );
-      calls = await Promise.allSettled(
-        tests.map(async (test) => {
-          // const deviceId = "791bc87d-2f47-45fd-9a32-57e01fb02d37"; // staging
-          // const deviceId = "6135989e-3b07-49d3-8d92-9fdaab4c4700"; // ceena
-          const deviceId = deviceIds[0]!;
-          const callId = await initiateOfOneKioskCall(
-            deviceId,
-            test.testAgentVapiId,
-            test.testAgentPrompt,
-            test.scenarioPrompt,
-            extraProperties.env,
-          );
 
-          return {
-            id: callId,
-            testAgentVapiId: test.testAgentVapiId,
-            scenarioId: test.scenarioId,
-            status: CallStatus.in_progress,
-          };
-        }),
-      );
+      const callsToStart = tests.map((test) => ({
+        callId: randomUUID(),
+        ownerId: agent.ownerId,
+        assistantId: test.testAgentVapiId,
+        testAgentPrompt: test.testAgentPrompt,
+        scenarioPrompt: test.scenarioPrompt,
+        baseUrl: extraProperties.baseUrl,
+        scenarioId: test.scenarioId,
+      }));
+
+      // create calls first and then queue them
+      const test = await db.test.create({
+        data: {
+          agentId,
+          runFromApi,
+          calls: {
+            createMany: {
+              data: callsToStart.map((call) => ({
+                id: call.callId,
+                status: CallStatus.queued,
+                stereoRecordingUrl: "",
+                testAgentId: call.assistantId,
+                scenarioId: call.scenarioId,
+                ownerId: agent.ownerId,
+              })),
+            },
+          },
+        },
+        include: {
+          calls: true,
+        },
+      });
+      await queueOfOneKioskCalls(deviceIds, callsToStart);
+      return test;
+
+      // NORMAL TEST
     } else {
-      calls = await Promise.allSettled(
+      const calls = await Promise.allSettled(
         tests.map(async (test) => {
           const vapiCall = await initiateVapiCall(
             test.testAgentVapiId,
@@ -179,52 +184,49 @@ export class TestService {
             test.scenarioPrompt,
           );
 
-          console.log("VAPI CALL INITIATED", vapiCall);
-
-          const callId = vapiCall.id;
-
           return {
-            id: callId,
+            id: randomUUID(),
+            vapiCallId: vapiCall.id,
             testAgentVapiId: test.testAgentVapiId,
             scenarioId: test.scenarioId,
             status: CallStatus.in_progress,
           };
         }),
       );
-    }
 
-    console.log("CALLS", calls);
+      const fulfilledCalls = calls.filter(
+        (call) => call.status === "fulfilled",
+      ) as PromiseFulfilledResult<{
+        id: string;
+        testAgentVapiId: string;
+        scenarioId: string;
+        status: CallStatus;
+        vapiCallId: string;
+      }>[];
 
-    const fulfilledCalls = calls.filter(
-      (call) => call.status === "fulfilled",
-    ) as PromiseFulfilledResult<{
-      id: string;
-      testAgentVapiId: string;
-      scenarioId: string;
-      status: CallStatus;
-    }>[];
-
-    return await db.test.create({
-      data: {
-        agentId,
-        runFromApi,
-        calls: {
-          createMany: {
-            data: fulfilledCalls.map((call) => ({
-              id: call.value.id,
-              status: call.value.status,
-              stereoRecordingUrl: "",
-              testAgentId: call.value.testAgentVapiId,
-              scenarioId: call.value.scenarioId,
-              ownerId: agent.ownerId,
-            })),
+      return await db.test.create({
+        data: {
+          agentId,
+          runFromApi,
+          calls: {
+            createMany: {
+              data: fulfilledCalls.map((call) => ({
+                id: call.value.id,
+                status: call.value.status,
+                stereoRecordingUrl: "",
+                vapiCallId: call.value.vapiCallId,
+                testAgentId: call.value.testAgentVapiId,
+                scenarioId: call.value.scenarioId,
+                ownerId: agent.ownerId,
+              })),
+            },
           },
         },
-      },
-      include: {
-        calls: true,
-      },
-    });
+        include: {
+          calls: true,
+        },
+      });
+    }
   }
 
   async getLastTest(agentId: string) {

@@ -8,7 +8,7 @@ export const getContext = async (
 ) => {
   try {
     const call = await db.call.findFirst({
-      where: { id: callId },
+      where: { vapiCallId: callId },
       include: {
         testAgent: true,
         scenario: {

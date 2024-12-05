@@ -1,0 +1,1515 @@
+{
+  "ConversationId:1a2b3c4d-1111-2222-3333-444455556666": [
+    {
+      "role": "user",
+      "content": "uh yeah lemme get a whopper combo with cheese and a sprite."
+    },
+    {
+      "request_id": "ConversationId:1a2b3c4d-1111-2222-3333-444455556666-1",
+      "role": "assistant",
+      "content": "{\"order\": [{\"WhopperMeal\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"WhopperWithCheese\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"MealDrinkSprite\", \"quantity\": 1, \"pre_modifier_id\": null}]}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Sure, what size would you like for your combo?"
+    },
+    {
+      "role": "user",
+      "content": "Medium."
+    },
+    {
+      "request_id": "ConversationId:1a2b3c4d-1111-2222-3333-444455556666-2",
+      "role": "assistant",
+      "content": "{\"order\": [{\"WhopperMeal\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"MediumWhopperMeal\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"WhopperWithCheese\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"MealDrinkSprite\", \"quantity\": 1, \"pre_modifier_id\": null}]}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Great! A medium Whopper combo with cheese and a Sprite. Will that be all?"
+    },
+    {
+      "role": "user",
+      "content": "Yes, that's it."
+    },
+    {
+      "request_id": "ConversationId:1a2b3c4d-1111-2222-3333-444455556666-3",
+      "role": "assistant",
+      "content": "{\"order\": [{\"WhopperMeal\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"MediumWhopperMeal\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"WhopperWithCheese\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"MealDrinkSprite\", \"quantity\": 1, \"pre_modifier_id\": null}]}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Thank you! Please drive forward to the next window."
+    }
+  ],
+  "ConversationId:2b3c4d5e-2222-3333-4444-555566667777": [
+    {
+      "role": "user",
+      "content": "hello I would like a medium whopper meal."
+    },
+    {
+      "request_id": "ConversationId:2b3c4d5e-2222-3333-4444-555566667777-1",
+      "role": "assistant",
+      "content": "{\"order\": [{\"WhopperMeal\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"MediumWhopperMeal\", \"quantity\": 1, \"pre_modifier_id\": null}]}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Sure, what size would you like for your meal?"
+    },
+    {
+      "role": "user",
+      "content": "Large."
+    },
+    {
+      "request_id": "ConversationId:2b3c4d5e-2222-3333-4444-555566667777-2",
+      "role": "assistant",
+      "content": "{\"order\": [{\"WhopperMeal\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"LargeWhopperMeal\", \"quantity\": 1, \"pre_modifier_id\": null}]}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Got it. And what would you like to drink with that?"
+    },
+    {
+      "role": "user",
+      "content": "Barq's root beer."
+    },
+    {
+      "request_id": "ConversationId:2b3c4d5e-2222-3333-4444-555566667777-3",
+      "role": "assistant",
+      "content": "{\"order\": [{\"WhopperMeal\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"LargeWhopperMeal\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"MealDrinkBarqsRootBeer\", \"quantity\": 1, \"pre_modifier_id\": null}]}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Great, a large Whopper meal with a Barq's root beer. Would you like anything else?"
+    },
+    {
+      "role": "user",
+      "content": "Please add extra tomato and pickle to the burger."
+    },
+    {
+      "request_id": "ConversationId:2b3c4d5e-2222-3333-4444-555566667777-4",
+      "role": "assistant",
+      "content": "{\"order\": [{\"WhopperMeal\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"LargeWhopperMeal\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"TomatoesExtra\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"PicklesExtra\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"MealDrinkBarqsRootBeer\", \"quantity\": 1, \"pre_modifier_id\": null}]}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Certainly, extra tomato and pickle on your Whopper. Anything else?"
+    },
+    {
+      "role": "user",
+      "content": "No, that's all."
+    },
+    {
+      "request_id": "ConversationId:2b3c4d5e-2222-3333-4444-555566667777-5",
+      "role": "assistant",
+      "content": "{\"order\": [{\"WhopperMeal\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"LargeWhopperMeal\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"TomatoesExtra\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"PicklesExtra\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"MealDrinkBarqsRootBeer\", \"quantity\": 1, \"pre_modifier_id\": null}]}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Thank you! Please drive forward to the next window."
+    }
+  ],
+  "ConversationId:3c4d5e6f-3333-4444-5555-666677778888": [
+    {
+      "role": "user",
+      "content": "afternoon, could I get a large whopper combo meal, add cheese and bacon, with a coca-cola and also add a Hershey pie."
+    },
+    {
+      "request_id": "ConversationId:3c4d5e6f-3333-4444-5555-666677778888-1",
+      "role": "assistant",
+      "content": "{\"order\": [{\"WhopperMeal\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"WhopperMealSizeLarge\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"WhopperWithBaconAndCheese\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"MealDrinkCocaCola\", \"quantity\": 1, \"pre_modifier_id\": null}]}, \"SundaePie\": {\"quantity\": 1, \"modifiers\": []}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Sure, a large Whopper combo with cheese and bacon, a Coca-Cola, and a Hershey pie. Will that be all?"
+    },
+    {
+      "role": "user",
+      "content": "Actually, please make the burger with no mayo."
+    },
+    {
+      "request_id": "ConversationId:3c4d5e6f-3333-4444-5555-666677778888-2",
+      "role": "assistant",
+      "content": "{\"order\": [{\"WhopperMeal\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"WhopperMealSizeLarge\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"WhopperWithBaconAndCheese\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"MealDrinkCocaCola\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"MayonnaiseNone\", \"quantity\": 1, \"pre_modifier_id\": null}]}}, {\"SundaePie\": {\"quantity\": 1, \"modifiers\": []}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "No problem, no mayo on your Whopper. Anything else?"
+    },
+    {
+      "role": "user",
+      "content": "No, that's it."
+    },
+    {
+      "request_id": "ConversationId:3c4d5e6f-3333-4444-5555-666677778888-3",
+      "role": "assistant",
+      "content": "{\"order\": [{\"WhopperMeal\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"WhopperMealSizeLarge\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"WhopperWithBaconAndCheese\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"MayonnaiseNone\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"MealDrinkCocaCola\", \"quantity\": 1, \"pre_modifier_id\": null}]}}, {\"SundaePie\": {\"quantity\": 1, \"modifiers\": []}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Thank you! Please drive forward to the next window."
+    }
+  ],
+  "ConversationId:4d5e6f7g-4444-5555-6666-777788889999": [
+    {
+      "role": "user",
+      "content": "Hi I\u2019d like a medium number 1 with a diet coke, no mayo, no tomato, sub barbeque sauce for ketchup, no mustard."
+    },
+    {
+      "request_id": "ConversationId:4d5e6f7g-4444-5555-6666-777788889999-1",
+      "role": "assistant",
+      "content": "{\"order\": [{\"WhopperMeal\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"WhopperMealSizeMedium\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"MealDrinkDietCoke\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"MayonnaiseNone\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"TomatoesNone\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"BarbecueRegular\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"MustardNoneDefault\", \"quantity\": 1, \"pre_modifier_id\": null}]}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Sure, a medium number 1 meal with a Diet Coke. So no mayo, no tomato, no mustard, and substitute barbecue sauce for ketchup on your burger. Is that correct?"
+    },
+    {
+      "role": "user",
+      "content": "Yes, that's correct."
+    },
+    {
+      "request_id": "ConversationId:4d5e6f7g-4444-5555-6666-777788889999-2",
+      "role": "assistant",
+      "content": "{\"order\": [{\"WhopperMeal\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"WhopperMealSizeMedium\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"MealDrinkDietCoke\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"BarbecueRegular\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"KetchupNone\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"MayonnaiseNone\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"TomatoesNone\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"MustardNoneDefault\", \"quantity\": 1, \"pre_modifier_id\": null}]}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Great. Will that be all for you today?"
+    },
+    {
+      "role": "user",
+      "content": "Yes, that's all."
+    },
+    {
+      "request_id": "ConversationId:4d5e6f7g-4444-5555-6666-777788889999-3",
+      "role": "assistant",
+      "content": "{\"order\": [{\"WhopperMeal\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"WhopperMealSizeMedium\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"MealDrinkDietCoke\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"MayonnaiseNone\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"TomatoesNone\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"BarbecueRegular\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"MustardNoneDefault\", \"quantity\": 1, \"pre_modifier_id\": null}]}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Thank you! Please drive forward to the next window."
+    }
+  ],
+  "ConversationId:5e6f7g8h-5555-6666-7777-888899990000": [
+    {
+      "role": "user",
+      "content": "Yo let me get a number 2, small, with a sprite."
+    },
+    {
+      "request_id": "ConversationId:5e6f7g8h-5555-6666-7777-888899990000-1",
+      "role": "assistant",
+      "content": "{\"order\": [{\"DoubleWhopperMeal\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"DoubleWhopperMealSizeSmall\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"MealDrinkSprite\", \"quantity\": 1, \"pre_modifier_id\": null}]}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Sure, a small number 2 meal with a Sprite. Will that be all?"
+    },
+    {
+      "role": "user",
+      "content": "Actually, add an extra large fry to that."
+    },
+    {
+      "request_id": "ConversationId:5e6f7g8h-5555-6666-7777-888899990000-2",
+      "role": "assistant",
+      "content": "{\"order\": [{\"DoubleWhopperMeal\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"DoubleWhopperMealSizeSmall\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"MealDrinkSprite\", \"quantity\": 1, \"pre_modifier_id\": null}]}}, {\"FrenchFries\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"LargeFrenchFries\", \"quantity\": 1, \"pre_modifier_id\": null}]}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Certainly, adding an extra large fry. Anything else?"
+    },
+    {
+      "role": "user",
+      "content": "No, that's it."
+    },
+    {
+      "request_id": "ConversationId:5e6f7g8h-5555-6666-7777-888899990000-3",
+      "role": "assistant",
+      "content": "{\"order\": [{\"DoubleWhopperMeal\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"DoubleWhopperMealSizeSmall\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"MealDrinkSprite\", \"quantity\": 1, \"pre_modifier_id\": null}]}}, {\"FrenchFries\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"LargeFrenchFries\", \"quantity\": 1, \"pre_modifier_id\": null}]}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Thank you! Please drive forward to the next window."
+    }
+  ],
+  "ConversationId:6f7g8h9i-6666-7777-8888-999900001111": [
+    {
+      "role": "user",
+      "content": "Hello, how are you today. Ummm\u2026let me get a double whopper meal."
+    },
+    {
+      "request_id": "ConversationId:6f7g8h9i-6666-7777-8888-999900001111-1",
+      "role": "assistant",
+      "content": "{\"order\": [{\"DoubleWhopperMeal\": {\"quantity\": 1, \"modifiers\": []}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "I'm good, thank you! What size would you like for your meal?"
+    },
+    {
+      "role": "user",
+      "content": "Large."
+    },
+    {
+      "request_id": "ConversationId:6f7g8h9i-6666-7777-8888-999900001111-2",
+      "role": "assistant",
+      "content": "{\"order\": [{\"DoubleWhopperMeal\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"DoubleWhopperMealSizeLarge\", \"quantity\": 1, \"pre_modifier_id\": null}]}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Great, and what would you like to drink with that?"
+    },
+    {
+      "role": "user",
+      "content": "Diet Coke."
+    },
+    {
+      "request_id": "ConversationId:6f7g8h9i-6666-7777-8888-999900001111-3",
+      "role": "assistant",
+      "content": "{\"order\": [{\"DoubleWhopperMeal\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"DoubleWhopperMealSizeLarge\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"MealDrinkDietCoke\", \"quantity\": 1, \"pre_modifier_id\": null}]}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Perfect, a large double Whopper meal with a Diet Coke. Anything else?"
+    },
+    {
+      "role": "user",
+      "content": "Could you add chicken fries with barbecue sauce?"
+    },
+    {
+      "request_id": "ConversationId:6f7g8h9i-6666-7777-8888-999900001111-4",
+      "role": "assistant",
+      "content": "{\"order\": [{\"DoubleWhopperMeal\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"DoubleWhopperMealSizeLarge\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"MealDrinkDietCoke\", \"quantity\": 1, \"pre_modifier_id\": null}]}}, {\"FourPieceChickenFries\": {\"quantity\": 1, \"modifiers\": []}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Certainly, adding chicken fries with barbecue sauce. Anything else?"
+    },
+    {
+      "role": "user",
+      "content": "No, that's all."
+    },
+    {
+      "request_id": "ConversationId:6f7g8h9i-6666-7777-8888-999900001111-5",
+      "role": "assistant",
+      "content": "{\"order\": [{\"DoubleWhopperMeal\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"DoubleWhopperMealSizeLarge\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"MealDrinkDietCoke\", \"quantity\": 1, \"pre_modifier_id\": null}]}}, {\"FourPieceChickenFries\": {\"quantity\": 1, \"modifiers\": []}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Thank you! Please drive forward to the next window."
+    }
+  ],
+  "ConversationId:7g8h9i0j-7777-8888-9999-000011112222": [
+    {
+      "role": "user",
+      "content": "Can I have a large double whopper combo meal with a coca-cola? And also add cookies, please."
+    },
+    {
+      "request_id": "ConversationId:7g8h9i0j-7777-8888-9999-000011112222-1",
+      "role": "assistant",
+      "content": "{\"order\": [{\"DoubleWhopperMeal\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"DoubleWhopperMealSizeLarge\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"MealDrinkCocaCola\", \"quantity\": 1, \"pre_modifier_id\": null}]}}, {\"ChocolateChipCookies\": {\"quantity\": 1, \"modifiers\": []}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Sure, a large double Whopper combo with a Coca-Cola and cookies. Will that be all?"
+    },
+    {
+      "role": "user",
+      "content": "Yes, that's it."
+    },
+    {
+      "request_id": "ConversationId:7g8h9i0j-7777-8888-9999-000011112222-2",
+      "role": "assistant",
+      "content": "{\"order\": [{\"DoubleWhopperMeal\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"DoubleWhopperMealSizeLarge\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"MealDrinkCocaCola\", \"quantity\": 1, \"pre_modifier_id\": null}]}}, {\"ChocolateChipCookies\": {\"quantity\": 1, \"modifiers\": []}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Great! Please drive forward to the next window."
+    }
+  ],
+  "ConversationId:8h9i0j1k-8888-9999-0000-111122223333": [
+    {
+      "role": "user",
+      "content": "I want a 3, large, with sprite, please add a second impossible patty, no ketchup, no mustard, extra tomato and pickles. Also I want a large fry and a junior Whopper."
+    },
+    {
+      "request_id": "ConversationId:8h9i0j1k-8888-9999-0000-111122223333-1",
+      "role": "assistant",
+      "content": "{\"order\": [{\"ImpossibleWhopperMeal\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"ImpossibleWhopperMealSizeLarge\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"ExtraImpossiblePatty\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"TomatoesExtra\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"PicklesExtra\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"KetchupNone\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"MustardNoneDefault\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"MealSideFries\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"MealDrinkSprite\", \"quantity\": 1, \"pre_modifier_id\": null}]}, \"WhopperJr\": {\"quantity\": 1, \"modifiers\": []}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Sure, a large number 3 meal with Sprite, add a second impossible patty, no ketchup, no mustard, extra tomato and pickles. Also, a large fry and a Junior Whopper. Anything else?"
+    },
+    {
+      "role": "user",
+      "content": "No, that's all."
+    },
+    {
+      "request_id": "ConversationId:8h9i0j1k-8888-9999-0000-111122223333-2",
+      "role": "assistant",
+      "content": "{\"order\": [{\"ImpossibleWhopperMeal\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"ImpossibleWhopperMealSizeLarge\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"ExtraImpossiblePatty\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"TomatoesExtra\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"PicklesExtra\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"KetchupNone\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"MustardNoneDefault\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"MealSideFries\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"MealDrinkSprite\", \"quantity\": 1, \"pre_modifier_id\": null}]}, \"WhopperJr\": {\"quantity\": 1, \"modifiers\": []}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Thank you! Please proceed to the next window."
+    }
+  ],
+  "ConversationId:9i0j1k2l-9999-0000-1111-222233334444": [
+    {
+      "role": "user",
+      "content": "Hey how ya doin\u2019? I would like an impossible whopper meal, um large, with a fanta."
+    },
+    {
+      "request_id": "ConversationId:9i0j1k2l-9999-0000-1111-222233334444-1",
+      "role": "assistant",
+      "content": "{\"order\": [{\"ImpossibleWhopperMeal\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"ImpossibleWhopperMealSizeLarge\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"MealDrinkFantaOrange\", \"quantity\": 1, \"pre_modifier_id\": null}]}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "I'm doing well, thanks! A large Impossible Whopper meal with a Fanta. Anything else?"
+    },
+    {
+      "role": "user",
+      "content": "Actually, can you make that a Sprite Zero instead of Fanta?"
+    },
+    {
+      "request_id": "ConversationId:9i0j1k2l-9999-0000-1111-222233334444-2",
+      "role": "assistant",
+      "content": "{\"order\": [{\"ImpossibleWhopperMeal\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"ImpossibleWhopperMealSizeLarge\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"MealDrinkSpriteZero\", \"quantity\": 1, \"pre_modifier_id\": null}]}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Sure, changing your drink to a Sprite Zero. Anything else?"
+    },
+    {
+      "role": "user",
+      "content": "No, that's it."
+    },
+    {
+      "request_id": "ConversationId:9i0j1k2l-9999-0000-1111-222233334444-3",
+      "role": "assistant",
+      "content": "{\"order\": [{\"ImpossibleWhopperMeal\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"ImpossibleWhopperMealSizeLarge\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"MealDrinkSpriteZero\", \"quantity\": 1, \"pre_modifier_id\": null}]}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Great! Please drive forward to the next window."
+    }
+  ],
+  "ConversationId:0j1k2l3m-0000-1111-2222-333344445555": [
+    {
+      "role": "user",
+      "content": "Howdy, can I have a number 3, medium and a coke?"
+    },
+    {
+      "request_id": "ConversationId:0j1k2l3m-0000-1111-2222-333344445555-1",
+      "role": "assistant",
+      "content": "{\"order\": [{\"ImpossibleWhopperMeal\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"ImpossibleWhopperMealSizeMedium\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"MealDrinkCocaCola\", \"quantity\": 1, \"pre_modifier_id\": null}]}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Sure, a medium number 3 meal with a Coke. Anything else?"
+    },
+    {
+      "role": "user",
+      "content": "Actually, add a second impossible Whopper."
+    },
+    {
+      "request_id": "ConversationId:0j1k2l3m-0000-1111-2222-333344445555-2",
+      "role": "assistant",
+      "content": "{\"order\": [{\"ImpossibleWhopperMeal\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"ImpossibleWhopperMealSizeMedium\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"MealDrinkCocaCola\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"MealSideFries\", \"quantity\": 1, \"pre_modifier_id\": null}]}}, {\"ImpossibleWhopper\": {\"quantity\": 1, \"modifiers\": []}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Certainly, adding another Impossible Whopper. Will that be all?"
+    },
+    {
+      "role": "user",
+      "content": "Yes, thank you."
+    },
+    {
+      "request_id": "ConversationId:0j1k2l3m-0000-1111-2222-333344445555-3",
+      "role": "assistant",
+      "content": "{\"order\": [{\"ImpossibleWhopperMeal\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"ImpossibleWhopperMealSizeMedium\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"MealDrinkCocaCola\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"MealSideFries\", \"quantity\": 1, \"pre_modifier_id\": null}]}}, {\"ImpossibleWhopper\": {\"quantity\": 1, \"modifiers\": []}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Thank you! Please proceed to the next window."
+    }
+  ],
+  "ConversationId:1k2l3m4n-1111-2222-3333-444455556666": [
+    {
+      "role": "user",
+      "content": "Hi let me get a large bacon king combo meal with a fanta zero and also please add chicken fries."
+    },
+    {
+      "request_id": "ConversationId:1k2l3m4n-1111-2222-3333-444455556666-1",
+      "role": "assistant",
+      "content": "{\"order\": [{\"BaconKingMeal\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"BaconKingMealSizeLarge\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"MealDrinkFantaZero\", \"quantity\": 1, \"pre_modifier_id\": null}]}, \"FourPieceChickenFries\": {\"quantity\": 1, \"modifiers\": []}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Sure, a large Bacon King combo with a Fanta Zero and chicken fries. Anything else?"
+    },
+    {
+      "role": "user",
+      "content": "Actually, change the chicken fries to an original chicken sandwich with no mayo."
+    },
+    {
+      "request_id": "ConversationId:1k2l3m4n-1111-2222-3333-444455556666-2",
+      "role": "assistant",
+      "content": "{\"order\": [{\"BaconKingMeal\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"BaconKingMealSizeLarge\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"MealDrinkFantaZero\", \"quantity\": 1, \"pre_modifier_id\": null}]}, \"OriginalChickenSandwich\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"MayonnaiseNone\", \"quantity\": 1, \"pre_modifier_id\": null}]}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "No problem, replacing the chicken fries with an Original Chicken Sandwich with no mayo. Anything else?"
+    },
+    {
+      "role": "user",
+      "content": "That's all, thanks."
+    },
+    {
+      "request_id": "ConversationId:1k2l3m4n-1111-2222-3333-444455556666-3",
+      "role": "assistant",
+      "content": "{\"order\": [{\"BaconKingMeal\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"BaconKingMealSizeLarge\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"MealDrinkFantaZero\", \"quantity\": 1, \"pre_modifier_id\": null}]}, \"OriginalChickenSandwich\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"MayonnaiseNone\", \"quantity\": 1, \"pre_modifier_id\": null}]}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Thank you! Please proceed to the next window."
+    }
+  ],
+  "ConversationId:2l3m4n5o-2222-3333-4444-555566667777": [
+    {
+      "role": "user",
+      "content": "I want a bacon king, um medium, with a coke. Actually make that 2."
+    },
+    {
+      "request_id": "ConversationId:2l3m4n5o-2222-3333-4444-555566667777-1",
+      "role": "assistant",
+      "content": "{\"order\": [{\"BaconKingMeal\": {\"quantity\": 2, \"modifiers\": [{\"modifier_option_id\": \"BaconKingMealSizeMedium\", \"quantity\": 2, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"MealDrinkCocaCola\", \"quantity\": 2, \"pre_modifier_id\": null}]}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Sure, two medium Bacon King meals with Cokes. Anything else?"
+    },
+    {
+      "role": "user",
+      "content": "No, that's it."
+    },
+    {
+      "request_id": "ConversationId:2l3m4n5o-2222-3333-4444-555566667777-2",
+      "role": "assistant",
+      "content": "{\"order\": [{\"BaconKingMeal\": {\"quantity\": 2, \"modifiers\": [{\"modifier_option_id\": \"BaconKingMealSizeMedium\", \"quantity\": 2, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"MealDrinkCocaCola\", \"quantity\": 2, \"pre_modifier_id\": null}]}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Great! Please drive forward to the next window."
+    }
+  ],
+  "ConversationId:3m4n5o6p-3333-4444-5555-666677778888": [
+    {
+      "role": "user",
+      "content": "Can I have a number 4 meal, no mayo, no cheese?"
+    },
+    {
+      "request_id": "ConversationId:3m4n5o6p-3333-4444-5555-666677778888-1",
+      "role": "assistant",
+      "content": "{\"order\": [{\"BaconKingMeal\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"MayonnaiseNone\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"AmericanCheeseNone\", \"quantity\": 1, \"pre_modifier_id\": null}]}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Sure, a number 4 meal with no mayo and no cheese. What size would you like?"
+    },
+    {
+      "role": "user",
+      "content": "Large."
+    },
+    {
+      "request_id": "ConversationId:3m4n5o6p-3333-4444-5555-666677778888-2",
+      "role": "assistant",
+      "content": "{\"order\": [{\"BaconKingMeal\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"BaconKingMealSizeLarge\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"MayonnaiseNone\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"AmericanCheeseNone\", \"quantity\": 1, \"pre_modifier_id\": null}]}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Got it, a large number 4 meal with no mayo and no cheese. What would you like to drink?"
+    },
+    {
+      "role": "user",
+      "content": "I'll have a Coke."
+    },
+    {
+      "request_id": "ConversationId:3m4n5o6p-3333-4444-5555-666677778888-3",
+      "role": "assistant",
+      "content": "{\"order\": [{\"BaconKingMeal\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"BaconKingMealSizeLarge\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"MayonnaiseNone\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"AmericanCheeseNone\", \"quantity\": 1, \"pre_modifier_id\": null}]}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Great, anything else?"
+    },
+    {
+      "role": "user",
+      "content": "No, that's all."
+    },
+    {
+      "request_id": "ConversationId:3m4n5o6p-3333-4444-5555-666677778888-4",
+      "role": "assistant",
+      "content": "{\"order\": [{\"BaconKingMeal\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"BaconKingMealSizeLarge\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"MayonnaiseNone\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"AmericanCheeseNone\", \"quantity\": 1, \"pre_modifier_id\": null}]}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Thank you! Please proceed to the next window."
+    }
+  ],
+  "ConversationId:4n5o6p7q-4444-5555-6666-777788889999": [
+    {
+      "role": "user",
+      "content": "Hi how ya doing? Can I have a large 4 with diet coke?"
+    },
+    {
+      "request_id": "ConversationId:4n5o6p7q-4444-5555-6666-777788889999-1",
+      "role": "assistant",
+      "content": "{\"order\": [{\"BaconKingMeal\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"BaconKingMealSizeLarge\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"MealDrinkDietCoke\", \"quantity\": 1, \"pre_modifier_id\": null}]}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "I'm doing well, thanks! A large number 4 meal with a Diet Coke. Anything else?"
+    },
+    {
+      "role": "user",
+      "content": "Please add a Hershey sundae pie."
+    },
+    {
+      "request_id": "ConversationId:4n5o6p7q-4444-5555-6666-777788889999-2",
+      "role": "assistant",
+      "content": "{\"order\": [{\"BaconKingMeal\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"BaconKingMealSizeLarge\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"MealDrinkDietCoke\", \"quantity\": 1, \"pre_modifier_id\": null}]}}, {\"SundaePie\": {\"quantity\": 1, \"modifiers\": []}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Certainly, adding a Hershey's Sundae Pie. Anything else?"
+    },
+    {
+      "role": "user",
+      "content": "No, that's it."
+    },
+    {
+      "request_id": "ConversationId:4n5o6p7q-4444-5555-6666-777788889999-3",
+      "role": "assistant",
+      "content": "{\"order\": [{\"BaconKingMeal\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"BaconKingMealSizeLarge\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"MealDrinkDietCoke\", \"quantity\": 1, \"pre_modifier_id\": null}]}}, {\"SundaePie\": {\"quantity\": 1, \"modifiers\": []}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Great! Please drive forward to the next window."
+    }
+  ],
+  "ConversationId:5o6p7q8r-5555-6666-7777-888899990000": [
+    {
+      "role": "user",
+      "content": "I wanna junior whopper meal with an extra fry. Um make the meal a large and also make the fry a large, please."
+    },
+    {
+      "request_id": "ConversationId:5o6p7q8r-5555-6666-7777-888899990000-1",
+      "role": "assistant",
+      "content": "{\"order\": [{\"WhopperJrMeal\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"WhopperJrMealSizeLarge\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"MealSideFries\", \"quantity\": 1, \"pre_modifier_id\": null}]}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Sure, a large Whopper Junior meal with an extra large fry. What would you like to drink?"
+    },
+    {
+      "role": "user",
+      "content": "A Coke, please."
+    },
+    {
+      "request_id": "ConversationId:5o6p7q8r-5555-6666-7777-888899990000-2",
+      "role": "assistant",
+      "content": "{\"order\": [{\"WhopperJrMeal\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"WhopperJrMealSizeLarge\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"MealSideFries\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"MealDrinkCocaCola\", \"quantity\": 1, \"pre_modifier_id\": null}]}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Got it, anything else?"
+    },
+    {
+      "role": "user",
+      "content": "No, that's all."
+    },
+    {
+      "request_id": "ConversationId:5o6p7q8r-5555-6666-7777-888899990000-3",
+      "role": "assistant",
+      "content": "{\"order\": [{\"WhopperJrMeal\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"WhopperJrMealSizeLarge\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"MealSideFries\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"MealDrinkCocaCola\", \"quantity\": 1, \"pre_modifier_id\": null}]}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Thank you! Please proceed to the next window."
+    }
+  ],
+  "ConversationId:6p7q8r9s-6666-7777-8888-999900001111": [
+    {
+      "role": "user",
+      "content": "Yeah do you have the junior whopper combo still?"
+    },
+    {
+      "request_id": "ConversationId:6p7q8r9s-6666-7777-8888-999900001111-1",
+      "role": "assistant",
+      "content": "{}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Yes, we do!"
+    },
+    {
+      "role": "user",
+      "content": "Great, I'll have that. Make it a large with a Coca-Cola."
+    },
+    {
+      "request_id": "ConversationId:6p7q8r9s-6666-7777-8888-999900001111-2",
+      "role": "assistant",
+      "content": "{\"order\": [{\"WhopperJrMeal\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"WhopperJrMealSizeLarge\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"MealDrinkCocaCola\", \"quantity\": 1, \"pre_modifier_id\": null}]}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Sure, a large Whopper Junior combo with a Coca-Cola. Anything else?"
+    },
+    {
+      "role": "user",
+      "content": "No, that's it."
+    },
+    {
+      "request_id": "ConversationId:6p7q8r9s-6666-7777-8888-999900001111-3",
+      "role": "assistant",
+      "content": "{\"order\": [{\"WhopperJrMeal\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"WhopperJrMealSizeLarge\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"MealDrinkCocaCola\", \"quantity\": 1, \"pre_modifier_id\": null}]}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Thank you! Please proceed to the next window."
+    }
+  ],
+  "ConversationId:7q8r9s0t-7777-8888-9999-000011112222": [
+    {
+      "role": "user",
+      "content": "Hey afternoon, um, I would like a large number 5 meal, actually make that two large number 5 meals."
+    },
+    {
+      "request_id": "ConversationId:7q8r9s0t-7777-8888-9999-000011112222-1",
+      "role": "assistant",
+      "content": "{\"order\": [{\"WhopperJrMeal\": {\"quantity\": 2, \"modifiers\": [{\"modifier_option_id\": \"WhopperJrMealSizeLarge\", \"quantity\": 2, \"pre_modifier_id\": null}]}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Sure, two large number 5 meals. What would you like to drink with those?"
+    },
+    {
+      "role": "user",
+      "content": "Sprite and Sprite Zero."
+    },
+    {
+      "request_id": "ConversationId:7q8r9s0t-7777-8888-9999-000011112222-2",
+      "role": "assistant",
+      "content": "{\"order\": [{\"WhopperJrMeal\": {\"quantity\": 2, \"modifiers\": [{\"modifier_option_id\": \"WhopperJrMealSizeLarge\", \"quantity\": 2, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"MealDrinkSprite\", \"quantity\": 2, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"MealDrinkSpriteZero\", \"quantity\": 2, \"pre_modifier_id\": null}]}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Got it, one with Sprite and one with Sprite Zero. Anything else?"
+    },
+    {
+      "role": "user",
+      "content": "No, that's all, thanks."
+    },
+    {
+      "request_id": "ConversationId:7q8r9s0t-7777-8888-9999-000011112222-3",
+      "role": "assistant",
+      "content": "{\"order\": [{\"WhopperJrMeal\": {\"quantity\": 2, \"modifiers\": [{\"modifier_option_id\": \"WhopperJrMealSizeLarge\", \"quantity\": 2, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"MealDrinkSprite\", \"quantity\": 2, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"MealDrinkSpriteZero\", \"quantity\": 2, \"pre_modifier_id\": null}]}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Thank you! Please proceed to the next window."
+    }
+  ],
+  "ConversationId:8r9s0t1u-8888-9999-0000-111122223333": [
+    {
+      "role": "user",
+      "content": "Yo lemme get a Royal Crispy meal. Um make that a medium with a diet coke."
+    },
+    {
+      "request_id": "ConversationId:8r9s0t1u-8888-9999-0000-111122223333-1",
+      "role": "assistant",
+      "content": "{\"order\": [{\"RoyalCrispyChickenMeal\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"MediumRoyalCrispyChickenMeal\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"MealDrinkDietCoke\", \"quantity\": 1, \"pre_modifier_id\": null}]}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Sure, a medium Royal Crispy meal with a Diet Coke. Anything else?"
+    },
+    {
+      "role": "user",
+      "content": "No, that's it."
+    },
+    {
+      "request_id": "ConversationId:8r9s0t1u-8888-9999-0000-111122223333-2",
+      "role": "assistant",
+      "content": "{\"order\": [{\"RoyalCrispyChickenMeal\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"MediumRoyalCrispyChickenMeal\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"MealDrinkDietCoke\", \"quantity\": 1, \"pre_modifier_id\": null}]}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Thank you! Please proceed to the next window."
+    }
+  ],
+  "ConversationId:9s0t1u2v-9999-0000-1111-222233334444": [
+    {
+      "role": "user",
+      "content": "Hey can I have a BK Royal Crispy meal?"
+    },
+    {
+      "request_id": "ConversationId:9s0t1u2v-9999-0000-1111-222233334444-1",
+      "role": "assistant",
+      "content": "{\"order\": [{\"RoyalCrispyChickenMeal\": {\"quantity\": 1, \"modifiers\": []}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Certainly! What size would you like for your meal?"
+    },
+    {
+      "role": "user",
+      "content": "Large."
+    },
+    {
+      "request_id": "ConversationId:9s0t1u2v-9999-0000-1111-222233334444-2",
+      "role": "assistant",
+      "content": "{\"order\": [{\"RoyalCrispyChickenMeal\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"LargeRoyalCrispyChickenMeal\", \"quantity\": 1, \"pre_modifier_id\": null}]}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "And what would you like to drink with that?"
+    },
+    {
+      "role": "user",
+      "content": "Mello Yello."
+    },
+    {
+      "request_id": "ConversationId:9s0t1u2v-9999-0000-1111-222233334444-3",
+      "role": "assistant",
+      "content": "{\"order\": [{\"RoyalCrispyChickenMeal\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"LargeRoyalCrispyChickenMeal\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"MealDrinkMelloYello\", \"quantity\": 1, \"pre_modifier_id\": null}]}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Got it, a large BK Royal Crispy meal with a Mello Yello. Would you like any modifications to your sandwich?"
+    },
+    {
+      "role": "user",
+      "content": "Yes, no tomato, extra pickles."
+    },
+    {
+      "request_id": "ConversationId:9s0t1u2v-9999-0000-1111-222233334444-4",
+      "role": "assistant",
+      "content": "{\"order\": [{\"RoyalCrispyChickenMeal\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"LargeRoyalCrispyChickenMeal\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"PicklesExtra\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"TomatoesNone\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"MealDrinkMelloYello\", \"quantity\": 1, \"pre_modifier_id\": null}]}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "No tomato and extra pickles on your sandwich. Anything else?"
+    },
+    {
+      "role": "user",
+      "content": "No, that's all."
+    },
+    {
+      "request_id": "ConversationId:9s0t1u2v-9999-0000-1111-222233334444-5",
+      "role": "assistant",
+      "content": "{\"order\": [{\"RoyalCrispyChickenMeal\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"LargeRoyalCrispyChickenMeal\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"PicklesExtra\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"TomatoesNone\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"MealDrinkMelloYello\", \"quantity\": 1, \"pre_modifier_id\": null}]}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Thank you! Please drive forward to the next window."
+    }
+  ],
+  "ConversationId:0t1u2v3w-0000-1111-2222-333344445555": [
+    {
+      "role": "user",
+      "content": "Yeah I want a large 6 meal combo meal with coke, also add a whopper and an impossible whopper to that."
+    },
+    {
+      "request_id": "ConversationId:0t1u2v3w-0000-1111-2222-333344445555-1",
+      "role": "assistant",
+      "content": "{\"order\": [{\"RoyalCrispyChickenMeal\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"LargeRoyalCrispyChickenMeal\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"MealDrinkCocaCola\", \"quantity\": 1, \"pre_modifier_id\": null}]}, \"Whopper\": {\"quantity\": 1, \"modifiers\": []}, \"ImpossibleWhopper\": {\"quantity\": 1, \"modifiers\": []}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Sure, a large number 6 combo meal with a Coke, a Whopper, and an Impossible Whopper. Anything else?"
+    },
+    {
+      "role": "user",
+      "content": "No, that's it."
+    },
+    {
+      "request_id": "ConversationId:0t1u2v3w-0000-1111-2222-333344445555-2",
+      "role": "assistant",
+      "content": "{\"order\": [{\"RoyalCrispyChickenMeal\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"LargeRoyalCrispyChickenMeal\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"MealDrinkCocaCola\", \"quantity\": 1, \"pre_modifier_id\": null}]}, \"Whopper\": {\"quantity\": 1, \"modifiers\": []}, \"ImpossibleWhopper\": {\"quantity\": 1, \"modifiers\": []}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Great! Please proceed to the next window."
+    }
+  ],
+  "ConversationId:1u2v3w4x-1111-2222-3333-444455556666": [
+    {
+      "role": "user",
+      "content": "Hi can I have a royal crispy combo. Um large, with Fanta and cookies, please?"
+    },
+    {
+      "request_id": "ConversationId:1u2v3w4x-1111-2222-3333-444455556666-1",
+      "role": "assistant",
+      "content": "{\"order\": [{\"RoyalCrispyChickenMeal\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"LargeRoyalCrispyChickenMeal\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"MealDrinkFantaOrange\", \"quantity\": 1, \"pre_modifier_id\": null}]}}, {\"ChocolateChipCookies\": {\"quantity\": 1, \"modifiers\": []}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Certainly! A large Royal Crispy combo with a Fanta and cookies. Anything else?"
+    },
+    {
+      "role": "user",
+      "content": "No, that's all, thank you."
+    },
+    {
+      "request_id": "ConversationId:1u2v3w4x-1111-2222-3333-444455556666-2",
+      "role": "assistant",
+      "content": "{\"order\": [{\"RoyalCrispyChickenMeal\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"LargeRoyalCrispyChickenMeal\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"MealDrinkFantaOrange\", \"quantity\": 1, \"pre_modifier_id\": null}]}}, {\"ChocolateChipCookies\": {\"quantity\": 1, \"modifiers\": []}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Thank you! Please drive forward to the next window."
+    }
+  ],
+  "ConversationId:2v3w4x5y-2222-3333-4444-555566667777": [
+    {
+      "role": "user",
+      "content": "Hey hey I want a large spicy crispy combo meal with a sprite."
+    },
+    {
+      "request_id": "ConversationId:2v3w4x5y-2222-3333-4444-555566667777-1",
+      "role": "assistant",
+      "content": "{\"order\": [{\"FieryRoyalCrispyChickenMeal\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"LargeFieryRoyalCrispyChickenMeal\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"MealDrinkSprite\", \"quantity\": 1, \"pre_modifier_id\": null}]}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Sure, a large Spicy BK Royal Crispy combo meal with a Sprite. Anything else?"
+    },
+    {
+      "role": "user",
+      "content": "No, that's it."
+    },
+    {
+      "request_id": "ConversationId:2v3w4x5y-2222-3333-4444-555566667777-2",
+      "role": "assistant",
+      "content": "{\"order\": [{\"FieryRoyalCrispyChickenMeal\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"LargeFieryRoyalCrispyChickenMeal\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"MealDrinkSprite\", \"quantity\": 1, \"pre_modifier_id\": null}]}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Great! Please proceed to the next window."
+    }
+  ],
+  "ConversationId:3w4x5y6z-3333-4444-5555-666677778888": [
+    {
+      "role": "user",
+      "content": "Hi Can I have a large spicy crispy chicken sandwich meal with a coke? Also I want to add two chicken fries to that and please put extra ketchup in the bag."
+    },
+    {
+      "request_id": "ConversationId:3w4x5y6z-3333-4444-5555-666677778888-1",
+      "role": "assistant",
+      "content": "{\"order\": [{\"FieryRoyalCrispyChickenMeal\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"LargeFieryRoyalCrispyChickenMeal\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"MealDrinkCocaCola\", \"quantity\": 1, \"pre_modifier_id\": null}]}}, {\"FourPieceChickenFries\": {\"quantity\": 2, \"modifiers\": []}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Certainly! A large Spicy Crispy Chicken Sandwich meal with a Coke, two orders of Chicken Fries, and extra ketchup in the bag. Anything else?"
+    },
+    {
+      "role": "user",
+      "content": "Actually, remove one order of chicken fries."
+    },
+    {
+      "request_id": "ConversationId:3w4x5y6z-3333-4444-5555-666677778888-2",
+      "role": "assistant",
+      "content": "{\"order\": [{\"FieryRoyalCrispyChickenMeal\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"LargeFieryRoyalCrispyChickenMeal\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"MealDrinkCocaCola\", \"quantity\": 1, \"pre_modifier_id\": null}]}}, {\"FourPieceChickenFries\": {\"quantity\": 1, \"modifiers\": []}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "No problem, removing one order of Chicken Fries. Anything else?"
+    },
+    {
+      "role": "user",
+      "content": "No, that's all, thank you."
+    },
+    {
+      "request_id": "ConversationId:3w4x5y6z-3333-4444-5555-666677778888-3",
+      "role": "assistant",
+      "content": "{\"order\": [{\"FieryRoyalCrispyChickenMeal\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"LargeFieryRoyalCrispyChickenMeal\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"MealDrinkCocaCola\", \"quantity\": 1, \"pre_modifier_id\": null}]}}, {\"FourPieceChickenFries\": {\"quantity\": 1, \"modifiers\": []}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Thank you! Please drive forward to the next window."
+    }
+  ],
+  "ConversationId:4x5y6z7a-4444-5555-6666-777788889999": [
+    {
+      "role": "user",
+      "content": "Yes I\u2019d like to order a 7 combo meal. Please make the drink a coke and um the size should be large."
+    },
+    {
+      "request_id": "ConversationId:4x5y6z7a-4444-5555-6666-777788889999-1",
+      "role": "assistant",
+      "content": "{\"order\": [{\"FieryRoyalCrispyChickenMeal\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"LargeFieryRoyalCrispyChickenMeal\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"MealDrinkCocaCola\", \"quantity\": 1, \"pre_modifier_id\": null}]}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Sure, a large number 7 combo meal with a Coke. Would you like to add bacon to your sandwich?"
+    },
+    {
+      "role": "user",
+      "content": "Yes, please add bacon."
+    },
+    {
+      "request_id": "ConversationId:4x5y6z7a-4444-5555-6666-777788889999-2",
+      "role": "assistant",
+      "content": "{\"order\": [{\"FieryRoyalCrispyChickenMeal\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"LargeFieryRoyalCrispyChickenMeal\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"MealDrinkCocaCola\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"BaconExtra\", \"quantity\": 1, \"pre_modifier_id\": null}]}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Adding bacon to your sandwich. Anything else?"
+    },
+    {
+      "role": "user",
+      "content": "No, that's it."
+    },
+    {
+      "request_id": "ConversationId:4x5y6z7a-4444-5555-6666-777788889999-3",
+      "role": "assistant",
+      "content": "{\"order\": [{\"FieryRoyalCrispyChickenMeal\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"LargeFieryRoyalCrispyChickenMeal\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"MealDrinkCocaCola\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"BaconExtra\", \"quantity\": 1, \"pre_modifier_id\": null}]}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Great! Please proceed to the next window."
+    }
+  ],
+  "ConversationId:5y6z7a8b-5555-6666-7777-888899990000": [
+    {
+      "role": "user",
+      "content": "Yep one sec. Okay I\u2019m ready: yeah hi, let me please get 2 large Bacon Swiss Royal meals? Um the first one should have a sprite, the second coke."
+    },
+    {
+      "request_id": "ConversationId:5y6z7a8b-5555-6666-7777-888899990000-1",
+      "role": "assistant",
+      "content": "{\"order\": [{\"BaconAndSwissRoyalCrispyChickenMeal\": {\"quantity\": 2, \"modifiers\": [{\"modifier_option_id\": \"LargeBaconAndSwissRoyalCrispyChickenMeal\", \"quantity\": 2, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"MealDrinkSprite\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"MealDrinkCocaCola\", \"quantity\": 1, \"pre_modifier_id\": null}]}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Certainly! Two large Bacon and Swiss BK Royal Crispy meals\u2014first with a Sprite, second with a Coke. Anything else?"
+    },
+    {
+      "role": "user",
+      "content": "Actually, change the second drink to Sprite Zero."
+    },
+    {
+      "request_id": "ConversationId:5y6z7a8b-5555-6666-7777-888899990000-2",
+      "role": "assistant",
+      "content": "{\"order\": [{\"BaconAndSwissRoyalCrispyChickenMeal\": {\"quantity\": 2, \"modifiers\": [{\"modifier_option_id\": \"LargeBaconAndSwissRoyalCrispyChickenMeal\", \"quantity\": 2, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"MealDrinkSprite\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"MealDrinkSpriteZero\", \"quantity\": 1, \"pre_modifier_id\": null}]}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "No problem, changing the second drink to Sprite Zero. Anything else?"
+    },
+    {
+      "role": "user",
+      "content": "No, that's all."
+    },
+    {
+      "request_id": "ConversationId:5y6z7a8b-5555-6666-7777-888899990000-3",
+      "role": "assistant",
+      "content": "{\"order\": [{\"BaconAndSwissRoyalCrispyChickenMeal\": {\"quantity\": 2, \"modifiers\": [{\"modifier_option_id\": \"LargeBaconAndSwissRoyalCrispyChickenMeal\", \"quantity\": 2, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"MealDrinkSprite\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"MealDrinkSpriteZero\", \"quantity\": 1, \"pre_modifier_id\": null}]}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Thank you! Please drive forward to the next window."
+    }
+  ],
+  "ConversationId:6z7a8b9c-6666-7777-8888-999900001111": [
+    {
+      "role": "user",
+      "content": "Hello, I\u2019d like a medium BK Royal Crispy. Oh wait, but I want the bacon and swiss one not the normal one. And I want root beer for my drink."
+    },
+    {
+      "request_id": "ConversationId:6z7a8b9c-6666-7777-8888-999900001111-1",
+      "role": "assistant",
+      "content": "{\"order\": [{\"BaconAndSwissRoyalCrispyChickenMeal\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"MediumBaconAndSwissRoyalCrispyChickenMeal\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"MealDrinkBarqsRootBeer\", \"quantity\": 1, \"pre_modifier_id\": null}]}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Certainly! A medium Bacon and Swiss BK Royal Crispy meal with a root beer. Anything else?"
+    },
+    {
+      "role": "user",
+      "content": "Do you have ice cream?"
+    },
+    {
+      "request_id": "ConversationId:6z7a8b9c-6666-7777-8888-999900001111-2",
+      "role": "assistant",
+      "content": "{\"order\": [{\"BaconAndSwissRoyalCrispyChickenMeal\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"MediumBaconAndSwissRoyalCrispyChickenMeal\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"MealDrinkBarqsRootBeer\", \"quantity\": 1, \"pre_modifier_id\": null}]}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Yes, we do!"
+    },
+    {
+      "role": "user",
+      "content": "Great, please add a vanilla cone."
+    },
+    {
+      "request_id": "ConversationId:6z7a8b9c-6666-7777-8888-999900001111-3",
+      "role": "assistant",
+      "content": "{\"order\": [{\"BaconAndSwissRoyalCrispyChickenMeal\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"MediumBaconAndSwissRoyalCrispyChickenMeal\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"MealDrinkBarqsRootBeer\", \"quantity\": 1, \"pre_modifier_id\": null}]}}, {\"SoftServeCone\": {\"quantity\": 1, \"modifiers\": []}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Adding a vanilla cone to your order. Anything else?"
+    },
+    {
+      "role": "user",
+      "content": "No, that's it, thank you."
+    },
+    {
+      "request_id": "ConversationId:6z7a8b9c-6666-7777-8888-999900001111-4",
+      "role": "assistant",
+      "content": "{\"order\": [{\"BaconAndSwissRoyalCrispyChickenMeal\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"MediumBaconAndSwissRoyalCrispyChickenMeal\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"MealDrinkBarqsRootBeer\", \"quantity\": 1, \"pre_modifier_id\": null}]}}, {\"SoftServeCone\": {\"quantity\": 1, \"modifiers\": []}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Thank you! Please proceed to the next window."
+    }
+  ],
+  "ConversationId:7a8b9c0d-7777-8888-9999-000011112222": [
+    {
+      "role": "user",
+      "content": "Hi how ya doin\u2019 let me get the bacon swiss crispy royal chicken meal? Make that a large. Actually let me get another bacon swiss crispy sandwich, just the sandwich though. And um with the meal please make the drink a sprite, thanks."
+    },
+    {
+      "request_id": "ConversationId:7a8b9c0d-7777-8888-9999-000011112222-1",
+      "role": "assistant",
+      "content": "{\"order\": [{\"BaconAndSwissRoyalCrispyChickenMeal\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"LargeBaconAndSwissRoyalCrispyChickenMeal\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"MealDrinkSprite\", \"quantity\": 1, \"pre_modifier_id\": null}]}}, {\"BaconAndSwissRoyalCrispyChicken\": {\"quantity\": 1, \"modifiers\": []}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "I'm doing well, thanks! So that's a large Bacon and Swiss BK Royal Crispy meal with a Sprite, and an additional Bacon and Swiss BK Royal Crispy sandwich. Anything else?"
+    },
+    {
+      "role": "user",
+      "content": "No, that's all."
+    },
+    {
+      "request_id": "ConversationId:7a8b9c0d-7777-8888-9999-000011112222-2",
+      "role": "assistant",
+      "content": "{\"order\": [{\"BaconAndSwissRoyalCrispyChickenMeal\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"LargeBaconAndSwissRoyalCrispyChickenMeal\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"MealDrinkSprite\", \"quantity\": 1, \"pre_modifier_id\": null}]}}, {\"BaconAndSwissRoyalCrispyChicken\": {\"quantity\": 1, \"modifiers\": []}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Great! Please drive forward to the next window."
+    }
+  ],
+  "ConversationId:8b9c0d1e-8888-9999-0000-111122223333": [
+    {
+      "role": "user",
+      "content": "Yes can I have a medium 8 combo meal with a coke? I need a second coke outside the meal as well. And let me get extra pickles on the meal sandwich."
+    },
+    {
+      "request_id": "ConversationId:8b9c0d1e-8888-9999-0000-111122223333-1",
+      "role": "assistant",
+      "content": "{\"order\": [{\"BaconAndSwissRoyalCrispyChickenMeal\": {\"quantity\": 2, \"modifiers\": [{\"modifier_option_id\": \"MediumBaconAndSwissRoyalCrispyChickenMeal\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"MealDrinkCocaCola\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"PicklesExtra\", \"quantity\": 1, \"pre_modifier_id\": null}]}}, {\"CocaCola\": {\"quantity\": 1, \"modifiers\": []}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Sure, a medium number 8 combo meal with a Coke, an extra Coke, and extra pickles on your sandwich. Anything else?"
+    },
+    {
+      "role": "user",
+      "content": "Please add barbecue sauce."
+    },
+    {
+      "request_id": "ConversationId:8b9c0d1e-8888-9999-0000-111122223333-2",
+      "role": "assistant",
+      "content": "{\"order\": [{\"BaconAndSwissRoyalCrispyChickenMeal\": {\"quantity\": 2, \"modifiers\": [{\"modifier_option_id\": \"MediumBaconAndSwissRoyalCrispyChickenMeal\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"MealDrinkCocaCola\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"BarbecueRegular\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"PicklesExtra\", \"quantity\": 1, \"pre_modifier_id\": null}]}}, {\"CocaCola\": {\"quantity\": 1, \"modifiers\": []}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Adding barbecue sauce. Anything else?"
+    },
+    {
+      "role": "user",
+      "content": "No, that's it, thanks."
+    },
+    {
+      "request_id": "ConversationId:8b9c0d1e-8888-9999-0000-111122223333-3",
+      "role": "assistant",
+      "content": "{\"order\": [{\"BaconAndSwissRoyalCrispyChickenMeal\": {\"quantity\": 2, \"modifiers\": [{\"modifier_option_id\": \"MediumBaconAndSwissRoyalCrispyChickenMeal\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"MealDrinkCocaCola\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"BarbecueRegular\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"PicklesExtra\", \"quantity\": 1, \"pre_modifier_id\": null}]}}, {\"CocaCola\": {\"quantity\": 1, \"modifiers\": []}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Thank you! Please proceed to the next window."
+    }
+  ],
+  "ConversationId:9c0d1e2f-9999-0000-1111-222233334444": [
+    {
+      "role": "user",
+      "content": "I would like an original chicken sandwich combo meal, please make that a large with a sprite, also I want a small fry and a medium fry. And then let me get two orders of chicken fingers."
+    },
+    {
+      "request_id": "ConversationId:9c0d1e2f-9999-0000-1111-222233334444-1",
+      "role": "assistant",
+      "content": "{\"order\": [{\"OriginalChickenSandwichMeal\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"LargeOriginalChickenSandwichMeal\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"MealDrinkSprite\", \"quantity\": 1, \"pre_modifier_id\": null}]}}, {\"FrenchFries\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"SmallFrenchFries\", \"quantity\": 1, \"pre_modifier_id\": null}]}}, {\"FrenchFries\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"MediumFrenchFries\", \"quantity\": 1, \"pre_modifier_id\": null}]}}, {\"ChickenFingers\": {\"quantity\": 2, \"modifiers\": []}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Certainly! A large Original Chicken Sandwich combo with a Sprite, a small fry, a medium fry, and two orders of chicken fingers. Anything else?"
+    },
+    {
+      "role": "user",
+      "content": "No, that's all, thank you."
+    },
+    {
+      "request_id": "ConversationId:9c0d1e2f-9999-0000-1111-222233334444-2",
+      "role": "assistant",
+      "content": "{\"order\": [{\"OriginalChickenSandwichMeal\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"LargeOriginalChickenSandwichMeal\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"MealDrinkSprite\", \"quantity\": 1, \"pre_modifier_id\": null}]}}, {\"FrenchFries\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"SmallFrenchFries\", \"quantity\": 1, \"pre_modifier_id\": null}]}}, {\"FrenchFries\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"MediumFrenchFries\", \"quantity\": 1, \"pre_modifier_id\": null}]}}, {\"ChickenFingers\": {\"quantity\": 2, \"modifiers\": []}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Thank you! Please drive forward to the next window."
+    }
+  ],
+  "ConversationId:0d1e2f3g-0000-1111-2222-333344445555": [
+    {
+      "role": "user",
+      "content": "Yo can I have an ocs combo meal, large, without mayo and a sprite?"
+    },
+    {
+      "request_id": "ConversationId:0d1e2f3g-0000-1111-2222-333344445555-1",
+      "role": "assistant",
+      "content": "{\"order\": [{\"OriginalChickenSandwichMeal\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"LargeOriginalChickenSandwichMeal\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"MealDrinkSprite\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"MayonnaiseNone\", \"quantity\": 1, \"pre_modifier_id\": null}]}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Sure, a large Original Chicken Sandwich combo meal without mayo and a Sprite. Anything else?"
+    },
+    {
+      "role": "user",
+      "content": "No, that's it."
+    },
+    {
+      "request_id": "ConversationId:0d1e2f3g-0000-1111-2222-333344445555-2",
+      "role": "assistant",
+      "content": "{\"order\": [{\"OriginalChickenSandwichMeal\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"LargeOriginalChickenSandwichMeal\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"MealDrinkSprite\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"MayonnaiseNone\", \"quantity\": 1, \"pre_modifier_id\": null}]}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Great! Please proceed to the next window."
+    }
+  ],
+  "ConversationId:1e2f3g4h-1111-2222-3333-444455556666": [
+    {
+      "role": "user",
+      "content": "Hi how are you today, oh you\u2019re an AI nevermind haha \u2013 let me get a 9 combo meal, make that a medium and I\u2019ll have a root beer for my drink please."
+    },
+    {
+      "request_id": "ConversationId:1e2f3g4h-1111-2222-3333-444455556666-1",
+      "role": "assistant",
+      "content": "{\"order\": [{\"OriginalChickenSandwichMeal\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"MediumOriginalChickenSandwichMeal\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"MealDrinkBarqsRootBeer\", \"quantity\": 1, \"pre_modifier_id\": null}]}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "I'm here to help! A medium number 9 combo meal with a root beer. Anything else?"
+    },
+    {
+      "role": "user",
+      "content": "No, that's all."
+    },
+    {
+      "request_id": "ConversationId:1e2f3g4h-1111-2222-3333-444455556666-2",
+      "role": "assistant",
+      "content": "{\"order\": [{\"OriginalChickenSandwichMeal\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"MediumOriginalChickenSandwichMeal\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"MealDrinkBarqsRootBeer\", \"quantity\": 1, \"pre_modifier_id\": null}]}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Thank you! Please proceed to the next window."
+    }
+  ],
+  "ConversationId:2f3g4h5i-2222-3333-4444-555566667777": [
+    {
+      "role": "user",
+      "content": "Yes I would like a number 10, medium, with a coke and also I just want a second big fish sandwich, please."
+    },
+    {
+      "request_id": "ConversationId:2f3g4h5i-2222-3333-4444-555566667777-1",
+      "role": "assistant",
+      "content": "{\"order\": [{\"BigFishMeal\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"MediumBigFishMeal\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"MealDrinkCocaCola\", \"quantity\": 1, \"pre_modifier_id\": null}]}} , {\"BigFish\": {\"quantity\": 1, \"modifiers\": []}}]}"
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Sure, a medium number 10 combo meal with a Coke and an additional Big Fish Sandwich. Anything else?"
+    },
+    {
+      "role": "user",
+      "content": "Please add a large fry."
+    },
+    {
+      "request_id": "ConversationId:2f3g4h5i-2222-3333-4444-555566667777-2",
+      "role": "assistant",
+      "content": "{\"order\": [{\"BigFishMeal\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"MediumBigFishMeal\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"MealDrinkCocaCola\", \"quantity\": 1, \"pre_modifier_id\": null}]}} , {\"BigFish\": {\"quantity\": 1, \"modifiers\": []}}, {\"FrenchFries\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"LargeFrenchFries\", \"quantity\": 1, \"pre_modifier_id\": null}]}}]}"
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Adding a large fry to your order. Anything else?"
+    },
+    {
+      "role": "user",
+      "content": "No, that's it, thanks."
+    },
+    {
+      "request_id": "ConversationId:2f3g4h5i-2222-3333-4444-555566667777-3",
+      "role": "assistant",
+      "content": "{\"order\": [{\"BigFishMeal\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"MediumBigFishMeal\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"MealDrinkCocaCola\", \"quantity\": 1, \"pre_modifier_id\": null}]}} , {\"BigFish\": {\"quantity\": 1, \"modifiers\": []}}, {\"FrenchFries\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"LargeFrenchFries\", \"quantity\": 1, \"pre_modifier_id\": null}]}}]}"
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Thank you! Please proceed to the next window."
+    }
+  ],
+  "ConversationId:3g4h5i6j-3333-4444-5555-666677778888": [
+    {
+      "role": "user",
+      "content": "Hello? I would like to order a large number 10 combo meal with a coca-cola, please? Also I want cookies and a Hershey sundae pie, thanks."
+    },
+    {
+      "request_id": "ConversationId:3g4h5i6j-3333-4444-5555-666677778888-1",
+      "role": "assistant",
+      "content": "{\"order\": [{\"BigFishMeal\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"LargeBigFishMeal\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"MealDrinkCocaCola\", \"quantity\": 1, \"pre_modifier_id\": null}]}} , {\"ChocolateChipCookies\": {\"quantity\": 1, \"modifiers\": []}}, {\"SundaePie\": {\"quantity\": 1, \"modifiers\": []}}]}"
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Certainly! A large number 10 combo meal with a Coca-Cola, cookies, and a Hershey's Sundae Pie. Anything else?"
+    },
+    {
+      "role": "user",
+      "content": "No, that's all."
+    },
+    {
+      "request_id": "ConversationId:3g4h5i6j-3333-4444-5555-666677778888-2",
+      "role": "assistant",
+      "content": "{\"order\": [{\"BigFishMeal\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"LargeBigFishMeal\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"MealDrinkCocaCola\", \"quantity\": 1, \"pre_modifier_id\": null}]}} , {\"ChocolateChipCookies\": {\"quantity\": 1, \"modifiers\": []}}, {\"SundaePie\": {\"quantity\": 1, \"modifiers\": []}}]}"
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Great! Please drive forward to the next window."
+    }
+  ],
+  "ConversationId:4h5i6j7k-4444-5555-6666-777788889999": [
+    {
+      "role": "user",
+      "content": "Yeah let me get the big fish combo meal, um make that a medium with a sprite."
+    },
+    {
+      "request_id": "ConversationId:4h5i6j7k-4444-5555-6666-777788889999-1",
+      "role": "assistant",
+      "content": "{\"order\": [{\"BigFishMeal\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"MediumBigFishMeal\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"MealDrinkSprite\", \"quantity\": 1, \"pre_modifier_id\": null}]}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Sure, a medium Big Fish combo meal with a Sprite. Anything else?"
+    },
+    {
+      "role": "user",
+      "content": "No, that's it."
+    },
+    {
+      "request_id": "ConversationId:4h5i6j7k-4444-5555-6666-777788889999-2",
+      "role": "assistant",
+      "content": "{\"order\": [{\"BigFishMeal\": {\"quantity\": 1, \"modifiers\": [{\"modifier_option_id\": \"MediumBigFishMeal\", \"quantity\": 1, \"pre_modifier_id\": null}, {\"modifier_option_id\": \"MealDrinkSprite\", \"quantity\": 1, \"pre_modifier_id\": null}]}}]}",
+      "tool_calls": [],
+      "tool_call_id": ""
+    },
+    {
+      "role": "CONVERSATIONAL_AGENT",
+      "content": "Thank you! Please proceed to the next window."
+    }
+  ]
+}

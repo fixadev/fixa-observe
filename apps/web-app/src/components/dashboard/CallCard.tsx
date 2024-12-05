@@ -87,7 +87,8 @@ export default function CallCard({
               className={cn(
                 "w-fit rounded-full px-2 py-1 text-xs",
                 call.status === CallStatus.in_progress ||
-                  call.status === CallStatus.analyzing
+                  call.status === CallStatus.analyzing ||
+                  call.status === CallStatus.queued
                   ? "bg-yellow-100"
                   : didCallSucceed(call)
                     ? "bg-green-100"
@@ -98,9 +99,11 @@ export default function CallCard({
                 ? "in progress"
                 : call.status === CallStatus.analyzing
                   ? "analyzing"
-                  : didCallSucceed(call)
-                    ? "succeeded"
-                    : "failed"}
+                  : call.status === CallStatus.queued
+                    ? "queued"
+                    : didCallSucceed(call)
+                      ? "succeeded"
+                      : "failed"}
             </div>
 
             {call.status === CallStatus.completed && numErrors > 0 && (

@@ -89,7 +89,9 @@ model Call {
   createdAt DateTime @default(now())
   ownerId   String?
 
+  vapiCallId         String?
   customerCallId     String?
+  ofOneDeviceId      String?
   status             CallStatus
   result             CallResult?
   failureReason      String?
@@ -165,6 +167,7 @@ enum Role {
 }
 
 enum CallStatus {
+  queued
   in_progress
   analyzing
   completed
@@ -211,11 +214,11 @@ model Eval {
   scenario    Scenario? @relation(fields: [scenarioId], references: [id])
   scenarioId  String?
 
-  type        EvalType
-  resultType  EvalResultType
-  contentType EvalContentType @default(content)
-
-  toolCallExpectedResult String @default("")
+  type                   EvalType
+  resultType             EvalResultType
+  contentType            EvalContentType @default(content)
+  isCritical             Boolean         @default(true)
+  toolCallExpectedResult String          @default("")
 
   evalResults EvalResult[]
 

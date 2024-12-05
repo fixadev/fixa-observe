@@ -2,6 +2,7 @@ import axios from "axios";
 import { env } from "../env";
 import { db } from "../db";
 import { CallStatus } from "@prisma/client";
+import { Socket } from "socket.io";
 
 // Create a Map to store device usage states
 const deviceUsageMap = new Map<string, boolean>();
@@ -9,62 +10,67 @@ const deviceUsageMap = new Map<string, boolean>();
 // Queue to store pending calls
 
 interface QueuedCall {
+  callId: string;
+  ownerId: string;
   deviceId: string;
-  testId: string;
-  testAgentId: string;
-  scenarioId: string;
-  ownerId: string;
   assistantId: string;
-  testAgentPrompt: string;
-  scenarioPrompt: string;
-}
-
-export interface CallToStart {
-  testId: string;
-  assistantId: string;
-  testAgentPrompt: string;
-  scenarioPrompt: string;
-  testAgentId: string;
-  scenarioId: string;
-  ownerId: string;
+  testAgentPrompt?: string;
+  scenarioPrompt?: string;
+  baseUrl: string;
 }
 
 const callQueue: QueuedCall[] = [];
 
 export function scheduleOfOneCalls(
   deviceIds: string[],
-  callsToStart: CallToStart[],
+  callsToStart: QueuedCall[],
+  connectedUsers: Map<string, Socket>,
 ) {
-  // Initialize devices as available
-  deviceIds.forEach((id) => {
-    if (!deviceUsageMap.has(id)) {
-      deviceUsageMap.set(id, false);
-    }
-  });
+  try {
+    // Initialize devices as available
+    deviceIds.forEach((id) => {
+      if (!deviceUsageMap.has(id)) {
+        deviceUsageMap.set(id, false);
+      }
+    });
 
-  // Try to start calls or queue them
-  for (const call of callsToStart) {
-    const availableDevice = deviceIds.find((id) => !isDeviceInUse(id));
+    // Try to start calls or queue them
+    for (const callDetails of callsToStart) {
+      const availableDevice = deviceIds.find((id) => !isDeviceInUse(id));
 
-    if (availableDevice) {
-      // Start the call immediately if a device is available
-      startCall({
-        deviceId: availableDevice,
-        assistantId: call.assistantId,
-        testAgentPrompt: call.testAgentPrompt,
-        scenarioPrompt: call.scenarioPrompt,
-        testId: call.testId,
-        testAgentId: call.testAgentId,
-        scenarioId: call.scenarioId,
-        ownerId: call.ownerId,
-      });
-    } else {
-      // Queue the call if no device is available
-      callQueue.push({
-        deviceId: deviceIds[0], // You might want a better selection strategy
-        ...call,
-      });
+      if (availableDevice) {
+        // Start the call immediately if a device is available
+        startCall(
+          {
+            callId: callDetails.callId,
+            ownerId: callDetails.ownerId,
+            deviceId: availableDevice,
+            assistantId: callDetails.assistantId,
+            testAgentPrompt: callDetails.testAgentPrompt,
+            scenarioPrompt: callDetails.scenarioPrompt,
+            baseUrl: callDetails.baseUrl,
+          },
+          connectedUsers.get(callDetails.ownerId),
+        );
+      } else {
+        // Queue the call if no device is available
+        callQueue.push({
+          deviceId: "",
+          callId: callDetails.callId,
+          ownerId: callDetails.ownerId,
+          assistantId: callDetails.assistantId,
+          testAgentPrompt: callDetails.testAgentPrompt,
+          scenarioPrompt: callDetails.scenarioPrompt,
+          baseUrl: callDetails.baseUrl,
+        });
+      }
     }
+    return callsToStart.map((call) => ({
+      id: call.callId,
+    }));
+  } catch (error) {
+    console.error("Error scheduling OFONE calls", error);
+    throw error;
   }
 }
 
@@ -73,13 +79,16 @@ export function setDeviceInUse(deviceId: string): void {
   deviceUsageMap.set(deviceId, true);
 }
 
-export function setDeviceAvailable(deviceId: string): void {
+export function setDeviceAvailable(
+  deviceId: string,
+  userSocket?: Socket,
+): void {
   deviceUsageMap.set(deviceId, false);
 
   // Try to process queued calls when a device becomes available
   if (callQueue.length > 0) {
     const nextCall = callQueue.shift()!;
-    startCall(nextCall);
+    startCall({ ...nextCall, deviceId }, userSocket);
   }
 }
 
@@ -87,55 +96,69 @@ export function isDeviceInUse(deviceId: string): boolean {
   return deviceUsageMap.get(deviceId) ?? false;
 }
 
-export const startCall = async ({
-  deviceId,
-  assistantId,
-  testAgentPrompt,
-  scenarioPrompt,
-  testId,
-  testAgentId,
-  scenarioId,
-  ownerId,
-}: QueuedCall) => {
-  const { data } = await axios.post<{ callId: string }>(
-    `${env.AUDIO_SERVICE_URL}/websocket-call-ofone`,
-    {
-      device_id: deviceId,
-      assistant_id: assistantId,
-      assistant_overrides: {
-        // for now
-        serverUrl: "http://localhost:8000",
-        model: {
-          provider: "openai",
-          model: "gpt-4o",
-          messages: [
-            {
-              role: "system",
-              content: testAgentPrompt,
-            },
-            {
-              role: "system",
-              content:
-                "end the call when the user says 'please drive forward to the window' or 'bye' or 'have a good day' or something along those lines",
-            },
-            {
-              role: "system",
-              content: scenarioPrompt,
-            },
-          ],
+export const startCall = async (
+  {
+    callId,
+    deviceId,
+    assistantId,
+    testAgentPrompt,
+    scenarioPrompt,
+    baseUrl,
+  }: QueuedCall,
+  userSocket?: Socket,
+) => {
+  userSocket?.emit("call-started", { callId });
+  try {
+    setDeviceInUse(deviceId);
+    console.log(
+      "========================Starting OFONE call=========================",
+      callId,
+      deviceId,
+      assistantId,
+    );
+    const { data } = await axios.post<{ callId: string }>(
+      `${env.AUDIO_SERVICE_URL}/websocket-call-ofone`,
+      {
+        device_id: deviceId,
+        assistant_id: assistantId,
+        assistant_overrides: {
+          // for now
+          serverUrl: env.NODE_SERVER_URL + "/vapi",
+          model: {
+            provider: "openai",
+            model: "gpt-4o",
+            messages: [
+              {
+                role: "system",
+                content: testAgentPrompt,
+              },
+              {
+                role: "system",
+                content:
+                  "end the call when the user says 'please drive forward to the window' or 'bye' or 'have a good day' or something along those lines",
+              },
+              {
+                role: "system",
+                content: scenarioPrompt,
+              },
+            ],
+          },
         },
+        base_url: baseUrl,
       },
-    },
-  );
-  await db.call.create({
-    data: {
-      id: data.callId,
-      status: CallStatus.in_progress,
-      stereoRecordingUrl: "",
-      testId: testId,
-      testAgentId: testAgentId,
-      scenarioId: scenarioId,
-      ownerId: ownerId,
-    },
-  });
+    );
+    await db.call.update({
+      where: {
+        id: callId,
+      },
+      data: {
+        status: CallStatus.in_progress,
+        vapiCallId: data.callId,
+        ofOneDeviceId: deviceId,
+      },
+    });
+  } catch (error) {
+    console.error("Error starting OFONE call", error);
+    throw error;
+  }
 };

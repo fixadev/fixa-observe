@@ -105,17 +105,17 @@ export const agentRouter = createTRPCRouter({
       return await agentServiceInstance.deleteScenario(input.id);
     }),
 
-  updateSettings: protectedProcedure
+  updateAgent: protectedProcedure
     .input(
       z.object({
         id: z.string(),
-        phoneNumber: z.string(),
-        name: z.string(),
-        enableSlackNotifications: z.boolean(),
+        agent: z.object({
+          ...AgentSchema.omit({ id: true }).partial().shape,
+        }),
       }),
     )
     .mutation(async ({ input }) => {
-      return await agentServiceInstance.updateAgentSettings(input);
+      return await agentServiceInstance.updateAgent(input);
     }),
 
   getAll: protectedProcedure.query(async ({ ctx }) => {
