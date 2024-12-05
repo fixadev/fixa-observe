@@ -265,17 +265,40 @@ function RunTestModal({
     [selectedScenarios, enabledAgents],
   );
 
+  const selectAll = useCallback(() => {
+    setSelectedScenarios(
+      new Set(agent.scenarios.map((scenario) => scenario.id)),
+    );
+  }, [agent.scenarios]);
+  const deselectAll = useCallback(() => {
+    setSelectedScenarios(new Set());
+  }, []);
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       {/* <DialogContent className="sm:max-w-[800px]"> */}
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>run test</DialogTitle>
-          <DialogDescription>select the scenarios to test.</DialogDescription>
+          <div className="flex items-center justify-between">
+            <div className="space-y-1.5">
+              <DialogTitle>run test</DialogTitle>
+              <DialogDescription>
+                select the scenarios to test.
+              </DialogDescription>
+            </div>
+            <div className="flex items-center gap-2">
+              <Button variant="ghost" size="sm" onClick={selectAll}>
+                select all
+              </Button>
+              <Button variant="ghost" size="sm" onClick={deselectAll}>
+                deselect all
+              </Button>
+            </div>
+          </div>
         </DialogHeader>
-        <div className="flex max-h-[80vh] flex-col gap-4">
+        <div className="flex max-h-[80vh] flex-col gap-4 overflow-hidden">
           {agent.scenarios.length > 0 ? (
-            <div className="flex h-[300px] flex-col gap-4 overflow-y-auto">
+            <div className="flex flex-col gap-4 overflow-y-auto py-4">
               {agent.scenarios.map((scenario) => (
                 <div key={scenario.id} className="flex items-center gap-2">
                   <Switch
