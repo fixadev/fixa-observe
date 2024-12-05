@@ -10,6 +10,7 @@ import { addCallToQueue } from "./services/addCallToQueue";
 import { startQueueConsumer } from "./workers/queueConsumer";
 import { authenticateRequest } from "./middlewares/auth";
 import { scheduleOfOneCalls } from "./services/scheduleOfOneCalls";
+import { env } from "./env";
 
 const app = express();
 const httpServer = createServer(app);
@@ -33,7 +34,8 @@ io.on("connection", (socket) => {
   socket.on("register", (newUserId) => {
     userId = newUserId;
     connectedUsers.set(userId, socket);
-    // console.log(`User ${userId} registered`);
+    console.log(`User ${userId} registered`);
+    console.log("audio service url", env.AUDIO_SERVICE_URL);
   });
 
   socket.on("disconnect", () => {
