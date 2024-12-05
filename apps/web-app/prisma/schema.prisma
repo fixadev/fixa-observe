@@ -208,6 +208,8 @@ model Scenario {
   calls Call[]
   evals Eval[]
 
+  deleted Boolean @default(false)
+
   @@map("Intent")
 }
 
@@ -231,8 +233,10 @@ model Eval {
   agent   Agent?  @relation(fields: [agentId], references: [id])
   agentId String?
 
-  ownerId      String?
-  EvalOverride EvalOverride[]
+  ownerId       String?
+  evalOverrides EvalOverride[]
+
+  deleted Boolean @default(false)
 }
 
 model EvalResult {
