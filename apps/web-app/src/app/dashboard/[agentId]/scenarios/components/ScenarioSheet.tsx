@@ -39,8 +39,7 @@ import { Input } from "~/components/ui/input";
 import { Textarea } from "~/components/ui/textarea";
 import { EvalCard } from "./EvalCard";
 import { Button } from "~/components/ui/button";
-import { PlusIcon, TrashIcon } from "@heroicons/react/24/solid";
-import { type EvalOverride } from "prisma/generated/zod";
+import { TrashIcon } from "@heroicons/react/24/solid";
 
 export function ScenarioSheet({
   selectedScenario,
@@ -70,6 +69,7 @@ export function ScenarioSheet({
       enabled: true,
       toolCallExpectedResult: "",
       isCritical: true,
+      deleted: false,
     };
   }, []);
 
@@ -173,6 +173,7 @@ export function ScenarioSheet({
           includeDateTime,
           timezone: includeDateTime ? timezone.value : null,
           generalEvalOverrides: [],
+          deleted: false,
         });
     setInstructions("");
     setName("");

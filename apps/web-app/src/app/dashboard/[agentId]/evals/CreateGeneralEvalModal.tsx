@@ -46,6 +46,7 @@ export const CreateGeneralEvalModal = ({
       ownerId: null,
       toolCallExpectedResult: "",
       isCritical: true,
+      deleted: false,
     },
   );
 
@@ -108,6 +109,7 @@ export const CreateGeneralEvalModal = ({
         agentId: null,
         ownerId: null,
         isCritical: true,
+        deleted: false,
       });
     }
   }, [existingEval]);
