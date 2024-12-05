@@ -100,9 +100,10 @@ export class AgentService {
       where: { id },
       include: {
         scenarios: {
+          where: { deleted: false },
           orderBy: { createdAt: "asc" },
           include: {
-            evals: { orderBy: { createdAt: "asc" } },
+            evals: { where: { deleted: false }, orderBy: { createdAt: "asc" } },
             generalEvalOverrides: true,
           },
         },
@@ -301,13 +302,16 @@ export class AgentService {
       data: {
         ...scenario,
         evals: {
-          deleteMany: {
-            id: { in: evaluationsToDelete.map((evaluation) => evaluation.id) },
-          },
-          updateMany: evaluationsToUpdate.map((evaluation) => ({
-            where: { id: evaluation.id },
-            data: evaluation,
-          })),
+          updateMany: [
+            ...evaluationsToDelete.map((evaluation) => ({
+              where: { id: evaluation.id },
+              data: { deleted: true },
+            })),
+            ...evaluationsToUpdate.map((evaluation) => ({
+              where: { id: evaluation.id },
+              data: evaluation,
+            })),
+          ],
           createMany: {
             data: evaluationsToCreate.map((evaluation) => ({
               ...evaluation,
@@ -316,13 +320,16 @@ export class AgentService {
           },
         },
         generalEvalOverrides: {
-          deleteMany: {
-            id: { in: evalOverridesToDelete.map((override) => override.id) },
-          },
-          updateMany: evalOverridesToUpdate.map((override) => ({
-            where: { id: override.id },
-            data: override,
-          })),
+          updateMany: [
+            ...evalOverridesToDelete.map((override) => ({
+              where: { id: override.id },
+              data: { deleted: true },
+            })),
+            ...evalOverridesToUpdate.map((override) => ({
+              where: { id: override.id },
+              data: override,
+            })),
+          ],
           createMany: {
             data: evalOverridesToCreate.map((override) => ({
               ...override,
@@ -332,8 +339,10 @@ export class AgentService {
         },
       },
       include: {
-        evals: { orderBy: { createdAt: "asc" } },
-        generalEvalOverrides: { orderBy: { createdAt: "asc" } },
+        evals: { where: { deleted: false }, orderBy: { createdAt: "asc" } },
+        generalEvalOverrides: {
+          orderBy: { createdAt: "asc" },
+        },
       },
     });
   }
@@ -393,10 +402,13 @@ export class AgentService {
   }
 
   async deleteGeneralEval(id: string) {
-    return await db.eval.delete({ where: { id } });
+    return await db.eval.update({ where: { id }, data: { deleted: true } });
   }
   async deleteScenario(id: string) {
-    return await db.scenario.delete({ where: { id } });
+    return await db.scenario.update({
+      where: { id },
+      data: { deleted: true },
+    });
   }
 
   async deleteAgent(id: string) {
