@@ -39,5 +39,4 @@ yarn-error.log*
 .venv/
 apps/backend/preprocessed_code.txt
 
-fly.toml
 .conda
