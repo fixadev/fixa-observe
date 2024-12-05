@@ -44,7 +44,7 @@ const addScenarios = async () => {
                     : {
                         name: evaluation.title,
                         description:
-                          "this evaluation should be applied to the last check state in the conversation. prices and order of items should be ignored in the comparison ",
+                          "this evaluation should only be applied to the last 'check state' tool_call in the conversation. prices and order of items should be ignored in the comparison.",
                         type: "scenario",
                         toolCallExpectedResult:
                           evaluation.expected_output ?? "",
