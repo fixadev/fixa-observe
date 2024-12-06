@@ -1,4 +1,4 @@
-import { LatencyBlock, Message, Role } from "@prisma/client";
+import { LatencyBlock, Role } from "@prisma/client";
 
 export const getDateTimeAtTimezone = (date: Date, timezone: string) => {
   return date.toLocaleString("en-US", { timeZone: timezone });

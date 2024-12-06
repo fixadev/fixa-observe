@@ -1,7 +1,7 @@
 import { CallResult, Role } from "@prisma/client";
 import { CallStatus } from "@prisma/client";
 import { db } from "../db";
-import { createGeminiPrompt } from "../utils/createGeminiPrompt";
+import { createGeminiPrompt } from "../utils/prompt";
 import vapiClient from "../clients/vapiClient";
 import { analyzeCallWitho1 } from "../services/textAnalysis";
 import { formatOutput } from "../helpers/formatOutput";

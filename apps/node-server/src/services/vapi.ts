@@ -16,7 +16,7 @@ import {
   type ServerMessageEndOfCallReport,
 } from "@vapi-ai/server-sdk/api";
 import { analyzeCallWitho1 } from "./textAnalysis";
-import { createGeminiPrompt } from "../utils/createGeminiPrompt";
+import { createGeminiPrompt } from "../utils/prompt";
 import { analyzeCallWithGemini } from "./audioAnalysis";
 import { formatOutput } from "../helpers/formatOutput";
 import { Socket } from "socket.io";

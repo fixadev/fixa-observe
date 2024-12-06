@@ -3,7 +3,7 @@ import { db } from "../db";
 import { v4 as uuidv4 } from "uuid";
 import { CallStatus, Role } from "@prisma/client";
 import { env } from "../env";
-import { calculateLatencyPercentiles } from "../utils/utils";
+import { calculateLatencyPercentiles } from "../utils/time";
 import { uploadFromPresignedUrl } from "./aws";
 
 export const transcribeAndSaveCall = async (
