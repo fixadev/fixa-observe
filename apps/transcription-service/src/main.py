@@ -8,7 +8,6 @@ from services.split_channels import split_channels
 from services.create_transcript import create_transcript_from_deepgram
 import asyncio
 
-# comment to redeploy
 if os.getenv('ENVIRONMENT') == 'local-staging':
   from dotenv import load_dotenv
   load_dotenv()
