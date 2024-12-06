@@ -1,12 +1,11 @@
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Switch } from "~/components/ui/switch";
-import MonoTextBlock from "~/components/MonoTextBlock";
 import { type EvalGroup } from "../page";
 import { Button } from "~/components/ui/button";
 import { cn } from "~/lib/utils";
-import { ibmPlexSans } from "~/app/fonts";
 import { Fragment } from "react";
 import ConditionChip from "./ConditionChip";
+import CriteriaBlock from "./CriteriaBlock";
 
 export default function EvalGroupCard({
   group,
@@ -55,17 +54,7 @@ export default function EvalGroupCard({
         <div className="text-xs font-medium text-muted-foreground">THEN</div>
         <div className="flex flex-col gap-2">
           {group.criteria.map((c) => (
-            <div className="flex flex-col gap-1 rounded border p-2" key={c.id}>
-              <MonoTextBlock>{c.name}</MonoTextBlock>
-              <pre
-                className={cn(
-                  "px-2 text-muted-foreground",
-                  ibmPlexSans.className,
-                )}
-              >
-                {c.description}
-              </pre>
-            </div>
+            <CriteriaBlock key={c.id} criteria={c} />
           ))}
           <Button
             variant="ghost"
