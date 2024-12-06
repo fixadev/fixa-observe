@@ -34,13 +34,23 @@ export default function EvalGroupCard({
         <div className="text-xs font-medium text-muted-foreground">IF</div>
         <div className="group flex items-center gap-2">
           {group.conditions.map((c, i) => (
-            <Fragment key={i}>
+            <Fragment key={c.id}>
               {i !== 0 && (
                 <div className="text-xs font-medium text-muted-foreground">
                   AND
                 </div>
               )}
-              <ConditionChip condition={c} />
+              <ConditionChip
+                condition={c}
+                onUpdate={(updated) => {
+                  onUpdate({
+                    ...group,
+                    conditions: group.conditions.map((c) =>
+                      c.id === updated.id ? updated : c,
+                    ),
+                  });
+                }}
+              />
             </Fragment>
           ))}
           <Button
@@ -53,7 +63,7 @@ export default function EvalGroupCard({
         </div>
         <div className="text-xs font-medium text-muted-foreground">THEN</div>
         <div className="flex flex-col gap-2">
-          {group.criteria.map((c) => (
+          {group.evals.map((c) => (
             <CriteriaBlock key={c.id} criteria={c} />
           ))}
           <Button

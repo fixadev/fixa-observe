@@ -39,23 +39,25 @@ export type EvalGroup = {
   id: string;
   name: string;
   conditions: EvalCondition[];
-  criteria: EvalCriteria[];
+  evals: Eval[];
   enabled: boolean;
 };
 
-export type EvalCriteria = {
+export type Eval = {
   id: string;
   name: string;
   description: string;
 };
 
 const evalFilterCondition = z.object({
+  id: z.string(),
   type: z.literal("filter"),
   property: z.string(),
   value: z.string(),
 });
 
 const evalTextCondition = z.object({
+  id: z.string(),
   type: z.literal("text"),
   text: z.string(),
 });
@@ -73,11 +75,12 @@ const testData: EvalGroup[] = [
     name: "test",
     conditions: [
       {
+        id: "1",
         type: "text",
         text: "true",
       },
     ],
-    criteria: [
+    evals: [
       {
         id: "c1",
         name: "placeholder text",
@@ -92,17 +95,19 @@ const testData: EvalGroup[] = [
     name: "test",
     conditions: [
       {
+        id: "1",
         type: "filter",
         property: "customerId",
         value: "321fdsa69420",
       },
       {
+        id: "2",
         type: "filter",
         property: "agentId",
         value: "42069asdf123",
       },
     ],
-    criteria: [
+    evals: [
       {
         id: "c1",
         name: "correct questions",
@@ -117,15 +122,21 @@ const testData: EvalGroup[] = [
     name: "test",
     conditions: [
       {
+        id: "1",
         type: "text",
         text: "agent tries to schedule a meeting",
       },
     ],
-    criteria: [
+    evals: [
       {
         id: "c1",
         name: "ask for time zone",
         description: "agent asked the caller for what their time zone is",
+      },
+      {
+        id: "c2",
+        name: "ask for name",
+        description: "agent asked the caller for their name",
       },
     ],
     enabled: true,

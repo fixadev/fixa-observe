@@ -4,9 +4,11 @@ import { cn } from "~/lib/utils";
 export default function MonoTextBlock({
   children,
   className,
+  onClick,
 }: {
   children: React.ReactNode;
   className?: string;
+  onClick?: () => void;
 }) {
   return (
     <div
@@ -15,6 +17,7 @@ export default function MonoTextBlock({
         ibmPlexMono.className,
         className,
       )}
+      onClick={onClick}
     >
       {children}
     </div>
