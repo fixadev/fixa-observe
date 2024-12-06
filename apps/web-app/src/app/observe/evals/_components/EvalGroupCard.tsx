@@ -29,7 +29,11 @@ export default function EvalGroupCard({
       ...group,
       evals: [
         ...group.evals,
-        { id: generateTempId(), name: "", description: "" },
+        {
+          id: generateTempId(),
+          name: "",
+          description: "make sure the agent...",
+        },
       ],
     });
   }, [group, onUpdate]);
@@ -102,6 +106,12 @@ export default function EvalGroupCard({
                   evals: group.evals.map((e) =>
                     e.id === updated.id ? updated : e,
                   ),
+                });
+              }}
+              onDelete={() => {
+                onUpdate({
+                  ...group,
+                  evals: group.evals.filter((e) => e.id !== criteria.id),
                 });
               }}
             />

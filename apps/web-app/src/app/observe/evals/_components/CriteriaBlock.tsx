@@ -1,5 +1,5 @@
 import MonoTextBlock from "~/components/MonoTextBlock";
-import { cn } from "~/lib/utils";
+import { cn, isTempId } from "~/lib/utils";
 import { type Eval } from "../page";
 import { ibmPlexSans } from "~/app/fonts";
 import { useState, useRef, useCallback } from "react";
@@ -7,29 +7,51 @@ import {
   AutosizeTextarea,
   type AutosizeTextAreaRef,
 } from "~/components/ui/autosize-textarea";
+import { Button } from "~/components/ui/button";
+import { XMarkIcon } from "@heroicons/react/24/solid";
 
 export default function CriteriaBlock({
   criteria,
   onUpdate,
+  onDelete,
 }: {
   criteria: Eval;
   onUpdate: (criteria: Eval) => void;
+  onDelete: () => void;
 }) {
   const [isEditingDescription, setIsEditingDescription] = useState(false);
   const textareaRef = useRef<AutosizeTextAreaRef>(null);
+  const touched = useRef(false);
 
   const onFocus = useCallback(() => {
+    // Go to end of text area on focus
     setTimeout(() => {
       textareaRef.current?.textArea.setSelectionRange(
         textareaRef.current?.textArea.value.length,
         textareaRef.current?.textArea.value.length,
       );
+      if (!touched.current) {
+        touched.current = true;
+        if (isTempId(criteria.id)) {
+          textareaRef.current?.textArea.select();
+        }
+      }
     });
-  }, []);
+  }, [criteria.id]);
 
   return (
     <div className="flex flex-col gap-1 rounded-md border p-2">
-      <MonoTextBlock>{criteria.name}</MonoTextBlock>
+      <div className="flex justify-between gap-1">
+        <MonoTextBlock>{criteria.name}</MonoTextBlock>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="size-5 text-muted-foreground hover:text-muted-foreground"
+          onClick={onDelete}
+        >
+          <XMarkIcon className="size-4" />
+        </Button>
+      </div>
       {isEditingDescription ? (
         <AutosizeTextarea
           ref={textareaRef}
