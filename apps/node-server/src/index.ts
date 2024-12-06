@@ -12,6 +12,8 @@ import { authenticateRequest } from "./middlewares/auth";
 import { scheduleOfOneCalls } from "./services/scheduleOfOneCalls";
 import { env } from "./env";
 
+// comment to redeploy
+
 const app = express();
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
