@@ -5,6 +5,8 @@ import { type EvalGroup } from "../page";
 import { Button } from "~/components/ui/button";
 import { cn } from "~/lib/utils";
 import { ibmPlexSans } from "~/app/fonts";
+import { Fragment } from "react";
+import ConditionChip from "./ConditionChip";
 
 export default function EvalGroupCard({
   group,
@@ -32,46 +34,16 @@ export default function EvalGroupCard({
       <CardContent className="flex flex-col gap-2">
         <div className="text-xs font-medium text-muted-foreground">IF</div>
         <div className="group flex items-center gap-2">
-          {group.conditions.map((c, i) => {
-            if (c.type === "text") {
-              return (
-                <>
-                  {i !== 0 && (
-                    <div className="text-xs font-medium text-muted-foreground">
-                      AND
-                    </div>
-                  )}
-                  <MonoTextBlock key={i}>
-                    <div className="flex items-baseline gap-1">
-                      <div className="text-xs text-muted-foreground">
-                        condition:
-                      </div>
-                      {c.text}
-                    </div>
-                  </MonoTextBlock>
-                </>
-              );
-            } else if (c.type === "filter") {
-              return (
-                <>
-                  {i !== 0 && (
-                    <div className="text-xs font-medium text-muted-foreground">
-                      AND
-                    </div>
-                  )}
-                  <MonoTextBlock key={i}>
-                    <div className="flex items-baseline gap-1">
-                      <div className="text-xs text-muted-foreground">
-                        filter:
-                      </div>
-                      {c.property} == {c.value}
-                    </div>
-                  </MonoTextBlock>
-                </>
-              );
-            }
-            return null;
-          })}
+          {group.conditions.map((c, i) => (
+            <Fragment key={i}>
+              {i !== 0 && (
+                <div className="text-xs font-medium text-muted-foreground">
+                  AND
+                </div>
+              )}
+              <ConditionChip condition={c} />
+            </Fragment>
+          ))}
           <Button
             variant="ghost"
             size="sm"
