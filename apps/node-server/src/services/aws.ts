@@ -2,7 +2,7 @@ import { env } from "../env";
 import { sqs } from "../clients/s3Client";
 import { s3 } from "../clients/s3Client";
 import { PutObjectCommand } from "@aws-sdk/client-s3";
-import { getAudioDuration } from "../utils/audioUtils";
+import { getAudioDuration } from "../utils/audio";
 
 interface AddCallToQueueProps {
   callId: string;
