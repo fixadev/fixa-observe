@@ -2,7 +2,7 @@
 
 import MonoTextBlock from "~/components/MonoTextBlock";
 import { type EvalCondition } from "../page";
-import { useCallback, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { Input } from "~/components/ui/input";
 import {
   Select,

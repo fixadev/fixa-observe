@@ -92,8 +92,19 @@ export default function EvalGroupCard({
         </div>
         <div className="text-xs font-medium text-muted-foreground">THEN</div>
         <div className="flex flex-col gap-2">
-          {group.evals.map((c) => (
-            <CriteriaBlock key={c.id} criteria={c} />
+          {group.evals.map((criteria) => (
+            <CriteriaBlock
+              key={criteria.id}
+              criteria={criteria}
+              onUpdate={(updated) => {
+                onUpdate({
+                  ...group,
+                  evals: group.evals.map((e) =>
+                    e.id === updated.id ? updated : e,
+                  ),
+                });
+              }}
+            />
           ))}
           <Button
             variant="ghost"
