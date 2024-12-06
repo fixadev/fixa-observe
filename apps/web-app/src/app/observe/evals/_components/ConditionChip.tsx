@@ -2,7 +2,7 @@
 
 import MonoTextBlock from "~/components/MonoTextBlock";
 import { type EvalCondition } from "../page";
-import { useMemo } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { Input } from "~/components/ui/input";
 import {
   Select,
@@ -11,8 +11,8 @@ import {
   SelectItem,
   SelectContent,
 } from "~/components/ui/select";
-import { QuestionMarkCircleIcon } from "@heroicons/react/24/solid";
-import { cn } from "~/lib/utils";
+import { QuestionMarkCircleIcon, XMarkIcon } from "@heroicons/react/24/solid";
+import { cn, isTempId } from "~/lib/utils";
 import {
   Popover,
   PopoverContent,
@@ -24,18 +24,23 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "~/components/ui/tooltip";
+import { Button } from "~/components/ui/button";
 
 export default function ConditionChipWithPopover({
   condition,
   onUpdate,
+  onDelete,
 }: {
   condition: EvalCondition;
   onUpdate: (condition: EvalCondition) => void;
+  onDelete: () => void;
 }) {
+  const [open, setOpen] = useState(isTempId(condition.id));
+
   return (
-    <Popover>
+    <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger>
-        <ConditionChip condition={condition} />
+        <ConditionChip condition={condition} onDelete={onDelete} />
       </PopoverTrigger>
       <PopoverContent className="w-fit p-2" align="start">
         <ConditionChipEditor condition={condition} onUpdate={onUpdate} />
@@ -44,7 +49,13 @@ export default function ConditionChipWithPopover({
   );
 }
 
-export function ConditionChip({ condition }: { condition: EvalCondition }) {
+export function ConditionChip({
+  condition,
+  onDelete,
+}: {
+  condition: EvalCondition;
+  onDelete: () => void;
+}) {
   const prefix = useMemo(() => {
     if (condition.type === "text") return "condition:";
     else if (condition.type === "filter") return "filter:";
@@ -59,12 +70,22 @@ export function ConditionChip({ condition }: { condition: EvalCondition }) {
   }, [condition]);
 
   return (
-    <MonoTextBlock>
-      <div className="flex items-baseline gap-1">
-        {prefix && (
-          <div className="text-xs text-muted-foreground">{prefix}</div>
-        )}
-        {body}
+    <MonoTextBlock className="hover:bg-muted/60">
+      <div className="flex items-center gap-1">
+        <div className="flex items-baseline gap-1">
+          {prefix && (
+            <div className="text-xs text-muted-foreground">{prefix}</div>
+          )}
+          {body}
+        </div>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="size-5 p-0 hover:bg-gray-200"
+          onClick={onDelete}
+        >
+          <XMarkIcon className="size-4 text-muted-foreground" />
+        </Button>
       </div>
     </MonoTextBlock>
   );
@@ -79,9 +100,9 @@ export function ConditionChipEditor({
 }) {
   const helpText = useMemo(() => {
     if (condition.type === "text")
-      return `specify when this evaluation should be run.\ne.g. "when the agent says X" or "true" to run on every conversation`;
+      return `specify when this evaluation should be run.\ne.g. "when the agent says X" or "true" to run on every call`;
     else if (condition.type === "filter")
-      return "when the agentId or customerId is...";
+      return "specify when this evaluation should be run based on a property of the call";
     return "";
   }, [condition.type]);
 
