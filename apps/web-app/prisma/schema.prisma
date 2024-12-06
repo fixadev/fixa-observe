@@ -124,6 +124,8 @@ model Call {
   scenario    Scenario?  @relation(fields: [scenarioId], references: [id], onDelete: Cascade)
   scenarioId  String?
 
+  evalGroups EvalGroup[]
+
   messages      Message[]
   latencyBlocks LatencyBlock[]
   interruptions Interruption[]
@@ -309,6 +311,7 @@ model EvalGroup {
   conditions EvalGroupCondition[]
   evals      Eval[]
   enabled    Boolean              @default(true)
+  call       Call[]
 }
 
 model EvalGroupCondition {
