@@ -29,28 +29,44 @@ export default function EvalGroupCard({
         />
       </CardHeader>
       <CardContent className="flex flex-col gap-2">
+        <div className="text-xs font-medium text-muted-foreground">IF</div>
         <div className="group flex items-center gap-2">
-          <div className="text-xs font-medium text-muted-foreground">IF</div>
           {group.conditions.map((c, i) => {
             if (c.type === "text") {
               return (
-                <MonoTextBlock key={i}>
-                  <div className="flex items-baseline gap-1">
-                    <div className="text-xs text-muted-foreground">
-                      condition:
+                <>
+                  {i !== 0 && (
+                    <div className="text-xs font-medium text-muted-foreground">
+                      AND
                     </div>
-                    {c.text}
-                  </div>
-                </MonoTextBlock>
+                  )}
+                  <MonoTextBlock key={i}>
+                    <div className="flex items-baseline gap-1">
+                      <div className="text-xs text-muted-foreground">
+                        condition:
+                      </div>
+                      {c.text}
+                    </div>
+                  </MonoTextBlock>
+                </>
               );
             } else if (c.type === "filter") {
               return (
-                <MonoTextBlock key={i}>
-                  <div className="flex items-baseline gap-1">
-                    <div className="text-xs text-muted-foreground">filter:</div>
-                    {c.property} == {c.value}
-                  </div>
-                </MonoTextBlock>
+                <>
+                  {i !== 0 && (
+                    <div className="text-xs font-medium text-muted-foreground">
+                      AND
+                    </div>
+                  )}
+                  <MonoTextBlock key={i}>
+                    <div className="flex items-baseline gap-1">
+                      <div className="text-xs text-muted-foreground">
+                        filter:
+                      </div>
+                      {c.property} == {c.value}
+                    </div>
+                  </MonoTextBlock>
+                </>
               );
             }
             return null;
