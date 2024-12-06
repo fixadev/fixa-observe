@@ -9,6 +9,7 @@ import {
 } from "~/components/ui/autosize-textarea";
 import { Button } from "~/components/ui/button";
 import { XMarkIcon } from "@heroicons/react/24/solid";
+import CriteriaCombobox from "./CriteriaCombobox";
 
 export default function CriteriaBlock({
   criteria,
@@ -42,7 +43,7 @@ export default function CriteriaBlock({
   return (
     <div className="flex flex-col gap-1 rounded-md border p-2">
       <div className="flex justify-between gap-1">
-        <MonoTextBlock>{criteria.name}</MonoTextBlock>
+        <CriteriaCombobox criteria={criteria} onUpdate={onUpdate} />
         <Button
           variant="ghost"
           size="icon"
