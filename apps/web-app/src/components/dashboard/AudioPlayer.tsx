@@ -1,6 +1,10 @@
 "use client";
 
-import { PauseIcon, PlayIcon } from "@heroicons/react/24/solid";
+import {
+  ArrowDownTrayIcon,
+  PauseIcon,
+  PlayIcon,
+} from "@heroicons/react/24/solid";
 import {
   useState,
   useRef,
@@ -172,6 +176,21 @@ const _AudioPlayer = forwardRef<
     },
     [play, seek, offsetFromStart],
   );
+
+  const downloadAudio = useCallback(async () => {
+    try {
+      const response = await fetch(call.stereoRecordingUrl);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${call.id}`;
+      a.click();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Error downloading audio:", error);
+    }
+  }, [call.stereoRecordingUrl, call.id]);
 
   return (
     <div
@@ -377,10 +396,14 @@ const _AudioPlayer = forwardRef<
               </SelectTrigger>
               <SelectContent className="w-20">
                 <SelectItem value="1">1x</SelectItem>
+                <SelectItem value="1.5">1.5x</SelectItem>
                 <SelectItem value="2">2x</SelectItem>
-                <SelectItem value="4">4x</SelectItem>
               </SelectContent>
             </Select>
+
+            <Button variant="outline" size="icon" onClick={downloadAudio}>
+              <ArrowDownTrayIcon className="size-4" />
+            </Button>
           </>
         )}
       </div>
