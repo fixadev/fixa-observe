@@ -4,8 +4,11 @@ import Link from "next/link";
 import { SidebarTrigger } from "~/components/ui/sidebar";
 import { z } from "zod";
 import EvalGroupCard from "./_components/EvalGroupCard";
+import { useState } from "react";
 
 export default function EvalsPage() {
+  const [evalGroups, setEvalGroups] = useState<EvalGroup[]>(testData);
+
   return (
     <>
       <div className="sticky top-0 z-20 flex h-14 items-center gap-2 border-b bg-background p-4">
@@ -15,8 +18,16 @@ export default function EvalsPage() {
         </Link>
       </div>
       <div className="flex flex-col gap-4 p-4">
-        {testData.map((g) => (
-          <EvalGroupCard key={g.id} group={g} />
+        {evalGroups.map((g) => (
+          <EvalGroupCard
+            key={g.id}
+            group={g}
+            onUpdate={(updated) => {
+              setEvalGroups(
+                evalGroups.map((g) => (g.id === updated.id ? updated : g)),
+              );
+            }}
+          />
         ))}
       </div>
     </>

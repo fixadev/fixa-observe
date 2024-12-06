@@ -3,13 +3,30 @@ import { Switch } from "~/components/ui/switch";
 import MonoTextBlock from "~/components/MonoTextBlock";
 import { type EvalGroup } from "../page";
 import { Button } from "~/components/ui/button";
+import { cn } from "~/lib/utils";
 
-export default function EvalGroupCard({ group }: { group: EvalGroup }) {
+export default function EvalGroupCard({
+  group,
+  onUpdate,
+}: {
+  group: EvalGroup;
+  onUpdate: (group: EvalGroup) => void;
+}) {
   return (
-    <Card className="text-sm">
+    <Card
+      className={cn(
+        "text-sm transition-opacity",
+        !group.enabled && "opacity-60",
+      )}
+    >
       <CardHeader className="flex flex-row items-center justify-between gap-2">
         <CardTitle>{group.name}</CardTitle>
-        <Switch checked={group.enabled} onCheckedChange={() => null} />
+        <Switch
+          checked={group.enabled}
+          onCheckedChange={(checked) =>
+            onUpdate({ ...group, enabled: checked })
+          }
+        />
       </CardHeader>
       <CardContent className="flex flex-col gap-2">
         <div className="group flex items-center gap-2">
