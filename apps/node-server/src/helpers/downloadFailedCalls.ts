@@ -1,4 +1,4 @@
-import { sqs } from "../utils/s3Client";
+import { sqs } from "../clients/s3Client";
 import fs from "fs";
 
 export const downloadFailedCalls = async () => {

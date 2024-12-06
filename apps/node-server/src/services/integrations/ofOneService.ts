@@ -1,6 +1,6 @@
 import axios from "axios";
-import { env } from "../env";
-import { db } from "../db";
+import { env } from "../../env";
+import { db } from "../../db";
 import { CallStatus } from "@prisma/client";
 import { Socket } from "socket.io";
 
@@ -40,7 +40,7 @@ export function scheduleOfOneCalls(
 
       if (availableDevice) {
         // Start the call immediately if a device is available
-        startCall(
+        void startCall(
           {
             callId: callDetails.callId,
             ownerId: callDetails.ownerId,
@@ -96,7 +96,7 @@ export function isDeviceInUse(deviceId: string): boolean {
   return deviceUsageMap.get(deviceId) ?? false;
 }
 
-export const startCall = async (
+export async function startCall(
   {
     callId,
     deviceId,
@@ -106,7 +106,7 @@ export const startCall = async (
     baseUrl,
   }: QueuedCall,
   userSocket?: Socket,
-) => {
+) {
   userSocket?.emit("call-started", { callId });
   try {
     setDeviceInUse(deviceId);
@@ -161,4 +161,4 @@ export const startCall = async (
     console.error("Error starting OFONE call", error);
     throw error;
   }
-};
+}

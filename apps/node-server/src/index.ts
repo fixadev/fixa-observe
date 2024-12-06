@@ -1,16 +1,19 @@
 import express, { Request, Response } from "express";
 import { createServer } from "http";
 import { Server } from "socket.io";
-import { handleVapiCallEnded } from "./services/handleVapiCallEnded";
-import { handleTranscriptUpdate } from "./services/handleTranscriptUpdate";
-import { handleAnalysisStarted } from "./services/handleAnalysisStarted";
+import {
+  handleCallEnded,
+  handleTranscriptUpdate,
+  handleAnalysisStarted,
+} from "./services/vapi";
 import { db } from "./db";
-import { getContext } from "./services/getContext";
-import { addCallToQueue } from "./services/addCallToQueue";
+import { getContext } from "./middlewares/getContext";
+import { addCallToQueue } from "./services/aws";
 import { startQueueConsumer } from "./workers/queueConsumer";
 import { authenticateRequest } from "./middlewares/auth";
-import { scheduleOfOneCalls } from "./services/scheduleOfOneCalls";
+import { scheduleOfOneCalls } from "./services/integrations/ofOneService";
 import { env } from "./env";
+import { validateUploadCallParams } from "./middlewares/validateParams";
 
 const app = express();
 const httpServer = createServer(app);
@@ -24,10 +27,8 @@ const io = new Server(httpServer, {
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Store connected sockets by userId
-const connectedUsers = new Map();
+export const connectedUsers = new Map();
 
-// Socket.IO connection handling
 io.on("connection", (socket) => {
   let userId: string | null = null;
 
@@ -52,19 +53,13 @@ app.use(express.json());
 // Routes
 app.get("/health", (_, res: Response) => res.json({ status: "ok" }));
 
-app.post("/vapi", async (req: Request, res: Response) => {
+app.post("/vapi", getContext, async (req: Request, res: Response) => {
   try {
     const { message } = req.body;
+    const { userSocket, agent, scenario, test, call } = res.locals.context;
     if (message.type === "end-of-call-report") {
-      console.log("Received end of call report for call", message.call.id);
-      const context = await getContext(message.call.id, connectedUsers);
-      if (!context) {
-        console.error("No context found for call", message.call.id);
-        return;
-      }
-      const { userSocket, agent, scenario, test, call } = context;
       await handleAnalysisStarted(message, userSocket);
-      await handleVapiCallEnded({
+      await handleCallEnded({
         report: message,
         call,
         agent,
@@ -73,7 +68,7 @@ app.post("/vapi", async (req: Request, res: Response) => {
         userSocket,
       });
     } else if (message.type === "transcript") {
-      await handleTranscriptUpdate(message, connectedUsers);
+      await handleTranscriptUpdate(message, call, userSocket);
     }
     res.json({ success: true });
   } catch (error) {
@@ -85,22 +80,11 @@ app.post("/vapi", async (req: Request, res: Response) => {
 app.post(
   "/upload-call",
   // authenticateRequest,
+  validateUploadCallParams,
   async (req: Request, res: Response) => {
     try {
       const { callId, location, agentId, regionId, metadata, createdAt } =
         req.body;
-      const missingFields = [];
-      if (!callId) missingFields.push("callId");
-      if (!location) missingFields.push("location");
-      // if (!agentId) missingFields.push("agentId");
-      // if (!regionId) missingFields.push("regionId");
-      // add comment to redeploy
-      if (missingFields.length > 0) {
-        return res.status(400).json({
-          success: false,
-          error: `Missing required fields: ${missingFields.join(", ")}`,
-        });
-      }
       await addCallToQueue({
         callId,
         location,
