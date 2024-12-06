@@ -21,7 +21,7 @@ interface QueuedCall {
 
 const callQueue: QueuedCall[] = [];
 
-export function scheduleOfOneCalls(
+export async function scheduleOfOneCalls(
   deviceIds: string[],
   callsToStart: QueuedCall[],
   connectedUsers: Map<string, Socket>,
@@ -40,7 +40,7 @@ export function scheduleOfOneCalls(
 
       if (availableDevice) {
         // Start the call immediately if a device is available
-        void startCall(
+        await startCall(
           {
             callId: callDetails.callId,
             ownerId: callDetails.ownerId,
