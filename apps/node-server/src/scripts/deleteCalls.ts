@@ -57,14 +57,17 @@ async function main() {
         const channels = parseInt(stdout?.toString().trim() ?? "0");
         console.log(`Recording ${callRecording} has ${channels} channel(s)`);
 
-        // if (channels === 1) {
-        //   console.log(`Deleting call ${call.id}`);
-        //   await db.call.delete({
-        //     where: {
-        //       id: call.id,
-        //     },
-        //   });
-        // }
+        if (channels === 1) {
+          console.log(`Deleting call ${call.id}`);
+          await db.call.update({
+            where: {
+              id: call.id,
+            },
+            data: {
+              deleted: true,
+            },
+          });
+        }
 
         // Clean up temp file
         fs.unlinkSync(tempFile);
