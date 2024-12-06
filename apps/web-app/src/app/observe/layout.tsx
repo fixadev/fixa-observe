@@ -1,5 +1,6 @@
-import { AudioProvider } from "~/components/hooks/useAudio";
 import { ObserveStateProvider } from "~/components/hooks/useObserveState";
+import ObserveSidebar from "~/components/observe/ObserveSidebar";
+import { SidebarProvider } from "~/components/ui/sidebar";
 
 export default function ObserveLayout({
   children,
@@ -8,7 +9,10 @@ export default function ObserveLayout({
 }) {
   return (
     <ObserveStateProvider>
-      <AudioProvider>{children}</AudioProvider>
+      <SidebarProvider>
+        <ObserveSidebar />
+        <main className="flex-1">{children}</main>
+      </SidebarProvider>
     </ObserveStateProvider>
   );
 }

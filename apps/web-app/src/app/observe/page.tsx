@@ -93,7 +93,7 @@ export default function ObservePage() {
 
   return (
     <div
-      className="relative h-full bg-muted/30 pt-16"
+      className="relative h-full bg-muted/30 pt-16 focus:outline-none"
       autoFocus
       tabIndex={0}
       onKeyDown={(e) => {

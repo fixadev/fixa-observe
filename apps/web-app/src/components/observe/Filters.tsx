@@ -8,15 +8,9 @@ import {
   SelectContent,
   SelectTrigger,
   SelectValue,
-  SelectSeparator,
 } from "../ui/select";
 import { formatDateTime } from "~/lib/utils";
-import {
-  CalendarIcon,
-  MapIcon,
-  PencilIcon,
-  UserIcon,
-} from "@heroicons/react/24/solid";
+import { CalendarIcon, MapIcon, UserIcon } from "@heroicons/react/24/solid";
 import { lookbackPeriods } from "../hooks/useObserveState";
 import { type Filter } from "~/lib/types";
 import { api } from "~/trpc/react";
@@ -41,6 +35,7 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { Check, ChevronsUpDown } from "lucide-react";
 import { cn } from "~/lib/utils";
+import { SidebarTrigger } from "../ui/sidebar";
 
 export default function Filters({
   modalOpen,
@@ -112,8 +107,9 @@ export default function Filters({
 
   return (
     <>
-      <div className="fixed top-0 z-50 flex h-16 w-screen items-center justify-between gap-2 border-b bg-background p-4">
-        <div className="flex gap-2">
+      <div className="fixed top-0 z-50 flex h-14 w-screen items-center justify-between gap-2 border-b bg-background p-4">
+        <div className="flex items-center gap-2">
+          <SidebarTrigger className="shrink-0" />
           <Select
             value={filter.lookbackPeriod.value.toString()}
             onValueChange={(value) => {
