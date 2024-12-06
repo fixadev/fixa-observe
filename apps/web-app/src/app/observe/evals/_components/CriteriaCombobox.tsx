@@ -72,28 +72,39 @@ export default function CriteriaCombobox({
             emptyName && "text-muted-foreground",
           )}
         >
-          <div className="flex items-center">
+          <div className="flex h-full items-center">
             {emptyName ? "enter criteria name" : criteria.name}
           </div>
         </MonoTextBlock>
       </PopoverTrigger>
-      <PopoverContent className="w-[200px] p-0" align="start">
-        <StatusList setOpen={setOpen} setSelectedStatus={setSelectedStatus} />
+      <PopoverContent className={cn("-mt-9 p-0")} align="start">
+        <StatusList
+          criteria={criteria}
+          onUpdate={onUpdate}
+          setOpen={setOpen}
+          setSelectedStatus={setSelectedStatus}
+        />
       </PopoverContent>
     </Popover>
   );
 }
 
 function StatusList({
+  criteria,
+  onUpdate,
   setOpen,
   setSelectedStatus,
 }: {
+  criteria: Eval;
+  onUpdate: (criteria: Eval) => void;
   setOpen: (open: boolean) => void;
   setSelectedStatus: (status: Status | null) => void;
 }) {
   return (
     <Command className="z-50">
       <CommandInput
+        value={criteria.name}
+        onValueChange={(value) => onUpdate({ ...criteria, name: value })}
         noIcon
         placeholder="enter criteria name"
         className={cn("-mx-1 h-8 h-fit py-1", ibmPlexMono.className)}
