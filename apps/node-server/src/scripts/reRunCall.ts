@@ -3,7 +3,7 @@ import { CallStatus } from "@prisma/client";
 import { db } from "../db";
 import vapiClient from "../clients/vapiClient";
 import { analyzeCallWitho1 } from "../services/textAnalysis";
-import { formatOutput } from "../helpers/formatOutput";
+import { formatOutput } from "../services/textAnalysis";
 import { analyzeCallWithGemini } from "../services/audioAnalysis";
 import { env } from "../env";
 import { getScenariosWithGeneralEvals } from "../services/scenario";

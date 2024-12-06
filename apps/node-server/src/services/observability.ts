@@ -5,6 +5,8 @@ import { CallStatus, Message, Role } from "@prisma/client";
 import { env } from "../env";
 import { calculateLatencyPercentiles } from "../utils/time";
 import { uploadFromPresignedUrl } from "./aws";
+import { zodResponseFormat } from "openai/helpers/zod";
+import { openai } from "../clients/openAIClient";
 
 export const transcribeAndSaveCall = async (
   callId: string,
@@ -132,4 +134,29 @@ export const findRelevantEvalGroups = async (
       ownerId,
     },
   });
+  const prompt = `
+    Your job is to determine which eval groups are relevant to the following call:
+  
+    ${output}
+    
+    `;
+  const completion = await openai.beta.chat.completions.parse({
+    model: "gpt-4o",
+    messages: [{ role: "system", content: prompt }],
+    response_format: zodResponseFormat(
+      findLLMErrorsOutputSchema,
+      "evalResults",
+    ),
+  });
+
+  const parsedResponse = completion.choices[0]?.message.parsed;
+
+  if (!parsedResponse) {
+    throw new Error("No response from OpenAI");
+  }
+
+  return {
+    evalResults: parsedResponse.evalResults,
+  };
+  ``;
 };

@@ -1,6 +1,6 @@
 import { VertexAI, type Part, SchemaType } from "@google-cloud/vertexai";
 import { Storage } from "@google-cloud/storage";
-import { uploadFile } from "../helpers/gcpUpload";
+import { uploadFile } from "./gcp";
 import { env } from "../env";
 import { z } from "zod";
 import { findLLMErrorsOutputSchema } from "./textAnalysis";
