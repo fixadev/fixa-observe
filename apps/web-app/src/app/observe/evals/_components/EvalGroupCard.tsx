@@ -4,6 +4,7 @@ import MonoTextBlock from "~/components/MonoTextBlock";
 import { type EvalGroup } from "../page";
 import { Button } from "~/components/ui/button";
 import { cn } from "~/lib/utils";
+import { ibmPlexSans } from "~/app/fonts";
 
 export default function EvalGroupCard({
   group,
@@ -84,7 +85,14 @@ export default function EvalGroupCard({
           {group.criteria.map((c) => (
             <div className="flex flex-col gap-1 rounded border p-2" key={c.id}>
               <MonoTextBlock>{c.name}</MonoTextBlock>
-              <pre className="px-2 text-muted-foreground">{c.description}</pre>
+              <pre
+                className={cn(
+                  "px-2 text-muted-foreground",
+                  ibmPlexSans.className,
+                )}
+              >
+                {c.description}
+              </pre>
             </div>
           ))}
           <Button

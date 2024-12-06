@@ -1,3 +1,4 @@
+import { ibmPlexMono } from "~/app/fonts";
 import { cn } from "~/lib/utils";
 
 export default function MonoTextBlock({
@@ -9,7 +10,11 @@ export default function MonoTextBlock({
 }) {
   return (
     <div
-      className={cn("w-fit rounded-md bg-muted px-2 py-1 font-mono", className)}
+      className={cn(
+        "w-fit rounded-md bg-muted px-2 py-1",
+        ibmPlexMono.className,
+        className,
+      )}
     >
       {children}
     </div>
