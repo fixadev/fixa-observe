@@ -92,6 +92,7 @@ model Call {
   id        String   @id @default(uuid())
   createdAt DateTime @default(now())
   ownerId   String?
+  deleted   Boolean  @default(false)
 
   vapiCallId         String?
   customerCallId     String?
