@@ -1,18 +1,18 @@
 import express, { Request, Response } from "express";
 import { createServer } from "http";
 import { Server } from "socket.io";
+import { env } from "./env";
+import { db } from "./db";
 import {
   handleCallEnded,
   handleTranscriptUpdate,
   handleAnalysisStarted,
 } from "./services/vapi";
-import { db } from "./db";
-import { getContext } from "./middlewares/getContext";
 import { addCallToQueue } from "./services/aws";
+import { scheduleOfOneCalls } from "./services/integrations/ofOneService";
 import { startQueueConsumer } from "./workers/queueConsumer";
 import { authenticateRequest } from "./middlewares/auth";
-import { scheduleOfOneCalls } from "./services/integrations/ofOneService";
-import { env } from "./env";
+import { getContext } from "./middlewares/getContext";
 import { validateUploadCallParams } from "./middlewares/validateParams";
 
 const app = express();
