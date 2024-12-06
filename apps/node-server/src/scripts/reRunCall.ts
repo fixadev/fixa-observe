@@ -1,7 +1,6 @@
 import { CallResult, Role } from "@prisma/client";
 import { CallStatus } from "@prisma/client";
 import { db } from "../db";
-import { createGeminiPrompt } from "../utils/prompt";
 import vapiClient from "../clients/vapiClient";
 import { analyzeCallWitho1 } from "../services/textAnalysis";
 import { formatOutput } from "../helpers/formatOutput";
@@ -11,13 +10,14 @@ import { getScenariosWithGeneralEvals } from "../services/scenario";
 
 const main = async () => {
   console.log("RE-RUNNING CALL");
+
   console.log("DB URL", env.DATABASE_URL);
   console.log("DIRECT URL", env.DIRECT_URL);
 
   // const agents = await db.agent.findMany();
   // console.log("AGENTS", agents);
 
-  const callId = "b24c4a13-53c7-4608-81cf-c299f5a29d56";
+  const callId = "ac76ee23-a242-441c-8498-4a2403cf6dcc";
 
   const call = await db.call.findFirst({
     where: { id: callId },
@@ -67,49 +67,30 @@ const main = async () => {
     scenario: scenarioWithGeneralEvals,
   });
 
-  let parsedResult: string;
-  const useGemini = false;
-  if (!useGemini) {
-    parsedResult = analysis.cleanedResult;
-  } else {
-    const geminiPrompt = createGeminiPrompt({
-      callStartedAt: vapiCall.startedAt,
-      messages: vapiCall.artifact.messages,
-      testAgentPrompt: call.scenario.instructions,
-      scenario: scenarioWithGeneralEvals,
-      analysis,
-    });
-
-    const geminiResult = await analyzeCallWithGemini(
-      vapiCall.artifact.stereoRecordingUrl,
-      geminiPrompt,
-    );
-    parsedResult = JSON.stringify(geminiResult.textResult);
-
-    console.log(
-      "GEMINI RESULT for call",
-      call.id,
-      JSON.stringify(geminiResult.textResult, null, 2),
-    );
-  }
+  const unparsedResult = analysis.cleanedResult;
 
   // const { parsedResult } = geminiResult;
-  if (!parsedResult) {
+  if (!unparsedResult) {
     console.error("No cleaned result found for call ID", call.id);
     return;
   }
 
-  const cleanedResultJson = await formatOutput(JSON.stringify(parsedResult));
+  const { evalResults } = await formatOutput(unparsedResult);
 
-  const { evalResults } = cleanedResultJson;
-
-  const evalResultsWithValidEvals = evalResults.filter((evalResult) =>
-    call.scenario?.evals?.some(
+  const validEvalResults = evalResults.filter((evalResult) =>
+    [...scenarioWithGeneralEvals.evals]?.some(
       (evaluation) => evaluation.id === evalResult.evalId,
     ),
   );
 
-  const success = evalResultsWithValidEvals.every((result) => result.success);
+  const criticalEvalResults = evalResults.filter((evalResult) =>
+    [...scenarioWithGeneralEvals.evals]?.some(
+      (evaluation) =>
+        evaluation.id === evalResult.evalId && evaluation.isCritical,
+    ),
+  );
+
+  const success = criticalEvalResults.every((result) => result.success);
 
   const updatedCall = await db.call.update({
     where: { id: call.id },
@@ -117,7 +98,7 @@ const main = async () => {
       status: CallStatus.completed,
       evalResults: {
         deleteMany: {},
-        create: evalResultsWithValidEvals,
+        create: validEvalResults,
       },
       result: success ? CallResult.success : CallResult.failure,
       stereoRecordingUrl: vapiCall.artifact?.stereoRecordingUrl,
