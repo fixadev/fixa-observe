@@ -106,6 +106,7 @@ export const callService = {
       where: {
         ownerId,
         testId,
+        deleted: false,
         scenarioId,
         ...filterWhere,
       },
