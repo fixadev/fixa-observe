@@ -88,6 +88,7 @@ model Call {
   id        String   @id @default(uuid())
   createdAt DateTime @default(now())
   ownerId   String?
+  deleted   Boolean  @default(false)
 
   vapiCallId         String?
   customerCallId     String?
@@ -119,6 +120,8 @@ model Call {
   testAgentId String?
   scenario    Scenario?  @relation(fields: [scenarioId], references: [id], onDelete: Cascade)
   scenarioId  String?
+
+  evalGroups EvalGroup[]
 
   messages      Message[]
   latencyBlocks LatencyBlock[]
@@ -232,7 +235,9 @@ model Eval {
   ownerId       String?
   evalOverrides EvalOverride[]
 
-  deleted Boolean @default(false)
+  deleted     Boolean    @default(false)
+  EvalGroup   EvalGroup? @relation(fields: [evalGroupId], references: [id])
+  evalGroupId String?
 }
 
 model EvalResult {
@@ -294,4 +299,30 @@ model Interruption {
   call             Call   @relation(fields: [callId], references: [id], onDelete: Cascade)
   callId           String
   text             String
+}
+
+model EvalGroup {
+  id         String               @id @default(uuid())
+  createdAt  DateTime             @default(now())
+  name       String
+  conditions EvalGroupCondition[]
+  evals      Eval[]
+  enabled    Boolean              @default(true)
+  call       Call[]
+}
+
+model EvalGroupCondition {
+  id          String                 @id @default(uuid())
+  createdAt   DateTime               @default(now())
+  evalGroup   EvalGroup              @relation(fields: [evalGroupId], references: [id])
+  evalGroupId String
+  type        EvalGroupConditionType
+  property    String?
+  value       String?
+  text        String?
+}
+
+enum EvalGroupConditionType {
+  filter
+  text
 }

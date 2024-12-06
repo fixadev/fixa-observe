@@ -1,6 +1,6 @@
-import { openai } from "../utils/OpenAIClient";
+import { openai } from "../clients/openAIClient";
 import { zodResponseFormat } from "openai/helpers/zod";
-import { findLLMErrorsOutputSchema } from "../services/findLLMErrors";
+import { findLLMErrorsOutputSchema } from "../services/textAnalysis";
 
 export const formatOutput = async (output: string) => {
   const prompt = `

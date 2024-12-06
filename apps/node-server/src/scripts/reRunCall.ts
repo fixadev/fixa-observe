@@ -1,17 +1,16 @@
 import { CallResult, Role } from "@prisma/client";
 import { CallStatus } from "@prisma/client";
 import { db } from "../db";
-import { createGeminiPrompt } from "../utils/createGeminiPrompt";
-import vapiClient from "../utils/vapiClient";
-import { analyzeCallWitho1 } from "./findLLMErrors";
+import { createGeminiPrompt } from "../utils/prompt";
+import vapiClient from "../clients/vapiClient";
+import { analyzeCallWitho1 } from "../services/textAnalysis";
 import { formatOutput } from "../helpers/formatOutput";
-import { analyzeCallWithGemini } from "./geminiAnalyzeAudio";
+import { analyzeCallWithGemini } from "../services/audioAnalysis";
 import { env } from "../env";
-import { getScenariosWithGeneralEvals } from "./getScenariosWithGeneralEvals";
+import { getScenariosWithGeneralEvals } from "../services/scenario";
 
 const main = async () => {
   console.log("RE-RUNNING CALL");
-
   console.log("DB URL", env.DATABASE_URL);
   console.log("DIRECT URL", env.DIRECT_URL);
 

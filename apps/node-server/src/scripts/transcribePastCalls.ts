@@ -1,5 +1,5 @@
 import { db } from "../db";
-import { transcribeAndSaveCall } from "./transcribeAndSaveCall";
+import { transcribeAndSaveCall } from "../services/call";
 
 const resetProcessedStatus = async () => {
   try {

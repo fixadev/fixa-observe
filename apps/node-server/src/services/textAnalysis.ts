@@ -1,8 +1,8 @@
-import { openai } from "../utils/OpenAIClient";
+import { openai } from "../clients/openAIClient";
 import { z } from "zod";
 import { ArtifactMessagesItem } from "@vapi-ai/server-sdk/api";
 import { Eval, EvalResultType, Scenario } from "@prisma/client";
-import { getDateTimeAtTimezone } from "../utils/utils";
+import { getDateTimeAtTimezone } from "../utils/time";
 
 export type EvalResultSchema = z.infer<typeof EvalResultSchema>;
 const EvalResultSchema = z.object({

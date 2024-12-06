@@ -1,7 +1,31 @@
-import { s3 } from "../utils/s3Client";
-import { PutObjectCommand } from "@aws-sdk/client-s3";
 import { env } from "../env";
-import { getAudioDuration } from "./getAudioDuration";
+import { sqs } from "../clients/s3Client";
+import { s3 } from "../clients/s3Client";
+import { PutObjectCommand } from "@aws-sdk/client-s3";
+import { getAudioDuration } from "../utils/audio";
+
+interface AddCallToQueueProps {
+  callId: string;
+  location: string;
+  agentId: string;
+  regionId: string;
+  createdAt: Date;
+  userId: string;
+  metadata: Record<string, string>;
+}
+
+export const addCallToQueue = async (input: AddCallToQueueProps) => {
+  // Send message
+
+  await sqs
+    .sendMessage({
+      QueueUrl: env.SQS_QUEUE_URL,
+      MessageBody: JSON.stringify(input),
+    })
+    .then((res) => {
+      console.log(res);
+    });
+};
 
 export const uploadFromPresignedUrl = async (
   callId: string,
