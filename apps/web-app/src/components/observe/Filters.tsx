@@ -8,15 +8,9 @@ import {
   SelectContent,
   SelectTrigger,
   SelectValue,
-  SelectSeparator,
 } from "../ui/select";
 import { formatDateTime } from "~/lib/utils";
-import {
-  CalendarIcon,
-  MapIcon,
-  PencilIcon,
-  UserIcon,
-} from "@heroicons/react/24/solid";
+import { CalendarIcon, MapIcon, UserIcon } from "@heroicons/react/24/solid";
 import { lookbackPeriods } from "../hooks/useObserveState";
 import { type Filter } from "~/lib/types";
 import { api } from "~/trpc/react";
