@@ -1,7 +1,7 @@
 import { env } from "../env";
 import { parseMetadata } from "../helpers/parseMetadata";
 import { transcribeAndSaveCall } from "../services/call";
-import { upsertAgent } from "../services/agentS";
+import { upsertAgent } from "../services/agent";
 import { sqs } from "../clients/s3Client";
 
 export async function startQueueConsumer() {

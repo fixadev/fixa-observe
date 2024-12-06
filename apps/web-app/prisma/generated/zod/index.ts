@@ -84,7 +84,7 @@ export const LatencyBlockScalarFieldEnumSchema = z.enum(['id','secondsFromStart'
 
 export const InterruptionScalarFieldEnumSchema = z.enum(['id','secondsFromStart','duration','callId','text']);
 
-export const EvalGroupScalarFieldEnumSchema = z.enum(['id','createdAt','name','enabled']);
+export const EvalGroupScalarFieldEnumSchema = z.enum(['id','createdAt','name','ownerId','enabled']);
 
 export const EvalGroupConditionScalarFieldEnumSchema = z.enum(['id','createdAt','evalGroupId','type','property','value','text']);
 
@@ -395,6 +395,7 @@ export const EvalGroupSchema = z.object({
   id: z.string(),
   createdAt: z.coerce.date(),
   name: z.string(),
+  ownerId: z.string(),
   enabled: z.boolean(),
 })
 
@@ -898,6 +899,7 @@ export const EvalGroupSelectSchema: z.ZodType<Prisma.EvalGroupSelect> = z.object
   id: z.boolean().optional(),
   createdAt: z.boolean().optional(),
   name: z.boolean().optional(),
+  ownerId: z.boolean().optional(),
   enabled: z.boolean().optional(),
   conditions: z.union([z.boolean(),z.lazy(() => EvalGroupConditionFindManyArgsSchema)]).optional(),
   evals: z.union([z.boolean(),z.lazy(() => EvalFindManyArgsSchema)]).optional(),
@@ -2123,6 +2125,7 @@ export const EvalGroupWhereInputSchema: z.ZodType<Prisma.EvalGroupWhereInput> = 
   id: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   createdAt: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
   name: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
+  ownerId: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   enabled: z.union([ z.lazy(() => BoolFilterSchema),z.boolean() ]).optional(),
   conditions: z.lazy(() => EvalGroupConditionListRelationFilterSchema).optional(),
   evals: z.lazy(() => EvalListRelationFilterSchema).optional(),
@@ -2133,6 +2136,7 @@ export const EvalGroupOrderByWithRelationInputSchema: z.ZodType<Prisma.EvalGroup
   id: z.lazy(() => SortOrderSchema).optional(),
   createdAt: z.lazy(() => SortOrderSchema).optional(),
   name: z.lazy(() => SortOrderSchema).optional(),
+  ownerId: z.lazy(() => SortOrderSchema).optional(),
   enabled: z.lazy(() => SortOrderSchema).optional(),
   conditions: z.lazy(() => EvalGroupConditionOrderByRelationAggregateInputSchema).optional(),
   evals: z.lazy(() => EvalOrderByRelationAggregateInputSchema).optional(),
@@ -2149,6 +2153,7 @@ export const EvalGroupWhereUniqueInputSchema: z.ZodType<Prisma.EvalGroupWhereUni
   NOT: z.union([ z.lazy(() => EvalGroupWhereInputSchema),z.lazy(() => EvalGroupWhereInputSchema).array() ]).optional(),
   createdAt: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
   name: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
+  ownerId: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   enabled: z.union([ z.lazy(() => BoolFilterSchema),z.boolean() ]).optional(),
   conditions: z.lazy(() => EvalGroupConditionListRelationFilterSchema).optional(),
   evals: z.lazy(() => EvalListRelationFilterSchema).optional(),
@@ -2159,6 +2164,7 @@ export const EvalGroupOrderByWithAggregationInputSchema: z.ZodType<Prisma.EvalGr
   id: z.lazy(() => SortOrderSchema).optional(),
   createdAt: z.lazy(() => SortOrderSchema).optional(),
   name: z.lazy(() => SortOrderSchema).optional(),
+  ownerId: z.lazy(() => SortOrderSchema).optional(),
   enabled: z.lazy(() => SortOrderSchema).optional(),
   _count: z.lazy(() => EvalGroupCountOrderByAggregateInputSchema).optional(),
   _max: z.lazy(() => EvalGroupMaxOrderByAggregateInputSchema).optional(),
@@ -2172,6 +2178,7 @@ export const EvalGroupScalarWhereWithAggregatesInputSchema: z.ZodType<Prisma.Eva
   id: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
   createdAt: z.union([ z.lazy(() => DateTimeWithAggregatesFilterSchema),z.coerce.date() ]).optional(),
   name: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
+  ownerId: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
   enabled: z.union([ z.lazy(() => BoolWithAggregatesFilterSchema),z.boolean() ]).optional(),
 }).strict();
 
@@ -3500,6 +3507,7 @@ export const EvalGroupCreateInputSchema: z.ZodType<Prisma.EvalGroupCreateInput> 
   id: z.string().optional(),
   createdAt: z.coerce.date().optional(),
   name: z.string(),
+  ownerId: z.string(),
   enabled: z.boolean().optional(),
   conditions: z.lazy(() => EvalGroupConditionCreateNestedManyWithoutEvalGroupInputSchema).optional(),
   evals: z.lazy(() => EvalCreateNestedManyWithoutEvalGroupInputSchema).optional(),
@@ -3510,6 +3518,7 @@ export const EvalGroupUncheckedCreateInputSchema: z.ZodType<Prisma.EvalGroupUnch
   id: z.string().optional(),
   createdAt: z.coerce.date().optional(),
   name: z.string(),
+  ownerId: z.string(),
   enabled: z.boolean().optional(),
   conditions: z.lazy(() => EvalGroupConditionUncheckedCreateNestedManyWithoutEvalGroupInputSchema).optional(),
   evals: z.lazy(() => EvalUncheckedCreateNestedManyWithoutEvalGroupInputSchema).optional(),
@@ -3520,6 +3529,7 @@ export const EvalGroupUpdateInputSchema: z.ZodType<Prisma.EvalGroupUpdateInput> 
   id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  ownerId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   enabled: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   conditions: z.lazy(() => EvalGroupConditionUpdateManyWithoutEvalGroupNestedInputSchema).optional(),
   evals: z.lazy(() => EvalUpdateManyWithoutEvalGroupNestedInputSchema).optional(),
@@ -3530,6 +3540,7 @@ export const EvalGroupUncheckedUpdateInputSchema: z.ZodType<Prisma.EvalGroupUnch
   id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  ownerId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   enabled: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   conditions: z.lazy(() => EvalGroupConditionUncheckedUpdateManyWithoutEvalGroupNestedInputSchema).optional(),
   evals: z.lazy(() => EvalUncheckedUpdateManyWithoutEvalGroupNestedInputSchema).optional(),
@@ -3540,6 +3551,7 @@ export const EvalGroupCreateManyInputSchema: z.ZodType<Prisma.EvalGroupCreateMan
   id: z.string().optional(),
   createdAt: z.coerce.date().optional(),
   name: z.string(),
+  ownerId: z.string(),
   enabled: z.boolean().optional()
 }).strict();
 
@@ -3547,6 +3559,7 @@ export const EvalGroupUpdateManyMutationInputSchema: z.ZodType<Prisma.EvalGroupU
   id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  ownerId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   enabled: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
 }).strict();
 
@@ -3554,6 +3567,7 @@ export const EvalGroupUncheckedUpdateManyInputSchema: z.ZodType<Prisma.EvalGroup
   id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  ownerId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   enabled: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
 }).strict();
 
@@ -4808,6 +4822,7 @@ export const EvalGroupCountOrderByAggregateInputSchema: z.ZodType<Prisma.EvalGro
   id: z.lazy(() => SortOrderSchema).optional(),
   createdAt: z.lazy(() => SortOrderSchema).optional(),
   name: z.lazy(() => SortOrderSchema).optional(),
+  ownerId: z.lazy(() => SortOrderSchema).optional(),
   enabled: z.lazy(() => SortOrderSchema).optional()
 }).strict();
 
@@ -4815,6 +4830,7 @@ export const EvalGroupMaxOrderByAggregateInputSchema: z.ZodType<Prisma.EvalGroup
   id: z.lazy(() => SortOrderSchema).optional(),
   createdAt: z.lazy(() => SortOrderSchema).optional(),
   name: z.lazy(() => SortOrderSchema).optional(),
+  ownerId: z.lazy(() => SortOrderSchema).optional(),
   enabled: z.lazy(() => SortOrderSchema).optional()
 }).strict();
 
@@ -4822,6 +4838,7 @@ export const EvalGroupMinOrderByAggregateInputSchema: z.ZodType<Prisma.EvalGroup
   id: z.lazy(() => SortOrderSchema).optional(),
   createdAt: z.lazy(() => SortOrderSchema).optional(),
   name: z.lazy(() => SortOrderSchema).optional(),
+  ownerId: z.lazy(() => SortOrderSchema).optional(),
   enabled: z.lazy(() => SortOrderSchema).optional()
 }).strict();
 
@@ -7220,6 +7237,7 @@ export const EvalGroupCreateWithoutCallInputSchema: z.ZodType<Prisma.EvalGroupCr
   id: z.string().optional(),
   createdAt: z.coerce.date().optional(),
   name: z.string(),
+  ownerId: z.string(),
   enabled: z.boolean().optional(),
   conditions: z.lazy(() => EvalGroupConditionCreateNestedManyWithoutEvalGroupInputSchema).optional(),
   evals: z.lazy(() => EvalCreateNestedManyWithoutEvalGroupInputSchema).optional()
@@ -7229,6 +7247,7 @@ export const EvalGroupUncheckedCreateWithoutCallInputSchema: z.ZodType<Prisma.Ev
   id: z.string().optional(),
   createdAt: z.coerce.date().optional(),
   name: z.string(),
+  ownerId: z.string(),
   enabled: z.boolean().optional(),
   conditions: z.lazy(() => EvalGroupConditionUncheckedCreateNestedManyWithoutEvalGroupInputSchema).optional(),
   evals: z.lazy(() => EvalUncheckedCreateNestedManyWithoutEvalGroupInputSchema).optional()
@@ -7511,6 +7530,7 @@ export const EvalGroupScalarWhereInputSchema: z.ZodType<Prisma.EvalGroupScalarWh
   id: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   createdAt: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
   name: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
+  ownerId: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   enabled: z.union([ z.lazy(() => BoolFilterSchema),z.boolean() ]).optional(),
 }).strict();
 
@@ -8379,6 +8399,7 @@ export const EvalGroupCreateWithoutEvalsInputSchema: z.ZodType<Prisma.EvalGroupC
   id: z.string().optional(),
   createdAt: z.coerce.date().optional(),
   name: z.string(),
+  ownerId: z.string(),
   enabled: z.boolean().optional(),
   conditions: z.lazy(() => EvalGroupConditionCreateNestedManyWithoutEvalGroupInputSchema).optional(),
   call: z.lazy(() => CallCreateNestedManyWithoutEvalGroupsInputSchema).optional()
@@ -8388,6 +8409,7 @@ export const EvalGroupUncheckedCreateWithoutEvalsInputSchema: z.ZodType<Prisma.E
   id: z.string().optional(),
   createdAt: z.coerce.date().optional(),
   name: z.string(),
+  ownerId: z.string(),
   enabled: z.boolean().optional(),
   conditions: z.lazy(() => EvalGroupConditionUncheckedCreateNestedManyWithoutEvalGroupInputSchema).optional(),
   call: z.lazy(() => CallUncheckedCreateNestedManyWithoutEvalGroupsInputSchema).optional()
@@ -8531,6 +8553,7 @@ export const EvalGroupUpdateWithoutEvalsInputSchema: z.ZodType<Prisma.EvalGroupU
   id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  ownerId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   enabled: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   conditions: z.lazy(() => EvalGroupConditionUpdateManyWithoutEvalGroupNestedInputSchema).optional(),
   call: z.lazy(() => CallUpdateManyWithoutEvalGroupsNestedInputSchema).optional()
@@ -8540,6 +8563,7 @@ export const EvalGroupUncheckedUpdateWithoutEvalsInputSchema: z.ZodType<Prisma.E
   id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  ownerId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   enabled: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   conditions: z.lazy(() => EvalGroupConditionUncheckedUpdateManyWithoutEvalGroupNestedInputSchema).optional(),
   call: z.lazy(() => CallUncheckedUpdateManyWithoutEvalGroupsNestedInputSchema).optional()
@@ -9493,6 +9517,7 @@ export const EvalGroupCreateWithoutConditionsInputSchema: z.ZodType<Prisma.EvalG
   id: z.string().optional(),
   createdAt: z.coerce.date().optional(),
   name: z.string(),
+  ownerId: z.string(),
   enabled: z.boolean().optional(),
   evals: z.lazy(() => EvalCreateNestedManyWithoutEvalGroupInputSchema).optional(),
   call: z.lazy(() => CallCreateNestedManyWithoutEvalGroupsInputSchema).optional()
@@ -9502,6 +9527,7 @@ export const EvalGroupUncheckedCreateWithoutConditionsInputSchema: z.ZodType<Pri
   id: z.string().optional(),
   createdAt: z.coerce.date().optional(),
   name: z.string(),
+  ownerId: z.string(),
   enabled: z.boolean().optional(),
   evals: z.lazy(() => EvalUncheckedCreateNestedManyWithoutEvalGroupInputSchema).optional(),
   call: z.lazy(() => CallUncheckedCreateNestedManyWithoutEvalGroupsInputSchema).optional()
@@ -9527,6 +9553,7 @@ export const EvalGroupUpdateWithoutConditionsInputSchema: z.ZodType<Prisma.EvalG
   id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  ownerId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   enabled: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   evals: z.lazy(() => EvalUpdateManyWithoutEvalGroupNestedInputSchema).optional(),
   call: z.lazy(() => CallUpdateManyWithoutEvalGroupsNestedInputSchema).optional()
@@ -9536,6 +9563,7 @@ export const EvalGroupUncheckedUpdateWithoutConditionsInputSchema: z.ZodType<Pri
   id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  ownerId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   enabled: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   evals: z.lazy(() => EvalUncheckedUpdateManyWithoutEvalGroupNestedInputSchema).optional(),
   call: z.lazy(() => CallUncheckedUpdateManyWithoutEvalGroupsNestedInputSchema).optional()
@@ -10137,6 +10165,7 @@ export const EvalGroupUpdateWithoutCallInputSchema: z.ZodType<Prisma.EvalGroupUp
   id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  ownerId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   enabled: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   conditions: z.lazy(() => EvalGroupConditionUpdateManyWithoutEvalGroupNestedInputSchema).optional(),
   evals: z.lazy(() => EvalUpdateManyWithoutEvalGroupNestedInputSchema).optional()
@@ -10146,6 +10175,7 @@ export const EvalGroupUncheckedUpdateWithoutCallInputSchema: z.ZodType<Prisma.Ev
   id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  ownerId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   enabled: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   conditions: z.lazy(() => EvalGroupConditionUncheckedUpdateManyWithoutEvalGroupNestedInputSchema).optional(),
   evals: z.lazy(() => EvalUncheckedUpdateManyWithoutEvalGroupNestedInputSchema).optional()
@@ -10155,6 +10185,7 @@ export const EvalGroupUncheckedUpdateManyWithoutCallInputSchema: z.ZodType<Prism
   id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  ownerId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   enabled: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
 }).strict();
 

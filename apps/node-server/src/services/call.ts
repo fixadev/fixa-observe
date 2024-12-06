@@ -1,7 +1,7 @@
 import axios from "axios";
 import { db } from "../db";
 import { v4 as uuidv4 } from "uuid";
-import { CallStatus, Role } from "@prisma/client";
+import { CallStatus, Message, Role } from "@prisma/client";
 import { env } from "../env";
 import { calculateLatencyPercentiles } from "../utils/time";
 import { uploadFromPresignedUrl } from "./aws";
@@ -121,4 +121,15 @@ export const transcribeAndSaveCall = async (
     console.error("Error in transcribeAndSaveCall:", error);
     throw error;
   }
+};
+
+export const findRelevantEvalGroups = async (
+  ownerId: string,
+  messages: Message[],
+) => {
+  const evalGroups = await db.evalGroup.findMany({
+    where: {
+      ownerId,
+    },
+  });
 };

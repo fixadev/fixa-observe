@@ -305,6 +305,7 @@ model EvalGroup {
   id         String               @id @default(uuid())
   createdAt  DateTime             @default(now())
   name       String
+  ownerId    String
   conditions EvalGroupCondition[]
   evals      Eval[]
   enabled    Boolean              @default(true)
