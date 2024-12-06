@@ -1,6 +1,6 @@
 import { env } from "../env";
 import { parseMetadata } from "../helpers/parseMetadata";
-import { transcribeAndSaveCall } from "../services/call";
+import { transcribeAndSaveCall } from "../services/observability";
 import { upsertAgent } from "../services/agent";
 import { sqs } from "../clients/s3Client";
 
