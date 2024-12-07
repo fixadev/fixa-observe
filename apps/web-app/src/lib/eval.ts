@@ -4,6 +4,7 @@ import {
   EvalSchema,
   type EvalOverrideSchema,
   EvalGroupSchema,
+  EvalGroupConditionSchema,
 } from "prisma/generated/zod";
 
 export type EvalSchema = z.infer<typeof EvalSchema>;
@@ -27,7 +28,8 @@ export const AlternateCreateEvalSchema = z.object({
   evalGroupId: z.string().nullable(),
 });
 
-export type EvalGroupWithEvals = z.infer<typeof EvalGroupWithEvals>;
-export const EvalGroupWithEvals = EvalGroupSchema.extend({
+export type EvalGroupWithIncludes = z.infer<typeof EvalGroupWithIncludesSchema>;
+export const EvalGroupWithIncludesSchema = EvalGroupSchema.extend({
   evals: z.array(EvalSchema),
+  conditions: z.array(EvalGroupConditionSchema),
 });

@@ -7,11 +7,14 @@ import { useCallback, useMemo, useState, useEffect } from "react";
 import UnsavedChangesBar from "./_components/UnsavedChangesBar";
 import { api } from "~/trpc/react";
 import { Skeleton } from "~/components/ui/skeleton";
-import { type EvalGroupWithIncludes } from "~/lib/types";
+import { type EvalGroupWithIncludes } from "~/lib/eval";
 import { Button } from "~/components/ui/button";
 import { instantiateEvalGroup } from "~/lib/instantiate";
+import { useToast } from "~/components/hooks/use-toast";
 
 export default function EvalsPage() {
+  const { toast } = useToast();
+
   const { data: _evalGroups } = api.eval.getEvalGroups.useQuery();
   const [evalGroups, setEvalGroups] = useState<EvalGroupWithIncludes[]>();
   const [originalEvalGroups, setOriginalEvalGroups] =
@@ -50,10 +53,22 @@ export default function EvalsPage() {
     ]);
   }, []);
 
-  const handleSave = useCallback(() => {
-    console.log("saving");
-    setOriginalEvalGroups(evalGroups);
-  }, [evalGroups]);
+  const { mutate: saveEvalGroups, isPending: isSaving } =
+    api.eval.saveEvalGroupsState.useMutation({
+      onSuccess: () => {
+        setOriginalEvalGroups(evalGroups);
+      },
+      onError: (e) => {
+        console.error("failed to save eval groups", e);
+        // toast({
+        //   title: "failed to save eval groups",
+        //   description: "please try again later",
+        // });
+      },
+    });
+  const handleSave = useCallback(async () => {
+    saveEvalGroups(evalGroups ?? []);
+  }, [evalGroups, saveEvalGroups]);
 
   const handleDiscard = useCallback(() => {
     console.log("discarding");
@@ -107,7 +122,11 @@ export default function EvalsPage() {
         )}
       </div>
       {unsavedChanges && (
-        <UnsavedChangesBar save={handleSave} discard={handleDiscard} />
+        <UnsavedChangesBar
+          save={handleSave}
+          discard={handleDiscard}
+          isSaving={isSaving}
+        />
       )}
     </>
   );

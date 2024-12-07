@@ -128,3 +128,20 @@ export function generateTempId() {
 export function isTempId(id: string) {
   return id.startsWith("TEMP-");
 }
+
+export function getCreatedUpdatedDeleted<T extends { id: string }>(
+  prior: T[],
+  current: T[],
+): { created: T[]; updated: T[]; deleted: T[] } {
+  return {
+    created: current.filter(
+      (item) => !prior.some((priorItem) => priorItem.id === item.id),
+    ),
+    updated: current.filter((item) =>
+      prior.some((priorItem) => priorItem.id === item.id),
+    ),
+    deleted: prior.filter(
+      (item) => !current.some((currentItem) => currentItem.id === item.id),
+    ),
+  };
+}
