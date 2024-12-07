@@ -17,7 +17,7 @@ export default function EvalsPage() {
           <div className="font-medium">evaluation criteria</div>
         </Link>
       </div>
-      <div className="flex flex-col gap-4 p-4">
+      <div className="mb-96 flex flex-col gap-4 p-4">
         {evalGroups.map((g) => (
           <EvalGroupCard
             key={g.id}

@@ -15,11 +15,19 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { useMemo, useState } from "react";
+import {
+  type InputHTMLAttributes,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import MonoTextBlock from "~/components/MonoTextBlock";
 import { type Eval } from "../page";
 import { cn } from "~/lib/utils";
 import { ibmPlexMono } from "~/app/fonts";
+import { Input } from "~/components/ui/input";
+import { XMarkIcon } from "@heroicons/react/24/solid";
 
 type Status = {
   value: string;
@@ -65,10 +73,10 @@ export default function CriteriaCombobox({
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger>
+      <PopoverTrigger className="focus:outline-none">
         <MonoTextBlock
           className={cn(
-            "h-8 hover:bg-muted/60",
+            "h-8 hover:bg-muted/60 focus:outline-none",
             emptyName && "text-muted-foreground",
           )}
         >
@@ -77,7 +85,11 @@ export default function CriteriaCombobox({
           </div>
         </MonoTextBlock>
       </PopoverTrigger>
-      <PopoverContent className={cn("-mt-9 p-0")} align="start">
+      <PopoverContent
+        className="-ml-[calc(0.25rem+1px)] -mt-[calc(2.5rem+1px)] p-0"
+        noAnimation
+        align="start"
+      >
         <StatusList
           criteria={criteria}
           onUpdate={onUpdate}
@@ -100,16 +112,37 @@ function StatusList({
   setOpen: (open: boolean) => void;
   setSelectedStatus: (status: Status | null) => void;
 }) {
+  const [query, setQuery] = useState("");
+
   return (
     <Command className="z-50">
+      {criteria.name.length > 0 && (
+        <div className="flex flex-col gap-2 px-1 py-1">
+          <MonoTextBlock className="h-8 text-sm">
+            <div className="flex h-full items-center gap-2">
+              {criteria.name}
+              <Button
+                variant="ghost"
+                size="icon"
+                className="size-5 text-muted-foreground hover:bg-gray-200 hover:text-muted-foreground"
+              >
+                <XMarkIcon className="h-4 w-4" />
+              </Button>
+            </div>
+          </MonoTextBlock>
+        </div>
+      )}
       <CommandInput
-        value={criteria.name}
-        onValueChange={(value) => onUpdate({ ...criteria, name: value })}
+        value={query}
+        onValueChange={(value) => {
+          setQuery(value);
+        }}
         noIcon
-        placeholder="enter criteria name"
-        className={cn("-mx-1 h-8 h-fit py-1", ibmPlexMono.className)}
+        autoFocus
+        placeholder={criteria.name.length === 0 ? "enter criteria name" : ""}
+        className={ibmPlexMono.className}
       />
-      <CommandList>
+      <CommandList className="max-h-[100px]">
         <CommandEmpty>No results found.</CommandEmpty>
         <CommandGroup heading="select an option or create one">
           {statuses.map((status) => (
@@ -129,5 +162,50 @@ function StatusList({
         </CommandGroup>
       </CommandList>
     </Command>
+  );
+}
+
+function InputWithChips({
+  items,
+  chipClassName,
+  ...props
+}: {
+  items: string[];
+  chipClassName?: string;
+} & InputHTMLAttributes<HTMLInputElement>) {
+  // useEffect(() => {
+  //   if (chipsContainerRef.current) {
+  //     chipsContainerRef.current.style.height = `${chipsContainerRef.current.scrollHeight}px`;
+  //   }
+  // }, [items]);
+
+  return (
+    <div>
+      <div className="flex flex-col gap-2 px-1 py-1">
+        {items.map((item, i) => (
+          <div
+            key={i}
+            className={cn(
+              "flex items-center gap-2",
+              "h-8 rounded-md bg-muted px-2 py-1 text-sm",
+              chipClassName,
+            )}
+          >
+            {item}
+            <Button
+              variant="ghost"
+              size="icon"
+              className="size-5 text-muted-foreground hover:bg-gray-200 hover:text-muted-foreground"
+            >
+              <XMarkIcon className="h-4 w-4" />
+            </Button>
+          </div>
+        ))}
+      </div>
+      <Input
+        className="h-10 border-none outline-none focus:outline-none"
+        {...props}
+      />
+    </div>
   );
 }
