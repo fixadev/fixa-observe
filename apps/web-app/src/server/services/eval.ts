@@ -1,11 +1,7 @@
 import { type PrismaClient } from "@prisma/client";
 import { db } from "../db";
 import { v4 as uuidv4 } from "uuid";
-import {
-  type EvalGroupWithEvals,
-  type CreateGeneralEvalSchema,
-  type EvalSchema,
-} from "~/lib/eval";
+import { type EvalGroupWithEvals, type EvalSchema } from "~/lib/eval";
 
 export class EvalService {
   constructor(private db: PrismaClient) {}
@@ -17,7 +13,7 @@ export class EvalService {
     });
   }
 
-  async createGeneralEval(userId: string, evaluation: CreateGeneralEvalSchema) {
+  async createGeneralEval(userId: string, evaluation: EvalSchema) {
     return await db.eval.create({
       data: {
         ...evaluation,

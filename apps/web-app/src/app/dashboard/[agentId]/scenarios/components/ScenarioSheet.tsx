@@ -19,10 +19,7 @@ import {
   AlertDialogTrigger,
   AlertDialogTitle,
 } from "~/components/ui/alert-dialog";
-import {
-  type EvalOverrideWithoutScenarioId,
-  type EvalWithoutScenarioId,
-} from "~/lib/eval";
+import { type EvalSchema, type EvalOverrideSchema } from "~/lib/eval";
 import {
   type ScenarioWithEvals,
   type UpdateScenarioSchema,
@@ -56,7 +53,7 @@ export function ScenarioSheet({
   saveScenario: (scenario: UpdateScenarioSchema) => void;
   deleteScenario: (id: string) => void;
 }) {
-  const emptyEval = useMemo<EvalWithoutScenarioId>(() => {
+  const emptyEval = useMemo<EvalSchema>(() => {
     return {
       id: crypto.randomUUID(),
       name: "",
@@ -89,9 +86,9 @@ export function ScenarioSheet({
       : [emptyEval],
   );
 
-  const [evalOverrides, setEvalOverrides] = useState<
-    EvalOverrideWithoutScenarioId[]
-  >(selectedScenario?.generalEvalOverrides ?? []);
+  const [evalOverrides, setEvalOverrides] = useState<Array<EvalOverrideSchema>>(
+    selectedScenario?.generalEvalOverrides ?? [],
+  );
 
   // Include date/time stuff
   const { options, parseTimezone } = useTimezoneSelect({});
@@ -105,7 +102,7 @@ export function ScenarioSheet({
   }, [emptyEval]);
 
   const handleUpdateEval = useCallback(
-    (evaluation: EvalWithoutScenarioId) => {
+    (evaluation: EvalSchema) => {
       setEvals(evals.map((e) => (e.id === evaluation.id ? evaluation : e)));
     },
     [evals],
@@ -193,12 +190,13 @@ export function ScenarioSheet({
     toast,
   ]);
 
-  const emptyEvalOverride = useMemo<EvalOverrideWithoutScenarioId>(() => {
+  const emptyEvalOverride = useMemo<EvalOverrideSchema>(() => {
     return {
       id: crypto.randomUUID(),
       createdAt: new Date(),
       enabled: true,
       evalId: "",
+      scenarioId: "",
     };
   }, []);
 

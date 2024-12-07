@@ -109,7 +109,7 @@ export default function AgentScenariosPage({
           evals: scenario.evals.map((e) => ({
             ...e,
             createdAt: new Date(),
-            scenarioId: undefined,
+            scenarioId: null,
             deleted: false,
             evalGroupId: null,
           })),

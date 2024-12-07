@@ -6,10 +6,7 @@ import {
   type UpdateScenarioSchema,
 } from "~/lib/scenario";
 
-import {
-  type EvalOverrideWithoutScenarioId,
-  type CreateEvalOverrideSchema,
-} from "~/lib/eval";
+import { type EvalOverride } from "prisma/generated/zod";
 
 export class ScenarioService {
   constructor(private db: PrismaClient) {}
@@ -26,6 +23,7 @@ export class ScenarioService {
             data: scenario.evals.map((evaluation) => ({
               ...evaluation,
               id: uuidv4(),
+              scenarioId: undefined,
             })),
           },
         },
@@ -34,6 +32,7 @@ export class ScenarioService {
             data: scenario.generalEvalOverrides.map((override) => ({
               ...override,
               id: uuidv4(),
+              scenarioId: undefined,
             })),
           },
         },
@@ -60,6 +59,7 @@ export class ScenarioService {
                   data: scenario.evals.map((evaluation) => ({
                     ...evaluation,
                     id: uuidv4(),
+                    scenarioId: undefined,
                   })),
                 },
               },
@@ -100,26 +100,26 @@ export class ScenarioService {
       where: { scenarioId: scenario.id },
     });
 
-    // TODO: fix this
     const evalOverridesToDelete = scenario.generalEvalOverrides.filter(
       (override) =>
-        "id" in override &&
         priorOverrides.some(
           (priorOverride) => priorOverride.id === override.id,
         ),
-    ) as EvalOverrideWithoutScenarioId[];
+    );
 
     const evalOverridesToUpdate = scenario.generalEvalOverrides.filter(
       (override) =>
-        "id" in override &&
         priorOverrides.some(
           (priorOverride) => priorOverride.id === override.id,
         ),
-    ) as EvalOverrideWithoutScenarioId[];
+    );
 
     const evalOverridesToCreate = scenario.generalEvalOverrides.filter(
-      (override) => !("id" in override),
-    ) as CreateEvalOverrideSchema[];
+      (override) =>
+        !priorOverrides.some(
+          (priorOverride) => priorOverride.id === override.id,
+        ),
+    );
 
     return await db.scenario.update({
       where: { id: scenario.id },
@@ -133,13 +133,14 @@ export class ScenarioService {
             })),
             ...evaluationsToUpdate.map((evaluation) => ({
               where: { id: evaluation.id },
-              data: evaluation,
+              data: { ...evaluation, scenarioId: undefined },
             })),
           ],
           createMany: {
             data: evaluationsToCreate.map((evaluation) => ({
               ...evaluation,
               id: uuidv4(),
+              scenarioId: scenario.id,
             })),
           },
         },
@@ -151,13 +152,14 @@ export class ScenarioService {
             })),
             ...evalOverridesToUpdate.map((override) => ({
               where: { id: override.id },
-              data: override,
+              data: { ...override, scenarioId: undefined },
             })),
           ],
           createMany: {
             data: evalOverridesToCreate.map((override) => ({
               ...override,
               id: uuidv4(),
+              scenarioId: undefined,
             })),
           },
         },

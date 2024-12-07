@@ -89,7 +89,7 @@ export class AgentService {
   }
 
   async getAgent(id: string) {
-    return await db.agent.findUnique({
+    const result = await db.agent.findUnique({
       where: { id },
       include: {
         scenarios: {
@@ -111,6 +111,8 @@ export class AgentService {
         enabledGeneralEvals: true,
       },
     });
+    console.log("AGENT", result?.scenarios[0]?.evals);
+    return result;
   }
 
   async getAllAgents(ownerId: string) {

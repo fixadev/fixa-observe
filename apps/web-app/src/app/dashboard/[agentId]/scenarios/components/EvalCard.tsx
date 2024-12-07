@@ -1,18 +1,18 @@
 import { useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { Card } from "~/components/ui/card";
-import { type EvalWithoutScenarioId } from "~/lib/eval";
 import { XMarkIcon } from "@heroicons/react/24/solid";
 
 import { EvalInput } from "~/app/_components/EvalInput";
+import { type EvalSchema } from "~/lib/eval";
 
 export function EvalCard({
   evaluation,
   setEval,
   deleteEval,
 }: {
-  evaluation: EvalWithoutScenarioId;
-  setEval: (evaluation: EvalWithoutScenarioId) => void;
+  evaluation: EvalSchema;
+  setEval: (evaluation: EvalSchema) => void;
   deleteEval: (id: string) => void;
 }) {
   const searchParams = useSearchParams();
