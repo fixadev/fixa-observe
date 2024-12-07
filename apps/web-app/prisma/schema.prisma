@@ -322,9 +322,13 @@ model EvalGroupCondition {
   evalGroup   EvalGroup              @relation(fields: [evalGroupId], references: [id])
   evalGroupId String
   type        EvalGroupConditionType
-  property    String?
-  value       String?
-  text        String?
+
+  // These are defined if the type is filter
+  property String?
+  value    String?
+
+  // These are defined if the type is text
+  text String?
 }
 
 enum EvalGroupConditionType {
