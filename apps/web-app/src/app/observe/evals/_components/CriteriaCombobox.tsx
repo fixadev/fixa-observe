@@ -21,13 +21,20 @@ import {
   useMemo,
   useRef,
   useState,
+  forwardRef,
 } from "react";
 import MonoTextBlock from "~/components/MonoTextBlock";
 import { type Eval } from "../page";
 import { cn } from "~/lib/utils";
 import { ibmPlexMono } from "~/app/fonts";
 import { Input } from "~/components/ui/input";
-import { XMarkIcon } from "@heroicons/react/24/solid";
+import {
+  CheckIcon,
+  EllipsisHorizontalIcon,
+  TrashIcon,
+  XMarkIcon,
+} from "@heroicons/react/24/solid";
+import { useCommandState } from "cmdk";
 
 type Status = {
   value: string;
@@ -113,6 +120,7 @@ function StatusList({
   setSelectedStatus: (status: Status | null) => void;
 }) {
   const [query, setQuery] = useState("");
+  const inputRef = useRef<HTMLInputElement>(null);
 
   return (
     <Command className="z-50">
@@ -125,6 +133,10 @@ function StatusList({
                 variant="ghost"
                 size="icon"
                 className="size-5 text-muted-foreground hover:bg-gray-200 hover:text-muted-foreground"
+                onClick={() => {
+                  onUpdate({ ...criteria, name: "" });
+                  inputRef.current?.focus();
+                }}
               >
                 <XMarkIcon className="h-4 w-4" />
               </Button>
@@ -132,18 +144,26 @@ function StatusList({
           </MonoTextBlock>
         </div>
       )}
-      <CommandInput
-        value={query}
-        onValueChange={(value) => {
-          setQuery(value);
-        }}
-        noIcon
-        autoFocus
-        placeholder={criteria.name.length === 0 ? "enter criteria name" : ""}
-        className={ibmPlexMono.className}
+      <ComboboxInput
+        criteria={criteria}
+        ref={inputRef}
+        query={query}
+        setQuery={setQuery}
+        onUpdate={onUpdate}
+        setOpen={setOpen}
       />
       <CommandList className="max-h-[100px]">
-        <CommandEmpty>No results found.</CommandEmpty>
+        <CommandEmpty className="p-1">
+          <Button
+            variant="ghost"
+            className="flex w-full items-center justify-start gap-2 p-2 hover:bg-muted/40"
+          >
+            <div className="text-sm">create</div>
+            <MonoTextBlock className="h-8 text-sm">
+              <div className="flex h-full items-center">{query}</div>
+            </MonoTextBlock>
+          </Button>
+        </CommandEmpty>
         <CommandGroup heading="select an option or create one">
           {statuses.map((status) => (
             <CommandItem
@@ -155,8 +175,42 @@ function StatusList({
                 );
                 setOpen(false);
               }}
+              className="group flex items-center justify-between gap-2"
             >
               {status.label}
+              <Popover>
+                <PopoverTrigger asChild onClick={(e) => e.stopPropagation()}>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="size-5 text-muted-foreground opacity-0 hover:bg-gray-200 hover:text-muted-foreground group-hover:opacity-100"
+                  >
+                    <EllipsisHorizontalIcon className="size-4" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent
+                  className="flex flex-col gap-2 py-2"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <div className="flex items-center gap-2">
+                    <Input defaultValue={status.label} />
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="-mr-2 shrink-0"
+                    >
+                      <CheckIcon className="size-4" />
+                    </Button>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    className="-mx-2 flex w-[calc(100%+1rem)] items-center justify-start gap-2 px-2"
+                  >
+                    <TrashIcon className="size-4" />
+                    <div>delete</div>
+                  </Button>
+                </PopoverContent>
+              </Popover>
             </CommandItem>
           ))}
         </CommandGroup>
@@ -164,6 +218,46 @@ function StatusList({
     </Command>
   );
 }
+
+const ComboboxInput = forwardRef<
+  HTMLInputElement,
+  {
+    criteria: Eval;
+    query: string;
+    setQuery: (query: string) => void;
+    onUpdate: (criteria: Eval) => void;
+    setOpen: (open: boolean) => void;
+  }
+>(function ComboboxInput(
+  { criteria, query, setQuery, onUpdate, setOpen },
+  ref,
+) {
+  const filtered = useCommandState((state) => state.filtered);
+
+  return (
+    <CommandInput
+      ref={ref}
+      value={query}
+      onValueChange={(value) => {
+        setQuery(value);
+      }}
+      noIcon
+      autoFocus
+      placeholder={criteria.name.length === 0 ? "enter criteria name" : ""}
+      className={ibmPlexMono.className}
+      onKeyDown={
+        filtered.count === 0
+          ? (e) => {
+              if (e.key === "Enter") {
+                onUpdate({ ...criteria, name: query });
+                setOpen(false);
+              }
+            }
+          : undefined
+      }
+    />
+  );
+});
 
 function InputWithChips({
   items,
