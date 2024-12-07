@@ -9,20 +9,12 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
-import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import {
-  type InputHTMLAttributes,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  forwardRef,
-} from "react";
+import { useMemo, useRef, useState, forwardRef } from "react";
 import MonoTextBlock from "~/components/MonoTextBlock";
 import { type Eval } from "../page";
 import { cn } from "~/lib/utils";
@@ -258,48 +250,3 @@ const ComboboxInput = forwardRef<
     />
   );
 });
-
-function InputWithChips({
-  items,
-  chipClassName,
-  ...props
-}: {
-  items: string[];
-  chipClassName?: string;
-} & InputHTMLAttributes<HTMLInputElement>) {
-  // useEffect(() => {
-  //   if (chipsContainerRef.current) {
-  //     chipsContainerRef.current.style.height = `${chipsContainerRef.current.scrollHeight}px`;
-  //   }
-  // }, [items]);
-
-  return (
-    <div>
-      <div className="flex flex-col gap-2 px-1 py-1">
-        {items.map((item, i) => (
-          <div
-            key={i}
-            className={cn(
-              "flex items-center gap-2",
-              "h-8 rounded-md bg-muted px-2 py-1 text-sm",
-              chipClassName,
-            )}
-          >
-            {item}
-            <Button
-              variant="ghost"
-              size="icon"
-              className="size-5 text-muted-foreground hover:bg-gray-200 hover:text-muted-foreground"
-            >
-              <XMarkIcon className="h-4 w-4" />
-            </Button>
-          </div>
-        ))}
-      </div>
-      <Input
-        className="h-10 border-none outline-none focus:outline-none"
-        {...props}
-      />
-    </div>
-  );
-}

@@ -32,7 +32,7 @@ export default function EvalGroupCard({
         {
           id: generateTempId(),
           name: "",
-          description: "make sure the agent...",
+          description: "",
         },
       ],
     });
