@@ -18,7 +18,12 @@ export const EvalOverrideWithoutScenarioId = EvalOverrideSchema.omit({
   scenarioId: true,
 });
 
-export const CreateEvalSchema = z.object({
+export const CreateEvalSchema = EvalSchema.omit({
+  createdAt: true,
+  scenarioId: true,
+});
+
+export const AlternateCreateEvalSchema = z.object({
   type: z.nativeEnum(EvalType),
   resultType: z.nativeEnum(EvalResultType),
   contentType: z.nativeEnum(EvalContentType),
@@ -27,15 +32,16 @@ export const CreateEvalSchema = z.object({
   name: z.string(),
   description: z.string(),
   toolCallExpectedResult: z.string(),
-  scenarioId: z.string().optional(),
+  scenarioId: z.string().nullable(),
   agentId: z.string().nullable(),
   ownerId: z.string().nullable(),
   isCritical: z.boolean(),
+  deleted: z.boolean(),
+  evalGroupId: z.string().nullable(),
 });
 
 export type CreateGeneralEvalSchema = z.infer<typeof CreateGeneralEvalSchema>;
 export const CreateGeneralEvalSchema = CreateEvalSchema.omit({
-  scenarioId: true,
   agentId: true,
   ownerId: true,
 });
@@ -58,5 +64,5 @@ export const UpdateOverridesSchema = z.array(
 
 export type EvalGroupWithEvals = z.infer<typeof EvalGroupWithEvals>;
 export const EvalGroupWithEvals = EvalGroupSchema.extend({
-  evals: z.array(EvalWithoutScenarioId),
+  evals: z.array(z.union([CreateEvalSchema, EvalWithoutScenarioId])),
 });
