@@ -85,6 +85,13 @@ export function setDeviceAvailable(
 ): void {
   deviceUsageMap.set(deviceId, false);
 
+  console.log(
+    "========================Setting device available=========================",
+    deviceId,
+  );
+  console.log("deviceUsageMap", deviceUsageMap);
+  console.log("callQueue", callQueue);
+
   // Try to process queued calls when a device becomes available
   if (callQueue.length > 0) {
     const nextCall = callQueue.shift()!;
@@ -116,6 +123,8 @@ export const startCall = async (
       deviceId,
       assistantId,
     );
+    console.log("deviceUsageMap", deviceUsageMap);
+    console.log("callQueue", callQueue);
     const { data } = await axios.post<{ callId: string }>(
       `${env.AUDIO_SERVICE_URL}/websocket-call-ofone`,
       {
