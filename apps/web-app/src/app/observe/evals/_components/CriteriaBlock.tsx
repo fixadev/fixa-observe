@@ -1,5 +1,4 @@
 import { cn, isTempId } from "~/lib/utils";
-import { type Eval } from "../page";
 import { ibmPlexMono, ibmPlexSans } from "~/app/fonts";
 import { useState, useRef, useCallback } from "react";
 import {
@@ -10,6 +9,7 @@ import { Button } from "~/components/ui/button";
 import { XMarkIcon } from "@heroicons/react/24/solid";
 import MonoTextBlock from "~/components/MonoTextBlock";
 import { Input } from "~/components/ui/input";
+import { type Eval } from "prisma/generated/zod";
 
 export default function CriteriaBlock({
   criteria,

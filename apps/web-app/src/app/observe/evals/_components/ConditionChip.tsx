@@ -1,7 +1,6 @@
 "use client";
 
 import MonoTextBlock from "~/components/MonoTextBlock";
-import { type EvalCondition } from "../page";
 import { useMemo, useState } from "react";
 import { Input } from "~/components/ui/input";
 import {
@@ -25,14 +24,15 @@ import {
   TooltipTrigger,
 } from "~/components/ui/tooltip";
 import { Button } from "~/components/ui/button";
+import { type EvalGroupCondition } from "prisma/generated/zod";
 
 export default function ConditionChipWithPopover({
   condition,
   onUpdate,
   onDelete,
 }: {
-  condition: EvalCondition;
-  onUpdate: (condition: EvalCondition) => void;
+  condition: EvalGroupCondition;
+  onUpdate: (condition: EvalGroupCondition) => void;
   onDelete: () => void;
 }) {
   const [open, setOpen] = useState(isTempId(condition.id));
@@ -53,7 +53,7 @@ export function ConditionChip({
   condition,
   onDelete,
 }: {
-  condition: EvalCondition;
+  condition: EvalGroupCondition;
   onDelete: () => void;
 }) {
   const prefix = useMemo(() => {
@@ -95,8 +95,8 @@ export function ConditionChipEditor({
   condition,
   onUpdate,
 }: {
-  condition: EvalCondition;
-  onUpdate: (condition: EvalCondition) => void;
+  condition: EvalGroupCondition;
+  onUpdate: (condition: EvalGroupCondition) => void;
 }) {
   const helpText = useMemo(() => {
     if (condition.type === "text")
@@ -112,11 +112,11 @@ export function ConditionChipEditor({
         value={condition.type}
         onValueChange={(value) => {
           if (value === "text") {
-            onUpdate({ type: "text", id: condition.id, text: "" });
+            onUpdate({ ...condition, type: "text", text: "" });
           } else {
             onUpdate({
+              ...condition,
               type: "filter",
-              id: condition.id,
               property: "agentId",
               value: "",
             });
@@ -138,7 +138,7 @@ export function ConditionChipEditor({
       </Select>
       {condition.type === "text" ? (
         <Input
-          value={condition.text}
+          value={condition.text!}
           onChange={(e) => {
             onUpdate({ ...condition, text: e.target.value });
           }}
@@ -149,7 +149,7 @@ export function ConditionChipEditor({
       ) : (
         <>
           <Select
-            value={condition.property}
+            value={condition.property!}
             onValueChange={(value) => {
               onUpdate({ ...condition, property: value });
             }}
@@ -164,7 +164,7 @@ export function ConditionChipEditor({
           </Select>
           <div className={cn("mx-2 text-sm", ibmPlexMono.className)}>==</div>
           <Input
-            value={condition.value}
+            value={condition.value!}
             onChange={(e) => {
               onUpdate({ ...condition, value: e.target.value });
             }}

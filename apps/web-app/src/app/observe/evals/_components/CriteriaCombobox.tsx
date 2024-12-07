@@ -16,7 +16,6 @@ import {
 } from "@/components/ui/popover";
 import { useMemo, useRef, useState, forwardRef } from "react";
 import MonoTextBlock from "~/components/MonoTextBlock";
-import { type Eval } from "../page";
 import { cn } from "~/lib/utils";
 import { ibmPlexMono } from "~/app/fonts";
 import { Input } from "~/components/ui/input";
@@ -27,6 +26,7 @@ import {
   XMarkIcon,
 } from "@heroicons/react/24/solid";
 import { useCommandState } from "cmdk";
+import { type Eval } from "prisma/generated/zod";
 
 type Status = {
   value: string;

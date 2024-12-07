@@ -6,6 +6,7 @@ import {
   type CreateGeneralEvalSchema,
   type EvalSchema,
 } from "~/lib/eval";
+import { type EvalGroupWithIncludes } from "~/lib/types";
 
 export class EvalService {
   constructor(private db: PrismaClient) {}
@@ -68,12 +69,13 @@ export class EvalService {
     return await db.eval.update({ where: { id }, data: { deleted: true } });
   }
 
-  async getEvalGroups(userId: string) {
+  async getEvalGroups(userId: string): Promise<EvalGroupWithIncludes[]> {
     return await db.evalGroup.findMany({
       where: { ownerId: userId },
       orderBy: { createdAt: "asc" },
       include: {
         evals: true,
+        conditions: true,
       },
     });
   }

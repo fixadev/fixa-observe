@@ -1,40 +1,50 @@
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Switch } from "~/components/ui/switch";
-import { type EvalGroup } from "../page";
 import { Button } from "~/components/ui/button";
 import { cn, generateTempId } from "~/lib/utils";
 import { Fragment, useCallback } from "react";
 import ConditionChip from "./ConditionChip";
 import CriteriaBlock from "./CriteriaBlock";
+import { type EvalGroupWithIncludes } from "~/lib/types";
+import { EvalGroupConditionSchema, EvalSchema } from "prisma/generated/zod";
 
 export default function EvalGroupCard({
   group,
   onUpdate,
 }: {
-  group: EvalGroup;
-  onUpdate: (group: EvalGroup) => void;
+  group: EvalGroupWithIncludes;
+  onUpdate: (group: EvalGroupWithIncludes) => void;
 }) {
   const addCondition = useCallback(() => {
+    const condition = EvalGroupConditionSchema.parse({
+      id: generateTempId(),
+      createdAt: new Date(),
+      evalGroupId: group.id,
+      type: "text",
+
+      text: "",
+    });
     onUpdate({
       ...group,
-      conditions: [
-        ...group.conditions,
-        { id: generateTempId(), type: "text", text: "" },
-      ],
+      conditions: [...group.conditions, condition],
     });
   }, [group, onUpdate]);
 
   const addCriteria = useCallback(() => {
+    const criteria = EvalSchema.parse({
+      id: generateTempId(),
+      createdAt: new Date(),
+
+      name: "",
+      description: "",
+      type: "general",
+      resultType: "boolean",
+
+      evalGroupId: group.id,
+    });
     onUpdate({
       ...group,
-      evals: [
-        ...group.evals,
-        {
-          id: generateTempId(),
-          name: "",
-          description: "",
-        },
-      ],
+      evals: [...group.evals, criteria],
     });
   }, [group, onUpdate]);
 

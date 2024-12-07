@@ -2,26 +2,26 @@
 
 import Link from "next/link";
 import { SidebarTrigger } from "~/components/ui/sidebar";
-import { z } from "zod";
 import EvalGroupCard from "./_components/EvalGroupCard";
 import { useCallback, useMemo, useState, useEffect } from "react";
 import UnsavedChangesBar from "./_components/UnsavedChangesBar";
 import { useRouter } from "next/navigation";
-import { type EvalGroup } from "prisma/generated/zod";
 import { api } from "~/trpc/react";
+import { Skeleton } from "~/components/ui/skeleton";
+import { type EvalGroupWithIncludes } from "~/lib/types";
 
 export default function EvalsPage() {
   const router = useRouter();
 
-  const { data: _evalGroups } = api.eval.getGeneralEvals.useQuery();
-  const [evalGroups, setEvalGroups] = useState<EvalGroup[]>();
+  const { data: _evalGroups } = api.eval.getEvalGroups.useQuery();
+  const [evalGroups, setEvalGroups] = useState<EvalGroupWithIncludes[]>();
+  const [originalEvalGroups, setOriginalEvalGroups] =
+    useState<EvalGroupWithIncludes[]>();
   useEffect(() => {
     if (_evalGroups) {
       setEvalGroups(_evalGroups);
     }
   }, [_evalGroups]);
-
-  const [originalEvalGroups, setOriginalEvalGroups] = useState<EvalGroup[]>();
 
   const unsavedChanges = useMemo(() => {
     return JSON.stringify(evalGroups) !== JSON.stringify(originalEvalGroups);
@@ -62,17 +62,25 @@ export default function EvalsPage() {
         </Link>
       </div>
       <div className="relative flex flex-col gap-4 p-4 pb-96">
-        {evalGroups.map((g) => (
-          <EvalGroupCard
-            key={g.id}
-            group={g}
-            onUpdate={(updated) => {
-              setEvalGroups(
-                evalGroups.map((g) => (g.id === updated.id ? updated : g)),
-              );
-            }}
-          />
-        ))}
+        {!evalGroups ? (
+          <>
+            <Skeleton className="h-20 w-full" />
+            <Skeleton className="h-20 w-full" />
+            <Skeleton className="h-20 w-full" />
+          </>
+        ) : (
+          evalGroups.map((group) => (
+            <EvalGroupCard
+              key={group.id}
+              group={group}
+              onUpdate={(updated) => {
+                setEvalGroups(
+                  evalGroups.map((g) => (g.id === updated.id ? updated : g)),
+                );
+              }}
+            />
+          ))
+        )}
       </div>
       {unsavedChanges && (
         <UnsavedChangesBar save={handleSave} discard={handleDiscard} />

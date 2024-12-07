@@ -1,7 +1,7 @@
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { CreateGeneralEvalSchema, EvalGroupWithEvals } from "~/lib/eval";
 import { EvalService } from "~/server/services/eval";
-import { EvalGroupSchema, EvalSchema } from "prisma/generated/zod";
+import { EvalSchema } from "prisma/generated/zod";
 import { db } from "~/server/db";
 import { z } from "zod";
 
