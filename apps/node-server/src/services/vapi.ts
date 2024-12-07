@@ -165,7 +165,7 @@ export const handleCallEnded = async ({
     console.log("O1 ANALYSIS for call", call.id, o1Analysis);
 
     let unparsedResult: string;
-    unparsedResult = o1Analysis.cleanedResult;
+    unparsedResult = o1Analysis;
 
     // const useGemini = !scenario.includeDateTime;
     // if (!useGemini) {
@@ -188,7 +188,7 @@ export const handleCallEnded = async ({
     //   unparsedResult = geminiResult.textResult ?? "";
     // }
 
-    const { evalResults } = await formatOutput(unparsedResult);
+    const evalResults = await formatOutput(unparsedResult);
 
     const validEvalResults = evalResults.filter((evalResult) =>
       [...scenario.evals]?.some(
