@@ -4,10 +4,45 @@ import Link from "next/link";
 import { SidebarTrigger } from "~/components/ui/sidebar";
 import { z } from "zod";
 import EvalGroupCard from "./_components/EvalGroupCard";
-import { useState } from "react";
+import { useCallback, useMemo, useRef, useState, useEffect } from "react";
+import UnsavedChangesBar from "./_components/UnsavedChangesBar";
+import { useRouter } from "next/navigation";
 
 export default function EvalsPage() {
+  const router = useRouter();
   const [evalGroups, setEvalGroups] = useState<EvalGroup[]>(testData);
+  const [originalEvalGroups, setOriginalEvalGroups] =
+    useState<EvalGroup[]>(testData);
+
+  const unsavedChanges = useMemo(() => {
+    return JSON.stringify(evalGroups) !== JSON.stringify(originalEvalGroups);
+  }, [evalGroups, originalEvalGroups]);
+
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (unsavedChanges) {
+        e.preventDefault();
+        e.returnValue = "";
+        return "";
+      }
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, [unsavedChanges, router]);
+
+  const handleSave = useCallback(() => {
+    console.log("saving");
+    setOriginalEvalGroups(evalGroups);
+  }, [evalGroups]);
+
+  const handleDiscard = useCallback(() => {
+    console.log("discarding");
+    setEvalGroups(originalEvalGroups);
+  }, [originalEvalGroups]);
 
   return (
     <>
@@ -17,7 +52,7 @@ export default function EvalsPage() {
           <div className="font-medium">evaluation criteria</div>
         </Link>
       </div>
-      <div className="mb-96 flex flex-col gap-4 p-4">
+      <div className="relative flex flex-col gap-4 p-4 pb-96">
         {evalGroups.map((g) => (
           <EvalGroupCard
             key={g.id}
@@ -30,6 +65,9 @@ export default function EvalsPage() {
           />
         ))}
       </div>
+      {unsavedChanges && (
+        <UnsavedChangesBar save={handleSave} discard={handleDiscard} />
+      )}
     </>
   );
 }

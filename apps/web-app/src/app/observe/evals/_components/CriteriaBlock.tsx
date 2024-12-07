@@ -8,7 +8,6 @@ import {
 } from "~/components/ui/autosize-textarea";
 import { Button } from "~/components/ui/button";
 import { XMarkIcon } from "@heroicons/react/24/solid";
-import CriteriaCombobox from "./CriteriaCombobox";
 import MonoTextBlock from "~/components/MonoTextBlock";
 import { Input } from "~/components/ui/input";
 
