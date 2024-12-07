@@ -68,7 +68,7 @@ export class EvalService {
     return await db.eval.update({ where: { id }, data: { deleted: true } });
   }
 
-  async updateEvalGroups(evalGroups: EvalGroupWithEvals[], userId: string) {
+  async saveEvalGroupsState(evalGroups: EvalGroupWithEvals[], userId: string) {
     const priorEvalGroups = await db.evalGroup.findMany({
       where: { ownerId: userId },
       orderBy: { createdAt: "asc" },
