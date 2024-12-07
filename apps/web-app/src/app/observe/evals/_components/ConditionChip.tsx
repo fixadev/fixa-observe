@@ -39,8 +39,10 @@ export default function ConditionChipWithPopover({
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger>
-        <ConditionChip condition={condition} onDelete={onDelete} />
+      <PopoverTrigger asChild>
+        <div onClick={() => setOpen(true)}>
+          <ConditionChip condition={condition} onDelete={onDelete} />
+        </div>
       </PopoverTrigger>
       <PopoverContent className="w-fit p-2" align="start">
         <ConditionChipEditor condition={condition} onUpdate={onUpdate} />
@@ -70,7 +72,7 @@ export function ConditionChip({
   }, [condition]);
 
   return (
-    <MonoTextBlock className="hover:bg-muted/60">
+    <MonoTextBlock className="cursor-pointer hover:bg-muted/60">
       <div className="flex items-center gap-1">
         <div className="flex items-baseline gap-1">
           {prefix && (
