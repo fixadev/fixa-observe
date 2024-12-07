@@ -150,6 +150,7 @@ export class EvalService {
               data: evaluationsToCreate.map((evaluation) => ({
                 ...evaluation,
                 id: uuidv4(),
+                ownerId: userId,
               })),
             },
           },
@@ -162,11 +163,13 @@ export class EvalService {
         data: {
           ...evalGroup,
           id: uuidv4(),
+          ownerId: userId,
           evals: {
             createMany: {
               data: evalGroup.evals.map((evaluation) => ({
                 ...evaluation,
                 id: uuidv4(),
+                ownerId: userId,
               })),
             },
           },
