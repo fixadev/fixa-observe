@@ -22,9 +22,11 @@ import {
 import {
   type EvalOverrideWithoutScenarioId,
   type EvalWithoutScenarioId,
+} from "~/lib/eval";
+import {
+  type ScenarioWithEvals,
   type UpdateScenarioSchema,
-} from "~/lib/agent";
-import { type ScenarioWithEvals } from "~/lib/agent";
+} from "~/lib/scenario";
 import { EvalContentType, EvalResultType, EvalType } from "@prisma/client";
 import { Label } from "~/components/ui/label";
 import { Switch } from "~/components/ui/switch";
@@ -70,6 +72,7 @@ export function ScenarioSheet({
       toolCallExpectedResult: "",
       isCritical: true,
       deleted: false,
+      evalGroupId: null,
     };
   }, []);
 

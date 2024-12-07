@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { Card } from "~/components/ui/card";
-import { type EvalWithoutScenarioId } from "~/lib/agent";
+import { type EvalWithoutScenarioId } from "~/lib/eval";
 import { XMarkIcon } from "@heroicons/react/24/solid";
 
 import { EvalInput } from "~/app/_components/EvalInput";

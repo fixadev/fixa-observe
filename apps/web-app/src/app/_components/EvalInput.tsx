@@ -14,7 +14,7 @@ import {
 } from "~/components/ui/tooltip";
 import { Switch } from "~/components/ui/switch";
 import { TextAreaWithLabel } from "./TextAreaWithLabel";
-import { type EvalWithoutScenarioId, type EvalSchema } from "~/lib/agent";
+import { type EvalWithoutScenarioId, type EvalSchema } from "~/lib/eval";
 import { InformationCircleIcon } from "@heroicons/react/24/solid";
 
 export function EvalInput({
