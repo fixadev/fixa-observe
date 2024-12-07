@@ -1,8 +1,9 @@
 import { type PrismaClient } from "@prisma/client";
 import { db } from "../db";
 import { v4 as uuidv4 } from "uuid";
-import { type EvalGroupWithEvals, type EvalSchema } from "~/lib/eval";
+import { type EvalSchema } from "~/lib/eval";
 import { type EvalGroupWithIncludes } from "~/lib/types";
+import { getCreatedUpdatedDeleted } from "~/lib/utils";
 
 export class EvalService {
   constructor(private db: PrismaClient) {}
@@ -76,31 +77,23 @@ export class EvalService {
     });
   }
 
-  async saveEvalGroupsState(evalGroups: EvalGroupWithEvals[], userId: string) {
+  async saveEvalGroupsState(
+    evalGroups: EvalGroupWithIncludes[],
+    userId: string,
+  ) {
     const priorEvalGroups = await db.evalGroup.findMany({
       where: { ownerId: userId },
       orderBy: { createdAt: "asc" },
       include: {
         evals: true,
+        conditions: true,
       },
     });
-    const evalGroupsToDelete = priorEvalGroups.filter(
-      (priorEvalGroup) =>
-        !evalGroups.some(
-          (newEvalGroup) => newEvalGroup.id === priorEvalGroup.id,
-        ),
-    );
-    const evalGroupsToUpdate = evalGroups.filter((evalGroup) =>
-      priorEvalGroups.some(
-        (priorEvalGroup) => priorEvalGroup.id === evalGroup.id,
-      ),
-    );
-    const evalGroupsToCreate = evalGroups.filter(
-      (evalGroup) =>
-        !priorEvalGroups.some(
-          (priorEvalGroup) => priorEvalGroup.id === evalGroup.id,
-        ),
-    );
+    const {
+      created: evalGroupsToCreate,
+      updated: evalGroupsToUpdate,
+      deleted: evalGroupsToDelete,
+    } = getCreatedUpdatedDeleted(priorEvalGroups, evalGroups);
     const deletePromises = evalGroupsToDelete.map((evalGroup) =>
       db.evalGroup.delete({ where: { id: evalGroup.id } }),
     );
@@ -111,19 +104,17 @@ export class EvalService {
       if (!priorEvals) {
         throw new Error("Prior evals not found");
       }
-      const evaluationsToDelete = priorEvals.evals.filter(
-        (priorEvaluation) =>
-          !evalGroup.evals.some(
-            (newEvaluation) => newEvaluation.id === priorEvaluation.id,
-          ),
-      );
-      const evaluationsToUpdate = evalGroup.evals.filter((evaluation) =>
-        priorEvals.evals.some((priorEval) => priorEval.id === evaluation.id),
-      );
-      const evaluationsToCreate = evalGroup.evals.filter(
-        (evaluation) =>
-          !priorEvals.evals.some((priorEval) => priorEval.id === evaluation.id),
-      );
+
+      const {
+        created: evaluationsToCreate,
+        updated: evaluationsToUpdate,
+        deleted: evaluationsToDelete,
+      } = getCreatedUpdatedDeleted(priorEvals.evals, evalGroup.evals);
+      const {
+        created: conditionsToCreate,
+        updated: conditionsToUpdate,
+        deleted: conditionsToDelete,
+      } = getCreatedUpdatedDeleted(priorEvals.conditions, evalGroup.conditions);
 
       return db.evalGroup.update({
         where: { id: evalGroup.id },
@@ -139,6 +130,7 @@ export class EvalService {
               data: evaluationsToUpdate.map((evaluation) => ({
                 ...evaluation,
                 id: evaluation.id,
+                evalGroupId: undefined,
               })),
               where: {
                 id: {
@@ -149,8 +141,33 @@ export class EvalService {
             createMany: {
               data: evaluationsToCreate.map((evaluation) => ({
                 ...evaluation,
-                id: uuidv4(),
                 ownerId: userId,
+                evalGroupId: undefined,
+              })),
+            },
+          },
+          conditions: {
+            deleteMany: {
+              id: {
+                in: conditionsToDelete.map((condition) => condition.id),
+              },
+            },
+            updateMany: {
+              data: conditionsToUpdate.map((condition) => ({
+                ...condition,
+                id: condition.id,
+                evalGroupId: undefined,
+              })),
+              where: {
+                id: {
+                  in: conditionsToUpdate.map((condition) => condition.id),
+                },
+              },
+            },
+            createMany: {
+              data: conditionsToCreate.map((condition) => ({
+                ...condition,
+                evalGroupId: undefined,
               })),
             },
           },
@@ -168,8 +185,16 @@ export class EvalService {
             createMany: {
               data: evalGroup.evals.map((evaluation) => ({
                 ...evaluation,
-                id: uuidv4(),
                 ownerId: userId,
+                evalGroupId: undefined,
+              })),
+            },
+          },
+          conditions: {
+            createMany: {
+              data: evalGroup.conditions.map((condition) => ({
+                ...condition,
+                evalGroupId: undefined,
               })),
             },
           },
