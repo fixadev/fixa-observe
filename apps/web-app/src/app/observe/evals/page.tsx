@@ -9,6 +9,8 @@ import { useRouter } from "next/navigation";
 import { api } from "~/trpc/react";
 import { Skeleton } from "~/components/ui/skeleton";
 import { type EvalGroupWithIncludes } from "~/lib/types";
+import { Button } from "~/components/ui/button";
+import { instantiateEvalGroup } from "~/lib/instantiate";
 
 export default function EvalsPage() {
   const router = useRouter();
@@ -20,6 +22,7 @@ export default function EvalsPage() {
   useEffect(() => {
     if (_evalGroups) {
       setEvalGroups(_evalGroups);
+      setOriginalEvalGroups(_evalGroups);
     }
   }, [_evalGroups]);
 
@@ -43,6 +46,13 @@ export default function EvalsPage() {
     };
   }, [unsavedChanges, router]);
 
+  const createEvalGroup = useCallback(() => {
+    setEvalGroups((prev) => [
+      ...(prev ?? []),
+      { ...instantiateEvalGroup(), evals: [], conditions: [] },
+    ]);
+  }, []);
+
   const handleSave = useCallback(() => {
     console.log("saving");
     setOriginalEvalGroups(evalGroups);
@@ -61,13 +71,30 @@ export default function EvalsPage() {
           <div className="font-medium">evaluation criteria</div>
         </Link>
       </div>
-      <div className="relative flex flex-col gap-4 p-4 pb-96">
+      <div className="relative flex flex-1 flex-col gap-4 p-4 pb-96">
         {!evalGroups ? (
           <>
             <Skeleton className="h-20 w-full" />
             <Skeleton className="h-20 w-full" />
             <Skeleton className="h-20 w-full" />
           </>
+        ) : evalGroups.length === 0 ? (
+          <div className="container mx-auto flex h-full items-center justify-center p-4">
+            <div className="flex flex-col gap-4">
+              <div>
+                <div className="text-lg font-medium">no eval groups.</div>
+                <div className="text-sm text-muted-foreground">
+                  create an eval group to get started
+                </div>
+              </div>
+              <Button
+                className="flex shrink-0 items-center gap-2"
+                onClick={createEvalGroup}
+              >
+                create eval group
+              </Button>
+            </div>
+          </div>
         ) : (
           evalGroups.map((group) => (
             <EvalGroupCard
