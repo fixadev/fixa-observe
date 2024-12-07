@@ -2,7 +2,7 @@ import { z } from "zod";
 import { zodResponseFormat } from "openai/helpers/zod";
 import { openai } from "../clients/openAIClient";
 import { ArtifactMessagesItem } from "@vapi-ai/server-sdk/api";
-import { Eval, EvalResultType, Scenario } from "@prisma/client";
+import { Eval, EvalResultType, Message, Scenario } from "@prisma/client";
 import { getDateTimeAtTimezone } from "../utils/time";
 
 export type EvalResultSchema = z.infer<typeof EvalResultSchema>;
@@ -25,12 +25,14 @@ export const analyzeCallWitho1 = async ({
   messages,
   testAgentPrompt,
   scenario,
+  evals,
 }: {
   callStartedAt?: string;
-  messages: ArtifactMessagesItem[];
+  messages: ArtifactMessagesItem[] | Message[];
   testAgentPrompt: string;
-  scenario: Scenario & { evals: Eval[] };
-}): Promise<{ cleanedResult: string }> => {
+  scenario?: Scenario & { evals: Eval[] };
+  evals?: Eval[];
+}): Promise<string> => {
   const basePrompt = `
   Your job to to analyze a call transcript between an AI agent (the main agent) and a test AI agent (the test agent), and determine how the main agent performed.
 
@@ -66,13 +68,13 @@ export const analyzeCallWitho1 = async ({
   `;
 
   const prompt = `${basePrompt}\n\n\n\nTest Agent Prompt: ${testAgentPrompt}\n\n${
-    scenario.includeDateTime && scenario.timezone && callStartedAt
+    scenario?.includeDateTime && scenario?.timezone && callStartedAt
       ? `The call occurred at ${getDateTimeAtTimezone(
           new Date(callStartedAt),
           scenario.timezone,
         )}. Use this as context for your evaluation, if the evaluation criteria is dependent on the current date or time, or if it mentions phrases like 'right now' or 'today', etc.`
       : ""
-  }\n\nScenario Evaluation Criteria: ${JSON.stringify(scenario.evals)}
+  }\n\nScenario Evaluation Criteria: ${JSON.stringify(scenario?.evals || evals || [])}
   \n\nCall Transcript: ${JSON.stringify(messages)}`;
   // console.log("========================= O1 PROMPT =========================");
   // console.log(prompt);
@@ -101,9 +103,7 @@ export const analyzeCallWitho1 = async ({
 
   console.log("CLEANED RESULT", cleanedResult);
 
-  return {
-    cleanedResult,
-  };
+  return cleanedResult;
 };
 
 export const formatOutput = async (output: string) => {
@@ -133,7 +133,5 @@ export const formatOutput = async (output: string) => {
     throw new Error("No response from OpenAI");
   }
 
-  return {
-    evalResults: parsedResponse.evalResults,
-  };
+  return parsedResponse.evalResults;
 };
