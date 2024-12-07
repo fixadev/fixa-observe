@@ -135,6 +135,7 @@ export default function AgentScenariosPage({
                 (e) => ({
                   ...e,
                   scenarioId: newScenario.id,
+                  agentId: agent?.id ?? "",
                 }),
               ),
             },
