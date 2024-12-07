@@ -4,7 +4,7 @@ import { Button } from "~/components/ui/button";
 import { api } from "~/trpc/react";
 import { useEffect, useState } from "react";
 import { useToast } from "~/components/hooks/use-toast";
-import { type EvalWithoutScenarioId, type EvalSchema } from "~/lib/agent";
+import { type EvalWithoutScenarioId, type EvalSchema } from "~/lib/eval";
 import { TrashIcon } from "@heroicons/react/24/solid";
 import {
   AlertDialog,
