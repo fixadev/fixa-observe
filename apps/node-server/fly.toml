@@ -3,7 +3,7 @@
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 #
 
-app = "pixa-observe"
+app = "pixa-observe-staging"
 primary_region = 'sjc'
 
 [build]
