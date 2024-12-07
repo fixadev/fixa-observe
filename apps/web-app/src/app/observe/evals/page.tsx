@@ -5,7 +5,6 @@ import { SidebarTrigger } from "~/components/ui/sidebar";
 import EvalGroupCard from "./_components/EvalGroupCard";
 import { useCallback, useMemo, useState, useEffect } from "react";
 import UnsavedChangesBar from "./_components/UnsavedChangesBar";
-import { useRouter } from "next/navigation";
 import { api } from "~/trpc/react";
 import { Skeleton } from "~/components/ui/skeleton";
 import { type EvalGroupWithIncludes } from "~/lib/types";
@@ -13,8 +12,6 @@ import { Button } from "~/components/ui/button";
 import { instantiateEvalGroup } from "~/lib/instantiate";
 
 export default function EvalsPage() {
-  const router = useRouter();
-
   const { data: _evalGroups } = api.eval.getEvalGroups.useQuery();
   const [evalGroups, setEvalGroups] = useState<EvalGroupWithIncludes[]>();
   const [originalEvalGroups, setOriginalEvalGroups] =
@@ -30,21 +27,21 @@ export default function EvalsPage() {
     return JSON.stringify(evalGroups) !== JSON.stringify(originalEvalGroups);
   }, [evalGroups, originalEvalGroups]);
 
-  useEffect(() => {
-    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-      if (unsavedChanges) {
-        e.preventDefault();
-        e.returnValue = "";
-        return "";
-      }
-    };
+  // useEffect(() => {
+  //   const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+  //     if (unsavedChanges) {
+  //       e.preventDefault();
+  //       e.returnValue = "";
+  //       return "";
+  //     }
+  //   };
 
-    window.addEventListener("beforeunload", handleBeforeUnload);
+  //   window.addEventListener("beforeunload", handleBeforeUnload);
 
-    return () => {
-      window.removeEventListener("beforeunload", handleBeforeUnload);
-    };
-  }, [unsavedChanges, router]);
+  //   return () => {
+  //     window.removeEventListener("beforeunload", handleBeforeUnload);
+  //   };
+  // }, [unsavedChanges, router]);
 
   const createEvalGroup = useCallback(() => {
     setEvalGroups((prev) => [
