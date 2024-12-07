@@ -37,7 +37,7 @@ export const GenerateScenariosModal = ({
   const { toast } = useToast();
 
   const { mutate: generateScenarios } =
-    api.agent.generateScenariosFromPrompt.useMutation({
+    api.scenario.generateFromPrompt.useMutation({
       onSuccess: (data) => {
         setAgent({
           ...agent,

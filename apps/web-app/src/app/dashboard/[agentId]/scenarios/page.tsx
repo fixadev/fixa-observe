@@ -33,7 +33,7 @@ export default function AgentScenariosPage({
   const searchParams = useSearchParams();
   const scenarioId = searchParams.get("scenarioId");
 
-  const { mutate: createScenario } = api.agent.createScenario.useMutation({
+  const { mutate: createScenario } = api.scenario.create.useMutation({
     onSuccess: (data) => {
       if (agent && data) {
         setAgent({
@@ -49,7 +49,7 @@ export default function AgentScenariosPage({
     },
   });
 
-  const { mutate: updateScenario } = api.agent.updateScenario.useMutation({
+  const { mutate: updateScenario } = api.scenario.update.useMutation({
     onSuccess: (data) => {
       if (agent && data) {
         setAgent({
@@ -65,7 +65,7 @@ export default function AgentScenariosPage({
     },
   });
 
-  const { mutate: deleteScenario } = api.agent.deleteScenario.useMutation({
+  const { mutate: deleteScenario } = api.scenario.delete.useMutation({
     onSuccess: () => {
       toast({
         title: "Scenario deleted",
@@ -111,6 +111,7 @@ export default function AgentScenariosPage({
             createdAt: new Date(),
             scenarioId: undefined,
             deleted: false,
+            evalGroupId: null,
           })),
           generalEvalOverrides: scenario.generalEvalOverrides.map((e) => ({
             ...e,
