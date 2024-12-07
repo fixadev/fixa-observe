@@ -84,6 +84,13 @@ export type AgentWithIncludes = Prisma.AgentGetPayload<{
   };
 }>;
 
+export type EvalGroupWithIncludes = Prisma.EvalGroupGetPayload<{
+  include: {
+    evals: true;
+    conditions: true;
+  };
+}>;
+
 export type Filter = z.infer<typeof FilterSchema>;
 export const FilterSchema = z.object({
   lookbackPeriod: z.object({
@@ -134,4 +141,17 @@ export const OfOneKioskPropertiesSchema = ExtraPropertiesSchema.extend({
   type: z.literal("ofone-kiosk"),
   deviceIds: z.array(z.string()),
   baseUrl: z.string(),
+});
+
+export const EvalGroupFilterCondition = z.object({
+  id: z.string(),
+  type: z.literal("filter"),
+  property: z.string(),
+  value: z.string(),
+});
+
+export const EvalGroupTextCondition = z.object({
+  id: z.string(),
+  type: z.literal("text"),
+  text: z.string(),
 });

@@ -1,7 +1,16 @@
 import { type PrismaClient } from "@prisma/client";
 import { db } from "../db";
 import { v4 as uuidv4 } from "uuid";
+<<<<<<< HEAD
 import { type EvalGroupWithEvals, type EvalSchema } from "~/lib/eval";
+=======
+import {
+  type EvalGroupWithEvals,
+  type CreateGeneralEvalSchema,
+  type EvalSchema,
+} from "~/lib/eval";
+import { type EvalGroupWithIncludes } from "~/lib/types";
+>>>>>>> cf120ccb770439386480aa0a8d16140ae2e7d617
 
 export class EvalService {
   constructor(private db: PrismaClient) {}
@@ -64,12 +73,13 @@ export class EvalService {
     return await db.eval.update({ where: { id }, data: { deleted: true } });
   }
 
-  async getEvalGroups(userId: string) {
+  async getEvalGroups(userId: string): Promise<EvalGroupWithIncludes[]> {
     return await db.evalGroup.findMany({
       where: { ownerId: userId },
       orderBy: { createdAt: "asc" },
       include: {
         evals: true,
+        conditions: true,
       },
     });
   }
