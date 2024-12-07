@@ -37,7 +37,7 @@ export const evalRouter = createTRPCRouter({
       return await evalServiceInstance.deleteGeneralEval(input.id);
     }),
 
-  syncEvalGroups: protectedProcedure
+  updateEvalGroups: protectedProcedure
     .input(z.array(EvalGroupWithEvals))
     .mutation(async ({ input, ctx }) => {
       return await evalServiceInstance.syncEvalGroups(input, ctx.user.id);
