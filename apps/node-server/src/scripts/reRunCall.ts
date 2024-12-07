@@ -67,15 +67,13 @@ const main = async () => {
     scenario: scenarioWithGeneralEvals,
   });
 
-  const unparsedResult = analysis.cleanedResult;
-
   // const { parsedResult } = geminiResult;
-  if (!unparsedResult) {
+  if (!analysis) {
     console.error("No cleaned result found for call ID", call.id);
     return;
   }
 
-  const { evalResults } = await formatOutput(unparsedResult);
+  const evalResults = await formatOutput(analysis);
 
   const validEvalResults = evalResults.filter((evalResult) =>
     [...scenarioWithGeneralEvals.evals]?.some(
