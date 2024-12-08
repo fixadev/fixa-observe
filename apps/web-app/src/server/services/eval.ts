@@ -1,20 +1,21 @@
 import { type PrismaClient } from "@prisma/client";
-import { db } from "../db";
 import { v4 as uuidv4 } from "uuid";
 import { type EvalSchema } from "~/lib/eval";
 import { type EvalSetWithIncludes } from "~/lib/types";
 import { getCreatedUpdatedDeleted } from "~/lib/utils";
 
 export class EvalService {
+  constructor(private db: PrismaClient) {}
+
   async getGeneralEvals(userId: string) {
-    return await db.eval.findMany({
+    return await this.db.eval.findMany({
       where: { ownerId: userId },
       orderBy: { createdAt: "asc" },
     });
   }
 
   async createGeneralEval(userId: string, evaluation: EvalSchema) {
-    return await db.eval.create({
+    return await this.db.eval.create({
       data: {
         ...evaluation,
         id: uuidv4(),
@@ -24,7 +25,7 @@ export class EvalService {
   }
 
   async updateGeneralEval(evaluation: EvalSchema) {
-    return await db.eval.update({
+    return await this.db.eval.update({
       where: { id: evaluation.id },
       data: evaluation,
     });
@@ -40,7 +41,7 @@ export class EvalService {
     enabled: boolean;
   }) {
     if (enabled) {
-      return await db.agent.update({
+      return await this.db.agent.update({
         where: { id: agentId },
         data: {
           enabledGeneralEvals: {
@@ -49,7 +50,7 @@ export class EvalService {
         },
       });
     } else {
-      return await db.agent.update({
+      return await this.db.agent.update({
         where: { id: agentId },
         data: {
           enabledGeneralEvals: {
@@ -61,21 +62,25 @@ export class EvalService {
   }
 
   async deleteGeneralEval(id: string) {
-    return await db.eval.update({ where: { id }, data: { deleted: true } });
+    return await this.db.eval.update({
+      where: { id },
+      data: { deleted: true },
+    });
   }
 
   async getSets(userId: string) {
-    return await db.evalSet.findMany({
+    return await this.db.evalSet.findMany({
       where: { ownerId: userId },
       orderBy: { createdAt: "asc" },
     });
   }
 
-  async createSet(set: EvalSetWithIncludes) {
-    return await db.evalSet.create({
+  async createSet(userId: string, set: EvalSetWithIncludes) {
+    return await this.db.evalSet.create({
       data: {
         ...set,
         id: uuidv4(),
+        ownerId: userId,
         evals: {
           create: set.evals,
         },
@@ -83,16 +88,16 @@ export class EvalService {
     });
   }
 
-  async updateSet(set: EvalSetWithIncludes) {
-    const priorEvals = await db.eval.findMany({
+  async updateSet(userId: string, set: EvalSetWithIncludes) {
+    const priorEvals = await this.db.eval.findMany({
       where: { evalSetId: set.id },
     });
     const { created, updated, deleted } = getCreatedUpdatedDeleted(
       priorEvals,
       set.evals,
     );
-    return await db.evalSet.update({
-      where: { id: set.id },
+    return await this.db.evalSet.update({
+      where: { id: set.id, ownerId: userId },
       data: {
         ...set,
         evals: {
@@ -107,7 +112,7 @@ export class EvalService {
     });
   }
 
-  async deleteSet(id: string) {
-    return await db.evalSet.delete({ where: { id } });
+  async deleteSet(userId: string, id: string) {
+    return await this.db.evalSet.delete({ where: { id, ownerId: userId } });
   }
 }

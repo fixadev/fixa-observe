@@ -1,9 +1,12 @@
 import { type SavedSearch } from "prisma/generated/zod";
 import { db } from "../db";
+import { type PrismaClient } from "@prisma/client";
 
 export class SearchService {
+  constructor(private db: PrismaClient) {}
+
   async save(userId: string, search: SavedSearch) {
-    return db.savedSearch.create({
+    return this.db.savedSearch.create({
       data: {
         ...search,
         ownerId: userId,
@@ -13,7 +16,7 @@ export class SearchService {
   }
 
   async update(userId: string, search: SavedSearch) {
-    return db.savedSearch.update({
+    return this.db.savedSearch.update({
       where: {
         id: search.id,
       },
@@ -25,10 +28,11 @@ export class SearchService {
     });
   }
 
-  getById(id: string) {
-    return db.savedSearch.findUnique({
+  getById(userId: string, id: string) {
+    return this.db.savedSearch.findUnique({
       where: {
         id,
+        ownerId: userId,
       },
       include: {
         alerts: true,
@@ -42,7 +46,7 @@ export class SearchService {
   }
 
   async getAll(userId: string) {
-    return db.savedSearch.findMany({
+    return this.db.savedSearch.findMany({
       where: {
         ownerId: userId,
       },

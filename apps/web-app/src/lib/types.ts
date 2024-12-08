@@ -87,7 +87,6 @@ export type AgentWithIncludes = Prisma.AgentGetPayload<{
 export type EvalSetWithIncludes = Prisma.EvalSetGetPayload<{
   include: {
     evals: true;
-    conditions: true;
   };
 }>;
 

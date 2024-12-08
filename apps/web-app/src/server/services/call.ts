@@ -1,12 +1,13 @@
-import { type Prisma } from "@prisma/client";
+import { type PrismaClient, type Prisma } from "@prisma/client";
 import { type OrderBy, type Filter } from "~/lib/types";
 import { type CallWithIncludes } from "~/lib/types";
 import { calculateLatencyPercentiles } from "~/lib/utils";
-import { db } from "../db";
 
 export class CallService {
+  constructor(private db: PrismaClient) {}
+
   getCall = async (id: string): Promise<CallWithIncludes | null> => {
-    return await db.call.findUnique({
+    return await this.db.call.findUnique({
       where: { id },
       include: {
         messages: true,
@@ -102,7 +103,7 @@ export class CallService {
       orderByObject.startedAt = "desc";
     }
 
-    const items = await db.call.findMany({
+    const items = await this.db.call.findMany({
       where: {
         ownerId,
         testId,
@@ -312,7 +313,7 @@ export class CallService {
     scenarioId?: string;
     lookbackPeriod?: number;
   }): Promise<number> => {
-    return await db.call.count({
+    return await this.db.call.count({
       where: {
         ownerId,
         testId,
@@ -327,7 +328,7 @@ export class CallService {
   };
 
   getAgentIds = async (ownerId: string): Promise<string[]> => {
-    const result = await db.call.groupBy({
+    const result = await this.db.call.groupBy({
       by: ["agentId"],
       where: { ownerId },
     });
@@ -335,7 +336,7 @@ export class CallService {
   };
 
   getRegionIds = async (ownerId: string): Promise<string[]> => {
-    const result = await db.call.groupBy({
+    const result = await this.db.call.groupBy({
       by: ["regionId"],
       where: { ownerId },
     });
@@ -345,7 +346,7 @@ export class CallService {
   getMetadata = async (
     ownerId: string,
   ): Promise<Array<Record<string, string>>> => {
-    const result = await db.call.findMany({
+    const result = await this.db.call.findMany({
       where: { ownerId },
     });
     return result

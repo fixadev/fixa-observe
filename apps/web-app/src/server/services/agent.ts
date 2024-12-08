@@ -1,4 +1,3 @@
-import { db } from "../db";
 import { type CreateScenarioSchema } from "~/lib/scenario";
 import { v4 as uuidv4 } from "uuid";
 import { type PrismaClient } from "@prisma/client";
@@ -13,7 +12,7 @@ export class AgentService {
     scenarios: CreateScenarioSchema[],
     ownerId: string,
   ) {
-    const testAgents = await db.testAgent.findMany({
+    const testAgents = await this.db.testAgent.findMany({
       where: {
         OR: [{ ownerId }, { ownerId: "SYSTEM" }],
         defaultSelected: true,
@@ -21,7 +20,7 @@ export class AgentService {
       },
     });
 
-    return await db.agent.create({
+    return await this.db.agent.create({
       data: {
         id: uuidv4(),
         phoneNumber,
@@ -43,7 +42,7 @@ export class AgentService {
   }
 
   async updateAgentName(id: string, name: string) {
-    return await db.agent.update({
+    return await this.db.agent.update({
       where: { id },
       data: { name },
     });
@@ -51,7 +50,7 @@ export class AgentService {
 
   async upsertAgent(agent: Partial<Agent>, ownerId: string) {
     if (agent.id) {
-      return await db.agent.upsert({
+      return await this.db.agent.upsert({
         where: { id: agent.id },
         update: {
           ...agent,
@@ -64,12 +63,12 @@ export class AgentService {
         },
       });
     } else if (agent.customerAgentId) {
-      const existingAgent = await db.agent.findFirst({
+      const existingAgent = await this.db.agent.findFirst({
         where: { customerAgentId: agent.customerAgentId, ownerId },
       });
 
       if (existingAgent) {
-        return await db.agent.update({
+        return await this.db.agent.update({
           where: { id: existingAgent.id },
           data: {
             ...agent,
@@ -77,7 +76,7 @@ export class AgentService {
           },
         });
       }
-      return await db.agent.create({
+      return await this.db.agent.create({
         data: {
           ...AgentSchema.parse(agent),
           extraProperties: agent.extraProperties ?? undefined,
@@ -89,7 +88,7 @@ export class AgentService {
   }
 
   async getAgent(id: string) {
-    const result = await db.agent.findUnique({
+    const result = await this.db.agent.findUnique({
       where: { id },
       include: {
         scenarios: {
@@ -117,11 +116,11 @@ export class AgentService {
 
   async getAllAgents(ownerId: string) {
     // return await db.agent.findMany({ where: {} });
-    return await db.agent.findMany({ where: { ownerId } });
+    return await this.db.agent.findMany({ where: { ownerId } });
   }
 
   async updateAgent({ id, agent }: { id: string; agent: Partial<Agent> }) {
-    return await db.agent.update({
+    return await this.db.agent.update({
       where: { id },
       data: {
         ...agent,
@@ -137,7 +136,7 @@ export class AgentService {
     headshotUrl: string,
     description: string,
   ) {
-    return await db.testAgent.create({
+    return await this.db.testAgent.create({
       data: {
         id: uuidv4(),
         name,
@@ -150,7 +149,7 @@ export class AgentService {
   }
 
   async getTestAgents(ownerId: string) {
-    return await db.testAgent.findMany({
+    return await this.db.testAgent.findMany({
       where: {
         OR: [{ ownerId }, { ownerId: "SYSTEM" }],
         enabled: true,
@@ -165,7 +164,7 @@ export class AgentService {
     enabled: boolean,
   ) {
     if (enabled) {
-      return await db.agent.update({
+      return await this.db.agent.update({
         where: { id: agentId },
         data: {
           enabledTestAgents: {
@@ -174,7 +173,7 @@ export class AgentService {
         },
       });
     } else {
-      return await db.agent.update({
+      return await this.db.agent.update({
         where: { id: agentId },
         data: {
           enabledTestAgents: {
@@ -185,6 +184,6 @@ export class AgentService {
     }
   }
   async deleteAgent(id: string) {
-    return await db.agent.delete({ where: { id } });
+    return await this.db.agent.delete({ where: { id } });
   }
 }

@@ -1,6 +1,5 @@
 import { type PrismaClient } from "@prisma/client";
 import { v4 as uuidv4 } from "uuid";
-import { db } from "../db";
 import {
   type CreateScenarioSchema,
   type UpdateScenarioSchema,
@@ -12,7 +11,7 @@ export class ScenarioService {
   constructor(private db: PrismaClient) {}
 
   async createScenario(agentId: string, scenario: CreateScenarioSchema) {
-    return await db.scenario.create({
+    return await this.db.scenario.create({
       data: {
         ...scenario,
         id: uuidv4(),
@@ -45,7 +44,7 @@ export class ScenarioService {
   }
 
   async createScenarios(agentId: string, scenarios: CreateScenarioSchema[]) {
-    return await db.$transaction(async (tx) => {
+    return await this.db.$transaction(async (tx) => {
       return await Promise.all(
         scenarios.map((scenario) =>
           tx.scenario.create({
@@ -76,7 +75,7 @@ export class ScenarioService {
   }
 
   async updateScenario(scenario: UpdateScenarioSchema) {
-    const priorEvals = await db.eval.findMany({
+    const priorEvals = await this.db.eval.findMany({
       where: { scenarioId: scenario.id },
     });
 
@@ -96,7 +95,7 @@ export class ScenarioService {
         !priorEvals.some((priorEval) => priorEval.id === evaluation.id),
     );
 
-    const priorOverrides = await db.evalOverride.findMany({
+    const priorOverrides = await this.db.evalOverride.findMany({
       where: { scenarioId: scenario.id },
     });
 
@@ -121,7 +120,7 @@ export class ScenarioService {
         ),
     );
 
-    return await db.scenario.update({
+    return await this.db.scenario.update({
       where: { id: scenario.id },
       data: {
         ...scenario,
@@ -174,7 +173,7 @@ export class ScenarioService {
   }
 
   async deleteScenario(id: string) {
-    return await db.scenario.update({
+    return await this.db.scenario.update({
       where: { id },
       data: { deleted: true },
     });
