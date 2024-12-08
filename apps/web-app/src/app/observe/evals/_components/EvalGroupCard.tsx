@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Switch } from "~/components/ui/switch";
 import { Button } from "~/components/ui/button";
-import { cn } from "~/lib/utils";
+import { cn, isTempId } from "~/lib/utils";
 import { Fragment, useCallback } from "react";
 import ConditionChip from "./ConditionChip";
 import CriteriaBlock from "./CriteriaBlock";
@@ -10,6 +10,8 @@ import {
   instantiateEval,
   instantiateEvalGroupCondition,
 } from "~/lib/instantiate";
+import { EditableText } from "~/components/EditableText";
+import { EllipsisHorizontalIcon } from "@heroicons/react/24/solid";
 
 export default function EvalGroupCard({
   group,
@@ -47,7 +49,20 @@ export default function EvalGroupCard({
       )}
     >
       <CardHeader className="flex flex-row items-center justify-between gap-2">
-        <CardTitle>{group.name}</CardTitle>
+        <div className="flex items-center gap-1">
+          <EditableText
+            value={group.name}
+            onValueChange={(value) => onUpdate({ ...group, name: value })}
+            initialEditing={isTempId(group.id)}
+            className="text-base font-medium"
+            inputClassName="text-base"
+            placeholder="enter group name..."
+            inputPlaceholder={`enter group name... (i.e. "general evals")`}
+          />
+          <Button variant="ghost" size="icon" className="size-7">
+            <EllipsisHorizontalIcon className="size-5" />
+          </Button>
+        </div>
         <Switch
           checked={group.enabled}
           onCheckedChange={(checked) =>

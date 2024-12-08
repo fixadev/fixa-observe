@@ -10,11 +10,8 @@ import { Skeleton } from "~/components/ui/skeleton";
 import { type EvalGroupWithIncludes } from "~/lib/eval";
 import { Button } from "~/components/ui/button";
 import { instantiateEvalGroup } from "~/lib/instantiate";
-import { useToast } from "~/components/hooks/use-toast";
 
 export default function EvalsPage() {
-  const { toast } = useToast();
-
   const { data: _evalGroups } = api.eval.getEvalGroups.useQuery();
   const [evalGroups, setEvalGroups] = useState<EvalGroupWithIncludes[]>();
   const [originalEvalGroups, setOriginalEvalGroups] =

@@ -141,6 +141,7 @@ export class EvalService {
             createMany: {
               data: evaluationsToCreate.map((evaluation) => ({
                 ...evaluation,
+                id: undefined,
                 ownerId: userId,
                 evalGroupId: undefined,
               })),
@@ -155,7 +156,6 @@ export class EvalService {
             updateMany: {
               data: conditionsToUpdate.map((condition) => ({
                 ...condition,
-                id: condition.id,
                 evalGroupId: undefined,
               })),
               where: {
@@ -167,6 +167,7 @@ export class EvalService {
             createMany: {
               data: conditionsToCreate.map((condition) => ({
                 ...condition,
+                id: undefined,
                 evalGroupId: undefined,
               })),
             },
@@ -185,6 +186,7 @@ export class EvalService {
             createMany: {
               data: evalGroup.evals.map((evaluation) => ({
                 ...evaluation,
+                id: undefined,
                 ownerId: userId,
                 evalGroupId: undefined,
               })),
@@ -194,6 +196,7 @@ export class EvalService {
             createMany: {
               data: evalGroup.conditions.map((condition) => ({
                 ...condition,
+                id: undefined,
                 evalGroupId: undefined,
               })),
             },
