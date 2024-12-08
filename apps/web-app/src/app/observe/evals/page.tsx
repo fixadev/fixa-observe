@@ -11,6 +11,10 @@
 // import { Button } from "~/components/ui/button";
 // import { instantiateEvalGroup } from "~/lib/instantiate";
 
+export default function EvalsPage() {
+  return <div>EvalsPage</div>;
+}
+
 // export default function EvalsPage() {
 //   const { data: _evalSets } = api.eval.getSets.useQuery();
 //   const [evalSets, setEvalSets] = useState<EvalSetWithIncludes[]>();
