@@ -1,11 +1,11 @@
 import { createTRPCRouter, protectedProcedure } from "../trpc";
-import { EvalGroupWithIncludesSchema } from "~/lib/eval";
+import { EvalSetWithIncludesSchema } from "~/lib/eval";
 import { EvalService } from "~/server/services/eval";
 import { EvalSchema } from "prisma/generated/zod";
 import { db } from "~/server/db";
 import { z } from "zod";
 
-const evalServiceInstance = new EvalService(db);
+const evalServiceInstance = new EvalService();
 
 export const evalRouter = createTRPCRouter({
   getGeneralEvals: protectedProcedure.query(async ({ ctx }) => {
@@ -37,13 +37,7 @@ export const evalRouter = createTRPCRouter({
       return await evalServiceInstance.deleteGeneralEval(input.id);
     }),
 
-  getEvalGroups: protectedProcedure.query(async ({ ctx }) => {
-    return await evalServiceInstance.getEvalGroups(ctx.user.id);
+  getSets: protectedProcedure.query(async ({ ctx }) => {
+    return await evalServiceInstance.getSets(ctx.user.id);
   }),
-
-  saveEvalGroupsState: protectedProcedure
-    .input(z.array(EvalGroupWithIncludesSchema))
-    .mutation(async ({ input, ctx }) => {
-      return await evalServiceInstance.saveEvalGroupsState(input, ctx.user.id);
-    }),
 });

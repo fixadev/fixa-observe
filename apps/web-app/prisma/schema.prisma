@@ -36,26 +36,24 @@ model ApiKey {
 }
 
 model Agent {
-  id              String   @id
+  id          String   @id
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  ownerId     String
+  name        String
+  phoneNumber String   @default("")
+
+  githubRepoUrl   String?
   customerAgentId String?
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-
-  ownerId       String
-  name          String
-  phoneNumber   String  @default("")
-  githubRepoUrl String?
-  systemPrompt  String  @default("")
-
-  extraProperties Json @default("{}")
+  systemPrompt    String  @default("")
+  extraProperties Json    @default("{}")
 
   enableSlackNotifications Boolean @default(true)
 
   enabledGeneralEvals Eval[]
-
-  enabledTestAgents TestAgent[]
-  scenarios         Scenario[]
-  tests             Test[]
+  enabledTestAgents   TestAgent[]
+  scenarios           Scenario[]
+  tests               Test[]
 }
 
 model Test {
@@ -125,7 +123,7 @@ model Call {
   scenario    Scenario?  @relation(fields: [scenarioId], references: [id], onDelete: Cascade)
   scenarioId  String?
 
-  evalGroups EvalGroup[]
+  evalSets EvalSet[]
 
   messages      Message[]
   latencyBlocks LatencyBlock[]
@@ -239,9 +237,9 @@ model Eval {
   ownerId       String?
   evalOverrides EvalOverride[]
 
-  deleted     Boolean    @default(false)
-  EvalGroup   EvalGroup? @relation(fields: [evalGroupId], references: [id])
-  evalGroupId String?
+  deleted   Boolean  @default(false)
+  EvalSet   EvalSet? @relation(fields: [evalSetId], references: [id])
+  evalSetId String?
 }
 
 model EvalResult {
@@ -305,33 +303,40 @@ model Interruption {
   text             String
 }
 
-model EvalGroup {
-  id         String               @id @default(uuid())
-  createdAt  DateTime             @default(now())
-  name       String
-  ownerId    String
-  conditions EvalGroupCondition[]
-  evals      Eval[]
-  enabled    Boolean              @default(true)
-  call       Call[]
+model EvalSet {
+  id            String       @id @default(uuid())
+  createdAt     DateTime     @default(now())
+  ownerId       String
+  name          String
+  condition     String       @default("")
+  calls         Call[]
+  evals         Eval[]
+  enabled       Boolean      @default(true)
+  savedSearch   SavedSearch? @relation(fields: [savedSearchId], references: [id])
+  savedSearchId String?
 }
 
-model EvalGroupCondition {
-  id          String                 @id @default(uuid())
-  createdAt   DateTime               @default(now())
-  evalGroup   EvalGroup              @relation(fields: [evalGroupId], references: [id])
-  evalGroupId String
-  type        EvalGroupConditionType
-
-  // These are defined if the type is filter
-  property String?
-  value    String?
-
-  // These are defined if the type is text
-  text String?
+model SavedSearch {
+  id        String    @id @default(uuid())
+  createdAt DateTime  @default(now())
+  ownerId   String
+  agentId   String
+  filters   Json
+  evalSets  EvalSet[]
+  alerts    Alert[]
 }
 
-enum EvalGroupConditionType {
-  filter
-  text
+model Alert {
+  id            String      @id @default(uuid())
+  createdAt     DateTime    @default(now())
+  ownerId       String
+  savedSearch   SavedSearch @relation(fields: [savedSearchId], references: [id])
+  savedSearchId String
+  type          AlertType
+  details       Json
+}
+
+enum AlertType {
+  evalSet
+  latency
 }

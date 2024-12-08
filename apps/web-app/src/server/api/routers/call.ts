@@ -1,8 +1,10 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
-import { callService } from "~/server/services/call";
+import { CallService } from "~/server/services/call";
 import { TRPCError } from "@trpc/server";
 import { FilterSchema, OrderBySchema } from "~/lib/types";
+
+const callService = new CallService();
 
 export const callRouter = createTRPCRouter({
   getCall: protectedProcedure.input(z.string()).query(async ({ input }) => {

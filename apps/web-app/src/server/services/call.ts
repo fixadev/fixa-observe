@@ -2,10 +2,10 @@ import { type Prisma } from "@prisma/client";
 import { type OrderBy, type Filter } from "~/lib/types";
 import { type CallWithIncludes } from "~/lib/types";
 import { calculateLatencyPercentiles } from "~/lib/utils";
-import { db } from "~/server/db";
+import { db } from "../db";
 
-export const callService = {
-  getCall: async (id: string): Promise<CallWithIncludes | null> => {
+export class CallService {
+  getCall = async (id: string): Promise<CallWithIncludes | null> => {
     return await db.call.findUnique({
       where: { id },
       include: {
@@ -25,9 +25,9 @@ export const callService = {
         interruptions: true,
       },
     });
-  },
+  };
 
-  getCalls: async ({
+  getCalls = async ({
     ownerId,
     testId,
     scenarioId,
@@ -141,7 +141,7 @@ export const callService = {
       items,
       nextCursor,
     };
-  },
+  };
 
   // // WIP
   // getLatencyInterruptionPercentiles: async ({
@@ -204,7 +204,7 @@ export const callService = {
   //   };
   // },
 
-  getLatencyInterruptionPercentiles: async ({
+  getLatencyInterruptionPercentiles = async ({
     ownerId,
     filter,
   }: {
@@ -220,7 +220,7 @@ export const callService = {
     }[];
   }> => {
     // Get all calls within filters
-    const calls = await callService.getCalls({
+    const calls = await this.getCalls({
       ownerId,
       filter,
     });
@@ -299,9 +299,9 @@ export const callService = {
       latency: latencyByPeriod,
       interruptions: interruptionsByPeriod,
     };
-  },
+  };
 
-  getCallsCount: async ({
+  getCallsCount = async ({
     ownerId,
     testId,
     scenarioId,
@@ -324,25 +324,25 @@ export const callService = {
         },
       },
     });
-  },
+  };
 
-  getAgentIds: async (ownerId: string): Promise<string[]> => {
+  getAgentIds = async (ownerId: string): Promise<string[]> => {
     const result = await db.call.groupBy({
       by: ["agentId"],
       where: { ownerId },
     });
     return result.filter((r) => r.agentId !== null).map((r) => r.agentId!);
-  },
+  };
 
-  getRegionIds: async (ownerId: string): Promise<string[]> => {
+  getRegionIds = async (ownerId: string): Promise<string[]> => {
     const result = await db.call.groupBy({
       by: ["regionId"],
       where: { ownerId },
     });
     return result.filter((r) => r.regionId !== null).map((r) => r.regionId!);
-  },
+  };
 
-  getMetadata: async (
+  getMetadata = async (
     ownerId: string,
   ): Promise<Array<Record<string, string>>> => {
     const result = await db.call.findMany({
@@ -351,5 +351,5 @@ export const callService = {
     return result
       .filter((r) => r.metadata !== null)
       .map((r) => r.metadata as Record<string, string>);
-  },
-};
+  };
+}

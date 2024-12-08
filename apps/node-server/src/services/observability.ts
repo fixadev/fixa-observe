@@ -207,7 +207,7 @@ export const findRelevantEvalGroups = async (
   metadata?: Record<string, string>,
 ) => {
   try {
-    const evalGroups = await db.evalGroup.findMany({
+    const evalGroups = await db.evalSet.findMany({
       where: {
         ownerId,
         conditions: {
