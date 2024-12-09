@@ -1,4 +1,4 @@
-import { type TestWithIncludes } from "~/lib/types";
+import { type TestWithIncludes } from "@repo/types";
 import {
   Popover,
   PopoverContent,

@@ -1,7 +1,7 @@
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { CallResult } from "@prisma/client";
-import { type Call, type LatencyBlock } from "@repo/types/generated";
+import { type Call, type LatencyBlock } from "@repo/types/src/generated";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));

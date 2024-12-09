@@ -2,7 +2,7 @@ import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { CallService } from "~/server/services/call";
 import { TRPCError } from "@trpc/server";
-import { FilterSchema, OrderBySchema } from "~/lib/types";
+import { FilterSchema, OrderBySchema } from "@repo/types";
 import { db } from "~/server/db";
 
 const callService = new CallService(db);

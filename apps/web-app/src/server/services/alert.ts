@@ -1,5 +1,5 @@
 import { type PrismaClient } from "@prisma/client";
-import { type Alert } from "@repo/types/generated";
+import { type Alert } from "@repo/types/src/generated";
 
 export class AlertService {
   constructor(private db: PrismaClient) {}

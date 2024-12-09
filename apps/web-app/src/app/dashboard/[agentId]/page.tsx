@@ -18,12 +18,12 @@ import { api } from "~/trpc/react";
 import { useToast } from "~/components/hooks/use-toast";
 
 import useSocketMessage from "~/app/_components/UseSocketMessage";
-import { type AgentWithIncludes } from "~/lib/types";
+import { type AgentWithIncludes } from "@repo/types";
 
 import { useUser } from "@clerk/nextjs";
 import { motion, AnimatePresence } from "framer-motion";
-import { type CallEndedData, type SocketMessage } from "~/lib/agent";
-import { type TestWithCalls } from "~/lib/types";
+import { type CallEndedData, type SocketMessage } from "@repo/types";
+import { type TestWithCalls } from "@repo/types";
 import Spinner from "~/components/Spinner";
 import { Label } from "~/components/ui/label";
 import { useAgent } from "~/app/contexts/UseAgent";

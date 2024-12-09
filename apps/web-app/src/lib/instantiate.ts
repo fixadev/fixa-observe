@@ -1,9 +1,5 @@
+import { type Eval, type EvalSet } from "@repo/types";
 import { generateTempId } from "./utils";
-import {
-  type EvalGroupCondition,
-  type Eval,
-  type EvalGroup,
-} from "@repo/types/generated";
 
 export function instantiateEval(partial?: Partial<Eval>): Eval {
   return {
@@ -24,35 +20,21 @@ export function instantiateEval(partial?: Partial<Eval>): Eval {
     ownerId: null,
     deleted: false,
 
-    evalGroupId: null,
+    evalSetId: null,
 
     ...partial,
   };
 }
 
-export function instantiateEvalGroupCondition(
-  partial?: Partial<EvalGroupCondition>,
-): EvalGroupCondition {
-  return {
-    id: generateTempId(),
-    createdAt: new Date(),
-    evalGroupId: "",
-    type: "text",
-
-    text: null,
-    value: null,
-    property: null,
-    ...partial,
-  };
-}
-
-export function instantiateEvalGroup(partial?: Partial<EvalGroup>): EvalGroup {
+export function instantiateEvalSet(partial?: Partial<EvalSet>): EvalSet {
   return {
     id: generateTempId(),
     createdAt: new Date(),
     ownerId: "",
     name: "",
     enabled: true,
+    condition: "",
+    savedSearchId: null,
 
     ...partial,
   };

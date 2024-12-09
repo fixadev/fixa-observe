@@ -7,10 +7,7 @@ import { ScenarioCard } from "~/app/_components/ScenarioCard";
 import { useAgent } from "~/app/contexts/UseAgent";
 import { Button } from "~/components/ui/button";
 import { useToast } from "~/components/hooks/use-toast";
-import {
-  type CreateScenarioSchema,
-  type ScenarioWithEvals,
-} from "~/lib/scenario";
+import { type CreateScenarioSchema, type ScenarioWithEvals } from "@repo/types";
 
 import { EvalContentType } from "@prisma/client";
 import { Card, CardTitle, CardHeader } from "~/components/ui/card";

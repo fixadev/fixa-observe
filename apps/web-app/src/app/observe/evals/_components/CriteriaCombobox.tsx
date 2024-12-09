@@ -26,7 +26,7 @@ import {
   XMarkIcon,
 } from "@heroicons/react/24/solid";
 import { useCommandState } from "cmdk";
-import { type Eval } from "@repo/types/generated";
+import { type Eval } from "@repo/types/src/generated";
 
 type Status = {
   value: string;

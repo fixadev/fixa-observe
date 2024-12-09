@@ -24,7 +24,7 @@ import {
   TooltipTrigger,
 } from "~/components/ui/tooltip";
 import { Button } from "~/components/ui/button";
-import { type EvalGroupCondition } from "@repo/types/generated";
+import { type EvalGroupCondition } from "@repo/types/src/generated";
 
 export default function ConditionChipWithPopover({
   condition,

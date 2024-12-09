@@ -1,7 +1,7 @@
 import { openai } from "~/server/utils/OpenAIClient";
 import { z } from "zod";
 import { zodResponseFormat } from "openai/helpers/zod";
-import { CreateScenarioSchema } from "~/lib/scenario";
+import { CreateScenarioSchema } from "@repo/types";
 import {
   generateOutboundScenariosPrompt,
   generateInboundScenariosPrompt,

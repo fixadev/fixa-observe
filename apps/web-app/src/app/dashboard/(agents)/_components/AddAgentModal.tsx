@@ -12,7 +12,7 @@ import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 
 import { useState } from "react";
-import { type CreateAgentSchema } from "~/lib/agent";
+import { type Agent } from "@repo/types";
 import { api } from "~/trpc/react";
 import Spinner from "~/components/Spinner";
 import {
@@ -22,6 +22,7 @@ import {
 } from "~/helpers/phoneNumberUtils";
 import { useToast } from "~/components/hooks/use-toast";
 import { useRouter } from "next/navigation";
+import { generateTempId } from "~/lib/utils";
 
 interface AddAgentModalProps {
   children: React.ReactNode;
@@ -49,7 +50,8 @@ export function AddAgentModal({ children, refetchAgents }: AddAgentModalProps) {
   const { toast } = useToast();
   const router = useRouter();
 
-  const [agent, setAgent] = useState<CreateAgentSchema>({
+  const [agent, setAgent] = useState<Agent>({
+    id: generateTempId(),
     name: "",
     systemPrompt: "",
     phoneNumber: "+1",
@@ -57,7 +59,6 @@ export function AddAgentModal({ children, refetchAgents }: AddAgentModalProps) {
     updatedAt: new Date(),
     githubRepoUrl: "",
     ownerId: "",
-    scenarios: [],
     enableSlackNotifications: false,
     customerAgentId: null,
     extraProperties: {},

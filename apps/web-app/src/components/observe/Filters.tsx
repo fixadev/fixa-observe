@@ -12,7 +12,7 @@ import {
 import { formatDateTime } from "~/lib/utils";
 import { CalendarIcon, MapIcon, UserIcon } from "@heroicons/react/24/solid";
 import { lookbackPeriods } from "../hooks/useObserveState";
-import { type Filter } from "~/lib/types";
+import { type Filter } from "@repo/types";
 import { api } from "~/trpc/react";
 import {
   Dialog,

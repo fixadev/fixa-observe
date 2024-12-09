@@ -18,7 +18,7 @@ import {
   SelectContent,
   SelectTrigger,
 } from "~/components/ui/select";
-import type { CallWithIncludes, EvalResultWithIncludes } from "~/lib/types";
+import type { CallWithIncludes, EvalResultWithIncludes } from "@repo/types";
 import {
   cn,
   formatDurationHoursMinutesSeconds,

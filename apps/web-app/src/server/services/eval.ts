@@ -1,7 +1,7 @@
 import { type PrismaClient } from "@prisma/client";
 import { v4 as uuidv4 } from "uuid";
-import { type EvalSchema } from "~/lib/eval";
-import { type EvalSetWithIncludes } from "~/lib/types";
+import { type EvalSchema } from "@repo/types";
+import { type EvalSetWithIncludes } from "@repo/types";
 import { getCreatedUpdatedDeleted } from "~/lib/utils";
 
 export class EvalService {

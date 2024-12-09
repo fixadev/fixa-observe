@@ -1,7 +1,7 @@
-import { type CreateScenarioSchema } from "~/lib/scenario";
+import { type CreateScenarioSchema } from "@repo/types";
 import { v4 as uuidv4 } from "uuid";
 import { type PrismaClient } from "@prisma/client";
-import { type Agent, AgentSchema } from "@repo/types/generated";
+import { type Agent, AgentSchema } from "@repo/types/src/generated";
 
 export class AgentService {
   constructor(private db: PrismaClient) {}

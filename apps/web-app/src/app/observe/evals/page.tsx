@@ -7,7 +7,7 @@
 // import UnsavedChangesBar from "./_components/UnsavedChangesBar";
 // import { api } from "~/trpc/react";
 // import { Skeleton } from "~/components/ui/skeleton";
-// import { type EvalSetWithIncludes } from "~/lib/eval";
+// import { type EvalSetWithIncludes } from "@repo/types";
 // import { Button } from "~/components/ui/button";
 // import { instantiateEvalGroup } from "~/lib/instantiate";
 

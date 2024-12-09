@@ -1,9 +1,5 @@
 import { z } from "zod";
-import {
-  EvalOverrideSchema,
-  EvalSchema,
-  ScenarioSchema,
-} from "@repo/types/generated";
+import { EvalOverrideSchema, EvalSchema, ScenarioSchema } from "./generated";
 
 export type ScenarioWithEvals = z.infer<typeof ScenarioWithEvals>;
 export const ScenarioWithEvals = ScenarioSchema.extend({

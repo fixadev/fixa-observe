@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useContext, useEffect, useRef, useState } from "react";
-import { type SelectItem, type Filter, type OrderBy } from "~/lib/types";
+import { type SelectItem, type Filter, type OrderBy } from "@repo/types";
 export const lookbackPeriods: SelectItem[] = [
   { label: "24 hours", value: 24 * 60 * 60 * 1000 },
   { label: "2 days", value: 2 * 24 * 60 * 60 * 1000 },

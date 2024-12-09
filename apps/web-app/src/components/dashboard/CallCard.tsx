@@ -4,7 +4,7 @@ import {
   didCallSucceed,
   formatDurationHoursMinutesSeconds,
 } from "~/lib/utils";
-import type { CallWithIncludes } from "~/lib/types";
+import type { CallWithIncludes } from "@repo/types";
 import { useMemo } from "react";
 import Image from "next/image";
 import { CallStatus } from "@prisma/client";

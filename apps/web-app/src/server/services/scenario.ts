@@ -3,9 +3,7 @@ import { v4 as uuidv4 } from "uuid";
 import {
   type CreateScenarioSchema,
   type UpdateScenarioSchema,
-} from "~/lib/scenario";
-
-import { type EvalOverride } from "@repo/types/generated";
+} from "@repo/types";
 
 export class ScenarioService {
   constructor(private db: PrismaClient) {}

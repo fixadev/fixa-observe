@@ -84,12 +84,6 @@ export type AgentWithIncludes = Prisma.AgentGetPayload<{
   };
 }>;
 
-export type EvalSetWithIncludes = Prisma.EvalSetGetPayload<{
-  include: {
-    evals: true;
-  };
-}>;
-
 export type Filter = z.infer<typeof FilterSchema>;
 export const FilterSchema = z.object({
   lookbackPeriod: z.object({

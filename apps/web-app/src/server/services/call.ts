@@ -1,6 +1,6 @@
 import { type PrismaClient, type Prisma } from "@prisma/client";
-import { type OrderBy, type Filter } from "~/lib/types";
-import { type CallWithIncludes } from "~/lib/types";
+import { type OrderBy, type Filter } from "@repo/types";
+import { type CallWithIncludes } from "@repo/types";
 import { calculateLatencyPercentiles } from "~/lib/utils";
 
 export class CallService {

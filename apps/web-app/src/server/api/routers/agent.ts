@@ -1,9 +1,9 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { AgentService } from "~/server/services/agent";
-import { CreateAgentSchema } from "~/lib/agent";
+import { CreateAgentSchema } from "@repo/types";
 import { db } from "~/server/db";
-import { AgentSchema } from "@repo/types/generated";
+import { AgentSchema } from "@repo/types/src/generated";
 
 const agentServiceInstance = new AgentService(db);
 

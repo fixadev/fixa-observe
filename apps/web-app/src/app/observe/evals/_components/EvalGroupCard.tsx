@@ -5,7 +5,7 @@ import { cn, isTempId } from "~/lib/utils";
 import { Fragment, useCallback } from "react";
 import ConditionChip from "./ConditionChip";
 import CriteriaBlock from "./CriteriaBlock";
-import { type EvalGroupWithIncludes } from "~/lib/types";
+import { type EvalGroupWithIncludes } from "@repo/types";
 import {
   instantiateEval,
   instantiateEvalGroupCondition,

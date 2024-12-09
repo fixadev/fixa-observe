@@ -9,7 +9,7 @@ import { Button } from "~/components/ui/button";
 import { XMarkIcon } from "@heroicons/react/24/solid";
 import MonoTextBlock from "~/components/MonoTextBlock";
 import { Input } from "~/components/ui/input";
-import { type Eval } from "@repo/types/generated";
+import { type Eval } from "@repo/types/src/generated";
 
 export default function CriteriaBlock({
   criteria,

@@ -4,7 +4,7 @@ import { Button } from "~/components/ui/button";
 import { api } from "~/trpc/react";
 import { useEffect, useState } from "react";
 import { useToast } from "~/components/hooks/use-toast";
-import { type EvalSchema } from "~/lib/eval";
+import { type Eval } from "@repo/types";
 import { TrashIcon } from "@heroicons/react/24/solid";
 import {
   AlertDialog,
@@ -25,12 +25,12 @@ export const CreateGeneralEvalModal = ({
   isModalOpen,
   setIsModalOpen,
 }: {
-  existingEval: EvalSchema | null;
-  setEvaluations: React.Dispatch<React.SetStateAction<EvalSchema[]>>;
+  existingEval: Eval | null;
+  setEvaluations: React.Dispatch<React.SetStateAction<Eval[]>>;
   isModalOpen: boolean;
   setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }) => {
-  const [evaluation, setEvaluation] = useState<EvalSchema>(
+  const [evaluation, setEvaluation] = useState<Eval>(
     existingEval ?? {
       id: crypto.randomUUID(),
       createdAt: new Date(),
@@ -45,7 +45,7 @@ export const CreateGeneralEvalModal = ({
       toolCallExpectedResult: "",
       isCritical: true,
       deleted: false,
-      evalGroupId: null,
+      evalSetId: null,
     },
   );
 
@@ -71,7 +71,7 @@ export const CreateGeneralEvalModal = ({
         duration: 2000,
       });
       setEvaluations((evaluations) =>
-        evaluations.map((e: EvalSchema) => (e.id === data.id ? data : e)),
+        evaluations.map((e: Eval) => (e.id === data.id ? data : e)),
       );
       setIsModalOpen(false);
     },
@@ -109,7 +109,7 @@ export const CreateGeneralEvalModal = ({
         ownerId: null,
         isCritical: true,
         deleted: false,
-        evalGroupId: null,
+        evalSetId: null,
       });
     }
   }, [existingEval]);

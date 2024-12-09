@@ -10,6 +10,6 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true
   },
-  "include": ["*.ts"],
+  "include": ["*.ts", "src/alert.ts", "src/index.ts"],
   "exclude": ["node_modules", "dist"]
 }

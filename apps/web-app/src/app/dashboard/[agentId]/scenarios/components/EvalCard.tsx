@@ -4,7 +4,7 @@ import { Card } from "~/components/ui/card";
 import { XMarkIcon } from "@heroicons/react/24/solid";
 
 import { EvalInput } from "~/app/_components/EvalInput";
-import { type EvalSchema } from "~/lib/eval";
+import { type EvalSchema } from "@repo/types";
 
 export function EvalCard({
   evaluation,

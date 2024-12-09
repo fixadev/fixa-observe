@@ -8,7 +8,7 @@ import {
 import { Button } from "~/components/ui/button";
 import { Label } from "~/components/ui/label";
 import { api } from "~/trpc/react";
-import { type AgentWithIncludes } from "~/lib/types";
+import { type AgentWithIncludes } from "@repo/types";
 import { type ReactNode, useEffect, useState } from "react";
 import { useToast } from "~/components/hooks/use-toast";
 import {

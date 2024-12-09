@@ -19,11 +19,8 @@ import {
   AlertDialogTrigger,
   AlertDialogTitle,
 } from "~/components/ui/alert-dialog";
-import { type EvalSchema, type EvalOverrideSchema } from "~/lib/eval";
-import {
-  type ScenarioWithEvals,
-  type UpdateScenarioSchema,
-} from "~/lib/scenario";
+import { type EvalSchema, type EvalOverrideSchema } from "@repo/types";
+import { type ScenarioWithEvals, type UpdateScenarioSchema } from "@repo/types";
 import { EvalContentType, EvalResultType, EvalType } from "@prisma/client";
 import { Label } from "~/components/ui/label";
 import { Switch } from "~/components/ui/switch";
