@@ -119,13 +119,12 @@ model Call {
   scenario    Scenario?  @relation(fields: [scenarioId], references: [id], onDelete: Cascade)
   scenarioId  String?
 
-  evalSets EvalSet[]
-
   messages      Message[]
   latencyBlocks LatencyBlock[]
   interruptions Interruption[]
 
-  errors CallError[]
+  errors           CallError[]
+  evalSetToSuccess Json        @default("{}")
 
   @@index([ownerId])
 }
@@ -305,7 +304,6 @@ model EvalSet {
   ownerId       String
   name          String
   condition     String       @default("")
-  calls         Call[]
   evals         Eval[]
   enabled       Boolean      @default(true)
   savedSearch   SavedSearch? @relation(fields: [savedSearchId], references: [id])
@@ -313,13 +311,13 @@ model EvalSet {
 }
 
 model SavedSearch {
-  id             String    @id @default(uuid())
-  createdAt      DateTime  @default(now())
-  ownerId        String
-  agentId        String
-  filters        Json
-  evaluationSets EvalSet[]
-  alerts         Alert[]
+  id        String    @id @default(uuid())
+  createdAt DateTime  @default(now())
+  ownerId   String
+  agentId   String
+  filters   Json
+  evalSets  EvalSet[]
+  alerts    Alert[]
 }
 
 model Alert {

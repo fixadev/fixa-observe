@@ -41,14 +41,19 @@ export async function startQueueConsumer() {
           // Upsert agent if it doesn't exist
           const agent = await upsertAgent(agentId || newAgentId, userId);
 
-          const newCall = await transcribeAndSaveCall(
+          const updatedMetadata = {
+            ...metadata,
+            regionId: regionId || newRegionId,
+          };
+
+          const newCall = await transcribeAndSaveCall({
             callId,
-            location,
+            audioUrl: location,
             createdAt,
-            agent.id,
-            regionId || newRegionId,
-            newMetadata,
-          );
+            agentId: agent.id,
+            metadata: updatedMetadata,
+            userId,
+          });
           console.log("Transcription completed:", newCall);
 
           await sqs.deleteMessage({

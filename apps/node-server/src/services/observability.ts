@@ -9,15 +9,23 @@ import { zodResponseFormat } from "openai/helpers/zod";
 import { openai } from "../clients/openAIClient";
 import { z } from "zod";
 import { analyzeCallWitho1, formatOutput } from "./textAnalysis";
+import { sendAlerts } from "./alert";
 
-export const transcribeAndSaveCall = async (
-  callId: string,
-  audioUrl: string,
-  createdAt: string,
-  agentId?: string,
-  regionId?: string,
-  metadata?: Record<string, string>,
-) => {
+export const transcribeAndSaveCall = async ({
+  callId,
+  audioUrl,
+  createdAt,
+  agentId,
+  metadata,
+  userId,
+}: {
+  callId: string;
+  audioUrl: string;
+  createdAt: string;
+  agentId: string;
+  metadata: Record<string, string>;
+  userId: string;
+}) => {
   try {
     interface TranscribeResponse {
       segments: Array<{
@@ -46,8 +54,7 @@ export const transcribeAndSaveCall = async (
     console.log("calling audio service", env.AUDIO_SERVICE_URL);
 
     const response = await axios.post<TranscribeResponse>(
-      // `${env.AUDIO_SERVICE_URL}/transcribe-deepgram`,
-      `https://fixa-transcription-service.fly.dev/transcribe-deepgram`,
+      `${env.AUDIO_SERVICE_URL}/transcribe-deepgram`,
       {
         stereo_audio_url: audioUrl,
       },
@@ -89,12 +96,21 @@ export const transcribeAndSaveCall = async (
       callId: callId,
     }));
 
-    const { evalResults, evalSets } = await analyzeBasedOnRules({
-      messages: messages || [],
-      createdAt,
-      agentId,
-      regionId,
-      metadata,
+    const { evalResults, evalSetResults, savedSearches } =
+      await analyzeBasedOnRules({
+        messages: messages || [],
+        createdAt,
+        agentId,
+        metadata,
+        userId,
+      });
+
+    await sendAlerts({
+      latencyP50,
+      latencyP90,
+      latencyP95,
+      savedSearches,
+      evalSetResults,
     });
 
     const newCall = await db.call.create({
@@ -107,14 +123,11 @@ export const transcribeAndSaveCall = async (
         status: CallStatus.completed,
         stereoRecordingUrl: url,
         agentId,
-        regionId,
-        evalSets: {
-          connect: evalSets.map((evalSet) => ({
-            id: evalSet.id,
-          })),
-        },
         evalResults: {
           create: evalResults,
+        },
+        evalSetToSuccess: {
+          create: evalSetResults,
         },
         latencyP50,
         latencyP90,
@@ -157,40 +170,63 @@ export const analyzeBasedOnRules = async ({
   messages,
   createdAt,
   agentId,
-  regionId,
   metadata,
+  userId,
 }: {
   messages: Message[];
   createdAt: string;
-  agentId?: string;
-  regionId?: string;
-  metadata?: Record<string, string>;
+  agentId: string;
+  metadata: Record<string, string>;
+  userId: string;
 }) => {
   try {
-    const relevantEvalSets = await findRelevantEvalSets(
-      messages || [],
-      "11x",
-      agentId || "",
-      regionId || "",
-      metadata,
-    );
+    const { evalSets: relevantEvalSets, savedSearches } =
+      await findRelevantEvalSets({
+        messages,
+        userId,
+        agentId,
+        metadata,
+      });
     if (relevantEvalSets.length > 0) {
+      const allEvals = relevantEvalSets.flatMap((evalSet) => evalSet.evals);
       const result = await analyzeCallWitho1({
         callStartedAt: createdAt,
         messages: messages || [],
         testAgentPrompt: "",
         scenario: undefined,
-        evals: relevantEvalSets.flatMap((evalSet) => evalSet.evals),
+        evals: allEvals,
       });
-      const parsedResult = await formatOutput(result);
+
+      const parsedEvalResults = await formatOutput(result);
+
+      const validEvalResults = parsedEvalResults.filter((result) =>
+        allEvals.some((evaluation) => evaluation.id === result.evalId),
+      );
+
+      const evalSetResults = relevantEvalSets.map((evalSet) => ({
+        evalSetId: evalSet.id,
+        success: validEvalResults
+          .filter((result) =>
+            evalSet.evals.some((evaluation) => evaluation.id === result.evalId),
+          )
+          .every(
+            (result) =>
+              result.success ||
+              !allEvals.find((evaluation) => evaluation.id === result.evalId)
+                ?.isCritical,
+          ),
+      }));
+
       return {
-        evalSets: relevantEvalSets,
-        evalResults: parsedResult,
+        evalResults: validEvalResults,
+        evalSetResults,
+        savedSearches,
       };
     } else {
       return {
         evalSets: [],
-        evalResults: [],
+        evalSetResults: [],
+        savedSearches,
       };
     }
   } catch (error) {
@@ -199,29 +235,28 @@ export const analyzeBasedOnRules = async ({
   }
 };
 
-export const findRelevantEvalSets = async (
-  messages: Message[],
-  ownerId: string,
-  agentId: string,
-  regionId: string,
-  metadata?: Record<string, string>,
-) => {
+export const findRelevantEvalSets = async ({
+  messages,
+  userId,
+  agentId,
+  metadata,
+}: {
+  messages: Message[];
+  userId: string;
+  agentId: string;
+  metadata?: Record<string, string>;
+}) => {
   try {
     const savedSearches = await db.savedSearch.findMany({
       where: {
-        ownerId,
+        ownerId: userId,
         agentId,
       },
       include: {
         evalSets: { include: { evals: true } },
+        alerts: true,
       },
     });
-
-    // TODO : Fix this
-    metadata = {
-      ...metadata,
-      regionId,
-    };
 
     const matchingSavedSearches = savedSearches.filter((savedSearch) => {
       const filters = savedSearch.filters as Record<string, string>;
@@ -238,6 +273,7 @@ export const findRelevantEvalSets = async (
       savedSearch.evalSets.map((evalSet) => ({
         ...evalSet,
         evals: [],
+        alerts: [],
       })),
     );
 
@@ -277,11 +313,14 @@ export const findRelevantEvalSets = async (
       throw new Error("No response from OpenAI");
     }
 
-    return evalSetsWithEvals.filter((evalSet) => {
-      return parsedResponse.relevantEvalSets.some(
-        (relevantEvalSet) => relevantEvalSet.id === evalSet.id,
-      );
-    });
+    return {
+      savedSearches: matchingSavedSearches,
+      evalSets: evalSetsWithEvals.filter((evalSet) => {
+        return parsedResponse.relevantEvalSets.some(
+          (relevantEvalSet) => relevantEvalSet.id === evalSet.id,
+        );
+      }),
+    };
   } catch (error) {
     console.error("Error in findRelevantEvalGroups:", error);
     throw error;
