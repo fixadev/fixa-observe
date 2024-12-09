@@ -1,10 +1,10 @@
-import { type SavedSearch } from "@repo/types/src/generated";
-import { type PrismaClient } from "@prisma/client";
+import { type SavedSearch } from "@repo/types";
+import { type PrismaClient } from "@repo/db";
 
 export class SearchService {
   constructor(private db: PrismaClient) {}
 
-  async save(userId: string, search: SavedSearch) {
+  async save(userId: string, search: SavedSearch): Promise<SavedSearch> {
     return this.db.savedSearch.create({
       data: {
         ...search,
@@ -14,7 +14,7 @@ export class SearchService {
     });
   }
 
-  async update(userId: string, search: SavedSearch) {
+  async update(userId: string, search: SavedSearch): Promise<SavedSearch> {
     return this.db.savedSearch.update({
       where: {
         id: search.id,
@@ -27,7 +27,7 @@ export class SearchService {
     });
   }
 
-  getById(userId: string, id: string) {
+  async getById(userId: string, id: string): Promise<SavedSearch | null> {
     return this.db.savedSearch.findUnique({
       where: {
         id,
@@ -44,7 +44,7 @@ export class SearchService {
     });
   }
 
-  async getAll(userId: string) {
+  async getAll(userId: string): Promise<SavedSearch[]> {
     return this.db.savedSearch.findMany({
       where: {
         ownerId: userId,

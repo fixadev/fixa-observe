@@ -213,6 +213,9 @@ importers:
       '@repo/db':
         specifier: workspace:*
         version: link:../../packages/db
+      '@repo/services':
+        specifier: workspace:*
+        version: link:../../packages/services
       '@repo/types':
         specifier: workspace:*
         version: link:../../packages/types
@@ -388,9 +391,6 @@ importers:
       '@types/lodash':
         specifier: ^4.17.13
         version: 4.17.13
-      '@types/node':
-        specifier: ^20.14.10
-        version: 20.14.15
       '@types/papaparse':
         specifier: ^5.3.14
         version: 5.3.14
@@ -474,14 +474,36 @@ importers:
         specifier: ^5.3.3
         version: 5.3.3
 
+  packages/services:
+    dependencies:
+      '@repo/db':
+        specifier: workspace:*
+        version: link:../db
+      '@repo/types':
+        specifier: workspace:*
+        version: link:../types
+      uuid:
+        specifier: ^9.0.0
+        version: 9.0.1
+    devDependencies:
+      '@types/node':
+        specifier: ^20.10.0
+        version: 20.14.15
+      '@types/uuid':
+        specifier: ^9.0.0
+        version: 9.0.8
+      typescript:
+        specifier: ^5.3.0
+        version: 5.5.4
+
   packages/types:
     dependencies:
       '@prisma/client':
         specifier: ^5.21.1
         version: 5.21.1(prisma@5.21.1)
-      prisma:
-        specifier: ^5.21.1
-        version: 5.21.1
+      '@repo/db':
+        specifier: workspace:*
+        version: link:../db
       zod:
         specifier: ^3.22.4
         version: 3.23.8
@@ -2730,6 +2752,9 @@ packages:
 
   '@types/uuid@10.0.0':
     resolution: {integrity: sha512-7gqG38EyHgyP1S+7+xomFtL+ZNHcKv6DwNaCZmJmo1vgMugyF3TCnXVg4t1uk89mLNwnLtnY3TpOpCOyp1/xHQ==}
+
+  '@types/uuid@9.0.8':
+    resolution: {integrity: sha512-jg+97EGIcY9AGHJJRaaPVgetKDsrTgbRjQ5Msgjh/DQKEFl0DtyRr/VCOyD1T2R1MNeWPK/u7JoGhlDZnKBAfA==}
 
   '@types/ws@8.5.12':
     resolution: {integrity: sha512-3tPRkv1EtkDpzlgyKyI8pGsGZAGPEaXeu0DOj5DI25Ja91bdAYddYHbADRYVrZMRbfW+1l5YwXVDKohDJNQxkQ==}
@@ -10133,6 +10158,8 @@ snapshots:
   '@types/unist@2.0.11': {}
 
   '@types/uuid@10.0.0': {}
+
+  '@types/uuid@9.0.8': {}
 
   '@types/ws@8.5.12':
     dependencies:

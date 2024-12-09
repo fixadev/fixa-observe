@@ -4,15 +4,15 @@ import { Card } from "~/components/ui/card";
 import { XMarkIcon } from "@heroicons/react/24/solid";
 
 import { EvalInput } from "~/app/_components/EvalInput";
-import { type EvalSchema } from "@repo/types";
+import { type Eval } from "@repo/types";
 
 export function EvalCard({
   evaluation,
   setEval,
   deleteEval,
 }: {
-  evaluation: EvalSchema;
-  setEval: (evaluation: EvalSchema) => void;
+  evaluation: Eval;
+  setEval: (evaluation: Eval) => void;
   deleteEval: (id: string) => void;
 }) {
   const searchParams = useSearchParams();

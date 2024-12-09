@@ -1,7 +1,6 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
-import { AgentService } from "~/server/services/agent";
-import { CreateAgentSchema } from "@repo/types";
+import { AgentService } from "@repo/services";
 import { db } from "~/server/db";
 import { AgentSchema } from "@repo/types/src/generated";
 
@@ -9,13 +8,12 @@ const agentServiceInstance = new AgentService(db);
 
 export const agentRouter = createTRPCRouter({
   create: protectedProcedure
-    .input(CreateAgentSchema)
+    .input(AgentSchema)
     .mutation(async ({ input, ctx }) => {
       return await agentServiceInstance.createAgent(
         input.phoneNumber,
         input.name,
         input.systemPrompt,
-        input.scenarios,
         ctx.user.id,
       );
     }),

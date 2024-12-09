@@ -1,14 +1,13 @@
 {
-  "name": "@repo/types",
+  "name": "@repo/services",
   "version": "0.0.1",
   "private": true,
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "scripts": {
-    "build": "tsc",
-    "dev": "tsc --watch",
-    "clean": "rm -rf dist"
+    "build": "tsc --build",
+    "typecheck": "tsc --noEmit"
   },
   "exports": {
     ".": {
@@ -17,13 +16,14 @@
       "default": "./dist/index.js"
     }
   },
+  "dependencies": {
+    "@repo/db": "workspace:*",
+    "@repo/types": "workspace:*",
+    "uuid": "^9.0.0"
+  },
   "devDependencies": {
     "@types/node": "^20.10.0",
-    "typescript": "^5.3.2"
-  },
-  "dependencies": {
-    "@prisma/client": "^5.21.1",
-    "@repo/db": "workspace:*",
-    "zod": "^3.22.4"
+    "@types/uuid": "^9.0.0",
+    "typescript": "^5.3.0"
   }
 }

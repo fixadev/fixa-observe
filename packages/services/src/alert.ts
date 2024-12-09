@@ -1,18 +1,21 @@
-import { type PrismaClient } from "@prisma/client";
-import { type Alert } from "@repo/types/src/generated";
+import { type PrismaClient } from "@repo/db";
+import { type Alert } from "@repo/types";
 
 export class AlertService {
   constructor(private db: PrismaClient) {}
-  async get(userId: string) {
+  async get(userId: string): Promise<Alert[]> {
     return await this.db.alert.findMany({ where: { ownerId: userId } });
   }
-  async getBySavedSearch(userId: string, savedSearchId: string) {
+  async getBySavedSearch(
+    userId: string,
+    savedSearchId: string,
+  ): Promise<Alert[]> {
     return await this.db.alert.findMany({
       where: { ownerId: userId, savedSearchId },
     });
   }
 
-  async save(userId: string, alert: Alert) {
+  async save(userId: string, alert: Alert): Promise<Alert> {
     return await this.db.alert.create({
       data: {
         ...alert,
@@ -21,7 +24,7 @@ export class AlertService {
       },
     });
   }
-  async update(userId: string, alert: Alert) {
+  async update(userId: string, alert: Alert): Promise<Alert> {
     return await this.db.alert.update({
       where: {
         id: alert.id,
@@ -33,7 +36,7 @@ export class AlertService {
       },
     });
   }
-  async delete(userId: string, id: string) {
-    return await this.db.alert.delete({ where: { id, ownerId: userId } });
+  async delete(userId: string, id: string): Promise<void> {
+    await this.db.alert.delete({ where: { id, ownerId: userId } });
   }
 }

@@ -1,7 +1,6 @@
-import { type CreateScenarioSchema } from "@repo/types";
+import { type Agent, AgentSchema } from "@repo/types";
 import { v4 as uuidv4 } from "uuid";
-import { type PrismaClient } from "@prisma/client";
-import { type Agent, AgentSchema } from "@repo/types/src/generated";
+import { type PrismaClient, type TestAgent } from "@repo/db";
 
 export class AgentService {
   constructor(private db: PrismaClient) {}
@@ -9,9 +8,8 @@ export class AgentService {
     phoneNumber: string,
     name: string,
     systemPrompt: string,
-    scenarios: CreateScenarioSchema[],
     ownerId: string,
-  ) {
+  ): Promise<Agent> {
     const testAgents = await this.db.testAgent.findMany({
       where: {
         OR: [{ ownerId }, { ownerId: "SYSTEM" }],
@@ -26,11 +24,6 @@ export class AgentService {
         phoneNumber,
         name,
         systemPrompt,
-        scenarios: {
-          createMany: {
-            data: scenarios,
-          },
-        },
         enabledTestAgents: {
           connect: testAgents.map((testAgent) => ({
             id: testAgent.id,
@@ -41,14 +34,14 @@ export class AgentService {
     });
   }
 
-  async updateAgentName(id: string, name: string) {
+  async updateAgentName(id: string, name: string): Promise<Agent> {
     return await this.db.agent.update({
       where: { id },
       data: { name },
     });
   }
 
-  async upsertAgent(agent: Partial<Agent>, ownerId: string) {
+  async upsertAgent(agent: Partial<Agent>, ownerId: string): Promise<Agent> {
     if (agent.id) {
       return await this.db.agent.upsert({
         where: { id: agent.id },
@@ -87,7 +80,7 @@ export class AgentService {
     throw new Error("Either id or customerAgentId must be provided");
   }
 
-  async getAgent(id: string) {
+  async getAgent(id: string): Promise<Agent | null> {
     const result = await this.db.agent.findUnique({
       where: { id },
       include: {
@@ -114,12 +107,18 @@ export class AgentService {
     return result;
   }
 
-  async getAllAgents(ownerId: string) {
+  async getAllAgents(ownerId: string): Promise<Agent[]> {
     // return await db.agent.findMany({ where: {} });
     return await this.db.agent.findMany({ where: { ownerId } });
   }
 
-  async updateAgent({ id, agent }: { id: string; agent: Partial<Agent> }) {
+  async updateAgent({
+    id,
+    agent,
+  }: {
+    id: string;
+    agent: Partial<Agent>;
+  }): Promise<Agent> {
     return await this.db.agent.update({
       where: { id },
       data: {
@@ -135,7 +134,7 @@ export class AgentService {
     ownerId: string,
     headshotUrl: string,
     description: string,
-  ) {
+  ): Promise<any> {
     return await this.db.testAgent.create({
       data: {
         id: uuidv4(),
@@ -148,7 +147,7 @@ export class AgentService {
     });
   }
 
-  async getTestAgents(ownerId: string) {
+  async getTestAgents(ownerId: string): Promise<TestAgent[]> {
     return await this.db.testAgent.findMany({
       where: {
         OR: [{ ownerId }, { ownerId: "SYSTEM" }],
@@ -162,7 +161,7 @@ export class AgentService {
     agentId: string,
     testAgentId: string,
     enabled: boolean,
-  ) {
+  ): Promise<Agent> {
     if (enabled) {
       return await this.db.agent.update({
         where: { id: agentId },
@@ -183,7 +182,7 @@ export class AgentService {
       });
     }
   }
-  async deleteAgent(id: string) {
-    return await this.db.agent.delete({ where: { id } });
+  async deleteAgent(id: string): Promise<void> {
+    await this.db.agent.delete({ where: { id } });
   }
 }

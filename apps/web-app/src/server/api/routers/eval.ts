@@ -1,6 +1,6 @@
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { EvalSetWithIncludesSchema } from "@repo/types";
-import { EvalService } from "~/server/services/eval";
+import { EvalService } from "@repo/services";
 import { EvalSchema } from "@repo/types/src/generated";
 import { z } from "zod";
 import { db } from "~/server/db";

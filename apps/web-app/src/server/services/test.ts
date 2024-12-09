@@ -1,4 +1,4 @@
-import { AgentService } from "./agent";
+import { AgentService } from "@repo/services/src/agent";
 import { CallStatus, type PrismaClient } from "@prisma/client";
 import { initiateVapiCall, queueOfOneKioskCalls } from "../helpers/vapiHelpers";
 import { type TestAgent } from "@repo/types/src/generated";

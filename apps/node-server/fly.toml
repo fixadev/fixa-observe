@@ -1,9 +1,9 @@
 # fly.toml app configuration file generated for pixa-observe on 2024-11-11T00:27:55-08:00
-#
+# redeploy
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 #
 
-app = "pixa-observe-staging"
+app = "pixa-observe"
 primary_region = 'sjc'
 
 [build]
@@ -11,9 +11,9 @@ primary_region = 'sjc'
 [http_service]
   internal_port = 3003
   force_https = true
-  auto_stop_machines = 'stop'
-  auto_start_machines = true
-  min_machines_running = 0
+  auto_stop_machines = 'off'
+  auto_start_machines = false
+  min_machines_running = 1
   processes = ['app']
 
 [[vm]]
