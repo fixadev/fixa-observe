@@ -168,6 +168,5 @@ export const startCall = async (
     });
   } catch (error) {
     console.error("Error starting OFONE call", error);
-    throw error;
   }
 };
