@@ -19,7 +19,12 @@ import {
   AlertDialogTrigger,
   AlertDialogTitle,
 } from "~/components/ui/alert-dialog";
-import { type EvalSchema, type EvalOverrideSchema } from "@repo/types";
+import {
+  type EvalSchema,
+  type EvalOverrideSchema,
+  type Eval,
+  type EvalOverride,
+} from "@repo/types";
 import { type ScenarioWithEvals, type UpdateScenarioSchema } from "@repo/types";
 import { EvalContentType, EvalResultType, EvalType } from "@prisma/client";
 import { Label } from "~/components/ui/label";
@@ -50,7 +55,7 @@ export function ScenarioSheet({
   saveScenario: (scenario: UpdateScenarioSchema) => void;
   deleteScenario: (id: string) => void;
 }) {
-  const emptyEval = useMemo<EvalSchema>(() => {
+  const emptyEval = useMemo<Eval>(() => {
     return {
       id: crypto.randomUUID(),
       name: "",
@@ -66,7 +71,7 @@ export function ScenarioSheet({
       toolCallExpectedResult: "",
       isCritical: true,
       deleted: false,
-      evalGroupId: null,
+      evalSetId: null,
     };
   }, []);
 
@@ -83,7 +88,7 @@ export function ScenarioSheet({
       : [emptyEval],
   );
 
-  const [evalOverrides, setEvalOverrides] = useState<Array<EvalOverrideSchema>>(
+  const [evalOverrides, setEvalOverrides] = useState<Array<EvalOverride>>(
     selectedScenario?.generalEvalOverrides ?? [],
   );
 
@@ -99,7 +104,7 @@ export function ScenarioSheet({
   }, [emptyEval]);
 
   const handleUpdateEval = useCallback(
-    (evaluation: EvalSchema) => {
+    (evaluation: Eval) => {
       setEvals(evals.map((e) => (e.id === evaluation.id ? evaluation : e)));
     },
     [evals],
@@ -187,7 +192,7 @@ export function ScenarioSheet({
     toast,
   ]);
 
-  const emptyEvalOverride = useMemo<EvalOverrideSchema>(() => {
+  const emptyEvalOverride = useMemo<EvalOverride>(() => {
     return {
       id: crypto.randomUUID(),
       createdAt: new Date(),
