@@ -134,7 +134,7 @@ export class AgentService {
     ownerId: string,
     headshotUrl: string,
     description: string,
-  ): Promise<any> {
+  ): Promise<TestAgent> {
     return await this.db.testAgent.create({
       data: {
         id: uuidv4(),
