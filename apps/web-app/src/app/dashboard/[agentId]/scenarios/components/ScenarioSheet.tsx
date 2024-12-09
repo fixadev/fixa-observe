@@ -24,8 +24,11 @@ import {
   type EvalOverrideSchema,
   type Eval,
   type EvalOverride,
-} from "@repo/types";
-import { type ScenarioWithEvals, type UpdateScenarioSchema } from "@repo/types";
+} from "@repo/types/src/index";
+import {
+  type ScenarioWithEvals,
+  type UpdateScenarioSchema,
+} from "@repo/types/src/index";
 import { EvalContentType, EvalResultType, EvalType } from "@prisma/client";
 import { Label } from "~/components/ui/label";
 import { Switch } from "~/components/ui/switch";

@@ -1,7 +1,7 @@
 import { type SortingState } from "@tanstack/react-table";
 import { DataTable } from "./call-table/CallsDataTable";
 import { columns } from "./call-table/columns";
-import { type CallWithIncludes } from "@repo/types";
+import { type CallWithIncludes } from "@repo/types/src/index";
 import { useObserveState } from "../hooks/useObserveState";
 import { useCallback, useEffect, useState, useMemo } from "react";
 import { Input } from "../ui/input";

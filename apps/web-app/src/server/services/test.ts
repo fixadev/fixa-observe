@@ -2,7 +2,10 @@ import { AgentService } from "@repo/services/src/agent";
 import { CallStatus, type PrismaClient } from "@prisma/client";
 import { initiateVapiCall, queueOfOneKioskCalls } from "../helpers/vapiHelpers";
 import { type TestAgent } from "@repo/types/src/generated";
-import { type OfOneKioskProperties, type TestWithIncludes } from "@repo/types";
+import {
+  type OfOneKioskProperties,
+  type TestWithIncludes,
+} from "@repo/types/src/index";
 import { randomUUID } from "crypto";
 
 export class TestService {

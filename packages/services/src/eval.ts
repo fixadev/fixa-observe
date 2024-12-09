@@ -1,6 +1,10 @@
 import { type PrismaClient } from "@repo/db";
 import { v4 as uuidv4 } from "uuid";
-import { type Eval, type Agent, type EvalSetWithIncludes } from "@repo/types";
+import {
+  type Eval,
+  type Agent,
+  type EvalSetWithIncludes,
+} from "@repo/types/src/index";
 import { getCreatedUpdatedDeleted } from "./utils";
 
 export class EvalService {

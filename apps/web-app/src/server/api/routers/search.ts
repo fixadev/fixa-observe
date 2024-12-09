@@ -1,8 +1,8 @@
 import { z } from "zod";
 import { createTRPCRouter } from "../trpc";
 import { protectedProcedure } from "../trpc";
-import { SearchService } from "@repo/services";
-import { SavedSearchSchema } from "@repo/types";
+import { SearchService } from "@repo/services/src/search";
+import { SavedSearchSchema } from "@repo/types/src/index";
 import { db } from "~/server/db";
 
 const searchServiceInstance = new SearchService(db);

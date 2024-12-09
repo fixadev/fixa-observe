@@ -3,7 +3,7 @@
 import {
   type EvalResultWithIncludes,
   type CallWithIncludes,
-} from "@repo/types";
+} from "@repo/types/src/index";
 import { cn, didCallSucceed, getLatencyColor } from "~/lib/utils";
 import Image from "next/image";
 import {

@@ -3,7 +3,7 @@
 import TestCard from "~/components/dashboard/TestCard";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import CallCard from "~/components/dashboard/CallCard";
-import type { TestWithIncludes } from "@repo/types";
+import type { TestWithIncludes } from "@repo/types/src/index";
 import CallDetails from "~/components/dashboard/CallDetails";
 import { AudioProvider, useAudio } from "~/components/hooks/useAudio";
 import { api } from "~/trpc/react";
@@ -15,7 +15,7 @@ import {
   type SocketMessage,
   type AnalysisStartedData,
   type CallStartedData,
-} from "@repo/types";
+} from "@repo/types/src/index";
 import { useUser } from "@clerk/nextjs";
 import { SlashIcon } from "@heroicons/react/24/solid";
 import { CallResult, CallStatus } from "@prisma/client";

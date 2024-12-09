@@ -1,4 +1,4 @@
-import { type SavedSearch } from "@repo/types";
+import { type SavedSearch } from "@repo/types/src/index";
 import { type PrismaClient } from "@repo/db";
 
 export class SearchService {

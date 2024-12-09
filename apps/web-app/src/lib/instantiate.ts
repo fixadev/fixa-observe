@@ -1,4 +1,4 @@
-import { type Eval, type EvalSet } from "@repo/types";
+import { type Eval, type EvalSet } from "@repo/types/src/index";
 import { generateTempId } from "./utils";
 
 export function instantiateEval(partial?: Partial<Eval>): Eval {

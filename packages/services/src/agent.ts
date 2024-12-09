@@ -1,4 +1,8 @@
-import { type Agent, AgentSchema, AgentWithIncludes } from "@repo/types";
+import {
+  type Agent,
+  AgentSchema,
+  AgentWithIncludes,
+} from "@repo/types/src/index";
 import { v4 as uuidv4 } from "uuid";
 import { type PrismaClient, type TestAgent } from "@repo/db";
 
@@ -134,7 +138,7 @@ export class AgentService {
     ownerId: string,
     headshotUrl: string,
     description: string,
-  ): Promise<any> {
+  ): Promise<TestAgent> {
     return await this.db.testAgent.create({
       data: {
         id: uuidv4(),

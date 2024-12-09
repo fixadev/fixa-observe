@@ -1,5 +1,5 @@
 import { GitHubLogoIcon } from "@radix-ui/react-icons";
-import { type Agent } from "@repo/types/src/generated";
+import { type Agent } from "@repo/types/src/index";
 import { Button } from "~/components/ui/button";
 import { useMemo } from "react";
 import Link from "next/link";
