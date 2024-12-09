@@ -70,7 +70,6 @@ export function scheduleOfOneCalls(
     }));
   } catch (error) {
     console.error("Error scheduling OFONE calls", error);
-    throw error;
   }
 }
 
