@@ -1,4 +1,4 @@
-import { type Eval } from "@repo/types/src/generated";
+import { type Eval } from "@repo/types/src/index";
 
 export function EvalChip({ evaluation }: { evaluation: Eval }) {
   return (

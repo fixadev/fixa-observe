@@ -3,7 +3,7 @@ import { v4 as uuidv4 } from "uuid";
 import {
   type CreateScenarioSchema,
   type UpdateScenarioSchema,
-} from "@repo/types";
+} from "@repo/types/src/index";
 
 export class ScenarioService {
   constructor(private db: PrismaClient) {}

@@ -1,8 +1,11 @@
 import { z } from "zod";
 import { createTRPCRouter } from "../trpc";
 import { protectedProcedure } from "../trpc";
-import { ScenarioService } from "@repo/services";
-import { CreateScenarioSchema, UpdateScenarioSchema } from "@repo/types";
+import { ScenarioService } from "@repo/services/src/scenario";
+import {
+  CreateScenarioSchema,
+  UpdateScenarioSchema,
+} from "@repo/types/src/index";
 import { db } from "~/server/db";
 import { generateScenariosFromPrompt } from "~/server/helpers/generateScenarios";
 

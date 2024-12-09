@@ -1,4 +1,4 @@
-// import type { RoleType, TestAgent } from "@repo/types/generated";
+// import type { RoleType, TestAgent } from "@repo/types/src/index/generated";
 // import type {
 //   TestWithIncludes,
 //   CallWithIncludes,

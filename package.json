@@ -6,7 +6,7 @@
     "dev": "turbo dev --concurrency 20",
     "lint": "turbo lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
-    "vercel-build": "pnpm --filter @repo/db generate && pnpm --filter @repo/db prisma migrate deploy && turbo build --filter=@repo/types --filter=@repo/services --filter=web-app..."
+    "vercel-build": "pnpm --filter @repo/db generate && pnpm --filter @repo/db prisma migrate deploy && turbo build --filter=@repo/types --filter=@repo/services --filter=web-app"
   },
   "devDependencies": {
     "prettier": "^3.3.3",

@@ -3,7 +3,7 @@ import { formatDistanceToNow } from "date-fns";
 import { CopyButton } from "~/components/CopyButton";
 import { useObserveState } from "~/components/hooks/useObserveState";
 import { Button } from "~/components/ui/button";
-import { type CallWithIncludes } from "@repo/types";
+import { type CallWithIncludes } from "@repo/types/src/index";
 import { cn, getInterruptionsColor, getLatencyColor } from "~/lib/utils";
 import { SortButton } from "./SortButton";
 import { ArrowTopRightOnSquareIcon } from "@heroicons/react/24/solid";

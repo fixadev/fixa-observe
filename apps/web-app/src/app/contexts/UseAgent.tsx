@@ -9,7 +9,7 @@ import {
   type ReactNode,
 } from "react";
 import { api } from "~/trpc/react";
-import { type AgentWithIncludes } from "@repo/types";
+import { type AgentWithIncludes } from "@repo/types/src/index";
 
 interface AgentContextType {
   agent: AgentWithIncludes | null;

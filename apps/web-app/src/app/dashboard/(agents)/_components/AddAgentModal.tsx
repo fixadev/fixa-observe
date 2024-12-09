@@ -12,7 +12,7 @@ import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 
 import { useState } from "react";
-import { type Agent } from "@repo/types";
+import { type Agent } from "@repo/types/src/index";
 import { api } from "~/trpc/react";
 import Spinner from "~/components/Spinner";
 import {
