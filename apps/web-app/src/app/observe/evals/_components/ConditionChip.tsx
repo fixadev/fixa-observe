@@ -24,7 +24,7 @@ import {
   TooltipTrigger,
 } from "~/components/ui/tooltip";
 import { Button } from "~/components/ui/button";
-import { type EvalGroupCondition } from "prisma/generated/zod";
+import { type EvalGroupCondition } from "@repo/types/generated";
 
 export default function ConditionChipWithPopover({
   condition,
@@ -140,7 +140,7 @@ export function ConditionChipEditor({
       </Select>
       {condition.type === "text" ? (
         <Input
-          value={condition.text!}
+          value={condition.text}
           onChange={(e) => {
             onUpdate({ ...condition, text: e.target.value });
           }}
@@ -151,7 +151,7 @@ export function ConditionChipEditor({
       ) : (
         <>
           <Select
-            value={condition.property!}
+            value={condition.property}
             onValueChange={(value) => {
               onUpdate({ ...condition, property: value });
             }}
@@ -166,7 +166,7 @@ export function ConditionChipEditor({
           </Select>
           <div className={cn("mx-2 text-sm", ibmPlexMono.className)}>==</div>
           <Input
-            value={condition.value!}
+            value={condition.value}
             onChange={(e) => {
               onUpdate({ ...condition, value: e.target.value });
             }}

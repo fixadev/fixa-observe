@@ -15,7 +15,7 @@ import {
 } from "@heroicons/react/24/solid";
 import { CallStatus, type LatencyBlock, Role } from "@prisma/client";
 import { LatencyCallHeader, TestCallHeader } from "./CallHeader";
-import { type Message } from "prisma/generated/zod";
+import { type Message } from "@repo/types/generated";
 import {
   Dialog,
   DialogContent,

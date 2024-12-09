@@ -6,16 +6,10 @@
   "scripts": {
     "build": "next build",
     "typecheck": "npx tsc --noEmit -p ./tsconfig.json",
-    "db:generate": "prisma migrate dev",
-    "db:migrate": "prisma migrate deploy",
-    "db:push": "prisma db push",
-    "db:studio": "prisma studio",
     "db:seed": "NODE_ENV=development prisma db seed",
     "dev": "next dev",
-    "postinstall": "prisma generate",
     "lint": "next lint",
-    "start": "next start",
-    "vercel-build": "prisma generate && prisma migrate deploy && next build"
+    "start": "next start"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.28.0",
@@ -102,12 +96,15 @@
     "swr": "^2.2.5",
     "tailwind-merge": "^2.5.2",
     "tailwindcss-animate": "^1.0.7",
+    "types": "link:shared/types",
     "uuid": "^10.0.0",
     "vaul": "^0.9.2",
     "wavesurfer.js": "^7.8.9",
     "zod": "^3.23.3",
     "zod-form-data": "^2.0.2",
-    "zod-prisma-types": "^3.1.8"
+    "zod-prisma-types": "^3.1.8",
+    "@repo/db": "workspace:*",
+    "@repo/types": "workspace:*"
   },
   "devDependencies": {
     "@types/eslint": "^8.56.10",

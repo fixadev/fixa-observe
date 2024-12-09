@@ -1,4 +1,4 @@
-import { type Eval } from "prisma/generated/zod";
+import { type Eval } from "@repo/types/generated";
 
 export function EvalChip({ evaluation }: { evaluation: Eval }) {
   return (

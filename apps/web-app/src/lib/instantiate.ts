@@ -3,7 +3,7 @@ import {
   type EvalGroupCondition,
   type Eval,
   type EvalGroup,
-} from "prisma/generated/zod";
+} from "@repo/types/generated";
 
 export function instantiateEval(partial?: Partial<Eval>): Eval {
   return {

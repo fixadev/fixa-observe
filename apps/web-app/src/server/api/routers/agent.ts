@@ -3,7 +3,7 @@ import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { AgentService } from "~/server/services/agent";
 import { CreateAgentSchema } from "~/lib/agent";
 import { db } from "~/server/db";
-import { AgentSchema } from "prisma/generated/zod";
+import { AgentSchema } from "@repo/types/generated";
 
 const agentServiceInstance = new AgentService(db);
 

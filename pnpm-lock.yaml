@@ -26,6 +26,9 @@ importers:
       '@aws-sdk/client-sqs':
         specifier: ^3.699.0
         version: 3.699.0
+      '@fixa/types':
+        specifier: link:/Users/oliverwendell-braly/pixa/pixa-observe/shared/types
+        version: link:../../shared/types
       '@google-cloud/storage':
         specifier: ^7.13.0
         version: 7.13.0
@@ -35,6 +38,12 @@ importers:
       '@prisma/client':
         specifier: ^5.21.1
         version: 5.21.1(prisma@5.21.1)
+      '@repo/db':
+        specifier: workspace:*
+        version: link:../../packages/db
+      '@repo/types':
+        specifier: workspace:*
+        version: link:../../packages/types
       '@t3-oss/env-core':
         specifier: ^0.11.1
         version: 0.11.1(typescript@5.5.4)(zod@3.23.8)
@@ -59,6 +68,9 @@ importers:
       ts-node:
         specifier: ^10.9.2
         version: 10.9.2(@types/node@20.14.15)(typescript@5.5.4)
+      types:
+        specifier: link:shared/types
+        version: link:shared/types
       uuid:
         specifier: ^10.0.0
         version: 10.0.0
@@ -198,6 +210,12 @@ importers:
       '@react-spring/web':
         specifier: ^9.7.4
         version: 9.7.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@repo/db':
+        specifier: workspace:*
+        version: link:../../packages/db
+      '@repo/types':
+        specifier: workspace:*
+        version: link:../../packages/types
       '@supabase/supabase-js':
         specifier: ^2.45.6
         version: 2.45.6
@@ -339,6 +357,9 @@ importers:
       tailwindcss-animate:
         specifier: ^1.0.7
         version: 1.0.7(tailwindcss@3.4.9(ts-node@10.9.2(@types/node@20.14.15)(typescript@5.5.4)))
+      types:
+        specifier: link:shared/types
+        version: link:shared/types
       uuid:
         specifier: ^10.0.0
         version: 10.0.0
@@ -416,6 +437,19 @@ importers:
         specifier: ^5.5.3
         version: 5.5.4
 
+  packages/db:
+    dependencies:
+      '@prisma/client':
+        specifier: ^5.21.1
+        version: 5.21.1(prisma@5.21.1)
+      zod-prisma-types:
+        specifier: ^3.1.8
+        version: 3.1.8
+    devDependencies:
+      prisma:
+        specifier: ^5.21.1
+        version: 5.21.1
+
   packages/eslint-config:
     devDependencies:
       '@typescript-eslint/eslint-plugin':
@@ -439,6 +473,25 @@ importers:
       typescript:
         specifier: ^5.3.3
         version: 5.3.3
+
+  packages/types:
+    dependencies:
+      '@prisma/client':
+        specifier: ^5.21.1
+        version: 5.21.1(prisma@5.21.1)
+      prisma:
+        specifier: ^5.21.1
+        version: 5.21.1
+      zod:
+        specifier: ^3.22.4
+        version: 3.23.8
+    devDependencies:
+      '@types/node':
+        specifier: ^20.10.0
+        version: 20.14.15
+      typescript:
+        specifier: ^5.3.2
+        version: 5.5.4
 
   packages/typescript-config: {}
 
@@ -4004,6 +4057,7 @@ packages:
   eslint@8.57.0:
     resolution: {integrity: sha512-dZ6+mexnaTIbSBZWgou51U6OmzIhYM2VcNdtiTtI7qPNZm35Akpr0f6vtw3w1Kmn5PYo+tZVfh13WrhpS6oLqQ==}
     engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
+    deprecated: This version is no longer supported. Please see https://eslint.org/version-support for other options.
     hasBin: true
 
   espree@9.6.1:
@@ -5609,10 +5663,6 @@ packages:
 
   pstree.remy@1.1.8:
     resolution: {integrity: sha512-77DZwxQmxKnu3aR542U+X8FypNzbfJ+C5XQDk3uWjWxn6151aIMGthWYRXTqT1E5oJvg+ljaa2OJi+VfvCOQ8w==}
-
-  punycode@2.3.0:
-    resolution: {integrity: sha512-rRV+zQD8tVFys26lAGR9WUuS4iUAngJScM+ZRSKtvl5tKeZ2t5bvdNFdNHBW9FWR4guGHlgmsZ1G7BSm2wTbuA==}
-    engines: {node: '>=6'}
 
   punycode@2.3.1:
     resolution: {integrity: sha512-vYt7UD1U9Wg6138shLtLOvdAu+8DsC/ilFtEVHcH+wydcSpNE20AfSOduf6MkRFahL5FY7X1oU7nKVZFtfq8Fg==}
@@ -8360,7 +8410,7 @@ snapshots:
       fast-glob: 3.3.1
       is-glob: 4.0.3
       open: 9.1.0
-      picocolors: 1.0.0
+      picocolors: 1.0.1
       tslib: 2.6.2
 
   '@prisma/client@5.21.1(prisma@5.21.1)':
@@ -11577,6 +11627,16 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
+  eslint-module-utils@2.8.0(@typescript-eslint/parser@7.1.0(eslint@8.57.0)(typescript@5.3.3))(eslint-import-resolver-node@0.3.9)(eslint@8.57.0):
+    dependencies:
+      debug: 3.2.7
+    optionalDependencies:
+      '@typescript-eslint/parser': 7.1.0(eslint@8.57.0)(typescript@5.3.3)
+      eslint: 8.57.0
+      eslint-import-resolver-node: 0.3.9
+    transitivePeerDependencies:
+      - supports-color
+
   eslint-module-utils@2.8.0(@typescript-eslint/parser@7.18.0(eslint@8.57.0)(typescript@5.5.4))(eslint-import-resolver-node@0.3.9)(eslint@8.57.0):
     dependencies:
       debug: 3.2.7
@@ -11614,7 +11674,7 @@ snapshots:
       doctrine: 2.1.0
       eslint: 8.57.0
       eslint-import-resolver-node: 0.3.9
-      eslint-module-utils: 2.8.0(@typescript-eslint/parser@6.17.0(eslint@8.57.0)(typescript@5.3.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.6.1(@typescript-eslint/parser@6.17.0(eslint@8.57.0)(typescript@5.3.3))(eslint-plugin-import@2.29.0)(eslint@8.57.0))(eslint@8.57.0)
+      eslint-module-utils: 2.8.0(@typescript-eslint/parser@7.1.0(eslint@8.57.0)(typescript@5.3.3))(eslint-import-resolver-node@0.3.9)(eslint@8.57.0)
       hasown: 2.0.0
       is-core-module: 2.13.1
       is-glob: 4.0.3
@@ -13489,8 +13549,6 @@ snapshots:
 
   pstree.remy@1.1.8: {}
 
-  punycode@2.3.0: {}
-
   punycode@2.3.1: {}
 
   qs@6.11.2:
@@ -14631,7 +14689,7 @@ snapshots:
 
   uri-js@4.4.1:
     dependencies:
-      punycode: 2.3.0
+      punycode: 2.3.1
 
   url-join@4.0.1: {}
 

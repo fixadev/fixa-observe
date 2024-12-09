@@ -2,7 +2,7 @@ import { z } from "zod";
 import { createTRPCRouter } from "../trpc";
 import { protectedProcedure } from "../trpc";
 import { SearchService } from "~/server/services/search";
-import { SavedSearchSchema } from "prisma/generated/zod";
+import { SavedSearchSchema } from "@repo/types/generated";
 import { db } from "~/server/db";
 
 const searchServiceInstance = new SearchService(db);

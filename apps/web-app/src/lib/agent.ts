@@ -4,7 +4,7 @@ import {
   type Message,
   type EvalResultSchema,
   type EvalSchema,
-} from "prisma/generated/zod";
+} from "@repo/types/generated";
 import { z } from "zod";
 import { type CallWithIncludes } from "./types";
 import { CreateScenarioSchema } from "./scenario";

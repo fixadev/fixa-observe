@@ -5,7 +5,7 @@ import {
   type UpdateScenarioSchema,
 } from "~/lib/scenario";
 
-import { type EvalOverride } from "prisma/generated/zod";
+import { type EvalOverride } from "@repo/types/generated";
 
 export class ScenarioService {
   constructor(private db: PrismaClient) {}

@@ -4,7 +4,7 @@ import {
   EvalSchema,
   type EvalOverrideSchema,
   EvalSetSchema,
-} from "prisma/generated/zod";
+} from "@repo/types/generated";
 
 export type EvalSchema = z.infer<typeof EvalSchema>;
 

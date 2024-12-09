@@ -1,4 +1,4 @@
-// import type { RoleType, TestAgent } from "prisma/generated/zod";
+// import type { RoleType, TestAgent } from "@repo/types/generated";
 // import type {
 //   TestWithIncludes,
 //   CallWithIncludes,

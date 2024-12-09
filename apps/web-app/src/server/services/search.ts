@@ -1,4 +1,4 @@
-import { type SavedSearch } from "prisma/generated/zod";
+import { type SavedSearch } from "@repo/types/generated";
 import { db } from "../db";
 import { type PrismaClient } from "@prisma/client";
 

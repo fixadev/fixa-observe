@@ -1,4 +1,5 @@
 import { Alert, SavedSearch } from "@prisma/client";
+import { z } from "zod";
 
 export async function sendAlerts({
   latencyP50,
@@ -15,6 +16,13 @@ export async function sendAlerts({
 }) {
   for (const savedSearch of savedSearches) {
     for (const alert of savedSearch.alerts) {
+      if (alert.type === "latency") {
+        // get latency for period from next backend
+
+        if (latencyP95 > alert.threshold) {
+          // TODO: send alert
+        }
+      }
     }
   }
 }

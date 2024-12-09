@@ -3,7 +3,7 @@ import {
   EvalOverrideSchema,
   EvalSchema,
   ScenarioSchema,
-} from "prisma/generated/zod";
+} from "@repo/types/generated";
 
 export type ScenarioWithEvals = z.infer<typeof ScenarioWithEvals>;
 export const ScenarioWithEvals = ScenarioSchema.extend({
