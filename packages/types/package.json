@@ -9,7 +9,7 @@
     "clean": "rm -rf dist"
   },
   "exports": {
-    ".": {
+    "./src/index": {
       "types": "./dist/index.d.ts",
       "import": "./src/index.ts",
       "default": "./dist/index.js"
