@@ -8,7 +8,6 @@ import { CSPostHogProvider } from "./providers";
 import { ClerkProvider } from "@clerk/nextjs";
 
 // import { dark } from "@clerk/themes";
-
 import ChildrenWrapper from "./_components/ChildrenWrapper";
 import { TooltipProvider } from "~/components/ui/tooltip";
 export const metadata: Metadata = {
