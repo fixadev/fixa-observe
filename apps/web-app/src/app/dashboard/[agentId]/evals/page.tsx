@@ -9,7 +9,7 @@ import { Button } from "~/components/ui/button";
 import { Card } from "~/components/ui/card";
 import { Switch } from "~/components/ui/switch";
 import { CreateGeneralEvalModal } from "./CreateGeneralEvalModal";
-import { type EvalSchema } from "@repo/types";
+import { type Eval } from "@repo/types";
 import { EvalContentType } from "@prisma/client";
 import { PencilIcon } from "@heroicons/react/24/solid";
 import { useAgent } from "~/app/contexts/UseAgent";
@@ -17,8 +17,8 @@ import { useAgent } from "~/app/contexts/UseAgent";
 export default function EvalsPage({ params }: { params: { agentId: string } }) {
   const { agent, setAgent } = useAgent(params.agentId);
   const [isEvalModalOpen, setIsEvalModalOpen] = useState(false);
-  const [selectedEval, setSelectedEval] = useState<EvalSchema | null>(null);
-  const [generalEvals, setGeneralEvals] = useState<EvalSchema[]>([]);
+  const [selectedEval, setSelectedEval] = useState<Eval | null>(null);
+  const [generalEvals, setGeneralEvals] = useState<Eval[]>([]);
 
   const { data: evaluations } = api.eval.getGeneralEvals.useQuery();
 

@@ -1,4 +1,4 @@
-import { type Agent, AgentSchema } from "@repo/types";
+import { type Agent, AgentSchema, AgentWithIncludes } from "@repo/types";
 import { v4 as uuidv4 } from "uuid";
 import { type PrismaClient, type TestAgent } from "@repo/db";
 
@@ -80,7 +80,7 @@ export class AgentService {
     throw new Error("Either id or customerAgentId must be provided");
   }
 
-  async getAgent(id: string): Promise<Agent | null> {
+  async getAgent(id: string): Promise<AgentWithIncludes | null> {
     const result = await this.db.agent.findUnique({
       where: { id },
       include: {
