@@ -93,7 +93,6 @@ export const transcribeAndSaveCall = async ({
       time: segment.start,
       endTime: segment.end,
       toolCalls: null,
-      callId: callId,
     }));
 
     const { evalResults, evalSetResults, savedSearches } =
@@ -174,13 +173,14 @@ export const analyzeBasedOnRules = async ({
   metadata,
   userId,
 }: {
-  messages: Message[];
+  messages: Omit<Message, "callId">[];
   createdAt: string;
   agentId: string;
   metadata: Record<string, string>;
   userId: string;
 }) => {
   try {
+    console.log("FINDING RELEVANT EVAL SETS");
     const { evalSets: relevantEvalSets, savedSearches } =
       await findRelevantEvalSets({
         messages,
@@ -224,6 +224,7 @@ export const analyzeBasedOnRules = async ({
         savedSearches,
       };
     } else {
+      console.log("NO RELEVANT EVAL SETS FOUND");
       return {
         evalSets: [],
         evalSetResults: [],
@@ -242,22 +243,23 @@ export const findRelevantEvalSets = async ({
   agentId,
   metadata,
 }: {
-  messages: Message[];
+  messages: Omit<Message, "callId">[];
   userId: string;
   agentId: string;
   metadata?: Record<string, string>;
 }) => {
   try {
     const savedSearches = await db.savedSearch.findMany({
-      where: {
-        ownerId: userId,
-        agentId,
-      },
+      // where: {
+      //   ownerId: userId,
+      // },
       include: {
         evalSets: { include: { evals: true } },
         alerts: true,
       },
     });
+
+    console.log("SAVED SEARCHES", savedSearches);
 
     const matchingSavedSearches = savedSearches.filter((savedSearch) => {
       const savedSearchMetadata = savedSearch.metadata as Record<

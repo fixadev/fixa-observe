@@ -3,6 +3,7 @@ import { sqs } from "../clients/s3Client";
 import { s3 } from "../clients/s3Client";
 import { PutObjectCommand } from "@aws-sdk/client-s3";
 import { getAudioDuration } from "../utils/audio";
+import { Readable } from "stream";
 
 interface AddCallToQueueProps {
   callId: string;
@@ -62,10 +63,12 @@ export const uploadFromPresignedUrl = async (
 
     const buffer = await response.arrayBuffer();
 
-    const stream = require("stream");
-    const readableStream = new stream.Readable();
-    readableStream.push(Buffer.from(buffer));
-    readableStream.push(null);
+    const readableStream = new Readable({
+      read() {
+        this.push(Buffer.from(buffer));
+        this.push(null);
+      },
+    });
 
     const duration = await getAudioDuration(recordingUrl);
 
