@@ -76,7 +76,7 @@ async def start_websocket_call_ofone(request: StartWebsocketCallOfOneRequest):
                   break
 
         return {
-            "call_id": call_id,
+            "callId": call_id,
         }
 
     except Exception as e:
