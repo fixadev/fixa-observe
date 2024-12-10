@@ -34,6 +34,9 @@ import { Button } from "~/components/ui/button";
 import EvalSetCard from "./components/EvalSetCard";
 import { instantiateEvalSet, instantiateAlert } from "~/lib/instantiate";
 import { AlertCard } from "./components/AlertCard";
+import { WarningDialog } from "~/app/_components/WarningDialog";
+import { TrashIcon } from "@heroicons/react/24/solid";
+import { useToast } from "~/components/hooks/use-toast";
 
 // TODO: refactor this to be cleaner
 
@@ -295,7 +298,7 @@ function EvalSetsAndAlertsCard({
                   <CardTitle className="p-0 text-sm font-medium">
                     {alert.type === "latency"
                       ? `latency ${alert.details.percentile} >= ${alert.details.threshold}ms`
-                      : `alert.name`}
+                      : `${alert.name}`}
                   </CardTitle>
                   <CardContent></CardContent>
                 </CardHeader>
@@ -474,6 +477,18 @@ function CreateEditAlertDialog({
       },
     });
 
+  const { mutate: deleteAlert, isPending: isDeleting } =
+    api.search.deleteAlert.useMutation({
+      onSuccess: () => {
+        setFilter({
+          ...filter,
+          alerts: filter.alerts?.filter((a) => a.id !== alert.id),
+        });
+        voidSelectedAlert();
+        setOpen(false);
+      },
+    });
+
   const handleSubmit = () => {
     if (isTempId(alert.id)) {
       createAlert(alert);
@@ -488,14 +503,41 @@ function CreateEditAlertDialog({
         <div className="flex flex-col gap-4">
           <AlertCard alert={alert} filter={filter} onUpdate={setAlert} />
         </div>
-        <DialogFooter className="mt-auto">
-          <Button
-            className="mt-4"
-            onClick={handleSubmit}
-            disabled={isCreating || isUpdating}
+        <DialogFooter className="mt-auto flex flex-row justify-between sm:justify-between">
+          <WarningDialog
+            title="delete alert"
+            message="are you sure you want to delete this alert?"
+            onConfirm={() => deleteAlert({ id: alert.id })}
+            isPending={isDeleting}
           >
-            {isCreating || isUpdating ? <Spinner /> : "save"}
-          </Button>
+            <Button
+              variant="ghost"
+              className="text-red-500 hover:text-red-500"
+              disabled={isCreating || isUpdating || isDeleting}
+            >
+              {isDeleting ? (
+                <Spinner />
+              ) : (
+                <TrashIcon className="size-5 text-black" />
+              )}
+            </Button>
+          </WarningDialog>
+          <div className="flex flex-row gap-3">
+            {/* <Button
+              variant="outline"
+              onClick={() => voidSelectedAlert()}
+              disabled={isCreating || isUpdating || isDeleting}
+            >
+              cancel
+            </Button> */}
+            <Button
+              className="w-20"
+              onClick={handleSubmit}
+              disabled={isCreating || isUpdating || isDeleting}
+            >
+              {isCreating || isUpdating ? <Spinner /> : "save"}
+            </Button>
+          </div>
         </DialogFooter>
       </DialogContent>
     </Dialog>

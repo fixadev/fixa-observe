@@ -55,7 +55,13 @@ export function AlertCard({
   ];
 
   useEffect(() => {
-    console.log("ALERT IS ", alert);
+    setAlertOptionIndex(
+      alertOptions.findIndex((opt) =>
+        alert.type === "latency"
+          ? opt.value === alert.details?.percentile
+          : opt.value === alert.details?.evalSetId,
+      ),
+    );
   }, [alert]);
 
   return (
@@ -111,11 +117,11 @@ export function AlertCard({
                               lookbackPeriod: lookbackPeriods[0]!,
                             }
                           : {
-                              evalSetId: selectedOption.evalSetId,
+                              evalSetId: selectedOption.evalSetId!,
                               trigger: true,
                               slackNames: alert.details?.slackNames || [""],
                             },
-                    };
+                    } as AlertWithDetails;
 
                     setAlertOptionIndex(
                       alertOptions.findIndex((opt) => opt.value === value),
@@ -229,13 +235,14 @@ export function AlertCard({
                   placeholder="enter name..."
                   value={alert.details?.slackNames[0] || ""}
                   onChange={(e) => {
-                    onUpdate({
+                    const updatedAlert = {
                       ...alert,
                       details: {
                         ...alert.details,
                         slackNames: [e.target.value],
                       },
-                    });
+                    } as AlertWithDetails;
+                    onUpdate(updatedAlert);
                   }}
                 />
               </div>
