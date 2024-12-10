@@ -32,7 +32,8 @@ import { PlusIcon } from "@heroicons/react/24/solid";
 import { DialogTitle } from "@radix-ui/react-dialog";
 import { Button } from "~/components/ui/button";
 import EvalSetCard from "./components/EvalSetCard";
-import { instantiateEvalSet } from "~/lib/instantiate";
+import { instantiateEvalSet, instantiateAlert } from "~/lib/instantiate";
+import { AlertCard } from "./components/AlertCard";
 
 // TODO: refactor this to be cleaner
 
@@ -296,7 +297,10 @@ function EvalSetsAndAlertsCard({
             ))}
             <div
               className="flex flex-row items-center gap-2 rounded-md bg-muted/70 p-4 text-muted-foreground hover:cursor-pointer hover:bg-muted"
-              // onClick={}
+              onClick={() => {
+                setSelectedAlert(null);
+                setAlertsModalOpen(true);
+              }}
             >
               <PlusIcon className="size-5" />
               <span className="text-sm">add alert</span>
@@ -309,6 +313,15 @@ function EvalSetsAndAlertsCard({
           savedSearchId={searchId}
           selectedEvalSet={selectedEvalSet}
           voidSelectedEvalSet={() => setSelectedEvalSet(null)}
+          filter={filter}
+          setFilter={setFilter}
+        />
+        <CreateEditAlertDialog
+          open={alertsModalOpen}
+          setOpen={setAlertsModalOpen}
+          selectedAlert={selectedAlert}
+          savedSearchId={searchId}
+          voidSelectedAlert={() => setSelectedAlert(null)}
           filter={filter}
           setFilter={setFilter}
         />
@@ -391,6 +404,87 @@ function CreateEditEvaluationDialog({
 
         <div className="flex flex-col gap-4">
           <EvalSetCard evalSet={evalSet} onUpdate={setEvalSet} />
+        </div>
+        <DialogFooter className="mt-auto">
+          <Button
+            className="mt-4"
+            onClick={handleSubmit}
+            disabled={isCreating || isUpdating}
+          >
+            {isCreating || isUpdating ? <Spinner /> : "save"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function CreateEditAlertDialog({
+  open,
+  setOpen,
+  savedSearchId,
+  selectedAlert,
+  voidSelectedAlert,
+  filter,
+  setFilter,
+}: {
+  open: boolean;
+  setOpen: (open: boolean) => void;
+  savedSearchId: string;
+  selectedAlert: AlertWithDetails | null;
+  voidSelectedAlert: () => void;
+  filter: Filter;
+  setFilter: React.Dispatch<React.SetStateAction<Filter>>;
+}) {
+  const [alert, setAlert] = useState<AlertWithDetails>(
+    selectedAlert ?? instantiateAlert({ savedSearchId }),
+  );
+
+  useEffect(() => {
+    if (selectedAlert) {
+      setAlert(selectedAlert);
+    }
+  }, [selectedAlert]);
+
+  const { mutate: createAlert, isPending: isCreating } =
+    api.search.createAlert.useMutation({
+      onSuccess: (data) => {
+        setFilter({
+          ...filter,
+          alerts: filter.alerts ? [...filter.alerts, data] : [data],
+        });
+        voidSelectedAlert();
+        setOpen(false);
+      },
+    });
+
+  const { mutate: updateAlert, isPending: isUpdating } =
+    api.search.updateAlert.useMutation({
+      onSuccess: (data) => {
+        setFilter({
+          ...filter,
+          alerts: filter.alerts?.map((a) => (a.id === data.id ? data : a)),
+        });
+        voidSelectedAlert();
+        setOpen(false);
+      },
+    });
+
+  const handleSubmit = () => {
+    if (selectedAlert) {
+      updateAlert(alert);
+    } else {
+      console.log("creating new alert");
+      console.log(alert);
+      createAlert(alert);
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogContent className="flex min-h-[400px] min-w-[600px] flex-col">
+        <div className="flex flex-col gap-4">
+          <AlertCard alert={alert} onUpdate={setAlert} />
         </div>
         <DialogFooter className="mt-auto">
           <Button
