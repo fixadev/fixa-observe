@@ -97,7 +97,6 @@ export const FilterSchema = z.object({
     })
     .optional(),
   agentId: z.string().optional(),
-  regionId: z.string().optional(),
   chartPeriod: z.number(),
   customerCallId: z.string().optional(),
   metadata: z.record(z.string(), z.string().or(z.undefined())).optional(),

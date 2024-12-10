@@ -62,13 +62,13 @@ export const transcribeAndSaveCall = async ({
 
     const { segments, interruptions, latencyBlocks } = response.data;
 
+    const latencyDurations = latencyBlocks?.map((block) => block.duration);
+
     const {
       p50: latencyP50,
       p90: latencyP90,
       p95: latencyP95,
-    } = calculateLatencyPercentiles(
-      latencyBlocks?.map((block) => block.duration) || [],
-    );
+    } = calculateLatencyPercentiles(latencyDurations || []);
 
     const {
       p50: interruptionP50,
@@ -106,9 +106,7 @@ export const transcribeAndSaveCall = async ({
       });
 
     await sendAlerts({
-      latencyP50,
-      latencyP90,
-      latencyP95,
+      latencyDurations,
       savedSearches,
       evalSetResults,
     });

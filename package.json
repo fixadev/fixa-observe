@@ -4,6 +4,7 @@
   "scripts": {
     "build": "turbo build",
     "dev": "turbo dev --concurrency 20",
+    "db:migrate": "pnpm --filter @repo/db db:migrate",
     "lint": "turbo lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "vercel-build": "pnpm --filter @repo/db generate && pnpm --filter @repo/db prisma migrate deploy && turbo build --filter=@repo/types --filter=@repo/services && cd apps/web-app && pnpm build"

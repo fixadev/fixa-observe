@@ -9,7 +9,9 @@ export class SearchService {
       data: {
         ...search,
         ownerId: userId,
-        filters: search.filters ?? {},
+        lookbackPeriod: search.lookbackPeriod ?? {},
+        timeRange: search.timeRange ?? {},
+        metadata: search.metadata ?? {},
       },
     });
   }
@@ -18,11 +20,13 @@ export class SearchService {
     return this.db.savedSearch.update({
       where: {
         id: search.id,
+        ownerId: userId,
       },
       data: {
         ...search,
-        ownerId: userId,
-        filters: search.filters ?? {},
+        lookbackPeriod: search.lookbackPeriod ?? {},
+        timeRange: search.timeRange ?? {},
+        metadata: search.metadata ?? {},
       },
     });
   }

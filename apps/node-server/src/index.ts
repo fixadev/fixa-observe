@@ -85,11 +85,13 @@ app.post(
     try {
       const { callId, location, agentId, regionId, metadata, createdAt } =
         req.body;
+
+      if (regionId) metadata.regionId = regionId;
+
       await addCallToQueue({
         callId,
         location,
         agentId,
-        regionId,
         createdAt: createdAt ? new Date(createdAt) : new Date(),
         // userId: res.locals.userId,
         userId: "11x",

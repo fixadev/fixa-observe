@@ -7,7 +7,7 @@
   "scripts": {
     "generate": "prisma generate --schema ./src/schema.prisma",
     "db:push": "prisma db push",
-    "db:migrate": "prisma migrate dev",
+    "db:migrate": "prisma migrate dev --schema ./src/schema.prisma",
     "postinstall": "prisma generate --schema ./src/schema.prisma"
   },
   "exports": {

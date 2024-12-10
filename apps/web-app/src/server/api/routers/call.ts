@@ -58,9 +58,6 @@ export const callRouter = createTRPCRouter({
     return await callService.getAgentIds("11x");
   }),
 
-  getRegionIds: protectedProcedure.query(async ({ ctx }) => {
-    return await callService.getRegionIds("11x");
-  }),
   getMetadata: protectedProcedure.query(async ({ ctx }) => {
     return await callService.getMetadata("11x");
   }),

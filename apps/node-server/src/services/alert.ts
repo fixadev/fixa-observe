@@ -1,16 +1,12 @@
-import { Alert, SavedSearch } from "@prisma/client";
 import { z } from "zod";
+import { Alert, SavedSearch } from "@prisma/client";
 
 export async function sendAlerts({
-  latencyP50,
-  latencyP90,
-  latencyP95,
+  latencyDurations,
   savedSearches,
   evalSetResults,
 }: {
-  latencyP50: number;
-  latencyP90: number;
-  latencyP95: number;
+  latencyDurations: number[] | undefined;
   savedSearches: Array<SavedSearch & { alerts: Alert[] }>;
   evalSetResults: Array<{ evalSetId: string; success: boolean }>;
 }) {

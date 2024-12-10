@@ -63,9 +63,6 @@ export class CallService {
       if (filter.agentId) {
         filterWhere.agentId = filter.agentId;
       }
-      if (filter.regionId) {
-        filterWhere.regionId = filter.regionId;
-      }
 
       if (filter.metadata) {
         const metadataFilters = Object.entries(filter.metadata).map(
@@ -302,6 +299,39 @@ export class CallService {
     };
   };
 
+  getMedianLatencyPercentilesForLookbackPeriod = async ({
+    ownerId,
+    filter,
+    newLatencyBlocks,
+  }: {
+    ownerId: string;
+    filter: Partial<Filter>;
+    newLatencyBlocks: number[];
+  }): Promise<{
+    p50: number;
+    p90: number;
+    p95: number;
+  }> => {
+    const calls = await this.getCalls({
+      ownerId,
+      filter,
+    });
+
+    const latencies = calls.items.flatMap((call) =>
+      call.latencyBlocks.map((block) => block.duration),
+    );
+
+    const sortedLatencies = latencies.sort((a, b) => a - b);
+    const medianIndex = Math.floor(sortedLatencies.length / 2);
+    const p90Index = Math.floor(sortedLatencies.length * 0.9);
+    const p95Index = Math.floor(sortedLatencies.length * 0.95);
+    const p50 = sortedLatencies[medianIndex] || 0;
+    const p90 = sortedLatencies[p90Index] || 0;
+    const p95 = sortedLatencies[p95Index] || 0;
+
+    return { p50, p90, p95 };
+  };
+
   getCallsCount = async ({
     ownerId,
     testId,
@@ -333,14 +363,6 @@ export class CallService {
       where: { ownerId },
     });
     return result.filter((r) => r.agentId !== null).map((r) => r.agentId!);
-  };
-
-  getRegionIds = async (ownerId: string): Promise<string[]> => {
-    const result = await this.db.call.groupBy({
-      by: ["regionId"],
-      where: { ownerId },
-    });
-    return result.filter((r) => r.regionId !== null).map((r) => r.regionId!);
   };
 
   getMetadata = async (

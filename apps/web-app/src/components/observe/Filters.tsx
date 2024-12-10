@@ -51,23 +51,9 @@ export default function Filters({
   refetch: () => void;
 }) {
   const { data: agentIds } = api._call.getAgentIds.useQuery();
-  const { data: regionIds } = api._call.getRegionIds.useQuery();
   const { data: _agents, refetch: refetchAgents } =
     api.agent.getAllFor11x.useQuery();
   const { data: metadata } = api._call.getMetadata.useQuery();
-
-  const regions = useMemo(() => {
-    return [
-      {
-        id: "all",
-        name: "all regions",
-      },
-      ...(regionIds ?? []).map((id) => ({
-        id,
-        name: id,
-      })),
-    ];
-  }, [regionIds]);
 
   const agents = useMemo(() => {
     return [
@@ -200,27 +186,6 @@ export default function Filters({
               </Command>
             </PopoverContent>
           </Popover>
-          <Select
-            value={filter.regionId ?? "all"}
-            onValueChange={(value) => {
-              setFilter({
-                ...filter,
-                regionId: value === "all" ? undefined : value,
-              });
-            }}
-          >
-            <SelectTrigger className="gap-2 bg-background">
-              <MapIcon className="size-4 shrink-0" />
-              <SelectValue placeholder="all regions" />
-            </SelectTrigger>
-            <SelectContent>
-              {regions.map((region) => (
-                <SelectItem key={region.id} value={region.id}>
-                  {region.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
           {Object.entries(metadataAttributes).map(([key, values]) => (
             <Select
               key={key}
@@ -347,72 +312,3 @@ function EditAgentDialog({
     </Dialog>
   );
 }
-
-// function SwitchWithValue({
-//   prefix,
-//   suffix,
-//   value,
-//   setValue,
-//   checked,
-//   onCheckedChange,
-// }: {
-//   prefix: string;
-//   suffix: string;
-//   value: number;
-//   setValue: (value: number) => void;
-//   checked: boolean;
-//   onCheckedChange: (checked: boolean) => void;
-// }) {
-//   const [_value, _setValue] = useState(value);
-
-//   useEffect(() => {
-//     _setValue(value);
-//   }, [value]);
-
-//   return (
-//     <Popover onOpenChange={() => setValue(_value)}>
-//       <PopoverTrigger asChild>
-//         <Button variant="outline" asChild>
-//           <div
-//             className={cn(
-//               "flex cursor-pointer items-center gap-2",
-//               !checked && "opacity-50",
-//             )}
-//           >
-//             <Switch
-//               onClick={(e) => e.stopPropagation()}
-//               checked={checked}
-//               onCheckedChange={onCheckedChange}
-//             />
-//             {prefix}
-//             {isNaN(_value) ? 0 : _value}
-//             {suffix}
-//           </div>
-//         </Button>
-//       </PopoverTrigger>
-//       <PopoverContent className="flex flex-col gap-2 text-sm">
-//         <div className="flex items-center gap-2">
-//           <div className="shrink-0">{prefix}</div>
-//           <Input
-//             type="number"
-//             value={_value}
-//             onChange={(e) => {
-//               _setValue(parseInt(e.target.value));
-//             }}
-//           />
-//           <div>{suffix}</div>
-//         </div>
-//         <Slider
-//           max={3000}
-//           step={10}
-//           value={[_value]}
-//           onValueChange={([value]) => {
-//             if (value !== undefined) {
-//               _setValue(value);
-//             }
-//           }}
-//         />
-//       </PopoverContent>
-//     </Popover>
-//   );
-// }

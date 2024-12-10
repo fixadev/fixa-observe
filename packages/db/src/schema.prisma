@@ -316,13 +316,18 @@ model EvalSet {
 }
 
 model SavedSearch {
-  id        String    @id @default(uuid())
-  createdAt DateTime  @default(now())
-  ownerId   String
-  agentId   String
-  filters   Json
-  evalSets  EvalSet[]
-  alerts    Alert[]
+  id             String   @id @default(uuid())
+  createdAt      DateTime @default(now())
+  ownerId        String
+  agentId        String
+  lookbackPeriod Json
+  timeRange      Json?
+  chartPeriod    Int
+  customerCallId String?
+  metadata       Json?
+
+  evalSets EvalSet[]
+  alerts   Alert[]
 }
 
 model Alert {

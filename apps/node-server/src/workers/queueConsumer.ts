@@ -18,40 +18,22 @@ export async function startQueueConsumer() {
         for (const message of response.Messages) {
           // Process message
           const data = JSON.parse(message.Body || "{}");
-          const {
-            callId,
-            location,
-            agentId,
-            regionId,
-            createdAt,
-            userId,
-            metadata,
-          } = data;
+          const { callId, location, agentId, createdAt, userId, metadata } =
+            data;
           if (!callId || !location || !userId || !createdAt) {
             console.error("Missing required fields in message:", data);
             throw new Error("Missing required fields");
           }
 
-          const {
-            regionId: newRegionId,
-            agentId: newAgentId,
-            metadata: newMetadata,
-          } = parseMetadata(metadata);
-
           // Upsert agent if it doesn't exist
-          const agent = await upsertAgent(agentId || newAgentId, userId);
-
-          const updatedMetadata = {
-            ...metadata,
-            regionId: regionId || newRegionId,
-          };
+          const agent = await upsertAgent(agentId, userId);
 
           const newCall = await transcribeAndSaveCall({
             callId,
             audioUrl: location,
             createdAt,
             agentId: agent.id,
-            metadata: updatedMetadata,
+            metadata,
             userId,
           });
           console.log("Transcription completed:", newCall);

@@ -8,7 +8,6 @@ interface AddCallToQueueProps {
   callId: string;
   location: string;
   agentId: string;
-  regionId: string;
   createdAt: Date;
   userId: string;
   metadata: Record<string, string>;
