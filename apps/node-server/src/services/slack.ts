@@ -1,6 +1,7 @@
 import { Call, CallResult, Test } from "@prisma/client";
 import { env } from "../env";
 import axios from "axios";
+import { Alert, EvalSetAlert, LatencyAlert } from "@repo/types/src";
 
 export const sendTestCompletedSlackMessage = async ({
   userId,
@@ -73,3 +74,77 @@ async function getUser(userId: string) {
     throw error;
   }
 }
+
+export const sendAlertSlackMessage = async ({
+  userId,
+  call,
+  success,
+  alert,
+}: {
+  userId: string;
+  call: Call;
+  success: boolean;
+  alert: Omit<Alert, "details"> & { details: LatencyAlert | EvalSetAlert };
+}) => {
+  console.log(
+    "sending slack message =========================================================",
+  );
+  const user = await getUser(userId);
+  console.log(user, "user");
+  if (!user.public_metadata.slackWebhookUrl) {
+    return;
+  }
+
+  const emoji =
+    alert.type === "latency"
+      ? ":stopwatch:"
+      : success
+        ? ":white_check_mark:"
+        : ":x:";
+
+  const message =
+    alert.type === "latency"
+      ? {
+          blocks: [
+            {
+              type: "section",
+              text: {
+                type: "mrkdwn",
+                text: `*alert triggered!*\n\n${emoji} ${(alert.details as LatencyAlert).threshold}ms ${(alert.details as LatencyAlert).percentile} ${(alert.details as LatencyAlert).lookbackPeriod.label} exceeded`,
+              },
+              accessory: {
+                type: "button",
+                text: {
+                  type: "plain_text",
+                  text: "view call",
+                  emoji: true,
+                },
+                url: `${process.env.NEXT_BASE_URL}/observe/saved/${alert.savedSearchId}/${call.id}`,
+              },
+            },
+          ],
+        }
+      : {
+          blocks: [
+            {
+              type: "section",
+              text: {
+                type: "mrkdwn",
+                text: `*alert triggered!*\n\n${emoji} Eval Set Alert`,
+              },
+              accessory: {
+                type: "button",
+                text: {
+                  type: "plain_text",
+                  text: "view call",
+                  emoji: true,
+                },
+                url: `${process.env.NEXT_BASE_URL}/observe/saved/${alert.savedSearchId}/${call.id}`,
+              },
+            },
+          ],
+        };
+
+  console.log(message);
+  await axios.post(user.public_metadata.slackWebhookUrl, message);
+};

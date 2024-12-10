@@ -6,17 +6,21 @@ import {
   SavedSearch,
   LatencyAlertSchema,
   EvalSetAlertSchema,
+  Call,
 } from "@repo/types/src/index";
+import { sendAlertSlackMessage } from "./slack";
 
 const callService = new CallService(db);
 
 export async function sendAlerts({
   userId,
+  call,
   latencyDurations,
   savedSearches,
   evalSetResults,
 }: {
   userId: string;
+  call: Call;
   latencyDurations: number[] | undefined;
   savedSearches: Array<SavedSearch & { alerts: Alert[] }>;
   evalSetResults: Array<{ evalSetId: string; success: boolean }>;
@@ -53,6 +57,17 @@ export async function sendAlerts({
             "and threshold",
             threshold, // TODO: send alert to slack
           );
+
+          sendAlertSlackMessage({
+            userId,
+            call,
+            success: false,
+            alert: {
+              ...alert,
+              type: "latency",
+              details: latencyAlert.data,
+            },
+          });
         }
       } else if (alert.type === "evalSet") {
         const evalSetAlert = EvalSetAlertSchema.safeParse(alert.details);
@@ -72,6 +87,17 @@ export async function sendAlerts({
             "and trigger",
             trigger, // TODO: send alert to slack
           );
+
+          sendAlertSlackMessage({
+            userId,
+            call,
+            success: evalSetResult.success,
+            alert: {
+              ...alert,
+              type: "evalSet",
+              details: evalSetAlert.data,
+            },
+          });
         }
       }
     }

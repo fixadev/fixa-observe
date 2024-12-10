@@ -105,13 +105,6 @@ export const transcribeAndSaveCall = async ({
         userId,
       });
 
-    await sendAlerts({
-      userId,
-      latencyDurations,
-      savedSearches,
-      evalSetResults,
-    });
-
     const newCall = await db.call.create({
       data: {
         id: uuidv4(),
@@ -158,6 +151,15 @@ export const transcribeAndSaveCall = async ({
         },
       },
     });
+
+    await sendAlerts({
+      userId,
+      latencyDurations,
+      savedSearches,
+      evalSetResults,
+      call: newCall,
+    });
+
     return newCall;
   } catch (error) {
     console.error("Error in transcribeAndSaveCall:", error);

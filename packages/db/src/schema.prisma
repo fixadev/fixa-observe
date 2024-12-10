@@ -334,6 +334,7 @@ model Alert {
   id            String      @id @default(uuid())
   createdAt     DateTime    @default(now())
   ownerId       String
+  name          String
   savedSearch   SavedSearch @relation(fields: [savedSearchId], references: [id])
   savedSearchId String
   type          AlertType
