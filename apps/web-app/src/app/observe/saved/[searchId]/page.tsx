@@ -32,8 +32,9 @@ import { PlusIcon } from "@heroicons/react/24/solid";
 import { DialogTitle } from "@radix-ui/react-dialog";
 import { Button } from "~/components/ui/button";
 import EvalSetCard from "./components/EvalSetCard";
-import { instantiateEval, instantiateEvalSet } from "~/lib/instantiate";
-import { set } from "lodash";
+import { instantiateEvalSet } from "~/lib/instantiate";
+
+// TODO: refactor this to be cleaner
 
 export default function SavedSearchPage({
   params,
@@ -49,7 +50,6 @@ export default function SavedSearchPage({
 
   useEffect(() => {
     if (savedSearchQueryResult) {
-      console.log("savedSearchQueryResult", savedSearchQueryResult);
       setFilter(savedSearchQueryResult);
     }
   }, [savedSearchQueryResult]);
@@ -256,7 +256,7 @@ function EvalSetsAndAlertsCard({
                   setEvalsModalOpen(true);
                 }}
                 key={evalSet.id}
-                className="flex flex-col gap-4 rounded-md border border-muted/20 bg-background p-4 shadow-sm"
+                className="flex flex-col gap-4 p-4"
               >
                 <CardHeader>
                   <CardTitle className="text-sm font-medium">
@@ -351,6 +351,7 @@ function CreateEditEvaluationDialog({
           ...filter,
           evalSets: filter.evalSets ? [...filter.evalSets, data] : [data],
         });
+        voidSelectedEvalSet();
         setOpen(false);
       },
     });
@@ -364,6 +365,7 @@ function CreateEditEvaluationDialog({
             es.id === data.id ? data : es,
           ),
         });
+        voidSelectedEvalSet();
         setOpen(false);
       },
     });

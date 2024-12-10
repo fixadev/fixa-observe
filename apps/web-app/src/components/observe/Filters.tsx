@@ -380,10 +380,6 @@ function SaveSearchDialog({
 }) {
   const [name, setName] = useState("");
 
-  useEffect(() => {
-    console.log("NAME IN STATE", name);
-  }, [name]);
-
   const handleSubmit = () => {
     saveSearch(name);
   };
