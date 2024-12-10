@@ -85,4 +85,8 @@ async def start_websocket_call_ofone(request: StartWebsocketCallOfOneRequest):
     
 if __name__ == "__main__":
     import uvicorn
+
+    # Build the selenium docker image before starting the server
+    subprocess.run(["bash", "./src/services/selenium/build_docker_image.sh"], check=True)
+
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
