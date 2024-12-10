@@ -21,7 +21,7 @@ import {
 import { api } from "~/trpc/react";
 import ChartCard from "~/components/observe/ChartCard";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
-import { cn } from "~/lib/utils";
+import { cn, isTempId } from "~/lib/utils";
 import {
   Alert,
   AlertWithDetails,
@@ -249,7 +249,7 @@ function EvalSetsAndAlertsCard({
       </div>
       <CardContent>
         {mode === "evaluations" ? (
-          <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-2">
             {filter.evalSets?.map((evalSet) => (
               <Card
                 onClick={() => {
@@ -257,7 +257,7 @@ function EvalSetsAndAlertsCard({
                   setEvalsModalOpen(true);
                 }}
                 key={evalSet.id}
-                className="flex flex-col gap-4 p-4"
+                className="flex flex-col gap-4 p-4 hover:cursor-pointer hover:bg-muted/40"
               >
                 <CardHeader className="p-0">
                   <CardTitle className="p-0 text-sm font-medium">
@@ -268,7 +268,7 @@ function EvalSetsAndAlertsCard({
               </Card>
             ))}
             <div
-              className="flex flex-row items-center gap-2 rounded-md bg-muted/70 p-4 text-muted-foreground hover:cursor-pointer hover:bg-muted"
+              className="flex flex-row items-center gap-2 rounded-lg bg-muted/70 p-4 text-muted-foreground hover:cursor-pointer hover:bg-muted"
               onClick={() => {
                 setSelectedEvalSet(
                   instantiateEvalSet({ savedSearchId: searchId }),
@@ -276,7 +276,7 @@ function EvalSetsAndAlertsCard({
                 setEvalsModalOpen(true);
               }}
             >
-              <PlusIcon className="size-5" />
+              <PlusIcon className="size-4" />
               <span className="text-sm">add evaluation</span>
             </div>
           </div>
@@ -289,7 +289,7 @@ function EvalSetsAndAlertsCard({
                   setAlertsModalOpen(true);
                 }}
                 key={alert.id}
-                className="flex flex-col gap-4 rounded-md border border-muted/20 bg-background p-4 shadow-sm"
+                className="flex flex-col gap-4 p-4 hover:cursor-pointer hover:bg-muted/40"
               >
                 <CardHeader>
                   <CardTitle className="text-sm font-medium">
@@ -305,7 +305,7 @@ function EvalSetsAndAlertsCard({
                 setAlertsModalOpen(true);
               }}
             >
-              <PlusIcon className="size-5" />
+              <PlusIcon className="size-4" />
               <span className="text-sm">add alert</span>
             </div>
           </div>
@@ -387,12 +387,10 @@ function CreateEditEvaluationDialog({
     });
 
   const handleSubmit = () => {
-    if (selectedEvalSet) {
-      updateEvalSet(evalSet);
-    } else {
-      console.log("creating new evaluation");
-      console.log(evalSet);
+    if (isTempId(evalSet.id)) {
       createEvalSet(evalSet);
+    } else {
+      updateEvalSet(evalSet);
     }
   };
 
@@ -474,12 +472,10 @@ function CreateEditAlertDialog({
     });
 
   const handleSubmit = () => {
-    if (selectedAlert) {
-      updateAlert(alert);
-    } else {
-      console.log("creating new alert");
-      console.log(alert);
+    if (isTempId(alert.id)) {
       createAlert(alert);
+    } else {
+      updateAlert(alert);
     }
   };
 

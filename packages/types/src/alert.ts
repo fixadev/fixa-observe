@@ -9,15 +9,24 @@ export const LatencyAlertSchema = z.object({
   }),
   percentile: z.enum(["p50", "p90", "p95"]),
   threshold: z.number(),
+  slackNames: z.array(z.string()),
 });
 
 export type EvalSetAlert = z.infer<typeof EvalSetAlertSchema>;
 export const EvalSetAlertSchema = z.object({
   evalSetId: z.string(),
   trigger: z.boolean(),
+  slackNames: z.array(z.string()),
 });
 
 export type AlertWithDetails = z.infer<typeof AlertWithDetailsSchema>;
-export const AlertWithDetailsSchema = AlertSchema.extend({
-  details: z.union([LatencyAlertSchema, EvalSetAlertSchema]),
-});
+export const AlertWithDetailsSchema = z.discriminatedUnion("type", [
+  AlertSchema.omit({ details: true }).extend({
+    type: z.literal("latency"),
+    details: LatencyAlertSchema,
+  }),
+  AlertSchema.omit({ details: true }).extend({
+    type: z.literal("evalSet"),
+    details: EvalSetAlertSchema,
+  }),
+]);

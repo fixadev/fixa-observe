@@ -17,8 +17,6 @@ export class SearchService {
     const { evalSets, alerts, timeRange, customerCallId, ...filterData } =
       filter;
 
-    console.log("NAME IS", name);
-
     const searchData = {
       ...filterData,
       id: crypto.randomUUID(),
@@ -101,11 +99,7 @@ export class SearchService {
       },
     });
 
-    console.log("SAVED SEARCHES", savedSearches);
-
     const parsed = SavedSearchWithIncludes.array().safeParse(savedSearches);
-    console.log("PARSED SUCCESS", parsed.success);
-    console.log("PARSED ERROR", parsed.error);
     return parsed.success ? parsed.data : [];
   }
 
@@ -116,6 +110,7 @@ export class SearchService {
     const alertWithDetails = await this.db.alert.create({
       data: {
         ...alert,
+        id: crypto.randomUUID(),
         ownerId: userId,
         details: alert.details ?? {},
       },

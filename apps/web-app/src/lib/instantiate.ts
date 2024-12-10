@@ -49,21 +49,23 @@ export function instantiateEvalSet(
   };
 }
 
-export function instantiateAlert(
-  partial?: Partial<AlertWithDetails>,
-): AlertWithDetails {
+export function instantiateAlert({
+  savedSearchId,
+}: {
+  savedSearchId: string;
+}): AlertWithDetails {
   return {
     id: generateTempId(),
     createdAt: new Date(),
     ownerId: "",
     name: "",
     type: AlertType.latency,
-    savedSearchId: "",
+    savedSearchId,
     details: {
       lookbackPeriod: { label: "1h", value: 1 },
       percentile: "p90",
-      threshold: 0,
+      threshold: 1000,
+      slackNames: [""],
     },
-    ...partial,
   };
 }
