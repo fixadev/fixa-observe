@@ -95,7 +95,7 @@ app.post(
         createdAt: createdAt ? new Date(createdAt) : new Date(),
         // userId: res.locals.userId,
         userId: "11x",
-        metadata,
+        metadata: metadata,
       });
       res.json({ success: true, muizz: "the man" });
     } catch (error) {
