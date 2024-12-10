@@ -1,6 +1,7 @@
 import {
   AlertWithDetails,
   AlertWithDetailsSchema,
+  SavedSearchWithIncludes,
   type SavedSearch,
 } from "@repo/types/src/index";
 import { type PrismaClient } from "@repo/db";
@@ -35,8 +36,11 @@ export class SearchService {
     });
   }
 
-  async getById(userId: string, id: string): Promise<SavedSearch | null> {
-    return this.db.savedSearch.findUnique({
+  async getById(
+    userId: string,
+    id: string,
+  ): Promise<SavedSearchWithIncludes | null> {
+    const savedSearch = await this.db.savedSearch.findUnique({
       where: {
         id,
         ownerId: userId,
@@ -50,14 +54,19 @@ export class SearchService {
         },
       },
     });
+    const parsed = SavedSearchWithIncludes.safeParse(savedSearch);
+    return parsed.success ? parsed.data : null;
   }
 
-  async getAll(userId: string): Promise<SavedSearch[]> {
-    return this.db.savedSearch.findMany({
+  async getAll(userId: string): Promise<SavedSearchWithIncludes[]> {
+    const savedSearches = await this.db.savedSearch.findMany({
       where: {
         ownerId: userId,
       },
     });
+
+    const parsed = SavedSearchWithIncludes.array().safeParse(savedSearches);
+    return parsed.success ? parsed.data : [];
   }
 
   async createAlert(

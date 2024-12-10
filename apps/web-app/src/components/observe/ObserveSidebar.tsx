@@ -9,6 +9,9 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarMenuSub,
+  SidebarMenuSubButton,
+  SidebarMenuSubItem,
 } from "../ui/sidebar";
 import { ChartBarIcon, CheckIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
@@ -16,6 +19,7 @@ import { usePathname } from "next/navigation";
 import { useCallback } from "react";
 import { removeTrailingSlash } from "~/lib/utils";
 import Logo from "../Logo";
+import { DocumentIcon } from "@heroicons/react/24/solid";
 
 const navItems = [
   { href: "/", icon: ChartBarIcon, label: "dashboard" },
@@ -37,6 +41,14 @@ export default function ObserveSidebar() {
     [pathname],
   );
 
+  const savedSearchNames = [
+    "saved",
+    "saved-1",
+    "saved-2",
+    "saved-3",
+    "saved-4",
+  ];
+
   return (
     <Sidebar>
       <SidebarHeader>
@@ -48,19 +60,25 @@ export default function ObserveSidebar() {
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
-              {navItems.map((item) => (
-                <SidebarMenuItem key={item.label}>
-                  <SidebarMenuButton
-                    asChild
-                    isActive={isCurrentPath(item.href)}
-                  >
-                    <Link href={`/observe${item.href}`}>
-                      <item.icon />
-                      <span>{item.label}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild isActive={isCurrentPath("/observe")}>
+                  <Link href={`/observe`}>
+                    <ChartBarIcon />
+                    <span>Dashboard</span>
+                  </Link>
+                </SidebarMenuButton>
+                <SidebarMenuButton isActive={isCurrentPath("/saved")}>
+                  <DocumentIcon className="h-4 w-4" />
+                  <span>Saved</span>
+                </SidebarMenuButton>
+                <SidebarMenuSub className="border-l-0">
+                  {savedSearchNames.map((name) => (
+                    <SidebarMenuSubItem key={name}>
+                      <SidebarMenuSubButton>{name}</SidebarMenuSubButton>
+                    </SidebarMenuSubItem>
+                  ))}
+                </SidebarMenuSub>
+              </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>

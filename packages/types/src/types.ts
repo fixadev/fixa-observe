@@ -1,6 +1,7 @@
 import { type Prisma } from "@prisma/client";
 import { z } from "zod";
-import { AlertSchema, EvalSetSchema } from "./generated";
+import { AlertSchema, EvalSetSchema, SavedSearchSchema } from "./generated";
+import { AlertWithDetailsSchema } from "./alert";
 
 export type PlatformOptions = z.infer<typeof platformOptions>;
 export const platformOptions = z.enum(["retell", "vapi", "bland"]);
@@ -111,6 +112,14 @@ export const FilterSchema = z.object({
   //   enabled: z.boolean(),
   //   value: z.number(),
   // }),
+});
+
+export type SavedSearchWithIncludes = z.infer<typeof SavedSearchWithIncludes>;
+export const SavedSearchWithIncludes = FilterSchema.extend({
+  id: z.string(),
+  createdAt: z.date(),
+  ownerId: z.string(),
+  name: z.string(),
 });
 
 export type SelectItem = {

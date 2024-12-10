@@ -217,6 +217,8 @@ export class CallService {
       p95: number;
     }[];
   }> => {
+    console.log("FILTER IS", filter);
+    console.log("OWNER ID IS", ownerId);
     // Get all calls within filters
     const calls = await this.getCalls({
       ownerId,
@@ -228,6 +230,8 @@ export class CallService {
         new Date(b.startedAt ?? "").getTime()
       );
     });
+
+    console.log("CALLS ARE", calls);
 
     const chartPeriod = filter.chartPeriod ?? 60 * 60 * 1000; // Default to 1 hour
 
@@ -291,7 +295,10 @@ export class CallService {
     //       call.interruptions.map((interruption) => interruption.duration),
     //     ),
     //   ),
-    // };
+    // }
+
+    console.log("LATENCY BY PERIOD", latencyByPeriod);
+    console.log("INTERRUPTIONS BY PERIOD", interruptionsByPeriod);
 
     return {
       latency: latencyByPeriod,
