@@ -1,5 +1,6 @@
 import { type Prisma } from "@prisma/client";
 import { z } from "zod";
+import { AlertSchema, EvalSetSchema } from "./generated";
 
 export type PlatformOptions = z.infer<typeof platformOptions>;
 export const platformOptions = z.enum(["retell", "vapi", "bland"]);
@@ -100,6 +101,8 @@ export const FilterSchema = z.object({
   chartPeriod: z.number(),
   customerCallId: z.string().optional(),
   metadata: z.record(z.string(), z.string().or(z.undefined())).optional(),
+  evalSets: z.array(EvalSetSchema).optional(),
+  alerts: z.array(AlertSchema).optional(),
   // latencyThreshold: z.object({
   //   enabled: z.boolean(),
   //   value: z.number(),

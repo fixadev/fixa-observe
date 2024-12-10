@@ -299,12 +299,12 @@ export class CallService {
     };
   };
 
-  getMedianLatencyPercentilesForLookbackPeriod = async ({
-    ownerId,
+  getLatencyPercentilesForLookbackPeriod = async ({
+    userId,
     filter,
     newLatencyBlocks,
   }: {
-    ownerId: string;
+    userId: string;
     filter: Partial<Filter>;
     newLatencyBlocks: number[];
   }): Promise<{
@@ -313,7 +313,7 @@ export class CallService {
     p95: number;
   }> => {
     const calls = await this.getCalls({
-      ownerId,
+      ownerId: userId,
       filter,
     });
 

@@ -26,7 +26,8 @@
     "uuid": "^10.0.0",
     "zod": "^3.23.3",
     "@repo/db": "workspace:*",
-    "@repo/types": "workspace:*"
+    "@repo/types": "workspace:*",
+    "@repo/services": "workspace:*"
   },
   "devDependencies": {
     "@types/express": "^4.17.21",

@@ -2,12 +2,16 @@ import { z } from "zod";
 
 export type LatencyAlert = z.infer<typeof LatencyAlertSchema>;
 export const LatencyAlertSchema = z.object({
-  lookbackPeriod: z.number(),
+  lookbackPeriod: z.object({
+    label: z.string(),
+    value: z.number(),
+  }),
+  percentile: z.enum(["p50", "p90", "p95"]),
   threshold: z.number(),
 });
 
-export type EvalGroupAlert = z.infer<typeof EvalGroupAlertSchema>;
-export const EvalGroupAlertSchema = z.object({
+export type EvalSetAlert = z.infer<typeof EvalSetAlertSchema>;
+export const EvalSetAlertSchema = z.object({
   evalSetId: z.string(),
   trigger: z.boolean(),
 });

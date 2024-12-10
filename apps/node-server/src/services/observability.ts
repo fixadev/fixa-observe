@@ -106,6 +106,7 @@ export const transcribeAndSaveCall = async ({
       });
 
     await sendAlerts({
+      userId,
       latencyDurations,
       savedSearches,
       evalSetResults,
@@ -257,8 +258,11 @@ export const findRelevantEvalSets = async ({
     });
 
     const matchingSavedSearches = savedSearches.filter((savedSearch) => {
-      const filters = savedSearch.filters as Record<string, string>;
-      return Object.entries(filters).every(
+      const savedSearchMetadata = savedSearch.metadata as Record<
+        string,
+        string
+      >;
+      return Object.entries(savedSearchMetadata).every(
         ([key, value]) => metadata?.[key] === value,
       );
     });
