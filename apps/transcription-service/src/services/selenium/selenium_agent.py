@@ -11,7 +11,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 import websockets.sync.client as websockets
 import time
 import json
-from .vapi_python import Vapi
+from vapi_python import Vapi
 
 class SeleniumAgent:
     def __init__(self, device_id, assistant_id, assistant_overrides, base_url):

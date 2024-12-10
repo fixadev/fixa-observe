@@ -1,6 +1,6 @@
 from daily import *
 import requests
-from .daily_call import DailyCall
+from daily_call import DailyCall
 import json
 
 SAMPLE_RATE = 16000

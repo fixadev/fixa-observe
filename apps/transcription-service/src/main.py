@@ -1,12 +1,14 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 import os
-from vapi_python import OfOneClient
 from utils.logger import logger
 from services.transcribe import transcribe_with_deepgram
 from services.split_channels import split_channels
 from services.create_transcript import create_transcript_from_deepgram
 import asyncio
+from typing import Optional
+import json
+import subprocess
 
 if os.getenv('ENVIRONMENT') == 'local-staging':
   from dotenv import load_dotenv
@@ -22,8 +24,6 @@ class StartWebsocketCallOfOneRequest(BaseModel):
     assistant_id: str
     assistant_overrides: dict
     base_url: str
-
-# comment to redeploy
 
 @app.get("/")
 async def health():
@@ -44,27 +44,45 @@ async def transcribe(request: TranscribeRequest):
 @app.post("/websocket-call-ofone")
 async def start_websocket_call_ofone(request: StartWebsocketCallOfOneRequest):
     try:
-        client_args = {
-            'device_id': request.device_id,
-            'assistant_id': request.assistant_id,
-            'assistant_overrides': request.assistant_overrides,
-            'base_url': request.base_url
+        # Convert assistant_overrides to JSON string if provided
+        assistant_overrides_str = json.dumps(request.assistant_overrides) if request.assistant_overrides else None
+
+        # Prepare the docker command
+        cmd = [
+            "docker", "run", "-it", "selenium-agent",
+            "--device-id", request.device_id,
+            "--assistant-id", request.assistant_id,
+            "--base-url", request.base_url
+        ]
+
+        # Add assistant_overrides if provided
+        if assistant_overrides_str:
+            cmd.extend(["--assistant-overrides", assistant_overrides_str])
+
+        # Run the docker container
+        process = subprocess.Popen(
+            cmd,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True
+        )
+
+        # Get the call ID from stdout
+        call_id = None
+        if process.stdout:
+          for line in process.stdout:
+              if line.startswith("VAPI_CALL_ID="):
+                  call_id = line.strip().split("=")[1]
+                  break
+
+        return {
+            "call_id": call_id,
         }
-        
-        client = OfOneClient(**client_args)
-        call_id = await client.start_call()
-        
-        asyncio.create_task(client.listen_for_check_state_events())
-            
-        return {"callId": call_id}
+
     except Exception as e:
-        logger.error(f"Error starting OFONE call: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
+
     
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
-
-"""
-curl -X POST http://localhost:8000/transcribe-deepgram -H "Content-Type: application/json" -d '{"stereo_audio_url": "https://storage.vapi.ai/123fdbc6-bb4f-425a-b3bd-3c1165a3b3a7-1733193612534-2f8659f7-0b6d-444c-8e11-6acaa4cbb448-stereo.wav"}'
-"""

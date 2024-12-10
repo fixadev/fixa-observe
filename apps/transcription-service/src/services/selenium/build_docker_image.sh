@@ -1,1 +1,1 @@
-docker build -t selenium_agent .
+docker build -t selenium-agent ./src/services/selenium/
