@@ -126,10 +126,16 @@ export class EvalService {
             id: uuidv4(),
             evalSetId: undefined,
             scenarioId: undefined,
+            agentId: undefined,
           })),
           update: updated.map((evaluation) => ({
             where: { id: evaluation.id },
-            data: { ...evaluation, scenarioId: undefined },
+            data: {
+              ...evaluation,
+              scenarioId: undefined,
+              agentId: undefined,
+              evalSetId: undefined,
+            },
           })),
           delete: deleted,
         },

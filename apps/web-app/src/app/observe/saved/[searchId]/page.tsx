@@ -259,17 +259,20 @@ function EvalSetsAndAlertsCard({
                 key={evalSet.id}
                 className="flex flex-col gap-4 p-4"
               >
-                <CardHeader>
-                  <CardTitle className="text-sm font-medium">
+                <CardHeader className="p-0">
+                  <CardTitle className="p-0 text-sm font-medium">
                     {evalSet.name}
                   </CardTitle>
+                  <CardContent></CardContent>
                 </CardHeader>
               </Card>
             ))}
             <div
               className="flex flex-row items-center gap-2 rounded-md bg-muted/70 p-4 text-muted-foreground hover:cursor-pointer hover:bg-muted"
               onClick={() => {
-                setSelectedEvalSet(null);
+                setSelectedEvalSet(
+                  instantiateEvalSet({ savedSearchId: searchId }),
+                );
                 setEvalsModalOpen(true);
               }}
             >
@@ -298,7 +301,7 @@ function EvalSetsAndAlertsCard({
             <div
               className="flex flex-row items-center gap-2 rounded-md bg-muted/70 p-4 text-muted-foreground hover:cursor-pointer hover:bg-muted"
               onClick={() => {
-                setSelectedAlert(null);
+                setSelectedAlert(instantiateAlert({ savedSearchId: searchId }));
                 setAlertsModalOpen(true);
               }}
             >
