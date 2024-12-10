@@ -91,7 +91,12 @@ export class EvalService {
         id: uuidv4(),
         ownerId: userId,
         evals: {
-          create: set.evals,
+          create: set.evals.map((evaluation) => ({
+            ...evaluation,
+            id: uuidv4(),
+            evalSetId: undefined,
+            scenarioId: undefined,
+          })),
         },
       },
       include: {
@@ -116,10 +121,15 @@ export class EvalService {
       data: {
         ...set,
         evals: {
-          create: created,
+          create: created.map((evaluation) => ({
+            ...evaluation,
+            id: uuidv4(),
+            evalSetId: undefined,
+            scenarioId: undefined,
+          })),
           update: updated.map((evaluation) => ({
             where: { id: evaluation.id },
-            data: evaluation,
+            data: { ...evaluation, scenarioId: undefined },
           })),
           delete: deleted,
         },

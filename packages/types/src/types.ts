@@ -2,6 +2,7 @@ import { type Prisma } from "@prisma/client";
 import { z } from "zod";
 import { AlertSchema, EvalSetSchema, SavedSearchSchema } from "./generated";
 import { AlertWithDetailsSchema } from "./alert";
+import { EvalSetWithIncludesSchema } from "./eval";
 
 export type PlatformOptions = z.infer<typeof platformOptions>;
 export const platformOptions = z.enum(["retell", "vapi", "bland"]);
@@ -102,8 +103,8 @@ export const FilterSchema = z.object({
   chartPeriod: z.number(),
   customerCallId: z.union([z.string(), z.null(), z.undefined()]),
   metadata: z.record(z.string(), z.string().or(z.undefined())).optional(),
-  evalSets: z.array(EvalSetSchema).optional(),
-  alerts: z.array(AlertSchema).optional(),
+  evalSets: z.array(EvalSetWithIncludesSchema).optional(),
+  alerts: z.array(AlertWithDetailsSchema).optional(),
 });
 
 export type SavedSearchWithIncludes = z.infer<typeof SavedSearchWithIncludes>;

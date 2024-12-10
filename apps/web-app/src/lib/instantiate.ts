@@ -1,4 +1,8 @@
-import { type Eval, type EvalSet } from "@repo/types/src/index";
+import {
+  EvalSetWithIncludes,
+  type Eval,
+  type EvalSet,
+} from "@repo/types/src/index";
 import { generateTempId } from "./utils";
 
 export function instantiateEval(partial?: Partial<Eval>): Eval {
@@ -26,7 +30,9 @@ export function instantiateEval(partial?: Partial<Eval>): Eval {
   };
 }
 
-export function instantiateEvalSet(partial?: Partial<EvalSet>): EvalSet {
+export function instantiateEvalSet(
+  partial?: Partial<EvalSetWithIncludes>,
+): EvalSetWithIncludes {
   return {
     id: generateTempId(),
     createdAt: new Date(),
@@ -35,6 +41,7 @@ export function instantiateEvalSet(partial?: Partial<EvalSet>): EvalSet {
     enabled: true,
     condition: "",
     savedSearchId: null,
+    evals: [],
 
     ...partial,
   };

@@ -12,13 +12,28 @@ import { useObserveState } from "~/components/hooks/useObserveState";
 import CallTable from "~/components/observe/CallTable";
 import Filters from "~/components/observe/Filters";
 import Spinner from "~/components/Spinner";
-import { Dialog, DialogContent } from "~/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+} from "~/components/ui/dialog";
 import { api } from "~/trpc/react";
 import ChartCard from "~/components/observe/ChartCard";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { cn } from "~/lib/utils";
-import { Filter } from "@repo/types/src";
+import {
+  Alert,
+  AlertWithDetails,
+  EvalSetWithIncludes,
+  Filter,
+} from "@repo/types/src";
 import { PlusIcon } from "@heroicons/react/24/solid";
+import { DialogTitle } from "@radix-ui/react-dialog";
+import { Button } from "~/components/ui/button";
+import EvalSetCard from "./components/EvalSetCard";
+import { instantiateEval, instantiateEvalSet } from "~/lib/instantiate";
+import { set } from "lodash";
 
 export default function SavedSearchPage({
   params,
@@ -32,10 +47,9 @@ export default function SavedSearchPage({
     id: params.searchId,
   });
 
-  const [savedSearch, setSavedSearch] = useState(savedSearchQueryResult);
-
   useEffect(() => {
     if (savedSearchQueryResult) {
+      console.log("savedSearchQueryResult", savedSearchQueryResult);
       setFilter(savedSearchQueryResult);
     }
   }, [savedSearchQueryResult]);
@@ -143,7 +157,11 @@ export default function SavedSearchPage({
             data={percentiles?.latency}
             isLoading={isLoadingPercentiles || isRefetchingPercentiles}
           />
-          <EvalSetsAndAlertsCard filter={filter} setFilter={setFilter} />
+          <EvalSetsAndAlertsCard
+            filter={filter}
+            setFilter={setFilter}
+            searchId={params.searchId ?? ""}
+          />
         </div>
         <CallTable isLoading={isLoading || isRefetching} calls={calls} />
         {/* Invisible marker for infinite scroll */}
@@ -192,11 +210,20 @@ export default function SavedSearchPage({
 function EvalSetsAndAlertsCard({
   filter,
   setFilter,
+  searchId,
 }: {
   filter: Filter;
   setFilter: React.Dispatch<React.SetStateAction<Filter>>;
+  searchId: string;
 }) {
   const [mode, setMode] = useState<"evaluations" | "alerts">("evaluations");
+  const [evalsModalOpen, setEvalsModalOpen] = useState(false);
+  const [alertsModalOpen, setAlertsModalOpen] = useState(false);
+  const [selectedEvalSet, setSelectedEvalSet] =
+    useState<EvalSetWithIncludes | null>(null);
+  const [selectedAlert, setSelectedAlert] = useState<AlertWithDetails | null>(
+    null,
+  );
   return (
     <Card className="flex-1">
       <div className="flex flex-row items-center gap-4 p-6 font-medium">
@@ -224,6 +251,10 @@ function EvalSetsAndAlertsCard({
           <div className="flex flex-col gap-4">
             {filter.evalSets?.map((evalSet) => (
               <Card
+                onClick={() => {
+                  setSelectedEvalSet(evalSet);
+                  setEvalsModalOpen(true);
+                }}
                 key={evalSet.id}
                 className="flex flex-col gap-4 rounded-md border border-muted/20 bg-background p-4 shadow-sm"
               >
@@ -236,7 +267,10 @@ function EvalSetsAndAlertsCard({
             ))}
             <div
               className="flex flex-row items-center gap-2 rounded-md bg-muted/70 p-4 text-muted-foreground hover:cursor-pointer hover:bg-muted"
-              // onClick={}
+              onClick={() => {
+                setSelectedEvalSet(null);
+                setEvalsModalOpen(true);
+              }}
             >
               <PlusIcon className="size-5" />
               <span className="text-sm">add evaluation</span>
@@ -246,6 +280,10 @@ function EvalSetsAndAlertsCard({
           <div className="flex flex-col gap-4">
             {filter.alerts?.map((alert) => (
               <Card
+                onClick={() => {
+                  setSelectedAlert(alert);
+                  setAlertsModalOpen(true);
+                }}
                 key={alert.id}
                 className="flex flex-col gap-4 rounded-md border border-muted/20 bg-background p-4 shadow-sm"
               >
@@ -265,7 +303,103 @@ function EvalSetsAndAlertsCard({
             </div>
           </div>
         )}
+        <CreateEditEvaluationDialog
+          open={evalsModalOpen}
+          setOpen={setEvalsModalOpen}
+          savedSearchId={searchId}
+          selectedEvalSet={selectedEvalSet}
+          voidSelectedEvalSet={() => setSelectedEvalSet(null)}
+          filter={filter}
+          setFilter={setFilter}
+        />
       </CardContent>
     </Card>
+  );
+}
+
+function CreateEditEvaluationDialog({
+  open,
+  setOpen,
+  savedSearchId,
+  selectedEvalSet,
+  voidSelectedEvalSet,
+  filter,
+  setFilter,
+}: {
+  open: boolean;
+  setOpen: (open: boolean) => void;
+  savedSearchId: string;
+  selectedEvalSet: EvalSetWithIncludes | null;
+  voidSelectedEvalSet: () => void;
+  filter: Filter;
+  setFilter: React.Dispatch<React.SetStateAction<Filter>>;
+}) {
+  const [evalSet, setEvalSet] = useState<EvalSetWithIncludes>(
+    selectedEvalSet ?? instantiateEvalSet({ savedSearchId }),
+  );
+
+  useEffect(() => {
+    if (selectedEvalSet) {
+      setEvalSet(selectedEvalSet);
+    }
+  }, [selectedEvalSet]);
+
+  const { mutate: createEvalSet, isPending: isCreating } =
+    api.eval.createSet.useMutation({
+      onSuccess: (data) => {
+        setFilter({
+          ...filter,
+          evalSets: filter.evalSets ? [...filter.evalSets, data] : [data],
+        });
+        setOpen(false);
+      },
+    });
+
+  const { mutate: updateEvalSet, isPending: isUpdating } =
+    api.eval.updateSet.useMutation({
+      onSuccess: (data) => {
+        setFilter({
+          ...filter,
+          evalSets: filter.evalSets?.map((es) =>
+            es.id === data.id ? data : es,
+          ),
+        });
+        setOpen(false);
+      },
+    });
+
+  const handleSubmit = () => {
+    if (selectedEvalSet) {
+      updateEvalSet(evalSet);
+    } else {
+      console.log("creating new evaluation");
+      console.log(evalSet);
+      createEvalSet(evalSet);
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogContent className="flex min-h-[400px] min-w-[600px] flex-col">
+        {/* <DialogHeader>
+          <DialogTitle className="text-lg font-medium leading-none tracking-tight">
+            {selectedEvalSet ? "edit evaluation" : "create evaluation"}
+          </DialogTitle>
+        </DialogHeader> */}
+
+        <div className="flex flex-col gap-4">
+          <EvalSetCard evalSet={evalSet} onUpdate={setEvalSet} />
+        </div>
+        <DialogFooter className="mt-auto">
+          <Button
+            className="mt-4"
+            onClick={handleSubmit}
+            disabled={isCreating || isUpdating}
+          >
+            {isCreating || isUpdating ? <Spinner /> : "save"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
