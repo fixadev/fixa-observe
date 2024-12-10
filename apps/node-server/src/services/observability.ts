@@ -117,9 +117,7 @@ export const transcribeAndSaveCall = async ({
         evalResults: {
           create: evalResults,
         },
-        evalSetToSuccess: {
-          create: evalSetResults,
-        },
+        evalSetToSuccess: evalSetResults,
         latencyP50,
         latencyP90,
         latencyP95,

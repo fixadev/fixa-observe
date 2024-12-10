@@ -6,6 +6,7 @@ import {
 } from "@repo/types/src/index";
 import { generateTempId } from "./utils";
 import { AlertType } from "@prisma/client";
+import { lookbackPeriods } from "~/components/hooks/useObserveState";
 
 export function instantiateEval(partial?: Partial<Eval>): Eval {
   return {
@@ -62,7 +63,7 @@ export function instantiateAlert({
     type: AlertType.latency,
     savedSearchId,
     details: {
-      lookbackPeriod: { label: "1h", value: 1 },
+      lookbackPeriod: lookbackPeriods[0]!,
       percentile: "p90",
       threshold: 1000,
       slackNames: [""],

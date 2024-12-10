@@ -291,10 +291,13 @@ function EvalSetsAndAlertsCard({
                 key={alert.id}
                 className="flex flex-col gap-4 p-4 hover:cursor-pointer hover:bg-muted/40"
               >
-                <CardHeader>
-                  <CardTitle className="text-sm font-medium">
-                    {alert.name}
+                <CardHeader className="p-0">
+                  <CardTitle className="p-0 text-sm font-medium">
+                    {alert.type === "latency"
+                      ? `latency ${alert.details.percentile} >= ${alert.details.threshold}ms`
+                      : `alert.name`}
                   </CardTitle>
+                  <CardContent></CardContent>
                 </CardHeader>
               </Card>
             ))}
@@ -483,7 +486,7 @@ function CreateEditAlertDialog({
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent className="flex min-h-[400px] min-w-[600px] flex-col">
         <div className="flex flex-col gap-4">
-          <AlertCard alert={alert} onUpdate={setAlert} />
+          <AlertCard alert={alert} filter={filter} onUpdate={setAlert} />
         </div>
         <DialogFooter className="mt-auto">
           <Button
