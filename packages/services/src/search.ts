@@ -1,4 +1,8 @@
-import { type SavedSearch } from "@repo/types/src/index";
+import {
+  AlertWithDetails,
+  AlertWithDetailsSchema,
+  type SavedSearch,
+} from "@repo/types/src/index";
 import { type PrismaClient } from "@repo/db";
 
 export class SearchService {
@@ -51,6 +55,46 @@ export class SearchService {
   async getAll(userId: string): Promise<SavedSearch[]> {
     return this.db.savedSearch.findMany({
       where: {
+        ownerId: userId,
+      },
+    });
+  }
+
+  async createAlert(
+    userId: string,
+    alert: AlertWithDetails,
+  ): Promise<AlertWithDetails> {
+    const alertWithDetails = await this.db.alert.create({
+      data: {
+        ...alert,
+        ownerId: userId,
+        details: alert.details ?? {},
+      },
+    });
+    return AlertWithDetailsSchema.parse(alertWithDetails);
+  }
+
+  async updateAlert(
+    userId: string,
+    alert: AlertWithDetails,
+  ): Promise<AlertWithDetails> {
+    const alertWithDetails = await this.db.alert.update({
+      where: {
+        id: alert.id,
+        ownerId: userId,
+      },
+      data: {
+        ...alert,
+        details: alert.details ?? {},
+      },
+    });
+    return AlertWithDetailsSchema.parse(alertWithDetails);
+  }
+
+  async deleteAlert(userId: string, id: string): Promise<void> {
+    await this.db.alert.delete({
+      where: {
+        id,
         ownerId: userId,
       },
     });
