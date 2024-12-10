@@ -1,6 +1,12 @@
 "use client";
 
-import { useCallback, useMemo, useRef, useEffect, useState } from "react";
+import React, {
+  useCallback,
+  useMemo,
+  useRef,
+  useEffect,
+  useState,
+} from "react";
 import CallDetails from "~/components/dashboard/CallDetails";
 import { useObserveState } from "~/components/hooks/useObserveState";
 import CallTable from "~/components/observe/CallTable";
@@ -9,6 +15,10 @@ import Spinner from "~/components/Spinner";
 import { Dialog, DialogContent } from "~/components/ui/dialog";
 import { api } from "~/trpc/react";
 import ChartCard from "~/components/observe/ChartCard";
+import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
+import { cn } from "~/lib/utils";
+import { Filter } from "@repo/types/src";
+import { PlusIcon } from "@heroicons/react/24/solid";
 
 export default function SavedSearchPage({
   params,
@@ -18,15 +28,17 @@ export default function SavedSearchPage({
   const { selectedCallId, setSelectedCallId, filter, setFilter, orderBy } =
     useObserveState();
 
-  const { data: savedSearch } = api.search.getById.useQuery({
+  const { data: savedSearchQueryResult } = api.search.getById.useQuery({
     id: params.searchId,
   });
 
+  const [savedSearch, setSavedSearch] = useState(savedSearchQueryResult);
+
   useEffect(() => {
-    if (savedSearch) {
-      setFilter(savedSearch);
+    if (savedSearchQueryResult) {
+      setFilter(savedSearchQueryResult);
     }
-  }, [savedSearch, setFilter]);
+  }, [savedSearchQueryResult]);
 
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -110,12 +122,12 @@ export default function SavedSearchPage({
       className="relative h-full bg-muted/30 pt-16 focus:outline-none"
       autoFocus
       tabIndex={0}
-      onKeyDown={(e) => {
-        if (e.key === " " && !modalOpen) {
-          e.preventDefault();
-          playPauseAudio();
-        }
-      }}
+      // onKeyDown={(e) => {
+      //   if (e.key === " " && !modalOpen) {
+      //     e.preventDefault();
+      //     playPauseAudio();
+      //   }
+      // }}
     >
       <Filters
         modalOpen={modalOpen}
@@ -131,11 +143,7 @@ export default function SavedSearchPage({
             data={percentiles?.latency}
             isLoading={isLoadingPercentiles || isRefetchingPercentiles}
           />
-          <ChartCard
-            title="interruptions"
-            data={percentiles?.interruptions}
-            isLoading={isLoadingPercentiles || isRefetchingPercentiles}
-          />
+          <EvalSetsAndAlertsCard filter={filter} setFilter={setFilter} />
         </div>
         <CallTable isLoading={isLoading || isRefetching} calls={calls} />
         {/* Invisible marker for infinite scroll */}
@@ -178,5 +186,86 @@ export default function SavedSearchPage({
         )}
       </div>
     </div>
+  );
+}
+
+function EvalSetsAndAlertsCard({
+  filter,
+  setFilter,
+}: {
+  filter: Filter;
+  setFilter: React.Dispatch<React.SetStateAction<Filter>>;
+}) {
+  const [mode, setMode] = useState<"evaluations" | "alerts">("evaluations");
+  return (
+    <Card className="flex-1">
+      <div className="flex flex-row items-center gap-4 p-6 font-medium">
+        <p
+          onClick={() => setMode("evaluations")}
+          className={cn(
+            "cursor-pointer",
+            mode === "evaluations" ? "text-primary" : "text-muted-foreground",
+          )}
+        >
+          evaluations
+        </p>
+        <p
+          onClick={() => setMode("alerts")}
+          className={cn(
+            "cursor-pointer",
+            mode === "alerts" ? "text-primary" : "text-muted-foreground",
+          )}
+        >
+          alerts
+        </p>
+      </div>
+      <CardContent>
+        {mode === "evaluations" ? (
+          <div className="flex flex-col gap-4">
+            {filter.evalSets?.map((evalSet) => (
+              <Card
+                key={evalSet.id}
+                className="flex flex-col gap-4 rounded-md border border-muted/20 bg-background p-4 shadow-sm"
+              >
+                <CardHeader>
+                  <CardTitle className="text-sm font-medium">
+                    {evalSet.name}
+                  </CardTitle>
+                </CardHeader>
+              </Card>
+            ))}
+            <div
+              className="flex flex-row items-center gap-2 rounded-md bg-muted/70 p-4 text-muted-foreground hover:cursor-pointer hover:bg-muted"
+              // onClick={}
+            >
+              <PlusIcon className="size-5" />
+              <span className="text-sm">add evaluation</span>
+            </div>
+          </div>
+        ) : (
+          <div className="flex flex-col gap-4">
+            {filter.alerts?.map((alert) => (
+              <Card
+                key={alert.id}
+                className="flex flex-col gap-4 rounded-md border border-muted/20 bg-background p-4 shadow-sm"
+              >
+                <CardHeader>
+                  <CardTitle className="text-sm font-medium">
+                    {alert.name}
+                  </CardTitle>
+                </CardHeader>
+              </Card>
+            ))}
+            <div
+              className="flex flex-row items-center gap-2 rounded-md bg-muted/70 p-4 text-muted-foreground hover:cursor-pointer hover:bg-muted"
+              // onClick={}
+            >
+              <PlusIcon className="size-5" />
+              <span className="text-sm">add alert</span>
+            </div>
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
 }

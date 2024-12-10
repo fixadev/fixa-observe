@@ -20,6 +20,7 @@ import { useCallback } from "react";
 import { removeTrailingSlash } from "~/lib/utils";
 import Logo from "../Logo";
 import { DocumentIcon } from "@heroicons/react/24/solid";
+import { api } from "~/trpc/react";
 
 const navItems = [
   { href: "/", icon: ChartBarIcon, label: "dashboard" },
@@ -41,13 +42,7 @@ export default function ObserveSidebar() {
     [pathname],
   );
 
-  const savedSearchNames = [
-    "saved",
-    "saved-1",
-    "saved-2",
-    "saved-3",
-    "saved-4",
-  ];
+  const { data: savedSearches } = api.search.getAll.useQuery();
 
   return (
     <Sidebar>
@@ -64,17 +59,21 @@ export default function ObserveSidebar() {
                 <SidebarMenuButton asChild isActive={isCurrentPath("/observe")}>
                   <Link href={`/observe`}>
                     <ChartBarIcon />
-                    <span>Dashboard</span>
+                    <span>dashboard</span>
                   </Link>
                 </SidebarMenuButton>
                 <SidebarMenuButton isActive={isCurrentPath("/saved")}>
                   <DocumentIcon className="h-4 w-4" />
-                  <span>Saved</span>
+                  <span>saved searches</span>
                 </SidebarMenuButton>
                 <SidebarMenuSub className="border-l-0">
-                  {savedSearchNames.map((name) => (
-                    <SidebarMenuSubItem key={name}>
-                      <SidebarMenuSubButton>{name}</SidebarMenuSubButton>
+                  {savedSearches?.map((search) => (
+                    <SidebarMenuSubItem key={search.id}>
+                      <SidebarMenuSubButton>
+                        <Link href={`/observe/saved/${search.id}`}>
+                          {search.name}
+                        </Link>
+                      </SidebarMenuSubButton>
                     </SidebarMenuSubItem>
                   ))}
                 </SidebarMenuSub>

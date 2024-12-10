@@ -86,32 +86,24 @@ export type AgentWithIncludes = Prisma.AgentGetPayload<{
   };
 }>;
 
+export const TimeRangeSchema = z.object({
+  start: z.number(),
+  end: z.number(),
+});
+
 export type Filter = z.infer<typeof FilterSchema>;
 export const FilterSchema = z.object({
   lookbackPeriod: z.object({
     label: z.string(),
     value: z.number(),
   }),
-  timeRange: z
-    .object({
-      start: z.number(),
-      end: z.number(),
-    })
-    .optional(),
+  timeRange: z.union([TimeRangeSchema, z.null(), z.undefined()]),
   agentId: z.string().optional(),
   chartPeriod: z.number(),
-  customerCallId: z.string().optional(),
+  customerCallId: z.union([z.string(), z.null(), z.undefined()]),
   metadata: z.record(z.string(), z.string().or(z.undefined())).optional(),
   evalSets: z.array(EvalSetSchema).optional(),
   alerts: z.array(AlertSchema).optional(),
-  // latencyThreshold: z.object({
-  //   enabled: z.boolean(),
-  //   value: z.number(),
-  // }),
-  // interruptionThreshold: z.object({
-  //   enabled: z.boolean(),
-  //   value: z.number(),
-  // }),
 });
 
 export type SavedSearchWithIncludes = z.infer<typeof SavedSearchWithIncludes>;

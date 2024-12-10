@@ -318,6 +318,7 @@ model EvalSet {
 model SavedSearch {
   id             String   @id @default(uuid())
   createdAt      DateTime @default(now())
+  name           String
   ownerId        String
   agentId        String
   lookbackPeriod Json

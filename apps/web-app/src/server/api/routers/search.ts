@@ -4,7 +4,10 @@ import { protectedProcedure } from "../trpc";
 import { SearchService } from "@repo/services/src/search";
 import {
   AlertWithDetailsSchema,
+  Filter,
+  FilterSchema,
   SavedSearchSchema,
+  SavedSearchWithIncludes,
 } from "@repo/types/src/index";
 import { db } from "~/server/db";
 
@@ -12,13 +15,24 @@ const searchServiceInstance = new SearchService(db);
 
 export const searchRouter = createTRPCRouter({
   save: protectedProcedure
-    .input(SavedSearchSchema)
+    .input(z.object({ filter: FilterSchema, name: z.string() }))
     .mutation(async ({ input, ctx }) => {
-      return await searchServiceInstance.save(ctx.user.id, input);
+      // Remove undefined and null values from the filter
+      const cleanFilter = Object.fromEntries(
+        Object.entries(input.filter).filter(
+          ([_, value]) => value !== undefined && value !== null,
+        ),
+      );
+
+      return await searchServiceInstance.save(
+        ctx.user.id,
+        cleanFilter as Filter,
+        input.name,
+      );
     }),
 
   update: protectedProcedure
-    .input(SavedSearchSchema)
+    .input(SavedSearchWithIncludes)
     .mutation(async ({ input, ctx }) => {
       return await searchServiceInstance.update(ctx.user.id, input);
     }),

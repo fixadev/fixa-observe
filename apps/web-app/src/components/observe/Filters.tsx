@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Button } from "../ui/button";
 import {
   Select,
@@ -10,7 +10,13 @@ import {
   SelectValue,
 } from "../ui/select";
 import { formatDateTime } from "~/lib/utils";
-import { CalendarIcon, MapIcon, UserIcon } from "@heroicons/react/24/solid";
+import {
+  CalendarIcon,
+  DocumentIcon,
+  MagnifyingGlassIcon,
+  MapIcon,
+  UserIcon,
+} from "@heroicons/react/24/solid";
 import { lookbackPeriods } from "../hooks/useObserveState";
 import { type Filter } from "@repo/types/src/index";
 import { api } from "~/trpc/react";
@@ -36,6 +42,9 @@ import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { Check, ChevronsUpDown } from "lucide-react";
 import { cn } from "~/lib/utils";
 import { SidebarTrigger } from "../ui/sidebar";
+import { useRouter } from "next/navigation";
+import { set } from "lodash";
+import { InputWithLabel } from "~/app/_components/InputWithLabel";
 
 export default function Filters({
   modalOpen,
@@ -50,6 +59,7 @@ export default function Filters({
   setFilter: (filter: Filter) => void;
   refetch: () => void;
 }) {
+  const router = useRouter();
   const { data: agentIds } = api._call.getAgentIds.useQuery();
   const { data: _agents, refetch: refetchAgents } =
     api.agent.getAllFor11x.useQuery();
@@ -91,9 +101,33 @@ export default function Filters({
 
   const [open, setOpen] = useState(false);
 
+  const { mutate: saveSearch, isPending: isSaving } =
+    api.search.save.useMutation({
+      onSuccess: (data) => {
+        setSaveModalOpen(false);
+        router.push("/observe/saved/" + data.id);
+      },
+    });
+
+  const [saveModalOpen, setSaveModalOpen] = useState(false);
+
+  function handleSaveSearch(name: string) {
+    console.log("SAVING", name);
+    console.log("FILTER", filter);
+    saveSearch({
+      filter: {
+        ...filter,
+        timeRange: undefined,
+        customerCallId: undefined,
+      },
+      name,
+    });
+    setSaveModalOpen(false);
+  }
+
   return (
     <>
-      <div className="fixed top-0 z-50 flex h-14 w-screen items-center justify-between gap-2 border-b bg-background p-4">
+      <div className="fixed top-0 z-50 flex h-14 items-center justify-between gap-2 border-b bg-background p-4 sm:w-full">
         <div className="flex items-center gap-2">
           <SidebarTrigger className="shrink-0" />
           <Select
@@ -216,11 +250,31 @@ export default function Filters({
               </SelectContent>
             </Select>
           ))}
+          <Button
+            variant="default"
+            className="gap-2"
+            onClick={() => {
+              setSaveModalOpen(true);
+            }}
+          >
+            {isSaving ? (
+              <Spinner />
+            ) : (
+              <DocumentIcon className="size-4 shrink-0" />
+            )}
+            save search
+          </Button>
         </div>
         <Button variant="outline" onClick={refetch}>
           refresh
         </Button>
       </div>
+      <SaveSearchDialog
+        open={saveModalOpen}
+        setOpen={setSaveModalOpen}
+        saveSearch={handleSaveSearch}
+        isSaving={isSaving}
+      />
       <EditAgentDialog
         open={modalOpen}
         setOpen={setModalOpen}
@@ -306,6 +360,52 @@ function EditAgentDialog({
         <DialogFooter className="mt-auto">
           <Button className="mt-4" onClick={handleSubmit} disabled={isUpdating}>
             {isUpdating ? <Spinner /> : "save changes"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function SaveSearchDialog({
+  open,
+  setOpen,
+  saveSearch,
+  isSaving,
+}: {
+  open: boolean;
+  setOpen: (open: boolean) => void;
+  saveSearch: (name: string) => void;
+  isSaving: boolean;
+}) {
+  const [name, setName] = useState("");
+
+  useEffect(() => {
+    console.log("NAME IN STATE", name);
+  }, [name]);
+
+  const handleSubmit = () => {
+    saveSearch(name);
+  };
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogContent className="flex h-[200px] min-w-[600px] flex-col">
+        <DialogHeader>
+          <DialogTitle>save search</DialogTitle>
+        </DialogHeader>
+
+        <div className="flex flex-col gap-4">
+          <InputWithLabel
+            label="name"
+            placeholder="EU outbound..."
+            value={name}
+            onChange={(e) => setName(e)}
+            className="w-full"
+          />
+        </div>
+        <DialogFooter className="mt-auto">
+          <Button className="mt-4" onClick={handleSubmit} disabled={isSaving}>
+            {isSaving ? <Spinner /> : "save"}
           </Button>
         </DialogFooter>
       </DialogContent>

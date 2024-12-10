@@ -1,39 +1,75 @@
 import {
   AlertWithDetails,
   AlertWithDetailsSchema,
+  Filter,
   SavedSearchWithIncludes,
-  type SavedSearch,
 } from "@repo/types/src/index";
 import { type PrismaClient } from "@repo/db";
 
 export class SearchService {
   constructor(private db: PrismaClient) {}
 
-  async save(userId: string, search: SavedSearch): Promise<SavedSearch> {
-    return this.db.savedSearch.create({
-      data: {
-        ...search,
-        ownerId: userId,
-        lookbackPeriod: search.lookbackPeriod ?? {},
-        timeRange: search.timeRange ?? {},
-        metadata: search.metadata ?? {},
+  async save(
+    userId: string,
+    filter: Filter,
+    name: string,
+  ): Promise<SavedSearchWithIncludes> {
+    const { evalSets, alerts, timeRange, customerCallId, ...filterData } =
+      filter;
+
+    console.log("NAME IS", name);
+
+    const searchData = {
+      ...filterData,
+      id: crypto.randomUUID(),
+      ownerId: userId,
+      createdAt: new Date(),
+      name,
+      agentId: filter.agentId ?? "",
+      lookbackPeriod: filter.lookbackPeriod ?? {},
+      metadata: filter.metadata ?? {},
+    };
+
+    const savedSearch = await this.db.savedSearch.create({
+      data: searchData,
+      include: {
+        evalSets: true,
+        alerts: true,
       },
     });
+    const parsed = SavedSearchWithIncludes.safeParse(savedSearch);
+    if (!parsed.success) {
+      throw new Error("Failed to save: " + parsed.error.message);
+    }
+    return parsed.data;
   }
 
-  async update(userId: string, search: SavedSearch): Promise<SavedSearch> {
-    return this.db.savedSearch.update({
+  async update(
+    userId: string,
+    search: SavedSearchWithIncludes,
+  ): Promise<SavedSearchWithIncludes> {
+    const { evalSets, alerts, ...searchData } = search;
+    const updatedSearch = await this.db.savedSearch.update({
       where: {
         id: search.id,
         ownerId: userId,
       },
       data: {
-        ...search,
-        lookbackPeriod: search.lookbackPeriod ?? {},
-        timeRange: search.timeRange ?? {},
-        metadata: search.metadata ?? {},
+        ...searchData,
+        lookbackPeriod: searchData.lookbackPeriod ?? {},
+        timeRange: searchData.timeRange ?? {},
+        metadata: searchData.metadata ?? {},
+      },
+      include: {
+        evalSets: true,
+        alerts: true,
       },
     });
+    const parsed = SavedSearchWithIncludes.safeParse(updatedSearch);
+    if (!parsed.success) {
+      throw new Error("Failed to save: " + parsed.error.message);
+    }
+    return parsed.data;
   }
 
   async getById(
@@ -65,7 +101,11 @@ export class SearchService {
       },
     });
 
+    console.log("SAVED SEARCHES", savedSearches);
+
     const parsed = SavedSearchWithIncludes.array().safeParse(savedSearches);
+    console.log("PARSED SUCCESS", parsed.success);
+    console.log("PARSED ERROR", parsed.error);
     return parsed.success ? parsed.data : [];
   }
 
