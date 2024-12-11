@@ -7,6 +7,7 @@
     "dev": "nodemon --exec tsx src/index.ts",
     "build": "tsc"
   },
+  
   "dependencies": {
     "@aws-sdk/client-s3": "^3.556.0",
     "@aws-sdk/client-sqs": "^3.699.0",

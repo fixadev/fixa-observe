@@ -8,6 +8,9 @@
     "clean": "rm -rf dist",
     "typecheck": "tsc --noEmit"
   },
+  "exports": {
+    "./src/*": "./src/*.ts"
+  },
   "dependencies": {
     "@repo/db": "workspace:*",
     "@repo/types": "workspace:*",
