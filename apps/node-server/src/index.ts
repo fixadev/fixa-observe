@@ -138,7 +138,13 @@ app.get("/db", async (_, res: Response) => {
     res.json({ result });
   } catch (error) {
     console.error("Error fetching data from database", error);
-    res.status(500).json({ error: "Internal server error" });
+    res
+      .status(500)
+      .json({
+        error,
+        databaseUrl: env.DATABASE_URL,
+        directUrl: env.DIRECT_URL,
+      });
   }
 });
 
