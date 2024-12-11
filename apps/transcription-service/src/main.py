@@ -69,7 +69,7 @@ async def start_websocket_call_ofone(request: StartWebsocketCallOfOneRequest):
         call_id = None
         if process.stdout:
             for line in process.stdout:
-                print(line)
+                print(line.strip())
                 if line.startswith("VAPI_CALL_ID="):
                     call_id = line.strip().split("=")[1]
                     break
