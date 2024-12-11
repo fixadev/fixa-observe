@@ -1,10 +1,18 @@
-const { build } = require('esbuild-wasm');
+const { build } = require('esbuild');
+const { copy } = require('esbuild-plugin-copy');
 
 build({
   entryPoints: ['src/index.ts'],
   bundle: true,
   platform: 'node',
   format: 'cjs',
-  sourcemap: true,
   outfile: 'dist/index.js',
-}).catch(() => process.exit(1));
+  plugins: [
+    copy({
+      assets: {
+        from: ['../../node_modules/.pnpm/@prisma+client@*/node_modules/.prisma/client/libquery_engine-*'],
+        to: ['./'],
+      },
+    }),
+  ],
+});
