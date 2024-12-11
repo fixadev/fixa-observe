@@ -1,4 +1,4 @@
-import { type PrismaClient } from "@repo/db";
+import { type PrismaClient } from "@repo/db/src/index";
 import { type Alert } from "@repo/types/src/index";
 
 export class AlertService {

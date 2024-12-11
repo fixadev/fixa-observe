@@ -1,4 +1,4 @@
-import { Prisma, type PrismaClient } from "@repo/db";
+import { Prisma, type PrismaClient } from "@repo/db/src/index";
 import { type OrderBy, type Filter } from "@repo/types/src/index";
 import { type CallWithIncludes } from "@repo/types/src/index";
 import { calculateLatencyPercentiles } from "./utils";

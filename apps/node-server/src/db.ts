@@ -1,4 +1,4 @@
-import { PrismaClient } from "@repo/db";
+import { PrismaClient } from "@repo/db/src/index";
 import { env } from "process";
 
 const createPrismaClient = () =>

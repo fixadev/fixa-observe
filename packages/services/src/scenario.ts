@@ -1,4 +1,4 @@
-import { type PrismaClient } from "@repo/db";
+import { type PrismaClient } from "@repo/db/src/index";
 import { v4 as uuidv4 } from "uuid";
 import {
   type CreateScenarioSchema,

@@ -1,4 +1,4 @@
-import { PrismaClient } from "@repo/db";
+import { PrismaClient } from "@repo/db/src/index";
 import {
   createOrUpdateVapiAssistant,
   deleteVapiAssistantById,

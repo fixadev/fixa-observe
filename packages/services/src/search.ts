@@ -4,7 +4,7 @@ import {
   Filter,
   SavedSearchWithIncludes,
 } from "@repo/types/src/index";
-import { type PrismaClient } from "@repo/db";
+import { type PrismaClient } from "@repo/db/src/index";
 
 export class SearchService {
   constructor(private db: PrismaClient) {}
