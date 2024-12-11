@@ -55,7 +55,7 @@ export class SearchService {
       data: {
         ...searchData,
         lookbackPeriod: searchData.lookbackPeriod ?? {},
-        timeRange: searchData.timeRange ?? {},
+        timeRange: searchData.timeRange ?? undefined,
         metadata: searchData.metadata ?? {},
       },
       include: {
