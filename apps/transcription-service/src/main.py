@@ -9,10 +9,8 @@ import asyncio
 from typing import Optional
 import json
 import subprocess
-
-if os.getenv('ENVIRONMENT') == 'local-staging':
-  from dotenv import load_dotenv
-  load_dotenv()
+from dotenv import load_dotenv
+load_dotenv()
 
 app = FastAPI()
 
@@ -86,12 +84,14 @@ async def start_websocket_call_ofone(request: StartWebsocketCallOfOneRequest):
     
 if __name__ == "__main__":
     import uvicorn
+    import platform
 
-    # Build the selenium docker image before starting the server
-    subprocess.run(
-        ["bash", "./src/services/selenium/build_docker_image.sh"],
-        check=True,
-    )
+    # Build the selenium docker image before starting the server, but only on Linux
+    if platform.system().lower() == "linux":
+        subprocess.run(
+            ["bash", "./src/services/selenium/build_docker_image.sh"],
+            check=True,
+        )
 
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
 
