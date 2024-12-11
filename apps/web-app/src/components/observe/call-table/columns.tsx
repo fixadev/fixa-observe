@@ -354,19 +354,26 @@ const EvalResultCell = ({ call }: { call: CallWithIncludes }) => {
   }
   return (
     <HoverCard openDelay={0} closeDelay={0}>
-      <HoverCardTrigger>
-        <div className="flex w-fit cursor-pointer items-center gap-1 rounded-sm p-1 hover:bg-gray-200">
-          {passed === total ? (
-            <CheckCircleIcon className="size-5 text-green-500" />
-          ) : (
-            <XCircleIcon className="size-5 text-red-500" />
-          )}
-          <div className="text-sm font-medium">
-            {passed}/{total}
+      <HoverCardTrigger asChild>
+        <div className="w-fit pr-1">
+          <div className="flex cursor-pointer items-center gap-1 rounded-sm p-1 hover:bg-gray-200">
+            {passed === total ? (
+              <CheckCircleIcon className="size-5 text-green-500" />
+            ) : (
+              <XCircleIcon className="size-5 text-red-500" />
+            )}
+            <div className="text-sm font-medium">
+              {passed}/{total}
+            </div>
           </div>
         </div>
       </HoverCardTrigger>
-      <HoverCardContent align="start" onClick={(e) => e.stopPropagation()}>
+      <HoverCardContent
+        side="right"
+        align="start"
+        sideOffset={0}
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="flex flex-col gap-1">
           {filteredEvalResults.map((evalResult) => (
             <EvalResultChip key={evalResult.id} evalResult={evalResult} />
