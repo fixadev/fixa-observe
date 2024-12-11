@@ -18,14 +18,20 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "../ui/collapsible";
-import { ChartBarIcon, CheckIcon } from "@heroicons/react/24/outline";
+import {
+  ChartBarIcon,
+  ChevronDownIcon,
+  DocumentIcon,
+  XMarkIcon,
+} from "@heroicons/react/24/outline";
+import { TrashIcon } from "@heroicons/react/24/solid";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCallback } from "react";
 import { removeTrailingSlash } from "~/lib/utils";
 import Logo from "../Logo";
-import { ChevronDownIcon, DocumentIcon } from "@heroicons/react/24/solid";
 import { api } from "~/trpc/react";
+import { Button } from "../ui/button";
 
 export default function ObserveSidebar() {
   const pathname = usePathname();
@@ -80,9 +86,25 @@ export default function ObserveSidebar() {
                           <SidebarMenuSubButton
                             asChild
                             isActive={isCurrentPath(`/saved/${search.id}`)}
+                            className="group/saved-search-item relative"
                           >
-                            <Link href={`/observe/saved/${search.id}`}>
+                            <Link
+                              href={`/observe/saved/${search.id}`}
+                              // className="group relative"
+                            >
                               {search.name}
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="absolute right-0 size-6 opacity-0 transition-opacity duration-200 hover:bg-gray-300 group-hover/saved-search-item:opacity-100"
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  console.log("DELETE", search.id);
+                                  // deleteSearch(search.id);
+                                }}
+                              >
+                                <XMarkIcon className="h-4 w-4" />
+                              </Button>
                             </Link>
                           </SidebarMenuSubButton>
                         </SidebarMenuSubItem>

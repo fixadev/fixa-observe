@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { Button } from "../ui/button";
 import {
   Select,
@@ -16,7 +16,6 @@ import {
   lookbackPeriods,
   useObserveState,
 } from "../hooks/useObserveState";
-import { type Filter } from "@repo/types/src/index";
 import { api } from "~/trpc/react";
 import {
   Dialog,
