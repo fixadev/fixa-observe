@@ -49,7 +49,7 @@ async def start_websocket_call_ofone(request: StartWebsocketCallOfOneRequest):
 
         # Prepare the docker command
         cmd = [
-            "docker", "run", "-it", "selenium-agent",
+            "docker", "run", "-e", f"VAPI_PUBLIC_KEY={os.getenv('VAPI_PUBLIC_KEY')}", "-it", "selenium-agent",
             "--device-id", request.device_id,
             "--assistant-id", request.assistant_id,
             "--base-url", request.base_url
@@ -70,10 +70,11 @@ async def start_websocket_call_ofone(request: StartWebsocketCallOfOneRequest):
         # Get the call ID from stdout
         call_id = None
         if process.stdout:
-          for line in process.stdout:
-              if line.startswith("VAPI_CALL_ID="):
-                  call_id = line.strip().split("=")[1]
-                  break
+            for line in process.stdout:
+                print(line)
+                if line.startswith("VAPI_CALL_ID="):
+                    call_id = line.strip().split("=")[1]
+                    break
 
         return {
             "callId": call_id,
@@ -87,6 +88,12 @@ if __name__ == "__main__":
     import uvicorn
 
     # Build the selenium docker image before starting the server
-    subprocess.run(["bash", "./src/services/selenium/build_docker_image.sh"], check=True)
+    subprocess.run(
+        ["bash", "./src/services/selenium/build_docker_image.sh"],
+        check=True,
+    )
 
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
+
+# docker build -t transcription-service .
+# docker run -p 8000:8000 -v /var/run/docker.sock:/var/run/docker.sock -it transcription-service

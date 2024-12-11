@@ -16,9 +16,9 @@ from vapi_python import Vapi
 class SeleniumAgent:
     def __init__(self, device_id, assistant_id, assistant_overrides, base_url):
         load_dotenv()  # Load environment variables from .env file
-        self.api_key = os.getenv('VAPI_API_KEY')
+        self.api_key = os.getenv('VAPI_PUBLIC_KEY')
         if not self.api_key:
-            raise ValueError("VAPI_API_KEY environment variable is not set")
+            raise ValueError("VAPI_PUBLIC_KEY environment variable is not set")
 
         self.device_id = device_id
         self.assistant_id = assistant_id
