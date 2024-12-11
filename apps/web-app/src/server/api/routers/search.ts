@@ -6,7 +6,6 @@ import {
   AlertWithDetailsSchema,
   type Filter,
   FilterSchema,
-  SavedSearchSchema,
   SavedSearchWithIncludes,
 } from "@repo/types/src/index";
 import { db } from "~/server/db";

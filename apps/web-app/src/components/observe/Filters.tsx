@@ -41,8 +41,15 @@ import { cn } from "~/lib/utils";
 import { SidebarTrigger } from "../ui/sidebar";
 import { useRouter } from "next/navigation";
 import { InputWithLabel } from "~/app/_components/InputWithLabel";
+import { FilterSchema, type Filter } from "@repo/types/src";
 
-export default function Filters({ refetch }: { refetch: () => void }) {
+export default function Filters({
+  refetch,
+  originalFilter = defaultFilter,
+}: {
+  refetch: () => void;
+  originalFilter?: Filter;
+}) {
   const router = useRouter();
   const { data: agentIds } = api._call.getAgentIds.useQuery();
   const { data: _agents, refetch: refetchAgents } =
@@ -99,8 +106,10 @@ export default function Filters({ refetch }: { refetch: () => void }) {
   const [editAgentModalOpen, setEditAgentModalOpen] = useState(false);
 
   const showSaveSearchButton = useMemo(() => {
-    return JSON.stringify(filter) !== JSON.stringify(defaultFilter);
-  }, [filter]);
+    const _originalFilter = FilterSchema.parse(originalFilter);
+    const _filter = FilterSchema.parse(filter);
+    return JSON.stringify(_filter) !== JSON.stringify(_originalFilter);
+  }, [filter, originalFilter]);
 
   const handleSaveSearch = useCallback(
     (name: string) => {
