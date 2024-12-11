@@ -5,7 +5,7 @@ import { Button } from "~/components/ui/button";
 import { cn, isTempId } from "~/lib/utils";
 import { EditableText } from "~/components/EditableText";
 import { EllipsisHorizontalIcon } from "@heroicons/react/24/solid";
-import { AlertWithDetails, Filter } from "@repo/types/src";
+import { AlertWithDetails, Filter } from "@repo/types/src/index";
 import { Input } from "~/components/ui/input";
 import {
   Select,

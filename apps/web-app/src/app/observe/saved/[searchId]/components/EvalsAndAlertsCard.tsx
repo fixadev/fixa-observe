@@ -2,7 +2,11 @@
 
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { AlertWithDetails, EvalSetWithIncludes, Filter } from "@repo/types/src";
+import {
+  AlertWithDetails,
+  EvalSetWithIncludes,
+  Filter,
+} from "@repo/types/src/index";
 import { Button } from "~/components/ui/button";
 import { cn } from "~/lib/utils";
 import { instantiateAlert, instantiateEvalSet } from "~/lib/instantiate";

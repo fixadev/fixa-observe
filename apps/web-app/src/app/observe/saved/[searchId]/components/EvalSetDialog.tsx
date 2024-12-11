@@ -5,7 +5,7 @@ import {
   DialogFooter,
   DialogHeader,
 } from "~/components/ui/dialog";
-import { EvalSetWithIncludes, Filter } from "@repo/types/src";
+import { EvalSetWithIncludes, Filter } from "@repo/types/src/index";
 import { useEffect, useState } from "react";
 import { instantiateEvalSet } from "~/lib/instantiate";
 import { isTempId } from "~/lib/utils";

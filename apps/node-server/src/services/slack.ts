@@ -1,7 +1,7 @@
 import { Call, CallResult, Test } from "@prisma/client";
 import { env } from "../env";
 import axios from "axios";
-import { Alert, EvalSetAlert, LatencyAlert } from "@repo/types/src";
+import { Alert, EvalSetAlert, LatencyAlert } from "@repo/types/src/index";
 
 export const sendTestCompletedSlackMessage = async ({
   userId,

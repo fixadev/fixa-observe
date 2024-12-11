@@ -7,7 +7,7 @@ import { CriteriaBlock } from "./CriteriaBlock";
 import { instantiateEval } from "~/lib/instantiate";
 import { EditableText } from "~/components/EditableText";
 import { EllipsisHorizontalIcon } from "@heroicons/react/24/solid";
-import { EvalSetWithIncludes } from "@repo/types/src";
+import { EvalSetWithIncludes } from "@repo/types/src/index";
 import { Input } from "~/components/ui/input";
 
 export default function EvalSetCard({

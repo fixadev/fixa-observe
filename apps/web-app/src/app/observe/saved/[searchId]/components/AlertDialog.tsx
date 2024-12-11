@@ -1,5 +1,5 @@
 "use client";
-import { AlertWithDetails, Filter } from "@repo/types/src";
+import { AlertWithDetails, Filter } from "@repo/types/src/index";
 import {
   Dialog,
   DialogContent,
