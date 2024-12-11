@@ -36,6 +36,12 @@ export const searchRouter = createTRPCRouter({
       return await searchServiceInstance.update(ctx.user.id, input);
     }),
 
+  delete: protectedProcedure
+    .input(z.object({ id: z.string() }))
+    .mutation(async ({ input, ctx }) => {
+      await searchServiceInstance.delete(ctx.user.id, input.id);
+    }),
+
   getAll: protectedProcedure.query(async ({ ctx }) => {
     return await searchServiceInstance.getAll(ctx.user.id);
   }),

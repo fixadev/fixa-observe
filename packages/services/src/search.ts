@@ -70,6 +70,15 @@ export class SearchService {
     return parsed.data;
   }
 
+  async delete(userId: string, id: string): Promise<void> {
+    await this.db.savedSearch.delete({
+      where: {
+        id,
+        ownerId: userId,
+      },
+    });
+  }
+
   async getById(
     userId: string,
     id: string,
