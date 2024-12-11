@@ -4,9 +4,8 @@ import { protectedProcedure } from "../trpc";
 import { SearchService } from "@repo/services/src/search";
 import {
   AlertWithDetailsSchema,
-  Filter,
+  type Filter,
   FilterSchema,
-  SavedSearchSchema,
   SavedSearchWithIncludes,
 } from "@repo/types/src/index";
 import { db } from "~/server/db";

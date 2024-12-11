@@ -13,19 +13,24 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem,
 } from "../ui/sidebar";
-import { ChartBarIcon, CheckIcon } from "@heroicons/react/24/outline";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "../ui/collapsible";
+import {
+  ChartBarIcon,
+  ChevronDownIcon,
+  DocumentIcon,
+  XMarkIcon,
+} from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCallback } from "react";
 import { removeTrailingSlash } from "~/lib/utils";
 import Logo from "../Logo";
-import { DocumentIcon } from "@heroicons/react/24/solid";
 import { api } from "~/trpc/react";
-
-const navItems = [
-  { href: "/", icon: ChartBarIcon, label: "dashboard" },
-  { href: "/evals", icon: CheckIcon, label: "evaluation criteria" },
-];
+import { Button } from "../ui/button";
 
 export default function ObserveSidebar() {
   const pathname = usePathname();
@@ -56,28 +61,57 @@ export default function ObserveSidebar() {
           <SidebarGroupContent>
             <SidebarMenu>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild isActive={isCurrentPath("/observe")}>
+                <SidebarMenuButton asChild isActive={isCurrentPath("/")}>
                   <Link href={`/observe`}>
                     <ChartBarIcon />
                     <span>dashboard</span>
                   </Link>
                 </SidebarMenuButton>
-                <SidebarMenuButton isActive={isCurrentPath("/saved")}>
-                  <DocumentIcon className="h-4 w-4" />
-                  <span>saved searches</span>
-                </SidebarMenuButton>
-                <SidebarMenuSub className="border-l-0">
-                  {savedSearches?.map((search) => (
-                    <SidebarMenuSubItem key={search.id}>
-                      <SidebarMenuSubButton>
-                        <Link href={`/observe/saved/${search.id}`}>
-                          {search.name}
-                        </Link>
-                      </SidebarMenuSubButton>
-                    </SidebarMenuSubItem>
-                  ))}
-                </SidebarMenuSub>
               </SidebarMenuItem>
+              <Collapsible defaultOpen className="group/collapsible">
+                <SidebarMenuItem>
+                  <CollapsibleTrigger asChild>
+                    <SidebarMenuButton isActive={isCurrentPath("/saved")}>
+                      <DocumentIcon className="h-4 w-4" />
+                      <span>saved searches</span>
+                      <div className="flex-1" />
+                      <ChevronDownIcon className="h-4 w-4 transition-transform duration-200 group-data-[state=closed]/collapsible:rotate-[-90deg]" />
+                    </SidebarMenuButton>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent>
+                    <SidebarMenuSub>
+                      {savedSearches?.map((search) => (
+                        <SidebarMenuSubItem key={search.id}>
+                          <SidebarMenuSubButton
+                            asChild
+                            isActive={isCurrentPath(`/saved/${search.id}`)}
+                            className="group/saved-search-item relative"
+                          >
+                            <Link
+                              href={`/observe/saved/${search.id}`}
+                              // className="group relative"
+                            >
+                              {search.name}
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="absolute right-0 size-6 text-muted-foreground opacity-0 duration-200 hover:bg-gray-200 group-hover/saved-search-item:opacity-100"
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  console.log("DELETE", search.id);
+                                  // deleteSearch(search.id);
+                                }}
+                              >
+                                <XMarkIcon className="h-4 w-4" />
+                              </Button>
+                            </Link>
+                          </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                      ))}
+                    </SidebarMenuSub>
+                  </CollapsibleContent>
+                </SidebarMenuItem>
+              </Collapsible>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>

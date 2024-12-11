@@ -3,9 +3,9 @@
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
-  AlertWithDetails,
-  EvalSetWithIncludes,
-  Filter,
+  type AlertWithDetails,
+  type EvalSetWithIncludes,
+  type Filter,
 } from "@repo/types/src/index";
 import { Button } from "~/components/ui/button";
 import { cn } from "~/lib/utils";
@@ -15,16 +15,10 @@ import { CreateEditEvaluationDialog } from "./EvalSetDialog";
 import { CreateEditAlertDialog } from "./AlertDialog";
 import { ToggleGroup, ToggleGroupItem } from "~/components/ui/toggle-group";
 import { SuccessRateChart } from "./SuccessRateChart";
+import { useObserveState } from "~/components/hooks/useObserveState";
 
-export function EvalSetsAndAlertsCard({
-  filter,
-  setFilter,
-  searchId,
-}: {
-  filter: Filter;
-  setFilter: React.Dispatch<React.SetStateAction<Filter>>;
-  searchId: string;
-}) {
+export function EvalSetsAndAlertsCard({ searchId }: { searchId: string }) {
+  const { filter, setFilter } = useObserveState();
   const [mode, setMode] = useState<"evaluations" | "alerts">("evaluations");
   const [evalsModalOpen, setEvalsModalOpen] = useState(false);
   const [alertsModalOpen, setAlertsModalOpen] = useState(false);
