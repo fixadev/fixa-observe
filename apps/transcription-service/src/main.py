@@ -46,10 +46,10 @@ async def start_websocket_call_ofone(request: StartWebsocketCallOfOneRequest):
 
         # Prepare the request payload
         payload = {
-            "deviceId": request.device_id,
-            "assistantId": request.assistant_id,
-            "assistantOverrides": request.assistant_overrides,
-            "baseUrl": request.base_url
+            "device_id": request.device_id,
+            "assistant_id": request.assistant_id,
+            "assistant_overrides": request.assistant_overrides,
+            "base_url": request.base_url
         }
 
         # Make the POST request to Pixa API
