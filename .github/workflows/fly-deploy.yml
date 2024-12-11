@@ -17,7 +17,7 @@ jobs:
       - uses: superfly/flyctl-actions/setup-flyctl@master
       - run: |
           export FLY_APP_NAME=${{ github.ref == 'refs/heads/main' && 'pixa-observe' || 'pixa-observe-staging' }}
-          flyctl deploy --remote-only --app $FLY_APP_NAME --dockerfile apps/node-server/Dockerfile --config apps/node-server/fly.toml
+          flyctl deploy --remote-only --app $FLY_APP_NAME --dockerfile apps/node-server/Dockerfile --config apps/node-server/fly.toml --build-secret DATABASE_URL=${{ github.ref == 'refs/heads/main' && secrets.PROD_DATABASE_URL || secrets.DEV_DATABASE_URL }} --build-secret DIRECT_URL=${{ github.ref == 'refs/heads/main' && secrets.PROD_DIRECT_URL || secrets.DEV_DIRECT_URL }}
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
 
