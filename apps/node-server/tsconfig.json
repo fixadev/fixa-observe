@@ -9,6 +9,9 @@
     "outDir": "dist",
     "rootDir": "./src", 
   },
+  "paths": { 
+    "@repo/*": ["../../packages/*"]
+  },
   "include": [
     "src/**/*.ts"
   ], 
