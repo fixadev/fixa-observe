@@ -25,9 +25,6 @@ COPY apps/node-server ./apps/node-server/
 # Set working directory to the server app
 WORKDIR /app/apps/node-server
 
-# Generate Prisma Client
-RUN npx prisma generate
-
 # Build TypeScript
 RUN pnpm build
 
