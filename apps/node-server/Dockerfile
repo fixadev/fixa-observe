@@ -15,6 +15,7 @@ COPY apps/node-server/package.json ./apps/node-server/
 RUN npm install -g pnpm
 RUN pnpm install --frozen-lockfile
 RUN npm install -g prisma
+RUN npm install -g zod-prisma-types
 
 COPY . . 
 
