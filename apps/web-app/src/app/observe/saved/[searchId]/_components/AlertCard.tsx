@@ -111,13 +111,13 @@ export function AlertCard({
                                 | "p90"
                                 | "p95",
                               threshold: 1000,
-                              slackNames: alert.details?.slackNames || [""],
+                              slackNames: alert.details?.slackNames ?? [""],
                               lookbackPeriod: lookbackPeriods[0]!,
                             }
                           : {
                               evalSetId: selectedOption.evalSetId,
                               trigger: true,
-                              slackNames: alert.details?.slackNames || [""],
+                              slackNames: alert.details?.slackNames ?? [""],
                             },
                     } as AlertWithDetails;
 
@@ -231,7 +231,7 @@ export function AlertCard({
                 <Input
                   className="w-40"
                   placeholder="enter name..."
-                  value={alert.details?.slackNames[0] || ""}
+                  value={alert.details?.slackNames[0] ?? ""}
                   onChange={(e) => {
                     const updatedAlert = {
                       ...alert,
