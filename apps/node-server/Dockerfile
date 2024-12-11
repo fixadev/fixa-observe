@@ -12,8 +12,9 @@ COPY packages/types/package.json ./packages/types/
 COPY packages/services/package.json ./packages/services/
 COPY apps/node-server/package.json ./apps/node-server/
 
-RUN npm install -g pnpm esbuild
+RUN npm install -g pnpm
 RUN pnpm install --frozen-lockfile
+RUN npm install -g prisma
 
 COPY . . 
 
