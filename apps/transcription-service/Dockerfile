@@ -4,35 +4,39 @@ ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1
 WORKDIR /app
 
-# Install system dependencies
-RUN apt-get update && apt-get install -y \
-    libsndfile1 \
-    ffmpeg \
-    # python3-pyaudio \
-    portaudio19-dev python3-pyaudio \
-    # libasound-dev portaudio19-dev libportaudio2 libportaudiocpp0 python3-pyaudio python3-all-dev \
-    # libportaudio0 libportaudio2 libportaudiocpp0 portaudio19-dev python3-pyaudio \
-    && rm -rf /var/lib/apt/lists/*
-
-RUN ldconfig
-
-# another comment
 RUN python -m venv .venv
 COPY requirements.txt ./
-ARG CACHEBUST=2
 RUN .venv/bin/pip install -r requirements.txt
 
 # fun comment 
 FROM python:3.11-slim
 WORKDIR /app
 
-# Install required runtime libraries
+# Install required runtime libraries and Docker CLI
 RUN apt-get update && apt-get install -y \
     libportaudio2 \
     libsndfile1 \
     ffmpeg \
+    # Install Docker CLI
+    ca-certificates \
+    curl \
+    gnupg \
+    && install -m 0755 -d /etc/apt/keyrings \
+    && curl -fsSL https://download.docker.com/linux/debian/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg \
+    && chmod a+r /etc/apt/keyrings/docker.gpg \
+    && echo \
+      "deb [arch="$(dpkg --print-architecture)" signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/debian \
+      "$(. /etc/os-release && echo "$VERSION_CODENAME")" stable" | \
+      tee /etc/apt/sources.list.d/docker.list > /dev/null \
+    && apt-get update \
+    && apt-get install -y docker-ce-cli \
+    # Add docker to PATH
+    && ln -s /usr/bin/docker /usr/local/bin/docker \
+    # Clean up
     && rm -rf /var/lib/apt/lists/*
 
 COPY --from=builder /app/.venv .venv/
 COPY . .
+
+EXPOSE 8000
 CMD ["/app/.venv/bin/python", "src/main.py"]

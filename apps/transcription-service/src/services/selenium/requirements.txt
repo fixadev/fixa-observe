@@ -1,0 +1,9 @@
+daily-python
+pyaudio
+requests
+websockets
+pydub
+selenium
+webdriver-manager
+numpy
+pasimple
