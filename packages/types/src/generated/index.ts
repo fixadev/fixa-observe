@@ -759,7 +759,7 @@ export const EvalIncludeSchema: z.ZodType<Prisma.EvalInclude> = z.object({
   evalResults: z.union([z.boolean(),z.lazy(() => EvalResultFindManyArgsSchema)]).optional(),
   agent: z.union([z.boolean(),z.lazy(() => AgentArgsSchema)]).optional(),
   evalOverrides: z.union([z.boolean(),z.lazy(() => EvalOverrideFindManyArgsSchema)]).optional(),
-  EvalSet: z.union([z.boolean(),z.lazy(() => EvalSetArgsSchema)]).optional(),
+  evalSet: z.union([z.boolean(),z.lazy(() => EvalSetArgsSchema)]).optional(),
   _count: z.union([z.boolean(),z.lazy(() => EvalCountOutputTypeArgsSchema)]).optional(),
 }).strict()
 
@@ -796,7 +796,7 @@ export const EvalSelectSchema: z.ZodType<Prisma.EvalSelect> = z.object({
   evalResults: z.union([z.boolean(),z.lazy(() => EvalResultFindManyArgsSchema)]).optional(),
   agent: z.union([z.boolean(),z.lazy(() => AgentArgsSchema)]).optional(),
   evalOverrides: z.union([z.boolean(),z.lazy(() => EvalOverrideFindManyArgsSchema)]).optional(),
-  EvalSet: z.union([z.boolean(),z.lazy(() => EvalSetArgsSchema)]).optional(),
+  evalSet: z.union([z.boolean(),z.lazy(() => EvalSetArgsSchema)]).optional(),
   _count: z.union([z.boolean(),z.lazy(() => EvalCountOutputTypeArgsSchema)]).optional(),
 }).strict()
 
@@ -1822,7 +1822,7 @@ export const EvalWhereInputSchema: z.ZodType<Prisma.EvalWhereInput> = z.object({
   evalResults: z.lazy(() => EvalResultListRelationFilterSchema).optional(),
   agent: z.union([ z.lazy(() => AgentNullableRelationFilterSchema),z.lazy(() => AgentWhereInputSchema) ]).optional().nullable(),
   evalOverrides: z.lazy(() => EvalOverrideListRelationFilterSchema).optional(),
-  EvalSet: z.union([ z.lazy(() => EvalSetNullableRelationFilterSchema),z.lazy(() => EvalSetWhereInputSchema) ]).optional().nullable(),
+  evalSet: z.union([ z.lazy(() => EvalSetNullableRelationFilterSchema),z.lazy(() => EvalSetWhereInputSchema) ]).optional().nullable(),
 }).strict();
 
 export const EvalOrderByWithRelationInputSchema: z.ZodType<Prisma.EvalOrderByWithRelationInput> = z.object({
@@ -1844,7 +1844,7 @@ export const EvalOrderByWithRelationInputSchema: z.ZodType<Prisma.EvalOrderByWit
   evalResults: z.lazy(() => EvalResultOrderByRelationAggregateInputSchema).optional(),
   agent: z.lazy(() => AgentOrderByWithRelationInputSchema).optional(),
   evalOverrides: z.lazy(() => EvalOverrideOrderByRelationAggregateInputSchema).optional(),
-  EvalSet: z.lazy(() => EvalSetOrderByWithRelationInputSchema).optional()
+  evalSet: z.lazy(() => EvalSetOrderByWithRelationInputSchema).optional()
 }).strict();
 
 export const EvalWhereUniqueInputSchema: z.ZodType<Prisma.EvalWhereUniqueInput> = z.object({
@@ -1872,7 +1872,7 @@ export const EvalWhereUniqueInputSchema: z.ZodType<Prisma.EvalWhereUniqueInput> 
   evalResults: z.lazy(() => EvalResultListRelationFilterSchema).optional(),
   agent: z.union([ z.lazy(() => AgentNullableRelationFilterSchema),z.lazy(() => AgentWhereInputSchema) ]).optional().nullable(),
   evalOverrides: z.lazy(() => EvalOverrideListRelationFilterSchema).optional(),
-  EvalSet: z.union([ z.lazy(() => EvalSetNullableRelationFilterSchema),z.lazy(() => EvalSetWhereInputSchema) ]).optional().nullable(),
+  evalSet: z.union([ z.lazy(() => EvalSetNullableRelationFilterSchema),z.lazy(() => EvalSetWhereInputSchema) ]).optional().nullable(),
 }).strict());
 
 export const EvalOrderByWithAggregationInputSchema: z.ZodType<Prisma.EvalOrderByWithAggregationInput> = z.object({
@@ -3308,7 +3308,7 @@ export const EvalCreateInputSchema: z.ZodType<Prisma.EvalCreateInput> = z.object
   evalResults: z.lazy(() => EvalResultCreateNestedManyWithoutEvalInputSchema).optional(),
   agent: z.lazy(() => AgentCreateNestedOneWithoutEnabledGeneralEvalsInputSchema).optional(),
   evalOverrides: z.lazy(() => EvalOverrideCreateNestedManyWithoutEvalInputSchema).optional(),
-  EvalSet: z.lazy(() => EvalSetCreateNestedOneWithoutEvalsInputSchema).optional()
+  evalSet: z.lazy(() => EvalSetCreateNestedOneWithoutEvalsInputSchema).optional()
 }).strict();
 
 export const EvalUncheckedCreateInputSchema: z.ZodType<Prisma.EvalUncheckedCreateInput> = z.object({
@@ -3346,7 +3346,7 @@ export const EvalUpdateInputSchema: z.ZodType<Prisma.EvalUpdateInput> = z.object
   evalResults: z.lazy(() => EvalResultUpdateManyWithoutEvalNestedInputSchema).optional(),
   agent: z.lazy(() => AgentUpdateOneWithoutEnabledGeneralEvalsNestedInputSchema).optional(),
   evalOverrides: z.lazy(() => EvalOverrideUpdateManyWithoutEvalNestedInputSchema).optional(),
-  EvalSet: z.lazy(() => EvalSetUpdateOneWithoutEvalsNestedInputSchema).optional()
+  evalSet: z.lazy(() => EvalSetUpdateOneWithoutEvalsNestedInputSchema).optional()
 }).strict();
 
 export const EvalUncheckedUpdateInputSchema: z.ZodType<Prisma.EvalUncheckedUpdateInput> = z.object({
@@ -6758,7 +6758,7 @@ export const EvalCreateWithoutAgentInputSchema: z.ZodType<Prisma.EvalCreateWitho
   scenario: z.lazy(() => ScenarioCreateNestedOneWithoutEvalsInputSchema).optional(),
   evalResults: z.lazy(() => EvalResultCreateNestedManyWithoutEvalInputSchema).optional(),
   evalOverrides: z.lazy(() => EvalOverrideCreateNestedManyWithoutEvalInputSchema).optional(),
-  EvalSet: z.lazy(() => EvalSetCreateNestedOneWithoutEvalsInputSchema).optional()
+  evalSet: z.lazy(() => EvalSetCreateNestedOneWithoutEvalsInputSchema).optional()
 }).strict();
 
 export const EvalUncheckedCreateWithoutAgentInputSchema: z.ZodType<Prisma.EvalUncheckedCreateWithoutAgentInput> = z.object({
@@ -8373,7 +8373,7 @@ export const EvalCreateWithoutScenarioInputSchema: z.ZodType<Prisma.EvalCreateWi
   evalResults: z.lazy(() => EvalResultCreateNestedManyWithoutEvalInputSchema).optional(),
   agent: z.lazy(() => AgentCreateNestedOneWithoutEnabledGeneralEvalsInputSchema).optional(),
   evalOverrides: z.lazy(() => EvalOverrideCreateNestedManyWithoutEvalInputSchema).optional(),
-  EvalSet: z.lazy(() => EvalSetCreateNestedOneWithoutEvalsInputSchema).optional()
+  evalSet: z.lazy(() => EvalSetCreateNestedOneWithoutEvalsInputSchema).optional()
 }).strict();
 
 export const EvalUncheckedCreateWithoutScenarioInputSchema: z.ZodType<Prisma.EvalUncheckedCreateWithoutScenarioInput> = z.object({
@@ -8906,7 +8906,7 @@ export const EvalCreateWithoutEvalResultsInputSchema: z.ZodType<Prisma.EvalCreat
   scenario: z.lazy(() => ScenarioCreateNestedOneWithoutEvalsInputSchema).optional(),
   agent: z.lazy(() => AgentCreateNestedOneWithoutEnabledGeneralEvalsInputSchema).optional(),
   evalOverrides: z.lazy(() => EvalOverrideCreateNestedManyWithoutEvalInputSchema).optional(),
-  EvalSet: z.lazy(() => EvalSetCreateNestedOneWithoutEvalsInputSchema).optional()
+  evalSet: z.lazy(() => EvalSetCreateNestedOneWithoutEvalsInputSchema).optional()
 }).strict();
 
 export const EvalUncheckedCreateWithoutEvalResultsInputSchema: z.ZodType<Prisma.EvalUncheckedCreateWithoutEvalResultsInput> = z.object({
@@ -9041,7 +9041,7 @@ export const EvalUpdateWithoutEvalResultsInputSchema: z.ZodType<Prisma.EvalUpdat
   scenario: z.lazy(() => ScenarioUpdateOneWithoutEvalsNestedInputSchema).optional(),
   agent: z.lazy(() => AgentUpdateOneWithoutEnabledGeneralEvalsNestedInputSchema).optional(),
   evalOverrides: z.lazy(() => EvalOverrideUpdateManyWithoutEvalNestedInputSchema).optional(),
-  EvalSet: z.lazy(() => EvalSetUpdateOneWithoutEvalsNestedInputSchema).optional()
+  evalSet: z.lazy(() => EvalSetUpdateOneWithoutEvalsNestedInputSchema).optional()
 }).strict();
 
 export const EvalUncheckedUpdateWithoutEvalResultsInputSchema: z.ZodType<Prisma.EvalUncheckedUpdateWithoutEvalResultsInput> = z.object({
@@ -9112,7 +9112,7 @@ export const EvalCreateWithoutEvalOverridesInputSchema: z.ZodType<Prisma.EvalCre
   scenario: z.lazy(() => ScenarioCreateNestedOneWithoutEvalsInputSchema).optional(),
   evalResults: z.lazy(() => EvalResultCreateNestedManyWithoutEvalInputSchema).optional(),
   agent: z.lazy(() => AgentCreateNestedOneWithoutEnabledGeneralEvalsInputSchema).optional(),
-  EvalSet: z.lazy(() => EvalSetCreateNestedOneWithoutEvalsInputSchema).optional()
+  evalSet: z.lazy(() => EvalSetCreateNestedOneWithoutEvalsInputSchema).optional()
 }).strict();
 
 export const EvalUncheckedCreateWithoutEvalOverridesInputSchema: z.ZodType<Prisma.EvalUncheckedCreateWithoutEvalOverridesInput> = z.object({
@@ -9205,7 +9205,7 @@ export const EvalUpdateWithoutEvalOverridesInputSchema: z.ZodType<Prisma.EvalUpd
   scenario: z.lazy(() => ScenarioUpdateOneWithoutEvalsNestedInputSchema).optional(),
   evalResults: z.lazy(() => EvalResultUpdateManyWithoutEvalNestedInputSchema).optional(),
   agent: z.lazy(() => AgentUpdateOneWithoutEnabledGeneralEvalsNestedInputSchema).optional(),
-  EvalSet: z.lazy(() => EvalSetUpdateOneWithoutEvalsNestedInputSchema).optional()
+  evalSet: z.lazy(() => EvalSetUpdateOneWithoutEvalsNestedInputSchema).optional()
 }).strict();
 
 export const EvalUncheckedUpdateWithoutEvalOverridesInputSchema: z.ZodType<Prisma.EvalUncheckedUpdateWithoutEvalOverridesInput> = z.object({
@@ -9920,7 +9920,7 @@ export const EvalUpdateWithoutAgentInputSchema: z.ZodType<Prisma.EvalUpdateWitho
   scenario: z.lazy(() => ScenarioUpdateOneWithoutEvalsNestedInputSchema).optional(),
   evalResults: z.lazy(() => EvalResultUpdateManyWithoutEvalNestedInputSchema).optional(),
   evalOverrides: z.lazy(() => EvalOverrideUpdateManyWithoutEvalNestedInputSchema).optional(),
-  EvalSet: z.lazy(() => EvalSetUpdateOneWithoutEvalsNestedInputSchema).optional()
+  evalSet: z.lazy(() => EvalSetUpdateOneWithoutEvalsNestedInputSchema).optional()
 }).strict();
 
 export const EvalUncheckedUpdateWithoutAgentInputSchema: z.ZodType<Prisma.EvalUncheckedUpdateWithoutAgentInput> = z.object({
@@ -10759,7 +10759,7 @@ export const EvalUpdateWithoutScenarioInputSchema: z.ZodType<Prisma.EvalUpdateWi
   evalResults: z.lazy(() => EvalResultUpdateManyWithoutEvalNestedInputSchema).optional(),
   agent: z.lazy(() => AgentUpdateOneWithoutEnabledGeneralEvalsNestedInputSchema).optional(),
   evalOverrides: z.lazy(() => EvalOverrideUpdateManyWithoutEvalNestedInputSchema).optional(),
-  EvalSet: z.lazy(() => EvalSetUpdateOneWithoutEvalsNestedInputSchema).optional()
+  evalSet: z.lazy(() => EvalSetUpdateOneWithoutEvalsNestedInputSchema).optional()
 }).strict();
 
 export const EvalUncheckedUpdateWithoutScenarioInputSchema: z.ZodType<Prisma.EvalUncheckedUpdateWithoutScenarioInput> = z.object({

@@ -6,8 +6,19 @@ import { Button } from "~/components/ui/button";
 import { type CallWithIncludes } from "@repo/types/src/index";
 import { cn, getInterruptionsColor, getLatencyColor } from "~/lib/utils";
 import { SortButton } from "./SortButton";
-import { ArrowTopRightOnSquareIcon } from "@heroicons/react/24/solid";
+import {
+  ArrowTopRightOnSquareIcon,
+  CheckCircleIcon,
+  XCircleIcon,
+} from "@heroicons/react/24/solid";
 import Link from "next/link";
+import { useMemo } from "react";
+import {
+  HoverCard,
+  HoverCardTrigger,
+  HoverCardContent,
+} from "~/components/ui/hover-card";
+import EvalResultChip from "~/components/dashboard/EvalResultChip";
 
 export const columns: ColumnDef<CallWithIncludes>[] = [
   {
@@ -260,6 +271,15 @@ export const columns: ColumnDef<CallWithIncludes>[] = [
     size: 10,
   },
   {
+    id: "evalResults",
+    header: () => <div className="text-xs font-medium">eval results</div>,
+    cell: ({ row }) => {
+      const call = row.original;
+      return <EvalResultCell call={call} />;
+    },
+    size: 50,
+  },
+  {
     header: ({ column }) => <SortButton column={column} title="created at" />,
     accessorKey: "startedAt",
     cell: ({ row }) => {
@@ -299,5 +319,54 @@ const ActionCell = ({ call }: { call: CallWithIncludes }) => {
         view details
       </Button>
     </div>
+  );
+};
+
+const EvalResultCell = ({ call }: { call: CallWithIncludes }) => {
+  const { savedSearch } = useObserveState();
+  const evalSetIds = useMemo(
+    () => new Set(savedSearch?.evalSets?.map((evalSet) => evalSet.id) ?? []),
+    [savedSearch],
+  );
+  const callEvalSetIds = useMemo(
+    () => Object.keys(call.evalSetToSuccess ?? {}),
+    [call],
+  );
+  const relevantEvalSetIds = useMemo(
+    () => callEvalSetIds.filter((id) => evalSetIds.has(id)),
+    [callEvalSetIds, evalSetIds],
+  );
+  const passed = useMemo(() => {
+    const evalSetToSuccess = call.evalSetToSuccess as Record<string, boolean>;
+    return relevantEvalSetIds.filter((id) => evalSetToSuccess[id] === true)
+      .length;
+  }, [relevantEvalSetIds, call.evalSetToSuccess]);
+  const total = useMemo(() => relevantEvalSetIds.length, [relevantEvalSetIds]);
+
+  if (total === 0) {
+    return <div className="text-sm text-muted-foreground/50">n/a</div>;
+  }
+  return (
+    <HoverCard openDelay={0} closeDelay={0}>
+      <HoverCardTrigger>
+        <div className="flex w-fit cursor-pointer items-center gap-1 rounded-sm p-1 hover:bg-gray-200">
+          {passed === total ? (
+            <CheckCircleIcon className="size-5 text-green-500" />
+          ) : (
+            <XCircleIcon className="size-5 text-red-500" />
+          )}
+          <div className="text-sm font-medium">
+            {passed}/{total}
+          </div>
+        </div>
+      </HoverCardTrigger>
+      <HoverCardContent align="start" onClick={(e) => e.stopPropagation()}>
+        <div className="flex flex-col gap-1">
+          {call.evalResults.map((evalResult) => (
+            <EvalResultChip key={evalResult.id} evalResult={evalResult} />
+          ))}
+        </div>
+      </HoverCardContent>
+    </HoverCard>
   );
 };
