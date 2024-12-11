@@ -54,48 +54,14 @@ export function EvalSetsAndAlertsCard({
         {mode === "evaluations" ? (
           <div className="flex flex-col gap-2">
             {filter.evalSets?.map((evalSet) => (
-              <Card
+              <EvalSetCard
+                evalSet={evalSet}
+                filter={filter}
+                setFilter={setFilter}
+                setSelectedEvalSet={setSelectedEvalSet}
+                setEvalsModalOpen={setEvalsModalOpen}
                 key={evalSet.id}
-                className="flex flex-col gap-4 p-4 hover:cursor-pointer hover:bg-muted/40"
-              >
-                <CardHeader className="p-0">
-                  <CardTitle className="p-0 text-sm font-medium">
-                    {evalSet.name}
-                  </CardTitle>
-                  <CardContent className="flex flex-row items-center justify-end gap-2">
-                    <ToggleGroup
-                      type="single"
-                      onValueChange={(value: string) =>
-                        setFilter({
-                          ...filter,
-                          evalSetToSuccess: value
-                            ? {
-                                id: evalSet.id,
-                                result:
-                                  value === "all" ? null : value === "passed",
-                              }
-                            : undefined,
-                        })
-                      }
-                    >
-                      <ToggleGroupItem value="all">all</ToggleGroupItem>
-                      <ToggleGroupItem value="passed">passed</ToggleGroupItem>
-                      <ToggleGroupItem value="failed">failed</ToggleGroupItem>
-                    </ToggleGroup>
-                    <Button
-                      onClick={() => {
-                        setSelectedEvalSet(evalSet);
-                        setEvalsModalOpen(true);
-                      }}
-                      variant="secondary"
-                      size="sm"
-                      className="text-xs"
-                    >
-                      edit
-                    </Button>
-                  </CardContent>
-                </CardHeader>
-              </Card>
+              />
             ))}
             <div
               className="flex flex-row items-center gap-2 rounded-lg bg-muted/70 p-4 text-muted-foreground hover:cursor-pointer hover:bg-muted"
@@ -161,6 +127,66 @@ export function EvalSetsAndAlertsCard({
           filter={filter}
           setFilter={setFilter}
         />
+      </CardContent>
+    </Card>
+  );
+}
+
+function EvalSetCard({
+  evalSet,
+  filter,
+  setFilter,
+  setSelectedEvalSet,
+  setEvalsModalOpen,
+}: {
+  evalSet: EvalSetWithIncludes;
+  filter: Filter;
+  setFilter: React.Dispatch<React.SetStateAction<Filter>>;
+  setSelectedEvalSet: React.Dispatch<
+    React.SetStateAction<EvalSetWithIncludes | null>
+  >;
+  setEvalsModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
+}) {
+  return (
+    <Card
+      key={evalSet.id}
+      className="flex flex-col gap-4 p-4 hover:cursor-pointer hover:bg-muted/40"
+    >
+      <CardHeader className="p-0">
+        <CardTitle className="p-0 text-sm font-medium">
+          {evalSet.name}
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="flex flex-row items-center justify-between gap-2">
+        <ToggleGroup
+          type="single"
+          onValueChange={(value: string) =>
+            setFilter({
+              ...filter,
+              evalSetToSuccess: value
+                ? {
+                    id: evalSet.id,
+                    result: value === "all" ? null : value === "passed",
+                  }
+                : undefined,
+            })
+          }
+        >
+          <ToggleGroupItem value="all">all</ToggleGroupItem>
+          <ToggleGroupItem value="passed">passed</ToggleGroupItem>
+          <ToggleGroupItem value="failed">failed</ToggleGroupItem>
+        </ToggleGroup>
+        <Button
+          onClick={() => {
+            setSelectedEvalSet(evalSet);
+            setEvalsModalOpen(true);
+          }}
+          variant="secondary"
+          size="sm"
+          className="text-xs"
+        >
+          edit
+        </Button>
       </CardContent>
     </Card>
   );

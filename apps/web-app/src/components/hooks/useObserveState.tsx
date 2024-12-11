@@ -35,6 +35,7 @@ interface ObserveStateContextType {
   setFilter: React.Dispatch<React.SetStateAction<Filter>>;
   orderBy: OrderBy | undefined;
   setOrderBy: (orderBy: OrderBy | undefined) => void;
+  resetFilter: () => void;
 }
 
 const ObserveStateContext = createContext<ObserveStateContextType | undefined>(
@@ -47,11 +48,20 @@ export function ObserveStateProvider({
   children: React.ReactNode;
 }) {
   const [selectedCallId, setSelectedCallId] = useState<string | null>(null);
-  const [filter, setFilter] = useState<Filter>({
+
+  const defaultFilter: Filter = {
     lookbackPeriod: lookbackPeriods[1]!,
     chartPeriod: chartPeriods[2]!.value,
-  });
+  };
+
+  const [filter, setFilter] = useState<Filter>(defaultFilter);
   const [orderBy, setOrderBy] = useState<OrderBy | undefined>();
+
+  const resetFilter = () => {
+    if (JSON.stringify(filter) !== JSON.stringify(defaultFilter)) {
+      setFilter(defaultFilter);
+    }
+  };
 
   const prevLookbackPeriod = useRef<number>(filter.lookbackPeriod.value);
   const prevTimeRange = useRef<{ start: number; end: number }>();
@@ -91,6 +101,7 @@ export function ObserveStateProvider({
         setFilter,
         orderBy,
         setOrderBy,
+        resetFilter,
       }}
     >
       {children}

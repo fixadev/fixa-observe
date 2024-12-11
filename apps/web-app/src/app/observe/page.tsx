@@ -11,10 +11,20 @@ import { api } from "~/trpc/react";
 import ChartCard from "~/components/observe/ChartCard";
 
 export default function ObservePage() {
-  const { selectedCallId, setSelectedCallId, filter, setFilter, orderBy } =
-    useObserveState();
+  const {
+    selectedCallId,
+    setSelectedCallId,
+    filter,
+    setFilter,
+    orderBy,
+    resetFilter,
+  } = useObserveState();
 
   const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    resetFilter();
+  }, [resetFilter]);
 
   const {
     data: percentiles,

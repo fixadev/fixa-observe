@@ -130,37 +130,42 @@ export default function Filters({
       <div className="fixed top-0 z-50 flex h-14 items-center justify-between gap-2 border-b bg-background p-4 sm:w-full">
         <div className="flex items-center gap-2">
           <SidebarTrigger className="shrink-0" />
-          <Select
-            value={filter.lookbackPeriod.value.toString()}
-            onValueChange={(value) => {
-              setFilter({
-                ...filter,
-                lookbackPeriod: lookbackPeriods.find(
-                  (p) => p.value === parseInt(value),
-                )!,
-                timeRange: undefined,
-              });
-            }}
-          >
-            <SelectTrigger className="gap-2 bg-background">
-              <CalendarIcon className="size-4 shrink-0" />
-              {filter.timeRange ? (
-                <SelectValue>
-                  {formatDateTime(new Date(filter.timeRange.start))} -{" "}
-                  {formatDateTime(new Date(filter.timeRange.end))}
-                </SelectValue>
-              ) : (
-                <SelectValue placeholder="time range" />
-              )}
-            </SelectTrigger>
-            <SelectContent>
-              {lookbackPeriods.map((period) => (
-                <SelectItem key={period.value} value={period.value.toString()}>
-                  {period.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <div className="flex w-40">
+            <Select
+              value={filter.lookbackPeriod.value.toString()}
+              onValueChange={(value) => {
+                setFilter({
+                  ...filter,
+                  lookbackPeriod: lookbackPeriods.find(
+                    (p) => p.value === parseInt(value),
+                  )!,
+                  timeRange: undefined,
+                });
+              }}
+            >
+              <SelectTrigger className="w-[140px] gap-2 bg-background">
+                <CalendarIcon className="size-4 shrink-0" />
+                {filter.timeRange ? (
+                  <SelectValue className="w-35">
+                    {formatDateTime(new Date(filter.timeRange.start))} -{" "}
+                    {formatDateTime(new Date(filter.timeRange.end))}
+                  </SelectValue>
+                ) : (
+                  <SelectValue placeholder="time range" />
+                )}
+              </SelectTrigger>
+              <SelectContent className="w-full">
+                {lookbackPeriods.map((period) => (
+                  <SelectItem
+                    key={period.value}
+                    value={period.value.toString()}
+                  >
+                    {period.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
           <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger asChild>
               <Button
