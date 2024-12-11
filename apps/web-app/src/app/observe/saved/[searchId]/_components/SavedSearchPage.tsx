@@ -9,16 +9,26 @@ import Spinner from "~/components/Spinner";
 import { Dialog, DialogContent } from "~/components/ui/dialog";
 import { api } from "~/trpc/react";
 import ChartCard from "~/components/observe/ChartCard";
+import { EvalSetsAndAlertsCard } from "./EvalsAndAlertsCard";
+import { type SavedSearchWithIncludes } from "@repo/types/src";
 
-export default function ObservePage() {
-  const { selectedCallId, setSelectedCallId, filter, orderBy, resetFilter } =
+export default function SavedSearchPage({
+  params,
+  savedSearch,
+}: {
+  params: { searchId: string };
+  savedSearch?: SavedSearchWithIncludes;
+}) {
+  const { selectedCallId, setSelectedCallId, filter, setFilter, orderBy } =
     useObserveState();
 
-  const containerRef = useRef<HTMLDivElement>(null);
-
   useEffect(() => {
-    resetFilter();
-  }, [resetFilter]);
+    if (savedSearch) {
+      setFilter(savedSearch);
+    }
+  }, [savedSearch, setFilter]);
+
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const {
     data: percentiles,
@@ -103,11 +113,7 @@ export default function ObservePage() {
             data={percentiles?.latency}
             isLoading={isLoadingPercentiles || isRefetchingPercentiles}
           />
-          <ChartCard
-            title="interruptions"
-            data={percentiles?.interruptions}
-            isLoading={isLoadingPercentiles || isRefetchingPercentiles}
-          />
+          <EvalSetsAndAlertsCard searchId={params.searchId ?? ""} />
         </div>
         <CallTable isLoading={isLoading || isRefetching} calls={calls} />
         {/* Invisible marker for infinite scroll */}

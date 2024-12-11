@@ -42,15 +42,7 @@ import { SidebarTrigger } from "../ui/sidebar";
 import { useRouter } from "next/navigation";
 import { InputWithLabel } from "~/app/_components/InputWithLabel";
 
-export default function Filters({
-  modalOpen,
-  setModalOpen,
-  refetch,
-}: {
-  modalOpen: boolean;
-  setModalOpen: (open: boolean) => void;
-  refetch: () => void;
-}) {
+export default function Filters({ refetch }: { refetch: () => void }) {
   const router = useRouter();
   const { data: agentIds } = api._call.getAgentIds.useQuery();
   const { data: _agents, refetch: refetchAgents } =
@@ -104,6 +96,7 @@ export default function Filters({
     });
 
   const [saveModalOpen, setSaveModalOpen] = useState(false);
+  const [editAgentModalOpen, setEditAgentModalOpen] = useState(false);
 
   const showSaveSearchButton = useMemo(() => {
     return JSON.stringify(filter) !== JSON.stringify(defaultFilter);
@@ -186,7 +179,7 @@ export default function Filters({
                 <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="p-1">
+            <PopoverContent className="p-1" align="start">
               <Command>
                 <CommandInput placeholder="Search agents..." />
                 <CommandList>
@@ -196,7 +189,7 @@ export default function Filters({
                       <CommandItem
                         key={agent.id}
                         value={`${agent.id} ${agent.name}`}
-                        onSelect={(value) => {
+                        onSelect={() => {
                           setFilter({
                             ...filter,
                             agentId: agent.id === "all" ? undefined : agent.id,
@@ -220,7 +213,7 @@ export default function Filters({
                 <CommandSeparator />
                 <CommandGroup>
                   <CommandItem
-                    onSelect={() => setModalOpen(true)}
+                    onSelect={() => setEditAgentModalOpen(true)}
                     className="flex w-full cursor-pointer flex-col items-center text-center font-medium"
                   >
                     edit display names
@@ -284,8 +277,8 @@ export default function Filters({
         isSaving={isSaving}
       />
       <EditAgentDialog
-        open={modalOpen}
-        setOpen={setModalOpen}
+        open={editAgentModalOpen}
+        setOpen={setEditAgentModalOpen}
         refetchAgents={refetchAgents}
       />
     </>
