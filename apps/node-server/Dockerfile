@@ -17,7 +17,6 @@ RUN pnpm install --frozen-lockfile
 
 COPY . . 
 
-RUN npm install -g prisma
 RUN pnpm --filter @repo/db generate
 RUN pnpm run build --filter node-server 
 
