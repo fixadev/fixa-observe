@@ -14,15 +14,16 @@ import {
 } from "~/components/ui/tooltip";
 import { Switch } from "~/components/ui/switch";
 import { TextAreaWithLabel } from "./TextAreaWithLabel";
-import { type EvalWithoutScenarioId, type EvalSchema } from "~/lib/agent";
+import { type Eval } from "@repo/types/src/index";
 import { InformationCircleIcon } from "@heroicons/react/24/solid";
+import React from "react";
 
 export function EvalInput({
   evaluation,
   setEvaluation,
 }: {
-  evaluation: EvalSchema | EvalWithoutScenarioId;
-  setEvaluation: (evaluation: EvalSchema | EvalWithoutScenarioId) => void;
+  evaluation: Eval;
+  setEvaluation: (evaluation: Eval) => void;
 }) {
   return (
     <div className="flex flex-col gap-4">
@@ -31,7 +32,9 @@ export function EvalInput({
           className="w-full"
           label="name"
           value={evaluation.name}
-          onChange={(e) => setEvaluation({ ...evaluation, name: e })}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+            setEvaluation({ ...evaluation, name: e.target.value })
+          }
         />
         <div className="flex flex-col gap-2">
           <Label>type</Label>
@@ -73,13 +76,18 @@ export function EvalInput({
           <TextAreaWithLabel
             label="when should this tool be called?"
             value={evaluation.description}
-            onChange={(e) => setEvaluation({ ...evaluation, description: e })}
+            onChange={(e) =>
+              setEvaluation({ ...evaluation, description: e.target.value })
+            }
           />
           <TextAreaWithLabel
             label="expected result?"
             value={evaluation.toolCallExpectedResult}
             onChange={(e) =>
-              setEvaluation({ ...evaluation, toolCallExpectedResult: e })
+              setEvaluation({
+                ...evaluation,
+                toolCallExpectedResult: e.target.value,
+              })
             }
           />
         </div>
@@ -88,7 +96,9 @@ export function EvalInput({
           <TextAreaWithLabel
             label="success description"
             value={evaluation.description}
-            onChange={(e) => setEvaluation({ ...evaluation, description: e })}
+            onChange={(e) =>
+              setEvaluation({ ...evaluation, description: e.target.value })
+            }
           />
         </div>
       )}

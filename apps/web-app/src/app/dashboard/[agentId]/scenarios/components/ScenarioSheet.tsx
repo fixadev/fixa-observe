@@ -20,11 +20,15 @@ import {
   AlertDialogTitle,
 } from "~/components/ui/alert-dialog";
 import {
-  type EvalOverrideWithoutScenarioId,
-  type EvalWithoutScenarioId,
+  type EvalSchema,
+  type EvalOverrideSchema,
+  type Eval,
+  type EvalOverride,
+} from "@repo/types/src/index";
+import {
+  type ScenarioWithEvals,
   type UpdateScenarioSchema,
-} from "~/lib/agent";
-import { type ScenarioWithEvals } from "~/lib/agent";
+} from "@repo/types/src/index";
 import { EvalContentType, EvalResultType, EvalType } from "@prisma/client";
 import { Label } from "~/components/ui/label";
 import { Switch } from "~/components/ui/switch";
@@ -54,7 +58,7 @@ export function ScenarioSheet({
   saveScenario: (scenario: UpdateScenarioSchema) => void;
   deleteScenario: (id: string) => void;
 }) {
-  const emptyEval = useMemo<EvalWithoutScenarioId>(() => {
+  const emptyEval = useMemo<Eval>(() => {
     return {
       id: crypto.randomUUID(),
       name: "",
@@ -70,6 +74,7 @@ export function ScenarioSheet({
       toolCallExpectedResult: "",
       isCritical: true,
       deleted: false,
+      evalSetId: null,
     };
   }, []);
 
@@ -86,9 +91,9 @@ export function ScenarioSheet({
       : [emptyEval],
   );
 
-  const [evalOverrides, setEvalOverrides] = useState<
-    EvalOverrideWithoutScenarioId[]
-  >(selectedScenario?.generalEvalOverrides ?? []);
+  const [evalOverrides, setEvalOverrides] = useState<Array<EvalOverride>>(
+    selectedScenario?.generalEvalOverrides ?? [],
+  );
 
   // Include date/time stuff
   const { options, parseTimezone } = useTimezoneSelect({});
@@ -102,7 +107,7 @@ export function ScenarioSheet({
   }, [emptyEval]);
 
   const handleUpdateEval = useCallback(
-    (evaluation: EvalWithoutScenarioId) => {
+    (evaluation: Eval) => {
       setEvals(evals.map((e) => (e.id === evaluation.id ? evaluation : e)));
     },
     [evals],
@@ -190,12 +195,13 @@ export function ScenarioSheet({
     toast,
   ]);
 
-  const emptyEvalOverride = useMemo<EvalOverrideWithoutScenarioId>(() => {
+  const emptyEvalOverride = useMemo<EvalOverride>(() => {
     return {
       id: crypto.randomUUID(),
       createdAt: new Date(),
       enabled: true,
       evalId: "",
+      scenarioId: "",
     };
   }, []);
 

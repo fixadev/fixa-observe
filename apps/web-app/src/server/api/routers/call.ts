@@ -1,8 +1,11 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
-import { callService } from "~/server/services/call";
 import { TRPCError } from "@trpc/server";
-import { FilterSchema, OrderBySchema } from "~/lib/types";
+import { db } from "~/server/db";
+import { CallService } from "@repo/services/src/call";
+import { FilterSchema, OrderBySchema } from "@repo/types/src/index";
+
+const callService = new CallService(db);
 
 export const callRouter = createTRPCRouter({
   getCall: protectedProcedure.input(z.string()).query(async ({ input }) => {
@@ -55,9 +58,6 @@ export const callRouter = createTRPCRouter({
     return await callService.getAgentIds("11x");
   }),
 
-  getRegionIds: protectedProcedure.query(async ({ ctx }) => {
-    return await callService.getRegionIds("11x");
-  }),
   getMetadata: protectedProcedure.query(async ({ ctx }) => {
     return await callService.getMetadata("11x");
   }),

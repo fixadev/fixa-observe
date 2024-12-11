@@ -3,7 +3,10 @@ import { useMemo } from "react";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
-import { type AgentWithIncludes, type OfOneKioskProperties } from "~/lib/types";
+import {
+  type AgentWithIncludes,
+  type OfOneKioskProperties,
+} from "@repo/types/src/index";
 
 interface OfOneKioskSettingsProps {
   agentState: AgentWithIncludes;
@@ -26,29 +29,20 @@ export function OfOneKioskSettings({
     <>
       <div className="flex flex-col gap-2">
         <Label>kiosk base url</Label>
-        <Input
-          value={ofOneProperties.baseUrl}
-          onChange={(e) => {
-            setAgentState({
-              ...agentState,
-              extraProperties: {
-                ...ofOneProperties,
-                baseUrl: e.target.value,
-              },
-            });
-          }}
-        />
-        <div className="flex flex-col gap-1 text-sm">
-          using the following urls:
-          <div className="w-fit rounded-md border border-border bg-muted p-1 font-mono">
-            https://api.{baseUrlDisplay}
-          </div>
-          <div className="w-fit rounded-md border border-border bg-muted p-1 font-mono">
-            wss://socket.{baseUrlDisplay}
-          </div>
-          <div className="w-fit rounded-md border border-border bg-muted p-1 font-mono">
-            wss://ais.{baseUrlDisplay}
-          </div>
+        <div className="flex items-center gap-2">
+          <div className="w-fit text-sm">https://kiosk.</div>
+          <Input
+            value={ofOneProperties.baseUrl}
+            onChange={(e) => {
+              setAgentState({
+                ...agentState,
+                extraProperties: {
+                  ...ofOneProperties,
+                  baseUrl: e.target.value,
+                },
+              });
+            }}
+          />
         </div>
       </div>
       <div className="flex flex-col gap-2">

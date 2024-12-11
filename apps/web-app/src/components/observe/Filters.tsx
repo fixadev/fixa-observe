@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Button } from "../ui/button";
 import {
   Select,
@@ -8,17 +8,14 @@ import {
   SelectContent,
   SelectTrigger,
   SelectValue,
-  SelectSeparator,
 } from "../ui/select";
 import { formatDateTime } from "~/lib/utils";
+import { CalendarIcon, UserIcon } from "@heroicons/react/24/solid";
 import {
-  CalendarIcon,
-  MapIcon,
-  PencilIcon,
-  UserIcon,
-} from "@heroicons/react/24/solid";
-import { lookbackPeriods } from "../hooks/useObserveState";
-import { type Filter } from "~/lib/types";
+  defaultFilter,
+  lookbackPeriods,
+  useObserveState,
+} from "../hooks/useObserveState";
 import { api } from "~/trpc/react";
 import {
   Dialog,
@@ -41,38 +38,30 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { Check, ChevronsUpDown } from "lucide-react";
 import { cn } from "~/lib/utils";
+import { SidebarTrigger, useSidebar } from "../ui/sidebar";
+import { useRouter } from "next/navigation";
+import { InputWithLabel } from "~/app/_components/InputWithLabel";
+import {
+  FilterSchema,
+  type Filter,
+  type SavedSearchWithIncludes,
+} from "@repo/types/src";
 
 export default function Filters({
-  modalOpen,
-  setModalOpen,
-  filter,
-  setFilter,
   refetch,
+  originalFilter = defaultFilter,
+  savedSearch,
 }: {
-  modalOpen: boolean;
-  setModalOpen: (open: boolean) => void;
-  filter: Filter;
-  setFilter: (filter: Filter) => void;
   refetch: () => void;
+  originalFilter?: Filter;
+  savedSearch?: SavedSearchWithIncludes;
 }) {
   const { data: agentIds } = api._call.getAgentIds.useQuery();
-  const { data: regionIds } = api._call.getRegionIds.useQuery();
   const { data: _agents, refetch: refetchAgents } =
     api.agent.getAllFor11x.useQuery();
   const { data: metadata } = api._call.getMetadata.useQuery();
 
-  const regions = useMemo(() => {
-    return [
-      {
-        id: "all",
-        name: "all regions",
-      },
-      ...(regionIds ?? []).map((id) => ({
-        id,
-        name: id,
-      })),
-    ];
-  }, [regionIds]);
+  const { filter, setFilter } = useObserveState();
 
   const agents = useMemo(() => {
     return [
@@ -110,41 +99,65 @@ export default function Filters({
 
   const [open, setOpen] = useState(false);
 
+  const [editAgentModalOpen, setEditAgentModalOpen] = useState(false);
+
+  const hasFilterChanged = useMemo(() => {
+    const _originalFilter = FilterSchema.parse(originalFilter);
+    const _filter = FilterSchema.parse(filter);
+    return JSON.stringify(_filter) !== JSON.stringify(_originalFilter);
+  }, [filter, originalFilter]);
+
+  const { open: sidebarOpen } = useSidebar();
   return (
     <>
-      <div className="fixed top-0 z-50 flex h-16 w-screen items-center justify-between gap-2 border-b bg-background p-4">
-        <div className="flex gap-2">
-          <Select
-            value={filter.lookbackPeriod.value.toString()}
-            onValueChange={(value) => {
-              setFilter({
-                ...filter,
-                lookbackPeriod: lookbackPeriods.find(
-                  (p) => p.value === parseInt(value),
-                )!,
-                timeRange: undefined,
-              });
-            }}
-          >
-            <SelectTrigger className="gap-2 bg-background">
-              <CalendarIcon className="size-4 shrink-0" />
-              {filter.timeRange ? (
-                <SelectValue>
-                  {formatDateTime(new Date(filter.timeRange.start))} -{" "}
-                  {formatDateTime(new Date(filter.timeRange.end))}
-                </SelectValue>
-              ) : (
-                <SelectValue placeholder="time range" />
-              )}
-            </SelectTrigger>
-            <SelectContent>
-              {lookbackPeriods.map((period) => (
-                <SelectItem key={period.value} value={period.value.toString()}>
-                  {period.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+      <div
+        className={cn(
+          "fixed top-0 z-50 flex h-14 items-center justify-between gap-2 border-b bg-background p-4 transition-[width] duration-200 ease-linear",
+          sidebarOpen ? "w-[calc(100%-var(--sidebar-width))]" : "w-full",
+        )}
+      >
+        <div className="flex items-center gap-2">
+          <SidebarTrigger className="shrink-0" />
+          <div className="flex w-40">
+            <Select
+              value={filter.lookbackPeriod.value.toString()}
+              onValueChange={(value) => {
+                console.log(
+                  "lookback period changed",
+                  lookbackPeriods.find((p) => p.value === parseInt(value)),
+                );
+                setFilter({
+                  ...filter,
+                  lookbackPeriod: lookbackPeriods.find(
+                    (p) => p.value === parseInt(value),
+                  )!,
+                  timeRange: undefined,
+                });
+              }}
+            >
+              <SelectTrigger className="w-[140px] gap-2 bg-background">
+                <CalendarIcon className="size-4 shrink-0" />
+                {filter.timeRange ? (
+                  <SelectValue className="w-35">
+                    {formatDateTime(new Date(filter.timeRange.start))} -{" "}
+                    {formatDateTime(new Date(filter.timeRange.end))}
+                  </SelectValue>
+                ) : (
+                  <SelectValue placeholder="time range" />
+                )}
+              </SelectTrigger>
+              <SelectContent className="w-full">
+                {lookbackPeriods.map((period) => (
+                  <SelectItem
+                    key={period.value}
+                    value={period.value.toString()}
+                  >
+                    {period.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
           <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger asChild>
               <Button
@@ -161,7 +174,7 @@ export default function Filters({
                 <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="p-1">
+            <PopoverContent className="p-1" align="start">
               <Command>
                 <CommandInput placeholder="Search agents..." />
                 <CommandList>
@@ -171,7 +184,7 @@ export default function Filters({
                       <CommandItem
                         key={agent.id}
                         value={`${agent.id} ${agent.name}`}
-                        onSelect={(value) => {
+                        onSelect={() => {
                           setFilter({
                             ...filter,
                             agentId: agent.id === "all" ? undefined : agent.id,
@@ -195,7 +208,7 @@ export default function Filters({
                 <CommandSeparator />
                 <CommandGroup>
                   <CommandItem
-                    onSelect={() => setModalOpen(true)}
+                    onSelect={() => setEditAgentModalOpen(true)}
                     className="flex w-full cursor-pointer flex-col items-center text-center font-medium"
                   >
                     edit display names
@@ -204,27 +217,6 @@ export default function Filters({
               </Command>
             </PopoverContent>
           </Popover>
-          <Select
-            value={filter.regionId ?? "all"}
-            onValueChange={(value) => {
-              setFilter({
-                ...filter,
-                regionId: value === "all" ? undefined : value,
-              });
-            }}
-          >
-            <SelectTrigger className="gap-2 bg-background">
-              <MapIcon className="size-4 shrink-0" />
-              <SelectValue placeholder="all regions" />
-            </SelectTrigger>
-            <SelectContent>
-              {regions.map((region) => (
-                <SelectItem key={region.id} value={region.id}>
-                  {region.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
           {Object.entries(metadataAttributes).map(([key, values]) => (
             <Select
               key={key}
@@ -256,13 +248,16 @@ export default function Filters({
             </Select>
           ))}
         </div>
-        <Button variant="outline" onClick={refetch}>
-          refresh
-        </Button>
+        <div className="flex items-center gap-2">
+          {hasFilterChanged && <SaveSearchButton savedSearch={savedSearch} />}
+          <Button variant="outline" onClick={refetch}>
+            refresh
+          </Button>
+        </div>
       </div>
       <EditAgentDialog
-        open={modalOpen}
-        setOpen={setModalOpen}
+        open={editAgentModalOpen}
+        setOpen={setEditAgentModalOpen}
         refetchAgents={refetchAgents}
       />
     </>
@@ -352,71 +347,125 @@ function EditAgentDialog({
   );
 }
 
-// function SwitchWithValue({
-//   prefix,
-//   suffix,
-//   value,
-//   setValue,
-//   checked,
-//   onCheckedChange,
-// }: {
-//   prefix: string;
-//   suffix: string;
-//   value: number;
-//   setValue: (value: number) => void;
-//   checked: boolean;
-//   onCheckedChange: (checked: boolean) => void;
-// }) {
-//   const [_value, _setValue] = useState(value);
+function SaveSearchButton({
+  savedSearch,
+}: {
+  savedSearch?: SavedSearchWithIncludes;
+}) {
+  const router = useRouter();
+  const [open, setOpen] = useState(false);
+  const [state, setState] = useState<"create-or-update" | "create">("create");
+  const { filter } = useObserveState();
+  const utils = api.useUtils();
 
-//   useEffect(() => {
-//     _setValue(value);
-//   }, [value]);
+  const reset = useCallback(() => {
+    setName("");
+    if (savedSearch) {
+      setState("create-or-update");
+    } else {
+      setState("create");
+    }
+  }, [savedSearch]);
 
-//   return (
-//     <Popover onOpenChange={() => setValue(_value)}>
-//       <PopoverTrigger asChild>
-//         <Button variant="outline" asChild>
-//           <div
-//             className={cn(
-//               "flex cursor-pointer items-center gap-2",
-//               !checked && "opacity-50",
-//             )}
-//           >
-//             <Switch
-//               onClick={(e) => e.stopPropagation()}
-//               checked={checked}
-//               onCheckedChange={onCheckedChange}
-//             />
-//             {prefix}
-//             {isNaN(_value) ? 0 : _value}
-//             {suffix}
-//           </div>
-//         </Button>
-//       </PopoverTrigger>
-//       <PopoverContent className="flex flex-col gap-2 text-sm">
-//         <div className="flex items-center gap-2">
-//           <div className="shrink-0">{prefix}</div>
-//           <Input
-//             type="number"
-//             value={_value}
-//             onChange={(e) => {
-//               _setValue(parseInt(e.target.value));
-//             }}
-//           />
-//           <div>{suffix}</div>
-//         </div>
-//         <Slider
-//           max={3000}
-//           step={10}
-//           value={[_value]}
-//           onValueChange={([value]) => {
-//             if (value !== undefined) {
-//               _setValue(value);
-//             }
-//           }}
-//         />
-//       </PopoverContent>
-//     </Popover>
-//   );
-// }
+  useEffect(() => {
+    reset();
+  }, [reset]);
+  useEffect(() => {
+    if (!open) {
+      setTimeout(() => {
+        reset();
+      }, 200);
+    }
+  }, [open, reset]);
+
+  const [name, setName] = useState("");
+
+  const { mutate: saveSearch, isPending: isSaving } =
+    api.search.save.useMutation({
+      onSuccess: async (data) => {
+        void utils.search.getAll.invalidate();
+        setOpen(false);
+        router.push("/observe/saved/" + data.id);
+      },
+    });
+
+  const { mutate: updateSavedSearch, isPending: isUpdating } =
+    api.search.update.useMutation({
+      onSuccess: () => {
+        void utils.search.getAll.invalidate();
+        setOpen(false);
+      },
+    });
+
+  const handleUpdate = useCallback(() => {
+    if (!savedSearch) return;
+
+    updateSavedSearch({
+      ...savedSearch,
+      ...filter,
+      timeRange: undefined,
+      customerCallId: undefined,
+    });
+  }, [filter, savedSearch, updateSavedSearch]);
+
+  const handleCreate = useCallback(
+    (name: string) => {
+      saveSearch({
+        filter: {
+          ...filter,
+          timeRange: undefined,
+          customerCallId: undefined,
+        },
+        name,
+      });
+    },
+    [filter, saveSearch],
+  );
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button variant="ghost" className={cn(open && "bg-muted")}>
+          save search
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent>
+        <div className="flex flex-col gap-4">
+          {state === "create-or-update" ? (
+            <div className="flex flex-col gap-2">
+              <Button onClick={handleUpdate} disabled={isUpdating}>
+                {isUpdating ? <Spinner /> : "update existing"}
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => setState("create")}
+                disabled={isUpdating}
+              >
+                save new
+              </Button>
+            </div>
+          ) : (
+            <div className="flex flex-col gap-4">
+              <InputWithLabel
+                label="name"
+                placeholder="EU outbound..."
+                autoFocus
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    handleCreate(name);
+                  }
+                }}
+                className="w-full"
+              />
+              <Button onClick={() => handleCreate(name)} disabled={isSaving}>
+                {isSaving ? <Spinner /> : "save"}
+              </Button>
+            </div>
+          )}
+        </div>
+      </PopoverContent>
+    </Popover>
+  );
+}

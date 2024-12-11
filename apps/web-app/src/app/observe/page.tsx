@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useRef, useEffect, useState } from "react";
+import { useCallback, useMemo, useRef, useEffect } from "react";
 import CallDetails from "~/components/dashboard/CallDetails";
 import { useObserveState } from "~/components/hooks/useObserveState";
 import CallTable from "~/components/observe/CallTable";
@@ -11,10 +11,14 @@ import { api } from "~/trpc/react";
 import ChartCard from "~/components/observe/ChartCard";
 
 export default function ObservePage() {
-  const { selectedCallId, setSelectedCallId, filter, setFilter, orderBy } =
+  const { selectedCallId, setSelectedCallId, filter, orderBy, resetFilter } =
     useObserveState();
 
   const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    resetFilter();
+  }, [resetFilter]);
 
   const {
     data: percentiles,
@@ -85,31 +89,13 @@ export default function ObservePage() {
     [calls, selectedCallId],
   );
 
-  const [modalOpen, setModalOpen] = useState(false);
-
-  const playPauseAudio = useCallback(() => {
-    console.log("play pause!!");
-  }, []);
-
   return (
     <div
-      className="relative h-full bg-muted/30 pt-16"
+      className="relative h-full bg-muted/30 pt-16 focus:outline-none"
       autoFocus
       tabIndex={0}
-      onKeyDown={(e) => {
-        if (e.key === " " && !modalOpen) {
-          e.preventDefault();
-          playPauseAudio();
-        }
-      }}
     >
-      <Filters
-        modalOpen={modalOpen}
-        setModalOpen={setModalOpen}
-        filter={filter}
-        setFilter={setFilter}
-        refetch={refetch}
-      />
+      <Filters refetch={refetch} />
       <div className="flex flex-col gap-4 p-4">
         <div className="flex w-full gap-4">
           <ChartCard

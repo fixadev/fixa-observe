@@ -1,14 +1,16 @@
 {
   "compilerOptions": {
-    "target": "ES2018",
-    "module": "CommonJS",
-    "moduleResolution": "node",
+    "target": "ES2022",
+    "module": "commonjs",
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "outDir": "./dist"
+    "outDir": "dist",
+    "rootDir": "./src", 
   },
-  "include": ["src/**/*.ts"],
+  "include": [
+    "src/**/*.ts"
+  ], 
   "exclude": ["dist"]
 }

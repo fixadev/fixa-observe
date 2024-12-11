@@ -1,0 +1,19 @@
+{
+  "display": "Default",
+  "compilerOptions": {
+    "lib": ["ESNext", "DOM"],
+    "allowJs": false,
+    "esModuleInterop": true,
+    "moduleDetection": "force",
+    "incremental": true,
+    "isolatedModules": true,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "preserveWatchOutput": true,
+    "noUncheckedIndexedAccess": true,
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "forceConsistentCasingInFileNames": true
+  }
+}

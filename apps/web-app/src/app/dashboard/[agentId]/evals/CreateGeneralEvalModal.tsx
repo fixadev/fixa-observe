@@ -4,7 +4,7 @@ import { Button } from "~/components/ui/button";
 import { api } from "~/trpc/react";
 import { useEffect, useState } from "react";
 import { useToast } from "~/components/hooks/use-toast";
-import { type EvalWithoutScenarioId, type EvalSchema } from "~/lib/agent";
+import { type Eval } from "@repo/types/src/index";
 import { TrashIcon } from "@heroicons/react/24/solid";
 import {
   AlertDialog,
@@ -25,14 +25,12 @@ export const CreateGeneralEvalModal = ({
   isModalOpen,
   setIsModalOpen,
 }: {
-  existingEval: EvalSchema | null;
-  setEvaluations: React.Dispatch<React.SetStateAction<EvalSchema[]>>;
+  existingEval: Eval | null;
+  setEvaluations: React.Dispatch<React.SetStateAction<Eval[]>>;
   isModalOpen: boolean;
   setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }) => {
-  const [evaluation, setEvaluation] = useState<
-    EvalSchema | EvalWithoutScenarioId
-  >(
+  const [evaluation, setEvaluation] = useState<Eval>(
     existingEval ?? {
       id: crypto.randomUUID(),
       createdAt: new Date(),
@@ -41,12 +39,13 @@ export const CreateGeneralEvalModal = ({
       type: "general",
       resultType: "number",
       contentType: "content",
-      scenarioId: undefined,
+      scenarioId: null,
       agentId: null,
       ownerId: null,
       toolCallExpectedResult: "",
       isCritical: true,
       deleted: false,
+      evalSetId: null,
     },
   );
 
@@ -72,7 +71,7 @@ export const CreateGeneralEvalModal = ({
         duration: 2000,
       });
       setEvaluations((evaluations) =>
-        evaluations.map((e: EvalSchema) => (e.id === data.id ? data : e)),
+        evaluations.map((e: Eval) => (e.id === data.id ? data : e)),
       );
       setIsModalOpen(false);
     },
@@ -110,19 +109,17 @@ export const CreateGeneralEvalModal = ({
         ownerId: null,
         isCritical: true,
         deleted: false,
+        evalSetId: null,
       });
     }
   }, [existingEval]);
 
   const handleSave = () => {
     if (existingEval) {
-      updateGeneralEval(evaluation as EvalSchema);
+      updateGeneralEval(evaluation);
     } else {
-      setEvaluations((evaluations) => [
-        ...evaluations,
-        evaluation as EvalSchema,
-      ]);
-      createGeneralEval(evaluation as EvalWithoutScenarioId);
+      setEvaluations((evaluations) => [...evaluations, evaluation]);
+      createGeneralEval(evaluation);
     }
   };
 

@@ -1,7 +1,9 @@
-import { type Eval } from "prisma/generated/zod";
+import { type Eval } from "@repo/types/src/index";
 
 export function EvalChip({ evaluation }: { evaluation: Eval }) {
   return (
-    <div className="rounded-full bg-muted py-1 px-2 text-xs">{evaluation.name}</div>
+    <div className="rounded-full bg-muted px-2 py-1 text-xs">
+      {evaluation.name}
+    </div>
   );
 }

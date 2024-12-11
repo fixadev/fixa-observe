@@ -1,0 +1,286 @@
+import {
+  Agent,
+  Call,
+  CallStatus,
+  Scenario,
+  Role,
+  Test,
+  Eval,
+  CallResult,
+  Message,
+} from "@prisma/client";
+import { db } from "../db";
+
+import {
+  ServerMessageTranscript,
+  type ServerMessageEndOfCallReport,
+} from "@vapi-ai/server-sdk/api";
+import { analyzeCallWitho1 } from "./textAnalysis";
+import { createGeminiPrompt } from "../utils/prompt";
+import { analyzeCallWithGemini } from "./audioAnalysis";
+import { formatOutput } from "./textAnalysis";
+import { Socket } from "socket.io";
+import { sendTestCompletedSlackMessage } from "./slack";
+import { setDeviceAvailable } from "./integrations/ofOneService";
+
+export const handleTranscriptUpdate = async (
+  report: ServerMessageTranscript,
+  call: Call & { test: Test },
+  userSocket?: Socket,
+): Promise<
+  | { userId: string; callId: string; testId: string; messages: Message[] }
+  | undefined
+> => {
+  const userId = call.ownerId;
+  if (!call || !userId || !call.test) {
+    console.error("No call, test or userId", call);
+    return;
+  }
+
+  const messagesToEmit = report.artifact?.messages
+    ?.map((message, index) => {
+      const baseMessage = {
+        id: `${call.id}-${index}`,
+        role: message.role as Role,
+        time: message.time,
+        secondsFromStart: message.secondsFromStart,
+        callId: call.id,
+      };
+      return {
+        ...baseMessage,
+        // @ts-expect-error
+        message: message.message || "",
+        // @ts-expect-error
+        endTime: message.endTime || 0,
+        // @ts-expect-error
+        duration: message.duration || 0,
+        // @ts-expect-error
+        toolCalls: message.toolCalls || [],
+        // @ts-expect-error
+        result: message.result || "",
+        // @ts-expect-error
+        name: message.name || "",
+      };
+    })
+    .filter((message) => message !== null);
+
+  if (!messagesToEmit) {
+    console.error("No messages to emit", report);
+    return;
+  }
+
+  if (userSocket) {
+    userSocket.emit("message", {
+      type: "messages-updated",
+      data: {
+        callId: call.id,
+        testId: call.test.id,
+        messages: messagesToEmit,
+      },
+    });
+  }
+
+  return {
+    userId,
+    callId: call.id,
+    testId: call.test.id,
+    messages: messagesToEmit,
+  };
+};
+
+export const handleAnalysisStarted = async (
+  report: ServerMessageEndOfCallReport,
+  userSocket?: Socket,
+) => {
+  try {
+    const vapiCallId = report?.call?.id;
+    if (!vapiCallId) {
+      console.error("No call ID found in Vapi call ended report");
+      return;
+    }
+    const call = await db.call.findFirst({
+      where: { vapiCallId: vapiCallId },
+    });
+    if (!call) {
+      console.error("Call not found in database, vapiCallId: ", vapiCallId);
+      return;
+    }
+    const updatedCall = await db.call.update({
+      where: { id: call.id },
+      data: { status: CallStatus.analyzing },
+    });
+
+    const userId = updatedCall.ownerId;
+    if (userSocket) {
+      userSocket.emit("message", {
+        type: "analysis-started",
+        data: { testId: updatedCall.testId, callId: updatedCall.id },
+      });
+    } else {
+      console.log("No connected user found for call", updatedCall.id);
+    }
+    return { userId, testId: updatedCall.testId, callId: updatedCall.id };
+  } catch (error) {
+    console.error("Error handling analysis started", error);
+    return null;
+  }
+};
+
+export const handleCallEnded = async ({
+  report,
+  call,
+  agent,
+  test,
+  scenario,
+  userSocket,
+}: {
+  report: ServerMessageEndOfCallReport;
+  call: Call;
+  agent: Agent;
+  test: Test;
+  scenario: Scenario & { evals: Eval[] };
+  userSocket?: Socket;
+}) => {
+  try {
+    if (!report.call || !report.artifact.messages) {
+      console.error("No artifact messages found");
+      return;
+    }
+
+    if (!report.artifact.stereoRecordingUrl) {
+      console.error("No stereo recording URL found");
+      return;
+    }
+
+    if (call.ofOneDeviceId) {
+      setDeviceAvailable(call.ofOneDeviceId, userSocket);
+    }
+
+    const o1Analysis = await analyzeCallWitho1({
+      callStartedAt: report.startedAt,
+      messages: report.artifact.messages,
+      testAgentPrompt: scenario.instructions,
+      scenario,
+    });
+    console.log("O1 ANALYSIS for call", call.id, o1Analysis);
+
+    let unparsedResult: string;
+    unparsedResult = o1Analysis;
+
+    // const useGemini = !scenario.includeDateTime;
+    // if (!useGemini) {
+    //   unparsedResult = o1Analysis.cleanedResult;
+    // } else {
+    //   const geminiPrompt = createGeminiPrompt({
+    //     callStartedAt: report.startedAt,
+    //     messages: report.artifact.messages,
+    //     testAgentPrompt: scenario.instructions,
+    //     scenario,
+    //     analysis: o1Analysis,
+    //   });
+
+    //   const geminiResult = await analyzeCallWithGemini(
+    //     report.artifact.stereoRecordingUrl,
+    //     geminiPrompt,
+    //   );
+
+    //   console.log("GEMINI RESULT for call", call.id, geminiResult.textResult);
+    //   unparsedResult = geminiResult.textResult ?? "";
+    // }
+
+    const evalResults = await formatOutput(unparsedResult);
+
+    const validEvalResults = evalResults.filter((evalResult) =>
+      [...scenario.evals]?.some(
+        (evaluation) => evaluation.id === evalResult.evalId,
+      ),
+    );
+
+    const criticalEvalResults = evalResults.filter((evalResult) =>
+      [...scenario.evals]?.some(
+        (evaluation) =>
+          evaluation.id === evalResult.evalId && evaluation.isCritical,
+      ),
+    );
+
+    const success = criticalEvalResults.every((result) => result.success);
+
+    const updatedCall = await db.call.update({
+      where: { id: call.id },
+      data: {
+        status: CallStatus.completed,
+        startedAt: report.startedAt,
+        endedAt: report.endedAt,
+        stereoRecordingUrl: report.artifact.stereoRecordingUrl,
+        monoRecordingUrl: report.artifact.recordingUrl,
+        result: success ? CallResult.success : CallResult.failure,
+        evalResults: {
+          create: validEvalResults,
+        },
+        messages: {
+          create: report.artifact.messages
+            .map((message) => {
+              const baseMessage = {
+                role: message.role as Role,
+                time: message.time,
+                secondsFromStart: message.secondsFromStart,
+              };
+              return {
+                ...baseMessage,
+                // @ts-expect-error
+                message: message.message || "",
+                // @ts-expect-error
+                endTime: message.endTime || 0,
+                // @ts-expect-error
+                duration: message.duration || 0,
+                // @ts-expect-error
+                toolCalls: message.toolCalls || [],
+                // @ts-expect-error
+                result: message.result || "",
+                // @ts-expect-error
+                name: message.name || "",
+              };
+            })
+            .filter((message) => message !== null),
+        },
+      },
+      include: {
+        messages: true,
+        testAgent: true,
+        scenario: { include: { evals: true } },
+        evalResults: { include: { eval: true } },
+      },
+    });
+
+    const updatedTest = await db.test.findUnique({
+      where: { id: test.id },
+      include: {
+        calls: true,
+      },
+    });
+
+    if (
+      agent.enableSlackNotifications &&
+      updatedTest?.calls.every((call) => call.status === CallStatus.completed)
+    ) {
+      try {
+        await sendTestCompletedSlackMessage({
+          userId: agent.ownerId,
+          test: updatedTest,
+        });
+      } catch (error) {
+        // console.error("Error sending test completed slack message", error);
+      }
+    }
+
+    if (userSocket) {
+      userSocket.emit("message", {
+        type: "call-ended",
+        data: { testId: test?.id, callId: call.id, call: updatedCall },
+      });
+    }
+  } catch (error) {
+    console.error("Error handling Vapi call ended for call", call.id, error);
+    return null;
+  }
+};

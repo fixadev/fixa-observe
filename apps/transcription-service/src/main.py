@@ -1,16 +1,16 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 import os
-from vapi_python import OfOneClient
 from utils.logger import logger
 from services.transcribe import transcribe_with_deepgram
 from services.split_channels import split_channels
 from services.create_transcript import create_transcript_from_deepgram
 import asyncio
-
-if os.getenv('ENVIRONMENT') == 'local-staging':
-  from dotenv import load_dotenv
-  load_dotenv()
+from typing import Optional
+import json
+import subprocess
+from dotenv import load_dotenv
+load_dotenv()
 
 app = FastAPI()
 
@@ -22,8 +22,6 @@ class StartWebsocketCallOfOneRequest(BaseModel):
     assistant_id: str
     assistant_overrides: dict
     base_url: str
-
-# comment to redeploy
 
 @app.get("/")
 async def health():
@@ -44,27 +42,42 @@ async def transcribe(request: TranscribeRequest):
 @app.post("/websocket-call-ofone")
 async def start_websocket_call_ofone(request: StartWebsocketCallOfOneRequest):
     try:
-        client_args = {
-            'device_id': request.device_id,
-            'assistant_id': request.assistant_id,
-            'assistant_overrides': request.assistant_overrides,
-            'base_url': request.base_url
+        import httpx
+
+        # Prepare the request payload
+        payload = {
+            "device_id": request.device_id,
+            "assistant_id": request.assistant_id,
+            "assistant_overrides": request.assistant_overrides,
+            "base_url": request.base_url
         }
+
+        # Make the POST request to the kiosk endpoint
+        endpoint = os.getenv('RUN_OFONE_KIOSK_ENDPOINT')
+        if not endpoint:
+            raise HTTPException(status_code=500, detail="RUN_OFONE_KIOSK_ENDPOINT is not set")
         
-        client = OfOneClient(**client_args)
-        call_id = await client.start_call()
-        
-        asyncio.create_task(client.listen_for_check_state_events())
+        async with httpx.AsyncClient() as client:
+            response = await client.post(
+                endpoint,
+                json=payload,
+            )
             
-        return {"callId": call_id}
+            if response.status_code != 200:
+                raise HTTPException(
+                    status_code=response.status_code,
+                    detail=f"Request failed: {response.text}"
+                )
+
+            response_data = response.json()
+            return {
+                "callId": response_data.get("callId")
+            }
+
     except Exception as e:
-        logger.error(f"Error starting OFONE call: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
+
     
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
-
-"""
-curl -X POST http://localhost:8000/transcribe-deepgram -H "Content-Type: application/json" -d '{"stereo_audio_url": "https://storage.vapi.ai/123fdbc6-bb4f-425a-b3bd-3c1165a3b3a7-1733193612534-2f8659f7-0b6d-444c-8e11-6acaa4cbb448-stereo.wav"}'
-"""

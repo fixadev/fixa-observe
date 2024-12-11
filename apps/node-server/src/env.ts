@@ -1,7 +1,6 @@
 import { z } from "zod";
 import dotenv from "dotenv";
 
-console.log("Loading environment variables for", process.env.NODE_ENV);
 dotenv.config({
   path:
     process.env.NODE_ENV === "production"
@@ -25,14 +24,11 @@ const envSchema = z.object({
   AWS_BUCKET_REGION: z.string().min(1),
   AWS_ACCESS_KEY_ID: z.string().min(1),
   AWS_SECRET_ACCESS_KEY: z.string().min(1),
-  DEEPGRAM_API_KEY: z.string().min(1),
   AUDIO_SERVICE_URL: z.string().min(1),
   GCP_CREDENTIALS: z.string().min(1),
   GOOGLE_CLOUD_BUCKET_NAME: z.string().min(1),
   NEXT_BASE_URL: z.string().min(1),
   CLERK_SECRET_KEY: z.string().min(1),
-  DATABASE_URL: z.string().min(1),
-  DIRECT_URL: z.string().min(1),
   SQS_QUEUE_URL: z.string().min(1),
   NODE_SERVER_URL: z.string().min(1),
 });

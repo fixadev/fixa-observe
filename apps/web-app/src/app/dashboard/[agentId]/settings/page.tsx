@@ -26,7 +26,10 @@ import { useRouter } from "next/navigation";
 import { Switch } from "~/components/ui/switch";
 import { useUser } from "@clerk/nextjs";
 import { cn } from "~/lib/utils";
-import { type ExtraProperties, type AgentWithIncludes } from "~/lib/types";
+import {
+  type ExtraProperties,
+  type AgentWithIncludes,
+} from "@repo/types/src/index";
 import { OfOneKioskSettings } from "./_components/OfOneKioskSettings";
 
 export default function AgentSettingsPage({

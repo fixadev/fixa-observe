@@ -8,7 +8,7 @@ import {
 import { Button } from "~/components/ui/button";
 import { Label } from "~/components/ui/label";
 import { api } from "~/trpc/react";
-import { type AgentWithIncludes } from "~/lib/types";
+import { type AgentWithIncludes } from "@repo/types/src/index";
 import { type ReactNode, useEffect, useState } from "react";
 import { useToast } from "~/components/hooks/use-toast";
 import {
@@ -37,7 +37,7 @@ export const GenerateScenariosModal = ({
   const { toast } = useToast();
 
   const { mutate: generateScenarios } =
-    api.agent.generateScenariosFromPrompt.useMutation({
+    api.scenario.generateFromPrompt.useMutation({
       onSuccess: (data) => {
         setAgent({
           ...agent,
