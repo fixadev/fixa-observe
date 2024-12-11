@@ -52,7 +52,7 @@ async def start_websocket_call_ofone(request: StartWebsocketCallOfOneRequest):
             "base_url": request.base_url
         }
 
-        # Make the POST request to Pixa API
+        # Make the POST request to the kiosk endpoint
         endpoint = os.getenv('RUN_OFONE_KIOSK_ENDPOINT')
         if not endpoint:
             raise HTTPException(status_code=500, detail="RUN_OFONE_KIOSK_ENDPOINT is not set")
@@ -66,7 +66,7 @@ async def start_websocket_call_ofone(request: StartWebsocketCallOfOneRequest):
             if response.status_code != 200:
                 raise HTTPException(
                     status_code=response.status_code,
-                    detail=f"Pixa API request failed: {response.text}"
+                    detail=f"Request failed: {response.text}"
                 )
 
             response_data = response.json()
