@@ -42,7 +42,7 @@ RUN find dist -type f
 EXPOSE 3003
 
 # Start the server with NODE_ENV set
-CMD ["sh", "-c", "NODE_ENV=production node dist/apps/node-server/src/index.js"]  
+CMD ["sh", "-c", "NODE_ENV=production echo 'Directory contents:' && ls -R dist && echo 'Starting server...' && node dist/index.js"]
 
 
 
