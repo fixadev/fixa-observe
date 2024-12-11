@@ -17,7 +17,7 @@ RUN apt-get update && apt-get install -y \
     libportaudio2 \
     libsndfile1 \
     ffmpeg \
-    # Install Docker CLI
+    # Install Docker daemon and CLI
     ca-certificates \
     curl \
     gnupg \
@@ -29,14 +29,19 @@ RUN apt-get update && apt-get install -y \
       "$(. /etc/os-release && echo "$VERSION_CODENAME")" stable" | \
       tee /etc/apt/sources.list.d/docker.list > /dev/null \
     && apt-get update \
-    && apt-get install -y docker-ce-cli \
-    # Add docker to PATH
-    && ln -s /usr/bin/docker /usr/local/bin/docker \
+    && apt-get install -y docker-ce docker-ce-cli containerd.io \
     # Clean up
     && rm -rf /var/lib/apt/lists/*
 
 COPY --from=builder /app/.venv .venv/
 COPY . .
 
+# Create start script
+RUN echo '#!/bin/bash\n\
+dockerd &\n\
+sleep 3\n\
+/app/.venv/bin/python src/main.py' > /start.sh && \
+    chmod +x /start.sh
+
 EXPOSE 8000
-CMD ["/app/.venv/bin/python", "src/main.py"]
+CMD ["/start.sh"]
