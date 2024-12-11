@@ -14,7 +14,6 @@ import { PlusIcon } from "@heroicons/react/24/solid";
 import { CreateEditEvaluationDialog } from "./EvalSetDialog";
 import { CreateEditAlertDialog } from "./AlertDialog";
 import { ToggleGroup, ToggleGroupItem } from "~/components/ui/toggle-group";
-import { SuccessRateChart } from "./SuccessRateChart";
 import { useObserveState } from "~/components/hooks/useObserveState";
 
 export function EvalSetsAndAlertsCard({ searchId }: { searchId: string }) {
@@ -146,10 +145,6 @@ function EvalSetCard({
   >;
   setEvalsModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }) {
-  const [toggleValue, setToggleValue] = useState<"all" | "passed" | "failed">(
-    "all",
-  );
-
   return (
     <Card key={evalSet.id} className="flex flex-col gap-4 p-4">
       <CardHeader className="flex flex-row items-center justify-between p-0">
@@ -171,21 +166,16 @@ function EvalSetCard({
         <div className="flex w-full flex-row items-center justify-between gap-2">
           <ToggleGroup
             type="single"
-            value={toggleValue}
             onValueChange={(value: string) => {
-              if (!value) return;
-
               setFilter({
                 ...filter,
-                evalSetToSuccess:
-                  value === "all"
-                    ? undefined
-                    : {
-                        id: evalSet.id,
-                        result: value === "passed",
-                      },
+                evalSetToSuccess: value
+                  ? {
+                      id: evalSet.id,
+                      result: value === "all" ? null : value === "passed",
+                    }
+                  : undefined,
               });
-              setToggleValue(value as "all" | "passed" | "failed");
             }}
             className="text-xs"
           >
