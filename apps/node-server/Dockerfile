@@ -10,8 +10,11 @@ WORKDIR /app
 COPY pnpm-lock.yaml package.json ./
 COPY pnpm-workspace.yaml ./
 
-# Copy the package.json from your server
+# Copy all package.json files
 COPY apps/node-server/package.json ./apps/node-server/
+COPY packages/types/package.json ./packages/types/
+COPY packages/db/package.json ./packages/db/
+COPY packages/services/package.json ./packages/services/
 
 # Install pnpm
 RUN npm install -g pnpm
@@ -19,14 +22,17 @@ RUN npm install -g pnpm
 # Install dependencies
 RUN pnpm install --frozen-lockfile
 
-# Copy source code
+# Copy all source code
+COPY packages ./packages/
 COPY apps/node-server ./apps/node-server/
+
+# Build shared packages first
+RUN cd /app/packages/types && pnpm build
+RUN cd /app/packages/db && pnpm build
+RUN cd /app/packages/services && pnpm build
 
 # Set working directory to the server app
 WORKDIR /app/apps/node-server
-
-# Generate Prisma Client
-RUN npx prisma generate
 
 # Build TypeScript
 RUN pnpm build
@@ -35,4 +41,4 @@ RUN pnpm build
 EXPOSE 3003
 
 # Start the server with NODE_ENV set
-CMD ["sh", "-c", "NODE_ENV=production node dist/index.js"]  
+CMD ["sh", "-c", "NODE_ENV=production node dist/index.js"]
