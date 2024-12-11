@@ -20,6 +20,10 @@ export type EvalResultWithIncludes = Prisma.EvalResultGetPayload<{
     eval: true;
   };
 }>;
+export type AggregateEvalResult = EvalResultWithIncludes & {
+  numSucceeded: number;
+  total: number;
+};
 
 export type CallWithIncludes = Prisma.CallGetPayload<{
   include: {
