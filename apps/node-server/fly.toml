@@ -20,3 +20,11 @@ primary_region = 'sjc'
   size = 'performance-2x'
   memory = '4gb'
   cpus = 2
+
+  [env]
+    HOST = "0.0.0.0"
+    PORT = "3003"
+    AWS_BUCKET_NAME = "newmark"
+    AWS_BUCKET_REGION = "us-east-1"
+    GOOGLE_CLOUD_BUCKET_NAME = "pixa-audio"
+
