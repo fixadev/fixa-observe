@@ -56,6 +56,9 @@ importers:
       dotenv:
         specifier: ^16.4.5
         version: 16.4.5
+      esbuild-wasm:
+        specifier: ^0.23.0
+        version: 0.23.1
       express:
         specifier: ^4.18.2
         version: 4.21.1
@@ -4055,6 +4058,11 @@ packages:
 
   es6-promise@4.2.8:
     resolution: {integrity: sha512-HJDGx5daxeIvxdBxvG2cb9g4tEvwIk3i8+nhX0yGrYmZUzbkdg8QbDevheDB8gd0//uPj4c1EQua8Q+MViT0/w==}
+
+  esbuild-wasm@0.23.1:
+    resolution: {integrity: sha512-L3vn7ctvBrtScRfoB0zG1eOCiV4xYvpLYWfe6PDZuV+iDFDm4Mt3xeLIDllG8cDHQ8clUouK3XekulE+cxgkgw==}
+    engines: {node: '>=18'}
+    hasBin: true
 
   esbuild@0.23.1:
     resolution: {integrity: sha512-VVNz/9Sa0bs5SELtn3f7qhJCDPCF5oMEl5cO9/SSinpE9hbPVvxbd572HH5AKiP7WD8INO53GgfDDhRjkylHEg==}
@@ -11792,6 +11800,8 @@ snapshots:
       is-symbol: 1.0.4
 
   es6-promise@4.2.8: {}
+
+  esbuild-wasm@0.23.1: {}
 
   esbuild@0.23.1:
     optionalDependencies:
