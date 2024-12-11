@@ -68,10 +68,13 @@ export function EvalSetsAndAlertsCard({
                       onValueChange={(value: string) =>
                         setFilter({
                           ...filter,
-                          evalSetToSuccess: {
-                            id: evalSet.id,
-                            result: value === "all" ? null : value === "passed",
-                          },
+                          evalSetToSuccess: value
+                            ? {
+                                id: evalSet.id,
+                                result:
+                                  value === "all" ? null : value === "passed",
+                              }
+                            : undefined,
                         })
                       }
                     >
