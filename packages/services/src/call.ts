@@ -1,4 +1,4 @@
-import { type PrismaClient, type Prisma } from "@repo/db";
+import { Prisma, type PrismaClient } from "@repo/db";
 import { type OrderBy, type Filter } from "@repo/types/src/index";
 import { type CallWithIncludes } from "@repo/types/src/index";
 import { calculateLatencyPercentiles } from "./utils";
@@ -78,6 +78,20 @@ export class CallService {
           ...(Array.isArray(filterWhere.AND) ? filterWhere.AND : []),
           ...metadataFilters,
         ];
+      }
+      if (filter.evalSetToSuccess) {
+        const { id, result } = filter.evalSetToSuccess;
+        if (result === null) {
+          filterWhere.evalSetToSuccess = {
+            path: [id],
+            not: Prisma.JsonNull,
+          };
+        } else {
+          filterWhere.evalSetToSuccess = {
+            path: [id],
+            equals: result,
+          };
+        }
       }
 
       // If customerCallId is set, filter for calls where customerCallId contains the search string (case insensitive)

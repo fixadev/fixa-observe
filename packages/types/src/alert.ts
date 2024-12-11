@@ -7,6 +7,10 @@ export const LatencyAlertSchema = z.object({
     label: z.string(),
     value: z.number(),
   }),
+  // coolDownPeriod: z.object({
+  //   label: z.string(),
+  //   value: z.number(),
+  // }),
   percentile: z.enum(["p50", "p90", "p95"]),
   threshold: z.number(),
   slackNames: z.array(z.string()),

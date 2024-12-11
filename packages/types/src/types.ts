@@ -92,6 +92,11 @@ export const TimeRangeSchema = z.object({
   end: z.number(),
 });
 
+export const evalSetToSuccess = z.object({
+  id: z.string(),
+  result: z.boolean().nullable(),
+});
+
 export type Filter = z.infer<typeof FilterSchema>;
 export const FilterSchema = z.object({
   lookbackPeriod: z.object({
@@ -105,6 +110,7 @@ export const FilterSchema = z.object({
   metadata: z.record(z.string(), z.string().or(z.undefined())).optional(),
   evalSets: z.array(EvalSetWithIncludesSchema).optional(),
   alerts: z.array(AlertWithDetailsSchema).optional(),
+  evalSetToSuccess: z.union([evalSetToSuccess, z.null(), z.undefined()]),
 });
 
 export type SavedSearchWithIncludes = z.infer<typeof SavedSearchWithIncludes>;
