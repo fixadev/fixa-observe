@@ -4,7 +4,8 @@ import {
   AgentWithIncludes,
 } from "@repo/types/src/index";
 import { v4 as uuidv4 } from "uuid";
-import { type PrismaClient, type TestAgent } from "@repo/db/src/index";
+import { type PrismaClient } from "@repo/db/src/index";
+import { type TestAgent } from "@repo/types/src/index";
 
 export class AgentService {
   constructor(private db: PrismaClient) {}
