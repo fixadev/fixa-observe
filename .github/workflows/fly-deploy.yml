@@ -53,6 +53,7 @@ jobs:
       - uses: superfly/flyctl-actions/setup-flyctl@master
       - run: |
           export FLY_APP_NAME=${{ github.ref == 'refs/heads/main' && 'fixa-transcription-service' || 'fixa-transcription-service-staging' }}
+          cd apps/transcription-service
           # Deploy the transcription-service application
           flyctl deploy --remote-only --app $FLY_APP_NAME
         env:
