@@ -72,7 +72,7 @@ export function ObserveStateProvider({
       prevTimeRange.current?.end !== filter.timeRange?.end
     ) {
       prevLookbackPeriod.current = filter.lookbackPeriod.value;
-      prevTimeRange.current = filter.timeRange;
+      prevTimeRange.current = filter.timeRange ?? undefined;
 
       let duration = 0;
       if (filter.timeRange) {
