@@ -40,8 +40,14 @@ WORKDIR /app/apps/node-server
 # Build TypeScript
 RUN pnpm build
 
+# Verify the build output exists
+RUN ls -la dist/
+
+# Set production environment
+ENV NODE_ENV=production
+
 # Expose port
 EXPOSE 3003
 
-# Start the server with NODE_ENV set
-CMD ["sh", "-c", "NODE_ENV=production node dist/index.js"]
+# Start the server
+CMD ["node", "--experimental-specifier-resolution=node", "dist/index.js"]
