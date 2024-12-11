@@ -35,7 +35,7 @@ export function CriteriaBlock({
   }, []);
 
   return (
-    <div className="flex flex-col gap-1 rounded-md border p-2">
+    <div className="flex flex-col gap-1 overflow-hidden rounded-md border p-2">
       <div className="flex justify-between gap-1">
         {isEditingName ? (
           <Input
@@ -100,6 +100,7 @@ export function CriteriaBlock({
         <pre
           className={cn(
             "min-h-7 cursor-pointer rounded-md px-2 py-1 text-muted-foreground hover:bg-muted/60",
+            "whitespace-pre-wrap break-words",
             ibmPlexSans.className,
             criteria.description.length === 0 && "text-muted-foreground/50",
           )}

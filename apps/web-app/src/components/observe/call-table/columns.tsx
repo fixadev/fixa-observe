@@ -342,6 +342,12 @@ const EvalResultCell = ({ call }: { call: CallWithIncludes }) => {
       .length;
   }, [relevantEvalSetIds, call.evalSetToSuccess]);
   const total = useMemo(() => relevantEvalSetIds.length, [relevantEvalSetIds]);
+  const filteredEvalResults = useMemo(() => {
+    return call.evalResults.filter(
+      (evalResult) =>
+        evalResult.eval.evalSetId && evalSetIds.has(evalResult.eval.evalSetId),
+    );
+  }, [call.evalResults, evalSetIds]);
 
   if (total === 0) {
     return <div className="text-sm text-muted-foreground/50">n/a</div>;
@@ -362,7 +368,7 @@ const EvalResultCell = ({ call }: { call: CallWithIncludes }) => {
       </HoverCardTrigger>
       <HoverCardContent align="start" onClick={(e) => e.stopPropagation()}>
         <div className="flex flex-col gap-1">
-          {call.evalResults.map((evalResult) => (
+          {filteredEvalResults.map((evalResult) => (
             <EvalResultChip key={evalResult.id} evalResult={evalResult} />
           ))}
         </div>
