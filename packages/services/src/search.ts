@@ -99,8 +99,16 @@ export class SearchService {
       },
     });
 
-    const parsed = SavedSearchWithIncludes.array().safeParse(savedSearches);
-    return parsed.success ? parsed.data : [];
+    const parsedSearches: SavedSearchWithIncludes[] = [];
+    for (const search of savedSearches) {
+      const parsed = SavedSearchWithIncludes.safeParse(search);
+      if (!parsed.success) {
+        console.log("parsed error", parsed.error);
+      } else {
+        parsedSearches.push(parsed.data);
+      }
+    }
+    return parsedSearches;
   }
 
   async createAlert(
