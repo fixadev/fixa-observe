@@ -1,18 +1,25 @@
 "use client";
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-} from "~/components/ui/dialog";
-import { EvalSetWithIncludes, Filter } from "@repo/types/src/index";
-import { useEffect, useState } from "react";
+import { Dialog, DialogContent, DialogFooter } from "~/components/ui/dialog";
+import { type EvalSetWithIncludes, type Filter } from "@repo/types/src/index";
+import { useCallback, useEffect, useState } from "react";
 import { instantiateEvalSet } from "~/lib/instantiate";
 import { isTempId } from "~/lib/utils";
 import { api } from "~/trpc/react";
 import EvalSetCard from "./EvalSetCard";
 import { Button } from "~/components/ui/button";
 import Spinner from "~/components/Spinner";
+import { TrashIcon } from "@heroicons/react/24/solid";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogFooter,
+  AlertDialogDescription,
+  AlertDialogHeader,
+  AlertDialogContent,
+  AlertDialogTrigger,
+  AlertDialogTitle,
+} from "~/components/ui/alert-dialog";
 
 export function CreateEditEvaluationDialog({
   open,
@@ -67,13 +74,25 @@ export function CreateEditEvaluationDialog({
       },
     });
 
-  const handleSubmit = () => {
+  const { mutate: deleteEvalSet, isPending: isDeleting } =
+    api.eval.deleteSet.useMutation({
+      onSuccess: () => {
+        setFilter({
+          ...filter,
+          evalSets: filter.evalSets?.filter((es) => es.id !== evalSet.id),
+        });
+        voidSelectedEvalSet();
+        setOpen(false);
+      },
+    });
+
+  const handleSubmit = useCallback(() => {
     if (isTempId(evalSet.id)) {
       createEvalSet(evalSet);
     } else {
       updateEvalSet(evalSet);
     }
-  };
+  }, [evalSet, createEvalSet, updateEvalSet]);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -88,13 +107,49 @@ export function CreateEditEvaluationDialog({
           <EvalSetCard evalSet={evalSet} onUpdate={setEvalSet} />
         </div>
         <DialogFooter className="mt-auto">
-          <Button
-            className="mt-4"
-            onClick={handleSubmit}
-            disabled={isCreating || isUpdating}
-          >
-            {isCreating || isUpdating ? <Spinner /> : "save"}
-          </Button>
+          <div className="flex w-full justify-between">
+            {!isTempId(evalSet.id) ? (
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    disabled={isCreating || isUpdating || isDeleting}
+                  >
+                    {isDeleting ? (
+                      <Spinner />
+                    ) : (
+                      <TrashIcon className="size-4" />
+                    )}
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>are you sure?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      this will permanently delete this evaluation.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>cancel</AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={() => deleteEvalSet({ id: evalSet.id })}
+                    >
+                      delete
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            ) : (
+              <div />
+            )}
+            <Button
+              onClick={handleSubmit}
+              disabled={isCreating || isUpdating || isDeleting}
+            >
+              {isCreating || isUpdating ? <Spinner /> : "save"}
+            </Button>
+          </div>
         </DialogFooter>
       </DialogContent>
     </Dialog>

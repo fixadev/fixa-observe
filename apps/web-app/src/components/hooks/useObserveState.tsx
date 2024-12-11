@@ -12,6 +12,7 @@ import {
   type SelectItem,
   type Filter,
   type OrderBy,
+  type SavedSearchWithIncludes,
 } from "@repo/types/src/index";
 export const lookbackPeriods: SelectItem[] = [
   { label: "24 hours", value: 24 * 60 * 60 * 1000 },
@@ -43,11 +44,16 @@ export const defaultFilter: Filter = {
 interface ObserveStateContextType {
   selectedCallId: string | null;
   setSelectedCallId: (callId: string | null) => void;
+
   filter: Filter;
   setFilter: React.Dispatch<React.SetStateAction<Filter>>;
+  resetFilter: () => void;
+
   orderBy: OrderBy | undefined;
   setOrderBy: (orderBy: OrderBy | undefined) => void;
-  resetFilter: () => void;
+
+  savedSearch: SavedSearchWithIncludes | undefined;
+  setSavedSearch: React.Dispatch<React.SetStateAction<SavedSearchWithIncludes | undefined>>;
 }
 
 const ObserveStateContext = createContext<ObserveStateContextType | undefined>(
@@ -63,6 +69,7 @@ export function ObserveStateProvider({
 
   const [filter, setFilter] = useState<Filter>(defaultFilter);
   const [orderBy, setOrderBy] = useState<OrderBy | undefined>();
+  const [savedSearch, setSavedSearch] = useState<SavedSearchWithIncludes | undefined>();
 
   const resetFilter = useCallback(() => {
     setFilter(defaultFilter);
@@ -104,9 +111,11 @@ export function ObserveStateProvider({
         setSelectedCallId,
         filter,
         setFilter,
+        resetFilter,
         orderBy,
         setOrderBy,
-        resetFilter,
+        savedSearch,
+        setSavedSearch,
       }}
     >
       {children}

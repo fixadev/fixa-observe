@@ -238,7 +238,7 @@ model Eval {
   evalOverrides EvalOverride[]
 
   deleted   Boolean  @default(false)
-  EvalSet   EvalSet? @relation(fields: [evalSetId], references: [id])
+  evalSet   EvalSet? @relation(fields: [evalSetId], references: [id])
   evalSetId String?
 }
 

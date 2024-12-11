@@ -14,8 +14,12 @@ import { PlusIcon } from "@heroicons/react/24/solid";
 import { CreateEditEvaluationDialog } from "./EvalSetDialog";
 import { CreateEditAlertDialog } from "./AlertDialog";
 import { ToggleGroup, ToggleGroupItem } from "~/components/ui/toggle-group";
-import { SuccessRateChart } from "./SuccessRateChart";
 import { useObserveState } from "~/components/hooks/useObserveState";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "~/components/ui/tooltip";
 
 export function EvalSetsAndAlertsCard({ searchId }: { searchId: string }) {
   const { filter, setFilter } = useObserveState();
@@ -39,15 +43,22 @@ export function EvalSetsAndAlertsCard({ searchId }: { searchId: string }) {
         >
           evaluations
         </p>
-        <p
-          onClick={() => setMode("alerts")}
-          className={cn(
-            "cursor-pointer",
-            mode === "alerts" ? "text-primary" : "text-muted-foreground",
-          )}
-        >
-          alerts
-        </p>
+        <Tooltip>
+          <TooltipTrigger>
+            <p
+              // onClick={() => setMode("alerts")}
+              className={cn(
+                "cursor-not-allowed",
+                mode === "alerts" ? "text-primary" : "text-muted-foreground",
+              )}
+            >
+              alerts
+            </p>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>coming soon!</p>
+          </TooltipContent>
+        </Tooltip>
       </div>
       <CardContent className="flex-1 overflow-y-auto">
         {mode === "evaluations" ? (
@@ -147,21 +158,27 @@ function EvalSetCard({
   setEvalsModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }) {
   return (
-    <Card
-      key={evalSet.id}
-      className="flex flex-col gap-4 p-4 hover:cursor-pointer hover:bg-muted/40"
-    >
-      <CardHeader className="p-0">
+    <Card key={evalSet.id} className="flex flex-col gap-2 p-4">
+      <CardHeader className="flex flex-row items-center justify-between p-0">
         <CardTitle className="p-0 text-sm font-medium">
           {evalSet.name}
         </CardTitle>
+        <Button
+          onClick={() => {
+            setSelectedEvalSet(evalSet);
+            setEvalsModalOpen(true);
+          }}
+          variant="outline"
+        >
+          edit
+        </Button>
       </CardHeader>
       <CardContent className="flex flex-col items-center justify-between gap-2 p-0">
-        <SuccessRateChart />
+        {/* <SuccessRateChart /> */}
         <div className="flex w-full flex-row items-center justify-between gap-2">
           <ToggleGroup
             type="single"
-            onValueChange={(value: string) =>
+            onValueChange={(value: string) => {
               setFilter({
                 ...filter,
                 evalSetToSuccess: value
@@ -170,22 +187,29 @@ function EvalSetCard({
                       result: value === "all" ? null : value === "passed",
                     }
                   : undefined,
-              })
-            }
-          >
-            <ToggleGroupItem value="all">all</ToggleGroupItem>
-            <ToggleGroupItem value="passed">passed</ToggleGroupItem>
-            <ToggleGroupItem value="failed">failed</ToggleGroupItem>
-          </ToggleGroup>
-          <Button
-            onClick={() => {
-              setSelectedEvalSet(evalSet);
-              setEvalsModalOpen(true);
+              });
             }}
-            variant="outline"
+            className="text-xs"
           >
-            edit
-          </Button>
+            <ToggleGroupItem
+              value="all"
+              className="text-xs data-[state=off]:text-muted-foreground"
+            >
+              all
+            </ToggleGroupItem>
+            <ToggleGroupItem
+              value="passed"
+              className="text-xs data-[state=off]:text-muted-foreground"
+            >
+              passed
+            </ToggleGroupItem>
+            <ToggleGroupItem
+              value="failed"
+              className="text-xs data-[state=off]:text-muted-foreground"
+            >
+              failed
+            </ToggleGroupItem>
+          </ToggleGroup>
         </div>
       </CardContent>
     </Card>

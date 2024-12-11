@@ -19,14 +19,21 @@ export default function SavedSearchPage({
   params: { searchId: string };
   savedSearch?: SavedSearchWithIncludes;
 }) {
-  const { selectedCallId, setSelectedCallId, filter, setFilter, orderBy } =
-    useObserveState();
+  const {
+    selectedCallId,
+    setSelectedCallId,
+    filter,
+    setFilter,
+    orderBy,
+    setSavedSearch,
+  } = useObserveState();
 
   useEffect(() => {
     if (savedSearch) {
       setFilter(savedSearch);
+      setSavedSearch(savedSearch);
     }
-  }, [savedSearch, setFilter]);
+  }, [savedSearch, setFilter, setSavedSearch]);
 
   const containerRef = useRef<HTMLDivElement>(null);
 
