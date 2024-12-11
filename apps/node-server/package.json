@@ -1,18 +1,23 @@
 {
   "name": "node-server",
   "version": "1.0.0",
+  "type": "module",
   "main": "dist/index.js",
   "scripts": {
-    "start": "node dist/index.ts",
-    "dev": "nodemon src/index.ts",
+    "start": "node dist/index.js",
+    "dev": "nodemon --exec tsx src/index.ts",
     "build": "tsc"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.556.0",
     "@aws-sdk/client-sqs": "^3.699.0",
+    "@fixa/types": "link:/Users/oliverwendell-braly/pixa/pixa-observe/shared/types",
     "@google-cloud/storage": "^7.13.0",
     "@google-cloud/vertexai": "^1.7.0",
     "@prisma/client": "^5.21.1",
+    "@repo/db": "workspace:*",
+    "@repo/services": "workspace:*",
+    "@repo/types": "workspace:*",
     "@t3-oss/env-core": "^0.11.1",
     "@vapi-ai/server-sdk": "^0.1.0",
     "axios": "^1.7.7",
@@ -20,7 +25,7 @@
     "express": "^4.18.2",
     "openai": "^4.67.1",
     "socket.io": "^4.7.4",
-    "ts-node": "^10.9.2",
+    "types": "link:shared/types",
     "uuid": "^10.0.0",
     "zod": "^3.23.3"
   },
@@ -29,7 +34,9 @@
     "@types/node": "^20.11.16",
     "@types/uuid": "^10.0.0",
     "nodemon": "^3.0.3",
+    "ts-node": "^10.9.2",
     "ts-node-dev": "^2.0.0",
+    "tsx": "^4.19.2",
     "typescript": "^5.3.3"
   }
 }

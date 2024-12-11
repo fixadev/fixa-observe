@@ -8,7 +8,7 @@ import { CallResult, CallStatus } from "@prisma/client";
 import { formatDistanceToNow } from "date-fns";
 import { useMemo } from "react";
 import { ibmPlexMono } from "~/app/fonts";
-import { type TestWithCalls } from "~/lib/types";
+import { type TestWithCalls } from "@repo/types/src/index";
 import { cn, didCallSucceed } from "~/lib/utils";
 import Spinner from "../Spinner";
 

@@ -1,18 +1,21 @@
-import { AgentService } from "./agent";
-import { db } from "../db";
+import { AgentService } from "@repo/services/src/agent";
 import { CallStatus, type PrismaClient } from "@prisma/client";
 import { initiateVapiCall, queueOfOneKioskCalls } from "../helpers/vapiHelpers";
-import { type TestAgent } from "prisma/generated/zod";
-import { type OfOneKioskProperties, type TestWithIncludes } from "~/lib/types";
+import { type TestAgent } from "@repo/types/src/generated";
+import {
+  type OfOneKioskProperties,
+  type TestWithIncludes,
+} from "@repo/types/src/index";
 import { randomUUID } from "crypto";
 
-const agentServiceInstance = new AgentService(db);
-
 export class TestService {
-  constructor(private db: PrismaClient) {}
+  constructor(private db: PrismaClient) {
+    this.agentServiceInstance = new AgentService(this.db);
+  }
+  agentServiceInstance: AgentService;
 
   async get(id: string): Promise<TestWithIncludes | null> {
-    return await db.test.findUnique({
+    return await this.db.test.findUnique({
       where: {
         id,
       },
@@ -45,7 +48,7 @@ export class TestService {
   }
 
   async getAll(agentId: string) {
-    return await db.test.findMany({
+    return await this.db.test.findMany({
       where: {
         agentId,
       },
@@ -59,7 +62,7 @@ export class TestService {
   }
 
   async getStatus(testId: string) {
-    const test = await db.test.findUnique({
+    const test = await this.db.test.findUnique({
       where: { id: testId },
       select: {
         calls: {
@@ -96,14 +99,14 @@ export class TestService {
     testAgentIds?: string[];
     runFromApi?: boolean;
   }) {
-    const agent = await agentServiceInstance.getAgent(agentId);
+    const agent = await this.agentServiceInstance.getAgent(agentId);
     if (!agent) {
       throw new Error("Agent not found");
     }
 
     let enabledTestAgents: TestAgent[] = [];
     if (testAgentIds && testAgentIds.length > 0) {
-      const testAgents = await agentServiceInstance.getTestAgents(
+      const testAgents = await this.agentServiceInstance.getTestAgents(
         agent.ownerId,
       );
       enabledTestAgents = testAgents.filter((testAgent) =>
@@ -149,7 +152,7 @@ export class TestService {
       }));
 
       // create calls first and then queue them
-      const test = await db.test.create({
+      const test = await this.db.test.create({
         data: {
           agentId,
           runFromApi,
@@ -204,7 +207,7 @@ export class TestService {
         vapiCallId: string;
       }>[];
 
-      return await db.test.create({
+      return await this.db.test.create({
         data: {
           agentId,
           runFromApi,
@@ -230,7 +233,7 @@ export class TestService {
   }
 
   async getLastTest(agentId: string) {
-    return await db.test.findFirst({
+    return await this.db.test.findFirst({
       where: { agentId },
       orderBy: { createdAt: "desc" },
     });

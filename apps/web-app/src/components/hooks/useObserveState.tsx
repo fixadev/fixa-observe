@@ -1,7 +1,11 @@
 "use client";
 
 import { createContext, useContext, useEffect, useRef, useState } from "react";
-import { type SelectItem, type Filter, type OrderBy } from "~/lib/types";
+import {
+  type SelectItem,
+  type Filter,
+  type OrderBy,
+} from "@repo/types/src/index";
 export const lookbackPeriods: SelectItem[] = [
   { label: "24 hours", value: 24 * 60 * 60 * 1000 },
   { label: "2 days", value: 2 * 24 * 60 * 60 * 1000 },
@@ -31,6 +35,7 @@ interface ObserveStateContextType {
   setFilter: React.Dispatch<React.SetStateAction<Filter>>;
   orderBy: OrderBy | undefined;
   setOrderBy: (orderBy: OrderBy | undefined) => void;
+  resetFilter: () => void;
 }
 
 const ObserveStateContext = createContext<ObserveStateContextType | undefined>(
@@ -43,11 +48,20 @@ export function ObserveStateProvider({
   children: React.ReactNode;
 }) {
   const [selectedCallId, setSelectedCallId] = useState<string | null>(null);
-  const [filter, setFilter] = useState<Filter>({
+
+  const defaultFilter: Filter = {
     lookbackPeriod: lookbackPeriods[1]!,
     chartPeriod: chartPeriods[2]!.value,
-  });
+  };
+
+  const [filter, setFilter] = useState<Filter>(defaultFilter);
   const [orderBy, setOrderBy] = useState<OrderBy | undefined>();
+
+  const resetFilter = () => {
+    if (JSON.stringify(filter) !== JSON.stringify(defaultFilter)) {
+      setFilter(defaultFilter);
+    }
+  };
 
   const prevLookbackPeriod = useRef<number>(filter.lookbackPeriod.value);
   const prevTimeRange = useRef<{ start: number; end: number }>();
@@ -58,7 +72,7 @@ export function ObserveStateProvider({
       prevTimeRange.current?.end !== filter.timeRange?.end
     ) {
       prevLookbackPeriod.current = filter.lookbackPeriod.value;
-      prevTimeRange.current = filter.timeRange;
+      prevTimeRange.current = filter.timeRange ?? undefined;
 
       let duration = 0;
       if (filter.timeRange) {
@@ -87,6 +101,7 @@ export function ObserveStateProvider({
         setFilter,
         orderBy,
         setOrderBy,
+        resetFilter,
       }}
     >
       {children}
