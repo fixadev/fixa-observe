@@ -1,4 +1,5 @@
-const { build } = require('esbuild');
+const { build } = require('esbuild-wasm');
+
 const { copy } = require('esbuild-plugin-copy');
 
 build({
@@ -15,4 +16,4 @@ build({
       },
     }),
   ],
-});
+}).catch(() => process.exit(1));
