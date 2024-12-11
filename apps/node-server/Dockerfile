@@ -11,6 +11,11 @@ RUN npm install -g pnpm
 RUN pnpm install --frozen-lockfile
 
 RUN pnpm --filter @repo/db generate
+
+RUN mkdir -p /usr/node_modules/.pnpm/@prisma+client@5.21.1_prisma@5.21.1/node_modules/.prisma/client
+RUN cp node_modules/.pnpm/@prisma+client@5.21.1_prisma@5.21.1/node_modules/.prisma/client/libquery_engine-debian-openssl-3.0.x.so.node \
+  /usr/node_modules/.pnpm/@prisma+client@5.21.1_prisma@5.21.1/node_modules/.prisma/client/
+
 RUN pnpm run build --filter node-server 
 
 # RUN pnpm deploy --filter=node-server --prod /prod/node-server
