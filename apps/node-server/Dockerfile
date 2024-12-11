@@ -10,7 +10,20 @@ COPY . .
 RUN npm install -g pnpm
 RUN pnpm install --frozen-lockfile
 
-RUN pnpm --filter @repo/db generate
+ARG DATABASE_URL=""
+ARG DIRECT_URL=""
+ARG TEST_SECRET=""
+
+ENV DATABASE_URL=${DATABASE_URL}
+ENV DIRECT_URL=${DIRECT_URL}
+ENV TEST_SECRET=${TEST_SECRET}
+
+RUN echo "DATABASE_URL: ${DATABASE_URL}"
+RUN echo "DIRECT_URL: ${DIRECT_URL}"
+RUN echo "TEST_SECRET: ${TEST_SECRET}"
+
+
+RUN pnpm --filter @repo/db db:generate
 
 RUN mkdir -p /usr/node_modules/.pnpm/@prisma+client@5.21.1_prisma@5.21.1/node_modules/.prisma/client
 RUN cp node_modules/.pnpm/@prisma+client@5.21.1_prisma@5.21.1/node_modules/.prisma/client/libquery_engine-debian-openssl-3.0.x.so.node \

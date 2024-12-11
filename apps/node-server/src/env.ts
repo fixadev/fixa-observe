@@ -31,6 +31,8 @@ const envSchema = z.object({
   CLERK_SECRET_KEY: z.string().min(1),
   SQS_QUEUE_URL: z.string().min(1),
   NODE_SERVER_URL: z.string().min(1),
+  DATABASE_URL: z.string().min(1),
+  DIRECT_URL: z.string().min(1),
 });
 
 // Validate and transform environment variables

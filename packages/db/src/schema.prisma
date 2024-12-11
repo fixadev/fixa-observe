@@ -16,8 +16,8 @@ generator zod {
 
 datasource db {
   provider  = "postgresql"
-  url       = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
+  url       = "postgresql://postgres.nkudjvfueumihtrpxxdu:jzG2xXyN45zP!ha@aws-0-us-west-1.pooler.supabase.com:6543/postgres?pgbouncer=true&connection_limit=1"
+  directUrl = "postgresql://postgres.nkudjvfueumihtrpxxdu:jzG2xXyN45zP!ha@aws-0-us-west-1.pooler.supabase.com:5432/postgres"
 }
 
 // model User {
