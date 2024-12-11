@@ -1,7 +1,6 @@
 {
   "name": "@repo/db",
-  "version": "0.0.0",
-  "private": true,
+  "version": "0.0.0", 
   "type": "module",
   "scripts": {
     "generate": "prisma generate --schema ./src/schema.prisma",

@@ -1,7 +1,6 @@
 import { z } from "zod";
 import dotenv from "dotenv";
 
-console.log("Loading environment variables for", process.env.NODE_ENV);
 dotenv.config({
   path:
     process.env.NODE_ENV === "production"
