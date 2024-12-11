@@ -7,4 +7,7 @@ build({
   format: 'cjs',
   sourcemap: true,
   outfile: 'dist/index.js',
-}).catch(() => process.exit(1));
+}).catch((error) => {
+  console.error(error);
+  process.exit(1);
+});

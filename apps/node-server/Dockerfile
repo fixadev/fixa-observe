@@ -5,19 +5,17 @@ RUN apt-get update -y && apt-get install -y openssl ffmpeg
 
 WORKDIR /usr/src/app
 
-# Copy package files first
-COPY package.json pnpm-lock.yaml ./
-COPY packages/db/package.json ./packages/db/
-COPY packages/types/package.json ./packages/types/
-COPY packages/services/package.json ./packages/services/
-COPY apps/node-server/package.json ./apps/node-server/
-
-RUN npm install -g pnpm esbuild
-RUN pnpm install --frozen-lockfile
-
 COPY . . 
 
+RUN npm install -g pnpm
+RUN pnpm install --frozen-lockfile
+
 RUN pnpm --filter @repo/db generate
+
+RUN mkdir -p /usr/node_modules/.pnpm/@prisma+client@5.21.1_prisma@5.21.1/node_modules/.prisma/client
+RUN cp node_modules/.pnpm/@prisma+client@5.21.1_prisma@5.21.1/node_modules/.prisma/client/libquery_engine-debian-openssl-3.0.x.so.node \
+  /usr/node_modules/.pnpm/@prisma+client@5.21.1_prisma@5.21.1/node_modules/.prisma/client/
+
 RUN pnpm run build --filter node-server 
 
 # RUN pnpm deploy --filter=node-server --prod /prod/node-server
