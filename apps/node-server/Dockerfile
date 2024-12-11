@@ -7,7 +7,7 @@ RUN apt-get update -y && apt-get install -y openssl ffmpeg
 WORKDIR /app
 
 # Copy root workspace files
-COPY pnpm-lock.yaml package.json ./
+COPY pnpm-lock.yaml package.json tsconfig.json ./
 COPY pnpm-workspace.yaml ./
 
 # Copy all package.json files
@@ -22,16 +22,16 @@ RUN npm install -g pnpm
 # Install dependencies
 RUN pnpm install --frozen-lockfile
 
-# Copy all source code
+# Copy all source code and config files
 COPY packages ./packages/
 COPY apps/node-server ./apps/node-server/
+COPY packages/typescript-config ./packages/typescript-config/
 
 # Generate Prisma Client (after source code is available)
 RUN cd /app/packages/db && pnpm generate
 
 # Build shared packages first
 RUN cd /app/packages/types && pnpm build
-RUN cd /app/packages/db && pnpm generate
 RUN cd /app/packages/services && pnpm build
 
 # Set working directory to the server app
