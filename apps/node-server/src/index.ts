@@ -133,8 +133,13 @@ app.post("/message/:userId", (req: Request, res: Response) => {
 });
 
 app.get("/db", async (_, res: Response) => {
-  const result = await db.testAgent.findMany();
-  res.json({ result });
+  try {
+    const result = await db.testAgent.findMany();
+    res.json({ result });
+  } catch (error) {
+    console.error("Error fetching data from database", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
 });
 
 // Server setup with unified cleanup
