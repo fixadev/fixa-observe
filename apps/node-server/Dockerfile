@@ -26,6 +26,9 @@ RUN pnpm install --frozen-lockfile
 COPY packages ./packages/
 COPY apps/node-server ./apps/node-server/
 
+# Generate Prisma Client (after source code is available)
+RUN cd /app/packages/db && pnpm generate
+
 # Build shared packages first
 RUN cd /app/packages/types && pnpm build
 RUN cd /app/packages/db && pnpm build
