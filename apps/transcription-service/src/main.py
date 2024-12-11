@@ -42,41 +42,37 @@ async def transcribe(request: TranscribeRequest):
 @app.post("/websocket-call-ofone")
 async def start_websocket_call_ofone(request: StartWebsocketCallOfOneRequest):
     try:
-        # Convert assistant_overrides to JSON string if provided
-        assistant_overrides_str = json.dumps(request.assistant_overrides) if request.assistant_overrides else None
+        import httpx
 
-        # Prepare the docker command
-        cmd = [
-            "docker", "run", "-e", f"VAPI_PUBLIC_KEY={os.getenv('VAPI_PUBLIC_KEY')}", "-it", "selenium-agent",
-            "--device-id", request.device_id,
-            "--assistant-id", request.assistant_id,
-            "--base-url", request.base_url
-        ]
-
-        # Add assistant_overrides if provided
-        if assistant_overrides_str:
-            cmd.extend(["--assistant-overrides", assistant_overrides_str])
-
-        # Run the docker container
-        process = subprocess.Popen(
-            cmd,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            text=True
-        )
-
-        # Get the call ID from stdout
-        call_id = None
-        if process.stdout:
-            for line in process.stdout:
-                print(line.strip())
-                if line.startswith("VAPI_CALL_ID="):
-                    call_id = line.strip().split("=")[1]
-                    break
-
-        return {
-            "callId": call_id,
+        # Prepare the request payload
+        payload = {
+            "deviceId": request.device_id,
+            "assistantId": request.assistant_id,
+            "assistantOverrides": request.assistant_overrides,
+            "baseUrl": request.base_url
         }
+
+        # Make the POST request to Pixa API
+        endpoint = os.getenv('RUN_OFONE_KIOSK_ENDPOINT')
+        if not endpoint:
+            raise HTTPException(status_code=500, detail="RUN_OFONE_KIOSK_ENDPOINT is not set")
+        
+        async with httpx.AsyncClient() as client:
+            response = await client.post(
+                endpoint,
+                json=payload,
+            )
+            
+            if response.status_code != 200:
+                raise HTTPException(
+                    status_code=response.status_code,
+                    detail=f"Pixa API request failed: {response.text}"
+                )
+
+            response_data = response.json()
+            return {
+                "callId": response_data.get("callId")
+            }
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -84,16 +80,4 @@ async def start_websocket_call_ofone(request: StartWebsocketCallOfOneRequest):
     
 if __name__ == "__main__":
     import uvicorn
-    import platform
-
-    # Build the selenium docker image before starting the server, but only on Linux
-    if platform.system().lower() == "linux":
-        subprocess.run(
-            ["bash", "./src/services/selenium/build_docker_image.sh"],
-            check=True,
-        )
-
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
-
-# docker build -t transcription-service .
-# docker run -p 8000:8000 -v /var/run/docker.sock:/var/run/docker.sock -it transcription-service
