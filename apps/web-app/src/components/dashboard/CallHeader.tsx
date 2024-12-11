@@ -17,6 +17,7 @@ import { CallStatus } from "@prisma/client";
 import { formatDistanceToNow } from "date-fns";
 import Link from "next/link";
 import { useCallback, useMemo } from "react";
+import { CopyText } from "../CopyText";
 
 interface CallHeaderProps {
   call: CallWithIncludes;
@@ -164,6 +165,16 @@ export function TestCallHeader({
             </div>
           ))}
         </div>
+        {call.ofOneDeviceId && (
+          <div className="flex flex-row items-center gap-2 text-xs text-muted-foreground">
+            <div className="shrink-0 text-sm">device ID: </div>
+            <CopyText
+              className="w-fit p-1"
+              size="xs"
+              text={call.ofOneDeviceId}
+            />
+          </div>
+        )}
       </div>
     </div>
   );

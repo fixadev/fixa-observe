@@ -70,7 +70,6 @@ export async function scheduleOfOneCalls(
     }));
   } catch (error) {
     console.error("Error scheduling OFONE calls", error);
-    throw error;
   }
 }
 
@@ -84,6 +83,13 @@ export function setDeviceAvailable(
   userSocket?: Socket,
 ): void {
   deviceUsageMap.set(deviceId, false);
+
+  console.log(
+    "========================Setting device available=========================",
+    deviceId,
+  );
+  console.log("deviceUsageMap", deviceUsageMap);
+  console.log("callQueue", callQueue);
 
   // Try to process queued calls when a device becomes available
   if (callQueue.length > 0) {
@@ -116,6 +122,8 @@ export async function startCall(
       deviceId,
       assistantId,
     );
+    console.log("deviceUsageMap", deviceUsageMap);
+    console.log("callQueue", callQueue);
     const { data } = await axios.post<{ callId: string }>(
       `${env.AUDIO_SERVICE_URL}/websocket-call-ofone`,
       {
@@ -159,6 +167,5 @@ export async function startCall(
     });
   } catch (error) {
     console.error("Error starting OFONE call", error);
-    throw error;
   }
 }
