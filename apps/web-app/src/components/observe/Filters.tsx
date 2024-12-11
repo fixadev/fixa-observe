@@ -255,7 +255,7 @@ export default function Filters({
               </SelectContent>
             </Select>
           ))}
-          <Button
+          {/* <Button
             variant="default"
             className="gap-2"
             onClick={() => {
@@ -268,7 +268,7 @@ export default function Filters({
               <DocumentIcon className="size-4 shrink-0" />
             )}
             save search
-          </Button>
+          </Button> */}
         </div>
         <Button variant="outline" onClick={refetch}>
           refresh
