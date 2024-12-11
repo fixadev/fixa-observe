@@ -10,6 +10,10 @@ COPY . .
 RUN npm install -g pnpm
 RUN pnpm install --frozen-lockfile
 
+RUN echo "TEST_SECRET: $(cat /run/secrets/TEST_SECRET)"
+RUN echo "CONTENTS OF run/secrets"
+RUN ls -l /run/secrets
+
 RUN --mount=type=secret,id=DATABASE_URL \
   DATABASE_URL="$(cat /run/secrets/DATABASE_URL)" \
   --mount=type=secret,id=DATABASE_SECRET \

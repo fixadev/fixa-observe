@@ -23,6 +23,7 @@ jobs:
             --app $FLY_APP_NAME \
             --dockerfile apps/node-server/Dockerfile \
             --config apps/node-server/fly.toml \
+            --build-secret TEST_SECRET=test \
             --build-secret DATABASE_URL="$DATABASE_URL" \
             --build-secret DIRECT_URL="$DIRECT_URL"
         env:
