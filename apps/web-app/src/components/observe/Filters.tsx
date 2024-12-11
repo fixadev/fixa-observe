@@ -356,6 +356,7 @@ function SaveSearchButton({
   const [open, setOpen] = useState(false);
   const [state, setState] = useState<"create-or-update" | "create">("create");
   const { filter } = useObserveState();
+  const utils = api.useUtils();
 
   const reset = useCallback(() => {
     setName("");
@@ -381,8 +382,8 @@ function SaveSearchButton({
 
   const { mutate: saveSearch, isPending: isSaving } =
     api.search.save.useMutation({
-      onSuccess: (data) => {
-        // TODO: refetch saved searches
+      onSuccess: async (data) => {
+        void utils.search.getAll.invalidate();
         setOpen(false);
         router.push("/observe/saved/" + data.id);
       },
@@ -391,7 +392,7 @@ function SaveSearchButton({
   const { mutate: updateSavedSearch, isPending: isUpdating } =
     api.search.update.useMutation({
       onSuccess: () => {
-        // TODO: refetch saved searches
+        void utils.search.getAll.invalidate();
         setOpen(false);
       },
     });

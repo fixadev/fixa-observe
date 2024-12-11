@@ -97,6 +97,9 @@ export class SearchService {
       where: {
         ownerId: userId,
       },
+      orderBy: {
+        createdAt: "asc",
+      },
     });
 
     const parsedSearches: SavedSearchWithIncludes[] = [];
