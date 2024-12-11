@@ -95,7 +95,7 @@ export default function ObserveSidebar() {
                               <Button
                                 variant="ghost"
                                 size="icon"
-                                className="absolute right-0 size-6 opacity-0 transition-opacity duration-200 hover:bg-gray-300 group-hover/saved-search-item:opacity-100"
+                                className="absolute right-0 size-6 text-muted-foreground opacity-0 duration-200 hover:bg-gray-200 group-hover/saved-search-item:opacity-100"
                                 onClick={(e) => {
                                   e.preventDefault();
                                   console.log("DELETE", search.id);

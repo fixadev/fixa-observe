@@ -38,7 +38,7 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { Check, ChevronsUpDown } from "lucide-react";
 import { cn } from "~/lib/utils";
-import { SidebarTrigger } from "../ui/sidebar";
+import { SidebarTrigger, useSidebar } from "../ui/sidebar";
 import { useRouter } from "next/navigation";
 import { InputWithLabel } from "~/app/_components/InputWithLabel";
 import { FilterSchema, type Filter } from "@repo/types/src";
@@ -127,9 +127,15 @@ export default function Filters({
     [filter, saveSearch],
   );
 
+  const { open: sidebarOpen } = useSidebar();
   return (
     <>
-      <div className="fixed top-0 z-50 flex h-14 items-center justify-between gap-2 border-b bg-background p-4 sm:w-full">
+      <div
+        className={cn(
+          "fixed top-0 z-50 flex h-14 items-center justify-between gap-2 border-b bg-background p-4 transition-[width] duration-200 ease-linear",
+          sidebarOpen ? "w-[calc(100%-var(--sidebar-width))]" : "w-full",
+        )}
+      >
         <div className="flex items-center gap-2">
           <SidebarTrigger className="shrink-0" />
           <div className="flex w-40">
