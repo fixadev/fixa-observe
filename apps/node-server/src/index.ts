@@ -15,8 +15,6 @@ import { authenticateRequest } from "./middlewares/auth";
 import { getContext } from "./middlewares/getContext";
 import { validateUploadCallParams } from "./middlewares/validateParams";
 
-// comment to redeploy
-
 const app = express();
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
