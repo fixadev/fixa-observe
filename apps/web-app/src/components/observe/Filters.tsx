@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Button } from "../ui/button";
 import {
   Select,
@@ -41,16 +41,22 @@ import { cn } from "~/lib/utils";
 import { SidebarTrigger, useSidebar } from "../ui/sidebar";
 import { useRouter } from "next/navigation";
 import { InputWithLabel } from "~/app/_components/InputWithLabel";
-import { FilterSchema, type Filter } from "@repo/types/src";
+import {
+  FilterSchema,
+  type SavedSearch,
+  type Filter,
+  type SavedSearchWithIncludes,
+} from "@repo/types/src";
 
 export default function Filters({
   refetch,
   originalFilter = defaultFilter,
+  savedSearch,
 }: {
   refetch: () => void;
   originalFilter?: Filter;
+  savedSearch?: SavedSearchWithIncludes;
 }) {
-  const router = useRouter();
   const { data: agentIds } = api._call.getAgentIds.useQuery();
   const { data: _agents, refetch: refetchAgents } =
     api.agent.getAllFor11x.useQuery();
@@ -94,38 +100,14 @@ export default function Filters({
 
   const [open, setOpen] = useState(false);
 
-  const { mutate: saveSearch, isPending: isSaving } =
-    api.search.save.useMutation({
-      onSuccess: (data) => {
-        setSaveModalOpen(false);
-        router.push("/observe/saved/" + data.id);
-      },
-    });
-
   const [saveModalOpen, setSaveModalOpen] = useState(false);
   const [editAgentModalOpen, setEditAgentModalOpen] = useState(false);
 
-  const showSaveSearchButton = useMemo(() => {
+  const hasFilterChanged = useMemo(() => {
     const _originalFilter = FilterSchema.parse(originalFilter);
     const _filter = FilterSchema.parse(filter);
     return JSON.stringify(_filter) !== JSON.stringify(_originalFilter);
   }, [filter, originalFilter]);
-
-  const handleSaveSearch = useCallback(
-    (name: string) => {
-      console.log("SAVING", name);
-      console.log("FILTER", filter);
-      saveSearch({
-        filter: {
-          ...filter,
-          timeRange: undefined,
-          customerCallId: undefined,
-        },
-        name,
-      });
-    },
-    [filter, saveSearch],
-  );
 
   const { open: sidebarOpen } = useSidebar();
   return (
@@ -267,30 +249,14 @@ export default function Filters({
               </SelectContent>
             </Select>
           ))}
-          {showSaveSearchButton && (
-            <Button
-              variant="ghost"
-              className="gap-2"
-              disabled={isSaving}
-              onClick={() => {
-                setSaveModalOpen(true);
-              }}
-            >
-              {isSaving && <Spinner />}
-              save search
-            </Button>
-          )}
         </div>
-        <Button variant="outline" onClick={refetch}>
-          refresh
-        </Button>
+        <div className="flex items-center gap-2">
+          {hasFilterChanged && <SaveSearchButton savedSearch={savedSearch} />}
+          <Button variant="outline" onClick={refetch}>
+            refresh
+          </Button>
+        </div>
       </div>
-      <SaveSearchDialog
-        open={saveModalOpen}
-        setOpen={setSaveModalOpen}
-        saveSearch={handleSaveSearch}
-        isSaving={isSaving}
-      />
       <EditAgentDialog
         open={editAgentModalOpen}
         setOpen={setEditAgentModalOpen}
@@ -383,44 +349,122 @@ function EditAgentDialog({
   );
 }
 
-function SaveSearchDialog({
-  open,
-  setOpen,
-  saveSearch,
-  isSaving,
+function SaveSearchButton({
+  savedSearch,
 }: {
-  open: boolean;
-  setOpen: (open: boolean) => void;
-  saveSearch: (name: string) => void;
-  isSaving: boolean;
+  savedSearch?: SavedSearchWithIncludes;
 }) {
+  const router = useRouter();
+  const [open, setOpen] = useState(false);
+  const [state, setState] = useState<"create-or-update" | "create">("create");
+  const { filter } = useObserveState();
+
+  const reset = useCallback(() => {
+    setName("");
+    if (savedSearch) {
+      setState("create-or-update");
+    } else {
+      setState("create");
+    }
+  }, [savedSearch]);
+
+  useEffect(() => {
+    reset();
+  }, [reset]);
+  useEffect(() => {
+    if (!open) {
+      setTimeout(() => {
+        reset();
+      }, 200);
+    }
+  }, [open, reset]);
+
   const [name, setName] = useState("");
 
-  const handleSubmit = () => {
-    saveSearch(name);
-  };
-  return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent className="flex h-[200px] min-w-[600px] flex-col">
-        <DialogHeader>
-          <DialogTitle>save search</DialogTitle>
-        </DialogHeader>
+  const { mutate: saveSearch, isPending: isSaving } =
+    api.search.save.useMutation({
+      onSuccess: (data) => {
+        // TODO: refetch saved searches
+        router.push("/observe/saved/" + data.id);
+      },
+    });
 
+  const { mutate: updateSavedSearch, isPending: isUpdating } =
+    api.search.update.useMutation({
+      onSuccess: (data) => {
+        // TODO: refetch saved searches
+      },
+    });
+
+  const handleUpdate = useCallback(() => {
+    if (!savedSearch) return;
+
+    updateSavedSearch({
+      ...savedSearch,
+      ...filter,
+      timeRange: undefined,
+      customerCallId: undefined,
+    });
+  }, [filter, savedSearch, updateSavedSearch]);
+
+  const handleCreate = useCallback(
+    (name: string) => {
+      saveSearch({
+        filter: {
+          ...filter,
+          timeRange: undefined,
+          customerCallId: undefined,
+        },
+        name,
+      });
+    },
+    [filter, saveSearch],
+  );
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button variant="ghost" className={cn(open && "bg-muted")}>
+          save search
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent>
         <div className="flex flex-col gap-4">
-          <InputWithLabel
-            label="name"
-            placeholder="EU outbound..."
-            value={name}
-            onChange={(e) => setName(e)}
-            className="w-full"
-          />
+          {state === "create-or-update" ? (
+            <div className="flex flex-col gap-2">
+              <Button onClick={handleUpdate} disabled={isUpdating}>
+                {isUpdating ? <Spinner /> : "update existing"}
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => setState("create")}
+                disabled={isUpdating}
+              >
+                save new
+              </Button>
+            </div>
+          ) : (
+            <div className="flex flex-col gap-4">
+              <InputWithLabel
+                label="name"
+                placeholder="EU outbound..."
+                autoFocus
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    handleCreate(name);
+                  }
+                }}
+                className="w-full"
+              />
+              <Button onClick={() => handleCreate(name)} disabled={isSaving}>
+                {isSaving ? <Spinner /> : "save"}
+              </Button>
+            </div>
+          )}
         </div>
-        <DialogFooter className="mt-auto">
-          <Button className="mt-4" onClick={handleSubmit} disabled={isSaving}>
-            {isSaving ? <Spinner /> : "save"}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+      </PopoverContent>
+    </Popover>
   );
 }

@@ -105,7 +105,11 @@ export default function SavedSearchPage({
       autoFocus
       tabIndex={0}
     >
-      <Filters refetch={refetch} originalFilter={savedSearch} />
+      <Filters
+        refetch={refetch}
+        originalFilter={savedSearch}
+        savedSearch={savedSearch}
+      />
       <div className="flex flex-col gap-4 p-4">
         <div className="flex w-full gap-4">
           <ChartCard
