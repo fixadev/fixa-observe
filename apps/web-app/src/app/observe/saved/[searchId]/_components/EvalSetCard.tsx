@@ -1,13 +1,11 @@
 import { CardContent, CardHeader } from "~/components/ui/card";
-import { Switch } from "~/components/ui/switch";
 import { Button } from "~/components/ui/button";
 import { cn, isTempId } from "~/lib/utils";
-import { Fragment, useCallback } from "react";
+import { useCallback } from "react";
 import { CriteriaBlock } from "./CriteriaBlock";
 import { instantiateEval } from "~/lib/instantiate";
 import { EditableText } from "~/components/EditableText";
-import { EllipsisHorizontalIcon } from "@heroicons/react/24/solid";
-import { EvalSetWithIncludes } from "@repo/types/src/index";
+import { type EvalSetWithIncludes } from "@repo/types/src/index";
 import { Input } from "~/components/ui/input";
 
 export default function EvalSetCard({
@@ -42,9 +40,6 @@ export default function EvalSetCard({
             placeholder="enter evaluation name..."
             inputPlaceholder={`enter evaluation name... (i.e. "appointment booking")`}
           />
-          <Button variant="ghost" size="icon" className="size-7">
-            <EllipsisHorizontalIcon className="size-5" />
-          </Button>
         </div>
         {/* <Switch
           checked={evalSet.enabled}

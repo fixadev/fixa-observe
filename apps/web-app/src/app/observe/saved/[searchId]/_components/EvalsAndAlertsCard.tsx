@@ -146,46 +146,68 @@ function EvalSetCard({
   >;
   setEvalsModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }) {
+  const [toggleValue, setToggleValue] = useState<"all" | "passed" | "failed">(
+    "all",
+  );
+
   return (
-    <Card
-      key={evalSet.id}
-      className="flex flex-col gap-4 p-4 hover:cursor-pointer hover:bg-muted/40"
-    >
-      <CardHeader className="p-0">
+    <Card key={evalSet.id} className="flex flex-col gap-4 p-4">
+      <CardHeader className="flex flex-row items-center justify-between p-0">
         <CardTitle className="p-0 text-sm font-medium">
           {evalSet.name}
         </CardTitle>
+        <Button
+          onClick={() => {
+            setSelectedEvalSet(evalSet);
+            setEvalsModalOpen(true);
+          }}
+          variant="outline"
+        >
+          edit
+        </Button>
       </CardHeader>
       <CardContent className="flex flex-col items-center justify-between gap-2 p-0">
-        <SuccessRateChart />
+        {/* <SuccessRateChart /> */}
         <div className="flex w-full flex-row items-center justify-between gap-2">
           <ToggleGroup
             type="single"
-            onValueChange={(value: string) =>
+            value={toggleValue}
+            onValueChange={(value: string) => {
+              if (!value) return;
+
               setFilter({
                 ...filter,
-                evalSetToSuccess: value
-                  ? {
-                      id: evalSet.id,
-                      result: value === "all" ? null : value === "passed",
-                    }
-                  : undefined,
-              })
-            }
-          >
-            <ToggleGroupItem value="all">all</ToggleGroupItem>
-            <ToggleGroupItem value="passed">passed</ToggleGroupItem>
-            <ToggleGroupItem value="failed">failed</ToggleGroupItem>
-          </ToggleGroup>
-          <Button
-            onClick={() => {
-              setSelectedEvalSet(evalSet);
-              setEvalsModalOpen(true);
+                evalSetToSuccess:
+                  value === "all"
+                    ? undefined
+                    : {
+                        id: evalSet.id,
+                        result: value === "passed",
+                      },
+              });
+              setToggleValue(value as "all" | "passed" | "failed");
             }}
-            variant="outline"
+            className="text-xs"
           >
-            edit
-          </Button>
+            <ToggleGroupItem
+              value="all"
+              className="text-xs data-[state=off]:text-muted-foreground"
+            >
+              all
+            </ToggleGroupItem>
+            <ToggleGroupItem
+              value="passed"
+              className="text-xs data-[state=off]:text-muted-foreground"
+            >
+              passed
+            </ToggleGroupItem>
+            <ToggleGroupItem
+              value="failed"
+              className="text-xs data-[state=off]:text-muted-foreground"
+            >
+              failed
+            </ToggleGroupItem>
+          </ToggleGroup>
         </div>
       </CardContent>
     </Card>
