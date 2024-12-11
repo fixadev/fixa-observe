@@ -14,11 +14,16 @@ RUN echo "TEST_SECRET: $(cat /run/secrets/TEST_SECRET)"
 RUN echo "CONTENTS OF run/secrets"
 RUN ls -l /run/secrets
 
-RUN --mount=type=secret,id=DATABASE_URL \
-  DATABASE_URL="$(cat /run/secrets/DATABASE_URL)" \
-  --mount=type=secret,id=DATABASE_SECRET \
-  DIRECT_URL="$(cat /run/secrets/DIRECT_URL)" \
-  pnpm --filter @repo/db db:generate
+ARG DATABASE_URL=""
+ARG DIRECT_URL=""
+
+ENV DATABASE_URL=${DATABASE_URL}
+ENV DATABASE_URL=${DATABASE_URL}
+
+RUN echo "DATABASE_URL: ${DATABASE_URL}"
+RUN echo "DIRECT_URL: ${DIRECT_URL}"
+
+RUN pnpm --filter @repo/db db:generate
 
 RUN mkdir -p /usr/node_modules/.pnpm/@prisma+client@5.21.1_prisma@5.21.1/node_modules/.prisma/client
 RUN cp node_modules/.pnpm/@prisma+client@5.21.1_prisma@5.21.1/node_modules/.prisma/client/libquery_engine-debian-openssl-3.0.x.so.node \
