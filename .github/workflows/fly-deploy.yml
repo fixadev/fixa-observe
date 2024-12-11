@@ -17,33 +17,19 @@ jobs:
       - uses: superfly/flyctl-actions/setup-flyctl@master
       - run: |
           export FLY_APP_NAME=${{ github.ref == 'refs/heads/main' && 'pixa-observe' || 'pixa-observe-staging' }}
-          # Create .env file with secrets for node-server
-          cat << EOF > apps/node-server/.env
-          OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}
-          VAPI_API_KEY=${{ secrets.VAPI_API_KEY }}
-          AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          DEEPGRAM_API_KEY=${{ secrets.DEEPGRAM_API_KEY }}
-          DATABASE_URL=${{ github.ref == 'refs/heads/main' && secrets.PROD_DATABASE_URL || secrets.DEV_DATABASE_URL }}
-          DIRECT_URL=${{ github.ref == 'refs/heads/main' && secrets.PROD_DIRECT_URL || secrets.DEV_DIRECT_URL }}
-          GCP_CREDENTIALS=${{ secrets.GCP_CREDENTIALS }}
-          NEXT_BASE_URL=${{ secrets.NEXT_BASE_URL }}
-          CLERK_SECRET_KEY=${{ github.ref == 'refs/heads/main' && secrets.PROD_CLERK_SECRET_KEY || secrets.DEV_CLERK_SECRET_KEY }}
-          NODE_SERVER_URL=${{ github.ref == 'refs/heads/main' && secrets.PROD_NODE_SERVER_URL || secrets.DEV_NODE_SERVER_URL }}
-          HOST=0.0.0.0
-          PORT=3003
-          ENVIRONMENT=development
-          DEBUG=true
-          AWS_BUCKET_NAME=newmark
-          AWS_BUCKET_REGION=us-east-1
-          AUDIO_SERVICE_URL=${{ github.ref == 'refs/heads/main' && 'https://fixa-transcription-service.fly.dev' || 'https://fixa-transcription-service-staging.fly.dev' }}
-          SQS_QUEUE_URL=${{ github.ref == 'refs/heads/main' && 'https://sqs.us-east-1.amazonaws.com/195275634305/fixa-observe-prod' || 'https://sqs.us-east-1.amazonaws.com/195275634305/fixa-observe-dev' }}
-          GOOGLE_CLOUD_BUCKET_NAME=pixa-audio
-          EOF
-          # Deploy the node-server application from root, specifying the dockerfile location
           flyctl deploy --remote-only --app $FLY_APP_NAME --dockerfile apps/node-server/Dockerfile --config apps/node-server/fly.toml
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+          HOST: 0.0.0.0
+          PORT: 3003
+          ENVIRONMENT: development
+          DEBUG: true
+          AWS_BUCKET_NAME: newmark
+          AWS_BUCKET_REGION: us-east-1
+          AUDIO_SERVICE_URL: ${{ github.ref == 'refs/heads/main' && 'https://fixa-transcription-service.fly.dev' || 'https://fixa-transcription-service-staging.fly.dev' }}
+          SQS_QUEUE_URL: ${{ github.ref == 'refs/heads/main' && 'https://sqs.us-east-1.amazonaws.com/195275634305/fixa-observe-prod' || 'https://sqs.us-east-1.amazonaws.com/195275634305/fixa-observe-dev' }}
+          GOOGLE_CLOUD_BUCKET_NAME: pixa-audio
+          NODE_SERVER_URL: ${{ github.ref == 'refs/heads/main' && 'https://pixa-observe.fly.dev' || 'https://pixa-observe-staging.fly.dev' }}
 
   deploy-transcription-service:
     runs-on: ubuntu-latest
@@ -53,7 +39,6 @@ jobs:
       - run: |
           export FLY_APP_NAME=${{ github.ref == 'refs/heads/main' && 'fixa-transcription-service' || 'fixa-transcription-service-staging' }}
           cd apps/transcription-service
-          # Deploy the transcription-service application
           flyctl deploy --remote-only --app $FLY_APP_NAME
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}

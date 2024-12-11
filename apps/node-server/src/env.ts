@@ -25,7 +25,6 @@ const envSchema = z.object({
   AWS_BUCKET_REGION: z.string().min(1),
   AWS_ACCESS_KEY_ID: z.string().min(1),
   AWS_SECRET_ACCESS_KEY: z.string().min(1),
-  DEEPGRAM_API_KEY: z.string().min(1),
   AUDIO_SERVICE_URL: z.string().min(1),
   GCP_CREDENTIALS: z.string().min(1),
   GOOGLE_CLOUD_BUCKET_NAME: z.string().min(1),
