@@ -4,7 +4,7 @@ import { Label } from "~/components/ui/label";
 interface TextAreaWithLabelProps {
   label: string;
   value: string;
-  onChange: (value: string) => void;
+  onChange: (value: React.ChangeEvent<HTMLTextAreaElement>) => void;
 }
 
 export const TextAreaWithLabel = ({
@@ -18,7 +18,7 @@ export const TextAreaWithLabel = ({
       <Textarea
         className="min-h-[100px]"
         value={value}
-        onChange={(e) => onChange(e.target.value)}
+        onChange={(e) => onChange(e)}
       />
     </div>
   );
