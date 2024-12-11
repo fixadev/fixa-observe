@@ -2,24 +2,22 @@
 FROM node:20-slim
 
 RUN apt-get update -y && apt-get install -y openssl ffmpeg
-RUN corepack enable && corepack prepare pnpm@9.0.6 --activate
 
 WORKDIR /usr/src/app
 
 COPY . . 
 
+RUN npm install -g pnpm
 RUN pnpm install --frozen-lockfile
 
 ARG DATABASE_URL=""
 ARG DIRECT_URL=""
-ARG TEST_SECRET=""
 
 ENV DATABASE_URL=${DATABASE_URL}
 ENV DIRECT_URL=${DIRECT_URL}
-ENV TEST_SECRET=${TEST_SECRET}
-RUN echo "DATABASE_URL: ${DATABASE_URL}"
-RUN echo "DIRECT_URL: ${DIRECT_URL}"
-RUN echo "TEST_SECRET: ${TEST_SECRET}"
+
+# RUN echo "DATABASE_URL: ${DATABASE_URL}"
+# RUN echo "DIRECT_URL: ${DIRECT_URL}"
 
 RUN pnpm --filter @repo/db db:generate
 
