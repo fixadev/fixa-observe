@@ -5,10 +5,10 @@ RUN apt-get update -y && apt-get install -y openssl ffmpeg
 
 WORKDIR /usr/src/app
 
+COPY . . 
+
 RUN npm install -g pnpm
 RUN pnpm install --frozen-lockfile
-
-COPY . . 
 
 RUN pnpm --filter @repo/db generate
 RUN pnpm run build --filter node-server 
