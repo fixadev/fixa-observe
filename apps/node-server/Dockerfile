@@ -5,17 +5,8 @@ RUN apt-get update -y && apt-get install -y openssl ffmpeg
 
 WORKDIR /usr/src/app
 
-# Copy package files first
-COPY package.json pnpm-lock.yaml ./
-COPY packages/db/package.json ./packages/db/
-COPY packages/types/package.json ./packages/types/
-COPY packages/services/package.json ./packages/services/
-COPY apps/node-server/package.json ./apps/node-server/
-
 RUN npm install -g pnpm
 RUN pnpm install --frozen-lockfile
-RUN npm install -g prisma
-RUN npm install -g zod-prisma-types
 
 COPY . . 
 
