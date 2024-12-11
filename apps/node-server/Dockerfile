@@ -27,4 +27,4 @@ RUN cd apps/node-server && pnpm build
 
 EXPOSE 3003
 
-CMD ["sh", "-c", "NODE_ENV=production && node apps/node-server/dist/main.js"]
+CMD ["sh", "-c", "NODE_ENV=production && node apps/node-server/dist/index.js"]
