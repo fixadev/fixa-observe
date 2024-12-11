@@ -7,7 +7,10 @@ import { ScenarioCard } from "~/app/_components/ScenarioCard";
 import { useAgent } from "~/app/contexts/UseAgent";
 import { Button } from "~/components/ui/button";
 import { useToast } from "~/components/hooks/use-toast";
-import { type CreateScenarioSchema, type ScenarioWithEvals } from "~/lib/agent";
+import {
+  type CreateScenarioSchema,
+  type ScenarioWithEvals,
+} from "@repo/types/src/index";
 
 import { EvalContentType } from "@prisma/client";
 import { Card, CardTitle, CardHeader } from "~/components/ui/card";
@@ -30,7 +33,7 @@ export default function AgentScenariosPage({
   const searchParams = useSearchParams();
   const scenarioId = searchParams.get("scenarioId");
 
-  const { mutate: createScenario } = api.agent.createScenario.useMutation({
+  const { mutate: createScenario } = api.scenario.create.useMutation({
     onSuccess: (data) => {
       if (agent && data) {
         setAgent({
@@ -46,7 +49,7 @@ export default function AgentScenariosPage({
     },
   });
 
-  const { mutate: updateScenario } = api.agent.updateScenario.useMutation({
+  const { mutate: updateScenario } = api.scenario.update.useMutation({
     onSuccess: (data) => {
       if (agent && data) {
         setAgent({
@@ -62,7 +65,7 @@ export default function AgentScenariosPage({
     },
   });
 
-  const { mutate: deleteScenario } = api.agent.deleteScenario.useMutation({
+  const { mutate: deleteScenario } = api.scenario.delete.useMutation({
     onSuccess: () => {
       toast({
         title: "Scenario deleted",
@@ -106,8 +109,9 @@ export default function AgentScenariosPage({
           evals: scenario.evals.map((e) => ({
             ...e,
             createdAt: new Date(),
-            scenarioId: undefined,
+            scenarioId: null,
             deleted: false,
+            evalGroupId: null,
           })),
           generalEvalOverrides: scenario.generalEvalOverrides.map((e) => ({
             ...e,
@@ -131,6 +135,7 @@ export default function AgentScenariosPage({
                 (e) => ({
                   ...e,
                   scenarioId: newScenario.id,
+                  agentId: agent?.id ?? "",
                 }),
               ),
             },

@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { io } from "socket.io-client";
 import { env } from "~/env";
-import { type SocketMessage } from "~/lib/agent";
+import { type SocketMessage } from "@repo/types/src/index";
 
 const useSocketMessage = (
   userId?: string,

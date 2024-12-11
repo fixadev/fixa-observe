@@ -1,26 +1,19 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
-import { AgentService } from "~/server/services/agent";
-import {
-  CreateAgentSchema,
-  CreateScenarioSchema,
-  UpdateScenarioSchema,
-} from "~/lib/agent";
+import { AgentService } from "@repo/services/src/agent";
 import { db } from "~/server/db";
-import { generateScenariosFromPrompt } from "~/server/helpers/generateScenarios";
-import { AgentSchema } from "prisma/generated/zod";
+import { AgentSchema } from "@repo/types/src/index";
 
 const agentServiceInstance = new AgentService(db);
 
 export const agentRouter = createTRPCRouter({
   create: protectedProcedure
-    .input(CreateAgentSchema)
+    .input(AgentSchema)
     .mutation(async ({ input, ctx }) => {
       return await agentServiceInstance.createAgent(
         input.phoneNumber,
         input.name,
         input.systemPrompt,
-        input.scenarios,
         ctx.user.id,
       );
     }),
@@ -61,48 +54,6 @@ export const agentRouter = createTRPCRouter({
         input.testAgentId,
         input.enabled,
       );
-    }),
-
-  // TODO: move all scenario related stuff to scenario router/service
-  generateScenariosFromPrompt: protectedProcedure
-    .input(
-      z.object({
-        prompt: z.string(),
-        numberOfScenarios: z.number(),
-        agentId: z.string(),
-      }),
-    )
-    .mutation(async ({ input }) => {
-      const scenarios = await generateScenariosFromPrompt(
-        input.prompt,
-        input.numberOfScenarios,
-      );
-      return await agentServiceInstance.createScenarios(
-        input.agentId,
-        scenarios,
-      );
-    }),
-
-  createScenario: protectedProcedure
-    .input(z.object({ agentId: z.string(), scenario: CreateScenarioSchema }))
-    .mutation(async ({ input }) => {
-      return await agentServiceInstance.createScenario(
-        input.agentId,
-        input.scenario,
-      );
-    }),
-
-  updateScenario: protectedProcedure
-    .input(z.object({ scenario: UpdateScenarioSchema }))
-    .mutation(async ({ input }) => {
-      console.log("INPUT: ", input.scenario);
-      return await agentServiceInstance.updateScenario(input.scenario);
-    }),
-
-  deleteScenario: protectedProcedure
-    .input(z.object({ id: z.string() }))
-    .mutation(async ({ input }) => {
-      return await agentServiceInstance.deleteScenario(input.id);
     }),
 
   updateAgent: protectedProcedure

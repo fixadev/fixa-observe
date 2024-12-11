@@ -1,6 +1,9 @@
 "use client";
 
-import type { CallWithIncludes, EvalResultWithIncludes } from "~/lib/types";
+import type {
+  CallWithIncludes,
+  EvalResultWithIncludes,
+} from "@repo/types/src/index";
 import AudioPlayer, { type AudioPlayerRef } from "./AudioPlayer";
 import { useMemo, useRef, useState, useEffect, useCallback } from "react";
 import {
@@ -15,7 +18,7 @@ import {
 } from "@heroicons/react/24/solid";
 import { CallStatus, type LatencyBlock, Role } from "@prisma/client";
 import { LatencyCallHeader, TestCallHeader } from "./CallHeader";
-import { type Message } from "prisma/generated/zod";
+import { type Message } from "@repo/types/src/index";
 import {
   Dialog,
   DialogContent,

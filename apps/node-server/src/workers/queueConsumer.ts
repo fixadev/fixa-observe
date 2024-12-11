@@ -1,8 +1,7 @@
 import { env } from "../env";
-import { parseMetadata } from "../helpers/parseMetadata";
-import { transcribeAndSaveCall } from "../services/transcribeAndSaveCall";
-import { upsertAgent } from "../services/upsertAgent";
-import { sqs } from "../utils/s3Client";
+import { transcribeAndSaveCall } from "../services/observability";
+import { upsertAgent } from "../services/agent";
+import { sqs } from "../clients/s3Client";
 
 export async function startQueueConsumer() {
   while (true) {
@@ -18,37 +17,24 @@ export async function startQueueConsumer() {
         for (const message of response.Messages) {
           // Process message
           const data = JSON.parse(message.Body || "{}");
-          const {
-            callId,
-            location,
-            agentId,
-            regionId,
-            createdAt,
-            userId,
-            metadata,
-          } = data;
+          const { callId, location, agentId, createdAt, userId, metadata } =
+            data;
           if (!callId || !location || !userId || !createdAt) {
             console.error("Missing required fields in message:", data);
             throw new Error("Missing required fields");
           }
 
-          const {
-            regionId: newRegionId,
-            agentId: newAgentId,
-            metadata: newMetadata,
-          } = parseMetadata(metadata);
-
           // Upsert agent if it doesn't exist
-          const agent = await upsertAgent(agentId || newAgentId, userId);
+          const agent = await upsertAgent(agentId, userId);
 
-          const newCall = await transcribeAndSaveCall(
+          const newCall = await transcribeAndSaveCall({
             callId,
-            location,
+            audioUrl: location,
             createdAt,
-            agent.id,
-            regionId || newRegionId,
-            newMetadata,
-          );
+            agentId: agent.id,
+            metadata,
+            userId,
+          });
           console.log("Transcription completed:", newCall);
 
           await sqs.deleteMessage({

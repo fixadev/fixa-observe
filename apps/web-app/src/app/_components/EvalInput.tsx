@@ -14,15 +14,15 @@ import {
 } from "~/components/ui/tooltip";
 import { Switch } from "~/components/ui/switch";
 import { TextAreaWithLabel } from "./TextAreaWithLabel";
-import { type EvalWithoutScenarioId, type EvalSchema } from "~/lib/agent";
+import { type Eval } from "@repo/types/src/index";
 import { InformationCircleIcon } from "@heroicons/react/24/solid";
 
 export function EvalInput({
   evaluation,
   setEvaluation,
 }: {
-  evaluation: EvalSchema | EvalWithoutScenarioId;
-  setEvaluation: (evaluation: EvalSchema | EvalWithoutScenarioId) => void;
+  evaluation: Eval;
+  setEvaluation: (evaluation: Eval) => void;
 }) {
   return (
     <div className="flex flex-col gap-4">

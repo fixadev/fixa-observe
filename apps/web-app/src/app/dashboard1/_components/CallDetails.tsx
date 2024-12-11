@@ -7,7 +7,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "~/components/ui/tooltip";
-import { ERROR_LABELS } from "~/lib/constants";
+import { ERROR_LABELS } from "@repo/types/src/index";
 import { useAudio } from "./useAudio";
 
 export default function CallDetails({ call }: { call: Call }) {

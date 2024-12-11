@@ -1,7 +1,7 @@
 import { EvalContentType, EvalResultType } from "@prisma/client";
 import { db } from "../db";
 
-import { menuTestData } from "./menu-data";
+import { menuTestData } from "./data/menu-data";
 
 const agentId = "ff2e1d70-845b-4d14-9819-c144765fad14";
 

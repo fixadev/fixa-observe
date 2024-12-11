@@ -1,6 +1,9 @@
 "use client";
 
-import { type ScenarioWithEvals, type CreateScenarioSchema } from "~/lib/agent";
+import {
+  type ScenarioWithEvals,
+  type CreateScenarioSchema,
+} from "@repo/types/src/index";
 import { Label } from "~/components/ui/label";
 import { Card } from "~/components/ui/card";
 import { CopyText } from "~/components/CopyText";

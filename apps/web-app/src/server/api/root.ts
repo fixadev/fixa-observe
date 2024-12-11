@@ -6,6 +6,8 @@ import { slackRouter } from "./routers/slack";
 import { userRouter } from "./routers/user";
 import { callRouter } from "./routers/call";
 import { evalRouter } from "./routers/eval";
+import { scenarioRouter } from "./routers/scenario";
+import { searchRouter } from "./routers/search";
 /*  *
  * This is the primary router for your server.
  *
@@ -15,6 +17,8 @@ export const appRouter = createTRPCRouter({
   s3: s3Router,
   agent: agentRouter,
   eval: evalRouter,
+  scenario: scenarioRouter,
+  search: searchRouter,
   slack: slackRouter,
   test: testRouter,
   user: userRouter,

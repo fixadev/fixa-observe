@@ -11,10 +11,20 @@ import { api } from "~/trpc/react";
 import ChartCard from "~/components/observe/ChartCard";
 
 export default function ObservePage() {
-  const { selectedCallId, setSelectedCallId, filter, setFilter, orderBy } =
-    useObserveState();
+  const {
+    selectedCallId,
+    setSelectedCallId,
+    filter,
+    setFilter,
+    orderBy,
+    resetFilter,
+  } = useObserveState();
 
   const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    resetFilter();
+  }, [resetFilter]);
 
   const {
     data: percentiles,
@@ -93,15 +103,15 @@ export default function ObservePage() {
 
   return (
     <div
-      className="relative h-full bg-muted/30 pt-16"
+      className="relative h-full bg-muted/30 pt-16 focus:outline-none"
       autoFocus
       tabIndex={0}
-      onKeyDown={(e) => {
-        if (e.key === " " && !modalOpen) {
-          e.preventDefault();
-          playPauseAudio();
-        }
-      }}
+      // onKeyDown={(e) => {
+      //   if (e.key === " " && !modalOpen) {
+      //     e.preventDefault();
+      //     playPauseAudio();
+      //   }
+      // }}
     >
       <Filters
         modalOpen={modalOpen}
