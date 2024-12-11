@@ -103,7 +103,8 @@ export default function CallDetails({
     if (call.customerCallId) {
       return 0;
     }
-    return messagesFiltered[0]?.secondsFromStart ?? 0;
+    // return messagesFiltered[0]?.secondsFromStart ?? 0; // this is causing bugs
+    return 0;
   }, [messagesFiltered, call.customerCallId]);
 
   // Index of the currently active message
@@ -652,7 +653,9 @@ function ToolCallResult({
                 ) : null}
               </div>
             </TooltipTrigger>
-            <TooltipContent>{evalResult?.details}</TooltipContent>
+            <TooltipContent className="max-w-[400px]">
+              {evalResult?.details}
+            </TooltipContent>
           </Tooltip>
         </div>
       </DialogTrigger>

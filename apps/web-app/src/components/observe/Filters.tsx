@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Button } from "../ui/button";
 import {
   Select,
@@ -10,14 +10,8 @@ import {
   SelectValue,
 } from "../ui/select";
 import { formatDateTime } from "~/lib/utils";
-import {
-  CalendarIcon,
-  DocumentIcon,
-  MagnifyingGlassIcon,
-  MapIcon,
-  UserIcon,
-} from "@heroicons/react/24/solid";
-import { lookbackPeriods } from "../hooks/useObserveState";
+import { CalendarIcon, UserIcon } from "@heroicons/react/24/solid";
+import { lookbackPeriods, useObserveState } from "../hooks/useObserveState";
 import { type Filter } from "@repo/types/src/index";
 import { api } from "~/trpc/react";
 import {
@@ -43,20 +37,15 @@ import { Check, ChevronsUpDown } from "lucide-react";
 import { cn } from "~/lib/utils";
 import { SidebarTrigger } from "../ui/sidebar";
 import { useRouter } from "next/navigation";
-import { set } from "lodash";
 import { InputWithLabel } from "~/app/_components/InputWithLabel";
 
 export default function Filters({
   modalOpen,
   setModalOpen,
-  filter,
-  setFilter,
   refetch,
 }: {
   modalOpen: boolean;
   setModalOpen: (open: boolean) => void;
-  filter: Filter;
-  setFilter: (filter: Filter) => void;
   refetch: () => void;
 }) {
   const router = useRouter();
@@ -64,6 +53,8 @@ export default function Filters({
   const { data: _agents, refetch: refetchAgents } =
     api.agent.getAllFor11x.useQuery();
   const { data: metadata } = api._call.getMetadata.useQuery();
+
+  const { filter, setFilter } = useObserveState();
 
   const agents = useMemo(() => {
     return [
@@ -111,19 +102,21 @@ export default function Filters({
 
   const [saveModalOpen, setSaveModalOpen] = useState(false);
 
-  function handleSaveSearch(name: string) {
-    console.log("SAVING", name);
-    console.log("FILTER", filter);
-    saveSearch({
-      filter: {
-        ...filter,
-        timeRange: undefined,
-        customerCallId: undefined,
-      },
-      name,
-    });
-    setSaveModalOpen(false);
-  }
+  const handleSaveSearch = useCallback(
+    (name: string) => {
+      console.log("SAVING", name);
+      console.log("FILTER", filter);
+      saveSearch({
+        filter: {
+          ...filter,
+          timeRange: undefined,
+          customerCallId: undefined,
+        },
+        name,
+      });
+    },
+    [filter, saveSearch],
+  );
 
   return (
     <>
@@ -134,6 +127,10 @@ export default function Filters({
             <Select
               value={filter.lookbackPeriod.value.toString()}
               onValueChange={(value) => {
+                console.log(
+                  "lookback period changed",
+                  lookbackPeriods.find((p) => p.value === parseInt(value)),
+                );
                 setFilter({
                   ...filter,
                   lookbackPeriod: lookbackPeriods.find(

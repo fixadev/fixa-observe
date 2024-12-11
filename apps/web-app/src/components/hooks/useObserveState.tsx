@@ -1,6 +1,14 @@
 "use client";
 
-import { createContext, useContext, useEffect, useRef, useState } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import {
   type SelectItem,
   type Filter,
@@ -49,19 +57,19 @@ export function ObserveStateProvider({
 }) {
   const [selectedCallId, setSelectedCallId] = useState<string | null>(null);
 
-  const defaultFilter: Filter = {
-    lookbackPeriod: lookbackPeriods[1]!,
-    chartPeriod: chartPeriods[2]!.value,
-  };
+  const defaultFilter = useMemo(() => {
+    return {
+      lookbackPeriod: lookbackPeriods[1]!,
+      chartPeriod: chartPeriods[2]!.value,
+    };
+  }, []);
 
   const [filter, setFilter] = useState<Filter>(defaultFilter);
   const [orderBy, setOrderBy] = useState<OrderBy | undefined>();
 
-  const resetFilter = () => {
-    if (JSON.stringify(filter) !== JSON.stringify(defaultFilter)) {
-      setFilter(defaultFilter);
-    }
-  };
+  const resetFilter = useCallback(() => {
+    setFilter(defaultFilter);
+  }, [defaultFilter]);
 
   const prevLookbackPeriod = useRef<number>(filter.lookbackPeriod.value);
   const prevTimeRange = useRef<{ start: number; end: number }>();

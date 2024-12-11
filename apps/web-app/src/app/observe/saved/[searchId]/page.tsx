@@ -38,7 +38,7 @@ export default function SavedSearchPage({
     } else {
       console.log("No saved search found", savedSearchQueryResult);
     }
-  }, [savedSearchQueryResult]);
+  }, [savedSearchQueryResult, setFilter]);
 
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -113,10 +113,6 @@ export default function SavedSearchPage({
 
   const [modalOpen, setModalOpen] = useState(false);
 
-  const playPauseAudio = useCallback(() => {
-    console.log("play pause!!");
-  }, []);
-
   return (
     <div
       className="relative h-full bg-muted/30 pt-16 focus:outline-none"
@@ -132,8 +128,6 @@ export default function SavedSearchPage({
       <Filters
         modalOpen={modalOpen}
         setModalOpen={setModalOpen}
-        filter={filter}
-        setFilter={setFilter}
         refetch={refetch}
       />
       <div className="flex flex-col gap-4 p-4">
