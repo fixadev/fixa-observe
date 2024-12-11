@@ -20,12 +20,6 @@ jobs:
           flyctl deploy --remote-only --app $FLY_APP_NAME --dockerfile apps/node-server/Dockerfile --config apps/node-server/fly.toml
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
-          DEBUG: true
-
-          AUDIO_SERVICE_URL: ${{ github.ref == 'refs/heads/main' && 'https://fixa-transcription-service.fly.dev' || 'https://fixa-transcription-service-staging.fly.dev' }}
-          SQS_QUEUE_URL: ${{ github.ref == 'refs/heads/main' && 'https://sqs.us-east-1.amazonaws.com/195275634305/fixa-observe-prod' || 'https://sqs.us-east-1.amazonaws.com/195275634305/fixa-observe-dev' }}
-
-          NODE_SERVER_URL: ${{ github.ref == 'refs/heads/main' && 'https://pixa-observe.fly.dev' || 'https://pixa-observe-staging.fly.dev' }}
 
   deploy-transcription-service:
     runs-on: ubuntu-latest
