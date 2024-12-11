@@ -31,7 +31,7 @@ RUN cd /app/packages/db && pnpm generate
 
 # Build shared packages first
 RUN cd /app/packages/types && pnpm build
-RUN cd /app/packages/db && pnpm build
+RUN cd /app/packages/db && pnpm generate
 RUN cd /app/packages/services && pnpm build
 
 # Set working directory to the server app
