@@ -25,23 +25,19 @@ RUN pnpm install --frozen-lockfile
 # Copy all source code and config files
 COPY packages ./packages/
 COPY apps/node-server ./apps/node-server/
-COPY packages/typescript-config ./packages/typescript-config/
 
 # Generate Prisma Client (after source code is available)
-RUN cd /app/packages/db && pnpm generate
+RUN cd packages/db && pnpm generate
 
 # Build shared packages first
-RUN cd /app/packages/types && pnpm build
-RUN cd /app/packages/services && pnpm build
-
-# Set working directory to the server app
-WORKDIR /app/apps/node-server
+RUN cd packages/types && pnpm build
+RUN cd packages/services && pnpm build
 
 # Build TypeScript
-RUN pnpm build
+RUN cd apps/node-server && pnpm build
 
 # Verify the build output exists
-RUN ls -la dist/
+RUN ls -la apps/node-server/dist/
 
 # Set production environment
 ENV NODE_ENV=production
@@ -50,4 +46,4 @@ ENV NODE_ENV=production
 EXPOSE 3003
 
 # Start the server
-CMD ["node", "--experimental-specifier-resolution=node", "dist/index.js"]
+CMD ["node", "apps/node-server/dist/index.js"]
