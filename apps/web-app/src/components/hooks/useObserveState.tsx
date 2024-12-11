@@ -5,7 +5,6 @@ import {
   useCallback,
   useContext,
   useEffect,
-  useMemo,
   useRef,
   useState,
 } from "react";
@@ -36,6 +35,11 @@ export const defaultDurationToChartPeriod: Record<number, number> = {
   [30 * 24 * 60 * 60 * 1000]: chartPeriods[5]!.value,
 };
 
+export const defaultFilter: Filter = {
+  lookbackPeriod: lookbackPeriods[1]!,
+  chartPeriod: chartPeriods[2]!.value,
+};
+
 interface ObserveStateContextType {
   selectedCallId: string | null;
   setSelectedCallId: (callId: string | null) => void;
@@ -57,19 +61,12 @@ export function ObserveStateProvider({
 }) {
   const [selectedCallId, setSelectedCallId] = useState<string | null>(null);
 
-  const defaultFilter = useMemo(() => {
-    return {
-      lookbackPeriod: lookbackPeriods[1]!,
-      chartPeriod: chartPeriods[2]!.value,
-    };
-  }, []);
-
   const [filter, setFilter] = useState<Filter>(defaultFilter);
   const [orderBy, setOrderBy] = useState<OrderBy | undefined>();
 
   const resetFilter = useCallback(() => {
     setFilter(defaultFilter);
-  }, [defaultFilter]);
+  }, []);
 
   const prevLookbackPeriod = useRef<number>(filter.lookbackPeriod.value);
   const prevTimeRange = useRef<{ start: number; end: number }>();

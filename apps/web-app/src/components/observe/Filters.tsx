@@ -11,7 +11,11 @@ import {
 } from "../ui/select";
 import { formatDateTime } from "~/lib/utils";
 import { CalendarIcon, UserIcon } from "@heroicons/react/24/solid";
-import { lookbackPeriods, useObserveState } from "../hooks/useObserveState";
+import {
+  defaultFilter,
+  lookbackPeriods,
+  useObserveState,
+} from "../hooks/useObserveState";
 import { type Filter } from "@repo/types/src/index";
 import { api } from "~/trpc/react";
 import {
@@ -101,6 +105,10 @@ export default function Filters({
     });
 
   const [saveModalOpen, setSaveModalOpen] = useState(false);
+
+  const showSaveSearchButton = useMemo(() => {
+    return JSON.stringify(filter) !== JSON.stringify(defaultFilter);
+  }, [filter]);
 
   const handleSaveSearch = useCallback(
     (name: string) => {
@@ -252,20 +260,19 @@ export default function Filters({
               </SelectContent>
             </Select>
           ))}
-          {/* <Button
-            variant="default"
-            className="gap-2"
-            onClick={() => {
-              setSaveModalOpen(true);
-            }}
-          >
-            {isSaving ? (
-              <Spinner />
-            ) : (
-              <DocumentIcon className="size-4 shrink-0" />
-            )}
-            save search
-          </Button> */}
+          {showSaveSearchButton && (
+            <Button
+              variant="ghost"
+              className="gap-2"
+              disabled={isSaving}
+              onClick={() => {
+                setSaveModalOpen(true);
+              }}
+            >
+              {isSaving && <Spinner />}
+              save search
+            </Button>
+          )}
         </div>
         <Button variant="outline" onClick={refetch}>
           refresh
