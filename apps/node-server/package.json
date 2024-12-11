@@ -1,7 +1,6 @@
 {
   "name": "node-server",
   "version": "1.0.0",
-  "type": "module",
   "main": "dist/index.js",
   "scripts": {
     "start": "node dist/index.js",
