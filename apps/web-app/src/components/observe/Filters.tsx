@@ -43,7 +43,6 @@ import { useRouter } from "next/navigation";
 import { InputWithLabel } from "~/app/_components/InputWithLabel";
 import {
   FilterSchema,
-  type SavedSearch,
   type Filter,
   type SavedSearchWithIncludes,
 } from "@repo/types/src";
@@ -100,7 +99,6 @@ export default function Filters({
 
   const [open, setOpen] = useState(false);
 
-  const [saveModalOpen, setSaveModalOpen] = useState(false);
   const [editAgentModalOpen, setEditAgentModalOpen] = useState(false);
 
   const hasFilterChanged = useMemo(() => {
@@ -385,14 +383,16 @@ function SaveSearchButton({
     api.search.save.useMutation({
       onSuccess: (data) => {
         // TODO: refetch saved searches
+        setOpen(false);
         router.push("/observe/saved/" + data.id);
       },
     });
 
   const { mutate: updateSavedSearch, isPending: isUpdating } =
     api.search.update.useMutation({
-      onSuccess: (data) => {
+      onSuccess: () => {
         // TODO: refetch saved searches
+        setOpen(false);
       },
     });
 
