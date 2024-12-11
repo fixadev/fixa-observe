@@ -2,7 +2,7 @@
 FROM node:20-slim
 
 RUN apt-get update -y && apt-get install -y openssl ffmpeg
-RUN corepack enable && corepack prepare pnpm@9.7.1 --activate
+RUN corepack enable && corepack prepare pnpm@9.0.6 --activate
 
 WORKDIR /usr/src/app
 
