@@ -1,11 +1,9 @@
 "use client";
 import { CardContent, CardHeader } from "~/components/ui/card";
-import { Switch } from "~/components/ui/switch";
-import { Button } from "~/components/ui/button";
 import { cn, isTempId } from "~/lib/utils";
 import { EditableText } from "~/components/EditableText";
 import { EllipsisHorizontalIcon } from "@heroicons/react/24/solid";
-import { AlertWithDetails, Filter } from "@repo/types/src/index";
+import { type AlertWithDetails, type Filter } from "@repo/types/src/index";
 import { Input } from "~/components/ui/input";
 import {
   Select,
@@ -51,7 +49,7 @@ export function AlertCard({
       label: evalSet.name,
       type: "evalSet" as const,
       evalSetId: evalSet.id,
-    })) || []),
+    })) ?? []),
   ];
 
   useEffect(() => {
@@ -117,7 +115,7 @@ export function AlertCard({
                               lookbackPeriod: lookbackPeriods[0]!,
                             }
                           : {
-                              evalSetId: selectedOption.evalSetId!,
+                              evalSetId: selectedOption.evalSetId,
                               trigger: true,
                               slackNames: alert.details?.slackNames || [""],
                             },
