@@ -53,14 +53,6 @@ jobs:
       - uses: superfly/flyctl-actions/setup-flyctl@master
       - run: |
           export FLY_APP_NAME=${{ github.ref == 'refs/heads/main' && 'fixa-transcription-service' || 'fixa-transcription-service-staging' }}
-          # Navigate to the transcription-service directory
-          cd apps/transcription-service
-          # Create .env file with secrets for transcription-service
-          cat << EOF > .env
-          DEEPGRAM_API_KEY=${{ secrets.DEEPGRAM_API_KEY }}
-          AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          EOF
           # Deploy the transcription-service application
           flyctl deploy --remote-only --app $FLY_APP_NAME
         env:
