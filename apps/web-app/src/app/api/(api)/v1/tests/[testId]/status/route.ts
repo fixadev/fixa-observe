@@ -31,7 +31,7 @@ export async function GET(
       );
     }
 
-    const statusResult = await testService.getStatus(testId);
+    const statusResult = await testService.getStatus(testId, userId);
 
     return NextResponse.json(statusResult);
   } catch (error) {
