@@ -7,6 +7,7 @@ type MetadataType = "public" | "private";
 export interface PrivateMetadata {
   slackAccessToken?: string;
   apiKey?: string;
+  stripeCustomerId?: string;
 }
 
 export interface PublicMetadata {
@@ -29,6 +30,15 @@ export class UserService {
     });
   }
 
+  async updateStripeCustomerId(userId: string, stripeCustomerId: string) {
+    await this.updatePrivateMetadata(userId, { stripeCustomerId });
+  }
+
+  async getStripeCustomerId(userId: string) {
+    const metadata = await this.getPrivateMetadata(userId);
+    return metadata.stripeCustomerId;
+  }
+
   /**
    * Generic function to update user metadata
    */
@@ -38,7 +48,7 @@ export class UserService {
     type: MetadataType,
   ): Promise<User> {
     try {
-      const user = await clerkClient.users.getUser(userId);
+      const user = await clerkClient().users.getUser(userId);
       const existingMetadata =
         type === "private" ? user.privateMetadata : user.publicMetadata;
 
@@ -47,7 +57,7 @@ export class UserService {
         ...metadata,
       };
 
-      return await clerkClient.users.updateUser(userId, {
+      return await clerkClient().users.updateUser(userId, {
         [`${type}Metadata`]: updatedMetadata,
       });
     } catch (error) {
@@ -64,7 +74,7 @@ export class UserService {
     type: MetadataType,
   ): Promise<PrivateMetadata | PublicMetadata> {
     try {
-      const user = await clerkClient.users.getUser(userId);
+      const user = await clerkClient().users.getUser(userId);
       return type === "private" ? user.privateMetadata : user.publicMetadata;
     } catch (error) {
       console.error(`Error getting user ${type} metadata:`, error);
@@ -81,14 +91,14 @@ export class UserService {
     type: MetadataType,
   ): Promise<User> {
     try {
-      const user = await clerkClient.users.getUser(userId);
+      const user = await clerkClient().users.getUser(userId);
       const existingMetadata = {
         ...(type === "private" ? user.privateMetadata : user.publicMetadata),
       };
 
       delete existingMetadata[key];
 
-      return await clerkClient.users.updateUser(userId, {
+      return await clerkClient().users.updateUser(userId, {
         [`${type}Metadata`]: existingMetadata,
       });
     } catch (error) {

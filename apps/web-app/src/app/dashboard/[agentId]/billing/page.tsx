@@ -2,12 +2,12 @@
 
 import { Button } from "@/components/ui/button";
 import { ExclamationTriangleIcon } from "@heroicons/react/24/solid";
-import axios from "axios";
 import Link from "next/link";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo } from "react";
 import Spinner from "~/components/Spinner";
 import { SidebarTrigger } from "~/components/ui/sidebar";
 import { cn } from "~/lib/utils";
+import { api } from "~/trpc/react";
 
 export default function BillingPage({
   params,
@@ -22,24 +22,16 @@ export default function BillingPage({
     return 0;
   }, []);
 
-  const [isGeneratingStripeUrl, setIsGeneratingStripeUrl] = useState(false);
+  const { mutate: getCheckoutUrl, isPending: isGeneratingStripeUrl } =
+    api.stripe.createCheckoutSession.useMutation({
+      onSuccess: (data) => {
+        window.location.href = data.checkoutUrl;
+      },
+    });
   const upgradePlan = useCallback(async () => {
     const redirectUrl = window.location.href;
-    setIsGeneratingStripeUrl(true);
-    try {
-      const response = await axios.post<{ url: string }>(
-        "/api/stripe/checkout-sessions",
-        {
-          redirectUrl,
-        },
-      );
-      window.location.href = response.data.url;
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setIsGeneratingStripeUrl(false);
-    }
-  }, []);
+    getCheckoutUrl({ redirectUrl });
+  }, [getCheckoutUrl]);
 
   return (
     <div className="h-full">

@@ -506,6 +506,9 @@ importers:
       '@repo/types':
         specifier: workspace:*
         version: link:../types
+      stripe:
+        specifier: ^17.4.0
+        version: 17.4.0
       uuid:
         specifier: ^9.0.0
         version: 9.0.1
