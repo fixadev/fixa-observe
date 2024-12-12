@@ -22,6 +22,7 @@ export const env = createEnv({
     RETELL_API_KEY: z.string(),
     VAPI_API_KEY: z.string(),
     SLACK_CLIENT_SECRET: z.string(),
+    STRIPE_SECRET_KEY: z.string(),
   },
 
   /**
@@ -72,6 +73,7 @@ export const env = createEnv({
     NEXT_PUBLIC_SLACK_CLIENT_ID: process.env.NEXT_PUBLIC_SLACK_CLIENT_ID,
     NEXT_PUBLIC_SLACK_REDIRECT_URI: process.env.NEXT_PUBLIC_SLACK_REDIRECT_URI,
     SLACK_CLIENT_SECRET: process.env.SLACK_CLIENT_SECRET,
+    STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially

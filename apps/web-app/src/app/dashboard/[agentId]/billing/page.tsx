@@ -2,9 +2,10 @@
 
 import { Button } from "@/components/ui/button";
 import { ExclamationTriangleIcon } from "@heroicons/react/24/solid";
-import { NUM_FREE_TESTS } from "@repo/types/src/constants";
+import axios from "axios";
 import Link from "next/link";
-import { useMemo } from "react";
+import { useCallback, useMemo, useState } from "react";
+import Spinner from "~/components/Spinner";
 import { SidebarTrigger } from "~/components/ui/sidebar";
 import { cn } from "~/lib/utils";
 
@@ -14,11 +15,30 @@ export default function BillingPage({
   params: { agentId: string };
 }) {
   const hasPaymentMethod = useMemo(() => {
-    return true;
+    return false;
   }, []);
 
   const freeTestsLeft = useMemo(() => {
-    return 1;
+    return 0;
+  }, []);
+
+  const [isGeneratingStripeUrl, setIsGeneratingStripeUrl] = useState(false);
+  const upgradePlan = useCallback(async () => {
+    const redirectUrl = window.location.href;
+    setIsGeneratingStripeUrl(true);
+    try {
+      const response = await axios.post<{ url: string }>(
+        "/api/stripe/checkout-sessions",
+        {
+          redirectUrl,
+        },
+      );
+      window.location.href = response.data.url;
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setIsGeneratingStripeUrl(false);
+    }
   }, []);
 
   return (
@@ -74,7 +94,8 @@ export default function BillingPage({
                       "text-sm",
                     )}
                   >
-                    {freeTestsLeft} free tests left
+                    {freeTestsLeft} free test{freeTestsLeft === 1 ? " " : "s "}
+                    left
                   </div>
                 </div>
                 {freeTestsLeft <= 0 && (
@@ -84,7 +105,17 @@ export default function BillingPage({
                   </div>
                 )}
               </div>
-              <Button className="mt-2 w-[16.5rem]">upgrade</Button>
+              <Button
+                className="mt-2 w-[16.5rem]"
+                onClick={upgradePlan}
+                disabled={isGeneratingStripeUrl}
+              >
+                {isGeneratingStripeUrl ? (
+                  <Spinner className="h-4 w-4" />
+                ) : (
+                  "upgrade"
+                )}
+              </Button>
               <div className="mt-1 w-[16.5rem] text-xs text-muted-foreground">
                 usage based pricing. only pay for what you use.
               </div>
