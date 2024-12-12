@@ -34,3 +34,7 @@ export function getCreatedUpdatedDeleted<T extends { id: string }>(
     ),
   };
 }
+
+export function generateApiKey() {
+  return `fx-${crypto.randomUUID()}`;
+}

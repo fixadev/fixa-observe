@@ -3,8 +3,11 @@ import { headers } from "next/headers";
 import { type WebhookEvent } from "@clerk/nextjs/server";
 import { env } from "~/env";
 import { addSubscriber } from "~/server/listmonk";
-import { userService } from "~/server/services/user";
 import { NUM_FREE_TESTS } from "@repo/types/src";
+import { UserService } from "@repo/services/src/user";
+import { db } from "~/server/db";
+
+const userService = new UserService(db, env.CLERK_SECRET_KEY);
 
 export async function GET() {
   return new Response("ok", { status: 200 });

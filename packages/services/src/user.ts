@@ -1,24 +1,27 @@
-import { clerkClient, type User } from "@clerk/nextjs/server";
-import { db } from "../db";
-import { generateApiKey } from "~/lib/utils";
-
-type MetadataType = "public" | "private";
-
-export interface PrivateMetadata {
-  slackAccessToken?: string;
-  apiKey?: string;
-}
-
-export interface PublicMetadata {
-  slackWebhookUrl?: string;
-  stripeCustomerId?: string;
-  freeTestsLeft?: number;
-}
+import { createClerkClient, type ClerkClient, type User } from "@clerk/backend";
+import { PrismaClient } from "@repo/db/src";
+import { generateApiKey } from "./utils";
+import {
+  type PrivateMetadata,
+  type PublicMetadata,
+  type MetadataType,
+} from "@repo/types/src";
 
 export class UserService {
+  private clerkClient: ClerkClient;
+
+  constructor(
+    private db: PrismaClient,
+    clerkSecretKey: string,
+  ) {
+    this.clerkClient = createClerkClient({
+      secretKey: clerkSecretKey,
+    });
+  }
+
   async createApiKey(userId: string) {
     const apiKey = generateApiKey();
-    return await db.apiKey.upsert({
+    return await this.db.apiKey.upsert({
       where: { userId },
       create: { apiKey, userId },
       update: { apiKey },
@@ -26,7 +29,7 @@ export class UserService {
   }
 
   async getApiKey(userId: string) {
-    return await db.apiKey.findFirst({
+    return await this.db.apiKey.findFirst({
       where: { userId },
     });
   }
@@ -50,7 +53,7 @@ export class UserService {
     type: MetadataType,
   ): Promise<User> {
     try {
-      const user = await clerkClient().users.getUser(userId);
+      const user = await this.clerkClient.users.getUser(userId);
       const existingMetadata =
         type === "private" ? user.privateMetadata : user.publicMetadata;
 
@@ -59,7 +62,7 @@ export class UserService {
         ...metadata,
       };
 
-      return await clerkClient().users.updateUser(userId, {
+      return await this.clerkClient.users.updateUser(userId, {
         [`${type}Metadata`]: updatedMetadata,
       });
     } catch (error) {
@@ -76,7 +79,7 @@ export class UserService {
     type: MetadataType,
   ): Promise<PrivateMetadata | PublicMetadata> {
     try {
-      const user = await clerkClient().users.getUser(userId);
+      const user = await this.clerkClient.users.getUser(userId);
       return type === "private" ? user.privateMetadata : user.publicMetadata;
     } catch (error) {
       console.error(`Error getting user ${type} metadata:`, error);
@@ -93,14 +96,14 @@ export class UserService {
     type: MetadataType,
   ): Promise<User> {
     try {
-      const user = await clerkClient().users.getUser(userId);
+      const user = await this.clerkClient.users.getUser(userId);
       const existingMetadata = {
         ...(type === "private" ? user.privateMetadata : user.publicMetadata),
       };
 
       delete existingMetadata[key];
 
-      return await clerkClient().users.updateUser(userId, {
+      return await this.clerkClient.users.updateUser(userId, {
         [`${type}Metadata`]: existingMetadata,
       });
     } catch (error) {
@@ -158,6 +161,3 @@ export class UserService {
     return this.removeMetadataKey(userId, key, "public");
   }
 }
-
-// Export singleton instance
-export const userService = new UserService();

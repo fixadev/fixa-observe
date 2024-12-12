@@ -5,3 +5,4 @@ export * from "./search";
 export * from "./agent";
 export * from "./alert";
 export * from "./stripe";
+export * from "./user";

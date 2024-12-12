@@ -1,8 +1,10 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { env } from "~/env";
 import Stripe from "stripe";
-import { userService } from "~/server/services/user";
+import { UserService } from "@repo/services/src/user";
+import { db } from "~/server/db";
 
+const userService = new UserService(db, env.CLERK_SECRET_KEY);
 const stripe = new Stripe(env.STRIPE_SECRET_KEY);
 const endpointSecret = env.STRIPE_WEBHOOK_SECRET;
 

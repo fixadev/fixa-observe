@@ -32,10 +32,6 @@ export function formatDurationHoursMinutesSeconds(numSeconds: number): string {
   return parts.join(":");
 }
 
-export function generateApiKey() {
-  return `fx-${crypto.randomUUID()}`;
-}
-
 export function getLatencyBlockColor(
   latencyBlock: LatencyBlock,
   opacity = 0.2,

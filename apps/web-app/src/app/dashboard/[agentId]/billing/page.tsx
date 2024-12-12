@@ -9,7 +9,7 @@ import Spinner from "~/components/Spinner";
 import { SidebarTrigger } from "~/components/ui/sidebar";
 import { Skeleton } from "~/components/ui/skeleton";
 import { cn } from "~/lib/utils";
-import { type PublicMetadata } from "~/server/services/user";
+import { type PublicMetadata } from "@repo/types/src";
 import { api } from "~/trpc/react";
 
 export default function BillingPage({
