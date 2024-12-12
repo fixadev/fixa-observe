@@ -58,6 +58,7 @@ export async function POST(req: NextRequest) {
       scenarioIds: input.scenarioIds,
       testAgentIds: input.testAgentIds,
       runFromApi: true,
+      userId,
     });
     return Response.json({ testId: result.id });
   } catch (error) {

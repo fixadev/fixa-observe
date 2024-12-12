@@ -170,6 +170,7 @@ export function ScenarioSheet({
           id: "new",
           createdAt: new Date(),
           name,
+          ownerId: "",
           instructions,
           evals,
           agentId: "",
