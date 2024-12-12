@@ -86,6 +86,7 @@ export class StripeService {
     const metadata = await this.userService.getPublicMetadata(userId);
     if (metadata.freeTestsLeft && metadata.freeTestsLeft > 0) {
       // Don't accrue minutes if there are still free tests left
+      // TODO: fix this. doesn't catch the case where user goes from 1 => 0 free tests left
       return;
     }
     const stripeCustomerId = await this.getCustomerId(userId);

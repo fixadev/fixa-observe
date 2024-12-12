@@ -54,6 +54,7 @@ export async function POST(req: NextRequest) {
     }
 
     const result = await testService.run({
+      userId,
       agentId: input.agentId,
       scenarioIds: input.scenarioIds,
       testAgentIds: input.testAgentIds,

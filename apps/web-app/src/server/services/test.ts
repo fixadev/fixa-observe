@@ -7,12 +7,18 @@ import {
   type TestWithIncludes,
 } from "@repo/types/src/index";
 import { randomUUID } from "crypto";
+import { UserService } from "@repo/services/src/user";
+import { StripeService } from "@repo/services/src/stripe";
 
 export class TestService {
   constructor(private db: PrismaClient) {
     this.agentServiceInstance = new AgentService(this.db);
+    this.userServiceInstance = new UserService(this.db);
+    this.stripeServiceInstance = new StripeService(this.db);
   }
   agentServiceInstance: AgentService;
+  userServiceInstance: UserService;
+  stripeServiceInstance: StripeService;
 
   async get(id: string): Promise<TestWithIncludes | null> {
     return await this.db.test.findUnique({
@@ -89,16 +95,43 @@ export class TestService {
   }
 
   async run({
+    userId,
     agentId,
     scenarioIds,
     testAgentIds,
     runFromApi = false,
   }: {
+    userId: string;
     agentId: string;
     scenarioIds?: string[];
     testAgentIds?: string[];
     runFromApi?: boolean;
   }) {
+    // Make sure user can run this test - check free tests left and subscription
+    const userData = await this.userServiceInstance.getPublicMetadata(userId);
+    if (!userData) {
+      throw new Error("User not found");
+    }
+    const noFreeTestsLeft =
+      !userData.freeTestsLeft ||
+      (userData.freeTestsLeft && userData.freeTestsLeft <= 0);
+    let hasActiveSubscription = false;
+    if (userData.stripeCustomerId) {
+      const subscriptions =
+        await this.stripeServiceInstance.getSubscriptions(userId);
+      if (subscriptions.data.length > 0) {
+        hasActiveSubscription = true;
+      }
+    }
+    if (noFreeTestsLeft && !hasActiveSubscription) {
+      throw new Error("User has no free tests left and no active subscription");
+    }
+
+    // If user has free tests left, deduct one
+    if (userData.freeTestsLeft && userData.freeTestsLeft > 0) {
+      await this.userServiceInstance.decrementFreeTestsLeft(userId);
+    }
+
     const agent = await this.agentServiceInstance.getAgent(agentId);
     if (!agent) {
       throw new Error("Agent not found");
