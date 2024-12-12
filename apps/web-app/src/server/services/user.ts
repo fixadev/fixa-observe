@@ -7,11 +7,12 @@ type MetadataType = "public" | "private";
 export interface PrivateMetadata {
   slackAccessToken?: string;
   apiKey?: string;
-  stripeCustomerId?: string;
 }
 
 export interface PublicMetadata {
   slackWebhookUrl?: string;
+  stripeCustomerId?: string;
+  freeTestsLeft?: number;
 }
 
 export class UserService {
@@ -30,13 +31,14 @@ export class UserService {
     });
   }
 
-  async updateStripeCustomerId(userId: string, stripeCustomerId: string) {
-    await this.updatePrivateMetadata(userId, { stripeCustomerId });
-  }
-
-  async getStripeCustomerId(userId: string) {
-    const metadata = await this.getPrivateMetadata(userId);
-    return metadata.stripeCustomerId;
+  async decrementFreeTestsLeft(userId: string) {
+    const metadata = await this.getPublicMetadata(userId);
+    if (metadata.freeTestsLeft === undefined) {
+      return;
+    }
+    await this.updatePublicMetadata(userId, {
+      freeTestsLeft: metadata.freeTestsLeft - 1,
+    });
   }
 
   /**

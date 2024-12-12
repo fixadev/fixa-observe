@@ -1,12 +1,15 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { useUser } from "@clerk/nextjs";
 import { ExclamationTriangleIcon } from "@heroicons/react/24/solid";
 import Link from "next/link";
 import { useCallback, useMemo } from "react";
 import Spinner from "~/components/Spinner";
 import { SidebarTrigger } from "~/components/ui/sidebar";
+import { Skeleton } from "~/components/ui/skeleton";
 import { cn } from "~/lib/utils";
+import { type PublicMetadata } from "~/server/services/user";
 import { api } from "~/trpc/react";
 
 export default function BillingPage({
@@ -14,9 +17,13 @@ export default function BillingPage({
 }: {
   params: { agentId: string };
 }) {
+  const { user, isLoaded } = useUser();
+  const userData = useMemo(() => {
+    return user?.publicMetadata as PublicMetadata | undefined;
+  }, [user]);
   const hasPaymentMethod = useMemo(() => {
-    return false;
-  }, []);
+    return userData?.stripeCustomerId !== undefined;
+  }, [userData]);
 
   const freeTestsLeft = useMemo(() => {
     return 0;
@@ -44,120 +51,131 @@ export default function BillingPage({
         </div>
       </div>
       <div className="max-w-lg space-y-8 p-6">
-        {/* Plan Section */}
-        <section>
-          <div className="mb-4 text-lg font-medium">current plan</div>
-          {hasPaymentMethod ? (
-            <>
-              <div className="flex flex-col gap-2">
-                <div className="flex items-center gap-2 text-sm">
-                  <div className="w-24 font-medium">plan</div>
-                  <div>pay as you go</div>
-                </div>
-                <div className="flex items-center gap-2 text-sm">
-                  <div className="w-24 font-medium">amount</div>
-                  <div>$0.20 / minute</div>
-                </div>
-              </div>
-              <div className="mt-2 flex items-center gap-2 text-sm text-gray-500">
-                <div>need enterprise volume discounts?</div>
-                <Button variant="link" asChild>
-                  <Link
-                    href="https://cal.com/team/fixa/fixa-enterprise"
-                    target="_blank"
-                  >
-                    talk to us
-                  </Link>
-                </Button>
-              </div>
-            </>
-          ) : (
-            <>
-              <div className="flex flex-col gap-2">
-                <div className="flex items-center gap-2 text-sm">
-                  <div className="w-24 font-medium">plan</div>
-                  <div>free</div>
-                </div>
-                <div className="flex items-center gap-2 text-sm">
-                  <div className="w-24 font-medium">amount</div>
-                  <div
-                    className={cn(
-                      freeTestsLeft <= 0 && "text-red-500",
-                      "text-sm",
+        {isLoaded ? (
+          <>
+            {/* Plan Section */}
+            <section>
+              <div className="mb-4 text-lg font-medium">current plan</div>
+              {hasPaymentMethod ? (
+                <>
+                  <div className="flex flex-col gap-2">
+                    <div className="flex items-center gap-2 text-sm">
+                      <div className="w-24 font-medium">plan</div>
+                      <div>pay as you go</div>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm">
+                      <div className="w-24 font-medium">amount</div>
+                      <div>$0.20 / minute</div>
+                    </div>
+                  </div>
+                  <div className="mt-2 flex items-center gap-2 text-sm text-gray-500">
+                    <div>need enterprise volume discounts?</div>
+                    <Button variant="link" asChild>
+                      <Link
+                        href="https://cal.com/team/fixa/fixa-enterprise"
+                        target="_blank"
+                      >
+                        talk to us
+                      </Link>
+                    </Button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="flex flex-col gap-2">
+                    <div className="flex items-center gap-2 text-sm">
+                      <div className="w-24 font-medium">plan</div>
+                      <div>free</div>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm">
+                      <div className="w-24 font-medium">amount</div>
+                      <div
+                        className={cn(
+                          freeTestsLeft <= 0 && "text-red-500",
+                          "text-sm",
+                        )}
+                      >
+                        {freeTestsLeft} free test
+                        {freeTestsLeft === 1 ? " " : "s "}
+                        left
+                      </div>
+                    </div>
+                    {freeTestsLeft <= 0 && (
+                      <div className="flex w-[16.5rem] items-center gap-2 rounded-md border border-yellow-600 bg-yellow-50 p-1 text-sm font-medium text-muted-foreground text-yellow-600">
+                        <ExclamationTriangleIcon className="h-4 w-4 text-yellow-600" />
+                        upgrade now to continue using fixa.
+                      </div>
                     )}
+                  </div>
+                  <Button
+                    className="mt-2 w-[16.5rem]"
+                    onClick={upgradePlan}
+                    disabled={isGeneratingStripeUrl}
                   >
-                    {freeTestsLeft} free test{freeTestsLeft === 1 ? " " : "s "}
-                    left
+                    {isGeneratingStripeUrl ? (
+                      <Spinner className="h-4 w-4" />
+                    ) : (
+                      "upgrade"
+                    )}
+                  </Button>
+                  <div className="mt-1 w-[16.5rem] text-xs text-muted-foreground">
+                    usage based pricing. only pay for what you use.
+                  </div>
+                </>
+              )}
+            </section>
+
+            {/* Billing Details Section */}
+            {hasPaymentMethod && (
+              <section>
+                <div className="mb-4 text-lg font-medium">billing details</div>
+                <div className="flex flex-col gap-2">
+                  <div className="flex items-center gap-2 text-sm">
+                    <div className="w-24 font-medium">name</div>
+                    <div>jonathan liu</div>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm">
+                    <div className="w-24 font-medium">email</div>
+                    <div>jonathan@fixa.dev</div>
                   </div>
                 </div>
-                {freeTestsLeft <= 0 && (
-                  <div className="flex w-[16.5rem] items-center gap-2 rounded-md border border-yellow-600 bg-yellow-50 p-1 text-sm font-medium text-muted-foreground text-yellow-600">
-                    <ExclamationTriangleIcon className="h-4 w-4 text-yellow-600" />
-                    upgrade now to continue using fixa.
-                  </div>
-                )}
-              </div>
-              <Button
-                className="mt-2 w-[16.5rem]"
-                onClick={upgradePlan}
-                disabled={isGeneratingStripeUrl}
-              >
-                {isGeneratingStripeUrl ? (
-                  <Spinner className="h-4 w-4" />
-                ) : (
-                  "upgrade"
-                )}
-              </Button>
-              <div className="mt-1 w-[16.5rem] text-xs text-muted-foreground">
-                usage based pricing. only pay for what you use.
-              </div>
-            </>
-          )}
-        </section>
+                <Button variant="outline" className="mt-4">
+                  edit info
+                </Button>
+              </section>
+            )}
 
-        {/* Billing Details Section */}
-        {hasPaymentMethod && (
-          <section>
-            <div className="mb-4 text-lg font-medium">billing details</div>
-            <div className="flex flex-col gap-2">
-              <div className="flex items-center gap-2 text-sm">
-                <div className="w-24 font-medium">name</div>
-                <div>jonathan liu</div>
+            {/* Usage Section */}
+            <section>
+              <div className="mb-4 text-lg font-medium">usage</div>
+              <div className="flex flex-col gap-2">
+                <div className="flex items-center gap-2 text-sm">
+                  <div className="w-24 font-medium">period</div>
+                  <div>dec 11, 2024 - dec 12, 2024</div>
+                </div>
+                <div className="flex items-baseline gap-2 text-sm">
+                  <div className="w-24 font-medium">usage</div>
+                  <div className="flex items-baseline gap-2">
+                    <div>120 minutes</div>
+                    <div className="text-xs text-muted-foreground">
+                      ($0.20 / minute)
+                    </div>
+                  </div>
+                </div>
+                <div className="flex items-baseline gap-2 text-sm">
+                  <div className="w-24 font-medium">total</div>
+                  <div className="text-lg font-medium">$24.00</div>
+                </div>
               </div>
-              <div className="flex items-center gap-2 text-sm">
-                <div className="w-24 font-medium">email</div>
-                <div>jonathan@fixa.dev</div>
-              </div>
-            </div>
-            <Button variant="outline" className="mt-4">
-              edit info
-            </Button>
-          </section>
+            </section>
+          </>
+        ) : (
+          <>
+            <Skeleton className="h-32 w-full" />
+            <Skeleton className="h-32 w-full" />
+            <Skeleton className="h-32 w-full" />
+          </>
         )}
-
-        {/* Usage Section */}
-        <section>
-          <div className="mb-4 text-lg font-medium">usage</div>
-          <div className="flex flex-col gap-2">
-            <div className="flex items-center gap-2 text-sm">
-              <div className="w-24 font-medium">period</div>
-              <div>dec 11, 2024 - dec 12, 2024</div>
-            </div>
-            <div className="flex items-baseline gap-2 text-sm">
-              <div className="w-24 font-medium">usage</div>
-              <div className="flex items-baseline gap-2">
-                <div>120 minutes</div>
-                <div className="text-xs text-muted-foreground">
-                  ($0.20 / minute)
-                </div>
-              </div>
-            </div>
-            <div className="flex items-baseline gap-2 text-sm">
-              <div className="w-24 font-medium">total</div>
-              <div className="text-lg font-medium">$24.00</div>
-            </div>
-          </div>
-        </section>
       </div>
     </div>
   );

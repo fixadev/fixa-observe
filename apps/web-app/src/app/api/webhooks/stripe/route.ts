@@ -42,7 +42,9 @@ export async function POST(req: NextRequest) {
 
         const customerId = session.customer as string | undefined;
         if (customerId) {
-          await userService.updateStripeCustomerId(userId, customerId);
+          await userService.updatePublicMetadata(userId, {
+            stripeCustomerId: customerId,
+          });
         }
       } else {
         console.log(`⚠️  Payment failed for user ${userId}`);
