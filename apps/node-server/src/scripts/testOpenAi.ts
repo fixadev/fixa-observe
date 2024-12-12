@@ -9,9 +9,6 @@ const main = async () => {
   const response = await openai.chat.completions.create({
     model: "gpt-4o-mini",
     messages: [{ role: "user", content: "Hello, world!" }],
-
-    // @ts-expect-error
-    timeout: 5000,
   });
 
   console.log(response);

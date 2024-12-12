@@ -108,7 +108,6 @@ export class AgentService {
         enabledGeneralEvals: true,
       },
     });
-    console.log("AGENT", result?.scenarios[0]?.evals);
     return result;
   }
 

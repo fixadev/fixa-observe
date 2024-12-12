@@ -108,7 +108,7 @@ export const transcribeAndSaveCall = async ({
       data: {
         id: uuidv4(),
         createdAt: new Date(),
-        ownerId: "11x",
+        ownerId: userId,
         customerCallId: callId,
         startedAt: createdAt,
         status: CallStatus.completed,

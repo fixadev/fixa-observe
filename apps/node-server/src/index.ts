@@ -79,7 +79,7 @@ app.post("/vapi", getContext, async (req: Request, res: Response) => {
 
 app.post(
   "/upload-call",
-  // authenticateRequest,
+  authenticateRequest,
   validateUploadCallParams,
   async (req: Request, res: Response) => {
     try {
@@ -88,13 +88,19 @@ app.post(
 
       if (regionId) metadata.regionId = regionId;
 
+      console.log(
+        "ADDING CALL TO QUEUE",
+        callId,
+        "with user id",
+        res.locals.userId,
+      );
+
       await addCallToQueue({
         callId,
         location,
         agentId,
         createdAt: createdAt ? new Date(createdAt) : new Date(),
-        // userId: res.locals.userId,
-        userId: "11x",
+        userId: res.locals.userId,
         metadata: metadata,
       });
       res.json({ success: true, muizz: "the man" });
@@ -138,13 +144,11 @@ app.get("/db", async (_, res: Response) => {
     res.json({ result });
   } catch (error) {
     console.error("Error fetching data from database", error);
-    res
-      .status(500)
-      .json({
-        error,
-        databaseUrl: env.DATABASE_URL,
-        directUrl: env.DIRECT_URL,
-      });
+    res.status(500).json({
+      error,
+      databaseUrl: env.DATABASE_URL,
+      directUrl: env.DIRECT_URL,
+    });
   }
 });
 

@@ -57,8 +57,7 @@ export default function Filters({
   savedSearch?: SavedSearchWithIncludes;
 }) {
   const { data: agentIds } = api._call.getAgentIds.useQuery();
-  const { data: _agents, refetch: refetchAgents } =
-    api.agent.getAllFor11x.useQuery();
+  const { data: _agents, refetch: refetchAgents } = api.agent.getAll.useQuery();
   const { data: metadata } = api._call.getMetadata.useQuery();
 
   const { filter, setFilter } = useObserveState();
@@ -273,7 +272,7 @@ function EditAgentDialog({
   setOpen: (open: boolean) => void;
   refetchAgents: () => void;
 }) {
-  const { data: agents } = api.agent.getAllFor11x.useQuery();
+  const { data: agents } = api.agent.getAll.useQuery();
   const [search, setSearch] = useState("");
 
   const { mutateAsync: updateAgentName, isPending: isUpdating } =

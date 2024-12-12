@@ -24,6 +24,8 @@ export async function startQueueConsumer() {
             throw new Error("Missing required fields");
           }
 
+          console.log("PROCESSING CALL", callId);
+
           // Upsert agent if it doesn't exist
           const agent = await upsertAgent(agentId, userId);
 
