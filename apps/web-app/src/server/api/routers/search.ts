@@ -49,7 +49,7 @@ export const searchRouter = createTRPCRouter({
   getById: protectedProcedure
     .input(z.object({ id: z.string() }))
     .query(async ({ input, ctx }) => {
-      return await searchServiceInstance.getById(ctx.user.id, input.id);
+      return await searchServiceInstance.getById(input.id, ctx.user.id);
     }),
 
   createAlert: protectedProcedure
