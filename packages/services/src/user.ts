@@ -10,12 +10,12 @@ import {
 export class UserService {
   private clerkClient: ClerkClient;
 
-  constructor(
-    private db: PrismaClient,
-    clerkSecretKey: string,
-  ) {
+  constructor(private db: PrismaClient) {
+    if (!process.env.CLERK_SECRET_KEY) {
+      throw new Error("CLERK_SECRET_KEY is not set");
+    }
     this.clerkClient = createClerkClient({
-      secretKey: clerkSecretKey,
+      secretKey: process.env.CLERK_SECRET_KEY,
     });
   }
 

@@ -2,14 +2,11 @@ import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { StripeService } from "@repo/services/src/stripe";
 import { db } from "~/server/db";
-import Stripe from "stripe";
-import { env } from "~/env";
 
-const stripe = new Stripe(env.STRIPE_SECRET_KEY);
-const stripeService = new StripeService(db, stripe);
+const stripeService = new StripeService(db);
 
 export const stripeRouter = createTRPCRouter({
-  createCheckoutSession: protectedProcedure
+  createCheckoutUrl: protectedProcedure
     .input(z.object({ redirectUrl: z.string().optional() }))
     .mutation(async ({ ctx, input }) => {
       const origin = ctx.headers.get("origin");

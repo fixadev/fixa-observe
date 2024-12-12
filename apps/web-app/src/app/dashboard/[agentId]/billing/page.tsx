@@ -30,7 +30,7 @@ export default function BillingPage({
   }, []);
 
   const { mutate: getCheckoutUrl, isPending: isGeneratingStripeUrl } =
-    api.stripe.createCheckoutSession.useMutation({
+    api.stripe.createCheckoutUrl.useMutation({
       onSuccess: (data) => {
         window.location.href = data.checkoutUrl;
       },

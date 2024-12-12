@@ -24,6 +24,7 @@ export const env = createEnv({
     SLACK_CLIENT_SECRET: z.string(),
     STRIPE_SECRET_KEY: z.string(),
     STRIPE_WEBHOOK_SECRET: z.string(),
+    TESTING_MINUTES_PRICE_ID: z.string(),
   },
 
   /**
@@ -76,6 +77,7 @@ export const env = createEnv({
     SLACK_CLIENT_SECRET: process.env.SLACK_CLIENT_SECRET,
     STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY,
     STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET,
+    TESTING_MINUTES_PRICE_ID: process.env.TESTING_MINUTES_PRICE_ID,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially

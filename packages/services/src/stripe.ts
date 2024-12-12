@@ -1,13 +1,17 @@
 import { PrismaClient } from "@repo/db/src";
-import type Stripe from "stripe";
-
-const FIXA_TESTING_MINUTES_PRICE_ID = "price_1QUzpIP8pM2RZq0fOji7aafl";
+import Stripe from "stripe";
 
 export class StripeService {
-  constructor(
-    private db: PrismaClient,
-    private stripe: Stripe,
-  ) {}
+  private stripe: Stripe;
+  constructor(private db: PrismaClient) {
+    if (!process.env.STRIPE_SECRET_KEY) {
+      throw new Error("STRIPE_SECRET_KEY is not set");
+    }
+    if (!process.env.TESTING_MINUTES_PRICE_ID) {
+      throw new Error("TESTING_MINUTES_PRICE_ID is not set");
+    }
+    this.stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+  }
 
   createCheckoutUrl = async ({
     userId,
@@ -23,7 +27,7 @@ export class StripeService {
       line_items: [
         {
           // Provide the exact Price ID (for example, pr_1234) of the product you want to sell
-          price: FIXA_TESTING_MINUTES_PRICE_ID,
+          price: process.env.TESTING_MINUTES_PRICE_ID,
         },
       ],
       mode: "subscription",

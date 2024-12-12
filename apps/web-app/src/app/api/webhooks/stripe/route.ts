@@ -4,7 +4,7 @@ import Stripe from "stripe";
 import { UserService } from "@repo/services/src/user";
 import { db } from "~/server/db";
 
-const userService = new UserService(db, env.CLERK_SECRET_KEY);
+const userService = new UserService(db);
 const stripe = new Stripe(env.STRIPE_SECRET_KEY);
 const endpointSecret = env.STRIPE_WEBHOOK_SECRET;
 

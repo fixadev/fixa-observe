@@ -7,7 +7,7 @@ import { currentUser } from "@clerk/nextjs/server";
 import { UserService } from "@repo/services/src/user";
 import { db } from "~/server/db";
 
-const userService = new UserService(db, env.CLERK_SECRET_KEY);
+const userService = new UserService(db);
 
 export const slackRouter = createTRPCRouter({
   exchangeCode: protectedProcedure
