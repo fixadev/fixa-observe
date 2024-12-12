@@ -99,7 +99,7 @@ export default function AgentScenariosPage({
               : s,
           ),
         });
-        updateScenario({ scenario });
+        updateScenario(scenario);
       } else {
         const newScenario: ScenarioWithEvals = {
           ...scenario,
@@ -141,7 +141,10 @@ export default function AgentScenariosPage({
             },
           ],
         });
-        createScenario({ agentId: agent?.id ?? "", scenario: newScenario });
+        createScenario({
+          agentId: agent?.id ?? "",
+          scenario: newScenario,
+        });
       }
       setIsDrawerOpen(false);
     },

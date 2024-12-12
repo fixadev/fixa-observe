@@ -8,12 +8,21 @@ import {
 export class ScenarioService {
   constructor(private db: PrismaClient) {}
 
-  async createScenario(agentId: string, scenario: CreateScenarioSchema) {
+  async createScenario({
+    agentId,
+    scenario,
+    userId,
+  }: {
+    agentId: string;
+    scenario: CreateScenarioSchema;
+    userId: string;
+  }) {
     return await this.db.scenario.create({
       data: {
         ...scenario,
         id: uuidv4(),
         agentId,
+        ownerId: userId,
         createdAt: new Date(),
         evals: {
           createMany: {
@@ -72,7 +81,7 @@ export class ScenarioService {
     });
   }
 
-  async updateScenario(scenario: UpdateScenarioSchema) {
+  async updateScenario(scenario: UpdateScenarioSchema, userId: string) {
     const priorEvals = await this.db.eval.findMany({
       where: { scenarioId: scenario.id },
     });
@@ -170,9 +179,9 @@ export class ScenarioService {
     });
   }
 
-  async deleteScenario(id: string) {
+  async deleteScenario(id: string, userId: string) {
     return await this.db.scenario.update({
-      where: { id },
+      where: { id, ownerId: userId },
       data: { deleted: true },
     });
   }

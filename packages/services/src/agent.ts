@@ -39,9 +39,13 @@ export class AgentService {
     });
   }
 
-  async updateAgentName(id: string, name: string): Promise<Agent> {
+  async updateAgentName(
+    id: string,
+    name: string,
+    ownerId: string,
+  ): Promise<Agent> {
     return await this.db.agent.update({
-      where: { id },
+      where: { id, ownerId },
       data: { name },
     });
   }
@@ -85,9 +89,12 @@ export class AgentService {
     throw new Error("Either id or customerAgentId must be provided");
   }
 
-  async getAgent(id: string): Promise<AgentWithIncludes | null> {
+  async getAgent(
+    id: string,
+    ownerId: string,
+  ): Promise<AgentWithIncludes | null> {
     const result = await this.db.agent.findUnique({
-      where: { id },
+      where: { id, ownerId },
       include: {
         scenarios: {
           where: { deleted: false },
@@ -119,12 +126,14 @@ export class AgentService {
   async updateAgent({
     id,
     agent,
+    ownerId,
   }: {
     id: string;
     agent: Partial<Agent>;
+    ownerId: string;
   }): Promise<Agent> {
     return await this.db.agent.update({
-      where: { id },
+      where: { id, ownerId },
       data: {
         ...agent,
         extraProperties: agent.extraProperties ?? undefined,
@@ -165,10 +174,11 @@ export class AgentService {
     agentId: string,
     testAgentId: string,
     enabled: boolean,
+    ownerId: string,
   ): Promise<Agent> {
     if (enabled) {
       return await this.db.agent.update({
-        where: { id: agentId },
+        where: { id: agentId, ownerId },
         data: {
           enabledTestAgents: {
             connect: { id: testAgentId },
@@ -186,7 +196,7 @@ export class AgentService {
       });
     }
   }
-  async deleteAgent(id: string): Promise<void> {
-    await this.db.agent.delete({ where: { id } });
+  async deleteAgent(id: string, ownerId: string): Promise<void> {
+    await this.db.agent.delete({ where: { id, ownerId } });
   }
 }

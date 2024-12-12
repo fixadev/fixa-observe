@@ -33,13 +33,13 @@ export const searchRouter = createTRPCRouter({
   update: protectedProcedure
     .input(SavedSearchWithIncludes)
     .mutation(async ({ input, ctx }) => {
-      return await searchServiceInstance.update(ctx.user.id, input);
+      return await searchServiceInstance.update(input, ctx.user.id);
     }),
 
   delete: protectedProcedure
     .input(z.object({ id: z.string() }))
     .mutation(async ({ input, ctx }) => {
-      await searchServiceInstance.delete(ctx.user.id, input.id);
+      await searchServiceInstance.delete(input.id, ctx.user.id);
     }),
 
   getAll: protectedProcedure.query(async ({ ctx }) => {
@@ -55,18 +55,18 @@ export const searchRouter = createTRPCRouter({
   createAlert: protectedProcedure
     .input(AlertWithDetailsSchema)
     .mutation(async ({ input, ctx }) => {
-      return await searchServiceInstance.createAlert(ctx.user.id, input);
+      return await searchServiceInstance.createAlert(input, ctx.user.id);
     }),
 
   updateAlert: protectedProcedure
     .input(AlertWithDetailsSchema)
     .mutation(async ({ input, ctx }) => {
-      return await searchServiceInstance.updateAlert(ctx.user.id, input);
+      return await searchServiceInstance.updateAlert(input, ctx.user.id);
     }),
 
   deleteAlert: protectedProcedure
     .input(z.object({ id: z.string() }))
     .mutation(async ({ input, ctx }) => {
-      return await searchServiceInstance.deleteAlert(ctx.user.id, input.id);
+      return await searchServiceInstance.deleteAlert(input.id, ctx.user.id);
     }),
 });

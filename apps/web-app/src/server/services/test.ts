@@ -14,10 +14,13 @@ export class TestService {
   }
   agentServiceInstance: AgentService;
 
-  async get(id: string): Promise<TestWithIncludes | null> {
+  async get(id: string, userId: string): Promise<TestWithIncludes | null> {
     return await this.db.test.findUnique({
       where: {
         id,
+        agent: {
+          ownerId: userId,
+        },
       },
       include: {
         calls: {
@@ -47,10 +50,13 @@ export class TestService {
     });
   }
 
-  async getAll(agentId: string) {
+  async getAll(agentId: string, userId: string) {
     return await this.db.test.findMany({
       where: {
         agentId,
+        agent: {
+          ownerId: userId,
+        },
       },
       include: {
         calls: true,
@@ -61,9 +67,9 @@ export class TestService {
     });
   }
 
-  async getStatus(testId: string) {
+  async getStatus(testId: string, userId: string) {
     const test = await this.db.test.findUnique({
-      where: { id: testId },
+      where: { id: testId, agent: { ownerId: userId } },
       select: {
         calls: {
           select: {
@@ -90,16 +96,18 @@ export class TestService {
 
   async run({
     agentId,
+    userId,
     scenarioIds,
     testAgentIds,
     runFromApi = false,
   }: {
     agentId: string;
+    userId: string;
     scenarioIds?: string[];
     testAgentIds?: string[];
     runFromApi?: boolean;
   }) {
-    const agent = await this.agentServiceInstance.getAgent(agentId);
+    const agent = await this.agentServiceInstance.getAgent(agentId, userId);
     if (!agent) {
       throw new Error("Agent not found");
     }
@@ -232,9 +240,14 @@ export class TestService {
     }
   }
 
-  async getLastTest(agentId: string) {
+  async getLastTest(agentId: string, userId: string) {
     return await this.db.test.findFirst({
-      where: { agentId },
+      where: {
+        agentId,
+        agent: {
+          ownerId: userId,
+        },
+      },
       orderBy: { createdAt: "desc" },
     });
   }

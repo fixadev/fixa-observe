@@ -8,17 +8,18 @@ import { FilterSchema, OrderBySchema } from "@repo/types/src/index";
 const callService = new CallService(db);
 
 export const callRouter = createTRPCRouter({
-  getCall: protectedProcedure.input(z.string()).query(async ({ input }) => {
-    console.log("GET CALL", input);
-    const call = await callService.getCall(input);
-    if (!call) {
-      throw new TRPCError({
-        code: "NOT_FOUND",
-        message: "Call not found",
-      });
-    }
-    return call;
-  }),
+  getCall: protectedProcedure
+    .input(z.string())
+    .query(async ({ input, ctx }) => {
+      const call = await callService.getCall(input, ctx.user.id);
+      if (!call) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Call not found",
+        });
+      }
+      return call;
+    }),
 
   getCalls: protectedProcedure
     .input(
@@ -49,8 +50,8 @@ export const callRouter = createTRPCRouter({
     .input(z.object({ filter: FilterSchema.partial() }))
     .query(async ({ input, ctx }) => {
       return await callService.getLatencyInterruptionPercentiles({
-        ownerId: ctx.user.id,
         filter: input.filter,
+        ownerId: ctx.user.id,
       });
     }),
 

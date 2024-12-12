@@ -32,24 +32,33 @@ export const scenarioRouter = createTRPCRouter({
     }),
 
   create: protectedProcedure
-    .input(z.object({ agentId: z.string(), scenario: CreateScenarioSchema }))
-    .mutation(async ({ input }) => {
-      return await scenarioServiceInstance.createScenario(
-        input.agentId,
-        input.scenario,
-      );
+    .input(
+      z.object({
+        agentId: z.string(),
+        scenario: CreateScenarioSchema,
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      return await scenarioServiceInstance.createScenario({
+        agentId: input.agentId,
+        scenario: input.scenario,
+        userId: ctx.user.id,
+      });
     }),
 
+  // todo: add ownerIds to all scenarios in prod
   update: protectedProcedure
-    .input(z.object({ scenario: UpdateScenarioSchema }))
-    .mutation(async ({ input }) => {
-      console.log("INPUT: ", input.scenario);
-      return await scenarioServiceInstance.updateScenario(input.scenario);
+    .input(UpdateScenarioSchema)
+    .mutation(async ({ input, ctx }) => {
+      return await scenarioServiceInstance.updateScenario(input, ctx.user.id);
     }),
 
   delete: protectedProcedure
     .input(z.object({ id: z.string() }))
-    .mutation(async ({ input }) => {
-      return await scenarioServiceInstance.deleteScenario(input.id);
+    .mutation(async ({ input, ctx }) => {
+      return await scenarioServiceInstance.deleteScenario(
+        input.id,
+        ctx.user.id,
+      );
     }),
 });

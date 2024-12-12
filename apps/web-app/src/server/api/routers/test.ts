@@ -8,14 +8,14 @@ const testServiceInstance = new TestService(db);
 export const testRouter = createTRPCRouter({
   get: protectedProcedure
     .input(z.object({ id: z.string() }))
-    .query(async ({ input }) => {
-      return await testServiceInstance.get(input.id);
+    .query(async ({ input, ctx }) => {
+      return await testServiceInstance.get(input.id, ctx.user.id);
     }),
 
   getAll: protectedProcedure
     .input(z.object({ agentId: z.string() }))
-    .query(async ({ input }) => {
-      return await testServiceInstance.getAll(input.agentId);
+    .query(async ({ input, ctx }) => {
+      return await testServiceInstance.getAll(input.agentId, ctx.user.id);
     }),
 
   run: protectedProcedure
@@ -26,9 +26,10 @@ export const testRouter = createTRPCRouter({
         testAgentIds: z.array(z.string()),
       }),
     )
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
       return await testServiceInstance.run({
         agentId: input.agentId,
+        userId: ctx.user.id,
         scenarioIds: input.scenarioIds,
         testAgentIds: input.testAgentIds,
       });
@@ -36,7 +37,7 @@ export const testRouter = createTRPCRouter({
 
   getLastTest: protectedProcedure
     .input(z.object({ agentId: z.string() }))
-    .query(async ({ input }) => {
-      return await testServiceInstance.getLastTest(input.agentId);
+    .query(async ({ input, ctx }) => {
+      return await testServiceInstance.getLastTest(input.agentId, ctx.user.id);
     }),
 });

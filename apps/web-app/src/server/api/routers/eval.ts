@@ -14,13 +14,13 @@ export const evalRouter = createTRPCRouter({
   createGeneralEval: protectedProcedure
     .input(EvalSchema)
     .mutation(async ({ input, ctx }) => {
-      return await evalServiceInstance.createGeneralEval(ctx.user.id, input);
+      return await evalServiceInstance.createGeneralEval(input, ctx.user.id);
     }),
 
   updateGeneralEval: protectedProcedure
     .input(EvalSchema)
     .mutation(async ({ input, ctx }) => {
-      return await evalServiceInstance.updateGeneralEval(input);
+      return await evalServiceInstance.updateGeneralEval(input, ctx.user.id);
     }),
 
   toggleGeneralEval: protectedProcedure
@@ -28,13 +28,16 @@ export const evalRouter = createTRPCRouter({
       z.object({ id: z.string(), agentId: z.string(), enabled: z.boolean() }),
     )
     .mutation(async ({ input, ctx }) => {
-      return await evalServiceInstance.toggleGeneralEval(input);
+      return await evalServiceInstance.toggleGeneralEval({
+        ...input,
+        userId: ctx.user.id,
+      });
     }),
 
   deleteGeneralEval: protectedProcedure
     .input(z.object({ id: z.string() }))
     .mutation(async ({ input, ctx }) => {
-      return await evalServiceInstance.deleteGeneralEval(input.id);
+      return await evalServiceInstance.deleteGeneralEval(input.id, ctx.user.id);
     }),
 
   getSets: protectedProcedure.query(async ({ ctx }) => {
@@ -43,16 +46,16 @@ export const evalRouter = createTRPCRouter({
   createSet: protectedProcedure
     .input(EvalSetWithIncludesSchema)
     .mutation(async ({ input, ctx }) => {
-      return await evalServiceInstance.createSet(ctx.user.id, input);
+      return await evalServiceInstance.createSet(input, ctx.user.id);
     }),
   updateSet: protectedProcedure
     .input(EvalSetWithIncludesSchema)
     .mutation(async ({ input, ctx }) => {
-      return await evalServiceInstance.updateSet(ctx.user.id, input);
+      return await evalServiceInstance.updateSet(input, ctx.user.id);
     }),
   deleteSet: protectedProcedure
     .input(z.object({ id: z.string() }))
     .mutation(async ({ input, ctx }) => {
-      return await evalServiceInstance.deleteSet(ctx.user.id, input.id);
+      return await evalServiceInstance.deleteSet(input.id, ctx.user.id);
     }),
 });

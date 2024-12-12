@@ -192,9 +192,11 @@ model CallRecording {
 
 model Scenario {
   id        String   @id @default(uuid())
-  agent     Agent    @relation(fields: [agentId], references: [id], onDelete: Cascade)
-  agentId   String
   createdAt DateTime @default(now())
+  ownerId   String   @default("")
+
+  agent   Agent  @relation(fields: [agentId], references: [id], onDelete: Cascade)
+  agentId String
 
   name                 String
   instructions         String
