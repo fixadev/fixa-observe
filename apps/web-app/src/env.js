@@ -44,6 +44,7 @@ export const env = createEnv({
     NEXT_PUBLIC_SERVER_URL: z.string(),
     NEXT_PUBLIC_SLACK_CLIENT_ID: z.string(),
     NEXT_PUBLIC_SLACK_REDIRECT_URI: z.string(),
+    NEXT_PUBLIC_STRIPE_CUSTOMER_PORTAL_URL: z.string(),
   },
 
   /**
@@ -80,6 +81,8 @@ export const env = createEnv({
     STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET,
     TESTING_MINUTES_PRICE_ID: process.env.TESTING_MINUTES_PRICE_ID,
     TESTING_MINUTES_EVENT_NAME: process.env.TESTING_MINUTES_EVENT_NAME,
+    NEXT_PUBLIC_STRIPE_CUSTOMER_PORTAL_URL:
+      process.env.NEXT_PUBLIC_STRIPE_CUSTOMER_PORTAL_URL,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially

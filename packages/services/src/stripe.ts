@@ -36,6 +36,15 @@ export class StripeService {
     }
   };
 
+  private getCustomerId = async (userId: string) => {
+    const metadata = await this.userService.getPublicMetadata(userId);
+    const stripeCustomerId = metadata.stripeCustomerId;
+    if (!stripeCustomerId) {
+      throw new Error("Stripe customer ID not found");
+    }
+    return stripeCustomerId;
+  };
+
   createCheckoutUrl = async ({
     userId,
     origin,
@@ -79,10 +88,7 @@ export class StripeService {
       // Don't accrue minutes if there are still free tests left
       return;
     }
-    const stripeCustomerId = metadata.stripeCustomerId;
-    if (!stripeCustomerId) {
-      throw new Error("Stripe customer ID not found");
-    }
+    const stripeCustomerId = await this.getCustomerId(userId);
 
     await backOff(() =>
       this.stripe.billing.meterEvents.create({
@@ -93,5 +99,43 @@ export class StripeService {
         },
       }),
     );
+  };
+
+  getCustomer = async (userId: string) => {
+    const stripeCustomerId = await this.getCustomerId(userId);
+    return this.stripe.customers.retrieve(stripeCustomerId);
+  };
+
+  getSubscriptions = async (userId: string) => {
+    const stripeCustomerId = await this.getCustomerId(userId);
+    return this.stripe.subscriptions.list({
+      customer: stripeCustomerId,
+      price: this.env.TESTING_MINUTES_PRICE_ID,
+    });
+  };
+
+  getMeterSummary = async ({
+    userId,
+    meterId,
+    start,
+    end,
+  }: {
+    userId: string;
+    meterId: string;
+    start: Date;
+    end: Date;
+  }) => {
+    const stripeCustomerId = await this.getCustomerId(userId);
+    // Align to start of day (UTC)
+    const startTime = Math.floor(start.setUTCHours(0, 0, 0, 0) / 1000);
+    // Align to end of day (UTC)
+    const endTime = Math.floor(end.setUTCHours(23, 59, 59, 999) / 1000) + 1;
+
+    return this.stripe.billing.meters.listEventSummaries(meterId, {
+      customer: stripeCustomerId,
+      start_time: startTime,
+      end_time: endTime,
+      value_grouping_window: "day",
+    });
   };
 }
