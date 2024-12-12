@@ -233,7 +233,11 @@ export const analyzeBasedOnRules = async ({
     }
   } catch (error) {
     console.error("Error in analyzeBasedOnRules:", error);
-    throw error;
+    return {
+      evalSets: [],
+      evalSetResults: [],
+      savedSearches: [],
+    };
   }
 };
 
@@ -250,9 +254,9 @@ export const findRelevantEvalSets = async ({
 }) => {
   try {
     const savedSearches = await db.savedSearch.findMany({
-      // where: {
-      //   ownerId: userId,
-      // },
+      where: {
+        ownerId: userId,
+      },
       include: {
         evalSets: { include: { evals: true } },
         alerts: true,
@@ -287,12 +291,52 @@ export const findRelevantEvalSets = async ({
       relevantEvalSets: z.array(
         z.object({
           id: z.string(),
+          relevant: z.boolean(),
         }),
       ),
     });
 
     const prompt = `
     Your job is to determine which eval sets are relevant to the following call by comparing the call transcript to the eval set condition:
+
+    Determine IF the condition in the eval set is clearly true for the call transcript. And return an array of objects with the following fields:
+    - id: the id of the eval set
+    - relevant: true if the condition is clearly true for the call transcript, false otherwise
+
+    For example, for this eval set:
+
+    {
+      "id": "1234",
+      "condition": "the user tries to book an appointment"
+    }
+
+    and this call transcript:
+
+    [
+      {
+        "role": "user",
+        "message": "hi"
+      },
+      {
+        "role": "bot",
+        "message": "hello"
+      },
+      {
+        "role": "user",
+        "message": "what are the hours of your store?"
+      }
+    ]
+
+    The eval set is not relevant because the condition "the user tries to book an appointment" is not clearly true for the call transcript.
+
+    So the output should be:
+
+    [
+      {
+        "id": "1234",
+        "relevant": false
+      }
+    ]
 
     Here is the call transcript:
     ${JSON.stringify(messages, null, 2)}
@@ -302,10 +346,12 @@ export const findRelevantEvalSets = async ({
 
     Return a array of objects with the following fields:
     - id: the id of the eval set
+    - relevant: true if the condition is clearly true for the call transcript, false otherwise
 
     `;
     const completion = await openai.beta.chat.completions.parse({
       model: "gpt-4o",
+      max_tokens: 10000,
       messages: [{ role: "system", content: prompt }],
       response_format: zodResponseFormat(
         findEvalSetsOutputSchema,
@@ -323,7 +369,8 @@ export const findRelevantEvalSets = async ({
       savedSearches: matchingSavedSearches,
       evalSets: evalSetsWithEvals.filter((evalSet) => {
         return parsedResponse.relevantEvalSets.some(
-          (relevantEvalSet) => relevantEvalSet.id === evalSet.id,
+          (relevantEvalSet) =>
+            relevantEvalSet.id === evalSet.id && relevantEvalSet.relevant,
         );
       }),
     };

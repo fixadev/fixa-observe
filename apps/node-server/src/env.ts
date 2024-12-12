@@ -33,6 +33,7 @@ const envSchema = z.object({
   NODE_SERVER_URL: z.string().min(1),
   DATABASE_URL: z.string().min(1),
   DIRECT_URL: z.string().min(1),
+  // KEYWORDSAI_API_KEY: z.string().min(1),
 });
 
 // Validate and transform environment variables
