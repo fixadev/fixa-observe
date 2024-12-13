@@ -51,7 +51,7 @@ io.on("connection", (socket) => {
 app.use(express.json());
 
 // Routes
-app.get("/health", (_, res: Response) => res.json({ status: "ok" }));
+app.get("/", (_, res: Response) => res.json({ status: "ollo" }));
 
 app.post("/vapi", getContext, async (req: Request, res: Response) => {
   try {
