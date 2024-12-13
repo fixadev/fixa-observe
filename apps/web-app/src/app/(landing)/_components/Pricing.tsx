@@ -3,6 +3,7 @@ import { Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Heading } from "./text/heading";
 import { Title } from "./text/title";
+import Link from "next/link";
 
 export function Pricing() {
   return (
@@ -103,8 +104,13 @@ export function Pricing() {
               </ul>
             </div>
             <div className="flex-1" />
-            <Button variant="outline" className="mt-8 w-full lowercase">
-              contact us
+            <Button variant="outline" className="mt-8 w-full lowercase" asChild>
+              <Link
+                href="https://cal.com/team/fixa/enterprise-pricing"
+                target="_blank"
+              >
+                contact us
+              </Link>
             </Button>
           </div>
         </div>
