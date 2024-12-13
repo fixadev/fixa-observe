@@ -2,19 +2,48 @@
 
 import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import Logo from "~/components/Logo";
-import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
+
+const navLinks = [
+  { href: "#features", label: "features" },
+  { href: "#pricing", label: "pricing" },
+  // { href: "#contact", label: "contact" },
+];
 
 export function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
 
-  const navLinks = [
-    { href: "#features", label: "features" },
-    { href: "#pricing", label: "pricing" },
-    { href: "#contact", label: "contact" },
-  ];
+  const handleScroll = useCallback(
+    (e: React.MouseEvent<HTMLButtonElement>, href: string) => {
+      e.preventDefault();
+      setIsOpen(false);
+
+      // Get the target element
+      const target = document.querySelector(href);
+      if (target) {
+        // Add a small delay to ensure proper execution
+        setTimeout(() => {
+          const navbarHeight = 64; // height of your navbar (16 * 4 = 64px)
+          const targetPosition = target.getBoundingClientRect().top;
+          const offsetPosition =
+            targetPosition + window.pageYOffset - navbarHeight;
+
+          window.scrollTo({
+            top: offsetPosition,
+            behavior: "smooth",
+          });
+
+          // Update URL after scrolling is complete
+          setTimeout(() => {
+            window.history.pushState({}, "", href);
+          }, 100);
+        }, 0);
+      }
+    },
+    [],
+  );
 
   return (
     <nav className="fixed z-50 w-full border-b border-gray-100 bg-white/90 backdrop-blur-sm">
@@ -25,8 +54,12 @@ export function Navbar() {
           <div className="hidden md:block">
             <div className="ml-10 flex items-center space-x-8">
               {navLinks.map((link) => (
-                <Button variant="ghost" key={link.href} asChild>
-                  <Link href={link.href}>{link.label}</Link>
+                <Button
+                  variant="ghost"
+                  key={link.href}
+                  onClick={(e) => handleScroll(e, link.href)}
+                >
+                  {link.label}
                 </Button>
               ))}
               <Button>get started</Button>
@@ -59,10 +92,9 @@ export function Navbar() {
                   variant="ghost"
                   key={link.href}
                   className="w-full"
-                  onClick={() => setIsOpen(false)}
-                  asChild
+                  onClick={(e) => handleScroll(e, link.href)}
                 >
-                  <Link href={link.href}>{link.label}</Link>
+                  {link.label}
                 </Button>
               ))}
               <Button className="w-full">get started</Button>
