@@ -21,6 +21,7 @@ import {
 import {
   ChartBarIcon,
   ChevronDownIcon,
+  CreditCardIcon,
   DocumentIcon,
   EllipsisHorizontalIcon,
 } from "@heroicons/react/24/outline";
@@ -48,9 +49,18 @@ import {
 } from "../ui/dialog";
 import { Input } from "../ui/input";
 import Spinner from "../Spinner";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../ui/select";
+import { UserButton } from "@clerk/nextjs";
 
 export default function ObserveSidebar() {
   const pathname = usePathname();
+  const router = useRouter();
 
   const isCurrentPath = useCallback(
     (path: string) => {
@@ -74,8 +84,33 @@ export default function ObserveSidebar() {
     <>
       <Sidebar>
         <SidebarHeader>
-          <div className="-m-2 flex h-14 items-center justify-between border-b px-4">
-            <Logo href="/observe" />
+          <div className="-m-2 flex h-14 items-center justify-between border-b px-4 lg:h-[60px]">
+            <Select
+              onValueChange={(value) => {
+                if (value === "test") {
+                  router.push(`/dashboard/new`);
+                }
+              }}
+            >
+              <SelectTrigger className="w-[100px]">
+                <SelectValue placeholder="observe" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="test">test</SelectItem>
+                <SelectItem value="observe">observe</SelectItem>
+              </SelectContent>
+            </Select>
+            <UserButton>
+              <UserButton.MenuItems>
+                <UserButton.Link
+                  href="/billing"
+                  label="billing"
+                  labelIcon={<CreditCardIcon />}
+                />
+                <UserButton.Action label="manageAccount" />
+                <UserButton.Action label="signOut" />
+              </UserButton.MenuItems>
+            </UserButton>
           </div>
         </SidebarHeader>
         <SidebarContent>

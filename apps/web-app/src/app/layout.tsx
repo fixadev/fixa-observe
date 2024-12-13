@@ -10,6 +10,7 @@ import { ClerkProvider } from "@clerk/nextjs";
 // import { dark } from "@clerk/themes";
 import ChildrenWrapper from "./_components/ChildrenWrapper";
 import { TooltipProvider } from "~/components/ui/tooltip";
+import { SidebarProvider } from "~/components/ui/sidebar";
 export const metadata: Metadata = {
   title: "fixa",
   description: "fix AI voice agents faster.",
@@ -27,28 +28,30 @@ export default function RootLayout({
       // suppressHydrationWarning
     >
       <CSPostHogProvider>
-        <ClerkProvider
-        // appearance={{ baseTheme: dark }}
-        // localization={localization}
-        >
-          <body className="h-full">
-            {/* <ThemeProvider
+        <SidebarProvider>
+          <ClerkProvider
+          // appearance={{ baseTheme: dark }}
+          // localization={localization}
+          >
+            <body className="h-full">
+              {/* <ThemeProvider
               attribute="class"
               defaultTheme="light"
               // enableSystem
               disableTransitionOnChange
             > */}
-            <TRPCReactProvider>
-              <TooltipProvider delayDuration={100}>
-                <ChildrenWrapper>
-                  {children}
-                  <Toaster />
-                </ChildrenWrapper>
-              </TooltipProvider>
-            </TRPCReactProvider>
-            {/* </ThemeProvider> */}
-          </body>
-        </ClerkProvider>
+              <TRPCReactProvider>
+                <TooltipProvider delayDuration={100}>
+                  <ChildrenWrapper>
+                    {children}
+                    <Toaster />
+                  </ChildrenWrapper>
+                </TooltipProvider>
+              </TRPCReactProvider>
+              {/* </ThemeProvider> */}
+            </body>
+          </ClerkProvider>
+        </SidebarProvider>
       </CSPostHogProvider>
     </html>
   );

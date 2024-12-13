@@ -2,7 +2,10 @@
 
 import { Button } from "@/components/ui/button";
 import { useUser } from "@clerk/nextjs";
-import { ExclamationTriangleIcon } from "@heroicons/react/24/solid";
+import {
+  ArrowLeftIcon,
+  ExclamationTriangleIcon,
+} from "@heroicons/react/24/solid";
 import Link from "next/link";
 import { useCallback, useMemo } from "react";
 import Spinner from "~/components/Spinner";
@@ -12,12 +15,14 @@ import { cn } from "~/lib/utils";
 import { type PublicMetadata } from "@repo/types/src";
 import { api } from "~/trpc/react";
 import { env } from "~/env";
+import { useRouter } from "next/navigation";
 
 export default function BillingPage({
   params,
 }: {
   params: { agentId: string };
 }) {
+  const router = useRouter();
   const { user, isLoaded: isUserLoaded } = useUser();
   const userData = useMemo(() => {
     return user?.publicMetadata as PublicMetadata | undefined;
@@ -74,10 +79,14 @@ export default function BillingPage({
     <div className="h-full">
       <div className="sticky top-0 z-20 flex h-14 w-full items-center justify-between border-b border-input bg-sidebar px-4 lg:h-[60px]">
         <div className="flex items-center gap-2">
-          <SidebarTrigger />
-          <Link href={`/dashboard/${params.agentId}/billing`}>
-            <div className="font-medium">billing</div>
-          </Link>
+          <Button
+            variant="ghost"
+            className="gap-2"
+            onClick={() => router.back()}
+          >
+            <ArrowLeftIcon className="h-4 w-4" />
+            back
+          </Button>
         </div>
       </div>
       <div className="max-w-lg space-y-8 p-6">
