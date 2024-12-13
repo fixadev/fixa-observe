@@ -9,8 +9,15 @@ uploadCallRouter.post(
   validateUploadCallParams,
   async (req: Request, res: Response) => {
     try {
-      const { callId, location, agentId, regionId, metadata, createdAt } =
-        req.body;
+      const {
+        callId,
+        location,
+        stereoRecordingUrl,
+        agentId,
+        regionId,
+        metadata,
+        createdAt,
+      } = req.body;
 
       if (regionId) metadata.regionId = regionId;
 
@@ -23,7 +30,7 @@ uploadCallRouter.post(
 
       await addCallToQueue({
         callId,
-        location,
+        location: location || stereoRecordingUrl,
         agentId,
         createdAt: createdAt ? new Date(createdAt) : new Date(),
         userId: res.locals.userId,

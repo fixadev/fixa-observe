@@ -5,11 +5,12 @@ export const validateUploadCallParams = (
   res: Response,
   next: NextFunction,
 ) => {
-  const { callId, location, agentId, metadata } = req.body;
+  const { callId, location, stereoRecordingUrl, agentId, metadata } = req.body;
 
   const missingFields = [];
   if (!callId) missingFields.push("callId");
-  if (!location) missingFields.push("location");
+  if (!location && !stereoRecordingUrl)
+    missingFields.push("stereoRecordingUrl");
   if (!agentId) missingFields.push("agentId");
   if (!metadata) missingFields.push("metadata");
   if (missingFields.length > 0) {
