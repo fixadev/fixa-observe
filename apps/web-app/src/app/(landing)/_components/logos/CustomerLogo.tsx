@@ -1,15 +1,20 @@
-import React from 'react';
+import Image from "next/image";
 
 interface CustomerLogoProps {
-  name: string;
-  grayscale?: boolean;
+  logo: string;
 }
 
-export function CustomerLogo({ name, grayscale = false }: CustomerLogoProps) {
+export function CustomerLogo({ logo }: CustomerLogoProps) {
   return (
-    <div className="col-span-1 flex justify-center items-center">
-      <div className="h-12 flex items-center justify-center">
-        <p className="text-xl font-semibold text-gray-400 lowercase">{name}</p>
+    <div className="col-span-1 flex items-center justify-center">
+      <div className="flex h-12 items-center justify-center">
+        <Image
+          src={logo}
+          alt="Customer Logo"
+          width={100}
+          height={100}
+          className="opacity-70 grayscale transition-all duration-300 hover:opacity-100 hover:grayscale-0"
+        />
       </div>
     </div>
   );

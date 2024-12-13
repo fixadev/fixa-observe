@@ -4,6 +4,8 @@ import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import Logo from "~/components/Logo";
+import Link from "next/link";
+import { AnimatePresence, motion } from "framer-motion";
 
 export function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -23,13 +25,9 @@ export function Navbar() {
           <div className="hidden md:block">
             <div className="ml-10 flex items-center space-x-8">
               {navLinks.map((link) => (
-                <a
-                  key={link.href}
-                  href={link.href}
-                  className="text-gray-600 transition-colors hover:text-black"
-                >
-                  {link.label}
-                </a>
+                <Button variant="ghost" key={link.href} asChild>
+                  <Link href={link.href}>{link.label}</Link>
+                </Button>
               ))}
               <Button>get started</Button>
             </div>
@@ -46,22 +44,32 @@ export function Navbar() {
         </div>
       </div>
 
-      {isOpen && (
-        <div className="border-t border-gray-100 md:hidden">
-          <div className="space-y-1 bg-white px-2 pb-3 pt-2 sm:px-3">
-            {navLinks.map((link) => (
-              <a
-                key={link.href}
-                href={link.href}
-                className="block px-3 py-2 text-gray-600 hover:text-black"
-              >
-                {link.label}
-              </a>
-            ))}
-            <Button className="w-full">get started</Button>
-          </div>
-        </div>
-      )}
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.2 }}
+            className="overflow-hidden border-t border-gray-100 md:hidden"
+          >
+            <div className="space-y-1 bg-white px-2 pb-3 pt-2 sm:px-3">
+              {navLinks.map((link) => (
+                <Button
+                  variant="ghost"
+                  key={link.href}
+                  className="w-full"
+                  onClick={() => setIsOpen(false)}
+                  asChild
+                >
+                  <Link href={link.href}>{link.label}</Link>
+                </Button>
+              ))}
+              <Button className="w-full">get started</Button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </nav>
   );
 }
