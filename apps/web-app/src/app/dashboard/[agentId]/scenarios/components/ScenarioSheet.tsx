@@ -300,9 +300,7 @@ export function ScenarioSheet({
               </Button>
             </div> */}
             <div>
-              <Label className="text-base">
-                scenario-specific evaluation criteria
-              </Label>
+              <Label className="text-base">evaluation criteria</Label>
               <div className="mb-2 text-sm text-muted-foreground">
                 the criteria on which we evaluate your agent
               </div>

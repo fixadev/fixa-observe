@@ -11,7 +11,7 @@ import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { type Agent } from "@repo/types/src/index";
 import { api } from "~/trpc/react";
 import Spinner from "~/components/Spinner";
@@ -52,9 +52,15 @@ export function AddAgentModal({
   defaultOpen?: boolean;
   unescapable?: boolean;
 }) {
-  const [modalOpen, setModalOpen] = useState(defaultOpen);
+  const [modalOpen, setModalOpen] = useState(false);
   const { toast } = useToast();
   const router = useRouter();
+
+  useEffect(() => {
+    setTimeout(() => {
+      setModalOpen(defaultOpen);
+    }, 500);
+  }, [defaultOpen]);
 
   const [agent, setAgent] = useState<Agent>({
     id: generateTempId(),
