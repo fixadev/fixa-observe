@@ -3,10 +3,12 @@
 import {
   Sidebar,
   SidebarContent,
+  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   SidebarHeader,
   SidebarMenu,
+  SidebarMenuBadge,
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarMenuSub,
@@ -56,6 +58,9 @@ import {
   SelectValue,
 } from "../ui/select";
 import { UserButton } from "@clerk/nextjs";
+import { SlackIcon } from "lucide-react";
+import { DocumentTextIcon, KeyIcon } from "@heroicons/react/24/outline";
+import { OpenInNewWindowIcon } from "@radix-ui/react-icons";
 
 export default function ObserveSidebar() {
   const pathname = usePathname();
@@ -188,6 +193,61 @@ export default function ObserveSidebar() {
             </SidebarGroupContent>
           </SidebarGroup>
         </SidebarContent>
+        <SidebarFooter>
+          <SidebarGroup>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    asChild
+                    isActive={isCurrentPath("/slack-app")}
+                  >
+                    <Link href="/observe/slack-app">
+                      <SlackIcon />
+                      <span>slack app</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    asChild
+                    isActive={isCurrentPath("/api-keys")}
+                  >
+                    <Link href="/observe/api-keys">
+                      <KeyIcon />
+                      <span>API keys</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild>
+                    <Link href={`https://docs.fixa.dev`} target="_blank">
+                      <DocumentTextIcon />
+                      <span>documentation</span>
+                    </Link>
+                  </SidebarMenuButton>
+                  <SidebarMenuBadge>
+                    <OpenInNewWindowIcon />
+                  </SidebarMenuBadge>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild>
+                    <Link
+                      href={`https://join.slack.com/t/fixacommunity/shared_invite/zt-2wbw79829-01HGYT7SxVYPk8t6pTNb9w`}
+                      target="_blank"
+                    >
+                      <SlackIcon />
+                      <span>support</span>
+                    </Link>
+                  </SidebarMenuButton>
+                  <SidebarMenuBadge>
+                    <OpenInNewWindowIcon />
+                  </SidebarMenuBadge>
+                </SidebarMenuItem>
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        </SidebarFooter>
       </Sidebar>
 
       <RenameDialog

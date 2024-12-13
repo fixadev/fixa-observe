@@ -198,7 +198,7 @@ export default function DashboardSidebar({
                   asChild
                   isActive={isCurrentPath("/slack-app")}
                 >
-                  <Link href={`${agentBaseUrl}/slack-app`}>
+                  <Link href={`observe/slack-app`}>
                     <SlackIcon />
                     <span>slack app</span>
                   </Link>
@@ -209,7 +209,7 @@ export default function DashboardSidebar({
                   asChild
                   isActive={isCurrentPath("/api-keys")}
                 >
-                  <Link href={`${agentBaseUrl}/api-keys`}>
+                  <Link href={`observe/api-keys`}>
                     <KeyIcon />
                     <span>API keys</span>
                   </Link>
@@ -220,6 +220,20 @@ export default function DashboardSidebar({
                   <Link href={`https://docs.fixa.dev`} target="_blank">
                     <DocumentTextIcon />
                     <span>documentation</span>
+                  </Link>
+                </SidebarMenuButton>
+                <SidebarMenuBadge>
+                  <OpenInNewWindowIcon />
+                </SidebarMenuBadge>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild>
+                  <Link
+                    href={`https://join.slack.com/t/fixacommunity/shared_invite/zt-2wbw79829-01HGYT7SxVYPk8t6pTNb9w`}
+                    target="_blank"
+                  >
+                    <SlackIcon />
+                    <span>support</span>
                   </Link>
                 </SidebarMenuButton>
                 <SidebarMenuBadge>
