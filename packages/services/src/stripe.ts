@@ -8,6 +8,8 @@ export class StripeService {
     STRIPE_SECRET_KEY: string;
     TESTING_MINUTES_PRICE_ID: string;
     TESTING_MINUTES_EVENT_NAME: string;
+    OBSERVABILITY_MINUTES_PRICE_ID: string;
+    OBSERVABILITY_MINUTES_EVENT_NAME: string;
   };
   private stripe: Stripe;
   private userService: UserService;
@@ -19,6 +21,10 @@ export class StripeService {
       STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY!,
       TESTING_MINUTES_PRICE_ID: process.env.TESTING_MINUTES_PRICE_ID!,
       TESTING_MINUTES_EVENT_NAME: process.env.TESTING_MINUTES_EVENT_NAME!,
+      OBSERVABILITY_MINUTES_PRICE_ID:
+        process.env.OBSERVABILITY_MINUTES_PRICE_ID!,
+      OBSERVABILITY_MINUTES_EVENT_NAME:
+        process.env.OBSERVABILITY_MINUTES_EVENT_NAME!,
     };
     this.stripe = new Stripe(this.env.STRIPE_SECRET_KEY);
     this.userService = new UserService(db);
@@ -33,6 +39,12 @@ export class StripeService {
     }
     if (!process.env.TESTING_MINUTES_EVENT_NAME) {
       throw new Error("TESTING_MINUTES_EVENT_NAME is not set");
+    }
+    if (!process.env.OBSERVABILITY_MINUTES_PRICE_ID) {
+      throw new Error("OBSERVABILITY_MINUTES_PRICE_ID is not set");
+    }
+    if (!process.env.OBSERVABILITY_MINUTES_EVENT_NAME) {
+      throw new Error("OBSERVABILITY_MINUTES_EVENT_NAME is not set");
     }
   };
 
@@ -60,6 +72,9 @@ export class StripeService {
         {
           // Provide the exact Price ID (for example, pr_1234) of the product you want to sell
           price: this.env.TESTING_MINUTES_PRICE_ID,
+        },
+        {
+          price: this.env.OBSERVABILITY_MINUTES_PRICE_ID,
         },
       ],
       mode: "subscription",
@@ -102,6 +117,26 @@ export class StripeService {
     );
   };
 
+  accrueObservabilityMinutes = async ({
+    userId,
+    minutes,
+  }: {
+    userId: string;
+    minutes: number;
+  }) => {
+    const stripeCustomerId = await this.getCustomerId(userId);
+
+    await backOff(() =>
+      this.stripe.billing.meterEvents.create({
+        event_name: this.env.OBSERVABILITY_MINUTES_EVENT_NAME,
+        payload: {
+          value: `${minutes}`,
+          stripe_customer_id: stripeCustomerId,
+        },
+      }),
+    );
+  };
+
   getCustomer = async (userId: string) => {
     const stripeCustomerId = await this.getCustomerId(userId);
     return this.stripe.customers.retrieve(stripeCustomerId);
@@ -109,10 +144,10 @@ export class StripeService {
 
   getSubscriptions = async (userId: string) => {
     const stripeCustomerId = await this.getCustomerId(userId);
-    return this.stripe.subscriptions.list({
+    const subscriptions = await this.stripe.subscriptions.list({
       customer: stripeCustomerId,
-      price: this.env.TESTING_MINUTES_PRICE_ID,
     });
+    return subscriptions;
   };
 
   getMeterSummary = async ({

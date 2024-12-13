@@ -36,6 +36,8 @@ const envSchema = z.object({
   STRIPE_SECRET_KEY: z.string().min(1),
   TESTING_MINUTES_PRICE_ID: z.string().min(1),
   TESTING_MINUTES_EVENT_NAME: z.string().min(1),
+  OBSERVABILITY_MINUTES_PRICE_ID: z.string().min(1),
+  OBSERVABILITY_MINUTES_EVENT_NAME: z.string().min(1),
   // KEYWORDSAI_API_KEY: z.string().min(1),
 });
 

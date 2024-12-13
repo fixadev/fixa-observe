@@ -26,6 +26,8 @@ export const env = createEnv({
     STRIPE_WEBHOOK_SECRET: z.string(),
     TESTING_MINUTES_PRICE_ID: z.string(),
     TESTING_MINUTES_EVENT_NAME: z.string(),
+    OBSERVABILITY_MINUTES_PRICE_ID: z.string(),
+    OBSERVABILITY_MINUTES_EVENT_NAME: z.string(),
   },
 
   /**
@@ -83,6 +85,9 @@ export const env = createEnv({
     TESTING_MINUTES_EVENT_NAME: process.env.TESTING_MINUTES_EVENT_NAME,
     NEXT_PUBLIC_STRIPE_CUSTOMER_PORTAL_URL:
       process.env.NEXT_PUBLIC_STRIPE_CUSTOMER_PORTAL_URL,
+    OBSERVABILITY_MINUTES_PRICE_ID: process.env.OBSERVABILITY_MINUTES_PRICE_ID,
+    OBSERVABILITY_MINUTES_EVENT_NAME:
+      process.env.OBSERVABILITY_MINUTES_EVENT_NAME,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially
