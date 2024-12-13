@@ -1,24 +1,40 @@
-import { AgentService } from "@repo/services/src/agent";
-import { CallStatus, type PrismaClient } from "@prisma/client";
-import { initiateVapiCall, queueOfOneKioskCalls } from "../helpers/vapiHelpers";
+import { CallStatus, type PrismaClient } from "@repo/db/src/index";
+import { VapiService } from "./vapi";
 import { type TestAgent } from "@repo/types/src/generated";
 import {
   type OfOneKioskProperties,
   type TestWithIncludes,
 } from "@repo/types/src/index";
 import { randomUUID } from "crypto";
-import { UserService } from "@repo/services/src/user";
-import { StripeService } from "@repo/services/src/stripe";
+import { AgentService } from "./agent";
+import { UserService } from "./user";
+import { StripeService } from "./stripe";
+import axios from "axios";
 
 export class TestService {
+  private env: { NODE_SERVER_URL: string };
+
   constructor(private db: PrismaClient) {
+    this.env = {
+      NODE_SERVER_URL:
+        process.env.NODE_SERVER_URL || process.env.NEXT_PUBLIC_SERVER_URL!,
+    };
+    this.checkEnv();
     this.agentServiceInstance = new AgentService(this.db);
     this.userServiceInstance = new UserService(this.db);
     this.stripeServiceInstance = new StripeService(this.db);
+    this.vapiServiceInstance = new VapiService(this.db);
   }
+
+  private checkEnv = () => {
+    if (!process.env.NODE_SERVER_URL && !process.env.NEXT_PUBLIC_SERVER_URL) {
+      throw new Error("NODE_SERVER_URL or NEXT_PUBLIC_SERVER_URL is not set");
+    }
+  };
   agentServiceInstance: AgentService;
   userServiceInstance: UserService;
   stripeServiceInstance: StripeService;
+  vapiServiceInstance: VapiService;
 
   async get(id: string, userId: string): Promise<TestWithIncludes | null> {
     return await this.db.test.findUnique({
@@ -212,14 +228,14 @@ export class TestService {
           calls: true,
         },
       });
-      await queueOfOneKioskCalls(deviceIds, callsToStart);
+      await this.queueOfOneKioskCalls(deviceIds, callsToStart);
       return test;
 
       // NORMAL TEST
     } else {
       const calls = await Promise.allSettled(
         tests.map(async (test) => {
-          const vapiCall = await initiateVapiCall(
+          const vapiCall = await this.vapiServiceInstance.initiateVapiCall(
             test.testAgentVapiId,
             agent.phoneNumber,
             test.testAgentPrompt,
@@ -281,5 +297,30 @@ export class TestService {
       },
       orderBy: { createdAt: "desc" },
     });
+  }
+
+  async queueOfOneKioskCalls(
+    deviceIds: string[],
+    callsToStart: {
+      callId: string;
+      ownerId: string;
+      assistantId: string;
+      testAgentPrompt: string;
+      scenarioPrompt: string;
+      baseUrl: string;
+    }[],
+  ) {
+    try {
+      return await axios.post(
+        this.env.NODE_SERVER_URL + "/queue-ofone-kiosk-calls",
+        {
+          deviceIds,
+          callsToStart,
+        },
+      );
+    } catch (error) {
+      console.error("Error queuing OFONE kiosk calls", error);
+      throw error;
+    }
   }
 }

@@ -11,12 +11,12 @@ export const authenticateRequest = async (
   // Extract token from Bearer header
   const token = authHeader?.split(" ")[1];
 
-  // if (!authHeader || !token || !authHeader.startsWith("Bearer ")) {
-  //   return res.status(401).json({
-  //     success: false,
-  //     error: "Invalid or missing Bearer token",
-  //   });
-  // }
+  if (!authHeader || !token || !authHeader.startsWith("Bearer ")) {
+    return res.status(401).json({
+      success: false,
+      error: "Invalid or missing Bearer token",
+    });
+  }
 
   const apiKeyRecord = await db.apiKey.findFirst({
     where: {
@@ -24,14 +24,13 @@ export const authenticateRequest = async (
     },
   });
 
-  // if (!apiKeyRecord) {
-  //   return res.status(401).json({
-  //     success: false,
-  //     error: "Invalid Bearer token",
-  //   });
-  // }
+  if (!apiKeyRecord) {
+    return res.status(401).json({
+      success: false,
+      error: "Invalid Bearer token",
+    });
+  }
 
-  res.locals.userId =
-    apiKeyRecord?.userId ?? "user_2pPJOFVVjZPXE8ho8CI68u5lSCf";
+  res.locals.userId = apiKeyRecord.userId;
   next();
 };

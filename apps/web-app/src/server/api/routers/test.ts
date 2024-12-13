@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
-import { TestService } from "~/server/services/test";
+import { TestService } from "@repo/services/src/test";
 import { db } from "~/server/db";
 
 const testServiceInstance = new TestService(db);
