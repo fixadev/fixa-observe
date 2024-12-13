@@ -44,6 +44,7 @@ import { Button } from "../ui/button";
 import { AddAgentModal } from "~/app/dashboard/(agents)/_components/AddAgentModal";
 import { useAgent } from "~/app/contexts/UseAgent";
 import { UserButton } from "@clerk/nextjs";
+import FreeTestsLeft from "./FreeTestsLeft";
 
 const navItems = [
   { href: "/", icon: CounterClockwiseClockIcon, label: "test history" },
@@ -192,6 +193,7 @@ export default function DashboardSidebar({
       <SidebarFooter>
         <SidebarGroup>
           <SidebarGroupContent>
+            <FreeTestsLeft />
             <SidebarMenu>
               <SidebarMenuItem>
                 <SidebarMenuButton

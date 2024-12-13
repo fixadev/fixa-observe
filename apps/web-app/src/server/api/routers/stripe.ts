@@ -3,6 +3,7 @@ import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { StripeService } from "@repo/services/src/stripe";
 import { db } from "~/server/db";
 import type Stripe from "stripe";
+import { type PublicMetadata } from "@repo/types/src";
 
 const stripeService = new StripeService(db);
 
@@ -24,6 +25,11 @@ export const stripeRouter = createTRPCRouter({
     }),
 
   billingDetails: protectedProcedure.query(async ({ ctx }) => {
+    const metadata = ctx.user.publicMetadata as PublicMetadata | undefined;
+    if (!metadata?.stripeCustomerId) {
+      return null;
+    }
+
     const customer = (await stripeService.getCustomer(ctx.user.id)) as
       | Stripe.Customer
       | Stripe.DeletedCustomer;
@@ -32,6 +38,11 @@ export const stripeRouter = createTRPCRouter({
   }),
 
   usageDetails: protectedProcedure.query(async ({ ctx }) => {
+    const metadata = ctx.user.publicMetadata as PublicMetadata | undefined;
+    if (!metadata?.stripeCustomerId) {
+      return null;
+    }
+
     const subscriptions = await stripeService.getSubscriptions(ctx.user.id);
     if (subscriptions.data.length === 0) return null;
     const subscription = subscriptions.data[0]!;
