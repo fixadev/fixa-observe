@@ -38,13 +38,13 @@ import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useMemo } from "react";
 import { removeTrailingSlash } from "~/lib/utils";
 import { api } from "~/trpc/react";
-import Logo from "../Logo";
 import { SlackIcon } from "lucide-react";
 import { Skeleton } from "../ui/skeleton";
 import { Button } from "../ui/button";
 import { AddAgentModal } from "~/app/dashboard/(agents)/_components/AddAgentModal";
 import { useAgent } from "~/app/contexts/UseAgent";
 import { UserButton } from "@clerk/nextjs";
+import FreeTestsLeft from "./FreeTestsLeft";
 
 const navItems = [
   { href: "/", icon: CounterClockwiseClockIcon, label: "test history" },
@@ -97,18 +97,19 @@ export default function DashboardSidebar({
       <SidebarHeader>
         <div className="-m-2 flex h-14 items-center justify-between border-b px-4 lg:h-[60px]">
           <Select
+            defaultValue="testing"
             onValueChange={(value) => {
-              if (value === "observe") {
+              if (value === "observability") {
                 router.push(`/observe/`);
               }
             }}
           >
-            <SelectTrigger className="w-[100px]">
-              <SelectValue placeholder="test" />
+            <SelectTrigger className="-ml-2 mr-2">
+              <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="test">test</SelectItem>
-              <SelectItem value="observe">observe</SelectItem>
+              <SelectItem value="testing">testing</SelectItem>
+              <SelectItem value="observability">observability</SelectItem>
             </SelectContent>
           </Select>
           <UserButton>
@@ -192,6 +193,7 @@ export default function DashboardSidebar({
       <SidebarFooter>
         <SidebarGroup>
           <SidebarGroupContent>
+            <FreeTestsLeft />
             <SidebarMenu>
               <SidebarMenuItem>
                 <SidebarMenuButton

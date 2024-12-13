@@ -18,7 +18,10 @@ import { api } from "~/trpc/react";
 import { useToast } from "~/components/hooks/use-toast";
 
 import useSocketMessage from "~/app/_components/UseSocketMessage";
-import { type AgentWithIncludes } from "@repo/types/src/index";
+import {
+  type PublicMetadata,
+  type AgentWithIncludes,
+} from "@repo/types/src/index";
 
 import { useUser } from "@clerk/nextjs";
 import { motion, AnimatePresence } from "framer-motion";
@@ -36,6 +39,11 @@ import {
 import { SidebarTrigger } from "~/components/ui/sidebar";
 import { useRouter } from "next/navigation";
 import { AddAgentModal } from "../(agents)/_components/AddAgentModal";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "~/components/ui/popover";
 
 export default function AgentPage({ params }: { params: { agentId: string } }) {
   const [tests, setTests] = useState<TestWithCalls[]>([]);
@@ -106,6 +114,11 @@ export default function AgentPage({ params }: { params: { agentId: string } }) {
   //   setRunTestModalOpen(true);
   // }, []);
 
+  const canRunTest = useMemo(() => {
+    const metadata = user?.publicMetadata as PublicMetadata | undefined;
+    return !!metadata?.stripeCustomerId || (metadata?.freeTestsLeft ?? 0) > 0;
+  }, [user]);
+
   const handleRunTest = useCallback(
     async (scenarioIds: string[], testAgentIds: string[]) => {
       // await new Promise((resolve) => setTimeout(resolve, 1000));
@@ -115,9 +128,21 @@ export default function AgentPage({ params }: { params: { agentId: string } }) {
         scenarioIds,
         testAgentIds,
       });
+      await user?.reload();
     },
-    [params.agentId, runTest],
+    [params.agentId, runTest, user],
   );
+
+  const { mutate: getCheckoutUrl, isPending: isGeneratingStripeUrl } =
+    api.stripe.createCheckoutUrl.useMutation({
+      onSuccess: (data) => {
+        window.location.href = data.checkoutUrl;
+      },
+    });
+  const upgradePlan = useCallback(async () => {
+    const redirectUrl = window.location.href;
+    getCheckoutUrl({ redirectUrl });
+  }, [getCheckoutUrl]);
 
   return (
     <div className="h-full">
@@ -129,12 +154,37 @@ export default function AgentPage({ params }: { params: { agentId: string } }) {
             <div className="font-medium">test history</div>
           </Link>
         </div>
-        <Button
-          className="flex min-w-[160px] items-center gap-2"
-          onClick={() => setRunTestModalOpen(true)}
-        >
-          run test <RocketLaunchIcon className="size-4" />
-        </Button>
+        {canRunTest ? (
+          <Button
+            className="flex min-w-[160px] items-center gap-2"
+            onClick={() => setRunTestModalOpen(true)}
+          >
+            run test <RocketLaunchIcon className="size-4" />
+          </Button>
+        ) : (
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button className="flex min-w-[160px] items-center gap-2">
+                run test <RocketLaunchIcon className="size-4" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent side="bottom" align="end">
+              <div className="flex flex-col gap-2">
+                <div className="font-medium">no more free tests</div>
+                <div className="text-sm text-muted-foreground">
+                  upgrade now to continue using fixa
+                </div>
+                <Button
+                  variant="outline"
+                  onClick={upgradePlan}
+                  disabled={isGeneratingStripeUrl}
+                >
+                  {isGeneratingStripeUrl ? <Spinner /> : "upgrade"}
+                </Button>
+              </div>
+            </PopoverContent>
+          </Popover>
+        )}
       </div>
 
       {/* content */}
@@ -173,6 +223,7 @@ export default function AgentPage({ params }: { params: { agentId: string } }) {
             <Button
               className="flex min-w-[216px] shrink-0 items-center gap-2"
               onClick={() => setRunTestModalOpen(true)}
+              disabled={!canRunTest}
             >
               run test <RocketLaunchIcon className="size-4" />
             </Button>
