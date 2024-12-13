@@ -6,7 +6,7 @@ import { Features } from "./_components/Features";
 import { Pricing } from "./_components/Pricing";
 import { CTA } from "./_components/CTA";
 
-function App() {
+export default function LandingPage() {
   return (
     <div className="min-h-screen bg-white">
       <Navbar />
@@ -18,5 +18,3 @@ function App() {
     </div>
   );
 }
-
-export default App;
