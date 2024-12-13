@@ -80,7 +80,9 @@ export function Navbar() {
                   </Button>
                 );
               })}
-              <Button>get started</Button>
+              <Button asChild>
+                <Link href="/sign-up">get started</Link>
+              </Button>
             </div>
           </div>
 
@@ -131,7 +133,9 @@ export function Navbar() {
                   </Button>
                 );
               })}
-              <Button className="w-full">get started</Button>
+              <Button className="w-full" asChild>
+                <Link href="/sign-up">get started</Link>
+              </Button>
             </div>
           </motion.div>
         )}

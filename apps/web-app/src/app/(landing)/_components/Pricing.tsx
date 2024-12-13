@@ -43,7 +43,7 @@ export function Pricing() {
                 </div>
                 <div className="flex items-baseline">
                   <div className="text-4xl font-extrabold text-black">
-                    $0.025
+                    $0.03
                   </div>
                   <div className="ml-2 text-gray-500">/minute</div>
                 </div>
@@ -54,8 +54,8 @@ export function Pricing() {
                 {[
                   "no minimum commitment",
                   "pay only for what you use",
-                  "full feature access",
                   "slack support",
+                  "10 free tests",
                 ].map((feature) => (
                   <li key={feature} className="flex items-center">
                     <Check className="mr-3 h-5 w-5 text-black" />
@@ -65,7 +65,9 @@ export function Pricing() {
               </ul>
             </div>
             <div className="flex-1" />
-            <Button className="mt-8 w-full lowercase">get started</Button>
+            <Button className="mt-8 w-full lowercase" asChild>
+              <Link href="/sign-up">get started</Link>
+            </Button>
           </div>
 
           <div className="flex flex-col rounded-lg border border-gray-200 bg-white p-8 shadow-sm transition-shadow hover:shadow-md">
