@@ -54,7 +54,7 @@ export default function EvalSetCard({
           className="text-muted-foreground"
           value={evalSet.condition}
           onChange={(e) => onUpdate({ ...evalSet, condition: e.target.value })}
-          placeholder="enter condition..."
+          placeholder="user asks to book appointment"
         />
         <div className="text-xs font-medium text-muted-foreground">THEN</div>
         <div className="flex flex-col gap-2">

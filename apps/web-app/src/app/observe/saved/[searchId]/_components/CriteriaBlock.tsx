@@ -41,7 +41,7 @@ export function CriteriaBlock({
           <Input
             value={criteria.name}
             onChange={(e) => onUpdate({ ...criteria, name: e.target.value })}
-            placeholder="enter criteria name..."
+            placeholder="confirm demographic info"
             autoFocus
             onBlur={() => setIsEditingName(false)}
             className={cn(
@@ -82,7 +82,7 @@ export function CriteriaBlock({
           onChange={(e) =>
             onUpdate({ ...criteria, description: e.target.value })
           }
-          placeholder="make sure the agent..."
+          placeholder="make sure the agent confirms the person's name, phone number, and address"
           autoFocus
           minHeight={0}
           onBlur={() => setIsEditingDescription(false)}
