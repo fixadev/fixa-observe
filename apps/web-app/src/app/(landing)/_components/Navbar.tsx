@@ -5,8 +5,15 @@ import { Button } from "@/components/ui/button";
 import { useCallback, useState } from "react";
 import Logo from "~/components/Logo";
 import { AnimatePresence, motion } from "framer-motion";
+import Link from "next/link";
 
 const navLinks = [
+  {
+    href: "https://docs.fixa.dev",
+    label: "docs",
+    isLink: true,
+    target: "_blank",
+  },
   { href: "#features", label: "features" },
   { href: "#pricing", label: "pricing" },
   // { href: "#contact", label: "contact" },
@@ -53,15 +60,26 @@ export function Navbar() {
 
           <div className="hidden md:block">
             <div className="ml-10 flex items-center space-x-8">
-              {navLinks.map((link) => (
-                <Button
-                  variant="ghost"
-                  key={link.href}
-                  onClick={(e) => handleScroll(e, link.href)}
-                >
-                  {link.label}
-                </Button>
-              ))}
+              {navLinks.map((link) => {
+                if (link.isLink) {
+                  return (
+                    <Button variant="ghost" key={link.href} asChild>
+                      <Link href={link.href} target={link.target}>
+                        {link.label}
+                      </Link>
+                    </Button>
+                  );
+                }
+                return (
+                  <Button
+                    variant="ghost"
+                    key={link.href}
+                    onClick={(e) => handleScroll(e, link.href)}
+                  >
+                    {link.label}
+                  </Button>
+                );
+              })}
               <Button>get started</Button>
             </div>
           </div>
@@ -87,16 +105,32 @@ export function Navbar() {
             className="overflow-hidden border-t border-gray-100 md:hidden"
           >
             <div className="space-y-1 bg-white px-2 pb-3 pt-2 sm:px-3">
-              {navLinks.map((link) => (
-                <Button
-                  variant="ghost"
-                  key={link.href}
-                  className="w-full"
-                  onClick={(e) => handleScroll(e, link.href)}
-                >
-                  {link.label}
-                </Button>
-              ))}
+              {navLinks.map((link) => {
+                if (link.isLink) {
+                  return (
+                    <Button
+                      className="w-full"
+                      variant="ghost"
+                      key={link.href}
+                      asChild
+                    >
+                      <Link href={link.href} target={link.target}>
+                        {link.label}
+                      </Link>
+                    </Button>
+                  );
+                }
+                return (
+                  <Button
+                    className="w-full"
+                    variant="ghost"
+                    key={link.href}
+                    onClick={(e) => handleScroll(e, link.href)}
+                  >
+                    {link.label}
+                  </Button>
+                );
+              })}
               <Button className="w-full">get started</Button>
             </div>
           </motion.div>
