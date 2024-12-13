@@ -1,10 +1,7 @@
-import { PrismaClient } from "@prisma/client";
-import {
-  createOrUpdateVapiAssistant,
-  deleteVapiAssistantById,
-} from "../src/server/helpers/vapiHelpers";
+import { VapiService } from "../../../packages/services/src/vapi";
+import { db } from "~/server/db";
 
-const prisma = new PrismaClient();
+const vapiService = new VapiService(db);
 
 async function main() {
   const testAgents = [
@@ -133,20 +130,20 @@ async function main() {
   // );
 
   // for (const assistant of assistantIdsToDelete) {
-  //   await deleteVapiAssistantById(assistant.id);
+  //   await vapiService.deleteVapiAssistantById(assistant.id);
   //   await prisma.testAgent.delete({ where: { id: assistant.id } });
   // }
 
   for (let i = 0; i < testAgents.length; i++) {
     const agent = testAgents[i]!;
-    // await deleteVapiAssistantById(agent.id);
-    const vapiAssistant = await createOrUpdateVapiAssistant(
+    // await vapiService.deleteVapiAssistantById(agent.id);
+    const vapiAssistant = await vapiService.createOrUpdateVapiAssistant(
       agent.prompt,
       agent.name,
       agent.voiceId,
       true,
     );
-    await prisma.testAgent.upsert({
+    await db.testAgent.upsert({
       where: { id: vapiAssistant.id },
       update: {
         name: agent.name,

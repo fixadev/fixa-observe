@@ -3,10 +3,12 @@
 import {
   Sidebar,
   SidebarContent,
+  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   SidebarHeader,
   SidebarMenu,
+  SidebarMenuBadge,
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarMenuSub,
@@ -21,14 +23,15 @@ import {
 import {
   ChartBarIcon,
   ChevronDownIcon,
+  CreditCardIcon,
   DocumentIcon,
   EllipsisHorizontalIcon,
+  LifebuoyIcon,
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { removeTrailingSlash } from "~/lib/utils";
-import Logo from "../Logo";
 import { api } from "~/trpc/react";
 import { Button } from "../ui/button";
 import {
@@ -48,9 +51,21 @@ import {
 } from "../ui/dialog";
 import { Input } from "../ui/input";
 import Spinner from "../Spinner";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../ui/select";
+import { UserButton } from "@clerk/nextjs";
+import { SlackIcon } from "lucide-react";
+import { DocumentTextIcon, KeyIcon } from "@heroicons/react/24/outline";
+import { OpenInNewWindowIcon } from "@radix-ui/react-icons";
 
 export default function ObserveSidebar() {
   const pathname = usePathname();
+  const router = useRouter();
 
   const isCurrentPath = useCallback(
     (path: string) => {
@@ -74,8 +89,34 @@ export default function ObserveSidebar() {
     <>
       <Sidebar>
         <SidebarHeader>
-          <div className="-m-2 flex h-14 items-center justify-between border-b px-4">
-            <Logo href="/observe" />
+          <div className="-m-2 flex h-14 items-center justify-between border-b px-4 lg:h-[60px]">
+            <Select
+              defaultValue="observability"
+              onValueChange={(value) => {
+                if (value === "testing") {
+                  router.push(`/dashboard/new`);
+                }
+              }}
+            >
+              <SelectTrigger className="-ml-2 mr-2">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="testing">testing</SelectItem>
+                <SelectItem value="observability">observability</SelectItem>
+              </SelectContent>
+            </Select>
+            <UserButton>
+              <UserButton.MenuItems>
+                <UserButton.Link
+                  href="/billing"
+                  label="billing"
+                  labelIcon={<CreditCardIcon />}
+                />
+                <UserButton.Action label="manageAccount" />
+                <UserButton.Action label="signOut" />
+              </UserButton.MenuItems>
+            </UserButton>
           </div>
         </SidebarHeader>
         <SidebarContent>
@@ -153,6 +194,61 @@ export default function ObserveSidebar() {
             </SidebarGroupContent>
           </SidebarGroup>
         </SidebarContent>
+        <SidebarFooter>
+          <SidebarGroup>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    asChild
+                    isActive={isCurrentPath("/slack-app")}
+                  >
+                    <Link href="/observe/slack-app">
+                      <SlackIcon />
+                      <span>slack app</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    asChild
+                    isActive={isCurrentPath("/api-keys")}
+                  >
+                    <Link href="/observe/api-keys">
+                      <KeyIcon />
+                      <span>API keys</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild>
+                    <Link href={`https://docs.fixa.dev`} target="_blank">
+                      <DocumentTextIcon />
+                      <span>documentation</span>
+                    </Link>
+                  </SidebarMenuButton>
+                  <SidebarMenuBadge>
+                    <OpenInNewWindowIcon />
+                  </SidebarMenuBadge>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild>
+                    <Link
+                      href={`https://join.slack.com/t/fixacommunity/shared_invite/zt-2wbw79829-01HGYT7SxVYPk8t6pTNb9w`}
+                      target="_blank"
+                    >
+                      <LifebuoyIcon />
+                      <span>support</span>
+                    </Link>
+                  </SidebarMenuButton>
+                  <SidebarMenuBadge>
+                    <OpenInNewWindowIcon />
+                  </SidebarMenuBadge>
+                </SidebarMenuItem>
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        </SidebarFooter>
       </Sidebar>
 
       <RenameDialog

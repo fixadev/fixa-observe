@@ -51,7 +51,7 @@ export default function LayoutHeader({
     <>
       <div className="flex w-full items-center justify-between p-4">
         <div className="flex items-center gap-4">
-          <Logo className="mb-1" href="/dashboard" />
+          <Logo className="mb-1" href="/dashboard/new" />
           {agentId && (
             <>
               <SlashIcon className="size-4 text-muted-foreground" />

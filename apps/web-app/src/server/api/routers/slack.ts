@@ -2,8 +2,12 @@ import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { env } from "~/env";
 import axios from "axios";
-import { type PublicMetadata, userService } from "~/server/services/user";
+import { type PublicMetadata } from "@repo/types/src";
 import { currentUser } from "@clerk/nextjs/server";
+import { UserService } from "@repo/services/src/user";
+import { db } from "~/server/db";
+
+const userService = new UserService(db);
 
 export const slackRouter = createTRPCRouter({
   exchangeCode: protectedProcedure

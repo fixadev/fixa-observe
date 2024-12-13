@@ -41,6 +41,6 @@
     "**/*.js",
     ".next/types/**/*.ts",
     "src/lib/pdfjs-dist.d.ts"
-  ],
+, "../../packages/services/src/test.ts", "../../packages/services/src/vapi.ts"  ],
   "exclude": ["node_modules", "public"]
 }

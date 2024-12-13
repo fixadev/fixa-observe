@@ -10,6 +10,7 @@ import { openai } from "../clients/openAIClient";
 import { z } from "zod";
 import { analyzeCallWitho1, formatOutput } from "./textAnalysis";
 import { sendAlerts } from "./alert";
+import stripeServiceClient from "../clients/stripeServiceClient";
 
 export const transcribeAndSaveCall = async ({
   callId,
@@ -49,6 +50,18 @@ export const transcribeAndSaveCall = async ({
       callId,
       audioUrl,
     );
+
+    // Accrue observability minutes
+    try {
+      console.log("ACCRUING OBSERVABILITY MINUTES", duration);
+      const durationMinutes = Math.ceil(duration / 60);
+      await stripeServiceClient.accrueObservabilityMinutes({
+        userId: userId,
+        minutes: durationMinutes,
+      });
+    } catch (error) {
+      console.error("Error accruing observability minutes", error);
+    }
 
     // TODO: Figure out why old audio url is cached
     console.log("calling audio service", env.AUDIO_SERVICE_URL);

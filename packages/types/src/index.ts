@@ -5,3 +5,4 @@ export * from "./constants";
 export * from "./eval";
 export * from "./scenario";
 export * from "./types";
+export * from "./user";

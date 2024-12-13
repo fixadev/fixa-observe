@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
-import { TestService } from "~/server/services/test";
+import { TestService } from "@repo/services/src/test";
 import { db } from "~/server/db";
 
 const testServiceInstance = new TestService(db);
@@ -28,8 +28,8 @@ export const testRouter = createTRPCRouter({
     )
     .mutation(async ({ input, ctx }) => {
       return await testServiceInstance.run({
-        agentId: input.agentId,
         userId: ctx.user.id,
+        agentId: input.agentId,
         scenarioIds: input.scenarioIds,
         testAgentIds: input.testAgentIds,
       });

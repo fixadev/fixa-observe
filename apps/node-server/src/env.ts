@@ -1,12 +1,7 @@
 import { z } from "zod";
 import dotenv from "dotenv";
 
-dotenv.config({
-  path:
-    process.env.NODE_ENV === "production"
-      ? ".env.production"
-      : ".env.development",
-});
+dotenv.config();
 
 // console.log(
 //   "Raw env file contents:",
@@ -33,6 +28,13 @@ const envSchema = z.object({
   NODE_SERVER_URL: z.string().min(1),
   DATABASE_URL: z.string().min(1),
   DIRECT_URL: z.string().min(1),
+  STRIPE_SECRET_KEY: z.string().min(1),
+  TESTING_MINUTES_PRICE_ID: z.string().min(1),
+  TESTING_MINUTES_EVENT_NAME: z.string().min(1),
+  OBSERVABILITY_MINUTES_PRICE_ID: z.string().min(1),
+  OBSERVABILITY_MINUTES_EVENT_NAME: z.string().min(1),
+  NEXT_PUBLIC_11X_USER_ID: z.string().min(1),
+  NEXT_PUBLIC_OFONE_USER_ID: z.string().min(1),
   // KEYWORDSAI_API_KEY: z.string().min(1),
 });
 

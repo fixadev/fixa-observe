@@ -12,8 +12,13 @@
     "./src/*": "./src/*.ts"
   },
   "dependencies": {
+    "@clerk/backend": "^1.21.0",
     "@repo/db": "workspace:*",
     "@repo/types": "workspace:*",
+    "@vapi-ai/server-sdk": "^0.1.0",
+    "axios": "^1.7.7",
+    "exponential-backoff": "^3.1.1",
+    "stripe": "^17.4.0",
     "uuid": "^9.0.0"
   },
   "devDependencies": {

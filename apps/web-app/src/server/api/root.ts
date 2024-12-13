@@ -8,6 +8,7 @@ import { callRouter } from "./routers/call";
 import { evalRouter } from "./routers/eval";
 import { scenarioRouter } from "./routers/scenario";
 import { searchRouter } from "./routers/search";
+import { stripeRouter } from "./routers/stripe";
 /*  *
  * This is the primary router for your server.
  *
@@ -22,6 +23,7 @@ export const appRouter = createTRPCRouter({
   slack: slackRouter,
   test: testRouter,
   user: userRouter,
+  stripe: stripeRouter,
   _call: callRouter,
 });
 

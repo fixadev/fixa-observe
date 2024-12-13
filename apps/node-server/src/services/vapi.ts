@@ -22,6 +22,8 @@ import { formatOutput } from "./textAnalysis";
 import { Socket } from "socket.io";
 import { sendTestCompletedSlackMessage } from "./slack";
 import { setDeviceAvailable } from "./integrations/ofOneService";
+import vapiClient from "../clients/vapiClient";
+import stripeServiceClient from "../clients/stripeServiceClient";
 
 export const handleTranscriptUpdate = async (
   report: ServerMessageTranscript,
@@ -145,6 +147,23 @@ export const handleCallEnded = async ({
     if (!report.call || !report.artifact.messages) {
       console.error("No artifact messages found");
       return;
+    }
+
+    // Accrue testing minutes
+    try {
+      const call = await vapiClient.calls.get(report.call.id);
+      if (call.startedAt && call.endedAt) {
+        const startedAt = new Date(call.startedAt);
+        const endedAt = new Date(call.endedAt);
+        const duration = endedAt.getTime() - startedAt.getTime();
+        const minutes = Math.ceil(duration / 60000);
+        await stripeServiceClient.accrueTestMinutes({
+          userId: agent.ownerId,
+          minutes: minutes,
+        });
+      }
+    } catch (error) {
+      console.error("Error accruing testing minutes", error);
     }
 
     if (!report.artifact.stereoRecordingUrl) {

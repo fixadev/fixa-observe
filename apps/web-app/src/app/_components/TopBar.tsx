@@ -33,7 +33,7 @@ export default function TopBar() {
                 <Button variant="ghost">sign out</Button>
               </SignOutButton>
               <Button asChild>
-                <Link href="/dashboard">dashboard</Link>
+                <Link href="/dashboard/new">dashboard</Link>
               </Button>
             </SignedIn>
           </div>

@@ -198,9 +198,9 @@ export default function AgentScenariosPage({
       </div>
       <div className="container flex h-full flex-col gap-4 p-4">
         <div>
-          <div className="text-lg font-medium">scenarios</div>
+          <div className="text-lg font-medium">test scenarios</div>
           <div className="text-sm text-muted-foreground">
-            the scenarios to test this agent.
+            design simulated scenarios to test your agent.
           </div>
         </div>
         {agent.scenarios.map((scenario, index) => (
@@ -216,12 +216,12 @@ export default function AgentScenariosPage({
         ))}
         {agent.scenarios.length > 0 ? (
           <div className="flex flex-row justify-end gap-4">
-            <GenerateScenariosModal agent={agent} setAgent={setAgent}>
+            {/* <GenerateScenariosModal agent={agent} setAgent={setAgent}>
               <Button variant="outline">generate from prompt</Button>
-            </GenerateScenariosModal>
+            </GenerateScenariosModal> */}
 
             <Button variant="outline" onClick={addScenario}>
-              add manually
+              add scenario
             </Button>
           </div>
         ) : (
@@ -235,11 +235,11 @@ export default function AgentScenariosPage({
                   </div>
                 </div>
                 <div className="flex flex-col gap-2">
-                  <GenerateScenariosModal agent={agent} setAgent={setAgent}>
+                  {/* <GenerateScenariosModal agent={agent} setAgent={setAgent}>
                     <Button>generate from prompt</Button>
-                  </GenerateScenariosModal>
+                  </GenerateScenariosModal> */}
                   <Button variant="outline" onClick={addScenario}>
-                    add manually
+                    add scenario
                   </Button>
                 </div>
               </div>
