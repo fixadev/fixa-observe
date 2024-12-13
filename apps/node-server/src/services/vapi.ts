@@ -157,7 +157,7 @@ export const handleCallEnded = async ({
         const endedAt = new Date(call.endedAt);
         const duration = endedAt.getTime() - startedAt.getTime();
         const minutes = Math.ceil(duration / 60000);
-        void stripeServiceClient.accrueTestMinutes({
+        await stripeServiceClient.accrueTestMinutes({
           userId: agent.ownerId,
           minutes: minutes,
         });
