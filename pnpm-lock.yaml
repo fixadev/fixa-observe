@@ -109,6 +109,8 @@ importers:
         specifier: ^5.3.3
         version: 5.5.4
 
+  apps/transcription-service: {}
+
   apps/web-app:
     dependencies:
       '@anthropic-ai/sdk':
