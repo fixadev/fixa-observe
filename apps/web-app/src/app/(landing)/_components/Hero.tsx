@@ -13,11 +13,11 @@ export function Hero() {
             <YCBadge />
           </div>
           <h1 className="text-3xl font-extrabold lowercase tracking-tight text-black sm:text-5xl md:text-6xl">
-            <span className="block">fix your AI voice agents</span>
+            <span className="block">fix your voice agents</span>
             <span className="block text-gray-600">faster</span>
           </h1>
-          <p className="mx-auto mt-3 text-base lowercase text-gray-500 sm:mt-5 sm:max-w-xl sm:text-lg md:mt-5 md:text-xl">
-            run tests, analyze calls, fix bugs in your voice agents
+          <p className="mx-auto mt-3 text-base text-gray-500 sm:mt-5 sm:max-w-xl sm:text-lg md:mt-5 md:text-xl">
+            run tests, analyze calls, fix bugs in your AI voice agents
           </p>
           <div className="mt-5 flex items-center justify-center gap-2 sm:mt-8">
             <Button
