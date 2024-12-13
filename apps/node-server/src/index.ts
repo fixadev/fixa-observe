@@ -47,6 +47,7 @@ app.get("/", (req, res) => {
 app.use("/vapi", vapiRouter);
 
 app.use(authenticateRequest);
+
 // temporary before 11x migration
 app.use("/", v1Router);
 app.use("/v1", v1Router);
