@@ -25,6 +25,7 @@ import {
   UsersIcon,
   CheckIcon,
   CreditCardIcon,
+  LifebuoyIcon,
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import {
@@ -234,7 +235,7 @@ export default function DashboardSidebar({
                     href={`https://join.slack.com/t/fixacommunity/shared_invite/zt-2wbw79829-01HGYT7SxVYPk8t6pTNb9w`}
                     target="_blank"
                   >
-                    <SlackIcon />
+                    <LifebuoyIcon />
                     <span>support</span>
                   </Link>
                 </SidebarMenuButton>

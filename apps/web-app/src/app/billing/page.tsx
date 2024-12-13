@@ -72,7 +72,10 @@ export default function BillingPage({
   );
 
   const totalCost = useMemo(() => {
-    return (usageDetails?.usage ?? 0) * 0.2;
+    return (
+      (usageDetails?.testingUsage ?? 0) * 0.2 +
+      (usageDetails?.observabilityUsage ?? 0) * 0.03
+    );
   }, [usageDetails]);
 
   return (
@@ -199,11 +202,22 @@ export default function BillingPage({
                     <div>{billingPeriod}</div>
                   </div>
                   <div className="flex items-baseline gap-2 text-sm">
-                    <div className="w-24 font-medium">usage</div>
+                    <div className="w-24 font-medium">testing</div>
                     <div className="flex items-baseline gap-2">
-                      <div>{usageDetails.usage} minutes</div>
+                      <div>{usageDetails.testingUsage} minutes</div>
                       <div className="text-xs text-muted-foreground">
                         ($0.20 / minute)
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-baseline gap-2 text-sm">
+                    <div className="w-24 font-medium">observability</div>
+                    <div className="flex items-baseline gap-2">
+                      <div>
+                        {usageDetails.observabilityUsage} minutes minutes
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        ($0.03 / minute)
                       </div>
                     </div>
                   </div>
