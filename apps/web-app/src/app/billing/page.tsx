@@ -111,7 +111,7 @@ export default function BillingPage({
                     <div>need enterprise volume discounts?</div>
                     <Button variant="link" asChild>
                       <Link
-                        href="https://cal.com/team/fixa/fixa-enterprise"
+                        href="https://cal.com/team/fixa/enterprise-pricing"
                         target="_blank"
                       >
                         talk to us
