@@ -17,7 +17,7 @@ export class EvalService {
     });
   }
 
-  async createGeneralEval(userId: string, evaluation: Eval): Promise<Eval> {
+  async createGeneralEval(evaluation: Eval, userId: string): Promise<Eval> {
     return await this.db.eval.create({
       data: {
         ...evaluation,
@@ -27,9 +27,9 @@ export class EvalService {
     });
   }
 
-  async updateGeneralEval(evaluation: Eval): Promise<Eval> {
+  async updateGeneralEval(evaluation: Eval, userId: string): Promise<Eval> {
     return await this.db.eval.update({
-      where: { id: evaluation.id },
+      where: { id: evaluation.id, ownerId: userId },
       data: evaluation,
     });
   }
@@ -38,14 +38,16 @@ export class EvalService {
     id,
     agentId,
     enabled,
+    userId,
   }: {
     id: string;
     agentId: string;
     enabled: boolean;
+    userId: string;
   }): Promise<Agent> {
     if (enabled) {
       return await this.db.agent.update({
-        where: { id: agentId },
+        where: { id: agentId, ownerId: userId },
         data: {
           enabledGeneralEvals: {
             connect: { id },
@@ -64,9 +66,9 @@ export class EvalService {
     }
   }
 
-  async deleteGeneralEval(id: string): Promise<Eval> {
+  async deleteGeneralEval(id: string, userId: string): Promise<Eval> {
     return await this.db.eval.update({
-      where: { id },
+      where: { id, ownerId: userId },
       data: { deleted: true },
     });
   }
@@ -82,8 +84,8 @@ export class EvalService {
   }
 
   async createSet(
-    userId: string,
     set: EvalSetWithIncludes,
+    userId: string,
   ): Promise<EvalSetWithIncludes> {
     return await this.db.evalSet.create({
       data: {
@@ -106,8 +108,8 @@ export class EvalService {
   }
 
   async updateSet(
-    userId: string,
     set: EvalSetWithIncludes,
+    userId: string,
   ): Promise<EvalSetWithIncludes> {
     const priorEvals = await this.db.eval.findMany({
       where: { evalSetId: set.id },
@@ -146,7 +148,7 @@ export class EvalService {
     });
   }
 
-  async deleteSet(userId: string, id: string): Promise<void> {
+  async deleteSet(id: string, userId: string): Promise<void> {
     await this.db.evalSet.delete({ where: { id, ownerId: userId } });
   }
 }

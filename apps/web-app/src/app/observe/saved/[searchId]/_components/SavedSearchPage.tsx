@@ -60,7 +60,6 @@ export default function SavedSearchPage({
     refetch: refetchCalls,
   } = api._call.getCalls.useInfiniteQuery(
     {
-      ownerId: "11x",
       limit: 10,
       filter: { ...filter, chartPeriod: undefined },
       orderBy,

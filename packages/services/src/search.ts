@@ -10,9 +10,9 @@ export class SearchService {
   constructor(private db: PrismaClient) {}
 
   async save(
-    userId: string,
-    filter: Filter,
     name: string,
+    filter: Filter,
+    userId: string,
   ): Promise<SavedSearchWithIncludes> {
     const { evalSets, alerts, timeRange, customerCallId, ...filterData } =
       filter;
@@ -43,8 +43,8 @@ export class SearchService {
   }
 
   async update(
-    userId: string,
     search: SavedSearchWithIncludes,
+    userId: string,
   ): Promise<SavedSearchWithIncludes> {
     const { evalSets, alerts, ...searchData } = search;
     const updatedSearch = await this.db.savedSearch.update({
@@ -80,8 +80,8 @@ export class SearchService {
   }
 
   async getById(
-    userId: string,
     id: string,
+    userId: string,
   ): Promise<SavedSearchWithIncludes | null> {
     const savedSearch = await this.db.savedSearch.findUnique({
       where: {
@@ -124,8 +124,8 @@ export class SearchService {
   }
 
   async createAlert(
-    userId: string,
     alert: AlertWithDetails,
+    userId: string,
   ): Promise<AlertWithDetails> {
     const alertWithDetails = await this.db.alert.create({
       data: {
@@ -139,8 +139,8 @@ export class SearchService {
   }
 
   async updateAlert(
-    userId: string,
     alert: AlertWithDetails,
+    userId: string,
   ): Promise<AlertWithDetails> {
     const alertWithDetails = await this.db.alert.update({
       where: {
@@ -155,7 +155,7 @@ export class SearchService {
     return AlertWithDetailsSchema.parse(alertWithDetails);
   }
 
-  async deleteAlert(userId: string, id: string): Promise<void> {
+  async deleteAlert(id: string, userId: string): Promise<void> {
     await this.db.alert.delete({
       where: {
         id,

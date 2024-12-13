@@ -5,7 +5,7 @@
     "build": "turbo build",
     "dev": "turbo dev --concurrency 20",
     "db:migrate": "pnpm --filter @repo/db db:migrate",
-    "db:generate": "pnpm --filter @repo/db generate",
+    "db:generate": "pnpm --filter @repo/db db:generate",
     "lint": "turbo lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "vercel-build": "pnpm --filter @repo/db db:generate && pnpm --filter @repo/db db:deploy  && turbo build --filter=@repo/types --filter=@repo/services && cd apps/web-app && pnpm build"

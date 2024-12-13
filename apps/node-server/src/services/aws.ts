@@ -16,7 +16,6 @@ interface AddCallToQueueProps {
 
 export const addCallToQueue = async (input: AddCallToQueueProps) => {
   // Send message
-
   await sqs
     .sendMessage({
       QueueUrl: env.SQS_QUEUE_URL,
@@ -24,6 +23,9 @@ export const addCallToQueue = async (input: AddCallToQueueProps) => {
     })
     .then((res) => {
       console.log(res);
+    })
+    .catch((err) => {
+      console.error(err);
     });
 };
 

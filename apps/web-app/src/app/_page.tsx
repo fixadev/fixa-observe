@@ -7,8 +7,9 @@ import { useCallback, useState } from "react";
 import { LinkedInLogoIcon } from "@radix-ui/react-icons";
 import TopBar from "./_components/TopBar";
 import { SuggestedChange } from "./_components/SuggestedChange";
-import { PlayCircleIcon } from "@heroicons/react/24/solid";
+import { EnvelopeIcon, PlayCircleIcon } from "@heroicons/react/24/solid";
 import { Dialog, DialogContent } from "~/components/ui/dialog";
+import { MailIcon, SlackIcon } from "lucide-react";
 
 // 420 69 🍆
 export default function LandingPage() {
@@ -211,29 +212,44 @@ export default function LandingPage() {
             />
           </a>
           <div className="flex flex-col gap-4">
-            <Button size="lg" asChild className="w-fit">
+            {/* <Button size="lg" asChild className="w-fit">
               <Link
                 href="https://cal.com/team/fixa/20-minute-meeting"
                 target="_blank"
               >
                 book demo
               </Link>
+            </Button> */}
+            <Button size="lg" variant="ghost" asChild className="w-fit">
+              <Link
+                href="https://join.slack.com/t/fixacommunity/shared_invite/zt-2wbw79829-01HGYT7SxVYPk8t6pTNb9w"
+                target="_blank"
+              >
+                <div className="flex flex-row items-center gap-2">
+                  support
+                  <SlackIcon className="size-5" />
+                </div>
+              </Link>
             </Button>
-            <div className="flex gap-2">
-              <Button variant="ghost" asChild>
-                <Link href="mailto:contact@fixa.dev" target="_blank">
+            <Button variant="ghost" size="lg" className="w-fit" asChild>
+              <Link href="mailto:contact@fixa.dev" target="_blank">
+                <div className="flex flex-row items-center gap-2">
                   contact
-                </Link>
-              </Button>
-              <Button variant="ghost" asChild>
-                <Link
-                  href="https://www.linkedin.com/company/pixa-dev"
-                  target="_blank"
-                >
+                  <EnvelopeIcon className="size-5" />
+                </div>
+              </Link>
+            </Button>
+            <Button variant="ghost" size="lg" className="w-fit" asChild>
+              <Link
+                href="https://www.linkedin.com/company/pixa-dev"
+                target="_blank"
+              >
+                <div className="flex flex-row items-center gap-2">
+                  linkedin
                   <LinkedInLogoIcon className="size-5" />
-                </Link>
-              </Button>
-            </div>
+                </div>
+              </Link>
+            </Button>
           </div>
         </div>
       </div>

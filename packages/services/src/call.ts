@@ -6,9 +6,12 @@ import { calculateLatencyPercentiles } from "./utils";
 export class CallService {
   constructor(private db: PrismaClient) {}
 
-  getCall = async (id: string): Promise<CallWithIncludes | null> => {
+  getCall = async (
+    id: string,
+    ownerId: string,
+  ): Promise<CallWithIncludes | null> => {
     return await this.db.call.findUnique({
-      where: { id },
+      where: { id, ownerId },
       include: {
         messages: true,
         scenario: {

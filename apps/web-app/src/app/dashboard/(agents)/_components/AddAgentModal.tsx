@@ -23,6 +23,7 @@ import {
 import { useToast } from "~/components/hooks/use-toast";
 import { useRouter } from "next/navigation";
 import { generateTempId } from "~/lib/utils";
+import Link from "next/link";
 
 interface AddAgentModalProps {
   children: React.ReactNode;
@@ -105,7 +106,19 @@ export function AddAgentModal({ children, refetchAgents }: AddAgentModalProps) {
             }
           />
         </div>
-        <div className="flex justify-end border-t p-4">
+        <div className="flex justify-between border-t p-4">
+          <div className="flex flex-col gap-1 text-xs">
+            <p className="font-medium">have a web-based agent?</p>
+            <p className="text-muted-foreground">
+              <Link
+                href="https://cal.com/team/fixa/implementation-meeting"
+                target="_blank"
+                className="hover:underline"
+              >
+                we&apos;ll connect it for you
+              </Link>
+            </p>
+          </div>
           <Button
             className="flex w-32 items-center gap-2"
             onClick={handleCreateAgent}

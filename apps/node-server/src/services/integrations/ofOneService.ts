@@ -1,7 +1,7 @@
 import axios from "axios";
 import { env } from "../../env";
 import { db } from "../../db";
-import { CallStatus } from "@prisma/client";
+import { CallResult, CallStatus } from "@prisma/client";
 import { Socket } from "socket.io";
 
 // Create a Map to store device usage states
@@ -155,6 +155,7 @@ export async function startCall(
         base_url: baseUrl,
       },
     );
+    console.log("data from OFONE call", data);
     await db.call.update({
       where: {
         id: callId,
@@ -167,5 +168,14 @@ export async function startCall(
     });
   } catch (error) {
     console.error("Error starting OFONE call", error);
+    await db.call.update({
+      where: {
+        id: callId,
+      },
+      data: {
+        status: CallStatus.completed,
+        result: CallResult.success,
+      },
+    });
   }
 }

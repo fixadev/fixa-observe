@@ -26,14 +26,18 @@ export const agentRouter = createTRPCRouter({
 
   updateName: protectedProcedure
     .input(z.object({ id: z.string(), name: z.string() }))
-    .mutation(async ({ input }) => {
-      return await agentServiceInstance.updateAgentName(input.id, input.name);
+    .mutation(async ({ input, ctx }) => {
+      return await agentServiceInstance.updateAgentName(
+        input.id,
+        input.name,
+        ctx.user.id,
+      );
     }),
 
   get: protectedProcedure
     .input(z.object({ id: z.string() }))
-    .query(async ({ input }) => {
-      return await agentServiceInstance.getAgent(input.id);
+    .query(async ({ input, ctx }) => {
+      return await agentServiceInstance.getAgent(input.id, ctx.user.id);
     }),
 
   getTestAgents: protectedProcedure.query(async ({ ctx }) => {
@@ -48,11 +52,12 @@ export const agentRouter = createTRPCRouter({
         enabled: z.boolean(),
       }),
     )
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
       return await agentServiceInstance.toggleTestAgentEnabled(
         input.agentId,
         input.testAgentId,
         input.enabled,
+        ctx.user.id,
       );
     }),
 
@@ -65,23 +70,20 @@ export const agentRouter = createTRPCRouter({
         }),
       }),
     )
-    .mutation(async ({ input }) => {
-      return await agentServiceInstance.updateAgent(input);
+    .mutation(async ({ input, ctx }) => {
+      return await agentServiceInstance.updateAgent({
+        ...input,
+        ownerId: ctx.user.id,
+      });
     }),
 
   getAll: protectedProcedure.query(async ({ ctx }) => {
-    // test w 11x as ownerId
     return await agentServiceInstance.getAllAgents(ctx.user.id);
-  }),
-
-  getAllFor11x: protectedProcedure.query(async ({ ctx }) => {
-    // test w 11x as ownerId
-    return await agentServiceInstance.getAllAgents("11x");
   }),
 
   delete: protectedProcedure
     .input(z.object({ id: z.string() }))
-    .mutation(async ({ input }) => {
-      return await agentServiceInstance.deleteAgent(input.id);
+    .mutation(async ({ input, ctx }) => {
+      return await agentServiceInstance.deleteAgent(input.id, ctx.user.id);
     }),
 });
