@@ -33,6 +33,8 @@ const envSchema = z.object({
   TESTING_MINUTES_EVENT_NAME: z.string().min(1),
   OBSERVABILITY_MINUTES_PRICE_ID: z.string().min(1),
   OBSERVABILITY_MINUTES_EVENT_NAME: z.string().min(1),
+  NEXT_PUBLIC_11X_USER_ID: z.string().min(1),
+  NEXT_PUBLIC_OFONE_USER_ID: z.string().min(1),
   // KEYWORDSAI_API_KEY: z.string().min(1),
 });
 
