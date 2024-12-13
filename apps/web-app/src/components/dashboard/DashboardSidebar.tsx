@@ -96,11 +96,25 @@ export default function DashboardSidebar({
     <Sidebar>
       <SidebarHeader>
         <div className="-m-2 flex h-14 items-center justify-between border-b px-4 lg:h-[60px]">
-          <Logo href="/dashboard" />
+          <Select
+            onValueChange={(value) => {
+              if (value === "observe") {
+                router.push(`/observe/`);
+              }
+            }}
+          >
+            <SelectTrigger className="w-[100px]">
+              <SelectValue placeholder="test" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="test">test</SelectItem>
+              <SelectItem value="observe">observe</SelectItem>
+            </SelectContent>
+          </Select>
           <UserButton>
             <UserButton.MenuItems>
               <UserButton.Link
-                href={`${agentBaseUrl}/billing`}
+                href="/billing"
                 label="billing"
                 labelIcon={<CreditCardIcon />}
               />
