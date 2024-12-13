@@ -29,6 +29,7 @@ export function EvalInput({
     <div className="flex flex-col gap-4">
       <div className="flex w-full flex-row justify-between gap-4">
         <InputWithLabel
+          placeholder="confirm demographic info"
           className="w-full"
           label="name"
           value={evaluation.name}
@@ -95,6 +96,7 @@ export function EvalInput({
         <div className="flex flex-col gap-2">
           <TextAreaWithLabel
             label="success description"
+            placeholder="the agent confirmed the person's name, phone number, and address"
             value={evaluation.description}
             onChange={(e) =>
               setEvaluation({ ...evaluation, description: e.target.value })

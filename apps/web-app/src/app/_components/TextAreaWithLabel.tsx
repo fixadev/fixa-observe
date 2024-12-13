@@ -5,12 +5,14 @@ interface TextAreaWithLabelProps {
   label: string;
   value: string;
   onChange: (value: React.ChangeEvent<HTMLTextAreaElement>) => void;
+  placeholder?: string;
 }
 
 export const TextAreaWithLabel = ({
   label,
   value,
   onChange,
+  placeholder,
 }: TextAreaWithLabelProps) => {
   return (
     <div className="flex flex-col gap-2">
@@ -19,6 +21,7 @@ export const TextAreaWithLabel = ({
         className="min-h-[100px]"
         value={value}
         onChange={(e) => onChange(e)}
+        placeholder={placeholder}
       />
     </div>
   );
