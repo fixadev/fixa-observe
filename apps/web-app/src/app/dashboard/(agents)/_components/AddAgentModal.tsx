@@ -25,11 +25,6 @@ import { useRouter } from "next/navigation";
 import { generateTempId } from "~/lib/utils";
 import Link from "next/link";
 
-interface AddAgentModalProps {
-  children: React.ReactNode;
-  refetchAgents: () => void;
-}
-
 interface InputWithLabelProps {
   label: string;
   value: string;
@@ -46,8 +41,18 @@ function InputWithLabel({ label, value, onChange }: InputWithLabelProps) {
   );
 }
 
-export function AddAgentModal({ children, refetchAgents }: AddAgentModalProps) {
-  const [modalOpen, setModalOpen] = useState(false);
+export function AddAgentModal({
+  children,
+  refetchAgents,
+  defaultOpen = false,
+  unescapable = false,
+}: {
+  children?: React.ReactNode;
+  refetchAgents: () => void;
+  defaultOpen?: boolean;
+  unescapable?: boolean;
+}) {
+  const [modalOpen, setModalOpen] = useState(defaultOpen);
   const { toast } = useToast();
   const router = useRouter();
 
@@ -58,10 +63,10 @@ export function AddAgentModal({ children, refetchAgents }: AddAgentModalProps) {
     phoneNumber: "+1",
     createdAt: new Date(),
     updatedAt: new Date(),
+    customerAgentId: "",
     githubRepoUrl: "",
     ownerId: "",
     enableSlackNotifications: false,
-    customerAgentId: null,
     extraProperties: {},
   });
 
@@ -69,7 +74,7 @@ export function AddAgentModal({ children, refetchAgents }: AddAgentModalProps) {
     api.agent.create.useMutation({
       onSuccess: (newAgent) => {
         setModalOpen(false);
-        refetchAgents();
+        // refetchAgents();
         router.push(`/dashboard/${newAgent.id}/scenarios`);
       },
     });
@@ -88,15 +93,25 @@ export function AddAgentModal({ children, refetchAgents }: AddAgentModalProps) {
   };
 
   return (
-    <Dialog open={modalOpen} onOpenChange={setModalOpen}>
+    <Dialog
+      open={modalOpen}
+      onOpenChange={unescapable ? undefined : setModalOpen}
+    >
       <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent className="h-100 flex w-[50vw] flex-col p-0">
-        <DialogTitle className="p-6 pb-2">new agent</DialogTitle>
+        <DialogTitle className="p-6 pb-2">
+          {unescapable ? "add an agent to get started" : "new agent"}
+        </DialogTitle>
         <div className="flex flex-1 flex-col space-y-4 overflow-y-auto p-6 pt-2">
           <InputWithLabel
-            label="name"
+            label="agent name"
             value={agent?.name ?? ""}
             onChange={(value) => setAgent({ ...agent, name: value })}
+          />
+          <InputWithLabel
+            label="agent_id (optional)"
+            value={agent?.customerAgentId ?? ""}
+            onChange={(value) => setAgent({ ...agent, customerAgentId: value })}
           />
           <InputWithLabel
             label="phone number"

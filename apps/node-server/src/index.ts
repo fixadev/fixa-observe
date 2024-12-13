@@ -146,8 +146,6 @@ app.get("/db", async (_, res: Response) => {
     console.error("Error fetching data from database", error);
     res.status(500).json({
       error,
-      databaseUrl: env.DATABASE_URL,
-      directUrl: env.DIRECT_URL,
     });
   }
 });
