@@ -145,7 +145,11 @@ export class TestService {
         hasActiveSubscription = true;
       }
     }
-    if (noFreeTestsLeft && !hasActiveSubscription) {
+    if (
+      noFreeTestsLeft &&
+      !hasActiveSubscription &&
+      userId !== process.env.NEXT_PUBLIC_OFONE_USER_ID
+    ) {
       throw new Error("User has no free tests left and no active subscription");
     }
 
