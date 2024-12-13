@@ -1,12 +1,7 @@
 import { z } from "zod";
 import dotenv from "dotenv";
 
-dotenv.config({
-  path:
-    process.env.NODE_ENV === "production"
-      ? ".env.production"
-      : ".env.development",
-});
+dotenv.config();
 
 // console.log(
 //   "Raw env file contents:",
