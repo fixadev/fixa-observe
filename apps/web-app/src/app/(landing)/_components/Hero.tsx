@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { YCBadge } from "./YCBadge";
 import { PlayCircleIcon, RocketLaunchIcon } from "@heroicons/react/24/solid";
 import { Dialog, DialogContent, DialogTrigger } from "~/components/ui/dialog";
+import Link from "next/link";
 
 export function Hero() {
   return (
@@ -20,12 +21,14 @@ export function Hero() {
             run tests, analyze calls, fix bugs in your AI voice agents
           </p>
           <div className="mt-5 flex items-center justify-center gap-2 sm:mt-8">
-            <Button
-              className="flex items-center justify-center lowercase"
-              size="lg"
-            >
-              get started
-              <RocketLaunchIcon className="ml-2 size-5" />
+            <Button size="lg" asChild>
+              <Link
+                href="/sign-up"
+                className="flex items-center justify-center lowercase"
+              >
+                get started
+                <RocketLaunchIcon className="ml-2 size-5" />
+              </Link>
             </Button>
             <Dialog>
               <DialogTrigger asChild>

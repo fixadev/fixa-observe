@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Button } from "~/components/ui/button";
 
 export function CTA() {
@@ -11,7 +12,9 @@ export function CTA() {
             start testing and fixing today
           </span> */}
       </h2>
-      <Button size="lg">get started</Button>
+      <Button size="lg" asChild>
+        <Link href="/sign-up">get started</Link>
+      </Button>
     </div>
   );
 }

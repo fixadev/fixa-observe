@@ -6,6 +6,8 @@ import { useCallback, useState } from "react";
 import Logo from "~/components/Logo";
 import { AnimatePresence, motion } from "framer-motion";
 import Link from "next/link";
+import { SignedIn } from "@clerk/nextjs";
+import { SignedOut } from "@clerk/nextjs";
 
 const navLinks = [
   {
@@ -80,7 +82,16 @@ export function Navbar() {
                   </Button>
                 );
               })}
-              <Button>get started</Button>
+              <SignedOut>
+                <Button asChild>
+                  <Link href="/sign-up">get started</Link>
+                </Button>
+              </SignedOut>
+              <SignedIn>
+                <Button asChild>
+                  <Link href="/dashboard">dashboard</Link>
+                </Button>
+              </SignedIn>
             </div>
           </div>
 
@@ -131,7 +142,16 @@ export function Navbar() {
                   </Button>
                 );
               })}
-              <Button className="w-full">get started</Button>
+              <SignedOut>
+                <Button className="w-full" asChild>
+                  <Link href="/sign-up">get started</Link>
+                </Button>
+              </SignedOut>
+              <SignedIn>
+                <Button className="w-full" asChild>
+                  <Link href="/dashboard">dashboard</Link>
+                </Button>
+              </SignedIn>
             </div>
           </motion.div>
         )}
