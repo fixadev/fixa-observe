@@ -37,7 +37,7 @@ import {
 } from "../ui/select";
 import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useMemo } from "react";
-import { removeTrailingSlash } from "~/lib/utils";
+import { cn, removeTrailingSlash } from "~/lib/utils";
 import { api } from "~/trpc/react";
 import { SlackIcon } from "lucide-react";
 import { Skeleton } from "../ui/skeleton";
@@ -180,7 +180,14 @@ export default function DashboardSidebar({
                     asChild
                     isActive={isCurrentPath(item.href)}
                   >
-                    <Link href={`${agentBaseUrl}${item.href}`}>
+                    <Link
+                      href={`${agentBaseUrl}${item.href}`}
+                      className={cn(
+                        item.href !== "/" &&
+                          params.agentId === "new" &&
+                          "pointer-events-none opacity-50",
+                      )}
+                    >
                       <item.icon />
                       <span>{item.label}</span>
                     </Link>

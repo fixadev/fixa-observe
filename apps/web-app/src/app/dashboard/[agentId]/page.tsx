@@ -12,7 +12,7 @@ import {
 } from "~/components/ui/dialog";
 import { Button } from "~/components/ui/button";
 import { Switch } from "~/components/ui/switch";
-import { RocketLaunchIcon } from "@heroicons/react/24/solid";
+import { PlusIcon, RocketLaunchIcon } from "@heroicons/react/24/solid";
 import TestCard from "~/components/dashboard/TestCard";
 import { api } from "~/trpc/react";
 import { useToast } from "~/components/hooks/use-toast";
@@ -114,8 +114,7 @@ export default function AgentPage({ params }: { params: { agentId: string } }) {
   //   setRunTestModalOpen(true);
   // }, []);
 
-  const { data: agents, isLoading: isLoadingAgents } =
-    api.agent.getAll.useQuery();
+  const { data: agents } = api.agent.getAll.useQuery();
 
   const canRunTest = useMemo(() => {
     const metadata = user?.publicMetadata as PublicMetadata | undefined;
@@ -159,6 +158,7 @@ export default function AgentPage({ params }: { params: { agentId: string } }) {
         </div>
         {canRunTest ? (
           <Button
+            disabled={!agent}
             className="flex min-w-[160px] items-center gap-2"
             onClick={() => setRunTestModalOpen(true)}
           >
@@ -167,7 +167,10 @@ export default function AgentPage({ params }: { params: { agentId: string } }) {
         ) : (
           <Popover>
             <PopoverTrigger asChild>
-              <Button className="flex min-w-[160px] items-center gap-2">
+              <Button
+                className="flex min-w-[160px] items-center gap-2"
+                disabled={!agent}
+              >
                 run test <RocketLaunchIcon className="size-4" />
               </Button>
             </PopoverTrigger>
@@ -191,7 +194,28 @@ export default function AgentPage({ params }: { params: { agentId: string } }) {
       </div>
 
       {/* content */}
-      {isLoading ? null : tests.length > 0 ? (
+      {isLoading ? null : agents && agents.length === 0 ? (
+        <div className="flex size-full items-center justify-center">
+          <div className="flex flex-col gap-4">
+            <div>
+              <div className="text-lg font-medium">no agents yet.</div>
+              <div className="text-sm text-muted-foreground">
+                add an agent to get testing!
+              </div>
+            </div>
+            <AddAgentModal refetchAgents={refetch}>
+              <Button
+                className="flex shrink-0 items-center gap-2"
+                onClick={() => setRunTestModalOpen(true)}
+                disabled={!canRunTest}
+              >
+                <PlusIcon className="size-4" />
+                <span>add agent</span>
+              </Button>
+            </AddAgentModal>
+          </div>
+        </div>
+      ) : tests.length > 0 ? (
         <div className="container mx-auto p-4">
           <div className="rounded-t-md border-x border-t border-input shadow-sm">
             <AnimatePresence mode="popLayout" initial={false}>
@@ -242,9 +266,6 @@ export default function AgentPage({ params }: { params: { agentId: string } }) {
             onRunTest={handleRunTest}
           />
         </>
-      )}
-      {agents && agents.length === 0 && !isLoadingAgents && (
-        <AddAgentModal unescapable defaultOpen refetchAgents={refetch} />
       )}
     </div>
   );
