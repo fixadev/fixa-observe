@@ -59,7 +59,7 @@ export function AddAgentModal({
   useEffect(() => {
     setTimeout(() => {
       setModalOpen(defaultOpen);
-    }, 500);
+    }, 1200);
   }, [defaultOpen]);
 
   const [agent, setAgent] = useState<Agent>({
