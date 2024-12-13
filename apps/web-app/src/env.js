@@ -22,6 +22,12 @@ export const env = createEnv({
     RETELL_API_KEY: z.string(),
     VAPI_API_KEY: z.string(),
     SLACK_CLIENT_SECRET: z.string(),
+    STRIPE_SECRET_KEY: z.string(),
+    STRIPE_WEBHOOK_SECRET: z.string(),
+    TESTING_MINUTES_PRICE_ID: z.string(),
+    TESTING_MINUTES_EVENT_NAME: z.string(),
+    OBSERVABILITY_MINUTES_PRICE_ID: z.string(),
+    OBSERVABILITY_MINUTES_EVENT_NAME: z.string(),
   },
 
   /**
@@ -40,6 +46,9 @@ export const env = createEnv({
     NEXT_PUBLIC_SERVER_URL: z.string(),
     NEXT_PUBLIC_SLACK_CLIENT_ID: z.string(),
     NEXT_PUBLIC_SLACK_REDIRECT_URI: z.string(),
+    NEXT_PUBLIC_STRIPE_CUSTOMER_PORTAL_URL: z.string(),
+    NEXT_PUBLIC_11X_USER_ID: z.string(),
+    NEXT_PUBLIC_OFONE_USER_ID: z.string(),
   },
 
   /**
@@ -72,6 +81,17 @@ export const env = createEnv({
     NEXT_PUBLIC_SLACK_CLIENT_ID: process.env.NEXT_PUBLIC_SLACK_CLIENT_ID,
     NEXT_PUBLIC_SLACK_REDIRECT_URI: process.env.NEXT_PUBLIC_SLACK_REDIRECT_URI,
     SLACK_CLIENT_SECRET: process.env.SLACK_CLIENT_SECRET,
+    STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY,
+    STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET,
+    TESTING_MINUTES_PRICE_ID: process.env.TESTING_MINUTES_PRICE_ID,
+    TESTING_MINUTES_EVENT_NAME: process.env.TESTING_MINUTES_EVENT_NAME,
+    NEXT_PUBLIC_STRIPE_CUSTOMER_PORTAL_URL:
+      process.env.NEXT_PUBLIC_STRIPE_CUSTOMER_PORTAL_URL,
+    OBSERVABILITY_MINUTES_PRICE_ID: process.env.OBSERVABILITY_MINUTES_PRICE_ID,
+    OBSERVABILITY_MINUTES_EVENT_NAME:
+      process.env.OBSERVABILITY_MINUTES_EVENT_NAME,
+    NEXT_PUBLIC_11X_USER_ID: process.env.NEXT_PUBLIC_11X_USER_ID,
+    NEXT_PUBLIC_OFONE_USER_ID: process.env.NEXT_PUBLIC_OFONE_USER_ID,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially

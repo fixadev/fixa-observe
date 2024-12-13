@@ -56,8 +56,7 @@ export default function EvalsPage({ params }: { params: { agentId: string } }) {
               general evaluation criteria
             </div>
             <div className="text-sm text-muted-foreground">
-              the criteria used to evaluate all scenarios. can be overridden on
-              a per-scenario basis.
+              criteria used to evaluate all scenarios.
             </div>
           </div>
           <CreateGeneralEvalModal

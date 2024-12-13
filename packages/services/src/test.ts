@@ -1,18 +1,40 @@
-import { AgentService } from "@repo/services/src/agent";
-import { CallStatus, type PrismaClient } from "@prisma/client";
-import { initiateVapiCall, queueOfOneKioskCalls } from "../helpers/vapiHelpers";
+import { CallStatus, type PrismaClient } from "@repo/db/src/index";
+import { VapiService } from "./vapi";
 import { type TestAgent } from "@repo/types/src/generated";
 import {
   type OfOneKioskProperties,
   type TestWithIncludes,
 } from "@repo/types/src/index";
 import { randomUUID } from "crypto";
+import { AgentService } from "./agent";
+import { UserService } from "./user";
+import { StripeService } from "./stripe";
+import axios from "axios";
 
 export class TestService {
+  private env: { NODE_SERVER_URL: string };
+
   constructor(private db: PrismaClient) {
+    this.env = {
+      NODE_SERVER_URL:
+        process.env.NODE_SERVER_URL || process.env.NEXT_PUBLIC_SERVER_URL!,
+    };
+    this.checkEnv();
     this.agentServiceInstance = new AgentService(this.db);
+    this.userServiceInstance = new UserService(this.db);
+    this.stripeServiceInstance = new StripeService(this.db);
+    this.vapiServiceInstance = new VapiService(this.db);
   }
+
+  private checkEnv = () => {
+    if (!process.env.NODE_SERVER_URL && !process.env.NEXT_PUBLIC_SERVER_URL) {
+      throw new Error("NODE_SERVER_URL or NEXT_PUBLIC_SERVER_URL is not set");
+    }
+  };
   agentServiceInstance: AgentService;
+  userServiceInstance: UserService;
+  stripeServiceInstance: StripeService;
+  vapiServiceInstance: VapiService;
 
   async get(id: string, userId: string): Promise<TestWithIncludes | null> {
     return await this.db.test.findUnique({
@@ -95,18 +117,47 @@ export class TestService {
   }
 
   async run({
-    agentId,
     userId,
+    agentId,
     scenarioIds,
     testAgentIds,
     runFromApi = false,
   }: {
-    agentId: string;
     userId: string;
+    agentId: string;
     scenarioIds?: string[];
     testAgentIds?: string[];
     runFromApi?: boolean;
   }) {
+    // Make sure user can run this test - check free tests left and subscription
+    const userData = await this.userServiceInstance.getPublicMetadata(userId);
+    if (!userData) {
+      throw new Error("User not found");
+    }
+    const noFreeTestsLeft =
+      !userData.freeTestsLeft ||
+      (userData.freeTestsLeft && userData.freeTestsLeft <= 0);
+    let hasActiveSubscription = false;
+    if (userData.stripeCustomerId) {
+      const subscriptions =
+        await this.stripeServiceInstance.getSubscriptions(userId);
+      if (subscriptions.data.length > 0) {
+        hasActiveSubscription = true;
+      }
+    }
+    if (
+      noFreeTestsLeft &&
+      !hasActiveSubscription &&
+      userId !== process.env.NEXT_PUBLIC_OFONE_USER_ID
+    ) {
+      throw new Error("User has no free tests left and no active subscription");
+    }
+
+    // If user has free tests left, deduct one
+    if (userData.freeTestsLeft && userData.freeTestsLeft > 0) {
+      await this.userServiceInstance.decrementFreeTestsLeft(userId);
+    }
+
     const agent = await this.agentServiceInstance.getAgent(agentId, userId);
     if (!agent) {
       throw new Error("Agent not found");
@@ -181,14 +232,14 @@ export class TestService {
           calls: true,
         },
       });
-      await queueOfOneKioskCalls(deviceIds, callsToStart);
+      await this.queueOfOneKioskCalls(deviceIds, callsToStart);
       return test;
 
       // NORMAL TEST
     } else {
       const calls = await Promise.allSettled(
         tests.map(async (test) => {
-          const vapiCall = await initiateVapiCall(
+          const vapiCall = await this.vapiServiceInstance.initiateVapiCall(
             test.testAgentVapiId,
             agent.phoneNumber,
             test.testAgentPrompt,
@@ -250,5 +301,30 @@ export class TestService {
       },
       orderBy: { createdAt: "desc" },
     });
+  }
+
+  async queueOfOneKioskCalls(
+    deviceIds: string[],
+    callsToStart: {
+      callId: string;
+      ownerId: string;
+      assistantId: string;
+      testAgentPrompt: string;
+      scenarioPrompt: string;
+      baseUrl: string;
+    }[],
+  ) {
+    try {
+      return await axios.post(
+        this.env.NODE_SERVER_URL + "/queue-ofone-kiosk-calls",
+        {
+          deviceIds,
+          callsToStart,
+        },
+      );
+    } catch (error) {
+      console.error("Error queuing OFONE kiosk calls", error);
+      throw error;
+    }
   }
 }

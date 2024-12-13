@@ -1,5 +1,8 @@
 import { createTRPCRouter, protectedProcedure } from "../trpc";
-import { userService } from "~/server/services/user";
+import { UserService } from "@repo/services/src/user";
+import { db } from "~/server/db";
+
+const userService = new UserService(db);
 
 export const userRouter = createTRPCRouter({
   generateApiKey: protectedProcedure.mutation(async ({ ctx }) => {

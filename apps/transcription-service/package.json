@@ -1,0 +1,7 @@
+{
+  "name": "transcription-service",
+  "scripts": {
+    "dev": "python src/main.py",
+    "start": "python src/main.py"
+  }
+} 

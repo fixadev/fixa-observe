@@ -93,8 +93,8 @@ export class AgentService {
     id: string,
     ownerId: string,
   ): Promise<AgentWithIncludes | null> {
-    const result = await this.db.agent.findUnique({
-      where: { id, ownerId },
+    const result = await this.db.agent.findFirst({
+      where: id === "new" ? { ownerId } : { id, ownerId },
       include: {
         scenarios: {
           where: { deleted: false },

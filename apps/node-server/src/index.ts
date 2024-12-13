@@ -1,19 +1,11 @@
-import express, { Request, Response } from "express";
+import express, { NextFunction, Request, Response } from "express";
 import { createServer } from "http";
 import { Server } from "socket.io";
 import { env } from "./env";
-import { db } from "./db";
-import {
-  handleCallEnded,
-  handleTranscriptUpdate,
-  handleAnalysisStarted,
-} from "./services/vapi";
-import { addCallToQueue } from "./services/aws";
-import { scheduleOfOneCalls } from "./services/integrations/ofOneService";
 import { startQueueConsumer } from "./workers/queueConsumer";
+import v1Router from "./routes/v1";
 import { authenticateRequest } from "./middlewares/auth";
-import { getContext } from "./middlewares/getContext";
-import { validateUploadCallParams } from "./middlewares/validateParams";
+import vapiRouter from "./routes/v1/vapi";
 
 const app = express();
 const httpServer = createServer(app);
@@ -47,109 +39,23 @@ io.on("connection", (socket) => {
   });
 });
 
-// Middleware
-app.use(express.json());
-
-// Routes
-app.get("/health", (_, res: Response) => res.json({ status: "ok" }));
-
-app.post("/vapi", getContext, async (req: Request, res: Response) => {
-  try {
-    const { message } = req.body;
-    const { userSocket, agent, scenario, test, call } = res.locals.context;
-    if (message.type === "end-of-call-report") {
-      await handleAnalysisStarted(message, userSocket);
-      await handleCallEnded({
-        report: message,
-        call,
-        agent,
-        test,
-        scenario,
-        userSocket,
-      });
-    } else if (message.type === "transcript") {
-      await handleTranscriptUpdate(message, call, userSocket);
-    }
-    res.json({ success: true });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ success: false, error: (error as Error).message });
-  }
+app.get("/", (req, res) => {
+  res.send("ollo");
 });
 
-app.post(
-  "/upload-call",
-  authenticateRequest,
-  validateUploadCallParams,
-  async (req: Request, res: Response) => {
-    try {
-      const { callId, location, agentId, regionId, metadata, createdAt } =
-        req.body;
+// TODO: authenticate vapi requests
+app.use("/vapi", vapiRouter);
 
-      if (regionId) metadata.regionId = regionId;
+app.use(authenticateRequest);
 
-      console.log(
-        "ADDING CALL TO QUEUE",
-        callId,
-        "with user id",
-        res.locals.userId,
-      );
+// temporary before 11x migration
+app.use("/", v1Router);
+app.use("/v1", v1Router);
 
-      await addCallToQueue({
-        callId,
-        location,
-        agentId,
-        createdAt: createdAt ? new Date(createdAt) : new Date(),
-        userId: res.locals.userId,
-        metadata: metadata,
-      });
-      res.json({ success: true, muizz: "the man" });
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ success: false, error: (error as Error).message });
-    }
-  },
-);
-
-app.post("/queue-ofone-kiosk-calls", async (req: Request, res: Response) => {
-  try {
-    const { deviceIds, callsToStart } = req.body;
-    const scheduledCalls = await scheduleOfOneCalls(
-      deviceIds,
-      callsToStart,
-      connectedUsers,
-    );
-    res.json({ success: true, scheduledCalls });
-  } catch (error) {
-    console.error("Error scheduling OFONE calls", error);
-    res.status(500).json({ success: false, error: (error as Error).message });
-  }
-});
-
-app.post("/message/:userId", (req: Request, res: Response) => {
-  const { userId } = req.params;
-  const { event, data } = req.body;
-  const userSocket = connectedUsers.get(userId);
-  if (userSocket) {
-    userSocket.emit(event, data);
-    res.json({ success: true });
-  } else {
-    res.status(404).json({ error: "User not connected" });
-  }
-});
-
-app.get("/db", async (_, res: Response) => {
-  try {
-    const result = await db.testAgent.findMany();
-    res.json({ result });
-  } catch (error) {
-    console.error("Error fetching data from database", error);
-    res.status(500).json({
-      error,
-      databaseUrl: env.DATABASE_URL,
-      directUrl: env.DIRECT_URL,
-    });
-  }
+// global error handler
+app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
+  console.error(err.stack);
+  res.status(500).json({ error: "Something broke!" });
 });
 
 // Server setup with unified cleanup

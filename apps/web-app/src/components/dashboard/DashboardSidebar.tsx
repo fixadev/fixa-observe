@@ -24,6 +24,8 @@ import {
   PlusIcon,
   UsersIcon,
   CheckIcon,
+  CreditCardIcon,
+  LifebuoyIcon,
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import {
@@ -34,15 +36,16 @@ import {
   SelectValue,
 } from "../ui/select";
 import { usePathname, useRouter } from "next/navigation";
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
 import { removeTrailingSlash } from "~/lib/utils";
 import { api } from "~/trpc/react";
-import Logo from "../Logo";
 import { SlackIcon } from "lucide-react";
 import { Skeleton } from "../ui/skeleton";
 import { Button } from "../ui/button";
 import { AddAgentModal } from "~/app/dashboard/(agents)/_components/AddAgentModal";
 import { useAgent } from "~/app/contexts/UseAgent";
+import { UserButton } from "@clerk/nextjs";
+import FreeTestsLeft from "./FreeTestsLeft";
 
 const navItems = [
   { href: "/", icon: CounterClockwiseClockIcon, label: "test history" },
@@ -65,20 +68,25 @@ export default function DashboardSidebar({
 
   const pathname = usePathname();
 
+  const agentBaseUrl = useMemo(
+    () => `/dashboard/${params.agentId}`,
+    [params.agentId],
+  );
+
   const isCurrentPath = useCallback(
     (path: string) => {
       if (path === "/") {
         return (
-          removeTrailingSlash(pathname) === `/dashboard/${params.agentId}` ||
-          pathname.startsWith(`/dashboard/${params.agentId}/tests`)
+          removeTrailingSlash(pathname) === agentBaseUrl ||
+          pathname.startsWith(`${agentBaseUrl}/tests`)
         );
       }
       return (
         removeTrailingSlash(pathname) ===
-        removeTrailingSlash(`/dashboard/${params.agentId}${path}`)
+        removeTrailingSlash(`${agentBaseUrl}${path}`)
       );
     },
-    [pathname, params.agentId],
+    [pathname, agentBaseUrl],
   );
 
   const { data: agents, refetch: refetchAgents } = api.agent.getAll.useQuery();
@@ -89,7 +97,33 @@ export default function DashboardSidebar({
     <Sidebar>
       <SidebarHeader>
         <div className="-m-2 flex h-14 items-center justify-between border-b px-4 lg:h-[60px]">
-          <Logo href="/dashboard" />
+          <Select
+            defaultValue="testing"
+            onValueChange={(value) => {
+              if (value === "observability") {
+                router.push(`/observe/`);
+              }
+            }}
+          >
+            <SelectTrigger className="-ml-2 mr-2">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="testing">testing</SelectItem>
+              <SelectItem value="observability">observability</SelectItem>
+            </SelectContent>
+          </Select>
+          <UserButton>
+            <UserButton.MenuItems>
+              <UserButton.Link
+                href="/billing"
+                label="billing"
+                labelIcon={<CreditCardIcon />}
+              />
+              <UserButton.Action label="manageAccount" />
+              <UserButton.Action label="signOut" />
+            </UserButton.MenuItems>
+          </UserButton>
         </div>
       </SidebarHeader>
       <SidebarContent>
@@ -146,7 +180,7 @@ export default function DashboardSidebar({
                     asChild
                     isActive={isCurrentPath(item.href)}
                   >
-                    <Link href={`/dashboard/${params.agentId}${item.href}`}>
+                    <Link href={`${agentBaseUrl}${item.href}`}>
                       <item.icon />
                       <span>{item.label}</span>
                     </Link>
@@ -160,13 +194,14 @@ export default function DashboardSidebar({
       <SidebarFooter>
         <SidebarGroup>
           <SidebarGroupContent>
+            <FreeTestsLeft />
             <SidebarMenu>
               <SidebarMenuItem>
                 <SidebarMenuButton
                   asChild
                   isActive={isCurrentPath("/slack-app")}
                 >
-                  <Link href={`/dashboard/${params.agentId}/slack-app`}>
+                  <Link href={`observe/slack-app`}>
                     <SlackIcon />
                     <span>slack app</span>
                   </Link>
@@ -177,7 +212,7 @@ export default function DashboardSidebar({
                   asChild
                   isActive={isCurrentPath("/api-keys")}
                 >
-                  <Link href={`/dashboard/${params.agentId}/api-keys`}>
+                  <Link href={`observe/api-keys`}>
                     <KeyIcon />
                     <span>API keys</span>
                   </Link>
@@ -188,6 +223,20 @@ export default function DashboardSidebar({
                   <Link href={`https://docs.fixa.dev`} target="_blank">
                     <DocumentTextIcon />
                     <span>documentation</span>
+                  </Link>
+                </SidebarMenuButton>
+                <SidebarMenuBadge>
+                  <OpenInNewWindowIcon />
+                </SidebarMenuBadge>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild>
+                  <Link
+                    href={`https://join.slack.com/t/fixacommunity/shared_invite/zt-2wbw79829-01HGYT7SxVYPk8t6pTNb9w`}
+                    target="_blank"
+                  >
+                    <LifebuoyIcon />
+                    <span>support</span>
                   </Link>
                 </SidebarMenuButton>
                 <SidebarMenuBadge>
