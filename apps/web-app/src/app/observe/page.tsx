@@ -9,6 +9,7 @@ import Spinner from "~/components/Spinner";
 import { Dialog, DialogContent } from "~/components/ui/dialog";
 import { api } from "~/trpc/react";
 import ChartCard from "~/components/observe/ChartCard";
+import { CopyText } from "~/components/CopyText";
 
 export default function ObservePage() {
   const { selectedCallId, setSelectedCallId, filter, orderBy, resetFilter } =
@@ -87,6 +88,41 @@ export default function ObservePage() {
     () => calls?.find((call) => call.id === selectedCallId),
     [calls, selectedCallId],
   );
+
+  if (calls.length === 0 && !isLoading) {
+    return (
+      <div className="flex h-full w-full flex-col items-center justify-center p-8">
+        <div className="max-w-2xl rounded-lg border border-border bg-card p-6 text-card-foreground shadow-sm">
+          <h3 className="mb-4 text-lg font-semibold">No calls found</h3>
+          <p className="mb-2 text-muted-foreground">
+            To start seeing calls, make a POST request to{" "}
+          </p>
+          <p className="mb-4 flex flex-row items-center gap-2 text-muted-foreground">
+            <CopyText
+              className="w-[250px]"
+              text="https://api.fixa.dev/upload-call"
+            />
+            with the following body:
+          </p>
+          <pre className="mb-4 rounded-md bg-muted p-4 font-mono text-sm">
+            {`{
+  "callId": "unique-call-identifier",
+  "location": "https://url-of-call-recording",
+  "agentId": "your-agent-id",
+  "metadata": {
+    "custom_field": "custom value",
+    "another_field": "another value"
+  }
+}`}
+          </pre>
+          <p className="text-sm text-muted-foreground">
+            Once you start sending calls, they will appear in this dashboard
+            automatically.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div

@@ -34,13 +34,23 @@ import {
   AccordionTrigger,
 } from "~/components/ui/accordion";
 import { SidebarTrigger } from "~/components/ui/sidebar";
+import { useRouter } from "next/navigation";
+import { AddAgentModal } from "../(agents)/_components/AddAgentModal";
 
 export default function AgentPage({ params }: { params: { agentId: string } }) {
   const [tests, setTests] = useState<TestWithCalls[]>([]);
   const [runTestModalOpen, setRunTestModalOpen] = useState(false);
   const { toast } = useToast();
   const { user } = useUser();
-  const { agent, setAgent } = useAgent(params.agentId);
+  const { agent, setAgent, refetch } = useAgent(params.agentId);
+  const router = useRouter();
+
+  // hacky fix
+  useEffect(() => {
+    if (params.agentId === "new" && agent?.id && agent?.id !== "new") {
+      router.push(`/dashboard/${agent?.id}`);
+    }
+  }, [params.agentId, agent, router]);
 
   useSocketMessage(
     user?.id,
@@ -178,6 +188,9 @@ export default function AgentPage({ params }: { params: { agentId: string } }) {
             onRunTest={handleRunTest}
           />
         </>
+      )}
+      {!agent && !isLoading && (
+        <AddAgentModal unescapable defaultOpen refetchAgents={refetch} />
       )}
     </div>
   );

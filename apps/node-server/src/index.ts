@@ -51,7 +51,7 @@ io.on("connection", (socket) => {
 app.use(express.json());
 
 // Routes
-app.get("/health", (_, res: Response) => res.json({ status: "ok" }));
+app.get("/", (_, res: Response) => res.json({ status: "ollo" }));
 
 app.post("/vapi", getContext, async (req: Request, res: Response) => {
   try {
@@ -146,8 +146,6 @@ app.get("/db", async (_, res: Response) => {
     console.error("Error fetching data from database", error);
     res.status(500).json({
       error,
-      databaseUrl: env.DATABASE_URL,
-      directUrl: env.DIRECT_URL,
     });
   }
 });

@@ -220,7 +220,7 @@ function DeleteAgentDialog({ agentId }: { agentId: string }) {
     onSuccess: () => {
       console.log("invalidating agents");
       void utils.agent.getAll.invalidate();
-      router.push("/dashboard");
+      router.push("/dashboard/new");
       toast({
         title: "Agent deleted",
         description: "Agent has been deleted successfully",
