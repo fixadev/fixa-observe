@@ -101,7 +101,7 @@ export const analyzeCallWitho1 = async ({
     throw new Error("No result from LLM");
   }
 
-  console.log("CLEANED RESULT", cleanedResult);
+  // console.log("CLEANED RESULT", cleanedResult);
 
   return cleanedResult;
 };
