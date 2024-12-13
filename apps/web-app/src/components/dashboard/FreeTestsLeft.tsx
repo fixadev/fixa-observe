@@ -6,6 +6,7 @@ import { useCallback, useMemo } from "react";
 import { Button } from "../ui/button";
 import { api } from "~/trpc/react";
 import Spinner from "../Spinner";
+import { env } from "~/env";
 
 export default function FreeTestsLeft() {
   const { user } = useUser();
@@ -17,8 +18,12 @@ export default function FreeTestsLeft() {
   }, [metadata]);
 
   const isPaidUser = useMemo(() => {
-    return !!metadata?.stripeCustomerId;
-  }, [metadata]);
+    return (
+      !!metadata?.stripeCustomerId ||
+      user?.id === env.NEXT_PUBLIC_11X_USER_ID ||
+      user?.id === env.NEXT_PUBLIC_OFONE_USER_ID
+    );
+  }, [metadata, user]);
 
   const { mutate: getCheckoutUrl, isPending: isGeneratingStripeUrl } =
     api.stripe.createCheckoutUrl.useMutation({

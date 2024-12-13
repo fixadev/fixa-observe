@@ -58,7 +58,7 @@ export default function ObservePage() {
   return <_ObservePage />;
 }
 
-export function _ObservePage() {
+function _ObservePage() {
   const { selectedCallId, setSelectedCallId, filter, orderBy, resetFilter } =
     useObserveState();
 
