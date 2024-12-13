@@ -121,6 +121,9 @@ export class CallService {
       where: {
         ownerId,
         testId,
+        customerCallId: {
+          not: null,
+        },
         deleted: false,
         scenarioId,
         ...filterWhere,
