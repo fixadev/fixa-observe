@@ -28,30 +28,28 @@ export default function RootLayout({
       // suppressHydrationWarning
     >
       <CSPostHogProvider>
-        <SidebarProvider>
-          <ClerkProvider
-          // appearance={{ baseTheme: dark }}
-          // localization={localization}
-          >
-            <body className="h-full">
-              {/* <ThemeProvider
+        <ClerkProvider
+        // appearance={{ baseTheme: dark }}
+        // localization={localization}
+        >
+          <body className="h-full">
+            {/* <ThemeProvider
               attribute="class"
               defaultTheme="light"
               // enableSystem
               disableTransitionOnChange
             > */}
-              <TRPCReactProvider>
-                <TooltipProvider delayDuration={100}>
-                  <ChildrenWrapper>
-                    {children}
-                    <Toaster />
-                  </ChildrenWrapper>
-                </TooltipProvider>
-              </TRPCReactProvider>
-              {/* </ThemeProvider> */}
-            </body>
-          </ClerkProvider>
-        </SidebarProvider>
+            <TRPCReactProvider>
+              <TooltipProvider delayDuration={100}>
+                <ChildrenWrapper>
+                  {children}
+                  <Toaster />
+                </ChildrenWrapper>
+              </TooltipProvider>
+            </TRPCReactProvider>
+            {/* </ThemeProvider> */}
+          </body>
+        </ClerkProvider>
       </CSPostHogProvider>
     </html>
   );
