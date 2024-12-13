@@ -52,16 +52,10 @@ export function AddAgentModal({
   defaultOpen?: boolean;
   unescapable?: boolean;
 }) {
-  const [modalOpen, setModalOpen] = useState(false);
+  const [modalOpen, setModalOpen] = useState(defaultOpen);
   const { toast } = useToast();
   const router = useRouter();
-
-  useEffect(() => {
-    setTimeout(() => {
-      setModalOpen(defaultOpen);
-    }, 1200);
-  }, [defaultOpen]);
-
+  const utils = api.useUtils();
   const [agent, setAgent] = useState<Agent>({
     id: generateTempId(),
     name: "",
@@ -80,6 +74,7 @@ export function AddAgentModal({
     api.agent.create.useMutation({
       onSuccess: (newAgent) => {
         setModalOpen(false);
+        void utils.agent.getAll.invalidate();
         // refetchAgents();
         router.push(`/dashboard/${newAgent.id}/scenarios`);
       },

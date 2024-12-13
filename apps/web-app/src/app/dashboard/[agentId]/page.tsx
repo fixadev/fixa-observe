@@ -114,6 +114,9 @@ export default function AgentPage({ params }: { params: { agentId: string } }) {
   //   setRunTestModalOpen(true);
   // }, []);
 
+  const { data: agents, isLoading: isLoadingAgents } =
+    api.agent.getAll.useQuery();
+
   const canRunTest = useMemo(() => {
     const metadata = user?.publicMetadata as PublicMetadata | undefined;
     return !!metadata?.stripeCustomerId || (metadata?.freeTestsLeft ?? 0) > 0;
@@ -240,7 +243,7 @@ export default function AgentPage({ params }: { params: { agentId: string } }) {
           />
         </>
       )}
-      {!agent && !isLoading && (
+      {agents && agents.length === 0 && !isLoadingAgents && (
         <AddAgentModal unescapable defaultOpen refetchAgents={refetch} />
       )}
     </div>

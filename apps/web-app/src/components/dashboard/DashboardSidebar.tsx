@@ -201,7 +201,7 @@ export default function DashboardSidebar({
                   asChild
                   isActive={isCurrentPath("/slack-app")}
                 >
-                  <Link href={`observe/slack-app`}>
+                  <Link href={`${agentBaseUrl}/slack-app`}>
                     <SlackIcon />
                     <span>slack app</span>
                   </Link>
@@ -212,7 +212,7 @@ export default function DashboardSidebar({
                   asChild
                   isActive={isCurrentPath("/api-keys")}
                 >
-                  <Link href={`observe/api-keys`}>
+                  <Link href={`${agentBaseUrl}/api-keys`}>
                     <KeyIcon />
                     <span>API keys</span>
                   </Link>

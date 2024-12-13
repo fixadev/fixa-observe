@@ -36,7 +36,7 @@ uploadCallRouter.post(
         userId: res.locals.userId,
         metadata: metadata,
       });
-      res.json({ success: true, muizz: "the man" });
+      res.json({ success: true, you: "are cool :)" });
     } catch (error) {
       console.error(error);
       res.status(500).json({ success: false, error: (error as Error).message });
