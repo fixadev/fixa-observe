@@ -8,8 +8,7 @@
     "db:generate": "pnpm --filter @repo/db db:generate",
     "lint": "turbo lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
-    "vercel-build": "pnpm --filter @repo/db db:generate && pnpm --filter @repo/db db:deploy  && turbo build --filter=@repo/types --filter=@repo/services && cd apps/web-app && pnpm build",
-    "postinstall": "cd apps/transcription-service && pip install -r requirements.txt"
+    "vercel-build": "pnpm --filter @repo/db db:generate && pnpm --filter @repo/db db:deploy  && turbo build --filter=@repo/types --filter=@repo/services && cd apps/web-app && pnpm build"
   },
   "devDependencies": {
     "prettier": "^3.3.3",
