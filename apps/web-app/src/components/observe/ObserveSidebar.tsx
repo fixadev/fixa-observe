@@ -29,7 +29,6 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { removeTrailingSlash } from "~/lib/utils";
-import Logo from "../Logo";
 import { api } from "~/trpc/react";
 import { Button } from "../ui/button";
 import {
@@ -86,18 +85,19 @@ export default function ObserveSidebar() {
         <SidebarHeader>
           <div className="-m-2 flex h-14 items-center justify-between border-b px-4 lg:h-[60px]">
             <Select
+              defaultValue="observability"
               onValueChange={(value) => {
-                if (value === "test") {
+                if (value === "testing") {
                   router.push(`/dashboard/new`);
                 }
               }}
             >
-              <SelectTrigger className="w-[100px]">
-                <SelectValue placeholder="observe" />
+              <SelectTrigger className="-ml-2 mr-2">
+                <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="test">test</SelectItem>
-                <SelectItem value="observe">observe</SelectItem>
+                <SelectItem value="testing">testing</SelectItem>
+                <SelectItem value="observability">observability</SelectItem>
               </SelectContent>
             </Select>
             <UserButton>
