@@ -15,21 +15,14 @@ ARG DIRECT_URL=
 ARG TEST_SECRET=
 
 
-RUN echo "=========================== PRINTING FILESYSTEM =================================="
-RUN ls -la / || true
-RUN ls -la /run || true
-RUN ls -la /run/secrets || true
-
-RUN --mount=type=secret,id=MY_SUPER_SECRET \
+RUN --mount=type=secret,id=DATABASE_URL \
+  --mount=type=secret,id=DIRECT_URL \
+  --mount=type=secret,id=TEST_SECRET \
   DATABASE_URL="$(cat /run/secrets/DATABASE_URL)" \
-  && echo "DATABASE_URL: ${DATABASE_URL}"
-
-RUN --mount=type=secret,id=DIRECT_URL \
   DIRECT_URL="$(cat /run/secrets/DIRECT_URL)" \
-  && echo "DIRECT_URL: ${DIRECT_URL}"
-
-RUN --mount=type=secret,id=TEST_SECRET \
   TEST_SECRET="$(cat /run/secrets/TEST_SECRET)" \
+  && echo "DATABASE_URL: ${DATABASE_URL}" \
+  && echo "DIRECT_URL: ${DIRECT_URL}" \
   && echo "TEST_SECRET: ${TEST_SECRET}"
 
 RUN pnpm --filter @repo/db db:generate
