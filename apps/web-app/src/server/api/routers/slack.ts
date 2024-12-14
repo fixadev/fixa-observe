@@ -6,8 +6,10 @@ import { type PublicMetadata } from "@repo/types/src";
 import { currentUser } from "@clerk/nextjs/server";
 import { UserService } from "@repo/services/src/user";
 import { db } from "~/server/db";
+import { SlackService } from "@repo/services/src/slack";
 
 const userService = new UserService(db);
+const slackService = new SlackService();
 
 export const slackRouter = createTRPCRouter({
   exchangeCode: protectedProcedure
@@ -73,5 +75,11 @@ export const slackRouter = createTRPCRouter({
       }
 
       await axios.post(webhookUrl, input.message);
+    }),
+
+  sendAnalyticsMessage: protectedProcedure
+    .input(z.object({ message: z.string() }))
+    .mutation(async ({ input }) => {
+      await slackService.sendAnalyticsMessage({ message: input.message });
     }),
 });

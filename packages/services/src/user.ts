@@ -19,6 +19,10 @@ export class UserService {
     });
   }
 
+  async getUser(userId: string) {
+    return await this.clerkClient.users.getUser(userId);
+  }
+
   async createApiKey(userId: string) {
     const apiKey = generateApiKey();
     return await this.db.apiKey.upsert({
