@@ -21,8 +21,6 @@ RUN pnpm install --frozen-lockfile
 #   && echo "TEST_SECRET: ${TEST_SECRET}" \
 #   && pnpm --filter @repo/db db:generate
 
-COPY packages/db/.env packages/db/.env
-
 RUN pnpm --filter @repo/db db:generate
 
 RUN mkdir -p /usr/node_modules/.pnpm/@prisma+client@5.21.1_prisma@5.21.1/node_modules/.prisma/client
