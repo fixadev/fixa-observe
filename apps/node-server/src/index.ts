@@ -50,26 +50,6 @@ app.use("/queue-ofone-kiosk-calls", ofOneRouter);
 
 app.use(authenticateRequest);
 
-app.get("/db", async (_: Request, res: Response) => {
-  try {
-    // const result = await db.testAgent.findMany();
-    res.json({
-      dbUrl: env.DATABASE_URL,
-      directUrl: env.DIRECT_URL,
-      processEnv: process.env.DATABASE_URL,
-      processEnv2: process.env.DIRECT_URL,
-      version: "0.0.1",
-    });
-  } catch (error) {
-    console.error("Error fetching data from database", error);
-    res.status(500).json({
-      error,
-      dbUrl: env.DATABASE_URL,
-      directUrl: env.DIRECT_URL,
-    });
-  }
-});
-
 // temporary before 11x migration
 app.use("/", v1Router);
 app.use("/v1", v1Router);
