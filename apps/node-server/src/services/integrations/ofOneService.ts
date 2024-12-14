@@ -125,7 +125,7 @@ export async function startCall(
     console.log("deviceUsageMap", deviceUsageMap);
     console.log("callQueue", callQueue);
     const { data } = await axios.post<{ callId: string }>(
-      `${env.AUDIO_SERVICE_URL}/websocket-call-ofone`,
+      `https://api.pixa.dev/run-ofone-kiosk`,
       {
         device_id: deviceId,
         assistant_id: assistantId,
@@ -167,6 +167,7 @@ export async function startCall(
       },
     });
   } catch (error) {
+    setDeviceAvailable(deviceId, userSocket);
     console.error("Error starting OFONE call", error);
     await db.call.update({
       where: {
