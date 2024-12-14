@@ -56,6 +56,8 @@ app.get("/db", async (_: Request, res: Response) => {
     res.json({
       dbUrl: env.DATABASE_URL,
       directUrl: env.DIRECT_URL,
+      processEnv: process.env.DATABASE_URL,
+      processEnv2: process.env.DIRECT_URL,
       version: "0.0.1",
     });
   } catch (error) {
