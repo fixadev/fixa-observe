@@ -9,7 +9,7 @@ import Spinner from "../Spinner";
 import { env } from "~/env";
 
 export default function FreeTestsLeft() {
-  const { user } = useUser();
+  const { user, isLoaded } = useUser();
 
   const metadata = user?.publicMetadata as PublicMetadata | undefined;
 
@@ -36,7 +36,7 @@ export default function FreeTestsLeft() {
     getCheckoutUrl({ redirectUrl });
   }, [getCheckoutUrl]);
 
-  if (isPaidUser) {
+  if (isPaidUser || !isLoaded) {
     return null;
   }
 

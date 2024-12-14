@@ -17,6 +17,8 @@ import { TextAreaWithLabel } from "./TextAreaWithLabel";
 import { type Eval } from "@repo/types/src/index";
 import { InformationCircleIcon } from "@heroicons/react/24/solid";
 import React from "react";
+import { useUser } from "@clerk/nextjs";
+import { env } from "~/env";
 
 export function EvalInput({
   evaluation,
@@ -25,6 +27,8 @@ export function EvalInput({
   evaluation: Eval;
   setEvaluation: (evaluation: Eval) => void;
 }) {
+  const { user } = useUser();
+
   return (
     <div className="flex flex-col gap-4">
       <div className="flex w-full flex-row justify-between gap-4">
@@ -60,7 +64,11 @@ export function EvalInput({
                 <SelectItem id="content" value="content">
                   content
                 </SelectItem>
-                <SelectItem id="tool" value="tool">
+                <SelectItem
+                  id="tool"
+                  value="tool"
+                  disabled={user?.id !== env.NEXT_PUBLIC_OFONE_USER_ID}
+                >
                   tool
                 </SelectItem>
               </SelectContent>
