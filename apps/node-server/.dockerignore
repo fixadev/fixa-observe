@@ -2,8 +2,6 @@
 **/dist
 **/.turbo
 **/.next
-**/.env*
-!**/.env.example
 
 # Logs
 **/logs
