@@ -11,13 +11,12 @@ import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { type Agent } from "@repo/types/src/index";
 import { api } from "~/trpc/react";
 import Spinner from "~/components/Spinner";
 import {
   checkForValidPhoneNumber,
-  formatPhoneNumber,
   displayPhoneNumberNicely,
 } from "~/helpers/phoneNumberUtils";
 import { useToast } from "~/components/hooks/use-toast";
@@ -25,30 +24,12 @@ import { useRouter } from "next/navigation";
 import { generateTempId } from "~/lib/utils";
 import Link from "next/link";
 
-interface InputWithLabelProps {
-  label: string;
-  value: string;
-  onChange: (value: string) => void;
-  onBlur?: () => void;
-}
-
-function InputWithLabel({ label, value, onChange }: InputWithLabelProps) {
-  return (
-    <div className="flex flex-col gap-2">
-      <Label className="text-md">{label}</Label>
-      <Input value={value} onChange={(e) => onChange(e.target.value)} />
-    </div>
-  );
-}
-
 export function AddAgentModal({
   children,
-  refetchAgents,
   defaultOpen = false,
   unescapable = false,
 }: {
   children?: React.ReactNode;
-  refetchAgents: () => void;
   defaultOpen?: boolean;
   unescapable?: boolean;
 }) {
@@ -75,7 +56,6 @@ export function AddAgentModal({
       onSuccess: (newAgent) => {
         setModalOpen(false);
         void utils.agent.getAll.invalidate();
-        // refetchAgents();
         router.push(`/dashboard/${newAgent.id}/scenarios`);
       },
     });
@@ -104,23 +84,54 @@ export function AddAgentModal({
           {unescapable ? "add an agent to get started" : "new agent"}
         </DialogTitle>
         <div className="flex flex-1 flex-col space-y-4 overflow-y-auto p-6 pt-2">
-          <InputWithLabel
-            label="agent name"
-            value={agent?.name ?? ""}
-            onChange={(value) => setAgent({ ...agent, name: value })}
-          />
-          <InputWithLabel
-            label="agent_id (optional)"
-            value={agent?.customerAgentId ?? ""}
-            onChange={(value) => setAgent({ ...agent, customerAgentId: value })}
-          />
-          <InputWithLabel
-            label="phone number"
-            value={displayPhoneNumberNicely(agent?.phoneNumber ?? "")}
-            onChange={(value) =>
-              setAgent({ ...agent, phoneNumber: formatPhoneNumber(value) })
-            }
-          />
+          <div className="flex flex-col gap-2">
+            <div>
+              <Label>agent name</Label>
+              <div className="text-xs text-muted-foreground">
+                name of your agent, to help you identify it
+              </div>
+            </div>
+            <Input
+              placeholder="my agent"
+              value={agent?.name ?? ""}
+              onChange={(e) => setAgent({ ...agent, name: e.target.value })}
+            />
+          </div>
+          <div className="flex flex-col gap-2">
+            <div>
+              <div className="mb-1 flex items-baseline gap-2">
+                <Label>internal agent ID</Label>
+                <span className="text-xs text-muted-foreground">
+                  (optional)
+                </span>
+              </div>
+              <div className="text-xs text-muted-foreground">
+                the ID of this agent in your database, used to associate
+                production calls with the agent created in fixa.
+              </div>
+            </div>
+            <Input
+              placeholder="agent_123456"
+              value={agent?.customerAgentId ?? ""}
+              onChange={(e) =>
+                setAgent({ ...agent, customerAgentId: e.target.value })
+              }
+            />
+          </div>
+          <div className="flex flex-col gap-2">
+            <div>
+              <Label>phone number</Label>
+              <div className="text-xs text-muted-foreground">
+                the phone number we call to test your agent
+              </div>
+            </div>
+            <Input
+              value={displayPhoneNumberNicely(agent?.phoneNumber ?? "")}
+              onChange={(e) =>
+                setAgent({ ...agent, phoneNumber: e.target.value })
+              }
+            />
+          </div>
         </div>
         <div className="flex justify-between border-t p-4">
           <div className="flex flex-col gap-1 text-xs">

@@ -37,7 +37,7 @@ import {
 } from "../ui/select";
 import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useMemo } from "react";
-import { removeTrailingSlash } from "~/lib/utils";
+import { cn, removeTrailingSlash } from "~/lib/utils";
 import { api } from "~/trpc/react";
 import { SlackIcon } from "lucide-react";
 import { Skeleton } from "../ui/skeleton";
@@ -89,7 +89,7 @@ export default function DashboardSidebar({
     [pathname, agentBaseUrl],
   );
 
-  const { data: agents, refetch: refetchAgents } = api.agent.getAll.useQuery();
+  const { data: agents } = api.agent.getAll.useQuery();
 
   const { agent } = useAgent();
 
@@ -161,7 +161,7 @@ export default function DashboardSidebar({
                       ))}
                     </div>
                     <div className="border-t">
-                      <AddAgentModal refetchAgents={refetchAgents}>
+                      <AddAgentModal>
                         <Button
                           variant="ghost"
                           className="flex w-full items-center justify-start px-2"
@@ -180,7 +180,14 @@ export default function DashboardSidebar({
                     asChild
                     isActive={isCurrentPath(item.href)}
                   >
-                    <Link href={`${agentBaseUrl}${item.href}`}>
+                    <Link
+                      href={`${agentBaseUrl}${item.href}`}
+                      className={cn(
+                        item.href !== "/" &&
+                          params.agentId === "new" &&
+                          "pointer-events-none opacity-50",
+                      )}
+                    >
                       <item.icon />
                       <span>{item.label}</span>
                     </Link>
