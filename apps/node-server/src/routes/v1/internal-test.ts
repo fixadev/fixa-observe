@@ -1,6 +1,5 @@
 import { Request, Response, Router } from "express";
 import { connectedUsers } from "../../index";
-import { db } from "../../db";
 import { env } from "../../env";
 
 const internalTestRouter = Router();
