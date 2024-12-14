@@ -89,7 +89,7 @@ export default function DashboardSidebar({
     [pathname, agentBaseUrl],
   );
 
-  const { data: agents, refetch: refetchAgents } = api.agent.getAll.useQuery();
+  const { data: agents } = api.agent.getAll.useQuery();
 
   const { agent } = useAgent();
 
@@ -161,7 +161,7 @@ export default function DashboardSidebar({
                       ))}
                     </div>
                     <div className="border-t">
-                      <AddAgentModal refetchAgents={refetchAgents}>
+                      <AddAgentModal>
                         <Button
                           variant="ghost"
                           className="flex w-full items-center justify-start px-2"

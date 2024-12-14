@@ -11,13 +11,12 @@ import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { type Agent } from "@repo/types/src/index";
 import { api } from "~/trpc/react";
 import Spinner from "~/components/Spinner";
 import {
   checkForValidPhoneNumber,
-  formatPhoneNumber,
   displayPhoneNumberNicely,
 } from "~/helpers/phoneNumberUtils";
 import { useToast } from "~/components/hooks/use-toast";
@@ -25,30 +24,12 @@ import { useRouter } from "next/navigation";
 import { generateTempId } from "~/lib/utils";
 import Link from "next/link";
 
-interface InputWithLabelProps {
-  label: string;
-  value: string;
-  onChange: (value: string) => void;
-  onBlur?: () => void;
-}
-
-function InputWithLabel({ label, value, onChange }: InputWithLabelProps) {
-  return (
-    <div className="flex flex-col gap-2">
-      <Label className="text-md">{label}</Label>
-      <Input value={value} onChange={(e) => onChange(e.target.value)} />
-    </div>
-  );
-}
-
 export function AddAgentModal({
   children,
-  refetchAgents,
   defaultOpen = false,
   unescapable = false,
 }: {
   children?: React.ReactNode;
-  refetchAgents: () => void;
   defaultOpen?: boolean;
   unescapable?: boolean;
 }) {
@@ -75,7 +56,6 @@ export function AddAgentModal({
       onSuccess: (newAgent) => {
         setModalOpen(false);
         void utils.agent.getAll.invalidate();
-        // refetchAgents();
         router.push(`/dashboard/${newAgent.id}/scenarios`);
       },
     });

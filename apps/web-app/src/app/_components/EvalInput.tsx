@@ -29,7 +29,11 @@ export function EvalInput({
     <div className="flex flex-col gap-4">
       <div className="flex w-full flex-row justify-between gap-4">
         <InputWithLabel
-          placeholder="confirm demographic info"
+          placeholder={
+            evaluation.contentType === "tool"
+              ? "order_updated"
+              : "order confirmed"
+          }
           className="w-full"
           label="name"
           value={evaluation.name}
@@ -76,6 +80,7 @@ export function EvalInput({
         <div className="flex flex-col gap-4">
           <TextAreaWithLabel
             label="when should this tool be called?"
+            placeholder="when the customer adds an item to the order"
             value={evaluation.description}
             onChange={(e) =>
               setEvaluation({ ...evaluation, description: e.target.value })
@@ -83,6 +88,7 @@ export function EvalInput({
           />
           <TextAreaWithLabel
             label="expected result?"
+            placeholder="the order is updated with the new item"
             value={evaluation.toolCallExpectedResult}
             onChange={(e) =>
               setEvaluation({
@@ -96,7 +102,7 @@ export function EvalInput({
         <div className="flex flex-col gap-2">
           <TextAreaWithLabel
             label="success description"
-            placeholder="the agent confirmed the person's name, phone number, and address"
+            placeholder="the agent confirmed the customer's order of a dozen donuts with sprinkles and a coffee"
             value={evaluation.description}
             onChange={(e) =>
               setEvaluation({ ...evaluation, description: e.target.value })
