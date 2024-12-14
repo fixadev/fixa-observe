@@ -2,10 +2,10 @@ import { Request, Response, Router } from "express";
 import { connectedUsers } from "../../index";
 import { db } from "../../db";
 
-const testRouter = Router();
+const internalTestRouter = Router();
 
 // Route to send message to specific user
-testRouter.post("/message/:userId", (req: Request, res: Response) => {
+internalTestRouter.post("/message/:userId", (req: Request, res: Response) => {
   const { userId } = req.params;
   const { event, data } = req.body;
   const userSocket = connectedUsers.get(userId);
@@ -18,7 +18,7 @@ testRouter.post("/message/:userId", (req: Request, res: Response) => {
 });
 
 // Route to test database connection
-testRouter.get("/db", async (_: Request, res: Response) => {
+internalTestRouter.get("/db", async (_: Request, res: Response) => {
   try {
     const result = await db.testAgent.findMany();
     res.json({ result });
@@ -30,4 +30,4 @@ testRouter.get("/db", async (_: Request, res: Response) => {
   }
 });
 
-export default testRouter;
+export default internalTestRouter;
