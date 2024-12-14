@@ -9,18 +9,26 @@ const evalServiceInstance = new EvalService(db);
 
 export const evalRouter = createTRPCRouter({
   getGeneralEvals: protectedProcedure.query(async ({ ctx }) => {
-    return await evalServiceInstance.getGeneralEvals(ctx.user.id);
+    return await evalServiceInstance.getGeneralEvals({
+      userId: ctx.user.id,
+    });
   }),
   createGeneralEval: protectedProcedure
     .input(EvalSchema)
     .mutation(async ({ input, ctx }) => {
-      return await evalServiceInstance.createGeneralEval(input, ctx.user.id);
+      return await evalServiceInstance.createGeneralEval({
+        evaluation: input,
+        userId: ctx.user.id,
+      });
     }),
 
   updateGeneralEval: protectedProcedure
     .input(EvalSchema)
     .mutation(async ({ input, ctx }) => {
-      return await evalServiceInstance.updateGeneralEval(input, ctx.user.id);
+      return await evalServiceInstance.updateGeneralEval({
+        evaluation: input,
+        userId: ctx.user.id,
+      });
     }),
 
   toggleGeneralEval: protectedProcedure
@@ -37,25 +45,39 @@ export const evalRouter = createTRPCRouter({
   deleteGeneralEval: protectedProcedure
     .input(z.object({ id: z.string() }))
     .mutation(async ({ input, ctx }) => {
-      return await evalServiceInstance.deleteGeneralEval(input.id, ctx.user.id);
+      return await evalServiceInstance.deleteGeneralEval({
+        id: input.id,
+        userId: ctx.user.id,
+      });
     }),
 
   getSets: protectedProcedure.query(async ({ ctx }) => {
-    return await evalServiceInstance.getSets(ctx.user.id);
+    return await evalServiceInstance.getSets({
+      userId: ctx.user.id,
+    });
   }),
   createSet: protectedProcedure
     .input(EvalSetWithIncludesSchema)
     .mutation(async ({ input, ctx }) => {
-      return await evalServiceInstance.createSet(input, ctx.user.id);
+      return await evalServiceInstance.createSet({
+        set: input,
+        userId: ctx.user.id,
+      });
     }),
   updateSet: protectedProcedure
     .input(EvalSetWithIncludesSchema)
     .mutation(async ({ input, ctx }) => {
-      return await evalServiceInstance.updateSet(input, ctx.user.id);
+      return await evalServiceInstance.updateSet({
+        set: input,
+        userId: ctx.user.id,
+      });
     }),
   deleteSet: protectedProcedure
     .input(z.object({ id: z.string() }))
     .mutation(async ({ input, ctx }) => {
-      return await evalServiceInstance.deleteSet(input.id, ctx.user.id);
+      return await evalServiceInstance.deleteSet({
+        id: input.id,
+        userId: ctx.user.id,
+      });
     }),
 });

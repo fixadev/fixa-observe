@@ -50,7 +50,13 @@ export class ScenarioService {
     });
   }
 
-  async createScenarios(agentId: string, scenarios: CreateScenarioSchema[]) {
+  async createScenarios({
+    agentId,
+    scenarios,
+  }: {
+    agentId: string;
+    scenarios: CreateScenarioSchema[];
+  }) {
     return await this.db.$transaction(async (tx) => {
       return await Promise.all(
         scenarios.map((scenario) =>
@@ -81,7 +87,13 @@ export class ScenarioService {
     });
   }
 
-  async updateScenario(scenario: UpdateScenarioSchema, userId: string) {
+  async updateScenario({
+    scenario,
+    userId,
+  }: {
+    scenario: UpdateScenarioSchema;
+    userId: string;
+  }) {
     const priorEvals = await this.db.eval.findMany({
       where: { scenarioId: scenario.id },
     });
@@ -179,7 +191,7 @@ export class ScenarioService {
     });
   }
 
-  async deleteScenario(id: string, userId: string) {
+  async deleteScenario({ id, userId }: { id: string; userId: string }) {
     return await this.db.scenario.update({
       where: { id, ownerId: userId },
       data: { deleted: true },

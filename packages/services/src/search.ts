@@ -9,11 +9,15 @@ import { type PrismaClient } from "@repo/db/src/index";
 export class SearchService {
   constructor(private db: PrismaClient) {}
 
-  async save(
-    name: string,
-    filter: Filter,
-    userId: string,
-  ): Promise<SavedSearchWithIncludes> {
+  async save({
+    name,
+    filter,
+    userId,
+  }: {
+    name: string;
+    filter: Filter;
+    userId: string;
+  }): Promise<SavedSearchWithIncludes> {
     const { evalSets, alerts, timeRange, customerCallId, ...filterData } =
       filter;
 
@@ -42,10 +46,13 @@ export class SearchService {
     return parsed.data;
   }
 
-  async update(
-    search: SavedSearchWithIncludes,
-    userId: string,
-  ): Promise<SavedSearchWithIncludes> {
+  async update({
+    search,
+    userId,
+  }: {
+    search: SavedSearchWithIncludes;
+    userId: string;
+  }): Promise<SavedSearchWithIncludes> {
     const { evalSets, alerts, ...searchData } = search;
     const updatedSearch = await this.db.savedSearch.update({
       where: {
@@ -70,7 +77,7 @@ export class SearchService {
     return parsed.data;
   }
 
-  async delete(userId: string, id: string): Promise<void> {
+  async delete({ userId, id }: { userId: string; id: string }): Promise<void> {
     await this.db.savedSearch.delete({
       where: {
         id,
@@ -79,10 +86,13 @@ export class SearchService {
     });
   }
 
-  async getById(
-    id: string,
-    userId: string,
-  ): Promise<SavedSearchWithIncludes | null> {
+  async getById({
+    id,
+    userId,
+  }: {
+    id: string;
+    userId: string;
+  }): Promise<SavedSearchWithIncludes | null> {
     const savedSearch = await this.db.savedSearch.findUnique({
       where: {
         id,
@@ -101,7 +111,11 @@ export class SearchService {
     return parsed.success ? parsed.data : null;
   }
 
-  async getAll(userId: string): Promise<SavedSearchWithIncludes[]> {
+  async getAll({
+    userId,
+  }: {
+    userId: string;
+  }): Promise<SavedSearchWithIncludes[]> {
     const savedSearches = await this.db.savedSearch.findMany({
       where: {
         ownerId: userId,
@@ -123,10 +137,13 @@ export class SearchService {
     return parsedSearches;
   }
 
-  async createAlert(
-    alert: AlertWithDetails,
-    userId: string,
-  ): Promise<AlertWithDetails> {
+  async createAlert({
+    alert,
+    userId,
+  }: {
+    alert: AlertWithDetails;
+    userId: string;
+  }): Promise<AlertWithDetails> {
     const alertWithDetails = await this.db.alert.create({
       data: {
         ...alert,
@@ -138,10 +155,13 @@ export class SearchService {
     return AlertWithDetailsSchema.parse(alertWithDetails);
   }
 
-  async updateAlert(
-    alert: AlertWithDetails,
-    userId: string,
-  ): Promise<AlertWithDetails> {
+  async updateAlert({
+    alert,
+    userId,
+  }: {
+    alert: AlertWithDetails;
+    userId: string;
+  }): Promise<AlertWithDetails> {
     const alertWithDetails = await this.db.alert.update({
       where: {
         id: alert.id,
@@ -155,7 +175,13 @@ export class SearchService {
     return AlertWithDetailsSchema.parse(alertWithDetails);
   }
 
-  async deleteAlert(id: string, userId: string): Promise<void> {
+  async deleteAlert({
+    id,
+    userId,
+  }: {
+    id: string;
+    userId: string;
+  }): Promise<void> {
     await this.db.alert.delete({
       where: {
         id,
