@@ -377,6 +377,15 @@ export class CallService {
     });
   };
 
+  checkIfACallExists = async (ownerId: string): Promise<boolean> => {
+    const call = await this.db.call.findFirst({
+      where: {
+        ownerId,
+      },
+    });
+    return call !== null;
+  };
+
   getAgentIds = async (ownerId: string): Promise<string[]> => {
     const result = await this.db.call.groupBy({
       by: ["agentId"],
