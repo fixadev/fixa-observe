@@ -6,6 +6,7 @@ import { startQueueConsumer } from "./workers/queueConsumer";
 import v1Router from "./routes/v1";
 import { authenticateRequest } from "./middlewares/auth";
 import vapiRouter from "./routes/v1/vapi";
+import ofOneRouter from "./routes/v1/of-one";
 
 const app = express();
 const httpServer = createServer(app);
@@ -45,6 +46,7 @@ app.get("/", (req, res) => {
 
 // TODO: authenticate vapi requests
 app.use("/vapi", vapiRouter);
+app.use("/queue-ofone-kiosk-calls", ofOneRouter);
 
 app.use(authenticateRequest);
 
