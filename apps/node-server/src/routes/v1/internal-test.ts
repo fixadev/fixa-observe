@@ -1,6 +1,7 @@
 import { Request, Response, Router } from "express";
 import { connectedUsers } from "../../index";
 import { db } from "../../db";
+import { env } from "../../env";
 
 const internalTestRouter = Router();
 
@@ -26,6 +27,8 @@ internalTestRouter.get("/db", async (_: Request, res: Response) => {
     console.error("Error fetching data from database", error);
     res.status(500).json({
       error,
+      dbUrl: env.DATABASE_URL,
+      directUrl: env.DIRECT_URL,
     });
   }
 });
