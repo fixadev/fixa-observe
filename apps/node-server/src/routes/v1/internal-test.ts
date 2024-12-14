@@ -1,6 +1,7 @@
 import { Request, Response, Router } from "express";
 import { connectedUsers } from "../../index";
 import { env } from "../../env";
+import { db } from "../../db";
 
 const internalTestRouter = Router();
 
@@ -32,17 +33,14 @@ internalTestRouter.post("/message/:userId", (req: Request, res: Response) => {
 // Route to test database connection
 internalTestRouter.get("/db", async (_: Request, res: Response) => {
   try {
-    // const result = await db.testAgent.findMany();
+    const result = await db.testAgent.findMany();
     res.json({
-      dbUrl: env.DATABASE_URL,
-      directUrl: env.DIRECT_URL,
+      result,
     });
   } catch (error) {
     console.error("Error fetching data from database", error);
     res.status(500).json({
       error,
-      dbUrl: env.DATABASE_URL,
-      directUrl: env.DIRECT_URL,
     });
   }
 });
