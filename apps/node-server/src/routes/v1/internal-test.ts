@@ -5,6 +5,13 @@ import { env } from "../../env";
 
 const internalTestRouter = Router();
 
+internalTestRouter.get("/", (req: Request, res: Response) => {
+  res.json({
+    dbUrl: env.DATABASE_URL,
+    directUrl: env.DIRECT_URL,
+  });
+});
+
 // Route to send message to specific user
 internalTestRouter.post("/message/:userId", (req: Request, res: Response) => {
   const { userId } = req.params;
