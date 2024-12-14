@@ -28,6 +28,8 @@ generator zod {
 //   directUrl = "postgresql://postgres.eswbggamquxvdsuuktpf:t24fwMp67!dNnsn@aws-0-us-west-1.pooler.supabase.com:5432/postgres"
 // }
 
+// comment to redeploy
+
 datasource db {
   provider  = "postgresql"
   url       = env("DATABASE_URL")
