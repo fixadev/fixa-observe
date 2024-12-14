@@ -5,7 +5,6 @@ fly deploy --remote-only \
             --app pixa-observe-staging \
             --dockerfile apps/node-server/Dockerfile \
             --config apps/node-server/fly.toml \
-            --build-arg TEST_SECRET=test \
-            --build-arg DATABASE_URL=$DATABASE_URL \
-            --build-arg DIRECT_URL=$DIRECT_URL \
-            --build-arg TEST_SECRET=$TEST_SECRET
+            --build-secret DATABASE_URL=$DATABASE_URL \
+            --build-secret DIRECT_URL=$DIRECT_URL \
+            --build-secret TEST_SECRET=test
