@@ -23,9 +23,8 @@ RUN --mount=type=secret,id=DATABASE_URL \
   TEST_SECRET="$(cat /run/secrets/TEST_SECRET)" \
   && echo "DATABASE_URL: ${DATABASE_URL}" \
   && echo "DIRECT_URL: ${DIRECT_URL}" \
-  && echo "TEST_SECRET: ${TEST_SECRET}"
-
-RUN pnpm --filter @repo/db db:generate
+  && echo "TEST_SECRET: ${TEST_SECRET}" \
+  && pnpm --filter @repo/db db:generate
 
 RUN mkdir -p /usr/node_modules/.pnpm/@prisma+client@5.21.1_prisma@5.21.1/node_modules/.prisma/client
 RUN cp node_modules/.pnpm/@prisma+client@5.21.1_prisma@5.21.1/node_modules/.prisma/client/libquery_engine-debian-openssl-3.0.x.so.node \
