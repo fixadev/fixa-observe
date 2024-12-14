@@ -5,6 +5,11 @@ import { env } from "../../env";
 
 const internalTestRouter = Router();
 
+internalTestRouter.use((req, res, next) => {
+  console.log(`Internal test route hit: ${req.method} ${req.path}`);
+  next();
+});
+
 internalTestRouter.get("/", (req: Request, res: Response) => {
   res.json({
     dbUrl: env.DATABASE_URL,
