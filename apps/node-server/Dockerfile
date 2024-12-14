@@ -29,10 +29,6 @@ RUN cp node_modules/.pnpm/@prisma+client@5.21.1_prisma@5.21.1/node_modules/.pris
 
 RUN pnpm run build --filter node-server 
 
-# RUN pnpm deploy --filter=node-server --prod /prod/node-server
-# WORKDIR /prod/node-server
-# RUN pnpm dlx prisma generate
-
 EXPOSE 3003
 
 CMD ["node", "apps/node-server/dist/index.js"]
