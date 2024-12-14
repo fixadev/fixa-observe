@@ -44,6 +44,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "~/components/ui/popover";
+import { env } from "~/env";
 
 export default function AgentPage({ params }: { params: { agentId: string } }) {
   const [tests, setTests] = useState<TestWithCalls[]>([]);
@@ -118,7 +119,11 @@ export default function AgentPage({ params }: { params: { agentId: string } }) {
 
   const canRunTest = useMemo(() => {
     const metadata = user?.publicMetadata as PublicMetadata | undefined;
-    return !!metadata?.stripeCustomerId || (metadata?.freeTestsLeft ?? 0) > 0;
+    return (
+      !!metadata?.stripeCustomerId ||
+      (metadata?.freeTestsLeft ?? 0) > 0 ||
+      user?.id === env.NEXT_PUBLIC_OFONE_USER_ID
+    );
   }, [user]);
 
   const handleRunTest = useCallback(

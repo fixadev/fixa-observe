@@ -134,28 +134,28 @@ export class TestService {
     if (!userData) {
       throw new Error("User not found");
     }
-    const noFreeTestsLeft =
-      !userData.freeTestsLeft ||
-      (userData.freeTestsLeft && userData.freeTestsLeft <= 0);
-    let hasActiveSubscription = false;
-    if (userData.stripeCustomerId) {
-      const subscriptions =
-        await this.stripeServiceInstance.getSubscriptions(userId);
-      if (subscriptions.data.length > 0) {
-        hasActiveSubscription = true;
+    if (userId !== process.env.NEXT_PUBLIC_OFONE_USER_ID) {
+      const noFreeTestsLeft =
+        !userData.freeTestsLeft ||
+        (userData.freeTestsLeft && userData.freeTestsLeft <= 0);
+      let hasActiveSubscription = false;
+      if (userData.stripeCustomerId) {
+        const subscriptions =
+          await this.stripeServiceInstance.getSubscriptions(userId);
+        if (subscriptions.data.length > 0) {
+          hasActiveSubscription = true;
+        }
       }
-    }
-    if (
-      noFreeTestsLeft &&
-      !hasActiveSubscription &&
-      userId !== process.env.NEXT_PUBLIC_OFONE_USER_ID
-    ) {
-      throw new Error("User has no free tests left and no active subscription");
-    }
+      if (noFreeTestsLeft && !hasActiveSubscription) {
+        throw new Error(
+          "User has no free tests left and no active subscription",
+        );
+      }
 
-    // If user has free tests left, deduct one
-    if (userData.freeTestsLeft && userData.freeTestsLeft > 0) {
-      await this.userServiceInstance.decrementFreeTestsLeft(userId);
+      // If user has free tests left, deduct one
+      if (userData.freeTestsLeft && userData.freeTestsLeft > 0) {
+        await this.userServiceInstance.decrementFreeTestsLeft(userId);
+      }
     }
 
     const agent = await this.agentServiceInstance.getAgent(agentId, userId);
