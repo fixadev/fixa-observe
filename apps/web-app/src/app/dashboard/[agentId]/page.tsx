@@ -61,6 +61,15 @@ export default function AgentPage({ params }: { params: { agentId: string } }) {
     }
   }, [params.agentId, agent, router]);
 
+  // hacky fix, reload user to update free tests left
+  useEffect(() => {
+    if (user && params.agentId === "new") {
+      setTimeout(() => {
+        void user.reload();
+      }, 1500);
+    }
+  }, [params.agentId, user]);
+
   useSocketMessage(
     user?.id,
     useCallback(
@@ -209,11 +218,7 @@ export default function AgentPage({ params }: { params: { agentId: string } }) {
               </div>
             </div>
             <AddAgentModal>
-              <Button
-                className="flex shrink-0 items-center gap-2"
-                onClick={() => setRunTestModalOpen(true)}
-                disabled={!canRunTest}
-              >
+              <Button className="flex shrink-0 items-center gap-2">
                 <PlusIcon className="size-4" />
                 <span>add agent</span>
               </Button>
