@@ -56,6 +56,7 @@ app.get("/db", async (_: Request, res: Response) => {
     res.json({
       dbUrl: env.DATABASE_URL,
       directUrl: env.DIRECT_URL,
+      version: "0.0.0",
     });
   } catch (error) {
     console.error("Error fetching data from database", error);
