@@ -1,11 +1,24 @@
 import { Request, Response, Router } from "express";
 import { connectedUsers } from "../../index";
+import { env } from "../../env";
 import { db } from "../../db";
 
-const testRouter = Router();
+const internalTestRouter = Router();
+
+internalTestRouter.use((req, res, next) => {
+  console.log(`Internal test route hit: ${req.method} ${req.path}`);
+  next();
+});
+
+internalTestRouter.get("/", (req: Request, res: Response) => {
+  res.json({
+    dbUrl: env.DATABASE_URL,
+    directUrl: env.DIRECT_URL,
+  });
+});
 
 // Route to send message to specific user
-testRouter.post("/message/:userId", (req: Request, res: Response) => {
+internalTestRouter.post("/message/:userId", (req: Request, res: Response) => {
   const { userId } = req.params;
   const { event, data } = req.body;
   const userSocket = connectedUsers.get(userId);
@@ -18,10 +31,12 @@ testRouter.post("/message/:userId", (req: Request, res: Response) => {
 });
 
 // Route to test database connection
-testRouter.get("/db", async (_: Request, res: Response) => {
+internalTestRouter.get("/db", async (_: Request, res: Response) => {
   try {
     const result = await db.testAgent.findMany();
-    res.json({ result });
+    res.json({
+      result,
+    });
   } catch (error) {
     console.error("Error fetching data from database", error);
     res.status(500).json({
@@ -30,4 +45,4 @@ testRouter.get("/db", async (_: Request, res: Response) => {
   }
 });
 
-export default testRouter;
+export default internalTestRouter;
