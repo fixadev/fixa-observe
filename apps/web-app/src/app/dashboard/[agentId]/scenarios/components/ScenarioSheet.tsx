@@ -19,12 +19,7 @@ import {
   AlertDialogTrigger,
   AlertDialogTitle,
 } from "~/components/ui/alert-dialog";
-import {
-  type EvalSchema,
-  type EvalOverrideSchema,
-  type Eval,
-  type EvalOverride,
-} from "@repo/types/src/index";
+import { type Eval, type EvalOverride } from "@repo/types/src/index";
 import {
   type ScenarioWithEvals,
   type UpdateScenarioSchema,

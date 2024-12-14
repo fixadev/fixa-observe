@@ -81,6 +81,7 @@ export default function AgentSettingsPage({
         phoneNumber: agentState.phoneNumber,
         name: agentState.name,
         enableSlackNotifications: agentState.enableSlackNotifications,
+        customerAgentId: agentState.customerAgentId,
         extraProperties: agentState.extraProperties,
       },
     });
@@ -132,12 +133,23 @@ export default function AgentSettingsPage({
       </div>
       <div className="container flex flex-col gap-6 p-4">
         <div className="flex flex-col gap-2">
-          <Label>agent id</Label>
+          <div>
+            <Label>agent id</Label>
+            <div className="text-xs text-muted-foreground">
+              agent ID to be used with fixa API requests
+            </div>
+          </div>
           <CopyText text={agentState.id} />
         </div>
         <div className="flex flex-col gap-2">
-          <Label>agent name</Label>
+          <div>
+            <Label>agent name</Label>
+            <div className="text-xs text-muted-foreground">
+              name of your agent, to help you identify it
+            </div>
+          </div>
           <Input
+            placeholder="my agent"
             value={agentState.name}
             onChange={(e) => {
               setAgentState({ ...agentState, name: e.target.value });
@@ -145,7 +157,31 @@ export default function AgentSettingsPage({
           />
         </div>
         <div className="flex flex-col gap-2">
-          <Label>agent phone number</Label>
+          <div>
+            <Label>internal agent ID</Label>
+            <div className="text-xs text-muted-foreground">
+              the ID of this agent in your database, used to associate
+              production calls with the agent created in fixa.
+            </div>
+          </div>
+          <Input
+            placeholder="agent_123456"
+            value={agentState.customerAgentId ?? ""}
+            onChange={(e) => {
+              setAgentState({
+                ...agentState,
+                customerAgentId: e.target.value,
+              });
+            }}
+          />
+        </div>
+        <div className="flex flex-col gap-2">
+          <div>
+            <Label>agent phone number</Label>
+            <div className="text-xs text-muted-foreground">
+              the phone number we call to test your agent
+            </div>
+          </div>
           <Input
             value={displayPhoneNumberNicely(agentState.phoneNumber)}
             onChange={(e) => {
@@ -155,6 +191,18 @@ export default function AgentSettingsPage({
               });
             }}
           />
+        </div>
+        <div className="flex items-baseline gap-2">
+          <Label>have a web-based agent?</Label>
+          <p className="text-sm text-muted-foreground">
+            <Link
+              href="https://cal.com/team/fixa/implementation-meeting"
+              target="_blank"
+              className="underline"
+            >
+              we&apos;ll connect it for you
+            </Link>
+          </p>
         </div>
         {(agentState?.extraProperties as ExtraProperties)?.type ===
           "ofone-kiosk" && (
