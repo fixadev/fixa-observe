@@ -25,10 +25,10 @@ export const scenarioRouter = createTRPCRouter({
         input.prompt,
         input.numberOfScenarios,
       );
-      return await scenarioServiceInstance.createScenarios(
-        input.agentId,
+      return await scenarioServiceInstance.createScenarios({
+        agentId: input.agentId,
         scenarios,
-      );
+      });
     }),
 
   create: protectedProcedure
@@ -50,15 +50,18 @@ export const scenarioRouter = createTRPCRouter({
   update: protectedProcedure
     .input(UpdateScenarioSchema)
     .mutation(async ({ input, ctx }) => {
-      return await scenarioServiceInstance.updateScenario(input, ctx.user.id);
+      return await scenarioServiceInstance.updateScenario({
+        scenario: input,
+        userId: ctx.user.id,
+      });
     }),
 
   delete: protectedProcedure
     .input(z.object({ id: z.string() }))
     .mutation(async ({ input, ctx }) => {
-      return await scenarioServiceInstance.deleteScenario(
-        input.id,
-        ctx.user.id,
-      );
+      return await scenarioServiceInstance.deleteScenario({
+        id: input.id,
+        userId: ctx.user.id,
+      });
     }),
 });

@@ -23,50 +23,70 @@ export const searchRouter = createTRPCRouter({
         ),
       );
 
-      return await searchServiceInstance.save(
-        ctx.user.id,
-        cleanFilter as Filter,
-        input.name,
-      );
+      return await searchServiceInstance.save({
+        userId: ctx.user.id,
+        filter: cleanFilter as Filter,
+        name: input.name,
+      });
     }),
 
   update: protectedProcedure
     .input(SavedSearchWithIncludes)
     .mutation(async ({ input, ctx }) => {
-      return await searchServiceInstance.update(input, ctx.user.id);
+      return await searchServiceInstance.update({
+        search: input,
+        userId: ctx.user.id,
+      });
     }),
 
   delete: protectedProcedure
     .input(z.object({ id: z.string() }))
     .mutation(async ({ input, ctx }) => {
-      await searchServiceInstance.delete(input.id, ctx.user.id);
+      await searchServiceInstance.delete({
+        id: input.id,
+        userId: ctx.user.id,
+      });
     }),
 
   getAll: protectedProcedure.query(async ({ ctx }) => {
-    return await searchServiceInstance.getAll(ctx.user.id);
+    return await searchServiceInstance.getAll({
+      userId: ctx.user.id,
+    });
   }),
 
   getById: protectedProcedure
     .input(z.object({ id: z.string() }))
     .query(async ({ input, ctx }) => {
-      return await searchServiceInstance.getById(input.id, ctx.user.id);
+      return await searchServiceInstance.getById({
+        id: input.id,
+        userId: ctx.user.id,
+      });
     }),
 
   createAlert: protectedProcedure
     .input(AlertWithDetailsSchema)
     .mutation(async ({ input, ctx }) => {
-      return await searchServiceInstance.createAlert(input, ctx.user.id);
+      return await searchServiceInstance.createAlert({
+        alert: input,
+        userId: ctx.user.id,
+      });
     }),
 
   updateAlert: protectedProcedure
     .input(AlertWithDetailsSchema)
     .mutation(async ({ input, ctx }) => {
-      return await searchServiceInstance.updateAlert(input, ctx.user.id);
+      return await searchServiceInstance.updateAlert({
+        alert: input,
+        userId: ctx.user.id,
+      });
     }),
 
   deleteAlert: protectedProcedure
     .input(z.object({ id: z.string() }))
     .mutation(async ({ input, ctx }) => {
-      return await searchServiceInstance.deleteAlert(input.id, ctx.user.id);
+      return await searchServiceInstance.deleteAlert({
+        id: input.id,
+        userId: ctx.user.id,
+      });
     }),
 });

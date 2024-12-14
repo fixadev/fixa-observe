@@ -10,14 +10,20 @@ import { getCreatedUpdatedDeleted } from "./utils";
 export class EvalService {
   constructor(private db: PrismaClient) {}
 
-  async getGeneralEvals(userId: string): Promise<Eval[]> {
+  async getGeneralEvals({ userId }: { userId: string }): Promise<Eval[]> {
     return await this.db.eval.findMany({
       where: { ownerId: userId },
       orderBy: { createdAt: "asc" },
     });
   }
 
-  async createGeneralEval(evaluation: Eval, userId: string): Promise<Eval> {
+  async createGeneralEval({
+    evaluation,
+    userId,
+  }: {
+    evaluation: Eval;
+    userId: string;
+  }): Promise<Eval> {
     return await this.db.eval.create({
       data: {
         ...evaluation,
@@ -27,7 +33,13 @@ export class EvalService {
     });
   }
 
-  async updateGeneralEval(evaluation: Eval, userId: string): Promise<Eval> {
+  async updateGeneralEval({
+    evaluation,
+    userId,
+  }: {
+    evaluation: Eval;
+    userId: string;
+  }): Promise<Eval> {
     return await this.db.eval.update({
       where: { id: evaluation.id, ownerId: userId },
       data: evaluation,
@@ -66,14 +78,24 @@ export class EvalService {
     }
   }
 
-  async deleteGeneralEval(id: string, userId: string): Promise<Eval> {
+  async deleteGeneralEval({
+    id,
+    userId,
+  }: {
+    id: string;
+    userId: string;
+  }): Promise<Eval> {
     return await this.db.eval.update({
       where: { id, ownerId: userId },
       data: { deleted: true },
     });
   }
 
-  async getSets(userId: string): Promise<EvalSetWithIncludes[]> {
+  async getSets({
+    userId,
+  }: {
+    userId: string;
+  }): Promise<EvalSetWithIncludes[]> {
     return await this.db.evalSet.findMany({
       where: { ownerId: userId },
       orderBy: { createdAt: "asc" },
@@ -83,10 +105,13 @@ export class EvalService {
     });
   }
 
-  async createSet(
-    set: EvalSetWithIncludes,
-    userId: string,
-  ): Promise<EvalSetWithIncludes> {
+  async createSet({
+    set,
+    userId,
+  }: {
+    set: EvalSetWithIncludes;
+    userId: string;
+  }): Promise<EvalSetWithIncludes> {
     return await this.db.evalSet.create({
       data: {
         ...set,
@@ -107,10 +132,13 @@ export class EvalService {
     });
   }
 
-  async updateSet(
-    set: EvalSetWithIncludes,
-    userId: string,
-  ): Promise<EvalSetWithIncludes> {
+  async updateSet({
+    set,
+    userId,
+  }: {
+    set: EvalSetWithIncludes;
+    userId: string;
+  }): Promise<EvalSetWithIncludes> {
     const priorEvals = await this.db.eval.findMany({
       where: { evalSetId: set.id },
     });
@@ -148,7 +176,13 @@ export class EvalService {
     });
   }
 
-  async deleteSet(id: string, userId: string): Promise<void> {
+  async deleteSet({
+    id,
+    userId,
+  }: {
+    id: string;
+    userId: string;
+  }): Promise<void> {
     await this.db.evalSet.delete({ where: { id, ownerId: userId } });
   }
 }
