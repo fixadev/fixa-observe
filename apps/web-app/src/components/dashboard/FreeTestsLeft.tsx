@@ -36,7 +36,7 @@ export default function FreeTestsLeft() {
     getCheckoutUrl({ redirectUrl });
   }, [getCheckoutUrl]);
 
-  if (isPaidUser || !isLoaded) {
+  if ((isPaidUser && freeTestsLeft === 0) || !isLoaded) {
     return null;
   }
 
@@ -52,9 +52,15 @@ export default function FreeTestsLeft() {
           </div>
         )}
       </div>
-      <Button onClick={upgradePlan} disabled={isGeneratingStripeUrl}>
-        {isGeneratingStripeUrl ? <Spinner /> : "upgrade now"}
-      </Button>
+      {isPaidUser ? (
+        <div className="text-sm text-muted-foreground">
+          you will not be charged until your free tests run out
+        </div>
+      ) : (
+        <Button onClick={upgradePlan} disabled={isGeneratingStripeUrl}>
+          {isGeneratingStripeUrl ? <Spinner /> : "upgrade now"}
+        </Button>
+      )}
     </div>
   );
 }
