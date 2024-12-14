@@ -46,6 +46,10 @@ export const callRouter = createTRPCRouter({
       };
     }),
 
+  checkIfACallExists: protectedProcedure.query(async ({ ctx }) => {
+    return await callService.checkIfACallExists(ctx.user.id);
+  }),
+
   getLatencyInterruptionPercentiles: protectedProcedure
     .input(z.object({ filter: FilterSchema.partial() }))
     .query(async ({ input, ctx }) => {

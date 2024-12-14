@@ -11,7 +11,7 @@ import { api } from "~/trpc/react";
 import ChartCard from "~/components/observe/ChartCard";
 import { CopyText } from "~/components/CopyText";
 import { useUser } from "@clerk/nextjs";
-import { PublicMetadata } from "@repo/types/src";
+import { type PublicMetadata } from "@repo/types/src";
 import { Button } from "~/components/ui/button";
 import { env } from "~/env";
 
@@ -100,6 +100,9 @@ function _ObservePage() {
     },
   );
 
+  const { data: callsExist, isLoading: isLoadingCallsExist } =
+    api._call.checkIfACallExists.useQuery();
+
   const refetch = useCallback(() => {
     void refetchCalls();
     void refetchPercentiles();
@@ -136,7 +139,7 @@ function _ObservePage() {
     [calls, selectedCallId],
   );
 
-  if (calls.length === 0 && !isLoading) {
+  if (!callsExist && !isLoadingCallsExist) {
     return (
       <div className="flex h-full w-full flex-col items-center justify-center p-8">
         <div className="max-w-2xl rounded-lg border border-border bg-card p-6 text-card-foreground shadow-sm">
