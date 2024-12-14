@@ -3,8 +3,8 @@ export DIRECT_URL="postgresql://postgres.eswbggamquxvdsuuktpf:t24fwMp67!dNnsn@aw
 
 fly deploy --remote-only \
             --app pixa-observe-staging \
+            --dockerfile apps/node-server/Dockerfile \
+            --config apps/node-server/fly.toml \
             --build-secret DATABASE_URL=$DATABASE_URL \
             --build-secret DIRECT_URL=$DIRECT_URL \
             --build-secret TEST_SECRET=test
-            --config apps/node-server/fly.toml \
-            --dockerfile apps/node-server/Dockerfile \
