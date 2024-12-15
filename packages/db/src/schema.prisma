@@ -313,7 +313,7 @@ model EvalSet {
   condition     String       @default("")
   evals         Eval[]
   enabled       Boolean      @default(true)
-  savedSearch   SavedSearch? @relation(fields: [savedSearchId], references: [id])
+  savedSearch   SavedSearch? @relation(fields: [savedSearchId], references: [id], onDelete: Cascade)
   savedSearchId String?
 }
 
@@ -338,7 +338,7 @@ model Alert {
   createdAt     DateTime    @default(now())
   ownerId       String
   name          String
-  savedSearch   SavedSearch @relation(fields: [savedSearchId], references: [id])
+  savedSearch   SavedSearch @relation(fields: [savedSearchId], references: [id], onDelete: Cascade)
   savedSearchId String
   type          AlertType
   details       Json

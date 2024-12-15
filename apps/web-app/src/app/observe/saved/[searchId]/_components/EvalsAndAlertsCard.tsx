@@ -218,12 +218,34 @@ function EvalSetCard({
   >;
   setEvalsModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }) {
+  const { mutate: updateEvalSet } = api.eval.updateSet.useMutation({
+    onSuccess: (data) => {
+      setFilter({
+        ...filter,
+        evalSets: filter.evalSets?.map((e) => (e.id === evalSet.id ? data : e)),
+      });
+    },
+  });
+
+  const toggleEvalSetEnabled = (checked: boolean) => {
+    updateEvalSet({
+      ...evalSet,
+      enabled: checked,
+    });
+  };
+
   return (
     <Card key={evalSet.id} className="flex flex-col gap-2 p-4">
       <CardHeader className="flex flex-row justify-between p-0">
-        <CardTitle className="p-0 text-sm font-medium">
-          {evalSet.name}
-        </CardTitle>
+        <div className="flex flex-row items-center gap-4">
+          <Switch
+            checked={evalSet.enabled}
+            onCheckedChange={toggleEvalSetEnabled}
+          />{" "}
+          <CardTitle className="p-0 text-sm font-medium">
+            {evalSet.name}
+          </CardTitle>
+        </div>
         <Button
           onClick={() => {
             setSelectedEvalSet(evalSet);

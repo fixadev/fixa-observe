@@ -17,7 +17,7 @@ export const transcribeAndSaveCall = async ({
   audioUrl,
   createdAt,
   agentId,
-  metadata,
+  metadata: callMetadata,
   userId,
 }: {
   callId: string;
@@ -113,7 +113,7 @@ export const transcribeAndSaveCall = async ({
         messages: messages || [],
         createdAt,
         agentId,
-        metadata,
+        callMetadata,
         userId,
       });
 
@@ -140,7 +140,7 @@ export const transcribeAndSaveCall = async ({
         interruptionP90,
         interruptionP95,
         numInterruptions: numberOfInterruptionsGreaterThan2Seconds,
-        metadata,
+        metadata: callMetadata,
         duration,
         messages: {
           create: messages?.map((message) => ({
@@ -183,23 +183,22 @@ export const analyzeBasedOnRules = async ({
   messages,
   createdAt,
   agentId,
-  metadata,
+  callMetadata,
   userId,
 }: {
   messages: Omit<Message, "callId">[];
   createdAt: string;
   agentId: string;
-  metadata: Record<string, string>;
+  callMetadata: Record<string, string>;
   userId: string;
 }) => {
   try {
-    console.log("FINDING RELEVANT EVAL SETS");
     const { evalSets: relevantEvalSets, savedSearches } =
       await findRelevantEvalSets({
         messages,
         userId,
         agentId,
-        metadata,
+        callMetadata,
       });
     if (relevantEvalSets.length > 0) {
       const allEvals = relevantEvalSets.flatMap((evalSet) => evalSet.evals);
@@ -258,12 +257,12 @@ export const findRelevantEvalSets = async ({
   messages,
   userId,
   agentId,
-  metadata,
+  callMetadata,
 }: {
   messages: Omit<Message, "callId">[];
   userId: string;
   agentId: string;
-  metadata?: Record<string, string>;
+  callMetadata?: Record<string, string>;
 }) => {
   try {
     const savedSearches = await db.savedSearch.findMany({
@@ -271,8 +270,8 @@ export const findRelevantEvalSets = async ({
         ownerId: userId,
       },
       include: {
-        evalSets: { include: { evals: true } },
-        alerts: true,
+        evalSets: { include: { evals: true }, where: { enabled: true } },
+        alerts: { where: { enabled: true } },
       },
     });
 
@@ -282,7 +281,9 @@ export const findRelevantEvalSets = async ({
         string
       >;
       return Object.entries(savedSearchMetadata).every(
-        ([key, value]) => metadata?.[key] === value,
+        ([key, value]) =>
+          callMetadata?.[key] === value ||
+          (callMetadata?.[key] && value.includes(callMetadata?.[key])),
       );
     });
 
@@ -290,13 +291,12 @@ export const findRelevantEvalSets = async ({
       (savedSearch) => savedSearch.evalSets,
     );
 
-    const evalSetsWithoutEvals = matchingSavedSearches.flatMap((savedSearch) =>
-      savedSearch.evalSets.map((evalSet) => ({
-        ...evalSet,
-        evals: [],
-        alerts: [],
-      })),
-    );
+    // remove evals and alerts to simplify prompt
+    const evalSetsWithoutEvals = evalSetsWithEvals.map((evalSet) => ({
+      ...evalSet,
+      evals: [],
+      alerts: [],
+    }));
 
     const findEvalSetsOutputSchema = z.object({
       relevantEvalSets: z.array(

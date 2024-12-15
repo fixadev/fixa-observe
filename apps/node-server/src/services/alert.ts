@@ -37,9 +37,6 @@ export async function sendAlerts({
       }
 
       for (const alert of filter.data.alerts ?? []) {
-        if (!alert.enabled) {
-          continue;
-        }
         if (alert.type === "latency") {
           // check cooldown period
           if (
