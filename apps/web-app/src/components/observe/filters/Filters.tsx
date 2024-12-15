@@ -91,7 +91,6 @@ export default function Filters({
     [setFilter],
   );
   const selectedAgentsText = useMemo(() => {
-    console.log("filter.agentId", filter.agentId);
     if (!filter.agentId || filter.agentId.length === 0) {
       return "all agents";
     }
@@ -133,11 +132,20 @@ export default function Filters({
 
   useEffect(() => {
     setMetadataFilters(
-      Object.entries(originalFilter.metadata ?? {}).map(([key, value]) => ({
-        property: key,
-        value,
-        isNew: false,
-      })),
+      Object.entries(originalFilter.metadata ?? {}).flatMap(([key, value]) => {
+        if (Array.isArray(value)) {
+          return value.map((v) => ({
+            property: key,
+            value: v,
+            isNew: false,
+          }));
+        }
+        return {
+          property: key,
+          value,
+          isNew: false,
+        };
+      }),
     );
   }, [originalFilter.metadata]);
 
@@ -147,12 +155,21 @@ export default function Filters({
       ...prev,
       metadata: metadataFilters.reduce(
         (acc, { property, value }) => {
-          if (value) {
+          if (!value) {
+            return acc;
+          }
+          if (acc[property]) {
+            if (Array.isArray(acc[property])) {
+              acc[property].push(value);
+            } else {
+              acc[property] = [acc[property], value];
+            }
+          } else {
             acc[property] = value;
           }
           return acc;
         },
-        {} as Record<string, string>,
+        {} as Record<string, string | string[]>,
       ),
     }));
   }, [metadataFilters, setFilter]);
@@ -170,10 +187,6 @@ export default function Filters({
             <Select
               value={filter.lookbackPeriod.value.toString()}
               onValueChange={(value) => {
-                console.log(
-                  "lookback period changed",
-                  lookbackPeriods.find((p) => p.value === parseInt(value)),
-                );
                 setFilter({
                   ...filter,
                   lookbackPeriod: lookbackPeriods.find(

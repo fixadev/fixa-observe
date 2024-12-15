@@ -111,7 +111,9 @@ export const FilterSchema = z.object({
   agentId: z.array(z.string()),
   chartPeriod: z.number(),
   customerCallId: z.union([z.string(), z.null(), z.undefined()]),
-  metadata: z.record(z.string(), z.string().or(z.undefined())).optional(),
+  metadata: z
+    .record(z.string(), z.string().or(z.array(z.string())).or(z.undefined()))
+    .optional(),
   evalSets: z.array(EvalSetWithIncludesSchema).optional(),
   alerts: z.array(AlertWithDetailsSchema).optional(),
   evalSetToSuccess: z.union([evalSetToSuccess, z.null(), z.undefined()]),
