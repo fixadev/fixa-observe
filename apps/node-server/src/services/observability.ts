@@ -11,6 +11,7 @@ import { z } from "zod";
 import { analyzeCallWitho1, formatOutput } from "./textAnalysis";
 import { sendAlerts } from "./alert";
 import stripeServiceClient from "../clients/stripeServiceClient";
+import { SearchService } from "@repo/services/src/search";
 
 export const transcribeAndSaveCall = async ({
   callId,
@@ -265,20 +266,20 @@ export const findRelevantEvalSets = async ({
   callMetadata?: Record<string, string>;
 }) => {
   try {
-    const savedSearches = await db.savedSearch.findMany({
-      where: {
-        ownerId: userId,
-      },
-      include: {
-        evalSets: { include: { evals: true }, where: { enabled: true } },
-        alerts: { where: { enabled: true } },
-      },
+    const searchServiceInstance = new SearchService(db);
+    const savedSearches = await searchServiceInstance.getAll({
+      userId,
     });
-
+    if (!savedSearches) {
+      return {
+        savedSearches: [],
+        evalSets: [],
+      };
+    }
     const matchingSavedSearches = savedSearches.filter((savedSearch) => {
       const savedSearchMetadata = savedSearch.metadata as Record<
         string,
-        string
+        string | string[]
       >;
       return Object.entries(savedSearchMetadata).every(
         ([key, value]) =>
@@ -287,9 +288,9 @@ export const findRelevantEvalSets = async ({
       );
     });
 
-    const evalSetsWithEvals = matchingSavedSearches.flatMap(
-      (savedSearch) => savedSearch.evalSets,
-    );
+    const evalSetsWithEvals = matchingSavedSearches
+      .flatMap((savedSearch) => savedSearch.evalSets)
+      .filter((evalSet) => evalSet !== undefined);
 
     // remove evals and alerts to simplify prompt
     const evalSetsWithoutEvals = evalSetsWithEvals.map((evalSet) => ({

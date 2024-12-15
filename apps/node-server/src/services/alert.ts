@@ -2,12 +2,8 @@ import { CallService } from "@repo/services/src/call";
 import { db } from "../db";
 import {
   FilterSchema,
-  Alert,
-  SavedSearch,
-  LatencyAlertSchema,
-  EvalSetAlertSchema,
   Call,
-  AlertWithDetailsSchema,
+  SavedSearchWithIncludes,
 } from "@repo/types/src/index";
 import { sendAlertSlackMessage } from "./slack";
 
@@ -24,7 +20,7 @@ export async function sendAlerts({
   userId: string;
   call: Call;
   latencyDurations: number[] | undefined;
-  savedSearches: Array<SavedSearch & { alerts: Alert[] }>;
+  savedSearches: SavedSearchWithIncludes[];
   evalSetResults: Array<{ evalSetId: string; success: boolean }>;
 }) {
   try {

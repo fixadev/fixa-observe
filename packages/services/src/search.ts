@@ -123,6 +123,13 @@ export class SearchService {
       orderBy: {
         createdAt: "asc",
       },
+      include: {
+        alerts: { where: { enabled: true } },
+        evalSets: {
+          include: { evals: true },
+          where: { enabled: true },
+        },
+      },
     });
 
     const parsedSearches: SavedSearchWithIncludes[] = [];
