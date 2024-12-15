@@ -45,7 +45,7 @@ export async function startQueueConsumer() {
           });
         }
       } else {
-        // console.log("No messages in queue");
+        console.log("No messages in queue");
       }
     } catch (error) {
       console.error("Error processing queue:", error);
