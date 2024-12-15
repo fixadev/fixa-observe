@@ -76,6 +76,15 @@ async function getUser(userId: string) {
   }
 }
 
+export async function getEvaluationSetName(alert: Alert) {
+  const evaluationSet = await db.evalSet.findUnique({
+    where: {
+      id: (alert.details as EvalSetAlert).evalSetId,
+    },
+  });
+  return evaluationSet?.name;
+}
+
 export const sendAlertSlackMessage = async ({
   userId,
   call,
@@ -94,15 +103,6 @@ export const sendAlertSlackMessage = async ({
   console.log(user, "user");
   if (!user.public_metadata.slackWebhookUrl) {
     return;
-  }
-
-  async function getEvaluationSetName(alert: Alert) {
-    const evaluationSet = await db.evalSet.findUnique({
-      where: {
-        id: (alert.details as EvalSetAlert).evalSetId,
-      },
-    });
-    return evaluationSet?.name;
   }
 
   const emoji =

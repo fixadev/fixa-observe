@@ -14,14 +14,17 @@ import {
 } from "~/components/ui/select";
 import { useEffect, useState, useMemo } from "react";
 import { lookbackPeriods } from "~/components/hooks/useObserveState";
+import { InstallSlackAppButton } from "~/app/observe/slack-app/page";
 
 export function AlertCard({
   alert,
   filter,
+  searchId,
   onUpdate,
 }: {
   alert: AlertWithDetails;
   filter: Filter;
+  searchId: string;
   onUpdate: (alert: AlertWithDetails) => void;
 }) {
   type LatencyOption = {
@@ -64,6 +67,16 @@ export function AlertCard({
       ),
     );
   }, [alert, alertOptions]);
+
+  function getTriggerSelectValue(trigger: boolean | null) {
+    if (trigger === null) return "null";
+    return trigger ? "true" : "false";
+  }
+
+  function getTriggerValue(trigger: string) {
+    if (trigger === "null") return null;
+    return trigger === "true";
+  }
 
   return (
     <div className={cn("p-0 text-sm transition-opacity")}>
@@ -203,13 +216,13 @@ export function AlertCard({
               ) : (
                 <>
                   <Select
-                    value={alert.details?.trigger.toString()}
+                    value={getTriggerSelectValue(alert.details?.trigger)}
                     onValueChange={(value) => {
                       onUpdate({
                         ...alert,
                         details: {
                           ...alert.details,
-                          trigger: value === "true",
+                          trigger: getTriggerValue(value),
                         },
                       });
                     }}
@@ -218,6 +231,7 @@ export function AlertCard({
                       <SelectValue placeholder="succeeds" />
                     </SelectTrigger>
                     <SelectContent>
+                      <SelectItem value="null">is triggered</SelectItem>
                       <SelectItem value="true">succeeds</SelectItem>
                       <SelectItem value="false">fails</SelectItem>
                     </SelectContent>
@@ -229,7 +243,16 @@ export function AlertCard({
               <div className="text-xs font-medium text-muted-foreground">
                 THEN
               </div>
-              <div className="flex flex-row items-center gap-4">
+              <div className="flex flex-row items-center gap-4 p-2 text-muted-foreground">
+                <div>send a slack alert</div>
+                <InstallSlackAppButton
+                  installText="add to slack"
+                  reInstallText="slack configured"
+                  savedSearchId={searchId}
+                />
+              </div>
+
+              {/* <div className="flex flex-row items-center gap-4">
                 <div>send a slack alert and tag</div>
                 <Input
                   className="w-40"
@@ -246,7 +269,7 @@ export function AlertCard({
                     onUpdate(updatedAlert);
                   }}
                 />
-              </div>
+              </div> */}
             </div>
           </div>
         </div>

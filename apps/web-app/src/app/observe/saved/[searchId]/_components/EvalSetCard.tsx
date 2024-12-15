@@ -38,7 +38,7 @@ export default function EvalSetCard({
             className="text-base font-medium"
             inputClassName="text-base"
             placeholder="enter evaluation name..."
-            inputPlaceholder={`enter evaluation name... (i.e. "appointment booking")`}
+            inputPlaceholder={`appointment booking`}
           />
         </div>
         {/* <Switch

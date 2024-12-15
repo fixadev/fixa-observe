@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
+  type EvalSetAlert,
   type AlertWithDetails,
   type EvalSetWithIncludes,
   type Filter,
@@ -15,11 +16,6 @@ import { CreateEditEvaluationDialog } from "./EvalSetDialog";
 import { CreateEditAlertDialog } from "./AlertDialog";
 import { ToggleGroup, ToggleGroupItem } from "~/components/ui/toggle-group";
 import { useObserveState } from "~/components/hooks/useObserveState";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "~/components/ui/tooltip";
 
 export function EvalSetsAndAlertsCard({ searchId }: { searchId: string }) {
   const { filter, setFilter } = useObserveState();
@@ -31,6 +27,14 @@ export function EvalSetsAndAlertsCard({ searchId }: { searchId: string }) {
   const [selectedAlert, setSelectedAlert] = useState<AlertWithDetails | null>(
     null,
   );
+
+  function getEvaluationSetName(alert: AlertWithDetails) {
+    const evaluationSet = filter.evalSets?.find(
+      (evalSet) => evalSet.id === (alert.details as EvalSetAlert).evalSetId,
+    );
+    return evaluationSet?.name;
+  }
+
   return (
     <Card className="flex h-[450px] w-1/2 flex-col">
       <div className="flex flex-row items-center gap-4 p-6 font-medium">
@@ -94,7 +98,13 @@ export function EvalSetsAndAlertsCard({ searchId }: { searchId: string }) {
                   <CardTitle className="p-0 text-sm font-medium">
                     {alert.type === "latency"
                       ? `latency ${alert.details.percentile} >= ${alert.details.threshold}ms`
-                      : `${alert.name}`}
+                      : `${getEvaluationSetName(alert)} ${
+                          alert.details.trigger === null
+                            ? "is triggered"
+                            : alert.details.trigger
+                              ? "succeeds"
+                              : "fails"
+                        }`}
                   </CardTitle>
                   <CardContent></CardContent>
                 </CardHeader>
@@ -152,7 +162,7 @@ function EvalSetCard({
 }) {
   return (
     <Card key={evalSet.id} className="flex flex-col gap-2 p-4">
-      <CardHeader className="flex flex-row items-center justify-between p-0">
+      <CardHeader className="flex flex-row justify-between p-0">
         <CardTitle className="p-0 text-sm font-medium">
           {evalSet.name}
         </CardTitle>

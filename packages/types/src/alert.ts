@@ -20,7 +20,7 @@ export const LatencyAlertSchema = z.object({
 export type EvalSetAlert = z.infer<typeof EvalSetAlertSchema>;
 export const EvalSetAlertSchema = z.object({
   evalSetId: z.string(),
-  trigger: z.boolean(),
+  trigger: z.boolean().nullable(),
   slackNames: z.array(z.string()),
 });
 
