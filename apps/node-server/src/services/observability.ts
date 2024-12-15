@@ -276,8 +276,6 @@ export const findRelevantEvalSets = async ({
       },
     });
 
-    console.log("SAVED SEARCHES", savedSearches);
-
     const matchingSavedSearches = savedSearches.filter((savedSearch) => {
       const savedSearchMetadata = savedSearch.metadata as Record<
         string,
