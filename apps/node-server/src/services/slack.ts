@@ -162,7 +162,5 @@ export const sendAlertSlackMessage = async ({
             },
           ],
         };
-
-  console.log(message);
   await axios.post(user.public_metadata.slackWebhookUrl, message);
 };

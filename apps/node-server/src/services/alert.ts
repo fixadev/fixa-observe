@@ -29,6 +29,7 @@ export async function sendAlerts({
     for (const savedSearch of savedSearches) {
       const filter = FilterSchema.safeParse(savedSearch);
       if (!filter.success) {
+        console.log("failed to parse filter", filter);
         continue;
       }
 
@@ -40,7 +41,6 @@ export async function sendAlerts({
             console.log("failed to parse latencyAlert", latencyAlert);
             continue;
           }
-          console.log("parsed latencyAlert", latencyAlert);
 
           const { lookbackPeriod, percentile, threshold } = latencyAlert.data;
           const latencyPercentiles =
@@ -49,21 +49,11 @@ export async function sendAlerts({
               filter: { ...filter.data, lookbackPeriod: lookbackPeriod },
               newLatencyBlocks: latencyDurations ?? [],
             });
-          console.log("result from callService", latencyPercentiles);
 
           if (
             latencyPercentiles[percentile] &&
             latencyPercentiles[percentile] > threshold
           ) {
-            console.log(
-              "latency alert triggered for saved search",
-              savedSearch.id,
-              "with latency",
-              latencyPercentiles[percentile],
-              "and threshold",
-              threshold, // TODO: send alert to slack
-            );
-
             sendAlertSlackMessage({
               userId,
               call,
@@ -89,15 +79,6 @@ export async function sendAlerts({
             (result) => result.evalSetId === evalSetId,
           );
           if (evalSetResult?.success === trigger) {
-            console.log(
-              "evalSet alert triggered for saved search",
-              savedSearch.id,
-              "with evalSetResult",
-              evalSetResult,
-              "and trigger",
-              trigger, // TODO: send alert to slack
-            );
-
             sendAlertSlackMessage({
               userId,
               call,
