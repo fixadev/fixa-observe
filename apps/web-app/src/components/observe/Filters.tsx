@@ -10,7 +10,12 @@ import {
   SelectValue,
 } from "../ui/select";
 import { formatDateTime } from "~/lib/utils";
-import { CalendarIcon, UserIcon } from "@heroicons/react/24/solid";
+import {
+  CalendarIcon,
+  PlusIcon,
+  UserIcon,
+  XMarkIcon,
+} from "@heroicons/react/24/solid";
 import {
   defaultFilter,
   lookbackPeriods,
@@ -106,6 +111,40 @@ export default function Filters({
     return JSON.stringify(_filter) !== JSON.stringify(_originalFilter);
   }, [filter, originalFilter]);
 
+  const [metadataFilters, setMetadataFilters] = useState<
+    { property: string; value?: string; isNew: boolean }[]
+  >([]);
+
+  useEffect(() => {
+    setMetadataFilters(
+      Object.entries(originalFilter.metadata ?? {}).map(([key, value]) => ({
+        property: key,
+        value,
+        isNew: false,
+      })),
+    );
+  }, [originalFilter.metadata]);
+
+  // useEffect(() => {
+  //   console.log(filter.metadata);
+  // }, [filter]);
+
+  // Update filter with metadata filters
+  useEffect(() => {
+    setFilter((prev) => ({
+      ...prev,
+      metadata: metadataFilters.reduce(
+        (acc, { property, value }) => {
+          if (value) {
+            acc[property] = value;
+          }
+          return acc;
+        },
+        {} as Record<string, string>,
+      ),
+    }));
+  }, [metadataFilters, setFilter]);
+
   const { open: sidebarOpen } = useSidebar();
   return (
     <>
@@ -117,46 +156,41 @@ export default function Filters({
       >
         <div className="flex items-center gap-2">
           <SidebarTrigger className="shrink-0" />
-          <div className="flex w-40">
-            <Select
-              value={filter.lookbackPeriod.value.toString()}
-              onValueChange={(value) => {
-                console.log(
-                  "lookback period changed",
-                  lookbackPeriods.find((p) => p.value === parseInt(value)),
-                );
-                setFilter({
-                  ...filter,
-                  lookbackPeriod: lookbackPeriods.find(
-                    (p) => p.value === parseInt(value),
-                  )!,
-                  timeRange: undefined,
-                });
-              }}
-            >
-              <SelectTrigger className="w-[140px] gap-2 bg-background">
-                <CalendarIcon className="size-4 shrink-0" />
-                {filter.timeRange ? (
-                  <SelectValue className="w-35">
-                    {formatDateTime(new Date(filter.timeRange.start))} -{" "}
-                    {formatDateTime(new Date(filter.timeRange.end))}
-                  </SelectValue>
-                ) : (
-                  <SelectValue placeholder="time range" />
-                )}
-              </SelectTrigger>
-              <SelectContent className="w-full">
-                {lookbackPeriods.map((period) => (
-                  <SelectItem
-                    key={period.value}
-                    value={period.value.toString()}
-                  >
-                    {period.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          <Select
+            value={filter.lookbackPeriod.value.toString()}
+            onValueChange={(value) => {
+              console.log(
+                "lookback period changed",
+                lookbackPeriods.find((p) => p.value === parseInt(value)),
+              );
+              setFilter({
+                ...filter,
+                lookbackPeriod: lookbackPeriods.find(
+                  (p) => p.value === parseInt(value),
+                )!,
+                timeRange: undefined,
+              });
+            }}
+          >
+            <SelectTrigger className="w-[140px] gap-2 bg-background">
+              <CalendarIcon className="size-4 shrink-0" />
+              {filter.timeRange ? (
+                <SelectValue className="w-35">
+                  {formatDateTime(new Date(filter.timeRange.start))} -{" "}
+                  {formatDateTime(new Date(filter.timeRange.end))}
+                </SelectValue>
+              ) : (
+                <SelectValue placeholder="time range" />
+              )}
+            </SelectTrigger>
+            <SelectContent className="w-full">
+              {lookbackPeriods.map((period) => (
+                <SelectItem key={period.value} value={period.value.toString()}>
+                  {period.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
           <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger asChild>
               <Button
@@ -216,36 +250,71 @@ export default function Filters({
               </Command>
             </PopoverContent>
           </Popover>
-          {Object.entries(metadataAttributes).map(([key, values]) => (
-            <Select
-              key={key}
-              defaultValue="all"
-              value={filter.metadata?.[key] ?? "all"}
-              onValueChange={(value) => {
-                setFilter({
-                  ...filter,
-                  metadata: {
-                    ...filter.metadata,
-                    [key]: value === "all" ? undefined : value,
-                  },
+          {metadataFilters.map(({ property, value, isNew }, index) => (
+            <MetadataFilterPopover
+              key={index}
+              metadataAttributes={metadataAttributes}
+              defaultOpen={isNew}
+              property={property}
+              value={value}
+              updateProperty={(property) => {
+                setMetadataFilters((prev) => {
+                  const newFilters = [...prev];
+                  newFilters[index]!.property = property;
+                  return newFilters;
                 });
               }}
-            >
-              <SelectTrigger className="gap-2 bg-background">
-                <SelectValue placeholder={key} />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem key="all" value="all">
-                  all {key}s
-                </SelectItem>
-                {values.map((value) => (
-                  <SelectItem key={value} value={value}>
-                    {value}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+              updateValue={(value) => {
+                setMetadataFilters((prev) => {
+                  const newFilters = [...prev];
+                  newFilters[index]!.value = value;
+                  return newFilters;
+                });
+              }}
+              onRemove={() => {
+                setMetadataFilters((prev) => {
+                  const newFilters = [...prev];
+                  newFilters.splice(index, 1);
+                  return newFilters;
+                });
+              }}
+            />
           ))}
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="outline" className="flex items-center gap-2">
+                <PlusIcon className="size-4" />
+                add filter
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="p-0" side="bottom" align="start">
+              <Command>
+                <CommandInput placeholder="Search metadata fields..." />
+                <CommandList>
+                  <CommandEmpty>No metadata fields found.</CommandEmpty>
+                  <CommandGroup heading="Metadata Fields">
+                    {Object.keys(metadataAttributes).map((key) => (
+                      <CommandItem
+                        key={key}
+                        onSelect={() => {
+                          setMetadataFilters((prev) => [
+                            ...prev,
+                            {
+                              property: key,
+                              value: metadataAttributes[key]?.[0],
+                              isNew: true,
+                            },
+                          ]);
+                        }}
+                      >
+                        {key}
+                      </CommandItem>
+                    ))}
+                  </CommandGroup>
+                </CommandList>
+              </Command>
+            </PopoverContent>
+          </Popover>
         </div>
         <div className="flex items-center gap-2">
           {hasFilterChanged && <SaveSearchButton savedSearch={savedSearch} />}
@@ -260,6 +329,100 @@ export default function Filters({
         refetchAgents={refetchAgents}
       />
     </>
+  );
+}
+
+function MetadataFilterPopover({
+  metadataAttributes,
+  defaultOpen,
+  children,
+  property,
+  value,
+  updateProperty,
+  updateValue,
+  onRemove,
+}: {
+  metadataAttributes: Record<string, string[]>;
+  defaultOpen?: boolean;
+  children?: React.ReactNode;
+  property: string;
+  value?: string;
+  updateProperty: (property: string) => void;
+  updateValue: (value?: string) => void;
+  onRemove: () => void;
+}) {
+  const values = useMemo(() => {
+    if (!property) return [];
+    return metadataAttributes[property] ?? [];
+  }, [property, metadataAttributes]);
+
+  useEffect(() => {
+    if (property && !value && values.length > 0) {
+      updateValue(values[0]);
+    }
+  }, [values, property, value, updateValue]);
+
+  return (
+    <Popover defaultOpen={defaultOpen}>
+      {children ? (
+        <PopoverTrigger asChild>{children}</PopoverTrigger>
+      ) : (
+        <PopoverTrigger asChild>
+          <Button
+            variant="outline"
+            className="flex items-center gap-2 font-normal data-[state=open]:bg-muted"
+          >
+            {property}
+            <div className="text-muted-foreground">=</div>
+            {value}
+            <XMarkIcon
+              className="-mr-2 size-5 shrink-0 rounded-md p-0.5 text-muted-foreground hover:bg-gray-300"
+              onClick={(e) => {
+                e.stopPropagation();
+                onRemove();
+              }}
+            />
+          </Button>
+        </PopoverTrigger>
+      )}
+      <PopoverContent
+        side="bottom"
+        align="start"
+        className="flex w-fit items-center gap-2"
+      >
+        <Select
+          value={property}
+          onValueChange={(value) => {
+            updateValue(undefined);
+            updateProperty(value);
+          }}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="select property" />
+          </SelectTrigger>
+          <SelectContent>
+            {Object.keys(metadataAttributes).map((key) => (
+              <SelectItem key={key} value={key}>
+                {key}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <div className="text-muted-foreground">=</div>
+        <Select value={value} onValueChange={updateValue}>
+          <SelectTrigger disabled={values.length === 0}>
+            <SelectValue placeholder="select value" />
+          </SelectTrigger>
+          <SelectContent>
+            {values.map((value) => (
+              <SelectItem key={value} value={value}>
+                {value}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </PopoverContent>
+    </Popover>
   );
 }
 
