@@ -22,13 +22,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  type Dispatch,
-  Fragment,
-  type SetStateAction,
-  useEffect,
-  useState,
-} from "react";
+import { type Dispatch, Fragment, type SetStateAction, useState } from "react";
 import { cn } from "~/lib/utils";
 import { type CallWithIncludes } from "@repo/types/src/index";
 import AudioPlayer from "../../dashboard/AudioPlayer";
@@ -90,7 +84,7 @@ export function DataTable<TData, TValue>({
     <div>
       <div className="rounded-md border bg-background">
         <Table>
-          <TableHeader className="sticky top-16 z-20 border-b bg-background">
+          <TableHeader className="sticky top-14 z-20 border-b bg-background">
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
