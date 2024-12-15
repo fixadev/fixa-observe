@@ -107,7 +107,7 @@ export default function SavedSearchPage({
 
   return (
     <div
-      className="relative h-full bg-muted/30 pt-16 focus:outline-none"
+      className="relative h-full bg-muted/30 focus:outline-none"
       autoFocus
       tabIndex={0}
     >

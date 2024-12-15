@@ -33,7 +33,7 @@ import {
 } from "~/components/ui/popover";
 import { Check, ChevronsUpDown } from "lucide-react";
 import { cn } from "~/lib/utils";
-import { SidebarTrigger, useSidebar } from "~/components/ui/sidebar";
+import { SidebarTrigger } from "~/components/ui/sidebar";
 import {
   FilterSchema,
   type Filter,
@@ -136,13 +136,11 @@ export default function Filters({
     }));
   }, [metadataFilters, setFilter]);
 
-  const { open: sidebarOpen } = useSidebar();
   return (
     <>
       <div
         className={cn(
-          "fixed top-0 z-50 flex w-full flex-wrap items-center justify-between gap-2 border-b bg-background p-3 transition-[width] duration-200 ease-linear",
-          sidebarOpen ? "md:w-[calc(100%-var(--sidebar-width))]" : "md:w-full",
+          "sticky top-0 z-50 flex w-full flex-wrap items-center justify-between gap-2 border-b bg-background p-3 transition-[width] duration-200 ease-linear",
         )}
       >
         <div className="flex flex-wrap items-center gap-2">

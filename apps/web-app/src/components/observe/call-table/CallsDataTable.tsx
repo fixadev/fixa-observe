@@ -90,7 +90,7 @@ export function DataTable<TData, TValue>({
     <div>
       <div className="rounded-md border bg-background">
         <Table>
-          <TableHeader className="sticky top-16 z-20 border-b bg-background">
+          <TableHeader className="sticky top-14 z-20 border-b bg-background">
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
