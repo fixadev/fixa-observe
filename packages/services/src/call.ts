@@ -64,7 +64,9 @@ export class CallService {
         };
       }
       if (filter.agentId) {
-        filterWhere.agentId = filter.agentId;
+        filterWhere.agentId = {
+          in: filter.agentId,
+        };
       }
 
       if (filter.metadata) {

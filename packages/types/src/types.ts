@@ -108,7 +108,7 @@ export const FilterSchema = z.object({
     value: z.number(),
   }),
   timeRange: z.union([TimeRangeSchema, z.null(), z.undefined()]),
-  agentId: z.string().optional(),
+  agentId: z.array(z.string()).optional(),
   chartPeriod: z.number(),
   customerCallId: z.union([z.string(), z.null(), z.undefined()]),
   metadata: z.record(z.string(), z.string().or(z.undefined())).optional(),
