@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Button } from "~/components/ui/button";
 import {
   Select,
@@ -60,10 +60,10 @@ export default function Filters({
 
   const agents = useMemo(() => {
     return [
-      {
-        id: "all",
-        name: "all agents",
-      },
+      // {
+      //   id: "all",
+      //   name: "all agents",
+      // },
       // ...(_agents ?? []),
       ...(agentIds ?? []).map((id) => {
         return {
@@ -73,6 +73,31 @@ export default function Filters({
       }),
     ];
   }, [_agents, agentIds]);
+  const toggleAgentId = useCallback(
+    (agentId: string) => {
+      setFilter((prev) => {
+        const agentIds = new Set(prev.agentId ?? []);
+        if (agentIds.has(agentId)) {
+          agentIds.delete(agentId);
+        } else {
+          agentIds.add(agentId);
+        }
+        return {
+          ...prev,
+          agentId: Array.from(agentIds),
+        };
+      });
+    },
+    [setFilter],
+  );
+  const selectedAgentsText = useMemo(() => {
+    console.log("filter.agentId", filter.agentId);
+    if (!filter.agentId || filter.agentId.length === 0) {
+      return "all agents";
+    }
+    const firstAgent = agents.find((a) => a.id === filter.agentId[0]);
+    return firstAgent?.name ?? filter.agentId[0];
+  }, [filter.agentId, agents]);
 
   const metadataAttributes = useMemo(() => {
     const result: Record<string, string[]> = {};
@@ -188,10 +213,14 @@ export default function Filters({
                 >
                   <div className="flex items-center gap-2">
                     <UserIcon className="size-4 shrink-0" />
-                    <span>
-                      {agents?.find((a) => a.id === filter.agentId)?.name ??
-                        "all agents"}
+                    <span className="font-regular max-w-[100px] truncate">
+                      {selectedAgentsText}
                     </span>
+                    {filter.agentId && filter.agentId.length > 1 && (
+                      <div className="shrink-0 rounded-full bg-muted px-2 py-1 text-xs">
+                        + {filter.agentId.length - 1} more
+                      </div>
+                    )}
                   </div>
                   <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
@@ -207,18 +236,14 @@ export default function Filters({
                           key={agent.id}
                           value={`${agent.id} ${agent.name}`}
                           onSelect={() => {
-                            setFilter({
-                              ...filter,
-                              agentId:
-                                agent.id === "all" ? undefined : agent.id,
-                            });
+                            toggleAgentId(agent.id);
                             setOpen(false);
                           }}
                         >
                           <Check
                             className={cn(
                               "mr-2 h-4 w-4",
-                              filter.agentId === agent.id
+                              filter.agentId?.includes(agent.id)
                                 ? "opacity-100"
                                 : "opacity-0",
                             )}
@@ -230,6 +255,20 @@ export default function Filters({
                   </CommandList>
                   <CommandSeparator />
                   <CommandGroup>
+                    {filter.agentId && (
+                      <CommandItem
+                        className="flex w-full cursor-pointer flex-col items-center text-center font-medium"
+                        onSelect={() => {
+                          setFilter({
+                            ...filter,
+                            agentId: [],
+                          });
+                          setOpen(false);
+                        }}
+                      >
+                        clear
+                      </CommandItem>
+                    )}
                     <CommandItem
                       onSelect={() => setEditAgentModalOpen(true)}
                       className="flex w-full cursor-pointer flex-col items-center text-center font-medium"

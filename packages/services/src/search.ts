@@ -27,7 +27,7 @@ export class SearchService {
       ownerId: userId,
       createdAt: new Date(),
       name,
-      agentId: filter.agentId ?? "",
+      agentId: filter.agentId ?? [],
       lookbackPeriod: filter.lookbackPeriod ?? {},
       metadata: filter.metadata ?? {},
     };
