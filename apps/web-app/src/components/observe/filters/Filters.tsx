@@ -141,171 +141,179 @@ export default function Filters({
     <>
       <div
         className={cn(
-          "fixed top-0 z-50 flex h-14 items-center justify-between gap-2 border-b bg-background p-4 transition-[width] duration-200 ease-linear",
-          sidebarOpen ? "w-[calc(100%-var(--sidebar-width))]" : "w-full",
+          "fixed top-0 z-50 flex w-full flex-wrap items-center justify-between gap-2 border-b bg-background p-3 transition-[width] duration-200 ease-linear",
+          sidebarOpen ? "md:w-[calc(100%-var(--sidebar-width))]" : "md:w-full",
         )}
       >
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <SidebarTrigger className="shrink-0" />
-          <Select
-            value={filter.lookbackPeriod.value.toString()}
-            onValueChange={(value) => {
-              console.log(
-                "lookback period changed",
-                lookbackPeriods.find((p) => p.value === parseInt(value)),
-              );
-              setFilter({
-                ...filter,
-                lookbackPeriod: lookbackPeriods.find(
-                  (p) => p.value === parseInt(value),
-                )!,
-                timeRange: undefined,
-              });
-            }}
-          >
-            <SelectTrigger className="w-[140px] gap-2 bg-background">
-              <CalendarIcon className="size-4 shrink-0" />
-              {filter.timeRange ? (
-                <SelectValue className="w-35">
-                  {formatDateTime(new Date(filter.timeRange.start))} -{" "}
-                  {formatDateTime(new Date(filter.timeRange.end))}
-                </SelectValue>
-              ) : (
-                <SelectValue placeholder="time range" />
-              )}
-            </SelectTrigger>
-            <SelectContent className="w-full">
-              {lookbackPeriods.map((period) => (
-                <SelectItem key={period.value} value={period.value.toString()}>
-                  {period.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Popover open={open} onOpenChange={setOpen}>
-            <PopoverTrigger asChild>
-              <Button
-                variant="outline"
-                className="justify-between gap-2 bg-background"
-              >
-                <div className="flex items-center gap-2">
-                  <UserIcon className="size-4 shrink-0" />
-                  <span>
-                    {agents?.find((a) => a.id === filter.agentId)?.name ??
-                      "all agents"}
-                  </span>
-                </div>
-                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="p-1" align="start">
-              <Command>
-                <CommandInput placeholder="search..." />
-                <CommandList>
-                  <CommandEmpty>no agents found.</CommandEmpty>
-                  <CommandGroup>
-                    {(agents ?? []).map((agent) => (
-                      <CommandItem
-                        key={agent.id}
-                        value={`${agent.id} ${agent.name}`}
-                        onSelect={() => {
-                          setFilter({
-                            ...filter,
-                            agentId: agent.id === "all" ? undefined : agent.id,
-                          });
-                          setOpen(false);
-                        }}
-                      >
-                        <Check
-                          className={cn(
-                            "mr-2 h-4 w-4",
-                            filter.agentId === agent.id
-                              ? "opacity-100"
-                              : "opacity-0",
-                          )}
-                        />
-                        {agent.name}
-                      </CommandItem>
-                    ))}
-                  </CommandGroup>
-                </CommandList>
-                <CommandSeparator />
-                <CommandGroup>
-                  <CommandItem
-                    onSelect={() => setEditAgentModalOpen(true)}
-                    className="flex w-full cursor-pointer flex-col items-center text-center font-medium"
+          <div className="flex items-center gap-2">
+            <Select
+              value={filter.lookbackPeriod.value.toString()}
+              onValueChange={(value) => {
+                console.log(
+                  "lookback period changed",
+                  lookbackPeriods.find((p) => p.value === parseInt(value)),
+                );
+                setFilter({
+                  ...filter,
+                  lookbackPeriod: lookbackPeriods.find(
+                    (p) => p.value === parseInt(value),
+                  )!,
+                  timeRange: undefined,
+                });
+              }}
+            >
+              <SelectTrigger className="w-[140px] gap-2 bg-background">
+                <CalendarIcon className="size-4 shrink-0" />
+                {filter.timeRange ? (
+                  <SelectValue className="w-35">
+                    {formatDateTime(new Date(filter.timeRange.start))} -{" "}
+                    {formatDateTime(new Date(filter.timeRange.end))}
+                  </SelectValue>
+                ) : (
+                  <SelectValue placeholder="time range" />
+                )}
+              </SelectTrigger>
+              <SelectContent className="w-full">
+                {lookbackPeriods.map((period) => (
+                  <SelectItem
+                    key={period.value}
+                    value={period.value.toString()}
                   >
-                    edit display names
-                  </CommandItem>
-                </CommandGroup>
-              </Command>
-            </PopoverContent>
-          </Popover>
-          {metadataFilters.map(({ property, value, isNew }, index) => (
-            <MetadataFilterPopover
-              key={index}
-              metadataAttributes={metadataAttributes}
-              defaultOpen={isNew}
-              property={property}
-              value={value}
-              updateProperty={(property) => {
-                setMetadataFilters((prev) => {
-                  const newFilters = [...prev];
-                  newFilters[index]!.property = property;
-                  return newFilters;
-                });
-              }}
-              updateValue={(value) => {
-                setMetadataFilters((prev) => {
-                  const newFilters = [...prev];
-                  newFilters[index]!.value = value;
-                  return newFilters;
-                });
-              }}
-              onRemove={() => {
-                setMetadataFilters((prev) => {
-                  const newFilters = [...prev];
-                  newFilters.splice(index, 1);
-                  return newFilters;
-                });
-              }}
-            />
-          ))}
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button variant="outline" className="flex items-center gap-2">
-                <PlusIcon className="size-4" />
-                add filter
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="p-0" side="bottom" align="start">
-              <Command>
-                <CommandInput placeholder="search..." />
-                <CommandList>
-                  <CommandEmpty>no metadata fields found.</CommandEmpty>
-                  <CommandGroup heading="metadata fields">
-                    {Object.keys(metadataAttributes).map((key) => (
-                      <CommandItem
-                        key={key}
-                        onSelect={() => {
-                          setMetadataFilters((prev) => [
-                            ...prev,
-                            {
-                              property: key,
-                              value: metadataAttributes[key]?.[0],
-                              isNew: true,
-                            },
-                          ]);
-                        }}
-                      >
-                        {key}
-                      </CommandItem>
-                    ))}
+                    {period.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Popover open={open} onOpenChange={setOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className="justify-between gap-2 bg-background"
+                >
+                  <div className="flex items-center gap-2">
+                    <UserIcon className="size-4 shrink-0" />
+                    <span>
+                      {agents?.find((a) => a.id === filter.agentId)?.name ??
+                        "all agents"}
+                    </span>
+                  </div>
+                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="p-1" align="start">
+                <Command>
+                  <CommandInput placeholder="search..." />
+                  <CommandList>
+                    <CommandEmpty>no agents found.</CommandEmpty>
+                    <CommandGroup>
+                      {(agents ?? []).map((agent) => (
+                        <CommandItem
+                          key={agent.id}
+                          value={`${agent.id} ${agent.name}`}
+                          onSelect={() => {
+                            setFilter({
+                              ...filter,
+                              agentId:
+                                agent.id === "all" ? undefined : agent.id,
+                            });
+                            setOpen(false);
+                          }}
+                        >
+                          <Check
+                            className={cn(
+                              "mr-2 h-4 w-4",
+                              filter.agentId === agent.id
+                                ? "opacity-100"
+                                : "opacity-0",
+                            )}
+                          />
+                          {agent.name}
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  </CommandList>
+                  <CommandSeparator />
+                  <CommandGroup>
+                    <CommandItem
+                      onSelect={() => setEditAgentModalOpen(true)}
+                      className="flex w-full cursor-pointer flex-col items-center text-center font-medium"
+                    >
+                      edit display names
+                    </CommandItem>
                   </CommandGroup>
-                </CommandList>
-              </Command>
-            </PopoverContent>
-          </Popover>
+                </Command>
+              </PopoverContent>
+            </Popover>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            {metadataFilters.map(({ property, value, isNew }, index) => (
+              <MetadataFilterPopover
+                key={index}
+                metadataAttributes={metadataAttributes}
+                defaultOpen={isNew}
+                property={property}
+                value={value}
+                updateProperty={(property) => {
+                  setMetadataFilters((prev) => {
+                    const newFilters = [...prev];
+                    newFilters[index]!.property = property;
+                    return newFilters;
+                  });
+                }}
+                updateValue={(value) => {
+                  setMetadataFilters((prev) => {
+                    const newFilters = [...prev];
+                    newFilters[index]!.value = value;
+                    return newFilters;
+                  });
+                }}
+                onRemove={() => {
+                  setMetadataFilters((prev) => {
+                    const newFilters = [...prev];
+                    newFilters.splice(index, 1);
+                    return newFilters;
+                  });
+                }}
+              />
+            ))}
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline" className="flex items-center gap-2">
+                  <PlusIcon className="size-4" />
+                  add filter
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="p-0" side="bottom" align="start">
+                <Command>
+                  <CommandInput placeholder="search..." />
+                  <CommandList>
+                    <CommandEmpty>no metadata fields found.</CommandEmpty>
+                    <CommandGroup heading="metadata fields">
+                      {Object.keys(metadataAttributes).map((key) => (
+                        <CommandItem
+                          key={key}
+                          onSelect={() => {
+                            setMetadataFilters((prev) => [
+                              ...prev,
+                              {
+                                property: key,
+                                value: metadataAttributes[key]?.[0],
+                                isNew: true,
+                              },
+                            ]);
+                          }}
+                        >
+                          {key}
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  </CommandList>
+                </Command>
+              </PopoverContent>
+            </Popover>
+          </div>
         </div>
         <div className="flex items-center gap-2">
           {hasFilterChanged && <SaveSearchButton savedSearch={savedSearch} />}
