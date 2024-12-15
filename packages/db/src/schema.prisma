@@ -342,6 +342,7 @@ model Alert {
   savedSearchId String
   type          AlertType
   details       Json
+  enabled       Boolean     @default(true)
 }
 
 enum AlertType {

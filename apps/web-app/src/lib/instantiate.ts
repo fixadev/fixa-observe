@@ -1,6 +1,6 @@
 import {
-  AlertWithDetails,
-  EvalSetWithIncludes,
+  type AlertWithDetails,
+  type EvalSetWithIncludes,
   type Eval,
   type EvalSet,
 } from "@repo/types/src/index";
@@ -67,6 +67,9 @@ export function instantiateAlert({
       percentile: "p90",
       threshold: 1000,
       slackNames: [""],
+      cooldownPeriod: lookbackPeriods[0]!,
+      lastAlerted: new Date().toISOString(),
     },
+    enabled: true,
   };
 }

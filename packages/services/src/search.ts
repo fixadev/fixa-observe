@@ -108,6 +108,7 @@ export class SearchService {
       },
     });
     const parsed = SavedSearchWithIncludes.safeParse(savedSearch);
+    console.log("parsed", JSON.stringify(parsed, null, 2));
     return parsed.success ? parsed.data : null;
   }
 
