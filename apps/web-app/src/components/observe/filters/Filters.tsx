@@ -82,12 +82,6 @@ export default function Filters({
         } else {
           agentIds.add(agentId);
         }
-        if (agentIds.size === 0) {
-          return {
-            ...prev,
-            agentId: undefined,
-          };
-        }
         return {
           ...prev,
           agentId: Array.from(agentIds),
@@ -101,7 +95,7 @@ export default function Filters({
     if (!filter.agentId || filter.agentId.length === 0) {
       return "all agents";
     }
-    const firstAgent = agents.find((a) => a.id === filter.agentId![0]);
+    const firstAgent = agents.find((a) => a.id === filter.agentId[0]);
     return firstAgent?.name ?? filter.agentId[0];
   }, [filter.agentId, agents]);
 

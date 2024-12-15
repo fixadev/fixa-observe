@@ -37,6 +37,7 @@ export const defaultDurationToChartPeriod: Record<number, number> = {
 };
 
 export const defaultFilter: Filter = {
+  agentId: [],
   lookbackPeriod: lookbackPeriods[1]!,
   chartPeriod: chartPeriods[2]!.value,
 };
