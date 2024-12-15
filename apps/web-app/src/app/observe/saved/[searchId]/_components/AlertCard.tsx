@@ -12,7 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { lookbackPeriods } from "~/components/hooks/useObserveState";
 
 export function AlertCard({
@@ -40,17 +40,20 @@ export function AlertCard({
   type AlertOption = LatencyOption | EvalSetOption;
 
   const [alertOptionIndex, setAlertOptionIndex] = useState(0);
-  const alertOptions: AlertOption[] = [
-    { value: "p50", label: "latency P50", type: "latency" },
-    { value: "p90", label: "latency P90", type: "latency" },
-    { value: "p95", label: "latency P95", type: "latency" },
-    ...(filter.evalSets?.map((evalSet) => ({
-      value: evalSet.id,
-      label: evalSet.name,
-      type: "evalSet" as const,
-      evalSetId: evalSet.id,
-    })) ?? []),
-  ];
+  const alertOptions = useMemo<AlertOption[]>(
+    () => [
+      { value: "p50", label: "latency P50", type: "latency" },
+      { value: "p90", label: "latency P90", type: "latency" },
+      { value: "p95", label: "latency P95", type: "latency" },
+      ...(filter.evalSets?.map((evalSet) => ({
+        value: evalSet.id,
+        label: evalSet.name,
+        type: "evalSet" as const,
+        evalSetId: evalSet.id,
+      })) ?? []),
+    ],
+    [filter.evalSets],
+  );
 
   useEffect(() => {
     setAlertOptionIndex(
@@ -60,7 +63,7 @@ export function AlertCard({
           : opt.value === alert.details?.evalSetId,
       ),
     );
-  }, [alert]);
+  }, [alert, alertOptions]);
 
   return (
     <div className={cn("p-0 text-sm transition-opacity")}>
