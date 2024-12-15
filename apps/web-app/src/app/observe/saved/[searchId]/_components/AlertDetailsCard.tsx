@@ -3,7 +3,11 @@ import { CardContent, CardHeader } from "~/components/ui/card";
 import { cn, isTempId } from "~/lib/utils";
 import { EditableText } from "~/components/EditableText";
 import { EllipsisHorizontalIcon } from "@heroicons/react/24/solid";
-import { type AlertWithDetails, type Filter } from "@repo/types/src/index";
+import {
+  type LatencyAlert,
+  type AlertWithDetails,
+  type Filter,
+} from "@repo/types/src/index";
 import { Input } from "~/components/ui/input";
 import {
   Select,
@@ -15,6 +19,7 @@ import {
 import { useEffect, useState, useMemo } from "react";
 import { lookbackPeriods } from "~/components/hooks/useObserveState";
 import { InstallSlackAppButton } from "~/app/observe/slack-app/page";
+import { Switch } from "~/components/ui/switch";
 
 export function AlertCard({
   alert,
@@ -239,19 +244,57 @@ export function AlertCard({
                 </>
               )}
             </div>
-            <div>
-              <div className="text-xs font-medium text-muted-foreground">
-                THEN
+            <div className="flex flex-col gap-2">
+              <div>
+                <div className="text-xs font-medium text-muted-foreground">
+                  THEN
+                </div>
+                <div className="flex flex-row items-center gap-4 p-2 text-muted-foreground">
+                  <div>send a slack alert</div>
+                  <InstallSlackAppButton
+                    installText="add to slack"
+                    reInstallText="slack configured"
+                    savedSearchId={searchId}
+                  />
+                </div>
               </div>
-              <div className="flex flex-row items-center gap-4 p-2 text-muted-foreground">
-                <div>send a slack alert</div>
-                <InstallSlackAppButton
-                  installText="add to slack"
-                  reInstallText="slack configured"
-                  savedSearchId={searchId}
-                />
-              </div>
-
+              {alert.type === "latency" && (
+                <div className="flex flex-col gap-2">
+                  <div className="text-xs font-medium text-muted-foreground">
+                    COOLDOWN PERIOD
+                  </div>
+                  <Select
+                    value={
+                      alert.details?.cooldownPeriod?.value.toString() ?? ""
+                    }
+                    onValueChange={(value) => {
+                      onUpdate({
+                        ...alert,
+                        details: {
+                          ...alert.details,
+                          cooldownPeriod: lookbackPeriods.find(
+                            (p) => p.value === parseInt(value),
+                          )!,
+                        },
+                      });
+                    }}
+                  >
+                    <SelectTrigger className="w-fit bg-white">
+                      <SelectValue placeholder="1000ms" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {lookbackPeriods.map((period) => (
+                        <SelectItem
+                          key={period.value}
+                          value={period.value.toString()}
+                        >
+                          {period.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
               {/* <div className="flex flex-row items-center gap-4">
                 <div>send a slack alert and tag</div>
                 <Input

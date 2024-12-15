@@ -5,7 +5,7 @@ import { useCallback, useEffect, useState } from "react";
 import { instantiateEvalSet } from "~/lib/instantiate";
 import { isTempId } from "~/lib/utils";
 import { api } from "~/trpc/react";
-import EvalSetCard from "./EvalSetCard";
+import EvalSetCard from "./EvalSetDetailsCard";
 import { Button } from "~/components/ui/button";
 import Spinner from "~/components/Spinner";
 import { TrashIcon } from "@heroicons/react/24/solid";
