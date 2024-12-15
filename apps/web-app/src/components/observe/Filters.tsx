@@ -116,8 +116,18 @@ export default function Filters({
   >([]);
 
   useEffect(() => {
-    console.log(filter.metadata);
-  }, [filter]);
+    setMetadataFilters(
+      Object.entries(originalFilter.metadata ?? {}).map(([key, value]) => ({
+        property: key,
+        value,
+        isNew: false,
+      })),
+    );
+  }, [originalFilter.metadata]);
+
+  // useEffect(() => {
+  //   console.log(filter.metadata);
+  // }, [filter]);
 
   // Update filter with metadata filters
   useEffect(() => {
