@@ -22,13 +22,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  type Dispatch,
-  Fragment,
-  type SetStateAction,
-  useEffect,
-  useState,
-} from "react";
+import { type Dispatch, Fragment, type SetStateAction, useState } from "react";
 import { cn } from "~/lib/utils";
 import { type CallWithIncludes } from "@repo/types/src/index";
 import AudioPlayer from "../../dashboard/AudioPlayer";

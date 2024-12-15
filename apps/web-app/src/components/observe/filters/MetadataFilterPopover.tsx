@@ -23,6 +23,7 @@ interface MetadataFilterPopoverProps {
   updateProperty: (property: string) => void;
   updateValue: (value?: string) => void;
   onRemove: () => void;
+  onClose: () => void;
 }
 
 export default function MetadataFilterPopover({
@@ -34,6 +35,7 @@ export default function MetadataFilterPopover({
   updateProperty,
   updateValue,
   onRemove,
+  onClose,
 }: MetadataFilterPopoverProps) {
   const values = useMemo(() => {
     if (!property) return [];
@@ -47,7 +49,14 @@ export default function MetadataFilterPopover({
   }, [values, property, value, updateValue]);
 
   return (
-    <Popover defaultOpen={defaultOpen}>
+    <Popover
+      defaultOpen={defaultOpen}
+      onOpenChange={(open) => {
+        if (!open) {
+          onClose();
+        }
+      }}
+    >
       {children ? (
         <PopoverTrigger asChild>{children}</PopoverTrigger>
       ) : (

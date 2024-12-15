@@ -116,10 +116,6 @@ export default function Filters({
     );
   }, [originalFilter.metadata]);
 
-  // useEffect(() => {
-  //   console.log(filter.metadata);
-  // }, [filter]);
-
   // Update filter with metadata filters
   useEffect(() => {
     setFilter((prev) => ({
@@ -273,6 +269,15 @@ export default function Filters({
                     newFilters.splice(index, 1);
                     return newFilters;
                   });
+                }}
+                onClose={() => {
+                  if (metadataFilters[index]!.isNew) {
+                    setMetadataFilters((prev) => {
+                      const newFilters = [...prev];
+                      newFilters[index]!.isNew = false;
+                      return newFilters;
+                    });
+                  }
                 }}
               />
             ))}
