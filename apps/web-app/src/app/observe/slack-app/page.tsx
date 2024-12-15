@@ -46,7 +46,17 @@ export default function SlackAppPage({
   );
 }
 
-function InstallSlackAppButton({ agentId }: { agentId: string }) {
+export function InstallSlackAppButton({
+  agentId,
+  installText,
+  reInstallText,
+  savedSearchId,
+}: {
+  agentId?: string;
+  installText?: string;
+  reInstallText?: string;
+  savedSearchId?: string;
+}) {
   const { user } = useUser();
 
   const slackWebhookUrl = useMemo(
@@ -55,8 +65,8 @@ function InstallSlackAppButton({ agentId }: { agentId: string }) {
   );
 
   const state = useMemo(() => {
-    return JSON.stringify({ agentId, origin: "observe" });
-  }, [agentId]);
+    return JSON.stringify({ agentId, origin: "observe", savedSearchId });
+  }, [agentId, savedSearchId]);
 
   const href = useMemo(() => {
     return `https://slack.com/oauth/v2/authorize?scope=chat%3Awrite%2Cincoming-webhook&user_scope=&redirect_uri=${encodeURIComponent(
@@ -110,12 +120,12 @@ function InstallSlackAppButton({ agentId }: { agentId: string }) {
             "re-install"
           ) : (
             <span className="flex items-center gap-2">
-              added to slack
+              {reInstallText ?? "added to slack"}
               <CheckCircleIcon className="h-4 w-4 text-green-500" />
             </span>
           )
         ) : (
-          "add to slack"
+          (installText ?? "add to slack")
         )}
       </a>
     </Button>

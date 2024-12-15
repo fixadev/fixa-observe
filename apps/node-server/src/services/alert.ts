@@ -78,11 +78,11 @@ export async function sendAlerts({
           const evalSetResult = evalSetResults.find(
             (result) => result.evalSetId === evalSetId,
           );
-          if (evalSetResult?.success === trigger) {
+          if (evalSetResult?.success === trigger || trigger === null) {
             sendAlertSlackMessage({
               userId,
               call,
-              success: evalSetResult.success,
+              success: evalSetResult?.success ?? false,
               alert: {
                 ...alert,
                 type: "evalSet",

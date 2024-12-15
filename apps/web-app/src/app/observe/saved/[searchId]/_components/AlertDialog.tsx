@@ -95,7 +95,12 @@ export function CreateEditAlertDialog({
           <DialogTitle>alert details</DialogTitle>
         </DialogHeader>
         <div className="flex flex-col gap-4">
-          <AlertCard alert={alert} filter={filter} onUpdate={setAlert} />
+          <AlertCard
+            alert={alert}
+            filter={filter}
+            onUpdate={setAlert}
+            searchId={savedSearchId}
+          />
         </div>
         <DialogFooter className="mt-auto flex flex-row justify-between sm:justify-between">
           <WarningDialog
