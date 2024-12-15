@@ -26,6 +26,7 @@ export default function SlackOAuthCallback({
     const parsedState = JSON.parse(state) as {
       agentId: string;
       origin: "dashboard" | "observe";
+      savedSearchId?: string;
     };
     return parsedState;
   }, [state]);
@@ -53,7 +54,7 @@ export default function SlackOAuthCallback({
         `/${
           parsedState?.origin === "dashboard"
             ? `dashboard/${parsedState.agentId}/slack-app`
-            : `observe/slack-app`
+            : `observe/${parsedState?.savedSearchId ? "saved/" + parsedState.savedSearchId : "slack-app"}`
         }`,
       );
     };

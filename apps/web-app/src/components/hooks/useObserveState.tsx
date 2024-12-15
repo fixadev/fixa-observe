@@ -37,6 +37,7 @@ export const defaultDurationToChartPeriod: Record<number, number> = {
 };
 
 export const defaultFilter: Filter = {
+  agentId: [],
   lookbackPeriod: lookbackPeriods[1]!,
   chartPeriod: chartPeriods[2]!.value,
 };
@@ -53,7 +54,9 @@ interface ObserveStateContextType {
   setOrderBy: (orderBy: OrderBy | undefined) => void;
 
   savedSearch: SavedSearchWithIncludes | undefined;
-  setSavedSearch: React.Dispatch<React.SetStateAction<SavedSearchWithIncludes | undefined>>;
+  setSavedSearch: React.Dispatch<
+    React.SetStateAction<SavedSearchWithIncludes | undefined>
+  >;
 }
 
 const ObserveStateContext = createContext<ObserveStateContextType | undefined>(
@@ -69,7 +72,9 @@ export function ObserveStateProvider({
 
   const [filter, setFilter] = useState<Filter>(defaultFilter);
   const [orderBy, setOrderBy] = useState<OrderBy | undefined>();
-  const [savedSearch, setSavedSearch] = useState<SavedSearchWithIncludes | undefined>();
+  const [savedSearch, setSavedSearch] = useState<
+    SavedSearchWithIncludes | undefined
+  >();
 
   const resetFilter = useCallback(() => {
     setFilter(defaultFilter);

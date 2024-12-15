@@ -1,17 +1,18 @@
 "use client";
-import { AlertWithDetails, Filter } from "@repo/types/src/index";
+import { type AlertWithDetails, type Filter } from "@repo/types/src/index";
 import {
   Dialog,
   DialogContent,
   DialogFooter,
   DialogHeader,
+  DialogTitle,
 } from "~/components/ui/dialog";
 import { Button } from "~/components/ui/button";
 import { WarningDialog } from "~/app/_components/WarningDialog";
 import { useState, useEffect } from "react";
 import { api } from "~/trpc/react";
 import { isTempId } from "~/lib/utils";
-import { AlertCard } from "./AlertCard";
+import { AlertCard } from "./AlertDetailsCard";
 import { instantiateAlert } from "~/lib/instantiate";
 import Spinner from "~/components/Spinner";
 import { TrashIcon } from "@heroicons/react/24/solid";
@@ -90,8 +91,16 @@ export function CreateEditAlertDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent className="flex min-h-[400px] min-w-[600px] flex-col">
+        <DialogHeader>
+          <DialogTitle>alert details</DialogTitle>
+        </DialogHeader>
         <div className="flex flex-col gap-4">
-          <AlertCard alert={alert} filter={filter} onUpdate={setAlert} />
+          <AlertCard
+            alert={alert}
+            filter={filter}
+            onUpdate={setAlert}
+            searchId={savedSearchId}
+          />
         </div>
         <DialogFooter className="mt-auto flex flex-row justify-between sm:justify-between">
           <WarningDialog

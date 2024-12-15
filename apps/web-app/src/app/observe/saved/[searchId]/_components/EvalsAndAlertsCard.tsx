@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
+  type EvalSetAlert,
   type AlertWithDetails,
   type EvalSetWithIncludes,
   type Filter,
@@ -15,11 +16,8 @@ import { CreateEditEvaluationDialog } from "./EvalSetDialog";
 import { CreateEditAlertDialog } from "./AlertDialog";
 import { ToggleGroup, ToggleGroupItem } from "~/components/ui/toggle-group";
 import { useObserveState } from "~/components/hooks/useObserveState";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "~/components/ui/tooltip";
+import { api } from "~/trpc/react";
+import { Switch } from "~/components/ui/switch";
 
 export function EvalSetsAndAlertsCard({ searchId }: { searchId: string }) {
   const { filter, setFilter } = useObserveState();
@@ -31,6 +29,14 @@ export function EvalSetsAndAlertsCard({ searchId }: { searchId: string }) {
   const [selectedAlert, setSelectedAlert] = useState<AlertWithDetails | null>(
     null,
   );
+
+  function getEvaluationSetName(alert: AlertWithDetails) {
+    const evaluationSet = filter.evalSets?.find(
+      (evalSet) => evalSet.id === (alert.details as EvalSetAlert).evalSetId,
+    );
+    return evaluationSet?.name;
+  }
+
   return (
     <Card className="flex h-[450px] w-1/2 flex-col">
       <div className="flex flex-row items-center gap-4 p-6 font-medium">
@@ -89,23 +95,15 @@ export function EvalSetsAndAlertsCard({ searchId }: { searchId: string }) {
         ) : (
           <div className="flex flex-col gap-4">
             {filter.alerts?.map((alert) => (
-              <Card
-                onClick={() => {
-                  setSelectedAlert(alert);
-                  setAlertsModalOpen(true);
-                }}
+              <AlertCard
+                alert={alert}
+                filter={filter}
+                setFilter={setFilter}
+                getEvaluationSetName={getEvaluationSetName}
+                setSelectedAlert={setSelectedAlert}
+                setAlertsModalOpen={setAlertsModalOpen}
                 key={alert.id}
-                className="flex flex-col gap-4 p-4 hover:cursor-pointer hover:bg-muted/40"
-              >
-                <CardHeader className="p-0">
-                  <CardTitle className="p-0 text-sm font-medium">
-                    {alert.type === "latency"
-                      ? `latency ${alert.details.percentile} >= ${alert.details.threshold}ms`
-                      : `${alert.name}`}
-                  </CardTitle>
-                  <CardContent></CardContent>
-                </CardHeader>
-              </Card>
+              />
             ))}
             <div
               className="flex flex-row items-center gap-2 rounded-md bg-muted/70 p-4 text-muted-foreground hover:cursor-pointer hover:bg-muted"
@@ -142,6 +140,76 @@ export function EvalSetsAndAlertsCard({ searchId }: { searchId: string }) {
   );
 }
 
+function AlertCard({
+  alert,
+  filter,
+  setFilter,
+  getEvaluationSetName,
+  setSelectedAlert,
+  setAlertsModalOpen,
+}: {
+  alert: AlertWithDetails;
+  filter: Filter;
+  setFilter: React.Dispatch<React.SetStateAction<Filter>>;
+  getEvaluationSetName: (alert: AlertWithDetails) => string | undefined;
+  setSelectedAlert: React.Dispatch<
+    React.SetStateAction<AlertWithDetails | null>
+  >;
+  setAlertsModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
+}) {
+  const { mutate: updateAlert } = api.search.updateAlert.useMutation({
+    onSuccess: (data) => {
+      setFilter({
+        ...filter,
+        alerts: filter.alerts?.map((a) => (a.id === alert.id ? data : a)),
+      });
+    },
+  });
+
+  const toggleAlertEnabled = (checked: boolean) => {
+    updateAlert({
+      ...alert,
+      enabled: checked,
+    });
+  };
+  return (
+    <Card
+      key={alert.id}
+      className="flex flex-col gap-4 p-4 hover:cursor-pointer hover:bg-muted/40"
+    >
+      <CardHeader className="flex flex-row items-center justify-between p-0">
+        <div className="flex flex-row items-center gap-4">
+          <Switch
+            checked={alert.enabled}
+            onCheckedChange={toggleAlertEnabled}
+          />{" "}
+          <CardTitle className="p-0 text-sm font-medium">
+            {alert.type === "latency"
+              ? `latency ${alert.details.percentile} >= ${alert.details.threshold}ms over past ${alert.details.lookbackPeriod.label}`
+              : `${getEvaluationSetName(alert)} ${
+                  alert.details.trigger === null
+                    ? "is triggered"
+                    : alert.details.trigger
+                      ? "succeeds"
+                      : "fails"
+                }`}
+          </CardTitle>
+        </div>
+
+        <Button
+          onClick={() => {
+            setSelectedAlert(alert);
+            setAlertsModalOpen(true);
+          }}
+          variant="outline"
+        >
+          edit
+        </Button>
+      </CardHeader>
+    </Card>
+  );
+}
+
 function EvalSetCard({
   evalSet,
   filter,
@@ -157,12 +225,34 @@ function EvalSetCard({
   >;
   setEvalsModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }) {
+  const { mutate: updateEvalSet } = api.eval.updateSet.useMutation({
+    onSuccess: (data) => {
+      setFilter({
+        ...filter,
+        evalSets: filter.evalSets?.map((e) => (e.id === evalSet.id ? data : e)),
+      });
+    },
+  });
+
+  const toggleEvalSetEnabled = (checked: boolean) => {
+    updateEvalSet({
+      ...evalSet,
+      enabled: checked,
+    });
+  };
+
   return (
     <Card key={evalSet.id} className="flex flex-col gap-2 p-4">
-      <CardHeader className="flex flex-row items-center justify-between p-0">
-        <CardTitle className="p-0 text-sm font-medium">
-          {evalSet.name}
-        </CardTitle>
+      <CardHeader className="flex flex-row justify-between p-0">
+        <div className="flex flex-row items-center gap-4">
+          <Switch
+            checked={evalSet.enabled}
+            onCheckedChange={toggleEvalSetEnabled}
+          />{" "}
+          <CardTitle className="p-0 text-sm font-medium">
+            {evalSet.name}
+          </CardTitle>
+        </div>
         <Button
           onClick={() => {
             setSelectedEvalSet(evalSet);

@@ -3,7 +3,11 @@ import { CardContent, CardHeader } from "~/components/ui/card";
 import { cn, isTempId } from "~/lib/utils";
 import { EditableText } from "~/components/EditableText";
 import { EllipsisHorizontalIcon } from "@heroicons/react/24/solid";
-import { type AlertWithDetails, type Filter } from "@repo/types/src/index";
+import {
+  type LatencyAlert,
+  type AlertWithDetails,
+  type Filter,
+} from "@repo/types/src/index";
 import { Input } from "~/components/ui/input";
 import {
   Select,
@@ -12,16 +16,19 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { lookbackPeriods } from "~/components/hooks/useObserveState";
+import { InstallSlackAppButton } from "~/app/observe/slack-app/SlackButton";
 
 export function AlertCard({
   alert,
   filter,
+  searchId,
   onUpdate,
 }: {
   alert: AlertWithDetails;
   filter: Filter;
+  searchId: string;
   onUpdate: (alert: AlertWithDetails) => void;
 }) {
   type LatencyOption = {
@@ -40,17 +47,20 @@ export function AlertCard({
   type AlertOption = LatencyOption | EvalSetOption;
 
   const [alertOptionIndex, setAlertOptionIndex] = useState(0);
-  const alertOptions: AlertOption[] = [
-    { value: "p50", label: "latency P50", type: "latency" },
-    { value: "p90", label: "latency P90", type: "latency" },
-    { value: "p95", label: "latency P95", type: "latency" },
-    ...(filter.evalSets?.map((evalSet) => ({
-      value: evalSet.id,
-      label: evalSet.name,
-      type: "evalSet" as const,
-      evalSetId: evalSet.id,
-    })) ?? []),
-  ];
+  const alertOptions = useMemo<AlertOption[]>(
+    () => [
+      { value: "p50", label: "latency P50", type: "latency" },
+      { value: "p90", label: "latency P90", type: "latency" },
+      { value: "p95", label: "latency P95", type: "latency" },
+      ...(filter.evalSets?.map((evalSet) => ({
+        value: evalSet.id,
+        label: evalSet.name,
+        type: "evalSet" as const,
+        evalSetId: evalSet.id,
+      })) ?? []),
+    ],
+    [filter.evalSets],
+  );
 
   useEffect(() => {
     setAlertOptionIndex(
@@ -60,7 +70,17 @@ export function AlertCard({
           : opt.value === alert.details?.evalSetId,
       ),
     );
-  }, [alert]);
+  }, [alert, alertOptions]);
+
+  function getTriggerSelectValue(trigger: boolean | null) {
+    if (trigger === null) return "null";
+    return trigger ? "true" : "false";
+  }
+
+  function getTriggerValue(trigger: string) {
+    if (trigger === "null") return null;
+    return trigger === "true";
+  }
 
   return (
     <div className={cn("p-0 text-sm transition-opacity")}>
@@ -200,13 +220,13 @@ export function AlertCard({
               ) : (
                 <>
                   <Select
-                    value={alert.details?.trigger.toString()}
+                    value={getTriggerSelectValue(alert.details?.trigger)}
                     onValueChange={(value) => {
                       onUpdate({
                         ...alert,
                         details: {
                           ...alert.details,
-                          trigger: value === "true",
+                          trigger: getTriggerValue(value),
                         },
                       });
                     }}
@@ -215,6 +235,7 @@ export function AlertCard({
                       <SelectValue placeholder="succeeds" />
                     </SelectTrigger>
                     <SelectContent>
+                      <SelectItem value="null">is triggered</SelectItem>
                       <SelectItem value="true">succeeds</SelectItem>
                       <SelectItem value="false">fails</SelectItem>
                     </SelectContent>
@@ -222,11 +243,58 @@ export function AlertCard({
                 </>
               )}
             </div>
-            <div>
-              <div className="text-xs font-medium text-muted-foreground">
-                THEN
+            <div className="flex flex-col gap-2">
+              <div>
+                <div className="text-xs font-medium text-muted-foreground">
+                  THEN
+                </div>
+                <div className="flex flex-row items-center gap-4 p-2 text-muted-foreground">
+                  <div>send a slack alert</div>
+                  <InstallSlackAppButton
+                    installText="add to slack"
+                    reInstallText="slack configured"
+                    savedSearchId={searchId}
+                  />
+                </div>
               </div>
-              <div className="flex flex-row items-center gap-4">
+              {alert.type === "latency" && (
+                <div className="flex flex-col gap-2">
+                  <div className="text-xs font-medium text-muted-foreground">
+                    COOLDOWN PERIOD
+                  </div>
+                  <Select
+                    value={
+                      alert.details?.cooldownPeriod?.value.toString() ?? ""
+                    }
+                    onValueChange={(value) => {
+                      onUpdate({
+                        ...alert,
+                        details: {
+                          ...alert.details,
+                          cooldownPeriod: lookbackPeriods.find(
+                            (p) => p.value === parseInt(value),
+                          )!,
+                        },
+                      });
+                    }}
+                  >
+                    <SelectTrigger className="w-fit bg-white">
+                      <SelectValue placeholder="1000ms" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {lookbackPeriods.map((period) => (
+                        <SelectItem
+                          key={period.value}
+                          value={period.value.toString()}
+                        >
+                          {period.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+              {/* <div className="flex flex-row items-center gap-4">
                 <div>send a slack alert and tag</div>
                 <Input
                   className="w-40"
@@ -243,7 +311,7 @@ export function AlertCard({
                     onUpdate(updatedAlert);
                   }}
                 />
-              </div>
+              </div> */}
             </div>
           </div>
         </div>
