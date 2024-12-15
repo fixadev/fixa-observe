@@ -151,7 +151,7 @@ export default function ObserveSidebar() {
                               className="group/saved-search-item relative data-[active=true]:font-medium"
                             >
                               <Link href={`/observe/saved/${search.id}`}>
-                                {search.name}
+                                <p className="truncate">{search.name}</p>
                                 <DropdownMenu>
                                   <DropdownMenuTrigger asChild>
                                     <Button
