@@ -286,7 +286,9 @@ export const findRelevantEvalSets = async ({
           ([key, value]) =>
             callMetadata?.[key] === value ||
             (callMetadata?.[key] && value.includes(callMetadata?.[key])),
-        ) && savedSearch.agentId.includes(agentId)
+        ) &&
+        (savedSearch.agentId.includes(agentId) ||
+          savedSearch.agentId.length === 0)
       );
     });
 
