@@ -18,8 +18,7 @@ import {
 } from "~/components/ui/select";
 import { useEffect, useState, useMemo } from "react";
 import { lookbackPeriods } from "~/components/hooks/useObserveState";
-import { InstallSlackAppButton } from "~/app/observe/slack-app/page";
-import { Switch } from "~/components/ui/switch";
+import { InstallSlackAppButton } from "~/app/observe/slack-app/SlackButton";
 
 export function AlertCard({
   alert,
