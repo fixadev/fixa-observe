@@ -200,9 +200,9 @@ export default function Filters({
             </PopoverTrigger>
             <PopoverContent className="p-1" align="start">
               <Command>
-                <CommandInput placeholder="Search agents..." />
+                <CommandInput placeholder="search..." />
                 <CommandList>
-                  <CommandEmpty>No agent found.</CommandEmpty>
+                  <CommandEmpty>no agents found.</CommandEmpty>
                   <CommandGroup>
                     {(agents ?? []).map((agent) => (
                       <CommandItem
@@ -280,10 +280,10 @@ export default function Filters({
             </PopoverTrigger>
             <PopoverContent className="p-0" side="bottom" align="start">
               <Command>
-                <CommandInput placeholder="Search metadata fields..." />
+                <CommandInput placeholder="search..." />
                 <CommandList>
-                  <CommandEmpty>No metadata fields found.</CommandEmpty>
-                  <CommandGroup heading="Metadata Fields">
+                  <CommandEmpty>no metadata fields found.</CommandEmpty>
+                  <CommandGroup heading="metadata fields">
                     {Object.keys(metadataAttributes).map((key) => (
                       <CommandItem
                         key={key}
