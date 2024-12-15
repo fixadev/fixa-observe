@@ -43,15 +43,22 @@ export function EvalSetsAndAlertsCard({ searchId }: { searchId: string }) {
         >
           evaluations
         </p>
-        <p
-          onClick={() => setMode("alerts")}
-          className={cn(
-            "cursor-pointer",
-            mode === "alerts" ? "text-primary" : "text-muted-foreground",
-          )}
-        >
-          alerts
-        </p>
+        <Tooltip>
+          <TooltipTrigger>
+            <p
+              // onClick={() => setMode("alerts")}
+              className={cn(
+                "cursor-not-allowed",
+                mode === "alerts" ? "text-primary" : "text-muted-foreground",
+              )}
+            >
+              alerts
+            </p>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>coming soon!</p>
+          </TooltipContent>
+        </Tooltip>
       </div>
       <CardContent className="flex-1 overflow-y-auto">
         {mode === "evaluations" ? (
