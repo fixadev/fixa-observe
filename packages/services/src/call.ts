@@ -71,12 +71,25 @@ export class CallService {
 
       if (filter.metadata) {
         const metadataFilters = Object.entries(filter.metadata).map(
-          ([key, value]) => ({
-            metadata: {
-              path: [key],
-              string_contains: value,
-            },
-          }),
+          ([key, value]) => {
+            if (Array.isArray(value)) {
+              return {
+                OR: value.map((v) => ({
+                  metadata: {
+                    path: [key],
+                    string_contains: v,
+                  },
+                })),
+              };
+            } else {
+              return {
+                metadata: {
+                  path: [key],
+                  string_contains: value,
+                },
+              };
+            }
+          },
         );
 
         filterWhere.AND = [
