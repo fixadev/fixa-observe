@@ -68,7 +68,7 @@ export function instantiateAlert({
       threshold: 1000,
       slackNames: [""],
       cooldownPeriod: lookbackPeriods[0]!,
-      lastAlerted: new Date().toISOString(),
+      lastAlerted: new Date(0).toISOString(),
     },
     enabled: true,
   };
