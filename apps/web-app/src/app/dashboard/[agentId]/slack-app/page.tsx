@@ -55,7 +55,7 @@ function InstallSlackAppButton({ agentId }: { agentId: string }) {
   );
 
   const state = useMemo(() => {
-    return JSON.stringify({ agentId });
+    return JSON.stringify({ agentId, origin: "dashboard" });
   }, [agentId]);
 
   const href = useMemo(() => {
