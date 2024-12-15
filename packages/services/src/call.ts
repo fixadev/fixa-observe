@@ -63,8 +63,10 @@ export class CallService {
           gte: new Date(Date.now() - filter.lookbackPeriod.value).toISOString(),
         };
       }
-      if (filter.agentId) {
-        filterWhere.agentId = filter.agentId;
+      if (filter.agentId && filter.agentId.length > 0) {
+        filterWhere.agentId = {
+          in: filter.agentId,
+        };
       }
 
       if (filter.metadata) {
