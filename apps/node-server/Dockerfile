@@ -10,18 +10,16 @@ COPY . .
 RUN npm install -g pnpm
 RUN pnpm install --frozen-lockfile
 
-ARG DATABASE_URL=""
-ARG DIRECT_URL=""
-ARG TEST_SECRET=""
-
-ENV DATABASE_URL=${DATABASE_URL}
-ENV DIRECT_URL=${DIRECT_URL}
-ENV TEST_SECRET=${TEST_SECRET}
-
-RUN echo "DATABASE_URL: ${DATABASE_URL}"
-RUN echo "DIRECT_URL: ${DIRECT_URL}"
-RUN echo "TEST_SECRET: ${TEST_SECRET}"
-
+# RUN --mount=type=secret,id=DATABASE_URL \
+#   --mount=type=secret,id=DIRECT_URL \
+#   --mount=type=secret,id=TEST_SECRET \
+#   DATABASE_URL="$(cat /run/secrets/DATABASE_URL)" \
+#   DIRECT_URL="$(cat /run/secrets/DIRECT_URL)" \
+#   TEST_SECRET="$(cat /run/secrets/TEST_SECRET)" \
+#   && echo "DATABASE_URL: ${DATABASE_URL}" \
+#   && echo "DIRECT_URL: ${DIRECT_URL}" \
+#   && echo "TEST_SECRET: ${TEST_SECRET}" \
+#   && pnpm --filter @repo/db db:generate
 
 RUN pnpm --filter @repo/db db:generate
 
@@ -30,10 +28,6 @@ RUN cp node_modules/.pnpm/@prisma+client@5.21.1_prisma@5.21.1/node_modules/.pris
   /usr/node_modules/.pnpm/@prisma+client@5.21.1_prisma@5.21.1/node_modules/.prisma/client/
 
 RUN pnpm run build --filter node-server 
-
-# RUN pnpm deploy --filter=node-server --prod /prod/node-server
-# WORKDIR /prod/node-server
-# RUN pnpm dlx prisma generate
 
 EXPOSE 3003
 

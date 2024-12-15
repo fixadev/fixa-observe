@@ -3,7 +3,7 @@
   "version": "0.0.0", 
   "type": "module",
   "scripts": {
-    "db:generate": "echo \"DATABASE_URL: $DATABASE_URL\nDIRECT_URL: $DIRECT_URL\" && prisma generate --schema ./src/schema.prisma",
+    "db:generate": "prisma generate --schema ./src/schema.prisma",
     "db:deploy": "prisma migrate deploy --schema ./src/schema.prisma",
     "db:push": "prisma db push",
     "db:migrate": "prisma migrate dev --schema ./src/schema.prisma"

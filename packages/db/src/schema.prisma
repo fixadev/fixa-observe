@@ -28,6 +28,12 @@ datasource db {
 //   directUrl = "postgresql://postgres.eswbggamquxvdsuuktpf:t24fwMp67!dNnsn@aws-0-us-west-1.pooler.supabase.com:5432/postgres"
 // }
 
+// datasource db {
+//   provider  = "postgresql"
+//   url       = env("DATABASE_URL")
+//   directUrl = env("DIRECT_URL")
+// }
+
 // model User {
 //   id        String   @id // Should be the clerkId
 //   createdAt DateTime @default(now())
