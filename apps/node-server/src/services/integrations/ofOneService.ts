@@ -34,13 +34,12 @@ export async function scheduleOfOneCalls(
       }
     });
 
-    // Try to start calls or queue them
-    for (const callDetails of callsToStart) {
+    const callPromises = callsToStart.map(async (callDetails) => {
       const availableDevice = deviceIds.find((id) => !isDeviceInUse(id));
 
       if (availableDevice) {
         // Start the call immediately if a device is available
-        await startCall(
+        return startCall(
           {
             callId: callDetails.callId,
             ownerId: callDetails.ownerId,
@@ -64,7 +63,10 @@ export async function scheduleOfOneCalls(
           baseUrl: callDetails.baseUrl,
         });
       }
-    }
+    });
+
+    await Promise.allSettled(callPromises);
+
     return callsToStart.map((call) => ({
       id: call.callId,
     }));
