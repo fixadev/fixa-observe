@@ -151,10 +151,10 @@ function AlertCard({
   setAlertsModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }) {
   const { mutate: updateAlert } = api.search.updateAlert.useMutation({
-    onSuccess: () => {
+    onSuccess: (data) => {
       setFilter({
         ...filter,
-        alerts: filter.alerts?.map((a) => (a.id === alert.id ? alert : a)),
+        alerts: filter.alerts?.map((a) => (a.id === alert.id ? data : a)),
       });
     },
   });
@@ -171,32 +171,33 @@ function AlertCard({
       className="flex flex-col gap-4 p-4 hover:cursor-pointer hover:bg-muted/40"
     >
       <CardHeader className="flex flex-row items-center justify-between p-0">
-        <CardTitle className="p-0 text-sm font-medium">
-          {alert.type === "latency"
-            ? `latency ${alert.details.percentile} >= ${alert.details.threshold}ms over past ${alert.details.lookbackPeriod.label}`
-            : `${getEvaluationSetName(alert)} ${
-                alert.details.trigger === null
-                  ? "is triggered"
-                  : alert.details.trigger
-                    ? "succeeds"
-                    : "fails"
-              }`}
-        </CardTitle>
-        <div className="flex flex-row items-center gap-2">
+        <div className="flex flex-row items-center gap-4">
           <Switch
             checked={alert.enabled}
             onCheckedChange={toggleAlertEnabled}
-          />
-          <Button
-            onClick={() => {
-              setSelectedAlert(alert);
-              setAlertsModalOpen(true);
-            }}
-            variant="outline"
-          >
-            edit
-          </Button>
+          />{" "}
+          <CardTitle className="p-0 text-sm font-medium">
+            {alert.type === "latency"
+              ? `latency ${alert.details.percentile} >= ${alert.details.threshold}ms over past ${alert.details.lookbackPeriod.label}`
+              : `${getEvaluationSetName(alert)} ${
+                  alert.details.trigger === null
+                    ? "is triggered"
+                    : alert.details.trigger
+                      ? "succeeds"
+                      : "fails"
+                }`}
+          </CardTitle>
         </div>
+
+        <Button
+          onClick={() => {
+            setSelectedAlert(alert);
+            setAlertsModalOpen(true);
+          }}
+          variant="outline"
+        >
+          edit
+        </Button>
       </CardHeader>
     </Card>
   );

@@ -7,11 +7,13 @@ import {
   LatencyAlertSchema,
   EvalSetAlertSchema,
   Call,
+  AlertWithDetailsSchema,
 } from "@repo/types/src/index";
 import { sendAlertSlackMessage } from "./slack";
 
 const callService = new CallService(db);
 
+// todo: refactor this
 export async function sendAlerts({
   userId,
   call,
@@ -28,21 +30,31 @@ export async function sendAlerts({
   try {
     for (const savedSearch of savedSearches) {
       const filter = FilterSchema.safeParse(savedSearch);
+
       if (!filter.success) {
         console.log("failed to parse filter", filter);
         continue;
       }
 
-      for (const alert of savedSearch.alerts) {
-        console.log("iterating alert", alert);
+      for (const alert of filter.data.alerts ?? []) {
+        if (!alert.enabled) {
+          continue;
+        }
         if (alert.type === "latency") {
-          const latencyAlert = LatencyAlertSchema.safeParse(alert.details);
-          if (!latencyAlert.success) {
-            console.log("failed to parse latencyAlert", latencyAlert);
+          // check cooldown period
+          if (
+            new Date(
+              new Date(alert.details.lastAlerted).getTime() +
+                alert.details.cooldownPeriod.value,
+            ) > new Date()
+          ) {
+            console.log(
+              `cooldown period not met for latency alert ${alert.id}. last alerted at ${alert.details.lastAlerted} and cooldown period is ${alert.details.cooldownPeriod.value}`,
+            );
             continue;
           }
 
-          const { lookbackPeriod, percentile, threshold } = latencyAlert.data;
+          const { lookbackPeriod, percentile, threshold } = alert.details;
           const latencyPercentiles =
             await callService.getLatencyPercentilesForLookbackPeriod({
               userId,
@@ -60,8 +72,16 @@ export async function sendAlerts({
               success: false,
               alert: {
                 ...alert,
-                type: "latency",
-                details: latencyAlert.data,
+                details: alert.details,
+              },
+            });
+            await db.alert.update({
+              where: { id: alert.id },
+              data: {
+                details: {
+                  ...alert.details,
+                  lastAlerted: new Date().toISOString(),
+                },
               },
             });
           } else {
@@ -70,11 +90,7 @@ export async function sendAlerts({
             );
           }
         } else if (alert.type === "evalSet") {
-          const evalSetAlert = EvalSetAlertSchema.safeParse(alert.details);
-          if (!evalSetAlert.success) {
-            continue;
-          }
-          const { evalSetId, trigger } = evalSetAlert.data;
+          const { evalSetId, trigger } = alert.details;
           const evalSetResult = evalSetResults.find(
             (result) => result.evalSetId === evalSetId,
           );
@@ -86,7 +102,7 @@ export async function sendAlerts({
               alert: {
                 ...alert,
                 type: "evalSet",
-                details: evalSetAlert.data,
+                details: alert.details,
               },
             });
           }
