@@ -2,6 +2,7 @@ import { Call, CallResult, Test } from "@prisma/client";
 import { env } from "../env";
 import axios from "axios";
 import { Alert, EvalSetAlert, LatencyAlert } from "@repo/types/src/index";
+import { db } from "../db";
 
 export const sendTestCompletedSlackMessage = async ({
   userId,
@@ -95,6 +96,15 @@ export const sendAlertSlackMessage = async ({
     return;
   }
 
+  async function getEvaluationSetName(alert: Alert) {
+    const evaluationSet = await db.evalSet.findUnique({
+      where: {
+        id: (alert.details as EvalSetAlert).evalSetId,
+      },
+    });
+    return evaluationSet?.name;
+  }
+
   const emoji =
     alert.type === "latency"
       ? ":stopwatch:"
@@ -110,16 +120,22 @@ export const sendAlertSlackMessage = async ({
               type: "section",
               text: {
                 type: "mrkdwn",
-                text: `*alert triggered!*\n\n${emoji} ${(alert.details as LatencyAlert).threshold}ms ${(alert.details as LatencyAlert).percentile} ${(alert.details as LatencyAlert).lookbackPeriod.label} exceeded`,
+                text: `${emoji} latency ${
+                  (alert.details as LatencyAlert).percentile
+                } exceeded ${
+                  (alert.details as LatencyAlert).threshold
+                }ms over the last ${
+                  (alert.details as LatencyAlert).lookbackPeriod.label
+                }`,
               },
               accessory: {
                 type: "button",
                 text: {
                   type: "plain_text",
-                  text: "view call",
+                  text: "view saved search",
                   emoji: true,
                 },
-                url: `${process.env.NEXT_BASE_URL}/observe/saved/${alert.savedSearchId}/${call.id}`,
+                url: `${process.env.NEXT_BASE_URL}/observe/saved/${alert.savedSearchId}`,
               },
             },
           ],
@@ -130,7 +146,9 @@ export const sendAlertSlackMessage = async ({
               type: "section",
               text: {
                 type: "mrkdwn",
-                text: `*alert triggered!*\n\n${emoji} Eval Set Alert`,
+                text: `${emoji} evaluation *${await getEvaluationSetName(
+                  alert,
+                )}* ${success ? "succeeded" : "failed"}`,
               },
               accessory: {
                 type: "button",
@@ -139,7 +157,7 @@ export const sendAlertSlackMessage = async ({
                   text: "view call",
                   emoji: true,
                 },
-                url: `${process.env.NEXT_BASE_URL}/observe/saved/${alert.savedSearchId}/${call.id}`,
+                url: `${process.env.NEXT_BASE_URL}/observe/calls/${call.id}`,
               },
             },
           ],
