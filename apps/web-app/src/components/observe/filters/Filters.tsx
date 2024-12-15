@@ -97,6 +97,7 @@ export default function Filters({
     [setFilter],
   );
   const selectedAgentsText = useMemo(() => {
+    console.log("filter.agentId", filter.agentId);
     if (!filter.agentId || filter.agentId.length === 0) {
       return "all agents";
     }
@@ -266,7 +267,7 @@ export default function Filters({
                         onSelect={() => {
                           setFilter({
                             ...filter,
-                            agentId: undefined,
+                            agentId: [],
                           });
                           setOpen(false);
                         }}

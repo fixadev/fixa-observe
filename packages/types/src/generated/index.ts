@@ -416,7 +416,7 @@ export const SavedSearchSchema = z.object({
   createdAt: z.coerce.date(),
   name: z.string(),
   ownerId: z.string(),
-  agentId: z.string(),
+  agentId: z.string().array(),
   lookbackPeriod: JsonValueSchema,
   timeRange: JsonValueSchema.nullable(),
   chartPeriod: z.number().int(),
@@ -2267,7 +2267,7 @@ export const SavedSearchWhereInputSchema: z.ZodType<Prisma.SavedSearchWhereInput
   createdAt: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
   name: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   ownerId: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
-  agentId: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
+  agentId: z.lazy(() => StringNullableListFilterSchema).optional(),
   lookbackPeriod: z.lazy(() => JsonFilterSchema).optional(),
   timeRange: z.lazy(() => JsonNullableFilterSchema).optional(),
   chartPeriod: z.union([ z.lazy(() => IntFilterSchema),z.number() ]).optional(),
@@ -2303,7 +2303,7 @@ export const SavedSearchWhereUniqueInputSchema: z.ZodType<Prisma.SavedSearchWher
   createdAt: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
   name: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   ownerId: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
-  agentId: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
+  agentId: z.lazy(() => StringNullableListFilterSchema).optional(),
   lookbackPeriod: z.lazy(() => JsonFilterSchema).optional(),
   timeRange: z.lazy(() => JsonNullableFilterSchema).optional(),
   chartPeriod: z.union([ z.lazy(() => IntFilterSchema),z.number().int() ]).optional(),
@@ -2339,7 +2339,7 @@ export const SavedSearchScalarWhereWithAggregatesInputSchema: z.ZodType<Prisma.S
   createdAt: z.union([ z.lazy(() => DateTimeWithAggregatesFilterSchema),z.coerce.date() ]).optional(),
   name: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
   ownerId: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
-  agentId: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
+  agentId: z.lazy(() => StringNullableListFilterSchema).optional(),
   lookbackPeriod: z.lazy(() => JsonWithAggregatesFilterSchema).optional(),
   timeRange: z.lazy(() => JsonNullableWithAggregatesFilterSchema).optional(),
   chartPeriod: z.union([ z.lazy(() => IntWithAggregatesFilterSchema),z.number() ]).optional(),
@@ -3761,7 +3761,7 @@ export const SavedSearchCreateInputSchema: z.ZodType<Prisma.SavedSearchCreateInp
   createdAt: z.coerce.date().optional(),
   name: z.string(),
   ownerId: z.string(),
-  agentId: z.string(),
+  agentId: z.union([ z.lazy(() => SavedSearchCreateagentIdInputSchema),z.string().array() ]).optional(),
   lookbackPeriod: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]),
   timeRange: z.union([ z.lazy(() => NullableJsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
   chartPeriod: z.number().int(),
@@ -3776,7 +3776,7 @@ export const SavedSearchUncheckedCreateInputSchema: z.ZodType<Prisma.SavedSearch
   createdAt: z.coerce.date().optional(),
   name: z.string(),
   ownerId: z.string(),
-  agentId: z.string(),
+  agentId: z.union([ z.lazy(() => SavedSearchCreateagentIdInputSchema),z.string().array() ]).optional(),
   lookbackPeriod: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]),
   timeRange: z.union([ z.lazy(() => NullableJsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
   chartPeriod: z.number().int(),
@@ -3791,7 +3791,7 @@ export const SavedSearchUpdateInputSchema: z.ZodType<Prisma.SavedSearchUpdateInp
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   ownerId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  agentId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  agentId: z.union([ z.lazy(() => SavedSearchUpdateagentIdInputSchema),z.string().array() ]).optional(),
   lookbackPeriod: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
   timeRange: z.union([ z.lazy(() => NullableJsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
   chartPeriod: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
@@ -3806,7 +3806,7 @@ export const SavedSearchUncheckedUpdateInputSchema: z.ZodType<Prisma.SavedSearch
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   ownerId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  agentId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  agentId: z.union([ z.lazy(() => SavedSearchUpdateagentIdInputSchema),z.string().array() ]).optional(),
   lookbackPeriod: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
   timeRange: z.union([ z.lazy(() => NullableJsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
   chartPeriod: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
@@ -3821,7 +3821,7 @@ export const SavedSearchCreateManyInputSchema: z.ZodType<Prisma.SavedSearchCreat
   createdAt: z.coerce.date().optional(),
   name: z.string(),
   ownerId: z.string(),
-  agentId: z.string(),
+  agentId: z.union([ z.lazy(() => SavedSearchCreateagentIdInputSchema),z.string().array() ]).optional(),
   lookbackPeriod: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]),
   timeRange: z.union([ z.lazy(() => NullableJsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
   chartPeriod: z.number().int(),
@@ -3834,7 +3834,7 @@ export const SavedSearchUpdateManyMutationInputSchema: z.ZodType<Prisma.SavedSea
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   ownerId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  agentId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  agentId: z.union([ z.lazy(() => SavedSearchUpdateagentIdInputSchema),z.string().array() ]).optional(),
   lookbackPeriod: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
   timeRange: z.union([ z.lazy(() => NullableJsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
   chartPeriod: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
@@ -3847,7 +3847,7 @@ export const SavedSearchUncheckedUpdateManyInputSchema: z.ZodType<Prisma.SavedSe
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   ownerId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  agentId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  agentId: z.union([ z.lazy(() => SavedSearchUpdateagentIdInputSchema),z.string().array() ]).optional(),
   lookbackPeriod: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
   timeRange: z.union([ z.lazy(() => NullableJsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
   chartPeriod: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
@@ -5128,6 +5128,14 @@ export const EvalSetMinOrderByAggregateInputSchema: z.ZodType<Prisma.EvalSetMinO
   savedSearchId: z.lazy(() => SortOrderSchema).optional()
 }).strict();
 
+export const StringNullableListFilterSchema: z.ZodType<Prisma.StringNullableListFilter> = z.object({
+  equals: z.string().array().optional().nullable(),
+  has: z.string().optional().nullable(),
+  hasEvery: z.string().array().optional(),
+  hasSome: z.string().array().optional(),
+  isEmpty: z.boolean().optional()
+}).strict();
+
 export const EvalSetListRelationFilterSchema: z.ZodType<Prisma.EvalSetListRelationFilter> = z.object({
   every: z.lazy(() => EvalSetWhereInputSchema).optional(),
   some: z.lazy(() => EvalSetWhereInputSchema).optional(),
@@ -5170,7 +5178,6 @@ export const SavedSearchMaxOrderByAggregateInputSchema: z.ZodType<Prisma.SavedSe
   createdAt: z.lazy(() => SortOrderSchema).optional(),
   name: z.lazy(() => SortOrderSchema).optional(),
   ownerId: z.lazy(() => SortOrderSchema).optional(),
-  agentId: z.lazy(() => SortOrderSchema).optional(),
   chartPeriod: z.lazy(() => SortOrderSchema).optional(),
   customerCallId: z.lazy(() => SortOrderSchema).optional()
 }).strict();
@@ -5180,7 +5187,6 @@ export const SavedSearchMinOrderByAggregateInputSchema: z.ZodType<Prisma.SavedSe
   createdAt: z.lazy(() => SortOrderSchema).optional(),
   name: z.lazy(() => SortOrderSchema).optional(),
   ownerId: z.lazy(() => SortOrderSchema).optional(),
-  agentId: z.lazy(() => SortOrderSchema).optional(),
   chartPeriod: z.lazy(() => SortOrderSchema).optional(),
   customerCallId: z.lazy(() => SortOrderSchema).optional()
 }).strict();
@@ -6316,6 +6322,10 @@ export const EvalUncheckedUpdateManyWithoutEvalSetNestedInputSchema: z.ZodType<P
   deleteMany: z.union([ z.lazy(() => EvalScalarWhereInputSchema),z.lazy(() => EvalScalarWhereInputSchema).array() ]).optional(),
 }).strict();
 
+export const SavedSearchCreateagentIdInputSchema: z.ZodType<Prisma.SavedSearchCreateagentIdInput> = z.object({
+  set: z.string().array()
+}).strict();
+
 export const EvalSetCreateNestedManyWithoutSavedSearchInputSchema: z.ZodType<Prisma.EvalSetCreateNestedManyWithoutSavedSearchInput> = z.object({
   create: z.union([ z.lazy(() => EvalSetCreateWithoutSavedSearchInputSchema),z.lazy(() => EvalSetCreateWithoutSavedSearchInputSchema).array(),z.lazy(() => EvalSetUncheckedCreateWithoutSavedSearchInputSchema),z.lazy(() => EvalSetUncheckedCreateWithoutSavedSearchInputSchema).array() ]).optional(),
   connectOrCreate: z.union([ z.lazy(() => EvalSetCreateOrConnectWithoutSavedSearchInputSchema),z.lazy(() => EvalSetCreateOrConnectWithoutSavedSearchInputSchema).array() ]).optional(),
@@ -6342,6 +6352,11 @@ export const AlertUncheckedCreateNestedManyWithoutSavedSearchInputSchema: z.ZodT
   connectOrCreate: z.union([ z.lazy(() => AlertCreateOrConnectWithoutSavedSearchInputSchema),z.lazy(() => AlertCreateOrConnectWithoutSavedSearchInputSchema).array() ]).optional(),
   createMany: z.lazy(() => AlertCreateManySavedSearchInputEnvelopeSchema).optional(),
   connect: z.union([ z.lazy(() => AlertWhereUniqueInputSchema),z.lazy(() => AlertWhereUniqueInputSchema).array() ]).optional(),
+}).strict();
+
+export const SavedSearchUpdateagentIdInputSchema: z.ZodType<Prisma.SavedSearchUpdateagentIdInput> = z.object({
+  set: z.string().array().optional(),
+  push: z.union([ z.string(),z.string().array() ]).optional(),
 }).strict();
 
 export const EvalSetUpdateManyWithoutSavedSearchNestedInputSchema: z.ZodType<Prisma.EvalSetUpdateManyWithoutSavedSearchNestedInput> = z.object({
@@ -9646,7 +9661,7 @@ export const SavedSearchCreateWithoutEvalSetsInputSchema: z.ZodType<Prisma.Saved
   createdAt: z.coerce.date().optional(),
   name: z.string(),
   ownerId: z.string(),
-  agentId: z.string(),
+  agentId: z.union([ z.lazy(() => SavedSearchCreateagentIdInputSchema),z.string().array() ]).optional(),
   lookbackPeriod: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]),
   timeRange: z.union([ z.lazy(() => NullableJsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
   chartPeriod: z.number().int(),
@@ -9660,7 +9675,7 @@ export const SavedSearchUncheckedCreateWithoutEvalSetsInputSchema: z.ZodType<Pri
   createdAt: z.coerce.date().optional(),
   name: z.string(),
   ownerId: z.string(),
-  agentId: z.string(),
+  agentId: z.union([ z.lazy(() => SavedSearchCreateagentIdInputSchema),z.string().array() ]).optional(),
   lookbackPeriod: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]),
   timeRange: z.union([ z.lazy(() => NullableJsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
   chartPeriod: z.number().int(),
@@ -9706,7 +9721,7 @@ export const SavedSearchUpdateWithoutEvalSetsInputSchema: z.ZodType<Prisma.Saved
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   ownerId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  agentId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  agentId: z.union([ z.lazy(() => SavedSearchUpdateagentIdInputSchema),z.string().array() ]).optional(),
   lookbackPeriod: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
   timeRange: z.union([ z.lazy(() => NullableJsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
   chartPeriod: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
@@ -9720,7 +9735,7 @@ export const SavedSearchUncheckedUpdateWithoutEvalSetsInputSchema: z.ZodType<Pri
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   ownerId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  agentId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  agentId: z.union([ z.lazy(() => SavedSearchUpdateagentIdInputSchema),z.string().array() ]).optional(),
   lookbackPeriod: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
   timeRange: z.union([ z.lazy(() => NullableJsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
   chartPeriod: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
@@ -9853,7 +9868,7 @@ export const SavedSearchCreateWithoutAlertsInputSchema: z.ZodType<Prisma.SavedSe
   createdAt: z.coerce.date().optional(),
   name: z.string(),
   ownerId: z.string(),
-  agentId: z.string(),
+  agentId: z.union([ z.lazy(() => SavedSearchCreateagentIdInputSchema),z.string().array() ]).optional(),
   lookbackPeriod: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]),
   timeRange: z.union([ z.lazy(() => NullableJsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
   chartPeriod: z.number().int(),
@@ -9867,7 +9882,7 @@ export const SavedSearchUncheckedCreateWithoutAlertsInputSchema: z.ZodType<Prism
   createdAt: z.coerce.date().optional(),
   name: z.string(),
   ownerId: z.string(),
-  agentId: z.string(),
+  agentId: z.union([ z.lazy(() => SavedSearchCreateagentIdInputSchema),z.string().array() ]).optional(),
   lookbackPeriod: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]),
   timeRange: z.union([ z.lazy(() => NullableJsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
   chartPeriod: z.number().int(),
@@ -9897,7 +9912,7 @@ export const SavedSearchUpdateWithoutAlertsInputSchema: z.ZodType<Prisma.SavedSe
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   ownerId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  agentId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  agentId: z.union([ z.lazy(() => SavedSearchUpdateagentIdInputSchema),z.string().array() ]).optional(),
   lookbackPeriod: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
   timeRange: z.union([ z.lazy(() => NullableJsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
   chartPeriod: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
@@ -9911,7 +9926,7 @@ export const SavedSearchUncheckedUpdateWithoutAlertsInputSchema: z.ZodType<Prism
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   ownerId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  agentId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  agentId: z.union([ z.lazy(() => SavedSearchUpdateagentIdInputSchema),z.string().array() ]).optional(),
   lookbackPeriod: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
   timeRange: z.union([ z.lazy(() => NullableJsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
   chartPeriod: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),

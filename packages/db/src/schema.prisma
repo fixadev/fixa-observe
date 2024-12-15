@@ -322,7 +322,7 @@ model SavedSearch {
   createdAt      DateTime @default(now())
   name           String
   ownerId        String
-  agentId        String
+  agentId        String[]
   lookbackPeriod Json
   timeRange      Json?
   chartPeriod    Int
