@@ -66,7 +66,7 @@ export class SearchService {
         metadata: searchData.metadata ?? {},
       },
       include: {
-        evalSets: true,
+        evalSets: { include: { evals: true } },
         alerts: true,
       },
     });
