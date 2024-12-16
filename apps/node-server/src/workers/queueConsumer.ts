@@ -3,6 +3,8 @@ import { transcribeAndSaveCall } from "../services/observability";
 import { upsertAgent } from "../services/agent";
 import { sqs } from "../clients/s3Client";
 
+// redeploy
+
 export async function startQueueConsumer() {
   while (true) {
     const queueUrl = env.SQS_QUEUE_URL;
