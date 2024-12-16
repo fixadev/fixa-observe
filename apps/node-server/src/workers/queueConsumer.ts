@@ -1,7 +1,10 @@
 import { env } from "../env";
 import { transcribeAndSaveCall } from "../services/observability";
-import { upsertAgent } from "../services/agent";
+import { AgentService } from "@repo/services/src/agent";
 import { sqs } from "../clients/s3Client";
+import { db } from "../db";
+
+const agentService = new AgentService(db);
 
 // redeploy
 
@@ -29,7 +32,7 @@ export async function startQueueConsumer() {
           console.log("PROCESSING CALL", callId);
 
           // Upsert agent if it doesn't exist
-          const agent = await upsertAgent(agentId, userId);
+          const agent = await agentService.upsertAgent({ agentId, userId });
 
           const newCall = await transcribeAndSaveCall({
             callId,

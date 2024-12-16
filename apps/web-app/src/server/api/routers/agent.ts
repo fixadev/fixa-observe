@@ -18,12 +18,6 @@ export const agentRouter = createTRPCRouter({
       );
     }),
 
-  upsert: protectedProcedure
-    .input(AgentSchema.partial())
-    .mutation(async ({ input, ctx }) => {
-      return await agentServiceInstance.upsertAgent(input, ctx.user.id);
-    }),
-
   updateName: protectedProcedure
     .input(z.object({ id: z.string(), name: z.string() }))
     .mutation(async ({ input, ctx }) => {

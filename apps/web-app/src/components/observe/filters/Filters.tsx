@@ -52,7 +52,7 @@ export default function Filters({
   originalFilter?: Filter;
   savedSearch?: SavedSearchWithIncludes;
 }) {
-  const { data: agentIds } = api._call.getAgentIds.useQuery();
+  // const { data: agentIds } = api._call.getAgentIds.useQuery();
   const { data: _agents, refetch: refetchAgents } = api.agent.getAll.useQuery();
   const { data: metadata } = api._call.getMetadata.useQuery();
 
@@ -60,19 +60,14 @@ export default function Filters({
 
   const agents = useMemo(() => {
     return [
-      // {
-      //   id: "all",
-      //   name: "all agents",
-      // },
-      // ...(_agents ?? []),
-      ...(agentIds ?? []).map((id) => {
+      ...(_agents ?? []).map((agent) => {
         return {
-          id,
-          name: _agents?.find((a) => a.id === id)?.name ?? id,
+          id: agent.id,
+          name: agent.name.length === 0 ? agent.id : agent.name,
         };
       }),
     ];
-  }, [_agents, agentIds]);
+  }, [_agents]);
   const toggleAgentId = useCallback(
     (agentId: string) => {
       setFilter((prev) => {
