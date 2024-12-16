@@ -39,7 +39,6 @@ export async function startQueueConsumer() {
             metadata,
             userId,
           });
-          console.log("Transcription completed:", newCall);
 
           await sqs.deleteMessage({
             QueueUrl: queueUrl,

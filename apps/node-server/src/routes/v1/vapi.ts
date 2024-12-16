@@ -11,7 +11,6 @@ const vapiRouter = Router();
 vapiRouter.post("/", getContext, async (req: Request, res: Response) => {
   try {
     const { message } = req.body;
-    console.log("got vapi message", message);
     const { userSocket, agent, scenario, test, call } = res.locals.context;
     if (message.type === "end-of-call-report") {
       await handleAnalysisStarted(message, userSocket);
