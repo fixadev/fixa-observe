@@ -11,6 +11,9 @@ import { api } from "~/trpc/react";
 import ChartCard from "~/components/observe/ChartCard";
 import { CopyText } from "~/components/CopyText";
 import FreeCallsLeft from "~/components/observe/FreeCallsLeft";
+import { Button } from "~/components/ui/button";
+import { ArrowTopRightOnSquareIcon } from "@heroicons/react/24/solid";
+import Link from "next/link";
 
 export default function _ObservePage() {
   const { selectedCallId, setSelectedCallId, filter, orderBy, resetFilter } =
@@ -97,9 +100,9 @@ export default function _ObservePage() {
     return (
       <div className="flex h-full w-full flex-col items-center justify-center p-8">
         <div className="max-w-2xl rounded-lg border border-border bg-card p-6 text-card-foreground shadow-sm">
-          <h3 className="mb-4 text-lg font-semibold">No calls found</h3>
+          <h3 className="mb-4 text-lg font-semibold">no calls found</h3>
           <p className="mb-2 text-muted-foreground">
-            To start seeing calls, make a POST request to{" "}
+            to start seeing calls, make a POST request to{" "}
           </p>
           <p className="mb-4 flex flex-row items-center gap-2 text-muted-foreground">
             <CopyText
@@ -111,7 +114,7 @@ export default function _ObservePage() {
           <pre className="mb-4 rounded-md bg-muted p-4 font-mono text-sm">
             {`{
   "callId": "unique-call-identifier",
-  "location": "https://url-of-call-recording",
+  "stereoRecordingUrl": "https://url-of-call-recording",
   "agentId": "your-agent-id",
   "metadata": {
     "custom_field": "custom value",
@@ -123,6 +126,18 @@ export default function _ObservePage() {
             Once you start sending calls, they will appear in this dashboard
             automatically.
           </p>
+          <Button
+            variant="link"
+            className="mt-4 flex w-fit gap-2 px-0 text-sm"
+            asChild
+          >
+            <Link
+              href="https://docs.fixa.dev/api-reference/endpoint/upload-call"
+              target="_blank"
+            >
+              view docs <ArrowTopRightOnSquareIcon className="size-4" />
+            </Link>
+          </Button>
         </div>
       </div>
     );
@@ -149,7 +164,6 @@ export default function _ObservePage() {
           />
         </div>
         <CallTable isLoading={isLoading || isRefetching} calls={calls} />
-        <FreeCallsLeft />
         {/* Invisible marker for infinite scroll */}
         <div ref={loadMoreRef} className="h-1" />
         {(isFetchingNextPage || isLoading) && (
@@ -157,6 +171,7 @@ export default function _ObservePage() {
             <Spinner />
           </div>
         )}
+        <FreeCallsLeft />
         {selectedCall && (
           <Dialog
             open={!!selectedCallId}
