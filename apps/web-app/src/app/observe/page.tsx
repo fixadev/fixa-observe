@@ -10,55 +10,9 @@ import { Dialog, DialogContent } from "~/components/ui/dialog";
 import { api } from "~/trpc/react";
 import ChartCard from "~/components/observe/ChartCard";
 import { CopyText } from "~/components/CopyText";
-import { useUser } from "@clerk/nextjs";
-import { type PublicMetadata } from "@repo/types/src";
-import { Button } from "~/components/ui/button";
-import { env } from "~/env";
+import FreeCallsLeft from "~/components/observe/FreeCallsLeft";
 
-export default function ObservePage() {
-  const { user } = useUser();
-
-  const hasPaymentMethod = useMemo(() => {
-    const metadata = user?.publicMetadata as PublicMetadata | undefined;
-    return (
-      metadata?.stripeCustomerId !== undefined ||
-      user?.id === env.NEXT_PUBLIC_11X_USER_ID
-    );
-  }, [user]);
-
-  const { mutate: getCheckoutUrl, isPending: isGeneratingStripeUrl } =
-    api.stripe.createCheckoutUrl.useMutation({
-      onSuccess: (data) => {
-        window.location.href = data.checkoutUrl;
-      },
-    });
-  const upgradePlan = useCallback(async () => {
-    const redirectUrl = window.location.href;
-    getCheckoutUrl({ redirectUrl });
-  }, [getCheckoutUrl]);
-
-  if (!hasPaymentMethod) {
-    return (
-      <div className="flex size-full items-center justify-center">
-        <div className="flex w-64 flex-col gap-2">
-          <div className="flex flex-col gap-1">
-            <div className="font-medium">add a payment method to continue</div>
-            <div className="text-sm text-muted-foreground">
-              payment method required to access the observability dashboard
-            </div>
-          </div>
-          <Button onClick={upgradePlan} disabled={isGeneratingStripeUrl}>
-            {isGeneratingStripeUrl ? <Spinner /> : "add payment method"}
-          </Button>
-        </div>
-      </div>
-    );
-  }
-
-  return <_ObservePage />;
-}
-
-function _ObservePage() {
+export default function _ObservePage() {
   const { selectedCallId, setSelectedCallId, filter, orderBy, resetFilter } =
     useObserveState();
 
@@ -195,6 +149,7 @@ function _ObservePage() {
           />
         </div>
         <CallTable isLoading={isLoading || isRefetching} calls={calls} />
+        <FreeCallsLeft />
         {/* Invisible marker for infinite scroll */}
         <div ref={loadMoreRef} className="h-1" />
         {(isFetchingNextPage || isLoading) && (
