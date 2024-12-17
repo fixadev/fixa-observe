@@ -41,7 +41,7 @@ export default function FreeCallsLeft() {
 
   return (
     <div className="my-4 flex size-full items-center justify-center">
-      <Card className="flex w-64 flex-col gap-2 p-4">
+      <Card className="flex w-64 flex-col gap-4 p-4">
         <div className="flex flex-col gap-1">
           <div className="font-medium">{freeCallsLeft} free calls left</div>
           {freeCallsLeft === 0 && (
