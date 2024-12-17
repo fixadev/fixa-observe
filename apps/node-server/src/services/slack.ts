@@ -153,7 +153,7 @@ export const sendAlertSlackMessage = async ({
                 type: "mrkdwn",
                 text: `${emoji} evaluation *${await getEvaluationSetName(
                   alert,
-                )}* ${success ? "succeeded" : "failed"} for agent ${call.agentId} ${call.agent?.name ? `(${call.agent?.name})` : ""} in call ${call.customerCallId}`,
+                )}* ${success ? "succeeded" : "failed"} \n\n agent: ${call.agentId} ${call.agent?.name ? `(${call.agent?.name})` : ""} \n\n callId: ${call.customerCallId}`,
               },
               accessory: {
                 type: "button",
