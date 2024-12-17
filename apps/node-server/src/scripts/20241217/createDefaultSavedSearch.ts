@@ -5,6 +5,10 @@ async function main() {
   const users = await userServiceClient.getUsers({ limit: 500 });
   // console.log(users);
 
+  // const savedSearches = await db.savedSearch.findMany();
+  // console.log(savedSearches.map((savedSearch) => savedSearch.name));
+  // return;
+
   await db.$transaction(async (tx) => {
     for (const user of users.data) {
       await tx.savedSearch.create({
