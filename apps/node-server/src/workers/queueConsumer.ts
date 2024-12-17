@@ -22,7 +22,7 @@ export async function startQueueConsumer() {
       if (response.Messages) {
         for (const message of response.Messages) {
           // Process message
-          const data: AddCallToQueueProps = JSON.parse(message.Body || "{}");
+          const data = JSON.parse(message.Body || "{}");
           const {
             callId,
             location,
@@ -45,7 +45,7 @@ export async function startQueueConsumer() {
           const newCall = await transcribeAndSaveCall({
             callId,
             audioUrl: location,
-            createdAt: createdAt.toISOString(),
+            createdAt: createdAt,
             agentId: agent.id,
             metadata,
             userId,
