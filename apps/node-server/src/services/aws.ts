@@ -5,14 +5,15 @@ import { PutObjectCommand } from "@aws-sdk/client-s3";
 import { getAudioDuration } from "../utils/audio";
 import { Readable } from "stream";
 
-interface AddCallToQueueProps {
+export type AddCallToQueueProps = {
   callId: string;
   location: string;
   agentId: string;
   createdAt: Date;
   userId: string;
   metadata: Record<string, string>;
-}
+  saveRecording: boolean;
+};
 
 export const addCallToQueue = async (input: AddCallToQueueProps) => {
   // Send message
@@ -72,8 +73,6 @@ export const uploadFromPresignedUrl = async (
       },
     });
 
-    const duration = await getAudioDuration(recordingUrl);
-
     // Upload to S3
     const uploadParams = {
       Bucket: env.AWS_BUCKET_NAME,
@@ -84,10 +83,7 @@ export const uploadFromPresignedUrl = async (
 
     await s3.send(new PutObjectCommand(uploadParams));
 
-    return {
-      audioUrl: `https://${env.AWS_BUCKET_NAME}.s3.amazonaws.com/${uploadParams.Key}`,
-      duration,
-    };
+    return `https://${env.AWS_BUCKET_NAME}.s3.amazonaws.com/${uploadParams.Key}`;
   } catch (error) {
     console.error(error);
     throw error;

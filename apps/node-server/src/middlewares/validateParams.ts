@@ -12,7 +12,6 @@ export const validateUploadCallParams = (
   if (!location && !stereoRecordingUrl)
     missingFields.push("stereoRecordingUrl");
   if (!agentId) missingFields.push("agentId");
-  if (!metadata) missingFields.push("metadata");
   if (missingFields.length > 0) {
     return res.status(400).json({
       success: false,

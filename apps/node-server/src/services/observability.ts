@@ -12,6 +12,7 @@ import { analyzeCallWitho1, formatOutput } from "./textAnalysis";
 import { sendAlerts } from "./alert";
 import stripeServiceClient from "../clients/stripeServiceClient";
 import { SearchService } from "@repo/services/src/search";
+import { getAudioDuration } from "../utils/audio";
 
 export const transcribeAndSaveCall = async ({
   callId,
@@ -20,13 +21,15 @@ export const transcribeAndSaveCall = async ({
   agentId,
   metadata: callMetadata,
   userId,
+  saveRecording,
 }: {
   callId: string;
   audioUrl: string;
-  createdAt: string;
+  createdAt?: string;
   agentId: string;
   metadata: Record<string, string>;
   userId: string;
+  saveRecording: boolean;
 }) => {
   try {
     interface TranscribeResponse {
@@ -47,10 +50,11 @@ export const transcribeAndSaveCall = async ({
       }> | null;
     }
 
-    const { audioUrl: url, duration } = await uploadFromPresignedUrl(
-      callId,
-      audioUrl,
-    );
+    const duration = await getAudioDuration(audioUrl);
+
+    const url = saveRecording
+      ? await uploadFromPresignedUrl(callId, audioUrl)
+      : audioUrl;
 
     // Accrue observability minutes
     try {
@@ -112,7 +116,7 @@ export const transcribeAndSaveCall = async ({
     const { evalResults, evalSetResults, savedSearches } =
       await analyzeBasedOnRules({
         messages: messages || [],
-        createdAt,
+        createdAt: createdAt || new Date().toISOString(),
         agentId,
         callMetadata,
         userId,
@@ -121,7 +125,7 @@ export const transcribeAndSaveCall = async ({
     const newCall = await db.call.create({
       data: {
         id: uuidv4(),
-        createdAt: new Date(),
+        createdAt: createdAt || new Date(),
         ownerId: userId,
         customerCallId: callId,
         startedAt: createdAt,
