@@ -50,6 +50,16 @@ export function instantiateEvalSet(
   };
 }
 
+export const alertLookbackPeriods = [
+  { label: "30 mins", value: 30 * 60 * 1000 },
+  { label: "1 hour", value: 60 * 60 * 1000 },
+  { label: "4 hours", value: 4 * 60 * 60 * 1000 },
+  { label: "6 hours", value: 6 * 60 * 60 * 1000 },
+  { label: "12 hours", value: 12 * 60 * 60 * 1000 },
+  { label: "24 hours", value: 24 * 60 * 60 * 1000 },
+  { label: "48 hours", value: 48 * 60 * 60 * 1000 },
+];
+
 export function instantiateAlert({
   savedSearchId,
 }: {
@@ -63,11 +73,11 @@ export function instantiateAlert({
     type: AlertType.latency,
     savedSearchId,
     details: {
-      lookbackPeriod: lookbackPeriods[0]!,
+      lookbackPeriod: alertLookbackPeriods[2]!,
       percentile: "p90",
       threshold: 1000,
       slackNames: [""],
-      cooldownPeriod: lookbackPeriods[0]!,
+      cooldownPeriod: alertLookbackPeriods[2]!,
       lastAlerted: new Date(0).toISOString(),
     },
     enabled: true,

@@ -1,14 +1,7 @@
 "use client";
-import { CardContent, CardHeader } from "~/components/ui/card";
-import { cn, isTempId } from "~/lib/utils";
-import { EditableText } from "~/components/EditableText";
-import { EllipsisHorizontalIcon } from "@heroicons/react/24/solid";
-import {
-  type LatencyAlert,
-  type AlertWithDetails,
-  type Filter,
-} from "@repo/types/src/index";
-import { Input } from "~/components/ui/input";
+import { CardContent } from "~/components/ui/card";
+import { cn } from "~/lib/utils";
+import { type AlertWithDetails, type Filter } from "@repo/types/src/index";
 import {
   Select,
   SelectContent,
@@ -16,9 +9,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
-import { useEffect, useState, useMemo } from "react";
-import { lookbackPeriods } from "~/components/hooks/useObserveState";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import { InstallSlackAppButton } from "~/app/observe/slack-app/SlackButton";
+import { alertLookbackPeriods } from "~/lib/instantiate";
 
 export function AlertCard({
   alert,
@@ -82,6 +75,36 @@ export function AlertCard({
     return trigger === "true";
   }
 
+  const updateAlert = useCallback(
+    (oldAlert: AlertWithDetails, selectedOption: AlertOption) => {
+      let details;
+      if (selectedOption.type === "latency") {
+        const latencyAlert = oldAlert.details;
+        details = {
+          percentile: selectedOption.value as "p50" | "p90" | "p95",
+          threshold: 1000,
+          slackNames: latencyAlert.slackNames ?? [""],
+          lookbackPeriod: alertLookbackPeriods[2]!,
+          lastAlerted: new Date(0).toISOString(),
+          cooldownPeriod: alertLookbackPeriods[2]!,
+        };
+      } else {
+        details = {
+          evalSetId: selectedOption.evalSetId,
+          trigger: null,
+          slackNames: oldAlert.details?.slackNames ?? [""],
+        };
+      }
+
+      return {
+        ...oldAlert,
+        type: selectedOption.type,
+        details,
+      } as AlertWithDetails;
+    },
+    [],
+  );
+
   return (
     <div className={cn("p-0 text-sm transition-opacity")}>
       {/* <CardHeader className="flex flex-col gap-2 px-0 py-2">
@@ -120,31 +143,11 @@ export function AlertCard({
                     );
                     if (!selectedOption) return;
 
-                    const newAlert = {
-                      ...alert,
-                      type: selectedOption.type,
-                      details:
-                        selectedOption.type === "latency"
-                          ? {
-                              percentile: selectedOption.value as
-                                | "p50"
-                                | "p90"
-                                | "p95",
-                              threshold: 1000,
-                              slackNames: alert.details?.slackNames ?? [""],
-                              lookbackPeriod: lookbackPeriods[0]!,
-                            }
-                          : {
-                              evalSetId: selectedOption.evalSetId,
-                              trigger: true,
-                              slackNames: alert.details?.slackNames ?? [""],
-                            },
-                    } as AlertWithDetails;
-
+                    const updatedAlert = updateAlert(alert, selectedOption);
                     setAlertOptionIndex(
                       alertOptions.findIndex((opt) => opt.value === value),
                     );
-                    onUpdate(newAlert);
+                    onUpdate(updatedAlert);
                   }}
                 >
                   <SelectTrigger className="w-full bg-white">
@@ -189,13 +192,15 @@ export function AlertCard({
                   </Select>
                   <div>for the last</div>
                   <Select
-                    value={alert.details?.lookbackPeriod.value.toString()}
+                    value={
+                      alert.details?.lookbackPeriod?.value.toString() ?? ""
+                    }
                     onValueChange={(value) => {
                       onUpdate({
                         ...alert,
                         details: {
                           ...alert.details,
-                          lookbackPeriod: lookbackPeriods.find(
+                          lookbackPeriod: alertLookbackPeriods.find(
                             (p) => p.value === parseInt(value),
                           )!,
                         },
@@ -203,10 +208,10 @@ export function AlertCard({
                     }}
                   >
                     <SelectTrigger className="w-fit bg-white">
-                      <SelectValue placeholder="1000ms" />
+                      <SelectValue placeholder="4 hours" />
                     </SelectTrigger>
                     <SelectContent>
-                      {lookbackPeriods.map((period) => (
+                      {alertLookbackPeriods.map((period) => (
                         <SelectItem
                           key={period.value}
                           value={period.value.toString()}
@@ -271,7 +276,7 @@ export function AlertCard({
                         ...alert,
                         details: {
                           ...alert.details,
-                          cooldownPeriod: lookbackPeriods.find(
+                          cooldownPeriod: alertLookbackPeriods.find(
                             (p) => p.value === parseInt(value),
                           )!,
                         },
@@ -279,10 +284,10 @@ export function AlertCard({
                     }}
                   >
                     <SelectTrigger className="w-fit bg-white">
-                      <SelectValue placeholder="1000ms" />
+                      <SelectValue placeholder="4 hours" />
                     </SelectTrigger>
                     <SelectContent>
-                      {lookbackPeriods.map((period) => (
+                      {alertLookbackPeriods.map((period) => (
                         <SelectItem
                           key={period.value}
                           value={period.value.toString()}

@@ -165,6 +165,9 @@ export const transcribeAndSaveCall = async ({
           })),
         },
       },
+      include: {
+        agent: true,
+      },
     });
 
     await sendAlerts({

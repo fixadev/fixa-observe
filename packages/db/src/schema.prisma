@@ -55,6 +55,7 @@ model Agent {
   enabledTestAgents   TestAgent[]
   scenarios           Scenario[]
   tests               Test[]
+  Call                Call[]
 }
 
 model Test {
@@ -104,7 +105,6 @@ model Call {
   startedAt          String?
   endedAt            String?
   regionId           String?
-  agentId            String?
   metadata           Json?
   latencyP50         Float?
   latencyP90         Float?
@@ -116,6 +116,9 @@ model Call {
   duration           Float?
 
   evalResults EvalResult[]
+
+  agent   Agent?  @relation(fields: [agentId], references: [id], onDelete: Cascade)
+  agentId String?
 
   test        Test?      @relation(fields: [testId], references: [id], onDelete: Cascade)
   testId      String?

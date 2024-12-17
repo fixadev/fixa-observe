@@ -34,15 +34,16 @@ export function CreateEditAlertDialog({
   filter: Filter;
   setFilter: React.Dispatch<React.SetStateAction<Filter>>;
 }) {
-  const [alert, setAlert] = useState<AlertWithDetails>(
-    selectedAlert ?? instantiateAlert({ savedSearchId }),
-  );
+  const [alert, setAlert] = useState<AlertWithDetails | null>(null);
 
   useEffect(() => {
+    console.log("selectedAlert", selectedAlert);
     if (selectedAlert) {
       setAlert(selectedAlert);
+    } else {
+      setAlert(instantiateAlert({ savedSearchId }));
     }
-  }, [selectedAlert]);
+  }, [selectedAlert, savedSearchId]);
 
   const { mutate: createAlert, isPending: isCreating } =
     api.search.createAlert.useMutation({
@@ -73,7 +74,7 @@ export function CreateEditAlertDialog({
       onSuccess: () => {
         setFilter({
           ...filter,
-          alerts: filter.alerts?.filter((a) => a.id !== alert.id),
+          alerts: filter.alerts?.filter((a) => a.id !== alert?.id),
         });
         voidSelectedAlert();
         setOpen(false);
@@ -81,12 +82,16 @@ export function CreateEditAlertDialog({
     });
 
   const handleSubmit = () => {
+    if (!alert) return;
     if (isTempId(alert.id)) {
+      console.log("creating alert", alert);
       createAlert(alert);
     } else {
       updateAlert(alert);
     }
   };
+
+  if (!alert) return null;
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
