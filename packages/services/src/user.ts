@@ -38,16 +38,6 @@ export class UserService {
     });
   }
 
-  async decrementFreeObservabilityCallsLeft(userId: string) {
-    const metadata = await this.getPublicMetadata(userId);
-    if (metadata.freeObservabilityCallsLeft === undefined) {
-      return;
-    }
-    await this.updatePublicMetadata(userId, {
-      freeObservabilityCallsLeft: metadata.freeObservabilityCallsLeft - 1,
-    });
-  }
-
   async decrementFreeTestsLeft(userId: string) {
     const metadata = await this.getPublicMetadata(userId);
     if (metadata.freeTestsLeft === undefined) {

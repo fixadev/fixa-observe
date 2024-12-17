@@ -213,7 +213,9 @@ export default function BillingPage({
                   <div className="flex items-baseline gap-2 text-sm">
                     <div className="w-24 font-medium">observability</div>
                     <div className="flex items-baseline gap-2">
-                      <div>{usageDetails.observabilityUsage} minutes</div>
+                      <div>
+                        {usageDetails.observabilityUsage} minutes minutes
+                      </div>
                       <div className="text-xs text-muted-foreground">
                         ($0.03 / minute)
                       </div>
