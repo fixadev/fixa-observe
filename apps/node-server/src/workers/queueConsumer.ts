@@ -3,6 +3,7 @@ import { transcribeAndSaveCall } from "../services/observability";
 import { AgentService } from "@repo/services/src/agent";
 import { sqs } from "../clients/s3Client";
 import { db } from "../db";
+import { AddCallToQueueProps } from "../services/aws";
 
 const agentService = new AgentService(db);
 
@@ -21,9 +22,16 @@ export async function startQueueConsumer() {
       if (response.Messages) {
         for (const message of response.Messages) {
           // Process message
-          const data = JSON.parse(message.Body || "{}");
-          const { callId, location, agentId, createdAt, userId, metadata } =
-            data;
+          const data: AddCallToQueueProps = JSON.parse(message.Body || "{}");
+          const {
+            callId,
+            location,
+            agentId,
+            createdAt,
+            userId,
+            metadata,
+            saveRecording,
+          } = data;
           if (!callId || !location || !userId || !createdAt) {
             console.error("Missing required fields in message:", data);
             throw new Error("Missing required fields");
@@ -37,10 +45,11 @@ export async function startQueueConsumer() {
           const newCall = await transcribeAndSaveCall({
             callId,
             audioUrl: location,
-            createdAt,
+            createdAt: createdAt.toISOString(),
             agentId: agent.id,
             metadata,
             userId,
+            saveRecording,
           });
 
           await sqs.deleteMessage({
