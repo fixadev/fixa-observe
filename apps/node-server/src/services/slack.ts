@@ -1,7 +1,12 @@
 import { Call, CallResult, Test } from "@prisma/client";
 import { env } from "../env";
 import axios from "axios";
-import { Alert, EvalSetAlert, LatencyAlert } from "@repo/types/src/index";
+import {
+  Agent,
+  Alert,
+  EvalSetAlert,
+  LatencyAlert,
+} from "@repo/types/src/index";
 import { db } from "../db";
 
 export const sendTestCompletedSlackMessage = async ({
@@ -92,7 +97,7 @@ export const sendAlertSlackMessage = async ({
   alert,
 }: {
   userId: string;
-  call: Call;
+  call: Call & { agent: Agent | null };
   success: boolean;
   alert: Omit<Alert, "details"> & { details: LatencyAlert | EvalSetAlert };
 }) => {
@@ -148,7 +153,7 @@ export const sendAlertSlackMessage = async ({
                 type: "mrkdwn",
                 text: `${emoji} evaluation *${await getEvaluationSetName(
                   alert,
-                )}* ${success ? "succeeded" : "failed"}`,
+                )}* ${success ? "succeeded" : "failed"} for agent ${call.agentId} ${call.agent?.name ? `(${call.agent?.name})` : ""} in call ${call.customerCallId}`,
               },
               accessory: {
                 type: "button",

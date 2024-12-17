@@ -4,6 +4,7 @@ import {
   FilterSchema,
   Call,
   SavedSearchWithIncludes,
+  Agent,
 } from "@repo/types/src/index";
 import { sendAlertSlackMessage } from "./slack";
 
@@ -18,7 +19,7 @@ export async function sendAlerts({
   evalSetResults,
 }: {
   userId: string;
-  call: Call;
+  call: Call & { agent: Agent | null };
   latencyDurations: number[] | undefined;
   savedSearches: SavedSearchWithIncludes[];
   evalSetResults: Array<{ evalSetId: string; success: boolean }>;
