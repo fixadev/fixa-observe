@@ -23,6 +23,19 @@ export class UserService {
     return await this.clerkClient.users.getUser(userId);
   }
 
+  async getUsers({
+    limit = 10,
+    offset = 0,
+  }: {
+    limit?: number;
+    offset?: number;
+  }) {
+    return await this.clerkClient.users.getUserList({
+      limit,
+      offset,
+    });
+  }
+
   async createApiKey(userId: string) {
     const apiKey = generateApiKey();
     return await this.db.apiKey.upsert({

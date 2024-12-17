@@ -6,7 +6,8 @@
     "start": "node dist/index.js",
     "dev": "nodemon --exec tsx src/index.ts",
     "build": "node esbuild.js",
-    "build:run": "node dist/index.js"
+    "build:run": "node dist/index.js",
+    "run-script": "npx tsx -r dotenv/config"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.556.0",
