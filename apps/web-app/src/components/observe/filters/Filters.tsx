@@ -40,7 +40,7 @@ import {
   type SavedSearchWithIncludes,
 } from "@repo/types/src";
 import MetadataFilterPopover from "./MetadataFilterPopover";
-import EditAgentDialog from "./EditAgentDialog";
+import { EditAgentDisplayNamesDialog } from "./EditAgentDialog";
 import SaveSearchButton from "./SaveSearchButton";
 
 export default function Filters({
@@ -63,6 +63,7 @@ export default function Filters({
       ...(_agents ?? []).map((agent) => {
         return {
           id: agent.id,
+          customerAgentId: agent.customerAgentId,
           name: agent.name.length === 0 ? agent.id : agent.name,
         };
       }),
@@ -372,7 +373,7 @@ export default function Filters({
           </Button>
         </div>
       </div>
-      <EditAgentDialog
+      <EditAgentDisplayNamesDialog
         open={editAgentModalOpen}
         setOpen={setEditAgentModalOpen}
         refetchAgents={refetchAgents}

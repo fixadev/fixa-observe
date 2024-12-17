@@ -11,17 +11,17 @@ import {
 import Spinner from "~/components/Spinner";
 import { api } from "~/trpc/react";
 
-interface EditAgentDialogProps {
+interface EditAgentDisplayNamesDialogProps {
   open: boolean;
   setOpen: (open: boolean) => void;
   refetchAgents: () => void;
 }
 
-export default function EditAgentDialog({
+export function EditAgentDisplayNamesDialog({
   open,
   setOpen,
   refetchAgents,
-}: EditAgentDialogProps) {
+}: EditAgentDisplayNamesDialogProps) {
   const { data: agents } = api.agent.getAll.useQuery();
   const [search, setSearch] = useState("");
 
@@ -33,8 +33,10 @@ export default function EditAgentDialog({
     if (!agents) return [];
     return agents.filter(
       (agent) =>
-        agent.id.toLowerCase().includes(search.toLowerCase()) ||
-        agent.name.toLowerCase().includes(search.toLowerCase()),
+        agent.customerAgentId?.trim() &&
+        // search by agent id or name
+        (agent.customerAgentId.toLowerCase().includes(search.toLowerCase()) ||
+          agent.name.toLowerCase().includes(search.toLowerCase())),
     );
   }, [agents, search]);
 
@@ -70,7 +72,12 @@ export default function EditAgentDialog({
 
           {filteredAgents.map((agent) => (
             <div key={agent.id} className="grid grid-cols-2 gap-4">
-              <Input className="w-full" value={agent.id} readOnly disabled />
+              <Input
+                className="w-full"
+                value={agent.customerAgentId ?? ""}
+                readOnly
+                disabled
+              />
               <Input
                 className="w-full"
                 value={editedNames[agent.id] ?? agent.name}
