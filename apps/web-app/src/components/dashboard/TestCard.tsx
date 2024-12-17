@@ -31,12 +31,17 @@ export default function TestCard({
 
   const callsInProgress = useMemo(
     () =>
-      test.calls.filter(
-        (call) =>
+      test.calls.filter((call) => {
+        const inProgress =
           call.status === CallStatus.in_progress ||
           call.status === CallStatus.analyzing ||
-          call.status === CallStatus.queued,
-      ),
+          call.status === CallStatus.queued;
+        const olderThan1Hour =
+          call.createdAt &&
+          new Date(call.createdAt).getTime() < Date.now() - 1 * 60 * 60 * 1000;
+
+        return inProgress && !olderThan1Hour;
+      }),
     [test.calls],
   );
 
@@ -77,7 +82,7 @@ export default function TestCard({
               <div
                 className="h-full bg-red-500 transition-all"
                 style={{
-                  width: `${((test.calls.length - callsSucceeded.length) / test.calls.length) * 100}%`,
+                  width: `${(callsFailed.length / test.calls.length) * 100}%`,
                 }}
               />
             </div>
