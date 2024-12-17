@@ -10,55 +10,12 @@ import { Dialog, DialogContent } from "~/components/ui/dialog";
 import { api } from "~/trpc/react";
 import ChartCard from "~/components/observe/ChartCard";
 import { CopyText } from "~/components/CopyText";
-import { useUser } from "@clerk/nextjs";
-import { type PublicMetadata } from "@repo/types/src";
+import FreeCallsLeft from "~/components/observe/FreeCallsLeft";
 import { Button } from "~/components/ui/button";
-import { env } from "~/env";
+import { ArrowTopRightOnSquareIcon } from "@heroicons/react/24/solid";
+import Link from "next/link";
 
-export default function ObservePage() {
-  const { user } = useUser();
-
-  const hasPaymentMethod = useMemo(() => {
-    const metadata = user?.publicMetadata as PublicMetadata | undefined;
-    return (
-      metadata?.stripeCustomerId !== undefined ||
-      user?.id === env.NEXT_PUBLIC_11X_USER_ID
-    );
-  }, [user]);
-
-  const { mutate: getCheckoutUrl, isPending: isGeneratingStripeUrl } =
-    api.stripe.createCheckoutUrl.useMutation({
-      onSuccess: (data) => {
-        window.location.href = data.checkoutUrl;
-      },
-    });
-  const upgradePlan = useCallback(async () => {
-    const redirectUrl = window.location.href;
-    getCheckoutUrl({ redirectUrl });
-  }, [getCheckoutUrl]);
-
-  if (!hasPaymentMethod) {
-    return (
-      <div className="flex size-full items-center justify-center">
-        <div className="flex w-64 flex-col gap-2">
-          <div className="flex flex-col gap-1">
-            <div className="font-medium">add a payment method to continue</div>
-            <div className="text-sm text-muted-foreground">
-              payment method required to access the observability dashboard
-            </div>
-          </div>
-          <Button onClick={upgradePlan} disabled={isGeneratingStripeUrl}>
-            {isGeneratingStripeUrl ? <Spinner /> : "add payment method"}
-          </Button>
-        </div>
-      </div>
-    );
-  }
-
-  return <_ObservePage />;
-}
-
-function _ObservePage() {
+export default function _ObservePage() {
   const { selectedCallId, setSelectedCallId, filter, orderBy, resetFilter } =
     useObserveState();
 
@@ -143,9 +100,9 @@ function _ObservePage() {
     return (
       <div className="flex h-full w-full flex-col items-center justify-center p-8">
         <div className="max-w-2xl rounded-lg border border-border bg-card p-6 text-card-foreground shadow-sm">
-          <h3 className="mb-4 text-lg font-semibold">No calls found</h3>
+          <h3 className="mb-4 text-lg font-semibold">no calls found</h3>
           <p className="mb-2 text-muted-foreground">
-            To start seeing calls, make a POST request to{" "}
+            to start seeing calls, make a POST request to{" "}
           </p>
           <p className="mb-4 flex flex-row items-center gap-2 text-muted-foreground">
             <CopyText
@@ -157,7 +114,7 @@ function _ObservePage() {
           <pre className="mb-4 rounded-md bg-muted p-4 font-mono text-sm">
             {`{
   "callId": "unique-call-identifier",
-  "location": "https://url-of-call-recording",
+  "stereoRecordingUrl": "https://url-of-call-recording",
   "agentId": "your-agent-id",
   "metadata": {
     "custom_field": "custom value",
@@ -169,6 +126,18 @@ function _ObservePage() {
             Once you start sending calls, they will appear in this dashboard
             automatically.
           </p>
+          <Button
+            variant="link"
+            className="mt-4 flex w-fit gap-2 px-0 text-sm"
+            asChild
+          >
+            <Link
+              href="https://docs.fixa.dev/api-reference/endpoint/upload-call"
+              target="_blank"
+            >
+              view docs <ArrowTopRightOnSquareIcon className="size-4" />
+            </Link>
+          </Button>
         </div>
       </div>
     );
@@ -202,6 +171,7 @@ function _ObservePage() {
             <Spinner />
           </div>
         )}
+        <FreeCallsLeft />
         {selectedCall && (
           <Dialog
             open={!!selectedCallId}

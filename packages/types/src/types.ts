@@ -1,6 +1,5 @@
 import { type Prisma } from "@prisma/client";
 import { z } from "zod";
-import { AlertSchema, EvalSetSchema, SavedSearchSchema } from "./generated";
 import { AlertWithDetailsSchema } from "./alert";
 import { EvalSetWithIncludesSchema } from "./eval";
 
