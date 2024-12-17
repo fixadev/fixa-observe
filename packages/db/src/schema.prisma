@@ -318,10 +318,14 @@ model EvalSet {
 }
 
 model SavedSearch {
-  id             String   @id @default(uuid())
-  createdAt      DateTime @default(now())
-  name           String
-  ownerId        String
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  name      String
+  ownerId   String
+
+  // If true, this is the default saved search for the user, shown in the "dashboard" tab
+  isDefault Boolean @default(false)
+
   agentId        String[]
   lookbackPeriod Json
   timeRange      Json?
