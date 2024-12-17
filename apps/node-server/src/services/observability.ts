@@ -13,24 +13,17 @@ import { sendAlerts } from "./alert";
 import stripeServiceClient from "../clients/stripeServiceClient";
 import { SearchService } from "@repo/services/src/search";
 import { getAudioDuration } from "../utils/audio";
+import { UploadCallParams } from "@repo/types/src/types";
 
 export const transcribeAndSaveCall = async ({
   callId,
-  audioUrl,
+  stereoRecordingUrl,
   createdAt,
   agentId,
   metadata: callMetadata,
   userId,
   saveRecording,
-}: {
-  callId: string;
-  audioUrl: string;
-  createdAt?: string;
-  agentId: string;
-  metadata: Record<string, string>;
-  userId: string;
-  saveRecording: boolean;
-}) => {
+}: UploadCallParams) => {
   try {
     interface TranscribeResponse {
       segments: Array<{
@@ -50,11 +43,16 @@ export const transcribeAndSaveCall = async ({
       }> | null;
     }
 
-    const duration = await getAudioDuration(audioUrl);
+    const duration = await getAudioDuration(stereoRecordingUrl);
 
-    const url = saveRecording
-      ? await uploadFromPresignedUrl(callId, audioUrl)
-      : audioUrl;
+    console.log(
+      "===================SAVE RECORDING===================",
+      saveRecording,
+    );
+    const urlToSave =
+      saveRecording === false
+        ? stereoRecordingUrl
+        : await uploadFromPresignedUrl(callId, stereoRecordingUrl);
 
     // Accrue observability minutes
     try {
@@ -74,7 +72,7 @@ export const transcribeAndSaveCall = async ({
     const response = await axios.post<TranscribeResponse>(
       `${env.AUDIO_SERVICE_URL}/transcribe-deepgram`,
       {
-        stereo_audio_url: audioUrl,
+        stereo_audio_url: urlToSave,
       },
     );
 
@@ -118,7 +116,7 @@ export const transcribeAndSaveCall = async ({
         messages: messages || [],
         createdAt: createdAt || new Date().toISOString(),
         agentId,
-        callMetadata,
+        callMetadata: callMetadata || {},
         userId,
       });
 
@@ -130,7 +128,7 @@ export const transcribeAndSaveCall = async ({
         customerCallId: callId,
         startedAt: createdAt,
         status: CallStatus.completed,
-        stereoRecordingUrl: url,
+        stereoRecordingUrl: urlToSave,
         agentId,
         evalResults: {
           create: evalResults,

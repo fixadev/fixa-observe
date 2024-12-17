@@ -17,7 +17,7 @@ uploadCallRouter.post(
         regionId,
         metadata,
         createdAt,
-        saveRecording = true,
+        saveRecording,
       } = req.body;
 
       if (regionId) metadata.regionId = regionId;
@@ -31,9 +31,9 @@ uploadCallRouter.post(
 
       await addCallToQueue({
         callId,
-        location: location || stereoRecordingUrl,
+        stereoRecordingUrl: location || stereoRecordingUrl,
         agentId,
-        createdAt: createdAt ? new Date(createdAt) : new Date(),
+        createdAt: createdAt || new Date().toISOString(),
         userId: res.locals.userId,
         metadata: metadata,
         saveRecording,

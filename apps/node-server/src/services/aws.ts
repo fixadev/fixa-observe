@@ -2,21 +2,11 @@ import { env } from "../env";
 import { sqs } from "../clients/s3Client";
 import { s3 } from "../clients/s3Client";
 import { PutObjectCommand } from "@aws-sdk/client-s3";
-import { getAudioDuration } from "../utils/audio";
 import { Readable } from "stream";
+import { UploadCallParams } from "@repo/types/src/types";
 
-export type AddCallToQueueProps = {
-  callId: string;
-  location: string;
-  agentId: string;
-  createdAt: Date;
-  userId: string;
-  metadata: Record<string, string>;
-  saveRecording: boolean;
-};
-
-export const addCallToQueue = async (input: AddCallToQueueProps) => {
-  // Send message
+export const addCallToQueue = async (input: UploadCallParams) => {
+  // Send messagep
   await sqs
     .sendMessage({
       QueueUrl: env.SQS_QUEUE_URL,

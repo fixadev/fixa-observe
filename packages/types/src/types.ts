@@ -163,3 +163,14 @@ export const EvalGroupTextCondition = z.object({
   type: z.literal("text"),
   text: z.string(),
 });
+
+export type UploadCallParams = z.infer<typeof UploadCallParams>;
+export const UploadCallParams = z.object({
+  callId: z.string(),
+  stereoRecordingUrl: z.string(),
+  agentId: z.string(),
+  createdAt: z.string().optional(),
+  userId: z.string(),
+  metadata: z.record(z.string(), z.string()).optional(),
+  saveRecording: z.boolean().optional(),
+});
