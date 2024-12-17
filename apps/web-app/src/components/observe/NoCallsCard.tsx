@@ -20,8 +20,8 @@ export default function NoCallsCard() {
   "stereoRecordingUrl": "<string>",
   "agentId": "<string>",
   "metadata": {
-    "regionId": "USA",
-    "ttsModel": "eleven-labs-v2"
+    "customField": "custom value",
+    "anotherField": "another value"
   }
 }'`}
         </pre>
