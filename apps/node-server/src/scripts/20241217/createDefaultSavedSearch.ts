@@ -1,5 +1,5 @@
-import userServiceClient from "../clients/userServiceClient";
-import { db } from "../db";
+import userServiceClient from "../../clients/userServiceClient";
+import { db } from "../../db";
 
 async function main() {
   const users = await userServiceClient.getUsers({ limit: 500 });

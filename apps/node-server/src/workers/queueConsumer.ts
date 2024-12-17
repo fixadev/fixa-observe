@@ -39,7 +39,10 @@ export async function startQueueConsumer() {
           console.log("PROCESSING CALL", callId);
 
           // Upsert agent if it doesn't exist
-          const agent = await agentService.upsertAgent({ agentId, userId });
+          const agent = await agentService.upsertAgent({
+            customerAgentId: agentId,
+            userId,
+          });
 
           const newCall = await transcribeAndSaveCall({
             callId,
