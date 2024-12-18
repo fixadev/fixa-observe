@@ -79,7 +79,9 @@ export default function ObserveSidebar() {
     [pathname],
   );
 
-  const { data: savedSearches } = api.search.getAll.useQuery();
+  const { data: savedSearches } = api.search.getAll.useQuery({
+    includeDefault: false,
+  });
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [renameDialogOpen, setRenameDialogOpen] = useState(false);
   const [curSavedSearch, setCurSavedSearch] =

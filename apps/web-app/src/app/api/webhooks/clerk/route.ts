@@ -78,10 +78,22 @@ export async function POST(req: Request) {
       // }
       // await upsertUser(userId, email ?? null, first_name, last_name, username);
 
-      // Give user free tests
+      // Give user free tests + observability calls
       await userService.updatePublicMetadata(userId, {
         freeTestsLeft: NUM_FREE_TESTS,
         freeObservabilityCallsLeft: NUM_FREE_OBSERVABILITY_CALLS,
+      });
+
+      // Create default saved search
+      await db.savedSearch.create({
+        data: {
+          name: "default",
+          ownerId: userId,
+          isDefault: true,
+          agentId: [],
+          lookbackPeriod: { label: "2 days", value: 2 * 24 * 60 * 60 * 1000 },
+          chartPeriod: 60 * 60 * 1000,
+        },
       });
 
       await slackService.sendAnalyticsMessage({

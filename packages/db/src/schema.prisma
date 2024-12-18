@@ -37,7 +37,7 @@ model ApiKey {
 }
 
 model Agent {
-  id          String   @id
+  id          String   @id @default(uuid())
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   ownerId     String
@@ -55,7 +55,7 @@ model Agent {
   enabledTestAgents   TestAgent[]
   scenarios           Scenario[]
   tests               Test[]
-  Call                Call[]
+  calls               Call[]
 }
 
 model Test {
