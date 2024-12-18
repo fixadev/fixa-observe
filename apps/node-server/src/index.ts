@@ -3,10 +3,10 @@ import { createServer } from "http";
 import { Server } from "socket.io";
 import { env } from "./env";
 import { startQueueConsumer } from "./workers/queueConsumer";
-import v1Router from "./routes/v1";
+import v1Router from "./routers/v1/private";
 import { authenticateRequest } from "./middlewares/auth";
-import vapiRouter from "./routes/v1/vapi";
-import ofOneRouter from "./routes/v1/of-one";
+import vapiRouter from "./routers/v1/routes/vapi";
+import ofOneRouter from "./routers/v1/routes/of-one";
 
 const app = express();
 const httpServer = createServer(app);
