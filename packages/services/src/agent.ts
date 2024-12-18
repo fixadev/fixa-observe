@@ -50,43 +50,23 @@ export class AgentService {
     });
   }
 
-  async upsertAgent(agent: Partial<Agent>, ownerId: string): Promise<Agent> {
-    if (agent.id) {
+  async upsertAgent({ agentId, userId }: { agentId: string; userId: string }) {
+    try {
       return await this.db.agent.upsert({
-        where: { id: agent.id },
-        update: {
-          ...agent,
-          extraProperties: agent.extraProperties ?? undefined,
-        },
+        where: { id: agentId },
+        update: {},
         create: {
-          ...AgentSchema.parse(agent),
-          extraProperties: agent.extraProperties ?? undefined,
-          ownerId,
+          id: agentId,
+          ownerId: userId,
+          name: agentId,
+          phoneNumber: "",
+          systemPrompt: "",
         },
       });
-    } else if (agent.customerAgentId) {
-      const existingAgent = await this.db.agent.findFirst({
-        where: { customerAgentId: agent.customerAgentId, ownerId },
-      });
-
-      if (existingAgent) {
-        return await this.db.agent.update({
-          where: { id: existingAgent.id },
-          data: {
-            ...agent,
-            extraProperties: agent.extraProperties ?? undefined,
-          },
-        });
-      }
-      return await this.db.agent.create({
-        data: {
-          ...AgentSchema.parse(agent),
-          extraProperties: agent.extraProperties ?? undefined,
-          ownerId,
-        },
-      });
+    } catch (error) {
+      console.error("Error upserting agent", error);
+      throw error;
     }
-    throw new Error("Either id or customerAgentId must be provided");
   }
 
   async getAgent(

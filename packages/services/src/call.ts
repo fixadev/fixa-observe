@@ -63,18 +63,33 @@ export class CallService {
           gte: new Date(Date.now() - filter.lookbackPeriod.value).toISOString(),
         };
       }
-      if (filter.agentId) {
-        filterWhere.agentId = filter.agentId;
+      if (filter.agentId && filter.agentId.length > 0) {
+        filterWhere.agentId = {
+          in: filter.agentId,
+        };
       }
 
       if (filter.metadata) {
         const metadataFilters = Object.entries(filter.metadata).map(
-          ([key, value]) => ({
-            metadata: {
-              path: [key],
-              string_contains: value,
-            },
-          }),
+          ([key, value]) => {
+            if (Array.isArray(value)) {
+              return {
+                OR: value.map((v) => ({
+                  metadata: {
+                    path: [key],
+                    string_contains: v,
+                  },
+                })),
+              };
+            } else {
+              return {
+                metadata: {
+                  path: [key],
+                  string_contains: value,
+                },
+              };
+            }
+          },
         );
 
         filterWhere.AND = [
@@ -337,17 +352,20 @@ export class CallService {
       filter,
     });
 
-    const latencies = calls.items.flatMap((call) =>
-      call.latencyBlocks.map((block) => block.duration),
-    );
+    const latencies = calls.items
+      .flatMap((call) => call.latencyBlocks.map((block) => block.duration))
+      .concat(newLatencyBlocks);
 
     const sortedLatencies = latencies.sort((a, b) => a - b);
+
+    console.log("sortedLatencies", sortedLatencies);
+
     const medianIndex = Math.floor(sortedLatencies.length / 2);
     const p90Index = Math.floor(sortedLatencies.length * 0.9);
     const p95Index = Math.floor(sortedLatencies.length * 0.95);
-    const p50 = sortedLatencies[medianIndex] || 0;
-    const p90 = sortedLatencies[p90Index] || 0;
-    const p95 = sortedLatencies[p95Index] || 0;
+    const p50 = (sortedLatencies[medianIndex] || 0) * 1000;
+    const p90 = (sortedLatencies[p90Index] || 0) * 1000;
+    const p95 = (sortedLatencies[p95Index] || 0) * 1000;
 
     return { p50, p90, p95 };
   };

@@ -3,8 +3,10 @@ import { env } from "~/env";
 import Stripe from "stripe";
 import { UserService } from "@repo/services/src/user";
 import { db } from "~/server/db";
+import { SlackService } from "@repo/services/src/slack";
 
 const userService = new UserService(db);
+const slackService = new SlackService();
 const stripe = new Stripe(env.STRIPE_SECRET_KEY);
 const endpointSecret = env.STRIPE_WEBHOOK_SECRET;
 
@@ -47,6 +49,16 @@ export async function POST(req: NextRequest) {
           await userService.updatePublicMetadata(userId, {
             stripeCustomerId: customerId,
           });
+        }
+
+        try {
+          const user = await userService.getUser(userId);
+          const email = user.primaryEmailAddress?.emailAddress;
+          await slackService.sendAnalyticsMessage({
+            message: `💰 ${user.firstName} ${user.lastName} (${email}) upgraded to pro`,
+          });
+        } catch (e) {
+          console.error("Error sending analytics message", e);
         }
       } else {
         console.log(`⚠️  Payment failed for user ${userId}`);

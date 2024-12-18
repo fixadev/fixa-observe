@@ -19,6 +19,10 @@ export class UserService {
     });
   }
 
+  async getUser(userId: string) {
+    return await this.clerkClient.users.getUser(userId);
+  }
+
   async createApiKey(userId: string) {
     const apiKey = generateApiKey();
     return await this.db.apiKey.upsert({
@@ -41,6 +45,16 @@ export class UserService {
     }
     await this.updatePublicMetadata(userId, {
       freeTestsLeft: metadata.freeTestsLeft - 1,
+    });
+  }
+
+  async decrementFreeObservabilityCallsLeft(userId: string) {
+    const metadata = await this.getPublicMetadata(userId);
+    if (metadata.freeObservabilityCallsLeft === undefined) {
+      return;
+    }
+    await this.updatePublicMetadata(userId, {
+      freeObservabilityCallsLeft: metadata.freeObservabilityCallsLeft - 1,
     });
   }
 

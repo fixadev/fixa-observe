@@ -149,11 +149,6 @@ export const findTranscriptionErrors = async (callId: string) => {
     });
     const originalTranscript = call.artifact?.transcript;
     const { transcript: newTranscript } = result.data;
-
-    console.log("Original Transcript");
-    console.log(originalTranscript);
-    console.log("New Transcript");
-    console.log(newTranscript);
   } catch (error) {
     console.error("Error analyzing call:", error);
     throw error;

@@ -3,11 +3,13 @@ import { headers } from "next/headers";
 import { type WebhookEvent } from "@clerk/nextjs/server";
 import { env } from "~/env";
 import { addSubscriber } from "~/server/listmonk";
-import { NUM_FREE_TESTS } from "@repo/types/src";
+import { NUM_FREE_OBSERVABILITY_CALLS, NUM_FREE_TESTS } from "@repo/types/src";
 import { UserService } from "@repo/services/src/user";
 import { db } from "~/server/db";
+import { SlackService } from "@repo/services/src/slack";
 
 const userService = new UserService(db);
+const slackService = new SlackService();
 
 export async function GET() {
   return new Response("ok", { status: 200 });
@@ -79,6 +81,11 @@ export async function POST(req: Request) {
       // Give user free tests
       await userService.updatePublicMetadata(userId, {
         freeTestsLeft: NUM_FREE_TESTS,
+        freeObservabilityCallsLeft: NUM_FREE_OBSERVABILITY_CALLS,
+      });
+
+      await slackService.sendAnalyticsMessage({
+        message: `👋 new user joined fixa: ${first_name} ${last_name} (${email})`,
       });
 
       // Add user to listmonk

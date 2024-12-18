@@ -1,6 +1,5 @@
 import { type Prisma } from "@prisma/client";
 import { z } from "zod";
-import { AlertSchema, EvalSetSchema, SavedSearchSchema } from "./generated";
 import { AlertWithDetailsSchema } from "./alert";
 import { EvalSetWithIncludesSchema } from "./eval";
 
@@ -108,10 +107,12 @@ export const FilterSchema = z.object({
     value: z.number(),
   }),
   timeRange: z.union([TimeRangeSchema, z.null(), z.undefined()]),
-  agentId: z.string().optional(),
+  agentId: z.array(z.string()),
   chartPeriod: z.number(),
   customerCallId: z.union([z.string(), z.null(), z.undefined()]),
-  metadata: z.record(z.string(), z.string().or(z.undefined())).optional(),
+  metadata: z
+    .record(z.string(), z.string().or(z.array(z.string())).or(z.undefined()))
+    .optional(),
   evalSets: z.array(EvalSetWithIncludesSchema).optional(),
   alerts: z.array(AlertWithDetailsSchema).optional(),
   evalSetToSuccess: z.union([evalSetToSuccess, z.null(), z.undefined()]),
@@ -161,4 +162,15 @@ export const EvalGroupTextCondition = z.object({
   id: z.string(),
   type: z.literal("text"),
   text: z.string(),
+});
+
+export type UploadCallParams = z.infer<typeof UploadCallParams>;
+export const UploadCallParams = z.object({
+  callId: z.string(),
+  stereoRecordingUrl: z.string(),
+  agentId: z.string(),
+  createdAt: z.string().optional(),
+  userId: z.string(),
+  metadata: z.record(z.string(), z.string()).optional(),
+  saveRecording: z.boolean().optional(),
 });

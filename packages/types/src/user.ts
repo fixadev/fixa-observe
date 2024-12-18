@@ -9,4 +9,5 @@ export interface PublicMetadata {
   slackWebhookUrl?: string;
   stripeCustomerId?: string;
   freeTestsLeft?: number;
+  freeObservabilityCallsLeft?: number;
 }

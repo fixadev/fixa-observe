@@ -4,7 +4,7 @@ import { useCallback, useMemo, useRef, useEffect } from "react";
 import CallDetails from "~/components/dashboard/CallDetails";
 import { useObserveState } from "~/components/hooks/useObserveState";
 import CallTable from "~/components/observe/CallTable";
-import Filters from "~/components/observe/Filters";
+import Filters from "~/components/observe/filters/Filters";
 import Spinner from "~/components/Spinner";
 import { Dialog, DialogContent } from "~/components/ui/dialog";
 import { api } from "~/trpc/react";
@@ -107,7 +107,7 @@ export default function SavedSearchPage({
 
   return (
     <div
-      className="relative h-full bg-muted/30 pt-16 focus:outline-none"
+      className="relative h-full bg-muted/30 focus:outline-none"
       autoFocus
       tabIndex={0}
     >

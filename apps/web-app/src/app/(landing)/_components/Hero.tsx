@@ -20,7 +20,7 @@ export function Hero() {
           <p className="mx-auto mt-3 text-base text-gray-500 sm:mt-5 sm:max-w-xl sm:text-lg md:mt-5 md:text-xl">
             run tests, analyze calls, fix bugs in your AI voice agents
           </p>
-          <div className="mt-5 flex items-center justify-center gap-2 sm:mt-8">
+          <div className="mt-5 flex flex-col items-center justify-center gap-2 sm:mt-8 sm:flex-row">
             <Button size="lg" asChild>
               <Link
                 href="/sign-up"

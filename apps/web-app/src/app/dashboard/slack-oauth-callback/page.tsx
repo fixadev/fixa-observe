@@ -19,12 +19,16 @@ export default function SlackOAuthCallback({
   const { mutateAsync: exchangeCode } = api.slack.exchangeCode.useMutation();
   const { mutateAsync: sendMessage } = api.slack.sendMessage.useMutation();
 
-  const agentId = useMemo(() => {
+  const parsedState = useMemo(() => {
     if (!state) {
       return null;
     }
-    const parsedState = JSON.parse(state) as { agentId: string };
-    return parsedState.agentId;
+    const parsedState = JSON.parse(state) as {
+      agentId: string;
+      origin: "dashboard" | "observe";
+      savedSearchId?: string;
+    };
+    return parsedState;
   }, [state]);
 
   const isExchangingCode = useRef(false);
@@ -43,14 +47,19 @@ export default function SlackOAuthCallback({
           console.error("Error exchanging code:", error);
         } finally {
           isExchangingCode.current = false;
-          router.push(`/dashboard/${agentId}/settings`);
         }
-      } else {
-        router.push(`/dashboard/${agentId}/settings`);
       }
+      console.log("parsedState", parsedState);
+      router.push(
+        `/${
+          parsedState?.origin === "dashboard"
+            ? `dashboard/${parsedState.agentId}/slack-app`
+            : `observe/${parsedState?.savedSearchId ? "saved/" + parsedState.savedSearchId : "slack-app"}`
+        }`,
+      );
     };
     void exchangeCodeAsync();
-  }, [exchangeCode, code, agentId, router, sendMessage]);
+  }, [exchangeCode, code, parsedState, router, sendMessage]);
 
   return (
     <div className="flex size-full items-center justify-center">

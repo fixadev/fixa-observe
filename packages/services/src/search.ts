@@ -27,7 +27,7 @@ export class SearchService {
       ownerId: userId,
       createdAt: new Date(),
       name,
-      agentId: filter.agentId ?? "",
+      agentId: filter.agentId ?? [],
       lookbackPeriod: filter.lookbackPeriod ?? {},
       metadata: filter.metadata ?? {},
     };
@@ -66,7 +66,7 @@ export class SearchService {
         metadata: searchData.metadata ?? {},
       },
       include: {
-        evalSets: true,
+        evalSets: { include: { evals: true } },
         alerts: true,
       },
     });
@@ -123,13 +123,21 @@ export class SearchService {
       orderBy: {
         createdAt: "asc",
       },
+      include: {
+        alerts: { where: { enabled: true } },
+        evalSets: {
+          include: { evals: true },
+          where: { enabled: true },
+        },
+      },
     });
 
     const parsedSearches: SavedSearchWithIncludes[] = [];
+
     for (const search of savedSearches) {
       const parsed = SavedSearchWithIncludes.safeParse(search);
       if (!parsed.success) {
-        console.log("parsed error", parsed.error);
+        console.log("parsed error", JSON.stringify(parsed.error, null, 2));
       } else {
         parsedSearches.push(parsed.data);
       }

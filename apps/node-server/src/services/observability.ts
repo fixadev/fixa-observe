@@ -11,22 +11,19 @@ import { z } from "zod";
 import { analyzeCallWitho1, formatOutput } from "./textAnalysis";
 import { sendAlerts } from "./alert";
 import stripeServiceClient from "../clients/stripeServiceClient";
+import { SearchService } from "@repo/services/src/search";
+import { getAudioDuration } from "../utils/audio";
+import { UploadCallParams } from "@repo/types/src/types";
 
 export const transcribeAndSaveCall = async ({
   callId,
-  audioUrl,
+  stereoRecordingUrl,
   createdAt,
   agentId,
-  metadata,
+  metadata: callMetadata,
   userId,
-}: {
-  callId: string;
-  audioUrl: string;
-  createdAt: string;
-  agentId: string;
-  metadata: Record<string, string>;
-  userId: string;
-}) => {
+  saveRecording,
+}: UploadCallParams) => {
   try {
     interface TranscribeResponse {
       segments: Array<{
@@ -46,10 +43,16 @@ export const transcribeAndSaveCall = async ({
       }> | null;
     }
 
-    const { audioUrl: url, duration } = await uploadFromPresignedUrl(
-      callId,
-      audioUrl,
+    const duration = await getAudioDuration(stereoRecordingUrl);
+
+    console.log(
+      "===================SAVE RECORDING===================",
+      saveRecording,
     );
+    const urlToSave =
+      saveRecording === false
+        ? stereoRecordingUrl
+        : await uploadFromPresignedUrl(callId, stereoRecordingUrl);
 
     // Accrue observability minutes
     try {
@@ -69,7 +72,7 @@ export const transcribeAndSaveCall = async ({
     const response = await axios.post<TranscribeResponse>(
       `${env.AUDIO_SERVICE_URL}/transcribe-deepgram`,
       {
-        stereo_audio_url: audioUrl,
+        stereo_audio_url: urlToSave,
       },
     );
 
@@ -111,21 +114,21 @@ export const transcribeAndSaveCall = async ({
     const { evalResults, evalSetResults, savedSearches } =
       await analyzeBasedOnRules({
         messages: messages || [],
-        createdAt,
+        createdAt: createdAt || new Date().toISOString(),
         agentId,
-        metadata,
+        callMetadata: callMetadata || {},
         userId,
       });
 
     const newCall = await db.call.create({
       data: {
         id: uuidv4(),
-        createdAt: new Date(),
+        createdAt: createdAt || new Date(),
         ownerId: userId,
         customerCallId: callId,
         startedAt: createdAt,
         status: CallStatus.completed,
-        stereoRecordingUrl: url,
+        stereoRecordingUrl: urlToSave,
         agentId,
         evalResults: {
           create: evalResults,
@@ -140,7 +143,7 @@ export const transcribeAndSaveCall = async ({
         interruptionP90,
         interruptionP95,
         numInterruptions: numberOfInterruptionsGreaterThan2Seconds,
-        metadata,
+        metadata: callMetadata,
         duration,
         messages: {
           create: messages?.map((message) => ({
@@ -161,6 +164,9 @@ export const transcribeAndSaveCall = async ({
             text: interruption.text,
           })),
         },
+      },
+      include: {
+        agent: true,
       },
     });
 
@@ -183,23 +189,22 @@ export const analyzeBasedOnRules = async ({
   messages,
   createdAt,
   agentId,
-  metadata,
+  callMetadata,
   userId,
 }: {
   messages: Omit<Message, "callId">[];
   createdAt: string;
   agentId: string;
-  metadata: Record<string, string>;
+  callMetadata: Record<string, string>;
   userId: string;
 }) => {
   try {
-    console.log("FINDING RELEVANT EVAL SETS");
     const { evalSets: relevantEvalSets, savedSearches } =
       await findRelevantEvalSets({
         messages,
         userId,
         agentId,
-        metadata,
+        callMetadata,
       });
     if (relevantEvalSets.length > 0) {
       const allEvals = relevantEvalSets.flatMap((evalSet) => evalSet.evals);
@@ -258,47 +263,50 @@ export const findRelevantEvalSets = async ({
   messages,
   userId,
   agentId,
-  metadata,
+  callMetadata,
 }: {
   messages: Omit<Message, "callId">[];
   userId: string;
   agentId: string;
-  metadata?: Record<string, string>;
+  callMetadata?: Record<string, string>;
 }) => {
   try {
-    const savedSearches = await db.savedSearch.findMany({
-      where: {
-        ownerId: userId,
-      },
-      include: {
-        evalSets: { include: { evals: true } },
-        alerts: true,
-      },
+    const searchServiceInstance = new SearchService(db);
+    const savedSearches = await searchServiceInstance.getAll({
+      userId,
     });
-
-    console.log("SAVED SEARCHES", savedSearches);
-
+    if (!savedSearches) {
+      return {
+        savedSearches: [],
+        evalSets: [],
+      };
+    }
     const matchingSavedSearches = savedSearches.filter((savedSearch) => {
       const savedSearchMetadata = savedSearch.metadata as Record<
         string,
-        string
+        string | string[]
       >;
-      return Object.entries(savedSearchMetadata).every(
-        ([key, value]) => metadata?.[key] === value,
+      return (
+        Object.entries(savedSearchMetadata).every(
+          ([key, value]) =>
+            callMetadata?.[key] === value ||
+            (callMetadata?.[key] && value.includes(callMetadata?.[key])),
+        ) &&
+        (savedSearch.agentId.includes(agentId) ||
+          savedSearch.agentId.length === 0)
       );
     });
 
-    const evalSetsWithEvals = matchingSavedSearches.flatMap(
-      (savedSearch) => savedSearch.evalSets,
-    );
+    const evalSetsWithEvals = matchingSavedSearches
+      .flatMap((savedSearch) => savedSearch.evalSets)
+      .filter((evalSet) => evalSet !== undefined);
 
-    const evalSetsWithoutEvals = matchingSavedSearches.flatMap((savedSearch) =>
-      savedSearch.evalSets.map((evalSet) => ({
-        ...evalSet,
-        evals: [],
-        alerts: [],
-      })),
-    );
+    // remove evals and alerts to simplify prompt
+    const evalSetsWithoutEvals = evalSetsWithEvals.map((evalSet) => ({
+      ...evalSet,
+      evals: [],
+      alerts: [],
+    }));
 
     const findEvalSetsOutputSchema = z.object({
       relevantEvalSets: z.array(

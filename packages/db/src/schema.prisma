@@ -14,22 +14,6 @@ generator zod {
   output   = "../../types/src/generated"
 }
 
-// // prod
-// datasource db {
-//   provider  = "postgresql"
-//   url       = "postgresql://postgres.nkudjvfueumihtrpxxdu:jzG2xXyN45zP!ha@aws-0-us-west-1.pooler.supabase.com:6543/postgres?pgbouncer=true&connection_limit=1"
-//   directUrl = "postgresql://postgres.nkudjvfueumihtrpxxdu:jzG2xXyN45zP!ha@aws-0-us-west-1.pooler.supabase.com:5432/postgres"
-// }
-
-// // dev
-// datasource db {
-//   provider  = "postgresql"
-//   url       = "postgresql://postgres.eswbggamquxvdsuuktpf:t24fwMp67!dNnsn@aws-0-us-west-1.pooler.supabase.com:6543/postgres?pgbouncer=true&connection_limit=1"
-//   directUrl = "postgresql://postgres.eswbggamquxvdsuuktpf:t24fwMp67!dNnsn@aws-0-us-west-1.pooler.supabase.com:5432/postgres"
-// }
-
-// comment to redeploy 
-
 datasource db {
   provider  = "postgresql"
   url       = env("DATABASE_URL")
@@ -71,6 +55,7 @@ model Agent {
   enabledTestAgents   TestAgent[]
   scenarios           Scenario[]
   tests               Test[]
+  Call                Call[]
 }
 
 model Test {
@@ -120,7 +105,6 @@ model Call {
   startedAt          String?
   endedAt            String?
   regionId           String?
-  agentId            String?
   metadata           Json?
   latencyP50         Float?
   latencyP90         Float?
@@ -132,6 +116,9 @@ model Call {
   duration           Float?
 
   evalResults EvalResult[]
+
+  agent   Agent?  @relation(fields: [agentId], references: [id], onDelete: Cascade)
+  agentId String?
 
   test        Test?      @relation(fields: [testId], references: [id], onDelete: Cascade)
   testId      String?
@@ -329,16 +316,20 @@ model EvalSet {
   condition     String       @default("")
   evals         Eval[]
   enabled       Boolean      @default(true)
-  savedSearch   SavedSearch? @relation(fields: [savedSearchId], references: [id])
+  savedSearch   SavedSearch? @relation(fields: [savedSearchId], references: [id], onDelete: Cascade)
   savedSearchId String?
 }
 
 model SavedSearch {
-  id             String   @id @default(uuid())
-  createdAt      DateTime @default(now())
-  name           String
-  ownerId        String
-  agentId        String
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  name      String
+  ownerId   String
+
+  // If true, this is the default saved search for the user, shown in the "dashboard" tab
+  isDefault Boolean @default(false)
+
+  agentId        String[]
   lookbackPeriod Json
   timeRange      Json?
   chartPeriod    Int
@@ -354,10 +345,11 @@ model Alert {
   createdAt     DateTime    @default(now())
   ownerId       String
   name          String
-  savedSearch   SavedSearch @relation(fields: [savedSearchId], references: [id])
+  savedSearch   SavedSearch @relation(fields: [savedSearchId], references: [id], onDelete: Cascade)
   savedSearchId String
   type          AlertType
   details       Json
+  enabled       Boolean     @default(true)
 }
 
 enum AlertType {

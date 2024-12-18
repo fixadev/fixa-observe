@@ -1,10 +1,7 @@
 "use client";
-import { CardContent, CardHeader } from "~/components/ui/card";
-import { cn, isTempId } from "~/lib/utils";
-import { EditableText } from "~/components/EditableText";
-import { EllipsisHorizontalIcon } from "@heroicons/react/24/solid";
+import { CardContent } from "~/components/ui/card";
+import { cn } from "~/lib/utils";
 import { type AlertWithDetails, type Filter } from "@repo/types/src/index";
-import { Input } from "~/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -12,16 +9,19 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
-import { useEffect, useState } from "react";
-import { lookbackPeriods } from "~/components/hooks/useObserveState";
+import { useEffect, useState, useMemo, useCallback } from "react";
+import { InstallSlackAppButton } from "~/app/observe/slack-app/SlackButton";
+import { alertLookbackPeriods } from "~/lib/instantiate";
 
 export function AlertCard({
   alert,
   filter,
+  searchId,
   onUpdate,
 }: {
   alert: AlertWithDetails;
   filter: Filter;
+  searchId: string;
   onUpdate: (alert: AlertWithDetails) => void;
 }) {
   type LatencyOption = {
@@ -40,17 +40,20 @@ export function AlertCard({
   type AlertOption = LatencyOption | EvalSetOption;
 
   const [alertOptionIndex, setAlertOptionIndex] = useState(0);
-  const alertOptions: AlertOption[] = [
-    { value: "p50", label: "latency P50", type: "latency" },
-    { value: "p90", label: "latency P90", type: "latency" },
-    { value: "p95", label: "latency P95", type: "latency" },
-    ...(filter.evalSets?.map((evalSet) => ({
-      value: evalSet.id,
-      label: evalSet.name,
-      type: "evalSet" as const,
-      evalSetId: evalSet.id,
-    })) ?? []),
-  ];
+  const alertOptions = useMemo<AlertOption[]>(
+    () => [
+      { value: "p50", label: "latency P50", type: "latency" },
+      { value: "p90", label: "latency P90", type: "latency" },
+      { value: "p95", label: "latency P95", type: "latency" },
+      ...(filter.evalSets?.map((evalSet) => ({
+        value: evalSet.id,
+        label: evalSet.name,
+        type: "evalSet" as const,
+        evalSetId: evalSet.id,
+      })) ?? []),
+    ],
+    [filter.evalSets],
+  );
 
   useEffect(() => {
     setAlertOptionIndex(
@@ -60,7 +63,47 @@ export function AlertCard({
           : opt.value === alert.details?.evalSetId,
       ),
     );
-  }, [alert]);
+  }, [alert, alertOptions]);
+
+  function getTriggerSelectValue(trigger: boolean | null) {
+    if (trigger === null) return "null";
+    return trigger ? "true" : "false";
+  }
+
+  function getTriggerValue(trigger: string) {
+    if (trigger === "null") return null;
+    return trigger === "true";
+  }
+
+  const updateAlert = useCallback(
+    (oldAlert: AlertWithDetails, selectedOption: AlertOption) => {
+      let details;
+      if (selectedOption.type === "latency") {
+        const latencyAlert = oldAlert.details;
+        details = {
+          percentile: selectedOption.value as "p50" | "p90" | "p95",
+          threshold: 1000,
+          slackNames: latencyAlert.slackNames ?? [""],
+          lookbackPeriod: alertLookbackPeriods[2]!,
+          lastAlerted: new Date(0).toISOString(),
+          cooldownPeriod: alertLookbackPeriods[2]!,
+        };
+      } else {
+        details = {
+          evalSetId: selectedOption.evalSetId,
+          trigger: null,
+          slackNames: oldAlert.details?.slackNames ?? [""],
+        };
+      }
+
+      return {
+        ...oldAlert,
+        type: selectedOption.type,
+        details,
+      } as AlertWithDetails;
+    },
+    [],
+  );
 
   return (
     <div className={cn("p-0 text-sm transition-opacity")}>
@@ -100,31 +143,11 @@ export function AlertCard({
                     );
                     if (!selectedOption) return;
 
-                    const newAlert = {
-                      ...alert,
-                      type: selectedOption.type,
-                      details:
-                        selectedOption.type === "latency"
-                          ? {
-                              percentile: selectedOption.value as
-                                | "p50"
-                                | "p90"
-                                | "p95",
-                              threshold: 1000,
-                              slackNames: alert.details?.slackNames ?? [""],
-                              lookbackPeriod: lookbackPeriods[0]!,
-                            }
-                          : {
-                              evalSetId: selectedOption.evalSetId,
-                              trigger: true,
-                              slackNames: alert.details?.slackNames ?? [""],
-                            },
-                    } as AlertWithDetails;
-
+                    const updatedAlert = updateAlert(alert, selectedOption);
                     setAlertOptionIndex(
                       alertOptions.findIndex((opt) => opt.value === value),
                     );
-                    onUpdate(newAlert);
+                    onUpdate(updatedAlert);
                   }}
                 >
                   <SelectTrigger className="w-full bg-white">
@@ -169,13 +192,15 @@ export function AlertCard({
                   </Select>
                   <div>for the last</div>
                   <Select
-                    value={alert.details?.lookbackPeriod.value.toString()}
+                    value={
+                      alert.details?.lookbackPeriod?.value.toString() ?? ""
+                    }
                     onValueChange={(value) => {
                       onUpdate({
                         ...alert,
                         details: {
                           ...alert.details,
-                          lookbackPeriod: lookbackPeriods.find(
+                          lookbackPeriod: alertLookbackPeriods.find(
                             (p) => p.value === parseInt(value),
                           )!,
                         },
@@ -183,10 +208,10 @@ export function AlertCard({
                     }}
                   >
                     <SelectTrigger className="w-fit bg-white">
-                      <SelectValue placeholder="1000ms" />
+                      <SelectValue placeholder="4 hours" />
                     </SelectTrigger>
                     <SelectContent>
-                      {lookbackPeriods.map((period) => (
+                      {alertLookbackPeriods.map((period) => (
                         <SelectItem
                           key={period.value}
                           value={period.value.toString()}
@@ -200,13 +225,13 @@ export function AlertCard({
               ) : (
                 <>
                   <Select
-                    value={alert.details?.trigger.toString()}
+                    value={getTriggerSelectValue(alert.details?.trigger)}
                     onValueChange={(value) => {
                       onUpdate({
                         ...alert,
                         details: {
                           ...alert.details,
-                          trigger: value === "true",
+                          trigger: getTriggerValue(value),
                         },
                       });
                     }}
@@ -215,6 +240,7 @@ export function AlertCard({
                       <SelectValue placeholder="succeeds" />
                     </SelectTrigger>
                     <SelectContent>
+                      <SelectItem value="null">is triggered</SelectItem>
                       <SelectItem value="true">succeeds</SelectItem>
                       <SelectItem value="false">fails</SelectItem>
                     </SelectContent>
@@ -222,11 +248,58 @@ export function AlertCard({
                 </>
               )}
             </div>
-            <div>
-              <div className="text-xs font-medium text-muted-foreground">
-                THEN
+            <div className="flex flex-col gap-2">
+              <div>
+                <div className="text-xs font-medium text-muted-foreground">
+                  THEN
+                </div>
+                <div className="flex flex-row items-center gap-4 p-2 text-muted-foreground">
+                  <div>send a slack alert</div>
+                  <InstallSlackAppButton
+                    installText="add to slack"
+                    reInstallText="slack configured"
+                    savedSearchId={searchId}
+                  />
+                </div>
               </div>
-              <div className="flex flex-row items-center gap-4">
+              {alert.type === "latency" && (
+                <div className="flex flex-col gap-2">
+                  <div className="text-xs font-medium text-muted-foreground">
+                    COOLDOWN PERIOD
+                  </div>
+                  <Select
+                    value={
+                      alert.details?.cooldownPeriod?.value.toString() ?? ""
+                    }
+                    onValueChange={(value) => {
+                      onUpdate({
+                        ...alert,
+                        details: {
+                          ...alert.details,
+                          cooldownPeriod: alertLookbackPeriods.find(
+                            (p) => p.value === parseInt(value),
+                          )!,
+                        },
+                      });
+                    }}
+                  >
+                    <SelectTrigger className="w-fit bg-white">
+                      <SelectValue placeholder="4 hours" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {alertLookbackPeriods.map((period) => (
+                        <SelectItem
+                          key={period.value}
+                          value={period.value.toString()}
+                        >
+                          {period.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+              {/* <div className="flex flex-row items-center gap-4">
                 <div>send a slack alert and tag</div>
                 <Input
                   className="w-40"
@@ -243,7 +316,7 @@ export function AlertCard({
                     onUpdate(updatedAlert);
                   }}
                 />
-              </div>
+              </div> */}
             </div>
           </div>
         </div>

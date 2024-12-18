@@ -12,9 +12,19 @@ export function CTA() {
             start testing and fixing today
           </span> */}
       </h2>
-      <Button size="lg" asChild>
-        <Link href="/sign-up">get started</Link>
-      </Button>
+      <div className="flex flex-col items-center gap-2 sm:flex-row">
+        <Button size="lg" asChild className="w-40">
+          <Link href="/sign-up">get started</Link>
+        </Button>
+        <Button size="lg" variant="outline" asChild className="w-40">
+          <Link
+            href="https://cal.com/team/fixa/20-minute-meeting"
+            target="_blank"
+          >
+            book a demo
+          </Link>
+        </Button>
+      </div>
     </div>
   );
 }

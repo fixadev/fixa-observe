@@ -8,6 +8,8 @@ import { Input } from "../ui/input";
 import { Skeleton } from "../ui/skeleton";
 import { MagnifyingGlassIcon } from "@heroicons/react/24/solid";
 import debounce from "lodash/debounce";
+import { Button } from "../ui/button";
+import Link from "next/link";
 
 export default function CallTable({
   calls,
@@ -58,14 +60,24 @@ export default function CallTable({
 
   return (
     <div className="flex flex-col gap-2">
-      <div className="relative">
-        <MagnifyingGlassIcon className="absolute left-2 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-        <Input
-          value={customerCallId}
-          onChange={handleCustomerCallIdChange}
-          className="max-w-sm bg-background pl-8"
-          placeholder="search for call ID"
-        />
+      <div className="flex items-end justify-between">
+        <div className="relative">
+          <MagnifyingGlassIcon className="absolute left-2 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            value={customerCallId}
+            onChange={handleCustomerCallIdChange}
+            className="max-w-sm bg-background pl-8"
+            placeholder="search for call ID"
+          />
+        </div>
+        <Button size="sm" variant="link" className="px-0" asChild>
+          <Link
+            href="https://docs.fixa.dev/api-reference/endpoint/upload-call"
+            target="_blank"
+          >
+            how do i upload a call?
+          </Link>
+        </Button>
       </div>
 
       {(isLoading ?? !calls) ? (

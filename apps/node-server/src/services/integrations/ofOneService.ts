@@ -34,13 +34,12 @@ export async function scheduleOfOneCalls(
       }
     });
 
-    // Try to start calls or queue them
-    for (const callDetails of callsToStart) {
+    const callPromises = callsToStart.map(async (callDetails) => {
       const availableDevice = deviceIds.find((id) => !isDeviceInUse(id));
 
       if (availableDevice) {
         // Start the call immediately if a device is available
-        await startCall(
+        return startCall(
           {
             callId: callDetails.callId,
             ownerId: callDetails.ownerId,
@@ -64,7 +63,10 @@ export async function scheduleOfOneCalls(
           baseUrl: callDetails.baseUrl,
         });
       }
-    }
+    });
+
+    await Promise.allSettled(callPromises);
+
     return callsToStart.map((call) => ({
       id: call.callId,
     }));
@@ -125,7 +127,7 @@ export async function startCall(
     console.log("deviceUsageMap", deviceUsageMap);
     console.log("callQueue", callQueue);
     const { data } = await axios.post<{ callId: string }>(
-      `${env.AUDIO_SERVICE_URL}/websocket-call-ofone`,
+      `https://api.pixa.dev/run-ofone-kiosk`,
       {
         device_id: deviceId,
         assistant_id: assistantId,
@@ -167,6 +169,7 @@ export async function startCall(
       },
     });
   } catch (error) {
+    setDeviceAvailable(deviceId, userSocket);
     console.error("Error starting OFONE call", error);
     await db.call.update({
       where: {

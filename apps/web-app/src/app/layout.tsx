@@ -1,7 +1,6 @@
 import "~/styles/globals.css";
 
 import { Toaster } from "@/components/ui/toaster";
-import { type Metadata } from "next";
 import { TRPCReactProvider } from "~/trpc/react";
 import { ibmPlexSans } from "./fonts";
 import { CSPostHogProvider } from "./providers";
@@ -10,11 +9,6 @@ import { ClerkProvider } from "@clerk/nextjs";
 // import { dark } from "@clerk/themes";
 import ChildrenWrapper from "./_components/ChildrenWrapper";
 import { TooltipProvider } from "~/components/ui/tooltip";
-export const metadata: Metadata = {
-  title: "fixa | AI voice agent testing and observability",
-  description: "run tests, analyze calls, fix bugs in your voice agents",
-  icons: [{ rel: "icon", url: "/favicon.ico" }],
-};
 
 export default function RootLayout({
   children,
