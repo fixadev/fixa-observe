@@ -11,6 +11,8 @@ import { api } from "~/trpc/react";
 import ChartCard from "~/components/observe/ChartCard";
 import { EvalSetsAndAlertsCard } from "./EvalsAndAlertsCard";
 import { type SavedSearchWithIncludes } from "@repo/types/src";
+import NoCallsCard from "~/components/observe/NoCallsCard";
+import FreeCallsLeft from "~/components/observe/FreeCallsLeft";
 
 export default function SavedSearchPage({
   params,
@@ -34,6 +36,9 @@ export default function SavedSearchPage({
   }, [savedSearch, setFilter, setSavedSearch]);
 
   const containerRef = useRef<HTMLDivElement>(null);
+
+  const { data: callsExist, isLoading: isLoadingCallsExist } =
+    api._call.checkIfACallExists.useQuery();
 
   const {
     data: percentiles,
@@ -103,6 +108,10 @@ export default function SavedSearchPage({
     [calls, selectedCallId],
   );
 
+  if (!callsExist && !isLoadingCallsExist) {
+    return <NoCallsCard />;
+  }
+
   return (
     <div
       className="relative h-full bg-muted/30 focus:outline-none"
@@ -131,6 +140,7 @@ export default function SavedSearchPage({
             <Spinner />
           </div>
         )}
+        <FreeCallsLeft />
         {selectedCall && (
           <Dialog
             open={!!selectedCallId}

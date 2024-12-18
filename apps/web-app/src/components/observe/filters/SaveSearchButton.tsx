@@ -28,10 +28,10 @@ export default function SaveSearchButton({
 
   const reset = useCallback(() => {
     setName("");
-    if (savedSearch) {
-      setState("create-or-update");
-    } else {
+    if (savedSearch?.isDefault) {
       setState("create");
+    } else {
+      setState("create-or-update");
     }
   }, [savedSearch]);
 
