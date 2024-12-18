@@ -50,15 +50,25 @@ export class AgentService {
     });
   }
 
-  async upsertAgent({ agentId, userId }: { agentId: string; userId: string }) {
+  async upsertAgent({
+    customerAgentId,
+    userId,
+  }: {
+    customerAgentId: string;
+    userId: string;
+  }) {
     try {
-      return await this.db.agent.upsert({
-        where: { id: agentId },
-        update: {},
-        create: {
-          id: agentId,
+      const existingAgent = await this.db.agent.findFirst({
+        where: { ownerId: userId, customerAgentId },
+      });
+      if (existingAgent) {
+        return existingAgent;
+      }
+      return await this.db.agent.create({
+        data: {
+          customerAgentId: customerAgentId,
           ownerId: userId,
-          name: agentId,
+          name: customerAgentId,
           phoneNumber: "",
           systemPrompt: "",
         },

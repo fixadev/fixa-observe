@@ -4,7 +4,7 @@ import {
   Filter,
   SavedSearchWithIncludes,
 } from "@repo/types/src/index";
-import { type PrismaClient } from "@repo/db/src/index";
+import { Prisma, type PrismaClient } from "@repo/db/src/index";
 
 export class SearchService {
   constructor(private db: PrismaClient) {}
@@ -113,13 +113,19 @@ export class SearchService {
 
   async getAll({
     userId,
+    includeDefault = true,
   }: {
     userId: string;
+    includeDefault?: boolean;
   }): Promise<SavedSearchWithIncludes[]> {
+    const where: Prisma.SavedSearchWhereInput = {
+      ownerId: userId,
+    };
+    if (!includeDefault) {
+      where.isDefault = false;
+    }
     const savedSearches = await this.db.savedSearch.findMany({
-      where: {
-        ownerId: userId,
-      },
+      where,
       orderBy: {
         createdAt: "asc",
       },
@@ -143,6 +149,24 @@ export class SearchService {
       }
     }
     return parsedSearches;
+  }
+
+  async getDefault({
+    userId,
+  }: {
+    userId: string;
+  }): Promise<SavedSearchWithIncludes | null> {
+    const savedSearch = await this.db.savedSearch.findFirst({
+      where: { ownerId: userId, isDefault: true },
+      include: {
+        alerts: true,
+        evalSets: {
+          include: { evals: true },
+        },
+      },
+    });
+    const parsed = SavedSearchWithIncludes.safeParse(savedSearch);
+    return parsed.success ? parsed.data : null;
   }
 
   async createAlert({

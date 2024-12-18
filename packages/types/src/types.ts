@@ -110,9 +110,11 @@ export const FilterSchema = z.object({
   agentId: z.array(z.string()),
   chartPeriod: z.number(),
   customerCallId: z.union([z.string(), z.null(), z.undefined()]),
-  metadata: z
-    .record(z.string(), z.string().or(z.array(z.string())).or(z.undefined()))
-    .optional(),
+  metadata: z.union([
+    z.record(z.string(), z.string().or(z.array(z.string())).or(z.undefined())),
+    z.null(),
+    z.undefined(),
+  ]),
   evalSets: z.array(EvalSetWithIncludesSchema).optional(),
   alerts: z.array(AlertWithDetailsSchema).optional(),
   evalSetToSuccess: z.union([evalSetToSuccess, z.null(), z.undefined()]),
@@ -124,6 +126,7 @@ export const SavedSearchWithIncludes = FilterSchema.extend({
   createdAt: z.date(),
   ownerId: z.string(),
   name: z.string(),
+  isDefault: z.boolean(),
 });
 
 export type SelectItem = {

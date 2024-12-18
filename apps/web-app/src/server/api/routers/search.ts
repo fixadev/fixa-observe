@@ -48,11 +48,14 @@ export const searchRouter = createTRPCRouter({
       });
     }),
 
-  getAll: protectedProcedure.query(async ({ ctx }) => {
-    return await searchServiceInstance.getAll({
-      userId: ctx.user.id,
-    });
-  }),
+  getAll: protectedProcedure
+    .input(z.object({ includeDefault: z.boolean().optional() }).optional())
+    .query(async ({ ctx, input }) => {
+      return await searchServiceInstance.getAll({
+        userId: ctx.user.id,
+        includeDefault: input?.includeDefault ?? true,
+      });
+    }),
 
   getById: protectedProcedure
     .input(z.object({ id: z.string() }))
@@ -62,6 +65,12 @@ export const searchRouter = createTRPCRouter({
         userId: ctx.user.id,
       });
     }),
+
+  getDefault: protectedProcedure.query(async ({ ctx }) => {
+    return await searchServiceInstance.getDefault({
+      userId: ctx.user.id,
+    });
+  }),
 
   createAlert: protectedProcedure
     .input(AlertWithDetailsSchema)

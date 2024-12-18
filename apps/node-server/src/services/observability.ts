@@ -285,12 +285,12 @@ export const findRelevantEvalSets = async ({
       const savedSearchMetadata = savedSearch.metadata as Record<
         string,
         string | string[]
-      >;
+      > | null;
       return (
-        Object.entries(savedSearchMetadata).every(
+        Object.entries(savedSearchMetadata || {}).every(
           ([key, value]) =>
             callMetadata?.[key] === value ||
-            (callMetadata?.[key] && value.includes(callMetadata?.[key])),
+            (callMetadata?.[key] && value?.includes(callMetadata?.[key])),
         ) &&
         (savedSearch.agentId.includes(agentId) ||
           savedSearch.agentId.length === 0)
