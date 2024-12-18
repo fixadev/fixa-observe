@@ -119,7 +119,20 @@ export default function Filters({
   const hasFilterChanged = useMemo(() => {
     const _originalFilter = FilterSchema.parse(originalFilter);
     const _filter = FilterSchema.parse(filter);
-    return JSON.stringify(_filter) !== JSON.stringify(_originalFilter);
+
+    // Create new objects without evalSets and alerts
+    const cleanOriginal = { ..._originalFilter };
+    const cleanFilter = { ..._filter };
+    delete cleanOriginal.evalSets;
+    delete cleanOriginal.alerts;
+    delete cleanFilter.evalSets;
+    delete cleanFilter.alerts;
+
+    // Fix the case where metadata is undefined / null
+    cleanOriginal.metadata = cleanOriginal.metadata ?? {};
+    cleanFilter.metadata = cleanFilter.metadata ?? {};
+
+    return JSON.stringify(cleanFilter) !== JSON.stringify(cleanOriginal);
   }, [filter, originalFilter]);
 
   const [metadataFilters, setMetadataFilters] = useState<
