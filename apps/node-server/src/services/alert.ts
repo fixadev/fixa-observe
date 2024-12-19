@@ -52,7 +52,14 @@ export async function sendAlerts({
           const latencyPercentiles =
             await callService.getLatencyPercentilesForLookbackPeriod({
               userId,
-              filter: { ...filter.data, lookbackPeriod: lookbackPeriod },
+              filter: {
+                ...filter.data,
+                lookbackPeriod: lookbackPeriod,
+                agentId:
+                  (call?.metadata as { test?: string })?.test && call?.agentId
+                    ? [call.agentId]
+                    : filter.data.agentId,
+              },
               newLatencyBlocks: latencyDurations ?? [],
             });
 
