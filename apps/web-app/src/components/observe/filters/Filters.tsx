@@ -100,6 +100,7 @@ export default function Filters({
 
     metadataObjects.forEach((object) => {
       Object.entries(object).forEach(([key, val]) => {
+        if (key === "test") return;
         if (!result[key]) {
           result[key] = [];
         }
@@ -131,6 +132,9 @@ export default function Filters({
     // Fix the case where metadata is undefined / null
     cleanOriginal.metadata = cleanOriginal.metadata ?? {};
     cleanFilter.metadata = cleanFilter.metadata ?? {};
+
+    delete cleanOriginal.metadata.test;
+    delete cleanFilter.metadata.test;
 
     return JSON.stringify(cleanFilter) !== JSON.stringify(cleanOriginal);
   }, [filter, originalFilter]);
