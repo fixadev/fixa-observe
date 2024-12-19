@@ -17,13 +17,16 @@ import FreeCallsLeft from "~/components/observe/FreeCallsLeft";
 export default function SavedSearchPage({
   params,
   savedSearch,
+  includeTestCalls = false,
 }: {
   params: { searchId: string };
   savedSearch: SavedSearchWithIncludes;
+  includeTestCalls?: boolean;
 }) {
   const {
     selectedCallId,
     setSelectedCallId,
+    setIncludeTestCalls,
     filter,
     setFilter,
     orderBy,
@@ -33,7 +36,14 @@ export default function SavedSearchPage({
   useEffect(() => {
     setFilter(savedSearch);
     setSavedSearch(savedSearch);
-  }, [savedSearch, setFilter, setSavedSearch]);
+    setIncludeTestCalls(includeTestCalls);
+  }, [
+    savedSearch,
+    setFilter,
+    setSavedSearch,
+    setIncludeTestCalls,
+    includeTestCalls,
+  ]);
 
   const containerRef = useRef<HTMLDivElement>(null);
 

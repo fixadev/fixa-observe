@@ -21,6 +21,7 @@ import {
   CollapsibleTrigger,
 } from "../ui/collapsible";
 import {
+  BeakerIcon,
   ChartBarIcon,
   ChevronDownIcon,
   CreditCardIcon,
@@ -130,6 +131,14 @@ export default function ObserveSidebar() {
                     <Link href={`/observe`}>
                       <ChartBarIcon />
                       <span>dashboard</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild isActive={isCurrentPath("/tests")}>
+                    <Link href={`/observe/tests`}>
+                      <BeakerIcon />
+                      <span>test calls</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
