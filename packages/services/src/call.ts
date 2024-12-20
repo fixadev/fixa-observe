@@ -71,7 +71,27 @@ export class CallService {
 
       if (filter.metadata) {
         const metadataFilters = Object.entries(filter.metadata).map(
-          ([key, value]) => {
+          ([key, value]): Prisma.CallWhereInput => {
+            // Test filter
+            if (key === "test") {
+              if (value === "true") {
+                return {
+                  metadata: {
+                    path: ["test"],
+                    not: Prisma.DbNull,
+                  },
+                };
+              } else if (value === "false") {
+                return {
+                  metadata: {
+                    path: ["test"],
+                    equals: Prisma.DbNull,
+                  },
+                };
+              }
+            }
+
+            // Other metadata filters
             if (Array.isArray(value)) {
               return {
                 OR: value.map((v) => ({

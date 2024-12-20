@@ -31,6 +31,7 @@ export class SearchService {
       lookbackPeriod: filter.lookbackPeriod ?? {},
       metadata: filter.metadata ?? {},
     };
+    delete searchData.metadata.test;
 
     const savedSearch = await this.db.savedSearch.create({
       data: searchData,
@@ -54,6 +55,7 @@ export class SearchService {
     userId: string;
   }): Promise<SavedSearchWithIncludes> {
     const { evalSets, alerts, ...searchData } = search;
+    delete searchData.metadata?.test;
     const updatedSearch = await this.db.savedSearch.update({
       where: {
         id: search.id,

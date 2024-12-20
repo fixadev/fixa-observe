@@ -5,6 +5,7 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useMemo,
   useRef,
   useState,
 } from "react";
@@ -46,6 +47,9 @@ interface ObserveStateContextType {
   selectedCallId: string | null;
   setSelectedCallId: (callId: string | null) => void;
 
+  includeTestCalls: boolean;
+  setIncludeTestCalls: (includeTestCalls: boolean) => void;
+
   filter: Filter;
   setFilter: React.Dispatch<React.SetStateAction<Filter>>;
   resetFilter: () => void;
@@ -69,8 +73,9 @@ export function ObserveStateProvider({
   children: React.ReactNode;
 }) {
   const [selectedCallId, setSelectedCallId] = useState<string | null>(null);
+  const [includeTestCalls, setIncludeTestCalls] = useState<boolean>(false);
 
-  const [filter, setFilter] = useState<Filter>(defaultFilter);
+  const [_filter, setFilter] = useState<Filter>(defaultFilter);
   const [orderBy, setOrderBy] = useState<OrderBy | undefined>();
   const [savedSearch, setSavedSearch] = useState<
     SavedSearchWithIncludes | undefined
@@ -79,6 +84,17 @@ export function ObserveStateProvider({
   const resetFilter = useCallback(() => {
     setFilter(defaultFilter);
   }, []);
+
+  const filter = useMemo<Filter>(() => {
+    const metadata = {
+      ...(_filter.metadata ?? {}),
+      test: includeTestCalls ? "true" : "false",
+    };
+    return {
+      ..._filter,
+      metadata,
+    };
+  }, [_filter, includeTestCalls]);
 
   const prevLookbackPeriod = useRef<number>(filter.lookbackPeriod.value);
   const prevTimeRange = useRef<{ start: number; end: number }>();
@@ -114,6 +130,8 @@ export function ObserveStateProvider({
       value={{
         selectedCallId,
         setSelectedCallId,
+        includeTestCalls,
+        setIncludeTestCalls,
         filter,
         setFilter,
         resetFilter,
@@ -135,5 +153,6 @@ export function useObserveState() {
       "useObserveState must be used within an ObserveStateProvider",
     );
   }
+
   return context;
 }
