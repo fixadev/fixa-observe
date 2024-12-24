@@ -399,6 +399,9 @@ export class CallService {
     const call = await this.db.call.findFirst({
       where: {
         ownerId,
+        customerCallId: {
+          not: null,
+        },
       },
     });
     return call !== null;
