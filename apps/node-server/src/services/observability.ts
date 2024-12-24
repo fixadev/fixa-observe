@@ -13,7 +13,11 @@ import { sendAlerts } from "./alert";
 import stripeServiceClient from "../clients/stripeServiceClient";
 import { SearchService } from "@repo/services/src/search";
 import { getAudioDuration } from "../utils/audio";
-import { UploadCallParams } from "@repo/types/src/types";
+import {
+  SavedSearchWithIncludes,
+  UploadCallParams,
+} from "@repo/types/src/types";
+import { EvalSetWithIncludes } from "@repo/types/src";
 
 export const transcribeAndSaveCall = async ({
   callId,
@@ -199,13 +203,12 @@ export const analyzeBasedOnRules = async ({
   userId: string;
 }) => {
   try {
-    const { evalSets: relevantEvalSets, savedSearches } =
-      await findRelevantEvalSets({
-        messages,
-        userId,
-        agentId,
-        callMetadata,
-      });
+    const { relevantEvalSets, savedSearches } = await findRelevantEvalSets({
+      messages,
+      userId,
+      agentId,
+      callMetadata,
+    });
     if (relevantEvalSets.length > 0) {
       const allEvals = relevantEvalSets.flatMap((evalSet) => evalSet.evals);
       const result = await analyzeCallWitho1({
@@ -269,7 +272,10 @@ export const findRelevantEvalSets = async ({
   userId: string;
   agentId: string;
   callMetadata?: Record<string, string>;
-}) => {
+}): Promise<{
+  savedSearches: SavedSearchWithIncludes[];
+  relevantEvalSets: EvalSetWithIncludes[];
+}> => {
   try {
     const searchServiceInstance = new SearchService(db);
     const savedSearches = await searchServiceInstance.getAll({
@@ -278,7 +284,7 @@ export const findRelevantEvalSets = async ({
     if (!savedSearches) {
       return {
         savedSearches: [],
-        evalSets: [],
+        relevantEvalSets: [],
       };
     }
     const matchingSavedSearches = savedSearches.filter((savedSearch) => {
@@ -388,7 +394,7 @@ export const findRelevantEvalSets = async ({
 
     return {
       savedSearches: matchingSavedSearches,
-      evalSets: evalSetsWithEvals.filter((evalSet) => {
+      relevantEvalSets: evalSetsWithEvals.filter((evalSet) => {
         return parsedResponse.relevantEvalSets.some(
           (relevantEvalSet) =>
             relevantEvalSet.id === evalSet.id && relevantEvalSet.relevant,
