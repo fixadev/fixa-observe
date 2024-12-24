@@ -1,17 +1,22 @@
-import { notFound } from "next/navigation";
-import { api } from "~/trpc/server";
+"use client";
+
+import { api } from "~/trpc/react";
 import SavedSearchPage from "./_components/SavedSearchPage";
+import Spinner from "~/components/Spinner";
+import { notFound } from "next/navigation";
 
-// TODO: refactor this to be cleaner
-
-export default async function Page({
-  params,
-}: {
-  params: { searchId: string };
-}) {
-  const savedSearch = await api.search.getById({
+export default function Page({ params }: { params: { searchId: string } }) {
+  const { data: savedSearch, isLoading } = api.search.getById.useQuery({
     id: params.searchId,
   });
+
+  if (isLoading) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <Spinner />
+      </div>
+    );
+  }
 
   if (!savedSearch) {
     notFound();
