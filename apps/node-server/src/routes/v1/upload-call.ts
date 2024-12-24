@@ -4,6 +4,7 @@ import { addCallToQueue } from "../../services/aws";
 import { env } from "../../env";
 import userServiceClient from "../../clients/userServiceClient";
 import { PublicMetadata } from "@repo/types/src";
+import { posthogClient } from "../../clients/posthogClient";
 
 const uploadCallRouter = Router();
 
@@ -30,10 +31,11 @@ uploadCallRouter.post(
         const user = await userServiceClient.getUser(res.locals.userId);
         if (user?.publicMetadata) {
           const metadata = user.publicMetadata as PublicMetadata;
-          if (
-            metadata.stripeCustomerId ||
-            user.id === env.NEXT_PUBLIC_11X_USER_ID
-          ) {
+          const bypassPayment = await posthogClient.getFeatureFlag(
+            "bypass-payment",
+            user.id,
+          );
+          if (metadata.stripeCustomerId || bypassPayment) {
             // User is paid user!
           } else {
             // User is free user! Decrement free calls left

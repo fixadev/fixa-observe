@@ -64,11 +64,7 @@ export function EvalInput({
                 <SelectItem id="content" value="content">
                   content
                 </SelectItem>
-                <SelectItem
-                  id="tool"
-                  value="tool"
-                  disabled={user?.id !== env.NEXT_PUBLIC_OFONE_USER_ID}
-                >
+                <SelectItem id="tool" value="tool">
                   tool
                 </SelectItem>
               </SelectContent>

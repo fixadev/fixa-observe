@@ -10,11 +10,15 @@ import { AgentService } from "./agent";
 import { UserService } from "./user";
 import { StripeService } from "./stripe";
 import axios from "axios";
+import { type PostHog } from "posthog-node";
 
 export class TestService {
   private env: { NODE_SERVER_URL: string };
 
-  constructor(private db: PrismaClient) {
+  constructor(
+    private db: PrismaClient,
+    private posthogClient: PostHog,
+  ) {
     this.env = {
       NODE_SERVER_URL:
         process.env.NODE_SERVER_URL || process.env.NEXT_PUBLIC_SERVER_URL!,
@@ -134,7 +138,13 @@ export class TestService {
     if (!userData) {
       throw new Error("User not found");
     }
-    if (userId !== process.env.NEXT_PUBLIC_OFONE_USER_ID) {
+
+    const bypassPayment = await this.posthogClient.getFeatureFlag(
+      "bypass-payment",
+      userId,
+    );
+    if (!bypassPayment) {
+      // Check if user has free tests left or subscription
       const noFreeTestsLeft =
         !userData.freeTestsLeft ||
         (userData.freeTestsLeft && userData.freeTestsLeft <= 0);

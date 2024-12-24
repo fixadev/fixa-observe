@@ -44,7 +44,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "~/components/ui/popover";
-import { env } from "~/env";
+import { useFeatureFlagEnabled } from "posthog-js/react";
 
 export default function AgentPage({ params }: { params: { agentId: string } }) {
   const [tests, setTests] = useState<TestWithCalls[]>([]);
@@ -53,6 +53,7 @@ export default function AgentPage({ params }: { params: { agentId: string } }) {
   const { user } = useUser();
   const { agent, setAgent } = useAgent(params.agentId);
   const router = useRouter();
+  const bypassPayment = useFeatureFlagEnabled("bypass-payment");
 
   // hacky fix
   useEffect(() => {
@@ -131,9 +132,9 @@ export default function AgentPage({ params }: { params: { agentId: string } }) {
     return (
       !!metadata?.stripeCustomerId ||
       (metadata?.freeTestsLeft ?? 0) > 0 ||
-      user?.id === env.NEXT_PUBLIC_OFONE_USER_ID
+      bypassPayment
     );
-  }, [user]);
+  }, [user, bypassPayment]);
 
   const handleRunTest = useCallback(
     async (scenarioIds: string[], testAgentIds: string[]) => {

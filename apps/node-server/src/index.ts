@@ -7,6 +7,7 @@ import v1Router from "./routes/v1";
 import { authenticateRequest } from "./middlewares/auth";
 import vapiRouter from "./routes/v1/vapi";
 import ofOneRouter from "./routes/v1/of-one";
+import { posthogClient } from "./clients/posthogClient";
 
 const app = express();
 const httpServer = createServer(app);
@@ -63,8 +64,9 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
 // Server setup with unified cleanup
 const PORT = process.env.PORT || 3003;
 const cleanup = () => {
-  httpServer.close(() => {
+  httpServer.close(async () => {
     console.log("Server closed");
+    await posthogClient.shutdown();
     process.exit(0);
   });
 };

@@ -2,9 +2,10 @@ import express from "express";
 import { z } from "zod";
 import { db } from "../../db";
 import { TestService } from "@repo/services/src/test";
+import { posthogClient } from "../../clients/posthogClient";
 
 const router = express.Router();
-const testService = new TestService(db);
+const testService = new TestService(db, posthogClient);
 
 const inputSchema = z.object({
   agentId: z.string(),

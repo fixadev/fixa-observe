@@ -6,10 +6,11 @@ import { useCallback, useMemo } from "react";
 import { Button } from "../ui/button";
 import { api } from "~/trpc/react";
 import Spinner from "../Spinner";
-import { env } from "~/env";
+import { useFeatureFlagEnabled } from "posthog-js/react";
 import { Card } from "../ui/card";
 
 export default function FreeCallsLeft() {
+  const bypassPayment = useFeatureFlagEnabled("bypass-payment");
   const { user, isLoaded } = useUser();
 
   const metadata = user?.publicMetadata as PublicMetadata | undefined;
@@ -19,10 +20,8 @@ export default function FreeCallsLeft() {
   }, [metadata]);
 
   const isPaidUser = useMemo(() => {
-    return (
-      !!metadata?.stripeCustomerId || user?.id === env.NEXT_PUBLIC_11X_USER_ID
-    );
-  }, [metadata, user]);
+    return !!metadata?.stripeCustomerId || bypassPayment;
+  }, [metadata, bypassPayment]);
 
   const { mutate: getCheckoutUrl, isPending: isGeneratingStripeUrl } =
     api.stripe.createCheckoutUrl.useMutation({

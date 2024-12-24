@@ -2,8 +2,9 @@ import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { TestService } from "@repo/services/src/test";
 import { db } from "~/server/db";
+import { posthogClient } from "~/server/clients/posthogClient";
 
-const testServiceInstance = new TestService(db);
+const testServiceInstance = new TestService(db, posthogClient);
 
 export const testRouter = createTRPCRouter({
   get: protectedProcedure
