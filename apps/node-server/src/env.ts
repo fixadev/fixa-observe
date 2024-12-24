@@ -36,6 +36,7 @@ const envSchema = z.object({
   SLACK_ANALYTICS_BOT_WEBHOOK_URL: z.string().min(1),
   NEXT_PUBLIC_POSTHOG_KEY: z.string().min(1),
   NEXT_PUBLIC_POSTHOG_HOST: z.string().min(1),
+  OFONE_KIOSK_ENDPOINT: z.string().min(1),
   // KEYWORDSAI_API_KEY: z.string().min(1),
 });
 
