@@ -1,4 +1,6 @@
 import {
+  EvalContentType,
+  EvalResultType,
   EvalType,
   EvaluationTemplate,
   type PrismaClient,
@@ -24,18 +26,23 @@ export class EvalService {
   }
 
   async createGeneralEval({
-    evaluation,
+    evaluationTemplate,
     userId,
   }: {
-    evaluation: Evaluation;
+    evaluationTemplate: EvaluationTemplate;
     userId: string;
   }): Promise<EvaluationTemplate> {
-    return await this.db.evaluationTemplate.create({
+    return await this.db.evaluation.create({
       data: {
-        ...evaluation,
         id: uuidv4(),
-        ownerId: userId,
-        type: EvalType.general,
+
+        evaluationTemplate: {
+          create: {
+            ...evaluationTemplate,
+            id: uuidv4(),
+            ownerId: userId,
+          },
+        },
       },
     });
   }
