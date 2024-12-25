@@ -1,7 +1,11 @@
-import { type PrismaClient } from "@repo/db/src/index";
+import {
+  EvalType,
+  EvaluationTemplate,
+  type PrismaClient,
+} from "@repo/db/src/index";
 import { v4 as uuidv4 } from "uuid";
 import {
-  type Eval,
+  type Evaluation,
   type Agent,
   type EvalSetWithIncludes,
 } from "@repo/types/src/index";
@@ -10,9 +14,11 @@ import { getCreatedUpdatedDeleted } from "./utils";
 export class EvalService {
   constructor(private db: PrismaClient) {}
 
-  async getGeneralEvals({ userId }: { userId: string }): Promise<Eval[]> {
-    return await this.db.eval.findMany({
-      where: { ownerId: userId },
+  async getGeneralEvals({ userId }: { userId: string }): Promise<Evaluation[]> {
+    return await this.db.evaluation.findMany({
+      where: {
+        evaluationTemplate: { ownerId: userId, type: EvalType.general },
+      },
       orderBy: { createdAt: "asc" },
     });
   }
@@ -21,14 +27,15 @@ export class EvalService {
     evaluation,
     userId,
   }: {
-    evaluation: Eval;
+    evaluation: Evaluation;
     userId: string;
-  }): Promise<Eval> {
-    return await this.db.eval.create({
+  }): Promise<EvaluationTemplate> {
+    return await this.db.evaluationTemplate.create({
       data: {
         ...evaluation,
         id: uuidv4(),
         ownerId: userId,
+        type: EvalType.general,
       },
     });
   }
@@ -37,12 +44,12 @@ export class EvalService {
     evaluation,
     userId,
   }: {
-    evaluation: Eval;
+    evaluation: Evaluation;
     userId: string;
-  }): Promise<Eval> {
-    return await this.db.eval.update({
-      where: { id: evaluation.id, ownerId: userId },
-      data: evaluation,
+  }): Promise<Evaluation> {
+    return await this.db.evaluation.update({
+      where: { id: evaluation.id, evaluationTemplate: { ownerId: userId } },
+      data: { ...evaluation, params: evaluation.params ?? undefined },
     });
   }
 
@@ -58,12 +65,10 @@ export class EvalService {
     userId: string;
   }): Promise<Agent> {
     if (enabled) {
-      return await this.db.agent.update({
-        where: { id: agentId, ownerId: userId },
+      return await this.db.evaluation.update({
+        where: { id },
         data: {
-          enabledGeneralEvals: {
-            connect: { id },
-          },
+          enabled,
         },
       });
     } else {
@@ -84,9 +89,9 @@ export class EvalService {
   }: {
     id: string;
     userId: string;
-  }): Promise<Eval> {
-    return await this.db.eval.update({
-      where: { id, ownerId: userId },
+  }): Promise<Evaluation> {
+    return await this.db.evaluation.update({
+      where: { id, evaluationTemplate: { ownerId: userId } },
       data: { deleted: true },
     });
   }
@@ -96,11 +101,11 @@ export class EvalService {
   }: {
     userId: string;
   }): Promise<EvalSetWithIncludes[]> {
-    return await this.db.evalSet.findMany({
+    return await this.db.evaluationGroup.findMany({
       where: { ownerId: userId },
       orderBy: { createdAt: "asc" },
       include: {
-        evals: true,
+        evaluations: true,
       },
     });
   }
@@ -112,22 +117,23 @@ export class EvalService {
     set: EvalSetWithIncludes;
     userId: string;
   }): Promise<EvalSetWithIncludes> {
-    return await this.db.evalSet.create({
+    return await this.db.evaluationGroup.create({
       data: {
         ...set,
         id: uuidv4(),
         ownerId: userId,
-        evals: {
+        evaluations: {
           create: set.evals.map((evaluation) => ({
             ...evaluation,
             id: uuidv4(),
-            evalSetId: undefined,
+            evaluationTemplateId: undefined,
+            evaluationGroupId: undefined,
             scenarioId: undefined,
           })),
         },
       },
       include: {
-        evals: true,
+        evaluations: { orderBy: { createdAt: "asc" } },
       },
     });
   }
@@ -146,15 +152,15 @@ export class EvalService {
       priorEvals,
       set.evals,
     );
-    return await this.db.evalSet.update({
+    return await this.db.evaluationGroup.update({
       where: { id: set.id, ownerId: userId },
       data: {
         ...set,
-        evals: {
+        evaluations: {
           create: created.map((evaluation) => ({
             ...evaluation,
             id: uuidv4(),
-            evalSetId: undefined,
+            evaluationGroupId: undefined,
             scenarioId: undefined,
             agentId: undefined,
           })),

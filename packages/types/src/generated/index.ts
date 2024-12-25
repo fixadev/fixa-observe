@@ -76,7 +76,7 @@ export const ScenarioScalarFieldEnumSchema = z.enum(['id','createdAt','ownerId',
 
 export const EvaluationTemplateScalarFieldEnumSchema = z.enum(['id','createdAt','name','description','params','scenarioId','type','resultType','contentType','isCritical','toolCallExpectedResult','agentId','ownerId','deleted','evaluationGroupId']);
 
-export const EvaluationScalarFieldEnumSchema = z.enum(['id','createdAt','params','evaluationTemplateId','scenarioId','evaluationGroupId','agentId']);
+export const EvaluationScalarFieldEnumSchema = z.enum(['id','createdAt','enabled','params','evaluationTemplateId','scenarioId','evaluationGroupId','agentId']);
 
 export const EvaluationResultScalarFieldEnumSchema = z.enum(['id','createdAt','callId','evaluationId','result','success','secondsFromStart','duration','type','details','evaluationTemplateId']);
 
@@ -339,6 +339,7 @@ export type EvaluationTemplate = z.infer<typeof EvaluationTemplateSchema>
 export const EvaluationSchema = z.object({
   id: z.string(),
   createdAt: z.coerce.date(),
+  enabled: z.boolean(),
   params: JsonValueSchema,
   evaluationTemplateId: z.string(),
   scenarioId: z.string().nullable(),
@@ -845,6 +846,7 @@ export const EvaluationCountOutputTypeSelectSchema: z.ZodType<Prisma.EvaluationC
 export const EvaluationSelectSchema: z.ZodType<Prisma.EvaluationSelect> = z.object({
   id: z.boolean().optional(),
   createdAt: z.boolean().optional(),
+  enabled: z.boolean().optional(),
   params: z.boolean().optional(),
   evaluationTemplateId: z.boolean().optional(),
   scenarioId: z.boolean().optional(),
@@ -1983,6 +1985,7 @@ export const EvaluationWhereInputSchema: z.ZodType<Prisma.EvaluationWhereInput> 
   NOT: z.union([ z.lazy(() => EvaluationWhereInputSchema),z.lazy(() => EvaluationWhereInputSchema).array() ]).optional(),
   id: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   createdAt: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
+  enabled: z.union([ z.lazy(() => BoolFilterSchema),z.boolean() ]).optional(),
   params: z.lazy(() => JsonFilterSchema).optional(),
   evaluationTemplateId: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   scenarioId: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
@@ -1998,6 +2001,7 @@ export const EvaluationWhereInputSchema: z.ZodType<Prisma.EvaluationWhereInput> 
 export const EvaluationOrderByWithRelationInputSchema: z.ZodType<Prisma.EvaluationOrderByWithRelationInput> = z.object({
   id: z.lazy(() => SortOrderSchema).optional(),
   createdAt: z.lazy(() => SortOrderSchema).optional(),
+  enabled: z.lazy(() => SortOrderSchema).optional(),
   params: z.lazy(() => SortOrderSchema).optional(),
   evaluationTemplateId: z.lazy(() => SortOrderSchema).optional(),
   scenarioId: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
@@ -2019,6 +2023,7 @@ export const EvaluationWhereUniqueInputSchema: z.ZodType<Prisma.EvaluationWhereU
   OR: z.lazy(() => EvaluationWhereInputSchema).array().optional(),
   NOT: z.union([ z.lazy(() => EvaluationWhereInputSchema),z.lazy(() => EvaluationWhereInputSchema).array() ]).optional(),
   createdAt: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
+  enabled: z.union([ z.lazy(() => BoolFilterSchema),z.boolean() ]).optional(),
   params: z.lazy(() => JsonFilterSchema).optional(),
   evaluationTemplateId: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   scenarioId: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
@@ -2034,6 +2039,7 @@ export const EvaluationWhereUniqueInputSchema: z.ZodType<Prisma.EvaluationWhereU
 export const EvaluationOrderByWithAggregationInputSchema: z.ZodType<Prisma.EvaluationOrderByWithAggregationInput> = z.object({
   id: z.lazy(() => SortOrderSchema).optional(),
   createdAt: z.lazy(() => SortOrderSchema).optional(),
+  enabled: z.lazy(() => SortOrderSchema).optional(),
   params: z.lazy(() => SortOrderSchema).optional(),
   evaluationTemplateId: z.lazy(() => SortOrderSchema).optional(),
   scenarioId: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
@@ -2050,6 +2056,7 @@ export const EvaluationScalarWhereWithAggregatesInputSchema: z.ZodType<Prisma.Ev
   NOT: z.union([ z.lazy(() => EvaluationScalarWhereWithAggregatesInputSchema),z.lazy(() => EvaluationScalarWhereWithAggregatesInputSchema).array() ]).optional(),
   id: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
   createdAt: z.union([ z.lazy(() => DateTimeWithAggregatesFilterSchema),z.coerce.date() ]).optional(),
+  enabled: z.union([ z.lazy(() => BoolWithAggregatesFilterSchema),z.boolean() ]).optional(),
   params: z.lazy(() => JsonWithAggregatesFilterSchema).optional(),
   evaluationTemplateId: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
   scenarioId: z.union([ z.lazy(() => StringNullableWithAggregatesFilterSchema),z.string() ]).optional().nullable(),
@@ -3542,6 +3549,7 @@ export const EvaluationTemplateUncheckedUpdateManyInputSchema: z.ZodType<Prisma.
 export const EvaluationCreateInputSchema: z.ZodType<Prisma.EvaluationCreateInput> = z.object({
   id: z.string().optional(),
   createdAt: z.coerce.date().optional(),
+  enabled: z.boolean().optional(),
   params: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]),
   evaluationTemplate: z.lazy(() => EvaluationTemplateCreateNestedOneWithoutEvaluationsInputSchema),
   scenario: z.lazy(() => ScenarioCreateNestedOneWithoutEvaluationsInputSchema).optional(),
@@ -3553,6 +3561,7 @@ export const EvaluationCreateInputSchema: z.ZodType<Prisma.EvaluationCreateInput
 export const EvaluationUncheckedCreateInputSchema: z.ZodType<Prisma.EvaluationUncheckedCreateInput> = z.object({
   id: z.string().optional(),
   createdAt: z.coerce.date().optional(),
+  enabled: z.boolean().optional(),
   params: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]),
   evaluationTemplateId: z.string(),
   scenarioId: z.string().optional().nullable(),
@@ -3564,6 +3573,7 @@ export const EvaluationUncheckedCreateInputSchema: z.ZodType<Prisma.EvaluationUn
 export const EvaluationUpdateInputSchema: z.ZodType<Prisma.EvaluationUpdateInput> = z.object({
   id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  enabled: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   params: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
   evaluationTemplate: z.lazy(() => EvaluationTemplateUpdateOneRequiredWithoutEvaluationsNestedInputSchema).optional(),
   scenario: z.lazy(() => ScenarioUpdateOneWithoutEvaluationsNestedInputSchema).optional(),
@@ -3575,6 +3585,7 @@ export const EvaluationUpdateInputSchema: z.ZodType<Prisma.EvaluationUpdateInput
 export const EvaluationUncheckedUpdateInputSchema: z.ZodType<Prisma.EvaluationUncheckedUpdateInput> = z.object({
   id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  enabled: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   params: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
   evaluationTemplateId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   scenarioId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
@@ -3586,6 +3597,7 @@ export const EvaluationUncheckedUpdateInputSchema: z.ZodType<Prisma.EvaluationUn
 export const EvaluationCreateManyInputSchema: z.ZodType<Prisma.EvaluationCreateManyInput> = z.object({
   id: z.string().optional(),
   createdAt: z.coerce.date().optional(),
+  enabled: z.boolean().optional(),
   params: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]),
   evaluationTemplateId: z.string(),
   scenarioId: z.string().optional().nullable(),
@@ -3596,12 +3608,14 @@ export const EvaluationCreateManyInputSchema: z.ZodType<Prisma.EvaluationCreateM
 export const EvaluationUpdateManyMutationInputSchema: z.ZodType<Prisma.EvaluationUpdateManyMutationInput> = z.object({
   id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  enabled: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   params: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
 }).strict();
 
 export const EvaluationUncheckedUpdateManyInputSchema: z.ZodType<Prisma.EvaluationUncheckedUpdateManyInput> = z.object({
   id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  enabled: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   params: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
   evaluationTemplateId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   scenarioId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
@@ -5092,6 +5106,7 @@ export const EvaluationTemplateRelationFilterSchema: z.ZodType<Prisma.Evaluation
 export const EvaluationCountOrderByAggregateInputSchema: z.ZodType<Prisma.EvaluationCountOrderByAggregateInput> = z.object({
   id: z.lazy(() => SortOrderSchema).optional(),
   createdAt: z.lazy(() => SortOrderSchema).optional(),
+  enabled: z.lazy(() => SortOrderSchema).optional(),
   params: z.lazy(() => SortOrderSchema).optional(),
   evaluationTemplateId: z.lazy(() => SortOrderSchema).optional(),
   scenarioId: z.lazy(() => SortOrderSchema).optional(),
@@ -5102,6 +5117,7 @@ export const EvaluationCountOrderByAggregateInputSchema: z.ZodType<Prisma.Evalua
 export const EvaluationMaxOrderByAggregateInputSchema: z.ZodType<Prisma.EvaluationMaxOrderByAggregateInput> = z.object({
   id: z.lazy(() => SortOrderSchema).optional(),
   createdAt: z.lazy(() => SortOrderSchema).optional(),
+  enabled: z.lazy(() => SortOrderSchema).optional(),
   evaluationTemplateId: z.lazy(() => SortOrderSchema).optional(),
   scenarioId: z.lazy(() => SortOrderSchema).optional(),
   evaluationGroupId: z.lazy(() => SortOrderSchema).optional(),
@@ -5111,6 +5127,7 @@ export const EvaluationMaxOrderByAggregateInputSchema: z.ZodType<Prisma.Evaluati
 export const EvaluationMinOrderByAggregateInputSchema: z.ZodType<Prisma.EvaluationMinOrderByAggregateInput> = z.object({
   id: z.lazy(() => SortOrderSchema).optional(),
   createdAt: z.lazy(() => SortOrderSchema).optional(),
+  enabled: z.lazy(() => SortOrderSchema).optional(),
   evaluationTemplateId: z.lazy(() => SortOrderSchema).optional(),
   scenarioId: z.lazy(() => SortOrderSchema).optional(),
   evaluationGroupId: z.lazy(() => SortOrderSchema).optional(),
@@ -7189,6 +7206,7 @@ export const NestedEnumAlertTypeWithAggregatesFilterSchema: z.ZodType<Prisma.Nes
 export const EvaluationCreateWithoutAgentInputSchema: z.ZodType<Prisma.EvaluationCreateWithoutAgentInput> = z.object({
   id: z.string().optional(),
   createdAt: z.coerce.date().optional(),
+  enabled: z.boolean().optional(),
   params: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]),
   evaluationTemplate: z.lazy(() => EvaluationTemplateCreateNestedOneWithoutEvaluationsInputSchema),
   scenario: z.lazy(() => ScenarioCreateNestedOneWithoutEvaluationsInputSchema).optional(),
@@ -7199,6 +7217,7 @@ export const EvaluationCreateWithoutAgentInputSchema: z.ZodType<Prisma.Evaluatio
 export const EvaluationUncheckedCreateWithoutAgentInputSchema: z.ZodType<Prisma.EvaluationUncheckedCreateWithoutAgentInput> = z.object({
   id: z.string().optional(),
   createdAt: z.coerce.date().optional(),
+  enabled: z.boolean().optional(),
   params: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]),
   evaluationTemplateId: z.string(),
   scenarioId: z.string().optional().nullable(),
@@ -7471,6 +7490,7 @@ export const EvaluationScalarWhereInputSchema: z.ZodType<Prisma.EvaluationScalar
   NOT: z.union([ z.lazy(() => EvaluationScalarWhereInputSchema),z.lazy(() => EvaluationScalarWhereInputSchema).array() ]).optional(),
   id: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   createdAt: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
+  enabled: z.union([ z.lazy(() => BoolFilterSchema),z.boolean() ]).optional(),
   params: z.lazy(() => JsonFilterSchema).optional(),
   evaluationTemplateId: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   scenarioId: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
@@ -9058,6 +9078,7 @@ export const CallCreateManyScenarioInputEnvelopeSchema: z.ZodType<Prisma.CallCre
 export const EvaluationCreateWithoutScenarioInputSchema: z.ZodType<Prisma.EvaluationCreateWithoutScenarioInput> = z.object({
   id: z.string().optional(),
   createdAt: z.coerce.date().optional(),
+  enabled: z.boolean().optional(),
   params: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]),
   evaluationTemplate: z.lazy(() => EvaluationTemplateCreateNestedOneWithoutEvaluationsInputSchema),
   evaluationGroup: z.lazy(() => EvaluationGroupCreateNestedOneWithoutEvaluationsInputSchema).optional(),
@@ -9068,6 +9089,7 @@ export const EvaluationCreateWithoutScenarioInputSchema: z.ZodType<Prisma.Evalua
 export const EvaluationUncheckedCreateWithoutScenarioInputSchema: z.ZodType<Prisma.EvaluationUncheckedCreateWithoutScenarioInput> = z.object({
   id: z.string().optional(),
   createdAt: z.coerce.date().optional(),
+  enabled: z.boolean().optional(),
   params: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]),
   evaluationTemplateId: z.string(),
   evaluationGroupId: z.string().optional().nullable(),
@@ -9376,6 +9398,7 @@ export const EvaluationGroupCreateOrConnectWithoutEvaluationTemplateInputSchema:
 export const EvaluationCreateWithoutEvaluationTemplateInputSchema: z.ZodType<Prisma.EvaluationCreateWithoutEvaluationTemplateInput> = z.object({
   id: z.string().optional(),
   createdAt: z.coerce.date().optional(),
+  enabled: z.boolean().optional(),
   params: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]),
   scenario: z.lazy(() => ScenarioCreateNestedOneWithoutEvaluationsInputSchema).optional(),
   evaluationGroup: z.lazy(() => EvaluationGroupCreateNestedOneWithoutEvaluationsInputSchema).optional(),
@@ -9386,6 +9409,7 @@ export const EvaluationCreateWithoutEvaluationTemplateInputSchema: z.ZodType<Pri
 export const EvaluationUncheckedCreateWithoutEvaluationTemplateInputSchema: z.ZodType<Prisma.EvaluationUncheckedCreateWithoutEvaluationTemplateInput> = z.object({
   id: z.string().optional(),
   createdAt: z.coerce.date().optional(),
+  enabled: z.boolean().optional(),
   params: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]),
   scenarioId: z.string().optional().nullable(),
   evaluationGroupId: z.string().optional().nullable(),
@@ -10016,6 +10040,7 @@ export const CallCreateOrConnectWithoutEvaluationResultsInputSchema: z.ZodType<P
 export const EvaluationCreateWithoutEvaluationResultInputSchema: z.ZodType<Prisma.EvaluationCreateWithoutEvaluationResultInput> = z.object({
   id: z.string().optional(),
   createdAt: z.coerce.date().optional(),
+  enabled: z.boolean().optional(),
   params: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]),
   evaluationTemplate: z.lazy(() => EvaluationTemplateCreateNestedOneWithoutEvaluationsInputSchema),
   scenario: z.lazy(() => ScenarioCreateNestedOneWithoutEvaluationsInputSchema).optional(),
@@ -10026,6 +10051,7 @@ export const EvaluationCreateWithoutEvaluationResultInputSchema: z.ZodType<Prism
 export const EvaluationUncheckedCreateWithoutEvaluationResultInputSchema: z.ZodType<Prisma.EvaluationUncheckedCreateWithoutEvaluationResultInput> = z.object({
   id: z.string().optional(),
   createdAt: z.coerce.date().optional(),
+  enabled: z.boolean().optional(),
   params: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]),
   evaluationTemplateId: z.string(),
   scenarioId: z.string().optional().nullable(),
@@ -10178,6 +10204,7 @@ export const EvaluationUpdateToOneWithWhereWithoutEvaluationResultInputSchema: z
 export const EvaluationUpdateWithoutEvaluationResultInputSchema: z.ZodType<Prisma.EvaluationUpdateWithoutEvaluationResultInput> = z.object({
   id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  enabled: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   params: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
   evaluationTemplate: z.lazy(() => EvaluationTemplateUpdateOneRequiredWithoutEvaluationsNestedInputSchema).optional(),
   scenario: z.lazy(() => ScenarioUpdateOneWithoutEvaluationsNestedInputSchema).optional(),
@@ -10188,6 +10215,7 @@ export const EvaluationUpdateWithoutEvaluationResultInputSchema: z.ZodType<Prism
 export const EvaluationUncheckedUpdateWithoutEvaluationResultInputSchema: z.ZodType<Prisma.EvaluationUncheckedUpdateWithoutEvaluationResultInput> = z.object({
   id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  enabled: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   params: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
   evaluationTemplateId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   scenarioId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
@@ -10567,6 +10595,7 @@ export const CallUncheckedUpdateWithoutInterruptionsInputSchema: z.ZodType<Prism
 export const EvaluationCreateWithoutEvaluationGroupInputSchema: z.ZodType<Prisma.EvaluationCreateWithoutEvaluationGroupInput> = z.object({
   id: z.string().optional(),
   createdAt: z.coerce.date().optional(),
+  enabled: z.boolean().optional(),
   params: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]),
   evaluationTemplate: z.lazy(() => EvaluationTemplateCreateNestedOneWithoutEvaluationsInputSchema),
   scenario: z.lazy(() => ScenarioCreateNestedOneWithoutEvaluationsInputSchema).optional(),
@@ -10577,6 +10606,7 @@ export const EvaluationCreateWithoutEvaluationGroupInputSchema: z.ZodType<Prisma
 export const EvaluationUncheckedCreateWithoutEvaluationGroupInputSchema: z.ZodType<Prisma.EvaluationUncheckedCreateWithoutEvaluationGroupInput> = z.object({
   id: z.string().optional(),
   createdAt: z.coerce.date().optional(),
+  enabled: z.boolean().optional(),
   params: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]),
   evaluationTemplateId: z.string(),
   scenarioId: z.string().optional().nullable(),
@@ -10950,6 +10980,7 @@ export const SavedSearchUncheckedUpdateWithoutAlertsInputSchema: z.ZodType<Prism
 export const EvaluationCreateManyAgentInputSchema: z.ZodType<Prisma.EvaluationCreateManyAgentInput> = z.object({
   id: z.string().optional(),
   createdAt: z.coerce.date().optional(),
+  enabled: z.boolean().optional(),
   params: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]),
   evaluationTemplateId: z.string(),
   scenarioId: z.string().optional().nullable(),
@@ -11029,6 +11060,7 @@ export const CallCreateManyAgentInputSchema: z.ZodType<Prisma.CallCreateManyAgen
 export const EvaluationUpdateWithoutAgentInputSchema: z.ZodType<Prisma.EvaluationUpdateWithoutAgentInput> = z.object({
   id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  enabled: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   params: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
   evaluationTemplate: z.lazy(() => EvaluationTemplateUpdateOneRequiredWithoutEvaluationsNestedInputSchema).optional(),
   scenario: z.lazy(() => ScenarioUpdateOneWithoutEvaluationsNestedInputSchema).optional(),
@@ -11039,6 +11071,7 @@ export const EvaluationUpdateWithoutAgentInputSchema: z.ZodType<Prisma.Evaluatio
 export const EvaluationUncheckedUpdateWithoutAgentInputSchema: z.ZodType<Prisma.EvaluationUncheckedUpdateWithoutAgentInput> = z.object({
   id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  enabled: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   params: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
   evaluationTemplateId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   scenarioId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
@@ -11049,6 +11082,7 @@ export const EvaluationUncheckedUpdateWithoutAgentInputSchema: z.ZodType<Prisma.
 export const EvaluationUncheckedUpdateManyWithoutAgentInputSchema: z.ZodType<Prisma.EvaluationUncheckedUpdateManyWithoutAgentInput> = z.object({
   id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  enabled: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   params: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
   evaluationTemplateId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   scenarioId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
@@ -11867,6 +11901,7 @@ export const CallCreateManyScenarioInputSchema: z.ZodType<Prisma.CallCreateManyS
 export const EvaluationCreateManyScenarioInputSchema: z.ZodType<Prisma.EvaluationCreateManyScenarioInput> = z.object({
   id: z.string().optional(),
   createdAt: z.coerce.date().optional(),
+  enabled: z.boolean().optional(),
   params: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]),
   evaluationTemplateId: z.string(),
   evaluationGroupId: z.string().optional().nullable(),
@@ -11996,6 +12031,7 @@ export const CallUncheckedUpdateManyWithoutScenarioInputSchema: z.ZodType<Prisma
 export const EvaluationUpdateWithoutScenarioInputSchema: z.ZodType<Prisma.EvaluationUpdateWithoutScenarioInput> = z.object({
   id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  enabled: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   params: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
   evaluationTemplate: z.lazy(() => EvaluationTemplateUpdateOneRequiredWithoutEvaluationsNestedInputSchema).optional(),
   evaluationGroup: z.lazy(() => EvaluationGroupUpdateOneWithoutEvaluationsNestedInputSchema).optional(),
@@ -12006,6 +12042,7 @@ export const EvaluationUpdateWithoutScenarioInputSchema: z.ZodType<Prisma.Evalua
 export const EvaluationUncheckedUpdateWithoutScenarioInputSchema: z.ZodType<Prisma.EvaluationUncheckedUpdateWithoutScenarioInput> = z.object({
   id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  enabled: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   params: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
   evaluationTemplateId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   evaluationGroupId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
@@ -12016,6 +12053,7 @@ export const EvaluationUncheckedUpdateWithoutScenarioInputSchema: z.ZodType<Pris
 export const EvaluationUncheckedUpdateManyWithoutScenarioInputSchema: z.ZodType<Prisma.EvaluationUncheckedUpdateManyWithoutScenarioInput> = z.object({
   id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  enabled: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   params: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
   evaluationTemplateId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   evaluationGroupId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
@@ -12093,6 +12131,7 @@ export const EvaluationResultCreateManyEvaluationTemplateInputSchema: z.ZodType<
 export const EvaluationCreateManyEvaluationTemplateInputSchema: z.ZodType<Prisma.EvaluationCreateManyEvaluationTemplateInput> = z.object({
   id: z.string().optional(),
   createdAt: z.coerce.date().optional(),
+  enabled: z.boolean().optional(),
   params: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]),
   scenarioId: z.string().optional().nullable(),
   evaluationGroupId: z.string().optional().nullable(),
@@ -12141,6 +12180,7 @@ export const EvaluationResultUncheckedUpdateManyWithoutEvaluationTemplateInputSc
 export const EvaluationUpdateWithoutEvaluationTemplateInputSchema: z.ZodType<Prisma.EvaluationUpdateWithoutEvaluationTemplateInput> = z.object({
   id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  enabled: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   params: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
   scenario: z.lazy(() => ScenarioUpdateOneWithoutEvaluationsNestedInputSchema).optional(),
   evaluationGroup: z.lazy(() => EvaluationGroupUpdateOneWithoutEvaluationsNestedInputSchema).optional(),
@@ -12151,6 +12191,7 @@ export const EvaluationUpdateWithoutEvaluationTemplateInputSchema: z.ZodType<Pri
 export const EvaluationUncheckedUpdateWithoutEvaluationTemplateInputSchema: z.ZodType<Prisma.EvaluationUncheckedUpdateWithoutEvaluationTemplateInput> = z.object({
   id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  enabled: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   params: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
   scenarioId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   evaluationGroupId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
@@ -12161,6 +12202,7 @@ export const EvaluationUncheckedUpdateWithoutEvaluationTemplateInputSchema: z.Zo
 export const EvaluationUncheckedUpdateManyWithoutEvaluationTemplateInputSchema: z.ZodType<Prisma.EvaluationUncheckedUpdateManyWithoutEvaluationTemplateInput> = z.object({
   id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  enabled: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   params: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
   scenarioId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   evaluationGroupId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
@@ -12222,6 +12264,7 @@ export const EvaluationResultUncheckedUpdateManyWithoutEvaluationInputSchema: z.
 export const EvaluationCreateManyEvaluationGroupInputSchema: z.ZodType<Prisma.EvaluationCreateManyEvaluationGroupInput> = z.object({
   id: z.string().optional(),
   createdAt: z.coerce.date().optional(),
+  enabled: z.boolean().optional(),
   params: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]),
   evaluationTemplateId: z.string(),
   scenarioId: z.string().optional().nullable(),
@@ -12248,6 +12291,7 @@ export const EvaluationTemplateCreateManyEvaluationGroupInputSchema: z.ZodType<P
 export const EvaluationUpdateWithoutEvaluationGroupInputSchema: z.ZodType<Prisma.EvaluationUpdateWithoutEvaluationGroupInput> = z.object({
   id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  enabled: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   params: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
   evaluationTemplate: z.lazy(() => EvaluationTemplateUpdateOneRequiredWithoutEvaluationsNestedInputSchema).optional(),
   scenario: z.lazy(() => ScenarioUpdateOneWithoutEvaluationsNestedInputSchema).optional(),
@@ -12258,6 +12302,7 @@ export const EvaluationUpdateWithoutEvaluationGroupInputSchema: z.ZodType<Prisma
 export const EvaluationUncheckedUpdateWithoutEvaluationGroupInputSchema: z.ZodType<Prisma.EvaluationUncheckedUpdateWithoutEvaluationGroupInput> = z.object({
   id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  enabled: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   params: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
   evaluationTemplateId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   scenarioId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
@@ -12268,6 +12313,7 @@ export const EvaluationUncheckedUpdateWithoutEvaluationGroupInputSchema: z.ZodTy
 export const EvaluationUncheckedUpdateManyWithoutEvaluationGroupInputSchema: z.ZodType<Prisma.EvaluationUncheckedUpdateManyWithoutEvaluationGroupInput> = z.object({
   id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  enabled: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   params: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
   evaluationTemplateId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   scenarioId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),

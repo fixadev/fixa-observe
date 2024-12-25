@@ -251,6 +251,7 @@ model EvaluationTemplate {
 model Evaluation {
   id        String   @id @default(uuid())
   createdAt DateTime @default(now())
+  enabled   Boolean  @default(true)
 
   params Json
 
