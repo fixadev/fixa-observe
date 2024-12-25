@@ -216,8 +216,6 @@ model Scenario {
 
   deleted            Boolean              @default(false)
   EvaluationTemplate EvaluationTemplate[]
-
-  @@map("Intent")
 }
 
 model EvaluationTemplate {
