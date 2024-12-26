@@ -151,18 +151,39 @@ export class EvalService {
     group: EvaluationGroupWithIncludes;
     userId: string;
   }): Promise<EvaluationGroupWithIncludes> {
+    const priorEvaluations = await this.db.evaluation.findMany({
+      where: { evaluationGroupId: group.id },
+    });
+    const { created, updated, deleted } = await getCreatedUpdatedDeleted(
+      priorEvaluations,
+      group.evaluations,
+    );
     return await this.db.evaluationGroup.update({
       where: { id: group.id, ownerId: userId },
       data: {
         ...group,
         evaluations: {
-          updateMany: group.evaluations.map((evaluation) => ({
-            where: { id: evaluation.id },
-            data: {
+          updateMany: [
+            ...deleted.map((evaluation) => ({
+              where: { id: evaluation.id },
+              data: { deleted: true },
+            })),
+            ...updated.map((evaluation) => ({
+              where: { id: evaluation.id },
+              data: {
+                ...evaluation,
+                params: evaluation.params ?? undefined,
+              },
+            })),
+          ],
+          createMany: {
+            data: created.map((evaluation) => ({
               ...evaluation,
+              id: uuidv4(),
+              evaluationGroupId: group.id,
               params: evaluation.params ?? undefined,
-            },
-          })),
+            })),
+          },
         },
       },
       include: {

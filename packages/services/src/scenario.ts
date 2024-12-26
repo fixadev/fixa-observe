@@ -4,6 +4,7 @@ import {
   type CreateScenarioSchema,
   type UpdateScenarioSchema,
 } from "@repo/types/src/index";
+import { getCreatedUpdatedDeleted } from "./utils";
 
 export class ScenarioService {
   constructor(private db: PrismaClient) {}
@@ -92,86 +93,31 @@ export class ScenarioService {
       where: { scenarioId: scenario.id },
     });
 
-    const evaluationsToDelete = priorEvals.filter(
-      (priorEvaluation) =>
-        !scenario.evals.some(
-          (newEvaluation) => newEvaluation.id === priorEvaluation.id,
-        ),
-    );
-
-    const evaluationsToUpdate = scenario.evals.filter((evaluation) =>
-      priorEvals.some((priorEval) => priorEval.id === evaluation.id),
-    );
-
-    const evaluationsToCreate = scenario.evals.filter(
-      (evaluation) =>
-        !priorEvals.some((priorEval) => priorEval.id === evaluation.id),
-    );
-
-    const priorOverrides = await this.db.evalOverride.findMany({
-      where: { scenarioId: scenario.id },
-    });
-
-    const evalOverridesToDelete = scenario.generalEvalOverrides.filter(
-      (override) =>
-        priorOverrides.some(
-          (priorOverride) => priorOverride.id === override.id,
-        ),
-    );
-
-    const evalOverridesToUpdate = scenario.generalEvalOverrides.filter(
-      (override) =>
-        priorOverrides.some(
-          (priorOverride) => priorOverride.id === override.id,
-        ),
-    );
-
-    const evalOverridesToCreate = scenario.generalEvalOverrides.filter(
-      (override) =>
-        !priorOverrides.some(
-          (priorOverride) => priorOverride.id === override.id,
-        ),
+    const { created, updated, deleted } = await getCreatedUpdatedDeleted(
+      priorEvals,
+      scenario.evals,
     );
 
     return await this.db.scenario.update({
       where: { id: scenario.id },
       data: {
         ...scenario,
-        evals: {
+        evaluations: {
           updateMany: [
-            ...evaluationsToDelete.map((evaluation) => ({
+            ...deleted.map((evaluation) => ({
               where: { id: evaluation.id },
               data: { deleted: true },
             })),
-            ...evaluationsToUpdate.map((evaluation) => ({
+            ...updated.map((evaluation) => ({
               where: { id: evaluation.id },
               data: { ...evaluation, scenarioId: undefined },
             })),
           ],
           createMany: {
-            data: evaluationsToCreate.map((evaluation) => ({
+            data: created.map((evaluation) => ({
               ...evaluation,
               id: uuidv4(),
               scenarioId: scenario.id,
-            })),
-          },
-        },
-        generalEvalOverrides: {
-          updateMany: [
-            ...evalOverridesToDelete.map((override) => ({
-              where: { id: override.id },
-              data: { deleted: true },
-            })),
-            ...evalOverridesToUpdate.map((override) => ({
-              where: { id: override.id },
-              data: { ...override, scenarioId: undefined },
-            })),
-          ],
-          createMany: {
-            data: evalOverridesToCreate.map((override) => ({
-              ...override,
-              id: uuidv4(),
-              scenarioId: undefined,
             })),
           },
         },
