@@ -1,11 +1,6 @@
 import { Label } from "~/components/ui/label";
 import { type EvaluationTemplate } from "../new-types";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "~/components/ui/dialog";
+import { Dialog, DialogContent } from "~/components/ui/dialog";
 import { Textarea } from "~/components/ui/textarea";
 import { Button } from "~/components/ui/button";
 import { InformationCircleIcon, TrashIcon } from "@heroicons/react/24/solid";
@@ -13,9 +8,9 @@ import { useEffect, useState } from "react";
 import {
   Tooltip,
   TooltipContent,
-  TooltipProvider,
   TooltipTrigger,
 } from "~/components/ui/tooltip";
+import { EditableText } from "~/components/EditableText";
 
 interface EvaluationTemplateDialogProps {
   isOpen: boolean;
@@ -42,9 +37,14 @@ export function EvaluationTemplateDialog({
       >
         <div className="space-y-6">
           {/* Tag section */}
-          <div className="inline-block rounded-md bg-gray-100 px-3 py-1">
-            {template?.name}
-          </div>
+          <EditableText
+            placeholder="enter name..."
+            value={template?.name ?? ""}
+            onValueChange={(value) => {
+              console.log("value", value);
+            }}
+            className="inline-block rounded-md bg-muted text-sm"
+          />
 
           {/* Success criteria section */}
           <div className="space-y-2">

@@ -9,11 +9,16 @@ import {
 import { Label } from "~/components/ui/label";
 import { Textarea } from "~/components/ui/textarea";
 import { TrashIcon } from "@heroicons/react/24/solid";
-import { type Scenario, sampleEvaluationTemplates } from "../new-types";
+import {
+  type EvaluationTemplate,
+  type Scenario,
+  sampleEvaluationTemplates,
+} from "../new-types";
 import { AdditionalContextSection } from "./AdditionalContextSection";
 import { EvaluationTabSection } from "./EvaluationTabSection";
 import { EvaluationTemplateDialog } from "./EvaluationTemplateDialog";
 import { useState } from "react";
+import { EditableText } from "~/components/EditableText";
 
 interface ScenarioDialogProps {
   scenario: Scenario;
@@ -29,10 +34,11 @@ export function ScenarioDialog({
   onSave,
 }: ScenarioDialogProps) {
   const [templateDialogOpen, setTemplateDialogOpen] = useState(false);
-  const [selectedTemplate, setSelectedTemplate] =
-    useState<EvaluationTemplate | null>(null);
+  const [selectedTemplate, setSelectedTemplate] = useState<
+    EvaluationTemplate | undefined
+  >(undefined);
 
-  const handleOpenTemplateDialog = (template: EvaluationTemplate | null) => {
+  const handleOpenTemplateDialog = (template?: EvaluationTemplate) => {
     setSelectedTemplate(template);
     setTemplateDialogOpen(true);
   };
@@ -40,9 +46,16 @@ export function ScenarioDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="flex max-h-[90vh] max-w-2xl flex-col gap-0 p-0">
-        <DialogHeader className="p-6 pb-2">
-          <DialogTitle>{scenario.name}</DialogTitle>
-        </DialogHeader>
+        <div className="p-6">
+          <EditableText
+            placeholder="name this scenario..."
+            value={scenario.name}
+            onValueChange={(value) => {
+              console.log("value", value);
+            }}
+            className="inline-block rounded-md bg-muted text-sm font-medium"
+          />
+        </div>
 
         <div className="flex-1 overflow-y-auto px-6 pb-2">
           <div className="space-y-6">
