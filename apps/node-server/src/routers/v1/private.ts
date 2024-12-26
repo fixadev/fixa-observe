@@ -1,16 +1,27 @@
 import express from "express";
-import uploadCallRouter from "./routes/upload-call";
 import vapiRouter from "./routes/vapi";
-import ofOneRouter from "./routes/of-one";
+import ofOneRouter from "./routes/ofOne";
 import testsRouter from "./routes/tests";
-import internalTestRouter from "./routes/internal-test";
 
 const v1Router = express.Router();
 
-// Routes
-v1Router.use("/vapi", vapiRouter);
-v1Router.use("/upload-call", uploadCallRouter);
-v1Router.use("/queue-kiosk-calls", ofOneRouter);
-v1Router.use("/internal-test", internalTestRouter);
+const apiRoutes = {
+  vapi: {
+    path: "/vapi",
+    router: vapiRouter,
+  },
+  queue: {
+    path: "/queue-kiosk-calls",
+    router: ofOneRouter,
+  },
+  test: {
+    path: "/test",
+    router: testsRouter,
+  },
+};
+
+Object.values(apiRoutes).forEach(({ path, router }) => {
+  v1Router.use(path, router);
+});
 
 export default v1Router;

@@ -6,7 +6,7 @@ import { startQueueConsumer } from "./workers/queueConsumer";
 import v1Router from "./routers/v1/private";
 import { authenticateRequest } from "./middlewares/auth";
 import vapiRouter from "./routers/v1/routes/vapi";
-import ofOneRouter from "./routers/v1/routes/of-one";
+import ofOneRouter from "./routers/v1/routes/ofOne";
 
 const app = express();
 const httpServer = createServer(app);

@@ -1,7 +1,7 @@
 import { Request, Response, Router } from "express";
-import { connectedUsers } from "../../index";
-import { env } from "../../env";
-import { db } from "../../db";
+import { connectedUsers } from "../../../index";
+import { env } from "../../../env";
+import { db } from "../../../db";
 
 const internalTestRouter = Router();
 
