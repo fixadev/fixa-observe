@@ -11,6 +11,7 @@ import {
   TooltipTrigger,
 } from "~/components/ui/tooltip";
 import { type Scenario } from "../new-types";
+import { EvaluationTemplateCombobox } from "./EvaluationTemplateCombobox";
 
 interface EvaluationTabSectionProps {
   evaluations: Scenario["evaluations"];
@@ -44,16 +45,12 @@ export function EvaluationTabSection({
               {evaluation.evaluationTemplate?.name}
             </Button>
           ))}
-          <Button
-            onClick={() => {
-              /* Handle add evaluation */
+          <EvaluationTemplateCombobox
+            onSelect={(templateId) => {
+              // TODO: Implement adding evaluation
+              console.log("Selected template:", templateId);
             }}
-            variant="ghost"
-            size="sm"
-            className="flex-shrink-0 text-muted-foreground/50 hover:text-muted-foreground/50"
-          >
-            + add evaluation
-          </Button>
+          />
         </div>
       </div>
 

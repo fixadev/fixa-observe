@@ -9,7 +9,7 @@ import {
 import { Label } from "~/components/ui/label";
 import { Textarea } from "~/components/ui/textarea";
 import { TrashIcon } from "@heroicons/react/24/solid";
-import { type Scenario } from "../new-types";
+import { type Scenario, sampleEvaluationTemplates } from "../new-types";
 import { AdditionalContextSection } from "./AdditionalContextSection";
 import { EvaluationTabSection } from "./EvaluationTabSection";
 
