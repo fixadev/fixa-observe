@@ -1,5 +1,4 @@
 import { useState, useMemo, useCallback } from "react";
-import { Plus } from "lucide-react";
 import { Button } from "~/components/ui/button";
 import {
   Command,
@@ -15,6 +14,7 @@ import {
   PopoverTrigger,
 } from "~/components/ui/popover-dialog";
 import { sampleEvaluationTemplates } from "../new-types";
+import { PlusIcon } from "@heroicons/react/24/solid";
 
 interface EvaluationTemplateComboboxProps {
   onSelect: (templateId: string) => void;
@@ -40,8 +40,6 @@ export function EvaluationTemplateCombobox({
     [setOpen, setInputValue],
   );
 
-  // return null;
-
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
@@ -52,7 +50,7 @@ export function EvaluationTemplateCombobox({
       <PopoverContent className="w-[300px] p-0" side="bottom" align="start">
         <Command>
           <CommandInput
-            placeholder="search evaluation templates..."
+            placeholder="search evaluations..."
             value={inputValue}
             onValueChange={setInputValue}
           />
@@ -80,7 +78,7 @@ export function EvaluationTemplateCombobox({
                     className="w-full justify-start"
                     onSelect={() => handleCreateTemplate(inputValue)}
                   >
-                    <Plus className="mr-2 h-4 w-4" />
+                    <PlusIcon className="mr-2 h-4 w-4" />
                     create &quot;{inputValue}&quot;
                   </CommandItem>
                 </CommandGroup>

@@ -12,6 +12,8 @@ import { TrashIcon } from "@heroicons/react/24/solid";
 import { type Scenario, sampleEvaluationTemplates } from "../new-types";
 import { AdditionalContextSection } from "./AdditionalContextSection";
 import { EvaluationTabSection } from "./EvaluationTabSection";
+import { EvaluationTemplateDialog } from "./EvaluationTemplateDialog";
+import { useState } from "react";
 
 interface ScenarioDialogProps {
   scenario: Scenario;
@@ -26,6 +28,15 @@ export function ScenarioDialog({
   onOpenChange,
   onSave,
 }: ScenarioDialogProps) {
+  const [templateDialogOpen, setTemplateDialogOpen] = useState(false);
+  const [selectedTemplate, setSelectedTemplate] =
+    useState<EvaluationTemplate | null>(null);
+
+  const handleOpenTemplateDialog = (template: EvaluationTemplate | null) => {
+    setSelectedTemplate(template);
+    setTemplateDialogOpen(true);
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="flex max-h-[90vh] max-w-2xl flex-col gap-0 p-0">
@@ -65,7 +76,10 @@ export function ScenarioDialog({
                 </div>
               </div>
               <div>
-                <EvaluationTabSection evaluations={scenario.evaluations} />
+                <EvaluationTabSection
+                  evaluations={scenario.evaluations}
+                  onEditTemplate={handleOpenTemplateDialog}
+                />
               </div>
             </div>
           </div>
@@ -85,6 +99,11 @@ export function ScenarioDialog({
           </div>
         </DialogFooter>
       </DialogContent>
+      <EvaluationTemplateDialog
+        isOpen={templateDialogOpen}
+        template={selectedTemplate}
+        onOpenChange={setTemplateDialogOpen}
+      />
     </Dialog>
   );
 }

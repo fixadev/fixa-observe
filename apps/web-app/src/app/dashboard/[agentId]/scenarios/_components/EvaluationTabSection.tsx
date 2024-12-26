@@ -10,15 +10,17 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "~/components/ui/tooltip";
-import { type Scenario } from "../new-types";
+import { type Scenario, type EvaluationTemplate } from "../new-types";
 import { EvaluationTemplateCombobox } from "./EvaluationTemplateCombobox";
 
 interface EvaluationTabSectionProps {
   evaluations: Scenario["evaluations"];
+  onEditTemplate: (template?: EvaluationTemplate) => void;
 }
 
 export function EvaluationTabSection({
   evaluations,
+  onEditTemplate,
 }: EvaluationTabSectionProps) {
   const [activeTab, setActiveTab] = useState(evaluations?.[0]?.id);
 
@@ -87,7 +89,14 @@ export function EvaluationTabSection({
                     </Tooltip>
                   </div>
 
-                  <Button variant="outline">edit template</Button>
+                  <Button
+                    variant="outline"
+                    onClick={() =>
+                      onEditTemplate(evaluation.evaluationTemplate)
+                    }
+                  >
+                    edit template
+                  </Button>
                 </div>
               </Card>
             </div>
