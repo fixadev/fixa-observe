@@ -253,7 +253,7 @@ model Evaluation {
   createdAt DateTime @default(now())
   enabled   Boolean  @default(true)
 
-  params Json
+  params Json @default("{}")
 
   evaluationTemplate   EvaluationTemplate @relation(fields: [evaluationTemplateId], references: [id], onDelete: Cascade)
   evaluationTemplateId String

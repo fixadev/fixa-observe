@@ -1,6 +1,6 @@
 import {
   type AlertWithDetails,
-  type EvalSetWithIncludes,
+  type EvaluationGroupWithIncludes,
   type Eval,
   type EvalSet,
 } from "@repo/types/src/index";
@@ -34,8 +34,8 @@ export function instantiateEval(partial?: Partial<Eval>): Eval {
 }
 
 export function instantiateEvalSet(
-  partial?: Partial<EvalSetWithIncludes>,
-): EvalSetWithIncludes {
+  partial?: Partial<EvaluationGroupWithIncludes>,
+): EvaluationGroupWithIncludes {
   return {
     id: generateTempId(),
     createdAt: new Date(),

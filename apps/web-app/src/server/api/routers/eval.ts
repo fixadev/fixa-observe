@@ -1,5 +1,5 @@
 import { createTRPCRouter, protectedProcedure } from "../trpc";
-import { EvalSetWithIncludesSchema } from "@repo/types/src/index";
+import { EvaluationGroupWithIncludesSchema } from "@repo/types/src/index";
 import { EvalService } from "@repo/services/src/eval";
 import { EvalSchema } from "@repo/types/src/index";
 import { z } from "zod";
@@ -57,7 +57,7 @@ export const evalRouter = createTRPCRouter({
     });
   }),
   createSet: protectedProcedure
-    .input(EvalSetWithIncludesSchema)
+    .input(EvaluationGroupWithIncludesSchema)
     .mutation(async ({ input, ctx }) => {
       return await evalServiceInstance.createSet({
         set: input,
@@ -65,7 +65,7 @@ export const evalRouter = createTRPCRouter({
       });
     }),
   updateSet: protectedProcedure
-    .input(EvalSetWithIncludesSchema)
+    .input(EvaluationGroupWithIncludesSchema)
     .mutation(async ({ input, ctx }) => {
       return await evalServiceInstance.updateSet({
         set: input,

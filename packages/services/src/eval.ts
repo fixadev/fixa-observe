@@ -9,7 +9,7 @@ import { v4 as uuidv4 } from "uuid";
 import {
   type Evaluation,
   type Agent,
-  type EvalSetWithIncludes,
+  type EvaluationGroupWithIncludes,
 } from "@repo/types/src/index";
 import { getCreatedUpdatedDeleted } from "./utils";
 
@@ -27,22 +27,27 @@ export class EvalService {
 
   async createGeneralEval({
     evaluationTemplate,
+    evaluationContent,
     userId,
   }: {
     evaluationTemplate: EvaluationTemplate;
+    evaluationContent: Evaluation;
     userId: string;
-  }): Promise<EvaluationTemplate> {
+  }): Promise<Evaluation> {
+    const template = await this.db.evaluationTemplate.create({
+      data: {
+        ...evaluationTemplate,
+        ownerId: userId,
+      },
+    });
+
+    const { evaluationTemplateId, ...restEvalContent } = evaluationContent;
     return await this.db.evaluation.create({
       data: {
-        id: uuidv4(),
-
-        evaluationTemplate: {
-          create: {
-            ...evaluationTemplate,
-            id: uuidv4(),
-            ownerId: userId,
-          },
-        },
+        ...restEvalContent,
+        scenarioId: null,
+        evaluationTemplateId: template.id,
+        params: restEvalContent.params ?? undefined,
       },
     });
   }
@@ -70,24 +75,13 @@ export class EvalService {
     agentId: string;
     enabled: boolean;
     userId: string;
-  }): Promise<Agent> {
-    if (enabled) {
-      return await this.db.evaluation.update({
-        where: { id },
-        data: {
-          enabled,
-        },
-      });
-    } else {
-      return await this.db.agent.update({
-        where: { id: agentId },
-        data: {
-          enabledGeneralEvals: {
-            disconnect: { id },
-          },
-        },
-      });
-    }
+  }): Promise<Evaluation> {
+    return await this.db.evaluation.update({
+      where: { id },
+      data: {
+        enabled,
+      },
+    });
   }
 
   async deleteGeneralEval({
@@ -97,105 +91,97 @@ export class EvalService {
     id: string;
     userId: string;
   }): Promise<Evaluation> {
-    return await this.db.evaluation.update({
+    return await this.db.evaluation.delete({
       where: { id, evaluationTemplate: { ownerId: userId } },
-      data: { deleted: true },
     });
   }
 
-  async getSets({
+  async getGroups({
     userId,
   }: {
     userId: string;
-  }): Promise<EvalSetWithIncludes[]> {
+  }): Promise<EvaluationGroupWithIncludes[]> {
     return await this.db.evaluationGroup.findMany({
       where: { ownerId: userId },
       orderBy: { createdAt: "asc" },
       include: {
-        evaluations: true,
+        evaluations: {
+          include: {
+            evaluationTemplate: true,
+          },
+        },
       },
     });
   }
 
-  async createSet({
-    set,
+  async createGroup({
+    group,
     userId,
   }: {
-    set: EvalSetWithIncludes;
+    group: EvaluationGroupWithIncludes;
     userId: string;
-  }): Promise<EvalSetWithIncludes> {
+  }): Promise<EvaluationGroupWithIncludes> {
     return await this.db.evaluationGroup.create({
       data: {
-        ...set,
+        ...group,
         id: uuidv4(),
         ownerId: userId,
         evaluations: {
-          create: set.evals.map((evaluation) => ({
+          create: group.evaluations.map((evaluation) => ({
             ...evaluation,
             id: uuidv4(),
-            evaluationTemplateId: undefined,
-            evaluationGroupId: undefined,
-            scenarioId: undefined,
+            params: evaluation.params ?? undefined,
           })),
         },
       },
       include: {
-        evaluations: { orderBy: { createdAt: "asc" } },
+        evaluations: {
+          include: {
+            evaluationTemplate: true,
+          },
+        },
       },
     });
   }
 
-  async updateSet({
-    set,
+  async updateGroup({
+    group,
     userId,
   }: {
-    set: EvalSetWithIncludes;
+    group: EvaluationGroupWithIncludes;
     userId: string;
-  }): Promise<EvalSetWithIncludes> {
-    const priorEvals = await this.db.eval.findMany({
-      where: { evalSetId: set.id },
-    });
-    const { created, updated, deleted } = getCreatedUpdatedDeleted(
-      priorEvals,
-      set.evals,
-    );
+  }): Promise<EvaluationGroupWithIncludes> {
     return await this.db.evaluationGroup.update({
-      where: { id: set.id, ownerId: userId },
+      where: { id: group.id, ownerId: userId },
       data: {
-        ...set,
+        ...group,
         evaluations: {
-          create: created.map((evaluation) => ({
-            ...evaluation,
-            id: uuidv4(),
-            evaluationGroupId: undefined,
-            scenarioId: undefined,
-            agentId: undefined,
-          })),
-          update: updated.map((evaluation) => ({
+          updateMany: group.evaluations.map((evaluation) => ({
             where: { id: evaluation.id },
             data: {
               ...evaluation,
-              scenarioId: undefined,
-              agentId: undefined,
-              evalSetId: undefined,
+              params: evaluation.params ?? undefined,
             },
           })),
-          delete: deleted,
         },
       },
       include: {
-        evals: true,
+        evaluations: {
+          include: {
+            evaluationTemplate: true,
+          },
+        },
       },
     });
   }
 
-  async deleteSet({
+  async deleteGroup({
     id,
     userId,
   }: {
     id: string;
     userId: string;
   }): Promise<void> {
-    await this.db.evalSet.delete({ where: { id, ownerId: userId } });
+    await this.db.evaluationGroup.delete({ where: { id, ownerId: userId } });
   }
 }

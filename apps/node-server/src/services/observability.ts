@@ -17,7 +17,7 @@ import {
   SavedSearchWithIncludes,
   UploadCallParams,
 } from "@repo/types/src/types";
-import { EvalSetWithIncludes } from "@repo/types/src";
+import { EvaluationGroupWithIncludes } from "@repo/types/src";
 
 export const transcribeAndSaveCall = async ({
   callId,
@@ -274,7 +274,7 @@ export const findRelevantEvalSets = async ({
   callMetadata?: Record<string, string>;
 }): Promise<{
   savedSearches: SavedSearchWithIncludes[];
-  relevantEvalSets: EvalSetWithIncludes[];
+  relevantEvalSets: EvaluationGroupWithIncludes[];
 }> => {
   try {
     const searchServiceInstance = new SearchService(db);

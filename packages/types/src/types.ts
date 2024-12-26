@@ -1,7 +1,7 @@
 import { type Prisma } from "@prisma/client";
 import { z } from "zod";
 import { AlertWithDetailsSchema } from "./alert";
-import { EvalSetWithIncludesSchema } from "./eval";
+import { EvaluationGroupWithIncludesSchema } from "./eval";
 
 export type PlatformOptions = z.infer<typeof platformOptions>;
 export const platformOptions = z.enum(["retell", "vapi", "bland"]);
@@ -115,7 +115,7 @@ export const FilterSchema = z.object({
     z.null(),
     z.undefined(),
   ]),
-  evalSets: z.array(EvalSetWithIncludesSchema).optional(),
+  evalSets: z.array(EvaluationGroupWithIncludesSchema).optional(),
   alerts: z.array(AlertWithDetailsSchema).optional(),
   evalSetToSuccess: z.union([evalSetToSuccess, z.null(), z.undefined()]),
 });
