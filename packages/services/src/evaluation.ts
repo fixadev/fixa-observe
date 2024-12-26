@@ -13,7 +13,7 @@ import {
 } from "@repo/types/src/index";
 import { getCreatedUpdatedDeleted } from "./utils";
 
-export class EvalService {
+export class EvaluationService {
   constructor(private db: PrismaClient) {}
 
   async getGeneralEvals({ userId }: { userId: string }): Promise<Evaluation[]> {
@@ -25,34 +25,46 @@ export class EvalService {
     });
   }
 
-  async createGeneralEval({
-    evaluationTemplate,
-    evaluationContent,
+  async getTemplates({
     userId,
   }: {
-    evaluationTemplate: EvaluationTemplate;
-    evaluationContent: Evaluation;
+    userId: string;
+  }): Promise<EvaluationTemplate[]> {
+    return await this.db.evaluationTemplate.findMany({
+      where: { ownerId: userId },
+      orderBy: { createdAt: "asc" },
+    });
+  }
+
+  async createTemplate({
+    template,
+    userId,
+  }: {
+    template: EvaluationTemplate;
+    userId: string;
+  }): Promise<EvaluationTemplate> {
+    return await this.db.evaluationTemplate.create({
+      data: { ...template, id: uuidv4(), ownerId: userId },
+    });
+  }
+
+  async create({
+    evaluation,
+    userId,
+  }: {
+    evaluation: Evaluation;
     userId: string;
   }): Promise<Evaluation> {
-    const template = await this.db.evaluationTemplate.create({
-      data: {
-        ...evaluationTemplate,
-        ownerId: userId,
-      },
-    });
-
-    const { evaluationTemplateId, ...restEvalContent } = evaluationContent;
     return await this.db.evaluation.create({
       data: {
-        ...restEvalContent,
+        ...evaluation,
         scenarioId: null,
-        evaluationTemplateId: template.id,
-        params: restEvalContent.params ?? undefined,
+        params: evaluation.params ?? undefined,
       },
     });
   }
 
-  async updateGeneralEval({
+  async update({
     evaluation,
     userId,
   }: {
@@ -65,9 +77,8 @@ export class EvalService {
     });
   }
 
-  async toggleGeneralEval({
+  async toggleEnabled({
     id,
-    agentId,
     enabled,
     userId,
   }: {
@@ -77,14 +88,14 @@ export class EvalService {
     userId: string;
   }): Promise<Evaluation> {
     return await this.db.evaluation.update({
-      where: { id },
+      where: { id, evaluationTemplate: { ownerId: userId } },
       data: {
         enabled,
       },
     });
   }
 
-  async deleteGeneralEval({
+  async delete({
     id,
     userId,
   }: {
