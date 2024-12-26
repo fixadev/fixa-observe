@@ -16,11 +16,13 @@ import { EvaluationTemplateCombobox } from "./EvaluationTemplateCombobox";
 interface EvaluationTabSectionProps {
   evaluations: Scenario["evaluations"];
   onEditTemplate: (template?: EvaluationTemplate) => void;
+  onCreateNewTemplate: (name: string) => void;
 }
 
 export function EvaluationTabSection({
   evaluations,
   onEditTemplate,
+  onCreateNewTemplate,
 }: EvaluationTabSectionProps) {
   const [activeTab, setActiveTab] = useState(evaluations?.[0]?.id);
 
@@ -52,6 +54,7 @@ export function EvaluationTabSection({
               // TODO: Implement adding evaluation
               console.log("Selected template:", templateId);
             }}
+            onCreateNew={onCreateNewTemplate}
           />
         </div>
       </div>

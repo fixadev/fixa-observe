@@ -10,6 +10,9 @@ import { Label } from "~/components/ui/label";
 import { Textarea } from "~/components/ui/textarea";
 import { TrashIcon } from "@heroicons/react/24/solid";
 import {
+  EvalContentType,
+  EvalResultType,
+  EvalType,
   type EvaluationTemplate,
   type Scenario,
   sampleEvaluationTemplates,
@@ -17,7 +20,7 @@ import {
 import { AdditionalContextSection } from "./AdditionalContextSection";
 import { EvaluationTabSection } from "./EvaluationTabSection";
 import { EvaluationTemplateDialog } from "./EvaluationTemplateDialog";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { EditableText } from "~/components/EditableText";
 
 interface ScenarioDialogProps {
@@ -38,10 +41,30 @@ export function ScenarioDialog({
     EvaluationTemplate | undefined
   >(undefined);
 
-  const handleOpenTemplateDialog = (template?: EvaluationTemplate) => {
-    setSelectedTemplate(template);
+  const handleOpenTemplateDialog = useCallback(
+    (template?: EvaluationTemplate) => {
+      setSelectedTemplate(template);
+      setTemplateDialogOpen(true);
+    },
+    [],
+  );
+
+  const handleCreateNewTemplate = useCallback((name: string) => {
+    setSelectedTemplate({
+      id: "new",
+      name,
+      description: "",
+      isCritical: false,
+      createdAt: new Date(),
+      params: [],
+      type: EvalType.scenario,
+      resultType: EvalResultType.boolean,
+      contentType: EvalContentType.content,
+      toolCallExpectedResult: "",
+      deleted: false,
+    });
     setTemplateDialogOpen(true);
-  };
+  }, []);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -92,6 +115,7 @@ export function ScenarioDialog({
                 <EvaluationTabSection
                   evaluations={scenario.evaluations}
                   onEditTemplate={handleOpenTemplateDialog}
+                  onCreateNewTemplate={handleCreateNewTemplate}
                 />
               </div>
             </div>

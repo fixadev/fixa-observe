@@ -18,10 +18,12 @@ import { PlusIcon } from "@heroicons/react/24/solid";
 
 interface EvaluationTemplateComboboxProps {
   onSelect: (templateId: string) => void;
+  onCreateNew: (name: string) => void;
 }
 
 export function EvaluationTemplateCombobox({
   onSelect,
+  onCreateNew,
 }: EvaluationTemplateComboboxProps) {
   const [open, setOpen] = useState(false);
   const [inputValue, setInputValue] = useState("");
@@ -32,12 +34,13 @@ export function EvaluationTemplateCombobox({
 
   const handleCreateTemplate = useCallback(
     (name: string) => {
-      // TODO: Implement template creation logic here
-      console.log("Creating new template:", name);
+      onCreateNew(name);
       setOpen(false);
-      setInputValue("");
+      setTimeout(() => {
+        setInputValue("");
+      }, 100);
     },
-    [setOpen, setInputValue],
+    [onCreateNew, setOpen, setInputValue],
   );
 
   return (
@@ -63,7 +66,9 @@ export function EvaluationTemplateCombobox({
                   onSelect={() => {
                     onSelect(template.id);
                     setOpen(false);
-                    setInputValue("");
+                    setTimeout(() => {
+                      setInputValue("");
+                    }, 100);
                   }}
                 >
                   {template.name}
