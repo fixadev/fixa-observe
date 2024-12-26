@@ -24,7 +24,7 @@ export class ScenarioService {
         agentId,
         ownerId: userId,
         createdAt: new Date(),
-        evals: {
+        evaluations: {
           createMany: {
             data: scenario.evals.map((evaluation) => ({
               ...evaluation,
@@ -33,19 +33,12 @@ export class ScenarioService {
             })),
           },
         },
-        generalEvalOverrides: {
-          createMany: {
-            data: scenario.generalEvalOverrides.map((override) => ({
-              ...override,
-              id: uuidv4(),
-              scenarioId: undefined,
-            })),
-          },
-        },
       },
       include: {
-        evals: { orderBy: { createdAt: "asc" } },
-        generalEvalOverrides: { orderBy: { createdAt: "asc" } },
+        evaluations: {
+          include: { evaluationTemplate: true },
+          orderBy: { createdAt: "asc" },
+        },
       },
     });
   }
@@ -66,7 +59,7 @@ export class ScenarioService {
               id: uuidv4(),
               agentId,
               createdAt: new Date(),
-              evals: {
+              evaluations: {
                 createMany: {
                   data: scenario.evals.map((evaluation) => ({
                     ...evaluation,
@@ -75,11 +68,12 @@ export class ScenarioService {
                   })),
                 },
               },
-              generalEvalOverrides: {},
             },
             include: {
-              evals: { orderBy: { createdAt: "asc" } },
-              generalEvalOverrides: { orderBy: { createdAt: "asc" } },
+              evaluations: {
+                include: { evaluationTemplate: true },
+                orderBy: { createdAt: "asc" },
+              },
             },
           }),
         ),
@@ -94,7 +88,7 @@ export class ScenarioService {
     scenario: UpdateScenarioSchema;
     userId: string;
   }) {
-    const priorEvals = await this.db.eval.findMany({
+    const priorEvals = await this.db.evaluation.findMany({
       where: { scenarioId: scenario.id },
     });
 
@@ -183,8 +177,8 @@ export class ScenarioService {
         },
       },
       include: {
-        evals: { where: { deleted: false }, orderBy: { createdAt: "asc" } },
-        generalEvalOverrides: {
+        evaluations: {
+          include: { evaluationTemplate: true },
           orderBy: { createdAt: "asc" },
         },
       },
