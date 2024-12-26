@@ -8,7 +8,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Switch } from "@/components/ui/switch";
-import { type Scenario } from "../dashboard/[agentId]/scenarios/new-types";
+import { type Scenario } from "../new-types";
 import { Label } from "~/components/ui/label";
 import { Textarea } from "~/components/ui/textarea";
 import { InformationCircleIcon, TrashIcon } from "@heroicons/react/24/solid";
@@ -155,44 +155,46 @@ function EvaluationTabSection({
   const [activeTab, setActiveTab] = useState(evaluations?.[0]?.id);
 
   if (!evaluations?.length) {
-    return <div>No evaluations available</div>;
+    return <div>no evaluations available</div>;
   }
 
   return (
     <div className="w-full">
       {/* Custom Tab List */}
-      <div className="mb-2 flex flex-wrap gap-2">
-        {evaluations.map((evaluation) => (
+      <div className="flex overflow-x-auto pb-4">
+        <div className="flex flex-nowrap gap-2">
+          {evaluations.map((evaluation) => (
+            <Button
+              key={evaluation.id}
+              onClick={() => setActiveTab(evaluation.id)}
+              variant="outline"
+              size="sm"
+              className={cn(
+                "group flex flex-shrink-0 items-center gap-2",
+                activeTab === evaluation.id && "bg-muted",
+              )}
+            >
+              {evaluation.evaluationTemplate?.name}
+            </Button>
+          ))}
           <Button
-            key={evaluation.id}
-            onClick={() => setActiveTab(evaluation.id)}
-            variant="outline"
+            onClick={() => {
+              /* Handle add evaluation */
+            }}
+            variant="ghost"
             size="sm"
-            className={cn(
-              "group flex items-center gap-2",
-              activeTab === evaluation.id && "bg-muted",
-            )}
+            className="flex-shrink-0 text-muted-foreground/50 hover:text-muted-foreground/50"
           >
-            {evaluation.evaluationTemplate?.name}
+            + add evaluation
           </Button>
-        ))}
-        <Button
-          onClick={() => {
-            /* Handle add evaluation */
-          }}
-          variant="ghost"
-          size="sm"
-          className="text-muted-foreground/50 hover:text-muted-foreground/50"
-        >
-          + add evaluation
-        </Button>
+        </div>
       </div>
 
       {/* Tab Content */}
       {evaluations.map(
         (evaluation) =>
           activeTab === evaluation.id && (
-            <div key={evaluation.id} className="mt-2">
+            <div key={evaluation.id}>
               <Card className="space-y-4 p-4">
                 <div className="h-[100px] overflow-y-auto text-sm">
                   {evaluation.evaluationTemplate?.description}

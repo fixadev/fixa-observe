@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { api } from "~/trpc/react";
 import { useState, useEffect, useCallback } from "react";
-import { ScenarioCard } from "~/app/_components/ScenarioCard";
+import { ScenarioCard } from "~/app/dashboard/[agentId]/scenarios/_components/ScenarioCard";
 import { useAgent } from "~/app/contexts/UseAgent";
 import { Button } from "~/components/ui/button";
 import { useToast } from "~/components/hooks/use-toast";

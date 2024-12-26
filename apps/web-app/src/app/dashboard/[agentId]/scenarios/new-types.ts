@@ -114,6 +114,54 @@ export enum EvalContentType {
   content = "content",
 }
 
+export const sampleEvaluationTemplates: EvaluationTemplate[] = [
+  {
+    id: "template-tone",
+    createdAt: new Date(),
+    name: "Professional Tone Analysis",
+    description:
+      "Evaluates if the agent maintains professional communication throughout the interaction",
+    params: ["politeness_level", "empathy_shown", "language_appropriateness"],
+    type: EvalType.general,
+    resultType: EvalResultType.percentage,
+    contentType: EvalContentType.content,
+    isCritical: true,
+    toolCallExpectedResult: "",
+    deleted: false,
+  },
+  {
+    id: "template-resolution",
+    createdAt: new Date(),
+    name: "Problem Resolution Check",
+    description:
+      "Assesses if the agent properly addressed and resolved the customer's concern",
+    params: [
+      "solution_offered",
+      "customer_satisfaction",
+      "follow_up_scheduled",
+    ],
+    type: EvalType.scenario,
+    resultType: EvalResultType.boolean,
+    contentType: EvalContentType.content,
+    isCritical: true,
+    toolCallExpectedResult: "",
+    deleted: false,
+  },
+  {
+    id: "template-tools",
+    createdAt: new Date(),
+    name: "Tool Usage Effectiveness",
+    description: "Evaluates if the agent used available tools appropriately",
+    params: ["tool_selection", "tool_timing", "tool_effectiveness"],
+    type: EvalType.general,
+    resultType: EvalResultType.boolean,
+    contentType: EvalContentType.tool,
+    isCritical: false,
+    toolCallExpectedResult: "order_management.replace_item",
+    deleted: false,
+  },
+];
+
 export const sampleScenario: Scenario = {
   id: "sample-scenario-1",
   createdAt: new Date(),
@@ -132,56 +180,46 @@ export const sampleScenario: Scenario = {
   // Relations
   evaluations: [
     {
-      id: "eval-1",
+      id: "eval-tone",
       createdAt: new Date(),
       enabled: true,
       params: {
-        tone: "professional",
-        resolution: "offer_replacement",
+        politeness_level: "high",
+        empathy_shown: "required",
+        language_appropriateness: "formal",
       },
-      evaluationTemplateId: "template-1",
+      evaluationTemplateId: "template-tone",
       scenarioId: "sample-scenario-1",
       agentId: "agent-456",
-      evaluationTemplate: {
-        id: "template-1",
-        createdAt: new Date(),
-        name: "Professional Tone Check",
-        description:
-          "Verify that the agent maintains a professional tone throughout the interaction",
-        params: ["tone", "resolution"],
-        type: EvalType.scenario,
-        resultType: EvalResultType.boolean,
-        contentType: EvalContentType.content,
-        isCritical: true,
-        toolCallExpectedResult: "",
-        deleted: false,
-      },
+      evaluationTemplate: sampleEvaluationTemplates[0],
     },
     {
-      id: "eval-2",
+      id: "eval-resolution",
       createdAt: new Date(),
       enabled: true,
       params: {
-        solution_offered: "true",
-        apology_given: "true",
+        solution_offered: "replacement_or_refund",
+        customer_satisfaction: "required",
+        follow_up_scheduled: "optional",
       },
-      evaluationTemplateId: "template-2",
+      evaluationTemplateId: "template-resolution",
       scenarioId: "sample-scenario-1",
       agentId: "agent-456",
-      evaluationTemplate: {
-        id: "template-2",
-        createdAt: new Date(),
-        name: "Resolution Effectiveness",
-        description:
-          "Check if the agent offered an appropriate solution and apologized for the mistake",
-        params: ["solution_offered", "apology_given"],
-        type: EvalType.scenario,
-        resultType: EvalResultType.boolean,
-        contentType: EvalContentType.content,
-        isCritical: true,
-        toolCallExpectedResult: "",
-        deleted: false,
+      evaluationTemplate: sampleEvaluationTemplates[1],
+    },
+    {
+      id: "eval-tools",
+      createdAt: new Date(),
+      enabled: true,
+      params: {
+        tool_selection: "order_management",
+        tool_timing: "after_apology",
+        tool_effectiveness: "complete_resolution",
       },
+      evaluationTemplateId: "template-tools",
+      scenarioId: "sample-scenario-1",
+      agentId: "agent-456",
+      evaluationTemplate: sampleEvaluationTemplates[2],
     },
   ],
 };

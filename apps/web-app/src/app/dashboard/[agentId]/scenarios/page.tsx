@@ -2,13 +2,13 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import { ScenarioCard } from "~/app/_components/ScenarioCard";
+import { ScenarioCard } from "~/app/dashboard/[agentId]/scenarios/_components/ScenarioCard";
 import { Button } from "~/components/ui/button";
 import { Card, CardTitle, CardHeader } from "~/components/ui/card";
 import { SidebarTrigger } from "~/components/ui/sidebar";
 import { sampleScenario, type Scenario } from "./new-types";
 import { NoScenariosYet } from "./_components/NoScenariosYet";
-import { ScenarioDialog } from "~/app/_components/ScenarioDialog";
+import { ScenarioDialog } from "~/app/dashboard/[agentId]/scenarios/_components/ScenarioDialog";
 
 export default function ScenariosPage({
   params,

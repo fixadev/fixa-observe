@@ -4,7 +4,7 @@ import { Label } from "~/components/ui/label";
 import { Card } from "~/components/ui/card";
 import { CopyText } from "~/components/CopyText";
 import { cn } from "~/lib/utils";
-import { type Scenario } from "../dashboard/[agentId]/scenarios/new-types";
+import { type Scenario } from "../new-types";
 
 interface ScenarioCardProps {
   scenario: Scenario;
