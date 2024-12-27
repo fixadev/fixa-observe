@@ -1,6 +1,6 @@
 import express from "express";
 import { z } from "zod";
-import { db } from "../../db";
+import { db } from "../../../db";
 import { TestService } from "@repo/services/src/test";
 import { posthogClient } from "../../clients/posthogClient";
 

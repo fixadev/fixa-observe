@@ -1,11 +1,14 @@
 import { createTRPCRouter, protectedProcedure } from "../trpc";
-import { EvalSetWithIncludesSchema } from "@repo/types/src/index";
-import { EvalService } from "@repo/services/src/eval";
-import { EvalSchema } from "@repo/types/src/index";
+import {
+  EvaluationGroupWithIncludesSchema,
+  EvaluationTemplateSchema,
+} from "@repo/types/src/index";
+import { EvaluationService } from "@repo/services/src/evaluation";
+import { EvaluationSchema } from "@repo/types/src/index";
 import { z } from "zod";
 import { db } from "~/server/db";
 
-const evalServiceInstance = new EvalService(db);
+const evalServiceInstance = new EvaluationService(db);
 
 export const evalRouter = createTRPCRouter({
   getGeneralEvals: protectedProcedure.query(async ({ ctx }) => {
@@ -13,69 +16,79 @@ export const evalRouter = createTRPCRouter({
       userId: ctx.user.id,
     });
   }),
-  createGeneralEval: protectedProcedure
-    .input(EvalSchema)
+
+  createTemplate: protectedProcedure
+    .input(EvaluationTemplateSchema)
     .mutation(async ({ input, ctx }) => {
-      return await evalServiceInstance.createGeneralEval({
+      return await evalServiceInstance.createTemplate({
+        template: input,
+        userId: ctx.user.id,
+      });
+    }),
+
+  create: protectedProcedure
+    .input(EvaluationSchema)
+    .mutation(async ({ input, ctx }) => {
+      return await evalServiceInstance.create({
         evaluation: input,
         userId: ctx.user.id,
       });
     }),
 
-  updateGeneralEval: protectedProcedure
-    .input(EvalSchema)
+  update: protectedProcedure
+    .input(EvaluationSchema)
     .mutation(async ({ input, ctx }) => {
-      return await evalServiceInstance.updateGeneralEval({
+      return await evalServiceInstance.update({
         evaluation: input,
         userId: ctx.user.id,
       });
     }),
 
-  toggleGeneralEval: protectedProcedure
+  toggleEnabled: protectedProcedure
     .input(
       z.object({ id: z.string(), agentId: z.string(), enabled: z.boolean() }),
     )
     .mutation(async ({ input, ctx }) => {
-      return await evalServiceInstance.toggleGeneralEval({
+      return await evalServiceInstance.toggleEnabled({
         ...input,
         userId: ctx.user.id,
       });
     }),
 
-  deleteGeneralEval: protectedProcedure
+  delete: protectedProcedure
     .input(z.object({ id: z.string() }))
     .mutation(async ({ input, ctx }) => {
-      return await evalServiceInstance.deleteGeneralEval({
+      return await evalServiceInstance.delete({
         id: input.id,
         userId: ctx.user.id,
       });
     }),
 
-  getSets: protectedProcedure.query(async ({ ctx }) => {
-    return await evalServiceInstance.getSets({
+  getGroups: protectedProcedure.query(async ({ ctx }) => {
+    return await evalServiceInstance.getGroups({
       userId: ctx.user.id,
     });
   }),
-  createSet: protectedProcedure
-    .input(EvalSetWithIncludesSchema)
+  createGroup: protectedProcedure
+    .input(EvaluationGroupWithIncludesSchema)
     .mutation(async ({ input, ctx }) => {
-      return await evalServiceInstance.createSet({
-        set: input,
+      return await evalServiceInstance.createGroup({
+        group: input,
         userId: ctx.user.id,
       });
     }),
-  updateSet: protectedProcedure
-    .input(EvalSetWithIncludesSchema)
+  updateGroup: protectedProcedure
+    .input(EvaluationGroupWithIncludesSchema)
     .mutation(async ({ input, ctx }) => {
-      return await evalServiceInstance.updateSet({
-        set: input,
+      return await evalServiceInstance.updateGroup({
+        group: input,
         userId: ctx.user.id,
       });
     }),
-  deleteSet: protectedProcedure
+  deleteGroup: protectedProcedure
     .input(z.object({ id: z.string() }))
     .mutation(async ({ input, ctx }) => {
-      return await evalServiceInstance.deleteSet({
+      return await evalServiceInstance.deleteGroup({
         id: input.id,
         userId: ctx.user.id,
       });

@@ -1,6 +1,9 @@
 "use client";
 import { Dialog, DialogContent, DialogFooter } from "~/components/ui/dialog";
-import { type EvalSetWithIncludes, type Filter } from "@repo/types/src/index";
+import {
+  type EvaluationGroupWithIncludes,
+  type Filter,
+} from "@repo/types/src/index";
 import { useCallback, useEffect, useState } from "react";
 import { instantiateEvalSet } from "~/lib/instantiate";
 import { isTempId } from "~/lib/utils";
@@ -33,12 +36,12 @@ export function CreateEditEvaluationDialog({
   open: boolean;
   setOpen: (open: boolean) => void;
   savedSearchId: string;
-  selectedEvalSet: EvalSetWithIncludes | null;
+  selectedEvalSet: EvaluationGroupWithIncludes | null;
   voidSelectedEvalSet: () => void;
   filter: Filter;
   setFilter: React.Dispatch<React.SetStateAction<Filter>>;
 }) {
-  const [evalSet, setEvalSet] = useState<EvalSetWithIncludes>(
+  const [evalSet, setEvalSet] = useState<EvaluationGroupWithIncludes>(
     selectedEvalSet ?? instantiateEvalSet({ savedSearchId }),
   );
 

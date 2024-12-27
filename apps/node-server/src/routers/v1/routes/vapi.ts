@@ -1,10 +1,10 @@
 import { Request, Response, Router } from "express";
-import { getContext } from "../../middlewares/getContext";
+import { getContext } from "../../../middlewares/getContext";
 import {
   handleAnalysisStarted,
   handleCallEnded,
   handleTranscriptUpdate,
-} from "../../services/vapi";
+} from "../../../services/vapi";
 
 const vapiRouter = Router();
 

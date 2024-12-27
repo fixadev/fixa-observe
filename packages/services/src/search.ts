@@ -36,7 +36,13 @@ export class SearchService {
     const savedSearch = await this.db.savedSearch.create({
       data: searchData,
       include: {
-        evalSets: true,
+        evaluationGroups: {
+          include: {
+            evaluations: {
+              include: { evaluationTemplate: true },
+            },
+          },
+        },
         alerts: true,
       },
     });
@@ -68,7 +74,13 @@ export class SearchService {
         metadata: searchData.metadata ?? {},
       },
       include: {
-        evalSets: { include: { evals: true } },
+        evaluationGroups: {
+          include: {
+            evaluations: {
+              include: { evaluationTemplate: true },
+            },
+          },
+        },
         alerts: true,
       },
     });
@@ -102,9 +114,11 @@ export class SearchService {
       },
       include: {
         alerts: true,
-        evalSets: {
+        evaluationGroups: {
           include: {
-            evals: true,
+            evaluations: {
+              include: { evaluationTemplate: true },
+            },
           },
         },
       },
@@ -133,9 +147,12 @@ export class SearchService {
       },
       include: {
         alerts: { where: { enabled: true } },
-        evalSets: {
-          include: { evals: true },
-          where: { enabled: true },
+        evaluationGroups: {
+          include: {
+            evaluations: {
+              include: { evaluationTemplate: true },
+            },
+          },
         },
       },
     });
@@ -162,8 +179,12 @@ export class SearchService {
       where: { ownerId: userId, isDefault: true },
       include: {
         alerts: true,
-        evalSets: {
-          include: { evals: true },
+        evaluationGroups: {
+          include: {
+            evaluations: {
+              include: { evaluationTemplate: true },
+            },
+          },
         },
       },
     });

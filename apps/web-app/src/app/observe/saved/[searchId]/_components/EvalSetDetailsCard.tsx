@@ -5,15 +5,15 @@ import { useCallback } from "react";
 import { CriteriaBlock } from "./CriteriaBlock";
 import { instantiateEval } from "~/lib/instantiate";
 import { EditableText } from "~/components/EditableText";
-import { type EvalSetWithIncludes } from "@repo/types/src/index";
+import { type EvaluationGroupWithIncludes } from "@repo/types/src/index";
 import { Input } from "~/components/ui/input";
 
 export default function EvalSetCard({
   evalSet,
   onUpdate,
 }: {
-  evalSet: EvalSetWithIncludes;
-  onUpdate: (evaluation: EvalSetWithIncludes) => void;
+  evalSet: EvaluationGroupWithIncludes;
+  onUpdate: (evaluation: EvaluationGroupWithIncludes) => void;
 }) {
   const addCriteria = useCallback(() => {
     onUpdate({

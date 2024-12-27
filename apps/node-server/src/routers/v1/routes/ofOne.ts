@@ -1,6 +1,6 @@
 import { Request, Response, Router } from "express";
-import { scheduleOfOneCalls } from "../../services/integrations/ofOneService";
-import { connectedUsers } from "../../index";
+import { scheduleOfOneCalls } from "../../../services/integrations/ofOneService";
+import { connectedUsers } from "../../../index";
 const ofOneRouter = Router();
 
 ofOneRouter.post("/", async (req: Request, res: Response) => {

@@ -51,11 +51,12 @@ model Agent {
 
   enableSlackNotifications Boolean @default(true)
 
-  enabledGeneralEvals Eval[]
-  enabledTestAgents   TestAgent[]
-  scenarios           Scenario[]
-  tests               Test[]
-  calls               Call[]
+  enabledGeneralEvaluations Evaluation[]
+  enabledTestAgents         TestAgent[]
+  scenarios                 Scenario[]
+  tests                     Test[]
+  evaluationTemplates       EvaluationTemplate[]
+  calls                     Call[]
 }
 
 model Test {
@@ -115,7 +116,7 @@ model Call {
   numInterruptions   Int?
   duration           Float?
 
-  evalResults EvalResult[]
+  evaluationResults EvaluationResult[]
 
   agent   Agent?  @relation(fields: [agentId], references: [id], onDelete: Cascade)
   agentId String?
@@ -201,32 +202,32 @@ model Scenario {
   agent   Agent  @relation(fields: [agentId], references: [id], onDelete: Cascade)
   agentId String
 
-  name                 String
-  instructions         String
-  successCriteria      String         @default("")
-  generalEvalOverrides EvalOverride[]
+  name            String
+  instructions    String
+  successCriteria String @default("")
 
   includeDateTime Boolean @default(false)
   timezone        String?
 
   isNew Boolean @default(false)
 
-  calls Call[]
-  evals Eval[]
+  calls       Call[]
+  evaluations Evaluation[]
 
-  deleted Boolean @default(false)
-
-  @@map("Intent")
+  deleted            Boolean              @default(false)
+  EvaluationTemplate EvaluationTemplate[]
 }
 
-model Eval {
+model EvaluationTemplate {
   id        String   @id @default(uuid())
   createdAt DateTime @default(now())
 
   name        String
   description String
-  scenario    Scenario? @relation(fields: [scenarioId], references: [id])
-  scenarioId  String?
+  params      String[]
+
+  scenario   Scenario? @relation(fields: [scenarioId], references: [id])
+  scenarioId String?
 
   type                   EvalType
   resultType             EvalResultType
@@ -234,45 +235,57 @@ model Eval {
   isCritical             Boolean         @default(true)
   toolCallExpectedResult String          @default("")
 
-  evalResults EvalResult[]
+  evaluationResults EvaluationResult[]
 
   agent   Agent?  @relation(fields: [agentId], references: [id])
   agentId String?
 
-  ownerId       String?
-  evalOverrides EvalOverride[]
+  ownerId String?
 
-  deleted   Boolean  @default(false)
-  evalSet   EvalSet? @relation(fields: [evalSetId], references: [id])
-  evalSetId String?
+  deleted           Boolean          @default(false)
+  evaluationGroup   EvaluationGroup? @relation(fields: [evaluationGroupId], references: [id])
+  evaluationGroupId String?
+  evaluations       Evaluation[]
 }
 
-model EvalResult {
+model Evaluation {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  enabled   Boolean  @default(true)
+
+  params Json @default("{}")
+
+  evaluationTemplate   EvaluationTemplate @relation(fields: [evaluationTemplateId], references: [id], onDelete: Cascade)
+  evaluationTemplateId String
+
+  scenario   Scenario? @relation(fields: [scenarioId], references: [id])
+  scenarioId String?
+
+  evaluationGroup   EvaluationGroup?   @relation(fields: [evaluationGroupId], references: [id])
+  evaluationGroupId String?
+  Agent             Agent?             @relation(fields: [agentId], references: [id])
+  agentId           String?
+  EvaluationResult  EvaluationResult[]
+}
+
+model EvaluationResult {
   id        String   @id @default(uuid())
   createdAt DateTime @default(now())
 
   call   Call?   @relation(fields: [callId], references: [id])
   callId String?
 
-  eval   Eval   @relation(fields: [evalId], references: [id], onDelete: Cascade)
-  evalId String
+  evaluation   Evaluation @relation(fields: [evaluationId], references: [id], onDelete: Cascade)
+  evaluationId String
 
-  result           String
-  success          Boolean
-  secondsFromStart Float?
-  duration         Float?
-  type             EvalResultType
-  details          String
-}
-
-model EvalOverride {
-  id         String   @id @default(uuid())
-  createdAt  DateTime @default(now())
-  scenario   Scenario @relation(fields: [scenarioId], references: [id], onDelete: Cascade)
-  scenarioId String
-  evalId     String
-  eval       Eval     @relation(fields: [evalId], references: [id], onDelete: Cascade)
-  enabled    Boolean
+  result               String
+  success              Boolean
+  secondsFromStart     Float?
+  duration             Float?
+  type                 EvalResultType
+  details              String
+  EvaluationTemplate   EvaluationTemplate? @relation(fields: [evaluationTemplateId], references: [id])
+  evaluationTemplateId String?
 }
 
 enum EvalType {
@@ -308,16 +321,17 @@ model Interruption {
   text             String
 }
 
-model EvalSet {
-  id            String       @id @default(uuid())
-  createdAt     DateTime     @default(now())
-  ownerId       String
-  name          String
-  condition     String       @default("")
-  evals         Eval[]
-  enabled       Boolean      @default(true)
-  savedSearch   SavedSearch? @relation(fields: [savedSearchId], references: [id], onDelete: Cascade)
-  savedSearchId String?
+model EvaluationGroup {
+  id                 String               @id @default(uuid())
+  createdAt          DateTime             @default(now())
+  ownerId            String
+  name               String
+  condition          String               @default("")
+  evaluations        Evaluation[]
+  enabled            Boolean              @default(true)
+  savedSearch        SavedSearch?         @relation(fields: [savedSearchId], references: [id], onDelete: Cascade)
+  savedSearchId      String?
+  EvaluationTemplate EvaluationTemplate[]
 }
 
 model SavedSearch {
@@ -336,8 +350,8 @@ model SavedSearch {
   customerCallId String?
   metadata       Json?
 
-  evalSets EvalSet[]
-  alerts   Alert[]
+  evaluationGroups EvaluationGroup[]
+  alerts           Alert[]
 }
 
 model Alert {

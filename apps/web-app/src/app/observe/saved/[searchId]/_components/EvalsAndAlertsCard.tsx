@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   type EvalSetAlert,
   type AlertWithDetails,
-  type EvalSetWithIncludes,
+  type EvaluationGroupWithIncludes,
   type Filter,
 } from "@repo/types/src/index";
 import { Button } from "~/components/ui/button";
@@ -25,7 +25,7 @@ export function EvalSetsAndAlertsCard({ searchId }: { searchId: string }) {
   const [evalsModalOpen, setEvalsModalOpen] = useState(false);
   const [alertsModalOpen, setAlertsModalOpen] = useState(false);
   const [selectedEvalSet, setSelectedEvalSet] =
-    useState<EvalSetWithIncludes | null>(null);
+    useState<EvaluationGroupWithIncludes | null>(null);
   const [selectedAlert, setSelectedAlert] = useState<AlertWithDetails | null>(
     null,
   );
@@ -210,11 +210,11 @@ function EvalSetCard({
   setSelectedEvalSet,
   setEvalsModalOpen,
 }: {
-  evalSet: EvalSetWithIncludes;
+  evalSet: EvaluationGroupWithIncludes;
   filter: Filter;
   setFilter: React.Dispatch<React.SetStateAction<Filter>>;
   setSelectedEvalSet: React.Dispatch<
-    React.SetStateAction<EvalSetWithIncludes | null>
+    React.SetStateAction<EvaluationGroupWithIncludes | null>
   >;
   setEvalsModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }) {

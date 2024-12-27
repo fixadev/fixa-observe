@@ -1,7 +1,17 @@
 import { z } from "zod";
-import { EvalSchema, EvalSetSchema } from "./generated";
+import {
+  EvaluationSchema,
+  EvaluationGroupSchema,
+  EvaluationTemplateSchema,
+} from "./generated";
 
-export type EvalSetWithIncludes = z.infer<typeof EvalSetWithIncludesSchema>;
-export const EvalSetWithIncludesSchema = EvalSetSchema.extend({
-  evals: z.array(EvalSchema),
+export type EvaluationGroupWithIncludes = z.infer<
+  typeof EvaluationGroupWithIncludesSchema
+>;
+export const EvaluationGroupWithIncludesSchema = EvaluationGroupSchema.extend({
+  evaluations: z.array(
+    EvaluationSchema.extend({
+      evaluationTemplate: EvaluationTemplateSchema,
+    }),
+  ),
 });
