@@ -60,12 +60,12 @@ export class TestService {
             errors: true,
             scenario: {
               include: {
-                evals: true,
+                evaluations: true,
               },
             },
-            evalResults: {
+            evaluationResults: {
               include: {
-                eval: true,
+                evaluation: true,
               },
             },
             latencyBlocks: true,

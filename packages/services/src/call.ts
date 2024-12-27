@@ -16,13 +16,21 @@ export class CallService {
         messages: true,
         scenario: {
           include: {
-            evals: true,
+            evaluations: {
+              include: {
+                evaluationTemplate: true,
+              },
+            },
           },
         },
         testAgent: true,
-        evalResults: {
+        evaluationResults: {
           include: {
-            eval: true,
+            evaluation: {
+              include: {
+                evaluationTemplate: true,
+              },
+            },
           },
         },
         latencyBlocks: true,
@@ -167,13 +175,21 @@ export class CallService {
         messages: true,
         scenario: {
           include: {
-            evals: true,
+            evaluations: {
+              include: {
+                evaluationTemplate: true,
+              },
+            },
           },
         },
         testAgent: true,
-        evalResults: {
+        evaluationResults: {
           include: {
-            eval: true,
+            evaluation: {
+              include: {
+                evaluationTemplate: true,
+              },
+            },
           },
         },
         latencyBlocks: true,

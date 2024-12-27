@@ -58,7 +58,11 @@ export type TestWithIncludes = Prisma.TestGetPayload<{
         messages: true;
         scenario: {
           include: {
-            evaluations: true;
+            evaluations: {
+              include: {
+                evaluationTemplate: true;
+              };
+            };
           };
         };
         testAgent: true;
