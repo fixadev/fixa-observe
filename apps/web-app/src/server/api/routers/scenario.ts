@@ -2,12 +2,9 @@ import { z } from "zod";
 import { createTRPCRouter } from "../trpc";
 import { protectedProcedure } from "../trpc";
 import { ScenarioService } from "@repo/services/src/scenario";
-import {
-  CreateScenarioSchema,
-  UpdateScenarioSchema,
-} from "@repo/types/src/index";
 import { db } from "~/server/db";
 import { generateScenariosFromPrompt } from "~/server/helpers/generateScenarios";
+import { ScenarioWithIncludesSchema } from "@repo/types/src/db";
 
 const scenarioServiceInstance = new ScenarioService(db);
 
@@ -35,7 +32,7 @@ export const scenarioRouter = createTRPCRouter({
     .input(
       z.object({
         agentId: z.string(),
-        scenario: CreateScenarioSchema,
+        scenario: ScenarioWithIncludesSchema,
       }),
     )
     .mutation(async ({ input, ctx }) => {
@@ -48,7 +45,7 @@ export const scenarioRouter = createTRPCRouter({
 
   // todo: add ownerIds to all scenarios in prod
   update: protectedProcedure
-    .input(UpdateScenarioSchema)
+    .input(ScenarioWithIncludesSchema)
     .mutation(async ({ input, ctx }) => {
       return await scenarioServiceInstance.updateScenario({
         scenario: input,

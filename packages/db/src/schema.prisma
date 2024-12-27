@@ -261,11 +261,12 @@ model Evaluation {
   scenario   Scenario? @relation(fields: [scenarioId], references: [id])
   scenarioId String?
 
-  evaluationGroup   EvaluationGroup?   @relation(fields: [evaluationGroupId], references: [id])
+  evaluationGroup   EvaluationGroup? @relation(fields: [evaluationGroupId], references: [id])
   evaluationGroupId String?
-  Agent             Agent?             @relation(fields: [agentId], references: [id])
+  agent             Agent?           @relation(fields: [agentId], references: [id])
   agentId           String?
-  EvaluationResult  EvaluationResult[]
+
+  evaluationResults EvaluationResult[]
 }
 
 model EvaluationResult {

@@ -90,8 +90,13 @@ export class AgentService {
           where: { deleted: false },
           orderBy: { createdAt: "asc" },
           include: {
-            evals: { where: { deleted: false }, orderBy: { createdAt: "asc" } },
-            generalEvalOverrides: true,
+            evaluations: {
+              where: { evaluationTemplate: { deleted: false } },
+              orderBy: { createdAt: "asc" },
+              include: {
+                evaluationTemplate: true,
+              },
+            },
           },
         },
         tests: {
@@ -102,7 +107,12 @@ export class AgentService {
         enabledTestAgents: {
           where: { enabled: true },
         },
-        enabledGeneralEvals: true,
+        enabledGeneralEvaluations: {
+          where: { evaluationTemplate: { deleted: false } },
+          include: {
+            evaluationTemplate: true,
+          },
+        },
       },
     });
     return result;

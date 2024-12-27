@@ -1,10 +1,7 @@
-import { type PrismaClient } from "@repo/db/src/index";
+import { Prisma, type PrismaClient } from "@repo/db/src/index";
 import { v4 as uuidv4 } from "uuid";
-import {
-  type CreateScenarioSchema,
-  type UpdateScenarioSchema,
-} from "@repo/types/src/index";
 import { getCreatedUpdatedDeleted } from "./utils";
+import { ScenarioWithIncludes } from "@repo/types/src/db";
 
 export class ScenarioService {
   constructor(private db: PrismaClient) {}
@@ -15,9 +12,9 @@ export class ScenarioService {
     userId,
   }: {
     agentId: string;
-    scenario: CreateScenarioSchema;
+    scenario: ScenarioWithIncludes;
     userId: string;
-  }) {
+  }): Promise<ScenarioWithIncludes> {
     return await this.db.scenario.create({
       data: {
         ...scenario,
@@ -27,10 +24,11 @@ export class ScenarioService {
         createdAt: new Date(),
         evaluations: {
           createMany: {
-            data: scenario.evals.map((evaluation) => ({
+            data: scenario.evaluations.map((evaluation) => ({
               ...evaluation,
               id: uuidv4(),
               scenarioId: undefined,
+              params: evaluation.params as Prisma.InputJsonValue,
             })),
           },
         },
@@ -49,8 +47,8 @@ export class ScenarioService {
     scenarios,
   }: {
     agentId: string;
-    scenarios: CreateScenarioSchema[];
-  }) {
+    scenarios: ScenarioWithIncludes[];
+  }): Promise<ScenarioWithIncludes[]> {
     return await this.db.$transaction(async (tx) => {
       return await Promise.all(
         scenarios.map((scenario) =>
@@ -62,10 +60,11 @@ export class ScenarioService {
               createdAt: new Date(),
               evaluations: {
                 createMany: {
-                  data: scenario.evals.map((evaluation) => ({
+                  data: scenario.evaluations.map((evaluation) => ({
                     ...evaluation,
                     id: uuidv4(),
                     scenarioId: undefined,
+                    params: evaluation.params as Prisma.InputJsonValue,
                   })),
                 },
               },
@@ -86,16 +85,16 @@ export class ScenarioService {
     scenario,
     userId,
   }: {
-    scenario: UpdateScenarioSchema;
+    scenario: ScenarioWithIncludes;
     userId: string;
-  }) {
+  }): Promise<ScenarioWithIncludes> {
     const priorEvals = await this.db.evaluation.findMany({
       where: { scenarioId: scenario.id },
     });
 
     const { created, updated, deleted } = await getCreatedUpdatedDeleted(
       priorEvals,
-      scenario.evals,
+      scenario.evaluations,
     );
 
     return await this.db.scenario.update({
@@ -110,7 +109,11 @@ export class ScenarioService {
             })),
             ...updated.map((evaluation) => ({
               where: { id: evaluation.id },
-              data: { ...evaluation, scenarioId: undefined },
+              data: {
+                ...evaluation,
+                scenarioId: undefined,
+                params: evaluation.params as Prisma.InputJsonValue,
+              },
             })),
           ],
           createMany: {
@@ -118,6 +121,7 @@ export class ScenarioService {
               ...evaluation,
               id: uuidv4(),
               scenarioId: scenario.id,
+              params: evaluation.params as Prisma.InputJsonValue,
             })),
           },
         },

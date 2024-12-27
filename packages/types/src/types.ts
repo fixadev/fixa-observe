@@ -2,6 +2,7 @@ import { type Prisma } from "@prisma/client";
 import { z } from "zod";
 import { AlertWithDetailsSchema } from "./alert";
 import { EvaluationGroupWithIncludesSchema } from "./eval";
+import { EvaluationSchema, EvaluationTemplateSchema } from "./generated";
 
 export type PlatformOptions = z.infer<typeof platformOptions>;
 export const platformOptions = z.enum(["retell", "vapi", "bland"]);
@@ -13,97 +14,6 @@ export const transcriptionErrorSchema = z.object({
   correctWord: z.string(),
 });
 export type TranscriptionError = z.infer<typeof transcriptionErrorSchema>;
-
-export type EvaluationResultWithIncludes = Prisma.EvaluationResultGetPayload<{
-  include: {
-    evaluation: {
-      include: {
-        evaluationTemplate: true;
-      };
-    };
-  };
-}>;
-export type AggregateEvaluationResult = EvaluationResultWithIncludes & {
-  numSucceeded: number;
-  total: number;
-};
-
-export type CallWithIncludes = Prisma.CallGetPayload<{
-  include: {
-    messages: true;
-    scenario: {
-      include: {
-        evaluations: true;
-      };
-    };
-    testAgent: true;
-    evaluationResults: {
-      include: {
-        evaluation: {
-          include: {
-            evaluationTemplate: true;
-          };
-        };
-      };
-    };
-    latencyBlocks: true;
-    interruptions: true;
-  };
-}>;
-
-export type TestWithIncludes = Prisma.TestGetPayload<{
-  include: {
-    calls: {
-      include: {
-        messages: true;
-        scenario: {
-          include: {
-            evaluations: {
-              include: {
-                evaluationTemplate: true;
-              };
-            };
-          };
-        };
-        testAgent: true;
-        evaluationResults: {
-          include: {
-            evaluation: {
-              include: {
-                evaluationTemplate: true;
-              };
-            };
-          };
-        };
-        latencyBlocks: true;
-        interruptions: true;
-      };
-    };
-  };
-}>;
-
-export type TestWithCalls = Prisma.TestGetPayload<{
-  include: {
-    calls: true;
-  };
-}>;
-
-export type AgentWithIncludes = Prisma.AgentGetPayload<{
-  include: {
-    scenarios: {
-      include: {
-        evaluations: true;
-      };
-    };
-    tests: {
-      include: {
-        calls: true;
-      };
-    };
-    enabledTestAgents: true;
-    enabledGeneralEvals: true;
-  };
-}>;
 
 export const TimeRangeSchema = z.object({
   start: z.number(),
@@ -133,15 +43,6 @@ export const FilterSchema = z.object({
   evalSets: z.array(EvaluationGroupWithIncludesSchema).optional(),
   alerts: z.array(AlertWithDetailsSchema).optional(),
   evalSetToSuccess: z.union([evalSetToSuccess, z.null(), z.undefined()]),
-});
-
-export type SavedSearchWithIncludes = z.infer<typeof SavedSearchWithIncludes>;
-export const SavedSearchWithIncludes = FilterSchema.extend({
-  id: z.string(),
-  createdAt: z.date(),
-  ownerId: z.string(),
-  name: z.string(),
-  isDefault: z.boolean(),
 });
 
 export type SelectItem = {
