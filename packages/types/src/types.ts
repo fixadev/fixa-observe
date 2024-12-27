@@ -14,12 +14,16 @@ export const transcriptionErrorSchema = z.object({
 });
 export type TranscriptionError = z.infer<typeof transcriptionErrorSchema>;
 
-export type EvalResultWithIncludes = Prisma.EvalResultGetPayload<{
+export type EvaluationResultWithIncludes = Prisma.EvaluationResultGetPayload<{
   include: {
-    eval: true;
+    evaluation: {
+      include: {
+        evaluationTemplate: true;
+      };
+    };
   };
 }>;
-export type AggregateEvalResult = EvalResultWithIncludes & {
+export type AggregateEvaluationResult = EvaluationResultWithIncludes & {
   numSucceeded: number;
   total: number;
 };
@@ -29,13 +33,17 @@ export type CallWithIncludes = Prisma.CallGetPayload<{
     messages: true;
     scenario: {
       include: {
-        evals: true;
+        evaluations: true;
       };
     };
     testAgent: true;
-    evalResults: {
+    evaluationResults: {
       include: {
-        eval: true;
+        evaluation: {
+          include: {
+            evaluationTemplate: true;
+          };
+        };
       };
     };
     latencyBlocks: true;
@@ -50,13 +58,17 @@ export type TestWithIncludes = Prisma.TestGetPayload<{
         messages: true;
         scenario: {
           include: {
-            evals: true;
+            evaluations: true;
           };
         };
         testAgent: true;
-        evalResults: {
+        evaluationResults: {
           include: {
-            eval: true;
+            evaluation: {
+              include: {
+                evaluationTemplate: true;
+              };
+            };
           };
         };
         latencyBlocks: true;
@@ -76,8 +88,7 @@ export type AgentWithIncludes = Prisma.AgentGetPayload<{
   include: {
     scenarios: {
       include: {
-        evals: true;
-        generalEvalOverrides: true;
+        evaluations: true;
       };
     };
     tests: {

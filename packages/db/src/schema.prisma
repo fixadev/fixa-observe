@@ -214,8 +214,8 @@ model Scenario {
   calls       Call[]
   evaluations Evaluation[]
 
-  deleted            Boolean              @default(false)
-  EvaluationTemplate EvaluationTemplate[]
+  deleted             Boolean              @default(false)
+  evaluationTemplates EvaluationTemplate[]
 }
 
 model EvaluationTemplate {
@@ -278,13 +278,14 @@ model EvaluationResult {
   evaluation   Evaluation @relation(fields: [evaluationId], references: [id], onDelete: Cascade)
   evaluationId String
 
-  result               String
-  success              Boolean
-  secondsFromStart     Float?
-  duration             Float?
-  type                 EvalResultType
-  details              String
-  EvaluationTemplate   EvaluationTemplate? @relation(fields: [evaluationTemplateId], references: [id])
+  result           String
+  success          Boolean
+  secondsFromStart Float?
+  duration         Float?
+  type             EvalResultType
+  details          String
+
+  evaluationTemplate   EvaluationTemplate? @relation(fields: [evaluationTemplateId], references: [id])
   evaluationTemplateId String?
 }
 

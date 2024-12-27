@@ -24,7 +24,7 @@ import {
 } from "~/components/ui/select";
 import type {
   CallWithIncludes,
-  EvalResultWithIncludes,
+  EvaluationResultWithIncludes,
 } from "@repo/types/src/index";
 import {
   cn,
@@ -36,7 +36,9 @@ import WaveSurfer from "wavesurfer.js";
 import { Skeleton } from "../ui/skeleton";
 
 export type AudioPlayerRef = {
-  setActiveEvalResult: (evalResult: EvalResultWithIncludes | null) => void;
+  setActiveEvalResult: (
+    evalResult: EvaluationResultWithIncludes | null,
+  ) => void;
   setHoveredEvalResult: (evalResultId: string | null) => void;
   play: () => void;
   pause: () => void;
@@ -58,7 +60,7 @@ const _AudioPlayer = forwardRef<
 ) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [activeEvalResult, setActiveEvalResult] =
-    useState<EvalResultWithIncludes | null>(null);
+    useState<EvaluationResultWithIncludes | null>(null);
   const [hoveredEvalResult, setHoveredEvalResult] = useState<string | null>(
     null,
   );
@@ -154,7 +156,9 @@ const _AudioPlayer = forwardRef<
   useImperativeHandle(
     ref,
     () => ({
-      setActiveEvalResult: (evalResult: EvalResultWithIncludes | null) => {
+      setActiveEvalResult: (
+        evalResult: EvaluationResultWithIncludes | null,
+      ) => {
         setActiveEvalResult(evalResult);
         if (evalResult && evalResult.secondsFromStart && evalResult.duration) {
           seek(evalResult.secondsFromStart - offsetFromStart);
@@ -171,7 +175,7 @@ const _AudioPlayer = forwardRef<
   );
 
   const handleEvalResultClick = useCallback(
-    (evalResult: EvalResultWithIncludes) => {
+    (evalResult: EvaluationResultWithIncludes) => {
       if (!evalResult.secondsFromStart || !evalResult.duration) return;
       seek(evalResult.secondsFromStart - offsetFromStart);
       play();
@@ -213,7 +217,7 @@ const _AudioPlayer = forwardRef<
         {!audioLoaded && (
           <Skeleton className="absolute left-0 top-0 size-full" />
         )}
-        {call.evalResults?.map((evalResult, index) => {
+        {call.evaluationResults?.map((evalResult, index) => {
           if (
             !containerRef.current ||
             !duration ||
