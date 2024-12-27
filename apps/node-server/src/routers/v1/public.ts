@@ -5,13 +5,17 @@ import personaRouter from "./routes/persona";
 import agentRouter from "./routes/agent";
 import scenarioRouter from "./routes/scenario";
 import alertRouter from "./routes/alert";
+import { authenticateRequest } from "../../middlewares/auth";
 
-const v1Router = express.Router();
+const publicRouter = express.Router();
 
-v1Router.use("/upload-call", uploadCallRouter);
-v1Router.use("/tests", testsRouter);
-v1Router.use("/persona", personaRouter);
-v1Router.use("/agent", agentRouter);
-v1Router.use("/scenario", scenarioRouter);
-v1Router.use("/alert", alertRouter);
-export default v1Router;
+publicRouter.use(authenticateRequest);
+
+publicRouter.use("/upload-call", uploadCallRouter);
+publicRouter.use("/tests", testsRouter);
+publicRouter.use("/persona", personaRouter);
+publicRouter.use("/agent", agentRouter);
+publicRouter.use("/scenario", scenarioRouter);
+publicRouter.use("/alert", alertRouter);
+
+export default publicRouter;

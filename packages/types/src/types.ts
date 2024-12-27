@@ -176,4 +176,5 @@ export const UploadCallParams = z.object({
   userId: z.string(),
   metadata: z.record(z.string(), z.string()).optional(),
   saveRecording: z.boolean().optional(),
+  language: z.string().optional(),
 });
