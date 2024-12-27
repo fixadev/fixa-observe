@@ -1,11 +1,5 @@
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogFooter } from "@/components/ui/dialog";
 import { Label } from "~/components/ui/label";
 import { Textarea } from "~/components/ui/textarea";
 import { TrashIcon } from "@heroicons/react/24/solid";
@@ -15,13 +9,13 @@ import {
   EvalType,
   type EvaluationTemplate,
   type Scenario,
-  sampleEvaluationTemplates,
 } from "../new-types";
 import { AdditionalContextSection } from "./AdditionalContextSection";
 import { EvaluationTabSection } from "./EvaluationTabSection";
 import { EvaluationTemplateDialog } from "./EvaluationTemplateDialog";
 import { useCallback, useState } from "react";
 import { EditableText } from "~/components/EditableText";
+import { useScenario } from "./ScenarioContext";
 
 interface ScenarioDialogProps {
   scenario: Scenario;
@@ -36,6 +30,8 @@ export function ScenarioDialog({
   onOpenChange,
   onSave,
 }: ScenarioDialogProps) {
+  const { setScenario } = useScenario();
+
   const [templateDialogOpen, setTemplateDialogOpen] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState<
     EvaluationTemplate | undefined
@@ -74,7 +70,9 @@ export function ScenarioDialog({
             placeholder="name this scenario..."
             value={scenario.name}
             onValueChange={(value) => {
-              console.log("value", value);
+              setScenario((prev) =>
+                prev ? { ...prev, name: value } : undefined,
+              );
             }}
             className="inline-block rounded-md bg-muted text-sm font-medium"
           />
@@ -94,8 +92,11 @@ export function ScenarioDialog({
               <Textarea
                 value={scenario.instructions}
                 onChange={(e) => {
-                  // You'll need to implement the onChange handler
-                  // to update the scenario instructions
+                  setScenario((prev) =>
+                    prev
+                      ? { ...prev, instructions: e.target.value }
+                      : undefined,
+                  );
                 }}
                 className="min-h-[100px]"
               />

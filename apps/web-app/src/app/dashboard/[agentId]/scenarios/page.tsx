@@ -1,20 +1,17 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
-import { ScenarioCard } from "~/app/dashboard/[agentId]/scenarios/_components/ScenarioCard";
+import { useMemo } from "react";
 import { Button } from "~/components/ui/button";
 import { Card, CardTitle, CardHeader } from "~/components/ui/card";
 import { SidebarTrigger } from "~/components/ui/sidebar";
-import { sampleScenario, type Scenario } from "./new-types";
+import { sampleScenario } from "./new-types";
 import { NoScenariosYet } from "./_components/NoScenariosYet";
-import { ScenarioDialog } from "~/app/dashboard/[agentId]/scenarios/_components/ScenarioDialog";
+import { ScenarioDialog } from "./_components/ScenarioDialog";
+import { ScenarioCard } from "./_components/ScenarioCard";
+import { ScenarioProvider, useScenario } from "./_components/ScenarioContext";
 
-export default function ScenariosPage({
-  params,
-}: {
-  params: { agentId: string };
-}) {
+function ScenariosPageContent({ params }: { params: { agentId: string } }) {
   const scenarios = useMemo(() => {
     return [sampleScenario];
   }, []);
@@ -23,10 +20,8 @@ export default function ScenariosPage({
     return [];
   }, []);
 
-  const [isDialogOpen, setIsDialogOpen] = useState(true);
-  const [selectedScenario, setSelectedScenario] = useState<Scenario | null>(
-    sampleScenario,
-  );
+  const { scenario, setScenario, isDialogOpen, setIsDialogOpen } =
+    useScenario();
 
   return (
     <>
@@ -48,23 +43,18 @@ export default function ScenariosPage({
           </div>
           {scenarios.length > 0 ? (
             <>
-              {scenarios.map((scenario) => (
+              {scenarios.map((scenarioItem) => (
                 <div
-                  key={scenario.id}
+                  key={scenarioItem.id}
                   onClick={() => {
-                    setSelectedScenario(scenario);
+                    setScenario(scenarioItem);
                     setIsDialogOpen(true);
-                    console.log("clicked");
                   }}
                 >
-                  <ScenarioCard scenario={scenario} />
+                  <ScenarioCard scenario={scenarioItem} />
                 </div>
               ))}
               <div className="flex flex-row justify-end gap-4">
-                {/* <GenerateScenariosModal agent={agent} setAgent={setAgent}>
-              <Button variant="outline">generate from prompt</Button>
-            </GenerateScenariosModal> */}
-
                 <Button variant="outline">add scenario</Button>
               </div>
             </>
@@ -86,13 +76,25 @@ export default function ScenariosPage({
           </Card>
         )}
       </div>
-      {selectedScenario && (
+      {scenario && (
         <ScenarioDialog
-          scenario={selectedScenario}
+          scenario={scenario}
           open={isDialogOpen}
           onOpenChange={setIsDialogOpen}
         />
       )}
     </>
+  );
+}
+
+export default function ScenariosPage({
+  params,
+}: {
+  params: { agentId: string };
+}) {
+  return (
+    <ScenarioProvider>
+      <ScenariosPageContent params={params} />
+    </ScenarioProvider>
   );
 }
