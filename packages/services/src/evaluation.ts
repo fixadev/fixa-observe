@@ -2,7 +2,6 @@ import {
   EvalContentType,
   EvalResultType,
   EvalType,
-  EvaluationTemplate,
   type PrismaClient,
 } from "@repo/db/src/index";
 import { v4 as uuidv4 } from "uuid";
@@ -10,6 +9,7 @@ import {
   type Evaluation,
   type Agent,
   type EvaluationGroupWithIncludes,
+  EvaluationTemplate,
 } from "@repo/types/src/index";
 import { getCreatedUpdatedDeleted } from "./utils";
 
@@ -31,7 +31,7 @@ export class EvaluationService {
     userId: string;
   }): Promise<EvaluationTemplate[]> {
     return await this.db.evaluationTemplate.findMany({
-      where: { ownerId: userId },
+      where: { ownerId: userId, deleted: false },
       orderBy: { createdAt: "asc" },
     });
   }
@@ -45,6 +45,19 @@ export class EvaluationService {
   }): Promise<EvaluationTemplate> {
     return await this.db.evaluationTemplate.create({
       data: { ...template, id: uuidv4(), ownerId: userId },
+    });
+  }
+
+  async updateTemplate({
+    template,
+    userId,
+  }: {
+    template: EvaluationTemplate;
+    userId: string;
+  }): Promise<EvaluationTemplate> {
+    return await this.db.evaluationTemplate.update({
+      where: { id: template.id, ownerId: userId },
+      data: { ...template },
     });
   }
 

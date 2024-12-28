@@ -10,24 +10,28 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "~/components/ui/tooltip";
-import { type Scenario, type EvaluationTemplate } from "../new-types";
 import { EvaluationTemplateCombobox } from "./EvaluationTemplateCombobox";
+import { useScenario } from "./ScenarioContext";
+import { type EvaluationTemplate } from "@repo/types/src";
 
 interface EvaluationTabSectionProps {
-  evaluations: Scenario["evaluations"];
   onEditTemplate: (template?: EvaluationTemplate) => void;
   onCreateNewTemplate: (name: string) => void;
 }
 
 export function EvaluationTabSection({
-  evaluations,
   onEditTemplate,
   onCreateNewTemplate,
 }: EvaluationTabSectionProps) {
-  const [activeTab, setActiveTab] = useState(evaluations?.[0]?.id);
+  const { scenario, setScenario } = useScenario();
+  const [activeTab, setActiveTab] = useState(scenario?.evaluations?.[0]?.id);
 
-  if (!evaluations?.length) {
-    return <div>no evaluations available</div>;
+  if (!scenario) {
+    return null;
+  }
+
+  if (!scenario.evaluations?.length) {
+    return <div>no evaluations added yet.</div>;
   }
 
   return (
@@ -35,7 +39,7 @@ export function EvaluationTabSection({
       {/* Custom Tab List */}
       <div className="flex overflow-x-auto pb-4">
         <div className="flex flex-nowrap gap-2">
-          {evaluations.map((evaluation) => (
+          {scenario.evaluations.map((evaluation) => (
             <Button
               key={evaluation.id}
               onClick={() => setActiveTab(evaluation.id)}
@@ -60,7 +64,7 @@ export function EvaluationTabSection({
       </div>
 
       {/* Tab Content */}
-      {evaluations.map(
+      {scenario.evaluations.map(
         (evaluation) =>
           activeTab === evaluation.id && (
             <div key={evaluation.id}>
@@ -73,9 +77,20 @@ export function EvaluationTabSection({
                   <div className="flex items-center space-x-2">
                     <Switch
                       id={`is-critical-${evaluation.id}`}
-                      checked={evaluation.evaluationTemplate?.isCritical}
+                      checked={evaluation.isCritical}
                       onCheckedChange={(checked) => {
-                        // Handle switch change
+                        setScenario((prev) =>
+                          prev
+                            ? {
+                                ...prev,
+                                evaluations: prev.evaluations.map((e) =>
+                                  e.id === evaluation.id
+                                    ? { ...e, isCritical: checked }
+                                    : e,
+                                ),
+                              }
+                            : prev,
+                        );
                       }}
                     />
                     <Label htmlFor={`is-critical-${evaluation.id}`}>

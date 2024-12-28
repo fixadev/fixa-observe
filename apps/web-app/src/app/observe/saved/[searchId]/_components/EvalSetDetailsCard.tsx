@@ -3,38 +3,43 @@ import { Button } from "~/components/ui/button";
 import { cn, isTempId } from "~/lib/utils";
 import { useCallback } from "react";
 import { CriteriaBlock } from "./CriteriaBlock";
-import { instantiateEval } from "~/lib/instantiate";
 import { EditableText } from "~/components/EditableText";
 import { type EvaluationGroupWithIncludes } from "@repo/types/src/index";
 import { Input } from "~/components/ui/input";
 
-export default function EvalSetCard({
-  evalSet,
+export default function EvaluationGroupCard({
+  evaluationGroup,
   onUpdate,
 }: {
-  evalSet: EvaluationGroupWithIncludes;
+  evaluationGroup: EvaluationGroupWithIncludes;
   onUpdate: (evaluation: EvaluationGroupWithIncludes) => void;
 }) {
+  // TODO: Need to fix this to instantiate evaluation template as an evaluation
   const addCriteria = useCallback(() => {
     onUpdate({
-      ...evalSet,
-      evals: [...evalSet.evals, instantiateEval({ evalSetId: evalSet.id })],
+      ...evaluationGroup,
+      evaluations: [
+        ...evaluationGroup.evaluations,
+        instantiateEvaluation({ evaluationGroupId: evaluationGroup.id }),
+      ],
     });
-  }, [evalSet, onUpdate]);
+  }, [evaluationGroup, onUpdate]);
 
   return (
     <div
       className={cn(
         "p-0 text-sm transition-opacity",
-        !evalSet.enabled && "opacity-60",
+        !evaluationGroup.enabled && "opacity-60",
       )}
     >
       <CardHeader className="flex flex-col gap-2 px-0 py-2">
         <div className="flex items-center gap-1">
           <EditableText
-            value={evalSet.name}
-            onValueChange={(value) => onUpdate({ ...evalSet, name: value })}
-            initialEditing={isTempId(evalSet.id)}
+            value={evaluationGroup.name}
+            onValueChange={(value) =>
+              onUpdate({ ...evaluationGroup, name: value })
+            }
+            initialEditing={isTempId(evaluationGroup.id)}
             className="text-base font-medium"
             inputClassName="text-base"
             placeholder="enter evaluation name..."
@@ -52,28 +57,32 @@ export default function EvalSetCard({
         <div className="text-xs font-medium text-muted-foreground">IF</div>
         <Input
           className="text-muted-foreground"
-          value={evalSet.condition}
-          onChange={(e) => onUpdate({ ...evalSet, condition: e.target.value })}
+          value={evaluationGroup.condition}
+          onChange={(e) =>
+            onUpdate({ ...evaluationGroup, condition: e.target.value })
+          }
           placeholder="user asks to book appointment"
         />
         <div className="text-xs font-medium text-muted-foreground">THEN</div>
         <div className="flex flex-col gap-2">
-          {evalSet.evals.map((criteria) => (
+          {evaluationGroup.evals.map((criteria) => (
             <CriteriaBlock
               key={criteria.id}
               criteria={criteria}
               onUpdate={(updated) => {
                 onUpdate({
-                  ...evalSet,
-                  evals: evalSet.evals.map((e) =>
+                  ...evaluationGroup,
+                  evals: evaluationGroup.evals.map((e) =>
                     e.id === updated.id ? updated : e,
                   ),
                 });
               }}
               onDelete={() => {
                 onUpdate({
-                  ...evalSet,
-                  evals: evalSet.evals.filter((e) => e.id !== criteria.id),
+                  ...evaluationGroup,
+                  evals: evaluationGroup.evals.filter(
+                    (e) => e.id !== criteria.id,
+                  ),
                 });
               }}
             />

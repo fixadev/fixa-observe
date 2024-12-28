@@ -20,8 +20,7 @@ function ScenariosPageContent({ params }: { params: { agentId: string } }) {
     return [];
   }, []);
 
-  const { scenario, setScenario, isDialogOpen, setIsDialogOpen } =
-    useScenario();
+  const { setScenario, isDialogOpen, setIsDialogOpen } = useScenario();
 
   return (
     <>
@@ -76,13 +75,7 @@ function ScenariosPageContent({ params }: { params: { agentId: string } }) {
           </Card>
         )}
       </div>
-      {scenario && (
-        <ScenarioDialog
-          scenario={scenario}
-          open={isDialogOpen}
-          onOpenChange={setIsDialogOpen}
-        />
-      )}
+      <ScenarioDialog open={isDialogOpen} onOpenChange={setIsDialogOpen} />
     </>
   );
 }

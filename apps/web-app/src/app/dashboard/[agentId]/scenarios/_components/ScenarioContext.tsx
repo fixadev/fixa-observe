@@ -6,11 +6,11 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import type { Scenario } from "../new-types";
+import { type ScenarioWithIncludes } from "@repo/types/src";
 
 interface ScenarioContextType {
-  scenario?: Scenario;
-  setScenario: Dispatch<SetStateAction<Scenario | undefined>>;
+  scenario?: ScenarioWithIncludes;
+  setScenario: Dispatch<SetStateAction<ScenarioWithIncludes | undefined>>;
   isDialogOpen: boolean;
   setIsDialogOpen: (open: boolean) => void;
 }
@@ -20,7 +20,7 @@ const ScenarioContext = createContext<ScenarioContextType | undefined>(
 );
 
 export function ScenarioProvider({ children }: { children: ReactNode }) {
-  const [scenario, setScenario] = useState<Scenario>();
+  const [scenario, setScenario] = useState<ScenarioWithIncludes>();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   return (

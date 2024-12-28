@@ -1,39 +1,44 @@
 import {
   type AlertWithDetails,
   type EvaluationGroupWithIncludes,
-  type Eval,
-  type EvalSet,
+  type EvaluationTemplate,
 } from "@repo/types/src/index";
 import { generateTempId } from "./utils";
-import { AlertType } from "@prisma/client";
-import { lookbackPeriods } from "~/components/hooks/useObserveState";
+import {
+  AlertType,
+  EvalContentType,
+  EvalResultType,
+  EvalType,
+} from "@prisma/client";
 
-export function instantiateEval(partial?: Partial<Eval>): Eval {
-  return {
-    id: generateTempId(),
-    createdAt: new Date(),
+// export function instantiateEvaluation(
+//   partial?: Partial<Evaluation>,
+// ): Evaluation {
+//   return {
+//     id: generateTempId(),
+//     createdAt: new Date(),
 
-    name: "",
-    description: "",
-    scenarioId: null,
+//     name: "",
+//     description: "",
+//     scenarioId: null,
 
-    type: "general",
-    resultType: "boolean",
-    contentType: "content",
-    isCritical: true,
-    toolCallExpectedResult: "",
+//     type: "general",
+//     resultType: "boolean",
+//     contentType: "content",
+//     isCritical: true,
+//     toolCallExpectedResult: "",
 
-    agentId: null,
-    ownerId: null,
-    deleted: false,
+//     agentId: null,
+//     ownerId: null,
+//     deleted: false,
 
-    evalSetId: null,
+//     evalSetId: null,
 
-    ...partial,
-  };
-}
+//     ...partial,
+//   };
+// }
 
-export function instantiateEvalSet(
+export function instantiateEvaluationGroup(
   partial?: Partial<EvaluationGroupWithIncludes>,
 ): EvaluationGroupWithIncludes {
   return {
@@ -44,7 +49,30 @@ export function instantiateEvalSet(
     enabled: true,
     condition: "",
     savedSearchId: null,
-    evals: [],
+    evaluations: [],
+
+    ...partial,
+  };
+}
+
+export function instantiateEvaluationTemplate(
+  partial?: Partial<EvaluationTemplate>,
+): EvaluationTemplate {
+  return {
+    id: generateTempId(),
+    name: "",
+    description: "",
+    createdAt: new Date(),
+    params: [],
+    type: EvalType.scenario,
+    resultType: EvalResultType.boolean,
+    contentType: EvalContentType.content,
+    toolCallExpectedResult: "",
+    deleted: false,
+    scenarioId: null,
+    agentId: null,
+    ownerId: null,
+    evaluationGroupId: null,
 
     ...partial,
   };

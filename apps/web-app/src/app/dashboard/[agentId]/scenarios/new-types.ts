@@ -1,4 +1,10 @@
-import { type SavedSearch, type Agent, type Call } from "@repo/types/src";
+import {
+  type SavedSearch,
+  type Agent,
+  type Call,
+  type ScenarioWithIncludes,
+  type EvaluationTemplate,
+} from "@repo/types/src";
 
 export interface Scenario {
   id: string;
@@ -36,31 +42,6 @@ export interface Evaluation {
   evaluationGroup?: EvaluationGroup;
   agent?: Agent;
   evaluationResults?: EvaluationResult[];
-}
-
-export interface EvaluationTemplate {
-  id: string;
-  createdAt: Date;
-  name: string;
-  description: string;
-  params: string[];
-  scenarioId?: string;
-  type: EvalType;
-  resultType: EvalResultType;
-  contentType: EvalContentType;
-  isCritical: boolean;
-  toolCallExpectedResult: string;
-  agentId?: string;
-  ownerId?: string;
-  evaluationGroupId?: string;
-  deleted: boolean;
-
-  // Relations
-  scenario?: Scenario;
-  evaluationResults?: EvaluationResult[];
-  agent?: Agent;
-  evaluationGroup?: EvaluationGroup;
-  evaluations?: Evaluation[];
 }
 
 export interface EvaluationResult {
@@ -125,9 +106,12 @@ export const sampleEvaluationTemplates: EvaluationTemplate[] = [
     type: EvalType.general,
     resultType: EvalResultType.percentage,
     contentType: EvalContentType.content,
-    isCritical: true,
     toolCallExpectedResult: "",
     deleted: false,
+    scenarioId: null,
+    agentId: null,
+    ownerId: null,
+    evaluationGroupId: null,
   },
   {
     id: "template-resolution",
@@ -143,9 +127,12 @@ export const sampleEvaluationTemplates: EvaluationTemplate[] = [
     type: EvalType.scenario,
     resultType: EvalResultType.boolean,
     contentType: EvalContentType.content,
-    isCritical: true,
     toolCallExpectedResult: "",
     deleted: false,
+    scenarioId: null,
+    agentId: null,
+    ownerId: null,
+    evaluationGroupId: null,
   },
   {
     id: "template-tools",
@@ -156,13 +143,16 @@ export const sampleEvaluationTemplates: EvaluationTemplate[] = [
     type: EvalType.general,
     resultType: EvalResultType.boolean,
     contentType: EvalContentType.tool,
-    isCritical: false,
     toolCallExpectedResult: "order_management.replace_item",
     deleted: false,
+    scenarioId: null,
+    agentId: null,
+    ownerId: null,
+    evaluationGroupId: null,
   },
 ];
 
-export const sampleScenario: Scenario = {
+export const sampleScenario: ScenarioWithIncludes = {
   id: "sample-scenario-1",
   createdAt: new Date(),
   ownerId: "user-123",
@@ -191,7 +181,9 @@ export const sampleScenario: Scenario = {
       evaluationTemplateId: "template-tone",
       scenarioId: "sample-scenario-1",
       agentId: "agent-456",
-      evaluationTemplate: sampleEvaluationTemplates[0],
+      evaluationTemplate: sampleEvaluationTemplates[0]!,
+      evaluationGroupId: null,
+      isCritical: false,
     },
     {
       id: "eval-resolution",
@@ -205,7 +197,9 @@ export const sampleScenario: Scenario = {
       evaluationTemplateId: "template-resolution",
       scenarioId: "sample-scenario-1",
       agentId: "agent-456",
-      evaluationTemplate: sampleEvaluationTemplates[1],
+      evaluationTemplate: sampleEvaluationTemplates[1]!,
+      evaluationGroupId: null,
+      isCritical: true,
     },
     {
       id: "eval-tools",
@@ -219,7 +213,9 @@ export const sampleScenario: Scenario = {
       evaluationTemplateId: "template-tools",
       scenarioId: "sample-scenario-1",
       agentId: "agent-456",
-      evaluationTemplate: sampleEvaluationTemplates[2],
+      evaluationTemplate: sampleEvaluationTemplates[2]!,
+      evaluationGroupId: null,
+      isCritical: false,
     },
   ],
 };

@@ -4,16 +4,10 @@ import { Label } from "~/components/ui/label";
 import { Card } from "~/components/ui/card";
 import { CopyText } from "~/components/CopyText";
 import { cn } from "~/lib/utils";
-import { type Scenario } from "../new-types";
+import { type ScenarioWithIncludes } from "@repo/types/src";
 
 interface ScenarioCardProps {
-  scenario: Scenario;
-  // index: number;
-  // deleteScenario: (index: number) => void;
-  // handleSaveScenario: (
-  //   scenario: CreateScenarioSchema | ScenarioWithEvals,
-  //   index: number,
-  // ) => void;
+  scenario: ScenarioWithIncludes;
 }
 
 export function ScenarioCard({ scenario }: ScenarioCardProps) {

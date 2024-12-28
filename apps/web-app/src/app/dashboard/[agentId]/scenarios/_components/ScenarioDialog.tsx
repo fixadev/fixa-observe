@@ -3,34 +3,30 @@ import { Dialog, DialogContent, DialogFooter } from "@/components/ui/dialog";
 import { Label } from "~/components/ui/label";
 import { Textarea } from "~/components/ui/textarea";
 import { TrashIcon } from "@heroicons/react/24/solid";
-import {
-  EvalContentType,
-  EvalResultType,
-  EvalType,
-  type EvaluationTemplate,
-  type Scenario,
-} from "../new-types";
 import { AdditionalContextSection } from "./AdditionalContextSection";
 import { EvaluationTabSection } from "./EvaluationTabSection";
 import { EvaluationTemplateDialog } from "./EvaluationTemplateDialog";
 import { useCallback, useState } from "react";
 import { EditableText } from "~/components/EditableText";
 import { useScenario } from "./ScenarioContext";
+import {
+  type EvaluationTemplate,
+  type ScenarioWithIncludes,
+} from "@repo/types/src";
+import { instantiateEvaluationTemplate } from "~/lib/instantiate";
 
 interface ScenarioDialogProps {
-  scenario: Scenario;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSave?: (scenario: Scenario) => void;
+  onSave?: (scenario: ScenarioWithIncludes) => void;
 }
 
 export function ScenarioDialog({
-  scenario,
   open,
   onOpenChange,
   onSave,
 }: ScenarioDialogProps) {
-  const { setScenario } = useScenario();
+  const { scenario, setScenario } = useScenario();
 
   const [templateDialogOpen, setTemplateDialogOpen] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState<
@@ -46,21 +42,13 @@ export function ScenarioDialog({
   );
 
   const handleCreateNewTemplate = useCallback((name: string) => {
-    setSelectedTemplate({
-      id: "new",
-      name,
-      description: "",
-      isCritical: false,
-      createdAt: new Date(),
-      params: [],
-      type: EvalType.scenario,
-      resultType: EvalResultType.boolean,
-      contentType: EvalContentType.content,
-      toolCallExpectedResult: "",
-      deleted: false,
-    });
+    setSelectedTemplate(instantiateEvaluationTemplate({ name }));
     setTemplateDialogOpen(true);
   }, []);
+
+  if (!scenario) {
+    return null;
+  }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -114,7 +102,6 @@ export function ScenarioDialog({
               </div>
               <div>
                 <EvaluationTabSection
-                  evaluations={scenario.evaluations}
                   onEditTemplate={handleOpenTemplateDialog}
                   onCreateNewTemplate={handleCreateNewTemplate}
                 />
@@ -138,8 +125,8 @@ export function ScenarioDialog({
         </DialogFooter>
       </DialogContent>
       <EvaluationTemplateDialog
-        isOpen={templateDialogOpen}
         template={selectedTemplate}
+        open={templateDialogOpen}
         onOpenChange={setTemplateDialogOpen}
       />
     </Dialog>
