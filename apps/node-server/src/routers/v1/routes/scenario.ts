@@ -1,9 +1,9 @@
 import { Request, Response, Router } from "express";
 import { ScenarioService } from "@repo/services/src/scenario";
 import {
-  CreateScenarioSchema,
-  UpdateScenarioSchema,
-} from "@repo/types/src/index";
+  ScenarioWithIncludes,
+  ScenarioWithIncludesSchema,
+} from "@repo/types/src/db";
 import { db } from "../../../db";
 
 const scenarioRouter = Router();
@@ -35,7 +35,7 @@ scenarioRouter.post("/:agentId", async (req: Request, res: Response) => {
   try {
     const { agentId } = req.params;
     const ownerId = res.locals.userId;
-    const scenario = req.body as CreateScenarioSchema;
+    const scenario = req.body as ScenarioWithIncludes;
 
     // Validate scenario data
     if (
@@ -56,7 +56,10 @@ scenarioRouter.post("/:agentId", async (req: Request, res: Response) => {
       });
     }
 
-    if (!Array.isArray(scenario.evals) || scenario.evals.length === 0) {
+    if (
+      !Array.isArray(scenario.evaluations) ||
+      scenario.evaluations.length === 0
+    ) {
       return res.status(400).json({
         success: false,
         error: "Scenario must include at least one evaluation",
@@ -82,7 +85,7 @@ scenarioRouter.put("/:id", async (req: Request, res: Response) => {
     const ownerId = res.locals.userId;
     const scenario = req.body;
 
-    const parsedScenario = UpdateScenarioSchema.safeParse(scenario);
+    const parsedScenario = ScenarioWithIncludesSchema.safeParse(scenario);
 
     if (!parsedScenario.success) {
       return res.status(400).json({

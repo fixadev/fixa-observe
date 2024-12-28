@@ -4,7 +4,7 @@ import { addCallToQueue } from "../../../services/aws";
 import { env } from "../../../env";
 import userServiceClient from "../../../clients/userServiceClient";
 import { PublicMetadata } from "@repo/types/src";
-import { posthogClient } from "../../clients/posthogClient";
+import { posthogClient } from "../../../clients/posthogClient";
 
 const uploadCallRouter = Router();
 

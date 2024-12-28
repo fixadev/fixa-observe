@@ -17,6 +17,12 @@ export const evalRouter = createTRPCRouter({
     });
   }),
 
+  getTemplates: protectedProcedure.query(async ({ ctx }) => {
+    return await evalServiceInstance.getTemplates({
+      userId: ctx.user.id,
+    });
+  }),
+
   createTemplate: protectedProcedure
     .input(EvaluationTemplateSchema)
     .mutation(async ({ input, ctx }) => {
