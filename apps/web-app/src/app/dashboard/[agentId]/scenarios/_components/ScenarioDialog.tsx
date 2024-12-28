@@ -18,19 +18,17 @@ import { EditableText } from "~/components/EditableText";
 import { useScenario } from "./ScenarioContext";
 
 interface ScenarioDialogProps {
-  scenario: Scenario;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSave?: (scenario: Scenario) => void;
 }
 
 export function ScenarioDialog({
-  scenario,
   open,
   onOpenChange,
   onSave,
 }: ScenarioDialogProps) {
-  const { setScenario } = useScenario();
+  const { scenario, setScenario } = useScenario();
 
   const [templateDialogOpen, setTemplateDialogOpen] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState<
@@ -61,6 +59,10 @@ export function ScenarioDialog({
     });
     setTemplateDialogOpen(true);
   }, []);
+
+  if (!scenario) {
+    return null;
+  }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
