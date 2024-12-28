@@ -30,6 +30,7 @@ export async function startQueueConsumer() {
             userId,
             metadata,
             saveRecording,
+            language,
           } = data;
           if (!callId || !stereoRecordingUrl || !userId || !createdAt) {
             console.error("Missing required fields in message:", data);
@@ -52,6 +53,7 @@ export async function startQueueConsumer() {
             metadata,
             userId,
             saveRecording,
+            language,
           });
 
           await sqs.deleteMessage({

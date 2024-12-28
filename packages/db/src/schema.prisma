@@ -232,7 +232,6 @@ model EvaluationTemplate {
   type                   EvalType
   resultType             EvalResultType
   contentType            EvalContentType @default(content)
-  isCritical             Boolean         @default(true)
   toolCallExpectedResult String          @default("")
 
   evaluationResults EvaluationResult[]
@@ -249,9 +248,10 @@ model EvaluationTemplate {
 }
 
 model Evaluation {
-  id        String   @id @default(uuid())
-  createdAt DateTime @default(now())
-  enabled   Boolean  @default(true)
+  id         String   @id @default(uuid())
+  createdAt  DateTime @default(now())
+  enabled    Boolean  @default(true)
+  isCritical Boolean  @default(true)
 
   params Json @default("{}")
 

@@ -27,6 +27,7 @@ export const transcribeAndSaveCall = async ({
   metadata: callMetadata,
   userId,
   saveRecording,
+  language,
 }: UploadCallParams) => {
   try {
     interface TranscribeResponse {
@@ -77,6 +78,7 @@ export const transcribeAndSaveCall = async ({
       `${env.AUDIO_SERVICE_URL}/transcribe-deepgram`,
       {
         stereo_audio_url: urlToSave,
+        language,
       },
     );
 
@@ -134,7 +136,7 @@ export const transcribeAndSaveCall = async ({
         status: CallStatus.completed,
         stereoRecordingUrl: urlToSave,
         agentId,
-        evalResults: {
+        evaluationResults: {
           create: evalResults,
         },
         evalSetToSuccess: Object.fromEntries(
@@ -210,7 +212,9 @@ export const analyzeBasedOnRules = async ({
       callMetadata,
     });
     if (relevantEvalSets.length > 0) {
-      const allEvals = relevantEvalSets.flatMap((evalSet) => evalSet.evals);
+      const allEvals = relevantEvalSets.flatMap(
+        (evalSet) => evalSet.evaluations,
+      );
       const result = await analyzeCallWitho1({
         callStartedAt: createdAt,
         messages: messages || [],
@@ -229,7 +233,9 @@ export const analyzeBasedOnRules = async ({
         evalSetId: evalSet.id,
         success: validEvalResults
           .filter((result) =>
-            evalSet.evals.some((evaluation) => evaluation.id === result.evalId),
+            evalSet.evaluations.some(
+              (evaluation) => evaluation.id === result.evalId,
+            ),
           )
           .every(
             (result) =>

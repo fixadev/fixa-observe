@@ -22,6 +22,7 @@ uploadCallRouter.post(
         metadata,
         createdAt,
         saveRecording,
+        language,
       } = req.body;
 
       if (regionId) metadata.regionId = regionId;
@@ -70,6 +71,7 @@ uploadCallRouter.post(
         userId: res.locals.userId,
         metadata: metadata,
         saveRecording,
+        language,
       });
       res.json({ success: true, you: "are cool :)" });
     } catch (error) {

@@ -3,7 +3,7 @@ import vapiRouter from "./routes/vapi";
 import ofOneRouter from "./routes/ofOne";
 import testsRouter from "./routes/tests";
 
-const v1Router = express.Router();
+const privateRouter = express.Router();
 
 const apiRoutes = {
   vapi: {
@@ -21,7 +21,7 @@ const apiRoutes = {
 };
 
 Object.values(apiRoutes).forEach(({ path, router }) => {
-  v1Router.use(path, router);
+  privateRouter.use(path, router);
 });
 
-export default v1Router;
+export default privateRouter;
