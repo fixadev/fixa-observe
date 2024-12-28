@@ -1,9 +1,11 @@
+"use client";
+
 import { Label } from "~/components/ui/label";
 import { Dialog, DialogContent } from "~/components/ui/dialog";
 import { Textarea } from "~/components/ui/textarea";
 import { Button } from "~/components/ui/button";
 import { InformationCircleIcon, TrashIcon } from "@heroicons/react/24/solid";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Tooltip,
   TooltipContent,
@@ -11,7 +13,10 @@ import {
 } from "~/components/ui/tooltip";
 import { EditableText } from "~/components/EditableText";
 import { type EvaluationTemplate } from "@repo/types/src";
-import { isTempId } from "~/lib/utils";
+import { extractTemplateVariables, isTempId } from "~/lib/utils";
+import { api } from "~/trpc/react";
+import Spinner from "~/components/Spinner";
+import { useToast } from "~/components/hooks/use-toast";
 
 interface EvaluationTemplateDialogProps {
   open: boolean;
@@ -24,20 +29,57 @@ export function EvaluationTemplateDialog({
   template,
   onOpenChange,
 }: EvaluationTemplateDialogProps) {
+  const { toast } = useToast();
+
   // Local template
   const [_template, setTemplate] = useState(template);
   useEffect(() => {
     setTemplate(template);
   }, [template]);
 
+  const { mutate: createTemplate, isPending: isCreatingTemplate } =
+    api.eval.createTemplate.useMutation({
+      onSuccess: () => {
+        onOpenChange(false);
+      },
+      onError: (error) => {
+        toast({
+          title: "failed to create template",
+          description: "please try again later.",
+          variant: "destructive",
+        });
+        console.error(error);
+      },
+    });
+  const { mutate: updateTemplate, isPending: isUpdatingTemplate } =
+    api.eval.updateTemplate.useMutation({
+      onSuccess: () => {
+        onOpenChange(false);
+      },
+      onError: (error) => {
+        toast({
+          title: "failed to update template",
+          description: "please try again later.",
+          variant: "destructive",
+        });
+        console.error(error);
+      },
+    });
+  const isSaving = useMemo(
+    () => isCreatingTemplate || isUpdatingTemplate,
+    [isCreatingTemplate, isUpdatingTemplate],
+  );
+
   const handleSave = useCallback(() => {
     if (!_template) return;
+    const templateVariables = extractTemplateVariables(_template.description);
+
     if (isTempId(_template.id)) {
-      console.log("save", _template);
+      createTemplate({ ..._template, params: templateVariables });
     } else {
-      console.log("update", _template);
+      updateTemplate({ ..._template, params: templateVariables });
     }
-  }, [_template]);
+  }, [_template, createTemplate, updateTemplate]);
 
   if (!_template) return null;
 
@@ -89,14 +131,20 @@ export function EvaluationTemplateDialog({
 
           {/* Button section */}
           <div className="flex items-center justify-between pt-4">
-            <Button variant="ghost" size="icon">
-              <TrashIcon className="size-4" />
-            </Button>
+            {isTempId(_template.id) ? (
+              <div className="flex-1" />
+            ) : (
+              <Button variant="ghost" size="icon">
+                <TrashIcon className="size-4" />
+              </Button>
+            )}
             <div className="space-x-2">
               <Button variant="outline" onClick={() => onOpenChange(false)}>
                 cancel
               </Button>
-              <Button onClick={handleSave}>save</Button>
+              <Button onClick={handleSave} disabled={isSaving}>
+                {isSaving ? <Spinner /> : "save"}
+              </Button>
             </div>
           </div>
         </div>

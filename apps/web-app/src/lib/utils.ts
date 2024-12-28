@@ -104,3 +104,24 @@ export function generateTempId() {
 export function isTempId(id: string) {
   return id.startsWith("TEMP-");
 }
+
+export function extractTemplateVariables(s: string) {
+  const regex = /{{([^}]+)}}/g;
+  const matches = s.match(regex);
+  return matches ? matches.map((m) => m.slice(2, -2).trim()) : [];
+}
+
+export function getTemplateVariableRanges(s: string) {
+  const regex = /{{([^}]+)}}/g;
+  const ranges = [];
+  let match;
+
+  while ((match = regex.exec(s)) !== null) {
+    ranges.push({
+      start: match.index,
+      end: match.index + match[0].length,
+    });
+  }
+
+  return ranges;
+}
