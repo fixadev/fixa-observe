@@ -1,36 +1,48 @@
 import { Label } from "~/components/ui/label";
-import { type EvaluationTemplate } from "../new-types";
 import { Dialog, DialogContent } from "~/components/ui/dialog";
 import { Textarea } from "~/components/ui/textarea";
 import { Button } from "~/components/ui/button";
 import { InformationCircleIcon, TrashIcon } from "@heroicons/react/24/solid";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "~/components/ui/tooltip";
 import { EditableText } from "~/components/EditableText";
+import { type EvaluationTemplate } from "@repo/types/src";
+import { isTempId } from "~/lib/utils";
 
 interface EvaluationTemplateDialogProps {
-  isOpen: boolean;
+  open: boolean;
   template?: EvaluationTemplate;
   onOpenChange: (open: boolean) => void;
 }
 
 export function EvaluationTemplateDialog({
-  isOpen,
+  open,
   template,
   onOpenChange,
 }: EvaluationTemplateDialogProps) {
-  const [description, setDescription] = useState(template?.description ?? "");
-
+  // Local template
+  const [_template, setTemplate] = useState(template);
   useEffect(() => {
-    setDescription(template?.description ?? "");
+    setTemplate(template);
   }, [template]);
 
+  const handleSave = useCallback(() => {
+    if (!_template) return;
+    if (isTempId(_template.id)) {
+      console.log("save", _template);
+    } else {
+      console.log("update", _template);
+    }
+  }, [_template]);
+
+  if (!_template) return null;
+
   return (
-    <Dialog open={isOpen} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         className="sm:max-w-[600px]"
         onOpenAutoFocus={(e) => e.preventDefault()}
@@ -39,10 +51,12 @@ export function EvaluationTemplateDialog({
           {/* Tag section */}
           <EditableText
             placeholder="enter name..."
-            value={template?.name ?? ""}
-            onValueChange={(value) => {
-              console.log("value", value);
-            }}
+            value={_template.name}
+            onValueChange={(value) =>
+              setTemplate((prev) =>
+                prev ? { ...prev, name: value } : undefined,
+              )
+            }
             className="inline-block rounded-md bg-muted text-sm"
           />
 
@@ -62,8 +76,12 @@ export function EvaluationTemplateDialog({
               </Tooltip>
             </div>
             <Textarea
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
+              value={_template.description}
+              onChange={(e) =>
+                setTemplate((prev) =>
+                  prev ? { ...prev, description: e.target.value } : undefined,
+                )
+              }
               className="min-h-[200px] w-full rounded-lg border p-4"
               placeholder="the agent confirmed the caller's order of {{customerOrder}}"
             />
@@ -78,7 +96,7 @@ export function EvaluationTemplateDialog({
               <Button variant="outline" onClick={() => onOpenChange(false)}>
                 cancel
               </Button>
-              <Button>save</Button>
+              <Button onClick={handleSave}>save</Button>
             </div>
           </div>
         </div>

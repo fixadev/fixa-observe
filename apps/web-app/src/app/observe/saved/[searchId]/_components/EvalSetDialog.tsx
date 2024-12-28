@@ -5,10 +5,10 @@ import {
   type Filter,
 } from "@repo/types/src/index";
 import { useCallback, useEffect, useState } from "react";
-import { instantiateEvalSet } from "~/lib/instantiate";
+import { instantiateEvaluationGroup } from "~/lib/instantiate";
 import { isTempId } from "~/lib/utils";
 import { api } from "~/trpc/react";
-import EvalSetCard from "./EvalSetDetailsCard";
+import EvaluationGroupCard from "./EvalSetDetailsCard";
 import { Button } from "~/components/ui/button";
 import Spinner from "~/components/Spinner";
 import { TrashIcon } from "@heroicons/react/24/solid";
@@ -42,7 +42,7 @@ export function CreateEditEvaluationDialog({
   setFilter: React.Dispatch<React.SetStateAction<Filter>>;
 }) {
   const [evalSet, setEvalSet] = useState<EvaluationGroupWithIncludes>(
-    selectedEvalSet ?? instantiateEvalSet({ savedSearchId }),
+    selectedEvalSet ?? instantiateEvaluationGroup({ savedSearchId }),
   );
 
   useEffect(() => {
@@ -107,7 +107,10 @@ export function CreateEditEvaluationDialog({
         </DialogHeader> */}
 
         <div className="flex flex-col gap-4">
-          <EvalSetCard evalSet={evalSet} onUpdate={setEvalSet} />
+          <EvaluationGroupCard
+            evaluationGroup={evalSet}
+            onUpdate={setEvalSet}
+          />
         </div>
         <DialogFooter className="mt-auto">
           <div className="flex w-full justify-between">

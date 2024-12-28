@@ -10,7 +10,10 @@ import {
 } from "@repo/types/src/index";
 import { Button } from "~/components/ui/button";
 import { cn } from "~/lib/utils";
-import { instantiateAlert, instantiateEvalSet } from "~/lib/instantiate";
+import {
+  instantiateAlert,
+  instantiateEvaluationGroup,
+} from "~/lib/instantiate";
 import { PlusIcon } from "@heroicons/react/24/solid";
 import { CreateEditEvaluationDialog } from "./EvalSetDialog";
 import { CreateEditAlertDialog } from "./AlertDialog";
@@ -76,7 +79,7 @@ export function EvalSetsAndAlertsCard({ searchId }: { searchId: string }) {
               className="flex flex-row items-center gap-2 rounded-lg bg-muted/70 p-4 text-muted-foreground hover:cursor-pointer hover:bg-muted"
               onClick={() => {
                 setSelectedEvalSet(
-                  instantiateEvalSet({ savedSearchId: searchId }),
+                  instantiateEvaluationGroup({ savedSearchId: searchId }),
                 );
                 setEvalsModalOpen(true);
               }}
