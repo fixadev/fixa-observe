@@ -1,7 +1,7 @@
 import { Prisma, type PrismaClient } from "@repo/db/src/index";
 import { v4 as uuidv4 } from "uuid";
 import { getCreatedUpdatedDeleted } from "./utils";
-import { ScenarioWithIncludes } from "@repo/types/src/db";
+import { ScenarioWithIncludes } from "@repo/types/src/index";
 
 export class ScenarioService {
   constructor(private db: PrismaClient) {}

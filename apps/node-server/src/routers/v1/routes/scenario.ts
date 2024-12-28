@@ -3,7 +3,7 @@ import { ScenarioService } from "@repo/services/src/scenario";
 import {
   ScenarioWithIncludes,
   ScenarioWithIncludesSchema,
-} from "@repo/types/src/db";
+} from "@repo/types/src/index";
 import { db } from "../../../db";
 
 const scenarioRouter = Router();
