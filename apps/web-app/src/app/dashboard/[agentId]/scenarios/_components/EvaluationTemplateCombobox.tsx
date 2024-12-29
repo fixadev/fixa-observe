@@ -1,4 +1,6 @@
-import { useState, useMemo, useCallback } from "react";
+"use client";
+
+import { useState, useCallback } from "react";
 import { Button } from "~/components/ui/button";
 import {
   Command,
@@ -13,11 +15,12 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "~/components/ui/popover-dialog";
-import { sampleEvaluationTemplates } from "../new-types";
 import { PlusIcon } from "@heroicons/react/24/solid";
+import { api } from "~/trpc/react";
+import { type EvaluationTemplate } from "@repo/types/src/generated";
 
 interface EvaluationTemplateComboboxProps {
-  onSelect: (templateId: string) => void;
+  onSelect: (template: EvaluationTemplate) => void;
   onCreateNew: (name: string) => void;
 }
 
@@ -28,9 +31,7 @@ export function EvaluationTemplateCombobox({
   const [open, setOpen] = useState(false);
   const [inputValue, setInputValue] = useState("");
 
-  const templates = useMemo(() => {
-    return sampleEvaluationTemplates ?? [];
-  }, []);
+  const { data: templates } = api.eval.getTemplates.useQuery();
 
   const handleCreateTemplate = useCallback(
     (name: string) => {
@@ -59,12 +60,12 @@ export function EvaluationTemplateCombobox({
           />
           <CommandList>
             <CommandGroup>
-              {templates.map((template) => (
+              {templates?.map((template) => (
                 <CommandItem
                   key={template.id}
                   value={template.name}
                   onSelect={() => {
-                    onSelect(template.id);
+                    onSelect(template);
                     setOpen(false);
                     setTimeout(() => {
                       setInputValue("");

@@ -22,12 +22,14 @@ interface EvaluationTemplateDialogProps {
   open: boolean;
   template?: EvaluationTemplate;
   onOpenChange: (open: boolean) => void;
+  onCreateTemplate: (template: EvaluationTemplate) => void;
 }
 
 export function EvaluationTemplateDialog({
   open,
   template,
   onOpenChange,
+  onCreateTemplate,
 }: EvaluationTemplateDialogProps) {
   const { toast } = useToast();
 
@@ -39,8 +41,9 @@ export function EvaluationTemplateDialog({
 
   const { mutate: createTemplate, isPending: isCreatingTemplate } =
     api.eval.createTemplate.useMutation({
-      onSuccess: () => {
+      onSuccess: (template) => {
         onOpenChange(false);
+        onCreateTemplate(template);
       },
       onError: (error) => {
         toast({

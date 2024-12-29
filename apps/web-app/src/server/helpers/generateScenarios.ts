@@ -1,65 +1,65 @@
-import { openai } from "~/server/utils/OpenAIClient";
-import { z } from "zod";
-import { zodResponseFormat } from "openai/helpers/zod";
-import { CreateScenarioSchema } from "@repo/types/src/index";
-import {
-  generateOutboundScenariosPrompt,
-  generateInboundScenariosPrompt,
-  generateCheckIfOutboundPrompt,
-} from "./prompts";
+// import { openai } from "~/server/utils/OpenAIClient";
+// import { z } from "zod";
+// import { zodResponseFormat } from "openai/helpers/zod";
+// import { CreateScenarioSchema } from "@repo/types/src/index";
+// import {
+//   generateOutboundScenariosPrompt,
+//   generateInboundScenariosPrompt,
+//   generateCheckIfOutboundPrompt,
+// } from "./prompts";
 
-export const generateScenariosFromPrompt = async (
-  prompt: string,
-  numberOfScenarios: number,
-): Promise<CreateScenarioSchema[]> => {
-  const outputSchema = z.object({
-    scenarios: z.array(CreateScenarioSchema),
-  });
+// export const generateScenariosFromPrompt = async (
+//   prompt: string,
+//   numberOfScenarios: number,
+// ): Promise<CreateScenarioSchema[]> => {
+//   const outputSchema = z.object({
+//     scenarios: z.array(CreateScenarioSchema),
+//   });
 
-  const outboundSchema = z.object({
-    isOutbound: z.boolean(),
-  });
+//   const outboundSchema = z.object({
+//     isOutbound: z.boolean(),
+//   });
 
-  const outboundCompletion = await openai.beta.chat.completions.parse({
-    model: "gpt-4o",
-    messages: [
-      { role: "system", content: generateCheckIfOutboundPrompt(prompt) },
-    ],
-    response_format: zodResponseFormat(outboundSchema, "isOutbound"),
-  });
+//   const outboundCompletion = await openai.beta.chat.completions.parse({
+//     model: "gpt-4o",
+//     messages: [
+//       { role: "system", content: generateCheckIfOutboundPrompt(prompt) },
+//     ],
+//     response_format: zodResponseFormat(outboundSchema, "isOutbound"),
+//   });
 
-  const outboundResult =
-    outboundCompletion.choices[0]?.message.parsed?.isOutbound;
+//   const outboundResult =
+//     outboundCompletion.choices[0]?.message.parsed?.isOutbound;
 
-  console.log("outboundResult", outboundResult);
+//   console.log("outboundResult", outboundResult);
 
-  const combinedPrompt = `${
-    outboundResult
-      ? generateOutboundScenariosPrompt(numberOfScenarios)
-      : generateInboundScenariosPrompt(numberOfScenarios)
-  }\n\n AGENT PROMPT: ${prompt}
-  \n\nmake sure to set the isNew field to false for all scenarios
-  \n\nmake sure to generate ${numberOfScenarios} scenarios
-  \n\nmake sure to set type to scenario for all evals
-  \n\nmake the evals granular and precise
-  \n\ngenerate at least 3 evals for each scenario`;
+//   const combinedPrompt = `${
+//     outboundResult
+//       ? generateOutboundScenariosPrompt(numberOfScenarios)
+//       : generateInboundScenariosPrompt(numberOfScenarios)
+//   }\n\n AGENT PROMPT: ${prompt}
+//   \n\nmake sure to set the isNew field to false for all scenarios
+//   \n\nmake sure to generate ${numberOfScenarios} scenarios
+//   \n\nmake sure to set type to scenario for all evals
+//   \n\nmake the evals granular and precise
+//   \n\ngenerate at least 3 evals for each scenario`;
 
-  const completion = await openai.beta.chat.completions.parse({
-    model: "gpt-4o",
-    messages: [{ role: "system", content: combinedPrompt }],
-    response_format: zodResponseFormat(outputSchema, "scenarios"),
-  });
+//   const completion = await openai.beta.chat.completions.parse({
+//     model: "gpt-4o",
+//     messages: [{ role: "system", content: combinedPrompt }],
+//     response_format: zodResponseFormat(outputSchema, "scenarios"),
+//   });
 
-  const parsedResponse = completion.choices[0]?.message.parsed;
+//   const parsedResponse = completion.choices[0]?.message.parsed;
 
-  if (!parsedResponse) {
-    throw new Error("No response from OpenAI");
-  }
+//   if (!parsedResponse) {
+//     throw new Error("No response from OpenAI");
+//   }
 
-  console.log("parsedResponse", parsedResponse);
+//   console.log("parsedResponse", parsedResponse);
 
-  return parsedResponse.scenarios;
-};
+//   return parsedResponse.scenarios;
+// };
 
 // const test = async () => {
 //   const scenarios = await generateScenariosFromPrompt(

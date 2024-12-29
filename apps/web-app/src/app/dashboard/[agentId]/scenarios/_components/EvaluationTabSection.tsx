@@ -1,3 +1,5 @@
+"use client";
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -17,11 +19,13 @@ import { type EvaluationTemplate } from "@repo/types/src";
 interface EvaluationTabSectionProps {
   onEditTemplate: (template?: EvaluationTemplate) => void;
   onCreateNewTemplate: (name: string) => void;
+  onAddEvaluation: (template: EvaluationTemplate) => void;
 }
 
 export function EvaluationTabSection({
   onEditTemplate,
   onCreateNewTemplate,
+  onAddEvaluation,
 }: EvaluationTabSectionProps) {
   const { scenario, setScenario } = useScenario();
   const [activeTab, setActiveTab] = useState(scenario?.evaluations?.[0]?.id);
@@ -54,9 +58,8 @@ export function EvaluationTabSection({
             </Button>
           ))}
           <EvaluationTemplateCombobox
-            onSelect={(templateId) => {
-              // TODO: Implement adding evaluation
-              console.log("Selected template:", templateId);
+            onSelect={(template) => {
+              onAddEvaluation(template);
             }}
             onCreateNew={onCreateNewTemplate}
           />

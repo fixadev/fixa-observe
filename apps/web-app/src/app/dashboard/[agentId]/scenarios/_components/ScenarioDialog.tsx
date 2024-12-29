@@ -13,7 +13,10 @@ import {
   type EvaluationTemplate,
   type ScenarioWithIncludes,
 } from "@repo/types/src";
-import { instantiateEvaluationTemplate } from "~/lib/instantiate";
+import {
+  instantiateEvaluation,
+  instantiateEvaluationTemplate,
+} from "~/lib/instantiate";
 
 interface ScenarioDialogProps {
   open: boolean;
@@ -45,6 +48,23 @@ export function ScenarioDialog({
     setSelectedTemplate(instantiateEvaluationTemplate({ name }));
     setTemplateDialogOpen(true);
   }, []);
+
+  const handleAddEvaluation = useCallback(
+    (template: EvaluationTemplate) => {
+      const evaluation = instantiateEvaluation({
+        evaluationTemplateId: template.id,
+        evaluationTemplate: template,
+        scenarioId: scenario?.id,
+      });
+
+      setScenario((prev) =>
+        prev
+          ? { ...prev, evaluations: [...prev.evaluations, evaluation] }
+          : prev,
+      );
+    },
+    [scenario?.id, setScenario],
+  );
 
   if (!scenario) {
     return null;
@@ -104,6 +124,7 @@ export function ScenarioDialog({
                 <EvaluationTabSection
                   onEditTemplate={handleOpenTemplateDialog}
                   onCreateNewTemplate={handleCreateNewTemplate}
+                  onAddEvaluation={handleAddEvaluation}
                 />
               </div>
             </div>
@@ -128,6 +149,7 @@ export function ScenarioDialog({
         template={selectedTemplate}
         open={templateDialogOpen}
         onOpenChange={setTemplateDialogOpen}
+        onCreateTemplate={handleAddEvaluation}
       />
     </Dialog>
   );

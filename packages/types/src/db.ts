@@ -9,9 +9,9 @@ import {
   LatencyBlockSchema,
   MessageSchema,
   ScenarioSchema,
+  TestAgentSchema,
   TestSchema,
 } from "./generated";
-import { Prisma } from "@prisma/client";
 import { FilterSchema } from "./types";
 
 // Evaluation
@@ -100,7 +100,7 @@ export const AgentWithIncludesSchema = AgentSchema.extend({
   tests: TestSchema.extend({
     calls: CallSchema.array(),
   }).array(),
-  enabledTestAgents: AgentSchema.array(),
+  enabledTestAgents: TestAgentSchema.array(),
   enabledGeneralEvaluations: EvaluationWithIncludesSchema.array(),
 });
 export type AgentWithIncludes = z.infer<typeof AgentWithIncludesSchema>;

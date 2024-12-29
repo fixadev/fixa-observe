@@ -1,4 +1,5 @@
 import {
+  type EvaluationWithIncludes,
   type AlertWithDetails,
   type EvaluationGroupWithIncludes,
   type EvaluationTemplate,
@@ -37,6 +38,28 @@ import {
 //     ...partial,
 //   };
 // }
+
+export function instantiateEvaluation(
+  partial?: Partial<EvaluationWithIncludes>,
+): EvaluationWithIncludes {
+  return {
+    id: generateTempId(),
+    createdAt: new Date(),
+    enabled: true,
+    isCritical: true,
+
+    params: {},
+
+    evaluationTemplateId: "",
+    evaluationTemplate: instantiateEvaluationTemplate(),
+
+    scenarioId: null,
+    evaluationGroupId: null,
+    agentId: null,
+
+    ...partial,
+  };
+}
 
 export function instantiateEvaluationGroup(
   partial?: Partial<EvaluationGroupWithIncludes>,
