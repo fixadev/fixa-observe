@@ -4,7 +4,7 @@ import { protectedProcedure } from "../trpc";
 import { ScenarioService } from "@repo/services/src/scenario";
 import { db } from "~/server/db";
 import { generateScenariosFromPrompt } from "~/server/helpers/generateScenarios";
-import { ScenarioWithIncludesSchema } from "@repo/types/src/db";
+import { ScenarioWithIncludesSchema } from "@repo/types/src/index";
 
 const scenarioServiceInstance = new ScenarioService(db);
 
