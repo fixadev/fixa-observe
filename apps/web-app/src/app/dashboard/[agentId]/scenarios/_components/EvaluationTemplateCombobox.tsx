@@ -18,6 +18,7 @@ import {
 import { PlusIcon } from "@heroicons/react/24/solid";
 import { api } from "~/trpc/react";
 import { type EvaluationTemplate } from "@repo/types/src/generated";
+import { useScenario } from "./ScenarioContext";
 
 interface EvaluationTemplateComboboxProps {
   onSelect: (template: EvaluationTemplate) => void;
@@ -31,6 +32,7 @@ export function EvaluationTemplateCombobox({
   const [open, setOpen] = useState(false);
   const [inputValue, setInputValue] = useState("");
 
+  const { scenario } = useScenario();
   const { data: templates } = api.eval.getTemplates.useQuery();
 
   const handleCreateTemplate = useCallback(
@@ -51,30 +53,44 @@ export function EvaluationTemplateCombobox({
           + add evaluation
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[300px] p-0" side="bottom" align="start">
+      <PopoverContent
+        className="w-[300px] p-0"
+        side="bottom"
+        align="start"
+        onEscapeKeyDown={() => setOpen(false)}
+      >
         <Command>
           <CommandInput
-            placeholder="search evaluations..."
+            placeholder="search evaluation templates..."
             value={inputValue}
             onValueChange={setInputValue}
           />
           <CommandList>
-            <CommandGroup>
-              {templates?.map((template) => (
-                <CommandItem
-                  key={template.id}
-                  value={template.name}
-                  onSelect={() => {
-                    onSelect(template);
-                    setOpen(false);
-                    setTimeout(() => {
-                      setInputValue("");
-                    }, 100);
-                  }}
-                >
-                  {template.name}
-                </CommandItem>
-              ))}
+            <CommandGroup heading="select an option or create one">
+              {templates?.map((template) => {
+                if (
+                  scenario?.evaluations.some(
+                    (e) => e.evaluationTemplateId === template.id,
+                  )
+                ) {
+                  return null;
+                }
+                return (
+                  <CommandItem
+                    key={template.id}
+                    value={template.name}
+                    onSelect={() => {
+                      onSelect(template);
+                      setOpen(false);
+                      setTimeout(() => {
+                        setInputValue("");
+                      }, 100);
+                    }}
+                  >
+                    {template.name}
+                  </CommandItem>
+                );
+              })}
             </CommandGroup>
             {inputValue.length > 0 && (
               <>

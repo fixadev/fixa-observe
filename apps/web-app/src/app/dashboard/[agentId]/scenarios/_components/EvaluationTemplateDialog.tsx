@@ -33,6 +33,8 @@ export function EvaluationTemplateDialog({
 }: EvaluationTemplateDialogProps) {
   const { toast } = useToast();
 
+  const utils = api.useUtils();
+
   // Local template
   const [_template, setTemplate] = useState(template);
   useEffect(() => {
@@ -44,6 +46,7 @@ export function EvaluationTemplateDialog({
       onSuccess: (template) => {
         onOpenChange(false);
         onCreateTemplate(template);
+        void utils.eval.getTemplates.invalidate();
       },
       onError: (error) => {
         toast({
@@ -132,6 +135,13 @@ export function EvaluationTemplateDialog({
             />
           </div>
 
+          {!isTempId(_template.id) && (
+            <div className="text-sm text-muted-foreground">
+              note: editing this evaluation template will edit it in all the
+              places that it is used.
+            </div>
+          )}
+
           {/* Button section */}
           <div className="flex items-center justify-between pt-4">
             {isTempId(_template.id) ? (
@@ -141,7 +151,7 @@ export function EvaluationTemplateDialog({
                 <TrashIcon className="size-4" />
               </Button>
             )}
-            <div className="space-x-2">
+            <div className="flex items-center gap-2">
               <Button variant="outline" onClick={() => onOpenChange(false)}>
                 cancel
               </Button>

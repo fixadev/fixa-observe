@@ -72,7 +72,12 @@ export function ScenarioDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="flex max-h-[90vh] max-w-2xl flex-col gap-0 p-0">
+      <DialogContent
+        className="flex max-h-[90vh] max-w-2xl flex-col gap-0 p-0"
+        onEscapeKeyDown={(e) => {
+          e.preventDefault();
+        }}
+      >
         <div className="p-6">
           <EditableText
             placeholder="name this scenario..."
