@@ -13,10 +13,7 @@ import { sendAlerts } from "./alert";
 import stripeServiceClient from "../clients/stripeServiceClient";
 import { SearchService } from "@repo/services/src/search";
 import { getAudioDuration } from "../utils/audio";
-import {
-  SavedSearchWithIncludes,
-  UploadCallParams,
-} from "@repo/types/src/types";
+import { SavedSearchWithIncludes, UploadCallParams } from "@repo/types/src";
 import { EvaluationGroupWithIncludes } from "@repo/types/src";
 
 export const transcribeAndSaveCall = async ({
@@ -137,7 +134,14 @@ export const transcribeAndSaveCall = async ({
         stereoRecordingUrl: urlToSave,
         agentId,
         evaluationResults: {
-          create: evalResults,
+          create: evalResults?.map((result) => ({
+            ...result,
+            evaluation: {
+              connect: {
+                id: result.evalId,
+              },
+            },
+          })),
         },
         evalSetToSuccess: Object.fromEntries(
           evalSetResults.map((result) => [result.evalSetId, result.success]),

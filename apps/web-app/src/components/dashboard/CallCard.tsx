@@ -33,8 +33,9 @@ export default function CallCard({
   }, [call.endedAt, startedAt]);
 
   const numErrors = useMemo(() => {
-    return call.evalResults.filter((evalResult) => !evalResult.success).length;
-  }, [call.evalResults]);
+    return call.evaluationResults.filter((evalResult) => !evalResult.success)
+      .length;
+  }, [call.evaluationResults]);
 
   return (
     <div

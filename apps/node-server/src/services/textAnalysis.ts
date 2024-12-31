@@ -2,8 +2,9 @@ import { z } from "zod";
 import { zodResponseFormat } from "openai/helpers/zod";
 import { openai } from "../clients/openAIClient";
 import { ArtifactMessagesItem } from "@vapi-ai/server-sdk/api";
-import { Eval, EvalResultType, Message, Scenario } from "@prisma/client";
+import { Evaluation, EvalResultType, Message } from "@prisma/client";
 import { getDateTimeAtTimezone } from "../utils/time";
+import { ScenarioWithIncludes } from "@repo/types/src";
 
 export type EvalResultSchema = z.infer<typeof EvalResultSchema>;
 const EvalResultSchema = z.object({
@@ -30,8 +31,8 @@ export const analyzeCallWitho1 = async ({
   callStartedAt?: string;
   messages: ArtifactMessagesItem[] | Message[];
   testAgentPrompt: string;
-  scenario?: Scenario & { evals: Eval[] };
-  evals?: Eval[];
+  scenario?: ScenarioWithIncludes;
+  evals?: Evaluation[];
 }): Promise<string> => {
   const basePrompt = `
   Your job to to analyze a call transcript between an AI agent (the main agent) and a test AI agent (the test agent), and determine how the main agent performed.
@@ -74,7 +75,9 @@ export const analyzeCallWitho1 = async ({
           scenario.timezone,
         )}. Use this as context for your evaluation, if the evaluation criteria is dependent on the current date or time, or if it mentions phrases like 'right now' or 'today', etc.`
       : ""
-  }\n\nScenario Evaluation Criteria: ${JSON.stringify(scenario?.evals || evals || [])}
+  }\n\nScenario Evaluation Criteria: ${JSON.stringify(
+    scenario?.evaluations || evals || [],
+  )}
   \n\nCall Transcript: ${JSON.stringify(messages)}`;
   // console.log("========================= O1 PROMPT =========================");
   // console.log(prompt);

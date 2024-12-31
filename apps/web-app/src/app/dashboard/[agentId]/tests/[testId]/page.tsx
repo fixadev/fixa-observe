@@ -1,7 +1,7 @@
 "use client";
 
 import TestCard from "~/components/dashboard/TestCard";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import CallCard from "~/components/dashboard/CallCard";
 import type { TestWithIncludes } from "@repo/types/src/index";
 import CallDetails from "~/components/dashboard/CallDetails";

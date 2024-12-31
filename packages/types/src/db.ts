@@ -50,6 +50,15 @@ export const CALL_INCLUDE = {
         evaluation: EVALUATION_INCLUDE,
       },
     },
+    test: {
+      include: {
+        agent: {
+          include: {
+            enabledGeneralEvaluations: EVALUATION_INCLUDE,
+          },
+        },
+      },
+    },
     latencyBlocks: true,
     interruptions: true,
   },
@@ -57,14 +66,25 @@ export const CALL_INCLUDE = {
 export const CallWithIncludesSchema = CallSchema.extend({
   messages: MessageSchema.array(),
   scenario: ScenarioWithIncludesSchema,
-  testAgent: AgentSchema,
+  testAgent: TestAgentSchema,
   evaluationResults: EvaluationResultSchema.extend({
     evaluation: EvaluationWithIncludesSchema,
   }).array(),
   latencyBlocks: LatencyBlockSchema.array(),
   interruptions: InterruptionSchema.array(),
 });
+export const CallWithIncludesAndTestSchema = CallWithIncludesSchema.extend({
+  test: TestSchema.extend({
+    agent: AgentSchema.extend({
+      enabledGeneralEvaluations: EvaluationWithIncludesSchema.array(),
+    }),
+  }),
+});
 export type CallWithIncludes = z.infer<typeof CallWithIncludesSchema>;
+export type CallWithIncludesAndTest = z.infer<
+  typeof CallWithIncludesAndTestSchema
+>;
+
 export type EvaluationResultWithIncludes =
   CallWithIncludes["evaluationResults"][number];
 export type AggregateEvaluationResult = EvaluationResultWithIncludes & {

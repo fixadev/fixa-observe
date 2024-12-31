@@ -3,6 +3,10 @@ import { Request, Response, NextFunction } from "express";
 import { db } from "../db";
 import { getScenariosWithGeneralEvals } from "../services/scenario";
 import { connectedUsers } from "../index";
+import {
+  CallWithIncludesAndTestSchema,
+  CallWithIncludesSchema,
+} from "@repo/types/src";
 
 export const getContext = async (
   req: Request,
@@ -15,26 +19,46 @@ export const getContext = async (
       throw new Error("No call ID provided");
     }
 
-    const call = await db.call.findFirst({
+    const _call = await db.call.findFirst({
       where: { vapiCallId: callId },
       include: {
         testAgent: true,
         scenario: {
           include: {
-            evals: true,
+            evaluations: {
+              include: {
+                evaluationTemplate: true,
+              },
+            },
           },
         },
         test: {
-          include: { agent: { include: { enabledGeneralEvals: true } } },
+          include: {
+            agent: {
+              include: {
+                enabledGeneralEvaluations: {
+                  include: { evaluationTemplate: true },
+                },
+              },
+            },
+          },
         },
       },
     });
 
-    if (!call) {
+    if (!_call) {
       throw new Error(`No call found in DB for call ID ${callId}`);
     }
 
-    const { test, scenario } = call;
+    const call = CallWithIncludesAndTestSchema.safeParse(_call);
+
+    if (!call.success) {
+      throw new Error(
+        `failed to parse call with call ID ${callId}: ${call.error.message}`,
+      );
+    }
+
+    const { test, scenario } = call.data;
     const agent = test?.agent;
     const ownerId = agent?.ownerId;
 

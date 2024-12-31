@@ -1,10 +1,11 @@
-import { Agent, Eval, Scenario } from "@prisma/client";
+import { Agent, Scenario } from "@prisma/client";
+import { EvaluationWithIncludes } from "@repo/types/src";
 
 export const getScenariosWithGeneralEvals = async (
-  agent: Agent & { enabledGeneralEvals: Eval[] },
-  scenario: Scenario & { evals: Eval[] },
+  agent: Agent & { enabledGeneralEvaluations: EvaluationWithIncludes[] },
+  scenario: Scenario & { evaluations: EvaluationWithIncludes[] },
 ) => {
-  const agentGeneralEvals = agent.enabledGeneralEvals;
+  const agentGeneralEvals = agent.enabledGeneralEvaluations;
   const filteredAgentGeneralEvals = agentGeneralEvals;
 
   // const filteredAgentGeneralEvals = agentGeneralEvals.filter(
@@ -13,19 +14,20 @@ export const getScenariosWithGeneralEvals = async (
   //       ?.enabled === false,
   // );
 
-  const allEvals = [...scenario.evals, ...filteredAgentGeneralEvals];
+  const allEvals = [...scenario.evaluations, ...filteredAgentGeneralEvals];
 
   const preparedEvals = allEvals.map((evaluation) => ({
     ...evaluation,
     description:
-      evaluation.contentType === "tool"
-        ? "this tool should be called whenever: " + evaluation.description
-        : evaluation.description,
+      evaluation.evaluationTemplate?.contentType === "tool"
+        ? "this tool should be called whenever: " +
+          evaluation.evaluationTemplate?.description
+        : evaluation.evaluationTemplate?.description,
   }));
 
   const scenarioWithGeneralEvals = {
     ...scenario,
-    evals: preparedEvals,
+    evaluations: preparedEvals,
   };
 
   return scenarioWithGeneralEvals;

@@ -82,7 +82,7 @@ async function getUser(userId: string) {
 }
 
 export async function getEvaluationSetName(alert: Alert) {
-  const evaluationSet = await db.evalSet.findUnique({
+  const evaluationSet = await db.evaluationGroup.findUnique({
     where: {
       id: (alert.details as EvalSetAlert).evalSetId,
     },

@@ -5,7 +5,7 @@ import {
   Scenario,
   Role,
   Test,
-  Eval,
+  Evaluation,
   CallResult,
   Message,
 } from "@prisma/client";
@@ -16,14 +16,13 @@ import {
   type ServerMessageEndOfCallReport,
 } from "@vapi-ai/server-sdk/api";
 import { analyzeCallWitho1 } from "./textAnalysis";
-import { createGeminiPrompt } from "../utils/prompt";
-import { analyzeCallWithGemini } from "./audioAnalysis";
 import { formatOutput } from "./textAnalysis";
 import { Socket } from "socket.io";
 import { sendTestCompletedSlackMessage } from "./slack";
 import { setDeviceAvailable } from "./integrations/ofOneService";
 import vapiClient from "../clients/vapiClient";
 import stripeServiceClient from "../clients/stripeServiceClient";
+import { ScenarioWithIncludes } from "@repo/types/src";
 
 export const handleTranscriptUpdate = async (
   report: ServerMessageTranscript,
@@ -140,7 +139,7 @@ export const handleCallEnded = async ({
   call: Call;
   agent: Agent;
   test: Test;
-  scenario: Scenario & { evals: Eval[] };
+  scenario: ScenarioWithIncludes;
   userSocket?: Socket;
 }) => {
   try {
@@ -210,13 +209,13 @@ export const handleCallEnded = async ({
     const evalResults = await formatOutput(unparsedResult);
 
     const validEvalResults = evalResults.filter((evalResult) =>
-      [...scenario.evals]?.some(
+      [...scenario.evaluations]?.some(
         (evaluation) => evaluation.id === evalResult.evalId,
       ),
     );
 
     const criticalEvalResults = evalResults.filter((evalResult) =>
-      [...scenario.evals]?.some(
+      [...scenario.evaluations]?.some(
         (evaluation) =>
           evaluation.id === evalResult.evalId && evaluation.isCritical,
       ),
@@ -233,8 +232,13 @@ export const handleCallEnded = async ({
         stereoRecordingUrl: report.artifact.stereoRecordingUrl,
         monoRecordingUrl: report.artifact.recordingUrl,
         result: success ? CallResult.success : CallResult.failure,
-        evalResults: {
-          create: validEvalResults,
+        evaluationResults: {
+          create: validEvalResults.map((result) => ({
+            ...result,
+            evaluation: {
+              connect: { id: result.evalId },
+            },
+          })),
         },
         messages: {
           create: report.artifact.messages
@@ -266,8 +270,8 @@ export const handleCallEnded = async ({
       include: {
         messages: true,
         testAgent: true,
-        scenario: { include: { evals: true } },
-        evalResults: { include: { eval: true } },
+        scenario: { include: { evaluations: true } },
+        evaluationResults: { include: { evaluation: true } },
       },
     });
 
