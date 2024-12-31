@@ -109,7 +109,7 @@ export function EvaluationTemplateDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         className="sm:max-w-[600px]"
-        onOpenAutoFocus={(e) => e.preventDefault()}
+        // onOpenAutoFocus={(e) => e.preventDefault()}
       >
         <div className="space-y-6">
           {/* Tag section */}
@@ -129,7 +129,7 @@ export function EvaluationTemplateDialog({
             <div className="flex items-center gap-2">
               <Label>success criteria</Label>
               <Tooltip>
-                <TooltipTrigger>
+                <TooltipTrigger tabIndex={-1}>
                   <InformationCircleIcon className="size-4 text-muted-foreground" />
                 </TooltipTrigger>
                 <TooltipContent className="max-w-[400px]">
@@ -140,12 +140,18 @@ export function EvaluationTemplateDialog({
               </Tooltip>
             </div>
             <Textarea
+              tabIndex={0}
               value={_template.description}
               onChange={(e) =>
                 setTemplate((prev) =>
                   prev ? { ...prev, description: e.target.value } : undefined,
                 )
               }
+              onFocus={(e) => {
+                // Go to the end of the text when focused
+                const length = e.target.value.length;
+                e.target.setSelectionRange(length, length);
+              }}
               className="min-h-[200px] w-full rounded-lg border p-4"
               placeholder="the agent confirmed the caller's order of {{customerOrder}}"
             />
