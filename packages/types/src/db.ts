@@ -22,6 +22,7 @@ export const EVALUATION_INCLUDE = {
 } as const;
 export const EvaluationWithIncludesSchema = EvaluationSchema.extend({
   evaluationTemplate: EvaluationTemplateSchema,
+  params: z.record(z.string(), z.string()),
 });
 export type EvaluationWithIncludes = z.infer<
   typeof EvaluationWithIncludesSchema

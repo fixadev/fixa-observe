@@ -13,10 +13,11 @@ import {
 } from "~/components/ui/tooltip";
 import { EditableText } from "~/components/EditableText";
 import { type EvaluationTemplate } from "@repo/types/src";
-import { extractTemplateVariables, isTempId } from "~/lib/utils";
+import { getTemplateVariableRanges, isTempId } from "~/lib/utils";
 import { api } from "~/trpc/react";
 import Spinner from "~/components/Spinner";
 import { useToast } from "~/components/hooks/use-toast";
+import { useScenario } from "./ScenarioContext";
 
 interface EvaluationTemplateDialogProps {
   open: boolean;
@@ -32,6 +33,7 @@ export function EvaluationTemplateDialog({
   onCreateTemplate,
 }: EvaluationTemplateDialogProps) {
   const { toast } = useToast();
+  const { setScenario } = useScenario();
 
   const utils = api.useUtils();
 
@@ -61,6 +63,18 @@ export function EvaluationTemplateDialog({
     api.eval.updateTemplate.useMutation({
       onSuccess: () => {
         onOpenChange(false);
+        setScenario((prev) =>
+          prev
+            ? {
+                ...prev,
+                evaluations: prev.evaluations.map((e) =>
+                  e.evaluationTemplate.id === _template?.id
+                    ? { ...e, evaluationTemplate: _template }
+                    : e,
+                ),
+              }
+            : undefined,
+        );
       },
       onError: (error) => {
         toast({
@@ -78,7 +92,9 @@ export function EvaluationTemplateDialog({
 
   const handleSave = useCallback(() => {
     if (!_template) return;
-    const templateVariables = extractTemplateVariables(_template.description);
+    const templateVariables = getTemplateVariableRanges(
+      _template.description,
+    ).map((range) => range.templateVariable);
 
     if (isTempId(_template.id)) {
       createTemplate({ ..._template, params: templateVariables });
