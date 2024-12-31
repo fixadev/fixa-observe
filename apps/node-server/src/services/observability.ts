@@ -13,8 +13,11 @@ import { sendAlerts } from "./alert";
 import stripeServiceClient from "../clients/stripeServiceClient";
 import { SearchService } from "@repo/services/src/search";
 import { getAudioDuration } from "../utils/audio";
-import { SavedSearchWithIncludes, UploadCallParams } from "@repo/types/src";
-import { EvaluationGroupWithIncludes } from "@repo/types/src";
+import {
+  SavedSearchWithIncludes,
+  UploadCallParams,
+  EvaluationGroupWithIncludes,
+} from "@repo/types/src/index";
 
 export const transcribeAndSaveCall = async ({
   callId,

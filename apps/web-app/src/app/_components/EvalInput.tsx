@@ -14,11 +14,10 @@ import {
 } from "~/components/ui/tooltip";
 import { Switch } from "~/components/ui/switch";
 import { TextAreaWithLabel } from "./TextAreaWithLabel";
-import { type Eval } from "@repo/types/src/index";
+import { type Evaluation } from "@repo/types/src/index";
 import { InformationCircleIcon } from "@heroicons/react/24/solid";
 import React from "react";
 import { useUser } from "@clerk/nextjs";
-import { env } from "~/env";
 
 export function EvalInput({
   evaluation,

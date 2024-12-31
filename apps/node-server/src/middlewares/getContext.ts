@@ -3,10 +3,7 @@ import { Request, Response, NextFunction } from "express";
 import { db } from "../db";
 import { getScenariosWithGeneralEvals } from "../services/scenario";
 import { connectedUsers } from "../index";
-import {
-  CallWithIncludesAndTestSchema,
-  CallWithIncludesSchema,
-} from "@repo/types/src";
+import { CallInProgressSchema } from "@repo/types/src/index";
 
 export const getContext = async (
   req: Request,
@@ -50,15 +47,16 @@ export const getContext = async (
       throw new Error(`No call found in DB for call ID ${callId}`);
     }
 
-    const call = CallWithIncludesAndTestSchema.safeParse(_call);
+    const parsedCall = CallInProgressSchema.safeParse(_call);
 
-    if (!call.success) {
+    if (!parsedCall.success) {
       throw new Error(
-        `failed to parse call with call ID ${callId}: ${call.error.message}`,
+        `failed to parse call with call ID ${callId}: ${parsedCall.error.message}`,
       );
     }
 
-    const { test, scenario } = call.data;
+    const call = parsedCall.data;
+    const { test, scenario } = call;
     const agent = test?.agent;
     const ownerId = agent?.ownerId;
 

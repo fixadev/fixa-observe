@@ -1,7 +1,7 @@
 import { Evaluation, Scenario } from "@prisma/client";
 import { ArtifactMessagesItem } from "@vapi-ai/server-sdk/api";
 import { getDateTimeAtTimezone } from "./time";
-import { ScenarioWithIncludes } from "@repo/types/src";
+import { ScenarioWithIncludes } from "@repo/types/src/index";
 
 export const createGeminiPrompt = ({
   callStartedAt,

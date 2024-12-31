@@ -1,9 +1,12 @@
 import { Agent, Scenario } from "@prisma/client";
-import { EvaluationWithIncludes } from "@repo/types/src";
+import {
+  EvaluationWithIncludes,
+  ScenarioWithIncludes,
+} from "@repo/types/src/index";
 
 export const getScenariosWithGeneralEvals = async (
   agent: Agent & { enabledGeneralEvaluations: EvaluationWithIncludes[] },
-  scenario: Scenario & { evaluations: EvaluationWithIncludes[] },
+  scenario: ScenarioWithIncludes,
 ) => {
   const agentGeneralEvals = agent.enabledGeneralEvaluations;
   const filteredAgentGeneralEvals = agentGeneralEvals;

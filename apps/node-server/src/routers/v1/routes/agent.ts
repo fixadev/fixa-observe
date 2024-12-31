@@ -1,6 +1,5 @@
 import { Request, Response, Router } from "express";
 import { AgentService } from "@repo/services/src/agent";
-import { AgentSchema } from "@repo/types/src/index";
 
 import { db } from "../../../db";
 

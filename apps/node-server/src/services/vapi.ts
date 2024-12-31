@@ -22,11 +22,11 @@ import { sendTestCompletedSlackMessage } from "./slack";
 import { setDeviceAvailable } from "./integrations/ofOneService";
 import vapiClient from "../clients/vapiClient";
 import stripeServiceClient from "../clients/stripeServiceClient";
-import { ScenarioWithIncludes } from "@repo/types/src";
+import { CallInProgress, ScenarioWithIncludes } from "@repo/types/src/index";
 
 export const handleTranscriptUpdate = async (
   report: ServerMessageTranscript,
-  call: Call & { test: Test },
+  call: CallInProgress,
   userSocket?: Socket,
 ): Promise<
   | { userId: string; callId: string; testId: string; messages: Message[] }
@@ -34,7 +34,7 @@ export const handleTranscriptUpdate = async (
 > => {
   const userId = call.ownerId;
   if (!call || !userId || !call.test) {
-    console.error("No call, test or userId", call);
+    console.error("No call, test or userId");
     return;
   }
 

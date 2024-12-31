@@ -73,7 +73,9 @@ export const CallWithIncludesSchema = CallSchema.extend({
   latencyBlocks: LatencyBlockSchema.array(),
   interruptions: InterruptionSchema.array(),
 });
-export const CallWithIncludesAndTestSchema = CallWithIncludesSchema.extend({
+export const CallInProgressSchema = CallSchema.extend({
+  testAgent: TestAgentSchema,
+  scenario: ScenarioWithIncludesSchema,
   test: TestSchema.extend({
     agent: AgentSchema.extend({
       enabledGeneralEvaluations: EvaluationWithIncludesSchema.array(),
@@ -81,9 +83,7 @@ export const CallWithIncludesAndTestSchema = CallWithIncludesSchema.extend({
   }),
 });
 export type CallWithIncludes = z.infer<typeof CallWithIncludesSchema>;
-export type CallWithIncludesAndTest = z.infer<
-  typeof CallWithIncludesAndTestSchema
->;
+export type CallInProgress = z.infer<typeof CallInProgressSchema>;
 
 export type EvaluationResultWithIncludes =
   CallWithIncludes["evaluationResults"][number];
