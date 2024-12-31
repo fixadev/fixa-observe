@@ -15,6 +15,7 @@ export function EvaluationDescription({
 }: EvaluationDescriptionProps) {
   const { scenario, setScenario } = useScenario();
   const templateVariables = getTemplateVariableRanges(description);
+
   const initialParams = useMemo(() => {
     return (
       scenario?.evaluations.find((e) => e.id === evaluationId)?.params ?? {}
@@ -32,7 +33,7 @@ export function EvaluationDescription({
 
     segments.push(
       <span
-        key={start}
+        key={templateVariable}
         contentEditable
         suppressContentEditableWarning
         onKeyDown={(e) => {
