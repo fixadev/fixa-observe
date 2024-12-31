@@ -4,12 +4,13 @@ import { Label } from "~/components/ui/label";
 import { Textarea } from "~/components/ui/textarea";
 import { TrashIcon } from "@heroicons/react/24/solid";
 import { AdditionalContextSection } from "./AdditionalContextSection";
-import { EvaluationTabSection } from "./EvaluationTabSection";
-import { EvaluationTemplateDialog } from "./EvaluationTemplateDialog";
 import { useCallback, useMemo, useState } from "react";
 import { EditableText } from "~/components/EditableText";
 import { useScenario } from "./ScenarioContext";
-import { type EvaluationTemplate } from "@repo/types/src";
+import {
+  type EvaluationWithIncludes,
+  type EvaluationTemplate,
+} from "@repo/types/src";
 import {
   instantiateEvaluation,
   instantiateEvaluationTemplate,
@@ -20,6 +21,8 @@ import { useAgent } from "~/app/contexts/UseAgent";
 import { useParams } from "next/navigation";
 import { isTempId } from "~/lib/utils";
 import { useToast } from "~/components/hooks/use-toast";
+import { EvaluationTabSection } from "~/components/evaluations/EvaluationTabSection";
+import { EvaluationTemplateDialog } from "~/components/evaluations/EvaluationTemplateDialog";
 
 interface ScenarioDialogProps {
   open: boolean;
@@ -121,6 +124,24 @@ export function ScenarioDialog({ open, onOpenChange }: ScenarioDialogProps) {
     setTemplateDialogOpen(true);
   }, []);
 
+  const handleUpdateTemplate = useCallback(
+    (template: EvaluationTemplate) => {
+      setScenario((prev) =>
+        prev
+          ? {
+              ...prev,
+              evaluations: prev.evaluations.map((e) =>
+                e.evaluationTemplate.id === template.id
+                  ? { ...e, evaluationTemplate: template }
+                  : e,
+              ),
+            }
+          : prev,
+      );
+    },
+    [setScenario],
+  );
+
   const handleAddEvaluation = useCallback(
     (template: EvaluationTemplate) => {
       const evaluation = instantiateEvaluation({
@@ -136,6 +157,36 @@ export function ScenarioDialog({ open, onOpenChange }: ScenarioDialogProps) {
       );
     },
     [scenario?.id, setScenario],
+  );
+  const handleUpdateEvaluation = useCallback(
+    (evaluationId: string, evaluation: EvaluationWithIncludes) => {
+      setScenario((prev) =>
+        prev
+          ? {
+              ...prev,
+              evaluations: prev.evaluations.map((e) =>
+                e.id === evaluationId ? evaluation : e,
+              ),
+            }
+          : prev,
+      );
+    },
+    [setScenario],
+  );
+  const handleRemoveEvaluation = useCallback(
+    (evaluationId: string) => {
+      setScenario((prev) =>
+        prev
+          ? {
+              ...prev,
+              evaluations: prev.evaluations.filter(
+                (e) => e.id !== evaluationId,
+              ),
+            }
+          : prev,
+      );
+    },
+    [setScenario],
   );
 
   const handleSave = useCallback(() => {
@@ -226,6 +277,9 @@ export function ScenarioDialog({ open, onOpenChange }: ScenarioDialogProps) {
               </div>
               <div>
                 <EvaluationTabSection
+                  evaluations={scenario.evaluations}
+                  onUpdateEvaluation={handleUpdateEvaluation}
+                  onDeleteEvaluation={handleRemoveEvaluation}
                   onEditTemplate={handleOpenTemplateDialog}
                   onCreateNewTemplate={handleCreateNewTemplate}
                   onAddEvaluation={handleAddEvaluation}
@@ -269,6 +323,7 @@ export function ScenarioDialog({ open, onOpenChange }: ScenarioDialogProps) {
         open={templateDialogOpen}
         onOpenChange={setTemplateDialogOpen}
         onCreateTemplate={handleAddEvaluation}
+        onUpdateTemplate={handleUpdateTemplate}
       />
     </Dialog>
   );

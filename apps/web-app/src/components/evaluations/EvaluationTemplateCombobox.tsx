@@ -18,21 +18,21 @@ import {
 import { PlusIcon } from "@heroicons/react/24/solid";
 import { api } from "~/trpc/react";
 import { type EvaluationTemplate } from "@repo/types/src/generated";
-import { useScenario } from "./ScenarioContext";
 
 interface EvaluationTemplateComboboxProps {
+  templatesToExclude: EvaluationTemplate[];
   onSelect: (template: EvaluationTemplate) => void;
   onCreateNew: (name: string) => void;
 }
 
 export function EvaluationTemplateCombobox({
+  templatesToExclude,
   onSelect,
   onCreateNew,
 }: EvaluationTemplateComboboxProps) {
   const [open, setOpen] = useState(false);
   const [inputValue, setInputValue] = useState("");
 
-  const { scenario } = useScenario();
   const { data: templates } = api.eval.getTemplates.useQuery();
 
   const handleCreateTemplate = useCallback(
@@ -68,11 +68,7 @@ export function EvaluationTemplateCombobox({
           <CommandList>
             <CommandGroup heading="select an option or create one">
               {templates?.map((template) => {
-                if (
-                  scenario?.evaluations.some(
-                    (e) => e.evaluationTemplateId === template.id,
-                  )
-                ) {
+                if (templatesToExclude.some((e) => e.id === template.id)) {
                   return null;
                 }
                 return (

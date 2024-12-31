@@ -17,31 +17,31 @@ import { getTemplateVariableRanges, isTempId } from "~/lib/utils";
 import { api } from "~/trpc/react";
 import Spinner from "~/components/Spinner";
 import { useToast } from "~/components/hooks/use-toast";
-import { useScenario } from "./ScenarioContext";
 
 interface EvaluationTemplateDialogProps {
   open: boolean;
   template?: EvaluationTemplate;
   onOpenChange: (open: boolean) => void;
   onCreateTemplate: (template: EvaluationTemplate) => void;
+  onUpdateTemplate: (template: EvaluationTemplate) => void;
 }
 
 export function EvaluationTemplateDialog({
   open,
-  template,
+  template: _template,
   onOpenChange,
   onCreateTemplate,
+  onUpdateTemplate,
 }: EvaluationTemplateDialogProps) {
   const { toast } = useToast();
-  const { setScenario } = useScenario();
 
   const utils = api.useUtils();
 
   // Local template
-  const [_template, setTemplate] = useState(template);
+  const [template, setTemplate] = useState(_template);
   useEffect(() => {
-    setTemplate(template);
-  }, [template]);
+    setTemplate(_template);
+  }, [_template]);
 
   const { mutate: createTemplate, isPending: isCreatingTemplate } =
     api.eval.createTemplate.useMutation({
@@ -63,18 +63,9 @@ export function EvaluationTemplateDialog({
     api.eval.updateTemplate.useMutation({
       onSuccess: () => {
         onOpenChange(false);
-        setScenario((prev) =>
-          prev
-            ? {
-                ...prev,
-                evaluations: prev.evaluations.map((e) =>
-                  e.evaluationTemplate.id === _template?.id
-                    ? { ...e, evaluationTemplate: _template }
-                    : e,
-                ),
-              }
-            : undefined,
-        );
+        if (template) {
+          onUpdateTemplate(template);
+        }
       },
       onError: (error) => {
         toast({
@@ -91,19 +82,19 @@ export function EvaluationTemplateDialog({
   );
 
   const handleSave = useCallback(() => {
-    if (!_template) return;
+    if (!template) return;
     const templateVariables = getTemplateVariableRanges(
-      _template.description,
+      template.description,
     ).map((range) => range.templateVariable);
 
-    if (isTempId(_template.id)) {
-      createTemplate({ ..._template, params: templateVariables });
+    if (isTempId(template.id)) {
+      createTemplate({ ...template, params: templateVariables });
     } else {
-      updateTemplate({ ..._template, params: templateVariables });
+      updateTemplate({ ...template, params: templateVariables });
     }
-  }, [_template, createTemplate, updateTemplate]);
+  }, [template, createTemplate, updateTemplate]);
 
-  if (!_template) return null;
+  if (!template) return null;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -115,7 +106,7 @@ export function EvaluationTemplateDialog({
           {/* Tag section */}
           <EditableText
             placeholder="enter name..."
-            value={_template.name}
+            value={template.name}
             onValueChange={(value) =>
               setTemplate((prev) =>
                 prev ? { ...prev, name: value } : undefined,
@@ -141,7 +132,7 @@ export function EvaluationTemplateDialog({
             </div>
             <Textarea
               tabIndex={0}
-              value={_template.description}
+              value={template.description}
               onChange={(e) =>
                 setTemplate((prev) =>
                   prev ? { ...prev, description: e.target.value } : undefined,
@@ -157,7 +148,7 @@ export function EvaluationTemplateDialog({
             />
           </div>
 
-          {!isTempId(_template.id) && (
+          {!isTempId(template.id) && (
             <div className="text-sm text-muted-foreground">
               note: editing this evaluation template will edit it in all the
               places that it is used.
@@ -166,7 +157,7 @@ export function EvaluationTemplateDialog({
 
           {/* Button section */}
           <div className="flex items-center justify-between pt-4">
-            {isTempId(_template.id) ? (
+            {isTempId(template.id) ? (
               <div className="flex-1" />
             ) : (
               <Button variant="ghost" size="icon">

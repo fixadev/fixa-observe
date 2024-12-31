@@ -1,25 +1,22 @@
 "use client";
 
-import { useScenario } from "./ScenarioContext";
 import { useMemo } from "react";
 import { getTemplateVariableRanges } from "~/lib/utils";
 
 interface EvaluationDescriptionProps {
+  initialParams: Record<string, string>;
+  onParamUpdate: (templateVariable: string, newValue: string) => void;
   description: string;
-  evaluationId: string;
 }
 
 export function EvaluationDescription({
+  initialParams: _initialParams,
+  onParamUpdate,
   description,
-  evaluationId,
 }: EvaluationDescriptionProps) {
-  const { scenario, setScenario } = useScenario();
   const templateVariables = getTemplateVariableRanges(description);
-
   const initialParams = useMemo(() => {
-    return (
-      scenario?.evaluations.find((e) => e.id === evaluationId)?.params ?? {}
-    );
+    return _initialParams;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -43,24 +40,7 @@ export function EvaluationDescription({
         }}
         onInput={(e) => {
           const newValue = e.currentTarget.textContent ?? "";
-          setScenario((prev) =>
-            prev
-              ? {
-                  ...prev,
-                  evaluations: prev.evaluations.map((e) =>
-                    e.id === evaluationId
-                      ? {
-                          ...e,
-                          params: {
-                            ...e.params,
-                            [templateVariable]: newValue,
-                          },
-                        }
-                      : e,
-                  ),
-                }
-              : prev,
-          );
+          onParamUpdate(templateVariable, newValue);
         }}
         className="mx-1 my-0.5 inline-block cursor-text rounded bg-muted p-2 font-mono text-xs empty:before:text-muted-foreground empty:before:content-[attr(data-placeholder)]"
         data-placeholder={`{{ ${templateVariable} }}`}
