@@ -6,35 +6,81 @@ import { TrashIcon } from "@heroicons/react/24/solid";
 import { AdditionalContextSection } from "./AdditionalContextSection";
 import { EvaluationTabSection } from "./EvaluationTabSection";
 import { EvaluationTemplateDialog } from "./EvaluationTemplateDialog";
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { EditableText } from "~/components/EditableText";
 import { useScenario } from "./ScenarioContext";
-import {
-  type EvaluationTemplate,
-  type ScenarioWithIncludes,
-} from "@repo/types/src";
+import { type EvaluationTemplate } from "@repo/types/src";
 import {
   instantiateEvaluation,
   instantiateEvaluationTemplate,
 } from "~/lib/instantiate";
+import { api } from "~/trpc/react";
+import Spinner from "~/components/Spinner";
+import { useAgent } from "~/app/contexts/UseAgent";
+import { useParams } from "next/navigation";
+import { isTempId } from "~/lib/utils";
 
 interface ScenarioDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSave?: (scenario: ScenarioWithIncludes) => void;
 }
 
-export function ScenarioDialog({
-  open,
-  onOpenChange,
-  onSave,
-}: ScenarioDialogProps) {
+export function ScenarioDialog({ open, onOpenChange }: ScenarioDialogProps) {
+  const { agentId } = useParams();
+  const { setAgent } = useAgent(agentId as string);
   const { scenario, setScenario } = useScenario();
 
   const [templateDialogOpen, setTemplateDialogOpen] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState<
     EvaluationTemplate | undefined
   >(undefined);
+
+  const { mutate: createScenario, isPending: isCreatingScenario } =
+    api.scenario.create.useMutation({
+      onSuccess: (createdScenario) => {
+        setAgent((prev) =>
+          prev
+            ? {
+                ...prev,
+                scenarios: [...prev.scenarios, createdScenario],
+              }
+            : prev,
+        );
+      },
+    });
+  const { mutate: updateScenario, isPending: isUpdatingScenario } =
+    api.scenario.update.useMutation({
+      onSuccess: (updatedScenario) => {
+        setAgent((prev) =>
+          prev
+            ? {
+                ...prev,
+                scenarios: prev.scenarios.map((s) =>
+                  s.id === updatedScenario.id ? updatedScenario : s,
+                ),
+              }
+            : prev,
+        );
+      },
+    });
+  const { mutate: deleteScenario, isPending: isDeletingScenario } =
+    api.scenario.delete.useMutation({
+      onSuccess: () => {
+        setAgent((prev) =>
+          prev
+            ? {
+                ...prev,
+                scenarios: prev.scenarios.filter((s) => s.id !== scenario?.id),
+              }
+            : prev,
+        );
+      },
+    });
+
+  const isSaving = useMemo(
+    () => isCreatingScenario || isUpdatingScenario,
+    [isCreatingScenario, isUpdatingScenario],
+  );
 
   const handleOpenTemplateDialog = useCallback(
     (template?: EvaluationTemplate) => {
@@ -66,6 +112,26 @@ export function ScenarioDialog({
     [scenario?.id, setScenario],
   );
 
+  const handleSave = useCallback(() => {
+    if (!scenario) {
+      return;
+    }
+
+    if (isTempId(scenario.id)) {
+      createScenario({ agentId: agentId as string, scenario });
+    } else {
+      updateScenario(scenario);
+    }
+  }, [scenario, createScenario, agentId, updateScenario]);
+
+  const handleDelete = useCallback(() => {
+    if (!scenario?.id) {
+      return;
+    }
+
+    deleteScenario({ id: scenario.id });
+  }, [scenario?.id, deleteScenario]);
+
   if (!scenario) {
     return null;
   }
@@ -81,6 +147,7 @@ export function ScenarioDialog({
         <div className="p-6">
           <EditableText
             placeholder="name this scenario..."
+            initialEditing={!scenario.name}
             value={scenario.name}
             onValueChange={(value) => {
               setScenario((prev) =>
@@ -103,6 +170,7 @@ export function ScenarioDialog({
                 </div>
               </div>
               <Textarea
+                placeholder="order a dozen donuts with sprinkles and a coffee"
                 value={scenario.instructions}
                 onChange={(e) => {
                   setScenario((prev) =>
@@ -138,14 +206,29 @@ export function ScenarioDialog({
 
         <DialogFooter className="flex-shrink-0 border-t p-6 pt-4">
           <div className="flex w-full justify-between gap-2">
-            <Button variant="ghost" size="icon">
-              <TrashIcon className="h-4 w-4" />
-            </Button>
+            {!isTempId(scenario.id) ? (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleDelete}
+                disabled={isDeletingScenario}
+              >
+                {isDeletingScenario ? (
+                  <Spinner />
+                ) : (
+                  <TrashIcon className="h-4 w-4" />
+                )}
+              </Button>
+            ) : (
+              <div className="flex-1" />
+            )}
             <div className="flex gap-2">
               <Button variant="outline" onClick={() => onOpenChange(false)}>
                 cancel
               </Button>
-              <Button onClick={() => onSave?.(scenario)}>save</Button>
+              <Button onClick={handleSave} disabled={isSaving}>
+                {isSaving ? <Spinner /> : "save"}
+              </Button>
             </div>
           </div>
         </DialogFooter>

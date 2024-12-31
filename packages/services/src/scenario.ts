@@ -1,7 +1,10 @@
 import { Prisma, type PrismaClient } from "@repo/db/src/index";
 import { v4 as uuidv4 } from "uuid";
 import { getCreatedUpdatedDeleted } from "./utils";
-import { ScenarioWithIncludes } from "@repo/types/src/index";
+import {
+  ScenarioWithIncludes,
+  ScenarioWithIncludesSchema,
+} from "@repo/types/src/index";
 
 export class ScenarioService {
   constructor(private db: PrismaClient) {}
@@ -15,7 +18,7 @@ export class ScenarioService {
     scenario: ScenarioWithIncludes;
     userId: string;
   }): Promise<ScenarioWithIncludes> {
-    return await this.db.scenario.create({
+    const createdScenario = await this.db.scenario.create({
       data: {
         ...scenario,
         id: uuidv4(),
@@ -27,8 +30,9 @@ export class ScenarioService {
             data: scenario.evaluations.map((evaluation) => ({
               ...evaluation,
               id: uuidv4(),
-              scenarioId: undefined,
               params: evaluation.params as Prisma.InputJsonValue,
+              scenarioId: undefined,
+              evaluationTemplate: undefined,
             })),
           },
         },
@@ -40,6 +44,12 @@ export class ScenarioService {
         },
       },
     });
+
+    const parsed = ScenarioWithIncludesSchema.safeParse(createdScenario);
+    if (!parsed.success) {
+      throw new Error(`Could not parse scenario data: ${parsed.error.message}`);
+    }
+    return parsed.data;
   }
 
   async createScenarios({
@@ -50,7 +60,7 @@ export class ScenarioService {
     scenarios: ScenarioWithIncludes[];
   }): Promise<ScenarioWithIncludes[]> {
     return await this.db.$transaction(async (tx) => {
-      return await Promise.all(
+      const createdScenarios = await Promise.all(
         scenarios.map((scenario) =>
           tx.scenario.create({
             data: {
@@ -63,8 +73,9 @@ export class ScenarioService {
                   data: scenario.evaluations.map((evaluation) => ({
                     ...evaluation,
                     id: uuidv4(),
-                    scenarioId: undefined,
                     params: evaluation.params as Prisma.InputJsonValue,
+                    scenarioId: undefined,
+                    evaluationTemplate: undefined,
                   })),
                 },
               },
@@ -78,6 +89,16 @@ export class ScenarioService {
           }),
         ),
       );
+
+      return createdScenarios.map((scenario) => {
+        const parsed = ScenarioWithIncludesSchema.safeParse(scenario);
+        if (!parsed.success) {
+          throw new Error(
+            `Could not parse scenario data: ${parsed.error.message}`,
+          );
+        }
+        return parsed.data;
+      });
     });
   }
 
@@ -92,12 +113,12 @@ export class ScenarioService {
       where: { scenarioId: scenario.id },
     });
 
-    const { created, updated, deleted } = await getCreatedUpdatedDeleted(
+    const { created, updated, deleted } = getCreatedUpdatedDeleted(
       priorEvals,
       scenario.evaluations,
     );
 
-    return await this.db.scenario.update({
+    const updatedScenario = await this.db.scenario.update({
       where: { id: scenario.id },
       data: {
         ...scenario,
@@ -111,8 +132,9 @@ export class ScenarioService {
               where: { id: evaluation.id },
               data: {
                 ...evaluation,
-                scenarioId: undefined,
                 params: evaluation.params as Prisma.InputJsonValue,
+                scenarioId: undefined,
+                evaluationTemplate: undefined,
               },
             })),
           ],
@@ -120,8 +142,9 @@ export class ScenarioService {
             data: created.map((evaluation) => ({
               ...evaluation,
               id: uuidv4(),
-              scenarioId: scenario.id,
               params: evaluation.params as Prisma.InputJsonValue,
+              scenarioId: undefined,
+              evaluationTemplate: undefined,
             })),
           },
         },
@@ -133,10 +156,22 @@ export class ScenarioService {
         },
       },
     });
+
+    const parsed = ScenarioWithIncludesSchema.safeParse(updatedScenario);
+    if (!parsed.success) {
+      throw new Error(`Could not parse scenario data: ${parsed.error.message}`);
+    }
+    return parsed.data;
   }
 
-  async deleteScenario({ id, userId }: { id: string; userId: string }) {
-    return await this.db.scenario.update({
+  async deleteScenario({
+    id,
+    userId,
+  }: {
+    id: string;
+    userId: string;
+  }): Promise<void> {
+    await this.db.scenario.update({
       where: { id, ownerId: userId },
       data: { deleted: true },
     });

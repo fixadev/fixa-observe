@@ -8,11 +8,10 @@ import {
 } from "react";
 import { type ScenarioWithIncludes } from "@repo/types/src";
 
+// Contains the currently selected scenario and a function to set/update it
 interface ScenarioContextType {
   scenario?: ScenarioWithIncludes;
   setScenario: Dispatch<SetStateAction<ScenarioWithIncludes | undefined>>;
-  isDialogOpen: boolean;
-  setIsDialogOpen: (open: boolean) => void;
 }
 
 const ScenarioContext = createContext<ScenarioContextType | undefined>(
@@ -21,15 +20,12 @@ const ScenarioContext = createContext<ScenarioContextType | undefined>(
 
 export function ScenarioProvider({ children }: { children: ReactNode }) {
   const [scenario, setScenario] = useState<ScenarioWithIncludes>();
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   return (
     <ScenarioContext.Provider
       value={{
         scenario,
         setScenario,
-        isDialogOpen,
-        setIsDialogOpen,
       }}
     >
       {children}

@@ -1,6 +1,10 @@
 import { Button } from "~/components/ui/button";
 
-export function NoScenariosYet() {
+interface NoScenariosYetProps {
+  onAddScenario: () => void;
+}
+
+export function NoScenariosYet({ onAddScenario }: NoScenariosYetProps) {
   return (
     <div className="flex h-full items-center justify-center p-4">
       <div className="flex flex-col gap-4">
@@ -14,7 +18,9 @@ export function NoScenariosYet() {
           {/* <GenerateScenariosModal agent={agent} setAgent={setAgent}>
                     <Button>generate from prompt</Button>
                   </GenerateScenariosModal> */}
-          <Button variant="outline">add scenario</Button>
+          <Button variant="outline" onClick={onAddScenario}>
+            add scenario
+          </Button>
         </div>
       </div>
     </div>

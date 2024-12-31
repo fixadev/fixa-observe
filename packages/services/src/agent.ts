@@ -2,6 +2,7 @@ import {
   type Agent,
   AgentSchema,
   AgentWithIncludes,
+  AgentWithIncludesSchema,
 } from "@repo/types/src/index";
 import { v4 as uuidv4 } from "uuid";
 import { type PrismaClient } from "@repo/db/src/index";
@@ -115,7 +116,11 @@ export class AgentService {
         },
       },
     });
-    return result;
+    const parsed = AgentWithIncludesSchema.safeParse(result);
+    if (!parsed.success) {
+      throw new Error(`Invalid agent data: ${parsed.error.message}`);
+    }
+    return parsed.data;
   }
 
   async getAllAgents(ownerId: string): Promise<Agent[]> {

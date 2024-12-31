@@ -3,6 +3,7 @@ import {
   type AlertWithDetails,
   type EvaluationGroupWithIncludes,
   type EvaluationTemplate,
+  type ScenarioWithIncludes,
 } from "@repo/types/src/index";
 import { generateTempId } from "./utils";
 import {
@@ -38,6 +39,26 @@ import {
 //     ...partial,
 //   };
 // }
+
+export function instantiateScenario(
+  partial?: Partial<ScenarioWithIncludes>,
+): ScenarioWithIncludes {
+  return {
+    id: generateTempId(),
+    createdAt: new Date(),
+    ownerId: "",
+    agentId: "",
+    name: "",
+    instructions: "",
+    successCriteria: "",
+    includeDateTime: false,
+    timezone: null,
+    isNew: true,
+    deleted: false,
+    evaluations: [],
+    ...partial,
+  };
+}
 
 export function instantiateEvaluation(
   partial?: Partial<EvaluationWithIncludes>,

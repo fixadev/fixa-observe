@@ -1,26 +1,33 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { Button } from "~/components/ui/button";
-import { Card, CardTitle, CardHeader } from "~/components/ui/card";
 import { SidebarTrigger } from "~/components/ui/sidebar";
-import { sampleScenario } from "./new-types";
 import { NoScenariosYet } from "./_components/NoScenariosYet";
 import { ScenarioDialog } from "./_components/ScenarioDialog";
 import { ScenarioCard } from "./_components/ScenarioCard";
 import { ScenarioProvider, useScenario } from "./_components/ScenarioContext";
+import { useAgent } from "~/app/contexts/UseAgent";
+import { RunFirstTest } from "./_components/RunFirstTest";
+import { instantiateScenario } from "~/lib/instantiate";
 
 function ScenariosPageContent({ params }: { params: { agentId: string } }) {
-  const scenarios = useMemo(() => {
-    return [sampleScenario];
-  }, []);
+  const { agent } = useAgent(params.agentId);
+
+  const scenarios = useMemo(() => agent?.scenarios ?? [], [agent?.scenarios]);
 
   const tests = useMemo(() => {
     return [];
   }, []);
 
-  const { setScenario, isDialogOpen, setIsDialogOpen } = useScenario();
+  const { setScenario } = useScenario();
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+  const createScenario = useCallback(() => {
+    setScenario(instantiateScenario());
+    setIsDialogOpen(true);
+  }, [setScenario]);
 
   return (
     <>
@@ -54,25 +61,18 @@ function ScenariosPageContent({ params }: { params: { agentId: string } }) {
                 </div>
               ))}
               <div className="flex flex-row justify-end gap-4">
-                <Button variant="outline">add scenario</Button>
+                <Button variant="outline" onClick={createScenario}>
+                  add scenario
+                </Button>
               </div>
             </>
           ) : (
-            <NoScenariosYet />
+            <NoScenariosYet onAddScenario={createScenario} />
           )}
         </div>
 
         {scenarios.length > 0 && tests.length === 0 && (
-          <Card className="fixed bottom-4 right-4 animate-slide-up">
-            <CardHeader className="flex flex-col gap-2">
-              <CardTitle>ready to run your first test?</CardTitle>
-              <Button className="w-full" asChild>
-                <Link href={`/dashboard/${params.agentId}`}>
-                  go to tests page
-                </Link>
-              </Button>
-            </CardHeader>
-          </Card>
+          <RunFirstTest agentId={params.agentId} />
         )}
       </div>
       <ScenarioDialog open={isDialogOpen} onOpenChange={setIsDialogOpen} />

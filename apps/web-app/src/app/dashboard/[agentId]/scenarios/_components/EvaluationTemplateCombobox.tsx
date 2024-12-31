@@ -54,7 +54,7 @@ export function EvaluationTemplateCombobox({
         </Button>
       </PopoverTrigger>
       <PopoverContent
-        className="w-[300px] p-0"
+        className="h-[200px] w-[250px] p-0"
         side="bottom"
         align="start"
         onEscapeKeyDown={() => setOpen(false)}

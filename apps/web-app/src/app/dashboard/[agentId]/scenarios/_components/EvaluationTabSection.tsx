@@ -74,10 +74,6 @@ export function EvaluationTabSection({
     return null;
   }
 
-  if (!scenario.evaluations?.length) {
-    return <div>no evaluations added yet.</div>;
-  }
-
   return (
     <>
       <div className="w-full">
