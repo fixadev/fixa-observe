@@ -15,9 +15,6 @@ export function NoScenariosYet({ onAddScenario }: NoScenariosYetProps) {
           </div>
         </div>
         <div className="flex flex-col gap-2">
-          {/* <GenerateScenariosModal agent={agent} setAgent={setAgent}>
-                    <Button>generate from prompt</Button>
-                  </GenerateScenariosModal> */}
           <Button variant="outline" onClick={onAddScenario}>
             add scenario
           </Button>

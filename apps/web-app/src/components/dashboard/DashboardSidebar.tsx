@@ -26,6 +26,7 @@ import {
   CheckIcon,
   CreditCardIcon,
   LifebuoyIcon,
+  DocumentCheckIcon,
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import {
@@ -51,6 +52,11 @@ const navItems = [
   { href: "/", icon: CounterClockwiseClockIcon, label: "test history" },
   { href: "/scenarios", icon: ChatBubbleOvalLeftIcon, label: "scenarios" },
   { href: "/evals", icon: CheckIcon, label: "evaluation criteria" },
+  {
+    href: "/eval-templates",
+    icon: DocumentCheckIcon,
+    label: "evaluation templates",
+  },
   {
     href: "/test-agents",
     icon: UsersIcon,

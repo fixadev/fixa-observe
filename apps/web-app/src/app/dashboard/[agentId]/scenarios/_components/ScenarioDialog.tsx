@@ -35,7 +35,6 @@ export function ScenarioDialog({ open, onOpenChange }: ScenarioDialogProps) {
   const { scenario, setScenario } = useScenario();
   const { toast } = useToast();
 
-  const [templateDialogOpen, setTemplateDialogOpen] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState<
     EvaluationTemplate | undefined
   >(undefined);
@@ -114,16 +113,12 @@ export function ScenarioDialog({ open, onOpenChange }: ScenarioDialogProps) {
   const handleOpenTemplateDialog = useCallback(
     (template?: EvaluationTemplate) => {
       setSelectedTemplate(template);
-      setTemplateDialogOpen(true);
     },
     [],
   );
-
   const handleCreateNewTemplate = useCallback((name: string) => {
     setSelectedTemplate(instantiateEvaluationTemplate({ name }));
-    setTemplateDialogOpen(true);
   }, []);
-
   const handleUpdateTemplate = useCallback(
     (template: EvaluationTemplate) => {
       setScenario((prev) =>
@@ -138,6 +133,22 @@ export function ScenarioDialog({ open, onOpenChange }: ScenarioDialogProps) {
             }
           : prev,
       );
+    },
+    [setScenario],
+  );
+  const handleDeleteTemplate = useCallback(
+    (templateId: string) => {
+      setScenario((prev) =>
+        prev
+          ? {
+              ...prev,
+              evaluations: prev.evaluations.filter(
+                (e) => e.evaluationTemplate.id !== templateId,
+              ),
+            }
+          : prev,
+      );
+      setSelectedTemplate(undefined);
     },
     [setScenario],
   );
@@ -320,10 +331,15 @@ export function ScenarioDialog({ open, onOpenChange }: ScenarioDialogProps) {
       </DialogContent>
       <EvaluationTemplateDialog
         template={selectedTemplate}
-        open={templateDialogOpen}
-        onOpenChange={setTemplateDialogOpen}
+        open={!!selectedTemplate}
+        onOpenChange={(open) => {
+          if (!open) {
+            setSelectedTemplate(undefined);
+          }
+        }}
         onCreateTemplate={handleAddEvaluation}
         onUpdateTemplate={handleUpdateTemplate}
+        onDeleteTemplate={handleDeleteTemplate}
       />
     </Dialog>
   );

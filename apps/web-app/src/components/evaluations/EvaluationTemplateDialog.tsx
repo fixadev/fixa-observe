@@ -17,6 +17,17 @@ import { getTemplateVariableRanges, isTempId } from "~/lib/utils";
 import { api } from "~/trpc/react";
 import Spinner from "~/components/Spinner";
 import { useToast } from "~/components/hooks/use-toast";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "~/components/ui/alert-dialog";
+import { AlertDialogTrigger } from "~/components/ui/alert-dialog";
 
 interface EvaluationTemplateDialogProps {
   open: boolean;
@@ -24,6 +35,7 @@ interface EvaluationTemplateDialogProps {
   onOpenChange: (open: boolean) => void;
   onCreateTemplate: (template: EvaluationTemplate) => void;
   onUpdateTemplate: (template: EvaluationTemplate) => void;
+  onDeleteTemplate: (id: string) => void;
 }
 
 export function EvaluationTemplateDialog({
@@ -32,6 +44,7 @@ export function EvaluationTemplateDialog({
   onOpenChange,
   onCreateTemplate,
   onUpdateTemplate,
+  onDeleteTemplate,
 }: EvaluationTemplateDialogProps) {
   const { toast } = useToast();
 
@@ -76,6 +89,20 @@ export function EvaluationTemplateDialog({
         console.error(error);
       },
     });
+  const { mutate: deleteTemplate, isPending: isDeletingTemplate } =
+    api.eval.deleteTemplate.useMutation({
+      onSuccess: (id) => {
+        onDeleteTemplate(id);
+      },
+      onError: (error) => {
+        toast({
+          title: "failed to delete template",
+          description: "please try again later.",
+          variant: "destructive",
+        });
+        console.error(error);
+      },
+    });
   const isSaving = useMemo(
     () => isCreatingTemplate || isUpdatingTemplate,
     [isCreatingTemplate, isUpdatingTemplate],
@@ -87,6 +114,7 @@ export function EvaluationTemplateDialog({
       template.description,
     ).map((range) => range.templateVariable);
 
+    console.log(template);
     if (isTempId(template.id)) {
       createTemplate({ ...template, params: templateVariables });
     } else {
@@ -112,6 +140,7 @@ export function EvaluationTemplateDialog({
                 prev ? { ...prev, name: value } : undefined,
               )
             }
+            initialEditing={!template.name}
             className="inline-block rounded-md bg-muted text-sm"
           />
 
@@ -160,9 +189,31 @@ export function EvaluationTemplateDialog({
             {isTempId(template.id) ? (
               <div className="flex-1" />
             ) : (
-              <Button variant="ghost" size="icon">
-                <TrashIcon className="size-4" />
-              </Button>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="ghost" size="icon">
+                    <TrashIcon className="size-4" />
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>are you sure?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      this action cannot be undone. this will permanently delete
+                      this template.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>cancel</AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={() => deleteTemplate({ id: template.id })}
+                      disabled={isDeletingTemplate}
+                    >
+                      {isDeletingTemplate ? <Spinner /> : "delete"}
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             )}
             <div className="flex items-center gap-2">
               <Button variant="outline" onClick={() => onOpenChange(false)}>

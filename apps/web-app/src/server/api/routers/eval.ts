@@ -41,6 +41,16 @@ export const evalRouter = createTRPCRouter({
       });
     }),
 
+  deleteTemplate: protectedProcedure
+    .input(z.object({ id: z.string() }))
+    .mutation(async ({ input, ctx }) => {
+      await evalServiceInstance.deleteTemplate({
+        id: input.id,
+        userId: ctx.user.id,
+      });
+      return input.id;
+    }),
+
   create: protectedProcedure
     .input(EvaluationSchema)
     .mutation(async ({ input, ctx }) => {

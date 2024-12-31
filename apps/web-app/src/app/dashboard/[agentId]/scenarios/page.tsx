@@ -1,9 +1,7 @@
 "use client";
 
-import Link from "next/link";
 import { useCallback, useMemo, useState } from "react";
 import { Button } from "~/components/ui/button";
-import { SidebarTrigger } from "~/components/ui/sidebar";
 import { NoScenariosYet } from "./_components/NoScenariosYet";
 import { ScenarioDialog } from "./_components/ScenarioDialog";
 import { ScenarioCard } from "./_components/ScenarioCard";
@@ -11,6 +9,7 @@ import { ScenarioProvider, useScenario } from "./_components/ScenarioContext";
 import { useAgent } from "~/app/contexts/UseAgent";
 import { RunFirstTest } from "./_components/RunFirstTest";
 import { instantiateScenario } from "~/lib/instantiate";
+import { DashboardPageHeader } from "~/components/DashboardPageHeader";
 
 function ScenariosPageContent({ params }: { params: { agentId: string } }) {
   const { agent } = useAgent(params.agentId);
@@ -32,14 +31,10 @@ function ScenariosPageContent({ params }: { params: { agentId: string } }) {
   return (
     <>
       <div className="h-full max-w-full">
-        <div className="sticky top-0 z-20 flex h-14 w-full items-center justify-between border-b border-input bg-sidebar px-4 lg:h-[60px]">
-          <div className="flex flex-1 items-center gap-2">
-            <SidebarTrigger />
-            <Link href={`/dashboard/${params.agentId}/scenarios`}>
-              <div className="font-medium">scenarios</div>
-            </Link>
-          </div>
-        </div>
+        <DashboardPageHeader
+          title="scenarios"
+          href={`/dashboard/${params.agentId}/scenarios`}
+        />
         <div className="container flex h-full flex-col gap-4 p-4">
           <div>
             <div className="text-lg font-medium">test scenarios</div>

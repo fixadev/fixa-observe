@@ -61,6 +61,19 @@ export class EvaluationService {
     });
   }
 
+  async deleteTemplate({
+    id,
+    userId,
+  }: {
+    id: string;
+    userId: string;
+  }): Promise<void> {
+    await this.db.evaluationTemplate.update({
+      where: { id, ownerId: userId },
+      data: { deleted: true },
+    });
+  }
+
   async create({
     evaluation,
     userId,
