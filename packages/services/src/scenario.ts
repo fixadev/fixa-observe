@@ -123,11 +123,8 @@ export class ScenarioService {
       data: {
         ...scenario,
         evaluations: {
+          deleteMany: { id: { in: deleted.map((e) => e.id) } },
           updateMany: [
-            ...deleted.map((evaluation) => ({
-              where: { id: evaluation.id },
-              data: { deleted: true },
-            })),
             ...updated.map((evaluation) => ({
               where: { id: evaluation.id },
               data: {

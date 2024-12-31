@@ -19,6 +19,7 @@ import Spinner from "~/components/Spinner";
 import { useAgent } from "~/app/contexts/UseAgent";
 import { useParams } from "next/navigation";
 import { isTempId } from "~/lib/utils";
+import { useToast } from "~/components/hooks/use-toast";
 
 interface ScenarioDialogProps {
   open: boolean;
@@ -29,6 +30,7 @@ export function ScenarioDialog({ open, onOpenChange }: ScenarioDialogProps) {
   const { agentId } = useParams();
   const { setAgent } = useAgent(agentId as string);
   const { scenario, setScenario } = useScenario();
+  const { toast } = useToast();
 
   const [templateDialogOpen, setTemplateDialogOpen] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState<
@@ -46,6 +48,14 @@ export function ScenarioDialog({ open, onOpenChange }: ScenarioDialogProps) {
               }
             : prev,
         );
+        onOpenChange(false);
+      },
+      onError: () => {
+        toast({
+          title: "error creating scenario",
+          description: "please try again later",
+          variant: "destructive",
+        });
       },
     });
   const { mutate: updateScenario, isPending: isUpdatingScenario } =
@@ -61,6 +71,14 @@ export function ScenarioDialog({ open, onOpenChange }: ScenarioDialogProps) {
               }
             : prev,
         );
+        onOpenChange(false);
+      },
+      onError: () => {
+        toast({
+          title: "error updating scenario",
+          description: "please try again later",
+          variant: "destructive",
+        });
       },
     });
   const { mutate: deleteScenario, isPending: isDeletingScenario } =
@@ -74,6 +92,14 @@ export function ScenarioDialog({ open, onOpenChange }: ScenarioDialogProps) {
               }
             : prev,
         );
+        onOpenChange(false);
+      },
+      onError: () => {
+        toast({
+          title: "error deleting scenario",
+          description: "please try again later",
+          variant: "destructive",
+        });
       },
     });
 
@@ -178,6 +204,11 @@ export function ScenarioDialog({ open, onOpenChange }: ScenarioDialogProps) {
                       ? { ...prev, instructions: e.target.value }
                       : undefined,
                   );
+                }}
+                onFocus={(e) => {
+                  // Go to the end of the text when focused
+                  const length = e.target.value.length;
+                  e.target.setSelectionRange(length, length);
                 }}
                 className="min-h-[100px]"
               />
