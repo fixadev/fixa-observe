@@ -6,6 +6,7 @@ import agentRouter from "./routes/agent";
 import scenarioRouter from "./routes/scenario";
 import alertRouter from "./routes/alert";
 import evaluationRouter from "./routes/evaluation";
+import toolCallRouter from "./routes/toolCall";
 import { authenticateRequest } from "../../middlewares/auth";
 
 const publicRouter = express.Router();
@@ -19,4 +20,5 @@ publicRouter.use("/agent", agentRouter);
 publicRouter.use("/scenario", scenarioRouter);
 publicRouter.use("/alert", alertRouter);
 publicRouter.use("/evaluation", evaluationRouter);
+publicRouter.use("/tool-call", toolCallRouter);
 export default publicRouter;
