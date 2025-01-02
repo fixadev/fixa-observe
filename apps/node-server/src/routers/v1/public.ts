@@ -5,6 +5,7 @@ import personaRouter from "./routes/persona";
 import agentRouter from "./routes/agent";
 import scenarioRouter from "./routes/scenario";
 import alertRouter from "./routes/alert";
+import evaluationRouter from "./routes/evaluation";
 import { authenticateRequest } from "../../middlewares/auth";
 
 const publicRouter = express.Router();
@@ -17,5 +18,5 @@ publicRouter.use("/persona", personaRouter);
 publicRouter.use("/agent", agentRouter);
 publicRouter.use("/scenario", scenarioRouter);
 publicRouter.use("/alert", alertRouter);
-
+publicRouter.use("/evaluation", evaluationRouter);
 export default publicRouter;
