@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
@@ -18,28 +18,56 @@ import {
   type EvaluationTemplate,
 } from "@repo/types/src";
 import { EvaluationDescription } from "./EvaluationDescription";
+import { EvaluationTemplateDialog } from "./EvaluationTemplateDialog";
+import { instantiateEvaluationTemplate } from "~/lib/instantiate";
 
 interface EvaluationTabSectionProps {
   evaluations: EvaluationWithIncludes[];
+  onAddEvaluation: (template: EvaluationTemplate) => void;
   onUpdateEvaluation: (
     evaluationId: string,
     evaluation: EvaluationWithIncludes,
   ) => void;
   onDeleteEvaluation: (evaluationId: string) => void;
-  onEditTemplate: (template?: EvaluationTemplate) => void;
-  onCreateNewTemplate: (name: string) => void;
-  onAddEvaluation: (template: EvaluationTemplate) => void;
 }
 
 export function EvaluationTabSection({
   evaluations,
+  onAddEvaluation,
   onUpdateEvaluation,
   onDeleteEvaluation,
-  onEditTemplate,
-  onCreateNewTemplate,
-  onAddEvaluation,
 }: EvaluationTabSectionProps) {
   const [activeTab, setActiveTab] = useState(evaluations?.[0]?.id);
+  const [selectedTemplate, setSelectedTemplate] = useState<
+    EvaluationTemplate | undefined
+  >(undefined);
+
+  const handleUpdateTemplate = useCallback(
+    (template: EvaluationTemplate) => {
+      // Update all evaluations that use this template
+      evaluations.forEach((evaluation) => {
+        if (evaluation.evaluationTemplate.id === template.id) {
+          onUpdateEvaluation(evaluation.id, {
+            ...evaluation,
+            evaluationTemplate: template,
+          });
+        }
+      });
+      setSelectedTemplate(undefined);
+    },
+    [evaluations, onUpdateEvaluation],
+  );
+
+  const handleDeleteTemplate = useCallback(
+    (templateId: string) => {
+      // Remove all evaluations that use this template
+      evaluations
+        .filter((e) => e.evaluationTemplate.id === templateId)
+        .forEach((e) => onDeleteEvaluation(e.id));
+      setSelectedTemplate(undefined);
+    },
+    [evaluations, onDeleteEvaluation],
+  );
 
   // When evaluation is added, set the active tab to the new evaluation
   const oldLength = useRef(evaluations.length);
@@ -80,10 +108,10 @@ export function EvaluationTabSection({
           ))}
           <EvaluationTemplateCombobox
             templatesToExclude={evaluations.map((e) => e.evaluationTemplate)}
-            onSelect={(template) => {
-              onAddEvaluation(template);
-            }}
-            onCreateNew={onCreateNewTemplate}
+            onSelect={onAddEvaluation}
+            onCreateNew={(name) =>
+              setSelectedTemplate(instantiateEvaluationTemplate({ name }))
+            }
           />
         </div>
       </div>
@@ -137,7 +165,7 @@ export function EvaluationTabSection({
                   <Button
                     variant="outline"
                     onClick={() =>
-                      onEditTemplate(evaluation.evaluationTemplate)
+                      setSelectedTemplate(evaluation.evaluationTemplate)
                     }
                   >
                     edit template
@@ -147,6 +175,19 @@ export function EvaluationTabSection({
             </div>
           ),
       )}
+
+      <EvaluationTemplateDialog
+        template={selectedTemplate}
+        open={!!selectedTemplate}
+        onOpenChange={(open) => {
+          if (!open) {
+            setSelectedTemplate(undefined);
+          }
+        }}
+        onCreateTemplate={onAddEvaluation}
+        onUpdateTemplate={handleUpdateTemplate}
+        onDeleteTemplate={handleDeleteTemplate}
+      />
     </div>
   );
 }

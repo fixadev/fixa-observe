@@ -317,8 +317,8 @@ export const findRelevantEvalSets = async ({
     });
 
     const evalSetsWithEvals = matchingSavedSearches
-      .flatMap((savedSearch) => savedSearch.evalSets)
-      .filter((evalSet) => evalSet !== undefined);
+      .flatMap((savedSearch) => savedSearch.evaluationGroups)
+      .filter((evaluationGroup) => evaluationGroup !== undefined);
 
     // remove evals and alerts to simplify prompt
     const evalSetsWithoutEvals = evalSetsWithEvals.map((evalSet) => ({

@@ -2,17 +2,19 @@ import { z } from "zod";
 import {
   AgentSchema,
   CallSchema,
+  EvaluationGroupSchema,
   EvaluationResultSchema,
   EvaluationSchema,
   EvaluationTemplateSchema,
   InterruptionSchema,
   LatencyBlockSchema,
   MessageSchema,
+  SavedSearchSchema,
   ScenarioSchema,
   TestAgentSchema,
   TestSchema,
 } from "./generated";
-import { FilterSchema } from "./types";
+import { AlertWithDetailsSchema } from "./alert";
 
 // Evaluation
 export const EVALUATION_INCLUDE = {
@@ -27,6 +29,14 @@ export const EvaluationWithIncludesSchema = EvaluationSchema.extend({
 export type EvaluationWithIncludes = z.infer<
   typeof EvaluationWithIncludesSchema
 >;
+
+// EvaluationGroup
+export type EvaluationGroupWithIncludes = z.infer<
+  typeof EvaluationGroupWithIncludesSchema
+>;
+export const EvaluationGroupWithIncludesSchema = EvaluationGroupSchema.extend({
+  evaluations: z.array(EvaluationWithIncludesSchema),
+});
 
 // Scenario
 export const SCENARIO_INCLUDE = {
@@ -127,12 +137,10 @@ export const AgentWithIncludesSchema = AgentSchema.extend({
 export type AgentWithIncludes = z.infer<typeof AgentWithIncludesSchema>;
 export type TestWithCalls = AgentWithIncludes["tests"][number];
 
-// SavedSearch
-export type SavedSearchWithIncludes = z.infer<typeof SavedSearchWithIncludes>;
-export const SavedSearchWithIncludes = FilterSchema.extend({
-  id: z.string(),
-  createdAt: z.date(),
-  ownerId: z.string(),
-  name: z.string(),
-  isDefault: z.boolean(),
+export type SavedSearchWithIncludes = z.infer<
+  typeof SavedSearchWithIncludesSchema
+>;
+export const SavedSearchWithIncludesSchema = SavedSearchSchema.extend({
+  evaluationGroups: z.array(EvaluationGroupWithIncludesSchema).optional(),
+  alerts: z.array(AlertWithDetailsSchema).optional(),
 });

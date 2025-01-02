@@ -3,6 +3,7 @@ import {
   AlertWithDetailsSchema,
   Filter,
   SavedSearchWithIncludes,
+  SavedSearchWithIncludesSchema,
 } from "@repo/types/src/index";
 import { Prisma, type PrismaClient } from "@repo/db/src/index";
 
@@ -51,7 +52,7 @@ export class SearchService {
         alerts: true,
       },
     });
-    const parsed = SavedSearchWithIncludes.safeParse(savedSearch);
+    const parsed = SavedSearchWithIncludesSchema.safeParse(savedSearch);
     if (!parsed.success) {
       throw new Error("Failed to save: " + parsed.error.message);
     }
@@ -66,6 +67,7 @@ export class SearchService {
     userId: string;
   }): Promise<SavedSearchWithIncludes> {
     const { evaluationGroups: evalSets, alerts, ...searchData } = search;
+    // @ts-expect-error test should not be in metadata
     delete searchData.metadata?.test;
     const updatedSearch = await this.db.savedSearch.update({
       where: {
@@ -89,7 +91,7 @@ export class SearchService {
         alerts: true,
       },
     });
-    const parsed = SavedSearchWithIncludes.safeParse(updatedSearch);
+    const parsed = SavedSearchWithIncludesSchema.safeParse(updatedSearch);
     if (!parsed.success) {
       throw new Error("Failed to save: " + parsed.error.message);
     }
@@ -128,7 +130,7 @@ export class SearchService {
         },
       },
     });
-    const parsed = SavedSearchWithIncludes.safeParse(savedSearch);
+    const parsed = SavedSearchWithIncludesSchema.safeParse(savedSearch);
     return parsed.success ? parsed.data : null;
   }
 
@@ -165,7 +167,7 @@ export class SearchService {
     const parsedSearches: SavedSearchWithIncludes[] = [];
 
     for (const search of savedSearches) {
-      const parsed = SavedSearchWithIncludes.safeParse(search);
+      const parsed = SavedSearchWithIncludesSchema.safeParse(search);
       if (!parsed.success) {
         console.log("parsed error", JSON.stringify(parsed.error, null, 2));
       } else {
@@ -193,7 +195,7 @@ export class SearchService {
         },
       },
     });
-    const parsed = SavedSearchWithIncludes.safeParse(savedSearch);
+    const parsed = SavedSearchWithIncludesSchema.safeParse(savedSearch);
     return parsed.success ? parsed.data : null;
   }
 

@@ -6,7 +6,7 @@ import {
   AlertWithDetailsSchema,
   type Filter,
   FilterSchema,
-  SavedSearchWithIncludes,
+  SavedSearchWithIncludesSchema,
 } from "@repo/types/src/index";
 import { db } from "~/server/db";
 
@@ -31,7 +31,7 @@ export const searchRouter = createTRPCRouter({
     }),
 
   update: protectedProcedure
-    .input(SavedSearchWithIncludes)
+    .input(SavedSearchWithIncludesSchema)
     .mutation(async ({ input, ctx }) => {
       return await searchServiceInstance.update({
         search: input,

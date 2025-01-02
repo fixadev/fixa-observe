@@ -1,8 +1,4 @@
-import { type Prisma } from "@prisma/client";
 import { z } from "zod";
-import { AlertWithDetailsSchema } from "./alert";
-import { EvaluationGroupWithIncludesSchema } from "./eval";
-import { EvaluationSchema, EvaluationTemplateSchema } from "./generated";
 
 export type PlatformOptions = z.infer<typeof platformOptions>;
 export const platformOptions = z.enum(["retell", "vapi", "bland"]);
@@ -14,40 +10,6 @@ export const transcriptionErrorSchema = z.object({
   correctWord: z.string(),
 });
 export type TranscriptionError = z.infer<typeof transcriptionErrorSchema>;
-
-export const TimeRangeSchema = z.object({
-  start: z.number(),
-  end: z.number(),
-});
-
-export const evaluationGroupResult = z.object({
-  id: z.string(),
-  result: z.boolean().nullable(),
-});
-
-export type Filter = z.infer<typeof FilterSchema>;
-export const FilterSchema = z.object({
-  lookbackPeriod: z.object({
-    label: z.string(),
-    value: z.number(),
-  }),
-  timeRange: z.union([TimeRangeSchema, z.null(), z.undefined()]),
-  agentId: z.array(z.string()),
-  chartPeriod: z.number(),
-  customerCallId: z.union([z.string(), z.null(), z.undefined()]),
-  metadata: z.union([
-    z.record(z.string(), z.string().or(z.array(z.string())).or(z.undefined())),
-    z.null(),
-    z.undefined(),
-  ]),
-  evaluationGroups: z.array(EvaluationGroupWithIncludesSchema).optional(),
-  alerts: z.array(AlertWithDetailsSchema).optional(),
-  evaluationGroupResult: z.union([
-    evaluationGroupResult,
-    z.null(),
-    z.undefined(),
-  ]),
-});
 
 export type SelectItem = {
   label: string;

@@ -5,7 +5,10 @@ import {
   type Filter,
 } from "@repo/types/src/index";
 import { useCallback, useEffect, useState } from "react";
-import { instantiateEvaluationGroup } from "~/lib/instantiate";
+import {
+  instantiateEvaluation,
+  instantiateEvaluationGroup,
+} from "~/lib/instantiate";
 import { cn, isTempId } from "~/lib/utils";
 import { api } from "~/trpc/react";
 import { Button } from "~/components/ui/button";
@@ -26,6 +29,7 @@ import { EditableText } from "~/components/EditableText";
 import { CardHeader, CardContent } from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
 import { CriteriaBlock } from "./CriteriaBlock";
+import { EvaluationTabSection } from "~/components/evaluations/EvaluationTabSection";
 
 export function EvaluationGroupDialog({
   open,
@@ -155,7 +159,15 @@ export function EvaluationGroupDialog({
             <div className="text-xs font-medium text-muted-foreground">
               THEN
             </div>
-            <div className="flex flex-col gap-2">
+            {/* <EvaluationTabSection
+              evaluations={evaluationGroup.evaluations}
+              onUpdateEvaluation={() => {}}
+              onDeleteEvaluation={() => {}}
+              onEditTemplate={() => {}}
+              onCreateNewTemplate={() => {}}
+              onAddEvaluation={() => {}}
+            /> */}
+            {/* <div className="flex flex-col gap-2">
               {evaluationGroup.evaluations.map((criteria) => (
                 <CriteriaBlock
                   key={criteria.id}
@@ -186,7 +198,7 @@ export function EvaluationGroupDialog({
               >
                 + add criteria
               </Button>
-            </div>
+            </div> */}
           </CardContent>
         </div>
 

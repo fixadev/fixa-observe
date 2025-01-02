@@ -4,17 +4,14 @@ import { Label } from "~/components/ui/label";
 import { Textarea } from "~/components/ui/textarea";
 import { TrashIcon } from "@heroicons/react/24/solid";
 import { AdditionalContextSection } from "./AdditionalContextSection";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo } from "react";
 import { EditableText } from "~/components/EditableText";
 import { useScenario } from "./ScenarioContext";
 import {
   type EvaluationWithIncludes,
   type EvaluationTemplate,
 } from "@repo/types/src";
-import {
-  instantiateEvaluation,
-  instantiateEvaluationTemplate,
-} from "~/lib/instantiate";
+import { instantiateEvaluation } from "~/lib/instantiate";
 import { api } from "~/trpc/react";
 import Spinner from "~/components/Spinner";
 import { useAgent } from "~/app/contexts/UseAgent";
@@ -22,7 +19,6 @@ import { useParams } from "next/navigation";
 import { isTempId } from "~/lib/utils";
 import { useToast } from "~/components/hooks/use-toast";
 import { EvaluationTabSection } from "~/components/evaluations/EvaluationTabSection";
-import { EvaluationTemplateDialog } from "~/components/evaluations/EvaluationTemplateDialog";
 
 interface ScenarioDialogProps {
   open: boolean;
@@ -34,10 +30,6 @@ export function ScenarioDialog({ open, onOpenChange }: ScenarioDialogProps) {
   const { setAgent } = useAgent(agentId as string);
   const { scenario, setScenario } = useScenario();
   const { toast } = useToast();
-
-  const [selectedTemplate, setSelectedTemplate] = useState<
-    EvaluationTemplate | undefined
-  >(undefined);
 
   const { mutate: createScenario, isPending: isCreatingScenario } =
     api.scenario.create.useMutation({
@@ -108,49 +100,6 @@ export function ScenarioDialog({ open, onOpenChange }: ScenarioDialogProps) {
   const isSaving = useMemo(
     () => isCreatingScenario || isUpdatingScenario,
     [isCreatingScenario, isUpdatingScenario],
-  );
-
-  const handleOpenTemplateDialog = useCallback(
-    (template?: EvaluationTemplate) => {
-      setSelectedTemplate(template);
-    },
-    [],
-  );
-  const handleCreateNewTemplate = useCallback((name: string) => {
-    setSelectedTemplate(instantiateEvaluationTemplate({ name }));
-  }, []);
-  const handleUpdateTemplate = useCallback(
-    (template: EvaluationTemplate) => {
-      setScenario((prev) =>
-        prev
-          ? {
-              ...prev,
-              evaluations: prev.evaluations.map((e) =>
-                e.evaluationTemplate.id === template.id
-                  ? { ...e, evaluationTemplate: template }
-                  : e,
-              ),
-            }
-          : prev,
-      );
-    },
-    [setScenario],
-  );
-  const handleDeleteTemplate = useCallback(
-    (templateId: string) => {
-      setScenario((prev) =>
-        prev
-          ? {
-              ...prev,
-              evaluations: prev.evaluations.filter(
-                (e) => e.evaluationTemplate.id !== templateId,
-              ),
-            }
-          : prev,
-      );
-      setSelectedTemplate(undefined);
-    },
-    [setScenario],
   );
 
   const handleAddEvaluation = useCallback(
@@ -289,11 +238,9 @@ export function ScenarioDialog({ open, onOpenChange }: ScenarioDialogProps) {
               <div>
                 <EvaluationTabSection
                   evaluations={scenario.evaluations}
+                  onAddEvaluation={handleAddEvaluation}
                   onUpdateEvaluation={handleUpdateEvaluation}
                   onDeleteEvaluation={handleRemoveEvaluation}
-                  onEditTemplate={handleOpenTemplateDialog}
-                  onCreateNewTemplate={handleCreateNewTemplate}
-                  onAddEvaluation={handleAddEvaluation}
                 />
               </div>
             </div>
@@ -329,18 +276,6 @@ export function ScenarioDialog({ open, onOpenChange }: ScenarioDialogProps) {
           </div>
         </DialogFooter>
       </DialogContent>
-      <EvaluationTemplateDialog
-        template={selectedTemplate}
-        open={!!selectedTemplate}
-        onOpenChange={(open) => {
-          if (!open) {
-            setSelectedTemplate(undefined);
-          }
-        }}
-        onCreateTemplate={handleAddEvaluation}
-        onUpdateTemplate={handleUpdateTemplate}
-        onDeleteTemplate={handleDeleteTemplate}
-      />
     </Dialog>
   );
 }
