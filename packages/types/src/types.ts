@@ -74,14 +74,14 @@ export const OfOneKioskPropertiesSchema = ExtraPropertiesSchema.extend({
   baseUrl: z.string(),
 });
 
-export const EvalGroupFilterCondition = z.object({
+export const EvaluationGroupFilterCondition = z.object({
   id: z.string(),
   type: z.literal("filter"),
   property: z.string(),
   value: z.string(),
 });
 
-export const EvalGroupTextCondition = z.object({
+export const EvaluationGroupTextCondition = z.object({
   id: z.string(),
   type: z.literal("text"),
   text: z.string(),

@@ -9,7 +9,7 @@ import Spinner from "~/components/Spinner";
 import { Dialog, DialogContent } from "~/components/ui/dialog";
 import { api } from "~/trpc/react";
 import ChartCard from "~/components/observe/ChartCard";
-import { EvalGroupsAndAlertsCard } from "./EvalGroupsAndAlertsCard";
+import { EvaluationGroupsAndAlertsCard } from "./EvaluationGroupsAndAlertsCard";
 import { type SavedSearchWithIncludes } from "@repo/types/src";
 import NoCallsCard from "~/components/observe/NoCallsCard";
 import FreeCallsLeft from "~/components/observe/FreeCallsLeft";
@@ -140,7 +140,7 @@ export default function SavedSearchPage({
             data={percentiles?.latency}
             isLoading={isLoadingPercentiles || isRefetchingPercentiles}
           />
-          <EvalGroupsAndAlertsCard searchId={params.searchId ?? ""} />
+          <EvaluationGroupsAndAlertsCard searchId={params.searchId ?? ""} />
         </div>
         <CallTable isLoading={isLoading || isRefetching} calls={calls} />
         {/* Invisible marker for infinite scroll */}

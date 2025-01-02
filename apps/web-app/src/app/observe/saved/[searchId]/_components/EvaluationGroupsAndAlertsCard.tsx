@@ -13,18 +13,22 @@ import {
   instantiateEvaluationGroup,
 } from "~/lib/instantiate";
 import { PlusIcon } from "@heroicons/react/24/solid";
-import { EvalGroupDialog } from "./EvalGroupDialog";
+import { EvaluationGroupDialog } from "./EvaluationGroupDialog";
 import { CreateEditAlertDialog } from "./AlertDialog";
 import { useObserveState } from "~/components/hooks/useObserveState";
 import { AlertCard } from "./AlertCard";
-import { EvalGroupCard } from "./EvalGroupCard";
+import { EvaluationGroupCard } from "./EvaluationGroupCard";
 
-export function EvalGroupsAndAlertsCard({ searchId }: { searchId: string }) {
+export function EvaluationGroupsAndAlertsCard({
+  searchId,
+}: {
+  searchId: string;
+}) {
   const { filter, setFilter } = useObserveState();
   const [mode, setMode] = useState<"evaluations" | "alerts">("evaluations");
   const [evalsModalOpen, setEvalsModalOpen] = useState(false);
   const [alertsModalOpen, setAlertsModalOpen] = useState(false);
-  const [selectedEvalGroup, setSelectedEvalGroup] =
+  const [selectedEvaluationGroup, setSelectedEvaluationGroup] =
     useState<EvaluationGroupWithIncludes | null>(null);
   const [selectedAlert, setSelectedAlert] = useState<AlertWithDetails | null>(
     null,
@@ -32,7 +36,8 @@ export function EvalGroupsAndAlertsCard({ searchId }: { searchId: string }) {
 
   function getEvaluationSetName(alert: AlertWithDetails) {
     const evaluationSet = filter.evaluationGroups?.find(
-      (evalGroup) => evalGroup.id === (alert.details as EvalSetAlert).evalSetId,
+      (evaluationGroup) =>
+        evaluationGroup.id === (alert.details as EvalSetAlert).evalSetId,
     );
     return evaluationSet?.name;
   }
@@ -62,20 +67,20 @@ export function EvalGroupsAndAlertsCard({ searchId }: { searchId: string }) {
       <CardContent className="flex-1 overflow-y-auto">
         {mode === "evaluations" ? (
           <div className="flex flex-col gap-2">
-            {filter.evaluationGroups?.map((evalGroup) => (
-              <EvalGroupCard
-                evalGroup={evalGroup}
+            {filter.evaluationGroups?.map((evaluationGroup) => (
+              <EvaluationGroupCard
+                evaluationGroup={evaluationGroup}
                 filter={filter}
                 setFilter={setFilter}
-                setSelectedEvalGroup={setSelectedEvalGroup}
+                setSelectedEvaluationGroup={setSelectedEvaluationGroup}
                 setEvalsModalOpen={setEvalsModalOpen}
-                key={evalGroup.id}
+                key={evaluationGroup.id}
               />
             ))}
             <div
               className="flex flex-row items-center gap-2 rounded-lg bg-muted/70 p-4 text-muted-foreground hover:cursor-pointer hover:bg-muted"
               onClick={() => {
-                setSelectedEvalGroup(
+                setSelectedEvaluationGroup(
                   instantiateEvaluationGroup({ savedSearchId: searchId }),
                 );
                 setEvalsModalOpen(true);
@@ -110,12 +115,12 @@ export function EvalGroupsAndAlertsCard({ searchId }: { searchId: string }) {
             </div>
           </div>
         )}
-        <EvalGroupDialog
+        <EvaluationGroupDialog
           open={evalsModalOpen}
           setOpen={setEvalsModalOpen}
           savedSearchId={searchId}
-          selectedEvalGroup={selectedEvalGroup}
-          voidSelectedEvalGroup={() => setSelectedEvalGroup(null)}
+          selectedEvaluationGroup={selectedEvaluationGroup}
+          voidSelectedEvaluationGroup={() => setSelectedEvaluationGroup(null)}
           filter={filter}
           setFilter={setFilter}
         />

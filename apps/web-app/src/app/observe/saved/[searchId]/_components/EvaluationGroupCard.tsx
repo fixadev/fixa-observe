@@ -10,29 +10,29 @@ import type {
   Filter,
 } from "@repo/types/src/index";
 
-interface EvalGroupCardProps {
-  evalGroup: EvaluationGroupWithIncludes;
+interface EvaluationGroupCardProps {
+  evaluationGroup: EvaluationGroupWithIncludes;
   filter: Filter;
   setFilter: React.Dispatch<React.SetStateAction<Filter>>;
-  setSelectedEvalGroup: React.Dispatch<
+  setSelectedEvaluationGroup: React.Dispatch<
     React.SetStateAction<EvaluationGroupWithIncludes | null>
   >;
   setEvalsModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-export function EvalGroupCard({
-  evalGroup,
+export function EvaluationGroupCard({
+  evaluationGroup,
   filter,
   setFilter,
-  setSelectedEvalGroup: setSelectedEvalSet,
+  setSelectedEvaluationGroup,
   setEvalsModalOpen,
-}: EvalGroupCardProps) {
+}: EvaluationGroupCardProps) {
   const { mutate: updateGroup } = api.eval.updateGroup.useMutation({
     onSuccess: (data) => {
       setFilter({
         ...filter,
         evaluationGroups: filter.evaluationGroups?.map((e) =>
-          e.id === evalGroup.id ? data : e,
+          e.id === evaluationGroup.id ? data : e,
         ),
       });
     },
@@ -40,26 +40,26 @@ export function EvalGroupCard({
 
   const toggleEvalSetEnabled = (checked: boolean) => {
     updateGroup({
-      ...evalGroup,
+      ...evaluationGroup,
       enabled: checked,
     });
   };
 
   return (
-    <Card key={evalGroup.id} className="flex flex-col gap-2 p-4">
+    <Card key={evaluationGroup.id} className="flex flex-col gap-2 p-4">
       <CardHeader className="flex flex-row justify-between p-0">
         <div className="flex flex-row items-center gap-4">
           <Switch
-            checked={evalGroup.enabled}
+            checked={evaluationGroup.enabled}
             onCheckedChange={toggleEvalSetEnabled}
           />
           <CardTitle className="p-0 text-sm font-medium">
-            {evalGroup.name}
+            {evaluationGroup.name}
           </CardTitle>
         </div>
         <Button
           onClick={() => {
-            setSelectedEvalSet(evalGroup);
+            setSelectedEvaluationGroup(evaluationGroup);
             setEvalsModalOpen(true);
           }}
           variant="outline"
@@ -76,7 +76,7 @@ export function EvalGroupCard({
                 ...filter,
                 evaluationGroupResult: value
                   ? {
-                      id: evalGroup.id,
+                      id: evaluationGroup.id,
                       result: value === "all" ? null : value === "passed",
                     }
                   : undefined,

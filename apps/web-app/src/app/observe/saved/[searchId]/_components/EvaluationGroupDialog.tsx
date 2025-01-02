@@ -8,7 +8,6 @@ import { useCallback, useEffect, useState } from "react";
 import { instantiateEvaluationGroup } from "~/lib/instantiate";
 import { cn, isTempId } from "~/lib/utils";
 import { api } from "~/trpc/react";
-import EvaluationGroupCard from "./EvalSetDetailsCard";
 import { Button } from "~/components/ui/button";
 import Spinner from "~/components/Spinner";
 import { TrashIcon } from "@heroicons/react/24/solid";
@@ -28,34 +27,35 @@ import { CardHeader, CardContent } from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
 import { CriteriaBlock } from "./CriteriaBlock";
 
-export function EvalGroupDialog({
+export function EvaluationGroupDialog({
   open,
   setOpen,
   savedSearchId,
-  selectedEvalGroup,
-  voidSelectedEvalGroup,
+  selectedEvaluationGroup,
+  voidSelectedEvaluationGroup,
   filter,
   setFilter,
 }: {
   open: boolean;
   setOpen: (open: boolean) => void;
   savedSearchId: string;
-  selectedEvalGroup: EvaluationGroupWithIncludes | null;
-  voidSelectedEvalGroup: () => void;
+  selectedEvaluationGroup: EvaluationGroupWithIncludes | null;
+  voidSelectedEvaluationGroup: () => void;
   filter: Filter;
   setFilter: React.Dispatch<React.SetStateAction<Filter>>;
 }) {
-  const [evalGroup, setEvalGroup] = useState<EvaluationGroupWithIncludes>(
-    selectedEvalGroup ?? instantiateEvaluationGroup({ savedSearchId }),
-  );
+  const [evaluationGroup, setEvaluationGroup] =
+    useState<EvaluationGroupWithIncludes>(
+      selectedEvaluationGroup ?? instantiateEvaluationGroup({ savedSearchId }),
+    );
 
   useEffect(() => {
-    if (selectedEvalGroup) {
-      setEvalGroup(selectedEvalGroup);
+    if (selectedEvaluationGroup) {
+      setEvaluationGroup(selectedEvaluationGroup);
     }
-  }, [selectedEvalGroup]);
+  }, [selectedEvaluationGroup]);
 
-  const { mutate: createEvalGroup, isPending: isCreating } =
+  const { mutate: createEvaluationGroup, isPending: isCreating } =
     api.eval.createGroup.useMutation({
       onSuccess: (data) => {
         setFilter({
@@ -64,12 +64,12 @@ export function EvalGroupDialog({
             ? [...filter.evaluationGroups, data]
             : [data],
         });
-        voidSelectedEvalGroup();
+        voidSelectedEvaluationGroup();
         setOpen(false);
       },
     });
 
-  const { mutate: updateEvalGroup, isPending: isUpdating } =
+  const { mutate: updateEvaluationGroup, isPending: isUpdating } =
     api.eval.updateGroup.useMutation({
       onSuccess: (data) => {
         setFilter({
@@ -78,76 +78,77 @@ export function EvalGroupDialog({
             es.id === data.id ? data : es,
           ),
         });
-        voidSelectedEvalGroup();
+        voidSelectedEvaluationGroup();
         setOpen(false);
       },
     });
 
-  const { mutate: deleteEvalGroup, isPending: isDeleting } =
+  const { mutate: deleteEvaluationGroup, isPending: isDeleting } =
     api.eval.deleteGroup.useMutation({
       onSuccess: () => {
         setFilter({
           ...filter,
           evaluationGroups: filter.evaluationGroups?.filter(
-            (es) => es.id !== evalGroup.id,
+            (es) => es.id !== evaluationGroup.id,
           ),
         });
-        voidSelectedEvalGroup();
+        voidSelectedEvaluationGroup();
         setOpen(false);
       },
     });
 
   const handleSubmit = useCallback(() => {
-    if (isTempId(evalGroup.id)) {
-      createEvalGroup(evalGroup);
+    if (isTempId(evaluationGroup.id)) {
+      createEvaluationGroup(evaluationGroup);
     } else {
-      updateEvalGroup(evalGroup);
+      updateEvaluationGroup(evaluationGroup);
     }
-  }, [evalGroup, createEvalGroup, updateEvalGroup]);
+  }, [evaluationGroup, createEvaluationGroup, updateEvaluationGroup]);
+
+  const addCriteria = useCallback(() => {
+    setEvaluationGroup({
+      ...evaluationGroup,
+      evaluations: [
+        ...evaluationGroup.evaluations,
+        instantiateEvaluation({ evaluationGroupId: evaluationGroup.id }),
+      ],
+    });
+  }, [evaluationGroup]);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent className="flex min-h-[400px] min-w-[600px] flex-col">
-        {/* <DialogHeader>
-          <DialogTitle className="text-lg font-medium leading-none tracking-tight">
-            {selectedEvalSet ? "edit evaluation" : "create evaluation"}
-          </DialogTitle>
-        </DialogHeader> */}
-
         <div
           className={cn(
             "p-0 text-sm transition-opacity",
-            !evalGroup.enabled && "opacity-60",
+            !evaluationGroup.enabled && "opacity-60",
           )}
         >
           <CardHeader className="flex flex-col gap-2 px-0 py-2">
             <div className="flex items-center gap-1">
               <EditableText
-                value={evalGroup.name}
+                value={evaluationGroup.name}
                 onValueChange={(value) =>
-                  setEvalGroup({ ...evalGroup, name: value })
+                  setEvaluationGroup({ ...evaluationGroup, name: value })
                 }
-                initialEditing={isTempId(evalGroup.id)}
+                initialEditing={isTempId(evaluationGroup.id)}
                 className="text-base font-medium"
                 inputClassName="text-base"
                 placeholder="enter evaluation group name..."
                 inputPlaceholder={`appointment booking`}
               />
             </div>
-            {/* <Switch
-          checked={evalSet.enabled}
-          onCheckedChange={(checked) =>
-            onUpdate({ ...evalSet, enabled: checked })
-          }
-        /> */}
           </CardHeader>
           <CardContent className="flex flex-col gap-2 p-0">
             <div className="text-xs font-medium text-muted-foreground">IF</div>
             <Input
               className="text-muted-foreground"
-              value={evalGroup.condition}
+              value={evaluationGroup.condition}
               onChange={(e) =>
-                setEvalGroup({ ...evalGroup, condition: e.target.value })
+                setEvaluationGroup({
+                  ...evaluationGroup,
+                  condition: e.target.value,
+                })
               }
               placeholder="user asks to book appointment"
             />
@@ -155,22 +156,22 @@ export function EvalGroupDialog({
               THEN
             </div>
             <div className="flex flex-col gap-2">
-              {evalGroup.evaluations.map((criteria) => (
+              {evaluationGroup.evaluations.map((criteria) => (
                 <CriteriaBlock
                   key={criteria.id}
                   criteria={criteria}
                   onUpdate={(updated) => {
-                    setEvalGroup({
-                      ...evalGroup,
-                      evaluations: evalGroup.evaluations.map((e) =>
+                    setEvaluationGroup({
+                      ...evaluationGroup,
+                      evaluations: evaluationGroup.evaluations.map((e) =>
                         e.id === updated.id ? updated : e,
                       ),
                     });
                   }}
                   onDelete={() => {
-                    setEvalGroup({
-                      ...evalGroup,
-                      evaluations: evalGroup.evaluations.filter(
+                    setEvaluationGroup({
+                      ...evaluationGroup,
+                      evaluations: evaluationGroup.evaluations.filter(
                         (e) => e.id !== criteria.id,
                       ),
                     });
@@ -191,7 +192,7 @@ export function EvalGroupDialog({
 
         <DialogFooter className="mt-auto">
           <div className="flex w-full justify-between">
-            {!isTempId(evalGroup.id) ? (
+            {!isTempId(evaluationGroup.id) ? (
               <AlertDialog>
                 <AlertDialogTrigger asChild>
                   <Button
@@ -216,7 +217,9 @@ export function EvalGroupDialog({
                   <AlertDialogFooter>
                     <AlertDialogCancel>cancel</AlertDialogCancel>
                     <AlertDialogAction
-                      onClick={() => deleteEvalGroup({ id: evalGroup.id })}
+                      onClick={() =>
+                        deleteEvaluationGroup({ id: evaluationGroup.id })
+                      }
                     >
                       delete
                     </AlertDialogAction>
