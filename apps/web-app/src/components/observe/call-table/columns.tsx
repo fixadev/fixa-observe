@@ -325,7 +325,10 @@ const ActionCell = ({ call }: { call: CallWithIncludes }) => {
 const EvalResultCell = ({ call }: { call: CallWithIncludes }) => {
   const { savedSearch } = useObserveState();
   const evalSetIds = useMemo(
-    () => new Set(savedSearch?.evalSets?.map((evalSet) => evalSet.id) ?? []),
+    () =>
+      new Set(
+        savedSearch?.evaluationGroups?.map((evalSet) => evalSet.id) ?? [],
+      ),
     [savedSearch],
   );
   const callEvalSetIds = useMemo(

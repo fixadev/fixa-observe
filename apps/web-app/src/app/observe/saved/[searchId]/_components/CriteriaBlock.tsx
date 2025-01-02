@@ -9,15 +9,18 @@ import { Button } from "~/components/ui/button";
 import { XMarkIcon } from "@heroicons/react/24/solid";
 import MonoTextBlock from "~/components/MonoTextBlock";
 import { Input } from "~/components/ui/input";
-import { type Eval } from "@repo/types/src/index";
+import {
+  type EvaluationWithIncludes,
+  type Evaluation,
+} from "@repo/types/src/index";
 
 export function CriteriaBlock({
   criteria,
   onUpdate,
   onDelete,
 }: {
-  criteria: Eval;
-  onUpdate: (criteria: Eval) => void;
+  criteria: EvaluationWithIncludes;
+  onUpdate: (criteria: EvaluationWithIncludes) => void;
   onDelete: () => void;
 }) {
   const [isEditingName, setIsEditingName] = useState(isTempId(criteria.id));
@@ -39,7 +42,7 @@ export function CriteriaBlock({
       <div className="flex justify-between gap-1">
         {isEditingName ? (
           <Input
-            value={criteria.name}
+            value={criteria.evaluationTemplate.name}
             onChange={(e) => onUpdate({ ...criteria, name: e.target.value })}
             placeholder="confirm demographic info"
             autoFocus

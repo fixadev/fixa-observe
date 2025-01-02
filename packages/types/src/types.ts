@@ -20,7 +20,7 @@ export const TimeRangeSchema = z.object({
   end: z.number(),
 });
 
-export const evalSetToSuccess = z.object({
+export const evaluationGroupResult = z.object({
   id: z.string(),
   result: z.boolean().nullable(),
 });
@@ -40,9 +40,13 @@ export const FilterSchema = z.object({
     z.null(),
     z.undefined(),
   ]),
-  evalSets: z.array(EvaluationGroupWithIncludesSchema).optional(),
+  evaluationGroups: z.array(EvaluationGroupWithIncludesSchema).optional(),
   alerts: z.array(AlertWithDetailsSchema).optional(),
-  evalSetToSuccess: z.union([evalSetToSuccess, z.null(), z.undefined()]),
+  evaluationGroupResult: z.union([
+    evaluationGroupResult,
+    z.null(),
+    z.undefined(),
+  ]),
 });
 
 export type SelectItem = {

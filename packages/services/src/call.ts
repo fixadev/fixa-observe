@@ -143,8 +143,8 @@ export class CallService {
           ...metadataFilters,
         ];
       }
-      if (filter.evalSetToSuccess) {
-        const { id, result } = filter.evalSetToSuccess;
+      if (filter.evaluationGroupResult) {
+        const { id, result } = filter.evaluationGroupResult;
         if (result === null) {
           filterWhere.evalSetToSuccess = {
             path: [id],

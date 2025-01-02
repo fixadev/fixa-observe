@@ -13,7 +13,8 @@ import {
 } from "~/components/ui/tooltip";
 import { EditableText } from "~/components/EditableText";
 import { type EvaluationTemplate } from "@repo/types/src";
-import { getTemplateVariableRanges, isTempId } from "~/lib/utils";
+import { isTempId } from "~/lib/utils";
+import { getTemplateVariableRanges } from "@repo/services/src/utils";
 import { api } from "~/trpc/react";
 import Spinner from "~/components/Spinner";
 import { useToast } from "~/components/hooks/use-toast";

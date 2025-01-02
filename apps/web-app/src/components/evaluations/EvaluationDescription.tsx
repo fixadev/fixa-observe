@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
-import { getTemplateVariableRanges } from "~/lib/utils";
+import { getTemplateVariableRanges } from "@repo/services/src/utils";
 
 interface EvaluationDescriptionProps {
   initialParams: Record<string, string>;

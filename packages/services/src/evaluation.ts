@@ -10,19 +10,39 @@ import {
   type Agent,
   type EvaluationGroupWithIncludes,
   EvaluationTemplate,
+  EvaluationWithIncludes,
+  EvaluationWithIncludesSchema,
 } from "@repo/types/src/index";
 import { getCreatedUpdatedDeleted } from "./utils";
 
 export class EvaluationService {
   constructor(private db: PrismaClient) {}
 
-  async getGeneralEvals({ userId }: { userId: string }): Promise<Evaluation[]> {
-    return await this.db.evaluation.findMany({
+  async getGeneralEvals({
+    userId,
+  }: {
+    userId: string;
+  }): Promise<EvaluationWithIncludes[]> {
+    const evaluations = await this.db.evaluation.findMany({
       where: {
         evaluationTemplate: { ownerId: userId, type: EvalType.general },
       },
       orderBy: { createdAt: "asc" },
+      include: {
+        evaluationTemplate: true,
+      },
     });
+    return evaluations
+      .map((evaluation) => {
+        const parsedEvaluation =
+          EvaluationWithIncludesSchema.safeParse(evaluation);
+        if (!parsedEvaluation.success) {
+          console.error(parsedEvaluation.error);
+          return null;
+        }
+        return parsedEvaluation.data;
+      })
+      .filter((e) => e !== null);
   }
 
   async getTemplates({

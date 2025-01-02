@@ -9,7 +9,7 @@ import { Button } from "~/components/ui/button";
 import { Card } from "~/components/ui/card";
 import { Switch } from "~/components/ui/switch";
 import { CreateGeneralEvalModal } from "./CreateGeneralEvalModal";
-import { type Eval } from "@repo/types/src/index";
+import { type EvaluationWithIncludes } from "@repo/types/src/index";
 import { EvalContentType } from "@prisma/client";
 import { PencilIcon } from "@heroicons/react/24/solid";
 import { useAgent } from "~/app/contexts/UseAgent";
@@ -17,8 +17,11 @@ import { useAgent } from "~/app/contexts/UseAgent";
 export default function EvalsPage({ params }: { params: { agentId: string } }) {
   const { agent, setAgent } = useAgent(params.agentId);
   const [isEvalModalOpen, setIsEvalModalOpen] = useState(false);
-  const [selectedEval, setSelectedEval] = useState<Eval | null>(null);
-  const [generalEvals, setGeneralEvals] = useState<Eval[]>([]);
+  const [selectedEval, setSelectedEval] =
+    useState<EvaluationWithIncludes | null>(null);
+  const [generalEvals, setGeneralEvals] = useState<EvaluationWithIncludes[]>(
+    [],
+  );
 
   const { data: evaluations } = api.eval.getGeneralEvals.useQuery();
 
@@ -81,7 +84,7 @@ export default function EvalsPage({ params }: { params: { agentId: string } }) {
               <Card className="flex w-full cursor-pointer flex-row items-center justify-between gap-2 overflow-hidden p-4 hover:bg-muted/40">
                 <div className="flex flex-row items-center gap-8 font-medium">
                   <Switch
-                    checked={agent?.enabledGeneralEvals.some(
+                    checked={agent?.enabledGeneralEvaluations.some(
                       (e) => e.id === evaluation.id,
                     )}
                     onCheckedChange={(checked) => {
@@ -93,33 +96,35 @@ export default function EvalsPage({ params }: { params: { agentId: string } }) {
                       if (checked && agent) {
                         setAgent({
                           ...agent,
-                          enabledGeneralEvals: [
-                            ...agent.enabledGeneralEvals,
+                          enabledGeneralEvaluations: [
+                            ...agent.enabledGeneralEvaluations,
                             evaluation,
                           ],
                         });
                       } else if (!checked && agent) {
                         setAgent({
                           ...agent,
-                          enabledGeneralEvals: agent.enabledGeneralEvals.filter(
-                            (e) => e.id !== evaluation.id,
-                          ),
+                          enabledGeneralEvaluations:
+                            agent.enabledGeneralEvaluations.filter(
+                              (e) => e.id !== evaluation.id,
+                            ),
                         });
                       }
                     }}
                   />
-                  {evaluation.name}
+                  {evaluation.evaluationTemplate.name}
                 </div>
                 <div className="flex flex-row items-center gap-3 text-sm text-muted-foreground">
-                  {evaluation.resultType}
+                  {evaluation.evaluationTemplate.resultType}
                   <div
                     className={`rounded-2xl bg-muted/70 px-3 py-1.5 text-xs text-black ${
-                      evaluation.contentType === EvalContentType.content
+                      evaluation.evaluationTemplate.contentType ===
+                      EvalContentType.content
                         ? "bg-blue-200"
                         : "bg-gray-200"
                     }`}
                   >
-                    {evaluation.contentType}
+                    {evaluation.evaluationTemplate.contentType}
                   </div>
                   <Button
                     onClick={() => {
