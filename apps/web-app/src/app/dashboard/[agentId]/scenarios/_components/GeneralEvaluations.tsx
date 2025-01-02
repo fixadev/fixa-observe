@@ -1,11 +1,16 @@
+"use client";
+
 import { useAgent } from "~/app/contexts/UseAgent";
 import { Button } from "~/components/ui/button";
 import { GeneralEvaluationCard } from "./GeneralEvaluationCard";
 import { useParams } from "next/navigation";
+import { GeneralEvaluationsDialog } from "./GeneralEvaluationsDialog";
+import { useState } from "react";
 
 export function GeneralEvaluations() {
   const { agentId } = useParams();
   const { agent } = useAgent(agentId as string);
+  const [isDialogOpen, setDialogOpen] = useState(false);
 
   return (
     <>
@@ -17,7 +22,9 @@ export function GeneralEvaluations() {
             performance across all scenarios.
           </div>
         </div>
-        <Button variant="outline">edit general evaluations</Button>
+        <Button variant="outline" onClick={() => setDialogOpen(true)}>
+          edit general evaluations
+        </Button>
       </div>
       {agent && agent.generalEvaluations.length > 0 ? (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -25,7 +32,9 @@ export function GeneralEvaluations() {
             <GeneralEvaluationCard
               key={generalEvaluation.id}
               evaluation={generalEvaluation.evaluation}
-              onClick={() => null}
+              onClick={() => {
+                setDialogOpen(true);
+              }}
             />
           ))}
         </div>
@@ -34,6 +43,10 @@ export function GeneralEvaluations() {
           no general evaluations.
         </div>
       )}
+      <GeneralEvaluationsDialog
+        open={isDialogOpen}
+        onOpenChange={setDialogOpen}
+      />
     </>
   );
 }

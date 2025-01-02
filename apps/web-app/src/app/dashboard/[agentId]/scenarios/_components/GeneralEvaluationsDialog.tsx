@@ -56,6 +56,7 @@ export function GeneralEvaluationsDialog({
       toast({
         title: "general evaluations updated",
       });
+      onOpenChange(false);
     },
     onError: (error) => {
       toast({
@@ -72,7 +73,10 @@ export function GeneralEvaluationsDialog({
         ...prev,
         instantiateGeneralEvaluation({
           agentId: agentId as string,
-          evaluation: instantiateEvaluation({ evaluationTemplate: template }),
+          evaluation: instantiateEvaluation({
+            evaluationTemplateId: template.id,
+            evaluationTemplate: template,
+          }),
         }),
       ]);
     },
@@ -89,7 +93,9 @@ export function GeneralEvaluationsDialog({
     [],
   );
   const handleDeleteEvaluation = useCallback((evaluationId: string) => {
-    setGeneralEvaluations((prev) => prev.filter((e) => e.id !== evaluationId));
+    setGeneralEvaluations((prev) =>
+      prev.filter((e) => e.evaluationId !== evaluationId),
+    );
   }, []);
 
   const handleCancel = useCallback(() => {
@@ -101,12 +107,11 @@ export function GeneralEvaluationsDialog({
       agentId: agentId as string,
       generalEvaluations: generalEvaluations,
     });
-    onOpenChange(false);
-  }, [generalEvaluations, agentId, updateGeneralEvaluations, onOpenChange]);
+  }, [generalEvaluations, agentId, updateGeneralEvaluations]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl">
+      <DialogContent className="max-w-4xl max-w-[500px]">
         <DialogHeader>
           <DialogTitle>general evaluations</DialogTitle>
         </DialogHeader>

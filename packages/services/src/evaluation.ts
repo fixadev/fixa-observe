@@ -8,6 +8,7 @@ import {
   EvaluationGroupWithIncludesSchema,
   GeneralEvaluationWithIncludes,
   GeneralEvaluationWithIncludesSchema,
+  EvaluationWithIncludesSchema,
 } from "@repo/types/src/index";
 import { getCreatedUpdatedDeleted } from "./utils";
 
@@ -36,26 +37,11 @@ export class EvaluationService {
     }
 
     const { created, updated, deleted } = getCreatedUpdatedDeleted(
-      generalEvaluations,
       agent.generalEvaluations,
+      generalEvaluations,
     );
 
     const updatedGeneralEvaluations: GeneralEvaluationWithIncludes[] = [];
-    for (const generalEvaluation of agent.generalEvaluations) {
-      const updatedSet = new Set(updated.map((e) => e.id));
-      if (updatedSet.has(generalEvaluation.evaluationId)) {
-        const parsedGeneralEvaluation =
-          GeneralEvaluationWithIncludesSchema.safeParse(generalEvaluation);
-        if (!parsedGeneralEvaluation.success) {
-          console.error(
-            "Failed to parse general evaluation",
-            parsedGeneralEvaluation.error,
-          );
-          continue;
-        }
-        updatedGeneralEvaluations.push(parsedGeneralEvaluation.data);
-      }
-    }
 
     await this.db.$transaction(async (tx) => {
       // Create new evaluations
@@ -94,13 +80,27 @@ export class EvaluationService {
 
       // Update existing evaluations
       for (const generalEvaluation of updated) {
-        await tx.evaluation.update({
+        const updatedEvaluation = await tx.evaluation.update({
           where: { id: generalEvaluation.evaluation.id },
           data: {
             ...generalEvaluation.evaluation,
             params: generalEvaluation.evaluation.params ?? undefined,
             evaluationTemplate: undefined,
           },
+          include: { evaluationTemplate: true },
+        });
+        const parsedUpdatedEvaluation =
+          EvaluationWithIncludesSchema.safeParse(updatedEvaluation);
+        if (!parsedUpdatedEvaluation.success) {
+          console.error(
+            "Failed to parse updated evaluation",
+            parsedUpdatedEvaluation.error,
+          );
+          continue;
+        }
+        updatedGeneralEvaluations.push({
+          ...generalEvaluation,
+          evaluation: parsedUpdatedEvaluation.data,
         });
       }
 
