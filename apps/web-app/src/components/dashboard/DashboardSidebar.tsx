@@ -23,7 +23,6 @@ import {
   KeyIcon,
   PlusIcon,
   UsersIcon,
-  CheckIcon,
   CreditCardIcon,
   LifebuoyIcon,
   DocumentCheckIcon,
@@ -51,7 +50,6 @@ import FreeTestsLeft from "./FreeTestsLeft";
 const navItems = [
   { href: "/", icon: CounterClockwiseClockIcon, label: "test history" },
   { href: "/scenarios", icon: ChatBubbleOvalLeftIcon, label: "scenarios" },
-  { href: "/evals", icon: CheckIcon, label: "evaluation criteria" },
   {
     href: "/eval-templates",
     icon: DocumentCheckIcon,

@@ -1,10 +1,8 @@
+import { type EvaluationTemplate } from "@repo/types/src";
 import { Card } from "~/components/ui/card";
 
 interface EvaluationTemplateCardProps {
-  template: {
-    id: string;
-    name: string;
-  };
+  template: EvaluationTemplate;
   onClick: (id: string) => void;
 }
 

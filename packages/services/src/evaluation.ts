@@ -1,13 +1,7 @@
-import {
-  EvalContentType,
-  EvalResultType,
-  EvalType,
-  type PrismaClient,
-} from "@repo/db/src/index";
+import { EvalType, type PrismaClient } from "@repo/db/src/index";
 import { v4 as uuidv4 } from "uuid";
 import {
   type Evaluation,
-  type Agent,
   type EvaluationGroupWithIncludes,
   EvaluationTemplate,
   EvaluationWithIncludes,

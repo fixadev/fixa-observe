@@ -10,6 +10,7 @@ import { useAgent } from "~/app/contexts/UseAgent";
 import { RunFirstTest } from "./_components/RunFirstTest";
 import { instantiateScenario } from "~/lib/instantiate";
 import { DashboardPageHeader } from "~/components/DashboardPageHeader";
+import { GeneralEvaluations } from "./_components/GeneralEvaluations";
 
 function ScenariosPageContent({ params }: { params: { agentId: string } }) {
   const { agent } = useAgent(params.agentId);
@@ -36,6 +37,9 @@ function ScenariosPageContent({ params }: { params: { agentId: string } }) {
           href={`/dashboard/${params.agentId}/scenarios`}
         />
         <div className="container flex h-full flex-col gap-4 p-4">
+          {scenarios.length > 0 && (
+            <GeneralEvaluations agentId={params.agentId} />
+          )}
           <div>
             <div className="text-lg font-medium">test scenarios</div>
             <div className="text-sm text-muted-foreground">
@@ -55,7 +59,7 @@ function ScenariosPageContent({ params }: { params: { agentId: string } }) {
                   <ScenarioCard scenario={scenarioItem} />
                 </div>
               ))}
-              <div className="flex flex-row justify-end gap-4">
+              <div className="mb-32 flex flex-row justify-end gap-4">
                 <Button variant="outline" onClick={createScenario}>
                   add scenario
                 </Button>

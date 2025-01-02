@@ -101,3 +101,12 @@
 .cl-button {
   @apply lowercase;
 }
+
+.cl-userButtonPopoverCard {
+  @apply rounded-md shadow-md;
+  width: unset !important;
+}
+
+.cl-userButtonPopoverMain {
+  @apply rounded-md;
+}
