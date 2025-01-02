@@ -2,6 +2,7 @@ import { CallStatus, type PrismaClient } from "@repo/db/src/index";
 import { VapiService } from "./vapi";
 import { type TestAgent } from "@repo/types/src/generated";
 import {
+  TestWithIncludesSchema,
   type OfOneKioskProperties,
   type TestWithIncludes,
 } from "@repo/types/src/index";
@@ -41,7 +42,7 @@ export class TestService {
   vapiServiceInstance: VapiService;
 
   async get(id: string, userId: string): Promise<TestWithIncludes | null> {
-    return await this.db.test.findUnique({
+    const test = await this.db.test.findUnique({
       where: {
         id,
         agent: {
@@ -74,6 +75,12 @@ export class TestService {
         },
       },
     });
+
+    const parsed = TestWithIncludesSchema.safeParse(test);
+    if (!parsed.success) {
+      throw new Error(`Couldn't parse test data: ${parsed.error.message}`);
+    }
+    return parsed.data;
   }
 
   async getAll(agentId: string, userId: string) {

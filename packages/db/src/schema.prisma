@@ -51,12 +51,13 @@ model Agent {
 
   enableSlackNotifications Boolean @default(true)
 
-  enabledGeneralEvaluations Evaluation[]
-  enabledTestAgents         TestAgent[]
-  scenarios                 Scenario[]
-  tests                     Test[]
-  evaluationTemplates       EvaluationTemplate[]
-  calls                     Call[]
+  enabledTestAgents   TestAgent[]
+  scenarios           Scenario[]
+  tests               Test[]
+  evaluationTemplates EvaluationTemplate[]
+  calls               Call[]
+  evaluations         Evaluation[]
+  generalEvaluations  GeneralEvaluation[]
 }
 
 model Test {
@@ -247,6 +248,14 @@ model EvaluationTemplate {
   evaluations       Evaluation[]
 }
 
+model GeneralEvaluation {
+  id           String     @id @default(uuid())
+  agentId      String
+  agent        Agent      @relation(fields: [agentId], references: [id])
+  evaluationId String
+  evaluation   Evaluation @relation(fields: [evaluationId], references: [id])
+}
+
 model Evaluation {
   id         String   @id @default(uuid())
   createdAt  DateTime @default(now())
@@ -266,7 +275,8 @@ model Evaluation {
   agent             Agent?           @relation(fields: [agentId], references: [id])
   agentId           String?
 
-  evaluationResults EvaluationResult[]
+  evaluationResults  EvaluationResult[]
+  generalEvaluations GeneralEvaluation[]
 }
 
 model EvaluationResult {

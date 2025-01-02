@@ -2,6 +2,7 @@ import { createTRPCRouter, protectedProcedure } from "../trpc";
 import {
   EvaluationGroupWithIncludesSchema,
   EvaluationTemplateSchema,
+  GeneralEvaluationWithIncludesSchema,
 } from "@repo/types/src/index";
 import { EvaluationService } from "@repo/services/src/evaluation";
 import { EvaluationSchema } from "@repo/types/src/index";
@@ -11,11 +12,20 @@ import { db } from "~/server/db";
 const evalServiceInstance = new EvaluationService(db);
 
 export const evalRouter = createTRPCRouter({
-  getGeneralEvals: protectedProcedure.query(async ({ ctx }) => {
-    return await evalServiceInstance.getGeneralEvals({
-      userId: ctx.user.id,
-    });
-  }),
+  updateGeneralEvaluations: protectedProcedure
+    .input(
+      z.object({
+        agentId: z.string(),
+        generalEvaluations: z.array(GeneralEvaluationWithIncludesSchema),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      return await evalServiceInstance.updateGeneralEvaluations({
+        agentId: input.agentId,
+        generalEvaluations: input.generalEvaluations,
+        userId: ctx.user.id,
+      });
+    }),
 
   getTemplates: protectedProcedure.query(async ({ ctx }) => {
     return await evalServiceInstance.getTemplates({
@@ -49,15 +59,6 @@ export const evalRouter = createTRPCRouter({
         userId: ctx.user.id,
       });
       return input.id;
-    }),
-
-  create: protectedProcedure
-    .input(EvaluationSchema)
-    .mutation(async ({ input, ctx }) => {
-      return await evalServiceInstance.create({
-        evaluation: input,
-        userId: ctx.user.id,
-      });
     }),
 
   update: protectedProcedure

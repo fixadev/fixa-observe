@@ -9,61 +9,100 @@ import {
 import { Button } from "@/components/ui/button";
 import { EvaluationTabSection } from "@/components/evaluations/EvaluationTabSection";
 import {
+  type GeneralEvaluationWithIncludes,
   type EvaluationTemplate,
   type EvaluationWithIncludes,
 } from "@repo/types/src";
-import { instantiateEvaluation } from "~/lib/instantiate";
+import {
+  instantiateEvaluation,
+  instantiateGeneralEvaluation,
+} from "~/lib/instantiate";
 import { useParams } from "next/navigation";
 import { useAgent } from "~/app/contexts/UseAgent";
 import { api } from "~/trpc/react";
+import Spinner from "~/components/Spinner";
+import { useToast } from "~/components/hooks/use-toast";
 
 interface GeneralEvaluationsDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSave: (evaluations: EvaluationWithIncludes[]) => void;
 }
 
 export function GeneralEvaluationsDialog({
   open,
   onOpenChange,
-  onSave,
 }: GeneralEvaluationsDialogProps) {
   const { agentId } = useParams();
   const { agent, setAgent } = useAgent(agentId as string);
+  const { toast } = useToast();
 
-  const [evaluations, setEvaluations] = useState<EvaluationWithIncludes[]>(
-    agent?.enabledGeneralEvaluations ?? [],
-  );
+  const [generalEvaluations, setGeneralEvaluations] = useState<
+    GeneralEvaluationWithIncludes[]
+  >(agent?.generalEvaluations ?? []);
   useEffect(() => {
-    setEvaluations(agent?.enabledGeneralEvaluations ?? []);
-  }, [agent?.enabledGeneralEvaluations]);
+    setGeneralEvaluations(agent?.generalEvaluations ?? []);
+  }, [agent?.generalEvaluations]);
 
-  const handleAddEvaluation = useCallback((template: EvaluationTemplate) => {
-    setEvaluations((prev) => [
-      ...prev,
-      instantiateEvaluation({ evaluationTemplate: template }),
-    ]);
-  }, []);
+  const {
+    mutate: updateGeneralEvaluations,
+    isPending: isUpdatingGeneralEvaluations,
+  } = api.eval.updateGeneralEvaluations.useMutation({
+    onSuccess: (updatedGeneralEvaluations) => {
+      setAgent((prev) =>
+        prev
+          ? { ...prev, generalEvaluations: updatedGeneralEvaluations }
+          : null,
+      );
+      toast({
+        title: "general evaluations updated",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "error updating general evaluations",
+        description: "please try again later",
+      });
+      console.error(error);
+    },
+  });
+
+  const handleAddEvaluation = useCallback(
+    (template: EvaluationTemplate) => {
+      setGeneralEvaluations((prev) => [
+        ...prev,
+        instantiateGeneralEvaluation({
+          agentId: agentId as string,
+          evaluation: instantiateEvaluation({ evaluationTemplate: template }),
+        }),
+      ]);
+    },
+    [agentId],
+  );
   const handleUpdateEvaluation = useCallback(
     (evaluationId: string, evaluation: EvaluationWithIncludes) => {
-      setEvaluations((prev) =>
-        prev.map((e) => (e.id === evaluationId ? evaluation : e)),
+      setGeneralEvaluations((prev) =>
+        prev.map((e) =>
+          e.evaluationId === evaluationId ? { ...e, evaluation } : e,
+        ),
       );
     },
     [],
   );
   const handleDeleteEvaluation = useCallback((evaluationId: string) => {
-    setEvaluations((prev) => prev.filter((e) => e.id !== evaluationId));
+    setGeneralEvaluations((prev) => prev.filter((e) => e.id !== evaluationId));
   }, []);
 
   const handleCancel = useCallback(() => {
-    setEvaluations(agent?.enabledGeneralEvaluations ?? []);
+    setGeneralEvaluations(agent?.generalEvaluations ?? []);
     onOpenChange(false);
-  }, [agent?.enabledGeneralEvaluations, onOpenChange]);
+  }, [agent?.generalEvaluations, onOpenChange]);
   const handleSave = useCallback(() => {
-    onSave(evaluations);
+    updateGeneralEvaluations({
+      agentId: agentId as string,
+      generalEvaluations: generalEvaluations,
+    });
     onOpenChange(false);
-  }, [evaluations, onSave, onOpenChange]);
+  }, [generalEvaluations, agentId, updateGeneralEvaluations, onOpenChange]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -72,16 +111,22 @@ export function GeneralEvaluationsDialog({
           <DialogTitle>general evaluations</DialogTitle>
         </DialogHeader>
         <EvaluationTabSection
-          evaluations={evaluations}
+          evaluations={generalEvaluations.map((e) => e.evaluation)}
           onAddEvaluation={handleAddEvaluation}
           onUpdateEvaluation={handleUpdateEvaluation}
           onDeleteEvaluation={handleDeleteEvaluation}
         />
         <DialogFooter>
-          <Button variant="outline" onClick={handleCancel}>
+          <Button
+            variant="outline"
+            onClick={handleCancel}
+            disabled={isUpdatingGeneralEvaluations}
+          >
             cancel
           </Button>
-          <Button onClick={handleSave}>save</Button>
+          <Button onClick={handleSave} disabled={isUpdatingGeneralEvaluations}>
+            {isUpdatingGeneralEvaluations ? <Spinner /> : "save"}
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

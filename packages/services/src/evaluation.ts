@@ -5,39 +5,120 @@ import {
   type EvaluationGroupWithIncludes,
   EvaluationTemplate,
   EvaluationWithIncludes,
-  EvaluationWithIncludesSchema,
   EvaluationGroupWithIncludesSchema,
+  GeneralEvaluationWithIncludes,
+  GeneralEvaluationWithIncludesSchema,
 } from "@repo/types/src/index";
 import { getCreatedUpdatedDeleted } from "./utils";
 
 export class EvaluationService {
   constructor(private db: PrismaClient) {}
 
-  async getGeneralEvals({
+  async updateGeneralEvaluations({
+    agentId,
+    generalEvaluations,
     userId,
   }: {
+    agentId: string;
+    generalEvaluations: GeneralEvaluationWithIncludes[];
     userId: string;
-  }): Promise<EvaluationWithIncludes[]> {
-    const evaluations = await this.db.evaluation.findMany({
-      where: {
-        evaluationTemplate: { ownerId: userId, type: EvalType.general },
-      },
-      orderBy: { createdAt: "asc" },
+  }): Promise<GeneralEvaluationWithIncludes[]> {
+    const agent = await this.db.agent.findUnique({
+      where: { id: agentId, ownerId: userId },
       include: {
-        evaluationTemplate: true,
+        generalEvaluations: {
+          include: { evaluation: { include: { evaluationTemplate: true } } },
+        },
       },
     });
-    return evaluations
-      .map((evaluation) => {
-        const parsedEvaluation =
-          EvaluationWithIncludesSchema.safeParse(evaluation);
-        if (!parsedEvaluation.success) {
-          console.error(parsedEvaluation.error);
-          return null;
+    if (!agent) {
+      throw new Error("Agent not found");
+    }
+
+    const { created, updated, deleted } = getCreatedUpdatedDeleted(
+      generalEvaluations,
+      agent.generalEvaluations,
+    );
+
+    const updatedGeneralEvaluations: GeneralEvaluationWithIncludes[] = [];
+    for (const generalEvaluation of agent.generalEvaluations) {
+      const updatedSet = new Set(updated.map((e) => e.id));
+      if (updatedSet.has(generalEvaluation.evaluationId)) {
+        const parsedGeneralEvaluation =
+          GeneralEvaluationWithIncludesSchema.safeParse(generalEvaluation);
+        if (!parsedGeneralEvaluation.success) {
+          console.error(
+            "Failed to parse general evaluation",
+            parsedGeneralEvaluation.error,
+          );
+          continue;
         }
-        return parsedEvaluation.data;
-      })
-      .filter((e) => e !== null);
+        updatedGeneralEvaluations.push(parsedGeneralEvaluation.data);
+      }
+    }
+
+    await this.db.$transaction(async (tx) => {
+      // Create new evaluations
+      const createdEvaluations = await tx.evaluation.createManyAndReturn({
+        data: created.map((e) => ({
+          ...e.evaluation,
+          id: undefined,
+          evaluationTemplate: undefined,
+          params: e.evaluation.params ?? undefined,
+        })),
+      });
+
+      // Create general evaluation links
+      const createdGeneralEvaluations =
+        await tx.generalEvaluation.createManyAndReturn({
+          data: createdEvaluations.map((e) => ({
+            agentId,
+            evaluationId: e.id,
+          })),
+          include: { evaluation: { include: { evaluationTemplate: true } } },
+        });
+
+      // Add created general evaluations to the list
+      for (const generalEvaluation of createdGeneralEvaluations) {
+        const parsedGeneralEvaluation =
+          GeneralEvaluationWithIncludesSchema.safeParse(generalEvaluation);
+        if (!parsedGeneralEvaluation.success) {
+          console.error(
+            "Failed to parse general evaluation",
+            parsedGeneralEvaluation.error,
+          );
+          continue;
+        }
+        updatedGeneralEvaluations.push(parsedGeneralEvaluation.data);
+      }
+
+      // Update existing evaluations
+      for (const generalEvaluation of updated) {
+        await tx.evaluation.update({
+          where: { id: generalEvaluation.evaluation.id },
+          data: {
+            ...generalEvaluation.evaluation,
+            params: generalEvaluation.evaluation.params ?? undefined,
+            evaluationTemplate: undefined,
+          },
+        });
+      }
+
+      // Delete removed evaluations
+      if (deleted.length > 0) {
+        await tx.generalEvaluation.deleteMany({
+          where: {
+            agentId,
+            evaluationId: { in: deleted.map((e) => e.id) },
+          },
+        });
+        await tx.evaluation.deleteMany({
+          where: { id: { in: deleted.map((e) => e.id) } },
+        });
+      }
+    });
+
+    return updatedGeneralEvaluations;
   }
 
   async getTemplates({
@@ -86,22 +167,6 @@ export class EvaluationService {
     await this.db.evaluationTemplate.update({
       where: { id, ownerId: userId },
       data: { deleted: true },
-    });
-  }
-
-  async create({
-    evaluation,
-    userId,
-  }: {
-    evaluation: Evaluation;
-    userId: string;
-  }): Promise<Evaluation> {
-    return await this.db.evaluation.create({
-      data: {
-        ...evaluation,
-        scenarioId: null,
-        params: evaluation.params ?? undefined,
-      },
     });
   }
 
@@ -233,7 +298,7 @@ export class EvaluationService {
     const priorEvaluations = await this.db.evaluation.findMany({
       where: { evaluationGroupId: group.id },
     });
-    const { created, updated, deleted } = await getCreatedUpdatedDeleted(
+    const { created, updated, deleted } = getCreatedUpdatedDeleted(
       priorEvaluations,
       group.evaluations,
     );

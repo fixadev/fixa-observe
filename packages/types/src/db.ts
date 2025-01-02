@@ -6,6 +6,7 @@ import {
   EvaluationResultSchema,
   EvaluationSchema,
   EvaluationTemplateSchema,
+  GeneralEvaluationSchema,
   InterruptionSchema,
   LatencyBlockSchema,
   MessageSchema,
@@ -29,6 +30,20 @@ export const EvaluationWithIncludesSchema = EvaluationSchema.extend({
 export type EvaluationWithIncludes = z.infer<
   typeof EvaluationWithIncludesSchema
 >;
+
+// GeneralEvaluation
+const GENERAL_EVALUATION_INCLUDE = {
+  include: {
+    evaluation: EVALUATION_INCLUDE,
+  },
+} as const;
+export type GeneralEvaluationWithIncludes = z.infer<
+  typeof GeneralEvaluationWithIncludesSchema
+>;
+export const GeneralEvaluationWithIncludesSchema =
+  GeneralEvaluationSchema.extend({
+    evaluation: EvaluationWithIncludesSchema,
+  });
 
 // EvaluationGroup
 export type EvaluationGroupWithIncludes = z.infer<
@@ -123,7 +138,7 @@ export const AGENT_INCLUDE = {
       },
     },
     enabledTestAgents: true,
-    enabledGeneralEvaluations: EVALUATION_INCLUDE,
+    generalEvaluations: GENERAL_EVALUATION_INCLUDE,
   },
 } as const;
 export const AgentWithIncludesSchema = AgentSchema.extend({
@@ -132,7 +147,7 @@ export const AgentWithIncludesSchema = AgentSchema.extend({
     calls: CallSchema.array(),
   }).array(),
   enabledTestAgents: TestAgentSchema.array(),
-  enabledGeneralEvaluations: EvaluationWithIncludesSchema.array(),
+  generalEvaluations: GeneralEvaluationWithIncludesSchema.array(),
 });
 export type AgentWithIncludes = z.infer<typeof AgentWithIncludesSchema>;
 export type TestWithCalls = AgentWithIncludes["tests"][number];

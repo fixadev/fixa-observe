@@ -19,12 +19,12 @@ export function GeneralEvaluations() {
         </div>
         <Button variant="outline">edit general evaluations</Button>
       </div>
-      {agent && agent.enabledGeneralEvaluations.length > 0 ? (
+      {agent && agent.generalEvaluations.length > 0 ? (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {agent?.enabledGeneralEvaluations.map((evaluation) => (
+          {agent?.generalEvaluations.map((generalEvaluation) => (
             <GeneralEvaluationCard
-              key={evaluation.id}
-              evaluation={evaluation}
+              key={generalEvaluation.id}
+              evaluation={generalEvaluation.evaluation}
               onClick={() => null}
             />
           ))}

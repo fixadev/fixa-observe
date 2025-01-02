@@ -1,6 +1,5 @@
 import {
   type Agent,
-  AgentSchema,
   AgentWithIncludes,
   AgentWithIncludesSchema,
 } from "@repo/types/src/index";
@@ -108,10 +107,14 @@ export class AgentService {
         enabledTestAgents: {
           where: { enabled: true },
         },
-        enabledGeneralEvaluations: {
-          where: { evaluationTemplate: { deleted: false } },
+        generalEvaluations: {
+          where: { evaluation: { evaluationTemplate: { deleted: false } } },
           include: {
-            evaluationTemplate: true,
+            evaluation: {
+              include: {
+                evaluationTemplate: true,
+              },
+            },
           },
         },
       },

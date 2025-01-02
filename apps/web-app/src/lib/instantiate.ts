@@ -4,6 +4,7 @@ import {
   type EvaluationGroupWithIncludes,
   type EvaluationTemplate,
   type ScenarioWithIncludes,
+  type GeneralEvaluationWithIncludes,
 } from "@repo/types/src/index";
 import { generateTempId } from "./utils";
 import {
@@ -78,6 +79,19 @@ export function instantiateEvaluation(
     evaluationGroupId: null,
     agentId: null,
 
+    ...partial,
+  };
+}
+
+export function instantiateGeneralEvaluation(
+  partial?: Partial<GeneralEvaluationWithIncludes>,
+): GeneralEvaluationWithIncludes {
+  const evaluation = instantiateEvaluation();
+  return {
+    id: generateTempId(),
+    agentId: "",
+    evaluationId: evaluation.id,
+    evaluation,
     ...partial,
   };
 }
