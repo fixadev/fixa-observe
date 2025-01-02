@@ -8,7 +8,7 @@ import {
 import { randomUUID } from "crypto";
 import { AgentService } from "./agent";
 import { UserService } from "./user";
-import { StripeService } from "./stripe";
+import { StripeService } from "./ee/stripe";
 import axios from "axios";
 import { type PostHog } from "posthog-node";
 

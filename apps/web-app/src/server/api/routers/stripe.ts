@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
-import { StripeService } from "@repo/services/src/stripe";
+import { StripeService } from "@repo/services/src/ee/stripe";
 import { db } from "~/server/db";
 import type Stripe from "stripe";
 import { type PublicMetadata } from "@repo/types/src";

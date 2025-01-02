@@ -1,6 +1,6 @@
 import { PrismaClient } from "@repo/db/src";
 import Stripe from "stripe";
-import { UserService } from "./user";
+import { UserService } from "../user";
 import { backOff } from "exponential-backoff";
 
 export class StripeService {

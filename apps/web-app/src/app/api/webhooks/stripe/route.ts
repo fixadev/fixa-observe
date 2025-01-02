@@ -3,7 +3,7 @@ import { env } from "~/env";
 import Stripe from "stripe";
 import { UserService } from "@repo/services/src/user";
 import { db } from "~/server/db";
-import { SlackService } from "@repo/services/src/slack";
+import { SlackService } from "@repo/services/src/ee/slack";
 
 const userService = new UserService(db);
 const slackService = new SlackService();

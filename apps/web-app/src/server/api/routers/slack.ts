@@ -6,7 +6,7 @@ import { type PublicMetadata } from "@repo/types/src";
 import { currentUser } from "@clerk/nextjs/server";
 import { UserService } from "@repo/services/src/user";
 import { db } from "~/server/db";
-import { SlackService } from "@repo/services/src/slack";
+import { SlackService } from "@repo/services/src/ee/slack";
 
 const userService = new UserService(db);
 const slackService = new SlackService();
