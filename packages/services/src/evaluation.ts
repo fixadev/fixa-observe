@@ -12,6 +12,7 @@ import {
   EvaluationTemplate,
   EvaluationWithIncludes,
   EvaluationWithIncludesSchema,
+  EvaluationGroupWithIncludesSchema,
 } from "@repo/types/src/index";
 import { getCreatedUpdatedDeleted } from "./utils";
 
@@ -158,7 +159,7 @@ export class EvaluationService {
   }: {
     userId: string;
   }): Promise<EvaluationGroupWithIncludes[]> {
-    return await this.db.evaluationGroup.findMany({
+    const evaluationGroups = await this.db.evaluationGroup.findMany({
       where: { ownerId: userId },
       orderBy: { createdAt: "asc" },
       include: {
@@ -169,6 +170,21 @@ export class EvaluationService {
         },
       },
     });
+
+    return evaluationGroups
+      .map((evaluationGroup) => {
+        const parsedEvaluationGroup =
+          EvaluationGroupWithIncludesSchema.safeParse(evaluationGroup);
+        if (!parsedEvaluationGroup.success) {
+          console.error(
+            "Failed to parse evaluation group",
+            parsedEvaluationGroup.error,
+          );
+          return null;
+        }
+        return parsedEvaluationGroup.data;
+      })
+      .filter((e) => e !== null);
   }
 
   async createGroup({
@@ -178,7 +194,7 @@ export class EvaluationService {
     group: EvaluationGroupWithIncludes;
     userId: string;
   }): Promise<EvaluationGroupWithIncludes> {
-    return await this.db.evaluationGroup.create({
+    const evaluationGroup = await this.db.evaluationGroup.create({
       data: {
         ...group,
         id: uuidv4(),
@@ -188,6 +204,8 @@ export class EvaluationService {
             ...evaluation,
             id: uuidv4(),
             params: evaluation.params ?? undefined,
+            evaluationTemplate: undefined,
+            evaluationGroupId: undefined,
           })),
         },
       },
@@ -199,6 +217,16 @@ export class EvaluationService {
         },
       },
     });
+
+    const parsedEvaluationGroup =
+      EvaluationGroupWithIncludesSchema.safeParse(evaluationGroup);
+    if (!parsedEvaluationGroup.success) {
+      throw new Error(
+        "Failed to parse evaluation group",
+        parsedEvaluationGroup.error,
+      );
+    }
+    return parsedEvaluationGroup.data;
   }
 
   async updateGroup({
@@ -215,21 +243,20 @@ export class EvaluationService {
       priorEvaluations,
       group.evaluations,
     );
-    return await this.db.evaluationGroup.update({
+    const evaluationGroup = await this.db.evaluationGroup.update({
       where: { id: group.id, ownerId: userId },
       data: {
         ...group,
         evaluations: {
+          deleteMany: { id: { in: deleted.map((e) => e.id) } },
           updateMany: [
-            ...deleted.map((evaluation) => ({
-              where: { id: evaluation.id },
-              data: { deleted: true },
-            })),
             ...updated.map((evaluation) => ({
               where: { id: evaluation.id },
               data: {
                 ...evaluation,
                 params: evaluation.params ?? undefined,
+                evaluationTemplate: undefined,
+                evaluationGroupId: undefined,
               },
             })),
           ],
@@ -237,8 +264,9 @@ export class EvaluationService {
             data: created.map((evaluation) => ({
               ...evaluation,
               id: uuidv4(),
-              evaluationGroupId: group.id,
               params: evaluation.params ?? undefined,
+              evaluationTemplate: undefined,
+              evaluationGroupId: undefined,
             })),
           },
         },
@@ -251,6 +279,16 @@ export class EvaluationService {
         },
       },
     });
+
+    const parsedEvaluationGroup =
+      EvaluationGroupWithIncludesSchema.safeParse(evaluationGroup);
+    if (!parsedEvaluationGroup.success) {
+      throw new Error(
+        "Failed to parse evaluation group",
+        parsedEvaluationGroup.error,
+      );
+    }
+    return parsedEvaluationGroup.data;
   }
 
   async deleteGroup({
