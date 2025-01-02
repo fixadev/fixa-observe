@@ -1,5 +1,5 @@
 import { createClerkClient, type ClerkClient, type User } from "@clerk/backend";
-import { PrismaClient } from "@repo/db/src";
+import { PrismaClient } from "@repo/db/src/index";
 import { generateApiKey } from "./utils";
 import {
   type PrivateMetadata,

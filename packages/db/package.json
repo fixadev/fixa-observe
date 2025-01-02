@@ -1,6 +1,6 @@
 {
   "name": "@repo/db",
-  "version": "0.0.0", 
+  "version": "0.0.0",
   "type": "module",
   "scripts": {
     "db:generate": "prisma generate --schema ./src/schema.prisma",
@@ -8,9 +8,9 @@
     "db:push": "prisma db push",
     "db:migrate": "prisma migrate dev --schema ./src/schema.prisma"
   },
- "exports": {
+  "exports": {
     "./src/index": "./src/index.ts"
-  }, 
+  },
   "dependencies": {
     "@prisma/client": "^5.21.1",
     "zod-prisma-types": "^3.1.8"

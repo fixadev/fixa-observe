@@ -1,4 +1,4 @@
-import { PrismaClient } from "@repo/db/src";
+import { PrismaClient } from "@repo/db/src/index";
 import { VapiClient } from "@vapi-ai/server-sdk";
 
 // export const editVapiAssistant = async (

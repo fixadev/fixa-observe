@@ -1,4 +1,4 @@
-import { PrismaClient, Role } from "@repo/db/src";
+import { PrismaClient, Role } from "@repo/db/src/index";
 
 export class ToolService {
   constructor(private db: PrismaClient) {}
