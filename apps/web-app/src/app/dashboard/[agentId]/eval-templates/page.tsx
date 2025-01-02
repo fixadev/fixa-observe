@@ -10,17 +10,15 @@ import { useCallback, useEffect, useState } from "react";
 import { type EvaluationTemplate } from "@repo/types/src";
 import { instantiateEvaluationTemplate } from "~/lib/instantiate";
 
-export default function EvalTemplatesPage({
-  params,
-}: {
-  params: { agentId: string };
-}) {
+export default function EvalTemplatesPage() {
   const { data: _evaluationTemplates = [] } = api.eval.getTemplates.useQuery();
   const [evaluationTemplates, setEvaluationTemplates] = useState<
     EvaluationTemplate[]
   >([]);
   useEffect(() => {
-    setEvaluationTemplates(_evaluationTemplates);
+    if (_evaluationTemplates.length > 0) {
+      setEvaluationTemplates(_evaluationTemplates);
+    }
   }, [_evaluationTemplates]);
 
   const [selectedTemplate, setSelectedTemplate] =
@@ -56,10 +54,7 @@ export default function EvalTemplatesPage({
 
   return (
     <div className="h-full">
-      <DashboardPageHeader
-        title="evaluation templates"
-        href={`/dashboard/${params.agentId}/eval-templates`}
-      />
+      <DashboardPageHeader title="evaluation templates" />
       <div className="container flex h-full flex-col gap-4 p-4">
         <div>
           <div className="text-lg font-medium">evaluation templates</div>

@@ -25,6 +25,7 @@ import {
   ChartBarIcon,
   ChevronDownIcon,
   CreditCardIcon,
+  DocumentCheckIcon,
   DocumentIcon,
   EllipsisHorizontalIcon,
   LifebuoyIcon,
@@ -63,6 +64,7 @@ import { UserButton } from "@clerk/nextjs";
 import { SlackIcon } from "lucide-react";
 import { DocumentTextIcon, KeyIcon } from "@heroicons/react/24/outline";
 import { OpenInNewWindowIcon } from "@radix-ui/react-icons";
+import { useFeatureFlagEnabled } from "posthog-js/react";
 
 export default function ObserveSidebar() {
   const pathname = usePathname();
@@ -87,6 +89,8 @@ export default function ObserveSidebar() {
   const [renameDialogOpen, setRenameDialogOpen] = useState(false);
   const [curSavedSearch, setCurSavedSearch] =
     useState<SavedSearchWithIncludes | null>(null);
+
+  const testsPageEnabled = useFeatureFlagEnabled("observability-tests-page");
 
   return (
     <>
@@ -135,13 +139,29 @@ export default function ObserveSidebar() {
                   </SidebarMenuButton>
                 </SidebarMenuItem>
                 <SidebarMenuItem>
-                  <SidebarMenuButton asChild isActive={isCurrentPath("/tests")}>
-                    <Link href={`/observe/tests`}>
-                      <BeakerIcon />
-                      <span>test calls</span>
+                  <SidebarMenuButton
+                    asChild
+                    isActive={isCurrentPath("/eval-templates")}
+                  >
+                    <Link href={`/observe/eval-templates`}>
+                      <DocumentCheckIcon />
+                      <span>evaluation templates</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
+                {testsPageEnabled && (
+                  <SidebarMenuItem>
+                    <SidebarMenuButton
+                      asChild
+                      isActive={isCurrentPath("/tests")}
+                    >
+                      <Link href={`/observe/tests`}>
+                        <BeakerIcon />
+                        <span>test calls</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                )}
                 <Collapsible defaultOpen className="group/collapsible">
                   <SidebarMenuItem>
                     <CollapsibleTrigger asChild>
