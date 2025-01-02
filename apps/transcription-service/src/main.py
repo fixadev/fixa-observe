@@ -3,7 +3,7 @@ from pydantic import BaseModel
 import os
 from utils.logger import logger
 from services.transcribe import transcribe_with_deepgram
-from services.split_channels import split_channels
+from services.split_channels import split_channels, cleanup_temp_files
 from services.create_transcript import create_transcript_from_deepgram
 import asyncio
 from typing import Optional
@@ -34,7 +34,8 @@ async def transcribe(request: TranscribeRequest):
     try: 
         user_audio_path, agent_audio_path = await split_channels(request.stereo_audio_url)
         transcriptions = await transcribe_with_deepgram([user_audio_path, agent_audio_path])
-        transcript = await create_transcript_from_deepgram(transcriptions[0], transcriptions[1], user_audio_path, agent_audio_path) # type: ignore
+        transcript = await create_transcript_from_deepgram(transcriptions[0], transcriptions[1], user_audio_path, agent_audio_path)
+        cleanup_temp_files(user_audio_path, agent_audio_path)
         return transcript
         
     except Exception as e:
