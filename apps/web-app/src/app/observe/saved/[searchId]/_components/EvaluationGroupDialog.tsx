@@ -3,6 +3,8 @@ import { Dialog, DialogContent, DialogFooter } from "~/components/ui/dialog";
 import {
   type EvaluationGroupWithIncludes,
   type Filter,
+  type EvaluationTemplate,
+  type EvaluationWithIncludes,
 } from "@repo/types/src/index";
 import { useCallback, useEffect, useState } from "react";
 import {
@@ -28,7 +30,6 @@ import {
 import { EditableText } from "~/components/EditableText";
 import { CardHeader, CardContent } from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
-import { CriteriaBlock } from "./CriteriaBlock";
 import { EvaluationTabSection } from "~/components/evaluations/EvaluationTabSection";
 
 export function EvaluationGroupDialog({
@@ -109,15 +110,40 @@ export function EvaluationGroupDialog({
     }
   }, [evaluationGroup, createEvaluationGroup, updateEvaluationGroup]);
 
-  const addCriteria = useCallback(() => {
-    setEvaluationGroup({
-      ...evaluationGroup,
-      evaluations: [
-        ...evaluationGroup.evaluations,
-        instantiateEvaluation({ evaluationGroupId: evaluationGroup.id }),
-      ],
-    });
-  }, [evaluationGroup]);
+  const handleAddEvaluation = useCallback(
+    (template: EvaluationTemplate) => {
+      const evaluation = instantiateEvaluation({
+        evaluationTemplateId: template.id,
+        evaluationTemplate: template,
+        evaluationGroupId: evaluationGroup.id,
+      });
+
+      setEvaluationGroup((prev) => ({
+        ...prev,
+        evaluations: [...prev.evaluations, evaluation],
+      }));
+    },
+    [evaluationGroup.id],
+  );
+
+  const handleUpdateEvaluation = useCallback(
+    (evaluationId: string, evaluation: EvaluationWithIncludes) => {
+      setEvaluationGroup((prev) => ({
+        ...prev,
+        evaluations: prev.evaluations.map((e) =>
+          e.id === evaluationId ? evaluation : e,
+        ),
+      }));
+    },
+    [],
+  );
+
+  const handleDeleteEvaluation = useCallback((evaluationId: string) => {
+    setEvaluationGroup((prev) => ({
+      ...prev,
+      evaluations: prev.evaluations.filter((e) => e.id !== evaluationId),
+    }));
+  }, []);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -159,46 +185,12 @@ export function EvaluationGroupDialog({
             <div className="text-xs font-medium text-muted-foreground">
               THEN
             </div>
-            {/* <EvaluationTabSection
+            <EvaluationTabSection
               evaluations={evaluationGroup.evaluations}
-              onUpdateEvaluation={() => {}}
-              onDeleteEvaluation={() => {}}
-              onEditTemplate={() => {}}
-              onCreateNewTemplate={() => {}}
-              onAddEvaluation={() => {}}
-            /> */}
-            {/* <div className="flex flex-col gap-2">
-              {evaluationGroup.evaluations.map((criteria) => (
-                <CriteriaBlock
-                  key={criteria.id}
-                  criteria={criteria}
-                  onUpdate={(updated) => {
-                    setEvaluationGroup({
-                      ...evaluationGroup,
-                      evaluations: evaluationGroup.evaluations.map((e) =>
-                        e.id === updated.id ? updated : e,
-                      ),
-                    });
-                  }}
-                  onDelete={() => {
-                    setEvaluationGroup({
-                      ...evaluationGroup,
-                      evaluations: evaluationGroup.evaluations.filter(
-                        (e) => e.id !== criteria.id,
-                      ),
-                    });
-                  }}
-                />
-              ))}
-              <Button
-                variant="ghost"
-                size="sm"
-                className="w-fit text-muted-foreground opacity-50 transition-opacity hover:text-muted-foreground hover:opacity-100"
-                onClick={addCriteria}
-              >
-                + add criteria
-              </Button>
-            </div> */}
+              onAddEvaluation={handleAddEvaluation}
+              onUpdateEvaluation={handleUpdateEvaluation}
+              onDeleteEvaluation={handleDeleteEvaluation}
+            />
           </CardContent>
         </div>
 
