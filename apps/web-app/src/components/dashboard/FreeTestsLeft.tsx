@@ -33,6 +33,7 @@ export default function FreeTestsLeft() {
     getCheckoutUrl({ redirectUrl });
   }, [getCheckoutUrl]);
 
+  // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
   if ((isPaidUser && freeTestsLeft === 0) || !isLoaded) {
     return null;
   }

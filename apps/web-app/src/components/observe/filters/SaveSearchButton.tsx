@@ -71,8 +71,8 @@ export default function SaveSearchButton({
     updateSavedSearch({
       ...savedSearch,
       ...filter,
-      timeRange: undefined,
-      customerCallId: undefined,
+      timeRange: null,
+      customerCallId: null,
     });
   }, [filter, savedSearch, updateSavedSearch]);
 

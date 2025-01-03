@@ -133,8 +133,7 @@ const _AudioPlayer = forwardRef<
   // Check if we need to stop playback due to reaching eval end
   useEffect(() => {
     if (
-      activeEvalResult &&
-      activeEvalResult.secondsFromStart &&
+      activeEvalResult?.secondsFromStart &&
       activeEvalResult.duration &&
       currentTime >=
         activeEvalResult.secondsFromStart +
@@ -160,7 +159,7 @@ const _AudioPlayer = forwardRef<
         evalResult: EvaluationResultWithIncludes | null,
       ) => {
         setActiveEvalResult(evalResult);
-        if (evalResult && evalResult.secondsFromStart && evalResult.duration) {
+        if (evalResult?.secondsFromStart && evalResult.duration) {
           seek(evalResult.secondsFromStart - offsetFromStart);
         }
       },

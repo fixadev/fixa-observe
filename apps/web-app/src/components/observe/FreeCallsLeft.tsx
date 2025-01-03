@@ -34,6 +34,7 @@ export default function FreeCallsLeft() {
     getCheckoutUrl({ redirectUrl });
   }, [getCheckoutUrl]);
 
+  // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
   if (isPaidUser || !isLoaded) {
     return null;
   }
