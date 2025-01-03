@@ -70,7 +70,11 @@ export class TestService {
             },
             evaluationResults: {
               include: {
-                evaluation: true,
+                evaluation: {
+                  include: {
+                    evaluationTemplate: true,
+                  },
+                },
               },
             },
             latencyBlocks: true,
