@@ -54,7 +54,6 @@ export function instantiateScenario(
     successCriteria: "",
     includeDateTime: false,
     timezone: null,
-    isNew: true,
     deleted: false,
     evaluations: [],
     ...partial,
@@ -77,7 +76,6 @@ export function instantiateEvaluation(
 
     scenarioId: null,
     evaluationGroupId: null,
-    agentId: null,
 
     ...partial,
   };
@@ -128,7 +126,6 @@ export function instantiateEvaluationTemplate(
     toolCallExpectedResult: "",
     deleted: false,
     scenarioId: null,
-    agentId: null,
     ownerId: null,
     evaluationGroupId: null,
 

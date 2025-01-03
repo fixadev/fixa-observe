@@ -51,13 +51,11 @@ model Agent {
 
   enableSlackNotifications Boolean @default(true)
 
-  enabledTestAgents   TestAgent[]
-  scenarios           Scenario[]
-  tests               Test[]
-  evaluationTemplates EvaluationTemplate[]
-  calls               Call[]
-  evaluations         Evaluation[]
-  generalEvaluations  GeneralEvaluation[]
+  enabledTestAgents  TestAgent[]
+  scenarios          Scenario[]
+  tests              Test[]
+  calls              Call[]
+  generalEvaluations GeneralEvaluation[]
 }
 
 model Test {
@@ -210,8 +208,6 @@ model Scenario {
   includeDateTime Boolean @default(false)
   timezone        String?
 
-  isNew Boolean @default(false)
-
   calls       Call[]
   evaluations Evaluation[]
 
@@ -236,9 +232,6 @@ model EvaluationTemplate {
   toolCallExpectedResult String          @default("")
 
   evaluationResults EvaluationResult[]
-
-  agent   Agent?  @relation(fields: [agentId], references: [id])
-  agentId String?
 
   ownerId String?
 
@@ -272,8 +265,6 @@ model Evaluation {
 
   evaluationGroup   EvaluationGroup? @relation(fields: [evaluationGroupId], references: [id])
   evaluationGroupId String?
-  agent             Agent?           @relation(fields: [agentId], references: [id])
-  agentId           String?
 
   evaluationResults  EvaluationResult[]
   generalEvaluations GeneralEvaluation[]
