@@ -56,7 +56,11 @@ export const EvaluationGroupWithIncludesSchema = EvaluationGroupSchema.extend({
 // Scenario
 export const SCENARIO_INCLUDE = {
   include: {
-    evaluations: EVALUATION_INCLUDE,
+    evaluations: {
+      include: {
+        evaluationTemplate: true,
+      },
+    },
   },
 } as const;
 export const ScenarioWithIncludesSchema = ScenarioSchema.extend({
@@ -103,7 +107,7 @@ export const CallInProgressSchema = CallSchema.extend({
   scenario: ScenarioWithIncludesSchema,
   test: TestSchema.extend({
     agent: AgentSchema.extend({
-      enabledGeneralEvaluations: EvaluationWithIncludesSchema.array(),
+      generalEvaluations: GeneralEvaluationWithIncludesSchema.array(),
     }),
   }),
 });

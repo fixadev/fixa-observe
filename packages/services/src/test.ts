@@ -61,7 +61,11 @@ export class TestService {
             errors: true,
             scenario: {
               include: {
-                evaluations: true,
+                evaluations: {
+                  include: {
+                    evaluationTemplate: true,
+                  },
+                },
               },
             },
             evaluationResults: {
@@ -246,7 +250,19 @@ export class TestService {
           },
         },
         include: {
-          calls: true,
+          calls: {
+            include: {
+              scenario: {
+                include: {
+                  evaluations: {
+                    include: {
+                      evaluationTemplate: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
         },
       });
       await this.queueOfOneKioskCalls(deviceIds, callsToStart);
