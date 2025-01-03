@@ -102,6 +102,12 @@
   @apply lowercase;
 }
 
+.cl-input {
+  &::placeholder {
+    @apply lowercase;
+  }
+}
+
 .cl-popoverBox {
   @apply rounded-md border border-border shadow-md;
   width: unset !important;
@@ -109,6 +115,10 @@
 
 .cl-popoverBox > div {
   @apply rounded-md;
+}
+
+.cl-userPreview__userButton {
+  @apply pr-10;
 }
 
 .cl-organizationSwitcher-root {
@@ -125,7 +135,7 @@
 
 .cl-organizationPreviewAvatarContainer__organizationSwitcherTrigger
   > .cl-organizationPreviewAvatarBox {
-  @apply size-4;
+  @apply size-4 rounded-sm;
 }
 
 .cl-organizationPreviewMainIdentifier__organizationSwitcherTrigger {
