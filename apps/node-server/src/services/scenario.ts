@@ -2,7 +2,7 @@ import {
   Agent,
   GeneralEvaluationWithIncludes,
   ScenarioWithIncludes,
-} from "@repo/types/src";
+} from "@repo/types/src/index";
 
 export const getScenariosWithGeneralEvals = async (
   agent: Agent & { generalEvaluations: GeneralEvaluationWithIncludes[] },

@@ -4,11 +4,11 @@ import { type WebhookEvent } from "@clerk/nextjs/server";
 import { env } from "~/env";
 import { addSubscriber } from "~/server/listmonk";
 import { NUM_FREE_OBSERVABILITY_CALLS, NUM_FREE_TESTS } from "@repo/types/src";
-import { OrgService } from "@repo/services/src/user";
+import { OrgService } from "@repo/services/src";
 import { db } from "~/server/db";
 import { SlackService } from "@repo/services/src/ee/slack";
 
-const userService = new OrgService(db);
+const orgService = new OrgService(db);
 const slackService = new SlackService();
 
 export async function GET() {
@@ -78,24 +78,6 @@ export async function POST(req: Request) {
       // }
       // await upsertUser(userId, email ?? null, first_name, last_name, username);
 
-      // Give user free tests + observability calls
-      await userService.updatePublicMetadata(userId, {
-        freeTestsLeft: NUM_FREE_TESTS,
-        freeObservabilityCallsLeft: NUM_FREE_OBSERVABILITY_CALLS,
-      });
-
-      // Create default saved search
-      await db.savedSearch.create({
-        data: {
-          name: "default",
-          ownerId: userId,
-          isDefault: true,
-          agentId: [],
-          lookbackPeriod: { label: "2 days", value: 2 * 24 * 60 * 60 * 1000 },
-          chartPeriod: 60 * 60 * 1000,
-        },
-      });
-
       await slackService.sendAnalyticsMessage({
         message: `👋 new user joined fixa: ${first_name} ${last_name} (${email})`,
       });
@@ -110,17 +92,28 @@ export async function POST(req: Request) {
       }
       break;
     }
-    case "user.updated": {
-      // const { first_name, last_name, email_addresses, username } = evt.data;
-      // const email = email_addresses?.[0]?.email_address;
-      // if (!email) {
-      //   return new Response("User has no email", { status: 400 });
-      // }
-      // await upsertUser(userId, email ?? null, first_name, last_name, username);
-      break;
-    }
-    case "user.deleted": {
-      // await deleteUser(userId);
+    case "organization.created": {
+      const orgId = evt.data.id;
+
+      // TODO: only do this when user has no org
+
+      // Give the org free tests + observability calls
+      await orgService.updatePublicMetadata(orgId, {
+        freeTestsLeft: NUM_FREE_TESTS,
+        freeObservabilityCallsLeft: NUM_FREE_OBSERVABILITY_CALLS,
+      });
+
+      // Create default saved search
+      await db.savedSearch.create({
+        data: {
+          name: "default",
+          ownerId: orgId,
+          isDefault: true,
+          agentId: [],
+          lookbackPeriod: { label: "2 days", value: 2 * 24 * 60 * 60 * 1000 },
+          chartPeriod: 60 * 60 * 1000,
+        },
+      });
       break;
     }
   }

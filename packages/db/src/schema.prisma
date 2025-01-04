@@ -32,7 +32,7 @@ datasource db {
 // }
 
 model ApiKey {
-  userId String @id
+  orgId  String @id
   apiKey String
 }
 

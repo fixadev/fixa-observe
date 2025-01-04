@@ -96,16 +96,20 @@ const main = async () => {
           where: { ownerId: user.id },
           data: { ownerId: org.id },
         }),
+        db.apiKey.updateMany({
+          where: { orgId: user.id },
+          data: { orgId: org.id },
+        }),
       ]);
 
       console.log(`Updated resources for org ${org.id}`);
 
       // Add user as admin of organization
-      await clerkClient.organizations.createOrganizationMembership({
-        organizationId: org.id,
-        userId: user.id,
-        role: "admin",
-      });
+      // await clerkClient.organizations.createOrganizationMembership({
+      //   organizationId: org.id,
+      //   userId: user.id,
+      //   role: "admin",
+      // });
 
       console.log(`Added user ${user.id} as admin to org ${org.id}`);
     } catch (error) {

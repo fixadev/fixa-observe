@@ -56,7 +56,7 @@ export type InputJsonValueType = z.infer<typeof InputJsonValueSchema>;
 
 export const TransactionIsolationLevelSchema = z.enum(['ReadUncommitted','ReadCommitted','RepeatableRead','Serializable']);
 
-export const ApiKeyScalarFieldEnumSchema = z.enum(['userId','apiKey']);
+export const ApiKeyScalarFieldEnumSchema = z.enum(['orgId','apiKey']);
 
 export const AgentScalarFieldEnumSchema = z.enum(['id','createdAt','updatedAt','ownerId','name','phoneNumber','githubRepoUrl','customerAgentId','systemPrompt','extraProperties','enableSlackNotifications']);
 
@@ -141,7 +141,7 @@ export type AlertTypeType = `${z.infer<typeof AlertTypeSchema>}`
 /////////////////////////////////////////
 
 export const ApiKeySchema = z.object({
-  userId: z.string(),
+  orgId: z.string(),
   apiKey: z.string(),
 })
 
@@ -467,7 +467,7 @@ export type Alert = z.infer<typeof AlertSchema>
 //------------------------------------------------------
 
 export const ApiKeySelectSchema: z.ZodType<Prisma.ApiKeySelect> = z.object({
-  userId: z.boolean().optional(),
+  orgId: z.boolean().optional(),
   apiKey: z.boolean().optional(),
 }).strict()
 
@@ -1061,20 +1061,20 @@ export const ApiKeyWhereInputSchema: z.ZodType<Prisma.ApiKeyWhereInput> = z.obje
   AND: z.union([ z.lazy(() => ApiKeyWhereInputSchema),z.lazy(() => ApiKeyWhereInputSchema).array() ]).optional(),
   OR: z.lazy(() => ApiKeyWhereInputSchema).array().optional(),
   NOT: z.union([ z.lazy(() => ApiKeyWhereInputSchema),z.lazy(() => ApiKeyWhereInputSchema).array() ]).optional(),
-  userId: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
+  orgId: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   apiKey: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
 }).strict();
 
 export const ApiKeyOrderByWithRelationInputSchema: z.ZodType<Prisma.ApiKeyOrderByWithRelationInput> = z.object({
-  userId: z.lazy(() => SortOrderSchema).optional(),
+  orgId: z.lazy(() => SortOrderSchema).optional(),
   apiKey: z.lazy(() => SortOrderSchema).optional()
 }).strict();
 
 export const ApiKeyWhereUniqueInputSchema: z.ZodType<Prisma.ApiKeyWhereUniqueInput> = z.object({
-  userId: z.string()
+  orgId: z.string()
 })
 .and(z.object({
-  userId: z.string().optional(),
+  orgId: z.string().optional(),
   AND: z.union([ z.lazy(() => ApiKeyWhereInputSchema),z.lazy(() => ApiKeyWhereInputSchema).array() ]).optional(),
   OR: z.lazy(() => ApiKeyWhereInputSchema).array().optional(),
   NOT: z.union([ z.lazy(() => ApiKeyWhereInputSchema),z.lazy(() => ApiKeyWhereInputSchema).array() ]).optional(),
@@ -1082,7 +1082,7 @@ export const ApiKeyWhereUniqueInputSchema: z.ZodType<Prisma.ApiKeyWhereUniqueInp
 }).strict());
 
 export const ApiKeyOrderByWithAggregationInputSchema: z.ZodType<Prisma.ApiKeyOrderByWithAggregationInput> = z.object({
-  userId: z.lazy(() => SortOrderSchema).optional(),
+  orgId: z.lazy(() => SortOrderSchema).optional(),
   apiKey: z.lazy(() => SortOrderSchema).optional(),
   _count: z.lazy(() => ApiKeyCountOrderByAggregateInputSchema).optional(),
   _max: z.lazy(() => ApiKeyMaxOrderByAggregateInputSchema).optional(),
@@ -1093,7 +1093,7 @@ export const ApiKeyScalarWhereWithAggregatesInputSchema: z.ZodType<Prisma.ApiKey
   AND: z.union([ z.lazy(() => ApiKeyScalarWhereWithAggregatesInputSchema),z.lazy(() => ApiKeyScalarWhereWithAggregatesInputSchema).array() ]).optional(),
   OR: z.lazy(() => ApiKeyScalarWhereWithAggregatesInputSchema).array().optional(),
   NOT: z.union([ z.lazy(() => ApiKeyScalarWhereWithAggregatesInputSchema),z.lazy(() => ApiKeyScalarWhereWithAggregatesInputSchema).array() ]).optional(),
-  userId: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
+  orgId: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
   apiKey: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
 }).strict();
 
@@ -2553,37 +2553,37 @@ export const AlertScalarWhereWithAggregatesInputSchema: z.ZodType<Prisma.AlertSc
 }).strict();
 
 export const ApiKeyCreateInputSchema: z.ZodType<Prisma.ApiKeyCreateInput> = z.object({
-  userId: z.string(),
+  orgId: z.string(),
   apiKey: z.string()
 }).strict();
 
 export const ApiKeyUncheckedCreateInputSchema: z.ZodType<Prisma.ApiKeyUncheckedCreateInput> = z.object({
-  userId: z.string(),
+  orgId: z.string(),
   apiKey: z.string()
 }).strict();
 
 export const ApiKeyUpdateInputSchema: z.ZodType<Prisma.ApiKeyUpdateInput> = z.object({
-  userId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  orgId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   apiKey: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
 }).strict();
 
 export const ApiKeyUncheckedUpdateInputSchema: z.ZodType<Prisma.ApiKeyUncheckedUpdateInput> = z.object({
-  userId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  orgId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   apiKey: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
 }).strict();
 
 export const ApiKeyCreateManyInputSchema: z.ZodType<Prisma.ApiKeyCreateManyInput> = z.object({
-  userId: z.string(),
+  orgId: z.string(),
   apiKey: z.string()
 }).strict();
 
 export const ApiKeyUpdateManyMutationInputSchema: z.ZodType<Prisma.ApiKeyUpdateManyMutationInput> = z.object({
-  userId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  orgId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   apiKey: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
 }).strict();
 
 export const ApiKeyUncheckedUpdateManyInputSchema: z.ZodType<Prisma.ApiKeyUncheckedUpdateManyInput> = z.object({
-  userId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  orgId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   apiKey: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
 }).strict();
 
@@ -4144,17 +4144,17 @@ export const StringFilterSchema: z.ZodType<Prisma.StringFilter> = z.object({
 }).strict();
 
 export const ApiKeyCountOrderByAggregateInputSchema: z.ZodType<Prisma.ApiKeyCountOrderByAggregateInput> = z.object({
-  userId: z.lazy(() => SortOrderSchema).optional(),
+  orgId: z.lazy(() => SortOrderSchema).optional(),
   apiKey: z.lazy(() => SortOrderSchema).optional()
 }).strict();
 
 export const ApiKeyMaxOrderByAggregateInputSchema: z.ZodType<Prisma.ApiKeyMaxOrderByAggregateInput> = z.object({
-  userId: z.lazy(() => SortOrderSchema).optional(),
+  orgId: z.lazy(() => SortOrderSchema).optional(),
   apiKey: z.lazy(() => SortOrderSchema).optional()
 }).strict();
 
 export const ApiKeyMinOrderByAggregateInputSchema: z.ZodType<Prisma.ApiKeyMinOrderByAggregateInput> = z.object({
-  userId: z.lazy(() => SortOrderSchema).optional(),
+  orgId: z.lazy(() => SortOrderSchema).optional(),
   apiKey: z.lazy(() => SortOrderSchema).optional()
 }).strict();
 

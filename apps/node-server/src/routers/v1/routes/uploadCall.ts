@@ -2,7 +2,7 @@ import { Request, Response, Router } from "express";
 import { validateUploadCallParams } from "../../../middlewares/validateParams";
 import { addCallToQueue } from "../../../services/aws";
 import { env } from "../../../env";
-import userServiceClient from "../../../clients/userServiceClient";
+import { orgServiceClient } from "../../../clients/orgServiceClient";
 import { PublicMetadata } from "@repo/types/src/index";
 import { posthogClient } from "../../../clients/posthogClient";
 
@@ -29,7 +29,7 @@ uploadCallRouter.post(
 
       // Determine whether to decrement free calls left
       try {
-        const user = await userServiceClient.getUser(res.locals.userId);
+        const user = await orgServiceClient.getUser(res.locals.userId);
         if (user?.publicMetadata) {
           const metadata = user.publicMetadata as PublicMetadata;
           const bypassPayment = await posthogClient.getFeatureFlag(
@@ -44,7 +44,7 @@ uploadCallRouter.post(
               metadata.freeObservabilityCallsLeft &&
               metadata.freeObservabilityCallsLeft > 0
             ) {
-              await userServiceClient.decrementFreeObservabilityCallsLeft(
+              await orgServiceClient.decrementFreeObservabilityCallsLeft(
                 res.locals.userId,
               );
             } else {
