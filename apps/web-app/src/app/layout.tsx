@@ -22,8 +22,9 @@ export default function RootLayout({
     >
       <CSPostHogProvider>
         <ClerkProvider
-        // appearance={{ baseTheme: dark }}
-        // localization={localization}
+          afterSignOutUrl="/"
+          // appearance={{ baseTheme: dark }}
+          // localization={localization}
         >
           <body className="h-full">
             {/* <ThemeProvider

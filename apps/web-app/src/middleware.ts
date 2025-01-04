@@ -5,6 +5,10 @@ const isPrivateRoute = createRouteMatcher(["/dashboard(.*)", "/observe(.*)"]);
 
 export default clerkMiddleware((auth, req) => {
   if (isPrivateRoute(req)) {
+    if (!auth().userId) {
+      return auth().redirectToSignIn();
+    }
+
     auth().protect();
 
     const { userId, orgId } = auth();
