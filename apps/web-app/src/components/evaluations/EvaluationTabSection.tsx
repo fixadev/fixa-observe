@@ -79,9 +79,9 @@ export function EvaluationTabSection({
   }, [evaluations]);
 
   return (
-    <div className="w-full">
+    <div className="flex w-full flex-col">
       {/* Custom Tab List */}
-      <div className="flex overflow-x-auto pb-4">
+      <div className="mb-2 flex overflow-x-auto pb-2">
         <div className="flex flex-nowrap gap-2">
           {evaluations.map((evaluation) => (
             <Button
