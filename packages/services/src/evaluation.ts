@@ -37,7 +37,9 @@ export class EvaluationService {
     }
 
     const { created, updated, deleted } = getCreatedUpdatedDeleted(
-      agent.generalEvaluations,
+      agent.generalEvaluations.map((ge) =>
+        GeneralEvaluationWithIncludesSchema.parse(ge),
+      ),
       generalEvaluations,
     );
 

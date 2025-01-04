@@ -1,11 +1,9 @@
 import { z } from "zod";
-import { EvaluationGroupWithIncludesSchema } from "./db";
+import {
+  EvaluationGroupWithIncludesSchema,
+  TimeRangeSchema,
+} from "./db";
 import { AlertWithDetailsSchema } from "./alert";
-
-export const TimeRangeSchema = z.object({
-  start: z.number(),
-  end: z.number(),
-});
 
 export const EvaluationGroupResultSchema = z.object({
   id: z.string(),

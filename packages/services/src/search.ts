@@ -67,7 +67,6 @@ export class SearchService {
     userId: string;
   }): Promise<SavedSearchWithIncludes> {
     const { evaluationGroups: evalSets, alerts, ...searchData } = search;
-    // @ts-expect-error test should not be in metadata
     delete searchData.metadata?.test;
     const updatedSearch = await this.db.savedSearch.update({
       where: {
