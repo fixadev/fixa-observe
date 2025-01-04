@@ -1,8 +1,9 @@
-Copyright (c) 2023--2024 Pixa Inc.
+Copyright (c) 2024-2025 Pixa Inc.
 
 Portions of this software are licensed as follows:
 
-- All content that resides under the "ee/", "app/node-server/ee/", and/or "app/web-app/ee/" directories of this repository, if these directories exist, is licensed under the license defined in "ee/LICENSE".
+- All content that resides under the "ee/", "app/node-server/ee/", and/or "app/web-app/ee/" and/or "packages/services/src/ee/" directories of this repository, if these directories exist, is licensed under the license defined in "ee/LICENSE".
+- All server components are licensed under the AGPLv3 license. Please refer to each package's `LICENSE` files for more information.
 - All third party components incorporated into the Fixa Software are licensed under the original license provided by the owner of the applicable component.
 - Content outside of the above mentioned directories or restrictions above is available under the "MIT Expat" license as defined below.
 
