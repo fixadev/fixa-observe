@@ -5,11 +5,7 @@ import { usePostHog } from "posthog-js/react";
 import { useEffect } from "react";
 
 // Create the ChildrenWrapper component (AuthProvider)
-export default function ChildrenWrapper({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export function PostHogIdentify() {
   const posthog = usePostHog();
   const { user, isLoaded, isSignedIn } = useUser();
 
@@ -27,5 +23,5 @@ export default function ChildrenWrapper({
     }
   }, [isLoaded, isSignedIn, user, posthog]);
 
-  return <>{children}</>;
+  return null;
 }
