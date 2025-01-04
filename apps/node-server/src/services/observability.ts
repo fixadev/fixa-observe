@@ -176,13 +176,13 @@ export const transcribeAndSaveCall = async ({
       newCall.customerCallId,
     );
 
-    // await sendAlerts({
-    //   userId,
-    //   latencyDurations,
-    //   savedSearches,
-    //   evalSetResults,
-    //   call: newCall,
-    // });
+    await sendAlerts({
+      userId,
+      latencyDurations,
+      savedSearches,
+      evalSetResults,
+      call: newCall,
+    });
 
     return newCall;
   } catch (error) {
