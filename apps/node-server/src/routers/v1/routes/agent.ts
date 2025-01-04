@@ -11,7 +11,13 @@ agentRouter.get("/", async (req: Request, res: Response) => {
   try {
     const ownerId = res.locals.orgId;
     const agents = await agentService.getAllAgents(ownerId);
-    res.json({ success: true, agents });
+    res.json({
+      success: true,
+      agents: agents.map((agent) => {
+        const { ownerId, id, customerAgentId, ...rest } = agent;
+        return { id: customerAgentId, ...rest };
+      }),
+    });
   } catch (error) {
     console.error("Error getting agents", error);
     res.status(500).json({ success: false, error: (error as Error).message });
@@ -22,12 +28,12 @@ agentRouter.get("/", async (req: Request, res: Response) => {
 agentRouter.get("/:id", async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const ownerId = res.locals.orgId;
-    const agent = await agentService.getAgent(id, ownerId);
+    const agent = await agentService.getAgentByCustomerId(id, res.locals.orgId);
     if (!agent) {
       return res.status(404).json({ success: false, error: "Agent not found" });
     }
-    res.json({ success: true, agent });
+    const { id: customerAgentId, ...rest } = agent;
+    res.json({ success: true, agent: { id: customerAgentId, ...rest } });
   } catch (error) {
     console.error("Error getting agent", error);
     res.status(500).json({ success: false, error: (error as Error).message });
@@ -37,21 +43,34 @@ agentRouter.get("/:id", async (req: Request, res: Response) => {
 // Create agent
 agentRouter.post("/", async (req: Request, res: Response) => {
   try {
-    const { phoneNumber, name, systemPrompt } = req.body;
-    const ownerId = res.locals.orgId;
-    const agent = await agentService.createAgent(
-      phoneNumber,
-      name,
-      systemPrompt,
+    const { phoneNumber, id, systemPrompt, name } = req.body;
+    if (!phoneNumber || !id || !systemPrompt) {
+      return res.status(400).json({
+        success: false,
+        error:
+          "Missing required fields: phoneNumber, name, and systemPrompt are required",
+      });
+    }
+    const {
+      id: originalId,
       ownerId,
-    );
-    res.json({ success: true, agent });
+      customerAgentId,
+      ...rest
+    } = await agentService.createAgent({
+      phoneNumber,
+      customerAgentId: id,
+      name: name,
+      systemPrompt,
+      ownerId: res.locals.orgId,
+    });
+    res.json({ success: true, agent: { id: customerAgentId, ...rest } });
   } catch (error) {
     console.error("Error creating agent", error);
     res.status(500).json({ success: false, error: (error as Error).message });
   }
 });
 
+// Update agent
 agentRouter.put("/:id", async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
@@ -92,12 +111,20 @@ agentRouter.put("/:id", async (req: Request, res: Response) => {
       });
     }
 
-    const agent = await agentService.updateAgent({
-      id,
-      agent: req.body,
+    const oldAgent = await agentService.getAgentByCustomerId(id, ownerId);
+    if (!oldAgent) {
+      return res.status(404).json({ success: false, error: "Agent not found" });
+    }
+    const updatedAgent = await agentService.updateAgent({
+      id: oldAgent.id,
+      agent: { ...req.body },
       ownerId,
     });
-    res.json({ success: true, agent });
+    const { id: updatedFixaAgentId, customerAgentId, ...rest } = updatedAgent;
+    res.json({
+      success: true,
+      agent: { id: customerAgentId, ...rest },
+    });
   } catch (error) {
     console.error("Error updating agent", error);
     res.status(500).json({ success: false, error: (error as Error).message });
