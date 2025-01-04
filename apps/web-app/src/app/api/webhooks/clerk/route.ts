@@ -4,11 +4,11 @@ import { type WebhookEvent } from "@clerk/nextjs/server";
 import { env } from "~/env";
 import { addSubscriber } from "~/server/listmonk";
 import { NUM_FREE_OBSERVABILITY_CALLS, NUM_FREE_TESTS } from "@repo/types/src";
-import { UserService } from "@repo/services/src/user";
+import { OrgService } from "@repo/services/src/user";
 import { db } from "~/server/db";
 import { SlackService } from "@repo/services/src/ee/slack";
 
-const userService = new UserService(db);
+const userService = new OrgService(db);
 const slackService = new SlackService();
 
 export async function GET() {

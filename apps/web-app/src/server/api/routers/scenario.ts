@@ -19,7 +19,7 @@ export const scenarioRouter = createTRPCRouter({
       return await scenarioServiceInstance.createScenario({
         agentId: input.agentId,
         scenario: input.scenario,
-        userId: ctx.user.id,
+        ownerId: ctx.orgId,
       });
     }),
 
@@ -29,7 +29,7 @@ export const scenarioRouter = createTRPCRouter({
     .mutation(async ({ input, ctx }) => {
       return await scenarioServiceInstance.updateScenario({
         scenario: input,
-        userId: ctx.user.id,
+        ownerId: ctx.orgId,
       });
     }),
 
@@ -38,7 +38,7 @@ export const scenarioRouter = createTRPCRouter({
     .mutation(async ({ input, ctx }) => {
       await scenarioServiceInstance.deleteScenario({
         id: input.id,
-        userId: ctx.user.id,
+        ownerId: ctx.orgId,
       });
     }),
 });

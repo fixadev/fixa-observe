@@ -4,11 +4,11 @@ import { env } from "~/env";
 import axios from "axios";
 import { type PublicMetadata } from "@repo/types/src";
 import { currentUser } from "@clerk/nextjs/server";
-import { UserService } from "@repo/services/src/user";
+import { OrgService } from "@repo/services/src";
 import { db } from "~/server/db";
 import { SlackService } from "@repo/services/src/ee/slack";
 
-const userService = new UserService(db);
+const orgService = new OrgService(db);
 const slackService = new SlackService();
 
 export const slackRouter = createTRPCRouter({
@@ -50,10 +50,10 @@ export const slackRouter = createTRPCRouter({
         const accessToken = response.data.access_token;
         const webhookUrl = response.data.incoming_webhook.url;
 
-        await userService.updatePrivateMetadata(ctx.user.id, {
+        await orgService.updatePrivateMetadata(ctx.orgId, {
           slackAccessToken: accessToken,
         });
-        await userService.updatePublicMetadata(ctx.user.id, {
+        await orgService.updatePublicMetadata(ctx.orgId, {
           slackWebhookUrl: webhookUrl,
         });
 

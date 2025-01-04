@@ -12,18 +12,18 @@ export class ScenarioService {
   async createScenario({
     agentId,
     scenario,
-    userId,
+    ownerId,
   }: {
     agentId: string;
     scenario: ScenarioWithIncludes;
-    userId: string;
+    ownerId: string;
   }): Promise<ScenarioWithIncludes> {
     const createdScenario = await this.db.scenario.create({
       data: {
         ...scenario,
         id: uuidv4(),
         agentId,
-        ownerId: userId,
+        ownerId,
         createdAt: new Date(),
         evaluations: {
           createMany: {
@@ -52,62 +52,12 @@ export class ScenarioService {
     return parsed.data;
   }
 
-  async createScenarios({
-    agentId,
-    scenarios,
-  }: {
-    agentId: string;
-    scenarios: ScenarioWithIncludes[];
-  }): Promise<ScenarioWithIncludes[]> {
-    return await this.db.$transaction(async (tx) => {
-      const createdScenarios = await Promise.all(
-        scenarios.map((scenario) =>
-          tx.scenario.create({
-            data: {
-              ...scenario,
-              id: uuidv4(),
-              agentId,
-              createdAt: new Date(),
-              evaluations: {
-                createMany: {
-                  data: scenario.evaluations.map((evaluation) => ({
-                    ...evaluation,
-                    id: uuidv4(),
-                    params: evaluation.params as Prisma.InputJsonValue,
-                    scenarioId: undefined,
-                    evaluationTemplate: undefined,
-                  })),
-                },
-              },
-            },
-            include: {
-              evaluations: {
-                include: { evaluationTemplate: true },
-                orderBy: { createdAt: "asc" },
-              },
-            },
-          }),
-        ),
-      );
-
-      return createdScenarios.map((scenario) => {
-        const parsed = ScenarioWithIncludesSchema.safeParse(scenario);
-        if (!parsed.success) {
-          throw new Error(
-            `Could not parse scenario data: ${parsed.error.message}`,
-          );
-        }
-        return parsed.data;
-      });
-    });
-  }
-
   async updateScenario({
     scenario,
-    userId,
+    ownerId,
   }: {
     scenario: ScenarioWithIncludes;
-    userId: string;
+    ownerId: string;
   }): Promise<ScenarioWithIncludes> {
     const priorEvals = await this.db.evaluation.findMany({
       where: { scenarioId: scenario.id },
@@ -119,7 +69,7 @@ export class ScenarioService {
     );
 
     const updatedScenario = await this.db.scenario.update({
-      where: { id: scenario.id },
+      where: { id: scenario.id, ownerId },
       data: {
         ...scenario,
         evaluations: {
@@ -163,13 +113,13 @@ export class ScenarioService {
 
   async deleteScenario({
     id,
-    userId,
+    ownerId,
   }: {
     id: string;
-    userId: string;
+    ownerId: string;
   }): Promise<void> {
     await this.db.scenario.update({
-      where: { id, ownerId: userId },
+      where: { id, ownerId },
       data: { deleted: true },
     });
   }

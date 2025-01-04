@@ -1,17 +1,17 @@
 import { createTRPCRouter, protectedProcedure } from "../trpc";
-import { UserService } from "@repo/services/src/user";
+import { OrgService } from "@repo/services/src";
 import { db } from "~/server/db";
 
-const userService = new UserService(db);
+const orgService = new OrgService(db);
 
 export const userRouter = createTRPCRouter({
   generateApiKey: protectedProcedure.mutation(async ({ ctx }) => {
-    const data = await userService.createApiKey(ctx.user.id);
+    const data = await orgService.createApiKey(ctx.orgId);
     return { apiKey: data.apiKey };
   }),
 
   getApiKey: protectedProcedure.query(async ({ ctx }) => {
-    const data = await userService.getApiKey(ctx.user.id);
+    const data = await orgService.getApiKey(ctx.orgId);
     return { apiKey: data?.apiKey };
   }),
 });

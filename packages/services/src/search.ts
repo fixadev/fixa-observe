@@ -13,11 +13,11 @@ export class SearchService {
   async save({
     name,
     filter,
-    userId,
+    ownerId,
   }: {
     name: string;
     filter: Filter;
-    userId: string;
+    ownerId: string;
   }): Promise<SavedSearchWithIncludes> {
     const {
       evaluationGroups: evalSets,
@@ -30,7 +30,7 @@ export class SearchService {
     const searchData = {
       ...filterData,
       id: crypto.randomUUID(),
-      ownerId: userId,
+      ownerId,
       createdAt: new Date(),
       name,
       agentId: filter.agentId ?? [],
@@ -61,17 +61,17 @@ export class SearchService {
 
   async update({
     search,
-    userId,
+    ownerId,
   }: {
     search: SavedSearchWithIncludes;
-    userId: string;
+    ownerId: string;
   }): Promise<SavedSearchWithIncludes> {
     const { evaluationGroups: evalSets, alerts, ...searchData } = search;
     delete searchData.metadata?.test;
     const updatedSearch = await this.db.savedSearch.update({
       where: {
         id: search.id,
-        ownerId: userId,
+        ownerId,
       },
       data: {
         ...searchData,
@@ -97,26 +97,32 @@ export class SearchService {
     return parsed.data;
   }
 
-  async delete({ userId, id }: { userId: string; id: string }): Promise<void> {
+  async delete({
+    ownerId,
+    id,
+  }: {
+    ownerId: string;
+    id: string;
+  }): Promise<void> {
     await this.db.savedSearch.delete({
       where: {
         id,
-        ownerId: userId,
+        ownerId,
       },
     });
   }
 
   async getById({
     id,
-    userId,
+    ownerId,
   }: {
     id: string;
-    userId: string;
+    ownerId: string;
   }): Promise<SavedSearchWithIncludes | null> {
     const savedSearch = await this.db.savedSearch.findUnique({
       where: {
         id,
-        ownerId: userId,
+        ownerId,
       },
       include: {
         alerts: true,
@@ -134,14 +140,14 @@ export class SearchService {
   }
 
   async getAll({
-    userId,
+    ownerId,
     includeDefault = true,
   }: {
-    userId: string;
+    ownerId: string;
     includeDefault?: boolean;
   }): Promise<SavedSearchWithIncludes[]> {
     const where: Prisma.SavedSearchWhereInput = {
-      ownerId: userId,
+      ownerId,
     };
     if (!includeDefault) {
       where.isDefault = false;
@@ -177,12 +183,12 @@ export class SearchService {
   }
 
   async getDefault({
-    userId,
+    ownerId,
   }: {
-    userId: string;
+    ownerId: string;
   }): Promise<SavedSearchWithIncludes | null> {
     const savedSearch = await this.db.savedSearch.findFirst({
-      where: { ownerId: userId, isDefault: true },
+      where: { ownerId, isDefault: true },
       include: {
         alerts: true,
         evaluationGroups: {
@@ -200,16 +206,16 @@ export class SearchService {
 
   async createAlert({
     alert,
-    userId,
+    ownerId,
   }: {
     alert: AlertWithDetails;
-    userId: string;
+    ownerId: string;
   }): Promise<AlertWithDetails> {
     const alertWithDetails = await this.db.alert.create({
       data: {
         ...alert,
         id: crypto.randomUUID(),
-        ownerId: userId,
+        ownerId,
         details: alert.details ?? {},
       },
     });
@@ -218,15 +224,15 @@ export class SearchService {
 
   async updateAlert({
     alert,
-    userId,
+    ownerId,
   }: {
     alert: AlertWithDetails;
-    userId: string;
+    ownerId: string;
   }): Promise<AlertWithDetails> {
     const alertWithDetails = await this.db.alert.update({
       where: {
         id: alert.id,
-        ownerId: userId,
+        ownerId,
       },
       data: {
         ...alert,
@@ -238,15 +244,15 @@ export class SearchService {
 
   async deleteAlert({
     id,
-    userId,
+    ownerId,
   }: {
     id: string;
-    userId: string;
+    ownerId: string;
   }): Promise<void> {
     await this.db.alert.delete({
       where: {
         id,
-        ownerId: userId,
+        ownerId,
       },
     });
   }

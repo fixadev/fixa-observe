@@ -1,6 +1,6 @@
 import { PrismaClient } from "@repo/db/src/index";
 import Stripe from "stripe";
-import { UserService } from "../user";
+import { OrgService } from "../org";
 import { backOff } from "exponential-backoff";
 
 export class StripeService {
@@ -12,7 +12,7 @@ export class StripeService {
     OBSERVABILITY_MINUTES_EVENT_NAME: string;
   };
   private stripe: Stripe;
-  private userService: UserService;
+  private orgService: OrgService;
 
   constructor(private db: PrismaClient) {
     this.checkEnv();
@@ -27,7 +27,7 @@ export class StripeService {
         process.env.OBSERVABILITY_MINUTES_EVENT_NAME!,
     };
     this.stripe = new Stripe(this.env.STRIPE_SECRET_KEY);
-    this.userService = new UserService(db);
+    this.orgService = new OrgService(db);
   }
 
   private checkEnv = () => {
@@ -48,8 +48,8 @@ export class StripeService {
     }
   };
 
-  private getCustomerId = async (userId: string) => {
-    const metadata = await this.userService.getPublicMetadata(userId);
+  private getCustomerId = async (orgId: string) => {
+    const metadata = await this.orgService.getPublicMetadata(orgId);
     const stripeCustomerId = metadata.stripeCustomerId;
     if (!stripeCustomerId) {
       throw new Error("Stripe customer ID not found");
@@ -58,11 +58,11 @@ export class StripeService {
   };
 
   createCheckoutUrl = async ({
-    userId,
+    orgId,
     origin,
     redirectUrl,
   }: {
-    userId: string;
+    orgId: string;
     origin: string;
     redirectUrl?: string;
   }) => {
@@ -82,7 +82,7 @@ export class StripeService {
       cancel_url: `${origin}/stripe-redirect?canceled=true${redirectQueryParam}`,
       automatic_tax: { enabled: true },
       metadata: {
-        userId,
+        orgId,
       },
     });
     if (!session.url) {
@@ -92,19 +92,19 @@ export class StripeService {
   };
 
   accrueTestMinutes = async ({
-    userId,
+    orgId,
     minutes,
   }: {
-    userId: string;
+    orgId: string;
     minutes: number;
   }) => {
-    const metadata = await this.userService.getPublicMetadata(userId);
+    const metadata = await this.orgService.getPublicMetadata(orgId);
     if (metadata.freeTestsLeft && metadata.freeTestsLeft > 0) {
       // Don't accrue minutes if there are still free tests left
       // TODO: fix this. doesn't catch the case where user goes from 1 => 0 free tests left
       return;
     }
-    const stripeCustomerId = await this.getCustomerId(userId);
+    const stripeCustomerId = await this.getCustomerId(orgId);
 
     await backOff(() =>
       this.stripe.billing.meterEvents.create({
@@ -118,13 +118,13 @@ export class StripeService {
   };
 
   accrueObservabilityMinutes = async ({
-    userId,
+    orgId,
     minutes,
   }: {
-    userId: string;
+    orgId: string;
     minutes: number;
   }) => {
-    const stripeCustomerId = await this.getCustomerId(userId);
+    const stripeCustomerId = await this.getCustomerId(orgId);
 
     await backOff(() =>
       this.stripe.billing.meterEvents.create({
@@ -137,13 +137,13 @@ export class StripeService {
     );
   };
 
-  getCustomer = async (userId: string) => {
-    const stripeCustomerId = await this.getCustomerId(userId);
+  getCustomer = async (orgId: string) => {
+    const stripeCustomerId = await this.getCustomerId(orgId);
     return this.stripe.customers.retrieve(stripeCustomerId);
   };
 
-  getSubscriptions = async (userId: string) => {
-    const stripeCustomerId = await this.getCustomerId(userId);
+  getSubscriptions = async (orgId: string) => {
+    const stripeCustomerId = await this.getCustomerId(orgId);
     const subscriptions = await this.stripe.subscriptions.list({
       customer: stripeCustomerId,
     });
@@ -151,17 +151,17 @@ export class StripeService {
   };
 
   getMeterSummary = async ({
-    userId,
+    orgId,
     meterId,
     start,
     end,
   }: {
-    userId: string;
+    orgId: string;
     meterId: string;
     start: Date;
     end: Date;
   }) => {
-    const stripeCustomerId = await this.getCustomerId(userId);
+    const stripeCustomerId = await this.getCustomerId(orgId);
     // Align to start of day (UTC)
     const startTime = Math.floor(start.setUTCHours(0, 0, 0, 0) / 1000);
     // Align to end of day (UTC)

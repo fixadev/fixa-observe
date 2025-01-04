@@ -1,4 +1,9 @@
-import { createClerkClient, type ClerkClient, type User } from "@clerk/backend";
+import {
+  createClerkClient,
+  Organization,
+  type ClerkClient,
+  type User,
+} from "@clerk/backend";
 import { PrismaClient } from "@repo/db/src/index";
 import { generateApiKey } from "./utils";
 import {
@@ -7,7 +12,7 @@ import {
   type MetadataType,
 } from "@repo/types/src";
 
-export class UserService {
+export class OrgService {
   private clerkClient: ClerkClient;
 
   constructor(private db: PrismaClient) {
@@ -19,54 +24,43 @@ export class UserService {
     });
   }
 
-  async getUser(userId: string) {
-    return await this.clerkClient.users.getUser(userId);
-  }
-
-  async getUsers({
-    limit = 10,
-    offset = 0,
-  }: {
-    limit?: number;
-    offset?: number;
-  }) {
-    return await this.clerkClient.users.getUserList({
-      limit,
-      offset,
+  async getOrg(orgId: string) {
+    return await this.clerkClient.organizations.getOrganization({
+      organizationId: orgId,
     });
   }
 
-  async createApiKey(userId: string) {
+  async createApiKey(orgId: string) {
     const apiKey = generateApiKey();
     return await this.db.apiKey.upsert({
-      where: { userId },
-      create: { apiKey, userId },
+      where: { orgId },
+      create: { apiKey, orgId },
       update: { apiKey },
     });
   }
 
-  async getApiKey(userId: string) {
+  async getApiKey(orgId: string) {
     return await this.db.apiKey.findFirst({
-      where: { userId },
+      where: { orgId },
     });
   }
 
-  async decrementFreeTestsLeft(userId: string) {
-    const metadata = await this.getPublicMetadata(userId);
+  async decrementFreeTestsLeft(orgId: string) {
+    const metadata = await this.getPublicMetadata(orgId);
     if (metadata.freeTestsLeft === undefined) {
       return;
     }
-    await this.updatePublicMetadata(userId, {
+    await this.updatePublicMetadata(orgId, {
       freeTestsLeft: metadata.freeTestsLeft - 1,
     });
   }
 
-  async decrementFreeObservabilityCallsLeft(userId: string) {
-    const metadata = await this.getPublicMetadata(userId);
+  async decrementFreeObservabilityCallsLeft(orgId: string) {
+    const metadata = await this.getPublicMetadata(orgId);
     if (metadata.freeObservabilityCallsLeft === undefined) {
       return;
     }
-    await this.updatePublicMetadata(userId, {
+    await this.updatePublicMetadata(orgId, {
       freeObservabilityCallsLeft: metadata.freeObservabilityCallsLeft - 1,
     });
   }
@@ -75,23 +69,26 @@ export class UserService {
    * Generic function to update user metadata
    */
   private async updateMetadata(
-    userId: string,
+    orgId: string,
     metadata: PrivateMetadata | PublicMetadata,
     type: MetadataType,
-  ): Promise<User> {
+  ): Promise<Organization> {
     try {
-      const user = await this.clerkClient.users.getUser(userId);
+      const org = await this.getOrg(orgId);
       const existingMetadata =
-        type === "private" ? user.privateMetadata : user.publicMetadata;
+        type === "private" ? org.privateMetadata : org.publicMetadata;
 
       const updatedMetadata = {
         ...existingMetadata,
         ...metadata,
       };
 
-      return await this.clerkClient.users.updateUser(userId, {
-        [`${type}Metadata`]: updatedMetadata,
-      });
+      return await this.clerkClient.organizations.updateOrganizationMetadata(
+        orgId,
+        {
+          [`${type}Metadata`]: updatedMetadata,
+        },
+      );
     } catch (error) {
       console.error(`Error updating user ${type} metadata:`, error);
       throw new Error(`Failed to update user ${type} metadata`);
@@ -102,12 +99,14 @@ export class UserService {
    * Generic function to get user metadata
    */
   private async getMetadata(
-    userId: string,
+    orgId: string,
     type: MetadataType,
   ): Promise<PrivateMetadata | PublicMetadata> {
     try {
-      const user = await this.clerkClient.users.getUser(userId);
-      return type === "private" ? user.privateMetadata : user.publicMetadata;
+      const org = await this.getOrg(orgId);
+      const metadata =
+        type === "private" ? org.privateMetadata : org.publicMetadata;
+      return metadata ?? {};
     } catch (error) {
       console.error(`Error getting user ${type} metadata:`, error);
       throw new Error(`Failed to get user ${type} metadata`);
@@ -118,21 +117,24 @@ export class UserService {
    * Generic function to remove a key from user metadata
    */
   private async removeMetadataKey(
-    userId: string,
+    orgId: string,
     key: string,
     type: MetadataType,
-  ): Promise<User> {
+  ): Promise<Organization> {
     try {
-      const user = await this.clerkClient.users.getUser(userId);
+      const org = await this.getOrg(orgId);
       const existingMetadata = {
-        ...(type === "private" ? user.privateMetadata : user.publicMetadata),
+        ...(type === "private" ? org.privateMetadata : org.publicMetadata),
       };
 
       delete existingMetadata[key];
 
-      return await this.clerkClient.users.updateUser(userId, {
-        [`${type}Metadata`]: existingMetadata,
-      });
+      return await this.clerkClient.organizations.updateOrganizationMetadata(
+        orgId,
+        {
+          [`${type}Metadata`]: existingMetadata,
+        },
+      );
     } catch (error) {
       console.error(`Error removing user ${type} metadata key:`, error);
       throw new Error(`Failed to remove user ${type} metadata key`);
@@ -144,47 +146,53 @@ export class UserService {
    * Updates private metadata for a Clerk user
    */
   async updatePrivateMetadata(
-    userId: string,
+    orgId: string,
     metadata: PrivateMetadata,
-  ): Promise<User> {
-    return this.updateMetadata(userId, metadata, "private");
+  ): Promise<Organization> {
+    return this.updateMetadata(orgId, metadata, "private");
   }
 
   /**
    * Gets private metadata for a Clerk user
    */
-  async getPrivateMetadata(userId: string): Promise<PrivateMetadata> {
-    return this.getMetadata(userId, "private") as Promise<PrivateMetadata>;
+  async getPrivateMetadata(orgId: string): Promise<PrivateMetadata> {
+    return this.getMetadata(orgId, "private") as Promise<PrivateMetadata>;
   }
 
   /**
    * Removes a key from user's private metadata
    */
-  async removePrivateMetadataKey(userId: string, key: string): Promise<User> {
-    return this.removeMetadataKey(userId, key, "private");
+  async removePrivateMetadataKey(
+    orgId: string,
+    key: string,
+  ): Promise<Organization> {
+    return this.removeMetadataKey(orgId, key, "private");
   }
 
   /**
    * Updates public metadata for a Clerk user
    */
   async updatePublicMetadata(
-    userId: string,
+    orgId: string,
     metadata: PublicMetadata,
-  ): Promise<User> {
-    return this.updateMetadata(userId, metadata, "public");
+  ): Promise<Organization> {
+    return this.updateMetadata(orgId, metadata, "public");
   }
 
   /**
    * Gets public metadata for a Clerk user
    */
-  async getPublicMetadata(userId: string): Promise<PublicMetadata> {
-    return this.getMetadata(userId, "public") as Promise<PublicMetadata>;
+  async getPublicMetadata(orgId: string): Promise<PublicMetadata> {
+    return this.getMetadata(orgId, "public") as Promise<PublicMetadata>;
   }
 
   /**
    * Removes a key from user's public metadata
    */
-  async removePublicMetadataKey(userId: string, key: string): Promise<User> {
-    return this.removeMetadataKey(userId, key, "public");
+  async removePublicMetadataKey(
+    orgId: string,
+    key: string,
+  ): Promise<Organization> {
+    return this.removeMetadataKey(orgId, key, "public");
   }
 }

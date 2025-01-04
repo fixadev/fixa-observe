@@ -1,11 +1,11 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { env } from "~/env";
 import Stripe from "stripe";
-import { UserService } from "@repo/services/src/user";
+import { OrgService } from "@repo/services/src";
 import { db } from "~/server/db";
 import { SlackService } from "@repo/services/src/ee/slack";
 
-const userService = new UserService(db);
+const orgService = new OrgService(db);
 const slackService = new SlackService();
 const stripe = new Stripe(env.STRIPE_SECRET_KEY);
 const endpointSecret = env.STRIPE_WEBHOOK_SECRET;
@@ -36,32 +36,31 @@ export async function POST(req: NextRequest) {
   switch (event.type) {
     case "checkout.session.completed":
       const session = event.data.object;
-      const userId = session.metadata?.userId;
-      if (!userId) {
+      const orgId = session.metadata?.orgId;
+      if (!orgId) {
         throw new Error("No user ID found in metadata");
       }
 
       if (session.payment_status === "paid") {
-        console.log(`✅ Payment completed for user ${userId}`);
+        console.log(`✅ Payment completed for org ${orgId}`);
 
         const customerId = session.customer as string | undefined;
         if (customerId) {
-          await userService.updatePublicMetadata(userId, {
+          await orgService.updatePublicMetadata(orgId, {
             stripeCustomerId: customerId,
           });
         }
 
         try {
-          const user = await userService.getUser(userId);
-          const email = user.primaryEmailAddress?.emailAddress;
+          const org = await orgService.getOrg(orgId);
           await slackService.sendAnalyticsMessage({
-            message: `💰 ${user.firstName} ${user.lastName} (${email}) upgraded to pro`,
+            message: `💰 ${org.name} (${org.id}) upgraded to pro`,
           });
         } catch (e) {
           console.error("Error sending analytics message", e);
         }
       } else {
-        console.log(`⚠️  Payment failed for user ${userId}`);
+        console.log(`⚠️  Payment failed for org ${orgId}`);
       }
       break;
     default:

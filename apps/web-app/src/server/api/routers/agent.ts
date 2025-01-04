@@ -14,7 +14,7 @@ export const agentRouter = createTRPCRouter({
         input.phoneNumber,
         input.name,
         input.systemPrompt,
-        ctx.user.id,
+        ctx.orgId,
       );
     }),
 
@@ -24,18 +24,18 @@ export const agentRouter = createTRPCRouter({
       return await agentServiceInstance.updateAgentName(
         input.id,
         input.name,
-        ctx.user.id,
+        ctx.orgId,
       );
     }),
 
   get: protectedProcedure
     .input(z.object({ id: z.string() }))
     .query(async ({ input, ctx }) => {
-      return await agentServiceInstance.getAgent(input.id, ctx.user.id);
+      return await agentServiceInstance.getAgent(input.id, ctx.orgId);
     }),
 
   getTestAgents: protectedProcedure.query(async ({ ctx }) => {
-    return await agentServiceInstance.getTestAgents(ctx.user.id);
+    return await agentServiceInstance.getTestAgents(ctx.orgId);
   }),
 
   toggleTestAgentEnabled: protectedProcedure
@@ -51,7 +51,7 @@ export const agentRouter = createTRPCRouter({
         input.agentId,
         input.testAgentId,
         input.enabled,
-        ctx.user.id,
+        ctx.orgId,
       );
     }),
 
@@ -67,17 +67,17 @@ export const agentRouter = createTRPCRouter({
     .mutation(async ({ input, ctx }) => {
       return await agentServiceInstance.updateAgent({
         ...input,
-        ownerId: ctx.user.id,
+        ownerId: ctx.orgId,
       });
     }),
 
   getAll: protectedProcedure.query(async ({ ctx }) => {
-    return await agentServiceInstance.getAllAgents(ctx.user.id);
+    return await agentServiceInstance.getAllAgents(ctx.orgId);
   }),
 
   delete: protectedProcedure
     .input(z.object({ id: z.string() }))
     .mutation(async ({ input, ctx }) => {
-      return await agentServiceInstance.deleteAgent(input.id, ctx.user.id);
+      return await agentServiceInstance.deleteAgent(input.id, ctx.orgId);
     }),
 });
