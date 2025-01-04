@@ -170,13 +170,19 @@ export const transcribeAndSaveCall = async ({
       },
     });
 
-    await sendAlerts({
-      userId,
-      latencyDurations,
-      savedSearches,
-      evalSetResults,
-      call: newCall,
-    });
+    console.log(
+      "===================saved call===================",
+      newCall.id,
+      newCall.customerCallId,
+    );
+
+    // await sendAlerts({
+    //   userId,
+    //   latencyDurations,
+    //   savedSearches,
+    //   evalSetResults,
+    //   call: newCall,
+    // });
 
     return newCall;
   } catch (error) {
