@@ -15,10 +15,10 @@ publicRouter.use(authenticateRequest);
 
 publicRouter.use("/upload-call", uploadCallRouter);
 publicRouter.use("/tests", testsRouter);
-publicRouter.use("/persona", personaRouter);
-publicRouter.use("/agent", agentRouter);
-publicRouter.use("/scenario", scenarioRouter);
-publicRouter.use("/alert", alertRouter);
-publicRouter.use("/evaluation", evaluationRouter);
-publicRouter.use("/tool-call", toolCallRouter);
+publicRouter.use("/personas", personaRouter);
+publicRouter.use("/agents", agentRouter);
+publicRouter.use("/scenarios", scenarioRouter);
+publicRouter.use("/alerts", alertRouter);
+publicRouter.use("/evaluations", evaluationRouter);
+publicRouter.use("/tool-calls", toolCallRouter);
 export default publicRouter;

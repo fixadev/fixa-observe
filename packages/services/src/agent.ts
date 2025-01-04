@@ -18,7 +18,7 @@ export class AgentService {
   }: {
     phoneNumber: string;
     name?: string;
-    customerAgentId: string;
+    customerAgentId?: string;
     systemPrompt: string;
     ownerId: string;
   }): Promise<Agent> {
@@ -38,11 +38,13 @@ export class AgentService {
       },
     });
 
+    const fixaAgentId = uuidv4();
+
     return await this.db.agent.create({
       data: {
-        id: uuidv4(),
+        id: fixaAgentId,
         phoneNumber,
-        name: name || customerAgentId,
+        name: name ?? customerAgentId ?? fixaAgentId,
         customerAgentId,
         systemPrompt,
         enabledTestAgents: {

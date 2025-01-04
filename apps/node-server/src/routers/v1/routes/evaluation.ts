@@ -5,18 +5,6 @@ import { EvaluationService } from "@repo/services/src/evaluation";
 const evaluationRouter = express.Router();
 const evaluationService = new EvaluationService(db);
 
-// Get general evaluations
-evaluationRouter.get("/general", async (req, res) => {
-  try {
-    const evals = await evaluationService.getGeneralEvals({
-      ownerId: res.locals.orgId,
-    });
-    res.json(evals);
-  } catch (error) {
-    res.status(500).json({ error: "Failed to get general evaluations" });
-  }
-});
-
 // Get evaluation templates
 evaluationRouter.get("/templates", async (req, res) => {
   try {
