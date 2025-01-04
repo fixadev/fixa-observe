@@ -55,7 +55,7 @@ export const UploadCallParams = z.object({
   stereoRecordingUrl: z.string(),
   agentId: z.string(),
   createdAt: z.string().optional(),
-  userId: z.string(),
+  ownerId: z.string(),
   metadata: z.record(z.string(), z.string()).optional(),
   saveRecording: z.boolean().optional(),
   language: z.string().optional(),

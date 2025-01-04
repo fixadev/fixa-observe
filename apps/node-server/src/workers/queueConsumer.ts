@@ -45,13 +45,13 @@ export async function startQueueConsumer() {
             userId,
           });
 
-          const newCall = await transcribeAndSaveCall({
+          await transcribeAndSaveCall({
             callId,
             stereoRecordingUrl,
             createdAt: createdAt,
             agentId: agent.id,
             metadata,
-            userId,
+            ownerId: userId,
             saveRecording,
             language,
           });

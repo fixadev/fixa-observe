@@ -28,13 +28,12 @@ uploadCallRouter.post(
 
       // Determine whether to decrement free calls left
       try {
-        const user = await clerkServiceClient.getUser(res.locals.orgId);
         const metadata = await clerkServiceClient.getPublicMetadata({
           orgId: res.locals.orgId,
         });
         const bypassPayment = await posthogClient.getFeatureFlag(
           "bypass-payment",
-          user.id,
+          res.locals.orgId,
         );
         if (metadata.stripeCustomerId || bypassPayment) {
           // User is paid user!
