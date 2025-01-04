@@ -38,39 +38,39 @@ async function processMessage(
 
   let newStereoRecordingUrl = stereoRecordingUrl;
 
-  // if (userId === "user_2pPJOFVVjZPXE8ho8CI68u5lSCf") {
-  //   try {
-  //     const result = await axios.post(
-  //       "https://mike.11x.ai/api/v1/retrieval/recording",
-  //       {
-  //         agentId: agentId,
-  //         callId,
-  //       },
-  //       {
-  //         headers: {
-  //           Authorization: `Bearer 40844265-bea1-4e08-98fb-8dbff46b9e03_2c02f0e1-1165-4092-ae49-9434f0e2e24e`,
-  //         },
-  //       },
-  //     );
-  //     console.log("AXIOS CALL RESULT", result.data);
-  //     console.log(result.data.url);
-  //     console.log("setting new stereo recording url to ", result.data.url);
-  //     newStereoRecordingUrl = result.data.url;
-  //   } catch (error) {
-  //     console.error("Error getting recording from 11x", error);
-  //     await sqs.sendMessage({
-  //       QueueUrl:
-  //         "https://sqs.us-east-1.amazonaws.com/195275634305/fixa-observe-11x-backlog",
-  //       MessageBody: message.Body,
-  //     });
-  //     await sqs.deleteMessage({
-  //       QueueUrl: queueUrl,
-  //       ReceiptHandle: message.ReceiptHandle!,
-  //     });
-  //     console.log("sent message to 11x backlog");
-  //     return;
-  //   }
-  // }
+  if (userId === "user_2pPJOFVVjZPXE8ho8CI68u5lSCf") {
+    try {
+      const result = await axios.post(
+        "https://mike.11x.ai/api/v1/retrieval/recording",
+        {
+          agentId: agentId,
+          callId,
+        },
+        {
+          headers: {
+            Authorization: `Bearer 40844265-bea1-4e08-98fb-8dbff46b9e03_2c02f0e1-1165-4092-ae49-9434f0e2e24e`,
+          },
+        },
+      );
+      console.log("AXIOS CALL RESULT", result.data);
+      console.log(result.data.url);
+      console.log("setting new stereo recording url to ", result.data.url);
+      newStereoRecordingUrl = result.data.url;
+    } catch (error) {
+      console.error("Error getting recording from 11x", error);
+      await sqs.sendMessage({
+        QueueUrl:
+          "https://sqs.us-east-1.amazonaws.com/195275634305/fixa-observe-11x-backlog",
+        MessageBody: message.Body,
+      });
+      await sqs.deleteMessage({
+        QueueUrl: queueUrl,
+        ReceiptHandle: message.ReceiptHandle!,
+      });
+      console.log("sent message to 11x backlog");
+      return;
+    }
+  }
 
   const newCall = await transcribeAndSaveCall({
     callId,
@@ -90,8 +90,7 @@ async function processMessage(
 
 export async function startQueueConsumer() {
   const semaphore = new Semaphore(5);
-  const queueUrl =
-    "https://sqs.us-east-1.amazonaws.com/195275634305/fixa-observe-dlq-prod";
+  const queueUrl = env.SQS_QUEUE_URL;
   const activeProcesses: Promise<void>[] = [];
 
   while (true) {
