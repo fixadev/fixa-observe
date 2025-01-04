@@ -32,7 +32,7 @@ import {
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { removeTrailingSlash } from "~/lib/utils";
 import { api } from "~/trpc/react";
 import { Button } from "../ui/button";
@@ -60,7 +60,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
-import { OrganizationSwitcher, UserButton } from "@clerk/nextjs";
+import {
+  OrganizationSwitcher,
+  useOrganization,
+  UserButton,
+} from "@clerk/nextjs";
 import { SlackIcon } from "lucide-react";
 import { DocumentTextIcon, KeyIcon } from "@heroicons/react/24/outline";
 import { OpenInNewWindowIcon } from "@radix-ui/react-icons";
@@ -91,6 +95,23 @@ export default function ObserveSidebar() {
     useState<SavedSearchWithIncludes | null>(null);
 
   const testsPageEnabled = useFeatureFlagEnabled("observability-tests-page");
+
+  // Invalidate everything when organization changes
+  const utils = api.useUtils();
+  const { organization, isLoaded: organizationLoaded } = useOrganization();
+  const prevOrganizationId = useRef<string | undefined>(undefined);
+  useEffect(() => {
+    if (organizationLoaded && organization) {
+      if (
+        prevOrganizationId.current &&
+        prevOrganizationId.current !== organization.id
+      ) {
+        void utils.invalidate();
+      }
+      prevOrganizationId.current = organization.id;
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [organization, utils]);
 
   return (
     <>

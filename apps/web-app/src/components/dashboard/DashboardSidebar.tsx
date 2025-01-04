@@ -97,7 +97,6 @@ export default function DashboardSidebar({
     [pathname, agentBaseUrl],
   );
 
-  const utils = api.useUtils();
   const { data: agents } = api.agent.getAll.useQuery();
   const { data: _agent, isFetching: _agentFetching } = api.agent.get.useQuery(
     { id: params.agentId },
@@ -121,23 +120,6 @@ export default function DashboardSidebar({
     }
   }, [agents, params.agentId, router]);
 
-  // Invalidate agent list when organization changes
-  const { organization, isLoaded: organizationLoaded } = useOrganization();
-  const prevOrganizationId = useRef<string | undefined>(undefined);
-  useEffect(() => {
-    if (organizationLoaded && organization) {
-      if (
-        prevOrganizationId.current &&
-        prevOrganizationId.current !== organization.id
-      ) {
-        void utils.agent.getAll.invalidate();
-        console.log("invalidating agent list");
-      }
-      prevOrganizationId.current = organization.id;
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [organization, utils]);
-
   // If agent is not found, redirect to new agent page
   useEffect(() => {
     if (
@@ -148,6 +130,23 @@ export default function DashboardSidebar({
       router.replace("/dashboard/new");
     }
   }, [agents, params.agentId, router]);
+
+  // Invalidate everything when organization changes
+  const utils = api.useUtils();
+  const { organization, isLoaded: organizationLoaded } = useOrganization();
+  const prevOrganizationId = useRef<string | undefined>(undefined);
+  useEffect(() => {
+    if (organizationLoaded && organization) {
+      if (
+        prevOrganizationId.current &&
+        prevOrganizationId.current !== organization.id
+      ) {
+        void utils.invalidate();
+      }
+      prevOrganizationId.current = organization.id;
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [organization, utils]);
 
   return (
     <Sidebar>
@@ -195,7 +194,11 @@ export default function DashboardSidebar({
                 <SelectTrigger className="bg-background">
                   <SelectValue placeholder="Select an agent" asChild>
                     <div className="w-[140px] cursor-pointer truncate text-left">
-                      {!agent ? (
+                      {agents?.length === 0 ? (
+                        <span className="text-muted-foreground/50">
+                          no agents yet!
+                        </span>
+                      ) : !agent ? (
                         <Skeleton className="h-4 w-full" />
                       ) : (
                         agent?.name
