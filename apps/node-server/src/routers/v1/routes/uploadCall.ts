@@ -29,28 +29,28 @@ uploadCallRouter.post(
       // Determine whether to decrement free calls left
       try {
         const user = await clerkServiceClient.getUser(res.locals.orgId);
-        if (user?.publicMetadata) {
-          const metadata = user.publicMetadata as PublicMetadata;
-          const bypassPayment = await posthogClient.getFeatureFlag(
-            "bypass-payment",
-            user.id,
-          );
-          if (metadata.stripeCustomerId || bypassPayment) {
-            // User is paid user!
+        const metadata = await clerkServiceClient.getPublicMetadata({
+          orgId: res.locals.orgId,
+        });
+        const bypassPayment = await posthogClient.getFeatureFlag(
+          "bypass-payment",
+          user.id,
+        );
+        if (metadata.stripeCustomerId || bypassPayment) {
+          // User is paid user!
+        } else {
+          // User is free user! Decrement free calls left
+          if (
+            metadata.freeObservabilityCallsLeft &&
+            metadata.freeObservabilityCallsLeft > 0
+          ) {
+            await clerkServiceClient.decrementFreeObservabilityCallsLeft(
+              res.locals.orgId,
+            );
           } else {
-            // User is free user! Decrement free calls left
-            if (
-              metadata.freeObservabilityCallsLeft &&
-              metadata.freeObservabilityCallsLeft > 0
-            ) {
-              await clerkServiceClient.decrementFreeObservabilityCallsLeft(
-                res.locals.orgId,
-              );
-            } else {
-              return res
-                .status(403)
-                .json({ success: false, error: "no free calls left" });
-            }
+            return res
+              .status(403)
+              .json({ success: false, error: "no free calls left" });
           }
         }
       } catch (error) {}

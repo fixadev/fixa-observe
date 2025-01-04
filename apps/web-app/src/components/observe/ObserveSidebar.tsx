@@ -60,7 +60,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
-import { UserButton } from "@clerk/nextjs";
+import { OrganizationSwitcher, UserButton } from "@clerk/nextjs";
 import { SlackIcon } from "lucide-react";
 import { DocumentTextIcon, KeyIcon } from "@heroicons/react/24/outline";
 import { OpenInNewWindowIcon } from "@radix-ui/react-icons";
@@ -275,6 +275,11 @@ export default function ObserveSidebar() {
                   <SidebarMenuBadge>
                     <OpenInNewWindowIcon />
                   </SidebarMenuBadge>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild>
+                    <OrganizationSwitcher hidePersonal hideSlug />
+                  </SidebarMenuButton>
                 </SidebarMenuItem>
               </SidebarMenu>
             </SidebarGroupContent>
