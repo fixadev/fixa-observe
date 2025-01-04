@@ -24,7 +24,7 @@ export const searchRouter = createTRPCRouter({
       );
 
       return await searchServiceInstance.save({
-        userId: ctx.user.id,
+        ownerId: ctx.orgId,
         filter: cleanFilter as Filter,
         name: input.name,
       });
@@ -35,7 +35,7 @@ export const searchRouter = createTRPCRouter({
     .mutation(async ({ input, ctx }) => {
       return await searchServiceInstance.update({
         search: input,
-        userId: ctx.user.id,
+        ownerId: ctx.orgId,
       });
     }),
 
@@ -44,7 +44,7 @@ export const searchRouter = createTRPCRouter({
     .mutation(async ({ input, ctx }) => {
       await searchServiceInstance.delete({
         id: input.id,
-        userId: ctx.user.id,
+        ownerId: ctx.orgId,
       });
     }),
 
@@ -52,7 +52,7 @@ export const searchRouter = createTRPCRouter({
     .input(z.object({ includeDefault: z.boolean().optional() }).optional())
     .query(async ({ ctx, input }) => {
       return await searchServiceInstance.getAll({
-        userId: ctx.user.id,
+        ownerId: ctx.orgId,
         includeDefault: input?.includeDefault ?? true,
       });
     }),
@@ -62,13 +62,13 @@ export const searchRouter = createTRPCRouter({
     .query(async ({ input, ctx }) => {
       return await searchServiceInstance.getById({
         id: input.id,
-        userId: ctx.user.id,
+        ownerId: ctx.orgId,
       });
     }),
 
   getDefault: protectedProcedure.query(async ({ ctx }) => {
     return await searchServiceInstance.getDefault({
-      userId: ctx.user.id,
+      ownerId: ctx.orgId,
     });
   }),
 
@@ -77,7 +77,7 @@ export const searchRouter = createTRPCRouter({
     .mutation(async ({ input, ctx }) => {
       return await searchServiceInstance.createAlert({
         alert: input,
-        userId: ctx.user.id,
+        ownerId: ctx.orgId,
       });
     }),
 
@@ -86,7 +86,7 @@ export const searchRouter = createTRPCRouter({
     .mutation(async ({ input, ctx }) => {
       return await searchServiceInstance.updateAlert({
         alert: input,
-        userId: ctx.user.id,
+        ownerId: ctx.orgId,
       });
     }),
 
@@ -95,7 +95,7 @@ export const searchRouter = createTRPCRouter({
     .mutation(async ({ input, ctx }) => {
       return await searchServiceInstance.deleteAlert({
         id: input.id,
-        userId: ctx.user.id,
+        ownerId: ctx.orgId,
       });
     }),
 });

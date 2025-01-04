@@ -8,7 +8,7 @@ import {
 } from "@repo/types/src/index";
 import { randomUUID } from "crypto";
 import { AgentService } from "./agent";
-import { UserService } from "./user";
+import { ClerkService } from "./clerk";
 import { StripeService } from "./ee/stripe";
 import axios from "axios";
 import { type PostHog } from "posthog-node";
@@ -26,7 +26,7 @@ export class TestService {
     };
     this.checkEnv();
     this.agentServiceInstance = new AgentService(this.db);
-    this.userServiceInstance = new UserService(this.db);
+    this.orgServiceInstance = new ClerkService(this.db);
     this.stripeServiceInstance = new StripeService(this.db);
     this.vapiServiceInstance = new VapiService(this.db);
   }
@@ -37,16 +37,16 @@ export class TestService {
     }
   };
   agentServiceInstance: AgentService;
-  userServiceInstance: UserService;
+  orgServiceInstance: ClerkService;
   stripeServiceInstance: StripeService;
   vapiServiceInstance: VapiService;
 
-  async get(id: string, userId: string): Promise<TestWithIncludes | null> {
+  async get(id: string, ownerId: string): Promise<TestWithIncludes | null> {
     const test = await this.db.test.findUnique({
       where: {
         id,
         agent: {
-          ownerId: userId,
+          ownerId,
         },
       },
       include: {
@@ -91,12 +91,12 @@ export class TestService {
     return parsed.data;
   }
 
-  async getAll(agentId: string, userId: string) {
+  async getAll(agentId: string, ownerId: string) {
     return await this.db.test.findMany({
       where: {
         agentId,
         agent: {
-          ownerId: userId,
+          ownerId,
         },
       },
       include: {
@@ -108,9 +108,9 @@ export class TestService {
     });
   }
 
-  async getStatus(testId: string, userId: string) {
+  async getStatus(testId: string, ownerId: string) {
     const test = await this.db.test.findUnique({
-      where: { id: testId, agent: { ownerId: userId } },
+      where: { id: testId, agent: { ownerId } },
       select: {
         calls: {
           select: {
@@ -136,37 +136,39 @@ export class TestService {
   }
 
   async run({
-    userId,
+    ownerId,
     agentId,
     scenarioIds,
     testAgentIds,
     runFromApi = false,
   }: {
-    userId: string;
+    ownerId: string;
     agentId: string;
     scenarioIds?: string[];
     testAgentIds?: string[];
     runFromApi?: boolean;
   }) {
     // Make sure user can run this test - check free tests left and subscription
-    const userData = await this.userServiceInstance.getPublicMetadata(userId);
-    if (!userData) {
-      throw new Error("User not found");
+    const orgData = await this.orgServiceInstance.getPublicMetadata({
+      orgId: ownerId,
+    });
+    if (!orgData) {
+      throw new Error("Org not found");
     }
 
     const bypassPayment = await this.posthogClient.getFeatureFlag(
       "bypass-payment",
-      userId,
+      ownerId,
     );
     if (!bypassPayment) {
       // Check if user has free tests left or subscription
       const noFreeTestsLeft =
-        !userData.freeTestsLeft ||
-        (userData.freeTestsLeft && userData.freeTestsLeft <= 0);
+        !orgData.freeTestsLeft ||
+        (orgData.freeTestsLeft && orgData.freeTestsLeft <= 0);
       let hasActiveSubscription = false;
-      if (userData.stripeCustomerId) {
+      if (orgData.stripeCustomerId) {
         const subscriptions =
-          await this.stripeServiceInstance.getSubscriptions(userId);
+          await this.stripeServiceInstance.getSubscriptions(ownerId);
         if (subscriptions.data.length > 0) {
           hasActiveSubscription = true;
         }
@@ -178,12 +180,14 @@ export class TestService {
       }
 
       // If user has free tests left, deduct one
-      if (userData.freeTestsLeft && userData.freeTestsLeft > 0) {
-        await this.userServiceInstance.decrementFreeTestsLeft(userId);
+      if (orgData.freeTestsLeft && orgData.freeTestsLeft > 0) {
+        await this.orgServiceInstance.decrementFreeTestsLeft({
+          orgId: ownerId,
+        });
       }
     }
 
-    const agent = await this.agentServiceInstance.getAgent(agentId, userId);
+    const agent = await this.agentServiceInstance.getAgent(agentId, ownerId);
     if (!agent) {
       throw new Error("Agent not found");
     }
@@ -328,12 +332,12 @@ export class TestService {
     }
   }
 
-  async getLastTest(agentId: string, userId: string) {
+  async getLastTest(agentId: string, ownerId: string) {
     return await this.db.test.findFirst({
       where: {
         agentId,
         agent: {
-          ownerId: userId,
+          ownerId,
         },
       },
       orderBy: { createdAt: "desc" },

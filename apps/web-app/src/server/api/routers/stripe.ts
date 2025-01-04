@@ -3,10 +3,11 @@ import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { StripeService } from "@repo/services/src/ee/stripe";
 import { db } from "~/server/db";
 import type Stripe from "stripe";
-import { type PublicMetadata } from "@repo/types/src";
 import { env } from "~/env";
+import { ClerkService } from "@repo/services/src";
 
 const stripeService = new StripeService(db);
+const clerkService = new ClerkService(db);
 
 export const stripeRouter = createTRPCRouter({
   createCheckoutUrl: protectedProcedure
@@ -18,7 +19,7 @@ export const stripeRouter = createTRPCRouter({
       }
 
       const checkoutUrl = await stripeService.createCheckoutUrl({
-        userId: ctx.user.id,
+        orgId: ctx.orgId,
         redirectUrl: input.redirectUrl,
         origin,
       });
@@ -26,12 +27,12 @@ export const stripeRouter = createTRPCRouter({
     }),
 
   billingDetails: protectedProcedure.query(async ({ ctx }) => {
-    const metadata = ctx.user.publicMetadata as PublicMetadata | undefined;
-    if (!metadata?.stripeCustomerId) {
+    const metadata = await clerkService.getPublicMetadata({ orgId: ctx.orgId });
+    if (!metadata.stripeCustomerId) {
       return null;
     }
 
-    const customer = (await stripeService.getCustomer(ctx.user.id)) as
+    const customer = (await stripeService.getCustomer(ctx.orgId)) as
       | Stripe.Customer
       | Stripe.DeletedCustomer;
     if (customer.deleted) throw new Error("Customer not found");
@@ -39,12 +40,12 @@ export const stripeRouter = createTRPCRouter({
   }),
 
   usageDetails: protectedProcedure.query(async ({ ctx }) => {
-    const metadata = ctx.user.publicMetadata as PublicMetadata | undefined;
-    if (!metadata?.stripeCustomerId) {
+    const metadata = await clerkService.getPublicMetadata({ orgId: ctx.orgId });
+    if (!metadata.stripeCustomerId) {
       return null;
     }
 
-    const subscriptions = await stripeService.getSubscriptions(ctx.user.id);
+    const subscriptions = await stripeService.getSubscriptions(ctx.orgId);
     const testingSubscriptionItems: Stripe.SubscriptionItem[] = [];
     const observabilitySubscriptionItems: Stripe.SubscriptionItem[] = [];
     for (const subscription of subscriptions.data) {
@@ -70,7 +71,7 @@ export const stripeRouter = createTRPCRouter({
       const subscription = subs[0]!;
       const meterId = subscription.plan.meter;
       const meterSummary = await stripeService.getMeterSummary({
-        userId: ctx.user.id,
+        orgId: ctx.orgId,
         meterId: meterId!,
         start: currentPeriodStart,
         end: currentPeriodEnd,

@@ -44,7 +44,7 @@ import { Skeleton } from "../ui/skeleton";
 import { Button } from "../ui/button";
 import { AddAgentModal } from "~/app/dashboard/(agents)/_components/AddAgentModal";
 import { useAgent } from "~/app/contexts/UseAgent";
-import { UserButton } from "@clerk/nextjs";
+import { OrganizationSwitcher, UserButton } from "@clerk/nextjs";
 import FreeTestsLeft from "./FreeTestsLeft";
 
 const navItems = [
@@ -253,6 +253,11 @@ export default function DashboardSidebar({
                 <SidebarMenuBadge>
                   <OpenInNewWindowIcon />
                 </SidebarMenuBadge>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild>
+                  <OrganizationSwitcher hidePersonal hideSlug />
+                </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>

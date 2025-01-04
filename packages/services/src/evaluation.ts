@@ -18,14 +18,14 @@ export class EvaluationService {
   async updateGeneralEvaluations({
     agentId,
     generalEvaluations,
-    userId,
+    ownerId,
   }: {
     agentId: string;
     generalEvaluations: GeneralEvaluationWithIncludes[];
-    userId: string;
+    ownerId: string;
   }): Promise<GeneralEvaluationWithIncludes[]> {
     const agent = await this.db.agent.findUnique({
-      where: { id: agentId, ownerId: userId },
+      where: { id: agentId, ownerId },
       include: {
         generalEvaluations: {
           include: { evaluation: { include: { evaluationTemplate: true } } },
@@ -124,63 +124,63 @@ export class EvaluationService {
   }
 
   async getTemplates({
-    userId,
+    ownerId,
   }: {
-    userId: string;
+    ownerId: string;
   }): Promise<EvaluationTemplate[]> {
     return await this.db.evaluationTemplate.findMany({
-      where: { ownerId: userId, deleted: false },
+      where: { ownerId, deleted: false },
       orderBy: { createdAt: "asc" },
     });
   }
 
   async createTemplate({
     template,
-    userId,
+    ownerId,
   }: {
     template: EvaluationTemplate;
-    userId: string;
+    ownerId: string;
   }): Promise<EvaluationTemplate> {
     return await this.db.evaluationTemplate.create({
-      data: { ...template, id: uuidv4(), ownerId: userId },
+      data: { ...template, id: uuidv4(), ownerId },
     });
   }
 
   async updateTemplate({
     template,
-    userId,
+    ownerId,
   }: {
     template: EvaluationTemplate;
-    userId: string;
+    ownerId: string;
   }): Promise<EvaluationTemplate> {
     return await this.db.evaluationTemplate.update({
-      where: { id: template.id, ownerId: userId },
+      where: { id: template.id, ownerId },
       data: { ...template },
     });
   }
 
   async deleteTemplate({
     id,
-    userId,
+    ownerId,
   }: {
     id: string;
-    userId: string;
+    ownerId: string;
   }): Promise<void> {
     await this.db.evaluationTemplate.update({
-      where: { id, ownerId: userId },
+      where: { id, ownerId },
       data: { deleted: true },
     });
   }
 
   async update({
     evaluation,
-    userId,
+    ownerId,
   }: {
     evaluation: Evaluation;
-    userId: string;
+    ownerId: string;
   }): Promise<Evaluation> {
     return await this.db.evaluation.update({
-      where: { id: evaluation.id, evaluationTemplate: { ownerId: userId } },
+      where: { id: evaluation.id, evaluationTemplate: { ownerId } },
       data: { ...evaluation, params: evaluation.params ?? undefined },
     });
   }
@@ -188,15 +188,15 @@ export class EvaluationService {
   async toggleEnabled({
     id,
     enabled,
-    userId,
+    ownerId,
   }: {
     id: string;
     agentId: string;
     enabled: boolean;
-    userId: string;
+    ownerId: string;
   }): Promise<Evaluation> {
     return await this.db.evaluation.update({
-      where: { id, evaluationTemplate: { ownerId: userId } },
+      where: { id, evaluationTemplate: { ownerId } },
       data: {
         enabled,
       },
@@ -205,23 +205,23 @@ export class EvaluationService {
 
   async delete({
     id,
-    userId,
+    ownerId,
   }: {
     id: string;
-    userId: string;
+    ownerId: string;
   }): Promise<Evaluation> {
     return await this.db.evaluation.delete({
-      where: { id, evaluationTemplate: { ownerId: userId } },
+      where: { id, evaluationTemplate: { ownerId } },
     });
   }
 
   async getGroups({
-    userId,
+    ownerId,
   }: {
-    userId: string;
+    ownerId: string;
   }): Promise<EvaluationGroupWithIncludes[]> {
     const evaluationGroups = await this.db.evaluationGroup.findMany({
-      where: { ownerId: userId },
+      where: { ownerId },
       orderBy: { createdAt: "asc" },
       include: {
         evaluations: {
@@ -250,16 +250,16 @@ export class EvaluationService {
 
   async createGroup({
     group,
-    userId,
+    ownerId,
   }: {
     group: EvaluationGroupWithIncludes;
-    userId: string;
+    ownerId: string;
   }): Promise<EvaluationGroupWithIncludes> {
     const evaluationGroup = await this.db.evaluationGroup.create({
       data: {
         ...group,
         id: uuidv4(),
-        ownerId: userId,
+        ownerId,
         evaluations: {
           create: group.evaluations.map((evaluation) => ({
             ...evaluation,
@@ -292,10 +292,10 @@ export class EvaluationService {
 
   async updateGroup({
     group,
-    userId,
+    ownerId,
   }: {
     group: EvaluationGroupWithIncludes;
-    userId: string;
+    ownerId: string;
   }): Promise<EvaluationGroupWithIncludes> {
     const priorEvaluations = await this.db.evaluation.findMany({
       where: { evaluationGroupId: group.id },
@@ -305,7 +305,7 @@ export class EvaluationService {
       group.evaluations,
     );
     const evaluationGroup = await this.db.evaluationGroup.update({
-      where: { id: group.id, ownerId: userId },
+      where: { id: group.id, ownerId },
       data: {
         ...group,
         evaluations: {
@@ -354,11 +354,11 @@ export class EvaluationService {
 
   async deleteGroup({
     id,
-    userId,
+    ownerId,
   }: {
     id: string;
-    userId: string;
+    ownerId: string;
   }): Promise<void> {
-    await this.db.evaluationGroup.delete({ where: { id, ownerId: userId } });
+    await this.db.evaluationGroup.delete({ where: { id, ownerId } });
   }
 }

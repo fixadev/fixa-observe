@@ -23,13 +23,13 @@ export const evalRouter = createTRPCRouter({
       return await evalServiceInstance.updateGeneralEvaluations({
         agentId: input.agentId,
         generalEvaluations: input.generalEvaluations,
-        userId: ctx.user.id,
+        ownerId: ctx.orgId,
       });
     }),
 
   getTemplates: protectedProcedure.query(async ({ ctx }) => {
     return await evalServiceInstance.getTemplates({
-      userId: ctx.user.id,
+      ownerId: ctx.orgId,
     });
   }),
 
@@ -38,7 +38,7 @@ export const evalRouter = createTRPCRouter({
     .mutation(async ({ input, ctx }) => {
       return await evalServiceInstance.createTemplate({
         template: input,
-        userId: ctx.user.id,
+        ownerId: ctx.orgId,
       });
     }),
 
@@ -47,7 +47,7 @@ export const evalRouter = createTRPCRouter({
     .mutation(async ({ input, ctx }) => {
       return await evalServiceInstance.updateTemplate({
         template: input,
-        userId: ctx.user.id,
+        ownerId: ctx.orgId,
       });
     }),
 
@@ -56,7 +56,7 @@ export const evalRouter = createTRPCRouter({
     .mutation(async ({ input, ctx }) => {
       await evalServiceInstance.deleteTemplate({
         id: input.id,
-        userId: ctx.user.id,
+        ownerId: ctx.orgId,
       });
       return input.id;
     }),
@@ -66,7 +66,7 @@ export const evalRouter = createTRPCRouter({
     .mutation(async ({ input, ctx }) => {
       return await evalServiceInstance.update({
         evaluation: input,
-        userId: ctx.user.id,
+        ownerId: ctx.orgId,
       });
     }),
 
@@ -77,7 +77,7 @@ export const evalRouter = createTRPCRouter({
     .mutation(async ({ input, ctx }) => {
       return await evalServiceInstance.toggleEnabled({
         ...input,
-        userId: ctx.user.id,
+        ownerId: ctx.orgId,
       });
     }),
 
@@ -86,13 +86,13 @@ export const evalRouter = createTRPCRouter({
     .mutation(async ({ input, ctx }) => {
       return await evalServiceInstance.delete({
         id: input.id,
-        userId: ctx.user.id,
+        ownerId: ctx.orgId,
       });
     }),
 
   getGroups: protectedProcedure.query(async ({ ctx }) => {
     return await evalServiceInstance.getGroups({
-      userId: ctx.user.id,
+      ownerId: ctx.orgId,
     });
   }),
   createGroup: protectedProcedure
@@ -100,7 +100,7 @@ export const evalRouter = createTRPCRouter({
     .mutation(async ({ input, ctx }) => {
       return await evalServiceInstance.createGroup({
         group: input,
-        userId: ctx.user.id,
+        ownerId: ctx.orgId,
       });
     }),
   updateGroup: protectedProcedure
@@ -108,7 +108,7 @@ export const evalRouter = createTRPCRouter({
     .mutation(async ({ input, ctx }) => {
       return await evalServiceInstance.updateGroup({
         group: input,
-        userId: ctx.user.id,
+        ownerId: ctx.orgId,
       });
     }),
   deleteGroup: protectedProcedure
@@ -116,7 +116,7 @@ export const evalRouter = createTRPCRouter({
     .mutation(async ({ input, ctx }) => {
       return await evalServiceInstance.deleteGroup({
         id: input.id,
-        userId: ctx.user.id,
+        ownerId: ctx.orgId,
       });
     }),
 });
