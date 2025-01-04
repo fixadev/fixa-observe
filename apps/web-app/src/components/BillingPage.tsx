@@ -14,16 +14,16 @@ import { env } from "~/env";
 
 export function BillingPage() {
   const { organization, isLoaded: isOrganizationLoaded } = useOrganization();
-  const userData = useMemo(() => {
+  const orgData = useMemo(() => {
     return organization?.publicMetadata as PublicMetadata | undefined;
   }, [organization]);
   const hasPaymentMethod = useMemo(() => {
-    return userData?.stripeCustomerId !== undefined;
-  }, [userData]);
+    return orgData?.stripeCustomerId !== undefined;
+  }, [orgData]);
 
   const freeTestsLeft = useMemo(() => {
-    return userData?.freeTestsLeft ?? 0;
-  }, [userData]);
+    return orgData?.freeTestsLeft ?? 0;
+  }, [orgData]);
 
   const { mutate: getCheckoutUrl, isPending: isGeneratingStripeUrl } =
     api.stripe.createCheckoutUrl.useMutation({

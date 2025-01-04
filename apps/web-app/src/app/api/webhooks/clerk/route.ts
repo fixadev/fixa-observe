@@ -102,9 +102,9 @@ export async function POST(req: Request) {
           userId: user.id,
         });
 
-      if (!orgs.data.length) {
+      if (orgs.data.length <= 1) {
         // Give the org free tests + observability calls
-        // Only do this when user has no org
+        // Only do this when user has no org (i.e. they are a new user)
         await clerkService.updatePublicMetadata({
           orgId,
           metadata: {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useUser } from "@clerk/nextjs";
+import { useOrganization } from "@clerk/nextjs";
 import { type PublicMetadata } from "@repo/types/src";
 import { useCallback, useMemo } from "react";
 import { Button } from "../ui/button";
@@ -10,9 +10,9 @@ import { useFeatureFlagEnabled } from "posthog-js/react";
 
 export default function FreeTestsLeft() {
   const bypassPayment = useFeatureFlagEnabled("bypass-payment");
-  const { user, isLoaded } = useUser();
+  const { organization, isLoaded } = useOrganization();
 
-  const metadata = user?.publicMetadata as PublicMetadata | undefined;
+  const metadata = organization?.publicMetadata as PublicMetadata | undefined;
 
   const freeTestsLeft = useMemo(() => {
     return metadata?.freeTestsLeft ?? 0;
