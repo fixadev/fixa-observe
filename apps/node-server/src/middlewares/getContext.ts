@@ -33,8 +33,10 @@ export const getContext = async (
           include: {
             agent: {
               include: {
-                enabledGeneralEvaluations: {
-                  include: { evaluationTemplate: true },
+                generalEvaluations: {
+                  include: {
+                    evaluation: { include: { evaluationTemplate: true } },
+                  },
                 },
               },
             },

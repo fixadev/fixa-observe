@@ -56,7 +56,11 @@ export const EvaluationGroupWithIncludesSchema = EvaluationGroupSchema.extend({
 // Scenario
 export const SCENARIO_INCLUDE = {
   include: {
-    evaluations: EVALUATION_INCLUDE,
+    evaluations: {
+      include: {
+        evaluationTemplate: true,
+      },
+    },
   },
 } as const;
 export const ScenarioWithIncludesSchema = ScenarioSchema.extend({
@@ -103,7 +107,7 @@ export const CallInProgressSchema = CallSchema.extend({
   scenario: ScenarioWithIncludesSchema,
   test: TestSchema.extend({
     agent: AgentSchema.extend({
-      enabledGeneralEvaluations: EvaluationWithIncludesSchema.array(),
+      generalEvaluations: GeneralEvaluationWithIncludesSchema.array(),
     }),
   }),
 });
@@ -152,10 +156,25 @@ export const AgentWithIncludesSchema = AgentSchema.extend({
 export type AgentWithIncludes = z.infer<typeof AgentWithIncludesSchema>;
 export type TestWithCalls = AgentWithIncludes["tests"][number];
 
+export const TimeRangeSchema = z.object({
+  start: z.number(),
+  end: z.number(),
+});
+
 export type SavedSearchWithIncludes = z.infer<
   typeof SavedSearchWithIncludesSchema
 >;
 export const SavedSearchWithIncludesSchema = SavedSearchSchema.extend({
+  lookbackPeriod: z.object({
+    label: z.string(),
+    value: z.number(),
+  }),
+  timeRange: z.union([TimeRangeSchema, z.null(), z.undefined()]),
+  metadata: z.union([
+    z.record(z.string(), z.string().or(z.array(z.string())).or(z.undefined())),
+    z.null(),
+    z.undefined(),
+  ]),
   evaluationGroups: z.array(EvaluationGroupWithIncludesSchema).optional(),
   alerts: z.array(AlertWithDetailsSchema).optional(),
 });

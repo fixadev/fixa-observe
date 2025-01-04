@@ -210,14 +210,14 @@ export const handleCallEnded = async ({
 
     const validEvalResults = evalResults.filter((evalResult) =>
       [...scenario.evaluations]?.some(
-        (evaluation) => evaluation.id === evalResult.evalId,
+        (evaluation) => evaluation.id === evalResult.evaluationId,
       ),
     );
 
     const criticalEvalResults = evalResults.filter((evalResult) =>
       [...scenario.evaluations]?.some(
         (evaluation) =>
-          evaluation.id === evalResult.evalId && evaluation.isCritical,
+          evaluation.id === evalResult.evaluationId && evaluation.isCritical,
       ),
     );
 
@@ -233,10 +233,10 @@ export const handleCallEnded = async ({
         monoRecordingUrl: report.artifact.recordingUrl,
         result: success ? CallResult.success : CallResult.failure,
         evaluationResults: {
-          create: validEvalResults.map((result) => ({
+          create: validEvalResults.map(({ evaluationId, ...result }) => ({
             ...result,
             evaluation: {
-              connect: { id: result.evalId },
+              connect: { id: evaluationId },
             },
           })),
         },

@@ -235,10 +235,8 @@ model EvaluationTemplate {
 
   ownerId String?
 
-  deleted           Boolean          @default(false)
-  evaluationGroup   EvaluationGroup? @relation(fields: [evaluationGroupId], references: [id])
-  evaluationGroupId String?
-  evaluations       Evaluation[]
+  deleted     Boolean      @default(false)
+  evaluations Evaluation[]
 }
 
 model GeneralEvaluation {
@@ -325,16 +323,15 @@ model Interruption {
 }
 
 model EvaluationGroup {
-  id                 String               @id @default(uuid())
-  createdAt          DateTime             @default(now())
-  ownerId            String
-  name               String
-  condition          String               @default("")
-  evaluations        Evaluation[]
-  enabled            Boolean              @default(true)
-  savedSearch        SavedSearch?         @relation(fields: [savedSearchId], references: [id], onDelete: Cascade)
-  savedSearchId      String?
-  EvaluationTemplate EvaluationTemplate[]
+  id            String       @id @default(uuid())
+  createdAt     DateTime     @default(now())
+  ownerId       String
+  name          String
+  condition     String       @default("")
+  evaluations   Evaluation[]
+  enabled       Boolean      @default(true)
+  savedSearch   SavedSearch? @relation(fields: [savedSearchId], references: [id], onDelete: Cascade)
+  savedSearchId String?
 }
 
 model SavedSearch {

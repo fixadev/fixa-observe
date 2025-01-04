@@ -4,11 +4,14 @@ import { openai } from "../clients/openAIClient";
 import { ArtifactMessagesItem } from "@vapi-ai/server-sdk/api";
 import { Evaluation, EvalResultType, Message } from "@prisma/client";
 import { getDateTimeAtTimezone } from "../utils/time";
-import { ScenarioWithIncludes } from "@repo/types/src/index";
+import {
+  EvaluationWithIncludes,
+  ScenarioWithIncludes,
+} from "@repo/types/src/index";
 
 export type EvalResultSchema = z.infer<typeof EvalResultSchema>;
 const EvalResultSchema = z.object({
-  evalId: z.string(),
+  evaluationId: z.string(),
   result: z.string(),
   success: z.boolean(),
   secondsFromStart: z.number(),
@@ -32,7 +35,7 @@ export const analyzeCallWitho1 = async ({
   messages: ArtifactMessagesItem[] | Message[];
   testAgentPrompt: string;
   scenario?: ScenarioWithIncludes;
-  evals?: Evaluation[];
+  evals?: EvaluationWithIncludes[];
 }): Promise<string> => {
   const basePrompt = `
   Your job to to analyze a call transcript between an AI agent (the main agent) and a test AI agent (the test agent), and determine how the main agent performed.

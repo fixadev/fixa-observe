@@ -37,9 +37,7 @@ function ScenariosPageContent({ params }: { params: { agentId: string } }) {
           href={`/dashboard/${params.agentId}/scenarios`}
         />
         <div className="container flex h-full flex-col gap-4 p-4">
-          {scenarios.length > 0 && (
-            <GeneralEvaluations agentId={params.agentId} />
-          )}
+          {scenarios.length > 0 && <GeneralEvaluations />}
           <div>
             <div className="text-lg font-medium">test scenarios</div>
             <div className="text-sm text-muted-foreground">
