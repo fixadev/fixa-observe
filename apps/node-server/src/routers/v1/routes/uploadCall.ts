@@ -2,7 +2,6 @@ import { Request, Response, Router } from "express";
 import { validateUploadCallParams } from "../../../middlewares/validateParams";
 import { addCallToQueue } from "../../../services/aws";
 import { clerkServiceClient } from "../../../clients/clerkServiceClient";
-import { PublicMetadata } from "@repo/types/src/index";
 import { posthogClient } from "../../../clients/posthogClient";
 
 const uploadCallRouter = Router();
