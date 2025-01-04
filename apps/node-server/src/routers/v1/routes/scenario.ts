@@ -13,7 +13,7 @@ const scenarioService = new ScenarioService(db);
 scenarioRouter.get("/:agentId", async (req: Request, res: Response) => {
   try {
     const { agentId } = req.params;
-    const ownerId = res.locals.userId;
+    const ownerId = res.locals.orgId;
     const scenarios = await db.scenario.findMany({
       where: { agentId, ownerId, deleted: false },
       include: {
@@ -34,7 +34,7 @@ scenarioRouter.get("/:agentId", async (req: Request, res: Response) => {
 scenarioRouter.post("/:agentId", async (req: Request, res: Response) => {
   try {
     const { agentId } = req.params;
-    const ownerId = res.locals.userId;
+    const ownerId = res.locals.orgId;
     const scenario = req.body as ScenarioWithIncludes;
 
     // Validate scenario data
@@ -82,7 +82,7 @@ scenarioRouter.post("/:agentId", async (req: Request, res: Response) => {
 scenarioRouter.put("/:id", async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const ownerId = res.locals.userId;
+    const ownerId = res.locals.orgId;
     const scenario = req.body;
 
     const parsedScenario = ScenarioWithIncludesSchema.safeParse(scenario);
@@ -149,7 +149,7 @@ scenarioRouter.put("/:id", async (req: Request, res: Response) => {
 scenarioRouter.delete("/:id", async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const ownerId = res.locals.userId;
+    const ownerId = res.locals.orgId;
 
     // Validate scenario exists and belongs to user
     const existingScenario = await db.scenario.findFirst({

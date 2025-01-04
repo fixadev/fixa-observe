@@ -7,7 +7,7 @@ const alertRouter = Router();
 // Get alerts for a user
 alertRouter.get("/", async (req: Request, res: Response) => {
   try {
-    const ownerId = res.locals.userId;
+    const ownerId = res.locals.orgId;
     const alerts = await db.alert.findMany({
       where: { ownerId },
     });
@@ -21,7 +21,7 @@ alertRouter.get("/", async (req: Request, res: Response) => {
 // Create alert
 alertRouter.post("/", async (req: Request, res: Response) => {
   try {
-    const ownerId = res.locals.userId;
+    const ownerId = res.locals.orgId;
     const alert = req.body;
 
     // Validate alert type
@@ -104,7 +104,7 @@ alertRouter.post("/", async (req: Request, res: Response) => {
 alertRouter.put("/:id", async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const ownerId = res.locals.userId;
+    const ownerId = res.locals.orgId;
     const alert = req.body;
 
     // Validate alert exists and belongs to user
@@ -199,7 +199,7 @@ alertRouter.put("/:id", async (req: Request, res: Response) => {
 alertRouter.delete("/:id", async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const ownerId = res.locals.userId;
+    const ownerId = res.locals.orgId;
 
     // Validate alert exists and belongs to user
     const existingAlert = await db.alert.findFirst({

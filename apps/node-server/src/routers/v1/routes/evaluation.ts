@@ -9,7 +9,7 @@ const evaluationService = new EvaluationService(db);
 evaluationRouter.get("/general", async (req, res) => {
   try {
     const evals = await evaluationService.getGeneralEvals({
-      ownerId: res.locals.userId,
+      ownerId: res.locals.orgId,
     });
     res.json(evals);
   } catch (error) {
@@ -21,7 +21,7 @@ evaluationRouter.get("/general", async (req, res) => {
 evaluationRouter.get("/templates", async (req, res) => {
   try {
     const templates = await evaluationService.getTemplates({
-      ownerId: res.locals.userId,
+      ownerId: res.locals.orgId,
     });
     res.json(templates);
   } catch (error) {
@@ -34,7 +34,7 @@ evaluationRouter.post("/template", async (req, res) => {
   try {
     const template = await evaluationService.createTemplate({
       template: req.body,
-      ownerId: res.locals.userId,
+      ownerId: res.locals.orgId,
     });
     res.json(template);
   } catch (error) {
@@ -47,7 +47,7 @@ evaluationRouter.put("/template/:id", async (req, res) => {
   try {
     const template = await evaluationService.updateTemplate({
       template: { ...req.body, id: req.params.id },
-      ownerId: res.locals.userId,
+      ownerId: res.locals.orgId,
     });
     res.json(template);
   } catch (error) {
@@ -60,7 +60,7 @@ evaluationRouter.post("/", async (req, res) => {
   try {
     const evaluation = await evaluationService.create({
       evaluation: req.body,
-      ownerId: res.locals.userId,
+      ownerId: res.locals.orgId,
     });
     res.json(evaluation);
   } catch (error) {
@@ -73,7 +73,7 @@ evaluationRouter.put("/:id", async (req, res) => {
   try {
     const evaluation = await evaluationService.update({
       evaluation: { ...req.body, id: req.params.id },
-      ownerId: res.locals.userId,
+      ownerId: res.locals.orgId,
     });
     res.json(evaluation);
   } catch (error) {
@@ -89,7 +89,7 @@ evaluationRouter.patch("/:id/toggle", async (req, res) => {
       id: req.params.id,
       enabled,
       agentId,
-      ownerId: res.locals.userId,
+      ownerId: res.locals.orgId,
     });
     res.json(evaluation);
   } catch (error) {
@@ -102,7 +102,7 @@ evaluationRouter.delete("/:id", async (req, res) => {
   try {
     const evaluation = await evaluationService.delete({
       id: req.params.id,
-      ownerId: res.locals.userId,
+      ownerId: res.locals.orgId,
     });
     res.json(evaluation);
   } catch (error) {
@@ -114,7 +114,7 @@ evaluationRouter.delete("/:id", async (req, res) => {
 evaluationRouter.get("/groups", async (req, res) => {
   try {
     const groups = await evaluationService.getGroups({
-      ownerId: res.locals.userId,
+      ownerId: res.locals.orgId,
     });
     res.json(groups);
   } catch (error) {
@@ -127,7 +127,7 @@ evaluationRouter.post("/group", async (req, res) => {
   try {
     const group = await evaluationService.createGroup({
       group: req.body,
-      ownerId: res.locals.userId,
+      ownerId: res.locals.orgId,
     });
     res.json(group);
   } catch (error) {
@@ -140,7 +140,7 @@ evaluationRouter.put("/group/:id", async (req, res) => {
   try {
     const group = await evaluationService.updateGroup({
       group: { ...req.body, id: req.params.id },
-      ownerId: res.locals.userId,
+      ownerId: res.locals.orgId,
     });
     res.json(group);
   } catch (error) {
@@ -153,7 +153,7 @@ evaluationRouter.delete("/group/:id", async (req, res) => {
   try {
     await evaluationService.deleteGroup({
       id: req.params.id,
-      ownerId: res.locals.userId,
+      ownerId: res.locals.orgId,
     });
     res.json({ success: true });
   } catch (error) {

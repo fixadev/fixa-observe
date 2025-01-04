@@ -28,7 +28,7 @@ uploadCallRouter.post(
 
       // Determine whether to decrement free calls left
       try {
-        const user = await clerkServiceClient.getUser(res.locals.userId);
+        const user = await clerkServiceClient.getUser(res.locals.orgId);
         if (user?.publicMetadata) {
           const metadata = user.publicMetadata as PublicMetadata;
           const bypassPayment = await posthogClient.getFeatureFlag(
@@ -44,7 +44,7 @@ uploadCallRouter.post(
               metadata.freeObservabilityCallsLeft > 0
             ) {
               await clerkServiceClient.decrementFreeObservabilityCallsLeft(
-                res.locals.userId,
+                res.locals.orgId,
               );
             } else {
               return res
@@ -58,8 +58,8 @@ uploadCallRouter.post(
       console.log(
         "ADDING CALL TO QUEUE",
         callId,
-        "with user id",
-        res.locals.userId,
+        "with org id",
+        res.locals.orgId,
       );
 
       await addCallToQueue({
@@ -67,7 +67,7 @@ uploadCallRouter.post(
         stereoRecordingUrl: location || stereoRecordingUrl,
         agentId,
         createdAt: createdAt || new Date().toISOString(),
-        userId: res.locals.userId,
+        userId: res.locals.orgId,
         metadata: metadata,
         saveRecording,
         language,

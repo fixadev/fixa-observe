@@ -30,10 +30,10 @@ router.post("/", async (req, res) => {
       });
     }
 
-    const userId = res.locals.userId;
+    const ownerId = res.locals.orgId;
 
     const agent = await db.agent.findFirst({
-      where: { id: input.agentId, ownerId: userId },
+      where: { id: input.agentId, ownerId: ownerId },
     });
     if (!agent) {
       return res.status(401).json({
@@ -43,7 +43,7 @@ router.post("/", async (req, res) => {
     }
 
     const result = await testService.run({
-      userId,
+      ownerId,
       agentId: input.agentId,
       scenarioIds: input.scenarioIds,
       testAgentIds: input.personaIds,
@@ -63,11 +63,11 @@ router.post("/", async (req, res) => {
 router.get("/:testId/status", async (req, res) => {
   try {
     const testId = req.params.testId;
-    const userId = res.locals.userId;
+    const ownerId = res.locals.orgId;
 
     // Check that the user has access to the test
     const test = await db.test.findFirst({
-      where: { id: testId, agent: { ownerId: userId } },
+      where: { id: testId, agent: { ownerId } },
     });
     if (!test) {
       return res.status(401).json({
@@ -76,7 +76,7 @@ router.get("/:testId/status", async (req, res) => {
       });
     }
 
-    const statusResult = await testService.getStatus(testId, userId);
+    const statusResult = await testService.getStatus(testId, ownerId);
 
     return res.json(statusResult);
   } catch (error) {

@@ -9,7 +9,7 @@ const agentService = new AgentService(db);
 // Get all agents
 agentRouter.get("/", async (req: Request, res: Response) => {
   try {
-    const ownerId = res.locals.userId;
+    const ownerId = res.locals.orgId;
     const agents = await agentService.getAllAgents(ownerId);
     res.json({ success: true, agents });
   } catch (error) {
@@ -22,7 +22,7 @@ agentRouter.get("/", async (req: Request, res: Response) => {
 agentRouter.get("/:id", async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const ownerId = res.locals.userId;
+    const ownerId = res.locals.orgId;
     const agent = await agentService.getAgent(id, ownerId);
     if (!agent) {
       return res.status(404).json({ success: false, error: "Agent not found" });
@@ -38,7 +38,7 @@ agentRouter.get("/:id", async (req: Request, res: Response) => {
 agentRouter.post("/", async (req: Request, res: Response) => {
   try {
     const { phoneNumber, name, systemPrompt } = req.body;
-    const ownerId = res.locals.userId;
+    const ownerId = res.locals.orgId;
     const agent = await agentService.createAgent(
       phoneNumber,
       name,
@@ -55,7 +55,7 @@ agentRouter.post("/", async (req: Request, res: Response) => {
 agentRouter.put("/:id", async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const ownerId = res.locals.userId;
+    const ownerId = res.locals.orgId;
 
     // Validate that required fields exist
     const { name, phoneNumber, systemPrompt } = req.body;
@@ -108,7 +108,7 @@ agentRouter.put("/:id", async (req: Request, res: Response) => {
 agentRouter.delete("/:id", async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const ownerId = res.locals.userId;
+    const ownerId = res.locals.orgId;
     await agentService.deleteAgent(id, ownerId);
     res.json({ success: true });
   } catch (error) {

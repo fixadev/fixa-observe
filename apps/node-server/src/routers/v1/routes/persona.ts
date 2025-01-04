@@ -8,7 +8,7 @@ const agentService = new AgentService(db);
 // Get test agents
 personaRouter.get("/", async (req: Request, res: Response) => {
   try {
-    const ownerId = res.locals.userId;
+    const ownerId = res.locals.orgId;
     const testAgents = await agentService.getTestAgents(ownerId);
     res.json({ success: true, testAgents });
   } catch (error) {
@@ -21,7 +21,7 @@ personaRouter.get("/", async (req: Request, res: Response) => {
 personaRouter.post("/", async (req: Request, res: Response) => {
   try {
     const { name, prompt, headshotUrl, description } = req.body;
-    const ownerId = res.locals.userId;
+    const ownerId = res.locals.orgId;
     const testAgent = await agentService.createTestAgent(
       name,
       prompt,
