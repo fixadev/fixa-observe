@@ -1,4 +1,4 @@
-import { orgServiceClient } from "../../clients/orgServiceClient";
+import { clerkServiceClient } from "../../clients/clerkServiceClient";
 import { db } from "../../db";
 
 // async function main() {

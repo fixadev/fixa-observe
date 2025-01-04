@@ -1,6 +1,6 @@
 import { PrismaClient } from "@repo/db/src/index";
 import Stripe from "stripe";
-import { OrgService } from "../org";
+import { ClerkService } from "../clerk";
 import { backOff } from "exponential-backoff";
 
 export class StripeService {
@@ -12,7 +12,7 @@ export class StripeService {
     OBSERVABILITY_MINUTES_EVENT_NAME: string;
   };
   private stripe: Stripe;
-  private orgService: OrgService;
+  private clerkService: ClerkService;
 
   constructor(private db: PrismaClient) {
     this.checkEnv();
@@ -27,7 +27,7 @@ export class StripeService {
         process.env.OBSERVABILITY_MINUTES_EVENT_NAME!,
     };
     this.stripe = new Stripe(this.env.STRIPE_SECRET_KEY);
-    this.orgService = new OrgService(db);
+    this.clerkService = new ClerkService(db);
   }
 
   private checkEnv = () => {
@@ -49,7 +49,7 @@ export class StripeService {
   };
 
   private getCustomerId = async (orgId: string) => {
-    const metadata = await this.orgService.getPublicMetadata({ orgId });
+    const metadata = await this.clerkService.getPublicMetadata({ orgId });
     const stripeCustomerId = metadata.stripeCustomerId;
     if (!stripeCustomerId) {
       throw new Error("Stripe customer ID not found");
@@ -98,7 +98,7 @@ export class StripeService {
     orgId: string;
     minutes: number;
   }) => {
-    const metadata = await this.orgService.getPublicMetadata({ orgId });
+    const metadata = await this.clerkService.getPublicMetadata({ orgId });
     if (metadata.freeTestsLeft && metadata.freeTestsLeft > 0) {
       // Don't accrue minutes if there are still free tests left
       // TODO: fix this. doesn't catch the case where user goes from 1 => 0 free tests left

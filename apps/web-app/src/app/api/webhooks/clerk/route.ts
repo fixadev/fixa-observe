@@ -4,11 +4,11 @@ import { type WebhookEvent } from "@clerk/nextjs/server";
 import { env } from "~/env";
 import { addSubscriber } from "~/server/listmonk";
 import { NUM_FREE_OBSERVABILITY_CALLS, NUM_FREE_TESTS } from "@repo/types/src";
-import { OrgService } from "@repo/services/src";
+import { ClerkService } from "@repo/services/src";
 import { db } from "~/server/db";
 import { SlackService } from "@repo/services/src/ee/slack";
 
-const orgService = new OrgService(db);
+const clerkService = new ClerkService(db);
 const slackService = new SlackService();
 
 export async function GET() {
@@ -102,7 +102,7 @@ export async function POST(req: Request) {
 
       // if (!user.orgId) {
       // Give the org free tests + observability calls
-      await orgService.updatePublicMetadata({
+      await clerkService.updatePublicMetadata({
         orgId,
         metadata: {
           freeTestsLeft: NUM_FREE_TESTS,

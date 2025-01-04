@@ -8,7 +8,7 @@ import {
 } from "@repo/types/src/index";
 import { randomUUID } from "crypto";
 import { AgentService } from "./agent";
-import { OrgService } from "./org";
+import { ClerkService } from "./clerk";
 import { StripeService } from "./ee/stripe";
 import axios from "axios";
 import { type PostHog } from "posthog-node";
@@ -26,7 +26,7 @@ export class TestService {
     };
     this.checkEnv();
     this.agentServiceInstance = new AgentService(this.db);
-    this.orgServiceInstance = new OrgService(this.db);
+    this.orgServiceInstance = new ClerkService(this.db);
     this.stripeServiceInstance = new StripeService(this.db);
     this.vapiServiceInstance = new VapiService(this.db);
   }
@@ -37,7 +37,7 @@ export class TestService {
     }
   };
   agentServiceInstance: AgentService;
-  orgServiceInstance: OrgService;
+  orgServiceInstance: ClerkService;
   stripeServiceInstance: StripeService;
   vapiServiceInstance: VapiService;
 

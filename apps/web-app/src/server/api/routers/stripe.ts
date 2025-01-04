@@ -4,10 +4,10 @@ import { StripeService } from "@repo/services/src/ee/stripe";
 import { db } from "~/server/db";
 import type Stripe from "stripe";
 import { env } from "~/env";
-import { OrgService } from "@repo/services/src";
+import { ClerkService } from "@repo/services/src";
 
 const stripeService = new StripeService(db);
-const orgService = new OrgService(db);
+const clerkService = new ClerkService(db);
 
 export const stripeRouter = createTRPCRouter({
   createCheckoutUrl: protectedProcedure
@@ -27,7 +27,7 @@ export const stripeRouter = createTRPCRouter({
     }),
 
   billingDetails: protectedProcedure.query(async ({ ctx }) => {
-    const metadata = await orgService.getPublicMetadata({ orgId: ctx.orgId });
+    const metadata = await clerkService.getPublicMetadata({ orgId: ctx.orgId });
     if (!metadata.stripeCustomerId) {
       return null;
     }
@@ -40,7 +40,7 @@ export const stripeRouter = createTRPCRouter({
   }),
 
   usageDetails: protectedProcedure.query(async ({ ctx }) => {
-    const metadata = await orgService.getPublicMetadata({ orgId: ctx.orgId });
+    const metadata = await clerkService.getPublicMetadata({ orgId: ctx.orgId });
     if (!metadata.stripeCustomerId) {
       return null;
     }

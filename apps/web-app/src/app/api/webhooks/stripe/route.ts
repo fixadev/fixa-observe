@@ -1,11 +1,11 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { env } from "~/env";
 import Stripe from "stripe";
-import { OrgService } from "@repo/services/src";
+import { ClerkService } from "@repo/services/src";
 import { db } from "~/server/db";
 import { SlackService } from "@repo/services/src/ee/slack";
 
-const orgService = new OrgService(db);
+const clerkService = new ClerkService(db);
 const slackService = new SlackService();
 const stripe = new Stripe(env.STRIPE_SECRET_KEY);
 const endpointSecret = env.STRIPE_WEBHOOK_SECRET;
@@ -46,7 +46,7 @@ export async function POST(req: NextRequest) {
 
         const customerId = session.customer as string | undefined;
         if (customerId) {
-          await orgService.updatePublicMetadata({
+          await clerkService.updatePublicMetadata({
             orgId,
             metadata: {
               stripeCustomerId: customerId,
@@ -55,7 +55,7 @@ export async function POST(req: NextRequest) {
         }
 
         try {
-          const org = await orgService.getOrg(orgId);
+          const org = await clerkService.getOrg(orgId);
           await slackService.sendAnalyticsMessage({
             message: `💰 ${org.name} (${org.id}) upgraded to pro`,
           });

@@ -12,7 +12,7 @@ import {
   type MetadataType,
 } from "@repo/types/src";
 
-export class OrgService {
+export class ClerkService {
   readonly clerkClient: ClerkClient;
 
   constructor(private db: PrismaClient) {

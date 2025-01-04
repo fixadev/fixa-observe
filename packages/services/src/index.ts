@@ -5,4 +5,4 @@ export * from "./search";
 export * from "./agent";
 export * from "./alert";
 export * from "./ee/stripe";
-export * from "./org";
+export * from "./clerk";
