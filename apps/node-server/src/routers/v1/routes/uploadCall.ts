@@ -66,7 +66,7 @@ uploadCallRouter.post(
         stereoRecordingUrl: location || stereoRecordingUrl,
         agentId,
         createdAt: createdAt || new Date().toISOString(),
-        userId: res.locals.orgId,
+        ownerId: res.locals.orgId,
         metadata: metadata,
         saveRecording,
         language,

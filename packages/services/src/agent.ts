@@ -52,14 +52,14 @@ export class AgentService {
 
   async upsertAgent({
     customerAgentId,
-    userId,
+    ownerId,
   }: {
     customerAgentId: string;
-    userId: string;
+    ownerId: string;
   }) {
     try {
       const existingAgent = await this.db.agent.findFirst({
-        where: { ownerId: userId, customerAgentId },
+        where: { ownerId, customerAgentId },
       });
       if (existingAgent) {
         return existingAgent;
@@ -67,7 +67,7 @@ export class AgentService {
       return await this.db.agent.create({
         data: {
           customerAgentId: customerAgentId,
-          ownerId: userId,
+          ownerId,
           name: customerAgentId,
           phoneNumber: "",
           systemPrompt: "",

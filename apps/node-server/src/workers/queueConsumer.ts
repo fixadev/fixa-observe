@@ -27,12 +27,12 @@ export async function startQueueConsumer() {
             stereoRecordingUrl,
             agentId,
             createdAt,
-            userId,
+            ownerId,
             metadata,
             saveRecording,
             language,
           } = data;
-          if (!callId || !stereoRecordingUrl || !userId || !createdAt) {
+          if (!callId || !stereoRecordingUrl || !ownerId || !createdAt) {
             console.error("Missing required fields in message:", data);
             throw new Error("Missing required fields");
           }
@@ -42,7 +42,7 @@ export async function startQueueConsumer() {
           // Upsert agent if it doesn't exist
           const agent = await agentService.upsertAgent({
             customerAgentId: agentId,
-            userId,
+            ownerId,
           });
 
           await transcribeAndSaveCall({
@@ -51,7 +51,7 @@ export async function startQueueConsumer() {
             createdAt: createdAt,
             agentId: agent.id,
             metadata,
-            ownerId: userId,
+            ownerId,
             saveRecording,
             language,
           });

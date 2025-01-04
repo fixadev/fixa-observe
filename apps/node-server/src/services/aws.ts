@@ -7,7 +7,7 @@ import { UploadCallParams } from "@repo/types/src/types";
 import { randomUUID } from "crypto";
 
 export const addCallToQueue = async (input: UploadCallParams) => {
-  // Send messagep
+  // Send message
   await sqs
     .sendMessage({
       QueueUrl: env.SQS_QUEUE_URL,
