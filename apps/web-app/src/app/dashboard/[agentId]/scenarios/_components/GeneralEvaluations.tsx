@@ -3,13 +3,11 @@
 import { useAgent } from "~/app/contexts/UseAgent";
 import { Button } from "~/components/ui/button";
 import { GeneralEvaluationCard } from "./GeneralEvaluationCard";
-import { useParams } from "next/navigation";
 import { GeneralEvaluationsDialog } from "./GeneralEvaluationsDialog";
 import { useState } from "react";
 
 export function GeneralEvaluations() {
-  const { agentId } = useParams();
-  const { agent } = useAgent(agentId as string);
+  const { agent } = useAgent();
   const [isDialogOpen, setDialogOpen] = useState(false);
 
   return (

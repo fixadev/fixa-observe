@@ -41,7 +41,7 @@ export default function AgentSettingsPage({
   const originalAgentState = useRef<AgentWithIncludes | null>(null);
 
   const { toast } = useToast();
-  const { agent, refetch, setAgent } = useAgent(params.agentId);
+  const { agent, setAgent } = useAgent();
   const { user } = useUser();
 
   const isSlackAppInstalled = useMemo(
@@ -49,13 +49,16 @@ export default function AgentSettingsPage({
     [user],
   );
 
+  const utils = api.useUtils();
   const { mutate: updateAgent, isPending: isUpdatingSettings } =
     api.agent.updateAgent.useMutation({
       onSuccess: () => {
         toast({
           title: "Settings saved",
         });
-        void refetch();
+        if (agent) {
+          void utils.agent.get.invalidate({ id: agent.id });
+        }
       },
     });
 

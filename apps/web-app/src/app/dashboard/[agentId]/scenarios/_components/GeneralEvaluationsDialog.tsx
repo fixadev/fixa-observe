@@ -33,7 +33,7 @@ export function GeneralEvaluationsDialog({
   onOpenChange,
 }: GeneralEvaluationsDialogProps) {
   const { agentId } = useParams();
-  const { agent, setAgent } = useAgent(agentId as string);
+  const { agent, setAgent } = useAgent();
   const { toast } = useToast();
 
   const [generalEvaluations, setGeneralEvaluations] = useState<

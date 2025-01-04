@@ -14,7 +14,7 @@ export default function TestAgentsPage({
 }: {
   params: { agentId: string };
 }) {
-  const { agent, setAgent } = useAgent(params.agentId);
+  const { agent, setAgent } = useAgent();
 
   const { data: testAgents } = api.agent.getTestAgents.useQuery();
   const { mutate: toggleTestAgentEnabled } =

@@ -36,7 +36,7 @@ import {
   SelectValue,
 } from "../ui/select";
 import { usePathname, useRouter } from "next/navigation";
-import { useCallback, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import { cn, removeTrailingSlash } from "~/lib/utils";
 import { api } from "~/trpc/react";
 import { SlackIcon } from "lucide-react";
@@ -44,7 +44,11 @@ import { Skeleton } from "../ui/skeleton";
 import { Button } from "../ui/button";
 import { AddAgentModal } from "~/app/dashboard/(agents)/_components/AddAgentModal";
 import { useAgent } from "~/app/contexts/UseAgent";
-import { OrganizationSwitcher, UserButton } from "@clerk/nextjs";
+import {
+  OrganizationSwitcher,
+  useOrganization,
+  UserButton,
+} from "@clerk/nextjs";
 import FreeTestsLeft from "./FreeTestsLeft";
 
 const navItems = [
@@ -93,9 +97,57 @@ export default function DashboardSidebar({
     [pathname, agentBaseUrl],
   );
 
+  const utils = api.useUtils();
   const { data: agents } = api.agent.getAll.useQuery();
+  const { data: _agent, isFetching: _agentFetching } = api.agent.get.useQuery(
+    { id: params.agentId },
+    { enabled: params.agentId !== "new" },
+  );
+  const { agent, setAgent } = useAgent();
 
-  const { agent } = useAgent();
+  // Set agent when it is loaded
+  useEffect(() => {
+    if (!_agentFetching && _agent) {
+      console.log("setting agent", _agent);
+      setAgent(_agent);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [_agentFetching]);
+
+  // If we're on the new page and agents exist, set the first agent as the current agent
+  useEffect(() => {
+    if (params.agentId === "new" && agents && agents.length > 0) {
+      router.replace(`/dashboard/${agents[0]!.id}`);
+    }
+  }, [agents, params.agentId, router]);
+
+  // Invalidate agent list when organization changes
+  const { organization, isLoaded: organizationLoaded } = useOrganization();
+  const prevOrganizationId = useRef<string | undefined>(undefined);
+  useEffect(() => {
+    if (organizationLoaded && organization) {
+      if (
+        prevOrganizationId.current &&
+        prevOrganizationId.current !== organization.id
+      ) {
+        void utils.agent.getAll.invalidate();
+        console.log("invalidating agent list");
+      }
+      prevOrganizationId.current = organization.id;
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [organization, utils]);
+
+  // If agent is not found, redirect to new agent page
+  useEffect(() => {
+    if (
+      params.agentId !== "new" &&
+      agents &&
+      !agents.find((a) => a.id === params.agentId)
+    ) {
+      router.replace("/dashboard/new");
+    }
+  }, [agents, params.agentId, router]);
 
   return (
     <Sidebar>
