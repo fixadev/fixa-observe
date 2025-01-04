@@ -10,12 +10,13 @@ export const agentRouter = createTRPCRouter({
   create: protectedProcedure
     .input(AgentSchema)
     .mutation(async ({ input, ctx }) => {
-      return await agentServiceInstance.createAgent(
-        input.phoneNumber,
-        input.name,
-        input.systemPrompt,
-        ctx.orgId,
-      );
+      return await agentServiceInstance.createAgent({
+        phoneNumber: input.phoneNumber,
+        name: input.name,
+        customerAgentId: input.customerAgentId ?? undefined,
+        systemPrompt: input.systemPrompt,
+        ownerId: ctx.orgId,
+      });
     }),
 
   updateName: protectedProcedure

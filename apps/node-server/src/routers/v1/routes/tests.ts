@@ -33,7 +33,7 @@ router.post("/", async (req, res) => {
     const ownerId = res.locals.orgId;
 
     const agent = await db.agent.findFirst({
-      where: { id: input.agentId, ownerId: ownerId },
+      where: { customerAgentId: input.agentId, ownerId: ownerId },
     });
     if (!agent) {
       return res.status(401).json({

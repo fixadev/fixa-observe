@@ -5,25 +5,29 @@ import {
   ScenarioWithIncludesSchema,
 } from "@repo/types/src/index";
 import { db } from "../../../db";
+import { AgentService } from "@repo/services/src/index";
 
 const scenarioRouter = Router();
 const scenarioService = new ScenarioService(db);
+const agentService = new AgentService(db);
 
 // Get scenarios for an agent
 scenarioRouter.get("/:agentId", async (req: Request, res: Response) => {
   try {
     const { agentId } = req.params;
     const ownerId = res.locals.orgId;
-    const scenarios = await db.scenario.findMany({
-      where: { agentId, ownerId, deleted: false },
-      include: {
-        evaluations: {
-          include: { evaluationTemplate: true },
-          orderBy: { createdAt: "asc" },
-        },
-      },
+    const agent = await agentService.getAgentByCustomerId(agentId, ownerId);
+    if (!agent) {
+      return res.status(404).json({ success: false, error: "Agent not found" });
+    }
+
+    res.json({
+      success: true,
+      scenarios: agent.scenarios.map((scenario) => {
+        const { agentId, ...rest } = scenario;
+        return { ...rest };
+      }),
     });
-    res.json({ success: true, scenarios });
   } catch (error) {
     console.error("Error getting scenarios", error);
     res.status(500).json({ success: false, error: (error as Error).message });
@@ -35,7 +39,40 @@ scenarioRouter.post("/:agentId", async (req: Request, res: Response) => {
   try {
     const { agentId } = req.params;
     const ownerId = res.locals.orgId;
-    const scenario = req.body as ScenarioWithIncludes;
+
+    const scenario: ScenarioWithIncludes = {
+      name: req.body.name,
+      instructions: req.body.instructions,
+      evaluations: req.body.evaluations,
+      agentId,
+      ownerId,
+      createdAt: new Date(),
+      id: "",
+      deleted: false,
+      includeDateTime: false,
+      timezone: null,
+      successCriteria: "",
+    };
+
+    if (!agentId) {
+      return res.status(400).json({
+        success: false,
+        error: "Agent ID is required",
+      });
+    }
+    const agent = await agentService.getAgentByCustomerId(agentId, ownerId);
+    if (!agent) {
+      return res.status(404).json({ success: false, error: "Agent not found" });
+    }
+
+    const parsedScenario = ScenarioWithIncludesSchema.safeParse(scenario);
+    if (!parsedScenario.success) {
+      console.error(parsedScenario.error);
+      return res.status(400).json({
+        success: false,
+        error: parsedScenario.error.message,
+      });
+    }
 
     // Validate scenario data
     if (
@@ -67,9 +104,9 @@ scenarioRouter.post("/:agentId", async (req: Request, res: Response) => {
     }
 
     const createdScenario = await scenarioService.createScenario({
-      agentId,
+      agentId: agent.id,
       scenario,
-      userId: ownerId,
+      ownerId,
     });
     res.json({ success: true, scenario: createdScenario });
   } catch (error) {
@@ -136,7 +173,7 @@ scenarioRouter.put("/:id", async (req: Request, res: Response) => {
 
     const updatedScenario = await scenarioService.updateScenario({
       scenario: { ...scenario, id },
-      userId: ownerId,
+      ownerId,
     });
     res.json({ success: true, scenario: updatedScenario });
   } catch (error) {
@@ -163,7 +200,7 @@ scenarioRouter.delete("/:id", async (req: Request, res: Response) => {
       });
     }
 
-    await scenarioService.deleteScenario({ id, userId: ownerId });
+    await scenarioService.deleteScenario({ id, ownerId });
     res.json({ success: true });
   } catch (error) {
     console.error("Error deleting scenario", error);
