@@ -19,6 +19,17 @@ import { useParams } from "next/navigation";
 import { isTempId } from "~/lib/utils";
 import { useToast } from "~/components/hooks/use-toast";
 import { EvaluationTabSection } from "~/components/evaluations/EvaluationTabSection";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "~/components/ui/alert-dialog";
 
 interface ScenarioDialogProps {
   open: boolean;
@@ -250,18 +261,32 @@ export function ScenarioDialog({ open, onOpenChange }: ScenarioDialogProps) {
         <DialogFooter className="flex-shrink-0 border-t p-6 pt-4">
           <div className="flex w-full justify-between gap-2">
             {!isTempId(scenario.id) ? (
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={handleDelete}
-                disabled={isDeletingScenario}
-              >
-                {isDeletingScenario ? (
-                  <Spinner />
-                ) : (
-                  <TrashIcon className="h-4 w-4" />
-                )}
-              </Button>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    disabled={isDeletingScenario}
+                  >
+                    <TrashIcon className="h-4 w-4" />
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>are you sure?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      this action cannot be undone. this will permanently delete
+                      this scenario.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>cancel</AlertDialogCancel>
+                    <AlertDialogAction onClick={handleDelete}>
+                      {isDeletingScenario ? <Spinner /> : "delete"}
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             ) : (
               <div className="flex-1" />
             )}
