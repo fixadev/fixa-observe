@@ -12,13 +12,13 @@ const callService = new CallService(db);
 
 // todo: refactor this
 export async function sendAlerts({
-  userId,
+  ownerId,
   call,
   latencyDurations,
   savedSearches,
   evalSetResults,
 }: {
-  userId: string;
+  ownerId: string;
   call: Call & { agent: Agent | null };
   latencyDurations: number[] | undefined;
   savedSearches: SavedSearchWithIncludes[];
@@ -51,7 +51,7 @@ export async function sendAlerts({
           const { lookbackPeriod, percentile, threshold } = alert.details;
           const latencyPercentiles =
             await callService.getLatencyPercentilesForLookbackPeriod({
-              userId,
+              ownerId,
               filter: {
                 ...filter.data,
                 lookbackPeriod: lookbackPeriod,
@@ -68,7 +68,7 @@ export async function sendAlerts({
             latencyPercentiles[percentile] > threshold
           ) {
             sendAlertSlackMessage({
-              userId,
+              ownerId,
               call,
               success: false,
               alert: {
@@ -97,7 +97,7 @@ export async function sendAlerts({
           );
           if (evalSetResult?.success === trigger || trigger === null) {
             sendAlertSlackMessage({
-              userId,
+              ownerId,
               call,
               success: evalSetResult?.success ?? false,
               alert: {

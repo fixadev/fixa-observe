@@ -94,8 +94,8 @@ export const CALL_INCLUDE = {
 } as const;
 export const CallWithIncludesSchema = CallSchema.extend({
   messages: MessageSchema.array(),
-  scenario: ScenarioWithIncludesSchema,
-  testAgent: TestAgentSchema,
+  scenario: ScenarioWithIncludesSchema.nullable(),
+  testAgent: TestAgentSchema.nullable(),
   evaluationResults: EvaluationResultSchema.extend({
     evaluation: EvaluationWithIncludesSchema,
   }).array(),

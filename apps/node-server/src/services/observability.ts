@@ -25,7 +25,7 @@ export const transcribeAndSaveCall = async ({
   createdAt,
   agentId,
   metadata: callMetadata,
-  userId,
+  ownerId,
   saveRecording,
   language,
 }: UploadCallParams) => {
@@ -54,6 +54,9 @@ export const transcribeAndSaveCall = async ({
       "===================SAVE RECORDING===================",
       saveRecording,
     );
+
+    console.log("============ownerID intital============", ownerId);
+
     const urlToSave =
       saveRecording === false
         ? stereoRecordingUrl
@@ -64,7 +67,7 @@ export const transcribeAndSaveCall = async ({
       console.log("ACCRUING OBSERVABILITY MINUTES", duration);
       const durationMinutes = Math.ceil(duration / 60);
       await stripeServiceClient.accrueObservabilityMinutes({
-        userId: userId,
+        orgId: ownerId,
         minutes: durationMinutes,
       });
     } catch (error) {
@@ -72,7 +75,7 @@ export const transcribeAndSaveCall = async ({
     }
 
     // TODO: Figure out why old audio url is cached
-    console.log("calling audio service", env.AUDIO_SERVICE_URL);
+    console.log("calling audio service with language", language);
 
     const response = await axios.post<TranscribeResponse>(
       `${env.AUDIO_SERVICE_URL}/transcribe-deepgram`,
@@ -123,14 +126,14 @@ export const transcribeAndSaveCall = async ({
         createdAt: createdAt || new Date().toISOString(),
         agentId,
         callMetadata: callMetadata || {},
-        userId,
+        ownerId,
       });
 
     const newCall = await db.call.create({
       data: {
         id: uuidv4(),
         createdAt: createdAt || new Date(),
-        ownerId: userId,
+        ownerId,
         customerCallId: callId,
         startedAt: createdAt,
         status: CallStatus.completed,
@@ -141,7 +144,7 @@ export const transcribeAndSaveCall = async ({
             ...result,
             evaluation: {
               connect: {
-                id: result.evalId,
+                id: result.evaluationId,
               },
             },
           })),
@@ -184,7 +187,7 @@ export const transcribeAndSaveCall = async ({
     });
 
     await sendAlerts({
-      userId,
+      ownerId,
       latencyDurations,
       savedSearches,
       evalSetResults,
@@ -203,18 +206,18 @@ export const analyzeBasedOnRules = async ({
   createdAt,
   agentId,
   callMetadata,
-  userId,
+  ownerId,
 }: {
   messages: Omit<Message, "callId">[];
   createdAt: string;
   agentId: string;
   callMetadata: Record<string, string>;
-  userId: string;
+  ownerId: string;
 }) => {
   try {
     const { relevantEvalSets, savedSearches } = await findRelevantEvalSets({
       messages,
-      userId,
+      ownerId,
       agentId,
       callMetadata,
     });
@@ -233,7 +236,7 @@ export const analyzeBasedOnRules = async ({
       const parsedEvalResults = await formatOutput(result);
 
       const validEvalResults = parsedEvalResults.filter((result) =>
-        allEvals.some((evaluation) => evaluation.id === result.evalId),
+        allEvals.some((evaluation) => evaluation.id === result.evaluationId),
       );
 
       const evalSetResults = relevantEvalSets.map((evalSet) => ({
@@ -241,14 +244,15 @@ export const analyzeBasedOnRules = async ({
         success: validEvalResults
           .filter((result) =>
             evalSet.evaluations.some(
-              (evaluation) => evaluation.id === result.evalId,
+              (evaluation) => evaluation.id === result.evaluationId,
             ),
           )
           .every(
             (result) =>
               result.success ||
-              !allEvals.find((evaluation) => evaluation.id === result.evalId)
-                ?.isCritical,
+              !allEvals.find(
+                (evaluation) => evaluation.id === result.evaluationId,
+              )?.isCritical,
           ),
       }));
 
@@ -277,12 +281,12 @@ export const analyzeBasedOnRules = async ({
 
 export const findRelevantEvalSets = async ({
   messages,
-  userId,
+  ownerId,
   agentId,
   callMetadata,
 }: {
   messages: Omit<Message, "callId">[];
-  userId: string;
+  ownerId: string;
   agentId: string;
   callMetadata?: Record<string, string>;
 }): Promise<{
@@ -292,7 +296,7 @@ export const findRelevantEvalSets = async ({
   try {
     const searchServiceInstance = new SearchService(db);
     const savedSearches = await searchServiceInstance.getAll({
-      userId,
+      ownerId,
     });
     if (!savedSearches) {
       return {
