@@ -96,19 +96,23 @@ export async function POST(req: Request) {
       const orgId = evt.data.id;
       const creatorId = evt.data.created_by;
 
-      // TODO: only do this when user has no org
-      // const user = await userService.getUser(creatorId);
-      // user.getOrga
+      const user = await clerkService.getUser(creatorId);
+      const orgs =
+        await clerkService.clerkClient.users.getOrganizationMembershipList({
+          userId: user.id,
+        });
 
-      // if (!user.orgId) {
-      // Give the org free tests + observability calls
-      await clerkService.updatePublicMetadata({
-        orgId,
-        metadata: {
-          freeTestsLeft: NUM_FREE_TESTS,
-          freeObservabilityCallsLeft: NUM_FREE_OBSERVABILITY_CALLS,
-        },
-      });
+      if (!orgs.data.length) {
+        // Give the org free tests + observability calls
+        // Only do this when user has no org
+        await clerkService.updatePublicMetadata({
+          orgId,
+          metadata: {
+            freeTestsLeft: NUM_FREE_TESTS,
+            freeObservabilityCallsLeft: NUM_FREE_OBSERVABILITY_CALLS,
+          },
+        });
+      }
 
       // Create default saved search
       await db.savedSearch.create({
