@@ -1,32 +1,22 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { useUser } from "@clerk/nextjs";
-import {
-  ArrowLeftIcon,
-  ExclamationTriangleIcon,
-} from "@heroicons/react/24/solid";
+import { useOrganization } from "@clerk/nextjs";
+import { ExclamationTriangleIcon } from "@heroicons/react/24/solid";
 import Link from "next/link";
 import { useCallback, useMemo } from "react";
 import Spinner from "~/components/Spinner";
-import { SidebarTrigger } from "~/components/ui/sidebar";
 import { Skeleton } from "~/components/ui/skeleton";
 import { cn } from "~/lib/utils";
 import { type PublicMetadata } from "@repo/types/src";
 import { api } from "~/trpc/react";
 import { env } from "~/env";
-import { useRouter } from "next/navigation";
 
-export default function BillingPage({
-  params,
-}: {
-  params: { agentId: string };
-}) {
-  const router = useRouter();
-  const { user, isLoaded: isUserLoaded } = useUser();
+export function BillingPage() {
+  const { organization, isLoaded: isOrganizationLoaded } = useOrganization();
   const userData = useMemo(() => {
-    return user?.publicMetadata as PublicMetadata | undefined;
-  }, [user]);
+    return organization?.publicMetadata as PublicMetadata | undefined;
+  }, [organization]);
   const hasPaymentMethod = useMemo(() => {
     return userData?.stripeCustomerId !== undefined;
   }, [userData]);
@@ -46,9 +36,9 @@ export default function BillingPage({
     getCheckoutUrl({ redirectUrl });
   }, [getCheckoutUrl]);
 
-  const { data: billingDetails, isLoading: isLoadingBillingDetails } =
+  const { data: billingDetails, isFetching: isFetchingBillingDetails } =
     api.stripe.billingDetails.useQuery();
-  const { data: usageDetails, isLoading: isLoadingUsageDetails } =
+  const { data: usageDetails, isFetching: isFetchingUsageDetails } =
     api.stripe.usageDetails.useQuery();
 
   const billingPeriod = useMemo(() => {
@@ -67,8 +57,11 @@ export default function BillingPage({
   }, [usageDetails]);
 
   const isLoaded = useMemo(
-    () => isUserLoaded && !isLoadingBillingDetails && !isLoadingUsageDetails,
-    [isUserLoaded, isLoadingBillingDetails, isLoadingUsageDetails],
+    () =>
+      isOrganizationLoaded &&
+      !isFetchingBillingDetails &&
+      !isFetchingUsageDetails,
+    [isOrganizationLoaded, isFetchingBillingDetails, isFetchingUsageDetails],
   );
 
   const totalCost = useMemo(() => {
@@ -80,19 +73,10 @@ export default function BillingPage({
 
   return (
     <div className="h-full">
-      <div className="sticky top-0 z-20 flex h-14 w-full items-center justify-between border-b border-input bg-sidebar px-4 lg:h-[60px]">
-        <div className="flex items-center gap-2">
-          <Button
-            variant="ghost"
-            className="gap-2"
-            onClick={() => router.back()}
-          >
-            <ArrowLeftIcon className="h-4 w-4" />
-            back
-          </Button>
-        </div>
+      <div className="mb-4 border-b border-border pb-4">
+        <div className="font-bold">billing</div>
       </div>
-      <div className="max-w-lg space-y-8 p-6">
+      <div className="max-w-lg space-y-8">
         {isLoaded ? (
           <>
             {/* Plan Section */}

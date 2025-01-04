@@ -23,7 +23,6 @@ import {
   KeyIcon,
   PlusIcon,
   UsersIcon,
-  CreditCardIcon,
   LifebuoyIcon,
   DocumentCheckIcon,
 } from "@heroicons/react/24/outline";
@@ -44,12 +43,9 @@ import { Skeleton } from "../ui/skeleton";
 import { Button } from "../ui/button";
 import { AddAgentModal } from "~/app/dashboard/(agents)/_components/AddAgentModal";
 import { useAgent } from "~/app/contexts/UseAgent";
-import {
-  OrganizationSwitcher,
-  useOrganization,
-  UserButton,
-} from "@clerk/nextjs";
+import { useOrganization, UserButton } from "@clerk/nextjs";
 import FreeTestsLeft from "./FreeTestsLeft";
+import { CustomOrganizationSwitcher } from "../CustomOrganizationSwitcher";
 
 const navItems = [
   { href: "/", icon: CounterClockwiseClockIcon, label: "test history" },
@@ -168,17 +164,7 @@ export default function DashboardSidebar({
               <SelectItem value="observability">observability</SelectItem>
             </SelectContent>
           </Select>
-          <UserButton>
-            <UserButton.MenuItems>
-              <UserButton.Link
-                href="/billing"
-                label="billing"
-                labelIcon={<CreditCardIcon />}
-              />
-              <UserButton.Action label="manageAccount" />
-              <UserButton.Action label="signOut" />
-            </UserButton.MenuItems>
-          </UserButton>
+          <UserButton />
         </div>
       </SidebarHeader>
       <SidebarContent>
@@ -311,7 +297,7 @@ export default function DashboardSidebar({
               </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild>
-                  <OrganizationSwitcher hidePersonal hideSlug />
+                  <CustomOrganizationSwitcher />
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>

@@ -24,7 +24,6 @@ import {
   BeakerIcon,
   ChartBarIcon,
   ChevronDownIcon,
-  CreditCardIcon,
   DocumentCheckIcon,
   DocumentIcon,
   EllipsisHorizontalIcon,
@@ -60,15 +59,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
-import {
-  OrganizationSwitcher,
-  useOrganization,
-  UserButton,
-} from "@clerk/nextjs";
+import { useOrganization, UserButton } from "@clerk/nextjs";
 import { SlackIcon } from "lucide-react";
 import { DocumentTextIcon, KeyIcon } from "@heroicons/react/24/outline";
 import { OpenInNewWindowIcon } from "@radix-ui/react-icons";
 import { useFeatureFlagEnabled } from "posthog-js/react";
+import { CustomOrganizationSwitcher } from "../CustomOrganizationSwitcher";
 
 export default function ObserveSidebar() {
   const pathname = usePathname();
@@ -134,17 +130,7 @@ export default function ObserveSidebar() {
                 <SelectItem value="observability">observability</SelectItem>
               </SelectContent>
             </Select>
-            <UserButton>
-              <UserButton.MenuItems>
-                <UserButton.Link
-                  href="/billing"
-                  label="billing"
-                  labelIcon={<CreditCardIcon />}
-                />
-                <UserButton.Action label="manageAccount" />
-                <UserButton.Action label="signOut" />
-              </UserButton.MenuItems>
-            </UserButton>
+            <UserButton />
           </div>
         </SidebarHeader>
         <SidebarContent>
@@ -299,7 +285,7 @@ export default function ObserveSidebar() {
                 </SidebarMenuItem>
                 <SidebarMenuItem>
                   <SidebarMenuButton asChild>
-                    <OrganizationSwitcher hidePersonal hideSlug />
+                    <CustomOrganizationSwitcher />
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               </SidebarMenu>
