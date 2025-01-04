@@ -46,7 +46,7 @@ export function GeneralEvaluationsDialog({
   const {
     mutate: updateGeneralEvaluations,
     isPending: isUpdatingGeneralEvaluations,
-  } = api.eval.updateGeneralEvaluations.useMutation({
+  } = api.evaluation.updateGeneralEvaluations.useMutation({
     onSuccess: (updatedGeneralEvaluations) => {
       setAgent((prev) =>
         prev

@@ -33,7 +33,7 @@ export function EvaluationTemplateCombobox({
   const [open, setOpen] = useState(false);
   const [inputValue, setInputValue] = useState("");
 
-  const { data: templates } = api.eval.getTemplates.useQuery();
+  const { data: templates } = api.evaluation.getTemplates.useQuery();
 
   const handleCreateTemplate = useCallback(
     (name: string) => {

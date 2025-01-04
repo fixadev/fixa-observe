@@ -11,7 +11,7 @@ import { db } from "~/server/db";
 
 const evalServiceInstance = new EvaluationService(db);
 
-export const evalRouter = createTRPCRouter({
+export const evaluationRouter = createTRPCRouter({
   updateGeneralEvaluations: protectedProcedure
     .input(
       z.object({

@@ -5,7 +5,7 @@ import { testRouter } from "./routers/test";
 import { slackRouter } from "./routers/slack";
 import { userRouter } from "./routers/user";
 import { callRouter } from "./routers/call";
-import { evalRouter } from "./routers/eval";
+import { evaluationRouter } from "./routers/evaluation";
 import { scenarioRouter } from "./routers/scenario";
 import { searchRouter } from "./routers/search";
 import { stripeRouter } from "./routers/stripe";
@@ -17,7 +17,7 @@ import { stripeRouter } from "./routers/stripe";
 export const appRouter = createTRPCRouter({
   s3: s3Router,
   agent: agentRouter,
-  eval: evalRouter,
+  evaluation: evaluationRouter,
   scenario: scenarioRouter,
   search: searchRouter,
   slack: slackRouter,

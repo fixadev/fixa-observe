@@ -11,7 +11,8 @@ import { type EvaluationTemplate } from "@repo/types/src";
 import { instantiateEvaluationTemplate } from "~/lib/instantiate";
 
 export default function EvalTemplatesPage() {
-  const { data: _evaluationTemplates = [] } = api.eval.getTemplates.useQuery();
+  const { data: _evaluationTemplates = [] } =
+    api.evaluation.getTemplates.useQuery();
   const [evaluationTemplates, setEvaluationTemplates] = useState<
     EvaluationTemplate[]
   >([]);

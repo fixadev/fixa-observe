@@ -58,11 +58,11 @@ export function EvaluationTemplateDialog({
   }, [_template]);
 
   const { mutate: createTemplate, isPending: isCreatingTemplate } =
-    api.eval.createTemplate.useMutation({
+    api.evaluation.createTemplate.useMutation({
       onSuccess: (template) => {
         onOpenChange(false);
         onCreateTemplate(template);
-        void utils.eval.getTemplates.invalidate();
+        void utils.evaluation.getTemplates.invalidate();
       },
       onError: (error) => {
         toast({
@@ -74,7 +74,7 @@ export function EvaluationTemplateDialog({
       },
     });
   const { mutate: updateTemplate, isPending: isUpdatingTemplate } =
-    api.eval.updateTemplate.useMutation({
+    api.evaluation.updateTemplate.useMutation({
       onSuccess: () => {
         onOpenChange(false);
         if (template) {
@@ -91,7 +91,7 @@ export function EvaluationTemplateDialog({
       },
     });
   const { mutate: deleteTemplate, isPending: isDeletingTemplate } =
-    api.eval.deleteTemplate.useMutation({
+    api.evaluation.deleteTemplate.useMutation({
       onSuccess: (id) => {
         onDeleteTemplate(id);
       },
