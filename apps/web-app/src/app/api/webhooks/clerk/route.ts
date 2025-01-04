@@ -94,13 +94,20 @@ export async function POST(req: Request) {
     }
     case "organization.created": {
       const orgId = evt.data.id;
+      const creatorId = evt.data.created_by;
 
       // TODO: only do this when user has no org
+      // const user = await userService.getUser(creatorId);
+      // user.getOrga
 
+      // if (!user.orgId) {
       // Give the org free tests + observability calls
-      await orgService.updatePublicMetadata(orgId, {
-        freeTestsLeft: NUM_FREE_TESTS,
-        freeObservabilityCallsLeft: NUM_FREE_OBSERVABILITY_CALLS,
+      await orgService.updatePublicMetadata({
+        orgId,
+        metadata: {
+          freeTestsLeft: NUM_FREE_TESTS,
+          freeObservabilityCallsLeft: NUM_FREE_OBSERVABILITY_CALLS,
+        },
       });
 
       // Create default saved search

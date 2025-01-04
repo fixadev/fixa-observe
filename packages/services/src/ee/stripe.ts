@@ -49,7 +49,7 @@ export class StripeService {
   };
 
   private getCustomerId = async (orgId: string) => {
-    const metadata = await this.orgService.getPublicMetadata(orgId);
+    const metadata = await this.orgService.getPublicMetadata({ orgId });
     const stripeCustomerId = metadata.stripeCustomerId;
     if (!stripeCustomerId) {
       throw new Error("Stripe customer ID not found");
@@ -98,7 +98,7 @@ export class StripeService {
     orgId: string;
     minutes: number;
   }) => {
-    const metadata = await this.orgService.getPublicMetadata(orgId);
+    const metadata = await this.orgService.getPublicMetadata({ orgId });
     if (metadata.freeTestsLeft && metadata.freeTestsLeft > 0) {
       // Don't accrue minutes if there are still free tests left
       // TODO: fix this. doesn't catch the case where user goes from 1 => 0 free tests left

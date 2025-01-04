@@ -27,7 +27,7 @@ export const stripeRouter = createTRPCRouter({
     }),
 
   billingDetails: protectedProcedure.query(async ({ ctx }) => {
-    const metadata = await orgService.getPublicMetadata(ctx.orgId);
+    const metadata = await orgService.getPublicMetadata({ orgId: ctx.orgId });
     if (!metadata.stripeCustomerId) {
       return null;
     }
@@ -40,7 +40,7 @@ export const stripeRouter = createTRPCRouter({
   }),
 
   usageDetails: protectedProcedure.query(async ({ ctx }) => {
-    const metadata = await orgService.getPublicMetadata(ctx.orgId);
+    const metadata = await orgService.getPublicMetadata({ orgId: ctx.orgId });
     if (!metadata.stripeCustomerId) {
       return null;
     }

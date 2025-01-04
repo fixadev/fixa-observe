@@ -46,8 +46,11 @@ export async function POST(req: NextRequest) {
 
         const customerId = session.customer as string | undefined;
         if (customerId) {
-          await orgService.updatePublicMetadata(orgId, {
-            stripeCustomerId: customerId,
+          await orgService.updatePublicMetadata({
+            orgId,
+            metadata: {
+              stripeCustomerId: customerId,
+            },
           });
         }
 

@@ -26,7 +26,7 @@ export class TestService {
     };
     this.checkEnv();
     this.agentServiceInstance = new AgentService(this.db);
-    this.userServiceInstance = new OrgService(this.db);
+    this.orgServiceInstance = new OrgService(this.db);
     this.stripeServiceInstance = new StripeService(this.db);
     this.vapiServiceInstance = new VapiService(this.db);
   }
@@ -37,7 +37,7 @@ export class TestService {
     }
   };
   agentServiceInstance: AgentService;
-  userServiceInstance: OrgService;
+  orgServiceInstance: OrgService;
   stripeServiceInstance: StripeService;
   vapiServiceInstance: VapiService;
 
@@ -149,9 +149,11 @@ export class TestService {
     runFromApi?: boolean;
   }) {
     // Make sure user can run this test - check free tests left and subscription
-    const userData = await this.userServiceInstance.getPublicMetadata(ownerId);
-    if (!userData) {
-      throw new Error("User not found");
+    const orgData = await this.orgServiceInstance.getPublicMetadata({
+      orgId: ownerId,
+    });
+    if (!orgData) {
+      throw new Error("Org not found");
     }
 
     const bypassPayment = await this.posthogClient.getFeatureFlag(
@@ -161,10 +163,10 @@ export class TestService {
     if (!bypassPayment) {
       // Check if user has free tests left or subscription
       const noFreeTestsLeft =
-        !userData.freeTestsLeft ||
-        (userData.freeTestsLeft && userData.freeTestsLeft <= 0);
+        !orgData.freeTestsLeft ||
+        (orgData.freeTestsLeft && orgData.freeTestsLeft <= 0);
       let hasActiveSubscription = false;
-      if (userData.stripeCustomerId) {
+      if (orgData.stripeCustomerId) {
         const subscriptions =
           await this.stripeServiceInstance.getSubscriptions(ownerId);
         if (subscriptions.data.length > 0) {
@@ -178,8 +180,10 @@ export class TestService {
       }
 
       // If user has free tests left, deduct one
-      if (userData.freeTestsLeft && userData.freeTestsLeft > 0) {
-        await this.userServiceInstance.decrementFreeTestsLeft(ownerId);
+      if (orgData.freeTestsLeft && orgData.freeTestsLeft > 0) {
+        await this.orgServiceInstance.decrementFreeTestsLeft({
+          orgId: ownerId,
+        });
       }
     }
 

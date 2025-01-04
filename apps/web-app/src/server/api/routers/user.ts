@@ -6,12 +6,12 @@ const orgService = new OrgService(db);
 
 export const userRouter = createTRPCRouter({
   generateApiKey: protectedProcedure.mutation(async ({ ctx }) => {
-    const data = await orgService.createApiKey(ctx.orgId);
+    const data = await orgService.createApiKey({ orgId: ctx.orgId });
     return { apiKey: data.apiKey };
   }),
 
   getApiKey: protectedProcedure.query(async ({ ctx }) => {
-    const data = await orgService.getApiKey(ctx.orgId);
+    const data = await orgService.getApiKey({ orgId: ctx.orgId });
     return { apiKey: data?.apiKey };
   }),
 });

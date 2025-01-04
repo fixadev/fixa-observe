@@ -50,11 +50,17 @@ export const slackRouter = createTRPCRouter({
         const accessToken = response.data.access_token;
         const webhookUrl = response.data.incoming_webhook.url;
 
-        await orgService.updatePrivateMetadata(ctx.orgId, {
-          slackAccessToken: accessToken,
+        await orgService.updatePrivateMetadata({
+          orgId: ctx.orgId,
+          metadata: {
+            slackAccessToken: accessToken,
+          },
         });
-        await orgService.updatePublicMetadata(ctx.orgId, {
-          slackWebhookUrl: webhookUrl,
+        await orgService.updatePublicMetadata({
+          orgId: ctx.orgId,
+          metadata: {
+            slackWebhookUrl: webhookUrl,
+          },
         });
 
         return response.data;
