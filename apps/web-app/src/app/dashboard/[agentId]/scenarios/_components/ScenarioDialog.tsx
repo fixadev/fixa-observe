@@ -27,7 +27,7 @@ interface ScenarioDialogProps {
 
 export function ScenarioDialog({ open, onOpenChange }: ScenarioDialogProps) {
   const { agentId } = useParams();
-  const { setAgent } = useAgent(agentId as string);
+  const { setAgent } = useAgent();
   const { scenario, setScenario } = useScenario();
   const { toast } = useToast();
 

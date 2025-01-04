@@ -51,7 +51,7 @@ export default function AgentPage({ params }: { params: { agentId: string } }) {
   const [runTestModalOpen, setRunTestModalOpen] = useState(false);
   const { toast } = useToast();
   const { user } = useUser();
-  const { agent, setAgent } = useAgent(params.agentId);
+  const { agent, setAgent } = useAgent();
   const router = useRouter();
   const bypassPayment = useFeatureFlagEnabled("bypass-payment");
 

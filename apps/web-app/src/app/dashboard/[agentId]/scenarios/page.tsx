@@ -13,7 +13,7 @@ import { DashboardPageHeader } from "~/components/DashboardPageHeader";
 import { GeneralEvaluations } from "./_components/GeneralEvaluations";
 
 function ScenariosPageContent({ params }: { params: { agentId: string } }) {
-  const { agent } = useAgent(params.agentId);
+  const { agent } = useAgent();
 
   const scenarios = useMemo(() => agent?.scenarios ?? [], [agent?.scenarios]);
 

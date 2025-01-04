@@ -24,7 +24,6 @@ import {
   BeakerIcon,
   ChartBarIcon,
   ChevronDownIcon,
-  CreditCardIcon,
   DocumentCheckIcon,
   DocumentIcon,
   EllipsisHorizontalIcon,
@@ -32,7 +31,7 @@ import {
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { removeTrailingSlash } from "~/lib/utils";
 import { api } from "~/trpc/react";
 import { Button } from "../ui/button";
@@ -60,11 +59,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
-import { OrganizationSwitcher, UserButton } from "@clerk/nextjs";
+import { useOrganization, UserButton } from "@clerk/nextjs";
 import { SlackIcon } from "lucide-react";
 import { DocumentTextIcon, KeyIcon } from "@heroicons/react/24/outline";
 import { OpenInNewWindowIcon } from "@radix-ui/react-icons";
 import { useFeatureFlagEnabled } from "posthog-js/react";
+import { CustomOrganizationSwitcher } from "../CustomOrganizationSwitcher";
 
 export default function ObserveSidebar() {
   const pathname = usePathname();
@@ -92,6 +92,23 @@ export default function ObserveSidebar() {
 
   const testsPageEnabled = useFeatureFlagEnabled("observability-tests-page");
 
+  // Invalidate everything when organization changes
+  const utils = api.useUtils();
+  const { organization, isLoaded: organizationLoaded } = useOrganization();
+  const prevOrganizationId = useRef<string | undefined>(undefined);
+  useEffect(() => {
+    if (organizationLoaded && organization) {
+      if (
+        prevOrganizationId.current &&
+        prevOrganizationId.current !== organization.id
+      ) {
+        void utils.invalidate();
+      }
+      prevOrganizationId.current = organization.id;
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [organization, utils]);
+
   return (
     <>
       <Sidebar>
@@ -113,17 +130,7 @@ export default function ObserveSidebar() {
                 <SelectItem value="observability">observability</SelectItem>
               </SelectContent>
             </Select>
-            <UserButton>
-              <UserButton.MenuItems>
-                <UserButton.Link
-                  href="/billing"
-                  label="billing"
-                  labelIcon={<CreditCardIcon />}
-                />
-                <UserButton.Action label="manageAccount" />
-                <UserButton.Action label="signOut" />
-              </UserButton.MenuItems>
-            </UserButton>
+            <UserButton />
           </div>
         </SidebarHeader>
         <SidebarContent>
@@ -278,7 +285,7 @@ export default function ObserveSidebar() {
                 </SidebarMenuItem>
                 <SidebarMenuItem>
                   <SidebarMenuButton asChild>
-                    <OrganizationSwitcher hidePersonal hideSlug />
+                    <CustomOrganizationSwitcher />
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               </SidebarMenu>
