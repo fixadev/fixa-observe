@@ -186,6 +186,11 @@ export const transcribeAndSaveCall = async ({
     } catch (error) {
       console.error("Error accruing observability minutes", error);
     }
+    console.log(
+      "===================saved call===================",
+      newCall.id,
+      newCall.customerCallId,
+    );
 
     await sendAlerts({
       ownerId,

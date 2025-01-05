@@ -12,6 +12,6 @@ export async function getAudioDuration(url: string): Promise<number> {
     return Math.round(parseFloat(metadata.format.duration) * 100) / 100;
   } catch (error) {
     console.error("Error getting audio duration:", error);
-    throw new Error("Failed to get audio duration");
+    throw new Error("Failed to get audio duration for url: " + url);
   }
 }
