@@ -16,7 +16,7 @@ import {
   type AnalysisStartedData,
   type CallStartedData,
 } from "@repo/types/src/index";
-import { useUser } from "@clerk/nextjs";
+import { useOrganization } from "@clerk/nextjs";
 import { SlashIcon } from "@heroicons/react/24/solid";
 import { CallResult, CallStatus } from "@prisma/client";
 import Link from "next/link";
@@ -47,10 +47,10 @@ function TestPage({ params }: { params: { agentId: string; testId: string } }) {
   });
   const { data: agent } = api.agent.get.useQuery({ id: params.agentId });
 
-  const { user } = useUser();
+  const { organization } = useOrganization();
 
   useSocketMessage(
-    user?.id,
+    organization?.id,
     useCallback(
       (message: SocketMessage) => {
         if (message.type === "call-ended") {
