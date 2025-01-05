@@ -69,6 +69,8 @@ export const analyzeCallWitho1 = async ({
   Keep the following in mind:
   - secondsFromStart and duration should only encompass the specific portion of the call where the error occurred. It should not be very long (10 seconds is a good max), unless it makes sense for it to be longer.
   - some evals do not require timestamps (such as an eval that failed but not in a particular part of the call)
+  - transcription errors occur frequently, particuarly for proper nouns and names. so if you see an error involving a name or proper noun that looks likes its been mis-transcribed, you should not count it as a failure and assume it was a transcription error instead.
+    - for example, if the transcript says "hi, this is Jordan from Masa Valley" but the evaluation says "agent should introduce themselves as 'Jordan from Mussab Ali'", you should not count this as a failure.
   `;
 
   const prompt = `${basePrompt}\n\n\n\nTest Agent Prompt: ${testAgentPrompt}\n\n${
