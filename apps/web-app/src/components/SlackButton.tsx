@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { Button } from "~/components/ui/button";
 import { CheckCircleIcon } from "@heroicons/react/24/solid";
-import { useUser } from "@clerk/nextjs";
+import { useOrganization } from "@clerk/nextjs";
 import { env } from "~/env";
 
 export function InstallSlackAppButton({
@@ -15,11 +15,11 @@ export function InstallSlackAppButton({
   reInstallText?: string;
   savedSearchId?: string;
 }) {
-  const { user } = useUser();
+  const { organization } = useOrganization();
 
   const slackWebhookUrl = useMemo(
-    () => user?.publicMetadata.slackWebhookUrl,
-    [user],
+    () => organization?.publicMetadata.slackWebhookUrl,
+    [organization],
   );
 
   const state = useMemo(() => {

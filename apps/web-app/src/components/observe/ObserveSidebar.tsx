@@ -60,7 +60,6 @@ import {
   SelectValue,
 } from "../ui/select";
 import { useOrganization, UserButton } from "@clerk/nextjs";
-import { SlackIcon } from "lucide-react";
 import { DocumentTextIcon, KeyIcon } from "@heroicons/react/24/outline";
 import { OpenInNewWindowIcon } from "@radix-ui/react-icons";
 import { useFeatureFlagEnabled } from "posthog-js/react";
@@ -236,17 +235,6 @@ export default function ObserveSidebar() {
           <SidebarGroup>
             <SidebarGroupContent>
               <SidebarMenu>
-                <SidebarMenuItem>
-                  <SidebarMenuButton
-                    asChild
-                    isActive={isCurrentPath("/slack-app")}
-                  >
-                    <Link href="/observe/slack-app">
-                      <SlackIcon />
-                      <span>slack app</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
                 <SidebarMenuItem>
                   <SidebarMenuButton
                     asChild
