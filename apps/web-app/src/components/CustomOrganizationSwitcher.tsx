@@ -3,8 +3,11 @@
 import { OrganizationSwitcher } from "@clerk/nextjs";
 import { CreditCardIcon } from "@heroicons/react/24/solid";
 import { BillingPage } from "~/components/BillingPage";
+import { useFeatureFlagEnabled } from "posthog-js/react";
 
 export function CustomOrganizationSwitcher() {
+  const bypassPayment = useFeatureFlagEnabled("bypass-payment");
+
   return (
     <OrganizationSwitcher
       hidePersonal
@@ -17,13 +20,15 @@ export function CustomOrganizationSwitcher() {
         (typeof window !== "undefined" ? window.location.href : "/")
       }
     >
-      <OrganizationSwitcher.OrganizationProfilePage
-        label="billing"
-        labelIcon={<CreditCardIcon />}
-        url="billing"
-      >
-        <BillingPage />
-      </OrganizationSwitcher.OrganizationProfilePage>
+      {!bypassPayment && (
+        <OrganizationSwitcher.OrganizationProfilePage
+          label="billing"
+          labelIcon={<CreditCardIcon />}
+          url="billing"
+        >
+          <BillingPage />
+        </OrganizationSwitcher.OrganizationProfilePage>
+      )}
     </OrganizationSwitcher>
   );
 }
