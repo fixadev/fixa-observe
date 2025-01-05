@@ -74,7 +74,7 @@ export function EvaluationTemplateCombobox({
                 return (
                   <CommandItem
                     key={template.id}
-                    value={template.name}
+                    value={template.id}
                     onSelect={() => {
                       onSelect(template);
                       setOpen(false);

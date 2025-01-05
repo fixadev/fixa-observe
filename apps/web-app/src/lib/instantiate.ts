@@ -127,7 +127,6 @@ export function instantiateEvaluationTemplate(
     deleted: false,
     scenarioId: null,
     ownerId: null,
-    evaluationGroupId: null,
 
     ...partial,
   };

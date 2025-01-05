@@ -147,18 +147,23 @@ export function EvaluationTemplateDialog({
 
           {/* Success criteria section */}
           <div className="space-y-2">
-            <div className="flex items-center gap-2">
-              <Label>success criteria</Label>
-              <Tooltip>
-                <TooltipTrigger tabIndex={-1}>
-                  <InformationCircleIcon className="size-4 text-muted-foreground" />
-                </TooltipTrigger>
-                <TooltipContent className="max-w-[400px]">
-                  the system prompt passed to the evaluator when evaluating this
-                  evaluation. try to be as thorough as possible. use brackets to
-                  denote template variables, i.e. {`{{`} templateVariable {`}}`}
-                </TooltipContent>
-              </Tooltip>
+            <div>
+              <div className="mb-1 flex items-center gap-2">
+                <Label>success criteria</Label>
+                <Tooltip>
+                  <TooltipTrigger tabIndex={-1}>
+                    <InformationCircleIcon className="size-4 text-muted-foreground" />
+                  </TooltipTrigger>
+                  <TooltipContent className="max-w-[400px]">
+                    the system prompt passed to the evaluator when evaluating
+                    this evaluation. try to be as thorough as possible.
+                  </TooltipContent>
+                </Tooltip>
+              </div>
+              <div className="text-sm text-muted-foreground">
+                use brackets to denote template variables, i.e. {`{{`}{" "}
+                templateVariable {`}}`}
+              </div>
             </div>
             <Textarea
               tabIndex={0}
