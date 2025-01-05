@@ -33,6 +33,11 @@ uploadCallRouter.post(
         const bypassPayment = await posthogClient.getFeatureFlag(
           "bypass-payment",
           res.locals.orgId,
+          {
+            groups: {
+              organization: res.locals.orgId,
+            },
+          },
         );
         if (metadata.stripeCustomerId || bypassPayment) {
           // User is paid user!

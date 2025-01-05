@@ -159,6 +159,11 @@ export class TestService {
     const bypassPayment = await this.posthogClient.getFeatureFlag(
       "bypass-payment",
       ownerId,
+      {
+        groups: {
+          organization: ownerId,
+        },
+      },
     );
     if (!bypassPayment) {
       // Check if user has free tests left or subscription
