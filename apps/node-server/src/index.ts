@@ -5,7 +5,6 @@ import { env } from "./env";
 import { startQueueConsumer } from "./workers/queueConsumer";
 import privateRouter from "./routers/v1/private";
 import publicRouter from "./routers/v1/public";
-import { authenticateRequest } from "./middlewares/auth";
 import { posthogClient } from "./clients/posthogClient";
 import vapiRouter from "./routers/v1/routes/vapi";
 import ofOneRouter from "./routers/v1/routes/ofOne";

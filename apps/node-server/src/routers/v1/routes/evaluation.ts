@@ -44,17 +44,17 @@ evaluationRouter.put("/template/:id", async (req, res) => {
 });
 
 // Create evaluation
-evaluationRouter.post("/", async (req, res) => {
-  try {
-    const evaluation = await evaluationService.create({
-      evaluation: req.body,
-      ownerId: res.locals.orgId,
-    });
-    res.json(evaluation);
-  } catch (error) {
-    res.status(500).json({ error: "Failed to create evaluation" });
-  }
-});
+// evaluationRouter.post("/", async (req, res) => {
+//   try {
+//     const evaluation = await evaluationService.create({
+//       evaluation: req.body,
+//       ownerId: res.locals.orgId,
+//     });
+//     res.json(evaluation);
+//   } catch (error) {
+//     res.status(500).json({ error: "Failed to create evaluation" });
+//   }
+// });
 
 // Update evaluation
 evaluationRouter.put("/:id", async (req, res) => {

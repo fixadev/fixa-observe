@@ -7,11 +7,11 @@ import scenarioRouter from "./routes/scenario";
 import alertRouter from "./routes/alert";
 import evaluationRouter from "./routes/evaluation";
 import toolCallRouter from "./routes/toolCall";
-import { authenticateRequest } from "../../middlewares/auth";
+import { authenticatePublicRequest } from "../../middlewares/auth";
 
 const publicRouter = express.Router();
 
-publicRouter.use(authenticateRequest);
+publicRouter.use(authenticatePublicRequest);
 
 publicRouter.use("/upload-call", uploadCallRouter);
 publicRouter.use("/tests", testsRouter);
@@ -21,4 +21,5 @@ publicRouter.use("/scenarios", scenarioRouter);
 publicRouter.use("/alerts", alertRouter);
 publicRouter.use("/evaluations", evaluationRouter);
 publicRouter.use("/tool-calls", toolCallRouter);
+
 export default publicRouter;

@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { db } from "../db";
 
-export const authenticateRequest = async (
+export const authenticatePublicRequest = async (
   req: Request,
   res: Response,
   next: NextFunction,

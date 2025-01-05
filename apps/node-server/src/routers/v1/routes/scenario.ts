@@ -133,7 +133,7 @@ scenarioRouter.put("/:id", async (req: Request, res: Response) => {
 
     // Validate scenario exists and belongs to user
     const existingScenario = await db.scenario.findFirst({
-      where: { id, ownerId, deleted: false },
+      where: { id, deleted: false },
     });
 
     if (!existingScenario) {
@@ -185,7 +185,7 @@ scenarioRouter.delete("/:id", async (req: Request, res: Response) => {
 
     // Validate scenario exists and belongs to user
     const existingScenario = await db.scenario.findFirst({
-      where: { id, ownerId, deleted: false },
+      where: { id, deleted: false },
     });
 
     if (!existingScenario) {

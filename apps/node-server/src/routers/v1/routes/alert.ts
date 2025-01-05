@@ -1,5 +1,11 @@
 import { Request, Response, Router } from "express";
 import { db } from "../../../db";
+import {
+  AlertWithDetailsSchema,
+  AlertWithDetails,
+  CreateAlertSchema,
+  CreateAlert,
+} from "@repo/types/src/index";
 import { v4 as uuidv4 } from "uuid";
 
 const alertRouter = Router();
@@ -19,9 +25,26 @@ alertRouter.get("/", async (req: Request, res: Response) => {
 });
 
 // Create alert
-alertRouter.post("/", async (req: Request, res: Response) => {
+alertRouter.post("/:savedSearchId?", async (req: Request, res: Response) => {
   try {
     const ownerId = res.locals.orgId;
+    let savedSearchId = req.params.savedSearchId;
+
+    if (!savedSearchId) {
+      const defaultSavedSearch = await db.savedSearch.findFirst({
+        where: {
+          name: "default",
+        },
+      });
+      if (!defaultSavedSearch) {
+        return res.status(400).json({
+          success: false,
+          error: "Default saved search not found",
+        });
+      }
+      savedSearchId = defaultSavedSearch?.id;
+    }
+
     const alert = req.body;
 
     // Validate alert type
@@ -44,7 +67,11 @@ alertRouter.post("/", async (req: Request, res: Response) => {
         });
       }
 
-      if (!percentile || percentile < 0 || percentile > 100) {
+      if (
+        !percentile ||
+        parseFloat(percentile) < 0 ||
+        parseFloat(percentile) > 100
+      ) {
         return res.status(400).json({
           success: false,
           error: "Percentile must be between 0 and 100",
@@ -83,6 +110,14 @@ alertRouter.post("/", async (req: Request, res: Response) => {
           error: "Trigger must be boolean or null",
         });
       }
+    }
+
+    const parsedAlert = CreateAlertSchema.safeParse(alert);
+    if (!parsedAlert.success) {
+      return res.status(400).json({
+        success: false,
+        error: parsedAlert.error.message,
+      });
     }
 
     const createdAlert = await db.alert.create({
