@@ -73,7 +73,7 @@ export default function AgentPage({ params }: { params: { agentId: string } }) {
   }, [params.agentId, user]);
 
   useSocketMessage(
-    user?.id,
+    organization?.id,
     useCallback(
       (message: SocketMessage) => {
         if (message.type === "call-ended") {
