@@ -44,8 +44,8 @@ model Agent {
   name        String
   phoneNumber String   @default("")
 
+  customerAgentId String
   githubRepoUrl   String?
-  customerAgentId String?
   systemPrompt    String  @default("")
   extraProperties Json    @default("{}")
 
@@ -238,7 +238,7 @@ model EvaluationTemplate {
 model GeneralEvaluation {
   id           String     @id @default(uuid())
   agentId      String
-  agent        Agent      @relation(fields: [agentId], references: [id])
+  agent        Agent      @relation(fields: [agentId], references: [id], onDelete: Cascade)
   evaluationId String
   evaluation   Evaluation @relation(fields: [evaluationId], references: [id])
 }

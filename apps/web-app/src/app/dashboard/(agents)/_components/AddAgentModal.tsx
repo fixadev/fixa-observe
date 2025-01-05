@@ -106,8 +106,10 @@ export function AddAgentModal({
                 </span>
               </div>
               <div className="text-xs text-muted-foreground">
-                the ID of this agent in your database, used to associate
-                production calls with the agent created in fixa.
+                the ID of this agent in your database, used to run tests and
+                associate production calls with the agent created in fixa. if
+                you don&apos;t have one, we&apos;ll generate a random one for
+                you. this cannot be changed later.
               </div>
             </div>
             <Input

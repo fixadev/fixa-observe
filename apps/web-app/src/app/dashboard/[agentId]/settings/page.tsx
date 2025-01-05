@@ -142,7 +142,7 @@ export default function AgentSettingsPage({
               agent ID to be used with fixa API requests
             </div>
           </div>
-          <CopyText text={agentState.id} />
+          <CopyText text={agentState.customerAgentId} />
         </div>
         <div className="flex flex-col gap-2">
           <div>
@@ -159,7 +159,7 @@ export default function AgentSettingsPage({
             }}
           />
         </div>
-        <div className="flex flex-col gap-2">
+        {/* <div className="flex flex-col gap-2">
           <div>
             <Label>internal agent ID</Label>
             <div className="text-xs text-muted-foreground">
@@ -177,7 +177,7 @@ export default function AgentSettingsPage({
               });
             }}
           />
-        </div>
+        </div> */}
         <div className="flex flex-col gap-2">
           <div>
             <Label>agent phone number</Label>
