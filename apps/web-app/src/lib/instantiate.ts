@@ -47,7 +47,6 @@ export function instantiateScenario(
   return {
     id: generateTempId(),
     createdAt: new Date(),
-    ownerId: "",
     agentId: "",
     name: "",
     instructions: "",
