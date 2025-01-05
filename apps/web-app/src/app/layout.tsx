@@ -7,7 +7,7 @@ import { CSPostHogProvider } from "./providers";
 import { ClerkProvider } from "@clerk/nextjs";
 
 // import { dark } from "@clerk/themes";
-import ChildrenWrapper from "./_components/ChildrenWrapper";
+import { PostHogIdentify } from "./_components/PostHogIdentify";
 import { TooltipProvider } from "~/components/ui/tooltip";
 
 export default function RootLayout({
@@ -22,8 +22,9 @@ export default function RootLayout({
     >
       <CSPostHogProvider>
         <ClerkProvider
-        // appearance={{ baseTheme: dark }}
-        // localization={localization}
+          afterSignOutUrl="/"
+          // appearance={{ baseTheme: dark }}
+          // localization={localization}
         >
           <body className="h-full">
             {/* <ThemeProvider
@@ -34,10 +35,9 @@ export default function RootLayout({
             > */}
             <TRPCReactProvider>
               <TooltipProvider delayDuration={100}>
-                <ChildrenWrapper>
-                  {children}
-                  <Toaster />
-                </ChildrenWrapper>
+                {children}
+                <Toaster />
+                <PostHogIdentify />
               </TooltipProvider>
             </TRPCReactProvider>
             {/* </ThemeProvider> */}

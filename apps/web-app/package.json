@@ -86,6 +86,7 @@
     "openai": "^4.67.1",
     "pdf-parse": "^1.1.1",
     "posthog-js": "^1.170.1",
+    "posthog-node": "^4.3.2",
     "react": "^18.3.1",
     "react-audio-visualize": "^1.2.0",
     "react-code-blocks": "^0.1.6",

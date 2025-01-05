@@ -9,7 +9,7 @@ import Spinner from "~/components/Spinner";
 import { Dialog, DialogContent } from "~/components/ui/dialog";
 import { api } from "~/trpc/react";
 import ChartCard from "~/components/observe/ChartCard";
-import { EvalSetsAndAlertsCard } from "./EvalsAndAlertsCard";
+import { EvaluationGroupsAndAlertsCard } from "./EvaluationGroupsAndAlertsCard";
 import { type SavedSearchWithIncludes } from "@repo/types/src";
 import NoCallsCard from "~/components/observe/NoCallsCard";
 import FreeCallsLeft from "~/components/observe/FreeCallsLeft";
@@ -140,7 +140,7 @@ export default function SavedSearchPage({
             data={percentiles?.latency}
             isLoading={isLoadingPercentiles || isRefetchingPercentiles}
           />
-          <EvalSetsAndAlertsCard searchId={params.searchId ?? ""} />
+          <EvaluationGroupsAndAlertsCard searchId={params.searchId ?? ""} />
         </div>
         <CallTable isLoading={isLoading || isRefetching} calls={calls} />
         {/* Invisible marker for infinite scroll */}
@@ -170,7 +170,7 @@ export default function SavedSearchPage({
               >
                 <CallDetails
                   call={selectedCall}
-                  botName="jordan"
+                  botName="agent"
                   userName="caller"
                   headerHeight={44}
                   includeHeaderTop={false}

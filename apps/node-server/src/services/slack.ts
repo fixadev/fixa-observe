@@ -6,22 +6,27 @@ import {
   Alert,
   EvalSetAlert,
   LatencyAlert,
+  SavedSearch,
+  SavedSearchWithIncludes,
 } from "@repo/types/src/index";
+import { clerkServiceClient } from "../clients/clerkServiceClient";
 import { db } from "../db";
 
 export const sendTestCompletedSlackMessage = async ({
-  userId,
+  orgId,
   test,
 }: {
-  userId: string;
+  orgId: string;
   test: Test & { calls: Call[] };
 }) => {
   console.log(
     "sending slack message =========================================================",
   );
-  const user = await getUser(userId);
-  console.log(user, "user");
-  if (!user.public_metadata.slackWebhookUrl) {
+  const metadata = await clerkServiceClient.getPublicMetadata({
+    orgId,
+  });
+  console.log(metadata, "metadata");
+  if (!metadata.slackWebhookUrl) {
     return;
   }
 
@@ -52,37 +57,11 @@ export const sendTestCompletedSlackMessage = async ({
   };
 
   console.log(message);
-  await axios.post(user.public_metadata.slackWebhookUrl, message);
+  await axios.post(metadata.slackWebhookUrl, message);
 };
 
-interface PrivateMetadata {
-  slackAccessToken?: string;
-}
-
-interface PublicMetadata {
-  slackWebhookUrl?: string;
-}
-async function getUser(userId: string) {
-  try {
-    const response = await axios.get<{
-      public_metadata: PublicMetadata;
-      private_metadata?: PrivateMetadata;
-    }>(`https://api.clerk.com/v1/users/${userId}`, {
-      headers: {
-        Authorization: `Bearer ${env.CLERK_SECRET_KEY}`,
-        "Content-Type": "application/json",
-      },
-    });
-
-    return response.data;
-  } catch (error) {
-    console.error("Error fetching user from Clerk:", error);
-    throw error;
-  }
-}
-
 export async function getEvaluationSetName(alert: Alert) {
-  const evaluationSet = await db.evalSet.findUnique({
+  const evaluationSet = await db.evaluationGroup.findUnique({
     where: {
       id: (alert.details as EvalSetAlert).evalSetId,
     },
@@ -91,22 +70,25 @@ export async function getEvaluationSetName(alert: Alert) {
 }
 
 export const sendAlertSlackMessage = async ({
-  userId,
+  ownerId,
   call,
   success,
   alert,
+  savedSearch,
 }: {
-  userId: string;
+  ownerId: string;
   call: Call & { agent: Agent | null };
   success: boolean;
   alert: Omit<Alert, "details"> & { details: LatencyAlert | EvalSetAlert };
+  savedSearch?: SavedSearchWithIncludes;
 }) => {
   console.log(
     "sending slack message =========================================================",
   );
-  const user = await getUser(userId);
-  console.log(user, "user");
-  if (!user.public_metadata.slackWebhookUrl) {
+  const metadata = await clerkServiceClient.getPublicMetadata({
+    orgId: ownerId,
+  });
+  if (!metadata.slackWebhookUrl) {
     return;
   }
 
@@ -131,7 +113,7 @@ export const sendAlertSlackMessage = async ({
                   (alert.details as LatencyAlert).threshold
                 }ms over the last ${
                   (alert.details as LatencyAlert).lookbackPeriod.label
-                }`,
+                } for saved search: ${savedSearch?.name}`,
               },
               accessory: {
                 type: "button",
@@ -153,7 +135,7 @@ export const sendAlertSlackMessage = async ({
                 type: "mrkdwn",
                 text: `${emoji} evaluation *${await getEvaluationSetName(
                   alert,
-                )}* ${success ? "succeeded" : "failed"} \n\n agent: ${call.agentId} ${call.agent?.name ? `(${call.agent?.name})` : ""} \n\n callId: ${call.customerCallId}`,
+                )}* ${success ? "succeeded" : "failed"} \n\n agent: ${call.agentId} ${call.agent?.name ? `(${call.agent?.name})` : ""} \n\n callId: ${call.customerCallId} \n\n saved search: ${savedSearch?.name}`,
               },
               accessory: {
                 type: "button",
@@ -167,5 +149,5 @@ export const sendAlertSlackMessage = async ({
             },
           ],
         };
-  await axios.post(user.public_metadata.slackWebhookUrl, message);
+  await axios.post(metadata.slackWebhookUrl, message);
 };

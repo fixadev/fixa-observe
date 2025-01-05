@@ -1,9 +1,9 @@
 "use client";
 
 import {
-  type EvalResultWithIncludes,
+  type EvaluationResultWithIncludes,
   type CallWithIncludes,
-  type AggregateEvalResult,
+  type AggregateEvaluationResult,
 } from "@repo/types/src/index";
 import { cn, didCallSucceed, getLatencyColor } from "~/lib/utils";
 import Image from "next/image";
@@ -36,15 +36,15 @@ export function TestCallHeader({
     audioPlayerRef.current?.play();
   }, [audioPlayerRef]);
 
-  const aggregateEvalResults = useMemo<AggregateEvalResult[]>(() => {
-    if (!call.evalResults) return [];
+  const aggregateEvalResults = useMemo<AggregateEvaluationResult[]>(() => {
+    if (!call.evaluationResults) return [];
 
-    const evalIdToResults = new Map<string, EvalResultWithIncludes[]>();
-    for (const evalResult of call.evalResults) {
-      if (!evalIdToResults.has(evalResult.evalId)) {
-        evalIdToResults.set(evalResult.evalId, [evalResult]);
+    const evalIdToResults = new Map<string, EvaluationResultWithIncludes[]>();
+    for (const evalResult of call.evaluationResults) {
+      if (!evalIdToResults.has(evalResult.evaluationId)) {
+        evalIdToResults.set(evalResult.evaluationId, [evalResult]);
       } else {
-        evalIdToResults.get(evalResult.evalId)?.push(evalResult);
+        evalIdToResults.get(evalResult.evaluationId)?.push(evalResult);
       }
     }
 
@@ -62,7 +62,7 @@ export function TestCallHeader({
         ...details,
       };
     });
-  }, [call.evalResults]);
+  }, [call.evaluationResults]);
 
   return (
     <div className="flex items-center gap-4 pb-4">
@@ -105,7 +105,7 @@ export function TestCallHeader({
               key={evalResult.id}
               aggregateEvalResult={evalResult}
               isActive={activeEvalResultId === evalResult.id}
-              editHref={`/dashboard/${agentId}/scenarios?scenarioId=${call.scenarioId}&evalId=${evalResult.eval.id}`}
+              editHref={`/dashboard/${agentId}/scenarios?scenarioId=${call.scenarioId}&evalId=${evalResult.evaluation.id}`}
               onMouseEnter={() => {
                 setActiveEvalResultId(evalResult.id);
                 audioPlayerRef.current?.setHoveredEvalResult(evalResult.id);
@@ -146,15 +146,15 @@ export function LatencyCallHeader({
     audioPlayerRef.current?.play();
   }, [audioPlayerRef]);
 
-  const aggregateEvalResults = useMemo<AggregateEvalResult[]>(() => {
-    if (!call.evalResults) return [];
+  const aggregateEvalResults = useMemo<AggregateEvaluationResult[]>(() => {
+    if (!call.evaluationResults) return [];
 
-    const evalIdToResults = new Map<string, EvalResultWithIncludes[]>();
-    for (const evalResult of call.evalResults) {
-      if (!evalIdToResults.has(evalResult.evalId)) {
-        evalIdToResults.set(evalResult.evalId, [evalResult]);
+    const evalIdToResults = new Map<string, EvaluationResultWithIncludes[]>();
+    for (const evalResult of call.evaluationResults) {
+      if (!evalIdToResults.has(evalResult.evaluationId)) {
+        evalIdToResults.set(evalResult.evaluationId, [evalResult]);
       } else {
-        evalIdToResults.get(evalResult.evalId)?.push(evalResult);
+        evalIdToResults.get(evalResult.evaluationId)?.push(evalResult);
       }
     }
 
@@ -172,7 +172,7 @@ export function LatencyCallHeader({
         ...details,
       };
     });
-  }, [call.evalResults]);
+  }, [call.evaluationResults]);
 
   return (
     <div className="flex items-center gap-4 pb-4">

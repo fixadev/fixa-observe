@@ -23,7 +23,7 @@ import {
   type AgentWithIncludes,
 } from "@repo/types/src/index";
 
-import { useUser } from "@clerk/nextjs";
+import { useOrganization, useUser } from "@clerk/nextjs";
 import { motion, AnimatePresence } from "framer-motion";
 import { type CallEndedData, type SocketMessage } from "@repo/types/src/index";
 import { type TestWithCalls } from "@repo/types/src/index";
@@ -44,15 +44,17 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "~/components/ui/popover";
-import { env } from "~/env";
+import { useFeatureFlagEnabled } from "posthog-js/react";
 
 export default function AgentPage({ params }: { params: { agentId: string } }) {
   const [tests, setTests] = useState<TestWithCalls[]>([]);
   const [runTestModalOpen, setRunTestModalOpen] = useState(false);
   const { toast } = useToast();
   const { user } = useUser();
-  const { agent, setAgent } = useAgent(params.agentId);
+  const { organization } = useOrganization();
+  const { agent, setAgent } = useAgent();
   const router = useRouter();
+  const bypassPayment = useFeatureFlagEnabled("bypass-payment");
 
   // hacky fix
   useEffect(() => {
@@ -71,7 +73,7 @@ export default function AgentPage({ params }: { params: { agentId: string } }) {
   }, [params.agentId, user]);
 
   useSocketMessage(
-    user?.id,
+    organization?.id,
     useCallback(
       (message: SocketMessage) => {
         if (message.type === "call-ended") {
@@ -127,13 +129,13 @@ export default function AgentPage({ params }: { params: { agentId: string } }) {
   const { data: agents } = api.agent.getAll.useQuery();
 
   const canRunTest = useMemo(() => {
-    const metadata = user?.publicMetadata as PublicMetadata | undefined;
+    const metadata = organization?.publicMetadata as PublicMetadata | undefined;
     return (
       !!metadata?.stripeCustomerId ||
       (metadata?.freeTestsLeft ?? 0) > 0 ||
-      user?.id === env.NEXT_PUBLIC_OFONE_USER_ID
+      bypassPayment
     );
-  }, [user]);
+  }, [organization, bypassPayment]);
 
   const handleRunTest = useCallback(
     async (scenarioIds: string[], testAgentIds: string[]) => {

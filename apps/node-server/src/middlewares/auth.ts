@@ -31,6 +31,6 @@ export const authenticateRequest = async (
     });
   }
 
-  res.locals.userId = apiKeyRecord.userId;
+  res.locals.orgId = apiKeyRecord.orgId;
   next();
 };

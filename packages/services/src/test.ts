@@ -2,26 +2,31 @@ import { CallStatus, type PrismaClient } from "@repo/db/src/index";
 import { VapiService } from "./vapi";
 import { type TestAgent } from "@repo/types/src/generated";
 import {
+  TestWithIncludesSchema,
   type OfOneKioskProperties,
   type TestWithIncludes,
 } from "@repo/types/src/index";
 import { randomUUID } from "crypto";
 import { AgentService } from "./agent";
-import { UserService } from "./user";
-import { StripeService } from "./stripe";
+import { ClerkService } from "./clerk";
+import { StripeService } from "./ee/stripe";
 import axios from "axios";
+import { type PostHog } from "posthog-node";
 
 export class TestService {
   private env: { NODE_SERVER_URL: string };
 
-  constructor(private db: PrismaClient) {
+  constructor(
+    private db: PrismaClient,
+    private posthogClient: PostHog,
+  ) {
     this.env = {
       NODE_SERVER_URL:
         process.env.NODE_SERVER_URL || process.env.NEXT_PUBLIC_SERVER_URL!,
     };
     this.checkEnv();
     this.agentServiceInstance = new AgentService(this.db);
-    this.userServiceInstance = new UserService(this.db);
+    this.orgServiceInstance = new ClerkService(this.db);
     this.stripeServiceInstance = new StripeService(this.db);
     this.vapiServiceInstance = new VapiService(this.db);
   }
@@ -32,16 +37,16 @@ export class TestService {
     }
   };
   agentServiceInstance: AgentService;
-  userServiceInstance: UserService;
+  orgServiceInstance: ClerkService;
   stripeServiceInstance: StripeService;
   vapiServiceInstance: VapiService;
 
-  async get(id: string, userId: string): Promise<TestWithIncludes | null> {
-    return await this.db.test.findUnique({
+  async get(id: string, ownerId: string): Promise<TestWithIncludes | null> {
+    const test = await this.db.test.findUnique({
       where: {
         id,
         agent: {
-          ownerId: userId,
+          ownerId,
         },
       },
       include: {
@@ -56,12 +61,20 @@ export class TestService {
             errors: true,
             scenario: {
               include: {
-                evals: true,
+                evaluations: {
+                  include: {
+                    evaluationTemplate: true,
+                  },
+                },
               },
             },
-            evalResults: {
+            evaluationResults: {
               include: {
-                eval: true,
+                evaluation: {
+                  include: {
+                    evaluationTemplate: true,
+                  },
+                },
               },
             },
             latencyBlocks: true,
@@ -70,14 +83,20 @@ export class TestService {
         },
       },
     });
+
+    const parsed = TestWithIncludesSchema.safeParse(test);
+    if (!parsed.success) {
+      throw new Error(`Couldn't parse test data: ${parsed.error.message}`);
+    }
+    return parsed.data;
   }
 
-  async getAll(agentId: string, userId: string) {
+  async getAll(agentId: string, ownerId: string) {
     return await this.db.test.findMany({
       where: {
         agentId,
         agent: {
-          ownerId: userId,
+          ownerId,
         },
       },
       include: {
@@ -89,9 +108,9 @@ export class TestService {
     });
   }
 
-  async getStatus(testId: string, userId: string) {
+  async getStatus(testId: string, ownerId: string) {
     const test = await this.db.test.findUnique({
-      where: { id: testId, agent: { ownerId: userId } },
+      where: { id: testId, agent: { ownerId } },
       select: {
         calls: {
           select: {
@@ -117,31 +136,44 @@ export class TestService {
   }
 
   async run({
-    userId,
+    ownerId,
     agentId,
     scenarioIds,
     testAgentIds,
     runFromApi = false,
   }: {
-    userId: string;
+    ownerId: string;
     agentId: string;
     scenarioIds?: string[];
     testAgentIds?: string[];
     runFromApi?: boolean;
   }) {
     // Make sure user can run this test - check free tests left and subscription
-    const userData = await this.userServiceInstance.getPublicMetadata(userId);
-    if (!userData) {
-      throw new Error("User not found");
+    const orgData = await this.orgServiceInstance.getPublicMetadata({
+      orgId: ownerId,
+    });
+    if (!orgData) {
+      throw new Error("Org not found");
     }
-    if (userId !== process.env.NEXT_PUBLIC_OFONE_USER_ID) {
+
+    const bypassPayment = await this.posthogClient.getFeatureFlag(
+      "bypass-payment",
+      ownerId,
+      {
+        groups: {
+          organization: ownerId,
+        },
+      },
+    );
+    if (!bypassPayment) {
+      // Check if user has free tests left or subscription
       const noFreeTestsLeft =
-        !userData.freeTestsLeft ||
-        (userData.freeTestsLeft && userData.freeTestsLeft <= 0);
+        !orgData.freeTestsLeft ||
+        (orgData.freeTestsLeft && orgData.freeTestsLeft <= 0);
       let hasActiveSubscription = false;
-      if (userData.stripeCustomerId) {
+      if (orgData.stripeCustomerId) {
         const subscriptions =
-          await this.stripeServiceInstance.getSubscriptions(userId);
+          await this.stripeServiceInstance.getSubscriptions(ownerId);
         if (subscriptions.data.length > 0) {
           hasActiveSubscription = true;
         }
@@ -153,12 +185,14 @@ export class TestService {
       }
 
       // If user has free tests left, deduct one
-      if (userData.freeTestsLeft && userData.freeTestsLeft > 0) {
-        await this.userServiceInstance.decrementFreeTestsLeft(userId);
+      if (orgData.freeTestsLeft && orgData.freeTestsLeft > 0) {
+        await this.orgServiceInstance.decrementFreeTestsLeft({
+          orgId: ownerId,
+        });
       }
     }
 
-    const agent = await this.agentServiceInstance.getAgent(agentId, userId);
+    const agent = await this.agentServiceInstance.getAgent(agentId, ownerId);
     if (!agent) {
       throw new Error("Agent not found");
     }
@@ -229,7 +263,19 @@ export class TestService {
           },
         },
         include: {
-          calls: true,
+          calls: {
+            include: {
+              scenario: {
+                include: {
+                  evaluations: {
+                    include: {
+                      evaluationTemplate: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
         },
       });
       await this.queueOfOneKioskCalls(deviceIds, callsToStart);
@@ -291,12 +337,12 @@ export class TestService {
     }
   }
 
-  async getLastTest(agentId: string, userId: string) {
+  async getLastTest(agentId: string, ownerId: string) {
     return await this.db.test.findFirst({
       where: {
         agentId,
         agent: {
-          ownerId: userId,
+          ownerId,
         },
       },
       orderBy: { createdAt: "desc" },

@@ -10,7 +10,7 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { useEffect, useState, useMemo, useCallback } from "react";
-import { InstallSlackAppButton } from "~/app/observe/slack-app/SlackButton";
+import { InstallSlackAppButton } from "~/components/SlackButton";
 import { alertLookbackPeriods } from "~/lib/instantiate";
 
 export function AlertCard({
@@ -45,14 +45,14 @@ export function AlertCard({
       { value: "p50", label: "latency P50", type: "latency" },
       { value: "p90", label: "latency P90", type: "latency" },
       { value: "p95", label: "latency P95", type: "latency" },
-      ...(filter.evalSets?.map((evalSet) => ({
+      ...(filter.evaluationGroups?.map((evalSet) => ({
         value: evalSet.id,
         label: evalSet.name,
         type: "evalSet" as const,
         evalSetId: evalSet.id,
       })) ?? []),
     ],
-    [filter.evalSets],
+    [filter.evaluationGroups],
   );
 
   useEffect(() => {

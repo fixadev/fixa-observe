@@ -1,29 +1,26 @@
 "use client";
 
-import { useUser } from "@clerk/nextjs";
+import { useOrganization } from "@clerk/nextjs";
 import { type PublicMetadata } from "@repo/types/src";
 import { useCallback, useMemo } from "react";
 import { Button } from "../ui/button";
 import { api } from "~/trpc/react";
 import Spinner from "../Spinner";
-import { env } from "~/env";
+import { useFeatureFlagEnabled } from "posthog-js/react";
 
 export default function FreeTestsLeft() {
-  const { user, isLoaded } = useUser();
+  const bypassPayment = useFeatureFlagEnabled("bypass-payment");
+  const { organization, isLoaded } = useOrganization();
 
-  const metadata = user?.publicMetadata as PublicMetadata | undefined;
+  const metadata = organization?.publicMetadata as PublicMetadata | undefined;
 
   const freeTestsLeft = useMemo(() => {
     return metadata?.freeTestsLeft ?? 0;
   }, [metadata]);
 
   const isPaidUser = useMemo(() => {
-    return (
-      !!metadata?.stripeCustomerId ||
-      user?.id === env.NEXT_PUBLIC_11X_USER_ID ||
-      user?.id === env.NEXT_PUBLIC_OFONE_USER_ID
-    );
-  }, [metadata, user]);
+    return !!metadata?.stripeCustomerId || bypassPayment;
+  }, [metadata, bypassPayment]);
 
   const { mutate: getCheckoutUrl, isPending: isGeneratingStripeUrl } =
     api.stripe.createCheckoutUrl.useMutation({
@@ -36,6 +33,7 @@ export default function FreeTestsLeft() {
     getCheckoutUrl({ redirectUrl });
   }, [getCheckoutUrl]);
 
+  // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
   if ((isPaidUser && freeTestsLeft === 0) || !isLoaded) {
     return null;
   }

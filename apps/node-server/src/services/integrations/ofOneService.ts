@@ -127,7 +127,7 @@ export async function startCall(
     console.log("deviceUsageMap", deviceUsageMap);
     console.log("callQueue", callQueue);
     const { data } = await axios.post<{ callId: string }>(
-      `https://api.pixa.dev/run-ofone-kiosk`,
+      env.OFONE_KIOSK_ENDPOINT!,
       {
         device_id: deviceId,
         assistant_id: assistantId,

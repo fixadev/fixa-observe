@@ -3,7 +3,6 @@ import { transcribeAndSaveCall } from "../services/observability";
 import { AgentService } from "@repo/services/src/agent";
 import { sqs } from "../clients/s3Client";
 import { db } from "../db";
-import axios from "axios";
 import { Semaphore } from "../utils/semaphore";
 
 const agentService = new AgentService(db);
@@ -19,12 +18,12 @@ async function processMessage(
       stereoRecordingUrl,
       agentId,
       createdAt,
-      userId,
+      ownerId,
       metadata,
       saveRecording,
+      language,
     } = data;
-
-    if (!callId || !stereoRecordingUrl || !userId || !createdAt) {
+    if (!callId || !stereoRecordingUrl || !ownerId || !createdAt) {
       console.error("Missing required fields in message:", data);
       throw new Error("Missing required fields");
     }
@@ -34,53 +33,18 @@ async function processMessage(
     // Upsert agent if it doesn't exist
     const agent = await agentService.upsertAgent({
       customerAgentId: agentId,
-      userId,
+      ownerId,
     });
 
-    let newStereoRecordingUrl = stereoRecordingUrl;
-
-    // if (userId === "user_2pPJOFVVjZPXE8ho8CI68u5lSCf") {
-    //   try {
-    //     const result = await axios.post(
-    //       "https://mike.11x.ai/api/v1/retrieval/recording",
-    //       {
-    //         agentId: agentId,
-    //         callId,
-    //       },
-    //       {
-    //         headers: {
-    //           Authorization: `Bearer 40844265-bea1-4e08-98fb-8dbff46b9e03_2c02f0e1-1165-4092-ae49-9434f0e2e24e`,
-    //         },
-    //       },
-    //     );
-    //     console.log("AXIOS CALL RESULT", result.data);
-    //     console.log(result.data.url);
-    //     console.log("setting new stereo recording url to ", result.data.url);
-    //     newStereoRecordingUrl = result.data.url;
-    //   } catch (error) {
-    //     console.error("Error getting recording from 11x", error);
-    //     await sqs.sendMessage({
-    //       QueueUrl:
-    //         "https://sqs.us-east-1.amazonaws.com/195275634305/fixa-observe-11x-backlog",
-    //       MessageBody: message.Body,
-    //     });
-    //     await sqs.deleteMessage({
-    //       QueueUrl: queueUrl,
-    //       ReceiptHandle: message.ReceiptHandle!,
-    //     });
-    //     console.log("sent message to 11x backlog");
-    //     return;
-    //   }
-    // }
-
-    const newCall = await transcribeAndSaveCall({
+    await transcribeAndSaveCall({
       callId,
-      stereoRecordingUrl: newStereoRecordingUrl,
+      stereoRecordingUrl,
       createdAt: createdAt,
       agentId: agent.id,
       metadata,
-      userId,
+      ownerId,
       saveRecording,
+      language,
     });
 
     await sqs.deleteMessage({

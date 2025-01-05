@@ -1,6 +1,7 @@
-import { Agent, Eval, Scenario } from "@prisma/client";
+import { Evaluation, Scenario } from "@prisma/client";
 import { ArtifactMessagesItem } from "@vapi-ai/server-sdk/api";
 import { getDateTimeAtTimezone } from "./time";
+import { ScenarioWithIncludes } from "@repo/types/src/index";
 
 export const createGeminiPrompt = ({
   callStartedAt,
@@ -12,7 +13,7 @@ export const createGeminiPrompt = ({
   callStartedAt?: string;
   messages: ArtifactMessagesItem[];
   testAgentPrompt: string;
-  scenario: Scenario & { evals: Eval[] };
+  scenario: ScenarioWithIncludes;
   analysis: any;
 }) => {
   return `
@@ -73,8 +74,8 @@ export const createGeminiPrompt = ({
           : ""
       }
 
-      MAIN AGENT GENERAL SUCCESS CRITERIA: ${[...scenario.evals]
-        .map((evaluation) => evaluation.name)
+      MAIN AGENT GENERAL SUCCESS CRITERIA: ${[...scenario.evaluations]
+        .map((evaluation) => evaluation.evaluationTemplate.name)
         .join(", ")}
 
       JUNIOR ANALYST'S ANALYSIS: ${JSON.stringify(analysis, null, 2)}

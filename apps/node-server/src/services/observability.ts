@@ -13,7 +13,11 @@ import { sendAlerts } from "./alert";
 import stripeServiceClient from "../clients/stripeServiceClient";
 import { SearchService } from "@repo/services/src/search";
 import { getAudioDuration } from "../utils/audio";
-import { UploadCallParams } from "@repo/types/src/types";
+import {
+  SavedSearchWithIncludes,
+  UploadCallParams,
+  EvaluationGroupWithIncludes,
+} from "@repo/types/src/index";
 
 export const transcribeAndSaveCall = async ({
   callId,
@@ -21,8 +25,9 @@ export const transcribeAndSaveCall = async ({
   createdAt,
   agentId,
   metadata: callMetadata,
-  userId,
+  ownerId,
   saveRecording,
+  language,
 }: UploadCallParams) => {
   try {
     interface TranscribeResponse {
@@ -49,30 +54,22 @@ export const transcribeAndSaveCall = async ({
       "===================SAVE RECORDING===================",
       saveRecording,
     );
+
+    console.log("============ownerID intital============", ownerId);
+
     const urlToSave =
       saveRecording === false
         ? stereoRecordingUrl
         : await uploadFromPresignedUrl(callId, stereoRecordingUrl);
 
-    // Accrue observability minutes
-    try {
-      console.log("ACCRUING OBSERVABILITY MINUTES", duration);
-      const durationMinutes = Math.ceil(duration / 60);
-      await stripeServiceClient.accrueObservabilityMinutes({
-        userId: userId,
-        minutes: durationMinutes,
-      });
-    } catch (error) {
-      console.error("Error accruing observability minutes", error);
-    }
-
     // TODO: Figure out why old audio url is cached
-    console.log("calling audio service", env.AUDIO_SERVICE_URL);
+    console.log("calling audio service with language", language);
 
     const response = await axios.post<TranscribeResponse>(
       `${env.AUDIO_SERVICE_URL}/transcribe-deepgram`,
       {
         stereo_audio_url: urlToSave,
+        language,
       },
     );
 
@@ -117,21 +114,29 @@ export const transcribeAndSaveCall = async ({
         createdAt: createdAt || new Date().toISOString(),
         agentId,
         callMetadata: callMetadata || {},
-        userId,
+        ownerId,
       });
 
     const newCall = await db.call.create({
       data: {
         id: uuidv4(),
         createdAt: createdAt || new Date(),
-        ownerId: userId,
+        ownerId,
         customerCallId: callId,
         startedAt: createdAt,
         status: CallStatus.completed,
         stereoRecordingUrl: urlToSave,
         agentId,
-        evalResults: {
-          create: evalResults,
+        evaluationResults: {
+          create: evalResults?.map((result) => ({
+            ...result,
+            evaluationId: undefined,
+            evaluation: {
+              connect: {
+                id: result.evaluationId,
+              },
+            },
+          })),
         },
         evalSetToSuccess: Object.fromEntries(
           evalSetResults.map((result) => [result.evalSetId, result.success]),
@@ -170,6 +175,17 @@ export const transcribeAndSaveCall = async ({
       },
     });
 
+    // Accrue observability minutes after call is created in db
+    try {
+      console.log("ACCRUING OBSERVABILITY MINUTES", duration);
+      const durationMinutes = Math.ceil(duration / 60);
+      await stripeServiceClient.accrueObservabilityMinutes({
+        orgId: ownerId,
+        minutes: durationMinutes,
+      });
+    } catch (error) {
+      console.error("Error accruing observability minutes", error);
+    }
     console.log(
       "===================saved call===================",
       newCall.id,
@@ -177,7 +193,7 @@ export const transcribeAndSaveCall = async ({
     );
 
     await sendAlerts({
-      userId,
+      ownerId,
       latencyDurations,
       savedSearches,
       evalSetResults,
@@ -196,24 +212,25 @@ export const analyzeBasedOnRules = async ({
   createdAt,
   agentId,
   callMetadata,
-  userId,
+  ownerId,
 }: {
   messages: Omit<Message, "callId">[];
   createdAt: string;
   agentId: string;
   callMetadata: Record<string, string>;
-  userId: string;
+  ownerId: string;
 }) => {
   try {
-    const { evalSets: relevantEvalSets, savedSearches } =
-      await findRelevantEvalSets({
-        messages,
-        userId,
-        agentId,
-        callMetadata,
-      });
+    const { relevantEvalSets, savedSearches } = await findRelevantEvalSets({
+      messages,
+      ownerId,
+      agentId,
+      callMetadata,
+    });
     if (relevantEvalSets.length > 0) {
-      const allEvals = relevantEvalSets.flatMap((evalSet) => evalSet.evals);
+      const allEvals = relevantEvalSets.flatMap(
+        (evalSet) => evalSet.evaluations,
+      );
       const result = await analyzeCallWitho1({
         callStartedAt: createdAt,
         messages: messages || [],
@@ -225,20 +242,23 @@ export const analyzeBasedOnRules = async ({
       const parsedEvalResults = await formatOutput(result);
 
       const validEvalResults = parsedEvalResults.filter((result) =>
-        allEvals.some((evaluation) => evaluation.id === result.evalId),
+        allEvals.some((evaluation) => evaluation.id === result.evaluationId),
       );
 
       const evalSetResults = relevantEvalSets.map((evalSet) => ({
         evalSetId: evalSet.id,
         success: validEvalResults
           .filter((result) =>
-            evalSet.evals.some((evaluation) => evaluation.id === result.evalId),
+            evalSet.evaluations.some(
+              (evaluation) => evaluation.id === result.evaluationId,
+            ),
           )
           .every(
             (result) =>
               result.success ||
-              !allEvals.find((evaluation) => evaluation.id === result.evalId)
-                ?.isCritical,
+              !allEvals.find(
+                (evaluation) => evaluation.id === result.evaluationId,
+              )?.isCritical,
           ),
       }));
 
@@ -267,24 +287,27 @@ export const analyzeBasedOnRules = async ({
 
 export const findRelevantEvalSets = async ({
   messages,
-  userId,
+  ownerId,
   agentId,
   callMetadata,
 }: {
   messages: Omit<Message, "callId">[];
-  userId: string;
+  ownerId: string;
   agentId: string;
   callMetadata?: Record<string, string>;
-}) => {
+}): Promise<{
+  savedSearches: SavedSearchWithIncludes[];
+  relevantEvalSets: EvaluationGroupWithIncludes[];
+}> => {
   try {
     const searchServiceInstance = new SearchService(db);
     const savedSearches = await searchServiceInstance.getAll({
-      userId,
+      ownerId,
     });
     if (!savedSearches) {
       return {
         savedSearches: [],
-        evalSets: [],
+        relevantEvalSets: [],
       };
     }
     const matchingSavedSearches = savedSearches.filter((savedSearch) => {
@@ -304,8 +327,8 @@ export const findRelevantEvalSets = async ({
     });
 
     const evalSetsWithEvals = matchingSavedSearches
-      .flatMap((savedSearch) => savedSearch.evalSets)
-      .filter((evalSet) => evalSet !== undefined);
+      .flatMap((savedSearch) => savedSearch.evaluationGroups)
+      .filter((evaluationGroup) => evaluationGroup !== undefined);
 
     // remove evals and alerts to simplify prompt
     const evalSetsWithoutEvals = evalSetsWithEvals.map((evalSet) => ({
@@ -394,7 +417,7 @@ export const findRelevantEvalSets = async ({
 
     return {
       savedSearches: matchingSavedSearches,
-      evalSets: evalSetsWithEvals.filter((evalSet) => {
+      relevantEvalSets: evalSetsWithEvals.filter((evalSet) => {
         return parsedResponse.relevantEvalSets.some(
           (relevantEvalSet) =>
             relevantEvalSet.id === evalSet.id && relevantEvalSet.relevant,

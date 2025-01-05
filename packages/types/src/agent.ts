@@ -1,5 +1,5 @@
 import { type Message } from "./generated";
-import { type CallWithIncludes } from "./types";
+import { type CallWithIncludes } from "./db";
 
 export type SocketMessage = {
   type: "call-ended" | "messages-updated" | "analysis-started";

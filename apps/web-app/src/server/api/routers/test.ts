@@ -2,20 +2,21 @@ import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { TestService } from "@repo/services/src/test";
 import { db } from "~/server/db";
+import { posthogClient } from "~/server/clients/posthogClient";
 
-const testServiceInstance = new TestService(db);
+const testServiceInstance = new TestService(db, posthogClient);
 
 export const testRouter = createTRPCRouter({
   get: protectedProcedure
     .input(z.object({ id: z.string() }))
     .query(async ({ input, ctx }) => {
-      return await testServiceInstance.get(input.id, ctx.user.id);
+      return await testServiceInstance.get(input.id, ctx.orgId);
     }),
 
   getAll: protectedProcedure
     .input(z.object({ agentId: z.string() }))
     .query(async ({ input, ctx }) => {
-      return await testServiceInstance.getAll(input.agentId, ctx.user.id);
+      return await testServiceInstance.getAll(input.agentId, ctx.orgId);
     }),
 
   run: protectedProcedure
@@ -28,7 +29,7 @@ export const testRouter = createTRPCRouter({
     )
     .mutation(async ({ input, ctx }) => {
       return await testServiceInstance.run({
-        userId: ctx.user.id,
+        ownerId: ctx.orgId,
         agentId: input.agentId,
         scenarioIds: input.scenarioIds,
         testAgentIds: input.testAgentIds,
@@ -38,6 +39,6 @@ export const testRouter = createTRPCRouter({
   getLastTest: protectedProcedure
     .input(z.object({ agentId: z.string() }))
     .query(async ({ input, ctx }) => {
-      return await testServiceInstance.getLastTest(input.agentId, ctx.user.id);
+      return await testServiceInstance.getLastTest(input.agentId, ctx.orgId);
     }),
 });

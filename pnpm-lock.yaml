@@ -26,6 +26,9 @@ importers:
       '@aws-sdk/client-sqs':
         specifier: ^3.699.0
         version: 3.699.0
+      '@clerk/backend':
+        specifier: ^1.21.0
+        version: 1.21.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@google-cloud/storage':
         specifier: ^7.13.0
         version: 7.13.0
@@ -68,6 +71,9 @@ importers:
       openai:
         specifier: ^4.67.1
         version: 4.67.1(zod@3.23.8)
+      posthog-node:
+        specifier: ^4.3.2
+        version: 4.3.2
       socket.io:
         specifier: ^4.7.4
         version: 4.8.1
@@ -335,6 +341,9 @@ importers:
       posthog-js:
         specifier: ^1.170.1
         version: 1.170.1
+      posthog-node:
+        specifier: ^4.3.2
+        version: 4.3.2
       react:
         specifier: ^18.3.1
         version: 18.3.1
@@ -520,6 +529,9 @@ importers:
       exponential-backoff:
         specifier: ^3.1.1
         version: 3.1.1
+      posthog-node:
+        specifier: ^4.3.2
+        version: 4.3.2
       stripe:
         specifier: ^17.4.0
         version: 17.4.0
@@ -5792,6 +5804,10 @@ packages:
   posthog-js@1.170.1:
     resolution: {integrity: sha512-LReG76Sb2c0PlJZT5DSyM8GBU40d1fW/gqukwhjWYD3P8+98GJI8+e2qjVic4MI1PCZUkVPYxbP/bXkZQWhskg==}
 
+  posthog-node@4.3.2:
+    resolution: {integrity: sha512-vy8Mt9IEfniUgqQ1rOCQ31CBO1VNqDGd3ZtHlWR9/YfU6RiuK+9pUXPb4h6HTGzQmjL8NFnjd8K8NMXSX8S6MQ==}
+    engines: {node: '>=15.0.0'}
+
   preact-render-to-string@5.2.3:
     resolution: {integrity: sha512-aPDxUn5o3GhWdtJtW0svRC2SS/l8D9MAgo2+AWml+BhDImb27ALf04Q2d+AHqUUOc6RdSXFIBVa2gxzgMKgtZA==}
     peerDependencies:
@@ -6207,6 +6223,9 @@ packages:
 
   run-parallel@1.2.0:
     resolution: {integrity: sha512-5l4VyZR86LZ/lDxZTR6jqL8AFE2S0IFLMP26AbjsLVADxHdhB/c0GUsH+y39UfCi3dzz8OlQuPmnaJOMoDHQBA==}
+
+  rusha@0.8.14:
+    resolution: {integrity: sha512-cLgakCUf6PedEu15t8kbsjnwIFFR2D4RfL+W3iWFJ4iac7z4B0ZI8fxy4R3J956kAI68HclCFGL8MPoUVC3qVA==}
 
   rxjs@6.6.7:
     resolution: {integrity: sha512-hTdwr+7yYNIT5n4AMYp85KA6yw2Va0FLa3Rguvbpa4W3I5xynaBZo41cM3XM+4Q6fRMj3sBYIR1VAmZMXYJvRQ==}
@@ -12042,16 +12061,6 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  eslint-module-utils@2.8.0(@typescript-eslint/parser@7.1.0(eslint@8.57.0)(typescript@5.3.3))(eslint-import-resolver-node@0.3.9)(eslint@8.57.0):
-    dependencies:
-      debug: 3.2.7
-    optionalDependencies:
-      '@typescript-eslint/parser': 7.1.0(eslint@8.57.0)(typescript@5.3.3)
-      eslint: 8.57.0
-      eslint-import-resolver-node: 0.3.9
-    transitivePeerDependencies:
-      - supports-color
-
   eslint-module-utils@2.8.0(@typescript-eslint/parser@7.18.0(eslint@8.57.0)(typescript@5.5.4))(eslint-import-resolver-node@0.3.9)(eslint@8.57.0):
     dependencies:
       debug: 3.2.7
@@ -12089,7 +12098,7 @@ snapshots:
       doctrine: 2.1.0
       eslint: 8.57.0
       eslint-import-resolver-node: 0.3.9
-      eslint-module-utils: 2.8.0(@typescript-eslint/parser@7.1.0(eslint@8.57.0)(typescript@5.3.3))(eslint-import-resolver-node@0.3.9)(eslint@8.57.0)
+      eslint-module-utils: 2.8.0(@typescript-eslint/parser@6.17.0(eslint@8.57.0)(typescript@5.3.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.6.1(@typescript-eslint/parser@6.17.0(eslint@8.57.0)(typescript@5.3.3))(eslint-plugin-import@2.29.0)(eslint@8.57.0))(eslint@8.57.0)
       hasown: 2.0.0
       is-core-module: 2.13.1
       is-glob: 4.0.3
@@ -13882,6 +13891,13 @@ snapshots:
       preact: 10.23.1
       web-vitals: 4.2.3
 
+  posthog-node@4.3.2:
+    dependencies:
+      axios: 1.7.7
+      rusha: 0.8.14
+    transitivePeerDependencies:
+      - debug
+
   preact-render-to-string@5.2.3(preact@10.11.3):
     dependencies:
       preact: 10.11.3
@@ -14307,6 +14323,8 @@ snapshots:
   run-parallel@1.2.0:
     dependencies:
       queue-microtask: 1.2.3
+
+  rusha@0.8.14: {}
 
   rxjs@6.6.7:
     dependencies:

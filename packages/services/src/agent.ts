@@ -1,7 +1,7 @@
 import {
   type Agent,
-  AgentSchema,
   AgentWithIncludes,
+  AgentWithIncludesSchema,
 } from "@repo/types/src/index";
 import { v4 as uuidv4 } from "uuid";
 import { type PrismaClient } from "@repo/db/src/index";
@@ -9,12 +9,27 @@ import { type TestAgent } from "@repo/types/src/index";
 
 export class AgentService {
   constructor(private db: PrismaClient) {}
-  async createAgent(
-    phoneNumber: string,
-    name: string,
-    systemPrompt: string,
-    ownerId: string,
-  ): Promise<Agent> {
+  async createAgent({
+    phoneNumber,
+    name,
+    customerAgentId,
+    systemPrompt,
+    ownerId,
+  }: {
+    phoneNumber: string;
+    name?: string;
+    customerAgentId?: string;
+    systemPrompt: string;
+    ownerId: string;
+  }): Promise<Agent> {
+    const existingAgent = await this.db.agent.findFirst({
+      where: { customerAgentId, ownerId },
+    });
+
+    if (customerAgentId && existingAgent) {
+      throw new Error(`Agent ${customerAgentId} already exists!`);
+    }
+
     const testAgents = await this.db.testAgent.findMany({
       where: {
         OR: [{ ownerId }, { ownerId: "SYSTEM" }],
@@ -23,11 +38,14 @@ export class AgentService {
       },
     });
 
+    const fixaAgentId = uuidv4();
+
     return await this.db.agent.create({
       data: {
-        id: uuidv4(),
+        id: fixaAgentId,
         phoneNumber,
-        name,
+        name: name ?? customerAgentId ?? fixaAgentId,
+        customerAgentId: customerAgentId ?? fixaAgentId,
         systemPrompt,
         enabledTestAgents: {
           connect: testAgents.map((testAgent) => ({
@@ -52,14 +70,14 @@ export class AgentService {
 
   async upsertAgent({
     customerAgentId,
-    userId,
+    ownerId,
   }: {
     customerAgentId: string;
-    userId: string;
+    ownerId: string;
   }) {
     try {
       const existingAgent = await this.db.agent.findFirst({
-        where: { ownerId: userId, customerAgentId },
+        where: { ownerId, customerAgentId },
       });
       if (existingAgent) {
         return existingAgent;
@@ -67,7 +85,7 @@ export class AgentService {
       return await this.db.agent.create({
         data: {
           customerAgentId: customerAgentId,
-          ownerId: userId,
+          ownerId,
           name: customerAgentId,
           phoneNumber: "",
           systemPrompt: "",
@@ -90,8 +108,13 @@ export class AgentService {
           where: { deleted: false },
           orderBy: { createdAt: "asc" },
           include: {
-            evals: { where: { deleted: false }, orderBy: { createdAt: "asc" } },
-            generalEvalOverrides: true,
+            evaluations: {
+              where: { evaluationTemplate: { deleted: false } },
+              orderBy: { createdAt: "asc" },
+              include: {
+                evaluationTemplate: true,
+              },
+            },
           },
         },
         tests: {
@@ -102,10 +125,70 @@ export class AgentService {
         enabledTestAgents: {
           where: { enabled: true },
         },
-        enabledGeneralEvals: true,
+        generalEvaluations: {
+          where: { evaluation: { evaluationTemplate: { deleted: false } } },
+          include: {
+            evaluation: {
+              include: {
+                evaluationTemplate: true,
+              },
+            },
+          },
+        },
       },
     });
-    return result;
+    const parsed = AgentWithIncludesSchema.safeParse(result);
+    if (!parsed.success) {
+      throw new Error(`Invalid agent data: ${parsed.error.message}`);
+    }
+    return parsed.data;
+  }
+
+  async getAgentByCustomerId(
+    customerAgentId: string,
+    ownerId: string,
+  ): Promise<AgentWithIncludes | null> {
+    const result = await this.db.agent.findFirst({
+      where: { customerAgentId, ownerId },
+      include: {
+        scenarios: {
+          where: { deleted: false },
+          orderBy: { createdAt: "asc" },
+          include: {
+            evaluations: {
+              where: { evaluationTemplate: { deleted: false } },
+              orderBy: { createdAt: "asc" },
+              include: {
+                evaluationTemplate: true,
+              },
+            },
+          },
+        },
+        tests: {
+          include: {
+            calls: true,
+          },
+        },
+        enabledTestAgents: {
+          where: { enabled: true },
+        },
+        generalEvaluations: {
+          where: { evaluation: { evaluationTemplate: { deleted: false } } },
+          include: {
+            evaluation: {
+              include: {
+                evaluationTemplate: true,
+              },
+            },
+          },
+        },
+      },
+    });
+    const parsed = AgentWithIncludesSchema.safeParse(result);
+    if (!parsed.success) {
+      throw new Error(`Invalid agent data: ${parsed.error.message}`);
+    }
+    return parsed.data;
   }
 
   async getAllAgents(ownerId: string): Promise<Agent[]> {
@@ -127,6 +210,39 @@ export class AgentService {
       data: {
         ...agent,
         extraProperties: agent.extraProperties ?? undefined,
+      },
+      include: {
+        scenarios: {
+          where: { deleted: false },
+          orderBy: { createdAt: "asc" },
+          include: {
+            evaluations: {
+              where: { evaluationTemplate: { deleted: false } },
+              orderBy: { createdAt: "asc" },
+              include: {
+                evaluationTemplate: true,
+              },
+            },
+          },
+        },
+        tests: {
+          include: {
+            calls: true,
+          },
+        },
+        enabledTestAgents: {
+          where: { enabled: true },
+        },
+        generalEvaluations: {
+          where: { evaluation: { evaluationTemplate: { deleted: false } } },
+          include: {
+            evaluation: {
+              include: {
+                evaluationTemplate: true,
+              },
+            },
+          },
+        },
       },
     });
   }
