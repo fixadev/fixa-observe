@@ -61,6 +61,7 @@ export default function SaveSearchButton({
     api.search.update.useMutation({
       onSuccess: () => {
         void utils.search.getAll.invalidate();
+        void utils.search.getById.invalidate({ id: savedSearch?.id });
         setOpen(false);
       },
     });

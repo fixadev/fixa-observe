@@ -19,7 +19,7 @@ export default function CallPage({ params }: { params: { callId: string } }) {
     <div className="p-4">
       <CallDetails
         call={call}
-        botName="jordan"
+        botName="agent"
         userName="caller"
         headerHeight={44}
         includeHeaderTop={false}

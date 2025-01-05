@@ -10,7 +10,7 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { useEffect, useState, useMemo, useCallback } from "react";
-import { InstallSlackAppButton } from "~/app/observe/slack-app/SlackButton";
+import { InstallSlackAppButton } from "~/components/SlackButton";
 import { alertLookbackPeriods } from "~/lib/instantiate";
 
 export function AlertCard({
