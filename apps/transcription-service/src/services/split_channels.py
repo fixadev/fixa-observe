@@ -1,10 +1,10 @@
 from pydub import AudioSegment
-import requests
 import tempfile
 from pathlib import Path
 import shutil  # Add this import for cleanup
 import aiohttp
 import aiofiles
+import os
 
 async def split_channels(stereo_audio_url: str) -> tuple[str, str]:
     """Split a stereo audio file into separate left and right channel files.
@@ -59,11 +59,15 @@ async def split_channels(stereo_audio_url: str) -> tuple[str, str]:
         print(f"Error splitting channels: {e}")
         raise e
 
-# Optional: Helper function for cleanup
-def cleanup_temp_files(directory: str) -> None:
-    """Remove temporary directory and its contents.
+
+def cleanup_temp_files(*paths: str) -> None:
+    """Remove temporary files or directories.
     
     Args:
-        directory: Path to temporary directory to remove
+        *paths: Variable number of paths to files or directories to remove
     """
-    shutil.rmtree(directory)
+    for path in paths:
+        if os.path.isfile(path):
+            os.remove(path)
+        elif os.path.isdir(path):
+            shutil.rmtree(path)
