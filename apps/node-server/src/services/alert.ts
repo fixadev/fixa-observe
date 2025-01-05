@@ -75,6 +75,7 @@ export async function sendAlerts({
                 ...alert,
                 details: alert.details,
               },
+              savedSearch,
             });
             await db.alert.update({
               where: { id: alert.id },
@@ -105,6 +106,7 @@ export async function sendAlerts({
                 type: "evalSet",
                 details: alert.details,
               },
+              savedSearch,
             });
           }
         }
