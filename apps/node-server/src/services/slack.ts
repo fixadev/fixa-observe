@@ -6,6 +6,8 @@ import {
   Alert,
   EvalSetAlert,
   LatencyAlert,
+  SavedSearch,
+  SavedSearchWithIncludes,
 } from "@repo/types/src/index";
 import { clerkServiceClient } from "../clients/clerkServiceClient";
 import { db } from "../db";
@@ -79,11 +81,13 @@ export const sendAlertSlackMessage = async ({
   call,
   success,
   alert,
+  savedSearch,
 }: {
   ownerId: string;
   call: Call & { agent: Agent | null };
   success: boolean;
   alert: Omit<Alert, "details"> & { details: LatencyAlert | EvalSetAlert };
+  savedSearch?: SavedSearchWithIncludes;
 }) => {
   console.log(
     "sending slack message =========================================================",
@@ -116,7 +120,7 @@ export const sendAlertSlackMessage = async ({
                   (alert.details as LatencyAlert).threshold
                 }ms over the last ${
                   (alert.details as LatencyAlert).lookbackPeriod.label
-                }`,
+                } for saved search: ${savedSearch?.name}`,
               },
               accessory: {
                 type: "button",
@@ -138,7 +142,7 @@ export const sendAlertSlackMessage = async ({
                 type: "mrkdwn",
                 text: `${emoji} evaluation *${await getEvaluationSetName(
                   alert,
-                )}* ${success ? "succeeded" : "failed"} \n\n agent: ${call.agentId} ${call.agent?.name ? `(${call.agent?.name})` : ""} \n\n callId: ${call.customerCallId}`,
+                )}* ${success ? "succeeded" : "failed"} \n\n agent: ${call.agentId} ${call.agent?.name ? `(${call.agent?.name})` : ""} \n\n callId: ${call.customerCallId} \n\n saved search: ${savedSearch?.name}`,
               },
               accessory: {
                 type: "button",
