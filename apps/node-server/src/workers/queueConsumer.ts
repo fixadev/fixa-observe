@@ -3,7 +3,6 @@ import { transcribeAndSaveCall } from "../services/observability";
 import { AgentService } from "@repo/services/src/agent";
 import { sqs } from "../clients/s3Client";
 import { db } from "../db";
-import axios from "axios";
 import { Semaphore } from "../utils/semaphore";
 
 const agentService = new AgentService(db);

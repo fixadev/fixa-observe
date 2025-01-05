@@ -45,7 +45,7 @@ export class AgentService {
         id: fixaAgentId,
         phoneNumber,
         name: name ?? customerAgentId ?? fixaAgentId,
-        customerAgentId,
+        customerAgentId: customerAgentId ?? fixaAgentId,
         systemPrompt,
         enabledTestAgents: {
           connect: testAgents.map((testAgent) => ({
