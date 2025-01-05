@@ -68,6 +68,30 @@ export const ScenarioWithIncludesSchema = ScenarioSchema.extend({
 });
 export type ScenarioWithIncludes = z.infer<typeof ScenarioWithIncludesSchema>;
 
+export const CreateScenarioSchema = ScenarioSchema.omit({
+  id: true,
+  createdAt: true,
+}).extend({
+  evaluations: EvaluationSchema.omit({
+    id: true,
+    createdAt: true,
+  }).array(),
+});
+export type CreateScenario = z.infer<typeof CreateScenarioSchema>;
+
+export const UpdateScenarioSchema = ScenarioSchema.extend({
+  evaluations: z.array(
+    z.union([
+      EvaluationSchema,
+      EvaluationSchema.omit({
+        id: true,
+        createdAt: true,
+      }),
+    ]),
+  ),
+});
+export type UpdateScenario = z.infer<typeof UpdateScenarioSchema>;
+
 // Call
 export const CALL_INCLUDE = {
   include: {

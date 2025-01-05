@@ -2,6 +2,7 @@ import { Prisma, type PrismaClient } from "@repo/db/src/index";
 import { v4 as uuidv4 } from "uuid";
 import { getCreatedUpdatedDeleted } from "./utils";
 import {
+  CreateScenario,
   ScenarioWithIncludes,
   ScenarioWithIncludesSchema,
 } from "@repo/types/src/index";
@@ -15,7 +16,7 @@ export class ScenarioService {
     ownerId,
   }: {
     agentId: string;
-    scenario: ScenarioWithIncludes;
+    scenario: CreateScenario;
     ownerId: string;
   }): Promise<ScenarioWithIncludes> {
     const createdScenario = await this.db.scenario.create({

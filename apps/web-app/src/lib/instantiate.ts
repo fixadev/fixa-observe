@@ -126,9 +126,7 @@ export function instantiateEvaluationTemplate(
     toolCallExpectedResult: "",
     deleted: false,
     scenarioId: null,
-    ownerId: null,
-    evaluationGroupId: null,
-
+    ownerId: "",
     ...partial,
   };
 }

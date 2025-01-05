@@ -1,8 +1,12 @@
 import { Request, Response, Router } from "express";
 import { ScenarioService } from "@repo/services/src/scenario";
 import {
+  CreateScenario,
+  CreateScenarioSchema,
+  Evaluation,
   ScenarioWithIncludes,
   ScenarioWithIncludesSchema,
+  UpdateScenarioSchema,
 } from "@repo/types/src/index";
 import { db } from "../../../db";
 import { AgentService } from "@repo/services/src/index";
@@ -38,34 +42,39 @@ scenarioRouter.get("/:agentId", async (req: Request, res: Response) => {
 scenarioRouter.post("/:agentId", async (req: Request, res: Response) => {
   try {
     const { agentId } = req.params;
-    const ownerId = res.locals.orgId;
-
-    const scenario: ScenarioWithIncludes = {
-      name: req.body.name,
-      instructions: req.body.instructions,
-      evaluations: req.body.evaluations,
-      agentId,
-      ownerId,
-      createdAt: new Date(),
-      id: "",
-      deleted: false,
-      includeDateTime: false,
-      timezone: null,
-      successCriteria: "",
-    };
-
     if (!agentId) {
       return res.status(400).json({
         success: false,
         error: "Agent ID is required",
       });
     }
+    const ownerId = res.locals.orgId;
+
+    const scenario = {
+      name: req.body.name,
+      instructions: req.body.instructions,
+      evaluations: req.body.evaluations.map((evaluation: Evaluation) => ({
+        enabled: evaluation.enabled !== false,
+        isCritical: evaluation.isCritical !== false,
+        params: evaluation.params ?? {},
+        scenarioId: evaluation.scenarioId ?? null,
+        evaluationGroupId: evaluation.evaluationGroupId ?? null,
+        evaluationTemplateId: evaluation.evaluationTemplateId,
+      })),
+      agentId,
+      ownerId,
+      deleted: false,
+      includeDateTime: false,
+      timezone: null,
+      successCriteria: "",
+    };
+
     const agent = await agentService.getAgentByCustomerId(agentId, ownerId);
     if (!agent) {
       return res.status(404).json({ success: false, error: "Agent not found" });
     }
 
-    const parsedScenario = ScenarioWithIncludesSchema.safeParse(scenario);
+    const parsedScenario = CreateScenarioSchema.safeParse(scenario);
     if (!parsedScenario.success) {
       console.error(parsedScenario.error);
       return res.status(400).json({
@@ -122,15 +131,6 @@ scenarioRouter.put("/:id", async (req: Request, res: Response) => {
     const ownerId = res.locals.orgId;
     const scenario = req.body;
 
-    const parsedScenario = ScenarioWithIncludesSchema.safeParse(scenario);
-
-    if (!parsedScenario.success) {
-      return res.status(400).json({
-        success: false,
-        error: parsedScenario.error.message,
-      });
-    }
-
     // Validate scenario exists and belongs to user
     const existingScenario = await db.scenario.findFirst({
       where: { id, ownerId, deleted: false },
@@ -143,36 +143,31 @@ scenarioRouter.put("/:id", async (req: Request, res: Response) => {
       });
     }
 
-    // Validate update data
-    if (
-      scenario.name &&
-      (scenario.name.length < 2 || scenario.name.length > 100)
-    ) {
-      return res.status(400).json({
-        success: false,
-        error: "Scenario name must be between 2 and 100 characters",
-      });
-    }
+    const formattedScenario = {
+      ...existingScenario,
+      ...scenario,
+      evaluations: scenario.evaluations.map((evaluation: Evaluation) => ({
+        ...evaluation,
+        enabled: evaluation.enabled !== false,
+        isCritical: evaluation.isCritical !== false,
+        params: evaluation.params ?? {},
+        scenarioId: evaluation.scenarioId ?? null,
+        evaluationGroupId: evaluation.evaluationGroupId ?? null,
+        evaluationTemplateId: evaluation.evaluationTemplateId,
+      })),
+    };
 
-    if (scenario.description && scenario.description.length > 1000) {
-      return res.status(400).json({
-        success: false,
-        error: "Scenario description must not exceed 1000 characters",
-      });
-    }
+    const parsedScenario = UpdateScenarioSchema.safeParse(formattedScenario);
 
-    if (
-      scenario.evals &&
-      (!Array.isArray(scenario.evals) || scenario.evals.length === 0)
-    ) {
+    if (!parsedScenario.success) {
       return res.status(400).json({
         success: false,
-        error: "Scenario must include at least one evaluation",
+        error: parsedScenario.error.message,
       });
     }
 
     const updatedScenario = await scenarioService.updateScenario({
-      scenario: { ...scenario, id },
+      scenario: { ...formattedScenario, id },
       ownerId,
     });
     res.json({ success: true, scenario: updatedScenario });

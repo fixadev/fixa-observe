@@ -211,8 +211,7 @@ model Scenario {
   calls       Call[]
   evaluations Evaluation[]
 
-  deleted             Boolean              @default(false)
-  evaluationTemplates EvaluationTemplate[]
+  deleted Boolean @default(false)
 }
 
 model EvaluationTemplate {
@@ -222,9 +221,6 @@ model EvaluationTemplate {
   name        String
   description String
   params      String[]
-
-  scenario   Scenario? @relation(fields: [scenarioId], references: [id])
-  scenarioId String?
 
   type                   EvalType
   resultType             EvalResultType
