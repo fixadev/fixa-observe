@@ -38,6 +38,7 @@ export function PostHogIdentify() {
       ) {
         // console.log("GROUPING ORGANIZATION", organization.id);
         posthog.group("organization", organization.id, {
+          id: organization.id,
           name: organization.name,
         });
       }
