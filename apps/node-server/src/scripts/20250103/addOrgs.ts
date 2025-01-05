@@ -76,10 +76,6 @@ const main = async () => {
           where: { ownerId: user.id },
           data: { ownerId: org.id },
         }),
-        db.scenario.updateMany({
-          where: { ownerId: user.id },
-          data: { ownerId: org.id },
-        }),
         db.evaluationTemplate.updateMany({
           where: { ownerId: user.id },
           data: { ownerId: org.id },
