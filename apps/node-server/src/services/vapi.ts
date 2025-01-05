@@ -268,8 +268,16 @@ export const handleCallEnded = async ({
       include: {
         messages: true,
         testAgent: true,
-        scenario: { include: { evaluations: true } },
-        evaluationResults: { include: { evaluation: true } },
+        scenario: {
+          include: {
+            evaluations: { include: { evaluationTemplate: true } },
+          },
+        },
+        evaluationResults: {
+          include: {
+            evaluation: { include: { evaluationTemplate: true } },
+          },
+        },
       },
     });
 
