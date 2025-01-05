@@ -103,7 +103,6 @@ export default function DashboardSidebar({
   // Set agent when it is loaded
   useEffect(() => {
     if (!_agentFetching && _agent) {
-      console.log("setting agent", _agent);
       setAgent(_agent);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

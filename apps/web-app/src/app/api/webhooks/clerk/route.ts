@@ -4,12 +4,14 @@ import { type WebhookEvent } from "@clerk/nextjs/server";
 import { env } from "~/env";
 import { addSubscriber } from "~/server/listmonk";
 import { NUM_FREE_OBSERVABILITY_CALLS, NUM_FREE_TESTS } from "@repo/types/src";
-import { ClerkService } from "@repo/services/src";
+import { ClerkService, EvaluationService } from "@repo/services/src";
 import { db } from "~/server/db";
 import { SlackService } from "@repo/services/src/ee/slack";
+import { instantiateEvaluationTemplate } from "~/lib/instantiate";
 
 const clerkService = new ClerkService(db);
 const slackService = new SlackService();
+const evaluationService = new EvaluationService(db);
 
 export async function GET() {
   return new Response("ok", { status: 200 });
@@ -125,33 +127,36 @@ export async function POST(req: Request) {
           chartPeriod: 60 * 60 * 1000,
         },
       });
+
+      // Add default evaluation templates
+      const templatesToCreate = [
+        {
+          name: "questions correctly answered",
+          description:
+            "the agent correctly answers all of the user's questions to the best of its ability",
+        },
+        {
+          name: "successful call transfer",
+          description:
+            "the agent successfully transferred the call after the user asked to speak with a human",
+        },
+        {
+          name: "consistency across turns",
+          description:
+            "the agent maintained consistent logic and context throughout the conversation, without contradicting itself.",
+        },
+      ];
+      await Promise.all(
+        templatesToCreate.map((template) =>
+          evaluationService.createTemplate({
+            template: instantiateEvaluationTemplate(template),
+            ownerId: orgId,
+          }),
+        ),
+      );
       break;
     }
   }
 
   return new Response("", { status: 200 });
 }
-
-// const upsertUser = async (
-//   userId: string,
-//   email: string | null,
-//   firstName: string | null,
-//   lastName: string | null,
-//   username: string | null,
-// ) => {
-//   return await db.user.upsert({
-//     where: { id: userId },
-//     update: { email, firstName, lastName, username },
-//     create: { id: userId, email, firstName, lastName, username },
-//   });
-// };
-
-// const deleteUser = async (userId: string) => {
-//   try {
-//     await db.user.delete({
-//       where: { id: userId },
-//     });
-//   } catch (error) {
-//     console.log("No existing user to delete");
-//   }
-// };

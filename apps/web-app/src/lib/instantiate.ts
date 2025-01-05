@@ -125,8 +125,8 @@ export function instantiateEvaluationTemplate(
     contentType: EvalContentType.content,
     toolCallExpectedResult: "",
     deleted: false,
-    scenarioId: null,
     ownerId: "",
+
     ...partial,
   };
 }

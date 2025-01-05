@@ -58,11 +58,11 @@ export function EvaluationTemplateDialog({
   }, [_template]);
 
   const { mutate: createTemplate, isPending: isCreatingTemplate } =
-    api.eval.createTemplate.useMutation({
+    api.evaluation.createTemplate.useMutation({
       onSuccess: (template) => {
         onOpenChange(false);
         onCreateTemplate(template);
-        void utils.eval.getTemplates.invalidate();
+        void utils.evaluation.getTemplates.invalidate();
       },
       onError: (error) => {
         toast({
@@ -74,7 +74,7 @@ export function EvaluationTemplateDialog({
       },
     });
   const { mutate: updateTemplate, isPending: isUpdatingTemplate } =
-    api.eval.updateTemplate.useMutation({
+    api.evaluation.updateTemplate.useMutation({
       onSuccess: () => {
         onOpenChange(false);
         if (template) {
@@ -91,7 +91,7 @@ export function EvaluationTemplateDialog({
       },
     });
   const { mutate: deleteTemplate, isPending: isDeletingTemplate } =
-    api.eval.deleteTemplate.useMutation({
+    api.evaluation.deleteTemplate.useMutation({
       onSuccess: (id) => {
         onDeleteTemplate(id);
       },
@@ -147,18 +147,23 @@ export function EvaluationTemplateDialog({
 
           {/* Success criteria section */}
           <div className="space-y-2">
-            <div className="flex items-center gap-2">
-              <Label>success criteria</Label>
-              <Tooltip>
-                <TooltipTrigger tabIndex={-1}>
-                  <InformationCircleIcon className="size-4 text-muted-foreground" />
-                </TooltipTrigger>
-                <TooltipContent className="max-w-[400px]">
-                  the system prompt passed to the evaluator when evaluating this
-                  evaluation. try to be as thorough as possible. use brackets to
-                  denote template variables, i.e. {`{{`} templateVariable {`}}`}
-                </TooltipContent>
-              </Tooltip>
+            <div>
+              <div className="mb-1 flex items-center gap-2">
+                <Label>success criteria</Label>
+                <Tooltip>
+                  <TooltipTrigger tabIndex={-1}>
+                    <InformationCircleIcon className="size-4 text-muted-foreground" />
+                  </TooltipTrigger>
+                  <TooltipContent className="max-w-[400px]">
+                    the system prompt passed to the evaluator when evaluating
+                    this evaluation. try to be as thorough as possible.
+                  </TooltipContent>
+                </Tooltip>
+              </div>
+              <div className="text-sm text-muted-foreground">
+                use brackets to denote template variables, i.e. {`{{`}{" "}
+                templateVariable {`}}`}
+              </div>
             </div>
             <Textarea
               tabIndex={0}

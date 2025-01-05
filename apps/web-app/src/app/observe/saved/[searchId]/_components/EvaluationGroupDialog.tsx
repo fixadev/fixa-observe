@@ -61,7 +61,7 @@ export function EvaluationGroupDialog({
   }, [selectedEvaluationGroup]);
 
   const { mutate: createEvaluationGroup, isPending: isCreating } =
-    api.eval.createGroup.useMutation({
+    api.evaluation.createGroup.useMutation({
       onSuccess: (data) => {
         setFilter({
           ...filter,
@@ -75,7 +75,7 @@ export function EvaluationGroupDialog({
     });
 
   const { mutate: updateEvaluationGroup, isPending: isUpdating } =
-    api.eval.updateGroup.useMutation({
+    api.evaluation.updateGroup.useMutation({
       onSuccess: (data) => {
         setFilter({
           ...filter,
@@ -89,7 +89,7 @@ export function EvaluationGroupDialog({
     });
 
   const { mutate: deleteEvaluationGroup, isPending: isDeleting } =
-    api.eval.deleteGroup.useMutation({
+    api.evaluation.deleteGroup.useMutation({
       onSuccess: () => {
         setFilter({
           ...filter,

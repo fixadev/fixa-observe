@@ -27,7 +27,7 @@ export function EvaluationGroupCard({
   setSelectedEvaluationGroup,
   setEvalsModalOpen,
 }: EvaluationGroupCardProps) {
-  const { mutate: updateGroup } = api.eval.updateGroup.useMutation({
+  const { mutate: updateGroup } = api.evaluation.updateGroup.useMutation({
     onSuccess: (data) => {
       setFilter({
         ...filter,

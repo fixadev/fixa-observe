@@ -111,11 +111,11 @@ export class EvaluationService {
         await tx.generalEvaluation.deleteMany({
           where: {
             agentId,
-            evaluationId: { in: deleted.map((e) => e.id) },
+            id: { in: deleted.map((e) => e.id) },
           },
         });
         await tx.evaluation.deleteMany({
-          where: { id: { in: deleted.map((e) => e.id) } },
+          where: { id: { in: deleted.map((e) => e.evaluationId) } },
         });
       }
     });
