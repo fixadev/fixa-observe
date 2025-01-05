@@ -1,3 +1,5 @@
+"use client";
+
 import { OrganizationSwitcher } from "@clerk/nextjs";
 import { CreditCardIcon } from "@heroicons/react/24/solid";
 import { BillingPage } from "~/components/BillingPage";
@@ -7,9 +9,12 @@ export function CustomOrganizationSwitcher() {
     <OrganizationSwitcher
       hidePersonal
       hideSlug
-      afterCreateOrganizationUrl={window.location.href}
+      afterCreateOrganizationUrl={
+        typeof window !== "undefined" ? window.location.href : "/"
+      }
       afterLeaveOrganizationUrl={
-        "/org-selection?redirectUrl=" + window.location.href
+        "/org-selection?redirectUrl=" +
+        (typeof window !== "undefined" ? window.location.href : "/")
       }
     >
       <OrganizationSwitcher.OrganizationProfilePage

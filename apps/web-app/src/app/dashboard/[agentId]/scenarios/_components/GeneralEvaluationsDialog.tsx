@@ -111,7 +111,7 @@ export function GeneralEvaluationsDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="flex max-w-4xl max-w-[500px] flex-col overflow-hidden">
+      <DialogContent className="flex max-w-4xl max-w-[500px] flex-col">
         <DialogHeader>
           <DialogTitle>general evaluations</DialogTitle>
         </DialogHeader>

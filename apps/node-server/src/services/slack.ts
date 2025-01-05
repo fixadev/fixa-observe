@@ -11,17 +11,17 @@ import { clerkServiceClient } from "../clients/clerkServiceClient";
 import { db } from "../db";
 
 export const sendTestCompletedSlackMessage = async ({
-  ownerId,
+  orgId,
   test,
 }: {
-  ownerId: string;
+  orgId: string;
   test: Test & { calls: Call[] };
 }) => {
   console.log(
     "sending slack message =========================================================",
   );
   const metadata = await clerkServiceClient.getPublicMetadata({
-    orgId: ownerId,
+    orgId,
   });
   console.log(metadata, "metadata");
   if (!metadata.slackWebhookUrl) {
@@ -58,13 +58,6 @@ export const sendTestCompletedSlackMessage = async ({
   await axios.post(metadata.slackWebhookUrl, message);
 };
 
-interface PrivateMetadata {
-  slackAccessToken?: string;
-}
-
-interface PublicMetadata {
-  slackWebhookUrl?: string;
-}
 export async function getEvaluationSetName(alert: Alert) {
   const evaluationSet = await db.evaluationGroup.findUnique({
     where: {

@@ -2,10 +2,8 @@ import {
   Agent,
   Call,
   CallStatus,
-  Scenario,
   Role,
   Test,
-  Evaluation,
   CallResult,
   Message,
 } from "@prisma/client";
@@ -29,12 +27,12 @@ export const handleTranscriptUpdate = async (
   call: CallInProgress,
   userSocket?: Socket,
 ): Promise<
-  | { userId: string; callId: string; testId: string; messages: Message[] }
+  | { orgId: string; callId: string; testId: string; messages: Message[] }
   | undefined
 > => {
-  const userId = call.ownerId;
-  if (!call || !userId || !call.test) {
-    console.error("No call, test or userId");
+  const orgId = call.ownerId;
+  if (!call || !orgId || !call.test) {
+    console.error("No call, test or orgId");
     return;
   }
 
@@ -82,7 +80,7 @@ export const handleTranscriptUpdate = async (
   }
 
   return {
-    userId,
+    orgId,
     callId: call.id,
     testId: call.test.id,
     messages: messagesToEmit,
@@ -157,7 +155,7 @@ export const handleCallEnded = async ({
         const duration = endedAt.getTime() - startedAt.getTime();
         const minutes = Math.ceil(duration / 60000);
         await stripeServiceClient.accrueTestMinutes({
-          userId: agent.ownerId,
+          orgId: agent.ownerId,
           minutes: minutes,
         });
       }
@@ -180,7 +178,7 @@ export const handleCallEnded = async ({
       testAgentPrompt: scenario.instructions,
       scenario,
     });
-    console.log("O1 ANALYSIS for call", call.id, o1Analysis);
+    // console.log("O1 ANALYSIS for call", call.id, o1Analysis);
 
     let unparsedResult: string;
     unparsedResult = o1Analysis;
@@ -288,7 +286,7 @@ export const handleCallEnded = async ({
     ) {
       try {
         await sendTestCompletedSlackMessage({
-          userId: agent.ownerId,
+          orgId: agent.ownerId,
           test: updatedTest,
         });
       } catch (error) {
