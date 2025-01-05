@@ -24,7 +24,6 @@ export class ScenarioService {
         ...scenario,
         id: uuidv4(),
         agentId,
-        ownerId,
         createdAt: new Date(),
         evaluations: {
           createMany: {
@@ -61,7 +60,7 @@ export class ScenarioService {
     ownerId: string;
   }): Promise<ScenarioWithIncludes> {
     const priorEvals = await this.db.evaluation.findMany({
-      where: { scenarioId: scenario.id },
+      where: { scenarioId: scenario.id, scenario: { agent: { ownerId } } },
     });
 
     const { created, updated, deleted } = getCreatedUpdatedDeleted(
@@ -70,7 +69,7 @@ export class ScenarioService {
     );
 
     const updatedScenario = await this.db.scenario.update({
-      where: { id: scenario.id, ownerId },
+      where: { id: scenario.id, agent: { ownerId } },
       data: {
         ...scenario,
         evaluations: {
@@ -120,7 +119,7 @@ export class ScenarioService {
     ownerId: string;
   }): Promise<void> {
     await this.db.scenario.update({
-      where: { id, ownerId },
+      where: { id, agent: { ownerId } },
       data: { deleted: true },
     });
   }
