@@ -62,18 +62,6 @@ export const transcribeAndSaveCall = async ({
         ? stereoRecordingUrl
         : await uploadFromPresignedUrl(callId, stereoRecordingUrl);
 
-    // Accrue observability minutes
-    try {
-      console.log("ACCRUING OBSERVABILITY MINUTES", duration);
-      const durationMinutes = Math.ceil(duration / 60);
-      await stripeServiceClient.accrueObservabilityMinutes({
-        orgId: ownerId,
-        minutes: durationMinutes,
-      });
-    } catch (error) {
-      console.error("Error accruing observability minutes", error);
-    }
-
     // TODO: Figure out why old audio url is cached
     console.log("calling audio service with language", language);
 
@@ -142,6 +130,7 @@ export const transcribeAndSaveCall = async ({
         evaluationResults: {
           create: evalResults?.map((result) => ({
             ...result,
+            evaluationId: undefined,
             evaluation: {
               connect: {
                 id: result.evaluationId,
@@ -185,6 +174,18 @@ export const transcribeAndSaveCall = async ({
         agent: true,
       },
     });
+
+    // Accrue observability minutes after call is created in db
+    try {
+      console.log("ACCRUING OBSERVABILITY MINUTES", duration);
+      const durationMinutes = Math.ceil(duration / 60);
+      await stripeServiceClient.accrueObservabilityMinutes({
+        orgId: ownerId,
+        minutes: durationMinutes,
+      });
+    } catch (error) {
+      console.error("Error accruing observability minutes", error);
+    }
 
     await sendAlerts({
       ownerId,

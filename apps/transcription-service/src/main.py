@@ -16,7 +16,7 @@ app = FastAPI()
 
 class TranscribeRequest(BaseModel):
     stereo_audio_url: str
-    language: str
+    language: Optional[str] = "en"
 class StartWebsocketCallOfOneRequest(BaseModel):
     device_id: str
     assistant_id: str
@@ -31,7 +31,7 @@ async def health():
 async def transcribe(request: TranscribeRequest):
     try: 
         user_audio_path, agent_audio_path = await split_channels(request.stereo_audio_url)
-        transcriptions = await transcribe_with_deepgram([user_audio_path, agent_audio_path], request.language)
+        transcriptions = await transcribe_with_deepgram([user_audio_path, agent_audio_path], request.language or "en")
         transcript = await create_transcript_from_deepgram(transcriptions[0], transcriptions[1], user_audio_path, agent_audio_path) # type: ignore
         return transcript
         
