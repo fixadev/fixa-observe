@@ -51,6 +51,7 @@ export const authenticateVapiRequest = (
 ) => {
   const apiKey = req.headers["x-vapi-secret"];
   if (apiKey !== env.NODE_SERVER_SECRET) {
+    console.log("Unauthorized vapi request", apiKey, env.NODE_SERVER_SECRET);
     return res.status(401).json({ error: "Unauthorized" });
   }
   next();

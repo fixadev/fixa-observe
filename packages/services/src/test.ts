@@ -366,7 +366,7 @@ export class TestService {
   ) {
     try {
       return await axios.post(
-        this.env.NODE_SERVER_URL + "/v1/queue-ofone-kiosk-calls",
+        this.env.NODE_SERVER_URL + "/internal/queue-ofone-kiosk-calls",
         {
           deviceIds,
           callsToStart,

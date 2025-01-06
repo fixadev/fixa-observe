@@ -43,11 +43,8 @@ app.get("/", (req, res) => {
   res.send("ollo");
 });
 
-// temporary before 11x migration
-app.use("/", privateRouter);
+app.use("/internal", privateRouter);
 app.use("/", publicRouter);
-
-app.use("/v1", privateRouter);
 app.use("/v1", publicRouter);
 
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {

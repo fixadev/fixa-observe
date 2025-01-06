@@ -38,6 +38,7 @@ const envSchema = z.object({
   NEXT_PUBLIC_POSTHOG_HOST: z.string().min(1),
   OFONE_KIOSK_ENDPOINT: z.string().min(1),
   NODE_SERVER_SECRET: z.string().min(1),
+  PYTHON_SERVER_SECRET: z.string().min(1),
   // KEYWORDSAI_API_KEY: z.string().min(1),
 });
 
