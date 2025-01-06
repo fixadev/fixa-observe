@@ -21,7 +21,7 @@ export function EditableText({
   initialEditing = false,
   onEditingChange,
   placeholder = "enter text...",
-  inputPlaceholder = "enter text...",
+  inputPlaceholder,
   className,
   inputClassName,
 }: EditableTextProps) {
@@ -39,7 +39,7 @@ export function EditableText({
       <Input
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        placeholder={inputPlaceholder || placeholder}
+        placeholder={inputPlaceholder ?? placeholder}
         autoFocus
         className={cn(
           "h-7 border-none px-2 py-0 focus-visible:ring-input",

@@ -13,7 +13,7 @@ from deepgram import (
     ListenRESTWord,
 )
 
-async def transcribe_with_deepgram(audio_paths: List[str | None]):
+async def transcribe_with_deepgram(audio_paths: List[str | None], language: str = "en"):
     try:
         deepgram_client = DeepgramClient(os.getenv("DEEPGRAM_API_KEY"))
         tasks = []
@@ -26,7 +26,7 @@ async def transcribe_with_deepgram(audio_paths: List[str | None]):
                 
             tasks.append(
                 asyncio.create_task(
-                    process_single_file(deepgram_client, audio_path)
+                    process_single_file(deepgram_client, audio_path, language)
                 )
             )
 
@@ -37,7 +37,7 @@ async def transcribe_with_deepgram(audio_paths: List[str | None]):
         print(f"Deepgram transcription failed: {str(e)}")
         raise e
 
-async def process_single_file(deepgram_client: DeepgramClient, audio_path: str):
+async def process_single_file(deepgram_client: DeepgramClient, audio_path: str, language: str = "en"):
     async with aiofiles.open(audio_path, "rb") as audio_file:
         buffer_data = await audio_file.read()
 
@@ -48,6 +48,7 @@ async def process_single_file(deepgram_client: DeepgramClient, audio_path: str):
     options = PrerecordedOptions(
         model="nova-2",
         smart_format=True,
+        language=language,
     )
 
     response = await deepgram_client.listen.asyncrest.v("1").transcribe_file(payload, options)   # type: ignore
@@ -60,7 +61,7 @@ if __name__ == "__main__":
     ]
     
     try:
-        results = asyncio.run(transcribe_with_deepgram(paths))
+        results = asyncio.run(transcribe_with_deepgram(paths, language="en"))
         for i, result in enumerate(results):
             print(f"\nTranscription {i+1}:")
             print(result.to_json(indent=4))

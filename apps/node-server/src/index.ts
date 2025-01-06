@@ -3,11 +3,11 @@ import { createServer } from "http";
 import { Server } from "socket.io";
 import { env } from "./env";
 import { startQueueConsumer } from "./workers/queueConsumer";
-import v1Router from "./routes/v1";
-import { authenticateRequest } from "./middlewares/auth";
-import vapiRouter from "./routes/v1/vapi";
-import ofOneRouter from "./routes/v1/of-one";
+import privateRouter from "./routers/v1/private";
+import publicRouter from "./routers/v1/public";
 import { posthogClient } from "./clients/posthogClient";
+import vapiRouter from "./routers/v1/routes/vapi";
+import ofOneRouter from "./routers/v1/routes/ofOne";
 
 const app = express();
 const httpServer = createServer(app);
@@ -49,11 +49,12 @@ app.get("/", (req, res) => {
 app.use("/vapi", vapiRouter);
 app.use("/queue-ofone-kiosk-calls", ofOneRouter);
 
-app.use(authenticateRequest);
-
 // temporary before 11x migration
-app.use("/", v1Router);
-app.use("/v1", v1Router);
+app.use("/", privateRouter);
+app.use("/", publicRouter);
+
+app.use("/v1", privateRouter);
+app.use("/v1", publicRouter);
 
 // global error handler
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {

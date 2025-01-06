@@ -2,9 +2,9 @@
 
 import type {
   CallWithIncludes,
-  EvalResultWithIncludes,
+  EvaluationResultWithIncludes,
 } from "@repo/types/src/index";
-import AudioPlayer, { type AudioPlayerRef } from "./AudioPlayer";
+import { AudioPlayer, type AudioPlayerRef } from "./AudioPlayer";
 import { useMemo, useRef, useState, useEffect, useCallback } from "react";
 import {
   cn,
@@ -105,7 +105,7 @@ export default function CallDetails({
     }
     // return messagesFiltered[0]?.secondsFromStart ?? 0; // this is causing bugs
     return 0;
-  }, [messagesFiltered, call.customerCallId]);
+  }, [call.customerCallId]);
 
   // Index of the currently active message
   const activeMessageIndex = useMemo(() => {
@@ -163,10 +163,10 @@ export default function CallDetails({
   );
 
   const activeEvalMessageIndices = useMemo(() => {
-    if (!activeEvalResultId || !call.evalResults || !call.latencyBlocks)
+    if (!activeEvalResultId || !call.evaluationResults || !call.latencyBlocks)
       return new Set<number>();
 
-    const activeEval = call.evalResults.find(
+    const activeEval = call.evaluationResults.find(
       (evalResult) => evalResult.id === activeEvalResultId,
     );
     const activeLatencyBlock = call.latencyBlocks.find(
@@ -177,8 +177,7 @@ export default function CallDetails({
     const overlappingIndices = new Set<number>();
     messagesFiltered.forEach((message, index) => {
       if (
-        activeEval &&
-        activeEval.secondsFromStart &&
+        activeEval?.secondsFromStart &&
         activeEval.duration &&
         activeEval.secondsFromStart <
           (messagesFiltered[index + 1]?.secondsFromStart ?? Infinity) &&
@@ -196,7 +195,7 @@ export default function CallDetails({
     return overlappingIndices;
   }, [
     activeEvalResultId,
-    call.evalResults,
+    call.evaluationResults,
     call.latencyBlocks,
     messageToLatencyMap,
     messagesFiltered,
@@ -225,7 +224,7 @@ export default function CallDetails({
   }, [activeMessageIndex, scrollMessageIntoView]);
 
   const doesEvalOverlapMessage = useCallback(
-    (evalResult: EvalResultWithIncludes, messageIndex: number) => {
+    (evalResult: EvaluationResultWithIncludes, messageIndex: number) => {
       if (!evalResult.secondsFromStart || !evalResult.duration) return false;
       return (
         evalResult.secondsFromStart <
@@ -238,9 +237,9 @@ export default function CallDetails({
   );
 
   const { messageEvalsMap, evalRangesMap: evalRangesMap } = useMemo(() => {
-    if (!call.evalResults) {
+    if (!call.evaluationResults) {
       return {
-        messageEvalsMap: new Map<number, EvalResultWithIncludes[]>(),
+        messageEvalsMap: new Map<number, EvaluationResultWithIncludes[]>(),
         evalRangesMap: new Map<
           string,
           { firstMessageIndex: number; lastMessageIndex: number }
@@ -248,14 +247,14 @@ export default function CallDetails({
       };
     }
 
-    const messageMap = new Map<number, EvalResultWithIncludes[]>();
+    const messageMap = new Map<number, EvaluationResultWithIncludes[]>();
     const rangesMap = new Map<
       string,
       { firstMessageIndex: number; lastMessageIndex: number }
     >();
 
     // First find initial ranges for each evalResult
-    call.evalResults?.forEach((evalResult) => {
+    call.evaluationResults?.forEach((evalResult) => {
       let firstMessageIndex = Infinity;
       let lastMessageIndex = -1;
 
@@ -275,11 +274,11 @@ export default function CallDetails({
     });
 
     // Merge overlapping ranges
-    call.evalResults?.forEach((evalResult) => {
+    call.evaluationResults?.forEach((evalResult) => {
       const currentRange = rangesMap.get(evalResult.id);
       if (!currentRange) return;
 
-      call.evalResults?.forEach((otherEval) => {
+      call.evaluationResults?.forEach((otherEval) => {
         if (evalResult.id === otherEval.id) return;
         const otherRange = rangesMap.get(otherEval.id);
         if (!otherRange) return;
@@ -313,7 +312,7 @@ export default function CallDetails({
     });
 
     // Now build messageMap using the merged ranges
-    call.evalResults?.forEach((evalResult) => {
+    call.evaluationResults?.forEach((evalResult) => {
       const range = rangesMap.get(evalResult.id);
       if (!range) return;
 
@@ -324,7 +323,7 @@ export default function CallDetails({
     });
 
     return { messageEvalsMap: messageMap, evalRangesMap: rangesMap };
-  }, [call.evalResults, messagesFiltered, doesEvalOverlapMessage]);
+  }, [call.evaluationResults, messagesFiltered, doesEvalOverlapMessage]);
 
   const getBorderColorClass = useCallback(
     (evalResultState: "success" | "failure" | "both") => {
@@ -341,15 +340,15 @@ export default function CallDetails({
   );
 
   const timeToEvalResultMap = useMemo(() => {
-    return call.evalResults?.reduce(
+    return call.evaluationResults?.reduce(
       (acc, evalResult) => {
         if (!evalResult.secondsFromStart) return acc;
         acc[evalResult.secondsFromStart] = evalResult;
         return acc;
       },
-      {} as Record<number, EvalResultWithIncludes>,
+      {} as Record<number, EvaluationResultWithIncludes>,
     );
-  }, [call.evalResults]);
+  }, [call.evaluationResults]);
 
   return (
     <div className="flex w-full flex-col rounded-md bg-background px-4 outline-none">
@@ -557,7 +556,7 @@ export default function CallDetails({
                         )}
                         <div className="flex flex-col gap-0.5 text-sm">
                           <div className="font-medium">
-                            {evalResult.eval.name}
+                            {evalResult.evaluation.evaluationTemplate.name}
                           </div>
                           <div className="text-xs">{evalResult.details}</div>
                         </div>
@@ -580,7 +579,7 @@ function ToolCallResult({
   timeToEvalResultMap,
 }: {
   message: Message;
-  timeToEvalResultMap: Record<number, EvalResultWithIncludes>;
+  timeToEvalResultMap: Record<number, EvaluationResultWithIncludes>;
 }) {
   const evalResult = useMemo(() => {
     return timeToEvalResultMap[message.secondsFromStart];

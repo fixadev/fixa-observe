@@ -24,7 +24,7 @@ import {
 } from "~/components/ui/select";
 import type {
   CallWithIncludes,
-  EvalResultWithIncludes,
+  EvaluationResultWithIncludes,
 } from "@repo/types/src/index";
 import {
   cn,
@@ -34,16 +34,19 @@ import {
 } from "~/lib/utils";
 import WaveSurfer from "wavesurfer.js";
 import { Skeleton } from "../ui/skeleton";
+import { useAudioSettings } from "~/components/hooks/useAudioSettings";
 
 export type AudioPlayerRef = {
-  setActiveEvalResult: (evalResult: EvalResultWithIncludes | null) => void;
+  setActiveEvalResult: (
+    evalResult: EvaluationResultWithIncludes | null,
+  ) => void;
   setHoveredEvalResult: (evalResultId: string | null) => void;
   play: () => void;
   pause: () => void;
   seek: (time: number) => void;
 };
 
-const _AudioPlayer = forwardRef<
+export const AudioPlayer = forwardRef<
   AudioPlayerRef,
   {
     call: CallWithIncludes;
@@ -58,7 +61,7 @@ const _AudioPlayer = forwardRef<
 ) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [activeEvalResult, setActiveEvalResult] =
-    useState<EvalResultWithIncludes | null>(null);
+    useState<EvaluationResultWithIncludes | null>(null);
   const [hoveredEvalResult, setHoveredEvalResult] = useState<string | null>(
     null,
   );
@@ -79,7 +82,7 @@ const _AudioPlayer = forwardRef<
     void wavesurfer?.play();
   }, [wavesurfer]);
   const [currentTime, setCurrentTime] = useState(0);
-  const [playbackSpeed, setPlaybackSpeed] = useState(1);
+  const { playbackSpeed, setPlaybackSpeed } = useAudioSettings();
   const [audioLoaded, setAudioLoaded] = useState(false);
   const audioVisualizerId = useMemo(() => {
     return `audio-visualizer-${crypto.randomUUID()}`;
@@ -103,6 +106,7 @@ const _AudioPlayer = forwardRef<
       _wavesurfer.on("ready", (_duration) => {
         setDuration(_duration);
         setAudioLoaded(true);
+        _wavesurfer.setPlaybackRate(playbackSpeed);
       });
       _wavesurfer.on("timeupdate", (time) => {
         setCurrentTime(time);
@@ -121,6 +125,7 @@ const _AudioPlayer = forwardRef<
         _wavesurfer.destroy();
       };
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [audioVisualizerId, call.stereoRecordingUrl, small]);
 
   // Update the time
@@ -128,11 +133,17 @@ const _AudioPlayer = forwardRef<
     onTimeUpdate?.(currentTime);
   }, [currentTime, onTimeUpdate]);
 
+  // Update playback speed
+  useEffect(() => {
+    if (wavesurfer) {
+      wavesurfer.setPlaybackRate(playbackSpeed);
+    }
+  }, [playbackSpeed, wavesurfer]);
+
   // Check if we need to stop playback due to reaching eval end
   useEffect(() => {
     if (
-      activeEvalResult &&
-      activeEvalResult.secondsFromStart &&
+      activeEvalResult?.secondsFromStart &&
       activeEvalResult.duration &&
       currentTime >=
         activeEvalResult.secondsFromStart +
@@ -154,9 +165,11 @@ const _AudioPlayer = forwardRef<
   useImperativeHandle(
     ref,
     () => ({
-      setActiveEvalResult: (evalResult: EvalResultWithIncludes | null) => {
+      setActiveEvalResult: (
+        evalResult: EvaluationResultWithIncludes | null,
+      ) => {
         setActiveEvalResult(evalResult);
-        if (evalResult && evalResult.secondsFromStart && evalResult.duration) {
+        if (evalResult?.secondsFromStart && evalResult.duration) {
           seek(evalResult.secondsFromStart - offsetFromStart);
         }
       },
@@ -171,7 +184,7 @@ const _AudioPlayer = forwardRef<
   );
 
   const handleEvalResultClick = useCallback(
-    (evalResult: EvalResultWithIncludes) => {
+    (evalResult: EvaluationResultWithIncludes) => {
       if (!evalResult.secondsFromStart || !evalResult.duration) return;
       seek(evalResult.secondsFromStart - offsetFromStart);
       play();
@@ -213,7 +226,7 @@ const _AudioPlayer = forwardRef<
         {!audioLoaded && (
           <Skeleton className="absolute left-0 top-0 size-full" />
         )}
-        {call.evalResults?.map((evalResult, index) => {
+        {call.evaluationResults?.map((evalResult, index) => {
           if (
             !containerRef.current ||
             !duration ||
@@ -413,8 +426,3 @@ const _AudioPlayer = forwardRef<
     </div>
   );
 });
-export default _AudioPlayer;
-// export default dynamic(() => Promise.resolve(_AudioPlayer), {
-//   ssr: false,
-//   loading: () => <div>Loading...</div>,
-// });

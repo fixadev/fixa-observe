@@ -41,7 +41,7 @@ export default function AgentSettingsPage({
   const originalAgentState = useRef<AgentWithIncludes | null>(null);
 
   const { toast } = useToast();
-  const { agent, refetch, setAgent } = useAgent(params.agentId);
+  const { agent, setAgent } = useAgent();
   const { user } = useUser();
 
   const isSlackAppInstalled = useMemo(
@@ -49,13 +49,16 @@ export default function AgentSettingsPage({
     [user],
   );
 
+  const utils = api.useUtils();
   const { mutate: updateAgent, isPending: isUpdatingSettings } =
     api.agent.updateAgent.useMutation({
       onSuccess: () => {
         toast({
           title: "Settings saved",
         });
-        void refetch();
+        if (agent) {
+          void utils.agent.get.invalidate({ id: agent.id });
+        }
       },
     });
 
@@ -139,7 +142,7 @@ export default function AgentSettingsPage({
               agent ID to be used with fixa API requests
             </div>
           </div>
-          <CopyText text={agentState.id} />
+          <CopyText text={agentState.customerAgentId} />
         </div>
         <div className="flex flex-col gap-2">
           <div>
@@ -156,7 +159,7 @@ export default function AgentSettingsPage({
             }}
           />
         </div>
-        <div className="flex flex-col gap-2">
+        {/* <div className="flex flex-col gap-2">
           <div>
             <Label>internal agent ID</Label>
             <div className="text-xs text-muted-foreground">
@@ -174,7 +177,7 @@ export default function AgentSettingsPage({
               });
             }}
           />
-        </div>
+        </div> */}
         <div className="flex flex-col gap-2">
           <div>
             <Label>agent phone number</Label>

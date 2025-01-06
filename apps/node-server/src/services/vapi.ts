@@ -2,10 +2,8 @@ import {
   Agent,
   Call,
   CallStatus,
-  Scenario,
   Role,
   Test,
-  Eval,
   CallResult,
   Message,
 } from "@prisma/client";
@@ -16,26 +14,25 @@ import {
   type ServerMessageEndOfCallReport,
 } from "@vapi-ai/server-sdk/api";
 import { analyzeCallWitho1 } from "./textAnalysis";
-import { createGeminiPrompt } from "../utils/prompt";
-import { analyzeCallWithGemini } from "./audioAnalysis";
 import { formatOutput } from "./textAnalysis";
 import { Socket } from "socket.io";
 import { sendTestCompletedSlackMessage } from "./slack";
 import { setDeviceAvailable } from "./integrations/ofOneService";
 import vapiClient from "../clients/vapiClient";
 import stripeServiceClient from "../clients/stripeServiceClient";
+import { CallInProgress, ScenarioWithIncludes } from "@repo/types/src/index";
 
 export const handleTranscriptUpdate = async (
   report: ServerMessageTranscript,
-  call: Call & { test: Test },
+  call: CallInProgress,
   userSocket?: Socket,
 ): Promise<
-  | { userId: string; callId: string; testId: string; messages: Message[] }
+  | { orgId: string; callId: string; testId: string; messages: Message[] }
   | undefined
 > => {
-  const userId = call.ownerId;
-  if (!call || !userId || !call.test) {
-    console.error("No call, test or userId", call);
+  const orgId = call.ownerId;
+  if (!call || !orgId || !call.test) {
+    console.error("No call, test or orgId");
     return;
   }
 
@@ -83,7 +80,7 @@ export const handleTranscriptUpdate = async (
   }
 
   return {
-    userId,
+    orgId,
     callId: call.id,
     testId: call.test.id,
     messages: messagesToEmit,
@@ -140,7 +137,7 @@ export const handleCallEnded = async ({
   call: Call;
   agent: Agent;
   test: Test;
-  scenario: Scenario & { evals: Eval[] };
+  scenario: ScenarioWithIncludes;
   userSocket?: Socket;
 }) => {
   try {
@@ -158,7 +155,7 @@ export const handleCallEnded = async ({
         const duration = endedAt.getTime() - startedAt.getTime();
         const minutes = Math.ceil(duration / 60000);
         await stripeServiceClient.accrueTestMinutes({
-          userId: agent.ownerId,
+          orgId: agent.ownerId,
           minutes: minutes,
         });
       }
@@ -181,7 +178,7 @@ export const handleCallEnded = async ({
       testAgentPrompt: scenario.instructions,
       scenario,
     });
-    console.log("O1 ANALYSIS for call", call.id, o1Analysis);
+    // console.log("O1 ANALYSIS for call", call.id, o1Analysis);
 
     let unparsedResult: string;
     unparsedResult = o1Analysis;
@@ -210,15 +207,15 @@ export const handleCallEnded = async ({
     const evalResults = await formatOutput(unparsedResult);
 
     const validEvalResults = evalResults.filter((evalResult) =>
-      [...scenario.evals]?.some(
-        (evaluation) => evaluation.id === evalResult.evalId,
+      [...scenario.evaluations]?.some(
+        (evaluation) => evaluation.id === evalResult.evaluationId,
       ),
     );
 
     const criticalEvalResults = evalResults.filter((evalResult) =>
-      [...scenario.evals]?.some(
+      [...scenario.evaluations]?.some(
         (evaluation) =>
-          evaluation.id === evalResult.evalId && evaluation.isCritical,
+          evaluation.id === evalResult.evaluationId && evaluation.isCritical,
       ),
     );
 
@@ -233,8 +230,13 @@ export const handleCallEnded = async ({
         stereoRecordingUrl: report.artifact.stereoRecordingUrl,
         monoRecordingUrl: report.artifact.recordingUrl,
         result: success ? CallResult.success : CallResult.failure,
-        evalResults: {
-          create: validEvalResults,
+        evaluationResults: {
+          create: validEvalResults.map(({ evaluationId, ...result }) => ({
+            ...result,
+            evaluation: {
+              connect: { id: evaluationId },
+            },
+          })),
         },
         messages: {
           create: report.artifact.messages
@@ -266,8 +268,16 @@ export const handleCallEnded = async ({
       include: {
         messages: true,
         testAgent: true,
-        scenario: { include: { evals: true } },
-        evalResults: { include: { eval: true } },
+        scenario: {
+          include: {
+            evaluations: { include: { evaluationTemplate: true } },
+          },
+        },
+        evaluationResults: {
+          include: {
+            evaluation: { include: { evaluationTemplate: true } },
+          },
+        },
       },
     });
 
@@ -284,7 +294,7 @@ export const handleCallEnded = async ({
     ) {
       try {
         await sendTestCompletedSlackMessage({
-          userId: agent.ownerId,
+          orgId: agent.ownerId,
           test: updatedTest,
         });
       } catch (error) {

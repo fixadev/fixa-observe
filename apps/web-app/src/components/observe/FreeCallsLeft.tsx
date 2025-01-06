@@ -1,6 +1,6 @@
 "use client";
 
-import { useUser } from "@clerk/nextjs";
+import { useOrganization } from "@clerk/nextjs";
 import { type PublicMetadata } from "@repo/types/src";
 import { useCallback, useMemo } from "react";
 import { Button } from "../ui/button";
@@ -11,9 +11,9 @@ import { Card } from "../ui/card";
 
 export default function FreeCallsLeft() {
   const bypassPayment = useFeatureFlagEnabled("bypass-payment");
-  const { user, isLoaded } = useUser();
+  const { organization, isLoaded } = useOrganization();
 
-  const metadata = user?.publicMetadata as PublicMetadata | undefined;
+  const metadata = organization?.publicMetadata as PublicMetadata | undefined;
 
   const freeCallsLeft = useMemo(() => {
     return metadata?.freeObservabilityCallsLeft ?? 0;
@@ -34,6 +34,7 @@ export default function FreeCallsLeft() {
     getCheckoutUrl({ redirectUrl });
   }, [getCheckoutUrl]);
 
+  // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
   if (isPaidUser || !isLoaded) {
     return null;
   }

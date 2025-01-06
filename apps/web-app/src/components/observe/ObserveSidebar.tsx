@@ -24,14 +24,14 @@ import {
   BeakerIcon,
   ChartBarIcon,
   ChevronDownIcon,
-  CreditCardIcon,
+  DocumentCheckIcon,
   DocumentIcon,
   EllipsisHorizontalIcon,
   LifebuoyIcon,
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { removeTrailingSlash } from "~/lib/utils";
 import { api } from "~/trpc/react";
 import { Button } from "../ui/button";
@@ -59,10 +59,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
-import { UserButton } from "@clerk/nextjs";
-import { SlackIcon } from "lucide-react";
+import { useOrganization, UserButton } from "@clerk/nextjs";
 import { DocumentTextIcon, KeyIcon } from "@heroicons/react/24/outline";
 import { OpenInNewWindowIcon } from "@radix-ui/react-icons";
+import { useFeatureFlagEnabled } from "posthog-js/react";
+import { CustomOrganizationSwitcher } from "../CustomOrganizationSwitcher";
 
 export default function ObserveSidebar() {
   const pathname = usePathname();
@@ -88,6 +89,25 @@ export default function ObserveSidebar() {
   const [curSavedSearch, setCurSavedSearch] =
     useState<SavedSearchWithIncludes | null>(null);
 
+  const testsPageEnabled = useFeatureFlagEnabled("observability-tests-page");
+
+  // Invalidate everything when organization changes
+  const utils = api.useUtils();
+  const { organization, isLoaded: organizationLoaded } = useOrganization();
+  const prevOrganizationId = useRef<string | undefined>(undefined);
+  useEffect(() => {
+    if (organizationLoaded && organization) {
+      if (
+        prevOrganizationId.current &&
+        prevOrganizationId.current !== organization.id
+      ) {
+        void utils.invalidate();
+      }
+      prevOrganizationId.current = organization.id;
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [organization, utils]);
+
   return (
     <>
       <Sidebar>
@@ -109,17 +129,7 @@ export default function ObserveSidebar() {
                 <SelectItem value="observability">observability</SelectItem>
               </SelectContent>
             </Select>
-            <UserButton>
-              <UserButton.MenuItems>
-                <UserButton.Link
-                  href="/billing"
-                  label="billing"
-                  labelIcon={<CreditCardIcon />}
-                />
-                <UserButton.Action label="manageAccount" />
-                <UserButton.Action label="signOut" />
-              </UserButton.MenuItems>
-            </UserButton>
+            <UserButton />
           </div>
         </SidebarHeader>
         <SidebarContent>
@@ -135,13 +145,29 @@ export default function ObserveSidebar() {
                   </SidebarMenuButton>
                 </SidebarMenuItem>
                 <SidebarMenuItem>
-                  <SidebarMenuButton asChild isActive={isCurrentPath("/tests")}>
-                    <Link href={`/observe/tests`}>
-                      <BeakerIcon />
-                      <span>test calls</span>
+                  <SidebarMenuButton
+                    asChild
+                    isActive={isCurrentPath("/eval-templates")}
+                  >
+                    <Link href={`/observe/eval-templates`}>
+                      <DocumentCheckIcon />
+                      <span>evaluation templates</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
+                {testsPageEnabled && (
+                  <SidebarMenuItem>
+                    <SidebarMenuButton
+                      asChild
+                      isActive={isCurrentPath("/tests")}
+                    >
+                      <Link href={`/observe/tests`}>
+                        <BeakerIcon />
+                        <span>test calls</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                )}
                 <Collapsible defaultOpen className="group/collapsible">
                   <SidebarMenuItem>
                     <CollapsibleTrigger asChild>
@@ -212,17 +238,6 @@ export default function ObserveSidebar() {
                 <SidebarMenuItem>
                   <SidebarMenuButton
                     asChild
-                    isActive={isCurrentPath("/slack-app")}
-                  >
-                    <Link href="/observe/slack-app">
-                      <SlackIcon />
-                      <span>slack app</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-                <SidebarMenuItem>
-                  <SidebarMenuButton
-                    asChild
                     isActive={isCurrentPath("/api-keys")}
                   >
                     <Link href="/observe/api-keys">
@@ -245,7 +260,7 @@ export default function ObserveSidebar() {
                 <SidebarMenuItem>
                   <SidebarMenuButton asChild>
                     <Link
-                      href={`https://join.slack.com/t/fixacommunity/shared_invite/zt-2wbw79829-01HGYT7SxVYPk8t6pTNb9w`}
+                      href={`https://discord.gg/rT9cYkfybZ`}
                       target="_blank"
                     >
                       <LifebuoyIcon />
@@ -255,6 +270,11 @@ export default function ObserveSidebar() {
                   <SidebarMenuBadge>
                     <OpenInNewWindowIcon />
                   </SidebarMenuBadge>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild>
+                    <CustomOrganizationSwitcher />
+                  </SidebarMenuButton>
                 </SidebarMenuItem>
               </SidebarMenu>
             </SidebarGroupContent>

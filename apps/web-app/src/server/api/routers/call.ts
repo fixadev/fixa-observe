@@ -11,7 +11,7 @@ export const callRouter = createTRPCRouter({
   getCall: protectedProcedure
     .input(z.string())
     .query(async ({ input, ctx }) => {
-      const call = await callService.getCall(input, ctx.user.id);
+      const call = await callService.getCall(input, ctx.orgId);
       if (!call) {
         throw new TRPCError({
           code: "NOT_FOUND",
@@ -36,7 +36,7 @@ export const callRouter = createTRPCRouter({
       const limit = input.limit ?? 50;
       const result = await callService.getCalls({
         ...input,
-        ownerId: ctx.user.id,
+        ownerId: ctx.orgId,
         limit,
       });
 
@@ -46,8 +46,17 @@ export const callRouter = createTRPCRouter({
       };
     }),
 
+  getCallsByCustomerCallId: protectedProcedure
+    .input(z.object({ customerCallId: z.string() }))
+    .query(async ({ input, ctx }) => {
+      return await callService.getCallsByCustomerCallId({
+        customerCallId: input.customerCallId,
+        orgId: ctx.orgId,
+      });
+    }),
+
   checkIfACallExists: protectedProcedure.query(async ({ ctx }) => {
-    return await callService.checkIfACallExists(ctx.user.id);
+    return await callService.checkIfACallExists(ctx.orgId);
   }),
 
   getLatencyInterruptionPercentiles: protectedProcedure
@@ -55,15 +64,15 @@ export const callRouter = createTRPCRouter({
     .query(async ({ input, ctx }) => {
       return await callService.getLatencyInterruptionPercentiles({
         filter: input.filter,
-        ownerId: ctx.user.id,
+        ownerId: ctx.orgId,
       });
     }),
 
   getAgentIds: protectedProcedure.query(async ({ ctx }) => {
-    return await callService.getAgentIds(ctx.user.id);
+    return await callService.getAgentIds(ctx.orgId);
   }),
 
   getMetadata: protectedProcedure.query(async ({ ctx }) => {
-    return await callService.getMetadata(ctx.user.id);
+    return await callService.getMetadata(ctx.orgId);
   }),
 });

@@ -39,7 +39,10 @@ export const columns: ColumnDef<CallWithIncludes>[] = [
             className="gap-2 text-xs text-muted-foreground"
             asChild
           >
-            <Link href={`/observe/calls/${call.id}`} target="_blank">
+            <Link
+              href={`/observe/calls/${call.customerCallId}`}
+              target="_blank"
+            >
               direct link <ArrowTopRightOnSquareIcon className="size-4" />
             </Link>
           </Button>
@@ -324,30 +327,40 @@ const ActionCell = ({ call }: { call: CallWithIncludes }) => {
 
 const EvalResultCell = ({ call }: { call: CallWithIncludes }) => {
   const { savedSearch } = useObserveState();
-  const evalSetIds = useMemo(
-    () => new Set(savedSearch?.evalSets?.map((evalSet) => evalSet.id) ?? []),
+  const evaluationGroupIds = useMemo(
+    () =>
+      new Set(
+        savedSearch?.evaluationGroups?.map(
+          (evaluationGroup) => evaluationGroup.id,
+        ) ?? [],
+      ),
     [savedSearch],
   );
-  const callEvalSetIds = useMemo(
+  const callEvaluationGroupIds = useMemo(
     () => Object.keys(call.evalSetToSuccess ?? {}),
     [call],
   );
-  const relevantEvalSetIds = useMemo(
-    () => callEvalSetIds.filter((id) => evalSetIds.has(id)),
-    [callEvalSetIds, evalSetIds],
+  const relevantEvaluationGroupIds = useMemo(
+    () => callEvaluationGroupIds.filter((id) => evaluationGroupIds.has(id)),
+    [callEvaluationGroupIds, evaluationGroupIds],
   );
   const passed = useMemo(() => {
     const evalSetToSuccess = call.evalSetToSuccess as Record<string, boolean>;
-    return relevantEvalSetIds.filter((id) => evalSetToSuccess[id] === true)
-      .length;
-  }, [relevantEvalSetIds, call.evalSetToSuccess]);
-  const total = useMemo(() => relevantEvalSetIds.length, [relevantEvalSetIds]);
+    return relevantEvaluationGroupIds.filter(
+      (id) => evalSetToSuccess[id] === true,
+    ).length;
+  }, [relevantEvaluationGroupIds, call.evalSetToSuccess]);
+  const total = useMemo(
+    () => relevantEvaluationGroupIds.length,
+    [relevantEvaluationGroupIds],
+  );
   const filteredEvalResults = useMemo(() => {
-    return call.evalResults.filter(
+    return call.evaluationResults.filter(
       (evalResult) =>
-        evalResult.eval.evalSetId && evalSetIds.has(evalResult.eval.evalSetId),
+        evalResult.evaluation.evaluationGroupId &&
+        evaluationGroupIds.has(evalResult.evaluation.evaluationGroupId),
     );
-  }, [call.evalResults, evalSetIds]);
+  }, [call.evaluationResults, evaluationGroupIds]);
 
   if (total === 0) {
     return <div className="text-sm text-muted-foreground/50">n/a</div>;

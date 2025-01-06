@@ -1,8 +1,10 @@
-import { type PrismaClient } from "@repo/db/src/index";
+import { Prisma, type PrismaClient } from "@repo/db/src/index";
 import { v4 as uuidv4 } from "uuid";
+import { getCreatedUpdatedDeleted } from "./utils";
 import {
-  type CreateScenarioSchema,
-  type UpdateScenarioSchema,
+  CreateScenario,
+  ScenarioWithIncludes,
+  ScenarioWithIncludesSchema,
 } from "@repo/types/src/index";
 
 export class ScenarioService {
@@ -11,189 +13,113 @@ export class ScenarioService {
   async createScenario({
     agentId,
     scenario,
-    userId,
+    ownerId,
   }: {
     agentId: string;
-    scenario: CreateScenarioSchema;
-    userId: string;
-  }) {
-    return await this.db.scenario.create({
+    scenario: CreateScenario;
+    ownerId: string;
+  }): Promise<ScenarioWithIncludes> {
+    const createdScenario = await this.db.scenario.create({
       data: {
         ...scenario,
         id: uuidv4(),
         agentId,
-        ownerId: userId,
         createdAt: new Date(),
-        evals: {
+        evaluations: {
           createMany: {
-            data: scenario.evals.map((evaluation) => ({
+            data: scenario.evaluations.map((evaluation) => ({
               ...evaluation,
               id: uuidv4(),
+              params: evaluation.params as Prisma.InputJsonValue,
               scenarioId: undefined,
-            })),
-          },
-        },
-        generalEvalOverrides: {
-          createMany: {
-            data: scenario.generalEvalOverrides.map((override) => ({
-              ...override,
-              id: uuidv4(),
-              scenarioId: undefined,
+              evaluationTemplate: undefined,
             })),
           },
         },
       },
       include: {
-        evals: { orderBy: { createdAt: "asc" } },
-        generalEvalOverrides: { orderBy: { createdAt: "asc" } },
-      },
-    });
-  }
-
-  async createScenarios({
-    agentId,
-    scenarios,
-  }: {
-    agentId: string;
-    scenarios: CreateScenarioSchema[];
-  }) {
-    return await this.db.$transaction(async (tx) => {
-      return await Promise.all(
-        scenarios.map((scenario) =>
-          tx.scenario.create({
-            data: {
-              ...scenario,
-              id: uuidv4(),
-              agentId,
-              createdAt: new Date(),
-              evals: {
-                createMany: {
-                  data: scenario.evals.map((evaluation) => ({
-                    ...evaluation,
-                    id: uuidv4(),
-                    scenarioId: undefined,
-                  })),
-                },
-              },
-              generalEvalOverrides: {},
-            },
-            include: {
-              evals: { orderBy: { createdAt: "asc" } },
-              generalEvalOverrides: { orderBy: { createdAt: "asc" } },
-            },
-          }),
-        ),
-      );
-    });
-  }
-
-  async updateScenario({
-    scenario,
-    userId,
-  }: {
-    scenario: UpdateScenarioSchema;
-    userId: string;
-  }) {
-    const priorEvals = await this.db.eval.findMany({
-      where: { scenarioId: scenario.id },
-    });
-
-    const evaluationsToDelete = priorEvals.filter(
-      (priorEvaluation) =>
-        !scenario.evals.some(
-          (newEvaluation) => newEvaluation.id === priorEvaluation.id,
-        ),
-    );
-
-    const evaluationsToUpdate = scenario.evals.filter((evaluation) =>
-      priorEvals.some((priorEval) => priorEval.id === evaluation.id),
-    );
-
-    const evaluationsToCreate = scenario.evals.filter(
-      (evaluation) =>
-        !priorEvals.some((priorEval) => priorEval.id === evaluation.id),
-    );
-
-    const priorOverrides = await this.db.evalOverride.findMany({
-      where: { scenarioId: scenario.id },
-    });
-
-    const evalOverridesToDelete = scenario.generalEvalOverrides.filter(
-      (override) =>
-        priorOverrides.some(
-          (priorOverride) => priorOverride.id === override.id,
-        ),
-    );
-
-    const evalOverridesToUpdate = scenario.generalEvalOverrides.filter(
-      (override) =>
-        priorOverrides.some(
-          (priorOverride) => priorOverride.id === override.id,
-        ),
-    );
-
-    const evalOverridesToCreate = scenario.generalEvalOverrides.filter(
-      (override) =>
-        !priorOverrides.some(
-          (priorOverride) => priorOverride.id === override.id,
-        ),
-    );
-
-    return await this.db.scenario.update({
-      where: { id: scenario.id },
-      data: {
-        ...scenario,
-        evals: {
-          updateMany: [
-            ...evaluationsToDelete.map((evaluation) => ({
-              where: { id: evaluation.id },
-              data: { deleted: true },
-            })),
-            ...evaluationsToUpdate.map((evaluation) => ({
-              where: { id: evaluation.id },
-              data: { ...evaluation, scenarioId: undefined },
-            })),
-          ],
-          createMany: {
-            data: evaluationsToCreate.map((evaluation) => ({
-              ...evaluation,
-              id: uuidv4(),
-              scenarioId: scenario.id,
-            })),
-          },
-        },
-        generalEvalOverrides: {
-          updateMany: [
-            ...evalOverridesToDelete.map((override) => ({
-              where: { id: override.id },
-              data: { deleted: true },
-            })),
-            ...evalOverridesToUpdate.map((override) => ({
-              where: { id: override.id },
-              data: { ...override, scenarioId: undefined },
-            })),
-          ],
-          createMany: {
-            data: evalOverridesToCreate.map((override) => ({
-              ...override,
-              id: uuidv4(),
-              scenarioId: undefined,
-            })),
-          },
-        },
-      },
-      include: {
-        evals: { where: { deleted: false }, orderBy: { createdAt: "asc" } },
-        generalEvalOverrides: {
+        evaluations: {
+          include: { evaluationTemplate: true },
           orderBy: { createdAt: "asc" },
         },
       },
     });
+
+    const parsed = ScenarioWithIncludesSchema.safeParse(createdScenario);
+    if (!parsed.success) {
+      throw new Error(`Could not parse scenario data: ${parsed.error.message}`);
+    }
+    return parsed.data;
   }
 
-  async deleteScenario({ id, userId }: { id: string; userId: string }) {
-    return await this.db.scenario.update({
-      where: { id, ownerId: userId },
+  async updateScenario({
+    scenario,
+    ownerId,
+  }: {
+    scenario: ScenarioWithIncludes;
+    ownerId: string;
+  }): Promise<ScenarioWithIncludes> {
+    const priorEvals = await this.db.evaluation.findMany({
+      where: { scenarioId: scenario.id, scenario: { agent: { ownerId } } },
+    });
+
+    const { created, updated, deleted } = getCreatedUpdatedDeleted(
+      priorEvals,
+      scenario.evaluations,
+    );
+
+    const updatedScenario = await this.db.scenario.update({
+      where: { id: scenario.id, agent: { ownerId } },
+      data: {
+        ...scenario,
+        evaluations: {
+          deleteMany: { id: { in: deleted.map((e) => e.id) } },
+          updateMany: [
+            ...updated.map((evaluation) => ({
+              where: { id: evaluation.id },
+              data: {
+                ...evaluation,
+                params: evaluation.params as Prisma.InputJsonValue,
+                scenarioId: undefined,
+                evaluationTemplate: undefined,
+              },
+            })),
+          ],
+          createMany: {
+            data: created.map((evaluation) => ({
+              ...evaluation,
+              id: uuidv4(),
+              params: evaluation.params as Prisma.InputJsonValue,
+              scenarioId: undefined,
+              evaluationTemplate: undefined,
+            })),
+          },
+        },
+      },
+      include: {
+        evaluations: {
+          include: { evaluationTemplate: true },
+          orderBy: { createdAt: "asc" },
+        },
+      },
+    });
+
+    const parsed = ScenarioWithIncludesSchema.safeParse(updatedScenario);
+    if (!parsed.success) {
+      throw new Error(`Could not parse scenario data: ${parsed.error.message}`);
+    }
+    return parsed.data;
+  }
+
+  async deleteScenario({
+    id,
+    ownerId,
+  }: {
+    id: string;
+    ownerId: string;
+  }): Promise<void> {
+    await this.db.scenario.update({
+      where: { id, agent: { ownerId } },
       data: { deleted: true },
     });
   }

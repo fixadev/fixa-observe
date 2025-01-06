@@ -4,9 +4,10 @@ import { s3 } from "../clients/s3Client";
 import { PutObjectCommand } from "@aws-sdk/client-s3";
 import { Readable } from "stream";
 import { UploadCallParams } from "@repo/types/src/types";
+import { randomUUID } from "crypto";
 
 export const addCallToQueue = async (input: UploadCallParams) => {
-  // Send messagep
+  // Send message
   await sqs
     .sendMessage({
       QueueUrl: env.SQS_QUEUE_URL,
@@ -66,7 +67,7 @@ export const uploadFromPresignedUrl = async (
     // Upload to S3
     const uploadParams = {
       Bucket: env.AWS_BUCKET_NAME,
-      Key: `calls/${callId}/audio.${extension}`,
+      Key: `calls/${callId}-${Date.now()}.${extension}`,
       Body: Buffer.from(buffer),
       ContentType: contentType,
     };

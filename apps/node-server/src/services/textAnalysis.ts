@@ -2,12 +2,16 @@ import { z } from "zod";
 import { zodResponseFormat } from "openai/helpers/zod";
 import { openai } from "../clients/openAIClient";
 import { ArtifactMessagesItem } from "@vapi-ai/server-sdk/api";
-import { Eval, EvalResultType, Message, Scenario } from "@prisma/client";
+import { Evaluation, EvalResultType, Message } from "@prisma/client";
 import { getDateTimeAtTimezone } from "../utils/time";
+import {
+  EvaluationWithIncludes,
+  ScenarioWithIncludes,
+} from "@repo/types/src/index";
 
 export type EvalResultSchema = z.infer<typeof EvalResultSchema>;
 const EvalResultSchema = z.object({
-  evalId: z.string(),
+  evaluationId: z.string(),
   result: z.string(),
   success: z.boolean(),
   secondsFromStart: z.number(),
@@ -30,8 +34,8 @@ export const analyzeCallWitho1 = async ({
   callStartedAt?: string;
   messages: ArtifactMessagesItem[] | Message[];
   testAgentPrompt: string;
-  scenario?: Scenario & { evals: Eval[] };
-  evals?: Eval[];
+  scenario?: ScenarioWithIncludes;
+  evals?: EvaluationWithIncludes[];
 }): Promise<string> => {
   const basePrompt = `
   Your job to to analyze a call transcript between an AI agent (the main agent) and a test AI agent (the test agent), and determine how the main agent performed.
@@ -65,6 +69,8 @@ export const analyzeCallWitho1 = async ({
   Keep the following in mind:
   - secondsFromStart and duration should only encompass the specific portion of the call where the error occurred. It should not be very long (10 seconds is a good max), unless it makes sense for it to be longer.
   - some evals do not require timestamps (such as an eval that failed but not in a particular part of the call)
+  - transcription errors occur frequently, particuarly for proper nouns and names. so if you see an error involving a name or proper noun that looks likes its been mis-transcribed, you should not count it as a failure and assume it was a transcription error instead.
+    - for example, if the transcript says "hi, this is Jordan from Masa Valley" but the evaluation says "agent should introduce themselves as 'Jordan from Mussab Ali'", you should not count this as a failure.
   `;
 
   const prompt = `${basePrompt}\n\n\n\nTest Agent Prompt: ${testAgentPrompt}\n\n${
@@ -74,7 +80,9 @@ export const analyzeCallWitho1 = async ({
           scenario.timezone,
         )}. Use this as context for your evaluation, if the evaluation criteria is dependent on the current date or time, or if it mentions phrases like 'right now' or 'today', etc.`
       : ""
-  }\n\nScenario Evaluation Criteria: ${JSON.stringify(scenario?.evals || evals || [])}
+  }\n\nScenario Evaluation Criteria: ${JSON.stringify(
+    scenario?.evaluations || evals || [],
+  )}
   \n\nCall Transcript: ${JSON.stringify(messages)}`;
   // console.log("========================= O1 PROMPT =========================");
   // console.log(prompt);

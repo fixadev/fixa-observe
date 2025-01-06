@@ -124,9 +124,9 @@ export default function Filters({
     // Create new objects without evalSets and alerts
     const cleanOriginal = { ..._originalFilter };
     const cleanFilter = { ..._filter };
-    delete cleanOriginal.evalSets;
+    delete cleanOriginal.evaluationGroups;
     delete cleanOriginal.alerts;
-    delete cleanFilter.evalSets;
+    delete cleanFilter.evaluationGroups;
     delete cleanFilter.alerts;
 
     // Fix the case where metadata is undefined / null

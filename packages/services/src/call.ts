@@ -1,5 +1,9 @@
 import { Prisma, type PrismaClient } from "@repo/db/src/index";
-import { type OrderBy, type Filter } from "@repo/types/src/index";
+import {
+  type OrderBy,
+  type Filter,
+  CallWithIncludesSchema,
+} from "@repo/types/src/index";
 import { type CallWithIncludes } from "@repo/types/src/index";
 import { calculateLatencyPercentiles } from "./utils";
 
@@ -10,25 +14,47 @@ export class CallService {
     id: string,
     ownerId: string,
   ): Promise<CallWithIncludes | null> => {
-    return await this.db.call.findUnique({
+    const call = await this.db.call.findUnique({
       where: { id, ownerId },
       include: {
         messages: true,
         scenario: {
           include: {
-            evals: true,
+            evaluations: {
+              include: {
+                evaluationTemplate: true,
+              },
+            },
           },
         },
         testAgent: true,
-        evalResults: {
+        evaluationResults: {
           include: {
-            eval: true,
+            evaluation: {
+              include: {
+                evaluationTemplate: true,
+              },
+            },
           },
         },
         latencyBlocks: true,
         interruptions: true,
       },
     });
+
+    if (!call) {
+      return null;
+    }
+
+    const parsedCall = CallWithIncludesSchema.safeParse(call);
+
+    if (!parsedCall.success) {
+      throw new Error(
+        `failed to parse call with call ID ${id}: ${parsedCall.error.message}`,
+      );
+    }
+
+    return parsedCall.data;
   };
 
   getCalls = async ({
@@ -117,8 +143,8 @@ export class CallService {
           ...metadataFilters,
         ];
       }
-      if (filter.evalSetToSuccess) {
-        const { id, result } = filter.evalSetToSuccess;
+      if (filter.evaluationGroupResult) {
+        const { id, result } = filter.evaluationGroupResult;
         if (result === null) {
           filterWhere.evalSetToSuccess = {
             path: [id],
@@ -167,13 +193,21 @@ export class CallService {
         messages: true,
         scenario: {
           include: {
-            evals: true,
+            evaluations: {
+              include: {
+                evaluationTemplate: true,
+              },
+            },
           },
         },
         testAgent: true,
-        evalResults: {
+        evaluationResults: {
           include: {
-            eval: true,
+            evaluation: {
+              include: {
+                evaluationTemplate: true,
+              },
+            },
           },
         },
         latencyBlocks: true,
@@ -191,9 +225,63 @@ export class CallService {
     }
 
     return {
-      items,
+      items: items
+        .map((item) => {
+          const parsed = CallWithIncludesSchema.safeParse(item);
+          if (!parsed.success) {
+            console.error(
+              `failed to parse call with call ID ${item.id}: ${parsed.error.message}`,
+            );
+          }
+          return parsed.success ? parsed.data : null;
+        })
+        .filter((p) => p !== null),
       nextCursor,
     };
+  };
+
+  getCallsByCustomerCallId = async ({
+    customerCallId,
+    orgId,
+  }: {
+    customerCallId: string;
+    orgId: string;
+  }): Promise<CallWithIncludes[]> => {
+    const calls = await this.db.call.findMany({
+      where: { customerCallId, ownerId: orgId },
+      include: {
+        messages: true,
+        scenario: {
+          include: {
+            evaluations: {
+              include: {
+                evaluationTemplate: true,
+              },
+            },
+          },
+        },
+        testAgent: true,
+        evaluationResults: {
+          include: {
+            evaluation: {
+              include: {
+                evaluationTemplate: true,
+              },
+            },
+          },
+        },
+        latencyBlocks: true,
+        interruptions: true,
+      },
+    });
+    const parsedCalls = calls.map((call) => {
+      const parsed = CallWithIncludesSchema.safeParse(call);
+      if (!parsed.success) {
+        console.error(`failed to parse call with call ID ${call.id}`);
+      }
+      return parsed.success ? parsed.data : null;
+    });
+    return parsedCalls.filter((p) => p !== null);
   };
 
   // // WIP
@@ -355,11 +443,11 @@ export class CallService {
   };
 
   getLatencyPercentilesForLookbackPeriod = async ({
-    userId,
+    ownerId,
     filter,
     newLatencyBlocks,
   }: {
-    userId: string;
+    ownerId: string;
     filter: Partial<Filter>;
     newLatencyBlocks: number[];
   }): Promise<{
@@ -368,7 +456,7 @@ export class CallService {
     p95: number;
   }> => {
     const calls = await this.getCalls({
-      ownerId: userId,
+      ownerId,
       filter,
     });
 

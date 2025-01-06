@@ -7,8 +7,16 @@ import { CSPostHogProvider } from "./providers";
 import { ClerkProvider } from "@clerk/nextjs";
 
 // import { dark } from "@clerk/themes";
-import ChildrenWrapper from "./_components/ChildrenWrapper";
+import { PostHogIdentify } from "./_components/PostHogIdentify";
 import { TooltipProvider } from "~/components/ui/tooltip";
+import { AudioSettingsProvider } from "~/components/hooks/useAudioSettings";
+import { type Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "fixa | AI voice agent testing and observability",
+  description: "run tests, analyze calls, fix bugs in your voice agents",
+  icons: [{ rel: "icon", url: "/favicon.ico" }],
+};
 
 export default function RootLayout({
   children,
@@ -22,22 +30,24 @@ export default function RootLayout({
     >
       <CSPostHogProvider>
         <ClerkProvider
-        // appearance={{ baseTheme: dark }}
-        // localization={localization}
+          afterSignOutUrl="/"
+          // appearance={{ baseTheme: dark }}
+          // localization={localization}
         >
           <body className="h-full">
             {/* <ThemeProvider
-              attribute="class"
-              defaultTheme="light"
-              // enableSystem
-              disableTransitionOnChange
-            > */}
+                attribute="class"
+                defaultTheme="light"
+                // enableSystem
+                disableTransitionOnChange
+              > */}
             <TRPCReactProvider>
               <TooltipProvider delayDuration={100}>
-                <ChildrenWrapper>
+                <AudioSettingsProvider>
                   {children}
                   <Toaster />
-                </ChildrenWrapper>
+                  <PostHogIdentify />
+                </AudioSettingsProvider>
               </TooltipProvider>
             </TRPCReactProvider>
             {/* </ThemeProvider> */}
