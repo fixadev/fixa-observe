@@ -35,6 +35,11 @@ import {
 import WaveSurfer from "wavesurfer.js";
 import { Skeleton } from "../ui/skeleton";
 import { useAudioSettings } from "~/components/hooks/useAudioSettings";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "~/components/ui/tooltip";
 
 export type AudioPlayerRef = {
   setActiveEvalResult: (
@@ -304,32 +309,48 @@ export const AudioPlayer = forwardRef<
             ) * 100;
 
           return (
-            <div
-              key={index}
-              className="absolute top-0 z-10 h-full cursor-pointer"
-              style={{
-                left: `${startPercentage}%`,
-                width: `${endPercentage - startPercentage}%`,
-                background:
-                  hoveredEvalResult === latencyBlock.id
-                    ? getLatencyBlockColor(latencyBlock, 0.5)
-                    : getLatencyBlockColor(latencyBlock),
-                border: `1px solid ${getLatencyBlockColor(latencyBlock, 1)}`,
-              }}
-              onClick={(e) => {
-                e.stopPropagation();
-                seek(latencyBlock.secondsFromStart);
-                play();
-              }}
-              onMouseEnter={() => {
-                setHoveredEvalResult(latencyBlock.id);
-                onEvalResultHover?.(latencyBlock.id);
-              }}
-              onMouseLeave={() => {
-                setHoveredEvalResult(null);
-                onEvalResultHover?.(null);
-              }}
-            />
+            <Tooltip key={index}>
+              <TooltipTrigger asChild>
+                <div
+                  className="absolute top-0 z-10 h-full cursor-pointer"
+                  style={{
+                    left: `${startPercentage}%`,
+                    width: `${endPercentage - startPercentage}%`,
+                    background:
+                      hoveredEvalResult === latencyBlock.id
+                        ? getLatencyBlockColor(latencyBlock, 0.5)
+                        : getLatencyBlockColor(latencyBlock),
+                    border: `1px solid ${getLatencyBlockColor(latencyBlock, 1)}`,
+                  }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    seek(latencyBlock.secondsFromStart);
+                    play();
+                  }}
+                >
+                  <div
+                    className="size-full"
+                    onMouseEnter={() => {
+                      setHoveredEvalResult(latencyBlock.id);
+                      onEvalResultHover?.(latencyBlock.id);
+                    }}
+                    onMouseLeave={() => {
+                      setHoveredEvalResult(null);
+                      onEvalResultHover?.(null);
+                    }}
+                  />
+                </div>
+              </TooltipTrigger>
+              <TooltipContent
+                style={{
+                  backgroundColor: "white",
+                  border: `1px solid ${getLatencyBlockColor(latencyBlock, 1)}`,
+                  color: getLatencyBlockColor(latencyBlock, 1),
+                }}
+              >
+                <p>latency: {Math.round(latencyBlock.duration * 1000)}ms</p>
+              </TooltipContent>
+            </Tooltip>
           );
         })}
         {call.interruptions?.map((interruption, index) => {
@@ -348,34 +369,52 @@ export const AudioPlayer = forwardRef<
             ) * 100;
 
           return (
-            <div
-              key={index}
-              className="absolute top-0 z-10 h-full cursor-pointer"
-              style={{
-                top: "50%",
-                height: "50%",
-                left: `${startPercentage}%`,
-                width: `${endPercentage - startPercentage}%`,
-                background:
-                  hoveredEvalResult === interruption.id
-                    ? getInterruptionColor(0.5)
-                    : getInterruptionColor(),
-                border: `1px solid ${getInterruptionColor(1)}`,
-              }}
-              onClick={(e) => {
-                e.stopPropagation();
-                seek(interruption.secondsFromStart);
-                play();
-              }}
-              onMouseEnter={() => {
-                setHoveredEvalResult(interruption.id);
-                onEvalResultHover?.(interruption.id);
-              }}
-              onMouseLeave={() => {
-                setHoveredEvalResult(null);
-                onEvalResultHover?.(null);
-              }}
-            />
+            <Tooltip key={index}>
+              <TooltipTrigger asChild>
+                <div
+                  className="absolute top-0 z-10 h-full cursor-pointer"
+                  style={{
+                    top: "50%",
+                    height: "50%",
+                    left: `${startPercentage}%`,
+                    width: `${endPercentage - startPercentage}%`,
+                    background:
+                      hoveredEvalResult === interruption.id
+                        ? getInterruptionColor(0.5)
+                        : getInterruptionColor(),
+                    border: `1px solid ${getInterruptionColor(1)}`,
+                  }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    seek(interruption.secondsFromStart);
+                    play();
+                  }}
+                >
+                  <div
+                    className="size-full"
+                    onMouseEnter={() => {
+                      setHoveredEvalResult(interruption.id);
+                      onEvalResultHover?.(interruption.id);
+                    }}
+                    onMouseLeave={() => {
+                      setHoveredEvalResult(null);
+                      onEvalResultHover?.(null);
+                    }}
+                  />
+                </div>
+              </TooltipTrigger>
+              <TooltipContent
+                style={{
+                  backgroundColor: "white",
+                  border: `1px solid ${getInterruptionColor(1)}`,
+                  color: getInterruptionColor(1),
+                }}
+              >
+                <p>
+                  interruption: {Math.round(interruption.duration * 1000)}ms
+                </p>
+              </TooltipContent>
+            </Tooltip>
           );
         })}
       </div>
