@@ -46,6 +46,15 @@ export const callRouter = createTRPCRouter({
       };
     }),
 
+  getCallsByCustomerCallId: protectedProcedure
+    .input(z.object({ customerCallId: z.string() }))
+    .query(async ({ input, ctx }) => {
+      return await callService.getCallsByCustomerCallId({
+        customerCallId: input.customerCallId,
+        orgId: ctx.orgId,
+      });
+    }),
+
   checkIfACallExists: protectedProcedure.query(async ({ ctx }) => {
     return await callService.checkIfACallExists(ctx.orgId);
   }),

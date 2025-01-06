@@ -39,7 +39,10 @@ export const columns: ColumnDef<CallWithIncludes>[] = [
             className="gap-2 text-xs text-muted-foreground"
             asChild
           >
-            <Link href={`/observe/calls/${call.id}`} target="_blank">
+            <Link
+              href={`/observe/calls/${call.customerCallId}`}
+              target="_blank"
+            >
               direct link <ArrowTopRightOnSquareIcon className="size-4" />
             </Link>
           </Button>

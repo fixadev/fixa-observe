@@ -237,7 +237,7 @@ export function LatencyCallHeader({
           </div>
         </div>
         <div className="flex flex-1 justify-end text-xs text-muted-foreground">
-          {formatDistanceToNow(new Date(), { addSuffix: true })}
+          {formatDistanceToNow(call.createdAt, { addSuffix: true })}
         </div>
       </div>
     </div>

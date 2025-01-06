@@ -240,6 +240,50 @@ export class CallService {
     };
   };
 
+  getCallsByCustomerCallId = async ({
+    customerCallId,
+    orgId,
+  }: {
+    customerCallId: string;
+    orgId: string;
+  }): Promise<CallWithIncludes[]> => {
+    const calls = await this.db.call.findMany({
+      where: { customerCallId, ownerId: orgId },
+      include: {
+        messages: true,
+        scenario: {
+          include: {
+            evaluations: {
+              include: {
+                evaluationTemplate: true,
+              },
+            },
+          },
+        },
+        testAgent: true,
+        evaluationResults: {
+          include: {
+            evaluation: {
+              include: {
+                evaluationTemplate: true,
+              },
+            },
+          },
+        },
+        latencyBlocks: true,
+        interruptions: true,
+      },
+    });
+    const parsedCalls = calls.map((call) => {
+      const parsed = CallWithIncludesSchema.safeParse(call);
+      if (!parsed.success) {
+        console.error(`failed to parse call with call ID ${call.id}`);
+      }
+      return parsed.success ? parsed.data : null;
+    });
+    return parsedCalls.filter((p) => p !== null);
+  };
+
   // // WIP
   // getLatencyInterruptionPercentiles: async ({
   //   ownerId,
