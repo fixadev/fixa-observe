@@ -25,7 +25,7 @@ import {
 import { type Dispatch, Fragment, type SetStateAction, useState } from "react";
 import { cn } from "~/lib/utils";
 import { type CallWithIncludes } from "@repo/types/src/index";
-import AudioPlayer from "../../dashboard/AudioPlayer";
+import { AudioPlayer } from "../../dashboard/AudioPlayer";
 
 // Add this type declaration at the top of the file
 declare module "@tanstack/react-table" {
@@ -161,7 +161,7 @@ export function DataTable<TData, TValue>({
                   colSpan={columns.length}
                   className="h-24 text-center"
                 >
-                  No results.
+                  no results.
                 </TableCell>
               </TableRow>
             )}

@@ -12,13 +12,13 @@ const callService = new CallService(db);
 
 // todo: refactor this
 export async function sendAlerts({
-  userId,
+  ownerId,
   call,
   latencyDurations,
   savedSearches,
   evalSetResults,
 }: {
-  userId: string;
+  ownerId: string;
   call: Call & { agent: Agent | null };
   latencyDurations: number[] | undefined;
   savedSearches: SavedSearchWithIncludes[];
@@ -51,7 +51,7 @@ export async function sendAlerts({
           const { lookbackPeriod, percentile, threshold } = alert.details;
           const latencyPercentiles =
             await callService.getLatencyPercentilesForLookbackPeriod({
-              userId,
+              ownerId,
               filter: {
                 ...filter.data,
                 lookbackPeriod: lookbackPeriod,
@@ -68,13 +68,14 @@ export async function sendAlerts({
             latencyPercentiles[percentile] > threshold
           ) {
             sendAlertSlackMessage({
-              userId,
+              ownerId,
               call,
               success: false,
               alert: {
                 ...alert,
                 details: alert.details,
               },
+              savedSearch,
             });
             await db.alert.update({
               where: { id: alert.id },
@@ -91,13 +92,13 @@ export async function sendAlerts({
             );
           }
         } else if (alert.type === "evalSet") {
-          const { evalSetId, trigger } = alert.details;
+          const { evaluationGroupId, trigger } = alert.details;
           const evalSetResult = evalSetResults.find(
-            (result) => result.evalSetId === evalSetId,
+            (result) => result.evalSetId === evaluationGroupId,
           );
           if (evalSetResult?.success === trigger || trigger === null) {
             sendAlertSlackMessage({
-              userId,
+              ownerId,
               call,
               success: evalSetResult?.success ?? false,
               alert: {
@@ -105,6 +106,7 @@ export async function sendAlerts({
                 type: "evalSet",
                 details: alert.details,
               },
+              savedSearch,
             });
           }
         }

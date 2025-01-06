@@ -4,8 +4,8 @@ import {
   XCircleIcon,
 } from "@heroicons/react/24/solid";
 import {
-  type EvalResultWithIncludes,
-  type AggregateEvalResult,
+  type EvaluationResultWithIncludes,
+  type AggregateEvaluationResult,
 } from "@repo/types/src/index";
 import Link from "next/link";
 import { type HTMLAttributes, useMemo } from "react";
@@ -18,12 +18,12 @@ export default function EvalResultChip({
   editHref,
   ...props
 }: {
-  aggregateEvalResult?: AggregateEvalResult;
-  evalResult?: EvalResultWithIncludes;
+  aggregateEvalResult?: AggregateEvaluationResult;
+  evalResult?: EvaluationResultWithIncludes;
   isActive?: boolean;
   editHref?: string;
 } & HTMLAttributes<HTMLDivElement>) {
-  const _evalResult: AggregateEvalResult = useMemo(() => {
+  const _evalResult: AggregateEvaluationResult = useMemo(() => {
     if (aggregateEvalResult) {
       return aggregateEvalResult;
     }
@@ -58,7 +58,7 @@ export default function EvalResultChip({
       ) : (
         <XCircleIcon className="size-4 shrink-0 text-red-500" />
       )}
-      {_evalResult.eval.name}
+      {_evalResult.evaluation.evaluationTemplate.name}
       {_evalResult.total > 1 && (
         <div className="text-xs">
           {_evalResult.numSucceeded}/{_evalResult.total}

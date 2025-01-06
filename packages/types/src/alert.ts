@@ -35,3 +35,32 @@ export const AlertWithDetailsSchema = z.discriminatedUnion("type", [
     details: EvalSetAlertSchema,
   }),
 ]);
+
+export const CreateAlertSchema = z.discriminatedUnion("type", [
+  AlertSchema.omit({
+    details: true,
+    id: true,
+    createdAt: true,
+    ownerId: true,
+    savedSearchId: true,
+  }).extend({
+    type: z.literal("latency"),
+    details: LatencyAlertSchema.omit({
+      slackNames: true,
+    }),
+  }),
+  AlertSchema.omit({
+    details: true,
+    id: true,
+    createdAt: true,
+    ownerId: true,
+    savedSearchId: true,
+  }).extend({
+    type: z.literal("evalSet"),
+    details: EvalSetAlertSchema.omit({
+      slackNames: true,
+    }),
+  }),
+]);
+
+export type CreateAlert = z.infer<typeof CreateAlertSchema>;

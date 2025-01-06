@@ -56,9 +56,9 @@ export type InputJsonValueType = z.infer<typeof InputJsonValueSchema>;
 
 export const TransactionIsolationLevelSchema = z.enum(['ReadUncommitted','ReadCommitted','RepeatableRead','Serializable']);
 
-export const ApiKeyScalarFieldEnumSchema = z.enum(['userId','apiKey']);
+export const ApiKeyScalarFieldEnumSchema = z.enum(['orgId','apiKey']);
 
-export const AgentScalarFieldEnumSchema = z.enum(['id','createdAt','updatedAt','ownerId','name','phoneNumber','githubRepoUrl','customerAgentId','systemPrompt','extraProperties','enableSlackNotifications']);
+export const AgentScalarFieldEnumSchema = z.enum(['id','createdAt','updatedAt','ownerId','name','phoneNumber','customerAgentId','githubRepoUrl','systemPrompt','extraProperties','enableSlackNotifications']);
 
 export const TestScalarFieldEnumSchema = z.enum(['id','createdAt','updatedAt','agentId','gitBranch','gitCommit','runFromApi']);
 
@@ -72,19 +72,21 @@ export const CallErrorScalarFieldEnumSchema = z.enum(['id','secondsFromStart','d
 
 export const CallRecordingScalarFieldEnumSchema = z.enum(['id','audioUrl','createdAt','processed','agentId','regionId','duration']);
 
-export const ScenarioScalarFieldEnumSchema = z.enum(['id','createdAt','ownerId','agentId','name','instructions','successCriteria','includeDateTime','timezone','isNew','deleted']);
+export const ScenarioScalarFieldEnumSchema = z.enum(['id','createdAt','agentId','name','instructions','successCriteria','includeDateTime','timezone','deleted']);
 
-export const EvalScalarFieldEnumSchema = z.enum(['id','createdAt','name','description','scenarioId','type','resultType','contentType','isCritical','toolCallExpectedResult','agentId','ownerId','deleted','evalSetId']);
+export const EvaluationTemplateScalarFieldEnumSchema = z.enum(['id','createdAt','name','description','params','type','resultType','contentType','toolCallExpectedResult','ownerId','deleted']);
 
-export const EvalResultScalarFieldEnumSchema = z.enum(['id','createdAt','callId','evalId','result','success','secondsFromStart','duration','type','details']);
+export const GeneralEvaluationScalarFieldEnumSchema = z.enum(['id','agentId','evaluationId']);
 
-export const EvalOverrideScalarFieldEnumSchema = z.enum(['id','createdAt','scenarioId','evalId','enabled']);
+export const EvaluationScalarFieldEnumSchema = z.enum(['id','createdAt','enabled','isCritical','params','evaluationTemplateId','scenarioId','evaluationGroupId']);
+
+export const EvaluationResultScalarFieldEnumSchema = z.enum(['id','createdAt','callId','evaluationId','result','success','secondsFromStart','duration','type','details','evaluationTemplateId']);
 
 export const LatencyBlockScalarFieldEnumSchema = z.enum(['id','secondsFromStart','duration','callId']);
 
 export const InterruptionScalarFieldEnumSchema = z.enum(['id','secondsFromStart','duration','callId','text']);
 
-export const EvalSetScalarFieldEnumSchema = z.enum(['id','createdAt','ownerId','name','condition','enabled','savedSearchId']);
+export const EvaluationGroupScalarFieldEnumSchema = z.enum(['id','createdAt','ownerId','name','condition','enabled','savedSearchId']);
 
 export const SavedSearchScalarFieldEnumSchema = z.enum(['id','createdAt','name','ownerId','isDefault','agentId','lookbackPeriod','timeRange','chartPeriod','customerCallId','metadata']);
 
@@ -139,7 +141,7 @@ export type AlertTypeType = `${z.infer<typeof AlertTypeSchema>}`
 /////////////////////////////////////////
 
 export const ApiKeySchema = z.object({
-  userId: z.string(),
+  orgId: z.string(),
   apiKey: z.string(),
 })
 
@@ -156,8 +158,8 @@ export const AgentSchema = z.object({
   ownerId: z.string(),
   name: z.string(),
   phoneNumber: z.string(),
+  customerAgentId: z.string(),
   githubRepoUrl: z.string().nullable(),
-  customerAgentId: z.string().nullable(),
   systemPrompt: z.string(),
   extraProperties: JsonValueSchema,
   enableSlackNotifications: z.boolean(),
@@ -295,24 +297,22 @@ export type CallRecording = z.infer<typeof CallRecordingSchema>
 export const ScenarioSchema = z.object({
   id: z.string(),
   createdAt: z.coerce.date(),
-  ownerId: z.string(),
   agentId: z.string(),
   name: z.string(),
   instructions: z.string(),
   successCriteria: z.string(),
   includeDateTime: z.boolean(),
   timezone: z.string().nullable(),
-  isNew: z.boolean(),
   deleted: z.boolean(),
 })
 
 export type Scenario = z.infer<typeof ScenarioSchema>
 
 /////////////////////////////////////////
-// EVAL SCHEMA
+// EVALUATION TEMPLATE SCHEMA
 /////////////////////////////////////////
 
-export const EvalSchema = z.object({
+export const EvaluationTemplateSchema = z.object({
   type: EvalTypeSchema,
   resultType: EvalResultTypeSchema,
   contentType: EvalContentTypeSchema,
@@ -320,49 +320,62 @@ export const EvalSchema = z.object({
   createdAt: z.coerce.date(),
   name: z.string(),
   description: z.string(),
-  scenarioId: z.string().nullable(),
-  isCritical: z.boolean(),
+  params: z.string().array(),
   toolCallExpectedResult: z.string(),
-  agentId: z.string().nullable(),
   ownerId: z.string().nullable(),
   deleted: z.boolean(),
-  evalSetId: z.string().nullable(),
 })
 
-export type Eval = z.infer<typeof EvalSchema>
+export type EvaluationTemplate = z.infer<typeof EvaluationTemplateSchema>
 
 /////////////////////////////////////////
-// EVAL RESULT SCHEMA
+// GENERAL EVALUATION SCHEMA
 /////////////////////////////////////////
 
-export const EvalResultSchema = z.object({
+export const GeneralEvaluationSchema = z.object({
+  id: z.string(),
+  agentId: z.string(),
+  evaluationId: z.string(),
+})
+
+export type GeneralEvaluation = z.infer<typeof GeneralEvaluationSchema>
+
+/////////////////////////////////////////
+// EVALUATION SCHEMA
+/////////////////////////////////////////
+
+export const EvaluationSchema = z.object({
+  id: z.string(),
+  createdAt: z.coerce.date(),
+  enabled: z.boolean(),
+  isCritical: z.boolean(),
+  params: JsonValueSchema,
+  evaluationTemplateId: z.string(),
+  scenarioId: z.string().nullable(),
+  evaluationGroupId: z.string().nullable(),
+})
+
+export type Evaluation = z.infer<typeof EvaluationSchema>
+
+/////////////////////////////////////////
+// EVALUATION RESULT SCHEMA
+/////////////////////////////////////////
+
+export const EvaluationResultSchema = z.object({
   type: EvalResultTypeSchema,
   id: z.string(),
   createdAt: z.coerce.date(),
   callId: z.string().nullable(),
-  evalId: z.string(),
+  evaluationId: z.string(),
   result: z.string(),
   success: z.boolean(),
   secondsFromStart: z.number().nullable(),
   duration: z.number().nullable(),
   details: z.string(),
+  evaluationTemplateId: z.string().nullable(),
 })
 
-export type EvalResult = z.infer<typeof EvalResultSchema>
-
-/////////////////////////////////////////
-// EVAL OVERRIDE SCHEMA
-/////////////////////////////////////////
-
-export const EvalOverrideSchema = z.object({
-  id: z.string(),
-  createdAt: z.coerce.date(),
-  scenarioId: z.string(),
-  evalId: z.string(),
-  enabled: z.boolean(),
-})
-
-export type EvalOverride = z.infer<typeof EvalOverrideSchema>
+export type EvaluationResult = z.infer<typeof EvaluationResultSchema>
 
 /////////////////////////////////////////
 // LATENCY BLOCK SCHEMA
@@ -392,10 +405,10 @@ export const InterruptionSchema = z.object({
 export type Interruption = z.infer<typeof InterruptionSchema>
 
 /////////////////////////////////////////
-// EVAL SET SCHEMA
+// EVALUATION GROUP SCHEMA
 /////////////////////////////////////////
 
-export const EvalSetSchema = z.object({
+export const EvaluationGroupSchema = z.object({
   id: z.string(),
   createdAt: z.coerce.date(),
   ownerId: z.string(),
@@ -405,7 +418,7 @@ export const EvalSetSchema = z.object({
   savedSearchId: z.string().nullable(),
 })
 
-export type EvalSet = z.infer<typeof EvalSetSchema>
+export type EvaluationGroup = z.infer<typeof EvaluationGroupSchema>
 
 /////////////////////////////////////////
 // SAVED SEARCH SCHEMA
@@ -452,7 +465,7 @@ export type Alert = z.infer<typeof AlertSchema>
 //------------------------------------------------------
 
 export const ApiKeySelectSchema: z.ZodType<Prisma.ApiKeySelect> = z.object({
-  userId: z.boolean().optional(),
+  orgId: z.boolean().optional(),
   apiKey: z.boolean().optional(),
 }).strict()
 
@@ -460,11 +473,11 @@ export const ApiKeySelectSchema: z.ZodType<Prisma.ApiKeySelect> = z.object({
 //------------------------------------------------------
 
 export const AgentIncludeSchema: z.ZodType<Prisma.AgentInclude> = z.object({
-  enabledGeneralEvals: z.union([z.boolean(),z.lazy(() => EvalFindManyArgsSchema)]).optional(),
   enabledTestAgents: z.union([z.boolean(),z.lazy(() => TestAgentFindManyArgsSchema)]).optional(),
   scenarios: z.union([z.boolean(),z.lazy(() => ScenarioFindManyArgsSchema)]).optional(),
   tests: z.union([z.boolean(),z.lazy(() => TestFindManyArgsSchema)]).optional(),
   calls: z.union([z.boolean(),z.lazy(() => CallFindManyArgsSchema)]).optional(),
+  generalEvaluations: z.union([z.boolean(),z.lazy(() => GeneralEvaluationFindManyArgsSchema)]).optional(),
   _count: z.union([z.boolean(),z.lazy(() => AgentCountOutputTypeArgsSchema)]).optional(),
 }).strict()
 
@@ -478,11 +491,11 @@ export const AgentCountOutputTypeArgsSchema: z.ZodType<Prisma.AgentCountOutputTy
 }).strict();
 
 export const AgentCountOutputTypeSelectSchema: z.ZodType<Prisma.AgentCountOutputTypeSelect> = z.object({
-  enabledGeneralEvals: z.boolean().optional(),
   enabledTestAgents: z.boolean().optional(),
   scenarios: z.boolean().optional(),
   tests: z.boolean().optional(),
   calls: z.boolean().optional(),
+  generalEvaluations: z.boolean().optional(),
 }).strict();
 
 export const AgentSelectSchema: z.ZodType<Prisma.AgentSelect> = z.object({
@@ -492,16 +505,16 @@ export const AgentSelectSchema: z.ZodType<Prisma.AgentSelect> = z.object({
   ownerId: z.boolean().optional(),
   name: z.boolean().optional(),
   phoneNumber: z.boolean().optional(),
-  githubRepoUrl: z.boolean().optional(),
   customerAgentId: z.boolean().optional(),
+  githubRepoUrl: z.boolean().optional(),
   systemPrompt: z.boolean().optional(),
   extraProperties: z.boolean().optional(),
   enableSlackNotifications: z.boolean().optional(),
-  enabledGeneralEvals: z.union([z.boolean(),z.lazy(() => EvalFindManyArgsSchema)]).optional(),
   enabledTestAgents: z.union([z.boolean(),z.lazy(() => TestAgentFindManyArgsSchema)]).optional(),
   scenarios: z.union([z.boolean(),z.lazy(() => ScenarioFindManyArgsSchema)]).optional(),
   tests: z.union([z.boolean(),z.lazy(() => TestFindManyArgsSchema)]).optional(),
   calls: z.union([z.boolean(),z.lazy(() => CallFindManyArgsSchema)]).optional(),
+  generalEvaluations: z.union([z.boolean(),z.lazy(() => GeneralEvaluationFindManyArgsSchema)]).optional(),
   _count: z.union([z.boolean(),z.lazy(() => AgentCountOutputTypeArgsSchema)]).optional(),
 }).strict()
 
@@ -582,7 +595,7 @@ export const TestAgentSelectSchema: z.ZodType<Prisma.TestAgentSelect> = z.object
 //------------------------------------------------------
 
 export const CallIncludeSchema: z.ZodType<Prisma.CallInclude> = z.object({
-  evalResults: z.union([z.boolean(),z.lazy(() => EvalResultFindManyArgsSchema)]).optional(),
+  evaluationResults: z.union([z.boolean(),z.lazy(() => EvaluationResultFindManyArgsSchema)]).optional(),
   agent: z.union([z.boolean(),z.lazy(() => AgentArgsSchema)]).optional(),
   test: z.union([z.boolean(),z.lazy(() => TestArgsSchema)]).optional(),
   testAgent: z.union([z.boolean(),z.lazy(() => TestAgentArgsSchema)]).optional(),
@@ -604,7 +617,7 @@ export const CallCountOutputTypeArgsSchema: z.ZodType<Prisma.CallCountOutputType
 }).strict();
 
 export const CallCountOutputTypeSelectSchema: z.ZodType<Prisma.CallCountOutputTypeSelect> = z.object({
-  evalResults: z.boolean().optional(),
+  evaluationResults: z.boolean().optional(),
   messages: z.boolean().optional(),
   latencyBlocks: z.boolean().optional(),
   interruptions: z.boolean().optional(),
@@ -641,7 +654,7 @@ export const CallSelectSchema: z.ZodType<Prisma.CallSelect> = z.object({
   testAgentId: z.boolean().optional(),
   scenarioId: z.boolean().optional(),
   evalSetToSuccess: z.boolean().optional(),
-  evalResults: z.union([z.boolean(),z.lazy(() => EvalResultFindManyArgsSchema)]).optional(),
+  evaluationResults: z.union([z.boolean(),z.lazy(() => EvaluationResultFindManyArgsSchema)]).optional(),
   agent: z.union([z.boolean(),z.lazy(() => AgentArgsSchema)]).optional(),
   test: z.union([z.boolean(),z.lazy(() => TestArgsSchema)]).optional(),
   testAgent: z.union([z.boolean(),z.lazy(() => TestAgentArgsSchema)]).optional(),
@@ -720,9 +733,8 @@ export const CallRecordingSelectSchema: z.ZodType<Prisma.CallRecordingSelect> = 
 
 export const ScenarioIncludeSchema: z.ZodType<Prisma.ScenarioInclude> = z.object({
   agent: z.union([z.boolean(),z.lazy(() => AgentArgsSchema)]).optional(),
-  generalEvalOverrides: z.union([z.boolean(),z.lazy(() => EvalOverrideFindManyArgsSchema)]).optional(),
   calls: z.union([z.boolean(),z.lazy(() => CallFindManyArgsSchema)]).optional(),
-  evals: z.union([z.boolean(),z.lazy(() => EvalFindManyArgsSchema)]).optional(),
+  evaluations: z.union([z.boolean(),z.lazy(() => EvaluationFindManyArgsSchema)]).optional(),
   _count: z.union([z.boolean(),z.lazy(() => ScenarioCountOutputTypeArgsSchema)]).optional(),
 }).strict()
 
@@ -736,128 +748,159 @@ export const ScenarioCountOutputTypeArgsSchema: z.ZodType<Prisma.ScenarioCountOu
 }).strict();
 
 export const ScenarioCountOutputTypeSelectSchema: z.ZodType<Prisma.ScenarioCountOutputTypeSelect> = z.object({
-  generalEvalOverrides: z.boolean().optional(),
   calls: z.boolean().optional(),
-  evals: z.boolean().optional(),
+  evaluations: z.boolean().optional(),
 }).strict();
 
 export const ScenarioSelectSchema: z.ZodType<Prisma.ScenarioSelect> = z.object({
   id: z.boolean().optional(),
   createdAt: z.boolean().optional(),
-  ownerId: z.boolean().optional(),
   agentId: z.boolean().optional(),
   name: z.boolean().optional(),
   instructions: z.boolean().optional(),
   successCriteria: z.boolean().optional(),
   includeDateTime: z.boolean().optional(),
   timezone: z.boolean().optional(),
-  isNew: z.boolean().optional(),
   deleted: z.boolean().optional(),
   agent: z.union([z.boolean(),z.lazy(() => AgentArgsSchema)]).optional(),
-  generalEvalOverrides: z.union([z.boolean(),z.lazy(() => EvalOverrideFindManyArgsSchema)]).optional(),
   calls: z.union([z.boolean(),z.lazy(() => CallFindManyArgsSchema)]).optional(),
-  evals: z.union([z.boolean(),z.lazy(() => EvalFindManyArgsSchema)]).optional(),
+  evaluations: z.union([z.boolean(),z.lazy(() => EvaluationFindManyArgsSchema)]).optional(),
   _count: z.union([z.boolean(),z.lazy(() => ScenarioCountOutputTypeArgsSchema)]).optional(),
 }).strict()
 
-// EVAL
+// EVALUATION TEMPLATE
 //------------------------------------------------------
 
-export const EvalIncludeSchema: z.ZodType<Prisma.EvalInclude> = z.object({
-  scenario: z.union([z.boolean(),z.lazy(() => ScenarioArgsSchema)]).optional(),
-  evalResults: z.union([z.boolean(),z.lazy(() => EvalResultFindManyArgsSchema)]).optional(),
-  agent: z.union([z.boolean(),z.lazy(() => AgentArgsSchema)]).optional(),
-  evalOverrides: z.union([z.boolean(),z.lazy(() => EvalOverrideFindManyArgsSchema)]).optional(),
-  evalSet: z.union([z.boolean(),z.lazy(() => EvalSetArgsSchema)]).optional(),
-  _count: z.union([z.boolean(),z.lazy(() => EvalCountOutputTypeArgsSchema)]).optional(),
+export const EvaluationTemplateIncludeSchema: z.ZodType<Prisma.EvaluationTemplateInclude> = z.object({
+  evaluationResults: z.union([z.boolean(),z.lazy(() => EvaluationResultFindManyArgsSchema)]).optional(),
+  evaluations: z.union([z.boolean(),z.lazy(() => EvaluationFindManyArgsSchema)]).optional(),
+  _count: z.union([z.boolean(),z.lazy(() => EvaluationTemplateCountOutputTypeArgsSchema)]).optional(),
 }).strict()
 
-export const EvalArgsSchema: z.ZodType<Prisma.EvalDefaultArgs> = z.object({
-  select: z.lazy(() => EvalSelectSchema).optional(),
-  include: z.lazy(() => EvalIncludeSchema).optional(),
+export const EvaluationTemplateArgsSchema: z.ZodType<Prisma.EvaluationTemplateDefaultArgs> = z.object({
+  select: z.lazy(() => EvaluationTemplateSelectSchema).optional(),
+  include: z.lazy(() => EvaluationTemplateIncludeSchema).optional(),
 }).strict();
 
-export const EvalCountOutputTypeArgsSchema: z.ZodType<Prisma.EvalCountOutputTypeDefaultArgs> = z.object({
-  select: z.lazy(() => EvalCountOutputTypeSelectSchema).nullish(),
+export const EvaluationTemplateCountOutputTypeArgsSchema: z.ZodType<Prisma.EvaluationTemplateCountOutputTypeDefaultArgs> = z.object({
+  select: z.lazy(() => EvaluationTemplateCountOutputTypeSelectSchema).nullish(),
 }).strict();
 
-export const EvalCountOutputTypeSelectSchema: z.ZodType<Prisma.EvalCountOutputTypeSelect> = z.object({
-  evalResults: z.boolean().optional(),
-  evalOverrides: z.boolean().optional(),
+export const EvaluationTemplateCountOutputTypeSelectSchema: z.ZodType<Prisma.EvaluationTemplateCountOutputTypeSelect> = z.object({
+  evaluationResults: z.boolean().optional(),
+  evaluations: z.boolean().optional(),
 }).strict();
 
-export const EvalSelectSchema: z.ZodType<Prisma.EvalSelect> = z.object({
+export const EvaluationTemplateSelectSchema: z.ZodType<Prisma.EvaluationTemplateSelect> = z.object({
   id: z.boolean().optional(),
   createdAt: z.boolean().optional(),
   name: z.boolean().optional(),
   description: z.boolean().optional(),
-  scenarioId: z.boolean().optional(),
+  params: z.boolean().optional(),
   type: z.boolean().optional(),
   resultType: z.boolean().optional(),
   contentType: z.boolean().optional(),
-  isCritical: z.boolean().optional(),
   toolCallExpectedResult: z.boolean().optional(),
-  agentId: z.boolean().optional(),
   ownerId: z.boolean().optional(),
   deleted: z.boolean().optional(),
-  evalSetId: z.boolean().optional(),
-  scenario: z.union([z.boolean(),z.lazy(() => ScenarioArgsSchema)]).optional(),
-  evalResults: z.union([z.boolean(),z.lazy(() => EvalResultFindManyArgsSchema)]).optional(),
-  agent: z.union([z.boolean(),z.lazy(() => AgentArgsSchema)]).optional(),
-  evalOverrides: z.union([z.boolean(),z.lazy(() => EvalOverrideFindManyArgsSchema)]).optional(),
-  evalSet: z.union([z.boolean(),z.lazy(() => EvalSetArgsSchema)]).optional(),
-  _count: z.union([z.boolean(),z.lazy(() => EvalCountOutputTypeArgsSchema)]).optional(),
+  evaluationResults: z.union([z.boolean(),z.lazy(() => EvaluationResultFindManyArgsSchema)]).optional(),
+  evaluations: z.union([z.boolean(),z.lazy(() => EvaluationFindManyArgsSchema)]).optional(),
+  _count: z.union([z.boolean(),z.lazy(() => EvaluationTemplateCountOutputTypeArgsSchema)]).optional(),
 }).strict()
 
-// EVAL RESULT
+// GENERAL EVALUATION
 //------------------------------------------------------
 
-export const EvalResultIncludeSchema: z.ZodType<Prisma.EvalResultInclude> = z.object({
-  call: z.union([z.boolean(),z.lazy(() => CallArgsSchema)]).optional(),
-  eval: z.union([z.boolean(),z.lazy(() => EvalArgsSchema)]).optional(),
+export const GeneralEvaluationIncludeSchema: z.ZodType<Prisma.GeneralEvaluationInclude> = z.object({
+  agent: z.union([z.boolean(),z.lazy(() => AgentArgsSchema)]).optional(),
+  evaluation: z.union([z.boolean(),z.lazy(() => EvaluationArgsSchema)]).optional(),
 }).strict()
 
-export const EvalResultArgsSchema: z.ZodType<Prisma.EvalResultDefaultArgs> = z.object({
-  select: z.lazy(() => EvalResultSelectSchema).optional(),
-  include: z.lazy(() => EvalResultIncludeSchema).optional(),
+export const GeneralEvaluationArgsSchema: z.ZodType<Prisma.GeneralEvaluationDefaultArgs> = z.object({
+  select: z.lazy(() => GeneralEvaluationSelectSchema).optional(),
+  include: z.lazy(() => GeneralEvaluationIncludeSchema).optional(),
 }).strict();
 
-export const EvalResultSelectSchema: z.ZodType<Prisma.EvalResultSelect> = z.object({
+export const GeneralEvaluationSelectSchema: z.ZodType<Prisma.GeneralEvaluationSelect> = z.object({
+  id: z.boolean().optional(),
+  agentId: z.boolean().optional(),
+  evaluationId: z.boolean().optional(),
+  agent: z.union([z.boolean(),z.lazy(() => AgentArgsSchema)]).optional(),
+  evaluation: z.union([z.boolean(),z.lazy(() => EvaluationArgsSchema)]).optional(),
+}).strict()
+
+// EVALUATION
+//------------------------------------------------------
+
+export const EvaluationIncludeSchema: z.ZodType<Prisma.EvaluationInclude> = z.object({
+  evaluationTemplate: z.union([z.boolean(),z.lazy(() => EvaluationTemplateArgsSchema)]).optional(),
+  scenario: z.union([z.boolean(),z.lazy(() => ScenarioArgsSchema)]).optional(),
+  evaluationGroup: z.union([z.boolean(),z.lazy(() => EvaluationGroupArgsSchema)]).optional(),
+  evaluationResults: z.union([z.boolean(),z.lazy(() => EvaluationResultFindManyArgsSchema)]).optional(),
+  generalEvaluations: z.union([z.boolean(),z.lazy(() => GeneralEvaluationFindManyArgsSchema)]).optional(),
+  _count: z.union([z.boolean(),z.lazy(() => EvaluationCountOutputTypeArgsSchema)]).optional(),
+}).strict()
+
+export const EvaluationArgsSchema: z.ZodType<Prisma.EvaluationDefaultArgs> = z.object({
+  select: z.lazy(() => EvaluationSelectSchema).optional(),
+  include: z.lazy(() => EvaluationIncludeSchema).optional(),
+}).strict();
+
+export const EvaluationCountOutputTypeArgsSchema: z.ZodType<Prisma.EvaluationCountOutputTypeDefaultArgs> = z.object({
+  select: z.lazy(() => EvaluationCountOutputTypeSelectSchema).nullish(),
+}).strict();
+
+export const EvaluationCountOutputTypeSelectSchema: z.ZodType<Prisma.EvaluationCountOutputTypeSelect> = z.object({
+  evaluationResults: z.boolean().optional(),
+  generalEvaluations: z.boolean().optional(),
+}).strict();
+
+export const EvaluationSelectSchema: z.ZodType<Prisma.EvaluationSelect> = z.object({
+  id: z.boolean().optional(),
+  createdAt: z.boolean().optional(),
+  enabled: z.boolean().optional(),
+  isCritical: z.boolean().optional(),
+  params: z.boolean().optional(),
+  evaluationTemplateId: z.boolean().optional(),
+  scenarioId: z.boolean().optional(),
+  evaluationGroupId: z.boolean().optional(),
+  evaluationTemplate: z.union([z.boolean(),z.lazy(() => EvaluationTemplateArgsSchema)]).optional(),
+  scenario: z.union([z.boolean(),z.lazy(() => ScenarioArgsSchema)]).optional(),
+  evaluationGroup: z.union([z.boolean(),z.lazy(() => EvaluationGroupArgsSchema)]).optional(),
+  evaluationResults: z.union([z.boolean(),z.lazy(() => EvaluationResultFindManyArgsSchema)]).optional(),
+  generalEvaluations: z.union([z.boolean(),z.lazy(() => GeneralEvaluationFindManyArgsSchema)]).optional(),
+  _count: z.union([z.boolean(),z.lazy(() => EvaluationCountOutputTypeArgsSchema)]).optional(),
+}).strict()
+
+// EVALUATION RESULT
+//------------------------------------------------------
+
+export const EvaluationResultIncludeSchema: z.ZodType<Prisma.EvaluationResultInclude> = z.object({
+  call: z.union([z.boolean(),z.lazy(() => CallArgsSchema)]).optional(),
+  evaluation: z.union([z.boolean(),z.lazy(() => EvaluationArgsSchema)]).optional(),
+  evaluationTemplate: z.union([z.boolean(),z.lazy(() => EvaluationTemplateArgsSchema)]).optional(),
+}).strict()
+
+export const EvaluationResultArgsSchema: z.ZodType<Prisma.EvaluationResultDefaultArgs> = z.object({
+  select: z.lazy(() => EvaluationResultSelectSchema).optional(),
+  include: z.lazy(() => EvaluationResultIncludeSchema).optional(),
+}).strict();
+
+export const EvaluationResultSelectSchema: z.ZodType<Prisma.EvaluationResultSelect> = z.object({
   id: z.boolean().optional(),
   createdAt: z.boolean().optional(),
   callId: z.boolean().optional(),
-  evalId: z.boolean().optional(),
+  evaluationId: z.boolean().optional(),
   result: z.boolean().optional(),
   success: z.boolean().optional(),
   secondsFromStart: z.boolean().optional(),
   duration: z.boolean().optional(),
   type: z.boolean().optional(),
   details: z.boolean().optional(),
+  evaluationTemplateId: z.boolean().optional(),
   call: z.union([z.boolean(),z.lazy(() => CallArgsSchema)]).optional(),
-  eval: z.union([z.boolean(),z.lazy(() => EvalArgsSchema)]).optional(),
-}).strict()
-
-// EVAL OVERRIDE
-//------------------------------------------------------
-
-export const EvalOverrideIncludeSchema: z.ZodType<Prisma.EvalOverrideInclude> = z.object({
-  scenario: z.union([z.boolean(),z.lazy(() => ScenarioArgsSchema)]).optional(),
-  eval: z.union([z.boolean(),z.lazy(() => EvalArgsSchema)]).optional(),
-}).strict()
-
-export const EvalOverrideArgsSchema: z.ZodType<Prisma.EvalOverrideDefaultArgs> = z.object({
-  select: z.lazy(() => EvalOverrideSelectSchema).optional(),
-  include: z.lazy(() => EvalOverrideIncludeSchema).optional(),
-}).strict();
-
-export const EvalOverrideSelectSchema: z.ZodType<Prisma.EvalOverrideSelect> = z.object({
-  id: z.boolean().optional(),
-  createdAt: z.boolean().optional(),
-  scenarioId: z.boolean().optional(),
-  evalId: z.boolean().optional(),
-  enabled: z.boolean().optional(),
-  scenario: z.union([z.boolean(),z.lazy(() => ScenarioArgsSchema)]).optional(),
-  eval: z.union([z.boolean(),z.lazy(() => EvalArgsSchema)]).optional(),
+  evaluation: z.union([z.boolean(),z.lazy(() => EvaluationArgsSchema)]).optional(),
+  evaluationTemplate: z.union([z.boolean(),z.lazy(() => EvaluationTemplateArgsSchema)]).optional(),
 }).strict()
 
 // LATENCY BLOCK
@@ -901,29 +944,29 @@ export const InterruptionSelectSchema: z.ZodType<Prisma.InterruptionSelect> = z.
   call: z.union([z.boolean(),z.lazy(() => CallArgsSchema)]).optional(),
 }).strict()
 
-// EVAL SET
+// EVALUATION GROUP
 //------------------------------------------------------
 
-export const EvalSetIncludeSchema: z.ZodType<Prisma.EvalSetInclude> = z.object({
-  evals: z.union([z.boolean(),z.lazy(() => EvalFindManyArgsSchema)]).optional(),
+export const EvaluationGroupIncludeSchema: z.ZodType<Prisma.EvaluationGroupInclude> = z.object({
+  evaluations: z.union([z.boolean(),z.lazy(() => EvaluationFindManyArgsSchema)]).optional(),
   savedSearch: z.union([z.boolean(),z.lazy(() => SavedSearchArgsSchema)]).optional(),
-  _count: z.union([z.boolean(),z.lazy(() => EvalSetCountOutputTypeArgsSchema)]).optional(),
+  _count: z.union([z.boolean(),z.lazy(() => EvaluationGroupCountOutputTypeArgsSchema)]).optional(),
 }).strict()
 
-export const EvalSetArgsSchema: z.ZodType<Prisma.EvalSetDefaultArgs> = z.object({
-  select: z.lazy(() => EvalSetSelectSchema).optional(),
-  include: z.lazy(() => EvalSetIncludeSchema).optional(),
+export const EvaluationGroupArgsSchema: z.ZodType<Prisma.EvaluationGroupDefaultArgs> = z.object({
+  select: z.lazy(() => EvaluationGroupSelectSchema).optional(),
+  include: z.lazy(() => EvaluationGroupIncludeSchema).optional(),
 }).strict();
 
-export const EvalSetCountOutputTypeArgsSchema: z.ZodType<Prisma.EvalSetCountOutputTypeDefaultArgs> = z.object({
-  select: z.lazy(() => EvalSetCountOutputTypeSelectSchema).nullish(),
+export const EvaluationGroupCountOutputTypeArgsSchema: z.ZodType<Prisma.EvaluationGroupCountOutputTypeDefaultArgs> = z.object({
+  select: z.lazy(() => EvaluationGroupCountOutputTypeSelectSchema).nullish(),
 }).strict();
 
-export const EvalSetCountOutputTypeSelectSchema: z.ZodType<Prisma.EvalSetCountOutputTypeSelect> = z.object({
-  evals: z.boolean().optional(),
+export const EvaluationGroupCountOutputTypeSelectSchema: z.ZodType<Prisma.EvaluationGroupCountOutputTypeSelect> = z.object({
+  evaluations: z.boolean().optional(),
 }).strict();
 
-export const EvalSetSelectSchema: z.ZodType<Prisma.EvalSetSelect> = z.object({
+export const EvaluationGroupSelectSchema: z.ZodType<Prisma.EvaluationGroupSelect> = z.object({
   id: z.boolean().optional(),
   createdAt: z.boolean().optional(),
   ownerId: z.boolean().optional(),
@@ -931,16 +974,16 @@ export const EvalSetSelectSchema: z.ZodType<Prisma.EvalSetSelect> = z.object({
   condition: z.boolean().optional(),
   enabled: z.boolean().optional(),
   savedSearchId: z.boolean().optional(),
-  evals: z.union([z.boolean(),z.lazy(() => EvalFindManyArgsSchema)]).optional(),
+  evaluations: z.union([z.boolean(),z.lazy(() => EvaluationFindManyArgsSchema)]).optional(),
   savedSearch: z.union([z.boolean(),z.lazy(() => SavedSearchArgsSchema)]).optional(),
-  _count: z.union([z.boolean(),z.lazy(() => EvalSetCountOutputTypeArgsSchema)]).optional(),
+  _count: z.union([z.boolean(),z.lazy(() => EvaluationGroupCountOutputTypeArgsSchema)]).optional(),
 }).strict()
 
 // SAVED SEARCH
 //------------------------------------------------------
 
 export const SavedSearchIncludeSchema: z.ZodType<Prisma.SavedSearchInclude> = z.object({
-  evalSets: z.union([z.boolean(),z.lazy(() => EvalSetFindManyArgsSchema)]).optional(),
+  evaluationGroups: z.union([z.boolean(),z.lazy(() => EvaluationGroupFindManyArgsSchema)]).optional(),
   alerts: z.union([z.boolean(),z.lazy(() => AlertFindManyArgsSchema)]).optional(),
   _count: z.union([z.boolean(),z.lazy(() => SavedSearchCountOutputTypeArgsSchema)]).optional(),
 }).strict()
@@ -955,7 +998,7 @@ export const SavedSearchCountOutputTypeArgsSchema: z.ZodType<Prisma.SavedSearchC
 }).strict();
 
 export const SavedSearchCountOutputTypeSelectSchema: z.ZodType<Prisma.SavedSearchCountOutputTypeSelect> = z.object({
-  evalSets: z.boolean().optional(),
+  evaluationGroups: z.boolean().optional(),
   alerts: z.boolean().optional(),
 }).strict();
 
@@ -971,7 +1014,7 @@ export const SavedSearchSelectSchema: z.ZodType<Prisma.SavedSearchSelect> = z.ob
   chartPeriod: z.boolean().optional(),
   customerCallId: z.boolean().optional(),
   metadata: z.boolean().optional(),
-  evalSets: z.union([z.boolean(),z.lazy(() => EvalSetFindManyArgsSchema)]).optional(),
+  evaluationGroups: z.union([z.boolean(),z.lazy(() => EvaluationGroupFindManyArgsSchema)]).optional(),
   alerts: z.union([z.boolean(),z.lazy(() => AlertFindManyArgsSchema)]).optional(),
   _count: z.union([z.boolean(),z.lazy(() => SavedSearchCountOutputTypeArgsSchema)]).optional(),
 }).strict()
@@ -1009,20 +1052,20 @@ export const ApiKeyWhereInputSchema: z.ZodType<Prisma.ApiKeyWhereInput> = z.obje
   AND: z.union([ z.lazy(() => ApiKeyWhereInputSchema),z.lazy(() => ApiKeyWhereInputSchema).array() ]).optional(),
   OR: z.lazy(() => ApiKeyWhereInputSchema).array().optional(),
   NOT: z.union([ z.lazy(() => ApiKeyWhereInputSchema),z.lazy(() => ApiKeyWhereInputSchema).array() ]).optional(),
-  userId: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
+  orgId: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   apiKey: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
 }).strict();
 
 export const ApiKeyOrderByWithRelationInputSchema: z.ZodType<Prisma.ApiKeyOrderByWithRelationInput> = z.object({
-  userId: z.lazy(() => SortOrderSchema).optional(),
+  orgId: z.lazy(() => SortOrderSchema).optional(),
   apiKey: z.lazy(() => SortOrderSchema).optional()
 }).strict();
 
 export const ApiKeyWhereUniqueInputSchema: z.ZodType<Prisma.ApiKeyWhereUniqueInput> = z.object({
-  userId: z.string()
+  orgId: z.string()
 })
 .and(z.object({
-  userId: z.string().optional(),
+  orgId: z.string().optional(),
   AND: z.union([ z.lazy(() => ApiKeyWhereInputSchema),z.lazy(() => ApiKeyWhereInputSchema).array() ]).optional(),
   OR: z.lazy(() => ApiKeyWhereInputSchema).array().optional(),
   NOT: z.union([ z.lazy(() => ApiKeyWhereInputSchema),z.lazy(() => ApiKeyWhereInputSchema).array() ]).optional(),
@@ -1030,7 +1073,7 @@ export const ApiKeyWhereUniqueInputSchema: z.ZodType<Prisma.ApiKeyWhereUniqueInp
 }).strict());
 
 export const ApiKeyOrderByWithAggregationInputSchema: z.ZodType<Prisma.ApiKeyOrderByWithAggregationInput> = z.object({
-  userId: z.lazy(() => SortOrderSchema).optional(),
+  orgId: z.lazy(() => SortOrderSchema).optional(),
   apiKey: z.lazy(() => SortOrderSchema).optional(),
   _count: z.lazy(() => ApiKeyCountOrderByAggregateInputSchema).optional(),
   _max: z.lazy(() => ApiKeyMaxOrderByAggregateInputSchema).optional(),
@@ -1041,7 +1084,7 @@ export const ApiKeyScalarWhereWithAggregatesInputSchema: z.ZodType<Prisma.ApiKey
   AND: z.union([ z.lazy(() => ApiKeyScalarWhereWithAggregatesInputSchema),z.lazy(() => ApiKeyScalarWhereWithAggregatesInputSchema).array() ]).optional(),
   OR: z.lazy(() => ApiKeyScalarWhereWithAggregatesInputSchema).array().optional(),
   NOT: z.union([ z.lazy(() => ApiKeyScalarWhereWithAggregatesInputSchema),z.lazy(() => ApiKeyScalarWhereWithAggregatesInputSchema).array() ]).optional(),
-  userId: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
+  orgId: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
   apiKey: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
 }).strict();
 
@@ -1055,16 +1098,16 @@ export const AgentWhereInputSchema: z.ZodType<Prisma.AgentWhereInput> = z.object
   ownerId: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   name: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   phoneNumber: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
+  customerAgentId: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   githubRepoUrl: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
-  customerAgentId: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
   systemPrompt: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   extraProperties: z.lazy(() => JsonFilterSchema).optional(),
   enableSlackNotifications: z.union([ z.lazy(() => BoolFilterSchema),z.boolean() ]).optional(),
-  enabledGeneralEvals: z.lazy(() => EvalListRelationFilterSchema).optional(),
   enabledTestAgents: z.lazy(() => TestAgentListRelationFilterSchema).optional(),
   scenarios: z.lazy(() => ScenarioListRelationFilterSchema).optional(),
   tests: z.lazy(() => TestListRelationFilterSchema).optional(),
-  calls: z.lazy(() => CallListRelationFilterSchema).optional()
+  calls: z.lazy(() => CallListRelationFilterSchema).optional(),
+  generalEvaluations: z.lazy(() => GeneralEvaluationListRelationFilterSchema).optional()
 }).strict();
 
 export const AgentOrderByWithRelationInputSchema: z.ZodType<Prisma.AgentOrderByWithRelationInput> = z.object({
@@ -1074,16 +1117,16 @@ export const AgentOrderByWithRelationInputSchema: z.ZodType<Prisma.AgentOrderByW
   ownerId: z.lazy(() => SortOrderSchema).optional(),
   name: z.lazy(() => SortOrderSchema).optional(),
   phoneNumber: z.lazy(() => SortOrderSchema).optional(),
+  customerAgentId: z.lazy(() => SortOrderSchema).optional(),
   githubRepoUrl: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
-  customerAgentId: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
   systemPrompt: z.lazy(() => SortOrderSchema).optional(),
   extraProperties: z.lazy(() => SortOrderSchema).optional(),
   enableSlackNotifications: z.lazy(() => SortOrderSchema).optional(),
-  enabledGeneralEvals: z.lazy(() => EvalOrderByRelationAggregateInputSchema).optional(),
   enabledTestAgents: z.lazy(() => TestAgentOrderByRelationAggregateInputSchema).optional(),
   scenarios: z.lazy(() => ScenarioOrderByRelationAggregateInputSchema).optional(),
   tests: z.lazy(() => TestOrderByRelationAggregateInputSchema).optional(),
-  calls: z.lazy(() => CallOrderByRelationAggregateInputSchema).optional()
+  calls: z.lazy(() => CallOrderByRelationAggregateInputSchema).optional(),
+  generalEvaluations: z.lazy(() => GeneralEvaluationOrderByRelationAggregateInputSchema).optional()
 }).strict();
 
 export const AgentWhereUniqueInputSchema: z.ZodType<Prisma.AgentWhereUniqueInput> = z.object({
@@ -1099,16 +1142,16 @@ export const AgentWhereUniqueInputSchema: z.ZodType<Prisma.AgentWhereUniqueInput
   ownerId: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   name: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   phoneNumber: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
+  customerAgentId: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   githubRepoUrl: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
-  customerAgentId: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
   systemPrompt: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   extraProperties: z.lazy(() => JsonFilterSchema).optional(),
   enableSlackNotifications: z.union([ z.lazy(() => BoolFilterSchema),z.boolean() ]).optional(),
-  enabledGeneralEvals: z.lazy(() => EvalListRelationFilterSchema).optional(),
   enabledTestAgents: z.lazy(() => TestAgentListRelationFilterSchema).optional(),
   scenarios: z.lazy(() => ScenarioListRelationFilterSchema).optional(),
   tests: z.lazy(() => TestListRelationFilterSchema).optional(),
-  calls: z.lazy(() => CallListRelationFilterSchema).optional()
+  calls: z.lazy(() => CallListRelationFilterSchema).optional(),
+  generalEvaluations: z.lazy(() => GeneralEvaluationListRelationFilterSchema).optional()
 }).strict());
 
 export const AgentOrderByWithAggregationInputSchema: z.ZodType<Prisma.AgentOrderByWithAggregationInput> = z.object({
@@ -1118,8 +1161,8 @@ export const AgentOrderByWithAggregationInputSchema: z.ZodType<Prisma.AgentOrder
   ownerId: z.lazy(() => SortOrderSchema).optional(),
   name: z.lazy(() => SortOrderSchema).optional(),
   phoneNumber: z.lazy(() => SortOrderSchema).optional(),
+  customerAgentId: z.lazy(() => SortOrderSchema).optional(),
   githubRepoUrl: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
-  customerAgentId: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
   systemPrompt: z.lazy(() => SortOrderSchema).optional(),
   extraProperties: z.lazy(() => SortOrderSchema).optional(),
   enableSlackNotifications: z.lazy(() => SortOrderSchema).optional(),
@@ -1138,8 +1181,8 @@ export const AgentScalarWhereWithAggregatesInputSchema: z.ZodType<Prisma.AgentSc
   ownerId: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
   name: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
   phoneNumber: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
+  customerAgentId: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
   githubRepoUrl: z.union([ z.lazy(() => StringNullableWithAggregatesFilterSchema),z.string() ]).optional().nullable(),
-  customerAgentId: z.union([ z.lazy(() => StringNullableWithAggregatesFilterSchema),z.string() ]).optional().nullable(),
   systemPrompt: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
   extraProperties: z.lazy(() => JsonWithAggregatesFilterSchema).optional(),
   enableSlackNotifications: z.union([ z.lazy(() => BoolWithAggregatesFilterSchema),z.boolean() ]).optional(),
@@ -1332,7 +1375,7 @@ export const CallWhereInputSchema: z.ZodType<Prisma.CallWhereInput> = z.object({
   testAgentId: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
   scenarioId: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
   evalSetToSuccess: z.lazy(() => JsonFilterSchema).optional(),
-  evalResults: z.lazy(() => EvalResultListRelationFilterSchema).optional(),
+  evaluationResults: z.lazy(() => EvaluationResultListRelationFilterSchema).optional(),
   agent: z.union([ z.lazy(() => AgentNullableRelationFilterSchema),z.lazy(() => AgentWhereInputSchema) ]).optional().nullable(),
   test: z.union([ z.lazy(() => TestNullableRelationFilterSchema),z.lazy(() => TestWhereInputSchema) ]).optional().nullable(),
   testAgent: z.union([ z.lazy(() => TestAgentNullableRelationFilterSchema),z.lazy(() => TestAgentWhereInputSchema) ]).optional().nullable(),
@@ -1373,7 +1416,7 @@ export const CallOrderByWithRelationInputSchema: z.ZodType<Prisma.CallOrderByWit
   testAgentId: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
   scenarioId: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
   evalSetToSuccess: z.lazy(() => SortOrderSchema).optional(),
-  evalResults: z.lazy(() => EvalResultOrderByRelationAggregateInputSchema).optional(),
+  evaluationResults: z.lazy(() => EvaluationResultOrderByRelationAggregateInputSchema).optional(),
   agent: z.lazy(() => AgentOrderByWithRelationInputSchema).optional(),
   test: z.lazy(() => TestOrderByWithRelationInputSchema).optional(),
   testAgent: z.lazy(() => TestAgentOrderByWithRelationInputSchema).optional(),
@@ -1420,7 +1463,7 @@ export const CallWhereUniqueInputSchema: z.ZodType<Prisma.CallWhereUniqueInput> 
   testAgentId: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
   scenarioId: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
   evalSetToSuccess: z.lazy(() => JsonFilterSchema).optional(),
-  evalResults: z.lazy(() => EvalResultListRelationFilterSchema).optional(),
+  evaluationResults: z.lazy(() => EvaluationResultListRelationFilterSchema).optional(),
   agent: z.union([ z.lazy(() => AgentNullableRelationFilterSchema),z.lazy(() => AgentWhereInputSchema) ]).optional().nullable(),
   test: z.union([ z.lazy(() => TestNullableRelationFilterSchema),z.lazy(() => TestWhereInputSchema) ]).optional().nullable(),
   testAgent: z.union([ z.lazy(() => TestAgentNullableRelationFilterSchema),z.lazy(() => TestAgentWhereInputSchema) ]).optional().nullable(),
@@ -1731,37 +1774,31 @@ export const ScenarioWhereInputSchema: z.ZodType<Prisma.ScenarioWhereInput> = z.
   NOT: z.union([ z.lazy(() => ScenarioWhereInputSchema),z.lazy(() => ScenarioWhereInputSchema).array() ]).optional(),
   id: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   createdAt: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
-  ownerId: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   agentId: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   name: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   instructions: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   successCriteria: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   includeDateTime: z.union([ z.lazy(() => BoolFilterSchema),z.boolean() ]).optional(),
   timezone: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
-  isNew: z.union([ z.lazy(() => BoolFilterSchema),z.boolean() ]).optional(),
   deleted: z.union([ z.lazy(() => BoolFilterSchema),z.boolean() ]).optional(),
   agent: z.union([ z.lazy(() => AgentRelationFilterSchema),z.lazy(() => AgentWhereInputSchema) ]).optional(),
-  generalEvalOverrides: z.lazy(() => EvalOverrideListRelationFilterSchema).optional(),
   calls: z.lazy(() => CallListRelationFilterSchema).optional(),
-  evals: z.lazy(() => EvalListRelationFilterSchema).optional()
+  evaluations: z.lazy(() => EvaluationListRelationFilterSchema).optional()
 }).strict();
 
 export const ScenarioOrderByWithRelationInputSchema: z.ZodType<Prisma.ScenarioOrderByWithRelationInput> = z.object({
   id: z.lazy(() => SortOrderSchema).optional(),
   createdAt: z.lazy(() => SortOrderSchema).optional(),
-  ownerId: z.lazy(() => SortOrderSchema).optional(),
   agentId: z.lazy(() => SortOrderSchema).optional(),
   name: z.lazy(() => SortOrderSchema).optional(),
   instructions: z.lazy(() => SortOrderSchema).optional(),
   successCriteria: z.lazy(() => SortOrderSchema).optional(),
   includeDateTime: z.lazy(() => SortOrderSchema).optional(),
   timezone: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
-  isNew: z.lazy(() => SortOrderSchema).optional(),
   deleted: z.lazy(() => SortOrderSchema).optional(),
   agent: z.lazy(() => AgentOrderByWithRelationInputSchema).optional(),
-  generalEvalOverrides: z.lazy(() => EvalOverrideOrderByRelationAggregateInputSchema).optional(),
   calls: z.lazy(() => CallOrderByRelationAggregateInputSchema).optional(),
-  evals: z.lazy(() => EvalOrderByRelationAggregateInputSchema).optional()
+  evaluations: z.lazy(() => EvaluationOrderByRelationAggregateInputSchema).optional()
 }).strict();
 
 export const ScenarioWhereUniqueInputSchema: z.ZodType<Prisma.ScenarioWhereUniqueInput> = z.object({
@@ -1773,32 +1810,27 @@ export const ScenarioWhereUniqueInputSchema: z.ZodType<Prisma.ScenarioWhereUniqu
   OR: z.lazy(() => ScenarioWhereInputSchema).array().optional(),
   NOT: z.union([ z.lazy(() => ScenarioWhereInputSchema),z.lazy(() => ScenarioWhereInputSchema).array() ]).optional(),
   createdAt: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
-  ownerId: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   agentId: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   name: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   instructions: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   successCriteria: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   includeDateTime: z.union([ z.lazy(() => BoolFilterSchema),z.boolean() ]).optional(),
   timezone: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
-  isNew: z.union([ z.lazy(() => BoolFilterSchema),z.boolean() ]).optional(),
   deleted: z.union([ z.lazy(() => BoolFilterSchema),z.boolean() ]).optional(),
   agent: z.union([ z.lazy(() => AgentRelationFilterSchema),z.lazy(() => AgentWhereInputSchema) ]).optional(),
-  generalEvalOverrides: z.lazy(() => EvalOverrideListRelationFilterSchema).optional(),
   calls: z.lazy(() => CallListRelationFilterSchema).optional(),
-  evals: z.lazy(() => EvalListRelationFilterSchema).optional()
+  evaluations: z.lazy(() => EvaluationListRelationFilterSchema).optional()
 }).strict());
 
 export const ScenarioOrderByWithAggregationInputSchema: z.ZodType<Prisma.ScenarioOrderByWithAggregationInput> = z.object({
   id: z.lazy(() => SortOrderSchema).optional(),
   createdAt: z.lazy(() => SortOrderSchema).optional(),
-  ownerId: z.lazy(() => SortOrderSchema).optional(),
   agentId: z.lazy(() => SortOrderSchema).optional(),
   name: z.lazy(() => SortOrderSchema).optional(),
   instructions: z.lazy(() => SortOrderSchema).optional(),
   successCriteria: z.lazy(() => SortOrderSchema).optional(),
   includeDateTime: z.lazy(() => SortOrderSchema).optional(),
   timezone: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
-  isNew: z.lazy(() => SortOrderSchema).optional(),
   deleted: z.lazy(() => SortOrderSchema).optional(),
   _count: z.lazy(() => ScenarioCountOrderByAggregateInputSchema).optional(),
   _max: z.lazy(() => ScenarioMaxOrderByAggregateInputSchema).optional(),
@@ -1811,279 +1843,336 @@ export const ScenarioScalarWhereWithAggregatesInputSchema: z.ZodType<Prisma.Scen
   NOT: z.union([ z.lazy(() => ScenarioScalarWhereWithAggregatesInputSchema),z.lazy(() => ScenarioScalarWhereWithAggregatesInputSchema).array() ]).optional(),
   id: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
   createdAt: z.union([ z.lazy(() => DateTimeWithAggregatesFilterSchema),z.coerce.date() ]).optional(),
-  ownerId: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
   agentId: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
   name: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
   instructions: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
   successCriteria: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
   includeDateTime: z.union([ z.lazy(() => BoolWithAggregatesFilterSchema),z.boolean() ]).optional(),
   timezone: z.union([ z.lazy(() => StringNullableWithAggregatesFilterSchema),z.string() ]).optional().nullable(),
-  isNew: z.union([ z.lazy(() => BoolWithAggregatesFilterSchema),z.boolean() ]).optional(),
   deleted: z.union([ z.lazy(() => BoolWithAggregatesFilterSchema),z.boolean() ]).optional(),
 }).strict();
 
-export const EvalWhereInputSchema: z.ZodType<Prisma.EvalWhereInput> = z.object({
-  AND: z.union([ z.lazy(() => EvalWhereInputSchema),z.lazy(() => EvalWhereInputSchema).array() ]).optional(),
-  OR: z.lazy(() => EvalWhereInputSchema).array().optional(),
-  NOT: z.union([ z.lazy(() => EvalWhereInputSchema),z.lazy(() => EvalWhereInputSchema).array() ]).optional(),
+export const EvaluationTemplateWhereInputSchema: z.ZodType<Prisma.EvaluationTemplateWhereInput> = z.object({
+  AND: z.union([ z.lazy(() => EvaluationTemplateWhereInputSchema),z.lazy(() => EvaluationTemplateWhereInputSchema).array() ]).optional(),
+  OR: z.lazy(() => EvaluationTemplateWhereInputSchema).array().optional(),
+  NOT: z.union([ z.lazy(() => EvaluationTemplateWhereInputSchema),z.lazy(() => EvaluationTemplateWhereInputSchema).array() ]).optional(),
   id: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   createdAt: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
   name: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   description: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
-  scenarioId: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
+  params: z.lazy(() => StringNullableListFilterSchema).optional(),
   type: z.union([ z.lazy(() => EnumEvalTypeFilterSchema),z.lazy(() => EvalTypeSchema) ]).optional(),
   resultType: z.union([ z.lazy(() => EnumEvalResultTypeFilterSchema),z.lazy(() => EvalResultTypeSchema) ]).optional(),
   contentType: z.union([ z.lazy(() => EnumEvalContentTypeFilterSchema),z.lazy(() => EvalContentTypeSchema) ]).optional(),
-  isCritical: z.union([ z.lazy(() => BoolFilterSchema),z.boolean() ]).optional(),
   toolCallExpectedResult: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
-  agentId: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
   ownerId: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
   deleted: z.union([ z.lazy(() => BoolFilterSchema),z.boolean() ]).optional(),
-  evalSetId: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
-  scenario: z.union([ z.lazy(() => ScenarioNullableRelationFilterSchema),z.lazy(() => ScenarioWhereInputSchema) ]).optional().nullable(),
-  evalResults: z.lazy(() => EvalResultListRelationFilterSchema).optional(),
-  agent: z.union([ z.lazy(() => AgentNullableRelationFilterSchema),z.lazy(() => AgentWhereInputSchema) ]).optional().nullable(),
-  evalOverrides: z.lazy(() => EvalOverrideListRelationFilterSchema).optional(),
-  evalSet: z.union([ z.lazy(() => EvalSetNullableRelationFilterSchema),z.lazy(() => EvalSetWhereInputSchema) ]).optional().nullable(),
+  evaluationResults: z.lazy(() => EvaluationResultListRelationFilterSchema).optional(),
+  evaluations: z.lazy(() => EvaluationListRelationFilterSchema).optional()
 }).strict();
 
-export const EvalOrderByWithRelationInputSchema: z.ZodType<Prisma.EvalOrderByWithRelationInput> = z.object({
+export const EvaluationTemplateOrderByWithRelationInputSchema: z.ZodType<Prisma.EvaluationTemplateOrderByWithRelationInput> = z.object({
   id: z.lazy(() => SortOrderSchema).optional(),
   createdAt: z.lazy(() => SortOrderSchema).optional(),
   name: z.lazy(() => SortOrderSchema).optional(),
   description: z.lazy(() => SortOrderSchema).optional(),
-  scenarioId: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
+  params: z.lazy(() => SortOrderSchema).optional(),
   type: z.lazy(() => SortOrderSchema).optional(),
   resultType: z.lazy(() => SortOrderSchema).optional(),
   contentType: z.lazy(() => SortOrderSchema).optional(),
-  isCritical: z.lazy(() => SortOrderSchema).optional(),
   toolCallExpectedResult: z.lazy(() => SortOrderSchema).optional(),
-  agentId: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
   ownerId: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
   deleted: z.lazy(() => SortOrderSchema).optional(),
-  evalSetId: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
-  scenario: z.lazy(() => ScenarioOrderByWithRelationInputSchema).optional(),
-  evalResults: z.lazy(() => EvalResultOrderByRelationAggregateInputSchema).optional(),
-  agent: z.lazy(() => AgentOrderByWithRelationInputSchema).optional(),
-  evalOverrides: z.lazy(() => EvalOverrideOrderByRelationAggregateInputSchema).optional(),
-  evalSet: z.lazy(() => EvalSetOrderByWithRelationInputSchema).optional()
+  evaluationResults: z.lazy(() => EvaluationResultOrderByRelationAggregateInputSchema).optional(),
+  evaluations: z.lazy(() => EvaluationOrderByRelationAggregateInputSchema).optional()
 }).strict();
 
-export const EvalWhereUniqueInputSchema: z.ZodType<Prisma.EvalWhereUniqueInput> = z.object({
+export const EvaluationTemplateWhereUniqueInputSchema: z.ZodType<Prisma.EvaluationTemplateWhereUniqueInput> = z.object({
   id: z.string()
 })
 .and(z.object({
   id: z.string().optional(),
-  AND: z.union([ z.lazy(() => EvalWhereInputSchema),z.lazy(() => EvalWhereInputSchema).array() ]).optional(),
-  OR: z.lazy(() => EvalWhereInputSchema).array().optional(),
-  NOT: z.union([ z.lazy(() => EvalWhereInputSchema),z.lazy(() => EvalWhereInputSchema).array() ]).optional(),
+  AND: z.union([ z.lazy(() => EvaluationTemplateWhereInputSchema),z.lazy(() => EvaluationTemplateWhereInputSchema).array() ]).optional(),
+  OR: z.lazy(() => EvaluationTemplateWhereInputSchema).array().optional(),
+  NOT: z.union([ z.lazy(() => EvaluationTemplateWhereInputSchema),z.lazy(() => EvaluationTemplateWhereInputSchema).array() ]).optional(),
   createdAt: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
   name: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   description: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
-  scenarioId: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
+  params: z.lazy(() => StringNullableListFilterSchema).optional(),
   type: z.union([ z.lazy(() => EnumEvalTypeFilterSchema),z.lazy(() => EvalTypeSchema) ]).optional(),
   resultType: z.union([ z.lazy(() => EnumEvalResultTypeFilterSchema),z.lazy(() => EvalResultTypeSchema) ]).optional(),
   contentType: z.union([ z.lazy(() => EnumEvalContentTypeFilterSchema),z.lazy(() => EvalContentTypeSchema) ]).optional(),
-  isCritical: z.union([ z.lazy(() => BoolFilterSchema),z.boolean() ]).optional(),
   toolCallExpectedResult: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
-  agentId: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
   ownerId: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
   deleted: z.union([ z.lazy(() => BoolFilterSchema),z.boolean() ]).optional(),
-  evalSetId: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
-  scenario: z.union([ z.lazy(() => ScenarioNullableRelationFilterSchema),z.lazy(() => ScenarioWhereInputSchema) ]).optional().nullable(),
-  evalResults: z.lazy(() => EvalResultListRelationFilterSchema).optional(),
-  agent: z.union([ z.lazy(() => AgentNullableRelationFilterSchema),z.lazy(() => AgentWhereInputSchema) ]).optional().nullable(),
-  evalOverrides: z.lazy(() => EvalOverrideListRelationFilterSchema).optional(),
-  evalSet: z.union([ z.lazy(() => EvalSetNullableRelationFilterSchema),z.lazy(() => EvalSetWhereInputSchema) ]).optional().nullable(),
+  evaluationResults: z.lazy(() => EvaluationResultListRelationFilterSchema).optional(),
+  evaluations: z.lazy(() => EvaluationListRelationFilterSchema).optional()
 }).strict());
 
-export const EvalOrderByWithAggregationInputSchema: z.ZodType<Prisma.EvalOrderByWithAggregationInput> = z.object({
+export const EvaluationTemplateOrderByWithAggregationInputSchema: z.ZodType<Prisma.EvaluationTemplateOrderByWithAggregationInput> = z.object({
   id: z.lazy(() => SortOrderSchema).optional(),
   createdAt: z.lazy(() => SortOrderSchema).optional(),
   name: z.lazy(() => SortOrderSchema).optional(),
   description: z.lazy(() => SortOrderSchema).optional(),
-  scenarioId: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
+  params: z.lazy(() => SortOrderSchema).optional(),
   type: z.lazy(() => SortOrderSchema).optional(),
   resultType: z.lazy(() => SortOrderSchema).optional(),
   contentType: z.lazy(() => SortOrderSchema).optional(),
-  isCritical: z.lazy(() => SortOrderSchema).optional(),
   toolCallExpectedResult: z.lazy(() => SortOrderSchema).optional(),
-  agentId: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
   ownerId: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
   deleted: z.lazy(() => SortOrderSchema).optional(),
-  evalSetId: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
-  _count: z.lazy(() => EvalCountOrderByAggregateInputSchema).optional(),
-  _max: z.lazy(() => EvalMaxOrderByAggregateInputSchema).optional(),
-  _min: z.lazy(() => EvalMinOrderByAggregateInputSchema).optional()
+  _count: z.lazy(() => EvaluationTemplateCountOrderByAggregateInputSchema).optional(),
+  _max: z.lazy(() => EvaluationTemplateMaxOrderByAggregateInputSchema).optional(),
+  _min: z.lazy(() => EvaluationTemplateMinOrderByAggregateInputSchema).optional()
 }).strict();
 
-export const EvalScalarWhereWithAggregatesInputSchema: z.ZodType<Prisma.EvalScalarWhereWithAggregatesInput> = z.object({
-  AND: z.union([ z.lazy(() => EvalScalarWhereWithAggregatesInputSchema),z.lazy(() => EvalScalarWhereWithAggregatesInputSchema).array() ]).optional(),
-  OR: z.lazy(() => EvalScalarWhereWithAggregatesInputSchema).array().optional(),
-  NOT: z.union([ z.lazy(() => EvalScalarWhereWithAggregatesInputSchema),z.lazy(() => EvalScalarWhereWithAggregatesInputSchema).array() ]).optional(),
+export const EvaluationTemplateScalarWhereWithAggregatesInputSchema: z.ZodType<Prisma.EvaluationTemplateScalarWhereWithAggregatesInput> = z.object({
+  AND: z.union([ z.lazy(() => EvaluationTemplateScalarWhereWithAggregatesInputSchema),z.lazy(() => EvaluationTemplateScalarWhereWithAggregatesInputSchema).array() ]).optional(),
+  OR: z.lazy(() => EvaluationTemplateScalarWhereWithAggregatesInputSchema).array().optional(),
+  NOT: z.union([ z.lazy(() => EvaluationTemplateScalarWhereWithAggregatesInputSchema),z.lazy(() => EvaluationTemplateScalarWhereWithAggregatesInputSchema).array() ]).optional(),
   id: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
   createdAt: z.union([ z.lazy(() => DateTimeWithAggregatesFilterSchema),z.coerce.date() ]).optional(),
   name: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
   description: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
-  scenarioId: z.union([ z.lazy(() => StringNullableWithAggregatesFilterSchema),z.string() ]).optional().nullable(),
+  params: z.lazy(() => StringNullableListFilterSchema).optional(),
   type: z.union([ z.lazy(() => EnumEvalTypeWithAggregatesFilterSchema),z.lazy(() => EvalTypeSchema) ]).optional(),
   resultType: z.union([ z.lazy(() => EnumEvalResultTypeWithAggregatesFilterSchema),z.lazy(() => EvalResultTypeSchema) ]).optional(),
   contentType: z.union([ z.lazy(() => EnumEvalContentTypeWithAggregatesFilterSchema),z.lazy(() => EvalContentTypeSchema) ]).optional(),
-  isCritical: z.union([ z.lazy(() => BoolWithAggregatesFilterSchema),z.boolean() ]).optional(),
   toolCallExpectedResult: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
-  agentId: z.union([ z.lazy(() => StringNullableWithAggregatesFilterSchema),z.string() ]).optional().nullable(),
   ownerId: z.union([ z.lazy(() => StringNullableWithAggregatesFilterSchema),z.string() ]).optional().nullable(),
   deleted: z.union([ z.lazy(() => BoolWithAggregatesFilterSchema),z.boolean() ]).optional(),
-  evalSetId: z.union([ z.lazy(() => StringNullableWithAggregatesFilterSchema),z.string() ]).optional().nullable(),
 }).strict();
 
-export const EvalResultWhereInputSchema: z.ZodType<Prisma.EvalResultWhereInput> = z.object({
-  AND: z.union([ z.lazy(() => EvalResultWhereInputSchema),z.lazy(() => EvalResultWhereInputSchema).array() ]).optional(),
-  OR: z.lazy(() => EvalResultWhereInputSchema).array().optional(),
-  NOT: z.union([ z.lazy(() => EvalResultWhereInputSchema),z.lazy(() => EvalResultWhereInputSchema).array() ]).optional(),
+export const GeneralEvaluationWhereInputSchema: z.ZodType<Prisma.GeneralEvaluationWhereInput> = z.object({
+  AND: z.union([ z.lazy(() => GeneralEvaluationWhereInputSchema),z.lazy(() => GeneralEvaluationWhereInputSchema).array() ]).optional(),
+  OR: z.lazy(() => GeneralEvaluationWhereInputSchema).array().optional(),
+  NOT: z.union([ z.lazy(() => GeneralEvaluationWhereInputSchema),z.lazy(() => GeneralEvaluationWhereInputSchema).array() ]).optional(),
   id: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
-  createdAt: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
-  callId: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
-  evalId: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
-  result: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
-  success: z.union([ z.lazy(() => BoolFilterSchema),z.boolean() ]).optional(),
-  secondsFromStart: z.union([ z.lazy(() => FloatNullableFilterSchema),z.number() ]).optional().nullable(),
-  duration: z.union([ z.lazy(() => FloatNullableFilterSchema),z.number() ]).optional().nullable(),
-  type: z.union([ z.lazy(() => EnumEvalResultTypeFilterSchema),z.lazy(() => EvalResultTypeSchema) ]).optional(),
-  details: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
-  call: z.union([ z.lazy(() => CallNullableRelationFilterSchema),z.lazy(() => CallWhereInputSchema) ]).optional().nullable(),
-  eval: z.union([ z.lazy(() => EvalRelationFilterSchema),z.lazy(() => EvalWhereInputSchema) ]).optional(),
+  agentId: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
+  evaluationId: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
+  agent: z.union([ z.lazy(() => AgentRelationFilterSchema),z.lazy(() => AgentWhereInputSchema) ]).optional(),
+  evaluation: z.union([ z.lazy(() => EvaluationRelationFilterSchema),z.lazy(() => EvaluationWhereInputSchema) ]).optional(),
 }).strict();
 
-export const EvalResultOrderByWithRelationInputSchema: z.ZodType<Prisma.EvalResultOrderByWithRelationInput> = z.object({
+export const GeneralEvaluationOrderByWithRelationInputSchema: z.ZodType<Prisma.GeneralEvaluationOrderByWithRelationInput> = z.object({
   id: z.lazy(() => SortOrderSchema).optional(),
-  createdAt: z.lazy(() => SortOrderSchema).optional(),
-  callId: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
-  evalId: z.lazy(() => SortOrderSchema).optional(),
-  result: z.lazy(() => SortOrderSchema).optional(),
-  success: z.lazy(() => SortOrderSchema).optional(),
-  secondsFromStart: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
-  duration: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
-  type: z.lazy(() => SortOrderSchema).optional(),
-  details: z.lazy(() => SortOrderSchema).optional(),
-  call: z.lazy(() => CallOrderByWithRelationInputSchema).optional(),
-  eval: z.lazy(() => EvalOrderByWithRelationInputSchema).optional()
+  agentId: z.lazy(() => SortOrderSchema).optional(),
+  evaluationId: z.lazy(() => SortOrderSchema).optional(),
+  agent: z.lazy(() => AgentOrderByWithRelationInputSchema).optional(),
+  evaluation: z.lazy(() => EvaluationOrderByWithRelationInputSchema).optional()
 }).strict();
 
-export const EvalResultWhereUniqueInputSchema: z.ZodType<Prisma.EvalResultWhereUniqueInput> = z.object({
+export const GeneralEvaluationWhereUniqueInputSchema: z.ZodType<Prisma.GeneralEvaluationWhereUniqueInput> = z.object({
   id: z.string()
 })
 .and(z.object({
   id: z.string().optional(),
-  AND: z.union([ z.lazy(() => EvalResultWhereInputSchema),z.lazy(() => EvalResultWhereInputSchema).array() ]).optional(),
-  OR: z.lazy(() => EvalResultWhereInputSchema).array().optional(),
-  NOT: z.union([ z.lazy(() => EvalResultWhereInputSchema),z.lazy(() => EvalResultWhereInputSchema).array() ]).optional(),
+  AND: z.union([ z.lazy(() => GeneralEvaluationWhereInputSchema),z.lazy(() => GeneralEvaluationWhereInputSchema).array() ]).optional(),
+  OR: z.lazy(() => GeneralEvaluationWhereInputSchema).array().optional(),
+  NOT: z.union([ z.lazy(() => GeneralEvaluationWhereInputSchema),z.lazy(() => GeneralEvaluationWhereInputSchema).array() ]).optional(),
+  agentId: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
+  evaluationId: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
+  agent: z.union([ z.lazy(() => AgentRelationFilterSchema),z.lazy(() => AgentWhereInputSchema) ]).optional(),
+  evaluation: z.union([ z.lazy(() => EvaluationRelationFilterSchema),z.lazy(() => EvaluationWhereInputSchema) ]).optional(),
+}).strict());
+
+export const GeneralEvaluationOrderByWithAggregationInputSchema: z.ZodType<Prisma.GeneralEvaluationOrderByWithAggregationInput> = z.object({
+  id: z.lazy(() => SortOrderSchema).optional(),
+  agentId: z.lazy(() => SortOrderSchema).optional(),
+  evaluationId: z.lazy(() => SortOrderSchema).optional(),
+  _count: z.lazy(() => GeneralEvaluationCountOrderByAggregateInputSchema).optional(),
+  _max: z.lazy(() => GeneralEvaluationMaxOrderByAggregateInputSchema).optional(),
+  _min: z.lazy(() => GeneralEvaluationMinOrderByAggregateInputSchema).optional()
+}).strict();
+
+export const GeneralEvaluationScalarWhereWithAggregatesInputSchema: z.ZodType<Prisma.GeneralEvaluationScalarWhereWithAggregatesInput> = z.object({
+  AND: z.union([ z.lazy(() => GeneralEvaluationScalarWhereWithAggregatesInputSchema),z.lazy(() => GeneralEvaluationScalarWhereWithAggregatesInputSchema).array() ]).optional(),
+  OR: z.lazy(() => GeneralEvaluationScalarWhereWithAggregatesInputSchema).array().optional(),
+  NOT: z.union([ z.lazy(() => GeneralEvaluationScalarWhereWithAggregatesInputSchema),z.lazy(() => GeneralEvaluationScalarWhereWithAggregatesInputSchema).array() ]).optional(),
+  id: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
+  agentId: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
+  evaluationId: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
+}).strict();
+
+export const EvaluationWhereInputSchema: z.ZodType<Prisma.EvaluationWhereInput> = z.object({
+  AND: z.union([ z.lazy(() => EvaluationWhereInputSchema),z.lazy(() => EvaluationWhereInputSchema).array() ]).optional(),
+  OR: z.lazy(() => EvaluationWhereInputSchema).array().optional(),
+  NOT: z.union([ z.lazy(() => EvaluationWhereInputSchema),z.lazy(() => EvaluationWhereInputSchema).array() ]).optional(),
+  id: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
+  createdAt: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
+  enabled: z.union([ z.lazy(() => BoolFilterSchema),z.boolean() ]).optional(),
+  isCritical: z.union([ z.lazy(() => BoolFilterSchema),z.boolean() ]).optional(),
+  params: z.lazy(() => JsonFilterSchema).optional(),
+  evaluationTemplateId: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
+  scenarioId: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
+  evaluationGroupId: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
+  evaluationTemplate: z.union([ z.lazy(() => EvaluationTemplateRelationFilterSchema),z.lazy(() => EvaluationTemplateWhereInputSchema) ]).optional(),
+  scenario: z.union([ z.lazy(() => ScenarioNullableRelationFilterSchema),z.lazy(() => ScenarioWhereInputSchema) ]).optional().nullable(),
+  evaluationGroup: z.union([ z.lazy(() => EvaluationGroupNullableRelationFilterSchema),z.lazy(() => EvaluationGroupWhereInputSchema) ]).optional().nullable(),
+  evaluationResults: z.lazy(() => EvaluationResultListRelationFilterSchema).optional(),
+  generalEvaluations: z.lazy(() => GeneralEvaluationListRelationFilterSchema).optional()
+}).strict();
+
+export const EvaluationOrderByWithRelationInputSchema: z.ZodType<Prisma.EvaluationOrderByWithRelationInput> = z.object({
+  id: z.lazy(() => SortOrderSchema).optional(),
+  createdAt: z.lazy(() => SortOrderSchema).optional(),
+  enabled: z.lazy(() => SortOrderSchema).optional(),
+  isCritical: z.lazy(() => SortOrderSchema).optional(),
+  params: z.lazy(() => SortOrderSchema).optional(),
+  evaluationTemplateId: z.lazy(() => SortOrderSchema).optional(),
+  scenarioId: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
+  evaluationGroupId: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
+  evaluationTemplate: z.lazy(() => EvaluationTemplateOrderByWithRelationInputSchema).optional(),
+  scenario: z.lazy(() => ScenarioOrderByWithRelationInputSchema).optional(),
+  evaluationGroup: z.lazy(() => EvaluationGroupOrderByWithRelationInputSchema).optional(),
+  evaluationResults: z.lazy(() => EvaluationResultOrderByRelationAggregateInputSchema).optional(),
+  generalEvaluations: z.lazy(() => GeneralEvaluationOrderByRelationAggregateInputSchema).optional()
+}).strict();
+
+export const EvaluationWhereUniqueInputSchema: z.ZodType<Prisma.EvaluationWhereUniqueInput> = z.object({
+  id: z.string()
+})
+.and(z.object({
+  id: z.string().optional(),
+  AND: z.union([ z.lazy(() => EvaluationWhereInputSchema),z.lazy(() => EvaluationWhereInputSchema).array() ]).optional(),
+  OR: z.lazy(() => EvaluationWhereInputSchema).array().optional(),
+  NOT: z.union([ z.lazy(() => EvaluationWhereInputSchema),z.lazy(() => EvaluationWhereInputSchema).array() ]).optional(),
+  createdAt: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
+  enabled: z.union([ z.lazy(() => BoolFilterSchema),z.boolean() ]).optional(),
+  isCritical: z.union([ z.lazy(() => BoolFilterSchema),z.boolean() ]).optional(),
+  params: z.lazy(() => JsonFilterSchema).optional(),
+  evaluationTemplateId: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
+  scenarioId: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
+  evaluationGroupId: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
+  evaluationTemplate: z.union([ z.lazy(() => EvaluationTemplateRelationFilterSchema),z.lazy(() => EvaluationTemplateWhereInputSchema) ]).optional(),
+  scenario: z.union([ z.lazy(() => ScenarioNullableRelationFilterSchema),z.lazy(() => ScenarioWhereInputSchema) ]).optional().nullable(),
+  evaluationGroup: z.union([ z.lazy(() => EvaluationGroupNullableRelationFilterSchema),z.lazy(() => EvaluationGroupWhereInputSchema) ]).optional().nullable(),
+  evaluationResults: z.lazy(() => EvaluationResultListRelationFilterSchema).optional(),
+  generalEvaluations: z.lazy(() => GeneralEvaluationListRelationFilterSchema).optional()
+}).strict());
+
+export const EvaluationOrderByWithAggregationInputSchema: z.ZodType<Prisma.EvaluationOrderByWithAggregationInput> = z.object({
+  id: z.lazy(() => SortOrderSchema).optional(),
+  createdAt: z.lazy(() => SortOrderSchema).optional(),
+  enabled: z.lazy(() => SortOrderSchema).optional(),
+  isCritical: z.lazy(() => SortOrderSchema).optional(),
+  params: z.lazy(() => SortOrderSchema).optional(),
+  evaluationTemplateId: z.lazy(() => SortOrderSchema).optional(),
+  scenarioId: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
+  evaluationGroupId: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
+  _count: z.lazy(() => EvaluationCountOrderByAggregateInputSchema).optional(),
+  _max: z.lazy(() => EvaluationMaxOrderByAggregateInputSchema).optional(),
+  _min: z.lazy(() => EvaluationMinOrderByAggregateInputSchema).optional()
+}).strict();
+
+export const EvaluationScalarWhereWithAggregatesInputSchema: z.ZodType<Prisma.EvaluationScalarWhereWithAggregatesInput> = z.object({
+  AND: z.union([ z.lazy(() => EvaluationScalarWhereWithAggregatesInputSchema),z.lazy(() => EvaluationScalarWhereWithAggregatesInputSchema).array() ]).optional(),
+  OR: z.lazy(() => EvaluationScalarWhereWithAggregatesInputSchema).array().optional(),
+  NOT: z.union([ z.lazy(() => EvaluationScalarWhereWithAggregatesInputSchema),z.lazy(() => EvaluationScalarWhereWithAggregatesInputSchema).array() ]).optional(),
+  id: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
+  createdAt: z.union([ z.lazy(() => DateTimeWithAggregatesFilterSchema),z.coerce.date() ]).optional(),
+  enabled: z.union([ z.lazy(() => BoolWithAggregatesFilterSchema),z.boolean() ]).optional(),
+  isCritical: z.union([ z.lazy(() => BoolWithAggregatesFilterSchema),z.boolean() ]).optional(),
+  params: z.lazy(() => JsonWithAggregatesFilterSchema).optional(),
+  evaluationTemplateId: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
+  scenarioId: z.union([ z.lazy(() => StringNullableWithAggregatesFilterSchema),z.string() ]).optional().nullable(),
+  evaluationGroupId: z.union([ z.lazy(() => StringNullableWithAggregatesFilterSchema),z.string() ]).optional().nullable(),
+}).strict();
+
+export const EvaluationResultWhereInputSchema: z.ZodType<Prisma.EvaluationResultWhereInput> = z.object({
+  AND: z.union([ z.lazy(() => EvaluationResultWhereInputSchema),z.lazy(() => EvaluationResultWhereInputSchema).array() ]).optional(),
+  OR: z.lazy(() => EvaluationResultWhereInputSchema).array().optional(),
+  NOT: z.union([ z.lazy(() => EvaluationResultWhereInputSchema),z.lazy(() => EvaluationResultWhereInputSchema).array() ]).optional(),
+  id: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   createdAt: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
   callId: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
-  evalId: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
+  evaluationId: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   result: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   success: z.union([ z.lazy(() => BoolFilterSchema),z.boolean() ]).optional(),
   secondsFromStart: z.union([ z.lazy(() => FloatNullableFilterSchema),z.number() ]).optional().nullable(),
   duration: z.union([ z.lazy(() => FloatNullableFilterSchema),z.number() ]).optional().nullable(),
   type: z.union([ z.lazy(() => EnumEvalResultTypeFilterSchema),z.lazy(() => EvalResultTypeSchema) ]).optional(),
   details: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
+  evaluationTemplateId: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
   call: z.union([ z.lazy(() => CallNullableRelationFilterSchema),z.lazy(() => CallWhereInputSchema) ]).optional().nullable(),
-  eval: z.union([ z.lazy(() => EvalRelationFilterSchema),z.lazy(() => EvalWhereInputSchema) ]).optional(),
-}).strict());
+  evaluation: z.union([ z.lazy(() => EvaluationRelationFilterSchema),z.lazy(() => EvaluationWhereInputSchema) ]).optional(),
+  evaluationTemplate: z.union([ z.lazy(() => EvaluationTemplateNullableRelationFilterSchema),z.lazy(() => EvaluationTemplateWhereInputSchema) ]).optional().nullable(),
+}).strict();
 
-export const EvalResultOrderByWithAggregationInputSchema: z.ZodType<Prisma.EvalResultOrderByWithAggregationInput> = z.object({
+export const EvaluationResultOrderByWithRelationInputSchema: z.ZodType<Prisma.EvaluationResultOrderByWithRelationInput> = z.object({
   id: z.lazy(() => SortOrderSchema).optional(),
   createdAt: z.lazy(() => SortOrderSchema).optional(),
   callId: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
-  evalId: z.lazy(() => SortOrderSchema).optional(),
+  evaluationId: z.lazy(() => SortOrderSchema).optional(),
   result: z.lazy(() => SortOrderSchema).optional(),
   success: z.lazy(() => SortOrderSchema).optional(),
   secondsFromStart: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
   duration: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
   type: z.lazy(() => SortOrderSchema).optional(),
   details: z.lazy(() => SortOrderSchema).optional(),
-  _count: z.lazy(() => EvalResultCountOrderByAggregateInputSchema).optional(),
-  _avg: z.lazy(() => EvalResultAvgOrderByAggregateInputSchema).optional(),
-  _max: z.lazy(() => EvalResultMaxOrderByAggregateInputSchema).optional(),
-  _min: z.lazy(() => EvalResultMinOrderByAggregateInputSchema).optional(),
-  _sum: z.lazy(() => EvalResultSumOrderByAggregateInputSchema).optional()
+  evaluationTemplateId: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
+  call: z.lazy(() => CallOrderByWithRelationInputSchema).optional(),
+  evaluation: z.lazy(() => EvaluationOrderByWithRelationInputSchema).optional(),
+  evaluationTemplate: z.lazy(() => EvaluationTemplateOrderByWithRelationInputSchema).optional()
 }).strict();
 
-export const EvalResultScalarWhereWithAggregatesInputSchema: z.ZodType<Prisma.EvalResultScalarWhereWithAggregatesInput> = z.object({
-  AND: z.union([ z.lazy(() => EvalResultScalarWhereWithAggregatesInputSchema),z.lazy(() => EvalResultScalarWhereWithAggregatesInputSchema).array() ]).optional(),
-  OR: z.lazy(() => EvalResultScalarWhereWithAggregatesInputSchema).array().optional(),
-  NOT: z.union([ z.lazy(() => EvalResultScalarWhereWithAggregatesInputSchema),z.lazy(() => EvalResultScalarWhereWithAggregatesInputSchema).array() ]).optional(),
+export const EvaluationResultWhereUniqueInputSchema: z.ZodType<Prisma.EvaluationResultWhereUniqueInput> = z.object({
+  id: z.string()
+})
+.and(z.object({
+  id: z.string().optional(),
+  AND: z.union([ z.lazy(() => EvaluationResultWhereInputSchema),z.lazy(() => EvaluationResultWhereInputSchema).array() ]).optional(),
+  OR: z.lazy(() => EvaluationResultWhereInputSchema).array().optional(),
+  NOT: z.union([ z.lazy(() => EvaluationResultWhereInputSchema),z.lazy(() => EvaluationResultWhereInputSchema).array() ]).optional(),
+  createdAt: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
+  callId: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
+  evaluationId: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
+  result: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
+  success: z.union([ z.lazy(() => BoolFilterSchema),z.boolean() ]).optional(),
+  secondsFromStart: z.union([ z.lazy(() => FloatNullableFilterSchema),z.number() ]).optional().nullable(),
+  duration: z.union([ z.lazy(() => FloatNullableFilterSchema),z.number() ]).optional().nullable(),
+  type: z.union([ z.lazy(() => EnumEvalResultTypeFilterSchema),z.lazy(() => EvalResultTypeSchema) ]).optional(),
+  details: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
+  evaluationTemplateId: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
+  call: z.union([ z.lazy(() => CallNullableRelationFilterSchema),z.lazy(() => CallWhereInputSchema) ]).optional().nullable(),
+  evaluation: z.union([ z.lazy(() => EvaluationRelationFilterSchema),z.lazy(() => EvaluationWhereInputSchema) ]).optional(),
+  evaluationTemplate: z.union([ z.lazy(() => EvaluationTemplateNullableRelationFilterSchema),z.lazy(() => EvaluationTemplateWhereInputSchema) ]).optional().nullable(),
+}).strict());
+
+export const EvaluationResultOrderByWithAggregationInputSchema: z.ZodType<Prisma.EvaluationResultOrderByWithAggregationInput> = z.object({
+  id: z.lazy(() => SortOrderSchema).optional(),
+  createdAt: z.lazy(() => SortOrderSchema).optional(),
+  callId: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
+  evaluationId: z.lazy(() => SortOrderSchema).optional(),
+  result: z.lazy(() => SortOrderSchema).optional(),
+  success: z.lazy(() => SortOrderSchema).optional(),
+  secondsFromStart: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
+  duration: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
+  type: z.lazy(() => SortOrderSchema).optional(),
+  details: z.lazy(() => SortOrderSchema).optional(),
+  evaluationTemplateId: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
+  _count: z.lazy(() => EvaluationResultCountOrderByAggregateInputSchema).optional(),
+  _avg: z.lazy(() => EvaluationResultAvgOrderByAggregateInputSchema).optional(),
+  _max: z.lazy(() => EvaluationResultMaxOrderByAggregateInputSchema).optional(),
+  _min: z.lazy(() => EvaluationResultMinOrderByAggregateInputSchema).optional(),
+  _sum: z.lazy(() => EvaluationResultSumOrderByAggregateInputSchema).optional()
+}).strict();
+
+export const EvaluationResultScalarWhereWithAggregatesInputSchema: z.ZodType<Prisma.EvaluationResultScalarWhereWithAggregatesInput> = z.object({
+  AND: z.union([ z.lazy(() => EvaluationResultScalarWhereWithAggregatesInputSchema),z.lazy(() => EvaluationResultScalarWhereWithAggregatesInputSchema).array() ]).optional(),
+  OR: z.lazy(() => EvaluationResultScalarWhereWithAggregatesInputSchema).array().optional(),
+  NOT: z.union([ z.lazy(() => EvaluationResultScalarWhereWithAggregatesInputSchema),z.lazy(() => EvaluationResultScalarWhereWithAggregatesInputSchema).array() ]).optional(),
   id: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
   createdAt: z.union([ z.lazy(() => DateTimeWithAggregatesFilterSchema),z.coerce.date() ]).optional(),
   callId: z.union([ z.lazy(() => StringNullableWithAggregatesFilterSchema),z.string() ]).optional().nullable(),
-  evalId: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
+  evaluationId: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
   result: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
   success: z.union([ z.lazy(() => BoolWithAggregatesFilterSchema),z.boolean() ]).optional(),
   secondsFromStart: z.union([ z.lazy(() => FloatNullableWithAggregatesFilterSchema),z.number() ]).optional().nullable(),
   duration: z.union([ z.lazy(() => FloatNullableWithAggregatesFilterSchema),z.number() ]).optional().nullable(),
   type: z.union([ z.lazy(() => EnumEvalResultTypeWithAggregatesFilterSchema),z.lazy(() => EvalResultTypeSchema) ]).optional(),
   details: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
-}).strict();
-
-export const EvalOverrideWhereInputSchema: z.ZodType<Prisma.EvalOverrideWhereInput> = z.object({
-  AND: z.union([ z.lazy(() => EvalOverrideWhereInputSchema),z.lazy(() => EvalOverrideWhereInputSchema).array() ]).optional(),
-  OR: z.lazy(() => EvalOverrideWhereInputSchema).array().optional(),
-  NOT: z.union([ z.lazy(() => EvalOverrideWhereInputSchema),z.lazy(() => EvalOverrideWhereInputSchema).array() ]).optional(),
-  id: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
-  createdAt: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
-  scenarioId: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
-  evalId: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
-  enabled: z.union([ z.lazy(() => BoolFilterSchema),z.boolean() ]).optional(),
-  scenario: z.union([ z.lazy(() => ScenarioRelationFilterSchema),z.lazy(() => ScenarioWhereInputSchema) ]).optional(),
-  eval: z.union([ z.lazy(() => EvalRelationFilterSchema),z.lazy(() => EvalWhereInputSchema) ]).optional(),
-}).strict();
-
-export const EvalOverrideOrderByWithRelationInputSchema: z.ZodType<Prisma.EvalOverrideOrderByWithRelationInput> = z.object({
-  id: z.lazy(() => SortOrderSchema).optional(),
-  createdAt: z.lazy(() => SortOrderSchema).optional(),
-  scenarioId: z.lazy(() => SortOrderSchema).optional(),
-  evalId: z.lazy(() => SortOrderSchema).optional(),
-  enabled: z.lazy(() => SortOrderSchema).optional(),
-  scenario: z.lazy(() => ScenarioOrderByWithRelationInputSchema).optional(),
-  eval: z.lazy(() => EvalOrderByWithRelationInputSchema).optional()
-}).strict();
-
-export const EvalOverrideWhereUniqueInputSchema: z.ZodType<Prisma.EvalOverrideWhereUniqueInput> = z.object({
-  id: z.string()
-})
-.and(z.object({
-  id: z.string().optional(),
-  AND: z.union([ z.lazy(() => EvalOverrideWhereInputSchema),z.lazy(() => EvalOverrideWhereInputSchema).array() ]).optional(),
-  OR: z.lazy(() => EvalOverrideWhereInputSchema).array().optional(),
-  NOT: z.union([ z.lazy(() => EvalOverrideWhereInputSchema),z.lazy(() => EvalOverrideWhereInputSchema).array() ]).optional(),
-  createdAt: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
-  scenarioId: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
-  evalId: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
-  enabled: z.union([ z.lazy(() => BoolFilterSchema),z.boolean() ]).optional(),
-  scenario: z.union([ z.lazy(() => ScenarioRelationFilterSchema),z.lazy(() => ScenarioWhereInputSchema) ]).optional(),
-  eval: z.union([ z.lazy(() => EvalRelationFilterSchema),z.lazy(() => EvalWhereInputSchema) ]).optional(),
-}).strict());
-
-export const EvalOverrideOrderByWithAggregationInputSchema: z.ZodType<Prisma.EvalOverrideOrderByWithAggregationInput> = z.object({
-  id: z.lazy(() => SortOrderSchema).optional(),
-  createdAt: z.lazy(() => SortOrderSchema).optional(),
-  scenarioId: z.lazy(() => SortOrderSchema).optional(),
-  evalId: z.lazy(() => SortOrderSchema).optional(),
-  enabled: z.lazy(() => SortOrderSchema).optional(),
-  _count: z.lazy(() => EvalOverrideCountOrderByAggregateInputSchema).optional(),
-  _max: z.lazy(() => EvalOverrideMaxOrderByAggregateInputSchema).optional(),
-  _min: z.lazy(() => EvalOverrideMinOrderByAggregateInputSchema).optional()
-}).strict();
-
-export const EvalOverrideScalarWhereWithAggregatesInputSchema: z.ZodType<Prisma.EvalOverrideScalarWhereWithAggregatesInput> = z.object({
-  AND: z.union([ z.lazy(() => EvalOverrideScalarWhereWithAggregatesInputSchema),z.lazy(() => EvalOverrideScalarWhereWithAggregatesInputSchema).array() ]).optional(),
-  OR: z.lazy(() => EvalOverrideScalarWhereWithAggregatesInputSchema).array().optional(),
-  NOT: z.union([ z.lazy(() => EvalOverrideScalarWhereWithAggregatesInputSchema),z.lazy(() => EvalOverrideScalarWhereWithAggregatesInputSchema).array() ]).optional(),
-  id: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
-  createdAt: z.union([ z.lazy(() => DateTimeWithAggregatesFilterSchema),z.coerce.date() ]).optional(),
-  scenarioId: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
-  evalId: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
-  enabled: z.union([ z.lazy(() => BoolWithAggregatesFilterSchema),z.boolean() ]).optional(),
+  evaluationTemplateId: z.union([ z.lazy(() => StringNullableWithAggregatesFilterSchema),z.string() ]).optional().nullable(),
 }).strict();
 
 export const LatencyBlockWhereInputSchema: z.ZodType<Prisma.LatencyBlockWhereInput> = z.object({
@@ -2201,10 +2290,10 @@ export const InterruptionScalarWhereWithAggregatesInputSchema: z.ZodType<Prisma.
   text: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
 }).strict();
 
-export const EvalSetWhereInputSchema: z.ZodType<Prisma.EvalSetWhereInput> = z.object({
-  AND: z.union([ z.lazy(() => EvalSetWhereInputSchema),z.lazy(() => EvalSetWhereInputSchema).array() ]).optional(),
-  OR: z.lazy(() => EvalSetWhereInputSchema).array().optional(),
-  NOT: z.union([ z.lazy(() => EvalSetWhereInputSchema),z.lazy(() => EvalSetWhereInputSchema).array() ]).optional(),
+export const EvaluationGroupWhereInputSchema: z.ZodType<Prisma.EvaluationGroupWhereInput> = z.object({
+  AND: z.union([ z.lazy(() => EvaluationGroupWhereInputSchema),z.lazy(() => EvaluationGroupWhereInputSchema).array() ]).optional(),
+  OR: z.lazy(() => EvaluationGroupWhereInputSchema).array().optional(),
+  NOT: z.union([ z.lazy(() => EvaluationGroupWhereInputSchema),z.lazy(() => EvaluationGroupWhereInputSchema).array() ]).optional(),
   id: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   createdAt: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
   ownerId: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
@@ -2212,11 +2301,11 @@ export const EvalSetWhereInputSchema: z.ZodType<Prisma.EvalSetWhereInput> = z.ob
   condition: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   enabled: z.union([ z.lazy(() => BoolFilterSchema),z.boolean() ]).optional(),
   savedSearchId: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
-  evals: z.lazy(() => EvalListRelationFilterSchema).optional(),
+  evaluations: z.lazy(() => EvaluationListRelationFilterSchema).optional(),
   savedSearch: z.union([ z.lazy(() => SavedSearchNullableRelationFilterSchema),z.lazy(() => SavedSearchWhereInputSchema) ]).optional().nullable(),
 }).strict();
 
-export const EvalSetOrderByWithRelationInputSchema: z.ZodType<Prisma.EvalSetOrderByWithRelationInput> = z.object({
+export const EvaluationGroupOrderByWithRelationInputSchema: z.ZodType<Prisma.EvaluationGroupOrderByWithRelationInput> = z.object({
   id: z.lazy(() => SortOrderSchema).optional(),
   createdAt: z.lazy(() => SortOrderSchema).optional(),
   ownerId: z.lazy(() => SortOrderSchema).optional(),
@@ -2224,29 +2313,29 @@ export const EvalSetOrderByWithRelationInputSchema: z.ZodType<Prisma.EvalSetOrde
   condition: z.lazy(() => SortOrderSchema).optional(),
   enabled: z.lazy(() => SortOrderSchema).optional(),
   savedSearchId: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
-  evals: z.lazy(() => EvalOrderByRelationAggregateInputSchema).optional(),
+  evaluations: z.lazy(() => EvaluationOrderByRelationAggregateInputSchema).optional(),
   savedSearch: z.lazy(() => SavedSearchOrderByWithRelationInputSchema).optional()
 }).strict();
 
-export const EvalSetWhereUniqueInputSchema: z.ZodType<Prisma.EvalSetWhereUniqueInput> = z.object({
+export const EvaluationGroupWhereUniqueInputSchema: z.ZodType<Prisma.EvaluationGroupWhereUniqueInput> = z.object({
   id: z.string()
 })
 .and(z.object({
   id: z.string().optional(),
-  AND: z.union([ z.lazy(() => EvalSetWhereInputSchema),z.lazy(() => EvalSetWhereInputSchema).array() ]).optional(),
-  OR: z.lazy(() => EvalSetWhereInputSchema).array().optional(),
-  NOT: z.union([ z.lazy(() => EvalSetWhereInputSchema),z.lazy(() => EvalSetWhereInputSchema).array() ]).optional(),
+  AND: z.union([ z.lazy(() => EvaluationGroupWhereInputSchema),z.lazy(() => EvaluationGroupWhereInputSchema).array() ]).optional(),
+  OR: z.lazy(() => EvaluationGroupWhereInputSchema).array().optional(),
+  NOT: z.union([ z.lazy(() => EvaluationGroupWhereInputSchema),z.lazy(() => EvaluationGroupWhereInputSchema).array() ]).optional(),
   createdAt: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
   ownerId: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   name: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   condition: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   enabled: z.union([ z.lazy(() => BoolFilterSchema),z.boolean() ]).optional(),
   savedSearchId: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
-  evals: z.lazy(() => EvalListRelationFilterSchema).optional(),
+  evaluations: z.lazy(() => EvaluationListRelationFilterSchema).optional(),
   savedSearch: z.union([ z.lazy(() => SavedSearchNullableRelationFilterSchema),z.lazy(() => SavedSearchWhereInputSchema) ]).optional().nullable(),
 }).strict());
 
-export const EvalSetOrderByWithAggregationInputSchema: z.ZodType<Prisma.EvalSetOrderByWithAggregationInput> = z.object({
+export const EvaluationGroupOrderByWithAggregationInputSchema: z.ZodType<Prisma.EvaluationGroupOrderByWithAggregationInput> = z.object({
   id: z.lazy(() => SortOrderSchema).optional(),
   createdAt: z.lazy(() => SortOrderSchema).optional(),
   ownerId: z.lazy(() => SortOrderSchema).optional(),
@@ -2254,15 +2343,15 @@ export const EvalSetOrderByWithAggregationInputSchema: z.ZodType<Prisma.EvalSetO
   condition: z.lazy(() => SortOrderSchema).optional(),
   enabled: z.lazy(() => SortOrderSchema).optional(),
   savedSearchId: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
-  _count: z.lazy(() => EvalSetCountOrderByAggregateInputSchema).optional(),
-  _max: z.lazy(() => EvalSetMaxOrderByAggregateInputSchema).optional(),
-  _min: z.lazy(() => EvalSetMinOrderByAggregateInputSchema).optional()
+  _count: z.lazy(() => EvaluationGroupCountOrderByAggregateInputSchema).optional(),
+  _max: z.lazy(() => EvaluationGroupMaxOrderByAggregateInputSchema).optional(),
+  _min: z.lazy(() => EvaluationGroupMinOrderByAggregateInputSchema).optional()
 }).strict();
 
-export const EvalSetScalarWhereWithAggregatesInputSchema: z.ZodType<Prisma.EvalSetScalarWhereWithAggregatesInput> = z.object({
-  AND: z.union([ z.lazy(() => EvalSetScalarWhereWithAggregatesInputSchema),z.lazy(() => EvalSetScalarWhereWithAggregatesInputSchema).array() ]).optional(),
-  OR: z.lazy(() => EvalSetScalarWhereWithAggregatesInputSchema).array().optional(),
-  NOT: z.union([ z.lazy(() => EvalSetScalarWhereWithAggregatesInputSchema),z.lazy(() => EvalSetScalarWhereWithAggregatesInputSchema).array() ]).optional(),
+export const EvaluationGroupScalarWhereWithAggregatesInputSchema: z.ZodType<Prisma.EvaluationGroupScalarWhereWithAggregatesInput> = z.object({
+  AND: z.union([ z.lazy(() => EvaluationGroupScalarWhereWithAggregatesInputSchema),z.lazy(() => EvaluationGroupScalarWhereWithAggregatesInputSchema).array() ]).optional(),
+  OR: z.lazy(() => EvaluationGroupScalarWhereWithAggregatesInputSchema).array().optional(),
+  NOT: z.union([ z.lazy(() => EvaluationGroupScalarWhereWithAggregatesInputSchema),z.lazy(() => EvaluationGroupScalarWhereWithAggregatesInputSchema).array() ]).optional(),
   id: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
   createdAt: z.union([ z.lazy(() => DateTimeWithAggregatesFilterSchema),z.coerce.date() ]).optional(),
   ownerId: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
@@ -2287,7 +2376,7 @@ export const SavedSearchWhereInputSchema: z.ZodType<Prisma.SavedSearchWhereInput
   chartPeriod: z.union([ z.lazy(() => IntFilterSchema),z.number() ]).optional(),
   customerCallId: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
   metadata: z.lazy(() => JsonNullableFilterSchema).optional(),
-  evalSets: z.lazy(() => EvalSetListRelationFilterSchema).optional(),
+  evaluationGroups: z.lazy(() => EvaluationGroupListRelationFilterSchema).optional(),
   alerts: z.lazy(() => AlertListRelationFilterSchema).optional()
 }).strict();
 
@@ -2303,7 +2392,7 @@ export const SavedSearchOrderByWithRelationInputSchema: z.ZodType<Prisma.SavedSe
   chartPeriod: z.lazy(() => SortOrderSchema).optional(),
   customerCallId: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
   metadata: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
-  evalSets: z.lazy(() => EvalSetOrderByRelationAggregateInputSchema).optional(),
+  evaluationGroups: z.lazy(() => EvaluationGroupOrderByRelationAggregateInputSchema).optional(),
   alerts: z.lazy(() => AlertOrderByRelationAggregateInputSchema).optional()
 }).strict();
 
@@ -2325,7 +2414,7 @@ export const SavedSearchWhereUniqueInputSchema: z.ZodType<Prisma.SavedSearchWher
   chartPeriod: z.union([ z.lazy(() => IntFilterSchema),z.number().int() ]).optional(),
   customerCallId: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
   metadata: z.lazy(() => JsonNullableFilterSchema).optional(),
-  evalSets: z.lazy(() => EvalSetListRelationFilterSchema).optional(),
+  evaluationGroups: z.lazy(() => EvaluationGroupListRelationFilterSchema).optional(),
   alerts: z.lazy(() => AlertListRelationFilterSchema).optional()
 }).strict());
 
@@ -2439,37 +2528,37 @@ export const AlertScalarWhereWithAggregatesInputSchema: z.ZodType<Prisma.AlertSc
 }).strict();
 
 export const ApiKeyCreateInputSchema: z.ZodType<Prisma.ApiKeyCreateInput> = z.object({
-  userId: z.string(),
+  orgId: z.string(),
   apiKey: z.string()
 }).strict();
 
 export const ApiKeyUncheckedCreateInputSchema: z.ZodType<Prisma.ApiKeyUncheckedCreateInput> = z.object({
-  userId: z.string(),
+  orgId: z.string(),
   apiKey: z.string()
 }).strict();
 
 export const ApiKeyUpdateInputSchema: z.ZodType<Prisma.ApiKeyUpdateInput> = z.object({
-  userId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  orgId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   apiKey: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
 }).strict();
 
 export const ApiKeyUncheckedUpdateInputSchema: z.ZodType<Prisma.ApiKeyUncheckedUpdateInput> = z.object({
-  userId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  orgId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   apiKey: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
 }).strict();
 
 export const ApiKeyCreateManyInputSchema: z.ZodType<Prisma.ApiKeyCreateManyInput> = z.object({
-  userId: z.string(),
+  orgId: z.string(),
   apiKey: z.string()
 }).strict();
 
 export const ApiKeyUpdateManyMutationInputSchema: z.ZodType<Prisma.ApiKeyUpdateManyMutationInput> = z.object({
-  userId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  orgId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   apiKey: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
 }).strict();
 
 export const ApiKeyUncheckedUpdateManyInputSchema: z.ZodType<Prisma.ApiKeyUncheckedUpdateManyInput> = z.object({
-  userId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  orgId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   apiKey: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
 }).strict();
 
@@ -2480,16 +2569,16 @@ export const AgentCreateInputSchema: z.ZodType<Prisma.AgentCreateInput> = z.obje
   ownerId: z.string(),
   name: z.string(),
   phoneNumber: z.string().optional(),
+  customerAgentId: z.string(),
   githubRepoUrl: z.string().optional().nullable(),
-  customerAgentId: z.string().optional().nullable(),
   systemPrompt: z.string().optional(),
   extraProperties: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
   enableSlackNotifications: z.boolean().optional(),
-  enabledGeneralEvals: z.lazy(() => EvalCreateNestedManyWithoutAgentInputSchema).optional(),
   enabledTestAgents: z.lazy(() => TestAgentCreateNestedManyWithoutAgentsInputSchema).optional(),
   scenarios: z.lazy(() => ScenarioCreateNestedManyWithoutAgentInputSchema).optional(),
   tests: z.lazy(() => TestCreateNestedManyWithoutAgentInputSchema).optional(),
-  calls: z.lazy(() => CallCreateNestedManyWithoutAgentInputSchema).optional()
+  calls: z.lazy(() => CallCreateNestedManyWithoutAgentInputSchema).optional(),
+  generalEvaluations: z.lazy(() => GeneralEvaluationCreateNestedManyWithoutAgentInputSchema).optional()
 }).strict();
 
 export const AgentUncheckedCreateInputSchema: z.ZodType<Prisma.AgentUncheckedCreateInput> = z.object({
@@ -2499,16 +2588,16 @@ export const AgentUncheckedCreateInputSchema: z.ZodType<Prisma.AgentUncheckedCre
   ownerId: z.string(),
   name: z.string(),
   phoneNumber: z.string().optional(),
+  customerAgentId: z.string(),
   githubRepoUrl: z.string().optional().nullable(),
-  customerAgentId: z.string().optional().nullable(),
   systemPrompt: z.string().optional(),
   extraProperties: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
   enableSlackNotifications: z.boolean().optional(),
-  enabledGeneralEvals: z.lazy(() => EvalUncheckedCreateNestedManyWithoutAgentInputSchema).optional(),
   enabledTestAgents: z.lazy(() => TestAgentUncheckedCreateNestedManyWithoutAgentsInputSchema).optional(),
   scenarios: z.lazy(() => ScenarioUncheckedCreateNestedManyWithoutAgentInputSchema).optional(),
   tests: z.lazy(() => TestUncheckedCreateNestedManyWithoutAgentInputSchema).optional(),
-  calls: z.lazy(() => CallUncheckedCreateNestedManyWithoutAgentInputSchema).optional()
+  calls: z.lazy(() => CallUncheckedCreateNestedManyWithoutAgentInputSchema).optional(),
+  generalEvaluations: z.lazy(() => GeneralEvaluationUncheckedCreateNestedManyWithoutAgentInputSchema).optional()
 }).strict();
 
 export const AgentUpdateInputSchema: z.ZodType<Prisma.AgentUpdateInput> = z.object({
@@ -2518,16 +2607,16 @@ export const AgentUpdateInputSchema: z.ZodType<Prisma.AgentUpdateInput> = z.obje
   ownerId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   phoneNumber: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  customerAgentId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   githubRepoUrl: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  customerAgentId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   systemPrompt: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   extraProperties: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
   enableSlackNotifications: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  enabledGeneralEvals: z.lazy(() => EvalUpdateManyWithoutAgentNestedInputSchema).optional(),
   enabledTestAgents: z.lazy(() => TestAgentUpdateManyWithoutAgentsNestedInputSchema).optional(),
   scenarios: z.lazy(() => ScenarioUpdateManyWithoutAgentNestedInputSchema).optional(),
   tests: z.lazy(() => TestUpdateManyWithoutAgentNestedInputSchema).optional(),
-  calls: z.lazy(() => CallUpdateManyWithoutAgentNestedInputSchema).optional()
+  calls: z.lazy(() => CallUpdateManyWithoutAgentNestedInputSchema).optional(),
+  generalEvaluations: z.lazy(() => GeneralEvaluationUpdateManyWithoutAgentNestedInputSchema).optional()
 }).strict();
 
 export const AgentUncheckedUpdateInputSchema: z.ZodType<Prisma.AgentUncheckedUpdateInput> = z.object({
@@ -2537,16 +2626,16 @@ export const AgentUncheckedUpdateInputSchema: z.ZodType<Prisma.AgentUncheckedUpd
   ownerId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   phoneNumber: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  customerAgentId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   githubRepoUrl: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  customerAgentId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   systemPrompt: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   extraProperties: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
   enableSlackNotifications: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  enabledGeneralEvals: z.lazy(() => EvalUncheckedUpdateManyWithoutAgentNestedInputSchema).optional(),
   enabledTestAgents: z.lazy(() => TestAgentUncheckedUpdateManyWithoutAgentsNestedInputSchema).optional(),
   scenarios: z.lazy(() => ScenarioUncheckedUpdateManyWithoutAgentNestedInputSchema).optional(),
   tests: z.lazy(() => TestUncheckedUpdateManyWithoutAgentNestedInputSchema).optional(),
-  calls: z.lazy(() => CallUncheckedUpdateManyWithoutAgentNestedInputSchema).optional()
+  calls: z.lazy(() => CallUncheckedUpdateManyWithoutAgentNestedInputSchema).optional(),
+  generalEvaluations: z.lazy(() => GeneralEvaluationUncheckedUpdateManyWithoutAgentNestedInputSchema).optional()
 }).strict();
 
 export const AgentCreateManyInputSchema: z.ZodType<Prisma.AgentCreateManyInput> = z.object({
@@ -2556,8 +2645,8 @@ export const AgentCreateManyInputSchema: z.ZodType<Prisma.AgentCreateManyInput> 
   ownerId: z.string(),
   name: z.string(),
   phoneNumber: z.string().optional(),
+  customerAgentId: z.string(),
   githubRepoUrl: z.string().optional().nullable(),
-  customerAgentId: z.string().optional().nullable(),
   systemPrompt: z.string().optional(),
   extraProperties: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
   enableSlackNotifications: z.boolean().optional()
@@ -2570,8 +2659,8 @@ export const AgentUpdateManyMutationInputSchema: z.ZodType<Prisma.AgentUpdateMan
   ownerId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   phoneNumber: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  customerAgentId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   githubRepoUrl: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  customerAgentId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   systemPrompt: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   extraProperties: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
   enableSlackNotifications: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
@@ -2584,8 +2673,8 @@ export const AgentUncheckedUpdateManyInputSchema: z.ZodType<Prisma.AgentUnchecke
   ownerId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   phoneNumber: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  customerAgentId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   githubRepoUrl: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  customerAgentId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   systemPrompt: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   extraProperties: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
   enableSlackNotifications: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
@@ -2782,7 +2871,7 @@ export const CallCreateInputSchema: z.ZodType<Prisma.CallCreateInput> = z.object
   numInterruptions: z.number().int().optional().nullable(),
   duration: z.number().optional().nullable(),
   evalSetToSuccess: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
-  evalResults: z.lazy(() => EvalResultCreateNestedManyWithoutCallInputSchema).optional(),
+  evaluationResults: z.lazy(() => EvaluationResultCreateNestedManyWithoutCallInputSchema).optional(),
   agent: z.lazy(() => AgentCreateNestedOneWithoutCallsInputSchema).optional(),
   test: z.lazy(() => TestCreateNestedOneWithoutCallsInputSchema).optional(),
   testAgent: z.lazy(() => TestAgentCreateNestedOneWithoutCallsInputSchema).optional(),
@@ -2823,7 +2912,7 @@ export const CallUncheckedCreateInputSchema: z.ZodType<Prisma.CallUncheckedCreat
   testAgentId: z.string().optional().nullable(),
   scenarioId: z.string().optional().nullable(),
   evalSetToSuccess: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
-  evalResults: z.lazy(() => EvalResultUncheckedCreateNestedManyWithoutCallInputSchema).optional(),
+  evaluationResults: z.lazy(() => EvaluationResultUncheckedCreateNestedManyWithoutCallInputSchema).optional(),
   messages: z.lazy(() => MessageUncheckedCreateNestedManyWithoutCallInputSchema).optional(),
   latencyBlocks: z.lazy(() => LatencyBlockUncheckedCreateNestedManyWithoutCallInputSchema).optional(),
   interruptions: z.lazy(() => InterruptionUncheckedCreateNestedManyWithoutCallInputSchema).optional(),
@@ -2856,7 +2945,7 @@ export const CallUpdateInputSchema: z.ZodType<Prisma.CallUpdateInput> = z.object
   numInterruptions: z.union([ z.number().int(),z.lazy(() => NullableIntFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   duration: z.union([ z.number(),z.lazy(() => NullableFloatFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   evalSetToSuccess: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
-  evalResults: z.lazy(() => EvalResultUpdateManyWithoutCallNestedInputSchema).optional(),
+  evaluationResults: z.lazy(() => EvaluationResultUpdateManyWithoutCallNestedInputSchema).optional(),
   agent: z.lazy(() => AgentUpdateOneWithoutCallsNestedInputSchema).optional(),
   test: z.lazy(() => TestUpdateOneWithoutCallsNestedInputSchema).optional(),
   testAgent: z.lazy(() => TestAgentUpdateOneWithoutCallsNestedInputSchema).optional(),
@@ -2897,7 +2986,7 @@ export const CallUncheckedUpdateInputSchema: z.ZodType<Prisma.CallUncheckedUpdat
   testAgentId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   scenarioId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   evalSetToSuccess: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
-  evalResults: z.lazy(() => EvalResultUncheckedUpdateManyWithoutCallNestedInputSchema).optional(),
+  evaluationResults: z.lazy(() => EvaluationResultUncheckedUpdateManyWithoutCallNestedInputSchema).optional(),
   messages: z.lazy(() => MessageUncheckedUpdateManyWithoutCallNestedInputSchema).optional(),
   latencyBlocks: z.lazy(() => LatencyBlockUncheckedUpdateManyWithoutCallNestedInputSchema).optional(),
   interruptions: z.lazy(() => InterruptionUncheckedUpdateManyWithoutCallNestedInputSchema).optional(),
@@ -3228,237 +3317,323 @@ export const CallRecordingUncheckedUpdateManyInputSchema: z.ZodType<Prisma.CallR
 export const ScenarioCreateInputSchema: z.ZodType<Prisma.ScenarioCreateInput> = z.object({
   id: z.string().optional(),
   createdAt: z.coerce.date().optional(),
-  ownerId: z.string().optional(),
   name: z.string(),
   instructions: z.string(),
   successCriteria: z.string().optional(),
   includeDateTime: z.boolean().optional(),
   timezone: z.string().optional().nullable(),
-  isNew: z.boolean().optional(),
   deleted: z.boolean().optional(),
   agent: z.lazy(() => AgentCreateNestedOneWithoutScenariosInputSchema),
-  generalEvalOverrides: z.lazy(() => EvalOverrideCreateNestedManyWithoutScenarioInputSchema).optional(),
   calls: z.lazy(() => CallCreateNestedManyWithoutScenarioInputSchema).optional(),
-  evals: z.lazy(() => EvalCreateNestedManyWithoutScenarioInputSchema).optional()
+  evaluations: z.lazy(() => EvaluationCreateNestedManyWithoutScenarioInputSchema).optional()
 }).strict();
 
 export const ScenarioUncheckedCreateInputSchema: z.ZodType<Prisma.ScenarioUncheckedCreateInput> = z.object({
   id: z.string().optional(),
   createdAt: z.coerce.date().optional(),
-  ownerId: z.string().optional(),
   agentId: z.string(),
   name: z.string(),
   instructions: z.string(),
   successCriteria: z.string().optional(),
   includeDateTime: z.boolean().optional(),
   timezone: z.string().optional().nullable(),
-  isNew: z.boolean().optional(),
   deleted: z.boolean().optional(),
-  generalEvalOverrides: z.lazy(() => EvalOverrideUncheckedCreateNestedManyWithoutScenarioInputSchema).optional(),
   calls: z.lazy(() => CallUncheckedCreateNestedManyWithoutScenarioInputSchema).optional(),
-  evals: z.lazy(() => EvalUncheckedCreateNestedManyWithoutScenarioInputSchema).optional()
+  evaluations: z.lazy(() => EvaluationUncheckedCreateNestedManyWithoutScenarioInputSchema).optional()
 }).strict();
 
 export const ScenarioUpdateInputSchema: z.ZodType<Prisma.ScenarioUpdateInput> = z.object({
   id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  ownerId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   instructions: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   successCriteria: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   includeDateTime: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   timezone: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  isNew: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   deleted: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   agent: z.lazy(() => AgentUpdateOneRequiredWithoutScenariosNestedInputSchema).optional(),
-  generalEvalOverrides: z.lazy(() => EvalOverrideUpdateManyWithoutScenarioNestedInputSchema).optional(),
   calls: z.lazy(() => CallUpdateManyWithoutScenarioNestedInputSchema).optional(),
-  evals: z.lazy(() => EvalUpdateManyWithoutScenarioNestedInputSchema).optional()
+  evaluations: z.lazy(() => EvaluationUpdateManyWithoutScenarioNestedInputSchema).optional()
 }).strict();
 
 export const ScenarioUncheckedUpdateInputSchema: z.ZodType<Prisma.ScenarioUncheckedUpdateInput> = z.object({
   id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  ownerId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   agentId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   instructions: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   successCriteria: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   includeDateTime: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   timezone: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  isNew: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   deleted: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  generalEvalOverrides: z.lazy(() => EvalOverrideUncheckedUpdateManyWithoutScenarioNestedInputSchema).optional(),
   calls: z.lazy(() => CallUncheckedUpdateManyWithoutScenarioNestedInputSchema).optional(),
-  evals: z.lazy(() => EvalUncheckedUpdateManyWithoutScenarioNestedInputSchema).optional()
+  evaluations: z.lazy(() => EvaluationUncheckedUpdateManyWithoutScenarioNestedInputSchema).optional()
 }).strict();
 
 export const ScenarioCreateManyInputSchema: z.ZodType<Prisma.ScenarioCreateManyInput> = z.object({
   id: z.string().optional(),
   createdAt: z.coerce.date().optional(),
-  ownerId: z.string().optional(),
   agentId: z.string(),
   name: z.string(),
   instructions: z.string(),
   successCriteria: z.string().optional(),
   includeDateTime: z.boolean().optional(),
   timezone: z.string().optional().nullable(),
-  isNew: z.boolean().optional(),
   deleted: z.boolean().optional()
 }).strict();
 
 export const ScenarioUpdateManyMutationInputSchema: z.ZodType<Prisma.ScenarioUpdateManyMutationInput> = z.object({
   id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  ownerId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   instructions: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   successCriteria: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   includeDateTime: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   timezone: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  isNew: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   deleted: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
 }).strict();
 
 export const ScenarioUncheckedUpdateManyInputSchema: z.ZodType<Prisma.ScenarioUncheckedUpdateManyInput> = z.object({
   id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  ownerId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   agentId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   instructions: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   successCriteria: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   includeDateTime: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   timezone: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  isNew: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   deleted: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
 }).strict();
 
-export const EvalCreateInputSchema: z.ZodType<Prisma.EvalCreateInput> = z.object({
+export const EvaluationTemplateCreateInputSchema: z.ZodType<Prisma.EvaluationTemplateCreateInput> = z.object({
   id: z.string().optional(),
   createdAt: z.coerce.date().optional(),
   name: z.string(),
   description: z.string(),
+  params: z.union([ z.lazy(() => EvaluationTemplateCreateparamsInputSchema),z.string().array() ]).optional(),
   type: z.lazy(() => EvalTypeSchema),
   resultType: z.lazy(() => EvalResultTypeSchema),
   contentType: z.lazy(() => EvalContentTypeSchema).optional(),
-  isCritical: z.boolean().optional(),
   toolCallExpectedResult: z.string().optional(),
   ownerId: z.string().optional().nullable(),
   deleted: z.boolean().optional(),
-  scenario: z.lazy(() => ScenarioCreateNestedOneWithoutEvalsInputSchema).optional(),
-  evalResults: z.lazy(() => EvalResultCreateNestedManyWithoutEvalInputSchema).optional(),
-  agent: z.lazy(() => AgentCreateNestedOneWithoutEnabledGeneralEvalsInputSchema).optional(),
-  evalOverrides: z.lazy(() => EvalOverrideCreateNestedManyWithoutEvalInputSchema).optional(),
-  evalSet: z.lazy(() => EvalSetCreateNestedOneWithoutEvalsInputSchema).optional()
+  evaluationResults: z.lazy(() => EvaluationResultCreateNestedManyWithoutEvaluationTemplateInputSchema).optional(),
+  evaluations: z.lazy(() => EvaluationCreateNestedManyWithoutEvaluationTemplateInputSchema).optional()
 }).strict();
 
-export const EvalUncheckedCreateInputSchema: z.ZodType<Prisma.EvalUncheckedCreateInput> = z.object({
+export const EvaluationTemplateUncheckedCreateInputSchema: z.ZodType<Prisma.EvaluationTemplateUncheckedCreateInput> = z.object({
   id: z.string().optional(),
   createdAt: z.coerce.date().optional(),
   name: z.string(),
   description: z.string(),
+  params: z.union([ z.lazy(() => EvaluationTemplateCreateparamsInputSchema),z.string().array() ]).optional(),
+  type: z.lazy(() => EvalTypeSchema),
+  resultType: z.lazy(() => EvalResultTypeSchema),
+  contentType: z.lazy(() => EvalContentTypeSchema).optional(),
+  toolCallExpectedResult: z.string().optional(),
+  ownerId: z.string().optional().nullable(),
+  deleted: z.boolean().optional(),
+  evaluationResults: z.lazy(() => EvaluationResultUncheckedCreateNestedManyWithoutEvaluationTemplateInputSchema).optional(),
+  evaluations: z.lazy(() => EvaluationUncheckedCreateNestedManyWithoutEvaluationTemplateInputSchema).optional()
+}).strict();
+
+export const EvaluationTemplateUpdateInputSchema: z.ZodType<Prisma.EvaluationTemplateUpdateInput> = z.object({
+  id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  description: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  params: z.union([ z.lazy(() => EvaluationTemplateUpdateparamsInputSchema),z.string().array() ]).optional(),
+  type: z.union([ z.lazy(() => EvalTypeSchema),z.lazy(() => EnumEvalTypeFieldUpdateOperationsInputSchema) ]).optional(),
+  resultType: z.union([ z.lazy(() => EvalResultTypeSchema),z.lazy(() => EnumEvalResultTypeFieldUpdateOperationsInputSchema) ]).optional(),
+  contentType: z.union([ z.lazy(() => EvalContentTypeSchema),z.lazy(() => EnumEvalContentTypeFieldUpdateOperationsInputSchema) ]).optional(),
+  toolCallExpectedResult: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  ownerId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  deleted: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
+  evaluationResults: z.lazy(() => EvaluationResultUpdateManyWithoutEvaluationTemplateNestedInputSchema).optional(),
+  evaluations: z.lazy(() => EvaluationUpdateManyWithoutEvaluationTemplateNestedInputSchema).optional()
+}).strict();
+
+export const EvaluationTemplateUncheckedUpdateInputSchema: z.ZodType<Prisma.EvaluationTemplateUncheckedUpdateInput> = z.object({
+  id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  description: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  params: z.union([ z.lazy(() => EvaluationTemplateUpdateparamsInputSchema),z.string().array() ]).optional(),
+  type: z.union([ z.lazy(() => EvalTypeSchema),z.lazy(() => EnumEvalTypeFieldUpdateOperationsInputSchema) ]).optional(),
+  resultType: z.union([ z.lazy(() => EvalResultTypeSchema),z.lazy(() => EnumEvalResultTypeFieldUpdateOperationsInputSchema) ]).optional(),
+  contentType: z.union([ z.lazy(() => EvalContentTypeSchema),z.lazy(() => EnumEvalContentTypeFieldUpdateOperationsInputSchema) ]).optional(),
+  toolCallExpectedResult: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  ownerId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  deleted: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
+  evaluationResults: z.lazy(() => EvaluationResultUncheckedUpdateManyWithoutEvaluationTemplateNestedInputSchema).optional(),
+  evaluations: z.lazy(() => EvaluationUncheckedUpdateManyWithoutEvaluationTemplateNestedInputSchema).optional()
+}).strict();
+
+export const EvaluationTemplateCreateManyInputSchema: z.ZodType<Prisma.EvaluationTemplateCreateManyInput> = z.object({
+  id: z.string().optional(),
+  createdAt: z.coerce.date().optional(),
+  name: z.string(),
+  description: z.string(),
+  params: z.union([ z.lazy(() => EvaluationTemplateCreateparamsInputSchema),z.string().array() ]).optional(),
+  type: z.lazy(() => EvalTypeSchema),
+  resultType: z.lazy(() => EvalResultTypeSchema),
+  contentType: z.lazy(() => EvalContentTypeSchema).optional(),
+  toolCallExpectedResult: z.string().optional(),
+  ownerId: z.string().optional().nullable(),
+  deleted: z.boolean().optional()
+}).strict();
+
+export const EvaluationTemplateUpdateManyMutationInputSchema: z.ZodType<Prisma.EvaluationTemplateUpdateManyMutationInput> = z.object({
+  id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  description: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  params: z.union([ z.lazy(() => EvaluationTemplateUpdateparamsInputSchema),z.string().array() ]).optional(),
+  type: z.union([ z.lazy(() => EvalTypeSchema),z.lazy(() => EnumEvalTypeFieldUpdateOperationsInputSchema) ]).optional(),
+  resultType: z.union([ z.lazy(() => EvalResultTypeSchema),z.lazy(() => EnumEvalResultTypeFieldUpdateOperationsInputSchema) ]).optional(),
+  contentType: z.union([ z.lazy(() => EvalContentTypeSchema),z.lazy(() => EnumEvalContentTypeFieldUpdateOperationsInputSchema) ]).optional(),
+  toolCallExpectedResult: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  ownerId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  deleted: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
+}).strict();
+
+export const EvaluationTemplateUncheckedUpdateManyInputSchema: z.ZodType<Prisma.EvaluationTemplateUncheckedUpdateManyInput> = z.object({
+  id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  description: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  params: z.union([ z.lazy(() => EvaluationTemplateUpdateparamsInputSchema),z.string().array() ]).optional(),
+  type: z.union([ z.lazy(() => EvalTypeSchema),z.lazy(() => EnumEvalTypeFieldUpdateOperationsInputSchema) ]).optional(),
+  resultType: z.union([ z.lazy(() => EvalResultTypeSchema),z.lazy(() => EnumEvalResultTypeFieldUpdateOperationsInputSchema) ]).optional(),
+  contentType: z.union([ z.lazy(() => EvalContentTypeSchema),z.lazy(() => EnumEvalContentTypeFieldUpdateOperationsInputSchema) ]).optional(),
+  toolCallExpectedResult: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  ownerId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  deleted: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
+}).strict();
+
+export const GeneralEvaluationCreateInputSchema: z.ZodType<Prisma.GeneralEvaluationCreateInput> = z.object({
+  id: z.string().optional(),
+  agent: z.lazy(() => AgentCreateNestedOneWithoutGeneralEvaluationsInputSchema),
+  evaluation: z.lazy(() => EvaluationCreateNestedOneWithoutGeneralEvaluationsInputSchema)
+}).strict();
+
+export const GeneralEvaluationUncheckedCreateInputSchema: z.ZodType<Prisma.GeneralEvaluationUncheckedCreateInput> = z.object({
+  id: z.string().optional(),
+  agentId: z.string(),
+  evaluationId: z.string()
+}).strict();
+
+export const GeneralEvaluationUpdateInputSchema: z.ZodType<Prisma.GeneralEvaluationUpdateInput> = z.object({
+  id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  agent: z.lazy(() => AgentUpdateOneRequiredWithoutGeneralEvaluationsNestedInputSchema).optional(),
+  evaluation: z.lazy(() => EvaluationUpdateOneRequiredWithoutGeneralEvaluationsNestedInputSchema).optional()
+}).strict();
+
+export const GeneralEvaluationUncheckedUpdateInputSchema: z.ZodType<Prisma.GeneralEvaluationUncheckedUpdateInput> = z.object({
+  id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  agentId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  evaluationId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+}).strict();
+
+export const GeneralEvaluationCreateManyInputSchema: z.ZodType<Prisma.GeneralEvaluationCreateManyInput> = z.object({
+  id: z.string().optional(),
+  agentId: z.string(),
+  evaluationId: z.string()
+}).strict();
+
+export const GeneralEvaluationUpdateManyMutationInputSchema: z.ZodType<Prisma.GeneralEvaluationUpdateManyMutationInput> = z.object({
+  id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+}).strict();
+
+export const GeneralEvaluationUncheckedUpdateManyInputSchema: z.ZodType<Prisma.GeneralEvaluationUncheckedUpdateManyInput> = z.object({
+  id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  agentId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  evaluationId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+}).strict();
+
+export const EvaluationCreateInputSchema: z.ZodType<Prisma.EvaluationCreateInput> = z.object({
+  id: z.string().optional(),
+  createdAt: z.coerce.date().optional(),
+  enabled: z.boolean().optional(),
+  isCritical: z.boolean().optional(),
+  params: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
+  evaluationTemplate: z.lazy(() => EvaluationTemplateCreateNestedOneWithoutEvaluationsInputSchema),
+  scenario: z.lazy(() => ScenarioCreateNestedOneWithoutEvaluationsInputSchema).optional(),
+  evaluationGroup: z.lazy(() => EvaluationGroupCreateNestedOneWithoutEvaluationsInputSchema).optional(),
+  evaluationResults: z.lazy(() => EvaluationResultCreateNestedManyWithoutEvaluationInputSchema).optional(),
+  generalEvaluations: z.lazy(() => GeneralEvaluationCreateNestedManyWithoutEvaluationInputSchema).optional()
+}).strict();
+
+export const EvaluationUncheckedCreateInputSchema: z.ZodType<Prisma.EvaluationUncheckedCreateInput> = z.object({
+  id: z.string().optional(),
+  createdAt: z.coerce.date().optional(),
+  enabled: z.boolean().optional(),
+  isCritical: z.boolean().optional(),
+  params: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
+  evaluationTemplateId: z.string(),
   scenarioId: z.string().optional().nullable(),
-  type: z.lazy(() => EvalTypeSchema),
-  resultType: z.lazy(() => EvalResultTypeSchema),
-  contentType: z.lazy(() => EvalContentTypeSchema).optional(),
-  isCritical: z.boolean().optional(),
-  toolCallExpectedResult: z.string().optional(),
-  agentId: z.string().optional().nullable(),
-  ownerId: z.string().optional().nullable(),
-  deleted: z.boolean().optional(),
-  evalSetId: z.string().optional().nullable(),
-  evalResults: z.lazy(() => EvalResultUncheckedCreateNestedManyWithoutEvalInputSchema).optional(),
-  evalOverrides: z.lazy(() => EvalOverrideUncheckedCreateNestedManyWithoutEvalInputSchema).optional()
+  evaluationGroupId: z.string().optional().nullable(),
+  evaluationResults: z.lazy(() => EvaluationResultUncheckedCreateNestedManyWithoutEvaluationInputSchema).optional(),
+  generalEvaluations: z.lazy(() => GeneralEvaluationUncheckedCreateNestedManyWithoutEvaluationInputSchema).optional()
 }).strict();
 
-export const EvalUpdateInputSchema: z.ZodType<Prisma.EvalUpdateInput> = z.object({
+export const EvaluationUpdateInputSchema: z.ZodType<Prisma.EvaluationUpdateInput> = z.object({
   id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  description: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  type: z.union([ z.lazy(() => EvalTypeSchema),z.lazy(() => EnumEvalTypeFieldUpdateOperationsInputSchema) ]).optional(),
-  resultType: z.union([ z.lazy(() => EvalResultTypeSchema),z.lazy(() => EnumEvalResultTypeFieldUpdateOperationsInputSchema) ]).optional(),
-  contentType: z.union([ z.lazy(() => EvalContentTypeSchema),z.lazy(() => EnumEvalContentTypeFieldUpdateOperationsInputSchema) ]).optional(),
+  enabled: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   isCritical: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  toolCallExpectedResult: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  ownerId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  deleted: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  scenario: z.lazy(() => ScenarioUpdateOneWithoutEvalsNestedInputSchema).optional(),
-  evalResults: z.lazy(() => EvalResultUpdateManyWithoutEvalNestedInputSchema).optional(),
-  agent: z.lazy(() => AgentUpdateOneWithoutEnabledGeneralEvalsNestedInputSchema).optional(),
-  evalOverrides: z.lazy(() => EvalOverrideUpdateManyWithoutEvalNestedInputSchema).optional(),
-  evalSet: z.lazy(() => EvalSetUpdateOneWithoutEvalsNestedInputSchema).optional()
+  params: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
+  evaluationTemplate: z.lazy(() => EvaluationTemplateUpdateOneRequiredWithoutEvaluationsNestedInputSchema).optional(),
+  scenario: z.lazy(() => ScenarioUpdateOneWithoutEvaluationsNestedInputSchema).optional(),
+  evaluationGroup: z.lazy(() => EvaluationGroupUpdateOneWithoutEvaluationsNestedInputSchema).optional(),
+  evaluationResults: z.lazy(() => EvaluationResultUpdateManyWithoutEvaluationNestedInputSchema).optional(),
+  generalEvaluations: z.lazy(() => GeneralEvaluationUpdateManyWithoutEvaluationNestedInputSchema).optional()
 }).strict();
 
-export const EvalUncheckedUpdateInputSchema: z.ZodType<Prisma.EvalUncheckedUpdateInput> = z.object({
+export const EvaluationUncheckedUpdateInputSchema: z.ZodType<Prisma.EvaluationUncheckedUpdateInput> = z.object({
   id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  description: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  enabled: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
+  isCritical: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
+  params: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
+  evaluationTemplateId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   scenarioId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  type: z.union([ z.lazy(() => EvalTypeSchema),z.lazy(() => EnumEvalTypeFieldUpdateOperationsInputSchema) ]).optional(),
-  resultType: z.union([ z.lazy(() => EvalResultTypeSchema),z.lazy(() => EnumEvalResultTypeFieldUpdateOperationsInputSchema) ]).optional(),
-  contentType: z.union([ z.lazy(() => EvalContentTypeSchema),z.lazy(() => EnumEvalContentTypeFieldUpdateOperationsInputSchema) ]).optional(),
-  isCritical: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  toolCallExpectedResult: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  agentId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  ownerId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  deleted: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  evalSetId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  evalResults: z.lazy(() => EvalResultUncheckedUpdateManyWithoutEvalNestedInputSchema).optional(),
-  evalOverrides: z.lazy(() => EvalOverrideUncheckedUpdateManyWithoutEvalNestedInputSchema).optional()
+  evaluationGroupId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  evaluationResults: z.lazy(() => EvaluationResultUncheckedUpdateManyWithoutEvaluationNestedInputSchema).optional(),
+  generalEvaluations: z.lazy(() => GeneralEvaluationUncheckedUpdateManyWithoutEvaluationNestedInputSchema).optional()
 }).strict();
 
-export const EvalCreateManyInputSchema: z.ZodType<Prisma.EvalCreateManyInput> = z.object({
+export const EvaluationCreateManyInputSchema: z.ZodType<Prisma.EvaluationCreateManyInput> = z.object({
   id: z.string().optional(),
   createdAt: z.coerce.date().optional(),
-  name: z.string(),
-  description: z.string(),
-  scenarioId: z.string().optional().nullable(),
-  type: z.lazy(() => EvalTypeSchema),
-  resultType: z.lazy(() => EvalResultTypeSchema),
-  contentType: z.lazy(() => EvalContentTypeSchema).optional(),
+  enabled: z.boolean().optional(),
   isCritical: z.boolean().optional(),
-  toolCallExpectedResult: z.string().optional(),
-  agentId: z.string().optional().nullable(),
-  ownerId: z.string().optional().nullable(),
-  deleted: z.boolean().optional(),
-  evalSetId: z.string().optional().nullable()
+  params: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
+  evaluationTemplateId: z.string(),
+  scenarioId: z.string().optional().nullable(),
+  evaluationGroupId: z.string().optional().nullable()
 }).strict();
 
-export const EvalUpdateManyMutationInputSchema: z.ZodType<Prisma.EvalUpdateManyMutationInput> = z.object({
+export const EvaluationUpdateManyMutationInputSchema: z.ZodType<Prisma.EvaluationUpdateManyMutationInput> = z.object({
   id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  description: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  type: z.union([ z.lazy(() => EvalTypeSchema),z.lazy(() => EnumEvalTypeFieldUpdateOperationsInputSchema) ]).optional(),
-  resultType: z.union([ z.lazy(() => EvalResultTypeSchema),z.lazy(() => EnumEvalResultTypeFieldUpdateOperationsInputSchema) ]).optional(),
-  contentType: z.union([ z.lazy(() => EvalContentTypeSchema),z.lazy(() => EnumEvalContentTypeFieldUpdateOperationsInputSchema) ]).optional(),
+  enabled: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   isCritical: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  toolCallExpectedResult: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  ownerId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  deleted: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
+  params: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
 }).strict();
 
-export const EvalUncheckedUpdateManyInputSchema: z.ZodType<Prisma.EvalUncheckedUpdateManyInput> = z.object({
+export const EvaluationUncheckedUpdateManyInputSchema: z.ZodType<Prisma.EvaluationUncheckedUpdateManyInput> = z.object({
   id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  description: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  enabled: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
+  isCritical: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
+  params: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
+  evaluationTemplateId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   scenarioId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  type: z.union([ z.lazy(() => EvalTypeSchema),z.lazy(() => EnumEvalTypeFieldUpdateOperationsInputSchema) ]).optional(),
-  resultType: z.union([ z.lazy(() => EvalResultTypeSchema),z.lazy(() => EnumEvalResultTypeFieldUpdateOperationsInputSchema) ]).optional(),
-  contentType: z.union([ z.lazy(() => EvalContentTypeSchema),z.lazy(() => EnumEvalContentTypeFieldUpdateOperationsInputSchema) ]).optional(),
-  isCritical: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  toolCallExpectedResult: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  agentId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  ownerId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  deleted: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  evalSetId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  evaluationGroupId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
 }).strict();
 
-export const EvalResultCreateInputSchema: z.ZodType<Prisma.EvalResultCreateInput> = z.object({
+export const EvaluationResultCreateInputSchema: z.ZodType<Prisma.EvaluationResultCreateInput> = z.object({
   id: z.string().optional(),
   createdAt: z.coerce.date().optional(),
   result: z.string(),
@@ -3467,24 +3642,26 @@ export const EvalResultCreateInputSchema: z.ZodType<Prisma.EvalResultCreateInput
   duration: z.number().optional().nullable(),
   type: z.lazy(() => EvalResultTypeSchema),
   details: z.string(),
-  call: z.lazy(() => CallCreateNestedOneWithoutEvalResultsInputSchema).optional(),
-  eval: z.lazy(() => EvalCreateNestedOneWithoutEvalResultsInputSchema)
+  call: z.lazy(() => CallCreateNestedOneWithoutEvaluationResultsInputSchema).optional(),
+  evaluation: z.lazy(() => EvaluationCreateNestedOneWithoutEvaluationResultsInputSchema),
+  evaluationTemplate: z.lazy(() => EvaluationTemplateCreateNestedOneWithoutEvaluationResultsInputSchema).optional()
 }).strict();
 
-export const EvalResultUncheckedCreateInputSchema: z.ZodType<Prisma.EvalResultUncheckedCreateInput> = z.object({
+export const EvaluationResultUncheckedCreateInputSchema: z.ZodType<Prisma.EvaluationResultUncheckedCreateInput> = z.object({
   id: z.string().optional(),
   createdAt: z.coerce.date().optional(),
   callId: z.string().optional().nullable(),
-  evalId: z.string(),
+  evaluationId: z.string(),
   result: z.string(),
   success: z.boolean(),
   secondsFromStart: z.number().optional().nullable(),
   duration: z.number().optional().nullable(),
   type: z.lazy(() => EvalResultTypeSchema),
-  details: z.string()
+  details: z.string(),
+  evaluationTemplateId: z.string().optional().nullable()
 }).strict();
 
-export const EvalResultUpdateInputSchema: z.ZodType<Prisma.EvalResultUpdateInput> = z.object({
+export const EvaluationResultUpdateInputSchema: z.ZodType<Prisma.EvaluationResultUpdateInput> = z.object({
   id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   result: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
@@ -3493,37 +3670,40 @@ export const EvalResultUpdateInputSchema: z.ZodType<Prisma.EvalResultUpdateInput
   duration: z.union([ z.number(),z.lazy(() => NullableFloatFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   type: z.union([ z.lazy(() => EvalResultTypeSchema),z.lazy(() => EnumEvalResultTypeFieldUpdateOperationsInputSchema) ]).optional(),
   details: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  call: z.lazy(() => CallUpdateOneWithoutEvalResultsNestedInputSchema).optional(),
-  eval: z.lazy(() => EvalUpdateOneRequiredWithoutEvalResultsNestedInputSchema).optional()
+  call: z.lazy(() => CallUpdateOneWithoutEvaluationResultsNestedInputSchema).optional(),
+  evaluation: z.lazy(() => EvaluationUpdateOneRequiredWithoutEvaluationResultsNestedInputSchema).optional(),
+  evaluationTemplate: z.lazy(() => EvaluationTemplateUpdateOneWithoutEvaluationResultsNestedInputSchema).optional()
 }).strict();
 
-export const EvalResultUncheckedUpdateInputSchema: z.ZodType<Prisma.EvalResultUncheckedUpdateInput> = z.object({
+export const EvaluationResultUncheckedUpdateInputSchema: z.ZodType<Prisma.EvaluationResultUncheckedUpdateInput> = z.object({
   id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   callId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  evalId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  evaluationId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   result: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   success: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   secondsFromStart: z.union([ z.number(),z.lazy(() => NullableFloatFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   duration: z.union([ z.number(),z.lazy(() => NullableFloatFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   type: z.union([ z.lazy(() => EvalResultTypeSchema),z.lazy(() => EnumEvalResultTypeFieldUpdateOperationsInputSchema) ]).optional(),
   details: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  evaluationTemplateId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
 }).strict();
 
-export const EvalResultCreateManyInputSchema: z.ZodType<Prisma.EvalResultCreateManyInput> = z.object({
+export const EvaluationResultCreateManyInputSchema: z.ZodType<Prisma.EvaluationResultCreateManyInput> = z.object({
   id: z.string().optional(),
   createdAt: z.coerce.date().optional(),
   callId: z.string().optional().nullable(),
-  evalId: z.string(),
+  evaluationId: z.string(),
   result: z.string(),
   success: z.boolean(),
   secondsFromStart: z.number().optional().nullable(),
   duration: z.number().optional().nullable(),
   type: z.lazy(() => EvalResultTypeSchema),
-  details: z.string()
+  details: z.string(),
+  evaluationTemplateId: z.string().optional().nullable()
 }).strict();
 
-export const EvalResultUpdateManyMutationInputSchema: z.ZodType<Prisma.EvalResultUpdateManyMutationInput> = z.object({
+export const EvaluationResultUpdateManyMutationInputSchema: z.ZodType<Prisma.EvaluationResultUpdateManyMutationInput> = z.object({
   id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   result: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
@@ -3534,71 +3714,18 @@ export const EvalResultUpdateManyMutationInputSchema: z.ZodType<Prisma.EvalResul
   details: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
 }).strict();
 
-export const EvalResultUncheckedUpdateManyInputSchema: z.ZodType<Prisma.EvalResultUncheckedUpdateManyInput> = z.object({
+export const EvaluationResultUncheckedUpdateManyInputSchema: z.ZodType<Prisma.EvaluationResultUncheckedUpdateManyInput> = z.object({
   id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   callId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  evalId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  evaluationId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   result: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   success: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   secondsFromStart: z.union([ z.number(),z.lazy(() => NullableFloatFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   duration: z.union([ z.number(),z.lazy(() => NullableFloatFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   type: z.union([ z.lazy(() => EvalResultTypeSchema),z.lazy(() => EnumEvalResultTypeFieldUpdateOperationsInputSchema) ]).optional(),
   details: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-}).strict();
-
-export const EvalOverrideCreateInputSchema: z.ZodType<Prisma.EvalOverrideCreateInput> = z.object({
-  id: z.string().optional(),
-  createdAt: z.coerce.date().optional(),
-  enabled: z.boolean(),
-  scenario: z.lazy(() => ScenarioCreateNestedOneWithoutGeneralEvalOverridesInputSchema),
-  eval: z.lazy(() => EvalCreateNestedOneWithoutEvalOverridesInputSchema)
-}).strict();
-
-export const EvalOverrideUncheckedCreateInputSchema: z.ZodType<Prisma.EvalOverrideUncheckedCreateInput> = z.object({
-  id: z.string().optional(),
-  createdAt: z.coerce.date().optional(),
-  scenarioId: z.string(),
-  evalId: z.string(),
-  enabled: z.boolean()
-}).strict();
-
-export const EvalOverrideUpdateInputSchema: z.ZodType<Prisma.EvalOverrideUpdateInput> = z.object({
-  id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  enabled: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  scenario: z.lazy(() => ScenarioUpdateOneRequiredWithoutGeneralEvalOverridesNestedInputSchema).optional(),
-  eval: z.lazy(() => EvalUpdateOneRequiredWithoutEvalOverridesNestedInputSchema).optional()
-}).strict();
-
-export const EvalOverrideUncheckedUpdateInputSchema: z.ZodType<Prisma.EvalOverrideUncheckedUpdateInput> = z.object({
-  id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  scenarioId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  evalId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  enabled: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-}).strict();
-
-export const EvalOverrideCreateManyInputSchema: z.ZodType<Prisma.EvalOverrideCreateManyInput> = z.object({
-  id: z.string().optional(),
-  createdAt: z.coerce.date().optional(),
-  scenarioId: z.string(),
-  evalId: z.string(),
-  enabled: z.boolean()
-}).strict();
-
-export const EvalOverrideUpdateManyMutationInputSchema: z.ZodType<Prisma.EvalOverrideUpdateManyMutationInput> = z.object({
-  id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  enabled: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-}).strict();
-
-export const EvalOverrideUncheckedUpdateManyInputSchema: z.ZodType<Prisma.EvalOverrideUncheckedUpdateManyInput> = z.object({
-  id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  scenarioId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  evalId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  enabled: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
+  evaluationTemplateId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
 }).strict();
 
 export const LatencyBlockCreateInputSchema: z.ZodType<Prisma.LatencyBlockCreateInput> = z.object({
@@ -3704,18 +3831,18 @@ export const InterruptionUncheckedUpdateManyInputSchema: z.ZodType<Prisma.Interr
   text: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
 }).strict();
 
-export const EvalSetCreateInputSchema: z.ZodType<Prisma.EvalSetCreateInput> = z.object({
+export const EvaluationGroupCreateInputSchema: z.ZodType<Prisma.EvaluationGroupCreateInput> = z.object({
   id: z.string().optional(),
   createdAt: z.coerce.date().optional(),
   ownerId: z.string(),
   name: z.string(),
   condition: z.string().optional(),
   enabled: z.boolean().optional(),
-  evals: z.lazy(() => EvalCreateNestedManyWithoutEvalSetInputSchema).optional(),
-  savedSearch: z.lazy(() => SavedSearchCreateNestedOneWithoutEvalSetsInputSchema).optional()
+  evaluations: z.lazy(() => EvaluationCreateNestedManyWithoutEvaluationGroupInputSchema).optional(),
+  savedSearch: z.lazy(() => SavedSearchCreateNestedOneWithoutEvaluationGroupsInputSchema).optional()
 }).strict();
 
-export const EvalSetUncheckedCreateInputSchema: z.ZodType<Prisma.EvalSetUncheckedCreateInput> = z.object({
+export const EvaluationGroupUncheckedCreateInputSchema: z.ZodType<Prisma.EvaluationGroupUncheckedCreateInput> = z.object({
   id: z.string().optional(),
   createdAt: z.coerce.date().optional(),
   ownerId: z.string(),
@@ -3723,21 +3850,21 @@ export const EvalSetUncheckedCreateInputSchema: z.ZodType<Prisma.EvalSetUnchecke
   condition: z.string().optional(),
   enabled: z.boolean().optional(),
   savedSearchId: z.string().optional().nullable(),
-  evals: z.lazy(() => EvalUncheckedCreateNestedManyWithoutEvalSetInputSchema).optional()
+  evaluations: z.lazy(() => EvaluationUncheckedCreateNestedManyWithoutEvaluationGroupInputSchema).optional()
 }).strict();
 
-export const EvalSetUpdateInputSchema: z.ZodType<Prisma.EvalSetUpdateInput> = z.object({
+export const EvaluationGroupUpdateInputSchema: z.ZodType<Prisma.EvaluationGroupUpdateInput> = z.object({
   id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   ownerId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   condition: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   enabled: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  evals: z.lazy(() => EvalUpdateManyWithoutEvalSetNestedInputSchema).optional(),
-  savedSearch: z.lazy(() => SavedSearchUpdateOneWithoutEvalSetsNestedInputSchema).optional()
+  evaluations: z.lazy(() => EvaluationUpdateManyWithoutEvaluationGroupNestedInputSchema).optional(),
+  savedSearch: z.lazy(() => SavedSearchUpdateOneWithoutEvaluationGroupsNestedInputSchema).optional()
 }).strict();
 
-export const EvalSetUncheckedUpdateInputSchema: z.ZodType<Prisma.EvalSetUncheckedUpdateInput> = z.object({
+export const EvaluationGroupUncheckedUpdateInputSchema: z.ZodType<Prisma.EvaluationGroupUncheckedUpdateInput> = z.object({
   id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   ownerId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
@@ -3745,10 +3872,10 @@ export const EvalSetUncheckedUpdateInputSchema: z.ZodType<Prisma.EvalSetUnchecke
   condition: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   enabled: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   savedSearchId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  evals: z.lazy(() => EvalUncheckedUpdateManyWithoutEvalSetNestedInputSchema).optional()
+  evaluations: z.lazy(() => EvaluationUncheckedUpdateManyWithoutEvaluationGroupNestedInputSchema).optional()
 }).strict();
 
-export const EvalSetCreateManyInputSchema: z.ZodType<Prisma.EvalSetCreateManyInput> = z.object({
+export const EvaluationGroupCreateManyInputSchema: z.ZodType<Prisma.EvaluationGroupCreateManyInput> = z.object({
   id: z.string().optional(),
   createdAt: z.coerce.date().optional(),
   ownerId: z.string(),
@@ -3758,7 +3885,7 @@ export const EvalSetCreateManyInputSchema: z.ZodType<Prisma.EvalSetCreateManyInp
   savedSearchId: z.string().optional().nullable()
 }).strict();
 
-export const EvalSetUpdateManyMutationInputSchema: z.ZodType<Prisma.EvalSetUpdateManyMutationInput> = z.object({
+export const EvaluationGroupUpdateManyMutationInputSchema: z.ZodType<Prisma.EvaluationGroupUpdateManyMutationInput> = z.object({
   id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   ownerId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
@@ -3767,7 +3894,7 @@ export const EvalSetUpdateManyMutationInputSchema: z.ZodType<Prisma.EvalSetUpdat
   enabled: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
 }).strict();
 
-export const EvalSetUncheckedUpdateManyInputSchema: z.ZodType<Prisma.EvalSetUncheckedUpdateManyInput> = z.object({
+export const EvaluationGroupUncheckedUpdateManyInputSchema: z.ZodType<Prisma.EvaluationGroupUncheckedUpdateManyInput> = z.object({
   id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   ownerId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
@@ -3789,7 +3916,7 @@ export const SavedSearchCreateInputSchema: z.ZodType<Prisma.SavedSearchCreateInp
   chartPeriod: z.number().int(),
   customerCallId: z.string().optional().nullable(),
   metadata: z.union([ z.lazy(() => NullableJsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
-  evalSets: z.lazy(() => EvalSetCreateNestedManyWithoutSavedSearchInputSchema).optional(),
+  evaluationGroups: z.lazy(() => EvaluationGroupCreateNestedManyWithoutSavedSearchInputSchema).optional(),
   alerts: z.lazy(() => AlertCreateNestedManyWithoutSavedSearchInputSchema).optional()
 }).strict();
 
@@ -3805,7 +3932,7 @@ export const SavedSearchUncheckedCreateInputSchema: z.ZodType<Prisma.SavedSearch
   chartPeriod: z.number().int(),
   customerCallId: z.string().optional().nullable(),
   metadata: z.union([ z.lazy(() => NullableJsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
-  evalSets: z.lazy(() => EvalSetUncheckedCreateNestedManyWithoutSavedSearchInputSchema).optional(),
+  evaluationGroups: z.lazy(() => EvaluationGroupUncheckedCreateNestedManyWithoutSavedSearchInputSchema).optional(),
   alerts: z.lazy(() => AlertUncheckedCreateNestedManyWithoutSavedSearchInputSchema).optional()
 }).strict();
 
@@ -3821,7 +3948,7 @@ export const SavedSearchUpdateInputSchema: z.ZodType<Prisma.SavedSearchUpdateInp
   chartPeriod: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   customerCallId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   metadata: z.union([ z.lazy(() => NullableJsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
-  evalSets: z.lazy(() => EvalSetUpdateManyWithoutSavedSearchNestedInputSchema).optional(),
+  evaluationGroups: z.lazy(() => EvaluationGroupUpdateManyWithoutSavedSearchNestedInputSchema).optional(),
   alerts: z.lazy(() => AlertUpdateManyWithoutSavedSearchNestedInputSchema).optional()
 }).strict();
 
@@ -3837,7 +3964,7 @@ export const SavedSearchUncheckedUpdateInputSchema: z.ZodType<Prisma.SavedSearch
   chartPeriod: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   customerCallId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   metadata: z.union([ z.lazy(() => NullableJsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
-  evalSets: z.lazy(() => EvalSetUncheckedUpdateManyWithoutSavedSearchNestedInputSchema).optional(),
+  evaluationGroups: z.lazy(() => EvaluationGroupUncheckedUpdateManyWithoutSavedSearchNestedInputSchema).optional(),
   alerts: z.lazy(() => AlertUncheckedUpdateManyWithoutSavedSearchNestedInputSchema).optional()
 }).strict();
 
@@ -3975,17 +4102,17 @@ export const StringFilterSchema: z.ZodType<Prisma.StringFilter> = z.object({
 }).strict();
 
 export const ApiKeyCountOrderByAggregateInputSchema: z.ZodType<Prisma.ApiKeyCountOrderByAggregateInput> = z.object({
-  userId: z.lazy(() => SortOrderSchema).optional(),
+  orgId: z.lazy(() => SortOrderSchema).optional(),
   apiKey: z.lazy(() => SortOrderSchema).optional()
 }).strict();
 
 export const ApiKeyMaxOrderByAggregateInputSchema: z.ZodType<Prisma.ApiKeyMaxOrderByAggregateInput> = z.object({
-  userId: z.lazy(() => SortOrderSchema).optional(),
+  orgId: z.lazy(() => SortOrderSchema).optional(),
   apiKey: z.lazy(() => SortOrderSchema).optional()
 }).strict();
 
 export const ApiKeyMinOrderByAggregateInputSchema: z.ZodType<Prisma.ApiKeyMinOrderByAggregateInput> = z.object({
-  userId: z.lazy(() => SortOrderSchema).optional(),
+  orgId: z.lazy(() => SortOrderSchema).optional(),
   apiKey: z.lazy(() => SortOrderSchema).optional()
 }).strict();
 
@@ -4054,12 +4181,6 @@ export const BoolFilterSchema: z.ZodType<Prisma.BoolFilter> = z.object({
   not: z.union([ z.boolean(),z.lazy(() => NestedBoolFilterSchema) ]).optional(),
 }).strict();
 
-export const EvalListRelationFilterSchema: z.ZodType<Prisma.EvalListRelationFilter> = z.object({
-  every: z.lazy(() => EvalWhereInputSchema).optional(),
-  some: z.lazy(() => EvalWhereInputSchema).optional(),
-  none: z.lazy(() => EvalWhereInputSchema).optional()
-}).strict();
-
 export const TestAgentListRelationFilterSchema: z.ZodType<Prisma.TestAgentListRelationFilter> = z.object({
   every: z.lazy(() => TestAgentWhereInputSchema).optional(),
   some: z.lazy(() => TestAgentWhereInputSchema).optional(),
@@ -4084,13 +4205,15 @@ export const CallListRelationFilterSchema: z.ZodType<Prisma.CallListRelationFilt
   none: z.lazy(() => CallWhereInputSchema).optional()
 }).strict();
 
+export const GeneralEvaluationListRelationFilterSchema: z.ZodType<Prisma.GeneralEvaluationListRelationFilter> = z.object({
+  every: z.lazy(() => GeneralEvaluationWhereInputSchema).optional(),
+  some: z.lazy(() => GeneralEvaluationWhereInputSchema).optional(),
+  none: z.lazy(() => GeneralEvaluationWhereInputSchema).optional()
+}).strict();
+
 export const SortOrderInputSchema: z.ZodType<Prisma.SortOrderInput> = z.object({
   sort: z.lazy(() => SortOrderSchema),
   nulls: z.lazy(() => NullsOrderSchema).optional()
-}).strict();
-
-export const EvalOrderByRelationAggregateInputSchema: z.ZodType<Prisma.EvalOrderByRelationAggregateInput> = z.object({
-  _count: z.lazy(() => SortOrderSchema).optional()
 }).strict();
 
 export const TestAgentOrderByRelationAggregateInputSchema: z.ZodType<Prisma.TestAgentOrderByRelationAggregateInput> = z.object({
@@ -4109,6 +4232,10 @@ export const CallOrderByRelationAggregateInputSchema: z.ZodType<Prisma.CallOrder
   _count: z.lazy(() => SortOrderSchema).optional()
 }).strict();
 
+export const GeneralEvaluationOrderByRelationAggregateInputSchema: z.ZodType<Prisma.GeneralEvaluationOrderByRelationAggregateInput> = z.object({
+  _count: z.lazy(() => SortOrderSchema).optional()
+}).strict();
+
 export const AgentCountOrderByAggregateInputSchema: z.ZodType<Prisma.AgentCountOrderByAggregateInput> = z.object({
   id: z.lazy(() => SortOrderSchema).optional(),
   createdAt: z.lazy(() => SortOrderSchema).optional(),
@@ -4116,8 +4243,8 @@ export const AgentCountOrderByAggregateInputSchema: z.ZodType<Prisma.AgentCountO
   ownerId: z.lazy(() => SortOrderSchema).optional(),
   name: z.lazy(() => SortOrderSchema).optional(),
   phoneNumber: z.lazy(() => SortOrderSchema).optional(),
-  githubRepoUrl: z.lazy(() => SortOrderSchema).optional(),
   customerAgentId: z.lazy(() => SortOrderSchema).optional(),
+  githubRepoUrl: z.lazy(() => SortOrderSchema).optional(),
   systemPrompt: z.lazy(() => SortOrderSchema).optional(),
   extraProperties: z.lazy(() => SortOrderSchema).optional(),
   enableSlackNotifications: z.lazy(() => SortOrderSchema).optional()
@@ -4130,8 +4257,8 @@ export const AgentMaxOrderByAggregateInputSchema: z.ZodType<Prisma.AgentMaxOrder
   ownerId: z.lazy(() => SortOrderSchema).optional(),
   name: z.lazy(() => SortOrderSchema).optional(),
   phoneNumber: z.lazy(() => SortOrderSchema).optional(),
-  githubRepoUrl: z.lazy(() => SortOrderSchema).optional(),
   customerAgentId: z.lazy(() => SortOrderSchema).optional(),
+  githubRepoUrl: z.lazy(() => SortOrderSchema).optional(),
   systemPrompt: z.lazy(() => SortOrderSchema).optional(),
   enableSlackNotifications: z.lazy(() => SortOrderSchema).optional()
 }).strict();
@@ -4143,8 +4270,8 @@ export const AgentMinOrderByAggregateInputSchema: z.ZodType<Prisma.AgentMinOrder
   ownerId: z.lazy(() => SortOrderSchema).optional(),
   name: z.lazy(() => SortOrderSchema).optional(),
   phoneNumber: z.lazy(() => SortOrderSchema).optional(),
-  githubRepoUrl: z.lazy(() => SortOrderSchema).optional(),
   customerAgentId: z.lazy(() => SortOrderSchema).optional(),
+  githubRepoUrl: z.lazy(() => SortOrderSchema).optional(),
   systemPrompt: z.lazy(() => SortOrderSchema).optional(),
   enableSlackNotifications: z.lazy(() => SortOrderSchema).optional()
 }).strict();
@@ -4376,10 +4503,10 @@ export const IntNullableFilterSchema: z.ZodType<Prisma.IntNullableFilter> = z.ob
   not: z.union([ z.number(),z.lazy(() => NestedIntNullableFilterSchema) ]).optional().nullable(),
 }).strict();
 
-export const EvalResultListRelationFilterSchema: z.ZodType<Prisma.EvalResultListRelationFilter> = z.object({
-  every: z.lazy(() => EvalResultWhereInputSchema).optional(),
-  some: z.lazy(() => EvalResultWhereInputSchema).optional(),
-  none: z.lazy(() => EvalResultWhereInputSchema).optional()
+export const EvaluationResultListRelationFilterSchema: z.ZodType<Prisma.EvaluationResultListRelationFilter> = z.object({
+  every: z.lazy(() => EvaluationResultWhereInputSchema).optional(),
+  some: z.lazy(() => EvaluationResultWhereInputSchema).optional(),
+  none: z.lazy(() => EvaluationResultWhereInputSchema).optional()
 }).strict();
 
 export const AgentNullableRelationFilterSchema: z.ZodType<Prisma.AgentNullableRelationFilter> = z.object({
@@ -4426,7 +4553,7 @@ export const CallErrorListRelationFilterSchema: z.ZodType<Prisma.CallErrorListRe
   none: z.lazy(() => CallErrorWhereInputSchema).optional()
 }).strict();
 
-export const EvalResultOrderByRelationAggregateInputSchema: z.ZodType<Prisma.EvalResultOrderByRelationAggregateInput> = z.object({
+export const EvaluationResultOrderByRelationAggregateInputSchema: z.ZodType<Prisma.EvaluationResultOrderByRelationAggregateInput> = z.object({
   _count: z.lazy(() => SortOrderSchema).optional()
 }).strict();
 
@@ -4809,56 +4936,58 @@ export const CallRecordingSumOrderByAggregateInputSchema: z.ZodType<Prisma.CallR
   duration: z.lazy(() => SortOrderSchema).optional()
 }).strict();
 
-export const EvalOverrideListRelationFilterSchema: z.ZodType<Prisma.EvalOverrideListRelationFilter> = z.object({
-  every: z.lazy(() => EvalOverrideWhereInputSchema).optional(),
-  some: z.lazy(() => EvalOverrideWhereInputSchema).optional(),
-  none: z.lazy(() => EvalOverrideWhereInputSchema).optional()
+export const EvaluationListRelationFilterSchema: z.ZodType<Prisma.EvaluationListRelationFilter> = z.object({
+  every: z.lazy(() => EvaluationWhereInputSchema).optional(),
+  some: z.lazy(() => EvaluationWhereInputSchema).optional(),
+  none: z.lazy(() => EvaluationWhereInputSchema).optional()
 }).strict();
 
-export const EvalOverrideOrderByRelationAggregateInputSchema: z.ZodType<Prisma.EvalOverrideOrderByRelationAggregateInput> = z.object({
+export const EvaluationOrderByRelationAggregateInputSchema: z.ZodType<Prisma.EvaluationOrderByRelationAggregateInput> = z.object({
   _count: z.lazy(() => SortOrderSchema).optional()
 }).strict();
 
 export const ScenarioCountOrderByAggregateInputSchema: z.ZodType<Prisma.ScenarioCountOrderByAggregateInput> = z.object({
   id: z.lazy(() => SortOrderSchema).optional(),
   createdAt: z.lazy(() => SortOrderSchema).optional(),
-  ownerId: z.lazy(() => SortOrderSchema).optional(),
   agentId: z.lazy(() => SortOrderSchema).optional(),
   name: z.lazy(() => SortOrderSchema).optional(),
   instructions: z.lazy(() => SortOrderSchema).optional(),
   successCriteria: z.lazy(() => SortOrderSchema).optional(),
   includeDateTime: z.lazy(() => SortOrderSchema).optional(),
   timezone: z.lazy(() => SortOrderSchema).optional(),
-  isNew: z.lazy(() => SortOrderSchema).optional(),
   deleted: z.lazy(() => SortOrderSchema).optional()
 }).strict();
 
 export const ScenarioMaxOrderByAggregateInputSchema: z.ZodType<Prisma.ScenarioMaxOrderByAggregateInput> = z.object({
   id: z.lazy(() => SortOrderSchema).optional(),
   createdAt: z.lazy(() => SortOrderSchema).optional(),
-  ownerId: z.lazy(() => SortOrderSchema).optional(),
   agentId: z.lazy(() => SortOrderSchema).optional(),
   name: z.lazy(() => SortOrderSchema).optional(),
   instructions: z.lazy(() => SortOrderSchema).optional(),
   successCriteria: z.lazy(() => SortOrderSchema).optional(),
   includeDateTime: z.lazy(() => SortOrderSchema).optional(),
   timezone: z.lazy(() => SortOrderSchema).optional(),
-  isNew: z.lazy(() => SortOrderSchema).optional(),
   deleted: z.lazy(() => SortOrderSchema).optional()
 }).strict();
 
 export const ScenarioMinOrderByAggregateInputSchema: z.ZodType<Prisma.ScenarioMinOrderByAggregateInput> = z.object({
   id: z.lazy(() => SortOrderSchema).optional(),
   createdAt: z.lazy(() => SortOrderSchema).optional(),
-  ownerId: z.lazy(() => SortOrderSchema).optional(),
   agentId: z.lazy(() => SortOrderSchema).optional(),
   name: z.lazy(() => SortOrderSchema).optional(),
   instructions: z.lazy(() => SortOrderSchema).optional(),
   successCriteria: z.lazy(() => SortOrderSchema).optional(),
   includeDateTime: z.lazy(() => SortOrderSchema).optional(),
   timezone: z.lazy(() => SortOrderSchema).optional(),
-  isNew: z.lazy(() => SortOrderSchema).optional(),
   deleted: z.lazy(() => SortOrderSchema).optional()
+}).strict();
+
+export const StringNullableListFilterSchema: z.ZodType<Prisma.StringNullableListFilter> = z.object({
+  equals: z.string().array().optional().nullable(),
+  has: z.string().optional().nullable(),
+  hasEvery: z.string().array().optional(),
+  hasSome: z.string().array().optional(),
+  isEmpty: z.boolean().optional()
 }).strict();
 
 export const EnumEvalTypeFilterSchema: z.ZodType<Prisma.EnumEvalTypeFilter> = z.object({
@@ -4882,60 +5011,44 @@ export const EnumEvalContentTypeFilterSchema: z.ZodType<Prisma.EnumEvalContentTy
   not: z.union([ z.lazy(() => EvalContentTypeSchema),z.lazy(() => NestedEnumEvalContentTypeFilterSchema) ]).optional(),
 }).strict();
 
-export const EvalSetNullableRelationFilterSchema: z.ZodType<Prisma.EvalSetNullableRelationFilter> = z.object({
-  is: z.lazy(() => EvalSetWhereInputSchema).optional().nullable(),
-  isNot: z.lazy(() => EvalSetWhereInputSchema).optional().nullable()
-}).strict();
-
-export const EvalCountOrderByAggregateInputSchema: z.ZodType<Prisma.EvalCountOrderByAggregateInput> = z.object({
+export const EvaluationTemplateCountOrderByAggregateInputSchema: z.ZodType<Prisma.EvaluationTemplateCountOrderByAggregateInput> = z.object({
   id: z.lazy(() => SortOrderSchema).optional(),
   createdAt: z.lazy(() => SortOrderSchema).optional(),
   name: z.lazy(() => SortOrderSchema).optional(),
   description: z.lazy(() => SortOrderSchema).optional(),
-  scenarioId: z.lazy(() => SortOrderSchema).optional(),
+  params: z.lazy(() => SortOrderSchema).optional(),
   type: z.lazy(() => SortOrderSchema).optional(),
   resultType: z.lazy(() => SortOrderSchema).optional(),
   contentType: z.lazy(() => SortOrderSchema).optional(),
-  isCritical: z.lazy(() => SortOrderSchema).optional(),
   toolCallExpectedResult: z.lazy(() => SortOrderSchema).optional(),
-  agentId: z.lazy(() => SortOrderSchema).optional(),
   ownerId: z.lazy(() => SortOrderSchema).optional(),
-  deleted: z.lazy(() => SortOrderSchema).optional(),
-  evalSetId: z.lazy(() => SortOrderSchema).optional()
+  deleted: z.lazy(() => SortOrderSchema).optional()
 }).strict();
 
-export const EvalMaxOrderByAggregateInputSchema: z.ZodType<Prisma.EvalMaxOrderByAggregateInput> = z.object({
+export const EvaluationTemplateMaxOrderByAggregateInputSchema: z.ZodType<Prisma.EvaluationTemplateMaxOrderByAggregateInput> = z.object({
   id: z.lazy(() => SortOrderSchema).optional(),
   createdAt: z.lazy(() => SortOrderSchema).optional(),
   name: z.lazy(() => SortOrderSchema).optional(),
   description: z.lazy(() => SortOrderSchema).optional(),
-  scenarioId: z.lazy(() => SortOrderSchema).optional(),
   type: z.lazy(() => SortOrderSchema).optional(),
   resultType: z.lazy(() => SortOrderSchema).optional(),
   contentType: z.lazy(() => SortOrderSchema).optional(),
-  isCritical: z.lazy(() => SortOrderSchema).optional(),
   toolCallExpectedResult: z.lazy(() => SortOrderSchema).optional(),
-  agentId: z.lazy(() => SortOrderSchema).optional(),
   ownerId: z.lazy(() => SortOrderSchema).optional(),
-  deleted: z.lazy(() => SortOrderSchema).optional(),
-  evalSetId: z.lazy(() => SortOrderSchema).optional()
+  deleted: z.lazy(() => SortOrderSchema).optional()
 }).strict();
 
-export const EvalMinOrderByAggregateInputSchema: z.ZodType<Prisma.EvalMinOrderByAggregateInput> = z.object({
+export const EvaluationTemplateMinOrderByAggregateInputSchema: z.ZodType<Prisma.EvaluationTemplateMinOrderByAggregateInput> = z.object({
   id: z.lazy(() => SortOrderSchema).optional(),
   createdAt: z.lazy(() => SortOrderSchema).optional(),
   name: z.lazy(() => SortOrderSchema).optional(),
   description: z.lazy(() => SortOrderSchema).optional(),
-  scenarioId: z.lazy(() => SortOrderSchema).optional(),
   type: z.lazy(() => SortOrderSchema).optional(),
   resultType: z.lazy(() => SortOrderSchema).optional(),
   contentType: z.lazy(() => SortOrderSchema).optional(),
-  isCritical: z.lazy(() => SortOrderSchema).optional(),
   toolCallExpectedResult: z.lazy(() => SortOrderSchema).optional(),
-  agentId: z.lazy(() => SortOrderSchema).optional(),
   ownerId: z.lazy(() => SortOrderSchema).optional(),
-  deleted: z.lazy(() => SortOrderSchema).optional(),
-  evalSetId: z.lazy(() => SortOrderSchema).optional()
+  deleted: z.lazy(() => SortOrderSchema).optional()
 }).strict();
 
 export const EnumEvalTypeWithAggregatesFilterSchema: z.ZodType<Prisma.EnumEvalTypeWithAggregatesFilter> = z.object({
@@ -4968,92 +5081,130 @@ export const EnumEvalContentTypeWithAggregatesFilterSchema: z.ZodType<Prisma.Enu
   _max: z.lazy(() => NestedEnumEvalContentTypeFilterSchema).optional()
 }).strict();
 
+export const EvaluationRelationFilterSchema: z.ZodType<Prisma.EvaluationRelationFilter> = z.object({
+  is: z.lazy(() => EvaluationWhereInputSchema).optional(),
+  isNot: z.lazy(() => EvaluationWhereInputSchema).optional()
+}).strict();
+
+export const GeneralEvaluationCountOrderByAggregateInputSchema: z.ZodType<Prisma.GeneralEvaluationCountOrderByAggregateInput> = z.object({
+  id: z.lazy(() => SortOrderSchema).optional(),
+  agentId: z.lazy(() => SortOrderSchema).optional(),
+  evaluationId: z.lazy(() => SortOrderSchema).optional()
+}).strict();
+
+export const GeneralEvaluationMaxOrderByAggregateInputSchema: z.ZodType<Prisma.GeneralEvaluationMaxOrderByAggregateInput> = z.object({
+  id: z.lazy(() => SortOrderSchema).optional(),
+  agentId: z.lazy(() => SortOrderSchema).optional(),
+  evaluationId: z.lazy(() => SortOrderSchema).optional()
+}).strict();
+
+export const GeneralEvaluationMinOrderByAggregateInputSchema: z.ZodType<Prisma.GeneralEvaluationMinOrderByAggregateInput> = z.object({
+  id: z.lazy(() => SortOrderSchema).optional(),
+  agentId: z.lazy(() => SortOrderSchema).optional(),
+  evaluationId: z.lazy(() => SortOrderSchema).optional()
+}).strict();
+
+export const EvaluationTemplateRelationFilterSchema: z.ZodType<Prisma.EvaluationTemplateRelationFilter> = z.object({
+  is: z.lazy(() => EvaluationTemplateWhereInputSchema).optional(),
+  isNot: z.lazy(() => EvaluationTemplateWhereInputSchema).optional()
+}).strict();
+
+export const EvaluationGroupNullableRelationFilterSchema: z.ZodType<Prisma.EvaluationGroupNullableRelationFilter> = z.object({
+  is: z.lazy(() => EvaluationGroupWhereInputSchema).optional().nullable(),
+  isNot: z.lazy(() => EvaluationGroupWhereInputSchema).optional().nullable()
+}).strict();
+
+export const EvaluationCountOrderByAggregateInputSchema: z.ZodType<Prisma.EvaluationCountOrderByAggregateInput> = z.object({
+  id: z.lazy(() => SortOrderSchema).optional(),
+  createdAt: z.lazy(() => SortOrderSchema).optional(),
+  enabled: z.lazy(() => SortOrderSchema).optional(),
+  isCritical: z.lazy(() => SortOrderSchema).optional(),
+  params: z.lazy(() => SortOrderSchema).optional(),
+  evaluationTemplateId: z.lazy(() => SortOrderSchema).optional(),
+  scenarioId: z.lazy(() => SortOrderSchema).optional(),
+  evaluationGroupId: z.lazy(() => SortOrderSchema).optional()
+}).strict();
+
+export const EvaluationMaxOrderByAggregateInputSchema: z.ZodType<Prisma.EvaluationMaxOrderByAggregateInput> = z.object({
+  id: z.lazy(() => SortOrderSchema).optional(),
+  createdAt: z.lazy(() => SortOrderSchema).optional(),
+  enabled: z.lazy(() => SortOrderSchema).optional(),
+  isCritical: z.lazy(() => SortOrderSchema).optional(),
+  evaluationTemplateId: z.lazy(() => SortOrderSchema).optional(),
+  scenarioId: z.lazy(() => SortOrderSchema).optional(),
+  evaluationGroupId: z.lazy(() => SortOrderSchema).optional()
+}).strict();
+
+export const EvaluationMinOrderByAggregateInputSchema: z.ZodType<Prisma.EvaluationMinOrderByAggregateInput> = z.object({
+  id: z.lazy(() => SortOrderSchema).optional(),
+  createdAt: z.lazy(() => SortOrderSchema).optional(),
+  enabled: z.lazy(() => SortOrderSchema).optional(),
+  isCritical: z.lazy(() => SortOrderSchema).optional(),
+  evaluationTemplateId: z.lazy(() => SortOrderSchema).optional(),
+  scenarioId: z.lazy(() => SortOrderSchema).optional(),
+  evaluationGroupId: z.lazy(() => SortOrderSchema).optional()
+}).strict();
+
 export const CallNullableRelationFilterSchema: z.ZodType<Prisma.CallNullableRelationFilter> = z.object({
   is: z.lazy(() => CallWhereInputSchema).optional().nullable(),
   isNot: z.lazy(() => CallWhereInputSchema).optional().nullable()
 }).strict();
 
-export const EvalRelationFilterSchema: z.ZodType<Prisma.EvalRelationFilter> = z.object({
-  is: z.lazy(() => EvalWhereInputSchema).optional(),
-  isNot: z.lazy(() => EvalWhereInputSchema).optional()
+export const EvaluationTemplateNullableRelationFilterSchema: z.ZodType<Prisma.EvaluationTemplateNullableRelationFilter> = z.object({
+  is: z.lazy(() => EvaluationTemplateWhereInputSchema).optional().nullable(),
+  isNot: z.lazy(() => EvaluationTemplateWhereInputSchema).optional().nullable()
 }).strict();
 
-export const EvalResultCountOrderByAggregateInputSchema: z.ZodType<Prisma.EvalResultCountOrderByAggregateInput> = z.object({
+export const EvaluationResultCountOrderByAggregateInputSchema: z.ZodType<Prisma.EvaluationResultCountOrderByAggregateInput> = z.object({
   id: z.lazy(() => SortOrderSchema).optional(),
   createdAt: z.lazy(() => SortOrderSchema).optional(),
   callId: z.lazy(() => SortOrderSchema).optional(),
-  evalId: z.lazy(() => SortOrderSchema).optional(),
+  evaluationId: z.lazy(() => SortOrderSchema).optional(),
   result: z.lazy(() => SortOrderSchema).optional(),
   success: z.lazy(() => SortOrderSchema).optional(),
   secondsFromStart: z.lazy(() => SortOrderSchema).optional(),
   duration: z.lazy(() => SortOrderSchema).optional(),
   type: z.lazy(() => SortOrderSchema).optional(),
-  details: z.lazy(() => SortOrderSchema).optional()
+  details: z.lazy(() => SortOrderSchema).optional(),
+  evaluationTemplateId: z.lazy(() => SortOrderSchema).optional()
 }).strict();
 
-export const EvalResultAvgOrderByAggregateInputSchema: z.ZodType<Prisma.EvalResultAvgOrderByAggregateInput> = z.object({
+export const EvaluationResultAvgOrderByAggregateInputSchema: z.ZodType<Prisma.EvaluationResultAvgOrderByAggregateInput> = z.object({
   secondsFromStart: z.lazy(() => SortOrderSchema).optional(),
   duration: z.lazy(() => SortOrderSchema).optional()
 }).strict();
 
-export const EvalResultMaxOrderByAggregateInputSchema: z.ZodType<Prisma.EvalResultMaxOrderByAggregateInput> = z.object({
+export const EvaluationResultMaxOrderByAggregateInputSchema: z.ZodType<Prisma.EvaluationResultMaxOrderByAggregateInput> = z.object({
   id: z.lazy(() => SortOrderSchema).optional(),
   createdAt: z.lazy(() => SortOrderSchema).optional(),
   callId: z.lazy(() => SortOrderSchema).optional(),
-  evalId: z.lazy(() => SortOrderSchema).optional(),
+  evaluationId: z.lazy(() => SortOrderSchema).optional(),
   result: z.lazy(() => SortOrderSchema).optional(),
   success: z.lazy(() => SortOrderSchema).optional(),
   secondsFromStart: z.lazy(() => SortOrderSchema).optional(),
   duration: z.lazy(() => SortOrderSchema).optional(),
   type: z.lazy(() => SortOrderSchema).optional(),
-  details: z.lazy(() => SortOrderSchema).optional()
+  details: z.lazy(() => SortOrderSchema).optional(),
+  evaluationTemplateId: z.lazy(() => SortOrderSchema).optional()
 }).strict();
 
-export const EvalResultMinOrderByAggregateInputSchema: z.ZodType<Prisma.EvalResultMinOrderByAggregateInput> = z.object({
+export const EvaluationResultMinOrderByAggregateInputSchema: z.ZodType<Prisma.EvaluationResultMinOrderByAggregateInput> = z.object({
   id: z.lazy(() => SortOrderSchema).optional(),
   createdAt: z.lazy(() => SortOrderSchema).optional(),
   callId: z.lazy(() => SortOrderSchema).optional(),
-  evalId: z.lazy(() => SortOrderSchema).optional(),
+  evaluationId: z.lazy(() => SortOrderSchema).optional(),
   result: z.lazy(() => SortOrderSchema).optional(),
   success: z.lazy(() => SortOrderSchema).optional(),
   secondsFromStart: z.lazy(() => SortOrderSchema).optional(),
   duration: z.lazy(() => SortOrderSchema).optional(),
   type: z.lazy(() => SortOrderSchema).optional(),
-  details: z.lazy(() => SortOrderSchema).optional()
+  details: z.lazy(() => SortOrderSchema).optional(),
+  evaluationTemplateId: z.lazy(() => SortOrderSchema).optional()
 }).strict();
 
-export const EvalResultSumOrderByAggregateInputSchema: z.ZodType<Prisma.EvalResultSumOrderByAggregateInput> = z.object({
+export const EvaluationResultSumOrderByAggregateInputSchema: z.ZodType<Prisma.EvaluationResultSumOrderByAggregateInput> = z.object({
   secondsFromStart: z.lazy(() => SortOrderSchema).optional(),
   duration: z.lazy(() => SortOrderSchema).optional()
-}).strict();
-
-export const ScenarioRelationFilterSchema: z.ZodType<Prisma.ScenarioRelationFilter> = z.object({
-  is: z.lazy(() => ScenarioWhereInputSchema).optional(),
-  isNot: z.lazy(() => ScenarioWhereInputSchema).optional()
-}).strict();
-
-export const EvalOverrideCountOrderByAggregateInputSchema: z.ZodType<Prisma.EvalOverrideCountOrderByAggregateInput> = z.object({
-  id: z.lazy(() => SortOrderSchema).optional(),
-  createdAt: z.lazy(() => SortOrderSchema).optional(),
-  scenarioId: z.lazy(() => SortOrderSchema).optional(),
-  evalId: z.lazy(() => SortOrderSchema).optional(),
-  enabled: z.lazy(() => SortOrderSchema).optional()
-}).strict();
-
-export const EvalOverrideMaxOrderByAggregateInputSchema: z.ZodType<Prisma.EvalOverrideMaxOrderByAggregateInput> = z.object({
-  id: z.lazy(() => SortOrderSchema).optional(),
-  createdAt: z.lazy(() => SortOrderSchema).optional(),
-  scenarioId: z.lazy(() => SortOrderSchema).optional(),
-  evalId: z.lazy(() => SortOrderSchema).optional(),
-  enabled: z.lazy(() => SortOrderSchema).optional()
-}).strict();
-
-export const EvalOverrideMinOrderByAggregateInputSchema: z.ZodType<Prisma.EvalOverrideMinOrderByAggregateInput> = z.object({
-  id: z.lazy(() => SortOrderSchema).optional(),
-  createdAt: z.lazy(() => SortOrderSchema).optional(),
-  scenarioId: z.lazy(() => SortOrderSchema).optional(),
-  evalId: z.lazy(() => SortOrderSchema).optional(),
-  enabled: z.lazy(() => SortOrderSchema).optional()
 }).strict();
 
 export const LatencyBlockCountOrderByAggregateInputSchema: z.ZodType<Prisma.LatencyBlockCountOrderByAggregateInput> = z.object({
@@ -5126,7 +5277,7 @@ export const SavedSearchNullableRelationFilterSchema: z.ZodType<Prisma.SavedSear
   isNot: z.lazy(() => SavedSearchWhereInputSchema).optional().nullable()
 }).strict();
 
-export const EvalSetCountOrderByAggregateInputSchema: z.ZodType<Prisma.EvalSetCountOrderByAggregateInput> = z.object({
+export const EvaluationGroupCountOrderByAggregateInputSchema: z.ZodType<Prisma.EvaluationGroupCountOrderByAggregateInput> = z.object({
   id: z.lazy(() => SortOrderSchema).optional(),
   createdAt: z.lazy(() => SortOrderSchema).optional(),
   ownerId: z.lazy(() => SortOrderSchema).optional(),
@@ -5136,7 +5287,7 @@ export const EvalSetCountOrderByAggregateInputSchema: z.ZodType<Prisma.EvalSetCo
   savedSearchId: z.lazy(() => SortOrderSchema).optional()
 }).strict();
 
-export const EvalSetMaxOrderByAggregateInputSchema: z.ZodType<Prisma.EvalSetMaxOrderByAggregateInput> = z.object({
+export const EvaluationGroupMaxOrderByAggregateInputSchema: z.ZodType<Prisma.EvaluationGroupMaxOrderByAggregateInput> = z.object({
   id: z.lazy(() => SortOrderSchema).optional(),
   createdAt: z.lazy(() => SortOrderSchema).optional(),
   ownerId: z.lazy(() => SortOrderSchema).optional(),
@@ -5146,7 +5297,7 @@ export const EvalSetMaxOrderByAggregateInputSchema: z.ZodType<Prisma.EvalSetMaxO
   savedSearchId: z.lazy(() => SortOrderSchema).optional()
 }).strict();
 
-export const EvalSetMinOrderByAggregateInputSchema: z.ZodType<Prisma.EvalSetMinOrderByAggregateInput> = z.object({
+export const EvaluationGroupMinOrderByAggregateInputSchema: z.ZodType<Prisma.EvaluationGroupMinOrderByAggregateInput> = z.object({
   id: z.lazy(() => SortOrderSchema).optional(),
   createdAt: z.lazy(() => SortOrderSchema).optional(),
   ownerId: z.lazy(() => SortOrderSchema).optional(),
@@ -5156,18 +5307,10 @@ export const EvalSetMinOrderByAggregateInputSchema: z.ZodType<Prisma.EvalSetMinO
   savedSearchId: z.lazy(() => SortOrderSchema).optional()
 }).strict();
 
-export const StringNullableListFilterSchema: z.ZodType<Prisma.StringNullableListFilter> = z.object({
-  equals: z.string().array().optional().nullable(),
-  has: z.string().optional().nullable(),
-  hasEvery: z.string().array().optional(),
-  hasSome: z.string().array().optional(),
-  isEmpty: z.boolean().optional()
-}).strict();
-
-export const EvalSetListRelationFilterSchema: z.ZodType<Prisma.EvalSetListRelationFilter> = z.object({
-  every: z.lazy(() => EvalSetWhereInputSchema).optional(),
-  some: z.lazy(() => EvalSetWhereInputSchema).optional(),
-  none: z.lazy(() => EvalSetWhereInputSchema).optional()
+export const EvaluationGroupListRelationFilterSchema: z.ZodType<Prisma.EvaluationGroupListRelationFilter> = z.object({
+  every: z.lazy(() => EvaluationGroupWhereInputSchema).optional(),
+  some: z.lazy(() => EvaluationGroupWhereInputSchema).optional(),
+  none: z.lazy(() => EvaluationGroupWhereInputSchema).optional()
 }).strict();
 
 export const AlertListRelationFilterSchema: z.ZodType<Prisma.AlertListRelationFilter> = z.object({
@@ -5176,7 +5319,7 @@ export const AlertListRelationFilterSchema: z.ZodType<Prisma.AlertListRelationFi
   none: z.lazy(() => AlertWhereInputSchema).optional()
 }).strict();
 
-export const EvalSetOrderByRelationAggregateInputSchema: z.ZodType<Prisma.EvalSetOrderByRelationAggregateInput> = z.object({
+export const EvaluationGroupOrderByRelationAggregateInputSchema: z.ZodType<Prisma.EvaluationGroupOrderByRelationAggregateInput> = z.object({
   _count: z.lazy(() => SortOrderSchema).optional()
 }).strict();
 
@@ -5283,13 +5426,6 @@ export const StringFieldUpdateOperationsInputSchema: z.ZodType<Prisma.StringFiel
   set: z.string().optional()
 }).strict();
 
-export const EvalCreateNestedManyWithoutAgentInputSchema: z.ZodType<Prisma.EvalCreateNestedManyWithoutAgentInput> = z.object({
-  create: z.union([ z.lazy(() => EvalCreateWithoutAgentInputSchema),z.lazy(() => EvalCreateWithoutAgentInputSchema).array(),z.lazy(() => EvalUncheckedCreateWithoutAgentInputSchema),z.lazy(() => EvalUncheckedCreateWithoutAgentInputSchema).array() ]).optional(),
-  connectOrCreate: z.union([ z.lazy(() => EvalCreateOrConnectWithoutAgentInputSchema),z.lazy(() => EvalCreateOrConnectWithoutAgentInputSchema).array() ]).optional(),
-  createMany: z.lazy(() => EvalCreateManyAgentInputEnvelopeSchema).optional(),
-  connect: z.union([ z.lazy(() => EvalWhereUniqueInputSchema),z.lazy(() => EvalWhereUniqueInputSchema).array() ]).optional(),
-}).strict();
-
 export const TestAgentCreateNestedManyWithoutAgentsInputSchema: z.ZodType<Prisma.TestAgentCreateNestedManyWithoutAgentsInput> = z.object({
   create: z.union([ z.lazy(() => TestAgentCreateWithoutAgentsInputSchema),z.lazy(() => TestAgentCreateWithoutAgentsInputSchema).array(),z.lazy(() => TestAgentUncheckedCreateWithoutAgentsInputSchema),z.lazy(() => TestAgentUncheckedCreateWithoutAgentsInputSchema).array() ]).optional(),
   connectOrCreate: z.union([ z.lazy(() => TestAgentCreateOrConnectWithoutAgentsInputSchema),z.lazy(() => TestAgentCreateOrConnectWithoutAgentsInputSchema).array() ]).optional(),
@@ -5317,11 +5453,11 @@ export const CallCreateNestedManyWithoutAgentInputSchema: z.ZodType<Prisma.CallC
   connect: z.union([ z.lazy(() => CallWhereUniqueInputSchema),z.lazy(() => CallWhereUniqueInputSchema).array() ]).optional(),
 }).strict();
 
-export const EvalUncheckedCreateNestedManyWithoutAgentInputSchema: z.ZodType<Prisma.EvalUncheckedCreateNestedManyWithoutAgentInput> = z.object({
-  create: z.union([ z.lazy(() => EvalCreateWithoutAgentInputSchema),z.lazy(() => EvalCreateWithoutAgentInputSchema).array(),z.lazy(() => EvalUncheckedCreateWithoutAgentInputSchema),z.lazy(() => EvalUncheckedCreateWithoutAgentInputSchema).array() ]).optional(),
-  connectOrCreate: z.union([ z.lazy(() => EvalCreateOrConnectWithoutAgentInputSchema),z.lazy(() => EvalCreateOrConnectWithoutAgentInputSchema).array() ]).optional(),
-  createMany: z.lazy(() => EvalCreateManyAgentInputEnvelopeSchema).optional(),
-  connect: z.union([ z.lazy(() => EvalWhereUniqueInputSchema),z.lazy(() => EvalWhereUniqueInputSchema).array() ]).optional(),
+export const GeneralEvaluationCreateNestedManyWithoutAgentInputSchema: z.ZodType<Prisma.GeneralEvaluationCreateNestedManyWithoutAgentInput> = z.object({
+  create: z.union([ z.lazy(() => GeneralEvaluationCreateWithoutAgentInputSchema),z.lazy(() => GeneralEvaluationCreateWithoutAgentInputSchema).array(),z.lazy(() => GeneralEvaluationUncheckedCreateWithoutAgentInputSchema),z.lazy(() => GeneralEvaluationUncheckedCreateWithoutAgentInputSchema).array() ]).optional(),
+  connectOrCreate: z.union([ z.lazy(() => GeneralEvaluationCreateOrConnectWithoutAgentInputSchema),z.lazy(() => GeneralEvaluationCreateOrConnectWithoutAgentInputSchema).array() ]).optional(),
+  createMany: z.lazy(() => GeneralEvaluationCreateManyAgentInputEnvelopeSchema).optional(),
+  connect: z.union([ z.lazy(() => GeneralEvaluationWhereUniqueInputSchema),z.lazy(() => GeneralEvaluationWhereUniqueInputSchema).array() ]).optional(),
 }).strict();
 
 export const TestAgentUncheckedCreateNestedManyWithoutAgentsInputSchema: z.ZodType<Prisma.TestAgentUncheckedCreateNestedManyWithoutAgentsInput> = z.object({
@@ -5351,6 +5487,13 @@ export const CallUncheckedCreateNestedManyWithoutAgentInputSchema: z.ZodType<Pri
   connect: z.union([ z.lazy(() => CallWhereUniqueInputSchema),z.lazy(() => CallWhereUniqueInputSchema).array() ]).optional(),
 }).strict();
 
+export const GeneralEvaluationUncheckedCreateNestedManyWithoutAgentInputSchema: z.ZodType<Prisma.GeneralEvaluationUncheckedCreateNestedManyWithoutAgentInput> = z.object({
+  create: z.union([ z.lazy(() => GeneralEvaluationCreateWithoutAgentInputSchema),z.lazy(() => GeneralEvaluationCreateWithoutAgentInputSchema).array(),z.lazy(() => GeneralEvaluationUncheckedCreateWithoutAgentInputSchema),z.lazy(() => GeneralEvaluationUncheckedCreateWithoutAgentInputSchema).array() ]).optional(),
+  connectOrCreate: z.union([ z.lazy(() => GeneralEvaluationCreateOrConnectWithoutAgentInputSchema),z.lazy(() => GeneralEvaluationCreateOrConnectWithoutAgentInputSchema).array() ]).optional(),
+  createMany: z.lazy(() => GeneralEvaluationCreateManyAgentInputEnvelopeSchema).optional(),
+  connect: z.union([ z.lazy(() => GeneralEvaluationWhereUniqueInputSchema),z.lazy(() => GeneralEvaluationWhereUniqueInputSchema).array() ]).optional(),
+}).strict();
+
 export const DateTimeFieldUpdateOperationsInputSchema: z.ZodType<Prisma.DateTimeFieldUpdateOperationsInput> = z.object({
   set: z.coerce.date().optional()
 }).strict();
@@ -5361,20 +5504,6 @@ export const NullableStringFieldUpdateOperationsInputSchema: z.ZodType<Prisma.Nu
 
 export const BoolFieldUpdateOperationsInputSchema: z.ZodType<Prisma.BoolFieldUpdateOperationsInput> = z.object({
   set: z.boolean().optional()
-}).strict();
-
-export const EvalUpdateManyWithoutAgentNestedInputSchema: z.ZodType<Prisma.EvalUpdateManyWithoutAgentNestedInput> = z.object({
-  create: z.union([ z.lazy(() => EvalCreateWithoutAgentInputSchema),z.lazy(() => EvalCreateWithoutAgentInputSchema).array(),z.lazy(() => EvalUncheckedCreateWithoutAgentInputSchema),z.lazy(() => EvalUncheckedCreateWithoutAgentInputSchema).array() ]).optional(),
-  connectOrCreate: z.union([ z.lazy(() => EvalCreateOrConnectWithoutAgentInputSchema),z.lazy(() => EvalCreateOrConnectWithoutAgentInputSchema).array() ]).optional(),
-  upsert: z.union([ z.lazy(() => EvalUpsertWithWhereUniqueWithoutAgentInputSchema),z.lazy(() => EvalUpsertWithWhereUniqueWithoutAgentInputSchema).array() ]).optional(),
-  createMany: z.lazy(() => EvalCreateManyAgentInputEnvelopeSchema).optional(),
-  set: z.union([ z.lazy(() => EvalWhereUniqueInputSchema),z.lazy(() => EvalWhereUniqueInputSchema).array() ]).optional(),
-  disconnect: z.union([ z.lazy(() => EvalWhereUniqueInputSchema),z.lazy(() => EvalWhereUniqueInputSchema).array() ]).optional(),
-  delete: z.union([ z.lazy(() => EvalWhereUniqueInputSchema),z.lazy(() => EvalWhereUniqueInputSchema).array() ]).optional(),
-  connect: z.union([ z.lazy(() => EvalWhereUniqueInputSchema),z.lazy(() => EvalWhereUniqueInputSchema).array() ]).optional(),
-  update: z.union([ z.lazy(() => EvalUpdateWithWhereUniqueWithoutAgentInputSchema),z.lazy(() => EvalUpdateWithWhereUniqueWithoutAgentInputSchema).array() ]).optional(),
-  updateMany: z.union([ z.lazy(() => EvalUpdateManyWithWhereWithoutAgentInputSchema),z.lazy(() => EvalUpdateManyWithWhereWithoutAgentInputSchema).array() ]).optional(),
-  deleteMany: z.union([ z.lazy(() => EvalScalarWhereInputSchema),z.lazy(() => EvalScalarWhereInputSchema).array() ]).optional(),
 }).strict();
 
 export const TestAgentUpdateManyWithoutAgentsNestedInputSchema: z.ZodType<Prisma.TestAgentUpdateManyWithoutAgentsNestedInput> = z.object({
@@ -5432,18 +5561,18 @@ export const CallUpdateManyWithoutAgentNestedInputSchema: z.ZodType<Prisma.CallU
   deleteMany: z.union([ z.lazy(() => CallScalarWhereInputSchema),z.lazy(() => CallScalarWhereInputSchema).array() ]).optional(),
 }).strict();
 
-export const EvalUncheckedUpdateManyWithoutAgentNestedInputSchema: z.ZodType<Prisma.EvalUncheckedUpdateManyWithoutAgentNestedInput> = z.object({
-  create: z.union([ z.lazy(() => EvalCreateWithoutAgentInputSchema),z.lazy(() => EvalCreateWithoutAgentInputSchema).array(),z.lazy(() => EvalUncheckedCreateWithoutAgentInputSchema),z.lazy(() => EvalUncheckedCreateWithoutAgentInputSchema).array() ]).optional(),
-  connectOrCreate: z.union([ z.lazy(() => EvalCreateOrConnectWithoutAgentInputSchema),z.lazy(() => EvalCreateOrConnectWithoutAgentInputSchema).array() ]).optional(),
-  upsert: z.union([ z.lazy(() => EvalUpsertWithWhereUniqueWithoutAgentInputSchema),z.lazy(() => EvalUpsertWithWhereUniqueWithoutAgentInputSchema).array() ]).optional(),
-  createMany: z.lazy(() => EvalCreateManyAgentInputEnvelopeSchema).optional(),
-  set: z.union([ z.lazy(() => EvalWhereUniqueInputSchema),z.lazy(() => EvalWhereUniqueInputSchema).array() ]).optional(),
-  disconnect: z.union([ z.lazy(() => EvalWhereUniqueInputSchema),z.lazy(() => EvalWhereUniqueInputSchema).array() ]).optional(),
-  delete: z.union([ z.lazy(() => EvalWhereUniqueInputSchema),z.lazy(() => EvalWhereUniqueInputSchema).array() ]).optional(),
-  connect: z.union([ z.lazy(() => EvalWhereUniqueInputSchema),z.lazy(() => EvalWhereUniqueInputSchema).array() ]).optional(),
-  update: z.union([ z.lazy(() => EvalUpdateWithWhereUniqueWithoutAgentInputSchema),z.lazy(() => EvalUpdateWithWhereUniqueWithoutAgentInputSchema).array() ]).optional(),
-  updateMany: z.union([ z.lazy(() => EvalUpdateManyWithWhereWithoutAgentInputSchema),z.lazy(() => EvalUpdateManyWithWhereWithoutAgentInputSchema).array() ]).optional(),
-  deleteMany: z.union([ z.lazy(() => EvalScalarWhereInputSchema),z.lazy(() => EvalScalarWhereInputSchema).array() ]).optional(),
+export const GeneralEvaluationUpdateManyWithoutAgentNestedInputSchema: z.ZodType<Prisma.GeneralEvaluationUpdateManyWithoutAgentNestedInput> = z.object({
+  create: z.union([ z.lazy(() => GeneralEvaluationCreateWithoutAgentInputSchema),z.lazy(() => GeneralEvaluationCreateWithoutAgentInputSchema).array(),z.lazy(() => GeneralEvaluationUncheckedCreateWithoutAgentInputSchema),z.lazy(() => GeneralEvaluationUncheckedCreateWithoutAgentInputSchema).array() ]).optional(),
+  connectOrCreate: z.union([ z.lazy(() => GeneralEvaluationCreateOrConnectWithoutAgentInputSchema),z.lazy(() => GeneralEvaluationCreateOrConnectWithoutAgentInputSchema).array() ]).optional(),
+  upsert: z.union([ z.lazy(() => GeneralEvaluationUpsertWithWhereUniqueWithoutAgentInputSchema),z.lazy(() => GeneralEvaluationUpsertWithWhereUniqueWithoutAgentInputSchema).array() ]).optional(),
+  createMany: z.lazy(() => GeneralEvaluationCreateManyAgentInputEnvelopeSchema).optional(),
+  set: z.union([ z.lazy(() => GeneralEvaluationWhereUniqueInputSchema),z.lazy(() => GeneralEvaluationWhereUniqueInputSchema).array() ]).optional(),
+  disconnect: z.union([ z.lazy(() => GeneralEvaluationWhereUniqueInputSchema),z.lazy(() => GeneralEvaluationWhereUniqueInputSchema).array() ]).optional(),
+  delete: z.union([ z.lazy(() => GeneralEvaluationWhereUniqueInputSchema),z.lazy(() => GeneralEvaluationWhereUniqueInputSchema).array() ]).optional(),
+  connect: z.union([ z.lazy(() => GeneralEvaluationWhereUniqueInputSchema),z.lazy(() => GeneralEvaluationWhereUniqueInputSchema).array() ]).optional(),
+  update: z.union([ z.lazy(() => GeneralEvaluationUpdateWithWhereUniqueWithoutAgentInputSchema),z.lazy(() => GeneralEvaluationUpdateWithWhereUniqueWithoutAgentInputSchema).array() ]).optional(),
+  updateMany: z.union([ z.lazy(() => GeneralEvaluationUpdateManyWithWhereWithoutAgentInputSchema),z.lazy(() => GeneralEvaluationUpdateManyWithWhereWithoutAgentInputSchema).array() ]).optional(),
+  deleteMany: z.union([ z.lazy(() => GeneralEvaluationScalarWhereInputSchema),z.lazy(() => GeneralEvaluationScalarWhereInputSchema).array() ]).optional(),
 }).strict();
 
 export const TestAgentUncheckedUpdateManyWithoutAgentsNestedInputSchema: z.ZodType<Prisma.TestAgentUncheckedUpdateManyWithoutAgentsNestedInput> = z.object({
@@ -5499,6 +5628,20 @@ export const CallUncheckedUpdateManyWithoutAgentNestedInputSchema: z.ZodType<Pri
   update: z.union([ z.lazy(() => CallUpdateWithWhereUniqueWithoutAgentInputSchema),z.lazy(() => CallUpdateWithWhereUniqueWithoutAgentInputSchema).array() ]).optional(),
   updateMany: z.union([ z.lazy(() => CallUpdateManyWithWhereWithoutAgentInputSchema),z.lazy(() => CallUpdateManyWithWhereWithoutAgentInputSchema).array() ]).optional(),
   deleteMany: z.union([ z.lazy(() => CallScalarWhereInputSchema),z.lazy(() => CallScalarWhereInputSchema).array() ]).optional(),
+}).strict();
+
+export const GeneralEvaluationUncheckedUpdateManyWithoutAgentNestedInputSchema: z.ZodType<Prisma.GeneralEvaluationUncheckedUpdateManyWithoutAgentNestedInput> = z.object({
+  create: z.union([ z.lazy(() => GeneralEvaluationCreateWithoutAgentInputSchema),z.lazy(() => GeneralEvaluationCreateWithoutAgentInputSchema).array(),z.lazy(() => GeneralEvaluationUncheckedCreateWithoutAgentInputSchema),z.lazy(() => GeneralEvaluationUncheckedCreateWithoutAgentInputSchema).array() ]).optional(),
+  connectOrCreate: z.union([ z.lazy(() => GeneralEvaluationCreateOrConnectWithoutAgentInputSchema),z.lazy(() => GeneralEvaluationCreateOrConnectWithoutAgentInputSchema).array() ]).optional(),
+  upsert: z.union([ z.lazy(() => GeneralEvaluationUpsertWithWhereUniqueWithoutAgentInputSchema),z.lazy(() => GeneralEvaluationUpsertWithWhereUniqueWithoutAgentInputSchema).array() ]).optional(),
+  createMany: z.lazy(() => GeneralEvaluationCreateManyAgentInputEnvelopeSchema).optional(),
+  set: z.union([ z.lazy(() => GeneralEvaluationWhereUniqueInputSchema),z.lazy(() => GeneralEvaluationWhereUniqueInputSchema).array() ]).optional(),
+  disconnect: z.union([ z.lazy(() => GeneralEvaluationWhereUniqueInputSchema),z.lazy(() => GeneralEvaluationWhereUniqueInputSchema).array() ]).optional(),
+  delete: z.union([ z.lazy(() => GeneralEvaluationWhereUniqueInputSchema),z.lazy(() => GeneralEvaluationWhereUniqueInputSchema).array() ]).optional(),
+  connect: z.union([ z.lazy(() => GeneralEvaluationWhereUniqueInputSchema),z.lazy(() => GeneralEvaluationWhereUniqueInputSchema).array() ]).optional(),
+  update: z.union([ z.lazy(() => GeneralEvaluationUpdateWithWhereUniqueWithoutAgentInputSchema),z.lazy(() => GeneralEvaluationUpdateWithWhereUniqueWithoutAgentInputSchema).array() ]).optional(),
+  updateMany: z.union([ z.lazy(() => GeneralEvaluationUpdateManyWithWhereWithoutAgentInputSchema),z.lazy(() => GeneralEvaluationUpdateManyWithWhereWithoutAgentInputSchema).array() ]).optional(),
+  deleteMany: z.union([ z.lazy(() => GeneralEvaluationScalarWhereInputSchema),z.lazy(() => GeneralEvaluationScalarWhereInputSchema).array() ]).optional(),
 }).strict();
 
 export const AgentCreateNestedOneWithoutTestsInputSchema: z.ZodType<Prisma.AgentCreateNestedOneWithoutTestsInput> = z.object({
@@ -5645,11 +5788,11 @@ export const CallUncheckedUpdateManyWithoutTestAgentNestedInputSchema: z.ZodType
   deleteMany: z.union([ z.lazy(() => CallScalarWhereInputSchema),z.lazy(() => CallScalarWhereInputSchema).array() ]).optional(),
 }).strict();
 
-export const EvalResultCreateNestedManyWithoutCallInputSchema: z.ZodType<Prisma.EvalResultCreateNestedManyWithoutCallInput> = z.object({
-  create: z.union([ z.lazy(() => EvalResultCreateWithoutCallInputSchema),z.lazy(() => EvalResultCreateWithoutCallInputSchema).array(),z.lazy(() => EvalResultUncheckedCreateWithoutCallInputSchema),z.lazy(() => EvalResultUncheckedCreateWithoutCallInputSchema).array() ]).optional(),
-  connectOrCreate: z.union([ z.lazy(() => EvalResultCreateOrConnectWithoutCallInputSchema),z.lazy(() => EvalResultCreateOrConnectWithoutCallInputSchema).array() ]).optional(),
-  createMany: z.lazy(() => EvalResultCreateManyCallInputEnvelopeSchema).optional(),
-  connect: z.union([ z.lazy(() => EvalResultWhereUniqueInputSchema),z.lazy(() => EvalResultWhereUniqueInputSchema).array() ]).optional(),
+export const EvaluationResultCreateNestedManyWithoutCallInputSchema: z.ZodType<Prisma.EvaluationResultCreateNestedManyWithoutCallInput> = z.object({
+  create: z.union([ z.lazy(() => EvaluationResultCreateWithoutCallInputSchema),z.lazy(() => EvaluationResultCreateWithoutCallInputSchema).array(),z.lazy(() => EvaluationResultUncheckedCreateWithoutCallInputSchema),z.lazy(() => EvaluationResultUncheckedCreateWithoutCallInputSchema).array() ]).optional(),
+  connectOrCreate: z.union([ z.lazy(() => EvaluationResultCreateOrConnectWithoutCallInputSchema),z.lazy(() => EvaluationResultCreateOrConnectWithoutCallInputSchema).array() ]).optional(),
+  createMany: z.lazy(() => EvaluationResultCreateManyCallInputEnvelopeSchema).optional(),
+  connect: z.union([ z.lazy(() => EvaluationResultWhereUniqueInputSchema),z.lazy(() => EvaluationResultWhereUniqueInputSchema).array() ]).optional(),
 }).strict();
 
 export const AgentCreateNestedOneWithoutCallsInputSchema: z.ZodType<Prisma.AgentCreateNestedOneWithoutCallsInput> = z.object({
@@ -5704,11 +5847,11 @@ export const CallErrorCreateNestedManyWithoutCallInputSchema: z.ZodType<Prisma.C
   connect: z.union([ z.lazy(() => CallErrorWhereUniqueInputSchema),z.lazy(() => CallErrorWhereUniqueInputSchema).array() ]).optional(),
 }).strict();
 
-export const EvalResultUncheckedCreateNestedManyWithoutCallInputSchema: z.ZodType<Prisma.EvalResultUncheckedCreateNestedManyWithoutCallInput> = z.object({
-  create: z.union([ z.lazy(() => EvalResultCreateWithoutCallInputSchema),z.lazy(() => EvalResultCreateWithoutCallInputSchema).array(),z.lazy(() => EvalResultUncheckedCreateWithoutCallInputSchema),z.lazy(() => EvalResultUncheckedCreateWithoutCallInputSchema).array() ]).optional(),
-  connectOrCreate: z.union([ z.lazy(() => EvalResultCreateOrConnectWithoutCallInputSchema),z.lazy(() => EvalResultCreateOrConnectWithoutCallInputSchema).array() ]).optional(),
-  createMany: z.lazy(() => EvalResultCreateManyCallInputEnvelopeSchema).optional(),
-  connect: z.union([ z.lazy(() => EvalResultWhereUniqueInputSchema),z.lazy(() => EvalResultWhereUniqueInputSchema).array() ]).optional(),
+export const EvaluationResultUncheckedCreateNestedManyWithoutCallInputSchema: z.ZodType<Prisma.EvaluationResultUncheckedCreateNestedManyWithoutCallInput> = z.object({
+  create: z.union([ z.lazy(() => EvaluationResultCreateWithoutCallInputSchema),z.lazy(() => EvaluationResultCreateWithoutCallInputSchema).array(),z.lazy(() => EvaluationResultUncheckedCreateWithoutCallInputSchema),z.lazy(() => EvaluationResultUncheckedCreateWithoutCallInputSchema).array() ]).optional(),
+  connectOrCreate: z.union([ z.lazy(() => EvaluationResultCreateOrConnectWithoutCallInputSchema),z.lazy(() => EvaluationResultCreateOrConnectWithoutCallInputSchema).array() ]).optional(),
+  createMany: z.lazy(() => EvaluationResultCreateManyCallInputEnvelopeSchema).optional(),
+  connect: z.union([ z.lazy(() => EvaluationResultWhereUniqueInputSchema),z.lazy(() => EvaluationResultWhereUniqueInputSchema).array() ]).optional(),
 }).strict();
 
 export const MessageUncheckedCreateNestedManyWithoutCallInputSchema: z.ZodType<Prisma.MessageUncheckedCreateNestedManyWithoutCallInput> = z.object({
@@ -5763,18 +5906,18 @@ export const NullableIntFieldUpdateOperationsInputSchema: z.ZodType<Prisma.Nulla
   divide: z.number().optional()
 }).strict();
 
-export const EvalResultUpdateManyWithoutCallNestedInputSchema: z.ZodType<Prisma.EvalResultUpdateManyWithoutCallNestedInput> = z.object({
-  create: z.union([ z.lazy(() => EvalResultCreateWithoutCallInputSchema),z.lazy(() => EvalResultCreateWithoutCallInputSchema).array(),z.lazy(() => EvalResultUncheckedCreateWithoutCallInputSchema),z.lazy(() => EvalResultUncheckedCreateWithoutCallInputSchema).array() ]).optional(),
-  connectOrCreate: z.union([ z.lazy(() => EvalResultCreateOrConnectWithoutCallInputSchema),z.lazy(() => EvalResultCreateOrConnectWithoutCallInputSchema).array() ]).optional(),
-  upsert: z.union([ z.lazy(() => EvalResultUpsertWithWhereUniqueWithoutCallInputSchema),z.lazy(() => EvalResultUpsertWithWhereUniqueWithoutCallInputSchema).array() ]).optional(),
-  createMany: z.lazy(() => EvalResultCreateManyCallInputEnvelopeSchema).optional(),
-  set: z.union([ z.lazy(() => EvalResultWhereUniqueInputSchema),z.lazy(() => EvalResultWhereUniqueInputSchema).array() ]).optional(),
-  disconnect: z.union([ z.lazy(() => EvalResultWhereUniqueInputSchema),z.lazy(() => EvalResultWhereUniqueInputSchema).array() ]).optional(),
-  delete: z.union([ z.lazy(() => EvalResultWhereUniqueInputSchema),z.lazy(() => EvalResultWhereUniqueInputSchema).array() ]).optional(),
-  connect: z.union([ z.lazy(() => EvalResultWhereUniqueInputSchema),z.lazy(() => EvalResultWhereUniqueInputSchema).array() ]).optional(),
-  update: z.union([ z.lazy(() => EvalResultUpdateWithWhereUniqueWithoutCallInputSchema),z.lazy(() => EvalResultUpdateWithWhereUniqueWithoutCallInputSchema).array() ]).optional(),
-  updateMany: z.union([ z.lazy(() => EvalResultUpdateManyWithWhereWithoutCallInputSchema),z.lazy(() => EvalResultUpdateManyWithWhereWithoutCallInputSchema).array() ]).optional(),
-  deleteMany: z.union([ z.lazy(() => EvalResultScalarWhereInputSchema),z.lazy(() => EvalResultScalarWhereInputSchema).array() ]).optional(),
+export const EvaluationResultUpdateManyWithoutCallNestedInputSchema: z.ZodType<Prisma.EvaluationResultUpdateManyWithoutCallNestedInput> = z.object({
+  create: z.union([ z.lazy(() => EvaluationResultCreateWithoutCallInputSchema),z.lazy(() => EvaluationResultCreateWithoutCallInputSchema).array(),z.lazy(() => EvaluationResultUncheckedCreateWithoutCallInputSchema),z.lazy(() => EvaluationResultUncheckedCreateWithoutCallInputSchema).array() ]).optional(),
+  connectOrCreate: z.union([ z.lazy(() => EvaluationResultCreateOrConnectWithoutCallInputSchema),z.lazy(() => EvaluationResultCreateOrConnectWithoutCallInputSchema).array() ]).optional(),
+  upsert: z.union([ z.lazy(() => EvaluationResultUpsertWithWhereUniqueWithoutCallInputSchema),z.lazy(() => EvaluationResultUpsertWithWhereUniqueWithoutCallInputSchema).array() ]).optional(),
+  createMany: z.lazy(() => EvaluationResultCreateManyCallInputEnvelopeSchema).optional(),
+  set: z.union([ z.lazy(() => EvaluationResultWhereUniqueInputSchema),z.lazy(() => EvaluationResultWhereUniqueInputSchema).array() ]).optional(),
+  disconnect: z.union([ z.lazy(() => EvaluationResultWhereUniqueInputSchema),z.lazy(() => EvaluationResultWhereUniqueInputSchema).array() ]).optional(),
+  delete: z.union([ z.lazy(() => EvaluationResultWhereUniqueInputSchema),z.lazy(() => EvaluationResultWhereUniqueInputSchema).array() ]).optional(),
+  connect: z.union([ z.lazy(() => EvaluationResultWhereUniqueInputSchema),z.lazy(() => EvaluationResultWhereUniqueInputSchema).array() ]).optional(),
+  update: z.union([ z.lazy(() => EvaluationResultUpdateWithWhereUniqueWithoutCallInputSchema),z.lazy(() => EvaluationResultUpdateWithWhereUniqueWithoutCallInputSchema).array() ]).optional(),
+  updateMany: z.union([ z.lazy(() => EvaluationResultUpdateManyWithWhereWithoutCallInputSchema),z.lazy(() => EvaluationResultUpdateManyWithWhereWithoutCallInputSchema).array() ]).optional(),
+  deleteMany: z.union([ z.lazy(() => EvaluationResultScalarWhereInputSchema),z.lazy(() => EvaluationResultScalarWhereInputSchema).array() ]).optional(),
 }).strict();
 
 export const AgentUpdateOneWithoutCallsNestedInputSchema: z.ZodType<Prisma.AgentUpdateOneWithoutCallsNestedInput> = z.object({
@@ -5873,18 +6016,18 @@ export const CallErrorUpdateManyWithoutCallNestedInputSchema: z.ZodType<Prisma.C
   deleteMany: z.union([ z.lazy(() => CallErrorScalarWhereInputSchema),z.lazy(() => CallErrorScalarWhereInputSchema).array() ]).optional(),
 }).strict();
 
-export const EvalResultUncheckedUpdateManyWithoutCallNestedInputSchema: z.ZodType<Prisma.EvalResultUncheckedUpdateManyWithoutCallNestedInput> = z.object({
-  create: z.union([ z.lazy(() => EvalResultCreateWithoutCallInputSchema),z.lazy(() => EvalResultCreateWithoutCallInputSchema).array(),z.lazy(() => EvalResultUncheckedCreateWithoutCallInputSchema),z.lazy(() => EvalResultUncheckedCreateWithoutCallInputSchema).array() ]).optional(),
-  connectOrCreate: z.union([ z.lazy(() => EvalResultCreateOrConnectWithoutCallInputSchema),z.lazy(() => EvalResultCreateOrConnectWithoutCallInputSchema).array() ]).optional(),
-  upsert: z.union([ z.lazy(() => EvalResultUpsertWithWhereUniqueWithoutCallInputSchema),z.lazy(() => EvalResultUpsertWithWhereUniqueWithoutCallInputSchema).array() ]).optional(),
-  createMany: z.lazy(() => EvalResultCreateManyCallInputEnvelopeSchema).optional(),
-  set: z.union([ z.lazy(() => EvalResultWhereUniqueInputSchema),z.lazy(() => EvalResultWhereUniqueInputSchema).array() ]).optional(),
-  disconnect: z.union([ z.lazy(() => EvalResultWhereUniqueInputSchema),z.lazy(() => EvalResultWhereUniqueInputSchema).array() ]).optional(),
-  delete: z.union([ z.lazy(() => EvalResultWhereUniqueInputSchema),z.lazy(() => EvalResultWhereUniqueInputSchema).array() ]).optional(),
-  connect: z.union([ z.lazy(() => EvalResultWhereUniqueInputSchema),z.lazy(() => EvalResultWhereUniqueInputSchema).array() ]).optional(),
-  update: z.union([ z.lazy(() => EvalResultUpdateWithWhereUniqueWithoutCallInputSchema),z.lazy(() => EvalResultUpdateWithWhereUniqueWithoutCallInputSchema).array() ]).optional(),
-  updateMany: z.union([ z.lazy(() => EvalResultUpdateManyWithWhereWithoutCallInputSchema),z.lazy(() => EvalResultUpdateManyWithWhereWithoutCallInputSchema).array() ]).optional(),
-  deleteMany: z.union([ z.lazy(() => EvalResultScalarWhereInputSchema),z.lazy(() => EvalResultScalarWhereInputSchema).array() ]).optional(),
+export const EvaluationResultUncheckedUpdateManyWithoutCallNestedInputSchema: z.ZodType<Prisma.EvaluationResultUncheckedUpdateManyWithoutCallNestedInput> = z.object({
+  create: z.union([ z.lazy(() => EvaluationResultCreateWithoutCallInputSchema),z.lazy(() => EvaluationResultCreateWithoutCallInputSchema).array(),z.lazy(() => EvaluationResultUncheckedCreateWithoutCallInputSchema),z.lazy(() => EvaluationResultUncheckedCreateWithoutCallInputSchema).array() ]).optional(),
+  connectOrCreate: z.union([ z.lazy(() => EvaluationResultCreateOrConnectWithoutCallInputSchema),z.lazy(() => EvaluationResultCreateOrConnectWithoutCallInputSchema).array() ]).optional(),
+  upsert: z.union([ z.lazy(() => EvaluationResultUpsertWithWhereUniqueWithoutCallInputSchema),z.lazy(() => EvaluationResultUpsertWithWhereUniqueWithoutCallInputSchema).array() ]).optional(),
+  createMany: z.lazy(() => EvaluationResultCreateManyCallInputEnvelopeSchema).optional(),
+  set: z.union([ z.lazy(() => EvaluationResultWhereUniqueInputSchema),z.lazy(() => EvaluationResultWhereUniqueInputSchema).array() ]).optional(),
+  disconnect: z.union([ z.lazy(() => EvaluationResultWhereUniqueInputSchema),z.lazy(() => EvaluationResultWhereUniqueInputSchema).array() ]).optional(),
+  delete: z.union([ z.lazy(() => EvaluationResultWhereUniqueInputSchema),z.lazy(() => EvaluationResultWhereUniqueInputSchema).array() ]).optional(),
+  connect: z.union([ z.lazy(() => EvaluationResultWhereUniqueInputSchema),z.lazy(() => EvaluationResultWhereUniqueInputSchema).array() ]).optional(),
+  update: z.union([ z.lazy(() => EvaluationResultUpdateWithWhereUniqueWithoutCallInputSchema),z.lazy(() => EvaluationResultUpdateWithWhereUniqueWithoutCallInputSchema).array() ]).optional(),
+  updateMany: z.union([ z.lazy(() => EvaluationResultUpdateManyWithWhereWithoutCallInputSchema),z.lazy(() => EvaluationResultUpdateManyWithWhereWithoutCallInputSchema).array() ]).optional(),
+  deleteMany: z.union([ z.lazy(() => EvaluationResultScalarWhereInputSchema),z.lazy(() => EvaluationResultScalarWhereInputSchema).array() ]).optional(),
 }).strict();
 
 export const MessageUncheckedUpdateManyWithoutCallNestedInputSchema: z.ZodType<Prisma.MessageUncheckedUpdateManyWithoutCallNestedInput> = z.object({
@@ -5989,13 +6132,6 @@ export const AgentCreateNestedOneWithoutScenariosInputSchema: z.ZodType<Prisma.A
   connect: z.lazy(() => AgentWhereUniqueInputSchema).optional()
 }).strict();
 
-export const EvalOverrideCreateNestedManyWithoutScenarioInputSchema: z.ZodType<Prisma.EvalOverrideCreateNestedManyWithoutScenarioInput> = z.object({
-  create: z.union([ z.lazy(() => EvalOverrideCreateWithoutScenarioInputSchema),z.lazy(() => EvalOverrideCreateWithoutScenarioInputSchema).array(),z.lazy(() => EvalOverrideUncheckedCreateWithoutScenarioInputSchema),z.lazy(() => EvalOverrideUncheckedCreateWithoutScenarioInputSchema).array() ]).optional(),
-  connectOrCreate: z.union([ z.lazy(() => EvalOverrideCreateOrConnectWithoutScenarioInputSchema),z.lazy(() => EvalOverrideCreateOrConnectWithoutScenarioInputSchema).array() ]).optional(),
-  createMany: z.lazy(() => EvalOverrideCreateManyScenarioInputEnvelopeSchema).optional(),
-  connect: z.union([ z.lazy(() => EvalOverrideWhereUniqueInputSchema),z.lazy(() => EvalOverrideWhereUniqueInputSchema).array() ]).optional(),
-}).strict();
-
 export const CallCreateNestedManyWithoutScenarioInputSchema: z.ZodType<Prisma.CallCreateNestedManyWithoutScenarioInput> = z.object({
   create: z.union([ z.lazy(() => CallCreateWithoutScenarioInputSchema),z.lazy(() => CallCreateWithoutScenarioInputSchema).array(),z.lazy(() => CallUncheckedCreateWithoutScenarioInputSchema),z.lazy(() => CallUncheckedCreateWithoutScenarioInputSchema).array() ]).optional(),
   connectOrCreate: z.union([ z.lazy(() => CallCreateOrConnectWithoutScenarioInputSchema),z.lazy(() => CallCreateOrConnectWithoutScenarioInputSchema).array() ]).optional(),
@@ -6003,18 +6139,11 @@ export const CallCreateNestedManyWithoutScenarioInputSchema: z.ZodType<Prisma.Ca
   connect: z.union([ z.lazy(() => CallWhereUniqueInputSchema),z.lazy(() => CallWhereUniqueInputSchema).array() ]).optional(),
 }).strict();
 
-export const EvalCreateNestedManyWithoutScenarioInputSchema: z.ZodType<Prisma.EvalCreateNestedManyWithoutScenarioInput> = z.object({
-  create: z.union([ z.lazy(() => EvalCreateWithoutScenarioInputSchema),z.lazy(() => EvalCreateWithoutScenarioInputSchema).array(),z.lazy(() => EvalUncheckedCreateWithoutScenarioInputSchema),z.lazy(() => EvalUncheckedCreateWithoutScenarioInputSchema).array() ]).optional(),
-  connectOrCreate: z.union([ z.lazy(() => EvalCreateOrConnectWithoutScenarioInputSchema),z.lazy(() => EvalCreateOrConnectWithoutScenarioInputSchema).array() ]).optional(),
-  createMany: z.lazy(() => EvalCreateManyScenarioInputEnvelopeSchema).optional(),
-  connect: z.union([ z.lazy(() => EvalWhereUniqueInputSchema),z.lazy(() => EvalWhereUniqueInputSchema).array() ]).optional(),
-}).strict();
-
-export const EvalOverrideUncheckedCreateNestedManyWithoutScenarioInputSchema: z.ZodType<Prisma.EvalOverrideUncheckedCreateNestedManyWithoutScenarioInput> = z.object({
-  create: z.union([ z.lazy(() => EvalOverrideCreateWithoutScenarioInputSchema),z.lazy(() => EvalOverrideCreateWithoutScenarioInputSchema).array(),z.lazy(() => EvalOverrideUncheckedCreateWithoutScenarioInputSchema),z.lazy(() => EvalOverrideUncheckedCreateWithoutScenarioInputSchema).array() ]).optional(),
-  connectOrCreate: z.union([ z.lazy(() => EvalOverrideCreateOrConnectWithoutScenarioInputSchema),z.lazy(() => EvalOverrideCreateOrConnectWithoutScenarioInputSchema).array() ]).optional(),
-  createMany: z.lazy(() => EvalOverrideCreateManyScenarioInputEnvelopeSchema).optional(),
-  connect: z.union([ z.lazy(() => EvalOverrideWhereUniqueInputSchema),z.lazy(() => EvalOverrideWhereUniqueInputSchema).array() ]).optional(),
+export const EvaluationCreateNestedManyWithoutScenarioInputSchema: z.ZodType<Prisma.EvaluationCreateNestedManyWithoutScenarioInput> = z.object({
+  create: z.union([ z.lazy(() => EvaluationCreateWithoutScenarioInputSchema),z.lazy(() => EvaluationCreateWithoutScenarioInputSchema).array(),z.lazy(() => EvaluationUncheckedCreateWithoutScenarioInputSchema),z.lazy(() => EvaluationUncheckedCreateWithoutScenarioInputSchema).array() ]).optional(),
+  connectOrCreate: z.union([ z.lazy(() => EvaluationCreateOrConnectWithoutScenarioInputSchema),z.lazy(() => EvaluationCreateOrConnectWithoutScenarioInputSchema).array() ]).optional(),
+  createMany: z.lazy(() => EvaluationCreateManyScenarioInputEnvelopeSchema).optional(),
+  connect: z.union([ z.lazy(() => EvaluationWhereUniqueInputSchema),z.lazy(() => EvaluationWhereUniqueInputSchema).array() ]).optional(),
 }).strict();
 
 export const CallUncheckedCreateNestedManyWithoutScenarioInputSchema: z.ZodType<Prisma.CallUncheckedCreateNestedManyWithoutScenarioInput> = z.object({
@@ -6024,11 +6153,11 @@ export const CallUncheckedCreateNestedManyWithoutScenarioInputSchema: z.ZodType<
   connect: z.union([ z.lazy(() => CallWhereUniqueInputSchema),z.lazy(() => CallWhereUniqueInputSchema).array() ]).optional(),
 }).strict();
 
-export const EvalUncheckedCreateNestedManyWithoutScenarioInputSchema: z.ZodType<Prisma.EvalUncheckedCreateNestedManyWithoutScenarioInput> = z.object({
-  create: z.union([ z.lazy(() => EvalCreateWithoutScenarioInputSchema),z.lazy(() => EvalCreateWithoutScenarioInputSchema).array(),z.lazy(() => EvalUncheckedCreateWithoutScenarioInputSchema),z.lazy(() => EvalUncheckedCreateWithoutScenarioInputSchema).array() ]).optional(),
-  connectOrCreate: z.union([ z.lazy(() => EvalCreateOrConnectWithoutScenarioInputSchema),z.lazy(() => EvalCreateOrConnectWithoutScenarioInputSchema).array() ]).optional(),
-  createMany: z.lazy(() => EvalCreateManyScenarioInputEnvelopeSchema).optional(),
-  connect: z.union([ z.lazy(() => EvalWhereUniqueInputSchema),z.lazy(() => EvalWhereUniqueInputSchema).array() ]).optional(),
+export const EvaluationUncheckedCreateNestedManyWithoutScenarioInputSchema: z.ZodType<Prisma.EvaluationUncheckedCreateNestedManyWithoutScenarioInput> = z.object({
+  create: z.union([ z.lazy(() => EvaluationCreateWithoutScenarioInputSchema),z.lazy(() => EvaluationCreateWithoutScenarioInputSchema).array(),z.lazy(() => EvaluationUncheckedCreateWithoutScenarioInputSchema),z.lazy(() => EvaluationUncheckedCreateWithoutScenarioInputSchema).array() ]).optional(),
+  connectOrCreate: z.union([ z.lazy(() => EvaluationCreateOrConnectWithoutScenarioInputSchema),z.lazy(() => EvaluationCreateOrConnectWithoutScenarioInputSchema).array() ]).optional(),
+  createMany: z.lazy(() => EvaluationCreateManyScenarioInputEnvelopeSchema).optional(),
+  connect: z.union([ z.lazy(() => EvaluationWhereUniqueInputSchema),z.lazy(() => EvaluationWhereUniqueInputSchema).array() ]).optional(),
 }).strict();
 
 export const AgentUpdateOneRequiredWithoutScenariosNestedInputSchema: z.ZodType<Prisma.AgentUpdateOneRequiredWithoutScenariosNestedInput> = z.object({
@@ -6037,20 +6166,6 @@ export const AgentUpdateOneRequiredWithoutScenariosNestedInputSchema: z.ZodType<
   upsert: z.lazy(() => AgentUpsertWithoutScenariosInputSchema).optional(),
   connect: z.lazy(() => AgentWhereUniqueInputSchema).optional(),
   update: z.union([ z.lazy(() => AgentUpdateToOneWithWhereWithoutScenariosInputSchema),z.lazy(() => AgentUpdateWithoutScenariosInputSchema),z.lazy(() => AgentUncheckedUpdateWithoutScenariosInputSchema) ]).optional(),
-}).strict();
-
-export const EvalOverrideUpdateManyWithoutScenarioNestedInputSchema: z.ZodType<Prisma.EvalOverrideUpdateManyWithoutScenarioNestedInput> = z.object({
-  create: z.union([ z.lazy(() => EvalOverrideCreateWithoutScenarioInputSchema),z.lazy(() => EvalOverrideCreateWithoutScenarioInputSchema).array(),z.lazy(() => EvalOverrideUncheckedCreateWithoutScenarioInputSchema),z.lazy(() => EvalOverrideUncheckedCreateWithoutScenarioInputSchema).array() ]).optional(),
-  connectOrCreate: z.union([ z.lazy(() => EvalOverrideCreateOrConnectWithoutScenarioInputSchema),z.lazy(() => EvalOverrideCreateOrConnectWithoutScenarioInputSchema).array() ]).optional(),
-  upsert: z.union([ z.lazy(() => EvalOverrideUpsertWithWhereUniqueWithoutScenarioInputSchema),z.lazy(() => EvalOverrideUpsertWithWhereUniqueWithoutScenarioInputSchema).array() ]).optional(),
-  createMany: z.lazy(() => EvalOverrideCreateManyScenarioInputEnvelopeSchema).optional(),
-  set: z.union([ z.lazy(() => EvalOverrideWhereUniqueInputSchema),z.lazy(() => EvalOverrideWhereUniqueInputSchema).array() ]).optional(),
-  disconnect: z.union([ z.lazy(() => EvalOverrideWhereUniqueInputSchema),z.lazy(() => EvalOverrideWhereUniqueInputSchema).array() ]).optional(),
-  delete: z.union([ z.lazy(() => EvalOverrideWhereUniqueInputSchema),z.lazy(() => EvalOverrideWhereUniqueInputSchema).array() ]).optional(),
-  connect: z.union([ z.lazy(() => EvalOverrideWhereUniqueInputSchema),z.lazy(() => EvalOverrideWhereUniqueInputSchema).array() ]).optional(),
-  update: z.union([ z.lazy(() => EvalOverrideUpdateWithWhereUniqueWithoutScenarioInputSchema),z.lazy(() => EvalOverrideUpdateWithWhereUniqueWithoutScenarioInputSchema).array() ]).optional(),
-  updateMany: z.union([ z.lazy(() => EvalOverrideUpdateManyWithWhereWithoutScenarioInputSchema),z.lazy(() => EvalOverrideUpdateManyWithWhereWithoutScenarioInputSchema).array() ]).optional(),
-  deleteMany: z.union([ z.lazy(() => EvalOverrideScalarWhereInputSchema),z.lazy(() => EvalOverrideScalarWhereInputSchema).array() ]).optional(),
 }).strict();
 
 export const CallUpdateManyWithoutScenarioNestedInputSchema: z.ZodType<Prisma.CallUpdateManyWithoutScenarioNestedInput> = z.object({
@@ -6067,32 +6182,18 @@ export const CallUpdateManyWithoutScenarioNestedInputSchema: z.ZodType<Prisma.Ca
   deleteMany: z.union([ z.lazy(() => CallScalarWhereInputSchema),z.lazy(() => CallScalarWhereInputSchema).array() ]).optional(),
 }).strict();
 
-export const EvalUpdateManyWithoutScenarioNestedInputSchema: z.ZodType<Prisma.EvalUpdateManyWithoutScenarioNestedInput> = z.object({
-  create: z.union([ z.lazy(() => EvalCreateWithoutScenarioInputSchema),z.lazy(() => EvalCreateWithoutScenarioInputSchema).array(),z.lazy(() => EvalUncheckedCreateWithoutScenarioInputSchema),z.lazy(() => EvalUncheckedCreateWithoutScenarioInputSchema).array() ]).optional(),
-  connectOrCreate: z.union([ z.lazy(() => EvalCreateOrConnectWithoutScenarioInputSchema),z.lazy(() => EvalCreateOrConnectWithoutScenarioInputSchema).array() ]).optional(),
-  upsert: z.union([ z.lazy(() => EvalUpsertWithWhereUniqueWithoutScenarioInputSchema),z.lazy(() => EvalUpsertWithWhereUniqueWithoutScenarioInputSchema).array() ]).optional(),
-  createMany: z.lazy(() => EvalCreateManyScenarioInputEnvelopeSchema).optional(),
-  set: z.union([ z.lazy(() => EvalWhereUniqueInputSchema),z.lazy(() => EvalWhereUniqueInputSchema).array() ]).optional(),
-  disconnect: z.union([ z.lazy(() => EvalWhereUniqueInputSchema),z.lazy(() => EvalWhereUniqueInputSchema).array() ]).optional(),
-  delete: z.union([ z.lazy(() => EvalWhereUniqueInputSchema),z.lazy(() => EvalWhereUniqueInputSchema).array() ]).optional(),
-  connect: z.union([ z.lazy(() => EvalWhereUniqueInputSchema),z.lazy(() => EvalWhereUniqueInputSchema).array() ]).optional(),
-  update: z.union([ z.lazy(() => EvalUpdateWithWhereUniqueWithoutScenarioInputSchema),z.lazy(() => EvalUpdateWithWhereUniqueWithoutScenarioInputSchema).array() ]).optional(),
-  updateMany: z.union([ z.lazy(() => EvalUpdateManyWithWhereWithoutScenarioInputSchema),z.lazy(() => EvalUpdateManyWithWhereWithoutScenarioInputSchema).array() ]).optional(),
-  deleteMany: z.union([ z.lazy(() => EvalScalarWhereInputSchema),z.lazy(() => EvalScalarWhereInputSchema).array() ]).optional(),
-}).strict();
-
-export const EvalOverrideUncheckedUpdateManyWithoutScenarioNestedInputSchema: z.ZodType<Prisma.EvalOverrideUncheckedUpdateManyWithoutScenarioNestedInput> = z.object({
-  create: z.union([ z.lazy(() => EvalOverrideCreateWithoutScenarioInputSchema),z.lazy(() => EvalOverrideCreateWithoutScenarioInputSchema).array(),z.lazy(() => EvalOverrideUncheckedCreateWithoutScenarioInputSchema),z.lazy(() => EvalOverrideUncheckedCreateWithoutScenarioInputSchema).array() ]).optional(),
-  connectOrCreate: z.union([ z.lazy(() => EvalOverrideCreateOrConnectWithoutScenarioInputSchema),z.lazy(() => EvalOverrideCreateOrConnectWithoutScenarioInputSchema).array() ]).optional(),
-  upsert: z.union([ z.lazy(() => EvalOverrideUpsertWithWhereUniqueWithoutScenarioInputSchema),z.lazy(() => EvalOverrideUpsertWithWhereUniqueWithoutScenarioInputSchema).array() ]).optional(),
-  createMany: z.lazy(() => EvalOverrideCreateManyScenarioInputEnvelopeSchema).optional(),
-  set: z.union([ z.lazy(() => EvalOverrideWhereUniqueInputSchema),z.lazy(() => EvalOverrideWhereUniqueInputSchema).array() ]).optional(),
-  disconnect: z.union([ z.lazy(() => EvalOverrideWhereUniqueInputSchema),z.lazy(() => EvalOverrideWhereUniqueInputSchema).array() ]).optional(),
-  delete: z.union([ z.lazy(() => EvalOverrideWhereUniqueInputSchema),z.lazy(() => EvalOverrideWhereUniqueInputSchema).array() ]).optional(),
-  connect: z.union([ z.lazy(() => EvalOverrideWhereUniqueInputSchema),z.lazy(() => EvalOverrideWhereUniqueInputSchema).array() ]).optional(),
-  update: z.union([ z.lazy(() => EvalOverrideUpdateWithWhereUniqueWithoutScenarioInputSchema),z.lazy(() => EvalOverrideUpdateWithWhereUniqueWithoutScenarioInputSchema).array() ]).optional(),
-  updateMany: z.union([ z.lazy(() => EvalOverrideUpdateManyWithWhereWithoutScenarioInputSchema),z.lazy(() => EvalOverrideUpdateManyWithWhereWithoutScenarioInputSchema).array() ]).optional(),
-  deleteMany: z.union([ z.lazy(() => EvalOverrideScalarWhereInputSchema),z.lazy(() => EvalOverrideScalarWhereInputSchema).array() ]).optional(),
+export const EvaluationUpdateManyWithoutScenarioNestedInputSchema: z.ZodType<Prisma.EvaluationUpdateManyWithoutScenarioNestedInput> = z.object({
+  create: z.union([ z.lazy(() => EvaluationCreateWithoutScenarioInputSchema),z.lazy(() => EvaluationCreateWithoutScenarioInputSchema).array(),z.lazy(() => EvaluationUncheckedCreateWithoutScenarioInputSchema),z.lazy(() => EvaluationUncheckedCreateWithoutScenarioInputSchema).array() ]).optional(),
+  connectOrCreate: z.union([ z.lazy(() => EvaluationCreateOrConnectWithoutScenarioInputSchema),z.lazy(() => EvaluationCreateOrConnectWithoutScenarioInputSchema).array() ]).optional(),
+  upsert: z.union([ z.lazy(() => EvaluationUpsertWithWhereUniqueWithoutScenarioInputSchema),z.lazy(() => EvaluationUpsertWithWhereUniqueWithoutScenarioInputSchema).array() ]).optional(),
+  createMany: z.lazy(() => EvaluationCreateManyScenarioInputEnvelopeSchema).optional(),
+  set: z.union([ z.lazy(() => EvaluationWhereUniqueInputSchema),z.lazy(() => EvaluationWhereUniqueInputSchema).array() ]).optional(),
+  disconnect: z.union([ z.lazy(() => EvaluationWhereUniqueInputSchema),z.lazy(() => EvaluationWhereUniqueInputSchema).array() ]).optional(),
+  delete: z.union([ z.lazy(() => EvaluationWhereUniqueInputSchema),z.lazy(() => EvaluationWhereUniqueInputSchema).array() ]).optional(),
+  connect: z.union([ z.lazy(() => EvaluationWhereUniqueInputSchema),z.lazy(() => EvaluationWhereUniqueInputSchema).array() ]).optional(),
+  update: z.union([ z.lazy(() => EvaluationUpdateWithWhereUniqueWithoutScenarioInputSchema),z.lazy(() => EvaluationUpdateWithWhereUniqueWithoutScenarioInputSchema).array() ]).optional(),
+  updateMany: z.union([ z.lazy(() => EvaluationUpdateManyWithWhereWithoutScenarioInputSchema),z.lazy(() => EvaluationUpdateManyWithWhereWithoutScenarioInputSchema).array() ]).optional(),
+  deleteMany: z.union([ z.lazy(() => EvaluationScalarWhereInputSchema),z.lazy(() => EvaluationScalarWhereInputSchema).array() ]).optional(),
 }).strict();
 
 export const CallUncheckedUpdateManyWithoutScenarioNestedInputSchema: z.ZodType<Prisma.CallUncheckedUpdateManyWithoutScenarioNestedInput> = z.object({
@@ -6109,64 +6210,55 @@ export const CallUncheckedUpdateManyWithoutScenarioNestedInputSchema: z.ZodType<
   deleteMany: z.union([ z.lazy(() => CallScalarWhereInputSchema),z.lazy(() => CallScalarWhereInputSchema).array() ]).optional(),
 }).strict();
 
-export const EvalUncheckedUpdateManyWithoutScenarioNestedInputSchema: z.ZodType<Prisma.EvalUncheckedUpdateManyWithoutScenarioNestedInput> = z.object({
-  create: z.union([ z.lazy(() => EvalCreateWithoutScenarioInputSchema),z.lazy(() => EvalCreateWithoutScenarioInputSchema).array(),z.lazy(() => EvalUncheckedCreateWithoutScenarioInputSchema),z.lazy(() => EvalUncheckedCreateWithoutScenarioInputSchema).array() ]).optional(),
-  connectOrCreate: z.union([ z.lazy(() => EvalCreateOrConnectWithoutScenarioInputSchema),z.lazy(() => EvalCreateOrConnectWithoutScenarioInputSchema).array() ]).optional(),
-  upsert: z.union([ z.lazy(() => EvalUpsertWithWhereUniqueWithoutScenarioInputSchema),z.lazy(() => EvalUpsertWithWhereUniqueWithoutScenarioInputSchema).array() ]).optional(),
-  createMany: z.lazy(() => EvalCreateManyScenarioInputEnvelopeSchema).optional(),
-  set: z.union([ z.lazy(() => EvalWhereUniqueInputSchema),z.lazy(() => EvalWhereUniqueInputSchema).array() ]).optional(),
-  disconnect: z.union([ z.lazy(() => EvalWhereUniqueInputSchema),z.lazy(() => EvalWhereUniqueInputSchema).array() ]).optional(),
-  delete: z.union([ z.lazy(() => EvalWhereUniqueInputSchema),z.lazy(() => EvalWhereUniqueInputSchema).array() ]).optional(),
-  connect: z.union([ z.lazy(() => EvalWhereUniqueInputSchema),z.lazy(() => EvalWhereUniqueInputSchema).array() ]).optional(),
-  update: z.union([ z.lazy(() => EvalUpdateWithWhereUniqueWithoutScenarioInputSchema),z.lazy(() => EvalUpdateWithWhereUniqueWithoutScenarioInputSchema).array() ]).optional(),
-  updateMany: z.union([ z.lazy(() => EvalUpdateManyWithWhereWithoutScenarioInputSchema),z.lazy(() => EvalUpdateManyWithWhereWithoutScenarioInputSchema).array() ]).optional(),
-  deleteMany: z.union([ z.lazy(() => EvalScalarWhereInputSchema),z.lazy(() => EvalScalarWhereInputSchema).array() ]).optional(),
+export const EvaluationUncheckedUpdateManyWithoutScenarioNestedInputSchema: z.ZodType<Prisma.EvaluationUncheckedUpdateManyWithoutScenarioNestedInput> = z.object({
+  create: z.union([ z.lazy(() => EvaluationCreateWithoutScenarioInputSchema),z.lazy(() => EvaluationCreateWithoutScenarioInputSchema).array(),z.lazy(() => EvaluationUncheckedCreateWithoutScenarioInputSchema),z.lazy(() => EvaluationUncheckedCreateWithoutScenarioInputSchema).array() ]).optional(),
+  connectOrCreate: z.union([ z.lazy(() => EvaluationCreateOrConnectWithoutScenarioInputSchema),z.lazy(() => EvaluationCreateOrConnectWithoutScenarioInputSchema).array() ]).optional(),
+  upsert: z.union([ z.lazy(() => EvaluationUpsertWithWhereUniqueWithoutScenarioInputSchema),z.lazy(() => EvaluationUpsertWithWhereUniqueWithoutScenarioInputSchema).array() ]).optional(),
+  createMany: z.lazy(() => EvaluationCreateManyScenarioInputEnvelopeSchema).optional(),
+  set: z.union([ z.lazy(() => EvaluationWhereUniqueInputSchema),z.lazy(() => EvaluationWhereUniqueInputSchema).array() ]).optional(),
+  disconnect: z.union([ z.lazy(() => EvaluationWhereUniqueInputSchema),z.lazy(() => EvaluationWhereUniqueInputSchema).array() ]).optional(),
+  delete: z.union([ z.lazy(() => EvaluationWhereUniqueInputSchema),z.lazy(() => EvaluationWhereUniqueInputSchema).array() ]).optional(),
+  connect: z.union([ z.lazy(() => EvaluationWhereUniqueInputSchema),z.lazy(() => EvaluationWhereUniqueInputSchema).array() ]).optional(),
+  update: z.union([ z.lazy(() => EvaluationUpdateWithWhereUniqueWithoutScenarioInputSchema),z.lazy(() => EvaluationUpdateWithWhereUniqueWithoutScenarioInputSchema).array() ]).optional(),
+  updateMany: z.union([ z.lazy(() => EvaluationUpdateManyWithWhereWithoutScenarioInputSchema),z.lazy(() => EvaluationUpdateManyWithWhereWithoutScenarioInputSchema).array() ]).optional(),
+  deleteMany: z.union([ z.lazy(() => EvaluationScalarWhereInputSchema),z.lazy(() => EvaluationScalarWhereInputSchema).array() ]).optional(),
 }).strict();
 
-export const ScenarioCreateNestedOneWithoutEvalsInputSchema: z.ZodType<Prisma.ScenarioCreateNestedOneWithoutEvalsInput> = z.object({
-  create: z.union([ z.lazy(() => ScenarioCreateWithoutEvalsInputSchema),z.lazy(() => ScenarioUncheckedCreateWithoutEvalsInputSchema) ]).optional(),
-  connectOrCreate: z.lazy(() => ScenarioCreateOrConnectWithoutEvalsInputSchema).optional(),
-  connect: z.lazy(() => ScenarioWhereUniqueInputSchema).optional()
+export const EvaluationTemplateCreateparamsInputSchema: z.ZodType<Prisma.EvaluationTemplateCreateparamsInput> = z.object({
+  set: z.string().array()
 }).strict();
 
-export const EvalResultCreateNestedManyWithoutEvalInputSchema: z.ZodType<Prisma.EvalResultCreateNestedManyWithoutEvalInput> = z.object({
-  create: z.union([ z.lazy(() => EvalResultCreateWithoutEvalInputSchema),z.lazy(() => EvalResultCreateWithoutEvalInputSchema).array(),z.lazy(() => EvalResultUncheckedCreateWithoutEvalInputSchema),z.lazy(() => EvalResultUncheckedCreateWithoutEvalInputSchema).array() ]).optional(),
-  connectOrCreate: z.union([ z.lazy(() => EvalResultCreateOrConnectWithoutEvalInputSchema),z.lazy(() => EvalResultCreateOrConnectWithoutEvalInputSchema).array() ]).optional(),
-  createMany: z.lazy(() => EvalResultCreateManyEvalInputEnvelopeSchema).optional(),
-  connect: z.union([ z.lazy(() => EvalResultWhereUniqueInputSchema),z.lazy(() => EvalResultWhereUniqueInputSchema).array() ]).optional(),
+export const EvaluationResultCreateNestedManyWithoutEvaluationTemplateInputSchema: z.ZodType<Prisma.EvaluationResultCreateNestedManyWithoutEvaluationTemplateInput> = z.object({
+  create: z.union([ z.lazy(() => EvaluationResultCreateWithoutEvaluationTemplateInputSchema),z.lazy(() => EvaluationResultCreateWithoutEvaluationTemplateInputSchema).array(),z.lazy(() => EvaluationResultUncheckedCreateWithoutEvaluationTemplateInputSchema),z.lazy(() => EvaluationResultUncheckedCreateWithoutEvaluationTemplateInputSchema).array() ]).optional(),
+  connectOrCreate: z.union([ z.lazy(() => EvaluationResultCreateOrConnectWithoutEvaluationTemplateInputSchema),z.lazy(() => EvaluationResultCreateOrConnectWithoutEvaluationTemplateInputSchema).array() ]).optional(),
+  createMany: z.lazy(() => EvaluationResultCreateManyEvaluationTemplateInputEnvelopeSchema).optional(),
+  connect: z.union([ z.lazy(() => EvaluationResultWhereUniqueInputSchema),z.lazy(() => EvaluationResultWhereUniqueInputSchema).array() ]).optional(),
 }).strict();
 
-export const AgentCreateNestedOneWithoutEnabledGeneralEvalsInputSchema: z.ZodType<Prisma.AgentCreateNestedOneWithoutEnabledGeneralEvalsInput> = z.object({
-  create: z.union([ z.lazy(() => AgentCreateWithoutEnabledGeneralEvalsInputSchema),z.lazy(() => AgentUncheckedCreateWithoutEnabledGeneralEvalsInputSchema) ]).optional(),
-  connectOrCreate: z.lazy(() => AgentCreateOrConnectWithoutEnabledGeneralEvalsInputSchema).optional(),
-  connect: z.lazy(() => AgentWhereUniqueInputSchema).optional()
+export const EvaluationCreateNestedManyWithoutEvaluationTemplateInputSchema: z.ZodType<Prisma.EvaluationCreateNestedManyWithoutEvaluationTemplateInput> = z.object({
+  create: z.union([ z.lazy(() => EvaluationCreateWithoutEvaluationTemplateInputSchema),z.lazy(() => EvaluationCreateWithoutEvaluationTemplateInputSchema).array(),z.lazy(() => EvaluationUncheckedCreateWithoutEvaluationTemplateInputSchema),z.lazy(() => EvaluationUncheckedCreateWithoutEvaluationTemplateInputSchema).array() ]).optional(),
+  connectOrCreate: z.union([ z.lazy(() => EvaluationCreateOrConnectWithoutEvaluationTemplateInputSchema),z.lazy(() => EvaluationCreateOrConnectWithoutEvaluationTemplateInputSchema).array() ]).optional(),
+  createMany: z.lazy(() => EvaluationCreateManyEvaluationTemplateInputEnvelopeSchema).optional(),
+  connect: z.union([ z.lazy(() => EvaluationWhereUniqueInputSchema),z.lazy(() => EvaluationWhereUniqueInputSchema).array() ]).optional(),
 }).strict();
 
-export const EvalOverrideCreateNestedManyWithoutEvalInputSchema: z.ZodType<Prisma.EvalOverrideCreateNestedManyWithoutEvalInput> = z.object({
-  create: z.union([ z.lazy(() => EvalOverrideCreateWithoutEvalInputSchema),z.lazy(() => EvalOverrideCreateWithoutEvalInputSchema).array(),z.lazy(() => EvalOverrideUncheckedCreateWithoutEvalInputSchema),z.lazy(() => EvalOverrideUncheckedCreateWithoutEvalInputSchema).array() ]).optional(),
-  connectOrCreate: z.union([ z.lazy(() => EvalOverrideCreateOrConnectWithoutEvalInputSchema),z.lazy(() => EvalOverrideCreateOrConnectWithoutEvalInputSchema).array() ]).optional(),
-  createMany: z.lazy(() => EvalOverrideCreateManyEvalInputEnvelopeSchema).optional(),
-  connect: z.union([ z.lazy(() => EvalOverrideWhereUniqueInputSchema),z.lazy(() => EvalOverrideWhereUniqueInputSchema).array() ]).optional(),
+export const EvaluationResultUncheckedCreateNestedManyWithoutEvaluationTemplateInputSchema: z.ZodType<Prisma.EvaluationResultUncheckedCreateNestedManyWithoutEvaluationTemplateInput> = z.object({
+  create: z.union([ z.lazy(() => EvaluationResultCreateWithoutEvaluationTemplateInputSchema),z.lazy(() => EvaluationResultCreateWithoutEvaluationTemplateInputSchema).array(),z.lazy(() => EvaluationResultUncheckedCreateWithoutEvaluationTemplateInputSchema),z.lazy(() => EvaluationResultUncheckedCreateWithoutEvaluationTemplateInputSchema).array() ]).optional(),
+  connectOrCreate: z.union([ z.lazy(() => EvaluationResultCreateOrConnectWithoutEvaluationTemplateInputSchema),z.lazy(() => EvaluationResultCreateOrConnectWithoutEvaluationTemplateInputSchema).array() ]).optional(),
+  createMany: z.lazy(() => EvaluationResultCreateManyEvaluationTemplateInputEnvelopeSchema).optional(),
+  connect: z.union([ z.lazy(() => EvaluationResultWhereUniqueInputSchema),z.lazy(() => EvaluationResultWhereUniqueInputSchema).array() ]).optional(),
 }).strict();
 
-export const EvalSetCreateNestedOneWithoutEvalsInputSchema: z.ZodType<Prisma.EvalSetCreateNestedOneWithoutEvalsInput> = z.object({
-  create: z.union([ z.lazy(() => EvalSetCreateWithoutEvalsInputSchema),z.lazy(() => EvalSetUncheckedCreateWithoutEvalsInputSchema) ]).optional(),
-  connectOrCreate: z.lazy(() => EvalSetCreateOrConnectWithoutEvalsInputSchema).optional(),
-  connect: z.lazy(() => EvalSetWhereUniqueInputSchema).optional()
+export const EvaluationUncheckedCreateNestedManyWithoutEvaluationTemplateInputSchema: z.ZodType<Prisma.EvaluationUncheckedCreateNestedManyWithoutEvaluationTemplateInput> = z.object({
+  create: z.union([ z.lazy(() => EvaluationCreateWithoutEvaluationTemplateInputSchema),z.lazy(() => EvaluationCreateWithoutEvaluationTemplateInputSchema).array(),z.lazy(() => EvaluationUncheckedCreateWithoutEvaluationTemplateInputSchema),z.lazy(() => EvaluationUncheckedCreateWithoutEvaluationTemplateInputSchema).array() ]).optional(),
+  connectOrCreate: z.union([ z.lazy(() => EvaluationCreateOrConnectWithoutEvaluationTemplateInputSchema),z.lazy(() => EvaluationCreateOrConnectWithoutEvaluationTemplateInputSchema).array() ]).optional(),
+  createMany: z.lazy(() => EvaluationCreateManyEvaluationTemplateInputEnvelopeSchema).optional(),
+  connect: z.union([ z.lazy(() => EvaluationWhereUniqueInputSchema),z.lazy(() => EvaluationWhereUniqueInputSchema).array() ]).optional(),
 }).strict();
 
-export const EvalResultUncheckedCreateNestedManyWithoutEvalInputSchema: z.ZodType<Prisma.EvalResultUncheckedCreateNestedManyWithoutEvalInput> = z.object({
-  create: z.union([ z.lazy(() => EvalResultCreateWithoutEvalInputSchema),z.lazy(() => EvalResultCreateWithoutEvalInputSchema).array(),z.lazy(() => EvalResultUncheckedCreateWithoutEvalInputSchema),z.lazy(() => EvalResultUncheckedCreateWithoutEvalInputSchema).array() ]).optional(),
-  connectOrCreate: z.union([ z.lazy(() => EvalResultCreateOrConnectWithoutEvalInputSchema),z.lazy(() => EvalResultCreateOrConnectWithoutEvalInputSchema).array() ]).optional(),
-  createMany: z.lazy(() => EvalResultCreateManyEvalInputEnvelopeSchema).optional(),
-  connect: z.union([ z.lazy(() => EvalResultWhereUniqueInputSchema),z.lazy(() => EvalResultWhereUniqueInputSchema).array() ]).optional(),
-}).strict();
-
-export const EvalOverrideUncheckedCreateNestedManyWithoutEvalInputSchema: z.ZodType<Prisma.EvalOverrideUncheckedCreateNestedManyWithoutEvalInput> = z.object({
-  create: z.union([ z.lazy(() => EvalOverrideCreateWithoutEvalInputSchema),z.lazy(() => EvalOverrideCreateWithoutEvalInputSchema).array(),z.lazy(() => EvalOverrideUncheckedCreateWithoutEvalInputSchema),z.lazy(() => EvalOverrideUncheckedCreateWithoutEvalInputSchema).array() ]).optional(),
-  connectOrCreate: z.union([ z.lazy(() => EvalOverrideCreateOrConnectWithoutEvalInputSchema),z.lazy(() => EvalOverrideCreateOrConnectWithoutEvalInputSchema).array() ]).optional(),
-  createMany: z.lazy(() => EvalOverrideCreateManyEvalInputEnvelopeSchema).optional(),
-  connect: z.union([ z.lazy(() => EvalOverrideWhereUniqueInputSchema),z.lazy(() => EvalOverrideWhereUniqueInputSchema).array() ]).optional(),
+export const EvaluationTemplateUpdateparamsInputSchema: z.ZodType<Prisma.EvaluationTemplateUpdateparamsInput> = z.object({
+  set: z.string().array().optional(),
+  push: z.union([ z.string(),z.string().array() ]).optional(),
 }).strict();
 
 export const EnumEvalTypeFieldUpdateOperationsInputSchema: z.ZodType<Prisma.EnumEvalTypeFieldUpdateOperationsInput> = z.object({
@@ -6181,148 +6273,264 @@ export const EnumEvalContentTypeFieldUpdateOperationsInputSchema: z.ZodType<Pris
   set: z.lazy(() => EvalContentTypeSchema).optional()
 }).strict();
 
-export const ScenarioUpdateOneWithoutEvalsNestedInputSchema: z.ZodType<Prisma.ScenarioUpdateOneWithoutEvalsNestedInput> = z.object({
-  create: z.union([ z.lazy(() => ScenarioCreateWithoutEvalsInputSchema),z.lazy(() => ScenarioUncheckedCreateWithoutEvalsInputSchema) ]).optional(),
-  connectOrCreate: z.lazy(() => ScenarioCreateOrConnectWithoutEvalsInputSchema).optional(),
-  upsert: z.lazy(() => ScenarioUpsertWithoutEvalsInputSchema).optional(),
-  disconnect: z.union([ z.boolean(),z.lazy(() => ScenarioWhereInputSchema) ]).optional(),
-  delete: z.union([ z.boolean(),z.lazy(() => ScenarioWhereInputSchema) ]).optional(),
-  connect: z.lazy(() => ScenarioWhereUniqueInputSchema).optional(),
-  update: z.union([ z.lazy(() => ScenarioUpdateToOneWithWhereWithoutEvalsInputSchema),z.lazy(() => ScenarioUpdateWithoutEvalsInputSchema),z.lazy(() => ScenarioUncheckedUpdateWithoutEvalsInputSchema) ]).optional(),
+export const EvaluationResultUpdateManyWithoutEvaluationTemplateNestedInputSchema: z.ZodType<Prisma.EvaluationResultUpdateManyWithoutEvaluationTemplateNestedInput> = z.object({
+  create: z.union([ z.lazy(() => EvaluationResultCreateWithoutEvaluationTemplateInputSchema),z.lazy(() => EvaluationResultCreateWithoutEvaluationTemplateInputSchema).array(),z.lazy(() => EvaluationResultUncheckedCreateWithoutEvaluationTemplateInputSchema),z.lazy(() => EvaluationResultUncheckedCreateWithoutEvaluationTemplateInputSchema).array() ]).optional(),
+  connectOrCreate: z.union([ z.lazy(() => EvaluationResultCreateOrConnectWithoutEvaluationTemplateInputSchema),z.lazy(() => EvaluationResultCreateOrConnectWithoutEvaluationTemplateInputSchema).array() ]).optional(),
+  upsert: z.union([ z.lazy(() => EvaluationResultUpsertWithWhereUniqueWithoutEvaluationTemplateInputSchema),z.lazy(() => EvaluationResultUpsertWithWhereUniqueWithoutEvaluationTemplateInputSchema).array() ]).optional(),
+  createMany: z.lazy(() => EvaluationResultCreateManyEvaluationTemplateInputEnvelopeSchema).optional(),
+  set: z.union([ z.lazy(() => EvaluationResultWhereUniqueInputSchema),z.lazy(() => EvaluationResultWhereUniqueInputSchema).array() ]).optional(),
+  disconnect: z.union([ z.lazy(() => EvaluationResultWhereUniqueInputSchema),z.lazy(() => EvaluationResultWhereUniqueInputSchema).array() ]).optional(),
+  delete: z.union([ z.lazy(() => EvaluationResultWhereUniqueInputSchema),z.lazy(() => EvaluationResultWhereUniqueInputSchema).array() ]).optional(),
+  connect: z.union([ z.lazy(() => EvaluationResultWhereUniqueInputSchema),z.lazy(() => EvaluationResultWhereUniqueInputSchema).array() ]).optional(),
+  update: z.union([ z.lazy(() => EvaluationResultUpdateWithWhereUniqueWithoutEvaluationTemplateInputSchema),z.lazy(() => EvaluationResultUpdateWithWhereUniqueWithoutEvaluationTemplateInputSchema).array() ]).optional(),
+  updateMany: z.union([ z.lazy(() => EvaluationResultUpdateManyWithWhereWithoutEvaluationTemplateInputSchema),z.lazy(() => EvaluationResultUpdateManyWithWhereWithoutEvaluationTemplateInputSchema).array() ]).optional(),
+  deleteMany: z.union([ z.lazy(() => EvaluationResultScalarWhereInputSchema),z.lazy(() => EvaluationResultScalarWhereInputSchema).array() ]).optional(),
 }).strict();
 
-export const EvalResultUpdateManyWithoutEvalNestedInputSchema: z.ZodType<Prisma.EvalResultUpdateManyWithoutEvalNestedInput> = z.object({
-  create: z.union([ z.lazy(() => EvalResultCreateWithoutEvalInputSchema),z.lazy(() => EvalResultCreateWithoutEvalInputSchema).array(),z.lazy(() => EvalResultUncheckedCreateWithoutEvalInputSchema),z.lazy(() => EvalResultUncheckedCreateWithoutEvalInputSchema).array() ]).optional(),
-  connectOrCreate: z.union([ z.lazy(() => EvalResultCreateOrConnectWithoutEvalInputSchema),z.lazy(() => EvalResultCreateOrConnectWithoutEvalInputSchema).array() ]).optional(),
-  upsert: z.union([ z.lazy(() => EvalResultUpsertWithWhereUniqueWithoutEvalInputSchema),z.lazy(() => EvalResultUpsertWithWhereUniqueWithoutEvalInputSchema).array() ]).optional(),
-  createMany: z.lazy(() => EvalResultCreateManyEvalInputEnvelopeSchema).optional(),
-  set: z.union([ z.lazy(() => EvalResultWhereUniqueInputSchema),z.lazy(() => EvalResultWhereUniqueInputSchema).array() ]).optional(),
-  disconnect: z.union([ z.lazy(() => EvalResultWhereUniqueInputSchema),z.lazy(() => EvalResultWhereUniqueInputSchema).array() ]).optional(),
-  delete: z.union([ z.lazy(() => EvalResultWhereUniqueInputSchema),z.lazy(() => EvalResultWhereUniqueInputSchema).array() ]).optional(),
-  connect: z.union([ z.lazy(() => EvalResultWhereUniqueInputSchema),z.lazy(() => EvalResultWhereUniqueInputSchema).array() ]).optional(),
-  update: z.union([ z.lazy(() => EvalResultUpdateWithWhereUniqueWithoutEvalInputSchema),z.lazy(() => EvalResultUpdateWithWhereUniqueWithoutEvalInputSchema).array() ]).optional(),
-  updateMany: z.union([ z.lazy(() => EvalResultUpdateManyWithWhereWithoutEvalInputSchema),z.lazy(() => EvalResultUpdateManyWithWhereWithoutEvalInputSchema).array() ]).optional(),
-  deleteMany: z.union([ z.lazy(() => EvalResultScalarWhereInputSchema),z.lazy(() => EvalResultScalarWhereInputSchema).array() ]).optional(),
+export const EvaluationUpdateManyWithoutEvaluationTemplateNestedInputSchema: z.ZodType<Prisma.EvaluationUpdateManyWithoutEvaluationTemplateNestedInput> = z.object({
+  create: z.union([ z.lazy(() => EvaluationCreateWithoutEvaluationTemplateInputSchema),z.lazy(() => EvaluationCreateWithoutEvaluationTemplateInputSchema).array(),z.lazy(() => EvaluationUncheckedCreateWithoutEvaluationTemplateInputSchema),z.lazy(() => EvaluationUncheckedCreateWithoutEvaluationTemplateInputSchema).array() ]).optional(),
+  connectOrCreate: z.union([ z.lazy(() => EvaluationCreateOrConnectWithoutEvaluationTemplateInputSchema),z.lazy(() => EvaluationCreateOrConnectWithoutEvaluationTemplateInputSchema).array() ]).optional(),
+  upsert: z.union([ z.lazy(() => EvaluationUpsertWithWhereUniqueWithoutEvaluationTemplateInputSchema),z.lazy(() => EvaluationUpsertWithWhereUniqueWithoutEvaluationTemplateInputSchema).array() ]).optional(),
+  createMany: z.lazy(() => EvaluationCreateManyEvaluationTemplateInputEnvelopeSchema).optional(),
+  set: z.union([ z.lazy(() => EvaluationWhereUniqueInputSchema),z.lazy(() => EvaluationWhereUniqueInputSchema).array() ]).optional(),
+  disconnect: z.union([ z.lazy(() => EvaluationWhereUniqueInputSchema),z.lazy(() => EvaluationWhereUniqueInputSchema).array() ]).optional(),
+  delete: z.union([ z.lazy(() => EvaluationWhereUniqueInputSchema),z.lazy(() => EvaluationWhereUniqueInputSchema).array() ]).optional(),
+  connect: z.union([ z.lazy(() => EvaluationWhereUniqueInputSchema),z.lazy(() => EvaluationWhereUniqueInputSchema).array() ]).optional(),
+  update: z.union([ z.lazy(() => EvaluationUpdateWithWhereUniqueWithoutEvaluationTemplateInputSchema),z.lazy(() => EvaluationUpdateWithWhereUniqueWithoutEvaluationTemplateInputSchema).array() ]).optional(),
+  updateMany: z.union([ z.lazy(() => EvaluationUpdateManyWithWhereWithoutEvaluationTemplateInputSchema),z.lazy(() => EvaluationUpdateManyWithWhereWithoutEvaluationTemplateInputSchema).array() ]).optional(),
+  deleteMany: z.union([ z.lazy(() => EvaluationScalarWhereInputSchema),z.lazy(() => EvaluationScalarWhereInputSchema).array() ]).optional(),
 }).strict();
 
-export const AgentUpdateOneWithoutEnabledGeneralEvalsNestedInputSchema: z.ZodType<Prisma.AgentUpdateOneWithoutEnabledGeneralEvalsNestedInput> = z.object({
-  create: z.union([ z.lazy(() => AgentCreateWithoutEnabledGeneralEvalsInputSchema),z.lazy(() => AgentUncheckedCreateWithoutEnabledGeneralEvalsInputSchema) ]).optional(),
-  connectOrCreate: z.lazy(() => AgentCreateOrConnectWithoutEnabledGeneralEvalsInputSchema).optional(),
-  upsert: z.lazy(() => AgentUpsertWithoutEnabledGeneralEvalsInputSchema).optional(),
-  disconnect: z.union([ z.boolean(),z.lazy(() => AgentWhereInputSchema) ]).optional(),
-  delete: z.union([ z.boolean(),z.lazy(() => AgentWhereInputSchema) ]).optional(),
+export const EvaluationResultUncheckedUpdateManyWithoutEvaluationTemplateNestedInputSchema: z.ZodType<Prisma.EvaluationResultUncheckedUpdateManyWithoutEvaluationTemplateNestedInput> = z.object({
+  create: z.union([ z.lazy(() => EvaluationResultCreateWithoutEvaluationTemplateInputSchema),z.lazy(() => EvaluationResultCreateWithoutEvaluationTemplateInputSchema).array(),z.lazy(() => EvaluationResultUncheckedCreateWithoutEvaluationTemplateInputSchema),z.lazy(() => EvaluationResultUncheckedCreateWithoutEvaluationTemplateInputSchema).array() ]).optional(),
+  connectOrCreate: z.union([ z.lazy(() => EvaluationResultCreateOrConnectWithoutEvaluationTemplateInputSchema),z.lazy(() => EvaluationResultCreateOrConnectWithoutEvaluationTemplateInputSchema).array() ]).optional(),
+  upsert: z.union([ z.lazy(() => EvaluationResultUpsertWithWhereUniqueWithoutEvaluationTemplateInputSchema),z.lazy(() => EvaluationResultUpsertWithWhereUniqueWithoutEvaluationTemplateInputSchema).array() ]).optional(),
+  createMany: z.lazy(() => EvaluationResultCreateManyEvaluationTemplateInputEnvelopeSchema).optional(),
+  set: z.union([ z.lazy(() => EvaluationResultWhereUniqueInputSchema),z.lazy(() => EvaluationResultWhereUniqueInputSchema).array() ]).optional(),
+  disconnect: z.union([ z.lazy(() => EvaluationResultWhereUniqueInputSchema),z.lazy(() => EvaluationResultWhereUniqueInputSchema).array() ]).optional(),
+  delete: z.union([ z.lazy(() => EvaluationResultWhereUniqueInputSchema),z.lazy(() => EvaluationResultWhereUniqueInputSchema).array() ]).optional(),
+  connect: z.union([ z.lazy(() => EvaluationResultWhereUniqueInputSchema),z.lazy(() => EvaluationResultWhereUniqueInputSchema).array() ]).optional(),
+  update: z.union([ z.lazy(() => EvaluationResultUpdateWithWhereUniqueWithoutEvaluationTemplateInputSchema),z.lazy(() => EvaluationResultUpdateWithWhereUniqueWithoutEvaluationTemplateInputSchema).array() ]).optional(),
+  updateMany: z.union([ z.lazy(() => EvaluationResultUpdateManyWithWhereWithoutEvaluationTemplateInputSchema),z.lazy(() => EvaluationResultUpdateManyWithWhereWithoutEvaluationTemplateInputSchema).array() ]).optional(),
+  deleteMany: z.union([ z.lazy(() => EvaluationResultScalarWhereInputSchema),z.lazy(() => EvaluationResultScalarWhereInputSchema).array() ]).optional(),
+}).strict();
+
+export const EvaluationUncheckedUpdateManyWithoutEvaluationTemplateNestedInputSchema: z.ZodType<Prisma.EvaluationUncheckedUpdateManyWithoutEvaluationTemplateNestedInput> = z.object({
+  create: z.union([ z.lazy(() => EvaluationCreateWithoutEvaluationTemplateInputSchema),z.lazy(() => EvaluationCreateWithoutEvaluationTemplateInputSchema).array(),z.lazy(() => EvaluationUncheckedCreateWithoutEvaluationTemplateInputSchema),z.lazy(() => EvaluationUncheckedCreateWithoutEvaluationTemplateInputSchema).array() ]).optional(),
+  connectOrCreate: z.union([ z.lazy(() => EvaluationCreateOrConnectWithoutEvaluationTemplateInputSchema),z.lazy(() => EvaluationCreateOrConnectWithoutEvaluationTemplateInputSchema).array() ]).optional(),
+  upsert: z.union([ z.lazy(() => EvaluationUpsertWithWhereUniqueWithoutEvaluationTemplateInputSchema),z.lazy(() => EvaluationUpsertWithWhereUniqueWithoutEvaluationTemplateInputSchema).array() ]).optional(),
+  createMany: z.lazy(() => EvaluationCreateManyEvaluationTemplateInputEnvelopeSchema).optional(),
+  set: z.union([ z.lazy(() => EvaluationWhereUniqueInputSchema),z.lazy(() => EvaluationWhereUniqueInputSchema).array() ]).optional(),
+  disconnect: z.union([ z.lazy(() => EvaluationWhereUniqueInputSchema),z.lazy(() => EvaluationWhereUniqueInputSchema).array() ]).optional(),
+  delete: z.union([ z.lazy(() => EvaluationWhereUniqueInputSchema),z.lazy(() => EvaluationWhereUniqueInputSchema).array() ]).optional(),
+  connect: z.union([ z.lazy(() => EvaluationWhereUniqueInputSchema),z.lazy(() => EvaluationWhereUniqueInputSchema).array() ]).optional(),
+  update: z.union([ z.lazy(() => EvaluationUpdateWithWhereUniqueWithoutEvaluationTemplateInputSchema),z.lazy(() => EvaluationUpdateWithWhereUniqueWithoutEvaluationTemplateInputSchema).array() ]).optional(),
+  updateMany: z.union([ z.lazy(() => EvaluationUpdateManyWithWhereWithoutEvaluationTemplateInputSchema),z.lazy(() => EvaluationUpdateManyWithWhereWithoutEvaluationTemplateInputSchema).array() ]).optional(),
+  deleteMany: z.union([ z.lazy(() => EvaluationScalarWhereInputSchema),z.lazy(() => EvaluationScalarWhereInputSchema).array() ]).optional(),
+}).strict();
+
+export const AgentCreateNestedOneWithoutGeneralEvaluationsInputSchema: z.ZodType<Prisma.AgentCreateNestedOneWithoutGeneralEvaluationsInput> = z.object({
+  create: z.union([ z.lazy(() => AgentCreateWithoutGeneralEvaluationsInputSchema),z.lazy(() => AgentUncheckedCreateWithoutGeneralEvaluationsInputSchema) ]).optional(),
+  connectOrCreate: z.lazy(() => AgentCreateOrConnectWithoutGeneralEvaluationsInputSchema).optional(),
+  connect: z.lazy(() => AgentWhereUniqueInputSchema).optional()
+}).strict();
+
+export const EvaluationCreateNestedOneWithoutGeneralEvaluationsInputSchema: z.ZodType<Prisma.EvaluationCreateNestedOneWithoutGeneralEvaluationsInput> = z.object({
+  create: z.union([ z.lazy(() => EvaluationCreateWithoutGeneralEvaluationsInputSchema),z.lazy(() => EvaluationUncheckedCreateWithoutGeneralEvaluationsInputSchema) ]).optional(),
+  connectOrCreate: z.lazy(() => EvaluationCreateOrConnectWithoutGeneralEvaluationsInputSchema).optional(),
+  connect: z.lazy(() => EvaluationWhereUniqueInputSchema).optional()
+}).strict();
+
+export const AgentUpdateOneRequiredWithoutGeneralEvaluationsNestedInputSchema: z.ZodType<Prisma.AgentUpdateOneRequiredWithoutGeneralEvaluationsNestedInput> = z.object({
+  create: z.union([ z.lazy(() => AgentCreateWithoutGeneralEvaluationsInputSchema),z.lazy(() => AgentUncheckedCreateWithoutGeneralEvaluationsInputSchema) ]).optional(),
+  connectOrCreate: z.lazy(() => AgentCreateOrConnectWithoutGeneralEvaluationsInputSchema).optional(),
+  upsert: z.lazy(() => AgentUpsertWithoutGeneralEvaluationsInputSchema).optional(),
   connect: z.lazy(() => AgentWhereUniqueInputSchema).optional(),
-  update: z.union([ z.lazy(() => AgentUpdateToOneWithWhereWithoutEnabledGeneralEvalsInputSchema),z.lazy(() => AgentUpdateWithoutEnabledGeneralEvalsInputSchema),z.lazy(() => AgentUncheckedUpdateWithoutEnabledGeneralEvalsInputSchema) ]).optional(),
+  update: z.union([ z.lazy(() => AgentUpdateToOneWithWhereWithoutGeneralEvaluationsInputSchema),z.lazy(() => AgentUpdateWithoutGeneralEvaluationsInputSchema),z.lazy(() => AgentUncheckedUpdateWithoutGeneralEvaluationsInputSchema) ]).optional(),
 }).strict();
 
-export const EvalOverrideUpdateManyWithoutEvalNestedInputSchema: z.ZodType<Prisma.EvalOverrideUpdateManyWithoutEvalNestedInput> = z.object({
-  create: z.union([ z.lazy(() => EvalOverrideCreateWithoutEvalInputSchema),z.lazy(() => EvalOverrideCreateWithoutEvalInputSchema).array(),z.lazy(() => EvalOverrideUncheckedCreateWithoutEvalInputSchema),z.lazy(() => EvalOverrideUncheckedCreateWithoutEvalInputSchema).array() ]).optional(),
-  connectOrCreate: z.union([ z.lazy(() => EvalOverrideCreateOrConnectWithoutEvalInputSchema),z.lazy(() => EvalOverrideCreateOrConnectWithoutEvalInputSchema).array() ]).optional(),
-  upsert: z.union([ z.lazy(() => EvalOverrideUpsertWithWhereUniqueWithoutEvalInputSchema),z.lazy(() => EvalOverrideUpsertWithWhereUniqueWithoutEvalInputSchema).array() ]).optional(),
-  createMany: z.lazy(() => EvalOverrideCreateManyEvalInputEnvelopeSchema).optional(),
-  set: z.union([ z.lazy(() => EvalOverrideWhereUniqueInputSchema),z.lazy(() => EvalOverrideWhereUniqueInputSchema).array() ]).optional(),
-  disconnect: z.union([ z.lazy(() => EvalOverrideWhereUniqueInputSchema),z.lazy(() => EvalOverrideWhereUniqueInputSchema).array() ]).optional(),
-  delete: z.union([ z.lazy(() => EvalOverrideWhereUniqueInputSchema),z.lazy(() => EvalOverrideWhereUniqueInputSchema).array() ]).optional(),
-  connect: z.union([ z.lazy(() => EvalOverrideWhereUniqueInputSchema),z.lazy(() => EvalOverrideWhereUniqueInputSchema).array() ]).optional(),
-  update: z.union([ z.lazy(() => EvalOverrideUpdateWithWhereUniqueWithoutEvalInputSchema),z.lazy(() => EvalOverrideUpdateWithWhereUniqueWithoutEvalInputSchema).array() ]).optional(),
-  updateMany: z.union([ z.lazy(() => EvalOverrideUpdateManyWithWhereWithoutEvalInputSchema),z.lazy(() => EvalOverrideUpdateManyWithWhereWithoutEvalInputSchema).array() ]).optional(),
-  deleteMany: z.union([ z.lazy(() => EvalOverrideScalarWhereInputSchema),z.lazy(() => EvalOverrideScalarWhereInputSchema).array() ]).optional(),
+export const EvaluationUpdateOneRequiredWithoutGeneralEvaluationsNestedInputSchema: z.ZodType<Prisma.EvaluationUpdateOneRequiredWithoutGeneralEvaluationsNestedInput> = z.object({
+  create: z.union([ z.lazy(() => EvaluationCreateWithoutGeneralEvaluationsInputSchema),z.lazy(() => EvaluationUncheckedCreateWithoutGeneralEvaluationsInputSchema) ]).optional(),
+  connectOrCreate: z.lazy(() => EvaluationCreateOrConnectWithoutGeneralEvaluationsInputSchema).optional(),
+  upsert: z.lazy(() => EvaluationUpsertWithoutGeneralEvaluationsInputSchema).optional(),
+  connect: z.lazy(() => EvaluationWhereUniqueInputSchema).optional(),
+  update: z.union([ z.lazy(() => EvaluationUpdateToOneWithWhereWithoutGeneralEvaluationsInputSchema),z.lazy(() => EvaluationUpdateWithoutGeneralEvaluationsInputSchema),z.lazy(() => EvaluationUncheckedUpdateWithoutGeneralEvaluationsInputSchema) ]).optional(),
 }).strict();
 
-export const EvalSetUpdateOneWithoutEvalsNestedInputSchema: z.ZodType<Prisma.EvalSetUpdateOneWithoutEvalsNestedInput> = z.object({
-  create: z.union([ z.lazy(() => EvalSetCreateWithoutEvalsInputSchema),z.lazy(() => EvalSetUncheckedCreateWithoutEvalsInputSchema) ]).optional(),
-  connectOrCreate: z.lazy(() => EvalSetCreateOrConnectWithoutEvalsInputSchema).optional(),
-  upsert: z.lazy(() => EvalSetUpsertWithoutEvalsInputSchema).optional(),
-  disconnect: z.union([ z.boolean(),z.lazy(() => EvalSetWhereInputSchema) ]).optional(),
-  delete: z.union([ z.boolean(),z.lazy(() => EvalSetWhereInputSchema) ]).optional(),
-  connect: z.lazy(() => EvalSetWhereUniqueInputSchema).optional(),
-  update: z.union([ z.lazy(() => EvalSetUpdateToOneWithWhereWithoutEvalsInputSchema),z.lazy(() => EvalSetUpdateWithoutEvalsInputSchema),z.lazy(() => EvalSetUncheckedUpdateWithoutEvalsInputSchema) ]).optional(),
+export const EvaluationTemplateCreateNestedOneWithoutEvaluationsInputSchema: z.ZodType<Prisma.EvaluationTemplateCreateNestedOneWithoutEvaluationsInput> = z.object({
+  create: z.union([ z.lazy(() => EvaluationTemplateCreateWithoutEvaluationsInputSchema),z.lazy(() => EvaluationTemplateUncheckedCreateWithoutEvaluationsInputSchema) ]).optional(),
+  connectOrCreate: z.lazy(() => EvaluationTemplateCreateOrConnectWithoutEvaluationsInputSchema).optional(),
+  connect: z.lazy(() => EvaluationTemplateWhereUniqueInputSchema).optional()
 }).strict();
 
-export const EvalResultUncheckedUpdateManyWithoutEvalNestedInputSchema: z.ZodType<Prisma.EvalResultUncheckedUpdateManyWithoutEvalNestedInput> = z.object({
-  create: z.union([ z.lazy(() => EvalResultCreateWithoutEvalInputSchema),z.lazy(() => EvalResultCreateWithoutEvalInputSchema).array(),z.lazy(() => EvalResultUncheckedCreateWithoutEvalInputSchema),z.lazy(() => EvalResultUncheckedCreateWithoutEvalInputSchema).array() ]).optional(),
-  connectOrCreate: z.union([ z.lazy(() => EvalResultCreateOrConnectWithoutEvalInputSchema),z.lazy(() => EvalResultCreateOrConnectWithoutEvalInputSchema).array() ]).optional(),
-  upsert: z.union([ z.lazy(() => EvalResultUpsertWithWhereUniqueWithoutEvalInputSchema),z.lazy(() => EvalResultUpsertWithWhereUniqueWithoutEvalInputSchema).array() ]).optional(),
-  createMany: z.lazy(() => EvalResultCreateManyEvalInputEnvelopeSchema).optional(),
-  set: z.union([ z.lazy(() => EvalResultWhereUniqueInputSchema),z.lazy(() => EvalResultWhereUniqueInputSchema).array() ]).optional(),
-  disconnect: z.union([ z.lazy(() => EvalResultWhereUniqueInputSchema),z.lazy(() => EvalResultWhereUniqueInputSchema).array() ]).optional(),
-  delete: z.union([ z.lazy(() => EvalResultWhereUniqueInputSchema),z.lazy(() => EvalResultWhereUniqueInputSchema).array() ]).optional(),
-  connect: z.union([ z.lazy(() => EvalResultWhereUniqueInputSchema),z.lazy(() => EvalResultWhereUniqueInputSchema).array() ]).optional(),
-  update: z.union([ z.lazy(() => EvalResultUpdateWithWhereUniqueWithoutEvalInputSchema),z.lazy(() => EvalResultUpdateWithWhereUniqueWithoutEvalInputSchema).array() ]).optional(),
-  updateMany: z.union([ z.lazy(() => EvalResultUpdateManyWithWhereWithoutEvalInputSchema),z.lazy(() => EvalResultUpdateManyWithWhereWithoutEvalInputSchema).array() ]).optional(),
-  deleteMany: z.union([ z.lazy(() => EvalResultScalarWhereInputSchema),z.lazy(() => EvalResultScalarWhereInputSchema).array() ]).optional(),
-}).strict();
-
-export const EvalOverrideUncheckedUpdateManyWithoutEvalNestedInputSchema: z.ZodType<Prisma.EvalOverrideUncheckedUpdateManyWithoutEvalNestedInput> = z.object({
-  create: z.union([ z.lazy(() => EvalOverrideCreateWithoutEvalInputSchema),z.lazy(() => EvalOverrideCreateWithoutEvalInputSchema).array(),z.lazy(() => EvalOverrideUncheckedCreateWithoutEvalInputSchema),z.lazy(() => EvalOverrideUncheckedCreateWithoutEvalInputSchema).array() ]).optional(),
-  connectOrCreate: z.union([ z.lazy(() => EvalOverrideCreateOrConnectWithoutEvalInputSchema),z.lazy(() => EvalOverrideCreateOrConnectWithoutEvalInputSchema).array() ]).optional(),
-  upsert: z.union([ z.lazy(() => EvalOverrideUpsertWithWhereUniqueWithoutEvalInputSchema),z.lazy(() => EvalOverrideUpsertWithWhereUniqueWithoutEvalInputSchema).array() ]).optional(),
-  createMany: z.lazy(() => EvalOverrideCreateManyEvalInputEnvelopeSchema).optional(),
-  set: z.union([ z.lazy(() => EvalOverrideWhereUniqueInputSchema),z.lazy(() => EvalOverrideWhereUniqueInputSchema).array() ]).optional(),
-  disconnect: z.union([ z.lazy(() => EvalOverrideWhereUniqueInputSchema),z.lazy(() => EvalOverrideWhereUniqueInputSchema).array() ]).optional(),
-  delete: z.union([ z.lazy(() => EvalOverrideWhereUniqueInputSchema),z.lazy(() => EvalOverrideWhereUniqueInputSchema).array() ]).optional(),
-  connect: z.union([ z.lazy(() => EvalOverrideWhereUniqueInputSchema),z.lazy(() => EvalOverrideWhereUniqueInputSchema).array() ]).optional(),
-  update: z.union([ z.lazy(() => EvalOverrideUpdateWithWhereUniqueWithoutEvalInputSchema),z.lazy(() => EvalOverrideUpdateWithWhereUniqueWithoutEvalInputSchema).array() ]).optional(),
-  updateMany: z.union([ z.lazy(() => EvalOverrideUpdateManyWithWhereWithoutEvalInputSchema),z.lazy(() => EvalOverrideUpdateManyWithWhereWithoutEvalInputSchema).array() ]).optional(),
-  deleteMany: z.union([ z.lazy(() => EvalOverrideScalarWhereInputSchema),z.lazy(() => EvalOverrideScalarWhereInputSchema).array() ]).optional(),
-}).strict();
-
-export const CallCreateNestedOneWithoutEvalResultsInputSchema: z.ZodType<Prisma.CallCreateNestedOneWithoutEvalResultsInput> = z.object({
-  create: z.union([ z.lazy(() => CallCreateWithoutEvalResultsInputSchema),z.lazy(() => CallUncheckedCreateWithoutEvalResultsInputSchema) ]).optional(),
-  connectOrCreate: z.lazy(() => CallCreateOrConnectWithoutEvalResultsInputSchema).optional(),
-  connect: z.lazy(() => CallWhereUniqueInputSchema).optional()
-}).strict();
-
-export const EvalCreateNestedOneWithoutEvalResultsInputSchema: z.ZodType<Prisma.EvalCreateNestedOneWithoutEvalResultsInput> = z.object({
-  create: z.union([ z.lazy(() => EvalCreateWithoutEvalResultsInputSchema),z.lazy(() => EvalUncheckedCreateWithoutEvalResultsInputSchema) ]).optional(),
-  connectOrCreate: z.lazy(() => EvalCreateOrConnectWithoutEvalResultsInputSchema).optional(),
-  connect: z.lazy(() => EvalWhereUniqueInputSchema).optional()
-}).strict();
-
-export const CallUpdateOneWithoutEvalResultsNestedInputSchema: z.ZodType<Prisma.CallUpdateOneWithoutEvalResultsNestedInput> = z.object({
-  create: z.union([ z.lazy(() => CallCreateWithoutEvalResultsInputSchema),z.lazy(() => CallUncheckedCreateWithoutEvalResultsInputSchema) ]).optional(),
-  connectOrCreate: z.lazy(() => CallCreateOrConnectWithoutEvalResultsInputSchema).optional(),
-  upsert: z.lazy(() => CallUpsertWithoutEvalResultsInputSchema).optional(),
-  disconnect: z.union([ z.boolean(),z.lazy(() => CallWhereInputSchema) ]).optional(),
-  delete: z.union([ z.boolean(),z.lazy(() => CallWhereInputSchema) ]).optional(),
-  connect: z.lazy(() => CallWhereUniqueInputSchema).optional(),
-  update: z.union([ z.lazy(() => CallUpdateToOneWithWhereWithoutEvalResultsInputSchema),z.lazy(() => CallUpdateWithoutEvalResultsInputSchema),z.lazy(() => CallUncheckedUpdateWithoutEvalResultsInputSchema) ]).optional(),
-}).strict();
-
-export const EvalUpdateOneRequiredWithoutEvalResultsNestedInputSchema: z.ZodType<Prisma.EvalUpdateOneRequiredWithoutEvalResultsNestedInput> = z.object({
-  create: z.union([ z.lazy(() => EvalCreateWithoutEvalResultsInputSchema),z.lazy(() => EvalUncheckedCreateWithoutEvalResultsInputSchema) ]).optional(),
-  connectOrCreate: z.lazy(() => EvalCreateOrConnectWithoutEvalResultsInputSchema).optional(),
-  upsert: z.lazy(() => EvalUpsertWithoutEvalResultsInputSchema).optional(),
-  connect: z.lazy(() => EvalWhereUniqueInputSchema).optional(),
-  update: z.union([ z.lazy(() => EvalUpdateToOneWithWhereWithoutEvalResultsInputSchema),z.lazy(() => EvalUpdateWithoutEvalResultsInputSchema),z.lazy(() => EvalUncheckedUpdateWithoutEvalResultsInputSchema) ]).optional(),
-}).strict();
-
-export const ScenarioCreateNestedOneWithoutGeneralEvalOverridesInputSchema: z.ZodType<Prisma.ScenarioCreateNestedOneWithoutGeneralEvalOverridesInput> = z.object({
-  create: z.union([ z.lazy(() => ScenarioCreateWithoutGeneralEvalOverridesInputSchema),z.lazy(() => ScenarioUncheckedCreateWithoutGeneralEvalOverridesInputSchema) ]).optional(),
-  connectOrCreate: z.lazy(() => ScenarioCreateOrConnectWithoutGeneralEvalOverridesInputSchema).optional(),
+export const ScenarioCreateNestedOneWithoutEvaluationsInputSchema: z.ZodType<Prisma.ScenarioCreateNestedOneWithoutEvaluationsInput> = z.object({
+  create: z.union([ z.lazy(() => ScenarioCreateWithoutEvaluationsInputSchema),z.lazy(() => ScenarioUncheckedCreateWithoutEvaluationsInputSchema) ]).optional(),
+  connectOrCreate: z.lazy(() => ScenarioCreateOrConnectWithoutEvaluationsInputSchema).optional(),
   connect: z.lazy(() => ScenarioWhereUniqueInputSchema).optional()
 }).strict();
 
-export const EvalCreateNestedOneWithoutEvalOverridesInputSchema: z.ZodType<Prisma.EvalCreateNestedOneWithoutEvalOverridesInput> = z.object({
-  create: z.union([ z.lazy(() => EvalCreateWithoutEvalOverridesInputSchema),z.lazy(() => EvalUncheckedCreateWithoutEvalOverridesInputSchema) ]).optional(),
-  connectOrCreate: z.lazy(() => EvalCreateOrConnectWithoutEvalOverridesInputSchema).optional(),
-  connect: z.lazy(() => EvalWhereUniqueInputSchema).optional()
+export const EvaluationGroupCreateNestedOneWithoutEvaluationsInputSchema: z.ZodType<Prisma.EvaluationGroupCreateNestedOneWithoutEvaluationsInput> = z.object({
+  create: z.union([ z.lazy(() => EvaluationGroupCreateWithoutEvaluationsInputSchema),z.lazy(() => EvaluationGroupUncheckedCreateWithoutEvaluationsInputSchema) ]).optional(),
+  connectOrCreate: z.lazy(() => EvaluationGroupCreateOrConnectWithoutEvaluationsInputSchema).optional(),
+  connect: z.lazy(() => EvaluationGroupWhereUniqueInputSchema).optional()
 }).strict();
 
-export const ScenarioUpdateOneRequiredWithoutGeneralEvalOverridesNestedInputSchema: z.ZodType<Prisma.ScenarioUpdateOneRequiredWithoutGeneralEvalOverridesNestedInput> = z.object({
-  create: z.union([ z.lazy(() => ScenarioCreateWithoutGeneralEvalOverridesInputSchema),z.lazy(() => ScenarioUncheckedCreateWithoutGeneralEvalOverridesInputSchema) ]).optional(),
-  connectOrCreate: z.lazy(() => ScenarioCreateOrConnectWithoutGeneralEvalOverridesInputSchema).optional(),
-  upsert: z.lazy(() => ScenarioUpsertWithoutGeneralEvalOverridesInputSchema).optional(),
+export const EvaluationResultCreateNestedManyWithoutEvaluationInputSchema: z.ZodType<Prisma.EvaluationResultCreateNestedManyWithoutEvaluationInput> = z.object({
+  create: z.union([ z.lazy(() => EvaluationResultCreateWithoutEvaluationInputSchema),z.lazy(() => EvaluationResultCreateWithoutEvaluationInputSchema).array(),z.lazy(() => EvaluationResultUncheckedCreateWithoutEvaluationInputSchema),z.lazy(() => EvaluationResultUncheckedCreateWithoutEvaluationInputSchema).array() ]).optional(),
+  connectOrCreate: z.union([ z.lazy(() => EvaluationResultCreateOrConnectWithoutEvaluationInputSchema),z.lazy(() => EvaluationResultCreateOrConnectWithoutEvaluationInputSchema).array() ]).optional(),
+  createMany: z.lazy(() => EvaluationResultCreateManyEvaluationInputEnvelopeSchema).optional(),
+  connect: z.union([ z.lazy(() => EvaluationResultWhereUniqueInputSchema),z.lazy(() => EvaluationResultWhereUniqueInputSchema).array() ]).optional(),
+}).strict();
+
+export const GeneralEvaluationCreateNestedManyWithoutEvaluationInputSchema: z.ZodType<Prisma.GeneralEvaluationCreateNestedManyWithoutEvaluationInput> = z.object({
+  create: z.union([ z.lazy(() => GeneralEvaluationCreateWithoutEvaluationInputSchema),z.lazy(() => GeneralEvaluationCreateWithoutEvaluationInputSchema).array(),z.lazy(() => GeneralEvaluationUncheckedCreateWithoutEvaluationInputSchema),z.lazy(() => GeneralEvaluationUncheckedCreateWithoutEvaluationInputSchema).array() ]).optional(),
+  connectOrCreate: z.union([ z.lazy(() => GeneralEvaluationCreateOrConnectWithoutEvaluationInputSchema),z.lazy(() => GeneralEvaluationCreateOrConnectWithoutEvaluationInputSchema).array() ]).optional(),
+  createMany: z.lazy(() => GeneralEvaluationCreateManyEvaluationInputEnvelopeSchema).optional(),
+  connect: z.union([ z.lazy(() => GeneralEvaluationWhereUniqueInputSchema),z.lazy(() => GeneralEvaluationWhereUniqueInputSchema).array() ]).optional(),
+}).strict();
+
+export const EvaluationResultUncheckedCreateNestedManyWithoutEvaluationInputSchema: z.ZodType<Prisma.EvaluationResultUncheckedCreateNestedManyWithoutEvaluationInput> = z.object({
+  create: z.union([ z.lazy(() => EvaluationResultCreateWithoutEvaluationInputSchema),z.lazy(() => EvaluationResultCreateWithoutEvaluationInputSchema).array(),z.lazy(() => EvaluationResultUncheckedCreateWithoutEvaluationInputSchema),z.lazy(() => EvaluationResultUncheckedCreateWithoutEvaluationInputSchema).array() ]).optional(),
+  connectOrCreate: z.union([ z.lazy(() => EvaluationResultCreateOrConnectWithoutEvaluationInputSchema),z.lazy(() => EvaluationResultCreateOrConnectWithoutEvaluationInputSchema).array() ]).optional(),
+  createMany: z.lazy(() => EvaluationResultCreateManyEvaluationInputEnvelopeSchema).optional(),
+  connect: z.union([ z.lazy(() => EvaluationResultWhereUniqueInputSchema),z.lazy(() => EvaluationResultWhereUniqueInputSchema).array() ]).optional(),
+}).strict();
+
+export const GeneralEvaluationUncheckedCreateNestedManyWithoutEvaluationInputSchema: z.ZodType<Prisma.GeneralEvaluationUncheckedCreateNestedManyWithoutEvaluationInput> = z.object({
+  create: z.union([ z.lazy(() => GeneralEvaluationCreateWithoutEvaluationInputSchema),z.lazy(() => GeneralEvaluationCreateWithoutEvaluationInputSchema).array(),z.lazy(() => GeneralEvaluationUncheckedCreateWithoutEvaluationInputSchema),z.lazy(() => GeneralEvaluationUncheckedCreateWithoutEvaluationInputSchema).array() ]).optional(),
+  connectOrCreate: z.union([ z.lazy(() => GeneralEvaluationCreateOrConnectWithoutEvaluationInputSchema),z.lazy(() => GeneralEvaluationCreateOrConnectWithoutEvaluationInputSchema).array() ]).optional(),
+  createMany: z.lazy(() => GeneralEvaluationCreateManyEvaluationInputEnvelopeSchema).optional(),
+  connect: z.union([ z.lazy(() => GeneralEvaluationWhereUniqueInputSchema),z.lazy(() => GeneralEvaluationWhereUniqueInputSchema).array() ]).optional(),
+}).strict();
+
+export const EvaluationTemplateUpdateOneRequiredWithoutEvaluationsNestedInputSchema: z.ZodType<Prisma.EvaluationTemplateUpdateOneRequiredWithoutEvaluationsNestedInput> = z.object({
+  create: z.union([ z.lazy(() => EvaluationTemplateCreateWithoutEvaluationsInputSchema),z.lazy(() => EvaluationTemplateUncheckedCreateWithoutEvaluationsInputSchema) ]).optional(),
+  connectOrCreate: z.lazy(() => EvaluationTemplateCreateOrConnectWithoutEvaluationsInputSchema).optional(),
+  upsert: z.lazy(() => EvaluationTemplateUpsertWithoutEvaluationsInputSchema).optional(),
+  connect: z.lazy(() => EvaluationTemplateWhereUniqueInputSchema).optional(),
+  update: z.union([ z.lazy(() => EvaluationTemplateUpdateToOneWithWhereWithoutEvaluationsInputSchema),z.lazy(() => EvaluationTemplateUpdateWithoutEvaluationsInputSchema),z.lazy(() => EvaluationTemplateUncheckedUpdateWithoutEvaluationsInputSchema) ]).optional(),
+}).strict();
+
+export const ScenarioUpdateOneWithoutEvaluationsNestedInputSchema: z.ZodType<Prisma.ScenarioUpdateOneWithoutEvaluationsNestedInput> = z.object({
+  create: z.union([ z.lazy(() => ScenarioCreateWithoutEvaluationsInputSchema),z.lazy(() => ScenarioUncheckedCreateWithoutEvaluationsInputSchema) ]).optional(),
+  connectOrCreate: z.lazy(() => ScenarioCreateOrConnectWithoutEvaluationsInputSchema).optional(),
+  upsert: z.lazy(() => ScenarioUpsertWithoutEvaluationsInputSchema).optional(),
+  disconnect: z.union([ z.boolean(),z.lazy(() => ScenarioWhereInputSchema) ]).optional(),
+  delete: z.union([ z.boolean(),z.lazy(() => ScenarioWhereInputSchema) ]).optional(),
   connect: z.lazy(() => ScenarioWhereUniqueInputSchema).optional(),
-  update: z.union([ z.lazy(() => ScenarioUpdateToOneWithWhereWithoutGeneralEvalOverridesInputSchema),z.lazy(() => ScenarioUpdateWithoutGeneralEvalOverridesInputSchema),z.lazy(() => ScenarioUncheckedUpdateWithoutGeneralEvalOverridesInputSchema) ]).optional(),
+  update: z.union([ z.lazy(() => ScenarioUpdateToOneWithWhereWithoutEvaluationsInputSchema),z.lazy(() => ScenarioUpdateWithoutEvaluationsInputSchema),z.lazy(() => ScenarioUncheckedUpdateWithoutEvaluationsInputSchema) ]).optional(),
 }).strict();
 
-export const EvalUpdateOneRequiredWithoutEvalOverridesNestedInputSchema: z.ZodType<Prisma.EvalUpdateOneRequiredWithoutEvalOverridesNestedInput> = z.object({
-  create: z.union([ z.lazy(() => EvalCreateWithoutEvalOverridesInputSchema),z.lazy(() => EvalUncheckedCreateWithoutEvalOverridesInputSchema) ]).optional(),
-  connectOrCreate: z.lazy(() => EvalCreateOrConnectWithoutEvalOverridesInputSchema).optional(),
-  upsert: z.lazy(() => EvalUpsertWithoutEvalOverridesInputSchema).optional(),
-  connect: z.lazy(() => EvalWhereUniqueInputSchema).optional(),
-  update: z.union([ z.lazy(() => EvalUpdateToOneWithWhereWithoutEvalOverridesInputSchema),z.lazy(() => EvalUpdateWithoutEvalOverridesInputSchema),z.lazy(() => EvalUncheckedUpdateWithoutEvalOverridesInputSchema) ]).optional(),
+export const EvaluationGroupUpdateOneWithoutEvaluationsNestedInputSchema: z.ZodType<Prisma.EvaluationGroupUpdateOneWithoutEvaluationsNestedInput> = z.object({
+  create: z.union([ z.lazy(() => EvaluationGroupCreateWithoutEvaluationsInputSchema),z.lazy(() => EvaluationGroupUncheckedCreateWithoutEvaluationsInputSchema) ]).optional(),
+  connectOrCreate: z.lazy(() => EvaluationGroupCreateOrConnectWithoutEvaluationsInputSchema).optional(),
+  upsert: z.lazy(() => EvaluationGroupUpsertWithoutEvaluationsInputSchema).optional(),
+  disconnect: z.union([ z.boolean(),z.lazy(() => EvaluationGroupWhereInputSchema) ]).optional(),
+  delete: z.union([ z.boolean(),z.lazy(() => EvaluationGroupWhereInputSchema) ]).optional(),
+  connect: z.lazy(() => EvaluationGroupWhereUniqueInputSchema).optional(),
+  update: z.union([ z.lazy(() => EvaluationGroupUpdateToOneWithWhereWithoutEvaluationsInputSchema),z.lazy(() => EvaluationGroupUpdateWithoutEvaluationsInputSchema),z.lazy(() => EvaluationGroupUncheckedUpdateWithoutEvaluationsInputSchema) ]).optional(),
+}).strict();
+
+export const EvaluationResultUpdateManyWithoutEvaluationNestedInputSchema: z.ZodType<Prisma.EvaluationResultUpdateManyWithoutEvaluationNestedInput> = z.object({
+  create: z.union([ z.lazy(() => EvaluationResultCreateWithoutEvaluationInputSchema),z.lazy(() => EvaluationResultCreateWithoutEvaluationInputSchema).array(),z.lazy(() => EvaluationResultUncheckedCreateWithoutEvaluationInputSchema),z.lazy(() => EvaluationResultUncheckedCreateWithoutEvaluationInputSchema).array() ]).optional(),
+  connectOrCreate: z.union([ z.lazy(() => EvaluationResultCreateOrConnectWithoutEvaluationInputSchema),z.lazy(() => EvaluationResultCreateOrConnectWithoutEvaluationInputSchema).array() ]).optional(),
+  upsert: z.union([ z.lazy(() => EvaluationResultUpsertWithWhereUniqueWithoutEvaluationInputSchema),z.lazy(() => EvaluationResultUpsertWithWhereUniqueWithoutEvaluationInputSchema).array() ]).optional(),
+  createMany: z.lazy(() => EvaluationResultCreateManyEvaluationInputEnvelopeSchema).optional(),
+  set: z.union([ z.lazy(() => EvaluationResultWhereUniqueInputSchema),z.lazy(() => EvaluationResultWhereUniqueInputSchema).array() ]).optional(),
+  disconnect: z.union([ z.lazy(() => EvaluationResultWhereUniqueInputSchema),z.lazy(() => EvaluationResultWhereUniqueInputSchema).array() ]).optional(),
+  delete: z.union([ z.lazy(() => EvaluationResultWhereUniqueInputSchema),z.lazy(() => EvaluationResultWhereUniqueInputSchema).array() ]).optional(),
+  connect: z.union([ z.lazy(() => EvaluationResultWhereUniqueInputSchema),z.lazy(() => EvaluationResultWhereUniqueInputSchema).array() ]).optional(),
+  update: z.union([ z.lazy(() => EvaluationResultUpdateWithWhereUniqueWithoutEvaluationInputSchema),z.lazy(() => EvaluationResultUpdateWithWhereUniqueWithoutEvaluationInputSchema).array() ]).optional(),
+  updateMany: z.union([ z.lazy(() => EvaluationResultUpdateManyWithWhereWithoutEvaluationInputSchema),z.lazy(() => EvaluationResultUpdateManyWithWhereWithoutEvaluationInputSchema).array() ]).optional(),
+  deleteMany: z.union([ z.lazy(() => EvaluationResultScalarWhereInputSchema),z.lazy(() => EvaluationResultScalarWhereInputSchema).array() ]).optional(),
+}).strict();
+
+export const GeneralEvaluationUpdateManyWithoutEvaluationNestedInputSchema: z.ZodType<Prisma.GeneralEvaluationUpdateManyWithoutEvaluationNestedInput> = z.object({
+  create: z.union([ z.lazy(() => GeneralEvaluationCreateWithoutEvaluationInputSchema),z.lazy(() => GeneralEvaluationCreateWithoutEvaluationInputSchema).array(),z.lazy(() => GeneralEvaluationUncheckedCreateWithoutEvaluationInputSchema),z.lazy(() => GeneralEvaluationUncheckedCreateWithoutEvaluationInputSchema).array() ]).optional(),
+  connectOrCreate: z.union([ z.lazy(() => GeneralEvaluationCreateOrConnectWithoutEvaluationInputSchema),z.lazy(() => GeneralEvaluationCreateOrConnectWithoutEvaluationInputSchema).array() ]).optional(),
+  upsert: z.union([ z.lazy(() => GeneralEvaluationUpsertWithWhereUniqueWithoutEvaluationInputSchema),z.lazy(() => GeneralEvaluationUpsertWithWhereUniqueWithoutEvaluationInputSchema).array() ]).optional(),
+  createMany: z.lazy(() => GeneralEvaluationCreateManyEvaluationInputEnvelopeSchema).optional(),
+  set: z.union([ z.lazy(() => GeneralEvaluationWhereUniqueInputSchema),z.lazy(() => GeneralEvaluationWhereUniqueInputSchema).array() ]).optional(),
+  disconnect: z.union([ z.lazy(() => GeneralEvaluationWhereUniqueInputSchema),z.lazy(() => GeneralEvaluationWhereUniqueInputSchema).array() ]).optional(),
+  delete: z.union([ z.lazy(() => GeneralEvaluationWhereUniqueInputSchema),z.lazy(() => GeneralEvaluationWhereUniqueInputSchema).array() ]).optional(),
+  connect: z.union([ z.lazy(() => GeneralEvaluationWhereUniqueInputSchema),z.lazy(() => GeneralEvaluationWhereUniqueInputSchema).array() ]).optional(),
+  update: z.union([ z.lazy(() => GeneralEvaluationUpdateWithWhereUniqueWithoutEvaluationInputSchema),z.lazy(() => GeneralEvaluationUpdateWithWhereUniqueWithoutEvaluationInputSchema).array() ]).optional(),
+  updateMany: z.union([ z.lazy(() => GeneralEvaluationUpdateManyWithWhereWithoutEvaluationInputSchema),z.lazy(() => GeneralEvaluationUpdateManyWithWhereWithoutEvaluationInputSchema).array() ]).optional(),
+  deleteMany: z.union([ z.lazy(() => GeneralEvaluationScalarWhereInputSchema),z.lazy(() => GeneralEvaluationScalarWhereInputSchema).array() ]).optional(),
+}).strict();
+
+export const EvaluationResultUncheckedUpdateManyWithoutEvaluationNestedInputSchema: z.ZodType<Prisma.EvaluationResultUncheckedUpdateManyWithoutEvaluationNestedInput> = z.object({
+  create: z.union([ z.lazy(() => EvaluationResultCreateWithoutEvaluationInputSchema),z.lazy(() => EvaluationResultCreateWithoutEvaluationInputSchema).array(),z.lazy(() => EvaluationResultUncheckedCreateWithoutEvaluationInputSchema),z.lazy(() => EvaluationResultUncheckedCreateWithoutEvaluationInputSchema).array() ]).optional(),
+  connectOrCreate: z.union([ z.lazy(() => EvaluationResultCreateOrConnectWithoutEvaluationInputSchema),z.lazy(() => EvaluationResultCreateOrConnectWithoutEvaluationInputSchema).array() ]).optional(),
+  upsert: z.union([ z.lazy(() => EvaluationResultUpsertWithWhereUniqueWithoutEvaluationInputSchema),z.lazy(() => EvaluationResultUpsertWithWhereUniqueWithoutEvaluationInputSchema).array() ]).optional(),
+  createMany: z.lazy(() => EvaluationResultCreateManyEvaluationInputEnvelopeSchema).optional(),
+  set: z.union([ z.lazy(() => EvaluationResultWhereUniqueInputSchema),z.lazy(() => EvaluationResultWhereUniqueInputSchema).array() ]).optional(),
+  disconnect: z.union([ z.lazy(() => EvaluationResultWhereUniqueInputSchema),z.lazy(() => EvaluationResultWhereUniqueInputSchema).array() ]).optional(),
+  delete: z.union([ z.lazy(() => EvaluationResultWhereUniqueInputSchema),z.lazy(() => EvaluationResultWhereUniqueInputSchema).array() ]).optional(),
+  connect: z.union([ z.lazy(() => EvaluationResultWhereUniqueInputSchema),z.lazy(() => EvaluationResultWhereUniqueInputSchema).array() ]).optional(),
+  update: z.union([ z.lazy(() => EvaluationResultUpdateWithWhereUniqueWithoutEvaluationInputSchema),z.lazy(() => EvaluationResultUpdateWithWhereUniqueWithoutEvaluationInputSchema).array() ]).optional(),
+  updateMany: z.union([ z.lazy(() => EvaluationResultUpdateManyWithWhereWithoutEvaluationInputSchema),z.lazy(() => EvaluationResultUpdateManyWithWhereWithoutEvaluationInputSchema).array() ]).optional(),
+  deleteMany: z.union([ z.lazy(() => EvaluationResultScalarWhereInputSchema),z.lazy(() => EvaluationResultScalarWhereInputSchema).array() ]).optional(),
+}).strict();
+
+export const GeneralEvaluationUncheckedUpdateManyWithoutEvaluationNestedInputSchema: z.ZodType<Prisma.GeneralEvaluationUncheckedUpdateManyWithoutEvaluationNestedInput> = z.object({
+  create: z.union([ z.lazy(() => GeneralEvaluationCreateWithoutEvaluationInputSchema),z.lazy(() => GeneralEvaluationCreateWithoutEvaluationInputSchema).array(),z.lazy(() => GeneralEvaluationUncheckedCreateWithoutEvaluationInputSchema),z.lazy(() => GeneralEvaluationUncheckedCreateWithoutEvaluationInputSchema).array() ]).optional(),
+  connectOrCreate: z.union([ z.lazy(() => GeneralEvaluationCreateOrConnectWithoutEvaluationInputSchema),z.lazy(() => GeneralEvaluationCreateOrConnectWithoutEvaluationInputSchema).array() ]).optional(),
+  upsert: z.union([ z.lazy(() => GeneralEvaluationUpsertWithWhereUniqueWithoutEvaluationInputSchema),z.lazy(() => GeneralEvaluationUpsertWithWhereUniqueWithoutEvaluationInputSchema).array() ]).optional(),
+  createMany: z.lazy(() => GeneralEvaluationCreateManyEvaluationInputEnvelopeSchema).optional(),
+  set: z.union([ z.lazy(() => GeneralEvaluationWhereUniqueInputSchema),z.lazy(() => GeneralEvaluationWhereUniqueInputSchema).array() ]).optional(),
+  disconnect: z.union([ z.lazy(() => GeneralEvaluationWhereUniqueInputSchema),z.lazy(() => GeneralEvaluationWhereUniqueInputSchema).array() ]).optional(),
+  delete: z.union([ z.lazy(() => GeneralEvaluationWhereUniqueInputSchema),z.lazy(() => GeneralEvaluationWhereUniqueInputSchema).array() ]).optional(),
+  connect: z.union([ z.lazy(() => GeneralEvaluationWhereUniqueInputSchema),z.lazy(() => GeneralEvaluationWhereUniqueInputSchema).array() ]).optional(),
+  update: z.union([ z.lazy(() => GeneralEvaluationUpdateWithWhereUniqueWithoutEvaluationInputSchema),z.lazy(() => GeneralEvaluationUpdateWithWhereUniqueWithoutEvaluationInputSchema).array() ]).optional(),
+  updateMany: z.union([ z.lazy(() => GeneralEvaluationUpdateManyWithWhereWithoutEvaluationInputSchema),z.lazy(() => GeneralEvaluationUpdateManyWithWhereWithoutEvaluationInputSchema).array() ]).optional(),
+  deleteMany: z.union([ z.lazy(() => GeneralEvaluationScalarWhereInputSchema),z.lazy(() => GeneralEvaluationScalarWhereInputSchema).array() ]).optional(),
+}).strict();
+
+export const CallCreateNestedOneWithoutEvaluationResultsInputSchema: z.ZodType<Prisma.CallCreateNestedOneWithoutEvaluationResultsInput> = z.object({
+  create: z.union([ z.lazy(() => CallCreateWithoutEvaluationResultsInputSchema),z.lazy(() => CallUncheckedCreateWithoutEvaluationResultsInputSchema) ]).optional(),
+  connectOrCreate: z.lazy(() => CallCreateOrConnectWithoutEvaluationResultsInputSchema).optional(),
+  connect: z.lazy(() => CallWhereUniqueInputSchema).optional()
+}).strict();
+
+export const EvaluationCreateNestedOneWithoutEvaluationResultsInputSchema: z.ZodType<Prisma.EvaluationCreateNestedOneWithoutEvaluationResultsInput> = z.object({
+  create: z.union([ z.lazy(() => EvaluationCreateWithoutEvaluationResultsInputSchema),z.lazy(() => EvaluationUncheckedCreateWithoutEvaluationResultsInputSchema) ]).optional(),
+  connectOrCreate: z.lazy(() => EvaluationCreateOrConnectWithoutEvaluationResultsInputSchema).optional(),
+  connect: z.lazy(() => EvaluationWhereUniqueInputSchema).optional()
+}).strict();
+
+export const EvaluationTemplateCreateNestedOneWithoutEvaluationResultsInputSchema: z.ZodType<Prisma.EvaluationTemplateCreateNestedOneWithoutEvaluationResultsInput> = z.object({
+  create: z.union([ z.lazy(() => EvaluationTemplateCreateWithoutEvaluationResultsInputSchema),z.lazy(() => EvaluationTemplateUncheckedCreateWithoutEvaluationResultsInputSchema) ]).optional(),
+  connectOrCreate: z.lazy(() => EvaluationTemplateCreateOrConnectWithoutEvaluationResultsInputSchema).optional(),
+  connect: z.lazy(() => EvaluationTemplateWhereUniqueInputSchema).optional()
+}).strict();
+
+export const CallUpdateOneWithoutEvaluationResultsNestedInputSchema: z.ZodType<Prisma.CallUpdateOneWithoutEvaluationResultsNestedInput> = z.object({
+  create: z.union([ z.lazy(() => CallCreateWithoutEvaluationResultsInputSchema),z.lazy(() => CallUncheckedCreateWithoutEvaluationResultsInputSchema) ]).optional(),
+  connectOrCreate: z.lazy(() => CallCreateOrConnectWithoutEvaluationResultsInputSchema).optional(),
+  upsert: z.lazy(() => CallUpsertWithoutEvaluationResultsInputSchema).optional(),
+  disconnect: z.union([ z.boolean(),z.lazy(() => CallWhereInputSchema) ]).optional(),
+  delete: z.union([ z.boolean(),z.lazy(() => CallWhereInputSchema) ]).optional(),
+  connect: z.lazy(() => CallWhereUniqueInputSchema).optional(),
+  update: z.union([ z.lazy(() => CallUpdateToOneWithWhereWithoutEvaluationResultsInputSchema),z.lazy(() => CallUpdateWithoutEvaluationResultsInputSchema),z.lazy(() => CallUncheckedUpdateWithoutEvaluationResultsInputSchema) ]).optional(),
+}).strict();
+
+export const EvaluationUpdateOneRequiredWithoutEvaluationResultsNestedInputSchema: z.ZodType<Prisma.EvaluationUpdateOneRequiredWithoutEvaluationResultsNestedInput> = z.object({
+  create: z.union([ z.lazy(() => EvaluationCreateWithoutEvaluationResultsInputSchema),z.lazy(() => EvaluationUncheckedCreateWithoutEvaluationResultsInputSchema) ]).optional(),
+  connectOrCreate: z.lazy(() => EvaluationCreateOrConnectWithoutEvaluationResultsInputSchema).optional(),
+  upsert: z.lazy(() => EvaluationUpsertWithoutEvaluationResultsInputSchema).optional(),
+  connect: z.lazy(() => EvaluationWhereUniqueInputSchema).optional(),
+  update: z.union([ z.lazy(() => EvaluationUpdateToOneWithWhereWithoutEvaluationResultsInputSchema),z.lazy(() => EvaluationUpdateWithoutEvaluationResultsInputSchema),z.lazy(() => EvaluationUncheckedUpdateWithoutEvaluationResultsInputSchema) ]).optional(),
+}).strict();
+
+export const EvaluationTemplateUpdateOneWithoutEvaluationResultsNestedInputSchema: z.ZodType<Prisma.EvaluationTemplateUpdateOneWithoutEvaluationResultsNestedInput> = z.object({
+  create: z.union([ z.lazy(() => EvaluationTemplateCreateWithoutEvaluationResultsInputSchema),z.lazy(() => EvaluationTemplateUncheckedCreateWithoutEvaluationResultsInputSchema) ]).optional(),
+  connectOrCreate: z.lazy(() => EvaluationTemplateCreateOrConnectWithoutEvaluationResultsInputSchema).optional(),
+  upsert: z.lazy(() => EvaluationTemplateUpsertWithoutEvaluationResultsInputSchema).optional(),
+  disconnect: z.union([ z.boolean(),z.lazy(() => EvaluationTemplateWhereInputSchema) ]).optional(),
+  delete: z.union([ z.boolean(),z.lazy(() => EvaluationTemplateWhereInputSchema) ]).optional(),
+  connect: z.lazy(() => EvaluationTemplateWhereUniqueInputSchema).optional(),
+  update: z.union([ z.lazy(() => EvaluationTemplateUpdateToOneWithWhereWithoutEvaluationResultsInputSchema),z.lazy(() => EvaluationTemplateUpdateWithoutEvaluationResultsInputSchema),z.lazy(() => EvaluationTemplateUncheckedUpdateWithoutEvaluationResultsInputSchema) ]).optional(),
 }).strict();
 
 export const CallCreateNestedOneWithoutLatencyBlocksInputSchema: z.ZodType<Prisma.CallCreateNestedOneWithoutLatencyBlocksInput> = z.object({
@@ -6353,73 +6561,73 @@ export const CallUpdateOneRequiredWithoutInterruptionsNestedInputSchema: z.ZodTy
   update: z.union([ z.lazy(() => CallUpdateToOneWithWhereWithoutInterruptionsInputSchema),z.lazy(() => CallUpdateWithoutInterruptionsInputSchema),z.lazy(() => CallUncheckedUpdateWithoutInterruptionsInputSchema) ]).optional(),
 }).strict();
 
-export const EvalCreateNestedManyWithoutEvalSetInputSchema: z.ZodType<Prisma.EvalCreateNestedManyWithoutEvalSetInput> = z.object({
-  create: z.union([ z.lazy(() => EvalCreateWithoutEvalSetInputSchema),z.lazy(() => EvalCreateWithoutEvalSetInputSchema).array(),z.lazy(() => EvalUncheckedCreateWithoutEvalSetInputSchema),z.lazy(() => EvalUncheckedCreateWithoutEvalSetInputSchema).array() ]).optional(),
-  connectOrCreate: z.union([ z.lazy(() => EvalCreateOrConnectWithoutEvalSetInputSchema),z.lazy(() => EvalCreateOrConnectWithoutEvalSetInputSchema).array() ]).optional(),
-  createMany: z.lazy(() => EvalCreateManyEvalSetInputEnvelopeSchema).optional(),
-  connect: z.union([ z.lazy(() => EvalWhereUniqueInputSchema),z.lazy(() => EvalWhereUniqueInputSchema).array() ]).optional(),
+export const EvaluationCreateNestedManyWithoutEvaluationGroupInputSchema: z.ZodType<Prisma.EvaluationCreateNestedManyWithoutEvaluationGroupInput> = z.object({
+  create: z.union([ z.lazy(() => EvaluationCreateWithoutEvaluationGroupInputSchema),z.lazy(() => EvaluationCreateWithoutEvaluationGroupInputSchema).array(),z.lazy(() => EvaluationUncheckedCreateWithoutEvaluationGroupInputSchema),z.lazy(() => EvaluationUncheckedCreateWithoutEvaluationGroupInputSchema).array() ]).optional(),
+  connectOrCreate: z.union([ z.lazy(() => EvaluationCreateOrConnectWithoutEvaluationGroupInputSchema),z.lazy(() => EvaluationCreateOrConnectWithoutEvaluationGroupInputSchema).array() ]).optional(),
+  createMany: z.lazy(() => EvaluationCreateManyEvaluationGroupInputEnvelopeSchema).optional(),
+  connect: z.union([ z.lazy(() => EvaluationWhereUniqueInputSchema),z.lazy(() => EvaluationWhereUniqueInputSchema).array() ]).optional(),
 }).strict();
 
-export const SavedSearchCreateNestedOneWithoutEvalSetsInputSchema: z.ZodType<Prisma.SavedSearchCreateNestedOneWithoutEvalSetsInput> = z.object({
-  create: z.union([ z.lazy(() => SavedSearchCreateWithoutEvalSetsInputSchema),z.lazy(() => SavedSearchUncheckedCreateWithoutEvalSetsInputSchema) ]).optional(),
-  connectOrCreate: z.lazy(() => SavedSearchCreateOrConnectWithoutEvalSetsInputSchema).optional(),
+export const SavedSearchCreateNestedOneWithoutEvaluationGroupsInputSchema: z.ZodType<Prisma.SavedSearchCreateNestedOneWithoutEvaluationGroupsInput> = z.object({
+  create: z.union([ z.lazy(() => SavedSearchCreateWithoutEvaluationGroupsInputSchema),z.lazy(() => SavedSearchUncheckedCreateWithoutEvaluationGroupsInputSchema) ]).optional(),
+  connectOrCreate: z.lazy(() => SavedSearchCreateOrConnectWithoutEvaluationGroupsInputSchema).optional(),
   connect: z.lazy(() => SavedSearchWhereUniqueInputSchema).optional()
 }).strict();
 
-export const EvalUncheckedCreateNestedManyWithoutEvalSetInputSchema: z.ZodType<Prisma.EvalUncheckedCreateNestedManyWithoutEvalSetInput> = z.object({
-  create: z.union([ z.lazy(() => EvalCreateWithoutEvalSetInputSchema),z.lazy(() => EvalCreateWithoutEvalSetInputSchema).array(),z.lazy(() => EvalUncheckedCreateWithoutEvalSetInputSchema),z.lazy(() => EvalUncheckedCreateWithoutEvalSetInputSchema).array() ]).optional(),
-  connectOrCreate: z.union([ z.lazy(() => EvalCreateOrConnectWithoutEvalSetInputSchema),z.lazy(() => EvalCreateOrConnectWithoutEvalSetInputSchema).array() ]).optional(),
-  createMany: z.lazy(() => EvalCreateManyEvalSetInputEnvelopeSchema).optional(),
-  connect: z.union([ z.lazy(() => EvalWhereUniqueInputSchema),z.lazy(() => EvalWhereUniqueInputSchema).array() ]).optional(),
+export const EvaluationUncheckedCreateNestedManyWithoutEvaluationGroupInputSchema: z.ZodType<Prisma.EvaluationUncheckedCreateNestedManyWithoutEvaluationGroupInput> = z.object({
+  create: z.union([ z.lazy(() => EvaluationCreateWithoutEvaluationGroupInputSchema),z.lazy(() => EvaluationCreateWithoutEvaluationGroupInputSchema).array(),z.lazy(() => EvaluationUncheckedCreateWithoutEvaluationGroupInputSchema),z.lazy(() => EvaluationUncheckedCreateWithoutEvaluationGroupInputSchema).array() ]).optional(),
+  connectOrCreate: z.union([ z.lazy(() => EvaluationCreateOrConnectWithoutEvaluationGroupInputSchema),z.lazy(() => EvaluationCreateOrConnectWithoutEvaluationGroupInputSchema).array() ]).optional(),
+  createMany: z.lazy(() => EvaluationCreateManyEvaluationGroupInputEnvelopeSchema).optional(),
+  connect: z.union([ z.lazy(() => EvaluationWhereUniqueInputSchema),z.lazy(() => EvaluationWhereUniqueInputSchema).array() ]).optional(),
 }).strict();
 
-export const EvalUpdateManyWithoutEvalSetNestedInputSchema: z.ZodType<Prisma.EvalUpdateManyWithoutEvalSetNestedInput> = z.object({
-  create: z.union([ z.lazy(() => EvalCreateWithoutEvalSetInputSchema),z.lazy(() => EvalCreateWithoutEvalSetInputSchema).array(),z.lazy(() => EvalUncheckedCreateWithoutEvalSetInputSchema),z.lazy(() => EvalUncheckedCreateWithoutEvalSetInputSchema).array() ]).optional(),
-  connectOrCreate: z.union([ z.lazy(() => EvalCreateOrConnectWithoutEvalSetInputSchema),z.lazy(() => EvalCreateOrConnectWithoutEvalSetInputSchema).array() ]).optional(),
-  upsert: z.union([ z.lazy(() => EvalUpsertWithWhereUniqueWithoutEvalSetInputSchema),z.lazy(() => EvalUpsertWithWhereUniqueWithoutEvalSetInputSchema).array() ]).optional(),
-  createMany: z.lazy(() => EvalCreateManyEvalSetInputEnvelopeSchema).optional(),
-  set: z.union([ z.lazy(() => EvalWhereUniqueInputSchema),z.lazy(() => EvalWhereUniqueInputSchema).array() ]).optional(),
-  disconnect: z.union([ z.lazy(() => EvalWhereUniqueInputSchema),z.lazy(() => EvalWhereUniqueInputSchema).array() ]).optional(),
-  delete: z.union([ z.lazy(() => EvalWhereUniqueInputSchema),z.lazy(() => EvalWhereUniqueInputSchema).array() ]).optional(),
-  connect: z.union([ z.lazy(() => EvalWhereUniqueInputSchema),z.lazy(() => EvalWhereUniqueInputSchema).array() ]).optional(),
-  update: z.union([ z.lazy(() => EvalUpdateWithWhereUniqueWithoutEvalSetInputSchema),z.lazy(() => EvalUpdateWithWhereUniqueWithoutEvalSetInputSchema).array() ]).optional(),
-  updateMany: z.union([ z.lazy(() => EvalUpdateManyWithWhereWithoutEvalSetInputSchema),z.lazy(() => EvalUpdateManyWithWhereWithoutEvalSetInputSchema).array() ]).optional(),
-  deleteMany: z.union([ z.lazy(() => EvalScalarWhereInputSchema),z.lazy(() => EvalScalarWhereInputSchema).array() ]).optional(),
+export const EvaluationUpdateManyWithoutEvaluationGroupNestedInputSchema: z.ZodType<Prisma.EvaluationUpdateManyWithoutEvaluationGroupNestedInput> = z.object({
+  create: z.union([ z.lazy(() => EvaluationCreateWithoutEvaluationGroupInputSchema),z.lazy(() => EvaluationCreateWithoutEvaluationGroupInputSchema).array(),z.lazy(() => EvaluationUncheckedCreateWithoutEvaluationGroupInputSchema),z.lazy(() => EvaluationUncheckedCreateWithoutEvaluationGroupInputSchema).array() ]).optional(),
+  connectOrCreate: z.union([ z.lazy(() => EvaluationCreateOrConnectWithoutEvaluationGroupInputSchema),z.lazy(() => EvaluationCreateOrConnectWithoutEvaluationGroupInputSchema).array() ]).optional(),
+  upsert: z.union([ z.lazy(() => EvaluationUpsertWithWhereUniqueWithoutEvaluationGroupInputSchema),z.lazy(() => EvaluationUpsertWithWhereUniqueWithoutEvaluationGroupInputSchema).array() ]).optional(),
+  createMany: z.lazy(() => EvaluationCreateManyEvaluationGroupInputEnvelopeSchema).optional(),
+  set: z.union([ z.lazy(() => EvaluationWhereUniqueInputSchema),z.lazy(() => EvaluationWhereUniqueInputSchema).array() ]).optional(),
+  disconnect: z.union([ z.lazy(() => EvaluationWhereUniqueInputSchema),z.lazy(() => EvaluationWhereUniqueInputSchema).array() ]).optional(),
+  delete: z.union([ z.lazy(() => EvaluationWhereUniqueInputSchema),z.lazy(() => EvaluationWhereUniqueInputSchema).array() ]).optional(),
+  connect: z.union([ z.lazy(() => EvaluationWhereUniqueInputSchema),z.lazy(() => EvaluationWhereUniqueInputSchema).array() ]).optional(),
+  update: z.union([ z.lazy(() => EvaluationUpdateWithWhereUniqueWithoutEvaluationGroupInputSchema),z.lazy(() => EvaluationUpdateWithWhereUniqueWithoutEvaluationGroupInputSchema).array() ]).optional(),
+  updateMany: z.union([ z.lazy(() => EvaluationUpdateManyWithWhereWithoutEvaluationGroupInputSchema),z.lazy(() => EvaluationUpdateManyWithWhereWithoutEvaluationGroupInputSchema).array() ]).optional(),
+  deleteMany: z.union([ z.lazy(() => EvaluationScalarWhereInputSchema),z.lazy(() => EvaluationScalarWhereInputSchema).array() ]).optional(),
 }).strict();
 
-export const SavedSearchUpdateOneWithoutEvalSetsNestedInputSchema: z.ZodType<Prisma.SavedSearchUpdateOneWithoutEvalSetsNestedInput> = z.object({
-  create: z.union([ z.lazy(() => SavedSearchCreateWithoutEvalSetsInputSchema),z.lazy(() => SavedSearchUncheckedCreateWithoutEvalSetsInputSchema) ]).optional(),
-  connectOrCreate: z.lazy(() => SavedSearchCreateOrConnectWithoutEvalSetsInputSchema).optional(),
-  upsert: z.lazy(() => SavedSearchUpsertWithoutEvalSetsInputSchema).optional(),
+export const SavedSearchUpdateOneWithoutEvaluationGroupsNestedInputSchema: z.ZodType<Prisma.SavedSearchUpdateOneWithoutEvaluationGroupsNestedInput> = z.object({
+  create: z.union([ z.lazy(() => SavedSearchCreateWithoutEvaluationGroupsInputSchema),z.lazy(() => SavedSearchUncheckedCreateWithoutEvaluationGroupsInputSchema) ]).optional(),
+  connectOrCreate: z.lazy(() => SavedSearchCreateOrConnectWithoutEvaluationGroupsInputSchema).optional(),
+  upsert: z.lazy(() => SavedSearchUpsertWithoutEvaluationGroupsInputSchema).optional(),
   disconnect: z.union([ z.boolean(),z.lazy(() => SavedSearchWhereInputSchema) ]).optional(),
   delete: z.union([ z.boolean(),z.lazy(() => SavedSearchWhereInputSchema) ]).optional(),
   connect: z.lazy(() => SavedSearchWhereUniqueInputSchema).optional(),
-  update: z.union([ z.lazy(() => SavedSearchUpdateToOneWithWhereWithoutEvalSetsInputSchema),z.lazy(() => SavedSearchUpdateWithoutEvalSetsInputSchema),z.lazy(() => SavedSearchUncheckedUpdateWithoutEvalSetsInputSchema) ]).optional(),
+  update: z.union([ z.lazy(() => SavedSearchUpdateToOneWithWhereWithoutEvaluationGroupsInputSchema),z.lazy(() => SavedSearchUpdateWithoutEvaluationGroupsInputSchema),z.lazy(() => SavedSearchUncheckedUpdateWithoutEvaluationGroupsInputSchema) ]).optional(),
 }).strict();
 
-export const EvalUncheckedUpdateManyWithoutEvalSetNestedInputSchema: z.ZodType<Prisma.EvalUncheckedUpdateManyWithoutEvalSetNestedInput> = z.object({
-  create: z.union([ z.lazy(() => EvalCreateWithoutEvalSetInputSchema),z.lazy(() => EvalCreateWithoutEvalSetInputSchema).array(),z.lazy(() => EvalUncheckedCreateWithoutEvalSetInputSchema),z.lazy(() => EvalUncheckedCreateWithoutEvalSetInputSchema).array() ]).optional(),
-  connectOrCreate: z.union([ z.lazy(() => EvalCreateOrConnectWithoutEvalSetInputSchema),z.lazy(() => EvalCreateOrConnectWithoutEvalSetInputSchema).array() ]).optional(),
-  upsert: z.union([ z.lazy(() => EvalUpsertWithWhereUniqueWithoutEvalSetInputSchema),z.lazy(() => EvalUpsertWithWhereUniqueWithoutEvalSetInputSchema).array() ]).optional(),
-  createMany: z.lazy(() => EvalCreateManyEvalSetInputEnvelopeSchema).optional(),
-  set: z.union([ z.lazy(() => EvalWhereUniqueInputSchema),z.lazy(() => EvalWhereUniqueInputSchema).array() ]).optional(),
-  disconnect: z.union([ z.lazy(() => EvalWhereUniqueInputSchema),z.lazy(() => EvalWhereUniqueInputSchema).array() ]).optional(),
-  delete: z.union([ z.lazy(() => EvalWhereUniqueInputSchema),z.lazy(() => EvalWhereUniqueInputSchema).array() ]).optional(),
-  connect: z.union([ z.lazy(() => EvalWhereUniqueInputSchema),z.lazy(() => EvalWhereUniqueInputSchema).array() ]).optional(),
-  update: z.union([ z.lazy(() => EvalUpdateWithWhereUniqueWithoutEvalSetInputSchema),z.lazy(() => EvalUpdateWithWhereUniqueWithoutEvalSetInputSchema).array() ]).optional(),
-  updateMany: z.union([ z.lazy(() => EvalUpdateManyWithWhereWithoutEvalSetInputSchema),z.lazy(() => EvalUpdateManyWithWhereWithoutEvalSetInputSchema).array() ]).optional(),
-  deleteMany: z.union([ z.lazy(() => EvalScalarWhereInputSchema),z.lazy(() => EvalScalarWhereInputSchema).array() ]).optional(),
+export const EvaluationUncheckedUpdateManyWithoutEvaluationGroupNestedInputSchema: z.ZodType<Prisma.EvaluationUncheckedUpdateManyWithoutEvaluationGroupNestedInput> = z.object({
+  create: z.union([ z.lazy(() => EvaluationCreateWithoutEvaluationGroupInputSchema),z.lazy(() => EvaluationCreateWithoutEvaluationGroupInputSchema).array(),z.lazy(() => EvaluationUncheckedCreateWithoutEvaluationGroupInputSchema),z.lazy(() => EvaluationUncheckedCreateWithoutEvaluationGroupInputSchema).array() ]).optional(),
+  connectOrCreate: z.union([ z.lazy(() => EvaluationCreateOrConnectWithoutEvaluationGroupInputSchema),z.lazy(() => EvaluationCreateOrConnectWithoutEvaluationGroupInputSchema).array() ]).optional(),
+  upsert: z.union([ z.lazy(() => EvaluationUpsertWithWhereUniqueWithoutEvaluationGroupInputSchema),z.lazy(() => EvaluationUpsertWithWhereUniqueWithoutEvaluationGroupInputSchema).array() ]).optional(),
+  createMany: z.lazy(() => EvaluationCreateManyEvaluationGroupInputEnvelopeSchema).optional(),
+  set: z.union([ z.lazy(() => EvaluationWhereUniqueInputSchema),z.lazy(() => EvaluationWhereUniqueInputSchema).array() ]).optional(),
+  disconnect: z.union([ z.lazy(() => EvaluationWhereUniqueInputSchema),z.lazy(() => EvaluationWhereUniqueInputSchema).array() ]).optional(),
+  delete: z.union([ z.lazy(() => EvaluationWhereUniqueInputSchema),z.lazy(() => EvaluationWhereUniqueInputSchema).array() ]).optional(),
+  connect: z.union([ z.lazy(() => EvaluationWhereUniqueInputSchema),z.lazy(() => EvaluationWhereUniqueInputSchema).array() ]).optional(),
+  update: z.union([ z.lazy(() => EvaluationUpdateWithWhereUniqueWithoutEvaluationGroupInputSchema),z.lazy(() => EvaluationUpdateWithWhereUniqueWithoutEvaluationGroupInputSchema).array() ]).optional(),
+  updateMany: z.union([ z.lazy(() => EvaluationUpdateManyWithWhereWithoutEvaluationGroupInputSchema),z.lazy(() => EvaluationUpdateManyWithWhereWithoutEvaluationGroupInputSchema).array() ]).optional(),
+  deleteMany: z.union([ z.lazy(() => EvaluationScalarWhereInputSchema),z.lazy(() => EvaluationScalarWhereInputSchema).array() ]).optional(),
 }).strict();
 
 export const SavedSearchCreateagentIdInputSchema: z.ZodType<Prisma.SavedSearchCreateagentIdInput> = z.object({
   set: z.string().array()
 }).strict();
 
-export const EvalSetCreateNestedManyWithoutSavedSearchInputSchema: z.ZodType<Prisma.EvalSetCreateNestedManyWithoutSavedSearchInput> = z.object({
-  create: z.union([ z.lazy(() => EvalSetCreateWithoutSavedSearchInputSchema),z.lazy(() => EvalSetCreateWithoutSavedSearchInputSchema).array(),z.lazy(() => EvalSetUncheckedCreateWithoutSavedSearchInputSchema),z.lazy(() => EvalSetUncheckedCreateWithoutSavedSearchInputSchema).array() ]).optional(),
-  connectOrCreate: z.union([ z.lazy(() => EvalSetCreateOrConnectWithoutSavedSearchInputSchema),z.lazy(() => EvalSetCreateOrConnectWithoutSavedSearchInputSchema).array() ]).optional(),
-  createMany: z.lazy(() => EvalSetCreateManySavedSearchInputEnvelopeSchema).optional(),
-  connect: z.union([ z.lazy(() => EvalSetWhereUniqueInputSchema),z.lazy(() => EvalSetWhereUniqueInputSchema).array() ]).optional(),
+export const EvaluationGroupCreateNestedManyWithoutSavedSearchInputSchema: z.ZodType<Prisma.EvaluationGroupCreateNestedManyWithoutSavedSearchInput> = z.object({
+  create: z.union([ z.lazy(() => EvaluationGroupCreateWithoutSavedSearchInputSchema),z.lazy(() => EvaluationGroupCreateWithoutSavedSearchInputSchema).array(),z.lazy(() => EvaluationGroupUncheckedCreateWithoutSavedSearchInputSchema),z.lazy(() => EvaluationGroupUncheckedCreateWithoutSavedSearchInputSchema).array() ]).optional(),
+  connectOrCreate: z.union([ z.lazy(() => EvaluationGroupCreateOrConnectWithoutSavedSearchInputSchema),z.lazy(() => EvaluationGroupCreateOrConnectWithoutSavedSearchInputSchema).array() ]).optional(),
+  createMany: z.lazy(() => EvaluationGroupCreateManySavedSearchInputEnvelopeSchema).optional(),
+  connect: z.union([ z.lazy(() => EvaluationGroupWhereUniqueInputSchema),z.lazy(() => EvaluationGroupWhereUniqueInputSchema).array() ]).optional(),
 }).strict();
 
 export const AlertCreateNestedManyWithoutSavedSearchInputSchema: z.ZodType<Prisma.AlertCreateNestedManyWithoutSavedSearchInput> = z.object({
@@ -6429,11 +6637,11 @@ export const AlertCreateNestedManyWithoutSavedSearchInputSchema: z.ZodType<Prism
   connect: z.union([ z.lazy(() => AlertWhereUniqueInputSchema),z.lazy(() => AlertWhereUniqueInputSchema).array() ]).optional(),
 }).strict();
 
-export const EvalSetUncheckedCreateNestedManyWithoutSavedSearchInputSchema: z.ZodType<Prisma.EvalSetUncheckedCreateNestedManyWithoutSavedSearchInput> = z.object({
-  create: z.union([ z.lazy(() => EvalSetCreateWithoutSavedSearchInputSchema),z.lazy(() => EvalSetCreateWithoutSavedSearchInputSchema).array(),z.lazy(() => EvalSetUncheckedCreateWithoutSavedSearchInputSchema),z.lazy(() => EvalSetUncheckedCreateWithoutSavedSearchInputSchema).array() ]).optional(),
-  connectOrCreate: z.union([ z.lazy(() => EvalSetCreateOrConnectWithoutSavedSearchInputSchema),z.lazy(() => EvalSetCreateOrConnectWithoutSavedSearchInputSchema).array() ]).optional(),
-  createMany: z.lazy(() => EvalSetCreateManySavedSearchInputEnvelopeSchema).optional(),
-  connect: z.union([ z.lazy(() => EvalSetWhereUniqueInputSchema),z.lazy(() => EvalSetWhereUniqueInputSchema).array() ]).optional(),
+export const EvaluationGroupUncheckedCreateNestedManyWithoutSavedSearchInputSchema: z.ZodType<Prisma.EvaluationGroupUncheckedCreateNestedManyWithoutSavedSearchInput> = z.object({
+  create: z.union([ z.lazy(() => EvaluationGroupCreateWithoutSavedSearchInputSchema),z.lazy(() => EvaluationGroupCreateWithoutSavedSearchInputSchema).array(),z.lazy(() => EvaluationGroupUncheckedCreateWithoutSavedSearchInputSchema),z.lazy(() => EvaluationGroupUncheckedCreateWithoutSavedSearchInputSchema).array() ]).optional(),
+  connectOrCreate: z.union([ z.lazy(() => EvaluationGroupCreateOrConnectWithoutSavedSearchInputSchema),z.lazy(() => EvaluationGroupCreateOrConnectWithoutSavedSearchInputSchema).array() ]).optional(),
+  createMany: z.lazy(() => EvaluationGroupCreateManySavedSearchInputEnvelopeSchema).optional(),
+  connect: z.union([ z.lazy(() => EvaluationGroupWhereUniqueInputSchema),z.lazy(() => EvaluationGroupWhereUniqueInputSchema).array() ]).optional(),
 }).strict();
 
 export const AlertUncheckedCreateNestedManyWithoutSavedSearchInputSchema: z.ZodType<Prisma.AlertUncheckedCreateNestedManyWithoutSavedSearchInput> = z.object({
@@ -6448,18 +6656,18 @@ export const SavedSearchUpdateagentIdInputSchema: z.ZodType<Prisma.SavedSearchUp
   push: z.union([ z.string(),z.string().array() ]).optional(),
 }).strict();
 
-export const EvalSetUpdateManyWithoutSavedSearchNestedInputSchema: z.ZodType<Prisma.EvalSetUpdateManyWithoutSavedSearchNestedInput> = z.object({
-  create: z.union([ z.lazy(() => EvalSetCreateWithoutSavedSearchInputSchema),z.lazy(() => EvalSetCreateWithoutSavedSearchInputSchema).array(),z.lazy(() => EvalSetUncheckedCreateWithoutSavedSearchInputSchema),z.lazy(() => EvalSetUncheckedCreateWithoutSavedSearchInputSchema).array() ]).optional(),
-  connectOrCreate: z.union([ z.lazy(() => EvalSetCreateOrConnectWithoutSavedSearchInputSchema),z.lazy(() => EvalSetCreateOrConnectWithoutSavedSearchInputSchema).array() ]).optional(),
-  upsert: z.union([ z.lazy(() => EvalSetUpsertWithWhereUniqueWithoutSavedSearchInputSchema),z.lazy(() => EvalSetUpsertWithWhereUniqueWithoutSavedSearchInputSchema).array() ]).optional(),
-  createMany: z.lazy(() => EvalSetCreateManySavedSearchInputEnvelopeSchema).optional(),
-  set: z.union([ z.lazy(() => EvalSetWhereUniqueInputSchema),z.lazy(() => EvalSetWhereUniqueInputSchema).array() ]).optional(),
-  disconnect: z.union([ z.lazy(() => EvalSetWhereUniqueInputSchema),z.lazy(() => EvalSetWhereUniqueInputSchema).array() ]).optional(),
-  delete: z.union([ z.lazy(() => EvalSetWhereUniqueInputSchema),z.lazy(() => EvalSetWhereUniqueInputSchema).array() ]).optional(),
-  connect: z.union([ z.lazy(() => EvalSetWhereUniqueInputSchema),z.lazy(() => EvalSetWhereUniqueInputSchema).array() ]).optional(),
-  update: z.union([ z.lazy(() => EvalSetUpdateWithWhereUniqueWithoutSavedSearchInputSchema),z.lazy(() => EvalSetUpdateWithWhereUniqueWithoutSavedSearchInputSchema).array() ]).optional(),
-  updateMany: z.union([ z.lazy(() => EvalSetUpdateManyWithWhereWithoutSavedSearchInputSchema),z.lazy(() => EvalSetUpdateManyWithWhereWithoutSavedSearchInputSchema).array() ]).optional(),
-  deleteMany: z.union([ z.lazy(() => EvalSetScalarWhereInputSchema),z.lazy(() => EvalSetScalarWhereInputSchema).array() ]).optional(),
+export const EvaluationGroupUpdateManyWithoutSavedSearchNestedInputSchema: z.ZodType<Prisma.EvaluationGroupUpdateManyWithoutSavedSearchNestedInput> = z.object({
+  create: z.union([ z.lazy(() => EvaluationGroupCreateWithoutSavedSearchInputSchema),z.lazy(() => EvaluationGroupCreateWithoutSavedSearchInputSchema).array(),z.lazy(() => EvaluationGroupUncheckedCreateWithoutSavedSearchInputSchema),z.lazy(() => EvaluationGroupUncheckedCreateWithoutSavedSearchInputSchema).array() ]).optional(),
+  connectOrCreate: z.union([ z.lazy(() => EvaluationGroupCreateOrConnectWithoutSavedSearchInputSchema),z.lazy(() => EvaluationGroupCreateOrConnectWithoutSavedSearchInputSchema).array() ]).optional(),
+  upsert: z.union([ z.lazy(() => EvaluationGroupUpsertWithWhereUniqueWithoutSavedSearchInputSchema),z.lazy(() => EvaluationGroupUpsertWithWhereUniqueWithoutSavedSearchInputSchema).array() ]).optional(),
+  createMany: z.lazy(() => EvaluationGroupCreateManySavedSearchInputEnvelopeSchema).optional(),
+  set: z.union([ z.lazy(() => EvaluationGroupWhereUniqueInputSchema),z.lazy(() => EvaluationGroupWhereUniqueInputSchema).array() ]).optional(),
+  disconnect: z.union([ z.lazy(() => EvaluationGroupWhereUniqueInputSchema),z.lazy(() => EvaluationGroupWhereUniqueInputSchema).array() ]).optional(),
+  delete: z.union([ z.lazy(() => EvaluationGroupWhereUniqueInputSchema),z.lazy(() => EvaluationGroupWhereUniqueInputSchema).array() ]).optional(),
+  connect: z.union([ z.lazy(() => EvaluationGroupWhereUniqueInputSchema),z.lazy(() => EvaluationGroupWhereUniqueInputSchema).array() ]).optional(),
+  update: z.union([ z.lazy(() => EvaluationGroupUpdateWithWhereUniqueWithoutSavedSearchInputSchema),z.lazy(() => EvaluationGroupUpdateWithWhereUniqueWithoutSavedSearchInputSchema).array() ]).optional(),
+  updateMany: z.union([ z.lazy(() => EvaluationGroupUpdateManyWithWhereWithoutSavedSearchInputSchema),z.lazy(() => EvaluationGroupUpdateManyWithWhereWithoutSavedSearchInputSchema).array() ]).optional(),
+  deleteMany: z.union([ z.lazy(() => EvaluationGroupScalarWhereInputSchema),z.lazy(() => EvaluationGroupScalarWhereInputSchema).array() ]).optional(),
 }).strict();
 
 export const AlertUpdateManyWithoutSavedSearchNestedInputSchema: z.ZodType<Prisma.AlertUpdateManyWithoutSavedSearchNestedInput> = z.object({
@@ -6476,18 +6684,18 @@ export const AlertUpdateManyWithoutSavedSearchNestedInputSchema: z.ZodType<Prism
   deleteMany: z.union([ z.lazy(() => AlertScalarWhereInputSchema),z.lazy(() => AlertScalarWhereInputSchema).array() ]).optional(),
 }).strict();
 
-export const EvalSetUncheckedUpdateManyWithoutSavedSearchNestedInputSchema: z.ZodType<Prisma.EvalSetUncheckedUpdateManyWithoutSavedSearchNestedInput> = z.object({
-  create: z.union([ z.lazy(() => EvalSetCreateWithoutSavedSearchInputSchema),z.lazy(() => EvalSetCreateWithoutSavedSearchInputSchema).array(),z.lazy(() => EvalSetUncheckedCreateWithoutSavedSearchInputSchema),z.lazy(() => EvalSetUncheckedCreateWithoutSavedSearchInputSchema).array() ]).optional(),
-  connectOrCreate: z.union([ z.lazy(() => EvalSetCreateOrConnectWithoutSavedSearchInputSchema),z.lazy(() => EvalSetCreateOrConnectWithoutSavedSearchInputSchema).array() ]).optional(),
-  upsert: z.union([ z.lazy(() => EvalSetUpsertWithWhereUniqueWithoutSavedSearchInputSchema),z.lazy(() => EvalSetUpsertWithWhereUniqueWithoutSavedSearchInputSchema).array() ]).optional(),
-  createMany: z.lazy(() => EvalSetCreateManySavedSearchInputEnvelopeSchema).optional(),
-  set: z.union([ z.lazy(() => EvalSetWhereUniqueInputSchema),z.lazy(() => EvalSetWhereUniqueInputSchema).array() ]).optional(),
-  disconnect: z.union([ z.lazy(() => EvalSetWhereUniqueInputSchema),z.lazy(() => EvalSetWhereUniqueInputSchema).array() ]).optional(),
-  delete: z.union([ z.lazy(() => EvalSetWhereUniqueInputSchema),z.lazy(() => EvalSetWhereUniqueInputSchema).array() ]).optional(),
-  connect: z.union([ z.lazy(() => EvalSetWhereUniqueInputSchema),z.lazy(() => EvalSetWhereUniqueInputSchema).array() ]).optional(),
-  update: z.union([ z.lazy(() => EvalSetUpdateWithWhereUniqueWithoutSavedSearchInputSchema),z.lazy(() => EvalSetUpdateWithWhereUniqueWithoutSavedSearchInputSchema).array() ]).optional(),
-  updateMany: z.union([ z.lazy(() => EvalSetUpdateManyWithWhereWithoutSavedSearchInputSchema),z.lazy(() => EvalSetUpdateManyWithWhereWithoutSavedSearchInputSchema).array() ]).optional(),
-  deleteMany: z.union([ z.lazy(() => EvalSetScalarWhereInputSchema),z.lazy(() => EvalSetScalarWhereInputSchema).array() ]).optional(),
+export const EvaluationGroupUncheckedUpdateManyWithoutSavedSearchNestedInputSchema: z.ZodType<Prisma.EvaluationGroupUncheckedUpdateManyWithoutSavedSearchNestedInput> = z.object({
+  create: z.union([ z.lazy(() => EvaluationGroupCreateWithoutSavedSearchInputSchema),z.lazy(() => EvaluationGroupCreateWithoutSavedSearchInputSchema).array(),z.lazy(() => EvaluationGroupUncheckedCreateWithoutSavedSearchInputSchema),z.lazy(() => EvaluationGroupUncheckedCreateWithoutSavedSearchInputSchema).array() ]).optional(),
+  connectOrCreate: z.union([ z.lazy(() => EvaluationGroupCreateOrConnectWithoutSavedSearchInputSchema),z.lazy(() => EvaluationGroupCreateOrConnectWithoutSavedSearchInputSchema).array() ]).optional(),
+  upsert: z.union([ z.lazy(() => EvaluationGroupUpsertWithWhereUniqueWithoutSavedSearchInputSchema),z.lazy(() => EvaluationGroupUpsertWithWhereUniqueWithoutSavedSearchInputSchema).array() ]).optional(),
+  createMany: z.lazy(() => EvaluationGroupCreateManySavedSearchInputEnvelopeSchema).optional(),
+  set: z.union([ z.lazy(() => EvaluationGroupWhereUniqueInputSchema),z.lazy(() => EvaluationGroupWhereUniqueInputSchema).array() ]).optional(),
+  disconnect: z.union([ z.lazy(() => EvaluationGroupWhereUniqueInputSchema),z.lazy(() => EvaluationGroupWhereUniqueInputSchema).array() ]).optional(),
+  delete: z.union([ z.lazy(() => EvaluationGroupWhereUniqueInputSchema),z.lazy(() => EvaluationGroupWhereUniqueInputSchema).array() ]).optional(),
+  connect: z.union([ z.lazy(() => EvaluationGroupWhereUniqueInputSchema),z.lazy(() => EvaluationGroupWhereUniqueInputSchema).array() ]).optional(),
+  update: z.union([ z.lazy(() => EvaluationGroupUpdateWithWhereUniqueWithoutSavedSearchInputSchema),z.lazy(() => EvaluationGroupUpdateWithWhereUniqueWithoutSavedSearchInputSchema).array() ]).optional(),
+  updateMany: z.union([ z.lazy(() => EvaluationGroupUpdateManyWithWhereWithoutSavedSearchInputSchema),z.lazy(() => EvaluationGroupUpdateManyWithWhereWithoutSavedSearchInputSchema).array() ]).optional(),
+  deleteMany: z.union([ z.lazy(() => EvaluationGroupScalarWhereInputSchema),z.lazy(() => EvaluationGroupScalarWhereInputSchema).array() ]).optional(),
 }).strict();
 
 export const AlertUncheckedUpdateManyWithoutSavedSearchNestedInputSchema: z.ZodType<Prisma.AlertUncheckedUpdateManyWithoutSavedSearchNestedInput> = z.object({
@@ -6881,52 +7089,6 @@ export const NestedEnumAlertTypeWithAggregatesFilterSchema: z.ZodType<Prisma.Nes
   _max: z.lazy(() => NestedEnumAlertTypeFilterSchema).optional()
 }).strict();
 
-export const EvalCreateWithoutAgentInputSchema: z.ZodType<Prisma.EvalCreateWithoutAgentInput> = z.object({
-  id: z.string().optional(),
-  createdAt: z.coerce.date().optional(),
-  name: z.string(),
-  description: z.string(),
-  type: z.lazy(() => EvalTypeSchema),
-  resultType: z.lazy(() => EvalResultTypeSchema),
-  contentType: z.lazy(() => EvalContentTypeSchema).optional(),
-  isCritical: z.boolean().optional(),
-  toolCallExpectedResult: z.string().optional(),
-  ownerId: z.string().optional().nullable(),
-  deleted: z.boolean().optional(),
-  scenario: z.lazy(() => ScenarioCreateNestedOneWithoutEvalsInputSchema).optional(),
-  evalResults: z.lazy(() => EvalResultCreateNestedManyWithoutEvalInputSchema).optional(),
-  evalOverrides: z.lazy(() => EvalOverrideCreateNestedManyWithoutEvalInputSchema).optional(),
-  evalSet: z.lazy(() => EvalSetCreateNestedOneWithoutEvalsInputSchema).optional()
-}).strict();
-
-export const EvalUncheckedCreateWithoutAgentInputSchema: z.ZodType<Prisma.EvalUncheckedCreateWithoutAgentInput> = z.object({
-  id: z.string().optional(),
-  createdAt: z.coerce.date().optional(),
-  name: z.string(),
-  description: z.string(),
-  scenarioId: z.string().optional().nullable(),
-  type: z.lazy(() => EvalTypeSchema),
-  resultType: z.lazy(() => EvalResultTypeSchema),
-  contentType: z.lazy(() => EvalContentTypeSchema).optional(),
-  isCritical: z.boolean().optional(),
-  toolCallExpectedResult: z.string().optional(),
-  ownerId: z.string().optional().nullable(),
-  deleted: z.boolean().optional(),
-  evalSetId: z.string().optional().nullable(),
-  evalResults: z.lazy(() => EvalResultUncheckedCreateNestedManyWithoutEvalInputSchema).optional(),
-  evalOverrides: z.lazy(() => EvalOverrideUncheckedCreateNestedManyWithoutEvalInputSchema).optional()
-}).strict();
-
-export const EvalCreateOrConnectWithoutAgentInputSchema: z.ZodType<Prisma.EvalCreateOrConnectWithoutAgentInput> = z.object({
-  where: z.lazy(() => EvalWhereUniqueInputSchema),
-  create: z.union([ z.lazy(() => EvalCreateWithoutAgentInputSchema),z.lazy(() => EvalUncheckedCreateWithoutAgentInputSchema) ]),
-}).strict();
-
-export const EvalCreateManyAgentInputEnvelopeSchema: z.ZodType<Prisma.EvalCreateManyAgentInputEnvelope> = z.object({
-  data: z.union([ z.lazy(() => EvalCreateManyAgentInputSchema),z.lazy(() => EvalCreateManyAgentInputSchema).array() ]),
-  skipDuplicates: z.boolean().optional()
-}).strict();
-
 export const TestAgentCreateWithoutAgentsInputSchema: z.ZodType<Prisma.TestAgentCreateWithoutAgentsInput> = z.object({
   id: z.string().optional(),
   ownerId: z.string().optional().nullable(),
@@ -6961,33 +7123,27 @@ export const TestAgentCreateOrConnectWithoutAgentsInputSchema: z.ZodType<Prisma.
 export const ScenarioCreateWithoutAgentInputSchema: z.ZodType<Prisma.ScenarioCreateWithoutAgentInput> = z.object({
   id: z.string().optional(),
   createdAt: z.coerce.date().optional(),
-  ownerId: z.string().optional(),
   name: z.string(),
   instructions: z.string(),
   successCriteria: z.string().optional(),
   includeDateTime: z.boolean().optional(),
   timezone: z.string().optional().nullable(),
-  isNew: z.boolean().optional(),
   deleted: z.boolean().optional(),
-  generalEvalOverrides: z.lazy(() => EvalOverrideCreateNestedManyWithoutScenarioInputSchema).optional(),
   calls: z.lazy(() => CallCreateNestedManyWithoutScenarioInputSchema).optional(),
-  evals: z.lazy(() => EvalCreateNestedManyWithoutScenarioInputSchema).optional()
+  evaluations: z.lazy(() => EvaluationCreateNestedManyWithoutScenarioInputSchema).optional()
 }).strict();
 
 export const ScenarioUncheckedCreateWithoutAgentInputSchema: z.ZodType<Prisma.ScenarioUncheckedCreateWithoutAgentInput> = z.object({
   id: z.string().optional(),
   createdAt: z.coerce.date().optional(),
-  ownerId: z.string().optional(),
   name: z.string(),
   instructions: z.string(),
   successCriteria: z.string().optional(),
   includeDateTime: z.boolean().optional(),
   timezone: z.string().optional().nullable(),
-  isNew: z.boolean().optional(),
   deleted: z.boolean().optional(),
-  generalEvalOverrides: z.lazy(() => EvalOverrideUncheckedCreateNestedManyWithoutScenarioInputSchema).optional(),
   calls: z.lazy(() => CallUncheckedCreateNestedManyWithoutScenarioInputSchema).optional(),
-  evals: z.lazy(() => EvalUncheckedCreateNestedManyWithoutScenarioInputSchema).optional()
+  evaluations: z.lazy(() => EvaluationUncheckedCreateNestedManyWithoutScenarioInputSchema).optional()
 }).strict();
 
 export const ScenarioCreateOrConnectWithoutAgentInputSchema: z.ZodType<Prisma.ScenarioCreateOrConnectWithoutAgentInput> = z.object({
@@ -7056,7 +7212,7 @@ export const CallCreateWithoutAgentInputSchema: z.ZodType<Prisma.CallCreateWitho
   numInterruptions: z.number().int().optional().nullable(),
   duration: z.number().optional().nullable(),
   evalSetToSuccess: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
-  evalResults: z.lazy(() => EvalResultCreateNestedManyWithoutCallInputSchema).optional(),
+  evaluationResults: z.lazy(() => EvaluationResultCreateNestedManyWithoutCallInputSchema).optional(),
   test: z.lazy(() => TestCreateNestedOneWithoutCallsInputSchema).optional(),
   testAgent: z.lazy(() => TestAgentCreateNestedOneWithoutCallsInputSchema).optional(),
   scenario: z.lazy(() => ScenarioCreateNestedOneWithoutCallsInputSchema).optional(),
@@ -7095,7 +7251,7 @@ export const CallUncheckedCreateWithoutAgentInputSchema: z.ZodType<Prisma.CallUn
   testAgentId: z.string().optional().nullable(),
   scenarioId: z.string().optional().nullable(),
   evalSetToSuccess: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
-  evalResults: z.lazy(() => EvalResultUncheckedCreateNestedManyWithoutCallInputSchema).optional(),
+  evaluationResults: z.lazy(() => EvaluationResultUncheckedCreateNestedManyWithoutCallInputSchema).optional(),
   messages: z.lazy(() => MessageUncheckedCreateNestedManyWithoutCallInputSchema).optional(),
   latencyBlocks: z.lazy(() => LatencyBlockUncheckedCreateNestedManyWithoutCallInputSchema).optional(),
   interruptions: z.lazy(() => InterruptionUncheckedCreateNestedManyWithoutCallInputSchema).optional(),
@@ -7112,40 +7268,24 @@ export const CallCreateManyAgentInputEnvelopeSchema: z.ZodType<Prisma.CallCreate
   skipDuplicates: z.boolean().optional()
 }).strict();
 
-export const EvalUpsertWithWhereUniqueWithoutAgentInputSchema: z.ZodType<Prisma.EvalUpsertWithWhereUniqueWithoutAgentInput> = z.object({
-  where: z.lazy(() => EvalWhereUniqueInputSchema),
-  update: z.union([ z.lazy(() => EvalUpdateWithoutAgentInputSchema),z.lazy(() => EvalUncheckedUpdateWithoutAgentInputSchema) ]),
-  create: z.union([ z.lazy(() => EvalCreateWithoutAgentInputSchema),z.lazy(() => EvalUncheckedCreateWithoutAgentInputSchema) ]),
+export const GeneralEvaluationCreateWithoutAgentInputSchema: z.ZodType<Prisma.GeneralEvaluationCreateWithoutAgentInput> = z.object({
+  id: z.string().optional(),
+  evaluation: z.lazy(() => EvaluationCreateNestedOneWithoutGeneralEvaluationsInputSchema)
 }).strict();
 
-export const EvalUpdateWithWhereUniqueWithoutAgentInputSchema: z.ZodType<Prisma.EvalUpdateWithWhereUniqueWithoutAgentInput> = z.object({
-  where: z.lazy(() => EvalWhereUniqueInputSchema),
-  data: z.union([ z.lazy(() => EvalUpdateWithoutAgentInputSchema),z.lazy(() => EvalUncheckedUpdateWithoutAgentInputSchema) ]),
+export const GeneralEvaluationUncheckedCreateWithoutAgentInputSchema: z.ZodType<Prisma.GeneralEvaluationUncheckedCreateWithoutAgentInput> = z.object({
+  id: z.string().optional(),
+  evaluationId: z.string()
 }).strict();
 
-export const EvalUpdateManyWithWhereWithoutAgentInputSchema: z.ZodType<Prisma.EvalUpdateManyWithWhereWithoutAgentInput> = z.object({
-  where: z.lazy(() => EvalScalarWhereInputSchema),
-  data: z.union([ z.lazy(() => EvalUpdateManyMutationInputSchema),z.lazy(() => EvalUncheckedUpdateManyWithoutAgentInputSchema) ]),
+export const GeneralEvaluationCreateOrConnectWithoutAgentInputSchema: z.ZodType<Prisma.GeneralEvaluationCreateOrConnectWithoutAgentInput> = z.object({
+  where: z.lazy(() => GeneralEvaluationWhereUniqueInputSchema),
+  create: z.union([ z.lazy(() => GeneralEvaluationCreateWithoutAgentInputSchema),z.lazy(() => GeneralEvaluationUncheckedCreateWithoutAgentInputSchema) ]),
 }).strict();
 
-export const EvalScalarWhereInputSchema: z.ZodType<Prisma.EvalScalarWhereInput> = z.object({
-  AND: z.union([ z.lazy(() => EvalScalarWhereInputSchema),z.lazy(() => EvalScalarWhereInputSchema).array() ]).optional(),
-  OR: z.lazy(() => EvalScalarWhereInputSchema).array().optional(),
-  NOT: z.union([ z.lazy(() => EvalScalarWhereInputSchema),z.lazy(() => EvalScalarWhereInputSchema).array() ]).optional(),
-  id: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
-  createdAt: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
-  name: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
-  description: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
-  scenarioId: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
-  type: z.union([ z.lazy(() => EnumEvalTypeFilterSchema),z.lazy(() => EvalTypeSchema) ]).optional(),
-  resultType: z.union([ z.lazy(() => EnumEvalResultTypeFilterSchema),z.lazy(() => EvalResultTypeSchema) ]).optional(),
-  contentType: z.union([ z.lazy(() => EnumEvalContentTypeFilterSchema),z.lazy(() => EvalContentTypeSchema) ]).optional(),
-  isCritical: z.union([ z.lazy(() => BoolFilterSchema),z.boolean() ]).optional(),
-  toolCallExpectedResult: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
-  agentId: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
-  ownerId: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
-  deleted: z.union([ z.lazy(() => BoolFilterSchema),z.boolean() ]).optional(),
-  evalSetId: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
+export const GeneralEvaluationCreateManyAgentInputEnvelopeSchema: z.ZodType<Prisma.GeneralEvaluationCreateManyAgentInputEnvelope> = z.object({
+  data: z.union([ z.lazy(() => GeneralEvaluationCreateManyAgentInputSchema),z.lazy(() => GeneralEvaluationCreateManyAgentInputSchema).array() ]),
+  skipDuplicates: z.boolean().optional()
 }).strict();
 
 export const TestAgentUpsertWithWhereUniqueWithoutAgentsInputSchema: z.ZodType<Prisma.TestAgentUpsertWithWhereUniqueWithoutAgentsInput> = z.object({
@@ -7201,14 +7341,12 @@ export const ScenarioScalarWhereInputSchema: z.ZodType<Prisma.ScenarioScalarWher
   NOT: z.union([ z.lazy(() => ScenarioScalarWhereInputSchema),z.lazy(() => ScenarioScalarWhereInputSchema).array() ]).optional(),
   id: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   createdAt: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
-  ownerId: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   agentId: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   name: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   instructions: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   successCriteria: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   includeDateTime: z.union([ z.lazy(() => BoolFilterSchema),z.boolean() ]).optional(),
   timezone: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
-  isNew: z.union([ z.lazy(() => BoolFilterSchema),z.boolean() ]).optional(),
   deleted: z.union([ z.lazy(() => BoolFilterSchema),z.boolean() ]).optional(),
 }).strict();
 
@@ -7292,6 +7430,31 @@ export const CallScalarWhereInputSchema: z.ZodType<Prisma.CallScalarWhereInput> 
   evalSetToSuccess: z.lazy(() => JsonFilterSchema).optional()
 }).strict();
 
+export const GeneralEvaluationUpsertWithWhereUniqueWithoutAgentInputSchema: z.ZodType<Prisma.GeneralEvaluationUpsertWithWhereUniqueWithoutAgentInput> = z.object({
+  where: z.lazy(() => GeneralEvaluationWhereUniqueInputSchema),
+  update: z.union([ z.lazy(() => GeneralEvaluationUpdateWithoutAgentInputSchema),z.lazy(() => GeneralEvaluationUncheckedUpdateWithoutAgentInputSchema) ]),
+  create: z.union([ z.lazy(() => GeneralEvaluationCreateWithoutAgentInputSchema),z.lazy(() => GeneralEvaluationUncheckedCreateWithoutAgentInputSchema) ]),
+}).strict();
+
+export const GeneralEvaluationUpdateWithWhereUniqueWithoutAgentInputSchema: z.ZodType<Prisma.GeneralEvaluationUpdateWithWhereUniqueWithoutAgentInput> = z.object({
+  where: z.lazy(() => GeneralEvaluationWhereUniqueInputSchema),
+  data: z.union([ z.lazy(() => GeneralEvaluationUpdateWithoutAgentInputSchema),z.lazy(() => GeneralEvaluationUncheckedUpdateWithoutAgentInputSchema) ]),
+}).strict();
+
+export const GeneralEvaluationUpdateManyWithWhereWithoutAgentInputSchema: z.ZodType<Prisma.GeneralEvaluationUpdateManyWithWhereWithoutAgentInput> = z.object({
+  where: z.lazy(() => GeneralEvaluationScalarWhereInputSchema),
+  data: z.union([ z.lazy(() => GeneralEvaluationUpdateManyMutationInputSchema),z.lazy(() => GeneralEvaluationUncheckedUpdateManyWithoutAgentInputSchema) ]),
+}).strict();
+
+export const GeneralEvaluationScalarWhereInputSchema: z.ZodType<Prisma.GeneralEvaluationScalarWhereInput> = z.object({
+  AND: z.union([ z.lazy(() => GeneralEvaluationScalarWhereInputSchema),z.lazy(() => GeneralEvaluationScalarWhereInputSchema).array() ]).optional(),
+  OR: z.lazy(() => GeneralEvaluationScalarWhereInputSchema).array().optional(),
+  NOT: z.union([ z.lazy(() => GeneralEvaluationScalarWhereInputSchema),z.lazy(() => GeneralEvaluationScalarWhereInputSchema).array() ]).optional(),
+  id: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
+  agentId: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
+  evaluationId: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
+}).strict();
+
 export const AgentCreateWithoutTestsInputSchema: z.ZodType<Prisma.AgentCreateWithoutTestsInput> = z.object({
   id: z.string().optional(),
   createdAt: z.coerce.date().optional(),
@@ -7299,15 +7462,15 @@ export const AgentCreateWithoutTestsInputSchema: z.ZodType<Prisma.AgentCreateWit
   ownerId: z.string(),
   name: z.string(),
   phoneNumber: z.string().optional(),
+  customerAgentId: z.string(),
   githubRepoUrl: z.string().optional().nullable(),
-  customerAgentId: z.string().optional().nullable(),
   systemPrompt: z.string().optional(),
   extraProperties: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
   enableSlackNotifications: z.boolean().optional(),
-  enabledGeneralEvals: z.lazy(() => EvalCreateNestedManyWithoutAgentInputSchema).optional(),
   enabledTestAgents: z.lazy(() => TestAgentCreateNestedManyWithoutAgentsInputSchema).optional(),
   scenarios: z.lazy(() => ScenarioCreateNestedManyWithoutAgentInputSchema).optional(),
-  calls: z.lazy(() => CallCreateNestedManyWithoutAgentInputSchema).optional()
+  calls: z.lazy(() => CallCreateNestedManyWithoutAgentInputSchema).optional(),
+  generalEvaluations: z.lazy(() => GeneralEvaluationCreateNestedManyWithoutAgentInputSchema).optional()
 }).strict();
 
 export const AgentUncheckedCreateWithoutTestsInputSchema: z.ZodType<Prisma.AgentUncheckedCreateWithoutTestsInput> = z.object({
@@ -7317,15 +7480,15 @@ export const AgentUncheckedCreateWithoutTestsInputSchema: z.ZodType<Prisma.Agent
   ownerId: z.string(),
   name: z.string(),
   phoneNumber: z.string().optional(),
+  customerAgentId: z.string(),
   githubRepoUrl: z.string().optional().nullable(),
-  customerAgentId: z.string().optional().nullable(),
   systemPrompt: z.string().optional(),
   extraProperties: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
   enableSlackNotifications: z.boolean().optional(),
-  enabledGeneralEvals: z.lazy(() => EvalUncheckedCreateNestedManyWithoutAgentInputSchema).optional(),
   enabledTestAgents: z.lazy(() => TestAgentUncheckedCreateNestedManyWithoutAgentsInputSchema).optional(),
   scenarios: z.lazy(() => ScenarioUncheckedCreateNestedManyWithoutAgentInputSchema).optional(),
-  calls: z.lazy(() => CallUncheckedCreateNestedManyWithoutAgentInputSchema).optional()
+  calls: z.lazy(() => CallUncheckedCreateNestedManyWithoutAgentInputSchema).optional(),
+  generalEvaluations: z.lazy(() => GeneralEvaluationUncheckedCreateNestedManyWithoutAgentInputSchema).optional()
 }).strict();
 
 export const AgentCreateOrConnectWithoutTestsInputSchema: z.ZodType<Prisma.AgentCreateOrConnectWithoutTestsInput> = z.object({
@@ -7359,7 +7522,7 @@ export const CallCreateWithoutTestInputSchema: z.ZodType<Prisma.CallCreateWithou
   numInterruptions: z.number().int().optional().nullable(),
   duration: z.number().optional().nullable(),
   evalSetToSuccess: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
-  evalResults: z.lazy(() => EvalResultCreateNestedManyWithoutCallInputSchema).optional(),
+  evaluationResults: z.lazy(() => EvaluationResultCreateNestedManyWithoutCallInputSchema).optional(),
   agent: z.lazy(() => AgentCreateNestedOneWithoutCallsInputSchema).optional(),
   testAgent: z.lazy(() => TestAgentCreateNestedOneWithoutCallsInputSchema).optional(),
   scenario: z.lazy(() => ScenarioCreateNestedOneWithoutCallsInputSchema).optional(),
@@ -7398,7 +7561,7 @@ export const CallUncheckedCreateWithoutTestInputSchema: z.ZodType<Prisma.CallUnc
   testAgentId: z.string().optional().nullable(),
   scenarioId: z.string().optional().nullable(),
   evalSetToSuccess: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
-  evalResults: z.lazy(() => EvalResultUncheckedCreateNestedManyWithoutCallInputSchema).optional(),
+  evaluationResults: z.lazy(() => EvaluationResultUncheckedCreateNestedManyWithoutCallInputSchema).optional(),
   messages: z.lazy(() => MessageUncheckedCreateNestedManyWithoutCallInputSchema).optional(),
   latencyBlocks: z.lazy(() => LatencyBlockUncheckedCreateNestedManyWithoutCallInputSchema).optional(),
   interruptions: z.lazy(() => InterruptionUncheckedCreateNestedManyWithoutCallInputSchema).optional(),
@@ -7433,15 +7596,15 @@ export const AgentUpdateWithoutTestsInputSchema: z.ZodType<Prisma.AgentUpdateWit
   ownerId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   phoneNumber: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  customerAgentId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   githubRepoUrl: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  customerAgentId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   systemPrompt: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   extraProperties: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
   enableSlackNotifications: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  enabledGeneralEvals: z.lazy(() => EvalUpdateManyWithoutAgentNestedInputSchema).optional(),
   enabledTestAgents: z.lazy(() => TestAgentUpdateManyWithoutAgentsNestedInputSchema).optional(),
   scenarios: z.lazy(() => ScenarioUpdateManyWithoutAgentNestedInputSchema).optional(),
-  calls: z.lazy(() => CallUpdateManyWithoutAgentNestedInputSchema).optional()
+  calls: z.lazy(() => CallUpdateManyWithoutAgentNestedInputSchema).optional(),
+  generalEvaluations: z.lazy(() => GeneralEvaluationUpdateManyWithoutAgentNestedInputSchema).optional()
 }).strict();
 
 export const AgentUncheckedUpdateWithoutTestsInputSchema: z.ZodType<Prisma.AgentUncheckedUpdateWithoutTestsInput> = z.object({
@@ -7451,15 +7614,15 @@ export const AgentUncheckedUpdateWithoutTestsInputSchema: z.ZodType<Prisma.Agent
   ownerId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   phoneNumber: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  customerAgentId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   githubRepoUrl: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  customerAgentId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   systemPrompt: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   extraProperties: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
   enableSlackNotifications: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  enabledGeneralEvals: z.lazy(() => EvalUncheckedUpdateManyWithoutAgentNestedInputSchema).optional(),
   enabledTestAgents: z.lazy(() => TestAgentUncheckedUpdateManyWithoutAgentsNestedInputSchema).optional(),
   scenarios: z.lazy(() => ScenarioUncheckedUpdateManyWithoutAgentNestedInputSchema).optional(),
-  calls: z.lazy(() => CallUncheckedUpdateManyWithoutAgentNestedInputSchema).optional()
+  calls: z.lazy(() => CallUncheckedUpdateManyWithoutAgentNestedInputSchema).optional(),
+  generalEvaluations: z.lazy(() => GeneralEvaluationUncheckedUpdateManyWithoutAgentNestedInputSchema).optional()
 }).strict();
 
 export const CallUpsertWithWhereUniqueWithoutTestInputSchema: z.ZodType<Prisma.CallUpsertWithWhereUniqueWithoutTestInput> = z.object({
@@ -7485,15 +7648,15 @@ export const AgentCreateWithoutEnabledTestAgentsInputSchema: z.ZodType<Prisma.Ag
   ownerId: z.string(),
   name: z.string(),
   phoneNumber: z.string().optional(),
+  customerAgentId: z.string(),
   githubRepoUrl: z.string().optional().nullable(),
-  customerAgentId: z.string().optional().nullable(),
   systemPrompt: z.string().optional(),
   extraProperties: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
   enableSlackNotifications: z.boolean().optional(),
-  enabledGeneralEvals: z.lazy(() => EvalCreateNestedManyWithoutAgentInputSchema).optional(),
   scenarios: z.lazy(() => ScenarioCreateNestedManyWithoutAgentInputSchema).optional(),
   tests: z.lazy(() => TestCreateNestedManyWithoutAgentInputSchema).optional(),
-  calls: z.lazy(() => CallCreateNestedManyWithoutAgentInputSchema).optional()
+  calls: z.lazy(() => CallCreateNestedManyWithoutAgentInputSchema).optional(),
+  generalEvaluations: z.lazy(() => GeneralEvaluationCreateNestedManyWithoutAgentInputSchema).optional()
 }).strict();
 
 export const AgentUncheckedCreateWithoutEnabledTestAgentsInputSchema: z.ZodType<Prisma.AgentUncheckedCreateWithoutEnabledTestAgentsInput> = z.object({
@@ -7503,15 +7666,15 @@ export const AgentUncheckedCreateWithoutEnabledTestAgentsInputSchema: z.ZodType<
   ownerId: z.string(),
   name: z.string(),
   phoneNumber: z.string().optional(),
+  customerAgentId: z.string(),
   githubRepoUrl: z.string().optional().nullable(),
-  customerAgentId: z.string().optional().nullable(),
   systemPrompt: z.string().optional(),
   extraProperties: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
   enableSlackNotifications: z.boolean().optional(),
-  enabledGeneralEvals: z.lazy(() => EvalUncheckedCreateNestedManyWithoutAgentInputSchema).optional(),
   scenarios: z.lazy(() => ScenarioUncheckedCreateNestedManyWithoutAgentInputSchema).optional(),
   tests: z.lazy(() => TestUncheckedCreateNestedManyWithoutAgentInputSchema).optional(),
-  calls: z.lazy(() => CallUncheckedCreateNestedManyWithoutAgentInputSchema).optional()
+  calls: z.lazy(() => CallUncheckedCreateNestedManyWithoutAgentInputSchema).optional(),
+  generalEvaluations: z.lazy(() => GeneralEvaluationUncheckedCreateNestedManyWithoutAgentInputSchema).optional()
 }).strict();
 
 export const AgentCreateOrConnectWithoutEnabledTestAgentsInputSchema: z.ZodType<Prisma.AgentCreateOrConnectWithoutEnabledTestAgentsInput> = z.object({
@@ -7545,7 +7708,7 @@ export const CallCreateWithoutTestAgentInputSchema: z.ZodType<Prisma.CallCreateW
   numInterruptions: z.number().int().optional().nullable(),
   duration: z.number().optional().nullable(),
   evalSetToSuccess: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
-  evalResults: z.lazy(() => EvalResultCreateNestedManyWithoutCallInputSchema).optional(),
+  evaluationResults: z.lazy(() => EvaluationResultCreateNestedManyWithoutCallInputSchema).optional(),
   agent: z.lazy(() => AgentCreateNestedOneWithoutCallsInputSchema).optional(),
   test: z.lazy(() => TestCreateNestedOneWithoutCallsInputSchema).optional(),
   scenario: z.lazy(() => ScenarioCreateNestedOneWithoutCallsInputSchema).optional(),
@@ -7584,7 +7747,7 @@ export const CallUncheckedCreateWithoutTestAgentInputSchema: z.ZodType<Prisma.Ca
   testId: z.string().optional().nullable(),
   scenarioId: z.string().optional().nullable(),
   evalSetToSuccess: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
-  evalResults: z.lazy(() => EvalResultUncheckedCreateNestedManyWithoutCallInputSchema).optional(),
+  evaluationResults: z.lazy(() => EvaluationResultUncheckedCreateNestedManyWithoutCallInputSchema).optional(),
   messages: z.lazy(() => MessageUncheckedCreateNestedManyWithoutCallInputSchema).optional(),
   latencyBlocks: z.lazy(() => LatencyBlockUncheckedCreateNestedManyWithoutCallInputSchema).optional(),
   interruptions: z.lazy(() => InterruptionUncheckedCreateNestedManyWithoutCallInputSchema).optional(),
@@ -7627,8 +7790,8 @@ export const AgentScalarWhereInputSchema: z.ZodType<Prisma.AgentScalarWhereInput
   ownerId: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   name: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   phoneNumber: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
+  customerAgentId: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   githubRepoUrl: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
-  customerAgentId: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
   systemPrompt: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   extraProperties: z.lazy(() => JsonFilterSchema).optional(),
   enableSlackNotifications: z.union([ z.lazy(() => BoolFilterSchema),z.boolean() ]).optional(),
@@ -7650,7 +7813,7 @@ export const CallUpdateManyWithWhereWithoutTestAgentInputSchema: z.ZodType<Prism
   data: z.union([ z.lazy(() => CallUpdateManyMutationInputSchema),z.lazy(() => CallUncheckedUpdateManyWithoutTestAgentInputSchema) ]),
 }).strict();
 
-export const EvalResultCreateWithoutCallInputSchema: z.ZodType<Prisma.EvalResultCreateWithoutCallInput> = z.object({
+export const EvaluationResultCreateWithoutCallInputSchema: z.ZodType<Prisma.EvaluationResultCreateWithoutCallInput> = z.object({
   id: z.string().optional(),
   createdAt: z.coerce.date().optional(),
   result: z.string(),
@@ -7659,28 +7822,30 @@ export const EvalResultCreateWithoutCallInputSchema: z.ZodType<Prisma.EvalResult
   duration: z.number().optional().nullable(),
   type: z.lazy(() => EvalResultTypeSchema),
   details: z.string(),
-  eval: z.lazy(() => EvalCreateNestedOneWithoutEvalResultsInputSchema)
+  evaluation: z.lazy(() => EvaluationCreateNestedOneWithoutEvaluationResultsInputSchema),
+  evaluationTemplate: z.lazy(() => EvaluationTemplateCreateNestedOneWithoutEvaluationResultsInputSchema).optional()
 }).strict();
 
-export const EvalResultUncheckedCreateWithoutCallInputSchema: z.ZodType<Prisma.EvalResultUncheckedCreateWithoutCallInput> = z.object({
+export const EvaluationResultUncheckedCreateWithoutCallInputSchema: z.ZodType<Prisma.EvaluationResultUncheckedCreateWithoutCallInput> = z.object({
   id: z.string().optional(),
   createdAt: z.coerce.date().optional(),
-  evalId: z.string(),
+  evaluationId: z.string(),
   result: z.string(),
   success: z.boolean(),
   secondsFromStart: z.number().optional().nullable(),
   duration: z.number().optional().nullable(),
   type: z.lazy(() => EvalResultTypeSchema),
-  details: z.string()
+  details: z.string(),
+  evaluationTemplateId: z.string().optional().nullable()
 }).strict();
 
-export const EvalResultCreateOrConnectWithoutCallInputSchema: z.ZodType<Prisma.EvalResultCreateOrConnectWithoutCallInput> = z.object({
-  where: z.lazy(() => EvalResultWhereUniqueInputSchema),
-  create: z.union([ z.lazy(() => EvalResultCreateWithoutCallInputSchema),z.lazy(() => EvalResultUncheckedCreateWithoutCallInputSchema) ]),
+export const EvaluationResultCreateOrConnectWithoutCallInputSchema: z.ZodType<Prisma.EvaluationResultCreateOrConnectWithoutCallInput> = z.object({
+  where: z.lazy(() => EvaluationResultWhereUniqueInputSchema),
+  create: z.union([ z.lazy(() => EvaluationResultCreateWithoutCallInputSchema),z.lazy(() => EvaluationResultUncheckedCreateWithoutCallInputSchema) ]),
 }).strict();
 
-export const EvalResultCreateManyCallInputEnvelopeSchema: z.ZodType<Prisma.EvalResultCreateManyCallInputEnvelope> = z.object({
-  data: z.union([ z.lazy(() => EvalResultCreateManyCallInputSchema),z.lazy(() => EvalResultCreateManyCallInputSchema).array() ]),
+export const EvaluationResultCreateManyCallInputEnvelopeSchema: z.ZodType<Prisma.EvaluationResultCreateManyCallInputEnvelope> = z.object({
+  data: z.union([ z.lazy(() => EvaluationResultCreateManyCallInputSchema),z.lazy(() => EvaluationResultCreateManyCallInputSchema).array() ]),
   skipDuplicates: z.boolean().optional()
 }).strict();
 
@@ -7691,15 +7856,15 @@ export const AgentCreateWithoutCallsInputSchema: z.ZodType<Prisma.AgentCreateWit
   ownerId: z.string(),
   name: z.string(),
   phoneNumber: z.string().optional(),
+  customerAgentId: z.string(),
   githubRepoUrl: z.string().optional().nullable(),
-  customerAgentId: z.string().optional().nullable(),
   systemPrompt: z.string().optional(),
   extraProperties: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
   enableSlackNotifications: z.boolean().optional(),
-  enabledGeneralEvals: z.lazy(() => EvalCreateNestedManyWithoutAgentInputSchema).optional(),
   enabledTestAgents: z.lazy(() => TestAgentCreateNestedManyWithoutAgentsInputSchema).optional(),
   scenarios: z.lazy(() => ScenarioCreateNestedManyWithoutAgentInputSchema).optional(),
-  tests: z.lazy(() => TestCreateNestedManyWithoutAgentInputSchema).optional()
+  tests: z.lazy(() => TestCreateNestedManyWithoutAgentInputSchema).optional(),
+  generalEvaluations: z.lazy(() => GeneralEvaluationCreateNestedManyWithoutAgentInputSchema).optional()
 }).strict();
 
 export const AgentUncheckedCreateWithoutCallsInputSchema: z.ZodType<Prisma.AgentUncheckedCreateWithoutCallsInput> = z.object({
@@ -7709,15 +7874,15 @@ export const AgentUncheckedCreateWithoutCallsInputSchema: z.ZodType<Prisma.Agent
   ownerId: z.string(),
   name: z.string(),
   phoneNumber: z.string().optional(),
+  customerAgentId: z.string(),
   githubRepoUrl: z.string().optional().nullable(),
-  customerAgentId: z.string().optional().nullable(),
   systemPrompt: z.string().optional(),
   extraProperties: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
   enableSlackNotifications: z.boolean().optional(),
-  enabledGeneralEvals: z.lazy(() => EvalUncheckedCreateNestedManyWithoutAgentInputSchema).optional(),
   enabledTestAgents: z.lazy(() => TestAgentUncheckedCreateNestedManyWithoutAgentsInputSchema).optional(),
   scenarios: z.lazy(() => ScenarioUncheckedCreateNestedManyWithoutAgentInputSchema).optional(),
-  tests: z.lazy(() => TestUncheckedCreateNestedManyWithoutAgentInputSchema).optional()
+  tests: z.lazy(() => TestUncheckedCreateNestedManyWithoutAgentInputSchema).optional(),
+  generalEvaluations: z.lazy(() => GeneralEvaluationUncheckedCreateNestedManyWithoutAgentInputSchema).optional()
 }).strict();
 
 export const AgentCreateOrConnectWithoutCallsInputSchema: z.ZodType<Prisma.AgentCreateOrConnectWithoutCallsInput> = z.object({
@@ -7784,33 +7949,27 @@ export const TestAgentCreateOrConnectWithoutCallsInputSchema: z.ZodType<Prisma.T
 export const ScenarioCreateWithoutCallsInputSchema: z.ZodType<Prisma.ScenarioCreateWithoutCallsInput> = z.object({
   id: z.string().optional(),
   createdAt: z.coerce.date().optional(),
-  ownerId: z.string().optional(),
   name: z.string(),
   instructions: z.string(),
   successCriteria: z.string().optional(),
   includeDateTime: z.boolean().optional(),
   timezone: z.string().optional().nullable(),
-  isNew: z.boolean().optional(),
   deleted: z.boolean().optional(),
   agent: z.lazy(() => AgentCreateNestedOneWithoutScenariosInputSchema),
-  generalEvalOverrides: z.lazy(() => EvalOverrideCreateNestedManyWithoutScenarioInputSchema).optional(),
-  evals: z.lazy(() => EvalCreateNestedManyWithoutScenarioInputSchema).optional()
+  evaluations: z.lazy(() => EvaluationCreateNestedManyWithoutScenarioInputSchema).optional()
 }).strict();
 
 export const ScenarioUncheckedCreateWithoutCallsInputSchema: z.ZodType<Prisma.ScenarioUncheckedCreateWithoutCallsInput> = z.object({
   id: z.string().optional(),
   createdAt: z.coerce.date().optional(),
-  ownerId: z.string().optional(),
   agentId: z.string(),
   name: z.string(),
   instructions: z.string(),
   successCriteria: z.string().optional(),
   includeDateTime: z.boolean().optional(),
   timezone: z.string().optional().nullable(),
-  isNew: z.boolean().optional(),
   deleted: z.boolean().optional(),
-  generalEvalOverrides: z.lazy(() => EvalOverrideUncheckedCreateNestedManyWithoutScenarioInputSchema).optional(),
-  evals: z.lazy(() => EvalUncheckedCreateNestedManyWithoutScenarioInputSchema).optional()
+  evaluations: z.lazy(() => EvaluationUncheckedCreateNestedManyWithoutScenarioInputSchema).optional()
 }).strict();
 
 export const ScenarioCreateOrConnectWithoutCallsInputSchema: z.ZodType<Prisma.ScenarioCreateOrConnectWithoutCallsInput> = z.object({
@@ -7926,36 +8085,37 @@ export const CallErrorCreateManyCallInputEnvelopeSchema: z.ZodType<Prisma.CallEr
   skipDuplicates: z.boolean().optional()
 }).strict();
 
-export const EvalResultUpsertWithWhereUniqueWithoutCallInputSchema: z.ZodType<Prisma.EvalResultUpsertWithWhereUniqueWithoutCallInput> = z.object({
-  where: z.lazy(() => EvalResultWhereUniqueInputSchema),
-  update: z.union([ z.lazy(() => EvalResultUpdateWithoutCallInputSchema),z.lazy(() => EvalResultUncheckedUpdateWithoutCallInputSchema) ]),
-  create: z.union([ z.lazy(() => EvalResultCreateWithoutCallInputSchema),z.lazy(() => EvalResultUncheckedCreateWithoutCallInputSchema) ]),
+export const EvaluationResultUpsertWithWhereUniqueWithoutCallInputSchema: z.ZodType<Prisma.EvaluationResultUpsertWithWhereUniqueWithoutCallInput> = z.object({
+  where: z.lazy(() => EvaluationResultWhereUniqueInputSchema),
+  update: z.union([ z.lazy(() => EvaluationResultUpdateWithoutCallInputSchema),z.lazy(() => EvaluationResultUncheckedUpdateWithoutCallInputSchema) ]),
+  create: z.union([ z.lazy(() => EvaluationResultCreateWithoutCallInputSchema),z.lazy(() => EvaluationResultUncheckedCreateWithoutCallInputSchema) ]),
 }).strict();
 
-export const EvalResultUpdateWithWhereUniqueWithoutCallInputSchema: z.ZodType<Prisma.EvalResultUpdateWithWhereUniqueWithoutCallInput> = z.object({
-  where: z.lazy(() => EvalResultWhereUniqueInputSchema),
-  data: z.union([ z.lazy(() => EvalResultUpdateWithoutCallInputSchema),z.lazy(() => EvalResultUncheckedUpdateWithoutCallInputSchema) ]),
+export const EvaluationResultUpdateWithWhereUniqueWithoutCallInputSchema: z.ZodType<Prisma.EvaluationResultUpdateWithWhereUniqueWithoutCallInput> = z.object({
+  where: z.lazy(() => EvaluationResultWhereUniqueInputSchema),
+  data: z.union([ z.lazy(() => EvaluationResultUpdateWithoutCallInputSchema),z.lazy(() => EvaluationResultUncheckedUpdateWithoutCallInputSchema) ]),
 }).strict();
 
-export const EvalResultUpdateManyWithWhereWithoutCallInputSchema: z.ZodType<Prisma.EvalResultUpdateManyWithWhereWithoutCallInput> = z.object({
-  where: z.lazy(() => EvalResultScalarWhereInputSchema),
-  data: z.union([ z.lazy(() => EvalResultUpdateManyMutationInputSchema),z.lazy(() => EvalResultUncheckedUpdateManyWithoutCallInputSchema) ]),
+export const EvaluationResultUpdateManyWithWhereWithoutCallInputSchema: z.ZodType<Prisma.EvaluationResultUpdateManyWithWhereWithoutCallInput> = z.object({
+  where: z.lazy(() => EvaluationResultScalarWhereInputSchema),
+  data: z.union([ z.lazy(() => EvaluationResultUpdateManyMutationInputSchema),z.lazy(() => EvaluationResultUncheckedUpdateManyWithoutCallInputSchema) ]),
 }).strict();
 
-export const EvalResultScalarWhereInputSchema: z.ZodType<Prisma.EvalResultScalarWhereInput> = z.object({
-  AND: z.union([ z.lazy(() => EvalResultScalarWhereInputSchema),z.lazy(() => EvalResultScalarWhereInputSchema).array() ]).optional(),
-  OR: z.lazy(() => EvalResultScalarWhereInputSchema).array().optional(),
-  NOT: z.union([ z.lazy(() => EvalResultScalarWhereInputSchema),z.lazy(() => EvalResultScalarWhereInputSchema).array() ]).optional(),
+export const EvaluationResultScalarWhereInputSchema: z.ZodType<Prisma.EvaluationResultScalarWhereInput> = z.object({
+  AND: z.union([ z.lazy(() => EvaluationResultScalarWhereInputSchema),z.lazy(() => EvaluationResultScalarWhereInputSchema).array() ]).optional(),
+  OR: z.lazy(() => EvaluationResultScalarWhereInputSchema).array().optional(),
+  NOT: z.union([ z.lazy(() => EvaluationResultScalarWhereInputSchema),z.lazy(() => EvaluationResultScalarWhereInputSchema).array() ]).optional(),
   id: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   createdAt: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
   callId: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
-  evalId: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
+  evaluationId: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   result: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   success: z.union([ z.lazy(() => BoolFilterSchema),z.boolean() ]).optional(),
   secondsFromStart: z.union([ z.lazy(() => FloatNullableFilterSchema),z.number() ]).optional().nullable(),
   duration: z.union([ z.lazy(() => FloatNullableFilterSchema),z.number() ]).optional().nullable(),
   type: z.union([ z.lazy(() => EnumEvalResultTypeFilterSchema),z.lazy(() => EvalResultTypeSchema) ]).optional(),
   details: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
+  evaluationTemplateId: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
 }).strict();
 
 export const AgentUpsertWithoutCallsInputSchema: z.ZodType<Prisma.AgentUpsertWithoutCallsInput> = z.object({
@@ -7976,15 +8136,15 @@ export const AgentUpdateWithoutCallsInputSchema: z.ZodType<Prisma.AgentUpdateWit
   ownerId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   phoneNumber: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  customerAgentId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   githubRepoUrl: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  customerAgentId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   systemPrompt: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   extraProperties: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
   enableSlackNotifications: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  enabledGeneralEvals: z.lazy(() => EvalUpdateManyWithoutAgentNestedInputSchema).optional(),
   enabledTestAgents: z.lazy(() => TestAgentUpdateManyWithoutAgentsNestedInputSchema).optional(),
   scenarios: z.lazy(() => ScenarioUpdateManyWithoutAgentNestedInputSchema).optional(),
-  tests: z.lazy(() => TestUpdateManyWithoutAgentNestedInputSchema).optional()
+  tests: z.lazy(() => TestUpdateManyWithoutAgentNestedInputSchema).optional(),
+  generalEvaluations: z.lazy(() => GeneralEvaluationUpdateManyWithoutAgentNestedInputSchema).optional()
 }).strict();
 
 export const AgentUncheckedUpdateWithoutCallsInputSchema: z.ZodType<Prisma.AgentUncheckedUpdateWithoutCallsInput> = z.object({
@@ -7994,15 +8154,15 @@ export const AgentUncheckedUpdateWithoutCallsInputSchema: z.ZodType<Prisma.Agent
   ownerId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   phoneNumber: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  customerAgentId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   githubRepoUrl: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  customerAgentId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   systemPrompt: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   extraProperties: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
   enableSlackNotifications: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  enabledGeneralEvals: z.lazy(() => EvalUncheckedUpdateManyWithoutAgentNestedInputSchema).optional(),
   enabledTestAgents: z.lazy(() => TestAgentUncheckedUpdateManyWithoutAgentsNestedInputSchema).optional(),
   scenarios: z.lazy(() => ScenarioUncheckedUpdateManyWithoutAgentNestedInputSchema).optional(),
-  tests: z.lazy(() => TestUncheckedUpdateManyWithoutAgentNestedInputSchema).optional()
+  tests: z.lazy(() => TestUncheckedUpdateManyWithoutAgentNestedInputSchema).optional(),
+  generalEvaluations: z.lazy(() => GeneralEvaluationUncheckedUpdateManyWithoutAgentNestedInputSchema).optional()
 }).strict();
 
 export const TestUpsertWithoutCallsInputSchema: z.ZodType<Prisma.TestUpsertWithoutCallsInput> = z.object({
@@ -8087,33 +8247,27 @@ export const ScenarioUpdateToOneWithWhereWithoutCallsInputSchema: z.ZodType<Pris
 export const ScenarioUpdateWithoutCallsInputSchema: z.ZodType<Prisma.ScenarioUpdateWithoutCallsInput> = z.object({
   id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  ownerId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   instructions: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   successCriteria: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   includeDateTime: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   timezone: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  isNew: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   deleted: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   agent: z.lazy(() => AgentUpdateOneRequiredWithoutScenariosNestedInputSchema).optional(),
-  generalEvalOverrides: z.lazy(() => EvalOverrideUpdateManyWithoutScenarioNestedInputSchema).optional(),
-  evals: z.lazy(() => EvalUpdateManyWithoutScenarioNestedInputSchema).optional()
+  evaluations: z.lazy(() => EvaluationUpdateManyWithoutScenarioNestedInputSchema).optional()
 }).strict();
 
 export const ScenarioUncheckedUpdateWithoutCallsInputSchema: z.ZodType<Prisma.ScenarioUncheckedUpdateWithoutCallsInput> = z.object({
   id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  ownerId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   agentId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   instructions: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   successCriteria: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   includeDateTime: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   timezone: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  isNew: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   deleted: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  generalEvalOverrides: z.lazy(() => EvalOverrideUncheckedUpdateManyWithoutScenarioNestedInputSchema).optional(),
-  evals: z.lazy(() => EvalUncheckedUpdateManyWithoutScenarioNestedInputSchema).optional()
+  evaluations: z.lazy(() => EvaluationUncheckedUpdateManyWithoutScenarioNestedInputSchema).optional()
 }).strict();
 
 export const MessageUpsertWithWhereUniqueWithoutCallInputSchema: z.ZodType<Prisma.MessageUpsertWithWhereUniqueWithoutCallInput> = z.object({
@@ -8256,7 +8410,7 @@ export const CallCreateWithoutMessagesInputSchema: z.ZodType<Prisma.CallCreateWi
   numInterruptions: z.number().int().optional().nullable(),
   duration: z.number().optional().nullable(),
   evalSetToSuccess: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
-  evalResults: z.lazy(() => EvalResultCreateNestedManyWithoutCallInputSchema).optional(),
+  evaluationResults: z.lazy(() => EvaluationResultCreateNestedManyWithoutCallInputSchema).optional(),
   agent: z.lazy(() => AgentCreateNestedOneWithoutCallsInputSchema).optional(),
   test: z.lazy(() => TestCreateNestedOneWithoutCallsInputSchema).optional(),
   testAgent: z.lazy(() => TestAgentCreateNestedOneWithoutCallsInputSchema).optional(),
@@ -8296,7 +8450,7 @@ export const CallUncheckedCreateWithoutMessagesInputSchema: z.ZodType<Prisma.Cal
   testAgentId: z.string().optional().nullable(),
   scenarioId: z.string().optional().nullable(),
   evalSetToSuccess: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
-  evalResults: z.lazy(() => EvalResultUncheckedCreateNestedManyWithoutCallInputSchema).optional(),
+  evaluationResults: z.lazy(() => EvaluationResultUncheckedCreateNestedManyWithoutCallInputSchema).optional(),
   latencyBlocks: z.lazy(() => LatencyBlockUncheckedCreateNestedManyWithoutCallInputSchema).optional(),
   interruptions: z.lazy(() => InterruptionUncheckedCreateNestedManyWithoutCallInputSchema).optional(),
   errors: z.lazy(() => CallErrorUncheckedCreateNestedManyWithoutCallInputSchema).optional()
@@ -8344,7 +8498,7 @@ export const CallUpdateWithoutMessagesInputSchema: z.ZodType<Prisma.CallUpdateWi
   numInterruptions: z.union([ z.number().int(),z.lazy(() => NullableIntFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   duration: z.union([ z.number(),z.lazy(() => NullableFloatFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   evalSetToSuccess: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
-  evalResults: z.lazy(() => EvalResultUpdateManyWithoutCallNestedInputSchema).optional(),
+  evaluationResults: z.lazy(() => EvaluationResultUpdateManyWithoutCallNestedInputSchema).optional(),
   agent: z.lazy(() => AgentUpdateOneWithoutCallsNestedInputSchema).optional(),
   test: z.lazy(() => TestUpdateOneWithoutCallsNestedInputSchema).optional(),
   testAgent: z.lazy(() => TestAgentUpdateOneWithoutCallsNestedInputSchema).optional(),
@@ -8384,7 +8538,7 @@ export const CallUncheckedUpdateWithoutMessagesInputSchema: z.ZodType<Prisma.Cal
   testAgentId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   scenarioId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   evalSetToSuccess: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
-  evalResults: z.lazy(() => EvalResultUncheckedUpdateManyWithoutCallNestedInputSchema).optional(),
+  evaluationResults: z.lazy(() => EvaluationResultUncheckedUpdateManyWithoutCallNestedInputSchema).optional(),
   latencyBlocks: z.lazy(() => LatencyBlockUncheckedUpdateManyWithoutCallNestedInputSchema).optional(),
   interruptions: z.lazy(() => InterruptionUncheckedUpdateManyWithoutCallNestedInputSchema).optional(),
   errors: z.lazy(() => CallErrorUncheckedUpdateManyWithoutCallNestedInputSchema).optional()
@@ -8416,7 +8570,7 @@ export const CallCreateWithoutErrorsInputSchema: z.ZodType<Prisma.CallCreateWith
   numInterruptions: z.number().int().optional().nullable(),
   duration: z.number().optional().nullable(),
   evalSetToSuccess: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
-  evalResults: z.lazy(() => EvalResultCreateNestedManyWithoutCallInputSchema).optional(),
+  evaluationResults: z.lazy(() => EvaluationResultCreateNestedManyWithoutCallInputSchema).optional(),
   agent: z.lazy(() => AgentCreateNestedOneWithoutCallsInputSchema).optional(),
   test: z.lazy(() => TestCreateNestedOneWithoutCallsInputSchema).optional(),
   testAgent: z.lazy(() => TestAgentCreateNestedOneWithoutCallsInputSchema).optional(),
@@ -8456,7 +8610,7 @@ export const CallUncheckedCreateWithoutErrorsInputSchema: z.ZodType<Prisma.CallU
   testAgentId: z.string().optional().nullable(),
   scenarioId: z.string().optional().nullable(),
   evalSetToSuccess: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
-  evalResults: z.lazy(() => EvalResultUncheckedCreateNestedManyWithoutCallInputSchema).optional(),
+  evaluationResults: z.lazy(() => EvaluationResultUncheckedCreateNestedManyWithoutCallInputSchema).optional(),
   messages: z.lazy(() => MessageUncheckedCreateNestedManyWithoutCallInputSchema).optional(),
   latencyBlocks: z.lazy(() => LatencyBlockUncheckedCreateNestedManyWithoutCallInputSchema).optional(),
   interruptions: z.lazy(() => InterruptionUncheckedCreateNestedManyWithoutCallInputSchema).optional()
@@ -8504,7 +8658,7 @@ export const CallUpdateWithoutErrorsInputSchema: z.ZodType<Prisma.CallUpdateWith
   numInterruptions: z.union([ z.number().int(),z.lazy(() => NullableIntFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   duration: z.union([ z.number(),z.lazy(() => NullableFloatFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   evalSetToSuccess: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
-  evalResults: z.lazy(() => EvalResultUpdateManyWithoutCallNestedInputSchema).optional(),
+  evaluationResults: z.lazy(() => EvaluationResultUpdateManyWithoutCallNestedInputSchema).optional(),
   agent: z.lazy(() => AgentUpdateOneWithoutCallsNestedInputSchema).optional(),
   test: z.lazy(() => TestUpdateOneWithoutCallsNestedInputSchema).optional(),
   testAgent: z.lazy(() => TestAgentUpdateOneWithoutCallsNestedInputSchema).optional(),
@@ -8544,7 +8698,7 @@ export const CallUncheckedUpdateWithoutErrorsInputSchema: z.ZodType<Prisma.CallU
   testAgentId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   scenarioId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   evalSetToSuccess: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
-  evalResults: z.lazy(() => EvalResultUncheckedUpdateManyWithoutCallNestedInputSchema).optional(),
+  evaluationResults: z.lazy(() => EvaluationResultUncheckedUpdateManyWithoutCallNestedInputSchema).optional(),
   messages: z.lazy(() => MessageUncheckedUpdateManyWithoutCallNestedInputSchema).optional(),
   latencyBlocks: z.lazy(() => LatencyBlockUncheckedUpdateManyWithoutCallNestedInputSchema).optional(),
   interruptions: z.lazy(() => InterruptionUncheckedUpdateManyWithoutCallNestedInputSchema).optional()
@@ -8557,15 +8711,15 @@ export const AgentCreateWithoutScenariosInputSchema: z.ZodType<Prisma.AgentCreat
   ownerId: z.string(),
   name: z.string(),
   phoneNumber: z.string().optional(),
+  customerAgentId: z.string(),
   githubRepoUrl: z.string().optional().nullable(),
-  customerAgentId: z.string().optional().nullable(),
   systemPrompt: z.string().optional(),
   extraProperties: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
   enableSlackNotifications: z.boolean().optional(),
-  enabledGeneralEvals: z.lazy(() => EvalCreateNestedManyWithoutAgentInputSchema).optional(),
   enabledTestAgents: z.lazy(() => TestAgentCreateNestedManyWithoutAgentsInputSchema).optional(),
   tests: z.lazy(() => TestCreateNestedManyWithoutAgentInputSchema).optional(),
-  calls: z.lazy(() => CallCreateNestedManyWithoutAgentInputSchema).optional()
+  calls: z.lazy(() => CallCreateNestedManyWithoutAgentInputSchema).optional(),
+  generalEvaluations: z.lazy(() => GeneralEvaluationCreateNestedManyWithoutAgentInputSchema).optional()
 }).strict();
 
 export const AgentUncheckedCreateWithoutScenariosInputSchema: z.ZodType<Prisma.AgentUncheckedCreateWithoutScenariosInput> = z.object({
@@ -8575,44 +8729,20 @@ export const AgentUncheckedCreateWithoutScenariosInputSchema: z.ZodType<Prisma.A
   ownerId: z.string(),
   name: z.string(),
   phoneNumber: z.string().optional(),
+  customerAgentId: z.string(),
   githubRepoUrl: z.string().optional().nullable(),
-  customerAgentId: z.string().optional().nullable(),
   systemPrompt: z.string().optional(),
   extraProperties: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
   enableSlackNotifications: z.boolean().optional(),
-  enabledGeneralEvals: z.lazy(() => EvalUncheckedCreateNestedManyWithoutAgentInputSchema).optional(),
   enabledTestAgents: z.lazy(() => TestAgentUncheckedCreateNestedManyWithoutAgentsInputSchema).optional(),
   tests: z.lazy(() => TestUncheckedCreateNestedManyWithoutAgentInputSchema).optional(),
-  calls: z.lazy(() => CallUncheckedCreateNestedManyWithoutAgentInputSchema).optional()
+  calls: z.lazy(() => CallUncheckedCreateNestedManyWithoutAgentInputSchema).optional(),
+  generalEvaluations: z.lazy(() => GeneralEvaluationUncheckedCreateNestedManyWithoutAgentInputSchema).optional()
 }).strict();
 
 export const AgentCreateOrConnectWithoutScenariosInputSchema: z.ZodType<Prisma.AgentCreateOrConnectWithoutScenariosInput> = z.object({
   where: z.lazy(() => AgentWhereUniqueInputSchema),
   create: z.union([ z.lazy(() => AgentCreateWithoutScenariosInputSchema),z.lazy(() => AgentUncheckedCreateWithoutScenariosInputSchema) ]),
-}).strict();
-
-export const EvalOverrideCreateWithoutScenarioInputSchema: z.ZodType<Prisma.EvalOverrideCreateWithoutScenarioInput> = z.object({
-  id: z.string().optional(),
-  createdAt: z.coerce.date().optional(),
-  enabled: z.boolean(),
-  eval: z.lazy(() => EvalCreateNestedOneWithoutEvalOverridesInputSchema)
-}).strict();
-
-export const EvalOverrideUncheckedCreateWithoutScenarioInputSchema: z.ZodType<Prisma.EvalOverrideUncheckedCreateWithoutScenarioInput> = z.object({
-  id: z.string().optional(),
-  createdAt: z.coerce.date().optional(),
-  evalId: z.string(),
-  enabled: z.boolean()
-}).strict();
-
-export const EvalOverrideCreateOrConnectWithoutScenarioInputSchema: z.ZodType<Prisma.EvalOverrideCreateOrConnectWithoutScenarioInput> = z.object({
-  where: z.lazy(() => EvalOverrideWhereUniqueInputSchema),
-  create: z.union([ z.lazy(() => EvalOverrideCreateWithoutScenarioInputSchema),z.lazy(() => EvalOverrideUncheckedCreateWithoutScenarioInputSchema) ]),
-}).strict();
-
-export const EvalOverrideCreateManyScenarioInputEnvelopeSchema: z.ZodType<Prisma.EvalOverrideCreateManyScenarioInputEnvelope> = z.object({
-  data: z.union([ z.lazy(() => EvalOverrideCreateManyScenarioInputSchema),z.lazy(() => EvalOverrideCreateManyScenarioInputSchema).array() ]),
-  skipDuplicates: z.boolean().optional()
 }).strict();
 
 export const CallCreateWithoutScenarioInputSchema: z.ZodType<Prisma.CallCreateWithoutScenarioInput> = z.object({
@@ -8641,7 +8771,7 @@ export const CallCreateWithoutScenarioInputSchema: z.ZodType<Prisma.CallCreateWi
   numInterruptions: z.number().int().optional().nullable(),
   duration: z.number().optional().nullable(),
   evalSetToSuccess: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
-  evalResults: z.lazy(() => EvalResultCreateNestedManyWithoutCallInputSchema).optional(),
+  evaluationResults: z.lazy(() => EvaluationResultCreateNestedManyWithoutCallInputSchema).optional(),
   agent: z.lazy(() => AgentCreateNestedOneWithoutCallsInputSchema).optional(),
   test: z.lazy(() => TestCreateNestedOneWithoutCallsInputSchema).optional(),
   testAgent: z.lazy(() => TestAgentCreateNestedOneWithoutCallsInputSchema).optional(),
@@ -8680,7 +8810,7 @@ export const CallUncheckedCreateWithoutScenarioInputSchema: z.ZodType<Prisma.Cal
   testId: z.string().optional().nullable(),
   testAgentId: z.string().optional().nullable(),
   evalSetToSuccess: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
-  evalResults: z.lazy(() => EvalResultUncheckedCreateNestedManyWithoutCallInputSchema).optional(),
+  evaluationResults: z.lazy(() => EvaluationResultUncheckedCreateNestedManyWithoutCallInputSchema).optional(),
   messages: z.lazy(() => MessageUncheckedCreateNestedManyWithoutCallInputSchema).optional(),
   latencyBlocks: z.lazy(() => LatencyBlockUncheckedCreateNestedManyWithoutCallInputSchema).optional(),
   interruptions: z.lazy(() => InterruptionUncheckedCreateNestedManyWithoutCallInputSchema).optional(),
@@ -8697,49 +8827,37 @@ export const CallCreateManyScenarioInputEnvelopeSchema: z.ZodType<Prisma.CallCre
   skipDuplicates: z.boolean().optional()
 }).strict();
 
-export const EvalCreateWithoutScenarioInputSchema: z.ZodType<Prisma.EvalCreateWithoutScenarioInput> = z.object({
+export const EvaluationCreateWithoutScenarioInputSchema: z.ZodType<Prisma.EvaluationCreateWithoutScenarioInput> = z.object({
   id: z.string().optional(),
   createdAt: z.coerce.date().optional(),
-  name: z.string(),
-  description: z.string(),
-  type: z.lazy(() => EvalTypeSchema),
-  resultType: z.lazy(() => EvalResultTypeSchema),
-  contentType: z.lazy(() => EvalContentTypeSchema).optional(),
+  enabled: z.boolean().optional(),
   isCritical: z.boolean().optional(),
-  toolCallExpectedResult: z.string().optional(),
-  ownerId: z.string().optional().nullable(),
-  deleted: z.boolean().optional(),
-  evalResults: z.lazy(() => EvalResultCreateNestedManyWithoutEvalInputSchema).optional(),
-  agent: z.lazy(() => AgentCreateNestedOneWithoutEnabledGeneralEvalsInputSchema).optional(),
-  evalOverrides: z.lazy(() => EvalOverrideCreateNestedManyWithoutEvalInputSchema).optional(),
-  evalSet: z.lazy(() => EvalSetCreateNestedOneWithoutEvalsInputSchema).optional()
+  params: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
+  evaluationTemplate: z.lazy(() => EvaluationTemplateCreateNestedOneWithoutEvaluationsInputSchema),
+  evaluationGroup: z.lazy(() => EvaluationGroupCreateNestedOneWithoutEvaluationsInputSchema).optional(),
+  evaluationResults: z.lazy(() => EvaluationResultCreateNestedManyWithoutEvaluationInputSchema).optional(),
+  generalEvaluations: z.lazy(() => GeneralEvaluationCreateNestedManyWithoutEvaluationInputSchema).optional()
 }).strict();
 
-export const EvalUncheckedCreateWithoutScenarioInputSchema: z.ZodType<Prisma.EvalUncheckedCreateWithoutScenarioInput> = z.object({
+export const EvaluationUncheckedCreateWithoutScenarioInputSchema: z.ZodType<Prisma.EvaluationUncheckedCreateWithoutScenarioInput> = z.object({
   id: z.string().optional(),
   createdAt: z.coerce.date().optional(),
-  name: z.string(),
-  description: z.string(),
-  type: z.lazy(() => EvalTypeSchema),
-  resultType: z.lazy(() => EvalResultTypeSchema),
-  contentType: z.lazy(() => EvalContentTypeSchema).optional(),
+  enabled: z.boolean().optional(),
   isCritical: z.boolean().optional(),
-  toolCallExpectedResult: z.string().optional(),
-  agentId: z.string().optional().nullable(),
-  ownerId: z.string().optional().nullable(),
-  deleted: z.boolean().optional(),
-  evalSetId: z.string().optional().nullable(),
-  evalResults: z.lazy(() => EvalResultUncheckedCreateNestedManyWithoutEvalInputSchema).optional(),
-  evalOverrides: z.lazy(() => EvalOverrideUncheckedCreateNestedManyWithoutEvalInputSchema).optional()
+  params: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
+  evaluationTemplateId: z.string(),
+  evaluationGroupId: z.string().optional().nullable(),
+  evaluationResults: z.lazy(() => EvaluationResultUncheckedCreateNestedManyWithoutEvaluationInputSchema).optional(),
+  generalEvaluations: z.lazy(() => GeneralEvaluationUncheckedCreateNestedManyWithoutEvaluationInputSchema).optional()
 }).strict();
 
-export const EvalCreateOrConnectWithoutScenarioInputSchema: z.ZodType<Prisma.EvalCreateOrConnectWithoutScenarioInput> = z.object({
-  where: z.lazy(() => EvalWhereUniqueInputSchema),
-  create: z.union([ z.lazy(() => EvalCreateWithoutScenarioInputSchema),z.lazy(() => EvalUncheckedCreateWithoutScenarioInputSchema) ]),
+export const EvaluationCreateOrConnectWithoutScenarioInputSchema: z.ZodType<Prisma.EvaluationCreateOrConnectWithoutScenarioInput> = z.object({
+  where: z.lazy(() => EvaluationWhereUniqueInputSchema),
+  create: z.union([ z.lazy(() => EvaluationCreateWithoutScenarioInputSchema),z.lazy(() => EvaluationUncheckedCreateWithoutScenarioInputSchema) ]),
 }).strict();
 
-export const EvalCreateManyScenarioInputEnvelopeSchema: z.ZodType<Prisma.EvalCreateManyScenarioInputEnvelope> = z.object({
-  data: z.union([ z.lazy(() => EvalCreateManyScenarioInputSchema),z.lazy(() => EvalCreateManyScenarioInputSchema).array() ]),
+export const EvaluationCreateManyScenarioInputEnvelopeSchema: z.ZodType<Prisma.EvaluationCreateManyScenarioInputEnvelope> = z.object({
+  data: z.union([ z.lazy(() => EvaluationCreateManyScenarioInputSchema),z.lazy(() => EvaluationCreateManyScenarioInputSchema).array() ]),
   skipDuplicates: z.boolean().optional()
 }).strict();
 
@@ -8761,15 +8879,15 @@ export const AgentUpdateWithoutScenariosInputSchema: z.ZodType<Prisma.AgentUpdat
   ownerId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   phoneNumber: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  customerAgentId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   githubRepoUrl: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  customerAgentId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   systemPrompt: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   extraProperties: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
   enableSlackNotifications: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  enabledGeneralEvals: z.lazy(() => EvalUpdateManyWithoutAgentNestedInputSchema).optional(),
   enabledTestAgents: z.lazy(() => TestAgentUpdateManyWithoutAgentsNestedInputSchema).optional(),
   tests: z.lazy(() => TestUpdateManyWithoutAgentNestedInputSchema).optional(),
-  calls: z.lazy(() => CallUpdateManyWithoutAgentNestedInputSchema).optional()
+  calls: z.lazy(() => CallUpdateManyWithoutAgentNestedInputSchema).optional(),
+  generalEvaluations: z.lazy(() => GeneralEvaluationUpdateManyWithoutAgentNestedInputSchema).optional()
 }).strict();
 
 export const AgentUncheckedUpdateWithoutScenariosInputSchema: z.ZodType<Prisma.AgentUncheckedUpdateWithoutScenariosInput> = z.object({
@@ -8779,42 +8897,15 @@ export const AgentUncheckedUpdateWithoutScenariosInputSchema: z.ZodType<Prisma.A
   ownerId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   phoneNumber: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  customerAgentId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   githubRepoUrl: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  customerAgentId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   systemPrompt: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   extraProperties: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
   enableSlackNotifications: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  enabledGeneralEvals: z.lazy(() => EvalUncheckedUpdateManyWithoutAgentNestedInputSchema).optional(),
   enabledTestAgents: z.lazy(() => TestAgentUncheckedUpdateManyWithoutAgentsNestedInputSchema).optional(),
   tests: z.lazy(() => TestUncheckedUpdateManyWithoutAgentNestedInputSchema).optional(),
-  calls: z.lazy(() => CallUncheckedUpdateManyWithoutAgentNestedInputSchema).optional()
-}).strict();
-
-export const EvalOverrideUpsertWithWhereUniqueWithoutScenarioInputSchema: z.ZodType<Prisma.EvalOverrideUpsertWithWhereUniqueWithoutScenarioInput> = z.object({
-  where: z.lazy(() => EvalOverrideWhereUniqueInputSchema),
-  update: z.union([ z.lazy(() => EvalOverrideUpdateWithoutScenarioInputSchema),z.lazy(() => EvalOverrideUncheckedUpdateWithoutScenarioInputSchema) ]),
-  create: z.union([ z.lazy(() => EvalOverrideCreateWithoutScenarioInputSchema),z.lazy(() => EvalOverrideUncheckedCreateWithoutScenarioInputSchema) ]),
-}).strict();
-
-export const EvalOverrideUpdateWithWhereUniqueWithoutScenarioInputSchema: z.ZodType<Prisma.EvalOverrideUpdateWithWhereUniqueWithoutScenarioInput> = z.object({
-  where: z.lazy(() => EvalOverrideWhereUniqueInputSchema),
-  data: z.union([ z.lazy(() => EvalOverrideUpdateWithoutScenarioInputSchema),z.lazy(() => EvalOverrideUncheckedUpdateWithoutScenarioInputSchema) ]),
-}).strict();
-
-export const EvalOverrideUpdateManyWithWhereWithoutScenarioInputSchema: z.ZodType<Prisma.EvalOverrideUpdateManyWithWhereWithoutScenarioInput> = z.object({
-  where: z.lazy(() => EvalOverrideScalarWhereInputSchema),
-  data: z.union([ z.lazy(() => EvalOverrideUpdateManyMutationInputSchema),z.lazy(() => EvalOverrideUncheckedUpdateManyWithoutScenarioInputSchema) ]),
-}).strict();
-
-export const EvalOverrideScalarWhereInputSchema: z.ZodType<Prisma.EvalOverrideScalarWhereInput> = z.object({
-  AND: z.union([ z.lazy(() => EvalOverrideScalarWhereInputSchema),z.lazy(() => EvalOverrideScalarWhereInputSchema).array() ]).optional(),
-  OR: z.lazy(() => EvalOverrideScalarWhereInputSchema).array().optional(),
-  NOT: z.union([ z.lazy(() => EvalOverrideScalarWhereInputSchema),z.lazy(() => EvalOverrideScalarWhereInputSchema).array() ]).optional(),
-  id: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
-  createdAt: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
-  scenarioId: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
-  evalId: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
-  enabled: z.union([ z.lazy(() => BoolFilterSchema),z.boolean() ]).optional(),
+  calls: z.lazy(() => CallUncheckedUpdateManyWithoutAgentNestedInputSchema).optional(),
+  generalEvaluations: z.lazy(() => GeneralEvaluationUncheckedUpdateManyWithoutAgentNestedInputSchema).optional()
 }).strict();
 
 export const CallUpsertWithWhereUniqueWithoutScenarioInputSchema: z.ZodType<Prisma.CallUpsertWithWhereUniqueWithoutScenarioInput> = z.object({
@@ -8833,60 +8924,37 @@ export const CallUpdateManyWithWhereWithoutScenarioInputSchema: z.ZodType<Prisma
   data: z.union([ z.lazy(() => CallUpdateManyMutationInputSchema),z.lazy(() => CallUncheckedUpdateManyWithoutScenarioInputSchema) ]),
 }).strict();
 
-export const EvalUpsertWithWhereUniqueWithoutScenarioInputSchema: z.ZodType<Prisma.EvalUpsertWithWhereUniqueWithoutScenarioInput> = z.object({
-  where: z.lazy(() => EvalWhereUniqueInputSchema),
-  update: z.union([ z.lazy(() => EvalUpdateWithoutScenarioInputSchema),z.lazy(() => EvalUncheckedUpdateWithoutScenarioInputSchema) ]),
-  create: z.union([ z.lazy(() => EvalCreateWithoutScenarioInputSchema),z.lazy(() => EvalUncheckedCreateWithoutScenarioInputSchema) ]),
+export const EvaluationUpsertWithWhereUniqueWithoutScenarioInputSchema: z.ZodType<Prisma.EvaluationUpsertWithWhereUniqueWithoutScenarioInput> = z.object({
+  where: z.lazy(() => EvaluationWhereUniqueInputSchema),
+  update: z.union([ z.lazy(() => EvaluationUpdateWithoutScenarioInputSchema),z.lazy(() => EvaluationUncheckedUpdateWithoutScenarioInputSchema) ]),
+  create: z.union([ z.lazy(() => EvaluationCreateWithoutScenarioInputSchema),z.lazy(() => EvaluationUncheckedCreateWithoutScenarioInputSchema) ]),
 }).strict();
 
-export const EvalUpdateWithWhereUniqueWithoutScenarioInputSchema: z.ZodType<Prisma.EvalUpdateWithWhereUniqueWithoutScenarioInput> = z.object({
-  where: z.lazy(() => EvalWhereUniqueInputSchema),
-  data: z.union([ z.lazy(() => EvalUpdateWithoutScenarioInputSchema),z.lazy(() => EvalUncheckedUpdateWithoutScenarioInputSchema) ]),
+export const EvaluationUpdateWithWhereUniqueWithoutScenarioInputSchema: z.ZodType<Prisma.EvaluationUpdateWithWhereUniqueWithoutScenarioInput> = z.object({
+  where: z.lazy(() => EvaluationWhereUniqueInputSchema),
+  data: z.union([ z.lazy(() => EvaluationUpdateWithoutScenarioInputSchema),z.lazy(() => EvaluationUncheckedUpdateWithoutScenarioInputSchema) ]),
 }).strict();
 
-export const EvalUpdateManyWithWhereWithoutScenarioInputSchema: z.ZodType<Prisma.EvalUpdateManyWithWhereWithoutScenarioInput> = z.object({
-  where: z.lazy(() => EvalScalarWhereInputSchema),
-  data: z.union([ z.lazy(() => EvalUpdateManyMutationInputSchema),z.lazy(() => EvalUncheckedUpdateManyWithoutScenarioInputSchema) ]),
+export const EvaluationUpdateManyWithWhereWithoutScenarioInputSchema: z.ZodType<Prisma.EvaluationUpdateManyWithWhereWithoutScenarioInput> = z.object({
+  where: z.lazy(() => EvaluationScalarWhereInputSchema),
+  data: z.union([ z.lazy(() => EvaluationUpdateManyMutationInputSchema),z.lazy(() => EvaluationUncheckedUpdateManyWithoutScenarioInputSchema) ]),
 }).strict();
 
-export const ScenarioCreateWithoutEvalsInputSchema: z.ZodType<Prisma.ScenarioCreateWithoutEvalsInput> = z.object({
-  id: z.string().optional(),
-  createdAt: z.coerce.date().optional(),
-  ownerId: z.string().optional(),
-  name: z.string(),
-  instructions: z.string(),
-  successCriteria: z.string().optional(),
-  includeDateTime: z.boolean().optional(),
-  timezone: z.string().optional().nullable(),
-  isNew: z.boolean().optional(),
-  deleted: z.boolean().optional(),
-  agent: z.lazy(() => AgentCreateNestedOneWithoutScenariosInputSchema),
-  generalEvalOverrides: z.lazy(() => EvalOverrideCreateNestedManyWithoutScenarioInputSchema).optional(),
-  calls: z.lazy(() => CallCreateNestedManyWithoutScenarioInputSchema).optional()
+export const EvaluationScalarWhereInputSchema: z.ZodType<Prisma.EvaluationScalarWhereInput> = z.object({
+  AND: z.union([ z.lazy(() => EvaluationScalarWhereInputSchema),z.lazy(() => EvaluationScalarWhereInputSchema).array() ]).optional(),
+  OR: z.lazy(() => EvaluationScalarWhereInputSchema).array().optional(),
+  NOT: z.union([ z.lazy(() => EvaluationScalarWhereInputSchema),z.lazy(() => EvaluationScalarWhereInputSchema).array() ]).optional(),
+  id: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
+  createdAt: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
+  enabled: z.union([ z.lazy(() => BoolFilterSchema),z.boolean() ]).optional(),
+  isCritical: z.union([ z.lazy(() => BoolFilterSchema),z.boolean() ]).optional(),
+  params: z.lazy(() => JsonFilterSchema).optional(),
+  evaluationTemplateId: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
+  scenarioId: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
+  evaluationGroupId: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
 }).strict();
 
-export const ScenarioUncheckedCreateWithoutEvalsInputSchema: z.ZodType<Prisma.ScenarioUncheckedCreateWithoutEvalsInput> = z.object({
-  id: z.string().optional(),
-  createdAt: z.coerce.date().optional(),
-  ownerId: z.string().optional(),
-  agentId: z.string(),
-  name: z.string(),
-  instructions: z.string(),
-  successCriteria: z.string().optional(),
-  includeDateTime: z.boolean().optional(),
-  timezone: z.string().optional().nullable(),
-  isNew: z.boolean().optional(),
-  deleted: z.boolean().optional(),
-  generalEvalOverrides: z.lazy(() => EvalOverrideUncheckedCreateNestedManyWithoutScenarioInputSchema).optional(),
-  calls: z.lazy(() => CallUncheckedCreateNestedManyWithoutScenarioInputSchema).optional()
-}).strict();
-
-export const ScenarioCreateOrConnectWithoutEvalsInputSchema: z.ZodType<Prisma.ScenarioCreateOrConnectWithoutEvalsInput> = z.object({
-  where: z.lazy(() => ScenarioWhereUniqueInputSchema),
-  create: z.union([ z.lazy(() => ScenarioCreateWithoutEvalsInputSchema),z.lazy(() => ScenarioUncheckedCreateWithoutEvalsInputSchema) ]),
-}).strict();
-
-export const EvalResultCreateWithoutEvalInputSchema: z.ZodType<Prisma.EvalResultCreateWithoutEvalInput> = z.object({
+export const EvaluationResultCreateWithoutEvaluationTemplateInputSchema: z.ZodType<Prisma.EvaluationResultCreateWithoutEvaluationTemplateInput> = z.object({
   id: z.string().optional(),
   createdAt: z.coerce.date().optional(),
   result: z.string(),
@@ -8895,13 +8963,15 @@ export const EvalResultCreateWithoutEvalInputSchema: z.ZodType<Prisma.EvalResult
   duration: z.number().optional().nullable(),
   type: z.lazy(() => EvalResultTypeSchema),
   details: z.string(),
-  call: z.lazy(() => CallCreateNestedOneWithoutEvalResultsInputSchema).optional()
+  call: z.lazy(() => CallCreateNestedOneWithoutEvaluationResultsInputSchema).optional(),
+  evaluation: z.lazy(() => EvaluationCreateNestedOneWithoutEvaluationResultsInputSchema)
 }).strict();
 
-export const EvalResultUncheckedCreateWithoutEvalInputSchema: z.ZodType<Prisma.EvalResultUncheckedCreateWithoutEvalInput> = z.object({
+export const EvaluationResultUncheckedCreateWithoutEvaluationTemplateInputSchema: z.ZodType<Prisma.EvaluationResultUncheckedCreateWithoutEvaluationTemplateInput> = z.object({
   id: z.string().optional(),
   createdAt: z.coerce.date().optional(),
   callId: z.string().optional().nullable(),
+  evaluationId: z.string(),
   result: z.string(),
   success: z.boolean(),
   secondsFromStart: z.number().optional().nullable(),
@@ -8910,25 +8980,91 @@ export const EvalResultUncheckedCreateWithoutEvalInputSchema: z.ZodType<Prisma.E
   details: z.string()
 }).strict();
 
-export const EvalResultCreateOrConnectWithoutEvalInputSchema: z.ZodType<Prisma.EvalResultCreateOrConnectWithoutEvalInput> = z.object({
-  where: z.lazy(() => EvalResultWhereUniqueInputSchema),
-  create: z.union([ z.lazy(() => EvalResultCreateWithoutEvalInputSchema),z.lazy(() => EvalResultUncheckedCreateWithoutEvalInputSchema) ]),
+export const EvaluationResultCreateOrConnectWithoutEvaluationTemplateInputSchema: z.ZodType<Prisma.EvaluationResultCreateOrConnectWithoutEvaluationTemplateInput> = z.object({
+  where: z.lazy(() => EvaluationResultWhereUniqueInputSchema),
+  create: z.union([ z.lazy(() => EvaluationResultCreateWithoutEvaluationTemplateInputSchema),z.lazy(() => EvaluationResultUncheckedCreateWithoutEvaluationTemplateInputSchema) ]),
 }).strict();
 
-export const EvalResultCreateManyEvalInputEnvelopeSchema: z.ZodType<Prisma.EvalResultCreateManyEvalInputEnvelope> = z.object({
-  data: z.union([ z.lazy(() => EvalResultCreateManyEvalInputSchema),z.lazy(() => EvalResultCreateManyEvalInputSchema).array() ]),
+export const EvaluationResultCreateManyEvaluationTemplateInputEnvelopeSchema: z.ZodType<Prisma.EvaluationResultCreateManyEvaluationTemplateInputEnvelope> = z.object({
+  data: z.union([ z.lazy(() => EvaluationResultCreateManyEvaluationTemplateInputSchema),z.lazy(() => EvaluationResultCreateManyEvaluationTemplateInputSchema).array() ]),
   skipDuplicates: z.boolean().optional()
 }).strict();
 
-export const AgentCreateWithoutEnabledGeneralEvalsInputSchema: z.ZodType<Prisma.AgentCreateWithoutEnabledGeneralEvalsInput> = z.object({
+export const EvaluationCreateWithoutEvaluationTemplateInputSchema: z.ZodType<Prisma.EvaluationCreateWithoutEvaluationTemplateInput> = z.object({
+  id: z.string().optional(),
+  createdAt: z.coerce.date().optional(),
+  enabled: z.boolean().optional(),
+  isCritical: z.boolean().optional(),
+  params: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
+  scenario: z.lazy(() => ScenarioCreateNestedOneWithoutEvaluationsInputSchema).optional(),
+  evaluationGroup: z.lazy(() => EvaluationGroupCreateNestedOneWithoutEvaluationsInputSchema).optional(),
+  evaluationResults: z.lazy(() => EvaluationResultCreateNestedManyWithoutEvaluationInputSchema).optional(),
+  generalEvaluations: z.lazy(() => GeneralEvaluationCreateNestedManyWithoutEvaluationInputSchema).optional()
+}).strict();
+
+export const EvaluationUncheckedCreateWithoutEvaluationTemplateInputSchema: z.ZodType<Prisma.EvaluationUncheckedCreateWithoutEvaluationTemplateInput> = z.object({
+  id: z.string().optional(),
+  createdAt: z.coerce.date().optional(),
+  enabled: z.boolean().optional(),
+  isCritical: z.boolean().optional(),
+  params: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
+  scenarioId: z.string().optional().nullable(),
+  evaluationGroupId: z.string().optional().nullable(),
+  evaluationResults: z.lazy(() => EvaluationResultUncheckedCreateNestedManyWithoutEvaluationInputSchema).optional(),
+  generalEvaluations: z.lazy(() => GeneralEvaluationUncheckedCreateNestedManyWithoutEvaluationInputSchema).optional()
+}).strict();
+
+export const EvaluationCreateOrConnectWithoutEvaluationTemplateInputSchema: z.ZodType<Prisma.EvaluationCreateOrConnectWithoutEvaluationTemplateInput> = z.object({
+  where: z.lazy(() => EvaluationWhereUniqueInputSchema),
+  create: z.union([ z.lazy(() => EvaluationCreateWithoutEvaluationTemplateInputSchema),z.lazy(() => EvaluationUncheckedCreateWithoutEvaluationTemplateInputSchema) ]),
+}).strict();
+
+export const EvaluationCreateManyEvaluationTemplateInputEnvelopeSchema: z.ZodType<Prisma.EvaluationCreateManyEvaluationTemplateInputEnvelope> = z.object({
+  data: z.union([ z.lazy(() => EvaluationCreateManyEvaluationTemplateInputSchema),z.lazy(() => EvaluationCreateManyEvaluationTemplateInputSchema).array() ]),
+  skipDuplicates: z.boolean().optional()
+}).strict();
+
+export const EvaluationResultUpsertWithWhereUniqueWithoutEvaluationTemplateInputSchema: z.ZodType<Prisma.EvaluationResultUpsertWithWhereUniqueWithoutEvaluationTemplateInput> = z.object({
+  where: z.lazy(() => EvaluationResultWhereUniqueInputSchema),
+  update: z.union([ z.lazy(() => EvaluationResultUpdateWithoutEvaluationTemplateInputSchema),z.lazy(() => EvaluationResultUncheckedUpdateWithoutEvaluationTemplateInputSchema) ]),
+  create: z.union([ z.lazy(() => EvaluationResultCreateWithoutEvaluationTemplateInputSchema),z.lazy(() => EvaluationResultUncheckedCreateWithoutEvaluationTemplateInputSchema) ]),
+}).strict();
+
+export const EvaluationResultUpdateWithWhereUniqueWithoutEvaluationTemplateInputSchema: z.ZodType<Prisma.EvaluationResultUpdateWithWhereUniqueWithoutEvaluationTemplateInput> = z.object({
+  where: z.lazy(() => EvaluationResultWhereUniqueInputSchema),
+  data: z.union([ z.lazy(() => EvaluationResultUpdateWithoutEvaluationTemplateInputSchema),z.lazy(() => EvaluationResultUncheckedUpdateWithoutEvaluationTemplateInputSchema) ]),
+}).strict();
+
+export const EvaluationResultUpdateManyWithWhereWithoutEvaluationTemplateInputSchema: z.ZodType<Prisma.EvaluationResultUpdateManyWithWhereWithoutEvaluationTemplateInput> = z.object({
+  where: z.lazy(() => EvaluationResultScalarWhereInputSchema),
+  data: z.union([ z.lazy(() => EvaluationResultUpdateManyMutationInputSchema),z.lazy(() => EvaluationResultUncheckedUpdateManyWithoutEvaluationTemplateInputSchema) ]),
+}).strict();
+
+export const EvaluationUpsertWithWhereUniqueWithoutEvaluationTemplateInputSchema: z.ZodType<Prisma.EvaluationUpsertWithWhereUniqueWithoutEvaluationTemplateInput> = z.object({
+  where: z.lazy(() => EvaluationWhereUniqueInputSchema),
+  update: z.union([ z.lazy(() => EvaluationUpdateWithoutEvaluationTemplateInputSchema),z.lazy(() => EvaluationUncheckedUpdateWithoutEvaluationTemplateInputSchema) ]),
+  create: z.union([ z.lazy(() => EvaluationCreateWithoutEvaluationTemplateInputSchema),z.lazy(() => EvaluationUncheckedCreateWithoutEvaluationTemplateInputSchema) ]),
+}).strict();
+
+export const EvaluationUpdateWithWhereUniqueWithoutEvaluationTemplateInputSchema: z.ZodType<Prisma.EvaluationUpdateWithWhereUniqueWithoutEvaluationTemplateInput> = z.object({
+  where: z.lazy(() => EvaluationWhereUniqueInputSchema),
+  data: z.union([ z.lazy(() => EvaluationUpdateWithoutEvaluationTemplateInputSchema),z.lazy(() => EvaluationUncheckedUpdateWithoutEvaluationTemplateInputSchema) ]),
+}).strict();
+
+export const EvaluationUpdateManyWithWhereWithoutEvaluationTemplateInputSchema: z.ZodType<Prisma.EvaluationUpdateManyWithWhereWithoutEvaluationTemplateInput> = z.object({
+  where: z.lazy(() => EvaluationScalarWhereInputSchema),
+  data: z.union([ z.lazy(() => EvaluationUpdateManyMutationInputSchema),z.lazy(() => EvaluationUncheckedUpdateManyWithoutEvaluationTemplateInputSchema) ]),
+}).strict();
+
+export const AgentCreateWithoutGeneralEvaluationsInputSchema: z.ZodType<Prisma.AgentCreateWithoutGeneralEvaluationsInput> = z.object({
   id: z.string().optional(),
   createdAt: z.coerce.date().optional(),
   updatedAt: z.coerce.date().optional(),
   ownerId: z.string(),
   name: z.string(),
   phoneNumber: z.string().optional(),
+  customerAgentId: z.string(),
   githubRepoUrl: z.string().optional().nullable(),
-  customerAgentId: z.string().optional().nullable(),
   systemPrompt: z.string().optional(),
   extraProperties: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
   enableSlackNotifications: z.boolean().optional(),
@@ -8938,15 +9074,15 @@ export const AgentCreateWithoutEnabledGeneralEvalsInputSchema: z.ZodType<Prisma.
   calls: z.lazy(() => CallCreateNestedManyWithoutAgentInputSchema).optional()
 }).strict();
 
-export const AgentUncheckedCreateWithoutEnabledGeneralEvalsInputSchema: z.ZodType<Prisma.AgentUncheckedCreateWithoutEnabledGeneralEvalsInput> = z.object({
+export const AgentUncheckedCreateWithoutGeneralEvaluationsInputSchema: z.ZodType<Prisma.AgentUncheckedCreateWithoutGeneralEvaluationsInput> = z.object({
   id: z.string().optional(),
   createdAt: z.coerce.date().optional(),
   updatedAt: z.coerce.date().optional(),
   ownerId: z.string(),
   name: z.string(),
   phoneNumber: z.string().optional(),
+  customerAgentId: z.string(),
   githubRepoUrl: z.string().optional().nullable(),
-  customerAgentId: z.string().optional().nullable(),
   systemPrompt: z.string().optional(),
   extraProperties: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
   enableSlackNotifications: z.boolean().optional(),
@@ -8956,139 +9092,60 @@ export const AgentUncheckedCreateWithoutEnabledGeneralEvalsInputSchema: z.ZodTyp
   calls: z.lazy(() => CallUncheckedCreateNestedManyWithoutAgentInputSchema).optional()
 }).strict();
 
-export const AgentCreateOrConnectWithoutEnabledGeneralEvalsInputSchema: z.ZodType<Prisma.AgentCreateOrConnectWithoutEnabledGeneralEvalsInput> = z.object({
+export const AgentCreateOrConnectWithoutGeneralEvaluationsInputSchema: z.ZodType<Prisma.AgentCreateOrConnectWithoutGeneralEvaluationsInput> = z.object({
   where: z.lazy(() => AgentWhereUniqueInputSchema),
-  create: z.union([ z.lazy(() => AgentCreateWithoutEnabledGeneralEvalsInputSchema),z.lazy(() => AgentUncheckedCreateWithoutEnabledGeneralEvalsInputSchema) ]),
+  create: z.union([ z.lazy(() => AgentCreateWithoutGeneralEvaluationsInputSchema),z.lazy(() => AgentUncheckedCreateWithoutGeneralEvaluationsInputSchema) ]),
 }).strict();
 
-export const EvalOverrideCreateWithoutEvalInputSchema: z.ZodType<Prisma.EvalOverrideCreateWithoutEvalInput> = z.object({
+export const EvaluationCreateWithoutGeneralEvaluationsInputSchema: z.ZodType<Prisma.EvaluationCreateWithoutGeneralEvaluationsInput> = z.object({
   id: z.string().optional(),
   createdAt: z.coerce.date().optional(),
-  enabled: z.boolean(),
-  scenario: z.lazy(() => ScenarioCreateNestedOneWithoutGeneralEvalOverridesInputSchema)
-}).strict();
-
-export const EvalOverrideUncheckedCreateWithoutEvalInputSchema: z.ZodType<Prisma.EvalOverrideUncheckedCreateWithoutEvalInput> = z.object({
-  id: z.string().optional(),
-  createdAt: z.coerce.date().optional(),
-  scenarioId: z.string(),
-  enabled: z.boolean()
-}).strict();
-
-export const EvalOverrideCreateOrConnectWithoutEvalInputSchema: z.ZodType<Prisma.EvalOverrideCreateOrConnectWithoutEvalInput> = z.object({
-  where: z.lazy(() => EvalOverrideWhereUniqueInputSchema),
-  create: z.union([ z.lazy(() => EvalOverrideCreateWithoutEvalInputSchema),z.lazy(() => EvalOverrideUncheckedCreateWithoutEvalInputSchema) ]),
-}).strict();
-
-export const EvalOverrideCreateManyEvalInputEnvelopeSchema: z.ZodType<Prisma.EvalOverrideCreateManyEvalInputEnvelope> = z.object({
-  data: z.union([ z.lazy(() => EvalOverrideCreateManyEvalInputSchema),z.lazy(() => EvalOverrideCreateManyEvalInputSchema).array() ]),
-  skipDuplicates: z.boolean().optional()
-}).strict();
-
-export const EvalSetCreateWithoutEvalsInputSchema: z.ZodType<Prisma.EvalSetCreateWithoutEvalsInput> = z.object({
-  id: z.string().optional(),
-  createdAt: z.coerce.date().optional(),
-  ownerId: z.string(),
-  name: z.string(),
-  condition: z.string().optional(),
   enabled: z.boolean().optional(),
-  savedSearch: z.lazy(() => SavedSearchCreateNestedOneWithoutEvalSetsInputSchema).optional()
+  isCritical: z.boolean().optional(),
+  params: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
+  evaluationTemplate: z.lazy(() => EvaluationTemplateCreateNestedOneWithoutEvaluationsInputSchema),
+  scenario: z.lazy(() => ScenarioCreateNestedOneWithoutEvaluationsInputSchema).optional(),
+  evaluationGroup: z.lazy(() => EvaluationGroupCreateNestedOneWithoutEvaluationsInputSchema).optional(),
+  evaluationResults: z.lazy(() => EvaluationResultCreateNestedManyWithoutEvaluationInputSchema).optional()
 }).strict();
 
-export const EvalSetUncheckedCreateWithoutEvalsInputSchema: z.ZodType<Prisma.EvalSetUncheckedCreateWithoutEvalsInput> = z.object({
+export const EvaluationUncheckedCreateWithoutGeneralEvaluationsInputSchema: z.ZodType<Prisma.EvaluationUncheckedCreateWithoutGeneralEvaluationsInput> = z.object({
   id: z.string().optional(),
   createdAt: z.coerce.date().optional(),
-  ownerId: z.string(),
-  name: z.string(),
-  condition: z.string().optional(),
   enabled: z.boolean().optional(),
-  savedSearchId: z.string().optional().nullable()
+  isCritical: z.boolean().optional(),
+  params: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
+  evaluationTemplateId: z.string(),
+  scenarioId: z.string().optional().nullable(),
+  evaluationGroupId: z.string().optional().nullable(),
+  evaluationResults: z.lazy(() => EvaluationResultUncheckedCreateNestedManyWithoutEvaluationInputSchema).optional()
 }).strict();
 
-export const EvalSetCreateOrConnectWithoutEvalsInputSchema: z.ZodType<Prisma.EvalSetCreateOrConnectWithoutEvalsInput> = z.object({
-  where: z.lazy(() => EvalSetWhereUniqueInputSchema),
-  create: z.union([ z.lazy(() => EvalSetCreateWithoutEvalsInputSchema),z.lazy(() => EvalSetUncheckedCreateWithoutEvalsInputSchema) ]),
+export const EvaluationCreateOrConnectWithoutGeneralEvaluationsInputSchema: z.ZodType<Prisma.EvaluationCreateOrConnectWithoutGeneralEvaluationsInput> = z.object({
+  where: z.lazy(() => EvaluationWhereUniqueInputSchema),
+  create: z.union([ z.lazy(() => EvaluationCreateWithoutGeneralEvaluationsInputSchema),z.lazy(() => EvaluationUncheckedCreateWithoutGeneralEvaluationsInputSchema) ]),
 }).strict();
 
-export const ScenarioUpsertWithoutEvalsInputSchema: z.ZodType<Prisma.ScenarioUpsertWithoutEvalsInput> = z.object({
-  update: z.union([ z.lazy(() => ScenarioUpdateWithoutEvalsInputSchema),z.lazy(() => ScenarioUncheckedUpdateWithoutEvalsInputSchema) ]),
-  create: z.union([ z.lazy(() => ScenarioCreateWithoutEvalsInputSchema),z.lazy(() => ScenarioUncheckedCreateWithoutEvalsInputSchema) ]),
-  where: z.lazy(() => ScenarioWhereInputSchema).optional()
-}).strict();
-
-export const ScenarioUpdateToOneWithWhereWithoutEvalsInputSchema: z.ZodType<Prisma.ScenarioUpdateToOneWithWhereWithoutEvalsInput> = z.object({
-  where: z.lazy(() => ScenarioWhereInputSchema).optional(),
-  data: z.union([ z.lazy(() => ScenarioUpdateWithoutEvalsInputSchema),z.lazy(() => ScenarioUncheckedUpdateWithoutEvalsInputSchema) ]),
-}).strict();
-
-export const ScenarioUpdateWithoutEvalsInputSchema: z.ZodType<Prisma.ScenarioUpdateWithoutEvalsInput> = z.object({
-  id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  ownerId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  instructions: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  successCriteria: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  includeDateTime: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  timezone: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  isNew: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  deleted: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  agent: z.lazy(() => AgentUpdateOneRequiredWithoutScenariosNestedInputSchema).optional(),
-  generalEvalOverrides: z.lazy(() => EvalOverrideUpdateManyWithoutScenarioNestedInputSchema).optional(),
-  calls: z.lazy(() => CallUpdateManyWithoutScenarioNestedInputSchema).optional()
-}).strict();
-
-export const ScenarioUncheckedUpdateWithoutEvalsInputSchema: z.ZodType<Prisma.ScenarioUncheckedUpdateWithoutEvalsInput> = z.object({
-  id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  ownerId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  agentId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  instructions: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  successCriteria: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  includeDateTime: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  timezone: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  isNew: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  deleted: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  generalEvalOverrides: z.lazy(() => EvalOverrideUncheckedUpdateManyWithoutScenarioNestedInputSchema).optional(),
-  calls: z.lazy(() => CallUncheckedUpdateManyWithoutScenarioNestedInputSchema).optional()
-}).strict();
-
-export const EvalResultUpsertWithWhereUniqueWithoutEvalInputSchema: z.ZodType<Prisma.EvalResultUpsertWithWhereUniqueWithoutEvalInput> = z.object({
-  where: z.lazy(() => EvalResultWhereUniqueInputSchema),
-  update: z.union([ z.lazy(() => EvalResultUpdateWithoutEvalInputSchema),z.lazy(() => EvalResultUncheckedUpdateWithoutEvalInputSchema) ]),
-  create: z.union([ z.lazy(() => EvalResultCreateWithoutEvalInputSchema),z.lazy(() => EvalResultUncheckedCreateWithoutEvalInputSchema) ]),
-}).strict();
-
-export const EvalResultUpdateWithWhereUniqueWithoutEvalInputSchema: z.ZodType<Prisma.EvalResultUpdateWithWhereUniqueWithoutEvalInput> = z.object({
-  where: z.lazy(() => EvalResultWhereUniqueInputSchema),
-  data: z.union([ z.lazy(() => EvalResultUpdateWithoutEvalInputSchema),z.lazy(() => EvalResultUncheckedUpdateWithoutEvalInputSchema) ]),
-}).strict();
-
-export const EvalResultUpdateManyWithWhereWithoutEvalInputSchema: z.ZodType<Prisma.EvalResultUpdateManyWithWhereWithoutEvalInput> = z.object({
-  where: z.lazy(() => EvalResultScalarWhereInputSchema),
-  data: z.union([ z.lazy(() => EvalResultUpdateManyMutationInputSchema),z.lazy(() => EvalResultUncheckedUpdateManyWithoutEvalInputSchema) ]),
-}).strict();
-
-export const AgentUpsertWithoutEnabledGeneralEvalsInputSchema: z.ZodType<Prisma.AgentUpsertWithoutEnabledGeneralEvalsInput> = z.object({
-  update: z.union([ z.lazy(() => AgentUpdateWithoutEnabledGeneralEvalsInputSchema),z.lazy(() => AgentUncheckedUpdateWithoutEnabledGeneralEvalsInputSchema) ]),
-  create: z.union([ z.lazy(() => AgentCreateWithoutEnabledGeneralEvalsInputSchema),z.lazy(() => AgentUncheckedCreateWithoutEnabledGeneralEvalsInputSchema) ]),
+export const AgentUpsertWithoutGeneralEvaluationsInputSchema: z.ZodType<Prisma.AgentUpsertWithoutGeneralEvaluationsInput> = z.object({
+  update: z.union([ z.lazy(() => AgentUpdateWithoutGeneralEvaluationsInputSchema),z.lazy(() => AgentUncheckedUpdateWithoutGeneralEvaluationsInputSchema) ]),
+  create: z.union([ z.lazy(() => AgentCreateWithoutGeneralEvaluationsInputSchema),z.lazy(() => AgentUncheckedCreateWithoutGeneralEvaluationsInputSchema) ]),
   where: z.lazy(() => AgentWhereInputSchema).optional()
 }).strict();
 
-export const AgentUpdateToOneWithWhereWithoutEnabledGeneralEvalsInputSchema: z.ZodType<Prisma.AgentUpdateToOneWithWhereWithoutEnabledGeneralEvalsInput> = z.object({
+export const AgentUpdateToOneWithWhereWithoutGeneralEvaluationsInputSchema: z.ZodType<Prisma.AgentUpdateToOneWithWhereWithoutGeneralEvaluationsInput> = z.object({
   where: z.lazy(() => AgentWhereInputSchema).optional(),
-  data: z.union([ z.lazy(() => AgentUpdateWithoutEnabledGeneralEvalsInputSchema),z.lazy(() => AgentUncheckedUpdateWithoutEnabledGeneralEvalsInputSchema) ]),
+  data: z.union([ z.lazy(() => AgentUpdateWithoutGeneralEvaluationsInputSchema),z.lazy(() => AgentUncheckedUpdateWithoutGeneralEvaluationsInputSchema) ]),
 }).strict();
 
-export const AgentUpdateWithoutEnabledGeneralEvalsInputSchema: z.ZodType<Prisma.AgentUpdateWithoutEnabledGeneralEvalsInput> = z.object({
+export const AgentUpdateWithoutGeneralEvaluationsInputSchema: z.ZodType<Prisma.AgentUpdateWithoutGeneralEvaluationsInput> = z.object({
   id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   ownerId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   phoneNumber: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  customerAgentId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   githubRepoUrl: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  customerAgentId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   systemPrompt: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   extraProperties: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
   enableSlackNotifications: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
@@ -9098,15 +9155,15 @@ export const AgentUpdateWithoutEnabledGeneralEvalsInputSchema: z.ZodType<Prisma.
   calls: z.lazy(() => CallUpdateManyWithoutAgentNestedInputSchema).optional()
 }).strict();
 
-export const AgentUncheckedUpdateWithoutEnabledGeneralEvalsInputSchema: z.ZodType<Prisma.AgentUncheckedUpdateWithoutEnabledGeneralEvalsInput> = z.object({
+export const AgentUncheckedUpdateWithoutGeneralEvaluationsInputSchema: z.ZodType<Prisma.AgentUncheckedUpdateWithoutGeneralEvaluationsInput> = z.object({
   id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   ownerId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   phoneNumber: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  customerAgentId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   githubRepoUrl: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  customerAgentId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   systemPrompt: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   extraProperties: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
   enableSlackNotifications: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
@@ -9116,44 +9173,288 @@ export const AgentUncheckedUpdateWithoutEnabledGeneralEvalsInputSchema: z.ZodTyp
   calls: z.lazy(() => CallUncheckedUpdateManyWithoutAgentNestedInputSchema).optional()
 }).strict();
 
-export const EvalOverrideUpsertWithWhereUniqueWithoutEvalInputSchema: z.ZodType<Prisma.EvalOverrideUpsertWithWhereUniqueWithoutEvalInput> = z.object({
-  where: z.lazy(() => EvalOverrideWhereUniqueInputSchema),
-  update: z.union([ z.lazy(() => EvalOverrideUpdateWithoutEvalInputSchema),z.lazy(() => EvalOverrideUncheckedUpdateWithoutEvalInputSchema) ]),
-  create: z.union([ z.lazy(() => EvalOverrideCreateWithoutEvalInputSchema),z.lazy(() => EvalOverrideUncheckedCreateWithoutEvalInputSchema) ]),
+export const EvaluationUpsertWithoutGeneralEvaluationsInputSchema: z.ZodType<Prisma.EvaluationUpsertWithoutGeneralEvaluationsInput> = z.object({
+  update: z.union([ z.lazy(() => EvaluationUpdateWithoutGeneralEvaluationsInputSchema),z.lazy(() => EvaluationUncheckedUpdateWithoutGeneralEvaluationsInputSchema) ]),
+  create: z.union([ z.lazy(() => EvaluationCreateWithoutGeneralEvaluationsInputSchema),z.lazy(() => EvaluationUncheckedCreateWithoutGeneralEvaluationsInputSchema) ]),
+  where: z.lazy(() => EvaluationWhereInputSchema).optional()
 }).strict();
 
-export const EvalOverrideUpdateWithWhereUniqueWithoutEvalInputSchema: z.ZodType<Prisma.EvalOverrideUpdateWithWhereUniqueWithoutEvalInput> = z.object({
-  where: z.lazy(() => EvalOverrideWhereUniqueInputSchema),
-  data: z.union([ z.lazy(() => EvalOverrideUpdateWithoutEvalInputSchema),z.lazy(() => EvalOverrideUncheckedUpdateWithoutEvalInputSchema) ]),
+export const EvaluationUpdateToOneWithWhereWithoutGeneralEvaluationsInputSchema: z.ZodType<Prisma.EvaluationUpdateToOneWithWhereWithoutGeneralEvaluationsInput> = z.object({
+  where: z.lazy(() => EvaluationWhereInputSchema).optional(),
+  data: z.union([ z.lazy(() => EvaluationUpdateWithoutGeneralEvaluationsInputSchema),z.lazy(() => EvaluationUncheckedUpdateWithoutGeneralEvaluationsInputSchema) ]),
 }).strict();
 
-export const EvalOverrideUpdateManyWithWhereWithoutEvalInputSchema: z.ZodType<Prisma.EvalOverrideUpdateManyWithWhereWithoutEvalInput> = z.object({
-  where: z.lazy(() => EvalOverrideScalarWhereInputSchema),
-  data: z.union([ z.lazy(() => EvalOverrideUpdateManyMutationInputSchema),z.lazy(() => EvalOverrideUncheckedUpdateManyWithoutEvalInputSchema) ]),
+export const EvaluationUpdateWithoutGeneralEvaluationsInputSchema: z.ZodType<Prisma.EvaluationUpdateWithoutGeneralEvaluationsInput> = z.object({
+  id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  enabled: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
+  isCritical: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
+  params: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
+  evaluationTemplate: z.lazy(() => EvaluationTemplateUpdateOneRequiredWithoutEvaluationsNestedInputSchema).optional(),
+  scenario: z.lazy(() => ScenarioUpdateOneWithoutEvaluationsNestedInputSchema).optional(),
+  evaluationGroup: z.lazy(() => EvaluationGroupUpdateOneWithoutEvaluationsNestedInputSchema).optional(),
+  evaluationResults: z.lazy(() => EvaluationResultUpdateManyWithoutEvaluationNestedInputSchema).optional()
 }).strict();
 
-export const EvalSetUpsertWithoutEvalsInputSchema: z.ZodType<Prisma.EvalSetUpsertWithoutEvalsInput> = z.object({
-  update: z.union([ z.lazy(() => EvalSetUpdateWithoutEvalsInputSchema),z.lazy(() => EvalSetUncheckedUpdateWithoutEvalsInputSchema) ]),
-  create: z.union([ z.lazy(() => EvalSetCreateWithoutEvalsInputSchema),z.lazy(() => EvalSetUncheckedCreateWithoutEvalsInputSchema) ]),
-  where: z.lazy(() => EvalSetWhereInputSchema).optional()
+export const EvaluationUncheckedUpdateWithoutGeneralEvaluationsInputSchema: z.ZodType<Prisma.EvaluationUncheckedUpdateWithoutGeneralEvaluationsInput> = z.object({
+  id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  enabled: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
+  isCritical: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
+  params: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
+  evaluationTemplateId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  scenarioId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  evaluationGroupId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  evaluationResults: z.lazy(() => EvaluationResultUncheckedUpdateManyWithoutEvaluationNestedInputSchema).optional()
 }).strict();
 
-export const EvalSetUpdateToOneWithWhereWithoutEvalsInputSchema: z.ZodType<Prisma.EvalSetUpdateToOneWithWhereWithoutEvalsInput> = z.object({
-  where: z.lazy(() => EvalSetWhereInputSchema).optional(),
-  data: z.union([ z.lazy(() => EvalSetUpdateWithoutEvalsInputSchema),z.lazy(() => EvalSetUncheckedUpdateWithoutEvalsInputSchema) ]),
+export const EvaluationTemplateCreateWithoutEvaluationsInputSchema: z.ZodType<Prisma.EvaluationTemplateCreateWithoutEvaluationsInput> = z.object({
+  id: z.string().optional(),
+  createdAt: z.coerce.date().optional(),
+  name: z.string(),
+  description: z.string(),
+  params: z.union([ z.lazy(() => EvaluationTemplateCreateparamsInputSchema),z.string().array() ]).optional(),
+  type: z.lazy(() => EvalTypeSchema),
+  resultType: z.lazy(() => EvalResultTypeSchema),
+  contentType: z.lazy(() => EvalContentTypeSchema).optional(),
+  toolCallExpectedResult: z.string().optional(),
+  ownerId: z.string().optional().nullable(),
+  deleted: z.boolean().optional(),
+  evaluationResults: z.lazy(() => EvaluationResultCreateNestedManyWithoutEvaluationTemplateInputSchema).optional()
 }).strict();
 
-export const EvalSetUpdateWithoutEvalsInputSchema: z.ZodType<Prisma.EvalSetUpdateWithoutEvalsInput> = z.object({
+export const EvaluationTemplateUncheckedCreateWithoutEvaluationsInputSchema: z.ZodType<Prisma.EvaluationTemplateUncheckedCreateWithoutEvaluationsInput> = z.object({
+  id: z.string().optional(),
+  createdAt: z.coerce.date().optional(),
+  name: z.string(),
+  description: z.string(),
+  params: z.union([ z.lazy(() => EvaluationTemplateCreateparamsInputSchema),z.string().array() ]).optional(),
+  type: z.lazy(() => EvalTypeSchema),
+  resultType: z.lazy(() => EvalResultTypeSchema),
+  contentType: z.lazy(() => EvalContentTypeSchema).optional(),
+  toolCallExpectedResult: z.string().optional(),
+  ownerId: z.string().optional().nullable(),
+  deleted: z.boolean().optional(),
+  evaluationResults: z.lazy(() => EvaluationResultUncheckedCreateNestedManyWithoutEvaluationTemplateInputSchema).optional()
+}).strict();
+
+export const EvaluationTemplateCreateOrConnectWithoutEvaluationsInputSchema: z.ZodType<Prisma.EvaluationTemplateCreateOrConnectWithoutEvaluationsInput> = z.object({
+  where: z.lazy(() => EvaluationTemplateWhereUniqueInputSchema),
+  create: z.union([ z.lazy(() => EvaluationTemplateCreateWithoutEvaluationsInputSchema),z.lazy(() => EvaluationTemplateUncheckedCreateWithoutEvaluationsInputSchema) ]),
+}).strict();
+
+export const ScenarioCreateWithoutEvaluationsInputSchema: z.ZodType<Prisma.ScenarioCreateWithoutEvaluationsInput> = z.object({
+  id: z.string().optional(),
+  createdAt: z.coerce.date().optional(),
+  name: z.string(),
+  instructions: z.string(),
+  successCriteria: z.string().optional(),
+  includeDateTime: z.boolean().optional(),
+  timezone: z.string().optional().nullable(),
+  deleted: z.boolean().optional(),
+  agent: z.lazy(() => AgentCreateNestedOneWithoutScenariosInputSchema),
+  calls: z.lazy(() => CallCreateNestedManyWithoutScenarioInputSchema).optional()
+}).strict();
+
+export const ScenarioUncheckedCreateWithoutEvaluationsInputSchema: z.ZodType<Prisma.ScenarioUncheckedCreateWithoutEvaluationsInput> = z.object({
+  id: z.string().optional(),
+  createdAt: z.coerce.date().optional(),
+  agentId: z.string(),
+  name: z.string(),
+  instructions: z.string(),
+  successCriteria: z.string().optional(),
+  includeDateTime: z.boolean().optional(),
+  timezone: z.string().optional().nullable(),
+  deleted: z.boolean().optional(),
+  calls: z.lazy(() => CallUncheckedCreateNestedManyWithoutScenarioInputSchema).optional()
+}).strict();
+
+export const ScenarioCreateOrConnectWithoutEvaluationsInputSchema: z.ZodType<Prisma.ScenarioCreateOrConnectWithoutEvaluationsInput> = z.object({
+  where: z.lazy(() => ScenarioWhereUniqueInputSchema),
+  create: z.union([ z.lazy(() => ScenarioCreateWithoutEvaluationsInputSchema),z.lazy(() => ScenarioUncheckedCreateWithoutEvaluationsInputSchema) ]),
+}).strict();
+
+export const EvaluationGroupCreateWithoutEvaluationsInputSchema: z.ZodType<Prisma.EvaluationGroupCreateWithoutEvaluationsInput> = z.object({
+  id: z.string().optional(),
+  createdAt: z.coerce.date().optional(),
+  ownerId: z.string(),
+  name: z.string(),
+  condition: z.string().optional(),
+  enabled: z.boolean().optional(),
+  savedSearch: z.lazy(() => SavedSearchCreateNestedOneWithoutEvaluationGroupsInputSchema).optional()
+}).strict();
+
+export const EvaluationGroupUncheckedCreateWithoutEvaluationsInputSchema: z.ZodType<Prisma.EvaluationGroupUncheckedCreateWithoutEvaluationsInput> = z.object({
+  id: z.string().optional(),
+  createdAt: z.coerce.date().optional(),
+  ownerId: z.string(),
+  name: z.string(),
+  condition: z.string().optional(),
+  enabled: z.boolean().optional(),
+  savedSearchId: z.string().optional().nullable()
+}).strict();
+
+export const EvaluationGroupCreateOrConnectWithoutEvaluationsInputSchema: z.ZodType<Prisma.EvaluationGroupCreateOrConnectWithoutEvaluationsInput> = z.object({
+  where: z.lazy(() => EvaluationGroupWhereUniqueInputSchema),
+  create: z.union([ z.lazy(() => EvaluationGroupCreateWithoutEvaluationsInputSchema),z.lazy(() => EvaluationGroupUncheckedCreateWithoutEvaluationsInputSchema) ]),
+}).strict();
+
+export const EvaluationResultCreateWithoutEvaluationInputSchema: z.ZodType<Prisma.EvaluationResultCreateWithoutEvaluationInput> = z.object({
+  id: z.string().optional(),
+  createdAt: z.coerce.date().optional(),
+  result: z.string(),
+  success: z.boolean(),
+  secondsFromStart: z.number().optional().nullable(),
+  duration: z.number().optional().nullable(),
+  type: z.lazy(() => EvalResultTypeSchema),
+  details: z.string(),
+  call: z.lazy(() => CallCreateNestedOneWithoutEvaluationResultsInputSchema).optional(),
+  evaluationTemplate: z.lazy(() => EvaluationTemplateCreateNestedOneWithoutEvaluationResultsInputSchema).optional()
+}).strict();
+
+export const EvaluationResultUncheckedCreateWithoutEvaluationInputSchema: z.ZodType<Prisma.EvaluationResultUncheckedCreateWithoutEvaluationInput> = z.object({
+  id: z.string().optional(),
+  createdAt: z.coerce.date().optional(),
+  callId: z.string().optional().nullable(),
+  result: z.string(),
+  success: z.boolean(),
+  secondsFromStart: z.number().optional().nullable(),
+  duration: z.number().optional().nullable(),
+  type: z.lazy(() => EvalResultTypeSchema),
+  details: z.string(),
+  evaluationTemplateId: z.string().optional().nullable()
+}).strict();
+
+export const EvaluationResultCreateOrConnectWithoutEvaluationInputSchema: z.ZodType<Prisma.EvaluationResultCreateOrConnectWithoutEvaluationInput> = z.object({
+  where: z.lazy(() => EvaluationResultWhereUniqueInputSchema),
+  create: z.union([ z.lazy(() => EvaluationResultCreateWithoutEvaluationInputSchema),z.lazy(() => EvaluationResultUncheckedCreateWithoutEvaluationInputSchema) ]),
+}).strict();
+
+export const EvaluationResultCreateManyEvaluationInputEnvelopeSchema: z.ZodType<Prisma.EvaluationResultCreateManyEvaluationInputEnvelope> = z.object({
+  data: z.union([ z.lazy(() => EvaluationResultCreateManyEvaluationInputSchema),z.lazy(() => EvaluationResultCreateManyEvaluationInputSchema).array() ]),
+  skipDuplicates: z.boolean().optional()
+}).strict();
+
+export const GeneralEvaluationCreateWithoutEvaluationInputSchema: z.ZodType<Prisma.GeneralEvaluationCreateWithoutEvaluationInput> = z.object({
+  id: z.string().optional(),
+  agent: z.lazy(() => AgentCreateNestedOneWithoutGeneralEvaluationsInputSchema)
+}).strict();
+
+export const GeneralEvaluationUncheckedCreateWithoutEvaluationInputSchema: z.ZodType<Prisma.GeneralEvaluationUncheckedCreateWithoutEvaluationInput> = z.object({
+  id: z.string().optional(),
+  agentId: z.string()
+}).strict();
+
+export const GeneralEvaluationCreateOrConnectWithoutEvaluationInputSchema: z.ZodType<Prisma.GeneralEvaluationCreateOrConnectWithoutEvaluationInput> = z.object({
+  where: z.lazy(() => GeneralEvaluationWhereUniqueInputSchema),
+  create: z.union([ z.lazy(() => GeneralEvaluationCreateWithoutEvaluationInputSchema),z.lazy(() => GeneralEvaluationUncheckedCreateWithoutEvaluationInputSchema) ]),
+}).strict();
+
+export const GeneralEvaluationCreateManyEvaluationInputEnvelopeSchema: z.ZodType<Prisma.GeneralEvaluationCreateManyEvaluationInputEnvelope> = z.object({
+  data: z.union([ z.lazy(() => GeneralEvaluationCreateManyEvaluationInputSchema),z.lazy(() => GeneralEvaluationCreateManyEvaluationInputSchema).array() ]),
+  skipDuplicates: z.boolean().optional()
+}).strict();
+
+export const EvaluationTemplateUpsertWithoutEvaluationsInputSchema: z.ZodType<Prisma.EvaluationTemplateUpsertWithoutEvaluationsInput> = z.object({
+  update: z.union([ z.lazy(() => EvaluationTemplateUpdateWithoutEvaluationsInputSchema),z.lazy(() => EvaluationTemplateUncheckedUpdateWithoutEvaluationsInputSchema) ]),
+  create: z.union([ z.lazy(() => EvaluationTemplateCreateWithoutEvaluationsInputSchema),z.lazy(() => EvaluationTemplateUncheckedCreateWithoutEvaluationsInputSchema) ]),
+  where: z.lazy(() => EvaluationTemplateWhereInputSchema).optional()
+}).strict();
+
+export const EvaluationTemplateUpdateToOneWithWhereWithoutEvaluationsInputSchema: z.ZodType<Prisma.EvaluationTemplateUpdateToOneWithWhereWithoutEvaluationsInput> = z.object({
+  where: z.lazy(() => EvaluationTemplateWhereInputSchema).optional(),
+  data: z.union([ z.lazy(() => EvaluationTemplateUpdateWithoutEvaluationsInputSchema),z.lazy(() => EvaluationTemplateUncheckedUpdateWithoutEvaluationsInputSchema) ]),
+}).strict();
+
+export const EvaluationTemplateUpdateWithoutEvaluationsInputSchema: z.ZodType<Prisma.EvaluationTemplateUpdateWithoutEvaluationsInput> = z.object({
+  id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  description: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  params: z.union([ z.lazy(() => EvaluationTemplateUpdateparamsInputSchema),z.string().array() ]).optional(),
+  type: z.union([ z.lazy(() => EvalTypeSchema),z.lazy(() => EnumEvalTypeFieldUpdateOperationsInputSchema) ]).optional(),
+  resultType: z.union([ z.lazy(() => EvalResultTypeSchema),z.lazy(() => EnumEvalResultTypeFieldUpdateOperationsInputSchema) ]).optional(),
+  contentType: z.union([ z.lazy(() => EvalContentTypeSchema),z.lazy(() => EnumEvalContentTypeFieldUpdateOperationsInputSchema) ]).optional(),
+  toolCallExpectedResult: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  ownerId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  deleted: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
+  evaluationResults: z.lazy(() => EvaluationResultUpdateManyWithoutEvaluationTemplateNestedInputSchema).optional()
+}).strict();
+
+export const EvaluationTemplateUncheckedUpdateWithoutEvaluationsInputSchema: z.ZodType<Prisma.EvaluationTemplateUncheckedUpdateWithoutEvaluationsInput> = z.object({
+  id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  description: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  params: z.union([ z.lazy(() => EvaluationTemplateUpdateparamsInputSchema),z.string().array() ]).optional(),
+  type: z.union([ z.lazy(() => EvalTypeSchema),z.lazy(() => EnumEvalTypeFieldUpdateOperationsInputSchema) ]).optional(),
+  resultType: z.union([ z.lazy(() => EvalResultTypeSchema),z.lazy(() => EnumEvalResultTypeFieldUpdateOperationsInputSchema) ]).optional(),
+  contentType: z.union([ z.lazy(() => EvalContentTypeSchema),z.lazy(() => EnumEvalContentTypeFieldUpdateOperationsInputSchema) ]).optional(),
+  toolCallExpectedResult: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  ownerId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  deleted: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
+  evaluationResults: z.lazy(() => EvaluationResultUncheckedUpdateManyWithoutEvaluationTemplateNestedInputSchema).optional()
+}).strict();
+
+export const ScenarioUpsertWithoutEvaluationsInputSchema: z.ZodType<Prisma.ScenarioUpsertWithoutEvaluationsInput> = z.object({
+  update: z.union([ z.lazy(() => ScenarioUpdateWithoutEvaluationsInputSchema),z.lazy(() => ScenarioUncheckedUpdateWithoutEvaluationsInputSchema) ]),
+  create: z.union([ z.lazy(() => ScenarioCreateWithoutEvaluationsInputSchema),z.lazy(() => ScenarioUncheckedCreateWithoutEvaluationsInputSchema) ]),
+  where: z.lazy(() => ScenarioWhereInputSchema).optional()
+}).strict();
+
+export const ScenarioUpdateToOneWithWhereWithoutEvaluationsInputSchema: z.ZodType<Prisma.ScenarioUpdateToOneWithWhereWithoutEvaluationsInput> = z.object({
+  where: z.lazy(() => ScenarioWhereInputSchema).optional(),
+  data: z.union([ z.lazy(() => ScenarioUpdateWithoutEvaluationsInputSchema),z.lazy(() => ScenarioUncheckedUpdateWithoutEvaluationsInputSchema) ]),
+}).strict();
+
+export const ScenarioUpdateWithoutEvaluationsInputSchema: z.ZodType<Prisma.ScenarioUpdateWithoutEvaluationsInput> = z.object({
+  id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  instructions: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  successCriteria: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  includeDateTime: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
+  timezone: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  deleted: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
+  agent: z.lazy(() => AgentUpdateOneRequiredWithoutScenariosNestedInputSchema).optional(),
+  calls: z.lazy(() => CallUpdateManyWithoutScenarioNestedInputSchema).optional()
+}).strict();
+
+export const ScenarioUncheckedUpdateWithoutEvaluationsInputSchema: z.ZodType<Prisma.ScenarioUncheckedUpdateWithoutEvaluationsInput> = z.object({
+  id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  agentId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  instructions: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  successCriteria: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  includeDateTime: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
+  timezone: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  deleted: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
+  calls: z.lazy(() => CallUncheckedUpdateManyWithoutScenarioNestedInputSchema).optional()
+}).strict();
+
+export const EvaluationGroupUpsertWithoutEvaluationsInputSchema: z.ZodType<Prisma.EvaluationGroupUpsertWithoutEvaluationsInput> = z.object({
+  update: z.union([ z.lazy(() => EvaluationGroupUpdateWithoutEvaluationsInputSchema),z.lazy(() => EvaluationGroupUncheckedUpdateWithoutEvaluationsInputSchema) ]),
+  create: z.union([ z.lazy(() => EvaluationGroupCreateWithoutEvaluationsInputSchema),z.lazy(() => EvaluationGroupUncheckedCreateWithoutEvaluationsInputSchema) ]),
+  where: z.lazy(() => EvaluationGroupWhereInputSchema).optional()
+}).strict();
+
+export const EvaluationGroupUpdateToOneWithWhereWithoutEvaluationsInputSchema: z.ZodType<Prisma.EvaluationGroupUpdateToOneWithWhereWithoutEvaluationsInput> = z.object({
+  where: z.lazy(() => EvaluationGroupWhereInputSchema).optional(),
+  data: z.union([ z.lazy(() => EvaluationGroupUpdateWithoutEvaluationsInputSchema),z.lazy(() => EvaluationGroupUncheckedUpdateWithoutEvaluationsInputSchema) ]),
+}).strict();
+
+export const EvaluationGroupUpdateWithoutEvaluationsInputSchema: z.ZodType<Prisma.EvaluationGroupUpdateWithoutEvaluationsInput> = z.object({
   id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   ownerId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   condition: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   enabled: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  savedSearch: z.lazy(() => SavedSearchUpdateOneWithoutEvalSetsNestedInputSchema).optional()
+  savedSearch: z.lazy(() => SavedSearchUpdateOneWithoutEvaluationGroupsNestedInputSchema).optional()
 }).strict();
 
-export const EvalSetUncheckedUpdateWithoutEvalsInputSchema: z.ZodType<Prisma.EvalSetUncheckedUpdateWithoutEvalsInput> = z.object({
+export const EvaluationGroupUncheckedUpdateWithoutEvaluationsInputSchema: z.ZodType<Prisma.EvaluationGroupUncheckedUpdateWithoutEvaluationsInput> = z.object({
   id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   ownerId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
@@ -9163,7 +9464,39 @@ export const EvalSetUncheckedUpdateWithoutEvalsInputSchema: z.ZodType<Prisma.Eva
   savedSearchId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
 }).strict();
 
-export const CallCreateWithoutEvalResultsInputSchema: z.ZodType<Prisma.CallCreateWithoutEvalResultsInput> = z.object({
+export const EvaluationResultUpsertWithWhereUniqueWithoutEvaluationInputSchema: z.ZodType<Prisma.EvaluationResultUpsertWithWhereUniqueWithoutEvaluationInput> = z.object({
+  where: z.lazy(() => EvaluationResultWhereUniqueInputSchema),
+  update: z.union([ z.lazy(() => EvaluationResultUpdateWithoutEvaluationInputSchema),z.lazy(() => EvaluationResultUncheckedUpdateWithoutEvaluationInputSchema) ]),
+  create: z.union([ z.lazy(() => EvaluationResultCreateWithoutEvaluationInputSchema),z.lazy(() => EvaluationResultUncheckedCreateWithoutEvaluationInputSchema) ]),
+}).strict();
+
+export const EvaluationResultUpdateWithWhereUniqueWithoutEvaluationInputSchema: z.ZodType<Prisma.EvaluationResultUpdateWithWhereUniqueWithoutEvaluationInput> = z.object({
+  where: z.lazy(() => EvaluationResultWhereUniqueInputSchema),
+  data: z.union([ z.lazy(() => EvaluationResultUpdateWithoutEvaluationInputSchema),z.lazy(() => EvaluationResultUncheckedUpdateWithoutEvaluationInputSchema) ]),
+}).strict();
+
+export const EvaluationResultUpdateManyWithWhereWithoutEvaluationInputSchema: z.ZodType<Prisma.EvaluationResultUpdateManyWithWhereWithoutEvaluationInput> = z.object({
+  where: z.lazy(() => EvaluationResultScalarWhereInputSchema),
+  data: z.union([ z.lazy(() => EvaluationResultUpdateManyMutationInputSchema),z.lazy(() => EvaluationResultUncheckedUpdateManyWithoutEvaluationInputSchema) ]),
+}).strict();
+
+export const GeneralEvaluationUpsertWithWhereUniqueWithoutEvaluationInputSchema: z.ZodType<Prisma.GeneralEvaluationUpsertWithWhereUniqueWithoutEvaluationInput> = z.object({
+  where: z.lazy(() => GeneralEvaluationWhereUniqueInputSchema),
+  update: z.union([ z.lazy(() => GeneralEvaluationUpdateWithoutEvaluationInputSchema),z.lazy(() => GeneralEvaluationUncheckedUpdateWithoutEvaluationInputSchema) ]),
+  create: z.union([ z.lazy(() => GeneralEvaluationCreateWithoutEvaluationInputSchema),z.lazy(() => GeneralEvaluationUncheckedCreateWithoutEvaluationInputSchema) ]),
+}).strict();
+
+export const GeneralEvaluationUpdateWithWhereUniqueWithoutEvaluationInputSchema: z.ZodType<Prisma.GeneralEvaluationUpdateWithWhereUniqueWithoutEvaluationInput> = z.object({
+  where: z.lazy(() => GeneralEvaluationWhereUniqueInputSchema),
+  data: z.union([ z.lazy(() => GeneralEvaluationUpdateWithoutEvaluationInputSchema),z.lazy(() => GeneralEvaluationUncheckedUpdateWithoutEvaluationInputSchema) ]),
+}).strict();
+
+export const GeneralEvaluationUpdateManyWithWhereWithoutEvaluationInputSchema: z.ZodType<Prisma.GeneralEvaluationUpdateManyWithWhereWithoutEvaluationInput> = z.object({
+  where: z.lazy(() => GeneralEvaluationScalarWhereInputSchema),
+  data: z.union([ z.lazy(() => GeneralEvaluationUpdateManyMutationInputSchema),z.lazy(() => GeneralEvaluationUncheckedUpdateManyWithoutEvaluationInputSchema) ]),
+}).strict();
+
+export const CallCreateWithoutEvaluationResultsInputSchema: z.ZodType<Prisma.CallCreateWithoutEvaluationResultsInput> = z.object({
   id: z.string().optional(),
   createdAt: z.coerce.date().optional(),
   ownerId: z.string().optional().nullable(),
@@ -9199,7 +9532,7 @@ export const CallCreateWithoutEvalResultsInputSchema: z.ZodType<Prisma.CallCreat
   errors: z.lazy(() => CallErrorCreateNestedManyWithoutCallInputSchema).optional()
 }).strict();
 
-export const CallUncheckedCreateWithoutEvalResultsInputSchema: z.ZodType<Prisma.CallUncheckedCreateWithoutEvalResultsInput> = z.object({
+export const CallUncheckedCreateWithoutEvaluationResultsInputSchema: z.ZodType<Prisma.CallUncheckedCreateWithoutEvaluationResultsInput> = z.object({
   id: z.string().optional(),
   createdAt: z.coerce.date().optional(),
   ownerId: z.string().optional().nullable(),
@@ -9235,64 +9568,87 @@ export const CallUncheckedCreateWithoutEvalResultsInputSchema: z.ZodType<Prisma.
   errors: z.lazy(() => CallErrorUncheckedCreateNestedManyWithoutCallInputSchema).optional()
 }).strict();
 
-export const CallCreateOrConnectWithoutEvalResultsInputSchema: z.ZodType<Prisma.CallCreateOrConnectWithoutEvalResultsInput> = z.object({
+export const CallCreateOrConnectWithoutEvaluationResultsInputSchema: z.ZodType<Prisma.CallCreateOrConnectWithoutEvaluationResultsInput> = z.object({
   where: z.lazy(() => CallWhereUniqueInputSchema),
-  create: z.union([ z.lazy(() => CallCreateWithoutEvalResultsInputSchema),z.lazy(() => CallUncheckedCreateWithoutEvalResultsInputSchema) ]),
+  create: z.union([ z.lazy(() => CallCreateWithoutEvaluationResultsInputSchema),z.lazy(() => CallUncheckedCreateWithoutEvaluationResultsInputSchema) ]),
 }).strict();
 
-export const EvalCreateWithoutEvalResultsInputSchema: z.ZodType<Prisma.EvalCreateWithoutEvalResultsInput> = z.object({
+export const EvaluationCreateWithoutEvaluationResultsInputSchema: z.ZodType<Prisma.EvaluationCreateWithoutEvaluationResultsInput> = z.object({
   id: z.string().optional(),
   createdAt: z.coerce.date().optional(),
-  name: z.string(),
-  description: z.string(),
-  type: z.lazy(() => EvalTypeSchema),
-  resultType: z.lazy(() => EvalResultTypeSchema),
-  contentType: z.lazy(() => EvalContentTypeSchema).optional(),
+  enabled: z.boolean().optional(),
   isCritical: z.boolean().optional(),
-  toolCallExpectedResult: z.string().optional(),
-  ownerId: z.string().optional().nullable(),
-  deleted: z.boolean().optional(),
-  scenario: z.lazy(() => ScenarioCreateNestedOneWithoutEvalsInputSchema).optional(),
-  agent: z.lazy(() => AgentCreateNestedOneWithoutEnabledGeneralEvalsInputSchema).optional(),
-  evalOverrides: z.lazy(() => EvalOverrideCreateNestedManyWithoutEvalInputSchema).optional(),
-  evalSet: z.lazy(() => EvalSetCreateNestedOneWithoutEvalsInputSchema).optional()
+  params: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
+  evaluationTemplate: z.lazy(() => EvaluationTemplateCreateNestedOneWithoutEvaluationsInputSchema),
+  scenario: z.lazy(() => ScenarioCreateNestedOneWithoutEvaluationsInputSchema).optional(),
+  evaluationGroup: z.lazy(() => EvaluationGroupCreateNestedOneWithoutEvaluationsInputSchema).optional(),
+  generalEvaluations: z.lazy(() => GeneralEvaluationCreateNestedManyWithoutEvaluationInputSchema).optional()
 }).strict();
 
-export const EvalUncheckedCreateWithoutEvalResultsInputSchema: z.ZodType<Prisma.EvalUncheckedCreateWithoutEvalResultsInput> = z.object({
+export const EvaluationUncheckedCreateWithoutEvaluationResultsInputSchema: z.ZodType<Prisma.EvaluationUncheckedCreateWithoutEvaluationResultsInput> = z.object({
   id: z.string().optional(),
   createdAt: z.coerce.date().optional(),
-  name: z.string(),
-  description: z.string(),
+  enabled: z.boolean().optional(),
+  isCritical: z.boolean().optional(),
+  params: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
+  evaluationTemplateId: z.string(),
   scenarioId: z.string().optional().nullable(),
+  evaluationGroupId: z.string().optional().nullable(),
+  generalEvaluations: z.lazy(() => GeneralEvaluationUncheckedCreateNestedManyWithoutEvaluationInputSchema).optional()
+}).strict();
+
+export const EvaluationCreateOrConnectWithoutEvaluationResultsInputSchema: z.ZodType<Prisma.EvaluationCreateOrConnectWithoutEvaluationResultsInput> = z.object({
+  where: z.lazy(() => EvaluationWhereUniqueInputSchema),
+  create: z.union([ z.lazy(() => EvaluationCreateWithoutEvaluationResultsInputSchema),z.lazy(() => EvaluationUncheckedCreateWithoutEvaluationResultsInputSchema) ]),
+}).strict();
+
+export const EvaluationTemplateCreateWithoutEvaluationResultsInputSchema: z.ZodType<Prisma.EvaluationTemplateCreateWithoutEvaluationResultsInput> = z.object({
+  id: z.string().optional(),
+  createdAt: z.coerce.date().optional(),
+  name: z.string(),
+  description: z.string(),
+  params: z.union([ z.lazy(() => EvaluationTemplateCreateparamsInputSchema),z.string().array() ]).optional(),
   type: z.lazy(() => EvalTypeSchema),
   resultType: z.lazy(() => EvalResultTypeSchema),
   contentType: z.lazy(() => EvalContentTypeSchema).optional(),
-  isCritical: z.boolean().optional(),
   toolCallExpectedResult: z.string().optional(),
-  agentId: z.string().optional().nullable(),
   ownerId: z.string().optional().nullable(),
   deleted: z.boolean().optional(),
-  evalSetId: z.string().optional().nullable(),
-  evalOverrides: z.lazy(() => EvalOverrideUncheckedCreateNestedManyWithoutEvalInputSchema).optional()
+  evaluations: z.lazy(() => EvaluationCreateNestedManyWithoutEvaluationTemplateInputSchema).optional()
 }).strict();
 
-export const EvalCreateOrConnectWithoutEvalResultsInputSchema: z.ZodType<Prisma.EvalCreateOrConnectWithoutEvalResultsInput> = z.object({
-  where: z.lazy(() => EvalWhereUniqueInputSchema),
-  create: z.union([ z.lazy(() => EvalCreateWithoutEvalResultsInputSchema),z.lazy(() => EvalUncheckedCreateWithoutEvalResultsInputSchema) ]),
+export const EvaluationTemplateUncheckedCreateWithoutEvaluationResultsInputSchema: z.ZodType<Prisma.EvaluationTemplateUncheckedCreateWithoutEvaluationResultsInput> = z.object({
+  id: z.string().optional(),
+  createdAt: z.coerce.date().optional(),
+  name: z.string(),
+  description: z.string(),
+  params: z.union([ z.lazy(() => EvaluationTemplateCreateparamsInputSchema),z.string().array() ]).optional(),
+  type: z.lazy(() => EvalTypeSchema),
+  resultType: z.lazy(() => EvalResultTypeSchema),
+  contentType: z.lazy(() => EvalContentTypeSchema).optional(),
+  toolCallExpectedResult: z.string().optional(),
+  ownerId: z.string().optional().nullable(),
+  deleted: z.boolean().optional(),
+  evaluations: z.lazy(() => EvaluationUncheckedCreateNestedManyWithoutEvaluationTemplateInputSchema).optional()
 }).strict();
 
-export const CallUpsertWithoutEvalResultsInputSchema: z.ZodType<Prisma.CallUpsertWithoutEvalResultsInput> = z.object({
-  update: z.union([ z.lazy(() => CallUpdateWithoutEvalResultsInputSchema),z.lazy(() => CallUncheckedUpdateWithoutEvalResultsInputSchema) ]),
-  create: z.union([ z.lazy(() => CallCreateWithoutEvalResultsInputSchema),z.lazy(() => CallUncheckedCreateWithoutEvalResultsInputSchema) ]),
+export const EvaluationTemplateCreateOrConnectWithoutEvaluationResultsInputSchema: z.ZodType<Prisma.EvaluationTemplateCreateOrConnectWithoutEvaluationResultsInput> = z.object({
+  where: z.lazy(() => EvaluationTemplateWhereUniqueInputSchema),
+  create: z.union([ z.lazy(() => EvaluationTemplateCreateWithoutEvaluationResultsInputSchema),z.lazy(() => EvaluationTemplateUncheckedCreateWithoutEvaluationResultsInputSchema) ]),
+}).strict();
+
+export const CallUpsertWithoutEvaluationResultsInputSchema: z.ZodType<Prisma.CallUpsertWithoutEvaluationResultsInput> = z.object({
+  update: z.union([ z.lazy(() => CallUpdateWithoutEvaluationResultsInputSchema),z.lazy(() => CallUncheckedUpdateWithoutEvaluationResultsInputSchema) ]),
+  create: z.union([ z.lazy(() => CallCreateWithoutEvaluationResultsInputSchema),z.lazy(() => CallUncheckedCreateWithoutEvaluationResultsInputSchema) ]),
   where: z.lazy(() => CallWhereInputSchema).optional()
 }).strict();
 
-export const CallUpdateToOneWithWhereWithoutEvalResultsInputSchema: z.ZodType<Prisma.CallUpdateToOneWithWhereWithoutEvalResultsInput> = z.object({
+export const CallUpdateToOneWithWhereWithoutEvaluationResultsInputSchema: z.ZodType<Prisma.CallUpdateToOneWithWhereWithoutEvaluationResultsInput> = z.object({
   where: z.lazy(() => CallWhereInputSchema).optional(),
-  data: z.union([ z.lazy(() => CallUpdateWithoutEvalResultsInputSchema),z.lazy(() => CallUncheckedUpdateWithoutEvalResultsInputSchema) ]),
+  data: z.union([ z.lazy(() => CallUpdateWithoutEvaluationResultsInputSchema),z.lazy(() => CallUncheckedUpdateWithoutEvaluationResultsInputSchema) ]),
 }).strict();
 
-export const CallUpdateWithoutEvalResultsInputSchema: z.ZodType<Prisma.CallUpdateWithoutEvalResultsInput> = z.object({
+export const CallUpdateWithoutEvaluationResultsInputSchema: z.ZodType<Prisma.CallUpdateWithoutEvaluationResultsInput> = z.object({
   id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   ownerId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
@@ -9328,7 +9684,7 @@ export const CallUpdateWithoutEvalResultsInputSchema: z.ZodType<Prisma.CallUpdat
   errors: z.lazy(() => CallErrorUpdateManyWithoutCallNestedInputSchema).optional()
 }).strict();
 
-export const CallUncheckedUpdateWithoutEvalResultsInputSchema: z.ZodType<Prisma.CallUncheckedUpdateWithoutEvalResultsInput> = z.object({
+export const CallUncheckedUpdateWithoutEvaluationResultsInputSchema: z.ZodType<Prisma.CallUncheckedUpdateWithoutEvaluationResultsInput> = z.object({
   id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   ownerId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
@@ -9364,219 +9720,80 @@ export const CallUncheckedUpdateWithoutEvalResultsInputSchema: z.ZodType<Prisma.
   errors: z.lazy(() => CallErrorUncheckedUpdateManyWithoutCallNestedInputSchema).optional()
 }).strict();
 
-export const EvalUpsertWithoutEvalResultsInputSchema: z.ZodType<Prisma.EvalUpsertWithoutEvalResultsInput> = z.object({
-  update: z.union([ z.lazy(() => EvalUpdateWithoutEvalResultsInputSchema),z.lazy(() => EvalUncheckedUpdateWithoutEvalResultsInputSchema) ]),
-  create: z.union([ z.lazy(() => EvalCreateWithoutEvalResultsInputSchema),z.lazy(() => EvalUncheckedCreateWithoutEvalResultsInputSchema) ]),
-  where: z.lazy(() => EvalWhereInputSchema).optional()
+export const EvaluationUpsertWithoutEvaluationResultsInputSchema: z.ZodType<Prisma.EvaluationUpsertWithoutEvaluationResultsInput> = z.object({
+  update: z.union([ z.lazy(() => EvaluationUpdateWithoutEvaluationResultsInputSchema),z.lazy(() => EvaluationUncheckedUpdateWithoutEvaluationResultsInputSchema) ]),
+  create: z.union([ z.lazy(() => EvaluationCreateWithoutEvaluationResultsInputSchema),z.lazy(() => EvaluationUncheckedCreateWithoutEvaluationResultsInputSchema) ]),
+  where: z.lazy(() => EvaluationWhereInputSchema).optional()
 }).strict();
 
-export const EvalUpdateToOneWithWhereWithoutEvalResultsInputSchema: z.ZodType<Prisma.EvalUpdateToOneWithWhereWithoutEvalResultsInput> = z.object({
-  where: z.lazy(() => EvalWhereInputSchema).optional(),
-  data: z.union([ z.lazy(() => EvalUpdateWithoutEvalResultsInputSchema),z.lazy(() => EvalUncheckedUpdateWithoutEvalResultsInputSchema) ]),
+export const EvaluationUpdateToOneWithWhereWithoutEvaluationResultsInputSchema: z.ZodType<Prisma.EvaluationUpdateToOneWithWhereWithoutEvaluationResultsInput> = z.object({
+  where: z.lazy(() => EvaluationWhereInputSchema).optional(),
+  data: z.union([ z.lazy(() => EvaluationUpdateWithoutEvaluationResultsInputSchema),z.lazy(() => EvaluationUncheckedUpdateWithoutEvaluationResultsInputSchema) ]),
 }).strict();
 
-export const EvalUpdateWithoutEvalResultsInputSchema: z.ZodType<Prisma.EvalUpdateWithoutEvalResultsInput> = z.object({
+export const EvaluationUpdateWithoutEvaluationResultsInputSchema: z.ZodType<Prisma.EvaluationUpdateWithoutEvaluationResultsInput> = z.object({
   id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  description: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  type: z.union([ z.lazy(() => EvalTypeSchema),z.lazy(() => EnumEvalTypeFieldUpdateOperationsInputSchema) ]).optional(),
-  resultType: z.union([ z.lazy(() => EvalResultTypeSchema),z.lazy(() => EnumEvalResultTypeFieldUpdateOperationsInputSchema) ]).optional(),
-  contentType: z.union([ z.lazy(() => EvalContentTypeSchema),z.lazy(() => EnumEvalContentTypeFieldUpdateOperationsInputSchema) ]).optional(),
+  enabled: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   isCritical: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  toolCallExpectedResult: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  ownerId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  deleted: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  scenario: z.lazy(() => ScenarioUpdateOneWithoutEvalsNestedInputSchema).optional(),
-  agent: z.lazy(() => AgentUpdateOneWithoutEnabledGeneralEvalsNestedInputSchema).optional(),
-  evalOverrides: z.lazy(() => EvalOverrideUpdateManyWithoutEvalNestedInputSchema).optional(),
-  evalSet: z.lazy(() => EvalSetUpdateOneWithoutEvalsNestedInputSchema).optional()
+  params: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
+  evaluationTemplate: z.lazy(() => EvaluationTemplateUpdateOneRequiredWithoutEvaluationsNestedInputSchema).optional(),
+  scenario: z.lazy(() => ScenarioUpdateOneWithoutEvaluationsNestedInputSchema).optional(),
+  evaluationGroup: z.lazy(() => EvaluationGroupUpdateOneWithoutEvaluationsNestedInputSchema).optional(),
+  generalEvaluations: z.lazy(() => GeneralEvaluationUpdateManyWithoutEvaluationNestedInputSchema).optional()
 }).strict();
 
-export const EvalUncheckedUpdateWithoutEvalResultsInputSchema: z.ZodType<Prisma.EvalUncheckedUpdateWithoutEvalResultsInput> = z.object({
+export const EvaluationUncheckedUpdateWithoutEvaluationResultsInputSchema: z.ZodType<Prisma.EvaluationUncheckedUpdateWithoutEvaluationResultsInput> = z.object({
   id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  description: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  enabled: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
+  isCritical: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
+  params: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
+  evaluationTemplateId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   scenarioId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  type: z.union([ z.lazy(() => EvalTypeSchema),z.lazy(() => EnumEvalTypeFieldUpdateOperationsInputSchema) ]).optional(),
-  resultType: z.union([ z.lazy(() => EvalResultTypeSchema),z.lazy(() => EnumEvalResultTypeFieldUpdateOperationsInputSchema) ]).optional(),
-  contentType: z.union([ z.lazy(() => EvalContentTypeSchema),z.lazy(() => EnumEvalContentTypeFieldUpdateOperationsInputSchema) ]).optional(),
-  isCritical: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  toolCallExpectedResult: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  agentId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  ownerId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  deleted: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  evalSetId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  evalOverrides: z.lazy(() => EvalOverrideUncheckedUpdateManyWithoutEvalNestedInputSchema).optional()
+  evaluationGroupId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  generalEvaluations: z.lazy(() => GeneralEvaluationUncheckedUpdateManyWithoutEvaluationNestedInputSchema).optional()
 }).strict();
 
-export const ScenarioCreateWithoutGeneralEvalOverridesInputSchema: z.ZodType<Prisma.ScenarioCreateWithoutGeneralEvalOverridesInput> = z.object({
-  id: z.string().optional(),
-  createdAt: z.coerce.date().optional(),
-  ownerId: z.string().optional(),
-  name: z.string(),
-  instructions: z.string(),
-  successCriteria: z.string().optional(),
-  includeDateTime: z.boolean().optional(),
-  timezone: z.string().optional().nullable(),
-  isNew: z.boolean().optional(),
-  deleted: z.boolean().optional(),
-  agent: z.lazy(() => AgentCreateNestedOneWithoutScenariosInputSchema),
-  calls: z.lazy(() => CallCreateNestedManyWithoutScenarioInputSchema).optional(),
-  evals: z.lazy(() => EvalCreateNestedManyWithoutScenarioInputSchema).optional()
+export const EvaluationTemplateUpsertWithoutEvaluationResultsInputSchema: z.ZodType<Prisma.EvaluationTemplateUpsertWithoutEvaluationResultsInput> = z.object({
+  update: z.union([ z.lazy(() => EvaluationTemplateUpdateWithoutEvaluationResultsInputSchema),z.lazy(() => EvaluationTemplateUncheckedUpdateWithoutEvaluationResultsInputSchema) ]),
+  create: z.union([ z.lazy(() => EvaluationTemplateCreateWithoutEvaluationResultsInputSchema),z.lazy(() => EvaluationTemplateUncheckedCreateWithoutEvaluationResultsInputSchema) ]),
+  where: z.lazy(() => EvaluationTemplateWhereInputSchema).optional()
 }).strict();
 
-export const ScenarioUncheckedCreateWithoutGeneralEvalOverridesInputSchema: z.ZodType<Prisma.ScenarioUncheckedCreateWithoutGeneralEvalOverridesInput> = z.object({
-  id: z.string().optional(),
-  createdAt: z.coerce.date().optional(),
-  ownerId: z.string().optional(),
-  agentId: z.string(),
-  name: z.string(),
-  instructions: z.string(),
-  successCriteria: z.string().optional(),
-  includeDateTime: z.boolean().optional(),
-  timezone: z.string().optional().nullable(),
-  isNew: z.boolean().optional(),
-  deleted: z.boolean().optional(),
-  calls: z.lazy(() => CallUncheckedCreateNestedManyWithoutScenarioInputSchema).optional(),
-  evals: z.lazy(() => EvalUncheckedCreateNestedManyWithoutScenarioInputSchema).optional()
+export const EvaluationTemplateUpdateToOneWithWhereWithoutEvaluationResultsInputSchema: z.ZodType<Prisma.EvaluationTemplateUpdateToOneWithWhereWithoutEvaluationResultsInput> = z.object({
+  where: z.lazy(() => EvaluationTemplateWhereInputSchema).optional(),
+  data: z.union([ z.lazy(() => EvaluationTemplateUpdateWithoutEvaluationResultsInputSchema),z.lazy(() => EvaluationTemplateUncheckedUpdateWithoutEvaluationResultsInputSchema) ]),
 }).strict();
 
-export const ScenarioCreateOrConnectWithoutGeneralEvalOverridesInputSchema: z.ZodType<Prisma.ScenarioCreateOrConnectWithoutGeneralEvalOverridesInput> = z.object({
-  where: z.lazy(() => ScenarioWhereUniqueInputSchema),
-  create: z.union([ z.lazy(() => ScenarioCreateWithoutGeneralEvalOverridesInputSchema),z.lazy(() => ScenarioUncheckedCreateWithoutGeneralEvalOverridesInputSchema) ]),
-}).strict();
-
-export const EvalCreateWithoutEvalOverridesInputSchema: z.ZodType<Prisma.EvalCreateWithoutEvalOverridesInput> = z.object({
-  id: z.string().optional(),
-  createdAt: z.coerce.date().optional(),
-  name: z.string(),
-  description: z.string(),
-  type: z.lazy(() => EvalTypeSchema),
-  resultType: z.lazy(() => EvalResultTypeSchema),
-  contentType: z.lazy(() => EvalContentTypeSchema).optional(),
-  isCritical: z.boolean().optional(),
-  toolCallExpectedResult: z.string().optional(),
-  ownerId: z.string().optional().nullable(),
-  deleted: z.boolean().optional(),
-  scenario: z.lazy(() => ScenarioCreateNestedOneWithoutEvalsInputSchema).optional(),
-  evalResults: z.lazy(() => EvalResultCreateNestedManyWithoutEvalInputSchema).optional(),
-  agent: z.lazy(() => AgentCreateNestedOneWithoutEnabledGeneralEvalsInputSchema).optional(),
-  evalSet: z.lazy(() => EvalSetCreateNestedOneWithoutEvalsInputSchema).optional()
-}).strict();
-
-export const EvalUncheckedCreateWithoutEvalOverridesInputSchema: z.ZodType<Prisma.EvalUncheckedCreateWithoutEvalOverridesInput> = z.object({
-  id: z.string().optional(),
-  createdAt: z.coerce.date().optional(),
-  name: z.string(),
-  description: z.string(),
-  scenarioId: z.string().optional().nullable(),
-  type: z.lazy(() => EvalTypeSchema),
-  resultType: z.lazy(() => EvalResultTypeSchema),
-  contentType: z.lazy(() => EvalContentTypeSchema).optional(),
-  isCritical: z.boolean().optional(),
-  toolCallExpectedResult: z.string().optional(),
-  agentId: z.string().optional().nullable(),
-  ownerId: z.string().optional().nullable(),
-  deleted: z.boolean().optional(),
-  evalSetId: z.string().optional().nullable(),
-  evalResults: z.lazy(() => EvalResultUncheckedCreateNestedManyWithoutEvalInputSchema).optional()
-}).strict();
-
-export const EvalCreateOrConnectWithoutEvalOverridesInputSchema: z.ZodType<Prisma.EvalCreateOrConnectWithoutEvalOverridesInput> = z.object({
-  where: z.lazy(() => EvalWhereUniqueInputSchema),
-  create: z.union([ z.lazy(() => EvalCreateWithoutEvalOverridesInputSchema),z.lazy(() => EvalUncheckedCreateWithoutEvalOverridesInputSchema) ]),
-}).strict();
-
-export const ScenarioUpsertWithoutGeneralEvalOverridesInputSchema: z.ZodType<Prisma.ScenarioUpsertWithoutGeneralEvalOverridesInput> = z.object({
-  update: z.union([ z.lazy(() => ScenarioUpdateWithoutGeneralEvalOverridesInputSchema),z.lazy(() => ScenarioUncheckedUpdateWithoutGeneralEvalOverridesInputSchema) ]),
-  create: z.union([ z.lazy(() => ScenarioCreateWithoutGeneralEvalOverridesInputSchema),z.lazy(() => ScenarioUncheckedCreateWithoutGeneralEvalOverridesInputSchema) ]),
-  where: z.lazy(() => ScenarioWhereInputSchema).optional()
-}).strict();
-
-export const ScenarioUpdateToOneWithWhereWithoutGeneralEvalOverridesInputSchema: z.ZodType<Prisma.ScenarioUpdateToOneWithWhereWithoutGeneralEvalOverridesInput> = z.object({
-  where: z.lazy(() => ScenarioWhereInputSchema).optional(),
-  data: z.union([ z.lazy(() => ScenarioUpdateWithoutGeneralEvalOverridesInputSchema),z.lazy(() => ScenarioUncheckedUpdateWithoutGeneralEvalOverridesInputSchema) ]),
-}).strict();
-
-export const ScenarioUpdateWithoutGeneralEvalOverridesInputSchema: z.ZodType<Prisma.ScenarioUpdateWithoutGeneralEvalOverridesInput> = z.object({
-  id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  ownerId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  instructions: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  successCriteria: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  includeDateTime: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  timezone: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  isNew: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  deleted: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  agent: z.lazy(() => AgentUpdateOneRequiredWithoutScenariosNestedInputSchema).optional(),
-  calls: z.lazy(() => CallUpdateManyWithoutScenarioNestedInputSchema).optional(),
-  evals: z.lazy(() => EvalUpdateManyWithoutScenarioNestedInputSchema).optional()
-}).strict();
-
-export const ScenarioUncheckedUpdateWithoutGeneralEvalOverridesInputSchema: z.ZodType<Prisma.ScenarioUncheckedUpdateWithoutGeneralEvalOverridesInput> = z.object({
-  id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  ownerId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  agentId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  instructions: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  successCriteria: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  includeDateTime: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  timezone: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  isNew: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  deleted: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  calls: z.lazy(() => CallUncheckedUpdateManyWithoutScenarioNestedInputSchema).optional(),
-  evals: z.lazy(() => EvalUncheckedUpdateManyWithoutScenarioNestedInputSchema).optional()
-}).strict();
-
-export const EvalUpsertWithoutEvalOverridesInputSchema: z.ZodType<Prisma.EvalUpsertWithoutEvalOverridesInput> = z.object({
-  update: z.union([ z.lazy(() => EvalUpdateWithoutEvalOverridesInputSchema),z.lazy(() => EvalUncheckedUpdateWithoutEvalOverridesInputSchema) ]),
-  create: z.union([ z.lazy(() => EvalCreateWithoutEvalOverridesInputSchema),z.lazy(() => EvalUncheckedCreateWithoutEvalOverridesInputSchema) ]),
-  where: z.lazy(() => EvalWhereInputSchema).optional()
-}).strict();
-
-export const EvalUpdateToOneWithWhereWithoutEvalOverridesInputSchema: z.ZodType<Prisma.EvalUpdateToOneWithWhereWithoutEvalOverridesInput> = z.object({
-  where: z.lazy(() => EvalWhereInputSchema).optional(),
-  data: z.union([ z.lazy(() => EvalUpdateWithoutEvalOverridesInputSchema),z.lazy(() => EvalUncheckedUpdateWithoutEvalOverridesInputSchema) ]),
-}).strict();
-
-export const EvalUpdateWithoutEvalOverridesInputSchema: z.ZodType<Prisma.EvalUpdateWithoutEvalOverridesInput> = z.object({
+export const EvaluationTemplateUpdateWithoutEvaluationResultsInputSchema: z.ZodType<Prisma.EvaluationTemplateUpdateWithoutEvaluationResultsInput> = z.object({
   id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   description: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  params: z.union([ z.lazy(() => EvaluationTemplateUpdateparamsInputSchema),z.string().array() ]).optional(),
   type: z.union([ z.lazy(() => EvalTypeSchema),z.lazy(() => EnumEvalTypeFieldUpdateOperationsInputSchema) ]).optional(),
   resultType: z.union([ z.lazy(() => EvalResultTypeSchema),z.lazy(() => EnumEvalResultTypeFieldUpdateOperationsInputSchema) ]).optional(),
   contentType: z.union([ z.lazy(() => EvalContentTypeSchema),z.lazy(() => EnumEvalContentTypeFieldUpdateOperationsInputSchema) ]).optional(),
-  isCritical: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   toolCallExpectedResult: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   ownerId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   deleted: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  scenario: z.lazy(() => ScenarioUpdateOneWithoutEvalsNestedInputSchema).optional(),
-  evalResults: z.lazy(() => EvalResultUpdateManyWithoutEvalNestedInputSchema).optional(),
-  agent: z.lazy(() => AgentUpdateOneWithoutEnabledGeneralEvalsNestedInputSchema).optional(),
-  evalSet: z.lazy(() => EvalSetUpdateOneWithoutEvalsNestedInputSchema).optional()
+  evaluations: z.lazy(() => EvaluationUpdateManyWithoutEvaluationTemplateNestedInputSchema).optional()
 }).strict();
 
-export const EvalUncheckedUpdateWithoutEvalOverridesInputSchema: z.ZodType<Prisma.EvalUncheckedUpdateWithoutEvalOverridesInput> = z.object({
+export const EvaluationTemplateUncheckedUpdateWithoutEvaluationResultsInputSchema: z.ZodType<Prisma.EvaluationTemplateUncheckedUpdateWithoutEvaluationResultsInput> = z.object({
   id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   description: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  scenarioId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  params: z.union([ z.lazy(() => EvaluationTemplateUpdateparamsInputSchema),z.string().array() ]).optional(),
   type: z.union([ z.lazy(() => EvalTypeSchema),z.lazy(() => EnumEvalTypeFieldUpdateOperationsInputSchema) ]).optional(),
   resultType: z.union([ z.lazy(() => EvalResultTypeSchema),z.lazy(() => EnumEvalResultTypeFieldUpdateOperationsInputSchema) ]).optional(),
   contentType: z.union([ z.lazy(() => EvalContentTypeSchema),z.lazy(() => EnumEvalContentTypeFieldUpdateOperationsInputSchema) ]).optional(),
-  isCritical: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   toolCallExpectedResult: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  agentId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   ownerId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   deleted: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  evalSetId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  evalResults: z.lazy(() => EvalResultUncheckedUpdateManyWithoutEvalNestedInputSchema).optional()
+  evaluations: z.lazy(() => EvaluationUncheckedUpdateManyWithoutEvaluationTemplateNestedInputSchema).optional()
 }).strict();
 
 export const CallCreateWithoutLatencyBlocksInputSchema: z.ZodType<Prisma.CallCreateWithoutLatencyBlocksInput> = z.object({
@@ -9605,7 +9822,7 @@ export const CallCreateWithoutLatencyBlocksInputSchema: z.ZodType<Prisma.CallCre
   numInterruptions: z.number().int().optional().nullable(),
   duration: z.number().optional().nullable(),
   evalSetToSuccess: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
-  evalResults: z.lazy(() => EvalResultCreateNestedManyWithoutCallInputSchema).optional(),
+  evaluationResults: z.lazy(() => EvaluationResultCreateNestedManyWithoutCallInputSchema).optional(),
   agent: z.lazy(() => AgentCreateNestedOneWithoutCallsInputSchema).optional(),
   test: z.lazy(() => TestCreateNestedOneWithoutCallsInputSchema).optional(),
   testAgent: z.lazy(() => TestAgentCreateNestedOneWithoutCallsInputSchema).optional(),
@@ -9645,7 +9862,7 @@ export const CallUncheckedCreateWithoutLatencyBlocksInputSchema: z.ZodType<Prism
   testAgentId: z.string().optional().nullable(),
   scenarioId: z.string().optional().nullable(),
   evalSetToSuccess: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
-  evalResults: z.lazy(() => EvalResultUncheckedCreateNestedManyWithoutCallInputSchema).optional(),
+  evaluationResults: z.lazy(() => EvaluationResultUncheckedCreateNestedManyWithoutCallInputSchema).optional(),
   messages: z.lazy(() => MessageUncheckedCreateNestedManyWithoutCallInputSchema).optional(),
   interruptions: z.lazy(() => InterruptionUncheckedCreateNestedManyWithoutCallInputSchema).optional(),
   errors: z.lazy(() => CallErrorUncheckedCreateNestedManyWithoutCallInputSchema).optional()
@@ -9693,7 +9910,7 @@ export const CallUpdateWithoutLatencyBlocksInputSchema: z.ZodType<Prisma.CallUpd
   numInterruptions: z.union([ z.number().int(),z.lazy(() => NullableIntFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   duration: z.union([ z.number(),z.lazy(() => NullableFloatFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   evalSetToSuccess: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
-  evalResults: z.lazy(() => EvalResultUpdateManyWithoutCallNestedInputSchema).optional(),
+  evaluationResults: z.lazy(() => EvaluationResultUpdateManyWithoutCallNestedInputSchema).optional(),
   agent: z.lazy(() => AgentUpdateOneWithoutCallsNestedInputSchema).optional(),
   test: z.lazy(() => TestUpdateOneWithoutCallsNestedInputSchema).optional(),
   testAgent: z.lazy(() => TestAgentUpdateOneWithoutCallsNestedInputSchema).optional(),
@@ -9733,7 +9950,7 @@ export const CallUncheckedUpdateWithoutLatencyBlocksInputSchema: z.ZodType<Prism
   testAgentId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   scenarioId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   evalSetToSuccess: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
-  evalResults: z.lazy(() => EvalResultUncheckedUpdateManyWithoutCallNestedInputSchema).optional(),
+  evaluationResults: z.lazy(() => EvaluationResultUncheckedUpdateManyWithoutCallNestedInputSchema).optional(),
   messages: z.lazy(() => MessageUncheckedUpdateManyWithoutCallNestedInputSchema).optional(),
   interruptions: z.lazy(() => InterruptionUncheckedUpdateManyWithoutCallNestedInputSchema).optional(),
   errors: z.lazy(() => CallErrorUncheckedUpdateManyWithoutCallNestedInputSchema).optional()
@@ -9765,7 +9982,7 @@ export const CallCreateWithoutInterruptionsInputSchema: z.ZodType<Prisma.CallCre
   numInterruptions: z.number().int().optional().nullable(),
   duration: z.number().optional().nullable(),
   evalSetToSuccess: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
-  evalResults: z.lazy(() => EvalResultCreateNestedManyWithoutCallInputSchema).optional(),
+  evaluationResults: z.lazy(() => EvaluationResultCreateNestedManyWithoutCallInputSchema).optional(),
   agent: z.lazy(() => AgentCreateNestedOneWithoutCallsInputSchema).optional(),
   test: z.lazy(() => TestCreateNestedOneWithoutCallsInputSchema).optional(),
   testAgent: z.lazy(() => TestAgentCreateNestedOneWithoutCallsInputSchema).optional(),
@@ -9805,7 +10022,7 @@ export const CallUncheckedCreateWithoutInterruptionsInputSchema: z.ZodType<Prism
   testAgentId: z.string().optional().nullable(),
   scenarioId: z.string().optional().nullable(),
   evalSetToSuccess: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
-  evalResults: z.lazy(() => EvalResultUncheckedCreateNestedManyWithoutCallInputSchema).optional(),
+  evaluationResults: z.lazy(() => EvaluationResultUncheckedCreateNestedManyWithoutCallInputSchema).optional(),
   messages: z.lazy(() => MessageUncheckedCreateNestedManyWithoutCallInputSchema).optional(),
   latencyBlocks: z.lazy(() => LatencyBlockUncheckedCreateNestedManyWithoutCallInputSchema).optional(),
   errors: z.lazy(() => CallErrorUncheckedCreateNestedManyWithoutCallInputSchema).optional()
@@ -9853,7 +10070,7 @@ export const CallUpdateWithoutInterruptionsInputSchema: z.ZodType<Prisma.CallUpd
   numInterruptions: z.union([ z.number().int(),z.lazy(() => NullableIntFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   duration: z.union([ z.number(),z.lazy(() => NullableFloatFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   evalSetToSuccess: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
-  evalResults: z.lazy(() => EvalResultUpdateManyWithoutCallNestedInputSchema).optional(),
+  evaluationResults: z.lazy(() => EvaluationResultUpdateManyWithoutCallNestedInputSchema).optional(),
   agent: z.lazy(() => AgentUpdateOneWithoutCallsNestedInputSchema).optional(),
   test: z.lazy(() => TestUpdateOneWithoutCallsNestedInputSchema).optional(),
   testAgent: z.lazy(() => TestAgentUpdateOneWithoutCallsNestedInputSchema).optional(),
@@ -9893,59 +10110,47 @@ export const CallUncheckedUpdateWithoutInterruptionsInputSchema: z.ZodType<Prism
   testAgentId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   scenarioId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   evalSetToSuccess: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
-  evalResults: z.lazy(() => EvalResultUncheckedUpdateManyWithoutCallNestedInputSchema).optional(),
+  evaluationResults: z.lazy(() => EvaluationResultUncheckedUpdateManyWithoutCallNestedInputSchema).optional(),
   messages: z.lazy(() => MessageUncheckedUpdateManyWithoutCallNestedInputSchema).optional(),
   latencyBlocks: z.lazy(() => LatencyBlockUncheckedUpdateManyWithoutCallNestedInputSchema).optional(),
   errors: z.lazy(() => CallErrorUncheckedUpdateManyWithoutCallNestedInputSchema).optional()
 }).strict();
 
-export const EvalCreateWithoutEvalSetInputSchema: z.ZodType<Prisma.EvalCreateWithoutEvalSetInput> = z.object({
+export const EvaluationCreateWithoutEvaluationGroupInputSchema: z.ZodType<Prisma.EvaluationCreateWithoutEvaluationGroupInput> = z.object({
   id: z.string().optional(),
   createdAt: z.coerce.date().optional(),
-  name: z.string(),
-  description: z.string(),
-  type: z.lazy(() => EvalTypeSchema),
-  resultType: z.lazy(() => EvalResultTypeSchema),
-  contentType: z.lazy(() => EvalContentTypeSchema).optional(),
+  enabled: z.boolean().optional(),
   isCritical: z.boolean().optional(),
-  toolCallExpectedResult: z.string().optional(),
-  ownerId: z.string().optional().nullable(),
-  deleted: z.boolean().optional(),
-  scenario: z.lazy(() => ScenarioCreateNestedOneWithoutEvalsInputSchema).optional(),
-  evalResults: z.lazy(() => EvalResultCreateNestedManyWithoutEvalInputSchema).optional(),
-  agent: z.lazy(() => AgentCreateNestedOneWithoutEnabledGeneralEvalsInputSchema).optional(),
-  evalOverrides: z.lazy(() => EvalOverrideCreateNestedManyWithoutEvalInputSchema).optional()
+  params: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
+  evaluationTemplate: z.lazy(() => EvaluationTemplateCreateNestedOneWithoutEvaluationsInputSchema),
+  scenario: z.lazy(() => ScenarioCreateNestedOneWithoutEvaluationsInputSchema).optional(),
+  evaluationResults: z.lazy(() => EvaluationResultCreateNestedManyWithoutEvaluationInputSchema).optional(),
+  generalEvaluations: z.lazy(() => GeneralEvaluationCreateNestedManyWithoutEvaluationInputSchema).optional()
 }).strict();
 
-export const EvalUncheckedCreateWithoutEvalSetInputSchema: z.ZodType<Prisma.EvalUncheckedCreateWithoutEvalSetInput> = z.object({
+export const EvaluationUncheckedCreateWithoutEvaluationGroupInputSchema: z.ZodType<Prisma.EvaluationUncheckedCreateWithoutEvaluationGroupInput> = z.object({
   id: z.string().optional(),
   createdAt: z.coerce.date().optional(),
-  name: z.string(),
-  description: z.string(),
+  enabled: z.boolean().optional(),
+  isCritical: z.boolean().optional(),
+  params: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
+  evaluationTemplateId: z.string(),
   scenarioId: z.string().optional().nullable(),
-  type: z.lazy(() => EvalTypeSchema),
-  resultType: z.lazy(() => EvalResultTypeSchema),
-  contentType: z.lazy(() => EvalContentTypeSchema).optional(),
-  isCritical: z.boolean().optional(),
-  toolCallExpectedResult: z.string().optional(),
-  agentId: z.string().optional().nullable(),
-  ownerId: z.string().optional().nullable(),
-  deleted: z.boolean().optional(),
-  evalResults: z.lazy(() => EvalResultUncheckedCreateNestedManyWithoutEvalInputSchema).optional(),
-  evalOverrides: z.lazy(() => EvalOverrideUncheckedCreateNestedManyWithoutEvalInputSchema).optional()
+  evaluationResults: z.lazy(() => EvaluationResultUncheckedCreateNestedManyWithoutEvaluationInputSchema).optional(),
+  generalEvaluations: z.lazy(() => GeneralEvaluationUncheckedCreateNestedManyWithoutEvaluationInputSchema).optional()
 }).strict();
 
-export const EvalCreateOrConnectWithoutEvalSetInputSchema: z.ZodType<Prisma.EvalCreateOrConnectWithoutEvalSetInput> = z.object({
-  where: z.lazy(() => EvalWhereUniqueInputSchema),
-  create: z.union([ z.lazy(() => EvalCreateWithoutEvalSetInputSchema),z.lazy(() => EvalUncheckedCreateWithoutEvalSetInputSchema) ]),
+export const EvaluationCreateOrConnectWithoutEvaluationGroupInputSchema: z.ZodType<Prisma.EvaluationCreateOrConnectWithoutEvaluationGroupInput> = z.object({
+  where: z.lazy(() => EvaluationWhereUniqueInputSchema),
+  create: z.union([ z.lazy(() => EvaluationCreateWithoutEvaluationGroupInputSchema),z.lazy(() => EvaluationUncheckedCreateWithoutEvaluationGroupInputSchema) ]),
 }).strict();
 
-export const EvalCreateManyEvalSetInputEnvelopeSchema: z.ZodType<Prisma.EvalCreateManyEvalSetInputEnvelope> = z.object({
-  data: z.union([ z.lazy(() => EvalCreateManyEvalSetInputSchema),z.lazy(() => EvalCreateManyEvalSetInputSchema).array() ]),
+export const EvaluationCreateManyEvaluationGroupInputEnvelopeSchema: z.ZodType<Prisma.EvaluationCreateManyEvaluationGroupInputEnvelope> = z.object({
+  data: z.union([ z.lazy(() => EvaluationCreateManyEvaluationGroupInputSchema),z.lazy(() => EvaluationCreateManyEvaluationGroupInputSchema).array() ]),
   skipDuplicates: z.boolean().optional()
 }).strict();
 
-export const SavedSearchCreateWithoutEvalSetsInputSchema: z.ZodType<Prisma.SavedSearchCreateWithoutEvalSetsInput> = z.object({
+export const SavedSearchCreateWithoutEvaluationGroupsInputSchema: z.ZodType<Prisma.SavedSearchCreateWithoutEvaluationGroupsInput> = z.object({
   id: z.string().optional(),
   createdAt: z.coerce.date().optional(),
   name: z.string(),
@@ -9960,7 +10165,7 @@ export const SavedSearchCreateWithoutEvalSetsInputSchema: z.ZodType<Prisma.Saved
   alerts: z.lazy(() => AlertCreateNestedManyWithoutSavedSearchInputSchema).optional()
 }).strict();
 
-export const SavedSearchUncheckedCreateWithoutEvalSetsInputSchema: z.ZodType<Prisma.SavedSearchUncheckedCreateWithoutEvalSetsInput> = z.object({
+export const SavedSearchUncheckedCreateWithoutEvaluationGroupsInputSchema: z.ZodType<Prisma.SavedSearchUncheckedCreateWithoutEvaluationGroupsInput> = z.object({
   id: z.string().optional(),
   createdAt: z.coerce.date().optional(),
   name: z.string(),
@@ -9975,39 +10180,39 @@ export const SavedSearchUncheckedCreateWithoutEvalSetsInputSchema: z.ZodType<Pri
   alerts: z.lazy(() => AlertUncheckedCreateNestedManyWithoutSavedSearchInputSchema).optional()
 }).strict();
 
-export const SavedSearchCreateOrConnectWithoutEvalSetsInputSchema: z.ZodType<Prisma.SavedSearchCreateOrConnectWithoutEvalSetsInput> = z.object({
+export const SavedSearchCreateOrConnectWithoutEvaluationGroupsInputSchema: z.ZodType<Prisma.SavedSearchCreateOrConnectWithoutEvaluationGroupsInput> = z.object({
   where: z.lazy(() => SavedSearchWhereUniqueInputSchema),
-  create: z.union([ z.lazy(() => SavedSearchCreateWithoutEvalSetsInputSchema),z.lazy(() => SavedSearchUncheckedCreateWithoutEvalSetsInputSchema) ]),
+  create: z.union([ z.lazy(() => SavedSearchCreateWithoutEvaluationGroupsInputSchema),z.lazy(() => SavedSearchUncheckedCreateWithoutEvaluationGroupsInputSchema) ]),
 }).strict();
 
-export const EvalUpsertWithWhereUniqueWithoutEvalSetInputSchema: z.ZodType<Prisma.EvalUpsertWithWhereUniqueWithoutEvalSetInput> = z.object({
-  where: z.lazy(() => EvalWhereUniqueInputSchema),
-  update: z.union([ z.lazy(() => EvalUpdateWithoutEvalSetInputSchema),z.lazy(() => EvalUncheckedUpdateWithoutEvalSetInputSchema) ]),
-  create: z.union([ z.lazy(() => EvalCreateWithoutEvalSetInputSchema),z.lazy(() => EvalUncheckedCreateWithoutEvalSetInputSchema) ]),
+export const EvaluationUpsertWithWhereUniqueWithoutEvaluationGroupInputSchema: z.ZodType<Prisma.EvaluationUpsertWithWhereUniqueWithoutEvaluationGroupInput> = z.object({
+  where: z.lazy(() => EvaluationWhereUniqueInputSchema),
+  update: z.union([ z.lazy(() => EvaluationUpdateWithoutEvaluationGroupInputSchema),z.lazy(() => EvaluationUncheckedUpdateWithoutEvaluationGroupInputSchema) ]),
+  create: z.union([ z.lazy(() => EvaluationCreateWithoutEvaluationGroupInputSchema),z.lazy(() => EvaluationUncheckedCreateWithoutEvaluationGroupInputSchema) ]),
 }).strict();
 
-export const EvalUpdateWithWhereUniqueWithoutEvalSetInputSchema: z.ZodType<Prisma.EvalUpdateWithWhereUniqueWithoutEvalSetInput> = z.object({
-  where: z.lazy(() => EvalWhereUniqueInputSchema),
-  data: z.union([ z.lazy(() => EvalUpdateWithoutEvalSetInputSchema),z.lazy(() => EvalUncheckedUpdateWithoutEvalSetInputSchema) ]),
+export const EvaluationUpdateWithWhereUniqueWithoutEvaluationGroupInputSchema: z.ZodType<Prisma.EvaluationUpdateWithWhereUniqueWithoutEvaluationGroupInput> = z.object({
+  where: z.lazy(() => EvaluationWhereUniqueInputSchema),
+  data: z.union([ z.lazy(() => EvaluationUpdateWithoutEvaluationGroupInputSchema),z.lazy(() => EvaluationUncheckedUpdateWithoutEvaluationGroupInputSchema) ]),
 }).strict();
 
-export const EvalUpdateManyWithWhereWithoutEvalSetInputSchema: z.ZodType<Prisma.EvalUpdateManyWithWhereWithoutEvalSetInput> = z.object({
-  where: z.lazy(() => EvalScalarWhereInputSchema),
-  data: z.union([ z.lazy(() => EvalUpdateManyMutationInputSchema),z.lazy(() => EvalUncheckedUpdateManyWithoutEvalSetInputSchema) ]),
+export const EvaluationUpdateManyWithWhereWithoutEvaluationGroupInputSchema: z.ZodType<Prisma.EvaluationUpdateManyWithWhereWithoutEvaluationGroupInput> = z.object({
+  where: z.lazy(() => EvaluationScalarWhereInputSchema),
+  data: z.union([ z.lazy(() => EvaluationUpdateManyMutationInputSchema),z.lazy(() => EvaluationUncheckedUpdateManyWithoutEvaluationGroupInputSchema) ]),
 }).strict();
 
-export const SavedSearchUpsertWithoutEvalSetsInputSchema: z.ZodType<Prisma.SavedSearchUpsertWithoutEvalSetsInput> = z.object({
-  update: z.union([ z.lazy(() => SavedSearchUpdateWithoutEvalSetsInputSchema),z.lazy(() => SavedSearchUncheckedUpdateWithoutEvalSetsInputSchema) ]),
-  create: z.union([ z.lazy(() => SavedSearchCreateWithoutEvalSetsInputSchema),z.lazy(() => SavedSearchUncheckedCreateWithoutEvalSetsInputSchema) ]),
+export const SavedSearchUpsertWithoutEvaluationGroupsInputSchema: z.ZodType<Prisma.SavedSearchUpsertWithoutEvaluationGroupsInput> = z.object({
+  update: z.union([ z.lazy(() => SavedSearchUpdateWithoutEvaluationGroupsInputSchema),z.lazy(() => SavedSearchUncheckedUpdateWithoutEvaluationGroupsInputSchema) ]),
+  create: z.union([ z.lazy(() => SavedSearchCreateWithoutEvaluationGroupsInputSchema),z.lazy(() => SavedSearchUncheckedCreateWithoutEvaluationGroupsInputSchema) ]),
   where: z.lazy(() => SavedSearchWhereInputSchema).optional()
 }).strict();
 
-export const SavedSearchUpdateToOneWithWhereWithoutEvalSetsInputSchema: z.ZodType<Prisma.SavedSearchUpdateToOneWithWhereWithoutEvalSetsInput> = z.object({
+export const SavedSearchUpdateToOneWithWhereWithoutEvaluationGroupsInputSchema: z.ZodType<Prisma.SavedSearchUpdateToOneWithWhereWithoutEvaluationGroupsInput> = z.object({
   where: z.lazy(() => SavedSearchWhereInputSchema).optional(),
-  data: z.union([ z.lazy(() => SavedSearchUpdateWithoutEvalSetsInputSchema),z.lazy(() => SavedSearchUncheckedUpdateWithoutEvalSetsInputSchema) ]),
+  data: z.union([ z.lazy(() => SavedSearchUpdateWithoutEvaluationGroupsInputSchema),z.lazy(() => SavedSearchUncheckedUpdateWithoutEvaluationGroupsInputSchema) ]),
 }).strict();
 
-export const SavedSearchUpdateWithoutEvalSetsInputSchema: z.ZodType<Prisma.SavedSearchUpdateWithoutEvalSetsInput> = z.object({
+export const SavedSearchUpdateWithoutEvaluationGroupsInputSchema: z.ZodType<Prisma.SavedSearchUpdateWithoutEvaluationGroupsInput> = z.object({
   id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
@@ -10022,7 +10227,7 @@ export const SavedSearchUpdateWithoutEvalSetsInputSchema: z.ZodType<Prisma.Saved
   alerts: z.lazy(() => AlertUpdateManyWithoutSavedSearchNestedInputSchema).optional()
 }).strict();
 
-export const SavedSearchUncheckedUpdateWithoutEvalSetsInputSchema: z.ZodType<Prisma.SavedSearchUncheckedUpdateWithoutEvalSetsInput> = z.object({
+export const SavedSearchUncheckedUpdateWithoutEvaluationGroupsInputSchema: z.ZodType<Prisma.SavedSearchUncheckedUpdateWithoutEvaluationGroupsInput> = z.object({
   id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
@@ -10037,33 +10242,33 @@ export const SavedSearchUncheckedUpdateWithoutEvalSetsInputSchema: z.ZodType<Pri
   alerts: z.lazy(() => AlertUncheckedUpdateManyWithoutSavedSearchNestedInputSchema).optional()
 }).strict();
 
-export const EvalSetCreateWithoutSavedSearchInputSchema: z.ZodType<Prisma.EvalSetCreateWithoutSavedSearchInput> = z.object({
+export const EvaluationGroupCreateWithoutSavedSearchInputSchema: z.ZodType<Prisma.EvaluationGroupCreateWithoutSavedSearchInput> = z.object({
   id: z.string().optional(),
   createdAt: z.coerce.date().optional(),
   ownerId: z.string(),
   name: z.string(),
   condition: z.string().optional(),
   enabled: z.boolean().optional(),
-  evals: z.lazy(() => EvalCreateNestedManyWithoutEvalSetInputSchema).optional()
+  evaluations: z.lazy(() => EvaluationCreateNestedManyWithoutEvaluationGroupInputSchema).optional()
 }).strict();
 
-export const EvalSetUncheckedCreateWithoutSavedSearchInputSchema: z.ZodType<Prisma.EvalSetUncheckedCreateWithoutSavedSearchInput> = z.object({
+export const EvaluationGroupUncheckedCreateWithoutSavedSearchInputSchema: z.ZodType<Prisma.EvaluationGroupUncheckedCreateWithoutSavedSearchInput> = z.object({
   id: z.string().optional(),
   createdAt: z.coerce.date().optional(),
   ownerId: z.string(),
   name: z.string(),
   condition: z.string().optional(),
   enabled: z.boolean().optional(),
-  evals: z.lazy(() => EvalUncheckedCreateNestedManyWithoutEvalSetInputSchema).optional()
+  evaluations: z.lazy(() => EvaluationUncheckedCreateNestedManyWithoutEvaluationGroupInputSchema).optional()
 }).strict();
 
-export const EvalSetCreateOrConnectWithoutSavedSearchInputSchema: z.ZodType<Prisma.EvalSetCreateOrConnectWithoutSavedSearchInput> = z.object({
-  where: z.lazy(() => EvalSetWhereUniqueInputSchema),
-  create: z.union([ z.lazy(() => EvalSetCreateWithoutSavedSearchInputSchema),z.lazy(() => EvalSetUncheckedCreateWithoutSavedSearchInputSchema) ]),
+export const EvaluationGroupCreateOrConnectWithoutSavedSearchInputSchema: z.ZodType<Prisma.EvaluationGroupCreateOrConnectWithoutSavedSearchInput> = z.object({
+  where: z.lazy(() => EvaluationGroupWhereUniqueInputSchema),
+  create: z.union([ z.lazy(() => EvaluationGroupCreateWithoutSavedSearchInputSchema),z.lazy(() => EvaluationGroupUncheckedCreateWithoutSavedSearchInputSchema) ]),
 }).strict();
 
-export const EvalSetCreateManySavedSearchInputEnvelopeSchema: z.ZodType<Prisma.EvalSetCreateManySavedSearchInputEnvelope> = z.object({
-  data: z.union([ z.lazy(() => EvalSetCreateManySavedSearchInputSchema),z.lazy(() => EvalSetCreateManySavedSearchInputSchema).array() ]),
+export const EvaluationGroupCreateManySavedSearchInputEnvelopeSchema: z.ZodType<Prisma.EvaluationGroupCreateManySavedSearchInputEnvelope> = z.object({
+  data: z.union([ z.lazy(() => EvaluationGroupCreateManySavedSearchInputSchema),z.lazy(() => EvaluationGroupCreateManySavedSearchInputSchema).array() ]),
   skipDuplicates: z.boolean().optional()
 }).strict();
 
@@ -10097,26 +10302,26 @@ export const AlertCreateManySavedSearchInputEnvelopeSchema: z.ZodType<Prisma.Ale
   skipDuplicates: z.boolean().optional()
 }).strict();
 
-export const EvalSetUpsertWithWhereUniqueWithoutSavedSearchInputSchema: z.ZodType<Prisma.EvalSetUpsertWithWhereUniqueWithoutSavedSearchInput> = z.object({
-  where: z.lazy(() => EvalSetWhereUniqueInputSchema),
-  update: z.union([ z.lazy(() => EvalSetUpdateWithoutSavedSearchInputSchema),z.lazy(() => EvalSetUncheckedUpdateWithoutSavedSearchInputSchema) ]),
-  create: z.union([ z.lazy(() => EvalSetCreateWithoutSavedSearchInputSchema),z.lazy(() => EvalSetUncheckedCreateWithoutSavedSearchInputSchema) ]),
+export const EvaluationGroupUpsertWithWhereUniqueWithoutSavedSearchInputSchema: z.ZodType<Prisma.EvaluationGroupUpsertWithWhereUniqueWithoutSavedSearchInput> = z.object({
+  where: z.lazy(() => EvaluationGroupWhereUniqueInputSchema),
+  update: z.union([ z.lazy(() => EvaluationGroupUpdateWithoutSavedSearchInputSchema),z.lazy(() => EvaluationGroupUncheckedUpdateWithoutSavedSearchInputSchema) ]),
+  create: z.union([ z.lazy(() => EvaluationGroupCreateWithoutSavedSearchInputSchema),z.lazy(() => EvaluationGroupUncheckedCreateWithoutSavedSearchInputSchema) ]),
 }).strict();
 
-export const EvalSetUpdateWithWhereUniqueWithoutSavedSearchInputSchema: z.ZodType<Prisma.EvalSetUpdateWithWhereUniqueWithoutSavedSearchInput> = z.object({
-  where: z.lazy(() => EvalSetWhereUniqueInputSchema),
-  data: z.union([ z.lazy(() => EvalSetUpdateWithoutSavedSearchInputSchema),z.lazy(() => EvalSetUncheckedUpdateWithoutSavedSearchInputSchema) ]),
+export const EvaluationGroupUpdateWithWhereUniqueWithoutSavedSearchInputSchema: z.ZodType<Prisma.EvaluationGroupUpdateWithWhereUniqueWithoutSavedSearchInput> = z.object({
+  where: z.lazy(() => EvaluationGroupWhereUniqueInputSchema),
+  data: z.union([ z.lazy(() => EvaluationGroupUpdateWithoutSavedSearchInputSchema),z.lazy(() => EvaluationGroupUncheckedUpdateWithoutSavedSearchInputSchema) ]),
 }).strict();
 
-export const EvalSetUpdateManyWithWhereWithoutSavedSearchInputSchema: z.ZodType<Prisma.EvalSetUpdateManyWithWhereWithoutSavedSearchInput> = z.object({
-  where: z.lazy(() => EvalSetScalarWhereInputSchema),
-  data: z.union([ z.lazy(() => EvalSetUpdateManyMutationInputSchema),z.lazy(() => EvalSetUncheckedUpdateManyWithoutSavedSearchInputSchema) ]),
+export const EvaluationGroupUpdateManyWithWhereWithoutSavedSearchInputSchema: z.ZodType<Prisma.EvaluationGroupUpdateManyWithWhereWithoutSavedSearchInput> = z.object({
+  where: z.lazy(() => EvaluationGroupScalarWhereInputSchema),
+  data: z.union([ z.lazy(() => EvaluationGroupUpdateManyMutationInputSchema),z.lazy(() => EvaluationGroupUncheckedUpdateManyWithoutSavedSearchInputSchema) ]),
 }).strict();
 
-export const EvalSetScalarWhereInputSchema: z.ZodType<Prisma.EvalSetScalarWhereInput> = z.object({
-  AND: z.union([ z.lazy(() => EvalSetScalarWhereInputSchema),z.lazy(() => EvalSetScalarWhereInputSchema).array() ]).optional(),
-  OR: z.lazy(() => EvalSetScalarWhereInputSchema).array().optional(),
-  NOT: z.union([ z.lazy(() => EvalSetScalarWhereInputSchema),z.lazy(() => EvalSetScalarWhereInputSchema).array() ]).optional(),
+export const EvaluationGroupScalarWhereInputSchema: z.ZodType<Prisma.EvaluationGroupScalarWhereInput> = z.object({
+  AND: z.union([ z.lazy(() => EvaluationGroupScalarWhereInputSchema),z.lazy(() => EvaluationGroupScalarWhereInputSchema).array() ]).optional(),
+  OR: z.lazy(() => EvaluationGroupScalarWhereInputSchema).array().optional(),
+  NOT: z.union([ z.lazy(() => EvaluationGroupScalarWhereInputSchema),z.lazy(() => EvaluationGroupScalarWhereInputSchema).array() ]).optional(),
   id: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   createdAt: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
   ownerId: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
@@ -10168,7 +10373,7 @@ export const SavedSearchCreateWithoutAlertsInputSchema: z.ZodType<Prisma.SavedSe
   chartPeriod: z.number().int(),
   customerCallId: z.string().optional().nullable(),
   metadata: z.union([ z.lazy(() => NullableJsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
-  evalSets: z.lazy(() => EvalSetCreateNestedManyWithoutSavedSearchInputSchema).optional()
+  evaluationGroups: z.lazy(() => EvaluationGroupCreateNestedManyWithoutSavedSearchInputSchema).optional()
 }).strict();
 
 export const SavedSearchUncheckedCreateWithoutAlertsInputSchema: z.ZodType<Prisma.SavedSearchUncheckedCreateWithoutAlertsInput> = z.object({
@@ -10183,7 +10388,7 @@ export const SavedSearchUncheckedCreateWithoutAlertsInputSchema: z.ZodType<Prism
   chartPeriod: z.number().int(),
   customerCallId: z.string().optional().nullable(),
   metadata: z.union([ z.lazy(() => NullableJsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
-  evalSets: z.lazy(() => EvalSetUncheckedCreateNestedManyWithoutSavedSearchInputSchema).optional()
+  evaluationGroups: z.lazy(() => EvaluationGroupUncheckedCreateNestedManyWithoutSavedSearchInputSchema).optional()
 }).strict();
 
 export const SavedSearchCreateOrConnectWithoutAlertsInputSchema: z.ZodType<Prisma.SavedSearchCreateOrConnectWithoutAlertsInput> = z.object({
@@ -10214,7 +10419,7 @@ export const SavedSearchUpdateWithoutAlertsInputSchema: z.ZodType<Prisma.SavedSe
   chartPeriod: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   customerCallId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   metadata: z.union([ z.lazy(() => NullableJsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
-  evalSets: z.lazy(() => EvalSetUpdateManyWithoutSavedSearchNestedInputSchema).optional()
+  evaluationGroups: z.lazy(() => EvaluationGroupUpdateManyWithoutSavedSearchNestedInputSchema).optional()
 }).strict();
 
 export const SavedSearchUncheckedUpdateWithoutAlertsInputSchema: z.ZodType<Prisma.SavedSearchUncheckedUpdateWithoutAlertsInput> = z.object({
@@ -10229,35 +10434,17 @@ export const SavedSearchUncheckedUpdateWithoutAlertsInputSchema: z.ZodType<Prism
   chartPeriod: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   customerCallId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   metadata: z.union([ z.lazy(() => NullableJsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
-  evalSets: z.lazy(() => EvalSetUncheckedUpdateManyWithoutSavedSearchNestedInputSchema).optional()
-}).strict();
-
-export const EvalCreateManyAgentInputSchema: z.ZodType<Prisma.EvalCreateManyAgentInput> = z.object({
-  id: z.string().optional(),
-  createdAt: z.coerce.date().optional(),
-  name: z.string(),
-  description: z.string(),
-  scenarioId: z.string().optional().nullable(),
-  type: z.lazy(() => EvalTypeSchema),
-  resultType: z.lazy(() => EvalResultTypeSchema),
-  contentType: z.lazy(() => EvalContentTypeSchema).optional(),
-  isCritical: z.boolean().optional(),
-  toolCallExpectedResult: z.string().optional(),
-  ownerId: z.string().optional().nullable(),
-  deleted: z.boolean().optional(),
-  evalSetId: z.string().optional().nullable()
+  evaluationGroups: z.lazy(() => EvaluationGroupUncheckedUpdateManyWithoutSavedSearchNestedInputSchema).optional()
 }).strict();
 
 export const ScenarioCreateManyAgentInputSchema: z.ZodType<Prisma.ScenarioCreateManyAgentInput> = z.object({
   id: z.string().optional(),
   createdAt: z.coerce.date().optional(),
-  ownerId: z.string().optional(),
   name: z.string(),
   instructions: z.string(),
   successCriteria: z.string().optional(),
   includeDateTime: z.boolean().optional(),
   timezone: z.string().optional().nullable(),
-  isNew: z.boolean().optional(),
   deleted: z.boolean().optional()
 }).strict();
 
@@ -10301,56 +10488,9 @@ export const CallCreateManyAgentInputSchema: z.ZodType<Prisma.CallCreateManyAgen
   evalSetToSuccess: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
 }).strict();
 
-export const EvalUpdateWithoutAgentInputSchema: z.ZodType<Prisma.EvalUpdateWithoutAgentInput> = z.object({
-  id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  description: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  type: z.union([ z.lazy(() => EvalTypeSchema),z.lazy(() => EnumEvalTypeFieldUpdateOperationsInputSchema) ]).optional(),
-  resultType: z.union([ z.lazy(() => EvalResultTypeSchema),z.lazy(() => EnumEvalResultTypeFieldUpdateOperationsInputSchema) ]).optional(),
-  contentType: z.union([ z.lazy(() => EvalContentTypeSchema),z.lazy(() => EnumEvalContentTypeFieldUpdateOperationsInputSchema) ]).optional(),
-  isCritical: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  toolCallExpectedResult: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  ownerId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  deleted: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  scenario: z.lazy(() => ScenarioUpdateOneWithoutEvalsNestedInputSchema).optional(),
-  evalResults: z.lazy(() => EvalResultUpdateManyWithoutEvalNestedInputSchema).optional(),
-  evalOverrides: z.lazy(() => EvalOverrideUpdateManyWithoutEvalNestedInputSchema).optional(),
-  evalSet: z.lazy(() => EvalSetUpdateOneWithoutEvalsNestedInputSchema).optional()
-}).strict();
-
-export const EvalUncheckedUpdateWithoutAgentInputSchema: z.ZodType<Prisma.EvalUncheckedUpdateWithoutAgentInput> = z.object({
-  id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  description: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  scenarioId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  type: z.union([ z.lazy(() => EvalTypeSchema),z.lazy(() => EnumEvalTypeFieldUpdateOperationsInputSchema) ]).optional(),
-  resultType: z.union([ z.lazy(() => EvalResultTypeSchema),z.lazy(() => EnumEvalResultTypeFieldUpdateOperationsInputSchema) ]).optional(),
-  contentType: z.union([ z.lazy(() => EvalContentTypeSchema),z.lazy(() => EnumEvalContentTypeFieldUpdateOperationsInputSchema) ]).optional(),
-  isCritical: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  toolCallExpectedResult: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  ownerId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  deleted: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  evalSetId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  evalResults: z.lazy(() => EvalResultUncheckedUpdateManyWithoutEvalNestedInputSchema).optional(),
-  evalOverrides: z.lazy(() => EvalOverrideUncheckedUpdateManyWithoutEvalNestedInputSchema).optional()
-}).strict();
-
-export const EvalUncheckedUpdateManyWithoutAgentInputSchema: z.ZodType<Prisma.EvalUncheckedUpdateManyWithoutAgentInput> = z.object({
-  id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  description: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  scenarioId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  type: z.union([ z.lazy(() => EvalTypeSchema),z.lazy(() => EnumEvalTypeFieldUpdateOperationsInputSchema) ]).optional(),
-  resultType: z.union([ z.lazy(() => EvalResultTypeSchema),z.lazy(() => EnumEvalResultTypeFieldUpdateOperationsInputSchema) ]).optional(),
-  contentType: z.union([ z.lazy(() => EvalContentTypeSchema),z.lazy(() => EnumEvalContentTypeFieldUpdateOperationsInputSchema) ]).optional(),
-  isCritical: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  toolCallExpectedResult: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  ownerId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  deleted: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  evalSetId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+export const GeneralEvaluationCreateManyAgentInputSchema: z.ZodType<Prisma.GeneralEvaluationCreateManyAgentInput> = z.object({
+  id: z.string().optional(),
+  evaluationId: z.string()
 }).strict();
 
 export const TestAgentUpdateWithoutAgentsInputSchema: z.ZodType<Prisma.TestAgentUpdateWithoutAgentsInput> = z.object({
@@ -10394,45 +10534,37 @@ export const TestAgentUncheckedUpdateManyWithoutAgentsInputSchema: z.ZodType<Pri
 export const ScenarioUpdateWithoutAgentInputSchema: z.ZodType<Prisma.ScenarioUpdateWithoutAgentInput> = z.object({
   id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  ownerId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   instructions: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   successCriteria: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   includeDateTime: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   timezone: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  isNew: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   deleted: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  generalEvalOverrides: z.lazy(() => EvalOverrideUpdateManyWithoutScenarioNestedInputSchema).optional(),
   calls: z.lazy(() => CallUpdateManyWithoutScenarioNestedInputSchema).optional(),
-  evals: z.lazy(() => EvalUpdateManyWithoutScenarioNestedInputSchema).optional()
+  evaluations: z.lazy(() => EvaluationUpdateManyWithoutScenarioNestedInputSchema).optional()
 }).strict();
 
 export const ScenarioUncheckedUpdateWithoutAgentInputSchema: z.ZodType<Prisma.ScenarioUncheckedUpdateWithoutAgentInput> = z.object({
   id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  ownerId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   instructions: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   successCriteria: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   includeDateTime: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   timezone: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  isNew: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   deleted: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  generalEvalOverrides: z.lazy(() => EvalOverrideUncheckedUpdateManyWithoutScenarioNestedInputSchema).optional(),
   calls: z.lazy(() => CallUncheckedUpdateManyWithoutScenarioNestedInputSchema).optional(),
-  evals: z.lazy(() => EvalUncheckedUpdateManyWithoutScenarioNestedInputSchema).optional()
+  evaluations: z.lazy(() => EvaluationUncheckedUpdateManyWithoutScenarioNestedInputSchema).optional()
 }).strict();
 
 export const ScenarioUncheckedUpdateManyWithoutAgentInputSchema: z.ZodType<Prisma.ScenarioUncheckedUpdateManyWithoutAgentInput> = z.object({
   id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  ownerId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   instructions: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   successCriteria: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   includeDateTime: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   timezone: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  isNew: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   deleted: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
 }).strict();
 
@@ -10491,7 +10623,7 @@ export const CallUpdateWithoutAgentInputSchema: z.ZodType<Prisma.CallUpdateWitho
   numInterruptions: z.union([ z.number().int(),z.lazy(() => NullableIntFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   duration: z.union([ z.number(),z.lazy(() => NullableFloatFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   evalSetToSuccess: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
-  evalResults: z.lazy(() => EvalResultUpdateManyWithoutCallNestedInputSchema).optional(),
+  evaluationResults: z.lazy(() => EvaluationResultUpdateManyWithoutCallNestedInputSchema).optional(),
   test: z.lazy(() => TestUpdateOneWithoutCallsNestedInputSchema).optional(),
   testAgent: z.lazy(() => TestAgentUpdateOneWithoutCallsNestedInputSchema).optional(),
   scenario: z.lazy(() => ScenarioUpdateOneWithoutCallsNestedInputSchema).optional(),
@@ -10530,7 +10662,7 @@ export const CallUncheckedUpdateWithoutAgentInputSchema: z.ZodType<Prisma.CallUn
   testAgentId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   scenarioId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   evalSetToSuccess: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
-  evalResults: z.lazy(() => EvalResultUncheckedUpdateManyWithoutCallNestedInputSchema).optional(),
+  evaluationResults: z.lazy(() => EvaluationResultUncheckedUpdateManyWithoutCallNestedInputSchema).optional(),
   messages: z.lazy(() => MessageUncheckedUpdateManyWithoutCallNestedInputSchema).optional(),
   latencyBlocks: z.lazy(() => LatencyBlockUncheckedUpdateManyWithoutCallNestedInputSchema).optional(),
   interruptions: z.lazy(() => InterruptionUncheckedUpdateManyWithoutCallNestedInputSchema).optional(),
@@ -10566,6 +10698,21 @@ export const CallUncheckedUpdateManyWithoutAgentInputSchema: z.ZodType<Prisma.Ca
   testAgentId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   scenarioId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   evalSetToSuccess: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
+}).strict();
+
+export const GeneralEvaluationUpdateWithoutAgentInputSchema: z.ZodType<Prisma.GeneralEvaluationUpdateWithoutAgentInput> = z.object({
+  id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  evaluation: z.lazy(() => EvaluationUpdateOneRequiredWithoutGeneralEvaluationsNestedInputSchema).optional()
+}).strict();
+
+export const GeneralEvaluationUncheckedUpdateWithoutAgentInputSchema: z.ZodType<Prisma.GeneralEvaluationUncheckedUpdateWithoutAgentInput> = z.object({
+  id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  evaluationId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+}).strict();
+
+export const GeneralEvaluationUncheckedUpdateManyWithoutAgentInputSchema: z.ZodType<Prisma.GeneralEvaluationUncheckedUpdateManyWithoutAgentInput> = z.object({
+  id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  evaluationId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
 }).strict();
 
 export const CallCreateManyTestInputSchema: z.ZodType<Prisma.CallCreateManyTestInput> = z.object({
@@ -10625,7 +10772,7 @@ export const CallUpdateWithoutTestInputSchema: z.ZodType<Prisma.CallUpdateWithou
   numInterruptions: z.union([ z.number().int(),z.lazy(() => NullableIntFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   duration: z.union([ z.number(),z.lazy(() => NullableFloatFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   evalSetToSuccess: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
-  evalResults: z.lazy(() => EvalResultUpdateManyWithoutCallNestedInputSchema).optional(),
+  evaluationResults: z.lazy(() => EvaluationResultUpdateManyWithoutCallNestedInputSchema).optional(),
   agent: z.lazy(() => AgentUpdateOneWithoutCallsNestedInputSchema).optional(),
   testAgent: z.lazy(() => TestAgentUpdateOneWithoutCallsNestedInputSchema).optional(),
   scenario: z.lazy(() => ScenarioUpdateOneWithoutCallsNestedInputSchema).optional(),
@@ -10664,7 +10811,7 @@ export const CallUncheckedUpdateWithoutTestInputSchema: z.ZodType<Prisma.CallUnc
   testAgentId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   scenarioId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   evalSetToSuccess: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
-  evalResults: z.lazy(() => EvalResultUncheckedUpdateManyWithoutCallNestedInputSchema).optional(),
+  evaluationResults: z.lazy(() => EvaluationResultUncheckedUpdateManyWithoutCallNestedInputSchema).optional(),
   messages: z.lazy(() => MessageUncheckedUpdateManyWithoutCallNestedInputSchema).optional(),
   latencyBlocks: z.lazy(() => LatencyBlockUncheckedUpdateManyWithoutCallNestedInputSchema).optional(),
   interruptions: z.lazy(() => InterruptionUncheckedUpdateManyWithoutCallNestedInputSchema).optional(),
@@ -10740,15 +10887,15 @@ export const AgentUpdateWithoutEnabledTestAgentsInputSchema: z.ZodType<Prisma.Ag
   ownerId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   phoneNumber: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  customerAgentId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   githubRepoUrl: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  customerAgentId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   systemPrompt: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   extraProperties: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
   enableSlackNotifications: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  enabledGeneralEvals: z.lazy(() => EvalUpdateManyWithoutAgentNestedInputSchema).optional(),
   scenarios: z.lazy(() => ScenarioUpdateManyWithoutAgentNestedInputSchema).optional(),
   tests: z.lazy(() => TestUpdateManyWithoutAgentNestedInputSchema).optional(),
-  calls: z.lazy(() => CallUpdateManyWithoutAgentNestedInputSchema).optional()
+  calls: z.lazy(() => CallUpdateManyWithoutAgentNestedInputSchema).optional(),
+  generalEvaluations: z.lazy(() => GeneralEvaluationUpdateManyWithoutAgentNestedInputSchema).optional()
 }).strict();
 
 export const AgentUncheckedUpdateWithoutEnabledTestAgentsInputSchema: z.ZodType<Prisma.AgentUncheckedUpdateWithoutEnabledTestAgentsInput> = z.object({
@@ -10758,15 +10905,15 @@ export const AgentUncheckedUpdateWithoutEnabledTestAgentsInputSchema: z.ZodType<
   ownerId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   phoneNumber: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  customerAgentId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   githubRepoUrl: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  customerAgentId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   systemPrompt: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   extraProperties: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
   enableSlackNotifications: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  enabledGeneralEvals: z.lazy(() => EvalUncheckedUpdateManyWithoutAgentNestedInputSchema).optional(),
   scenarios: z.lazy(() => ScenarioUncheckedUpdateManyWithoutAgentNestedInputSchema).optional(),
   tests: z.lazy(() => TestUncheckedUpdateManyWithoutAgentNestedInputSchema).optional(),
-  calls: z.lazy(() => CallUncheckedUpdateManyWithoutAgentNestedInputSchema).optional()
+  calls: z.lazy(() => CallUncheckedUpdateManyWithoutAgentNestedInputSchema).optional(),
+  generalEvaluations: z.lazy(() => GeneralEvaluationUncheckedUpdateManyWithoutAgentNestedInputSchema).optional()
 }).strict();
 
 export const AgentUncheckedUpdateManyWithoutEnabledTestAgentsInputSchema: z.ZodType<Prisma.AgentUncheckedUpdateManyWithoutEnabledTestAgentsInput> = z.object({
@@ -10776,8 +10923,8 @@ export const AgentUncheckedUpdateManyWithoutEnabledTestAgentsInputSchema: z.ZodT
   ownerId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   phoneNumber: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  customerAgentId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   githubRepoUrl: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  customerAgentId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   systemPrompt: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   extraProperties: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
   enableSlackNotifications: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
@@ -10809,7 +10956,7 @@ export const CallUpdateWithoutTestAgentInputSchema: z.ZodType<Prisma.CallUpdateW
   numInterruptions: z.union([ z.number().int(),z.lazy(() => NullableIntFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   duration: z.union([ z.number(),z.lazy(() => NullableFloatFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   evalSetToSuccess: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
-  evalResults: z.lazy(() => EvalResultUpdateManyWithoutCallNestedInputSchema).optional(),
+  evaluationResults: z.lazy(() => EvaluationResultUpdateManyWithoutCallNestedInputSchema).optional(),
   agent: z.lazy(() => AgentUpdateOneWithoutCallsNestedInputSchema).optional(),
   test: z.lazy(() => TestUpdateOneWithoutCallsNestedInputSchema).optional(),
   scenario: z.lazy(() => ScenarioUpdateOneWithoutCallsNestedInputSchema).optional(),
@@ -10848,7 +10995,7 @@ export const CallUncheckedUpdateWithoutTestAgentInputSchema: z.ZodType<Prisma.Ca
   testId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   scenarioId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   evalSetToSuccess: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
-  evalResults: z.lazy(() => EvalResultUncheckedUpdateManyWithoutCallNestedInputSchema).optional(),
+  evaluationResults: z.lazy(() => EvaluationResultUncheckedUpdateManyWithoutCallNestedInputSchema).optional(),
   messages: z.lazy(() => MessageUncheckedUpdateManyWithoutCallNestedInputSchema).optional(),
   latencyBlocks: z.lazy(() => LatencyBlockUncheckedUpdateManyWithoutCallNestedInputSchema).optional(),
   interruptions: z.lazy(() => InterruptionUncheckedUpdateManyWithoutCallNestedInputSchema).optional(),
@@ -10886,16 +11033,17 @@ export const CallUncheckedUpdateManyWithoutTestAgentInputSchema: z.ZodType<Prism
   evalSetToSuccess: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
 }).strict();
 
-export const EvalResultCreateManyCallInputSchema: z.ZodType<Prisma.EvalResultCreateManyCallInput> = z.object({
+export const EvaluationResultCreateManyCallInputSchema: z.ZodType<Prisma.EvaluationResultCreateManyCallInput> = z.object({
   id: z.string().optional(),
   createdAt: z.coerce.date().optional(),
-  evalId: z.string(),
+  evaluationId: z.string(),
   result: z.string(),
   success: z.boolean(),
   secondsFromStart: z.number().optional().nullable(),
   duration: z.number().optional().nullable(),
   type: z.lazy(() => EvalResultTypeSchema),
-  details: z.string()
+  details: z.string(),
+  evaluationTemplateId: z.string().optional().nullable()
 }).strict();
 
 export const MessageCreateManyCallInputSchema: z.ZodType<Prisma.MessageCreateManyCallInput> = z.object({
@@ -10932,7 +11080,7 @@ export const CallErrorCreateManyCallInputSchema: z.ZodType<Prisma.CallErrorCreat
   description: z.string()
 }).strict();
 
-export const EvalResultUpdateWithoutCallInputSchema: z.ZodType<Prisma.EvalResultUpdateWithoutCallInput> = z.object({
+export const EvaluationResultUpdateWithoutCallInputSchema: z.ZodType<Prisma.EvaluationResultUpdateWithoutCallInput> = z.object({
   id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   result: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
@@ -10941,31 +11089,34 @@ export const EvalResultUpdateWithoutCallInputSchema: z.ZodType<Prisma.EvalResult
   duration: z.union([ z.number(),z.lazy(() => NullableFloatFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   type: z.union([ z.lazy(() => EvalResultTypeSchema),z.lazy(() => EnumEvalResultTypeFieldUpdateOperationsInputSchema) ]).optional(),
   details: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  eval: z.lazy(() => EvalUpdateOneRequiredWithoutEvalResultsNestedInputSchema).optional()
+  evaluation: z.lazy(() => EvaluationUpdateOneRequiredWithoutEvaluationResultsNestedInputSchema).optional(),
+  evaluationTemplate: z.lazy(() => EvaluationTemplateUpdateOneWithoutEvaluationResultsNestedInputSchema).optional()
 }).strict();
 
-export const EvalResultUncheckedUpdateWithoutCallInputSchema: z.ZodType<Prisma.EvalResultUncheckedUpdateWithoutCallInput> = z.object({
+export const EvaluationResultUncheckedUpdateWithoutCallInputSchema: z.ZodType<Prisma.EvaluationResultUncheckedUpdateWithoutCallInput> = z.object({
   id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  evalId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  evaluationId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   result: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   success: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   secondsFromStart: z.union([ z.number(),z.lazy(() => NullableFloatFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   duration: z.union([ z.number(),z.lazy(() => NullableFloatFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   type: z.union([ z.lazy(() => EvalResultTypeSchema),z.lazy(() => EnumEvalResultTypeFieldUpdateOperationsInputSchema) ]).optional(),
   details: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  evaluationTemplateId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
 }).strict();
 
-export const EvalResultUncheckedUpdateManyWithoutCallInputSchema: z.ZodType<Prisma.EvalResultUncheckedUpdateManyWithoutCallInput> = z.object({
+export const EvaluationResultUncheckedUpdateManyWithoutCallInputSchema: z.ZodType<Prisma.EvaluationResultUncheckedUpdateManyWithoutCallInput> = z.object({
   id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  evalId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  evaluationId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   result: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   success: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   secondsFromStart: z.union([ z.number(),z.lazy(() => NullableFloatFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   duration: z.union([ z.number(),z.lazy(() => NullableFloatFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   type: z.union([ z.lazy(() => EvalResultTypeSchema),z.lazy(() => EnumEvalResultTypeFieldUpdateOperationsInputSchema) ]).optional(),
   details: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  evaluationTemplateId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
 }).strict();
 
 export const MessageUpdateWithoutCallInputSchema: z.ZodType<Prisma.MessageUpdateWithoutCallInput> = z.object({
@@ -11070,13 +11221,6 @@ export const CallErrorUncheckedUpdateManyWithoutCallInputSchema: z.ZodType<Prism
   description: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
 }).strict();
 
-export const EvalOverrideCreateManyScenarioInputSchema: z.ZodType<Prisma.EvalOverrideCreateManyScenarioInput> = z.object({
-  id: z.string().optional(),
-  createdAt: z.coerce.date().optional(),
-  evalId: z.string(),
-  enabled: z.boolean()
-}).strict();
-
 export const CallCreateManyScenarioInputSchema: z.ZodType<Prisma.CallCreateManyScenarioInput> = z.object({
   id: z.string().optional(),
   createdAt: z.coerce.date().optional(),
@@ -11108,41 +11252,14 @@ export const CallCreateManyScenarioInputSchema: z.ZodType<Prisma.CallCreateManyS
   evalSetToSuccess: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
 }).strict();
 
-export const EvalCreateManyScenarioInputSchema: z.ZodType<Prisma.EvalCreateManyScenarioInput> = z.object({
+export const EvaluationCreateManyScenarioInputSchema: z.ZodType<Prisma.EvaluationCreateManyScenarioInput> = z.object({
   id: z.string().optional(),
   createdAt: z.coerce.date().optional(),
-  name: z.string(),
-  description: z.string(),
-  type: z.lazy(() => EvalTypeSchema),
-  resultType: z.lazy(() => EvalResultTypeSchema),
-  contentType: z.lazy(() => EvalContentTypeSchema).optional(),
+  enabled: z.boolean().optional(),
   isCritical: z.boolean().optional(),
-  toolCallExpectedResult: z.string().optional(),
-  agentId: z.string().optional().nullable(),
-  ownerId: z.string().optional().nullable(),
-  deleted: z.boolean().optional(),
-  evalSetId: z.string().optional().nullable()
-}).strict();
-
-export const EvalOverrideUpdateWithoutScenarioInputSchema: z.ZodType<Prisma.EvalOverrideUpdateWithoutScenarioInput> = z.object({
-  id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  enabled: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  eval: z.lazy(() => EvalUpdateOneRequiredWithoutEvalOverridesNestedInputSchema).optional()
-}).strict();
-
-export const EvalOverrideUncheckedUpdateWithoutScenarioInputSchema: z.ZodType<Prisma.EvalOverrideUncheckedUpdateWithoutScenarioInput> = z.object({
-  id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  evalId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  enabled: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-}).strict();
-
-export const EvalOverrideUncheckedUpdateManyWithoutScenarioInputSchema: z.ZodType<Prisma.EvalOverrideUncheckedUpdateManyWithoutScenarioInput> = z.object({
-  id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  evalId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  enabled: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
+  params: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
+  evaluationTemplateId: z.string(),
+  evaluationGroupId: z.string().optional().nullable()
 }).strict();
 
 export const CallUpdateWithoutScenarioInputSchema: z.ZodType<Prisma.CallUpdateWithoutScenarioInput> = z.object({
@@ -11171,7 +11288,7 @@ export const CallUpdateWithoutScenarioInputSchema: z.ZodType<Prisma.CallUpdateWi
   numInterruptions: z.union([ z.number().int(),z.lazy(() => NullableIntFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   duration: z.union([ z.number(),z.lazy(() => NullableFloatFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   evalSetToSuccess: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
-  evalResults: z.lazy(() => EvalResultUpdateManyWithoutCallNestedInputSchema).optional(),
+  evaluationResults: z.lazy(() => EvaluationResultUpdateManyWithoutCallNestedInputSchema).optional(),
   agent: z.lazy(() => AgentUpdateOneWithoutCallsNestedInputSchema).optional(),
   test: z.lazy(() => TestUpdateOneWithoutCallsNestedInputSchema).optional(),
   testAgent: z.lazy(() => TestAgentUpdateOneWithoutCallsNestedInputSchema).optional(),
@@ -11210,7 +11327,7 @@ export const CallUncheckedUpdateWithoutScenarioInputSchema: z.ZodType<Prisma.Cal
   testId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   testAgentId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   evalSetToSuccess: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
-  evalResults: z.lazy(() => EvalResultUncheckedUpdateManyWithoutCallNestedInputSchema).optional(),
+  evaluationResults: z.lazy(() => EvaluationResultUncheckedUpdateManyWithoutCallNestedInputSchema).optional(),
   messages: z.lazy(() => MessageUncheckedUpdateManyWithoutCallNestedInputSchema).optional(),
   latencyBlocks: z.lazy(() => LatencyBlockUncheckedUpdateManyWithoutCallNestedInputSchema).optional(),
   interruptions: z.lazy(() => InterruptionUncheckedUpdateManyWithoutCallNestedInputSchema).optional(),
@@ -11248,62 +11365,45 @@ export const CallUncheckedUpdateManyWithoutScenarioInputSchema: z.ZodType<Prisma
   evalSetToSuccess: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
 }).strict();
 
-export const EvalUpdateWithoutScenarioInputSchema: z.ZodType<Prisma.EvalUpdateWithoutScenarioInput> = z.object({
+export const EvaluationUpdateWithoutScenarioInputSchema: z.ZodType<Prisma.EvaluationUpdateWithoutScenarioInput> = z.object({
   id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  description: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  type: z.union([ z.lazy(() => EvalTypeSchema),z.lazy(() => EnumEvalTypeFieldUpdateOperationsInputSchema) ]).optional(),
-  resultType: z.union([ z.lazy(() => EvalResultTypeSchema),z.lazy(() => EnumEvalResultTypeFieldUpdateOperationsInputSchema) ]).optional(),
-  contentType: z.union([ z.lazy(() => EvalContentTypeSchema),z.lazy(() => EnumEvalContentTypeFieldUpdateOperationsInputSchema) ]).optional(),
+  enabled: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   isCritical: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  toolCallExpectedResult: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  ownerId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  deleted: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  evalResults: z.lazy(() => EvalResultUpdateManyWithoutEvalNestedInputSchema).optional(),
-  agent: z.lazy(() => AgentUpdateOneWithoutEnabledGeneralEvalsNestedInputSchema).optional(),
-  evalOverrides: z.lazy(() => EvalOverrideUpdateManyWithoutEvalNestedInputSchema).optional(),
-  evalSet: z.lazy(() => EvalSetUpdateOneWithoutEvalsNestedInputSchema).optional()
+  params: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
+  evaluationTemplate: z.lazy(() => EvaluationTemplateUpdateOneRequiredWithoutEvaluationsNestedInputSchema).optional(),
+  evaluationGroup: z.lazy(() => EvaluationGroupUpdateOneWithoutEvaluationsNestedInputSchema).optional(),
+  evaluationResults: z.lazy(() => EvaluationResultUpdateManyWithoutEvaluationNestedInputSchema).optional(),
+  generalEvaluations: z.lazy(() => GeneralEvaluationUpdateManyWithoutEvaluationNestedInputSchema).optional()
 }).strict();
 
-export const EvalUncheckedUpdateWithoutScenarioInputSchema: z.ZodType<Prisma.EvalUncheckedUpdateWithoutScenarioInput> = z.object({
+export const EvaluationUncheckedUpdateWithoutScenarioInputSchema: z.ZodType<Prisma.EvaluationUncheckedUpdateWithoutScenarioInput> = z.object({
   id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  description: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  type: z.union([ z.lazy(() => EvalTypeSchema),z.lazy(() => EnumEvalTypeFieldUpdateOperationsInputSchema) ]).optional(),
-  resultType: z.union([ z.lazy(() => EvalResultTypeSchema),z.lazy(() => EnumEvalResultTypeFieldUpdateOperationsInputSchema) ]).optional(),
-  contentType: z.union([ z.lazy(() => EvalContentTypeSchema),z.lazy(() => EnumEvalContentTypeFieldUpdateOperationsInputSchema) ]).optional(),
+  enabled: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   isCritical: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  toolCallExpectedResult: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  agentId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  ownerId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  deleted: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  evalSetId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  evalResults: z.lazy(() => EvalResultUncheckedUpdateManyWithoutEvalNestedInputSchema).optional(),
-  evalOverrides: z.lazy(() => EvalOverrideUncheckedUpdateManyWithoutEvalNestedInputSchema).optional()
+  params: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
+  evaluationTemplateId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  evaluationGroupId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  evaluationResults: z.lazy(() => EvaluationResultUncheckedUpdateManyWithoutEvaluationNestedInputSchema).optional(),
+  generalEvaluations: z.lazy(() => GeneralEvaluationUncheckedUpdateManyWithoutEvaluationNestedInputSchema).optional()
 }).strict();
 
-export const EvalUncheckedUpdateManyWithoutScenarioInputSchema: z.ZodType<Prisma.EvalUncheckedUpdateManyWithoutScenarioInput> = z.object({
+export const EvaluationUncheckedUpdateManyWithoutScenarioInputSchema: z.ZodType<Prisma.EvaluationUncheckedUpdateManyWithoutScenarioInput> = z.object({
   id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  description: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  type: z.union([ z.lazy(() => EvalTypeSchema),z.lazy(() => EnumEvalTypeFieldUpdateOperationsInputSchema) ]).optional(),
-  resultType: z.union([ z.lazy(() => EvalResultTypeSchema),z.lazy(() => EnumEvalResultTypeFieldUpdateOperationsInputSchema) ]).optional(),
-  contentType: z.union([ z.lazy(() => EvalContentTypeSchema),z.lazy(() => EnumEvalContentTypeFieldUpdateOperationsInputSchema) ]).optional(),
+  enabled: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   isCritical: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  toolCallExpectedResult: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  agentId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  ownerId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  deleted: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  evalSetId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  params: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
+  evaluationTemplateId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  evaluationGroupId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
 }).strict();
 
-export const EvalResultCreateManyEvalInputSchema: z.ZodType<Prisma.EvalResultCreateManyEvalInput> = z.object({
+export const EvaluationResultCreateManyEvaluationTemplateInputSchema: z.ZodType<Prisma.EvaluationResultCreateManyEvaluationTemplateInput> = z.object({
   id: z.string().optional(),
   createdAt: z.coerce.date().optional(),
   callId: z.string().optional().nullable(),
+  evaluationId: z.string(),
   result: z.string(),
   success: z.boolean(),
   secondsFromStart: z.number().optional().nullable(),
@@ -11312,139 +11412,206 @@ export const EvalResultCreateManyEvalInputSchema: z.ZodType<Prisma.EvalResultCre
   details: z.string()
 }).strict();
 
-export const EvalOverrideCreateManyEvalInputSchema: z.ZodType<Prisma.EvalOverrideCreateManyEvalInput> = z.object({
+export const EvaluationCreateManyEvaluationTemplateInputSchema: z.ZodType<Prisma.EvaluationCreateManyEvaluationTemplateInput> = z.object({
   id: z.string().optional(),
   createdAt: z.coerce.date().optional(),
-  scenarioId: z.string(),
-  enabled: z.boolean()
-}).strict();
-
-export const EvalResultUpdateWithoutEvalInputSchema: z.ZodType<Prisma.EvalResultUpdateWithoutEvalInput> = z.object({
-  id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  result: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  success: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  secondsFromStart: z.union([ z.number(),z.lazy(() => NullableFloatFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  duration: z.union([ z.number(),z.lazy(() => NullableFloatFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  type: z.union([ z.lazy(() => EvalResultTypeSchema),z.lazy(() => EnumEvalResultTypeFieldUpdateOperationsInputSchema) ]).optional(),
-  details: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  call: z.lazy(() => CallUpdateOneWithoutEvalResultsNestedInputSchema).optional()
-}).strict();
-
-export const EvalResultUncheckedUpdateWithoutEvalInputSchema: z.ZodType<Prisma.EvalResultUncheckedUpdateWithoutEvalInput> = z.object({
-  id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  callId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  result: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  success: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  secondsFromStart: z.union([ z.number(),z.lazy(() => NullableFloatFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  duration: z.union([ z.number(),z.lazy(() => NullableFloatFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  type: z.union([ z.lazy(() => EvalResultTypeSchema),z.lazy(() => EnumEvalResultTypeFieldUpdateOperationsInputSchema) ]).optional(),
-  details: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-}).strict();
-
-export const EvalResultUncheckedUpdateManyWithoutEvalInputSchema: z.ZodType<Prisma.EvalResultUncheckedUpdateManyWithoutEvalInput> = z.object({
-  id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  callId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  result: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  success: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  secondsFromStart: z.union([ z.number(),z.lazy(() => NullableFloatFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  duration: z.union([ z.number(),z.lazy(() => NullableFloatFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  type: z.union([ z.lazy(() => EvalResultTypeSchema),z.lazy(() => EnumEvalResultTypeFieldUpdateOperationsInputSchema) ]).optional(),
-  details: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-}).strict();
-
-export const EvalOverrideUpdateWithoutEvalInputSchema: z.ZodType<Prisma.EvalOverrideUpdateWithoutEvalInput> = z.object({
-  id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  enabled: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  scenario: z.lazy(() => ScenarioUpdateOneRequiredWithoutGeneralEvalOverridesNestedInputSchema).optional()
-}).strict();
-
-export const EvalOverrideUncheckedUpdateWithoutEvalInputSchema: z.ZodType<Prisma.EvalOverrideUncheckedUpdateWithoutEvalInput> = z.object({
-  id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  scenarioId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  enabled: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-}).strict();
-
-export const EvalOverrideUncheckedUpdateManyWithoutEvalInputSchema: z.ZodType<Prisma.EvalOverrideUncheckedUpdateManyWithoutEvalInput> = z.object({
-  id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  scenarioId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  enabled: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-}).strict();
-
-export const EvalCreateManyEvalSetInputSchema: z.ZodType<Prisma.EvalCreateManyEvalSetInput> = z.object({
-  id: z.string().optional(),
-  createdAt: z.coerce.date().optional(),
-  name: z.string(),
-  description: z.string(),
-  scenarioId: z.string().optional().nullable(),
-  type: z.lazy(() => EvalTypeSchema),
-  resultType: z.lazy(() => EvalResultTypeSchema),
-  contentType: z.lazy(() => EvalContentTypeSchema).optional(),
+  enabled: z.boolean().optional(),
   isCritical: z.boolean().optional(),
-  toolCallExpectedResult: z.string().optional(),
-  agentId: z.string().optional().nullable(),
-  ownerId: z.string().optional().nullable(),
-  deleted: z.boolean().optional()
+  params: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
+  scenarioId: z.string().optional().nullable(),
+  evaluationGroupId: z.string().optional().nullable()
 }).strict();
 
-export const EvalUpdateWithoutEvalSetInputSchema: z.ZodType<Prisma.EvalUpdateWithoutEvalSetInput> = z.object({
+export const EvaluationResultUpdateWithoutEvaluationTemplateInputSchema: z.ZodType<Prisma.EvaluationResultUpdateWithoutEvaluationTemplateInput> = z.object({
   id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  description: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  type: z.union([ z.lazy(() => EvalTypeSchema),z.lazy(() => EnumEvalTypeFieldUpdateOperationsInputSchema) ]).optional(),
-  resultType: z.union([ z.lazy(() => EvalResultTypeSchema),z.lazy(() => EnumEvalResultTypeFieldUpdateOperationsInputSchema) ]).optional(),
-  contentType: z.union([ z.lazy(() => EvalContentTypeSchema),z.lazy(() => EnumEvalContentTypeFieldUpdateOperationsInputSchema) ]).optional(),
+  result: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  success: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
+  secondsFromStart: z.union([ z.number(),z.lazy(() => NullableFloatFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  duration: z.union([ z.number(),z.lazy(() => NullableFloatFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  type: z.union([ z.lazy(() => EvalResultTypeSchema),z.lazy(() => EnumEvalResultTypeFieldUpdateOperationsInputSchema) ]).optional(),
+  details: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  call: z.lazy(() => CallUpdateOneWithoutEvaluationResultsNestedInputSchema).optional(),
+  evaluation: z.lazy(() => EvaluationUpdateOneRequiredWithoutEvaluationResultsNestedInputSchema).optional()
+}).strict();
+
+export const EvaluationResultUncheckedUpdateWithoutEvaluationTemplateInputSchema: z.ZodType<Prisma.EvaluationResultUncheckedUpdateWithoutEvaluationTemplateInput> = z.object({
+  id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  callId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  evaluationId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  result: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  success: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
+  secondsFromStart: z.union([ z.number(),z.lazy(() => NullableFloatFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  duration: z.union([ z.number(),z.lazy(() => NullableFloatFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  type: z.union([ z.lazy(() => EvalResultTypeSchema),z.lazy(() => EnumEvalResultTypeFieldUpdateOperationsInputSchema) ]).optional(),
+  details: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+}).strict();
+
+export const EvaluationResultUncheckedUpdateManyWithoutEvaluationTemplateInputSchema: z.ZodType<Prisma.EvaluationResultUncheckedUpdateManyWithoutEvaluationTemplateInput> = z.object({
+  id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  callId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  evaluationId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  result: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  success: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
+  secondsFromStart: z.union([ z.number(),z.lazy(() => NullableFloatFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  duration: z.union([ z.number(),z.lazy(() => NullableFloatFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  type: z.union([ z.lazy(() => EvalResultTypeSchema),z.lazy(() => EnumEvalResultTypeFieldUpdateOperationsInputSchema) ]).optional(),
+  details: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+}).strict();
+
+export const EvaluationUpdateWithoutEvaluationTemplateInputSchema: z.ZodType<Prisma.EvaluationUpdateWithoutEvaluationTemplateInput> = z.object({
+  id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  enabled: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   isCritical: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  toolCallExpectedResult: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  ownerId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  deleted: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  scenario: z.lazy(() => ScenarioUpdateOneWithoutEvalsNestedInputSchema).optional(),
-  evalResults: z.lazy(() => EvalResultUpdateManyWithoutEvalNestedInputSchema).optional(),
-  agent: z.lazy(() => AgentUpdateOneWithoutEnabledGeneralEvalsNestedInputSchema).optional(),
-  evalOverrides: z.lazy(() => EvalOverrideUpdateManyWithoutEvalNestedInputSchema).optional()
+  params: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
+  scenario: z.lazy(() => ScenarioUpdateOneWithoutEvaluationsNestedInputSchema).optional(),
+  evaluationGroup: z.lazy(() => EvaluationGroupUpdateOneWithoutEvaluationsNestedInputSchema).optional(),
+  evaluationResults: z.lazy(() => EvaluationResultUpdateManyWithoutEvaluationNestedInputSchema).optional(),
+  generalEvaluations: z.lazy(() => GeneralEvaluationUpdateManyWithoutEvaluationNestedInputSchema).optional()
 }).strict();
 
-export const EvalUncheckedUpdateWithoutEvalSetInputSchema: z.ZodType<Prisma.EvalUncheckedUpdateWithoutEvalSetInput> = z.object({
+export const EvaluationUncheckedUpdateWithoutEvaluationTemplateInputSchema: z.ZodType<Prisma.EvaluationUncheckedUpdateWithoutEvaluationTemplateInput> = z.object({
   id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  description: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  enabled: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
+  isCritical: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
+  params: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
   scenarioId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  type: z.union([ z.lazy(() => EvalTypeSchema),z.lazy(() => EnumEvalTypeFieldUpdateOperationsInputSchema) ]).optional(),
-  resultType: z.union([ z.lazy(() => EvalResultTypeSchema),z.lazy(() => EnumEvalResultTypeFieldUpdateOperationsInputSchema) ]).optional(),
-  contentType: z.union([ z.lazy(() => EvalContentTypeSchema),z.lazy(() => EnumEvalContentTypeFieldUpdateOperationsInputSchema) ]).optional(),
-  isCritical: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  toolCallExpectedResult: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  agentId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  ownerId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  deleted: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  evalResults: z.lazy(() => EvalResultUncheckedUpdateManyWithoutEvalNestedInputSchema).optional(),
-  evalOverrides: z.lazy(() => EvalOverrideUncheckedUpdateManyWithoutEvalNestedInputSchema).optional()
+  evaluationGroupId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  evaluationResults: z.lazy(() => EvaluationResultUncheckedUpdateManyWithoutEvaluationNestedInputSchema).optional(),
+  generalEvaluations: z.lazy(() => GeneralEvaluationUncheckedUpdateManyWithoutEvaluationNestedInputSchema).optional()
 }).strict();
 
-export const EvalUncheckedUpdateManyWithoutEvalSetInputSchema: z.ZodType<Prisma.EvalUncheckedUpdateManyWithoutEvalSetInput> = z.object({
+export const EvaluationUncheckedUpdateManyWithoutEvaluationTemplateInputSchema: z.ZodType<Prisma.EvaluationUncheckedUpdateManyWithoutEvaluationTemplateInput> = z.object({
   id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  description: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  scenarioId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  type: z.union([ z.lazy(() => EvalTypeSchema),z.lazy(() => EnumEvalTypeFieldUpdateOperationsInputSchema) ]).optional(),
-  resultType: z.union([ z.lazy(() => EvalResultTypeSchema),z.lazy(() => EnumEvalResultTypeFieldUpdateOperationsInputSchema) ]).optional(),
-  contentType: z.union([ z.lazy(() => EvalContentTypeSchema),z.lazy(() => EnumEvalContentTypeFieldUpdateOperationsInputSchema) ]).optional(),
+  enabled: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   isCritical: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  toolCallExpectedResult: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  agentId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  ownerId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  deleted: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
+  params: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
+  scenarioId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  evaluationGroupId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
 }).strict();
 
-export const EvalSetCreateManySavedSearchInputSchema: z.ZodType<Prisma.EvalSetCreateManySavedSearchInput> = z.object({
+export const EvaluationResultCreateManyEvaluationInputSchema: z.ZodType<Prisma.EvaluationResultCreateManyEvaluationInput> = z.object({
+  id: z.string().optional(),
+  createdAt: z.coerce.date().optional(),
+  callId: z.string().optional().nullable(),
+  result: z.string(),
+  success: z.boolean(),
+  secondsFromStart: z.number().optional().nullable(),
+  duration: z.number().optional().nullable(),
+  type: z.lazy(() => EvalResultTypeSchema),
+  details: z.string(),
+  evaluationTemplateId: z.string().optional().nullable()
+}).strict();
+
+export const GeneralEvaluationCreateManyEvaluationInputSchema: z.ZodType<Prisma.GeneralEvaluationCreateManyEvaluationInput> = z.object({
+  id: z.string().optional(),
+  agentId: z.string()
+}).strict();
+
+export const EvaluationResultUpdateWithoutEvaluationInputSchema: z.ZodType<Prisma.EvaluationResultUpdateWithoutEvaluationInput> = z.object({
+  id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  result: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  success: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
+  secondsFromStart: z.union([ z.number(),z.lazy(() => NullableFloatFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  duration: z.union([ z.number(),z.lazy(() => NullableFloatFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  type: z.union([ z.lazy(() => EvalResultTypeSchema),z.lazy(() => EnumEvalResultTypeFieldUpdateOperationsInputSchema) ]).optional(),
+  details: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  call: z.lazy(() => CallUpdateOneWithoutEvaluationResultsNestedInputSchema).optional(),
+  evaluationTemplate: z.lazy(() => EvaluationTemplateUpdateOneWithoutEvaluationResultsNestedInputSchema).optional()
+}).strict();
+
+export const EvaluationResultUncheckedUpdateWithoutEvaluationInputSchema: z.ZodType<Prisma.EvaluationResultUncheckedUpdateWithoutEvaluationInput> = z.object({
+  id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  callId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  result: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  success: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
+  secondsFromStart: z.union([ z.number(),z.lazy(() => NullableFloatFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  duration: z.union([ z.number(),z.lazy(() => NullableFloatFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  type: z.union([ z.lazy(() => EvalResultTypeSchema),z.lazy(() => EnumEvalResultTypeFieldUpdateOperationsInputSchema) ]).optional(),
+  details: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  evaluationTemplateId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+}).strict();
+
+export const EvaluationResultUncheckedUpdateManyWithoutEvaluationInputSchema: z.ZodType<Prisma.EvaluationResultUncheckedUpdateManyWithoutEvaluationInput> = z.object({
+  id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  callId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  result: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  success: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
+  secondsFromStart: z.union([ z.number(),z.lazy(() => NullableFloatFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  duration: z.union([ z.number(),z.lazy(() => NullableFloatFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  type: z.union([ z.lazy(() => EvalResultTypeSchema),z.lazy(() => EnumEvalResultTypeFieldUpdateOperationsInputSchema) ]).optional(),
+  details: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  evaluationTemplateId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+}).strict();
+
+export const GeneralEvaluationUpdateWithoutEvaluationInputSchema: z.ZodType<Prisma.GeneralEvaluationUpdateWithoutEvaluationInput> = z.object({
+  id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  agent: z.lazy(() => AgentUpdateOneRequiredWithoutGeneralEvaluationsNestedInputSchema).optional()
+}).strict();
+
+export const GeneralEvaluationUncheckedUpdateWithoutEvaluationInputSchema: z.ZodType<Prisma.GeneralEvaluationUncheckedUpdateWithoutEvaluationInput> = z.object({
+  id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  agentId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+}).strict();
+
+export const GeneralEvaluationUncheckedUpdateManyWithoutEvaluationInputSchema: z.ZodType<Prisma.GeneralEvaluationUncheckedUpdateManyWithoutEvaluationInput> = z.object({
+  id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  agentId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+}).strict();
+
+export const EvaluationCreateManyEvaluationGroupInputSchema: z.ZodType<Prisma.EvaluationCreateManyEvaluationGroupInput> = z.object({
+  id: z.string().optional(),
+  createdAt: z.coerce.date().optional(),
+  enabled: z.boolean().optional(),
+  isCritical: z.boolean().optional(),
+  params: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
+  evaluationTemplateId: z.string(),
+  scenarioId: z.string().optional().nullable()
+}).strict();
+
+export const EvaluationUpdateWithoutEvaluationGroupInputSchema: z.ZodType<Prisma.EvaluationUpdateWithoutEvaluationGroupInput> = z.object({
+  id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  enabled: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
+  isCritical: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
+  params: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
+  evaluationTemplate: z.lazy(() => EvaluationTemplateUpdateOneRequiredWithoutEvaluationsNestedInputSchema).optional(),
+  scenario: z.lazy(() => ScenarioUpdateOneWithoutEvaluationsNestedInputSchema).optional(),
+  evaluationResults: z.lazy(() => EvaluationResultUpdateManyWithoutEvaluationNestedInputSchema).optional(),
+  generalEvaluations: z.lazy(() => GeneralEvaluationUpdateManyWithoutEvaluationNestedInputSchema).optional()
+}).strict();
+
+export const EvaluationUncheckedUpdateWithoutEvaluationGroupInputSchema: z.ZodType<Prisma.EvaluationUncheckedUpdateWithoutEvaluationGroupInput> = z.object({
+  id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  enabled: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
+  isCritical: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
+  params: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
+  evaluationTemplateId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  scenarioId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  evaluationResults: z.lazy(() => EvaluationResultUncheckedUpdateManyWithoutEvaluationNestedInputSchema).optional(),
+  generalEvaluations: z.lazy(() => GeneralEvaluationUncheckedUpdateManyWithoutEvaluationNestedInputSchema).optional()
+}).strict();
+
+export const EvaluationUncheckedUpdateManyWithoutEvaluationGroupInputSchema: z.ZodType<Prisma.EvaluationUncheckedUpdateManyWithoutEvaluationGroupInput> = z.object({
+  id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  enabled: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
+  isCritical: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
+  params: z.union([ z.lazy(() => JsonNullValueInputSchema),InputJsonValueSchema ]).optional(),
+  evaluationTemplateId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  scenarioId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+}).strict();
+
+export const EvaluationGroupCreateManySavedSearchInputSchema: z.ZodType<Prisma.EvaluationGroupCreateManySavedSearchInput> = z.object({
   id: z.string().optional(),
   createdAt: z.coerce.date().optional(),
   ownerId: z.string(),
@@ -11463,27 +11630,27 @@ export const AlertCreateManySavedSearchInputSchema: z.ZodType<Prisma.AlertCreate
   enabled: z.boolean().optional()
 }).strict();
 
-export const EvalSetUpdateWithoutSavedSearchInputSchema: z.ZodType<Prisma.EvalSetUpdateWithoutSavedSearchInput> = z.object({
+export const EvaluationGroupUpdateWithoutSavedSearchInputSchema: z.ZodType<Prisma.EvaluationGroupUpdateWithoutSavedSearchInput> = z.object({
   id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   ownerId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   condition: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   enabled: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  evals: z.lazy(() => EvalUpdateManyWithoutEvalSetNestedInputSchema).optional()
+  evaluations: z.lazy(() => EvaluationUpdateManyWithoutEvaluationGroupNestedInputSchema).optional()
 }).strict();
 
-export const EvalSetUncheckedUpdateWithoutSavedSearchInputSchema: z.ZodType<Prisma.EvalSetUncheckedUpdateWithoutSavedSearchInput> = z.object({
+export const EvaluationGroupUncheckedUpdateWithoutSavedSearchInputSchema: z.ZodType<Prisma.EvaluationGroupUncheckedUpdateWithoutSavedSearchInput> = z.object({
   id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   ownerId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   condition: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   enabled: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  evals: z.lazy(() => EvalUncheckedUpdateManyWithoutEvalSetNestedInputSchema).optional()
+  evaluations: z.lazy(() => EvaluationUncheckedUpdateManyWithoutEvaluationGroupNestedInputSchema).optional()
 }).strict();
 
-export const EvalSetUncheckedUpdateManyWithoutSavedSearchInputSchema: z.ZodType<Prisma.EvalSetUncheckedUpdateManyWithoutSavedSearchInput> = z.object({
+export const EvaluationGroupUncheckedUpdateManyWithoutSavedSearchInputSchema: z.ZodType<Prisma.EvaluationGroupUncheckedUpdateManyWithoutSavedSearchInput> = z.object({
   id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   ownerId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
@@ -12074,190 +12241,252 @@ export const ScenarioFindUniqueOrThrowArgsSchema: z.ZodType<Prisma.ScenarioFindU
   where: ScenarioWhereUniqueInputSchema,
 }).strict() ;
 
-export const EvalFindFirstArgsSchema: z.ZodType<Prisma.EvalFindFirstArgs> = z.object({
-  select: EvalSelectSchema.optional(),
-  include: EvalIncludeSchema.optional(),
-  where: EvalWhereInputSchema.optional(),
-  orderBy: z.union([ EvalOrderByWithRelationInputSchema.array(),EvalOrderByWithRelationInputSchema ]).optional(),
-  cursor: EvalWhereUniqueInputSchema.optional(),
+export const EvaluationTemplateFindFirstArgsSchema: z.ZodType<Prisma.EvaluationTemplateFindFirstArgs> = z.object({
+  select: EvaluationTemplateSelectSchema.optional(),
+  include: EvaluationTemplateIncludeSchema.optional(),
+  where: EvaluationTemplateWhereInputSchema.optional(),
+  orderBy: z.union([ EvaluationTemplateOrderByWithRelationInputSchema.array(),EvaluationTemplateOrderByWithRelationInputSchema ]).optional(),
+  cursor: EvaluationTemplateWhereUniqueInputSchema.optional(),
   take: z.number().optional(),
   skip: z.number().optional(),
-  distinct: z.union([ EvalScalarFieldEnumSchema,EvalScalarFieldEnumSchema.array() ]).optional(),
+  distinct: z.union([ EvaluationTemplateScalarFieldEnumSchema,EvaluationTemplateScalarFieldEnumSchema.array() ]).optional(),
 }).strict() ;
 
-export const EvalFindFirstOrThrowArgsSchema: z.ZodType<Prisma.EvalFindFirstOrThrowArgs> = z.object({
-  select: EvalSelectSchema.optional(),
-  include: EvalIncludeSchema.optional(),
-  where: EvalWhereInputSchema.optional(),
-  orderBy: z.union([ EvalOrderByWithRelationInputSchema.array(),EvalOrderByWithRelationInputSchema ]).optional(),
-  cursor: EvalWhereUniqueInputSchema.optional(),
+export const EvaluationTemplateFindFirstOrThrowArgsSchema: z.ZodType<Prisma.EvaluationTemplateFindFirstOrThrowArgs> = z.object({
+  select: EvaluationTemplateSelectSchema.optional(),
+  include: EvaluationTemplateIncludeSchema.optional(),
+  where: EvaluationTemplateWhereInputSchema.optional(),
+  orderBy: z.union([ EvaluationTemplateOrderByWithRelationInputSchema.array(),EvaluationTemplateOrderByWithRelationInputSchema ]).optional(),
+  cursor: EvaluationTemplateWhereUniqueInputSchema.optional(),
   take: z.number().optional(),
   skip: z.number().optional(),
-  distinct: z.union([ EvalScalarFieldEnumSchema,EvalScalarFieldEnumSchema.array() ]).optional(),
+  distinct: z.union([ EvaluationTemplateScalarFieldEnumSchema,EvaluationTemplateScalarFieldEnumSchema.array() ]).optional(),
 }).strict() ;
 
-export const EvalFindManyArgsSchema: z.ZodType<Prisma.EvalFindManyArgs> = z.object({
-  select: EvalSelectSchema.optional(),
-  include: EvalIncludeSchema.optional(),
-  where: EvalWhereInputSchema.optional(),
-  orderBy: z.union([ EvalOrderByWithRelationInputSchema.array(),EvalOrderByWithRelationInputSchema ]).optional(),
-  cursor: EvalWhereUniqueInputSchema.optional(),
+export const EvaluationTemplateFindManyArgsSchema: z.ZodType<Prisma.EvaluationTemplateFindManyArgs> = z.object({
+  select: EvaluationTemplateSelectSchema.optional(),
+  include: EvaluationTemplateIncludeSchema.optional(),
+  where: EvaluationTemplateWhereInputSchema.optional(),
+  orderBy: z.union([ EvaluationTemplateOrderByWithRelationInputSchema.array(),EvaluationTemplateOrderByWithRelationInputSchema ]).optional(),
+  cursor: EvaluationTemplateWhereUniqueInputSchema.optional(),
   take: z.number().optional(),
   skip: z.number().optional(),
-  distinct: z.union([ EvalScalarFieldEnumSchema,EvalScalarFieldEnumSchema.array() ]).optional(),
+  distinct: z.union([ EvaluationTemplateScalarFieldEnumSchema,EvaluationTemplateScalarFieldEnumSchema.array() ]).optional(),
 }).strict() ;
 
-export const EvalAggregateArgsSchema: z.ZodType<Prisma.EvalAggregateArgs> = z.object({
-  where: EvalWhereInputSchema.optional(),
-  orderBy: z.union([ EvalOrderByWithRelationInputSchema.array(),EvalOrderByWithRelationInputSchema ]).optional(),
-  cursor: EvalWhereUniqueInputSchema.optional(),
-  take: z.number().optional(),
-  skip: z.number().optional(),
-}).strict() ;
-
-export const EvalGroupByArgsSchema: z.ZodType<Prisma.EvalGroupByArgs> = z.object({
-  where: EvalWhereInputSchema.optional(),
-  orderBy: z.union([ EvalOrderByWithAggregationInputSchema.array(),EvalOrderByWithAggregationInputSchema ]).optional(),
-  by: EvalScalarFieldEnumSchema.array(),
-  having: EvalScalarWhereWithAggregatesInputSchema.optional(),
+export const EvaluationTemplateAggregateArgsSchema: z.ZodType<Prisma.EvaluationTemplateAggregateArgs> = z.object({
+  where: EvaluationTemplateWhereInputSchema.optional(),
+  orderBy: z.union([ EvaluationTemplateOrderByWithRelationInputSchema.array(),EvaluationTemplateOrderByWithRelationInputSchema ]).optional(),
+  cursor: EvaluationTemplateWhereUniqueInputSchema.optional(),
   take: z.number().optional(),
   skip: z.number().optional(),
 }).strict() ;
 
-export const EvalFindUniqueArgsSchema: z.ZodType<Prisma.EvalFindUniqueArgs> = z.object({
-  select: EvalSelectSchema.optional(),
-  include: EvalIncludeSchema.optional(),
-  where: EvalWhereUniqueInputSchema,
-}).strict() ;
-
-export const EvalFindUniqueOrThrowArgsSchema: z.ZodType<Prisma.EvalFindUniqueOrThrowArgs> = z.object({
-  select: EvalSelectSchema.optional(),
-  include: EvalIncludeSchema.optional(),
-  where: EvalWhereUniqueInputSchema,
-}).strict() ;
-
-export const EvalResultFindFirstArgsSchema: z.ZodType<Prisma.EvalResultFindFirstArgs> = z.object({
-  select: EvalResultSelectSchema.optional(),
-  include: EvalResultIncludeSchema.optional(),
-  where: EvalResultWhereInputSchema.optional(),
-  orderBy: z.union([ EvalResultOrderByWithRelationInputSchema.array(),EvalResultOrderByWithRelationInputSchema ]).optional(),
-  cursor: EvalResultWhereUniqueInputSchema.optional(),
-  take: z.number().optional(),
-  skip: z.number().optional(),
-  distinct: z.union([ EvalResultScalarFieldEnumSchema,EvalResultScalarFieldEnumSchema.array() ]).optional(),
-}).strict() ;
-
-export const EvalResultFindFirstOrThrowArgsSchema: z.ZodType<Prisma.EvalResultFindFirstOrThrowArgs> = z.object({
-  select: EvalResultSelectSchema.optional(),
-  include: EvalResultIncludeSchema.optional(),
-  where: EvalResultWhereInputSchema.optional(),
-  orderBy: z.union([ EvalResultOrderByWithRelationInputSchema.array(),EvalResultOrderByWithRelationInputSchema ]).optional(),
-  cursor: EvalResultWhereUniqueInputSchema.optional(),
-  take: z.number().optional(),
-  skip: z.number().optional(),
-  distinct: z.union([ EvalResultScalarFieldEnumSchema,EvalResultScalarFieldEnumSchema.array() ]).optional(),
-}).strict() ;
-
-export const EvalResultFindManyArgsSchema: z.ZodType<Prisma.EvalResultFindManyArgs> = z.object({
-  select: EvalResultSelectSchema.optional(),
-  include: EvalResultIncludeSchema.optional(),
-  where: EvalResultWhereInputSchema.optional(),
-  orderBy: z.union([ EvalResultOrderByWithRelationInputSchema.array(),EvalResultOrderByWithRelationInputSchema ]).optional(),
-  cursor: EvalResultWhereUniqueInputSchema.optional(),
-  take: z.number().optional(),
-  skip: z.number().optional(),
-  distinct: z.union([ EvalResultScalarFieldEnumSchema,EvalResultScalarFieldEnumSchema.array() ]).optional(),
-}).strict() ;
-
-export const EvalResultAggregateArgsSchema: z.ZodType<Prisma.EvalResultAggregateArgs> = z.object({
-  where: EvalResultWhereInputSchema.optional(),
-  orderBy: z.union([ EvalResultOrderByWithRelationInputSchema.array(),EvalResultOrderByWithRelationInputSchema ]).optional(),
-  cursor: EvalResultWhereUniqueInputSchema.optional(),
+export const EvaluationTemplateGroupByArgsSchema: z.ZodType<Prisma.EvaluationTemplateGroupByArgs> = z.object({
+  where: EvaluationTemplateWhereInputSchema.optional(),
+  orderBy: z.union([ EvaluationTemplateOrderByWithAggregationInputSchema.array(),EvaluationTemplateOrderByWithAggregationInputSchema ]).optional(),
+  by: EvaluationTemplateScalarFieldEnumSchema.array(),
+  having: EvaluationTemplateScalarWhereWithAggregatesInputSchema.optional(),
   take: z.number().optional(),
   skip: z.number().optional(),
 }).strict() ;
 
-export const EvalResultGroupByArgsSchema: z.ZodType<Prisma.EvalResultGroupByArgs> = z.object({
-  where: EvalResultWhereInputSchema.optional(),
-  orderBy: z.union([ EvalResultOrderByWithAggregationInputSchema.array(),EvalResultOrderByWithAggregationInputSchema ]).optional(),
-  by: EvalResultScalarFieldEnumSchema.array(),
-  having: EvalResultScalarWhereWithAggregatesInputSchema.optional(),
+export const EvaluationTemplateFindUniqueArgsSchema: z.ZodType<Prisma.EvaluationTemplateFindUniqueArgs> = z.object({
+  select: EvaluationTemplateSelectSchema.optional(),
+  include: EvaluationTemplateIncludeSchema.optional(),
+  where: EvaluationTemplateWhereUniqueInputSchema,
+}).strict() ;
+
+export const EvaluationTemplateFindUniqueOrThrowArgsSchema: z.ZodType<Prisma.EvaluationTemplateFindUniqueOrThrowArgs> = z.object({
+  select: EvaluationTemplateSelectSchema.optional(),
+  include: EvaluationTemplateIncludeSchema.optional(),
+  where: EvaluationTemplateWhereUniqueInputSchema,
+}).strict() ;
+
+export const GeneralEvaluationFindFirstArgsSchema: z.ZodType<Prisma.GeneralEvaluationFindFirstArgs> = z.object({
+  select: GeneralEvaluationSelectSchema.optional(),
+  include: GeneralEvaluationIncludeSchema.optional(),
+  where: GeneralEvaluationWhereInputSchema.optional(),
+  orderBy: z.union([ GeneralEvaluationOrderByWithRelationInputSchema.array(),GeneralEvaluationOrderByWithRelationInputSchema ]).optional(),
+  cursor: GeneralEvaluationWhereUniqueInputSchema.optional(),
+  take: z.number().optional(),
+  skip: z.number().optional(),
+  distinct: z.union([ GeneralEvaluationScalarFieldEnumSchema,GeneralEvaluationScalarFieldEnumSchema.array() ]).optional(),
+}).strict() ;
+
+export const GeneralEvaluationFindFirstOrThrowArgsSchema: z.ZodType<Prisma.GeneralEvaluationFindFirstOrThrowArgs> = z.object({
+  select: GeneralEvaluationSelectSchema.optional(),
+  include: GeneralEvaluationIncludeSchema.optional(),
+  where: GeneralEvaluationWhereInputSchema.optional(),
+  orderBy: z.union([ GeneralEvaluationOrderByWithRelationInputSchema.array(),GeneralEvaluationOrderByWithRelationInputSchema ]).optional(),
+  cursor: GeneralEvaluationWhereUniqueInputSchema.optional(),
+  take: z.number().optional(),
+  skip: z.number().optional(),
+  distinct: z.union([ GeneralEvaluationScalarFieldEnumSchema,GeneralEvaluationScalarFieldEnumSchema.array() ]).optional(),
+}).strict() ;
+
+export const GeneralEvaluationFindManyArgsSchema: z.ZodType<Prisma.GeneralEvaluationFindManyArgs> = z.object({
+  select: GeneralEvaluationSelectSchema.optional(),
+  include: GeneralEvaluationIncludeSchema.optional(),
+  where: GeneralEvaluationWhereInputSchema.optional(),
+  orderBy: z.union([ GeneralEvaluationOrderByWithRelationInputSchema.array(),GeneralEvaluationOrderByWithRelationInputSchema ]).optional(),
+  cursor: GeneralEvaluationWhereUniqueInputSchema.optional(),
+  take: z.number().optional(),
+  skip: z.number().optional(),
+  distinct: z.union([ GeneralEvaluationScalarFieldEnumSchema,GeneralEvaluationScalarFieldEnumSchema.array() ]).optional(),
+}).strict() ;
+
+export const GeneralEvaluationAggregateArgsSchema: z.ZodType<Prisma.GeneralEvaluationAggregateArgs> = z.object({
+  where: GeneralEvaluationWhereInputSchema.optional(),
+  orderBy: z.union([ GeneralEvaluationOrderByWithRelationInputSchema.array(),GeneralEvaluationOrderByWithRelationInputSchema ]).optional(),
+  cursor: GeneralEvaluationWhereUniqueInputSchema.optional(),
   take: z.number().optional(),
   skip: z.number().optional(),
 }).strict() ;
 
-export const EvalResultFindUniqueArgsSchema: z.ZodType<Prisma.EvalResultFindUniqueArgs> = z.object({
-  select: EvalResultSelectSchema.optional(),
-  include: EvalResultIncludeSchema.optional(),
-  where: EvalResultWhereUniqueInputSchema,
-}).strict() ;
-
-export const EvalResultFindUniqueOrThrowArgsSchema: z.ZodType<Prisma.EvalResultFindUniqueOrThrowArgs> = z.object({
-  select: EvalResultSelectSchema.optional(),
-  include: EvalResultIncludeSchema.optional(),
-  where: EvalResultWhereUniqueInputSchema,
-}).strict() ;
-
-export const EvalOverrideFindFirstArgsSchema: z.ZodType<Prisma.EvalOverrideFindFirstArgs> = z.object({
-  select: EvalOverrideSelectSchema.optional(),
-  include: EvalOverrideIncludeSchema.optional(),
-  where: EvalOverrideWhereInputSchema.optional(),
-  orderBy: z.union([ EvalOverrideOrderByWithRelationInputSchema.array(),EvalOverrideOrderByWithRelationInputSchema ]).optional(),
-  cursor: EvalOverrideWhereUniqueInputSchema.optional(),
-  take: z.number().optional(),
-  skip: z.number().optional(),
-  distinct: z.union([ EvalOverrideScalarFieldEnumSchema,EvalOverrideScalarFieldEnumSchema.array() ]).optional(),
-}).strict() ;
-
-export const EvalOverrideFindFirstOrThrowArgsSchema: z.ZodType<Prisma.EvalOverrideFindFirstOrThrowArgs> = z.object({
-  select: EvalOverrideSelectSchema.optional(),
-  include: EvalOverrideIncludeSchema.optional(),
-  where: EvalOverrideWhereInputSchema.optional(),
-  orderBy: z.union([ EvalOverrideOrderByWithRelationInputSchema.array(),EvalOverrideOrderByWithRelationInputSchema ]).optional(),
-  cursor: EvalOverrideWhereUniqueInputSchema.optional(),
-  take: z.number().optional(),
-  skip: z.number().optional(),
-  distinct: z.union([ EvalOverrideScalarFieldEnumSchema,EvalOverrideScalarFieldEnumSchema.array() ]).optional(),
-}).strict() ;
-
-export const EvalOverrideFindManyArgsSchema: z.ZodType<Prisma.EvalOverrideFindManyArgs> = z.object({
-  select: EvalOverrideSelectSchema.optional(),
-  include: EvalOverrideIncludeSchema.optional(),
-  where: EvalOverrideWhereInputSchema.optional(),
-  orderBy: z.union([ EvalOverrideOrderByWithRelationInputSchema.array(),EvalOverrideOrderByWithRelationInputSchema ]).optional(),
-  cursor: EvalOverrideWhereUniqueInputSchema.optional(),
-  take: z.number().optional(),
-  skip: z.number().optional(),
-  distinct: z.union([ EvalOverrideScalarFieldEnumSchema,EvalOverrideScalarFieldEnumSchema.array() ]).optional(),
-}).strict() ;
-
-export const EvalOverrideAggregateArgsSchema: z.ZodType<Prisma.EvalOverrideAggregateArgs> = z.object({
-  where: EvalOverrideWhereInputSchema.optional(),
-  orderBy: z.union([ EvalOverrideOrderByWithRelationInputSchema.array(),EvalOverrideOrderByWithRelationInputSchema ]).optional(),
-  cursor: EvalOverrideWhereUniqueInputSchema.optional(),
+export const GeneralEvaluationGroupByArgsSchema: z.ZodType<Prisma.GeneralEvaluationGroupByArgs> = z.object({
+  where: GeneralEvaluationWhereInputSchema.optional(),
+  orderBy: z.union([ GeneralEvaluationOrderByWithAggregationInputSchema.array(),GeneralEvaluationOrderByWithAggregationInputSchema ]).optional(),
+  by: GeneralEvaluationScalarFieldEnumSchema.array(),
+  having: GeneralEvaluationScalarWhereWithAggregatesInputSchema.optional(),
   take: z.number().optional(),
   skip: z.number().optional(),
 }).strict() ;
 
-export const EvalOverrideGroupByArgsSchema: z.ZodType<Prisma.EvalOverrideGroupByArgs> = z.object({
-  where: EvalOverrideWhereInputSchema.optional(),
-  orderBy: z.union([ EvalOverrideOrderByWithAggregationInputSchema.array(),EvalOverrideOrderByWithAggregationInputSchema ]).optional(),
-  by: EvalOverrideScalarFieldEnumSchema.array(),
-  having: EvalOverrideScalarWhereWithAggregatesInputSchema.optional(),
+export const GeneralEvaluationFindUniqueArgsSchema: z.ZodType<Prisma.GeneralEvaluationFindUniqueArgs> = z.object({
+  select: GeneralEvaluationSelectSchema.optional(),
+  include: GeneralEvaluationIncludeSchema.optional(),
+  where: GeneralEvaluationWhereUniqueInputSchema,
+}).strict() ;
+
+export const GeneralEvaluationFindUniqueOrThrowArgsSchema: z.ZodType<Prisma.GeneralEvaluationFindUniqueOrThrowArgs> = z.object({
+  select: GeneralEvaluationSelectSchema.optional(),
+  include: GeneralEvaluationIncludeSchema.optional(),
+  where: GeneralEvaluationWhereUniqueInputSchema,
+}).strict() ;
+
+export const EvaluationFindFirstArgsSchema: z.ZodType<Prisma.EvaluationFindFirstArgs> = z.object({
+  select: EvaluationSelectSchema.optional(),
+  include: EvaluationIncludeSchema.optional(),
+  where: EvaluationWhereInputSchema.optional(),
+  orderBy: z.union([ EvaluationOrderByWithRelationInputSchema.array(),EvaluationOrderByWithRelationInputSchema ]).optional(),
+  cursor: EvaluationWhereUniqueInputSchema.optional(),
+  take: z.number().optional(),
+  skip: z.number().optional(),
+  distinct: z.union([ EvaluationScalarFieldEnumSchema,EvaluationScalarFieldEnumSchema.array() ]).optional(),
+}).strict() ;
+
+export const EvaluationFindFirstOrThrowArgsSchema: z.ZodType<Prisma.EvaluationFindFirstOrThrowArgs> = z.object({
+  select: EvaluationSelectSchema.optional(),
+  include: EvaluationIncludeSchema.optional(),
+  where: EvaluationWhereInputSchema.optional(),
+  orderBy: z.union([ EvaluationOrderByWithRelationInputSchema.array(),EvaluationOrderByWithRelationInputSchema ]).optional(),
+  cursor: EvaluationWhereUniqueInputSchema.optional(),
+  take: z.number().optional(),
+  skip: z.number().optional(),
+  distinct: z.union([ EvaluationScalarFieldEnumSchema,EvaluationScalarFieldEnumSchema.array() ]).optional(),
+}).strict() ;
+
+export const EvaluationFindManyArgsSchema: z.ZodType<Prisma.EvaluationFindManyArgs> = z.object({
+  select: EvaluationSelectSchema.optional(),
+  include: EvaluationIncludeSchema.optional(),
+  where: EvaluationWhereInputSchema.optional(),
+  orderBy: z.union([ EvaluationOrderByWithRelationInputSchema.array(),EvaluationOrderByWithRelationInputSchema ]).optional(),
+  cursor: EvaluationWhereUniqueInputSchema.optional(),
+  take: z.number().optional(),
+  skip: z.number().optional(),
+  distinct: z.union([ EvaluationScalarFieldEnumSchema,EvaluationScalarFieldEnumSchema.array() ]).optional(),
+}).strict() ;
+
+export const EvaluationAggregateArgsSchema: z.ZodType<Prisma.EvaluationAggregateArgs> = z.object({
+  where: EvaluationWhereInputSchema.optional(),
+  orderBy: z.union([ EvaluationOrderByWithRelationInputSchema.array(),EvaluationOrderByWithRelationInputSchema ]).optional(),
+  cursor: EvaluationWhereUniqueInputSchema.optional(),
   take: z.number().optional(),
   skip: z.number().optional(),
 }).strict() ;
 
-export const EvalOverrideFindUniqueArgsSchema: z.ZodType<Prisma.EvalOverrideFindUniqueArgs> = z.object({
-  select: EvalOverrideSelectSchema.optional(),
-  include: EvalOverrideIncludeSchema.optional(),
-  where: EvalOverrideWhereUniqueInputSchema,
+export const EvaluationGroupByArgsSchema: z.ZodType<Prisma.EvaluationGroupByArgs> = z.object({
+  where: EvaluationWhereInputSchema.optional(),
+  orderBy: z.union([ EvaluationOrderByWithAggregationInputSchema.array(),EvaluationOrderByWithAggregationInputSchema ]).optional(),
+  by: EvaluationScalarFieldEnumSchema.array(),
+  having: EvaluationScalarWhereWithAggregatesInputSchema.optional(),
+  take: z.number().optional(),
+  skip: z.number().optional(),
 }).strict() ;
 
-export const EvalOverrideFindUniqueOrThrowArgsSchema: z.ZodType<Prisma.EvalOverrideFindUniqueOrThrowArgs> = z.object({
-  select: EvalOverrideSelectSchema.optional(),
-  include: EvalOverrideIncludeSchema.optional(),
-  where: EvalOverrideWhereUniqueInputSchema,
+export const EvaluationFindUniqueArgsSchema: z.ZodType<Prisma.EvaluationFindUniqueArgs> = z.object({
+  select: EvaluationSelectSchema.optional(),
+  include: EvaluationIncludeSchema.optional(),
+  where: EvaluationWhereUniqueInputSchema,
+}).strict() ;
+
+export const EvaluationFindUniqueOrThrowArgsSchema: z.ZodType<Prisma.EvaluationFindUniqueOrThrowArgs> = z.object({
+  select: EvaluationSelectSchema.optional(),
+  include: EvaluationIncludeSchema.optional(),
+  where: EvaluationWhereUniqueInputSchema,
+}).strict() ;
+
+export const EvaluationResultFindFirstArgsSchema: z.ZodType<Prisma.EvaluationResultFindFirstArgs> = z.object({
+  select: EvaluationResultSelectSchema.optional(),
+  include: EvaluationResultIncludeSchema.optional(),
+  where: EvaluationResultWhereInputSchema.optional(),
+  orderBy: z.union([ EvaluationResultOrderByWithRelationInputSchema.array(),EvaluationResultOrderByWithRelationInputSchema ]).optional(),
+  cursor: EvaluationResultWhereUniqueInputSchema.optional(),
+  take: z.number().optional(),
+  skip: z.number().optional(),
+  distinct: z.union([ EvaluationResultScalarFieldEnumSchema,EvaluationResultScalarFieldEnumSchema.array() ]).optional(),
+}).strict() ;
+
+export const EvaluationResultFindFirstOrThrowArgsSchema: z.ZodType<Prisma.EvaluationResultFindFirstOrThrowArgs> = z.object({
+  select: EvaluationResultSelectSchema.optional(),
+  include: EvaluationResultIncludeSchema.optional(),
+  where: EvaluationResultWhereInputSchema.optional(),
+  orderBy: z.union([ EvaluationResultOrderByWithRelationInputSchema.array(),EvaluationResultOrderByWithRelationInputSchema ]).optional(),
+  cursor: EvaluationResultWhereUniqueInputSchema.optional(),
+  take: z.number().optional(),
+  skip: z.number().optional(),
+  distinct: z.union([ EvaluationResultScalarFieldEnumSchema,EvaluationResultScalarFieldEnumSchema.array() ]).optional(),
+}).strict() ;
+
+export const EvaluationResultFindManyArgsSchema: z.ZodType<Prisma.EvaluationResultFindManyArgs> = z.object({
+  select: EvaluationResultSelectSchema.optional(),
+  include: EvaluationResultIncludeSchema.optional(),
+  where: EvaluationResultWhereInputSchema.optional(),
+  orderBy: z.union([ EvaluationResultOrderByWithRelationInputSchema.array(),EvaluationResultOrderByWithRelationInputSchema ]).optional(),
+  cursor: EvaluationResultWhereUniqueInputSchema.optional(),
+  take: z.number().optional(),
+  skip: z.number().optional(),
+  distinct: z.union([ EvaluationResultScalarFieldEnumSchema,EvaluationResultScalarFieldEnumSchema.array() ]).optional(),
+}).strict() ;
+
+export const EvaluationResultAggregateArgsSchema: z.ZodType<Prisma.EvaluationResultAggregateArgs> = z.object({
+  where: EvaluationResultWhereInputSchema.optional(),
+  orderBy: z.union([ EvaluationResultOrderByWithRelationInputSchema.array(),EvaluationResultOrderByWithRelationInputSchema ]).optional(),
+  cursor: EvaluationResultWhereUniqueInputSchema.optional(),
+  take: z.number().optional(),
+  skip: z.number().optional(),
+}).strict() ;
+
+export const EvaluationResultGroupByArgsSchema: z.ZodType<Prisma.EvaluationResultGroupByArgs> = z.object({
+  where: EvaluationResultWhereInputSchema.optional(),
+  orderBy: z.union([ EvaluationResultOrderByWithAggregationInputSchema.array(),EvaluationResultOrderByWithAggregationInputSchema ]).optional(),
+  by: EvaluationResultScalarFieldEnumSchema.array(),
+  having: EvaluationResultScalarWhereWithAggregatesInputSchema.optional(),
+  take: z.number().optional(),
+  skip: z.number().optional(),
+}).strict() ;
+
+export const EvaluationResultFindUniqueArgsSchema: z.ZodType<Prisma.EvaluationResultFindUniqueArgs> = z.object({
+  select: EvaluationResultSelectSchema.optional(),
+  include: EvaluationResultIncludeSchema.optional(),
+  where: EvaluationResultWhereUniqueInputSchema,
+}).strict() ;
+
+export const EvaluationResultFindUniqueOrThrowArgsSchema: z.ZodType<Prisma.EvaluationResultFindUniqueOrThrowArgs> = z.object({
+  select: EvaluationResultSelectSchema.optional(),
+  include: EvaluationResultIncludeSchema.optional(),
+  where: EvaluationResultWhereUniqueInputSchema,
 }).strict() ;
 
 export const LatencyBlockFindFirstArgsSchema: z.ZodType<Prisma.LatencyBlockFindFirstArgs> = z.object({
@@ -12384,66 +12613,66 @@ export const InterruptionFindUniqueOrThrowArgsSchema: z.ZodType<Prisma.Interrupt
   where: InterruptionWhereUniqueInputSchema,
 }).strict() ;
 
-export const EvalSetFindFirstArgsSchema: z.ZodType<Prisma.EvalSetFindFirstArgs> = z.object({
-  select: EvalSetSelectSchema.optional(),
-  include: EvalSetIncludeSchema.optional(),
-  where: EvalSetWhereInputSchema.optional(),
-  orderBy: z.union([ EvalSetOrderByWithRelationInputSchema.array(),EvalSetOrderByWithRelationInputSchema ]).optional(),
-  cursor: EvalSetWhereUniqueInputSchema.optional(),
+export const EvaluationGroupFindFirstArgsSchema: z.ZodType<Prisma.EvaluationGroupFindFirstArgs> = z.object({
+  select: EvaluationGroupSelectSchema.optional(),
+  include: EvaluationGroupIncludeSchema.optional(),
+  where: EvaluationGroupWhereInputSchema.optional(),
+  orderBy: z.union([ EvaluationGroupOrderByWithRelationInputSchema.array(),EvaluationGroupOrderByWithRelationInputSchema ]).optional(),
+  cursor: EvaluationGroupWhereUniqueInputSchema.optional(),
   take: z.number().optional(),
   skip: z.number().optional(),
-  distinct: z.union([ EvalSetScalarFieldEnumSchema,EvalSetScalarFieldEnumSchema.array() ]).optional(),
+  distinct: z.union([ EvaluationGroupScalarFieldEnumSchema,EvaluationGroupScalarFieldEnumSchema.array() ]).optional(),
 }).strict() ;
 
-export const EvalSetFindFirstOrThrowArgsSchema: z.ZodType<Prisma.EvalSetFindFirstOrThrowArgs> = z.object({
-  select: EvalSetSelectSchema.optional(),
-  include: EvalSetIncludeSchema.optional(),
-  where: EvalSetWhereInputSchema.optional(),
-  orderBy: z.union([ EvalSetOrderByWithRelationInputSchema.array(),EvalSetOrderByWithRelationInputSchema ]).optional(),
-  cursor: EvalSetWhereUniqueInputSchema.optional(),
+export const EvaluationGroupFindFirstOrThrowArgsSchema: z.ZodType<Prisma.EvaluationGroupFindFirstOrThrowArgs> = z.object({
+  select: EvaluationGroupSelectSchema.optional(),
+  include: EvaluationGroupIncludeSchema.optional(),
+  where: EvaluationGroupWhereInputSchema.optional(),
+  orderBy: z.union([ EvaluationGroupOrderByWithRelationInputSchema.array(),EvaluationGroupOrderByWithRelationInputSchema ]).optional(),
+  cursor: EvaluationGroupWhereUniqueInputSchema.optional(),
   take: z.number().optional(),
   skip: z.number().optional(),
-  distinct: z.union([ EvalSetScalarFieldEnumSchema,EvalSetScalarFieldEnumSchema.array() ]).optional(),
+  distinct: z.union([ EvaluationGroupScalarFieldEnumSchema,EvaluationGroupScalarFieldEnumSchema.array() ]).optional(),
 }).strict() ;
 
-export const EvalSetFindManyArgsSchema: z.ZodType<Prisma.EvalSetFindManyArgs> = z.object({
-  select: EvalSetSelectSchema.optional(),
-  include: EvalSetIncludeSchema.optional(),
-  where: EvalSetWhereInputSchema.optional(),
-  orderBy: z.union([ EvalSetOrderByWithRelationInputSchema.array(),EvalSetOrderByWithRelationInputSchema ]).optional(),
-  cursor: EvalSetWhereUniqueInputSchema.optional(),
+export const EvaluationGroupFindManyArgsSchema: z.ZodType<Prisma.EvaluationGroupFindManyArgs> = z.object({
+  select: EvaluationGroupSelectSchema.optional(),
+  include: EvaluationGroupIncludeSchema.optional(),
+  where: EvaluationGroupWhereInputSchema.optional(),
+  orderBy: z.union([ EvaluationGroupOrderByWithRelationInputSchema.array(),EvaluationGroupOrderByWithRelationInputSchema ]).optional(),
+  cursor: EvaluationGroupWhereUniqueInputSchema.optional(),
   take: z.number().optional(),
   skip: z.number().optional(),
-  distinct: z.union([ EvalSetScalarFieldEnumSchema,EvalSetScalarFieldEnumSchema.array() ]).optional(),
+  distinct: z.union([ EvaluationGroupScalarFieldEnumSchema,EvaluationGroupScalarFieldEnumSchema.array() ]).optional(),
 }).strict() ;
 
-export const EvalSetAggregateArgsSchema: z.ZodType<Prisma.EvalSetAggregateArgs> = z.object({
-  where: EvalSetWhereInputSchema.optional(),
-  orderBy: z.union([ EvalSetOrderByWithRelationInputSchema.array(),EvalSetOrderByWithRelationInputSchema ]).optional(),
-  cursor: EvalSetWhereUniqueInputSchema.optional(),
-  take: z.number().optional(),
-  skip: z.number().optional(),
-}).strict() ;
-
-export const EvalSetGroupByArgsSchema: z.ZodType<Prisma.EvalSetGroupByArgs> = z.object({
-  where: EvalSetWhereInputSchema.optional(),
-  orderBy: z.union([ EvalSetOrderByWithAggregationInputSchema.array(),EvalSetOrderByWithAggregationInputSchema ]).optional(),
-  by: EvalSetScalarFieldEnumSchema.array(),
-  having: EvalSetScalarWhereWithAggregatesInputSchema.optional(),
+export const EvaluationGroupAggregateArgsSchema: z.ZodType<Prisma.EvaluationGroupAggregateArgs> = z.object({
+  where: EvaluationGroupWhereInputSchema.optional(),
+  orderBy: z.union([ EvaluationGroupOrderByWithRelationInputSchema.array(),EvaluationGroupOrderByWithRelationInputSchema ]).optional(),
+  cursor: EvaluationGroupWhereUniqueInputSchema.optional(),
   take: z.number().optional(),
   skip: z.number().optional(),
 }).strict() ;
 
-export const EvalSetFindUniqueArgsSchema: z.ZodType<Prisma.EvalSetFindUniqueArgs> = z.object({
-  select: EvalSetSelectSchema.optional(),
-  include: EvalSetIncludeSchema.optional(),
-  where: EvalSetWhereUniqueInputSchema,
+export const EvaluationGroupGroupByArgsSchema: z.ZodType<Prisma.EvaluationGroupGroupByArgs> = z.object({
+  where: EvaluationGroupWhereInputSchema.optional(),
+  orderBy: z.union([ EvaluationGroupOrderByWithAggregationInputSchema.array(),EvaluationGroupOrderByWithAggregationInputSchema ]).optional(),
+  by: EvaluationGroupScalarFieldEnumSchema.array(),
+  having: EvaluationGroupScalarWhereWithAggregatesInputSchema.optional(),
+  take: z.number().optional(),
+  skip: z.number().optional(),
 }).strict() ;
 
-export const EvalSetFindUniqueOrThrowArgsSchema: z.ZodType<Prisma.EvalSetFindUniqueOrThrowArgs> = z.object({
-  select: EvalSetSelectSchema.optional(),
-  include: EvalSetIncludeSchema.optional(),
-  where: EvalSetWhereUniqueInputSchema,
+export const EvaluationGroupFindUniqueArgsSchema: z.ZodType<Prisma.EvaluationGroupFindUniqueArgs> = z.object({
+  select: EvaluationGroupSelectSchema.optional(),
+  include: EvaluationGroupIncludeSchema.optional(),
+  where: EvaluationGroupWhereUniqueInputSchema,
+}).strict() ;
+
+export const EvaluationGroupFindUniqueOrThrowArgsSchema: z.ZodType<Prisma.EvaluationGroupFindUniqueOrThrowArgs> = z.object({
+  select: EvaluationGroupSelectSchema.optional(),
+  include: EvaluationGroupIncludeSchema.optional(),
+  where: EvaluationGroupWhereUniqueInputSchema,
 }).strict() ;
 
 export const SavedSearchFindFirstArgsSchema: z.ZodType<Prisma.SavedSearchFindFirstArgs> = z.object({
@@ -12976,142 +13205,188 @@ export const ScenarioDeleteManyArgsSchema: z.ZodType<Prisma.ScenarioDeleteManyAr
   where: ScenarioWhereInputSchema.optional(),
 }).strict() ;
 
-export const EvalCreateArgsSchema: z.ZodType<Prisma.EvalCreateArgs> = z.object({
-  select: EvalSelectSchema.optional(),
-  include: EvalIncludeSchema.optional(),
-  data: z.union([ EvalCreateInputSchema,EvalUncheckedCreateInputSchema ]),
+export const EvaluationTemplateCreateArgsSchema: z.ZodType<Prisma.EvaluationTemplateCreateArgs> = z.object({
+  select: EvaluationTemplateSelectSchema.optional(),
+  include: EvaluationTemplateIncludeSchema.optional(),
+  data: z.union([ EvaluationTemplateCreateInputSchema,EvaluationTemplateUncheckedCreateInputSchema ]),
 }).strict() ;
 
-export const EvalUpsertArgsSchema: z.ZodType<Prisma.EvalUpsertArgs> = z.object({
-  select: EvalSelectSchema.optional(),
-  include: EvalIncludeSchema.optional(),
-  where: EvalWhereUniqueInputSchema,
-  create: z.union([ EvalCreateInputSchema,EvalUncheckedCreateInputSchema ]),
-  update: z.union([ EvalUpdateInputSchema,EvalUncheckedUpdateInputSchema ]),
+export const EvaluationTemplateUpsertArgsSchema: z.ZodType<Prisma.EvaluationTemplateUpsertArgs> = z.object({
+  select: EvaluationTemplateSelectSchema.optional(),
+  include: EvaluationTemplateIncludeSchema.optional(),
+  where: EvaluationTemplateWhereUniqueInputSchema,
+  create: z.union([ EvaluationTemplateCreateInputSchema,EvaluationTemplateUncheckedCreateInputSchema ]),
+  update: z.union([ EvaluationTemplateUpdateInputSchema,EvaluationTemplateUncheckedUpdateInputSchema ]),
 }).strict() ;
 
-export const EvalCreateManyArgsSchema: z.ZodType<Prisma.EvalCreateManyArgs> = z.object({
-  data: z.union([ EvalCreateManyInputSchema,EvalCreateManyInputSchema.array() ]),
+export const EvaluationTemplateCreateManyArgsSchema: z.ZodType<Prisma.EvaluationTemplateCreateManyArgs> = z.object({
+  data: z.union([ EvaluationTemplateCreateManyInputSchema,EvaluationTemplateCreateManyInputSchema.array() ]),
   skipDuplicates: z.boolean().optional(),
 }).strict() ;
 
-export const EvalCreateManyAndReturnArgsSchema: z.ZodType<Prisma.EvalCreateManyAndReturnArgs> = z.object({
-  data: z.union([ EvalCreateManyInputSchema,EvalCreateManyInputSchema.array() ]),
+export const EvaluationTemplateCreateManyAndReturnArgsSchema: z.ZodType<Prisma.EvaluationTemplateCreateManyAndReturnArgs> = z.object({
+  data: z.union([ EvaluationTemplateCreateManyInputSchema,EvaluationTemplateCreateManyInputSchema.array() ]),
   skipDuplicates: z.boolean().optional(),
 }).strict() ;
 
-export const EvalDeleteArgsSchema: z.ZodType<Prisma.EvalDeleteArgs> = z.object({
-  select: EvalSelectSchema.optional(),
-  include: EvalIncludeSchema.optional(),
-  where: EvalWhereUniqueInputSchema,
+export const EvaluationTemplateDeleteArgsSchema: z.ZodType<Prisma.EvaluationTemplateDeleteArgs> = z.object({
+  select: EvaluationTemplateSelectSchema.optional(),
+  include: EvaluationTemplateIncludeSchema.optional(),
+  where: EvaluationTemplateWhereUniqueInputSchema,
 }).strict() ;
 
-export const EvalUpdateArgsSchema: z.ZodType<Prisma.EvalUpdateArgs> = z.object({
-  select: EvalSelectSchema.optional(),
-  include: EvalIncludeSchema.optional(),
-  data: z.union([ EvalUpdateInputSchema,EvalUncheckedUpdateInputSchema ]),
-  where: EvalWhereUniqueInputSchema,
+export const EvaluationTemplateUpdateArgsSchema: z.ZodType<Prisma.EvaluationTemplateUpdateArgs> = z.object({
+  select: EvaluationTemplateSelectSchema.optional(),
+  include: EvaluationTemplateIncludeSchema.optional(),
+  data: z.union([ EvaluationTemplateUpdateInputSchema,EvaluationTemplateUncheckedUpdateInputSchema ]),
+  where: EvaluationTemplateWhereUniqueInputSchema,
 }).strict() ;
 
-export const EvalUpdateManyArgsSchema: z.ZodType<Prisma.EvalUpdateManyArgs> = z.object({
-  data: z.union([ EvalUpdateManyMutationInputSchema,EvalUncheckedUpdateManyInputSchema ]),
-  where: EvalWhereInputSchema.optional(),
+export const EvaluationTemplateUpdateManyArgsSchema: z.ZodType<Prisma.EvaluationTemplateUpdateManyArgs> = z.object({
+  data: z.union([ EvaluationTemplateUpdateManyMutationInputSchema,EvaluationTemplateUncheckedUpdateManyInputSchema ]),
+  where: EvaluationTemplateWhereInputSchema.optional(),
 }).strict() ;
 
-export const EvalDeleteManyArgsSchema: z.ZodType<Prisma.EvalDeleteManyArgs> = z.object({
-  where: EvalWhereInputSchema.optional(),
+export const EvaluationTemplateDeleteManyArgsSchema: z.ZodType<Prisma.EvaluationTemplateDeleteManyArgs> = z.object({
+  where: EvaluationTemplateWhereInputSchema.optional(),
 }).strict() ;
 
-export const EvalResultCreateArgsSchema: z.ZodType<Prisma.EvalResultCreateArgs> = z.object({
-  select: EvalResultSelectSchema.optional(),
-  include: EvalResultIncludeSchema.optional(),
-  data: z.union([ EvalResultCreateInputSchema,EvalResultUncheckedCreateInputSchema ]),
+export const GeneralEvaluationCreateArgsSchema: z.ZodType<Prisma.GeneralEvaluationCreateArgs> = z.object({
+  select: GeneralEvaluationSelectSchema.optional(),
+  include: GeneralEvaluationIncludeSchema.optional(),
+  data: z.union([ GeneralEvaluationCreateInputSchema,GeneralEvaluationUncheckedCreateInputSchema ]),
 }).strict() ;
 
-export const EvalResultUpsertArgsSchema: z.ZodType<Prisma.EvalResultUpsertArgs> = z.object({
-  select: EvalResultSelectSchema.optional(),
-  include: EvalResultIncludeSchema.optional(),
-  where: EvalResultWhereUniqueInputSchema,
-  create: z.union([ EvalResultCreateInputSchema,EvalResultUncheckedCreateInputSchema ]),
-  update: z.union([ EvalResultUpdateInputSchema,EvalResultUncheckedUpdateInputSchema ]),
+export const GeneralEvaluationUpsertArgsSchema: z.ZodType<Prisma.GeneralEvaluationUpsertArgs> = z.object({
+  select: GeneralEvaluationSelectSchema.optional(),
+  include: GeneralEvaluationIncludeSchema.optional(),
+  where: GeneralEvaluationWhereUniqueInputSchema,
+  create: z.union([ GeneralEvaluationCreateInputSchema,GeneralEvaluationUncheckedCreateInputSchema ]),
+  update: z.union([ GeneralEvaluationUpdateInputSchema,GeneralEvaluationUncheckedUpdateInputSchema ]),
 }).strict() ;
 
-export const EvalResultCreateManyArgsSchema: z.ZodType<Prisma.EvalResultCreateManyArgs> = z.object({
-  data: z.union([ EvalResultCreateManyInputSchema,EvalResultCreateManyInputSchema.array() ]),
+export const GeneralEvaluationCreateManyArgsSchema: z.ZodType<Prisma.GeneralEvaluationCreateManyArgs> = z.object({
+  data: z.union([ GeneralEvaluationCreateManyInputSchema,GeneralEvaluationCreateManyInputSchema.array() ]),
   skipDuplicates: z.boolean().optional(),
 }).strict() ;
 
-export const EvalResultCreateManyAndReturnArgsSchema: z.ZodType<Prisma.EvalResultCreateManyAndReturnArgs> = z.object({
-  data: z.union([ EvalResultCreateManyInputSchema,EvalResultCreateManyInputSchema.array() ]),
+export const GeneralEvaluationCreateManyAndReturnArgsSchema: z.ZodType<Prisma.GeneralEvaluationCreateManyAndReturnArgs> = z.object({
+  data: z.union([ GeneralEvaluationCreateManyInputSchema,GeneralEvaluationCreateManyInputSchema.array() ]),
   skipDuplicates: z.boolean().optional(),
 }).strict() ;
 
-export const EvalResultDeleteArgsSchema: z.ZodType<Prisma.EvalResultDeleteArgs> = z.object({
-  select: EvalResultSelectSchema.optional(),
-  include: EvalResultIncludeSchema.optional(),
-  where: EvalResultWhereUniqueInputSchema,
+export const GeneralEvaluationDeleteArgsSchema: z.ZodType<Prisma.GeneralEvaluationDeleteArgs> = z.object({
+  select: GeneralEvaluationSelectSchema.optional(),
+  include: GeneralEvaluationIncludeSchema.optional(),
+  where: GeneralEvaluationWhereUniqueInputSchema,
 }).strict() ;
 
-export const EvalResultUpdateArgsSchema: z.ZodType<Prisma.EvalResultUpdateArgs> = z.object({
-  select: EvalResultSelectSchema.optional(),
-  include: EvalResultIncludeSchema.optional(),
-  data: z.union([ EvalResultUpdateInputSchema,EvalResultUncheckedUpdateInputSchema ]),
-  where: EvalResultWhereUniqueInputSchema,
+export const GeneralEvaluationUpdateArgsSchema: z.ZodType<Prisma.GeneralEvaluationUpdateArgs> = z.object({
+  select: GeneralEvaluationSelectSchema.optional(),
+  include: GeneralEvaluationIncludeSchema.optional(),
+  data: z.union([ GeneralEvaluationUpdateInputSchema,GeneralEvaluationUncheckedUpdateInputSchema ]),
+  where: GeneralEvaluationWhereUniqueInputSchema,
 }).strict() ;
 
-export const EvalResultUpdateManyArgsSchema: z.ZodType<Prisma.EvalResultUpdateManyArgs> = z.object({
-  data: z.union([ EvalResultUpdateManyMutationInputSchema,EvalResultUncheckedUpdateManyInputSchema ]),
-  where: EvalResultWhereInputSchema.optional(),
+export const GeneralEvaluationUpdateManyArgsSchema: z.ZodType<Prisma.GeneralEvaluationUpdateManyArgs> = z.object({
+  data: z.union([ GeneralEvaluationUpdateManyMutationInputSchema,GeneralEvaluationUncheckedUpdateManyInputSchema ]),
+  where: GeneralEvaluationWhereInputSchema.optional(),
 }).strict() ;
 
-export const EvalResultDeleteManyArgsSchema: z.ZodType<Prisma.EvalResultDeleteManyArgs> = z.object({
-  where: EvalResultWhereInputSchema.optional(),
+export const GeneralEvaluationDeleteManyArgsSchema: z.ZodType<Prisma.GeneralEvaluationDeleteManyArgs> = z.object({
+  where: GeneralEvaluationWhereInputSchema.optional(),
 }).strict() ;
 
-export const EvalOverrideCreateArgsSchema: z.ZodType<Prisma.EvalOverrideCreateArgs> = z.object({
-  select: EvalOverrideSelectSchema.optional(),
-  include: EvalOverrideIncludeSchema.optional(),
-  data: z.union([ EvalOverrideCreateInputSchema,EvalOverrideUncheckedCreateInputSchema ]),
+export const EvaluationCreateArgsSchema: z.ZodType<Prisma.EvaluationCreateArgs> = z.object({
+  select: EvaluationSelectSchema.optional(),
+  include: EvaluationIncludeSchema.optional(),
+  data: z.union([ EvaluationCreateInputSchema,EvaluationUncheckedCreateInputSchema ]),
 }).strict() ;
 
-export const EvalOverrideUpsertArgsSchema: z.ZodType<Prisma.EvalOverrideUpsertArgs> = z.object({
-  select: EvalOverrideSelectSchema.optional(),
-  include: EvalOverrideIncludeSchema.optional(),
-  where: EvalOverrideWhereUniqueInputSchema,
-  create: z.union([ EvalOverrideCreateInputSchema,EvalOverrideUncheckedCreateInputSchema ]),
-  update: z.union([ EvalOverrideUpdateInputSchema,EvalOverrideUncheckedUpdateInputSchema ]),
+export const EvaluationUpsertArgsSchema: z.ZodType<Prisma.EvaluationUpsertArgs> = z.object({
+  select: EvaluationSelectSchema.optional(),
+  include: EvaluationIncludeSchema.optional(),
+  where: EvaluationWhereUniqueInputSchema,
+  create: z.union([ EvaluationCreateInputSchema,EvaluationUncheckedCreateInputSchema ]),
+  update: z.union([ EvaluationUpdateInputSchema,EvaluationUncheckedUpdateInputSchema ]),
 }).strict() ;
 
-export const EvalOverrideCreateManyArgsSchema: z.ZodType<Prisma.EvalOverrideCreateManyArgs> = z.object({
-  data: z.union([ EvalOverrideCreateManyInputSchema,EvalOverrideCreateManyInputSchema.array() ]),
+export const EvaluationCreateManyArgsSchema: z.ZodType<Prisma.EvaluationCreateManyArgs> = z.object({
+  data: z.union([ EvaluationCreateManyInputSchema,EvaluationCreateManyInputSchema.array() ]),
   skipDuplicates: z.boolean().optional(),
 }).strict() ;
 
-export const EvalOverrideCreateManyAndReturnArgsSchema: z.ZodType<Prisma.EvalOverrideCreateManyAndReturnArgs> = z.object({
-  data: z.union([ EvalOverrideCreateManyInputSchema,EvalOverrideCreateManyInputSchema.array() ]),
+export const EvaluationCreateManyAndReturnArgsSchema: z.ZodType<Prisma.EvaluationCreateManyAndReturnArgs> = z.object({
+  data: z.union([ EvaluationCreateManyInputSchema,EvaluationCreateManyInputSchema.array() ]),
   skipDuplicates: z.boolean().optional(),
 }).strict() ;
 
-export const EvalOverrideDeleteArgsSchema: z.ZodType<Prisma.EvalOverrideDeleteArgs> = z.object({
-  select: EvalOverrideSelectSchema.optional(),
-  include: EvalOverrideIncludeSchema.optional(),
-  where: EvalOverrideWhereUniqueInputSchema,
+export const EvaluationDeleteArgsSchema: z.ZodType<Prisma.EvaluationDeleteArgs> = z.object({
+  select: EvaluationSelectSchema.optional(),
+  include: EvaluationIncludeSchema.optional(),
+  where: EvaluationWhereUniqueInputSchema,
 }).strict() ;
 
-export const EvalOverrideUpdateArgsSchema: z.ZodType<Prisma.EvalOverrideUpdateArgs> = z.object({
-  select: EvalOverrideSelectSchema.optional(),
-  include: EvalOverrideIncludeSchema.optional(),
-  data: z.union([ EvalOverrideUpdateInputSchema,EvalOverrideUncheckedUpdateInputSchema ]),
-  where: EvalOverrideWhereUniqueInputSchema,
+export const EvaluationUpdateArgsSchema: z.ZodType<Prisma.EvaluationUpdateArgs> = z.object({
+  select: EvaluationSelectSchema.optional(),
+  include: EvaluationIncludeSchema.optional(),
+  data: z.union([ EvaluationUpdateInputSchema,EvaluationUncheckedUpdateInputSchema ]),
+  where: EvaluationWhereUniqueInputSchema,
 }).strict() ;
 
-export const EvalOverrideUpdateManyArgsSchema: z.ZodType<Prisma.EvalOverrideUpdateManyArgs> = z.object({
-  data: z.union([ EvalOverrideUpdateManyMutationInputSchema,EvalOverrideUncheckedUpdateManyInputSchema ]),
-  where: EvalOverrideWhereInputSchema.optional(),
+export const EvaluationUpdateManyArgsSchema: z.ZodType<Prisma.EvaluationUpdateManyArgs> = z.object({
+  data: z.union([ EvaluationUpdateManyMutationInputSchema,EvaluationUncheckedUpdateManyInputSchema ]),
+  where: EvaluationWhereInputSchema.optional(),
 }).strict() ;
 
-export const EvalOverrideDeleteManyArgsSchema: z.ZodType<Prisma.EvalOverrideDeleteManyArgs> = z.object({
-  where: EvalOverrideWhereInputSchema.optional(),
+export const EvaluationDeleteManyArgsSchema: z.ZodType<Prisma.EvaluationDeleteManyArgs> = z.object({
+  where: EvaluationWhereInputSchema.optional(),
+}).strict() ;
+
+export const EvaluationResultCreateArgsSchema: z.ZodType<Prisma.EvaluationResultCreateArgs> = z.object({
+  select: EvaluationResultSelectSchema.optional(),
+  include: EvaluationResultIncludeSchema.optional(),
+  data: z.union([ EvaluationResultCreateInputSchema,EvaluationResultUncheckedCreateInputSchema ]),
+}).strict() ;
+
+export const EvaluationResultUpsertArgsSchema: z.ZodType<Prisma.EvaluationResultUpsertArgs> = z.object({
+  select: EvaluationResultSelectSchema.optional(),
+  include: EvaluationResultIncludeSchema.optional(),
+  where: EvaluationResultWhereUniqueInputSchema,
+  create: z.union([ EvaluationResultCreateInputSchema,EvaluationResultUncheckedCreateInputSchema ]),
+  update: z.union([ EvaluationResultUpdateInputSchema,EvaluationResultUncheckedUpdateInputSchema ]),
+}).strict() ;
+
+export const EvaluationResultCreateManyArgsSchema: z.ZodType<Prisma.EvaluationResultCreateManyArgs> = z.object({
+  data: z.union([ EvaluationResultCreateManyInputSchema,EvaluationResultCreateManyInputSchema.array() ]),
+  skipDuplicates: z.boolean().optional(),
+}).strict() ;
+
+export const EvaluationResultCreateManyAndReturnArgsSchema: z.ZodType<Prisma.EvaluationResultCreateManyAndReturnArgs> = z.object({
+  data: z.union([ EvaluationResultCreateManyInputSchema,EvaluationResultCreateManyInputSchema.array() ]),
+  skipDuplicates: z.boolean().optional(),
+}).strict() ;
+
+export const EvaluationResultDeleteArgsSchema: z.ZodType<Prisma.EvaluationResultDeleteArgs> = z.object({
+  select: EvaluationResultSelectSchema.optional(),
+  include: EvaluationResultIncludeSchema.optional(),
+  where: EvaluationResultWhereUniqueInputSchema,
+}).strict() ;
+
+export const EvaluationResultUpdateArgsSchema: z.ZodType<Prisma.EvaluationResultUpdateArgs> = z.object({
+  select: EvaluationResultSelectSchema.optional(),
+  include: EvaluationResultIncludeSchema.optional(),
+  data: z.union([ EvaluationResultUpdateInputSchema,EvaluationResultUncheckedUpdateInputSchema ]),
+  where: EvaluationResultWhereUniqueInputSchema,
+}).strict() ;
+
+export const EvaluationResultUpdateManyArgsSchema: z.ZodType<Prisma.EvaluationResultUpdateManyArgs> = z.object({
+  data: z.union([ EvaluationResultUpdateManyMutationInputSchema,EvaluationResultUncheckedUpdateManyInputSchema ]),
+  where: EvaluationResultWhereInputSchema.optional(),
+}).strict() ;
+
+export const EvaluationResultDeleteManyArgsSchema: z.ZodType<Prisma.EvaluationResultDeleteManyArgs> = z.object({
+  where: EvaluationResultWhereInputSchema.optional(),
 }).strict() ;
 
 export const LatencyBlockCreateArgsSchema: z.ZodType<Prisma.LatencyBlockCreateArgs> = z.object({
@@ -13206,50 +13481,50 @@ export const InterruptionDeleteManyArgsSchema: z.ZodType<Prisma.InterruptionDele
   where: InterruptionWhereInputSchema.optional(),
 }).strict() ;
 
-export const EvalSetCreateArgsSchema: z.ZodType<Prisma.EvalSetCreateArgs> = z.object({
-  select: EvalSetSelectSchema.optional(),
-  include: EvalSetIncludeSchema.optional(),
-  data: z.union([ EvalSetCreateInputSchema,EvalSetUncheckedCreateInputSchema ]),
+export const EvaluationGroupCreateArgsSchema: z.ZodType<Prisma.EvaluationGroupCreateArgs> = z.object({
+  select: EvaluationGroupSelectSchema.optional(),
+  include: EvaluationGroupIncludeSchema.optional(),
+  data: z.union([ EvaluationGroupCreateInputSchema,EvaluationGroupUncheckedCreateInputSchema ]),
 }).strict() ;
 
-export const EvalSetUpsertArgsSchema: z.ZodType<Prisma.EvalSetUpsertArgs> = z.object({
-  select: EvalSetSelectSchema.optional(),
-  include: EvalSetIncludeSchema.optional(),
-  where: EvalSetWhereUniqueInputSchema,
-  create: z.union([ EvalSetCreateInputSchema,EvalSetUncheckedCreateInputSchema ]),
-  update: z.union([ EvalSetUpdateInputSchema,EvalSetUncheckedUpdateInputSchema ]),
+export const EvaluationGroupUpsertArgsSchema: z.ZodType<Prisma.EvaluationGroupUpsertArgs> = z.object({
+  select: EvaluationGroupSelectSchema.optional(),
+  include: EvaluationGroupIncludeSchema.optional(),
+  where: EvaluationGroupWhereUniqueInputSchema,
+  create: z.union([ EvaluationGroupCreateInputSchema,EvaluationGroupUncheckedCreateInputSchema ]),
+  update: z.union([ EvaluationGroupUpdateInputSchema,EvaluationGroupUncheckedUpdateInputSchema ]),
 }).strict() ;
 
-export const EvalSetCreateManyArgsSchema: z.ZodType<Prisma.EvalSetCreateManyArgs> = z.object({
-  data: z.union([ EvalSetCreateManyInputSchema,EvalSetCreateManyInputSchema.array() ]),
+export const EvaluationGroupCreateManyArgsSchema: z.ZodType<Prisma.EvaluationGroupCreateManyArgs> = z.object({
+  data: z.union([ EvaluationGroupCreateManyInputSchema,EvaluationGroupCreateManyInputSchema.array() ]),
   skipDuplicates: z.boolean().optional(),
 }).strict() ;
 
-export const EvalSetCreateManyAndReturnArgsSchema: z.ZodType<Prisma.EvalSetCreateManyAndReturnArgs> = z.object({
-  data: z.union([ EvalSetCreateManyInputSchema,EvalSetCreateManyInputSchema.array() ]),
+export const EvaluationGroupCreateManyAndReturnArgsSchema: z.ZodType<Prisma.EvaluationGroupCreateManyAndReturnArgs> = z.object({
+  data: z.union([ EvaluationGroupCreateManyInputSchema,EvaluationGroupCreateManyInputSchema.array() ]),
   skipDuplicates: z.boolean().optional(),
 }).strict() ;
 
-export const EvalSetDeleteArgsSchema: z.ZodType<Prisma.EvalSetDeleteArgs> = z.object({
-  select: EvalSetSelectSchema.optional(),
-  include: EvalSetIncludeSchema.optional(),
-  where: EvalSetWhereUniqueInputSchema,
+export const EvaluationGroupDeleteArgsSchema: z.ZodType<Prisma.EvaluationGroupDeleteArgs> = z.object({
+  select: EvaluationGroupSelectSchema.optional(),
+  include: EvaluationGroupIncludeSchema.optional(),
+  where: EvaluationGroupWhereUniqueInputSchema,
 }).strict() ;
 
-export const EvalSetUpdateArgsSchema: z.ZodType<Prisma.EvalSetUpdateArgs> = z.object({
-  select: EvalSetSelectSchema.optional(),
-  include: EvalSetIncludeSchema.optional(),
-  data: z.union([ EvalSetUpdateInputSchema,EvalSetUncheckedUpdateInputSchema ]),
-  where: EvalSetWhereUniqueInputSchema,
+export const EvaluationGroupUpdateArgsSchema: z.ZodType<Prisma.EvaluationGroupUpdateArgs> = z.object({
+  select: EvaluationGroupSelectSchema.optional(),
+  include: EvaluationGroupIncludeSchema.optional(),
+  data: z.union([ EvaluationGroupUpdateInputSchema,EvaluationGroupUncheckedUpdateInputSchema ]),
+  where: EvaluationGroupWhereUniqueInputSchema,
 }).strict() ;
 
-export const EvalSetUpdateManyArgsSchema: z.ZodType<Prisma.EvalSetUpdateManyArgs> = z.object({
-  data: z.union([ EvalSetUpdateManyMutationInputSchema,EvalSetUncheckedUpdateManyInputSchema ]),
-  where: EvalSetWhereInputSchema.optional(),
+export const EvaluationGroupUpdateManyArgsSchema: z.ZodType<Prisma.EvaluationGroupUpdateManyArgs> = z.object({
+  data: z.union([ EvaluationGroupUpdateManyMutationInputSchema,EvaluationGroupUncheckedUpdateManyInputSchema ]),
+  where: EvaluationGroupWhereInputSchema.optional(),
 }).strict() ;
 
-export const EvalSetDeleteManyArgsSchema: z.ZodType<Prisma.EvalSetDeleteManyArgs> = z.object({
-  where: EvalSetWhereInputSchema.optional(),
+export const EvaluationGroupDeleteManyArgsSchema: z.ZodType<Prisma.EvaluationGroupDeleteManyArgs> = z.object({
+  where: EvaluationGroupWhereInputSchema.optional(),
 }).strict() ;
 
 export const SavedSearchCreateArgsSchema: z.ZodType<Prisma.SavedSearchCreateArgs> = z.object({

@@ -4,12 +4,14 @@ import { type WebhookEvent } from "@clerk/nextjs/server";
 import { env } from "~/env";
 import { addSubscriber } from "~/server/listmonk";
 import { NUM_FREE_OBSERVABILITY_CALLS, NUM_FREE_TESTS } from "@repo/types/src";
-import { UserService } from "@repo/services/src/user";
+import { ClerkService, EvaluationService } from "@repo/services/src";
 import { db } from "~/server/db";
-import { SlackService } from "@repo/services/src/slack";
+import { SlackService } from "@repo/services/src/ee/slack";
+import { instantiateEvaluationTemplate } from "~/lib/instantiate";
 
-const userService = new UserService(db);
+const clerkService = new ClerkService(db);
 const slackService = new SlackService();
+const evaluationService = new EvaluationService(db);
 
 export async function GET() {
   return new Response("ok", { status: 200 });
@@ -78,24 +80,6 @@ export async function POST(req: Request) {
       // }
       // await upsertUser(userId, email ?? null, first_name, last_name, username);
 
-      // Give user free tests + observability calls
-      await userService.updatePublicMetadata(userId, {
-        freeTestsLeft: NUM_FREE_TESTS,
-        freeObservabilityCallsLeft: NUM_FREE_OBSERVABILITY_CALLS,
-      });
-
-      // Create default saved search
-      await db.savedSearch.create({
-        data: {
-          name: "default",
-          ownerId: userId,
-          isDefault: true,
-          agentId: [],
-          lookbackPeriod: { label: "2 days", value: 2 * 24 * 60 * 60 * 1000 },
-          chartPeriod: 60 * 60 * 1000,
-        },
-      });
-
       await slackService.sendAnalyticsMessage({
         message: `👋 new user joined fixa: ${first_name} ${last_name} (${email})`,
       });
@@ -110,44 +94,69 @@ export async function POST(req: Request) {
       }
       break;
     }
-    case "user.updated": {
-      // const { first_name, last_name, email_addresses, username } = evt.data;
-      // const email = email_addresses?.[0]?.email_address;
-      // if (!email) {
-      //   return new Response("User has no email", { status: 400 });
-      // }
-      // await upsertUser(userId, email ?? null, first_name, last_name, username);
-      break;
-    }
-    case "user.deleted": {
-      // await deleteUser(userId);
+    case "organization.created": {
+      const orgId = evt.data.id;
+      const creatorId = evt.data.created_by;
+
+      const user = await clerkService.getUser(creatorId);
+      const orgs =
+        await clerkService.clerkClient.users.getOrganizationMembershipList({
+          userId: user.id,
+        });
+
+      if (orgs.data.length <= 1) {
+        // Give the org free tests + observability calls
+        // Only do this when user has no org (i.e. they are a new user)
+        await clerkService.updatePublicMetadata({
+          orgId,
+          metadata: {
+            freeTestsLeft: NUM_FREE_TESTS,
+            freeObservabilityCallsLeft: NUM_FREE_OBSERVABILITY_CALLS,
+          },
+        });
+      }
+
+      // Create default saved search
+      await db.savedSearch.create({
+        data: {
+          name: "default",
+          ownerId: orgId,
+          isDefault: true,
+          agentId: [],
+          lookbackPeriod: { label: "2 days", value: 2 * 24 * 60 * 60 * 1000 },
+          chartPeriod: 60 * 60 * 1000,
+        },
+      });
+
+      // Add default evaluation templates
+      const templatesToCreate = [
+        {
+          name: "questions correctly answered",
+          description:
+            "the agent correctly answers all of the user's questions to the best of its ability",
+        },
+        {
+          name: "successful call transfer",
+          description:
+            "the agent successfully transferred the call after the user asked to speak with a human",
+        },
+        {
+          name: "consistency across turns",
+          description:
+            "the agent maintained consistent logic and context throughout the conversation, without contradicting itself.",
+        },
+      ];
+      await Promise.all(
+        templatesToCreate.map((template) =>
+          evaluationService.createTemplate({
+            template: instantiateEvaluationTemplate(template),
+            ownerId: orgId,
+          }),
+        ),
+      );
       break;
     }
   }
 
   return new Response("", { status: 200 });
 }
-
-// const upsertUser = async (
-//   userId: string,
-//   email: string | null,
-//   firstName: string | null,
-//   lastName: string | null,
-//   username: string | null,
-// ) => {
-//   return await db.user.upsert({
-//     where: { id: userId },
-//     update: { email, firstName, lastName, username },
-//     create: { id: userId, email, firstName, lastName, username },
-//   });
-// };
-
-// const deleteUser = async (userId: string) => {
-//   try {
-//     await db.user.delete({
-//       where: { id: userId },
-//     });
-//   } catch (error) {
-//     console.log("No existing user to delete");
-//   }
-// };

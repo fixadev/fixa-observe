@@ -38,3 +38,19 @@ export function getCreatedUpdatedDeleted<T extends { id: string }>(
 export function generateApiKey() {
   return `fx-${crypto.randomUUID()}`;
 }
+
+export function getTemplateVariableRanges(s: string) {
+  const regex = /{{([^}]+)}}/g;
+  const ranges = [];
+  let match;
+
+  while ((match = regex.exec(s)) !== null) {
+    ranges.push({
+      templateVariable: match[1]?.trim() ?? "",
+      start: match.index,
+      end: match.index + match[0].length,
+    });
+  }
+
+  return ranges;
+}

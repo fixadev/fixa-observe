@@ -17,12 +17,8 @@ export default function NoCallsCard() {
   --header 'Content-Type: application/json' \\
   --data '{
   "callId": "<string>",
-  "stereoRecordingUrl": "<string>",
   "agentId": "<string>",
-  "metadata": {
-    "customField": "custom value",
-    "anotherField": "another value"
-  }
+  "stereoRecordingUrl": "<string>"
 }'`}
         </pre>
         <p className="text-sm text-muted-foreground">

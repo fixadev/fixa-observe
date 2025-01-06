@@ -1,41 +1,101 @@
 import {
+  type EvaluationWithIncludes,
   type AlertWithDetails,
-  type EvalSetWithIncludes,
-  type Eval,
-  type EvalSet,
+  type EvaluationGroupWithIncludes,
+  type EvaluationTemplate,
+  type ScenarioWithIncludes,
+  type GeneralEvaluationWithIncludes,
 } from "@repo/types/src/index";
 import { generateTempId } from "./utils";
-import { AlertType } from "@prisma/client";
-import { lookbackPeriods } from "~/components/hooks/useObserveState";
+import {
+  AlertType,
+  EvalContentType,
+  EvalResultType,
+  EvalType,
+} from "@prisma/client";
 
-export function instantiateEval(partial?: Partial<Eval>): Eval {
+// export function instantiateEvaluation(
+//   partial?: Partial<Evaluation>,
+// ): Evaluation {
+//   return {
+//     id: generateTempId(),
+//     createdAt: new Date(),
+
+//     name: "",
+//     description: "",
+//     scenarioId: null,
+
+//     type: "general",
+//     resultType: "boolean",
+//     contentType: "content",
+//     isCritical: true,
+//     toolCallExpectedResult: "",
+
+//     agentId: null,
+//     ownerId: null,
+//     deleted: false,
+
+//     evalSetId: null,
+
+//     ...partial,
+//   };
+// }
+
+export function instantiateScenario(
+  partial?: Partial<ScenarioWithIncludes>,
+): ScenarioWithIncludes {
   return {
     id: generateTempId(),
     createdAt: new Date(),
-
+    agentId: "",
     name: "",
-    description: "",
-    scenarioId: null,
-
-    type: "general",
-    resultType: "boolean",
-    contentType: "content",
-    isCritical: true,
-    toolCallExpectedResult: "",
-
-    agentId: null,
-    ownerId: null,
+    instructions: "",
+    successCriteria: "",
+    includeDateTime: false,
+    timezone: null,
     deleted: false,
+    evaluations: [],
+    ...partial,
+  };
+}
 
-    evalSetId: null,
+export function instantiateEvaluation(
+  partial?: Partial<EvaluationWithIncludes>,
+): EvaluationWithIncludes {
+  return {
+    id: generateTempId(),
+    createdAt: new Date(),
+    enabled: true,
+    isCritical: true,
+
+    params: {},
+
+    evaluationTemplateId: "",
+    evaluationTemplate: instantiateEvaluationTemplate(),
+
+    scenarioId: null,
+    evaluationGroupId: null,
 
     ...partial,
   };
 }
 
-export function instantiateEvalSet(
-  partial?: Partial<EvalSetWithIncludes>,
-): EvalSetWithIncludes {
+export function instantiateGeneralEvaluation(
+  partial?: Partial<GeneralEvaluationWithIncludes>,
+): GeneralEvaluationWithIncludes {
+  const evaluation = instantiateEvaluation();
+  return {
+    id: generateTempId(),
+    agentId: "",
+    evaluationId: evaluation.id,
+    evaluation,
+    ...partial,
+  };
+}
+
+export function instantiateEvaluationGroup(
+  partial?: Partial<EvaluationGroupWithIncludes>,
+): EvaluationGroupWithIncludes {
   return {
     id: generateTempId(),
     createdAt: new Date(),
@@ -44,7 +104,27 @@ export function instantiateEvalSet(
     enabled: true,
     condition: "",
     savedSearchId: null,
-    evals: [],
+    evaluations: [],
+
+    ...partial,
+  };
+}
+
+export function instantiateEvaluationTemplate(
+  partial?: Partial<EvaluationTemplate>,
+): EvaluationTemplate {
+  return {
+    id: generateTempId(),
+    name: "",
+    description: "",
+    createdAt: new Date(),
+    params: [],
+    type: EvalType.scenario,
+    resultType: EvalResultType.boolean,
+    contentType: EvalContentType.content,
+    toolCallExpectedResult: "",
+    deleted: false,
+    ownerId: "",
 
     ...partial,
   };

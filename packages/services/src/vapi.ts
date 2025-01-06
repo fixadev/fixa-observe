@@ -1,4 +1,4 @@
-import { PrismaClient } from "@repo/db/src";
+import { PrismaClient } from "@repo/db/src/index";
 import { VapiClient } from "@vapi-ai/server-sdk";
 
 // export const editVapiAssistant = async (
@@ -172,7 +172,7 @@ export class VapiService {
           number: phoneNumber,
         },
         assistantOverrides: {
-          serverUrl: this.env.NODE_SERVER_URL + "/vapi",
+          serverUrl: this.env.NODE_SERVER_URL + "/internal/vapi",
           model: {
             provider: "openai",
             model: "gpt-4o",
