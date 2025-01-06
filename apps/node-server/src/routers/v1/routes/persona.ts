@@ -36,4 +36,4 @@ personaRouter.post("/", async (req: Request, res: Response) => {
   }
 });
 
-export default personaRouter;
+export { personaRouter };

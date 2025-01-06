@@ -29,6 +29,7 @@ export const env = createEnv({
     OBSERVABILITY_MINUTES_PRICE_ID: z.string(),
     OBSERVABILITY_MINUTES_EVENT_NAME: z.string(),
     SLACK_ANALYTICS_BOT_WEBHOOK_URL: z.string(),
+    NODE_SERVER_SECRET: z.string(),
   },
 
   /**
@@ -91,6 +92,7 @@ export const env = createEnv({
       process.env.OBSERVABILITY_MINUTES_EVENT_NAME,
     SLACK_ANALYTICS_BOT_WEBHOOK_URL:
       process.env.SLACK_ANALYTICS_BOT_WEBHOOK_URL,
+    NODE_SERVER_SECRET: process.env.NODE_SERVER_SECRET,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially

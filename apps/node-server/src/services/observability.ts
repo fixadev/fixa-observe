@@ -71,6 +71,11 @@ export const transcribeAndSaveCall = async ({
         stereo_audio_url: urlToSave,
         language,
       },
+      {
+        headers: {
+          Authorization: `Bearer ${env.PYTHON_SERVER_SECRET}`,
+        },
+      },
     );
 
     const { segments, interruptions, latencyBlocks } = response.data;

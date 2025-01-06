@@ -24,4 +24,4 @@ toolCallRouter.post("/", async (req: Request, res: Response) => {
   }
 });
 
-export default toolCallRouter;
+export { toolCallRouter };

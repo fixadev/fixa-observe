@@ -133,7 +133,7 @@ export async function startCall(
         assistant_id: assistantId,
         assistant_overrides: {
           // for now
-          serverUrl: env.NODE_SERVER_URL + "/vapi",
+          serverUrl: env.NODE_SERVER_URL + "/internal/vapi",
           model: {
             provider: "openai",
             model: "gpt-4o",

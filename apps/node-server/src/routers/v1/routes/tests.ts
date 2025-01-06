@@ -4,7 +4,7 @@ import { db } from "../../../db";
 import { TestService } from "@repo/services/src/test";
 import { posthogClient } from "../../../clients/posthogClient";
 
-const router = express.Router();
+const testsRouter = express.Router();
 const testService = new TestService(db, posthogClient);
 
 const inputSchema = z.object({
@@ -13,7 +13,7 @@ const inputSchema = z.object({
   personaIds: z.array(z.string()).optional(),
 });
 
-router.post("/", async (req, res) => {
+testsRouter.post("/", async (req, res) => {
   try {
     let input: z.infer<typeof inputSchema>;
     try {
@@ -36,9 +36,9 @@ router.post("/", async (req, res) => {
       where: { customerAgentId: input.agentId, ownerId: ownerId },
     });
     if (!agent) {
-      return res.status(401).json({
+      return res.status(404).json({
         success: false,
-        error: "Unauthorized",
+        error: "Agent not found",
       });
     }
 
@@ -60,7 +60,7 @@ router.post("/", async (req, res) => {
   }
 });
 
-router.get("/:testId/status", async (req, res) => {
+testsRouter.get("/:testId/status", async (req, res) => {
   try {
     const testId = req.params.testId;
     const ownerId = res.locals.orgId;
@@ -70,9 +70,9 @@ router.get("/:testId/status", async (req, res) => {
       where: { id: testId, agent: { ownerId } },
     });
     if (!test) {
-      return res.status(401).json({
+      return res.status(404).json({
         success: false,
-        error: "Unauthorized",
+        error: "Test not found",
       });
     }
 
@@ -87,4 +87,4 @@ router.get("/:testId/status", async (req, res) => {
   }
 });
 
-export default router;
+export { testsRouter };

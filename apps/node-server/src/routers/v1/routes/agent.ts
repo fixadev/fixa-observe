@@ -144,4 +144,4 @@ agentRouter.delete("/:id", async (req: Request, res: Response) => {
   }
 });
 
-export default agentRouter;
+export { agentRouter };
