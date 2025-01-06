@@ -4,7 +4,7 @@ import type {
   CallWithIncludes,
   EvaluationResultWithIncludes,
 } from "@repo/types/src/index";
-import AudioPlayer, { type AudioPlayerRef } from "./AudioPlayer";
+import { AudioPlayer, type AudioPlayerRef } from "./AudioPlayer";
 import { useMemo, useRef, useState, useEffect, useCallback } from "react";
 import {
   cn,
