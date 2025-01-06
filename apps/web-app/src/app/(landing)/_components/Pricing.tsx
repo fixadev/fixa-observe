@@ -54,7 +54,7 @@ export function Pricing() {
                 {[
                   "no minimum commitment",
                   "pay only for what you use",
-                  "slack support",
+                  "discord support",
                   "10 free tests",
                 ].map((feature) => (
                   <li key={feature} className="flex items-center">

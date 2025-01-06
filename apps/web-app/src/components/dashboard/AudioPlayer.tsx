@@ -34,6 +34,7 @@ import {
 } from "~/lib/utils";
 import WaveSurfer from "wavesurfer.js";
 import { Skeleton } from "../ui/skeleton";
+import { useAudioSettings } from "~/components/hooks/useAudioSettings";
 
 export type AudioPlayerRef = {
   setActiveEvalResult: (
@@ -45,7 +46,7 @@ export type AudioPlayerRef = {
   seek: (time: number) => void;
 };
 
-const _AudioPlayer = forwardRef<
+export const AudioPlayer = forwardRef<
   AudioPlayerRef,
   {
     call: CallWithIncludes;
@@ -81,7 +82,7 @@ const _AudioPlayer = forwardRef<
     void wavesurfer?.play();
   }, [wavesurfer]);
   const [currentTime, setCurrentTime] = useState(0);
-  const [playbackSpeed, setPlaybackSpeed] = useState(1);
+  const { playbackSpeed, setPlaybackSpeed } = useAudioSettings();
   const [audioLoaded, setAudioLoaded] = useState(false);
   const audioVisualizerId = useMemo(() => {
     return `audio-visualizer-${crypto.randomUUID()}`;
@@ -105,6 +106,7 @@ const _AudioPlayer = forwardRef<
       _wavesurfer.on("ready", (_duration) => {
         setDuration(_duration);
         setAudioLoaded(true);
+        _wavesurfer.setPlaybackRate(playbackSpeed);
       });
       _wavesurfer.on("timeupdate", (time) => {
         setCurrentTime(time);
@@ -123,12 +125,20 @@ const _AudioPlayer = forwardRef<
         _wavesurfer.destroy();
       };
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [audioVisualizerId, call.stereoRecordingUrl, small]);
 
   // Update the time
   useEffect(() => {
     onTimeUpdate?.(currentTime);
   }, [currentTime, onTimeUpdate]);
+
+  // Update playback speed
+  useEffect(() => {
+    if (wavesurfer) {
+      wavesurfer.setPlaybackRate(playbackSpeed);
+    }
+  }, [playbackSpeed, wavesurfer]);
 
   // Check if we need to stop playback due to reaching eval end
   useEffect(() => {
@@ -416,8 +426,3 @@ const _AudioPlayer = forwardRef<
     </div>
   );
 });
-export default _AudioPlayer;
-// export default dynamic(() => Promise.resolve(_AudioPlayer), {
-//   ssr: false,
-//   loading: () => <div>Loading...</div>,
-// });
