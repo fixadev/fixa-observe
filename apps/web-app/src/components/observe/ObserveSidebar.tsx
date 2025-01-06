@@ -260,7 +260,7 @@ export default function ObserveSidebar() {
                 <SidebarMenuItem>
                   <SidebarMenuButton asChild>
                     <Link
-                      href={`https://join.slack.com/t/fixacommunity/shared_invite/zt-2wbw79829-01HGYT7SxVYPk8t6pTNb9w`}
+                      href={`https://discord.gg/rT9cYkfybZ`}
                       target="_blank"
                     >
                       <LifebuoyIcon />
