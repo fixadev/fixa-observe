@@ -362,6 +362,6 @@ model Alert {
 }
 
 enum AlertType {
-  evaluationGroup
+  evalSet
   latency
 }
