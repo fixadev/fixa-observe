@@ -17,9 +17,9 @@ export const LatencyAlertSchema = z.object({
   slackNames: z.array(z.string()),
 });
 
-export type EvalSetAlert = z.infer<typeof EvalSetAlertSchema>;
-export const EvalSetAlertSchema = z.object({
-  evalSetId: z.string(),
+export type EvaluationGroupAlert = z.infer<typeof EvaluationGroupAlertSchema>;
+export const EvaluationGroupAlertSchema = z.object({
+  evaluationGroupId: z.string(),
   trigger: z.boolean().nullable(),
   slackNames: z.array(z.string()),
 });
@@ -32,7 +32,7 @@ export const AlertWithDetailsSchema = z.discriminatedUnion("type", [
   }),
   AlertSchema.omit({ details: true }).extend({
     type: z.literal("evalSet"),
-    details: EvalSetAlertSchema,
+    details: EvaluationGroupAlertSchema,
   }),
 ]);
 
@@ -42,18 +42,24 @@ export const CreateAlertSchema = z.discriminatedUnion("type", [
     id: true,
     createdAt: true,
     ownerId: true,
+    savedSearchId: true,
   }).extend({
     type: z.literal("latency"),
-    details: LatencyAlertSchema,
+    details: LatencyAlertSchema.omit({
+      slackNames: true,
+    }),
   }),
   AlertSchema.omit({
     details: true,
     id: true,
     createdAt: true,
     ownerId: true,
+    savedSearchId: true,
   }).extend({
     type: z.literal("evalSet"),
-    details: EvalSetAlertSchema,
+    details: EvaluationGroupAlertSchema.omit({
+      slackNames: true,
+    }),
   }),
 ]);
 

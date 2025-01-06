@@ -92,9 +92,9 @@ export async function sendAlerts({
             );
           }
         } else if (alert.type === "evalSet") {
-          const { evalSetId, trigger } = alert.details;
+          const { evaluationGroupId, trigger } = alert.details;
           const evalSetResult = evalSetResults.find(
-            (result) => result.evalSetId === evalSetId,
+            (result) => result.evalSetId === evaluationGroupId,
           );
           if (evalSetResult?.success === trigger || trigger === null) {
             sendAlertSlackMessage({

@@ -3,11 +3,9 @@ import { createServer } from "http";
 import { Server } from "socket.io";
 import { env } from "./env";
 import { startQueueConsumer } from "./workers/queueConsumer";
-import privateRouter from "./routers/v1/private";
-import publicRouter from "./routers/v1/public";
+import { privateRouter } from "./routers/v1/private";
+import { publicRouter } from "./routers/v1/public";
 import { posthogClient } from "./clients/posthogClient";
-import vapiRouter from "./routers/v1/routes/vapi";
-import ofOneRouter from "./routers/v1/routes/ofOne";
 
 const app = express();
 const httpServer = createServer(app);
@@ -45,10 +43,6 @@ app.get("/", (req, res) => {
   res.send("ollo");
 });
 
-// TODO: authenticate vapi requests
-app.use("/vapi", vapiRouter);
-app.use("/queue-ofone-kiosk-calls", ofOneRouter);
-
 // temporary before 11x migration
 app.use("/", privateRouter);
 app.use("/", publicRouter);
@@ -56,13 +50,11 @@ app.use("/", publicRouter);
 app.use("/v1", privateRouter);
 app.use("/v1", publicRouter);
 
-// global error handler
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
   console.error(err.stack);
-  res.status(500).json({ error: "Something broke!" });
+  res.status(500).json({ error: err.message });
 });
 
-// Server setup with unified cleanup
 const PORT = process.env.PORT || 3003;
 const cleanup = () => {
   httpServer.close(async () => {
