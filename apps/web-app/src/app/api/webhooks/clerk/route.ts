@@ -98,13 +98,17 @@ export async function POST(req: Request) {
       const orgId = evt.data.id;
       const creatorId = evt.data.created_by;
 
-      const user = await clerkService.getUser(creatorId ?? "");
-      const orgs =
-        await clerkService.clerkClient.users.getOrganizationMembershipList({
-          userId: user.id,
-        });
+      let numOrgs = 0;
+      if (creatorId) {
+        const user = await clerkService.getUser(creatorId);
+        const orgs =
+          await clerkService.clerkClient.users.getOrganizationMembershipList({
+            userId: user.id,
+          });
+        numOrgs = orgs.data.length;
+      }
 
-      if (orgs.data.length <= 1) {
+      if (numOrgs <= 1) {
         // Give the org free tests + observability calls
         // Only do this when user has no org (i.e. they are a new user)
         await clerkService.updatePublicMetadata({
