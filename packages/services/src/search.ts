@@ -19,13 +19,7 @@ export class SearchService {
     filter: Filter;
     ownerId: string;
   }): Promise<SavedSearchWithIncludes> {
-    const {
-      evaluationGroups: evalSets,
-      alerts,
-      timeRange,
-      customerCallId,
-      ...filterData
-    } = filter;
+    const { timeRange, customerCallId, ...filterData } = filter;
 
     const searchData = {
       ...filterData,
@@ -66,7 +60,7 @@ export class SearchService {
     search: SavedSearchWithIncludes;
     ownerId: string;
   }): Promise<SavedSearchWithIncludes> {
-    const { evaluationGroups: evalSets, alerts, ...searchData } = search;
+    const { evaluationGroups, alerts, ...searchData } = search;
     delete searchData.metadata?.test;
     const updatedSearch = await this.db.savedSearch.update({
       where: {

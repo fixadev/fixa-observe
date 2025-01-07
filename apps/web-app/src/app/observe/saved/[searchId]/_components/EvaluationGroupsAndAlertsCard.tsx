@@ -24,7 +24,7 @@ export function EvaluationGroupsAndAlertsCard({
 }: {
   searchId: string;
 }) {
-  const { filter, setFilter } = useObserveState();
+  const { savedSearch } = useObserveState();
   const [mode, setMode] = useState<"evaluations" | "alerts">("evaluations");
   const [evalsModalOpen, setEvalsModalOpen] = useState(false);
   const [alertsModalOpen, setAlertsModalOpen] = useState(false);
@@ -35,7 +35,7 @@ export function EvaluationGroupsAndAlertsCard({
   );
 
   function getEvaluationSetName(alert: AlertWithDetails) {
-    const evaluationSet = filter.evaluationGroups?.find(
+    const evaluationSet = savedSearch?.evaluationGroups?.find(
       (evaluationGroup) =>
         evaluationGroup.id === (alert.details as EvalSetAlert).evalSetId,
     );
@@ -67,11 +67,9 @@ export function EvaluationGroupsAndAlertsCard({
       <CardContent className="flex-1 overflow-y-auto">
         {mode === "evaluations" ? (
           <div className="flex flex-col gap-2">
-            {filter.evaluationGroups?.map((evaluationGroup) => (
+            {savedSearch?.evaluationGroups?.map((evaluationGroup) => (
               <EvaluationGroupCard
                 evaluationGroup={evaluationGroup}
-                filter={filter}
-                setFilter={setFilter}
                 setSelectedEvaluationGroup={setSelectedEvaluationGroup}
                 setEvalsModalOpen={setEvalsModalOpen}
                 key={evaluationGroup.id}
@@ -92,11 +90,9 @@ export function EvaluationGroupsAndAlertsCard({
           </div>
         ) : (
           <div className="flex flex-col gap-4">
-            {filter.alerts?.map((alert) => (
+            {savedSearch?.alerts?.map((alert) => (
               <AlertCard
                 alert={alert}
-                filter={filter}
-                setFilter={setFilter}
                 getEvaluationSetName={getEvaluationSetName}
                 setSelectedAlert={setSelectedAlert}
                 setAlertsModalOpen={setAlertsModalOpen}
@@ -121,8 +117,6 @@ export function EvaluationGroupsAndAlertsCard({
           savedSearchId={searchId}
           selectedEvaluationGroup={selectedEvaluationGroup}
           voidSelectedEvaluationGroup={() => setSelectedEvaluationGroup(null)}
-          filter={filter}
-          setFilter={setFilter}
         />
         <CreateEditAlertDialog
           open={alertsModalOpen}
@@ -130,8 +124,6 @@ export function EvaluationGroupsAndAlertsCard({
           selectedAlert={selectedAlert}
           savedSearchId={searchId}
           voidSelectedAlert={() => setSelectedAlert(null)}
-          filter={filter}
-          setFilter={setFilter}
         />
       </CardContent>
     </Card>

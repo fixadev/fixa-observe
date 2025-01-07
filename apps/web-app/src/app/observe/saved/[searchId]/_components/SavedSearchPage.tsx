@@ -10,7 +10,7 @@ import { Dialog, DialogContent } from "~/components/ui/dialog";
 import { api } from "~/trpc/react";
 import ChartCard from "~/components/observe/ChartCard";
 import { EvaluationGroupsAndAlertsCard } from "./EvaluationGroupsAndAlertsCard";
-import { type SavedSearchWithIncludes } from "@repo/types/src";
+import { FilterSchema, type SavedSearchWithIncludes } from "@repo/types/src";
 import NoCallsCard from "~/components/observe/NoCallsCard";
 import FreeCallsLeft from "~/components/observe/FreeCallsLeft";
 
@@ -34,9 +34,15 @@ export default function SavedSearchPage({
   } = useObserveState();
 
   useEffect(() => {
-    setFilter(savedSearch);
     setSavedSearch(savedSearch);
     setIncludeTestCalls(includeTestCalls);
+
+    const parsedFilter = FilterSchema.safeParse(savedSearch);
+    if (parsedFilter.success) {
+      setFilter(parsedFilter.data);
+    } else {
+      console.error("Invalid filter", parsedFilter.error);
+    }
   }, [
     savedSearch,
     setFilter,

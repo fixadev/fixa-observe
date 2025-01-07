@@ -4,12 +4,11 @@ import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "~/components/ui/button";
 import { Switch } from "~/components/ui/switch";
 import { api } from "~/trpc/react";
-import type { AlertWithDetails, Filter } from "@repo/types/src/index";
+import type { AlertWithDetails } from "@repo/types/src/index";
+import { useObserveState } from "~/components/hooks/useObserveState";
 
 interface AlertCardProps {
   alert: AlertWithDetails;
-  filter: Filter;
-  setFilter: React.Dispatch<React.SetStateAction<Filter>>;
   getEvaluationSetName: (alert: AlertWithDetails) => string | undefined;
   setSelectedAlert: React.Dispatch<
     React.SetStateAction<AlertWithDetails | null>
@@ -19,18 +18,21 @@ interface AlertCardProps {
 
 export function AlertCard({
   alert,
-  filter,
-  setFilter,
   getEvaluationSetName,
   setSelectedAlert,
   setAlertsModalOpen,
 }: AlertCardProps) {
+  const { setSavedSearch } = useObserveState();
   const { mutate: updateAlert } = api.search.updateAlert.useMutation({
     onSuccess: (data) => {
-      setFilter({
-        ...filter,
-        alerts: filter.alerts?.map((a) => (a.id === alert.id ? data : a)),
-      });
+      setSavedSearch((prev) =>
+        prev
+          ? {
+              ...prev,
+              alerts: prev.alerts?.map((a) => (a.id === alert.id ? data : a)),
+            }
+          : prev,
+      );
     },
   });
 
