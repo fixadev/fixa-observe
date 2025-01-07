@@ -114,7 +114,7 @@ model Call {
   interruptionP95    Float?
   numInterruptions   Int?
   duration           Float?
-  unread             Boolean     @default(true)
+  unread             Boolean?
 
   agent   Agent?  @relation(fields: [agentId], references: [id], onDelete: Cascade)
   agentId String?
