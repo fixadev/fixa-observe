@@ -22,9 +22,10 @@ import {
   SelectContent,
   SelectTrigger,
 } from "~/components/ui/select";
-import type {
-  CallWithIncludes,
-  EvaluationResultWithIncludes,
+import {
+  MARK_CALL_AS_READ_DELAY_MS,
+  type CallWithIncludes,
+  type EvaluationResultWithIncludes,
 } from "@repo/types/src/index";
 import {
   cn,
@@ -40,6 +41,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "~/components/ui/tooltip";
+import { api } from "~/trpc/react";
 
 export type AudioPlayerRef = {
   setActiveEvalResult: (
@@ -59,9 +61,17 @@ export const AudioPlayer = forwardRef<
     offsetFromStart?: number;
     onEvalResultHover?: (evalId: string | null) => void;
     onTimeUpdate?: (time: number) => void;
+    onMarkCallAsRead?: (callId: string) => void;
   }
 >(function AudioPlayer(
-  { call, small = false, offsetFromStart = 0, onEvalResultHover, onTimeUpdate },
+  {
+    call,
+    small = false,
+    offsetFromStart = 0,
+    onEvalResultHover,
+    onTimeUpdate,
+    onMarkCallAsRead,
+  },
   ref,
 ) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -92,6 +102,11 @@ export const AudioPlayer = forwardRef<
   const audioVisualizerId = useMemo(() => {
     return `audio-visualizer-${crypto.randomUUID()}`;
   }, []);
+  const markCallAsRead = api._call.markRead.useMutation({
+    onSuccess: () => {
+      onMarkCallAsRead?.(call.id);
+    },
+  });
 
   // Load the audio visualizer
   useEffect(() => {
@@ -166,6 +181,17 @@ export const AudioPlayer = forwardRef<
       setActiveEvalResult(null);
     }
   }, [activeEvalResult, isPlaying]);
+
+  useEffect(() => {
+    if (audioLoaded && call.unread) {
+      const timer = setTimeout(() => {
+        markCallAsRead.mutate({ callId: call.id });
+      }, MARK_CALL_AS_READ_DELAY_MS);
+
+      return () => clearTimeout(timer);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [audioLoaded]);
 
   useImperativeHandle(
     ref,

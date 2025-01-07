@@ -114,18 +114,18 @@ model Call {
   interruptionP95    Float?
   numInterruptions   Int?
   duration           Float?
-
-  evaluationResults EvaluationResult[]
+  unread             Boolean     @default(true)
 
   agent   Agent?  @relation(fields: [agentId], references: [id], onDelete: Cascade)
   agentId String?
 
-  test        Test?      @relation(fields: [testId], references: [id], onDelete: Cascade)
-  testId      String?
-  testAgent   TestAgent? @relation(fields: [testAgentId], references: [id], onDelete: Cascade)
-  testAgentId String?
-  scenario    Scenario?  @relation(fields: [scenarioId], references: [id], onDelete: Cascade)
-  scenarioId  String?
+  test              Test?              @relation(fields: [testId], references: [id], onDelete: Cascade)
+  testId            String?
+  testAgent         TestAgent?         @relation(fields: [testAgentId], references: [id], onDelete: Cascade)
+  testAgentId       String?
+  scenario          Scenario?          @relation(fields: [scenarioId], references: [id], onDelete: Cascade)
+  scenarioId        String?
+  evaluationResults EvaluationResult[]
 
   messages      Message[]
   latencyBlocks LatencyBlock[]

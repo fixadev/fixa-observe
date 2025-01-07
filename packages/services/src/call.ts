@@ -284,6 +284,13 @@ export class CallService {
     return parsedCalls.filter((p) => p !== null);
   };
 
+  markRead = async ({ callId, orgId }: { callId: string; orgId: string }) => {
+    await this.db.call.update({
+      where: { id: callId, ownerId: orgId },
+      data: { unread: false },
+    });
+  };
+
   // // WIP
   // getLatencyInterruptionPercentiles: async ({
   //   ownerId,
