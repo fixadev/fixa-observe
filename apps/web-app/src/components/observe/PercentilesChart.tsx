@@ -39,12 +39,16 @@ const chartConfig = {
 export default function PercentilesChart({
   data,
 }: {
-  data: { timestamp: number; p50: number; p90: number; p95: number }[];
+  data?: { timestamp: number; p50: number; p90: number; p95: number }[];
 }) {
   const { filter, setFilter } = useObserveState();
 
   // Fill in missing timestamps, based on the chart period
   const formattedData = useMemo(() => {
+    if (!data) {
+      return [];
+    }
+
     const ret = [...data];
 
     const periodSet = new Set<number>();

@@ -1,5 +1,5 @@
 "use client";
-import { type AlertWithDetails, type Filter } from "@repo/types/src/index";
+import { type AlertWithDetails } from "@repo/types/src/index";
 import {
   Dialog,
   DialogContent,
@@ -16,6 +16,7 @@ import { AlertCard } from "./AlertDetailsCard";
 import { instantiateAlert } from "~/lib/instantiate";
 import Spinner from "~/components/Spinner";
 import { TrashIcon } from "@heroicons/react/24/solid";
+import { useObserveState } from "~/components/hooks/useObserveState";
 
 export function CreateEditAlertDialog({
   open,
@@ -23,17 +24,14 @@ export function CreateEditAlertDialog({
   savedSearchId,
   selectedAlert,
   voidSelectedAlert,
-  filter,
-  setFilter,
 }: {
   open: boolean;
   setOpen: (open: boolean) => void;
   savedSearchId: string;
   selectedAlert: AlertWithDetails | null;
   voidSelectedAlert: () => void;
-  filter: Filter;
-  setFilter: React.Dispatch<React.SetStateAction<Filter>>;
 }) {
+  const { setSavedSearch } = useObserveState();
   const [alert, setAlert] = useState<AlertWithDetails | null>(null);
 
   useEffect(() => {
@@ -48,10 +46,14 @@ export function CreateEditAlertDialog({
   const { mutate: createAlert, isPending: isCreating } =
     api.search.createAlert.useMutation({
       onSuccess: (data) => {
-        setFilter({
-          ...filter,
-          alerts: filter.alerts ? [...filter.alerts, data] : [data],
-        });
+        setSavedSearch((prev) =>
+          prev
+            ? {
+                ...prev,
+                alerts: prev.alerts ? [...prev.alerts, data] : [data],
+              }
+            : prev,
+        );
         voidSelectedAlert();
         setOpen(false);
       },
@@ -60,10 +62,14 @@ export function CreateEditAlertDialog({
   const { mutate: updateAlert, isPending: isUpdating } =
     api.search.updateAlert.useMutation({
       onSuccess: (data) => {
-        setFilter({
-          ...filter,
-          alerts: filter.alerts?.map((a) => (a.id === data.id ? data : a)),
-        });
+        setSavedSearch((prev) =>
+          prev
+            ? {
+                ...prev,
+                alerts: prev.alerts?.map((a) => (a.id === data.id ? data : a)),
+              }
+            : prev,
+        );
         voidSelectedAlert();
         setOpen(false);
       },
@@ -72,10 +78,14 @@ export function CreateEditAlertDialog({
   const { mutate: deleteAlert, isPending: isDeleting } =
     api.search.deleteAlert.useMutation({
       onSuccess: () => {
-        setFilter({
-          ...filter,
-          alerts: filter.alerts?.filter((a) => a.id !== alert?.id),
-        });
+        setSavedSearch((prev) =>
+          prev
+            ? {
+                ...prev,
+                alerts: prev.alerts?.filter((a) => a.id !== alert?.id),
+              }
+            : prev,
+        );
         voidSelectedAlert();
         setOpen(false);
       },
@@ -102,7 +112,6 @@ export function CreateEditAlertDialog({
         <div className="flex flex-col gap-4">
           <AlertCard
             alert={alert}
-            filter={filter}
             onUpdate={setAlert}
             searchId={savedSearchId}
           />

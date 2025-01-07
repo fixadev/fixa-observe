@@ -1,8 +1,5 @@
 import { z } from "zod";
-import {
-  EvaluationGroupWithIncludesSchema,
-  TimeRangeSchema,
-} from "./db";
+import { EvaluationGroupWithIncludesSchema, TimeRangeSchema } from "./db";
 import { AlertWithDetailsSchema } from "./alert";
 
 export const EvaluationGroupResultSchema = z.object({
@@ -25,8 +22,6 @@ export const FilterSchema = z.object({
     z.null(),
     z.undefined(),
   ]),
-  evaluationGroups: z.array(EvaluationGroupWithIncludesSchema).optional(),
-  alerts: z.array(AlertWithDetailsSchema).optional(),
   evaluationGroupResult: z.union([
     EvaluationGroupResultSchema,
     z.null(),

@@ -172,16 +172,13 @@ export const handleCallEnded = async ({
       setDeviceAvailable(call.ofOneDeviceId, userSocket);
     }
 
-    const o1Analysis = await analyzeCallWitho1({
+    const evalResults = await analyzeCallWitho1({
       callStartedAt: report.startedAt,
       messages: report.artifact.messages,
       testAgentPrompt: scenario.instructions,
       scenario,
     });
     // console.log("O1 ANALYSIS for call", call.id, o1Analysis);
-
-    let unparsedResult: string;
-    unparsedResult = o1Analysis;
 
     // const useGemini = !scenario.includeDateTime;
     // if (!useGemini) {
@@ -204,15 +201,13 @@ export const handleCallEnded = async ({
     //   unparsedResult = geminiResult.textResult ?? "";
     // }
 
-    const evalResults = await formatOutput(unparsedResult);
-
     const validEvalResults = evalResults.filter((evalResult) =>
       [...scenario.evaluations]?.some(
         (evaluation) => evaluation.id === evalResult.evaluationId,
       ),
     );
 
-    const criticalEvalResults = evalResults.filter((evalResult) =>
+    const criticalEvalResults = validEvalResults.filter((evalResult) =>
       [...scenario.evaluations]?.some(
         (evaluation) =>
           evaluation.id === evalResult.evaluationId && evaluation.isCritical,

@@ -3,27 +3,34 @@ import { NextResponse } from "next/server";
 
 const isPrivateRoute = createRouteMatcher(["/dashboard(.*)", "/observe(.*)"]);
 
-export default clerkMiddleware((auth, req) => {
-  if (isPrivateRoute(req)) {
-    if (!auth().userId) {
-      return auth().redirectToSignIn();
-    }
-
-    auth().protect();
-
-    const { userId, orgId } = auth();
-    // Redirect signed in users to organization selection page if they are not active in an organization
-    if (userId && !orgId && req.nextUrl.pathname !== "/org-selection") {
-      const searchParams = new URLSearchParams({ redirectUrl: req.url });
-
-      const orgSelection = new URL(
-        `/org-selection?${searchParams.toString()}`,
-        req.url,
-      );
-
-      return NextResponse.redirect(orgSelection);
-    }
+export default clerkMiddleware(async (auth, req) => {
+  // Skip middleware for static assets and public routes
+  if (!isPrivateRoute(req)) {
+    return NextResponse.next();
   }
+
+  const _auth = await auth();
+  if (!_auth.userId) {
+    return _auth.redirectToSignIn();
+  }
+
+  await auth.protect();
+
+  const { userId, orgId } = _auth;
+  if (userId && !orgId && req.nextUrl.pathname !== "/org-selection") {
+    const searchParams = new URLSearchParams({
+      redirectUrl: new URL(req.url).pathname, // Only store pathname instead of full URL
+    });
+
+    const orgSelection = new URL(
+      `/org-selection?${searchParams.toString()}`,
+      req.url,
+    );
+
+    return NextResponse.redirect(orgSelection);
+  }
+
+  return NextResponse.next();
 });
 
 export const config = {

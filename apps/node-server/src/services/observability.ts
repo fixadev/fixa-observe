@@ -8,7 +8,7 @@ import { uploadFromPresignedUrl } from "./aws";
 import { zodResponseFormat } from "openai/helpers/zod";
 import { openai } from "../clients/openAIClient";
 import { z } from "zod";
-import { analyzeCallWitho1, formatOutput } from "./textAnalysis";
+import { analyzeCallWitho1 } from "./textAnalysis";
 import { sendAlerts } from "./alert";
 import stripeServiceClient from "../clients/stripeServiceClient";
 import { SearchService } from "@repo/services/src/search";
@@ -244,9 +244,7 @@ export const analyzeBasedOnRules = async ({
         evals: allEvals,
       });
 
-      const parsedEvalResults = await formatOutput(result);
-
-      const validEvalResults = parsedEvalResults.filter((result) =>
+      const validEvalResults = result.filter((result) =>
         allEvals.some((evaluation) => evaluation.id === result.evaluationId),
       );
 
