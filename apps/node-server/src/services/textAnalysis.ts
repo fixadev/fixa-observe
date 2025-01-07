@@ -2,7 +2,7 @@ import { z } from "zod";
 import { zodResponseFormat } from "openai/helpers/zod";
 import { openai } from "../clients/openAIClient";
 import { ArtifactMessagesItem } from "@vapi-ai/server-sdk/api";
-import { Evaluation, EvalResultType, Message } from "@prisma/client";
+import { EvalResultType, Message } from "@prisma/client";
 import { getDateTimeAtTimezone } from "../utils/time";
 import {
   EvaluationWithIncludes,
@@ -36,7 +36,7 @@ export const analyzeCallWitho1 = async ({
   testAgentPrompt: string;
   scenario?: ScenarioWithIncludes;
   evals?: EvaluationWithIncludes[];
-}): Promise<string> => {
+}): Promise<Array<z.infer<typeof EvalResultSchema>>> => {
   const basePrompt = `
   Your job to to analyze a call transcript between an AI agent (the main agent) and a test AI agent (the test agent), and determine how the main agent performed.
 
@@ -71,6 +71,7 @@ export const analyzeCallWitho1 = async ({
   - some evals do not require timestamps (such as an eval that failed but not in a particular part of the call)
   - transcription errors occur frequently, particuarly for proper nouns and names. so if you see an error involving a name or proper noun that looks likes its been mis-transcribed, you should not count it as a failure and assume it was a transcription error instead.
     - for example, if the transcript says "hi, this is Jordan from Masa Valley" but the evaluation says "agent should introduce themselves as 'Jordan from Mussab Ali'", you should not count this as a failure.
+  - OUTPUT ONLY THE JSON - do not include backticks like \`\`\`json or any other formatting
   `;
 
   const prompt = `${basePrompt}\n\n\n\nTest Agent Prompt: ${testAgentPrompt}\n\n${
@@ -84,34 +85,26 @@ export const analyzeCallWitho1 = async ({
     scenario?.evaluations || evals || [],
   )}
   \n\nCall Transcript: ${JSON.stringify(messages)}`;
-  // console.log("========================= O1 PROMPT =========================");
-  // console.log(prompt);
-  // console.log("========================= END O1 PROMPT ======================");
 
-  const completion = await openai.chat.completions.create({
-    model: "o1-preview",
+  const completion = await openai.beta.chat.completions.parse({
+    model: "gpt-4o-mini",
     messages: [
       {
         role: "user",
         content: prompt,
       },
     ],
+    response_format: zodResponseFormat(
+      findLLMErrorsOutputSchema,
+      "evalResults",
+    ),
   });
 
-  const result = completion.choices[0].message.content;
-
-  const cleanedResult = result
-    ?.replace("```json\n", "")
-    .replace("\n```", "")
-    .trim();
-
-  if (!cleanedResult) {
+  const result = completion.choices[0]?.message.parsed?.evalResults;
+  if (!result) {
     throw new Error("No result from LLM");
   }
-
-  // console.log("CLEANED RESULT", cleanedResult);
-
-  return cleanedResult;
+  return result;
 };
 
 export const formatOutput = async (output: string) => {

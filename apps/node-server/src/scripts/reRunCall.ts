@@ -3,8 +3,6 @@ import { CallStatus } from "@prisma/client";
 import { db } from "../db";
 import vapiClient from "../clients/vapiClient";
 import { analyzeCallWitho1 } from "../services/textAnalysis";
-import { formatOutput } from "../services/textAnalysis";
-import { analyzeCallWithGemini } from "../services/audioAnalysis";
 import { env } from "../env";
 import { getScenariosWithGeneralEvals } from "../services/scenario";
 
@@ -73,11 +71,9 @@ const main = async () => {
     return;
   }
 
-  const evalResults = await formatOutput(analysis);
-
-  const validEvalResults = evalResults.filter((evalResult) =>
-    [...scenarioWithGeneralEvals.evals]?.some(
-      (evaluation) => evaluation.id === evalResult.evalId,
+  const validEvalResults = analysis.filter((evalResult) =>
+    [...scenarioWithGeneralEvals.evaluations]?.some(
+      (evaluation) => evaluation.id === evalResult.evaluationId,
     ),
   );
 
