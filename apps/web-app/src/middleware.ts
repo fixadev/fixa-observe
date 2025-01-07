@@ -3,19 +3,20 @@ import { NextResponse } from "next/server";
 
 const isPrivateRoute = createRouteMatcher(["/dashboard(.*)", "/observe(.*)"]);
 
-export default clerkMiddleware((auth, req) => {
+export default clerkMiddleware(async (auth, req) => {
   // Skip middleware for static assets and public routes
   if (!isPrivateRoute(req)) {
     return NextResponse.next();
   }
 
-  if (!auth().userId) {
-    return auth().redirectToSignIn();
+  const _auth = await auth();
+  if (!_auth.userId) {
+    return _auth.redirectToSignIn();
   }
 
-  auth().protect();
+  await auth.protect();
 
-  const { userId, orgId } = auth();
+  const { userId, orgId } = _auth;
   if (userId && !orgId && req.nextUrl.pathname !== "/org-selection") {
     const searchParams = new URLSearchParams({
       redirectUrl: new URL(req.url).pathname, // Only store pathname instead of full URL
@@ -28,6 +29,8 @@ export default clerkMiddleware((auth, req) => {
 
     return NextResponse.redirect(orgSelection);
   }
+
+  return NextResponse.next();
 });
 
 export const config = {
