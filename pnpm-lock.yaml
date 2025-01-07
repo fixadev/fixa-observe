@@ -138,11 +138,11 @@ importers:
         specifier: ^6.9.6
         version: 6.9.6(next@14.2.5(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@clerk/themes':
-        specifier: ^2.1.27
-        version: 2.1.27
+        specifier: ^2.2.3
+        version: 2.2.3
       '@clerk/types':
-        specifier: ^4.25.0
-        version: 4.25.0
+        specifier: ^4.40.0
+        version: 4.40.0
       '@dagrejs/dagre':
         specifier: ^1.1.4
         version: 1.1.4
@@ -1088,20 +1088,8 @@ packages:
       react-dom:
         optional: true
 
-  '@clerk/themes@2.1.27':
-    resolution: {integrity: sha512-BFbSDhhFMTPsWzbEqm/LOOT4ULEin0C7jSngeiCFKjCG246QhsqfEZfwZVrWM7Gzfz/geR6itAtmLSSFDpzAbA==}
-    engines: {node: '>=18.17.0'}
-
-  '@clerk/types@4.19.0':
-    resolution: {integrity: sha512-bDN/nRUD5PFCehQ+Kjdcft0I3b9CIyCcY3OBNDSc1L6RQhlXH+J48EtaP/cbRdslb83LJiBPQ2i/gV4VgblzwA==}
-    engines: {node: '>=18.17.0'}
-
-  '@clerk/types@4.25.0':
-    resolution: {integrity: sha512-p2IyJ0q5WF1e976L1pS1J6Mb5ducfkUC31DR1EvMjPwJkrlWJdAMCPc+zqRRAePVy/JBVK2gEKbUVtJ6/jrpag==}
-    engines: {node: '>=18.17.0'}
-
-  '@clerk/types@4.39.2':
-    resolution: {integrity: sha512-zkZoJIBe1VIVyT444INCNxLnpee1vT/sP7vrBpYK8PjDkB/gaybRsPvKhZnZDbmNAvpcsc2MR4iWsgfp1O17Yw==}
+  '@clerk/themes@2.2.3':
+    resolution: {integrity: sha512-pDA5P9IUTLVKYviEtm7BgB+1rcJINDuP9F4LJ5ZH3f/6+LdG09EaVM/9nvGLnNqDJ7XvldzcKes1BpPJuGSCew==}
     engines: {node: '>=18.17.0'}
 
   '@clerk/types@4.40.0':
@@ -8306,7 +8294,7 @@ snapshots:
   '@clerk/backend@1.21.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
       '@clerk/shared': 2.20.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@clerk/types': 4.39.2
+      '@clerk/types': 4.40.0
       cookie: 0.7.0
       snakecase-keys: 5.4.4
       tslib: 2.4.1
@@ -8348,7 +8336,7 @@ snapshots:
 
   '@clerk/shared@2.20.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
-      '@clerk/types': 4.39.2
+      '@clerk/types': 4.40.0
       dequal: 2.0.3
       glob-to-regexp: 0.4.1
       js-cookie: 3.0.5
@@ -8370,22 +8358,10 @@ snapshots:
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
 
-  '@clerk/themes@2.1.27':
+  '@clerk/themes@2.2.3':
     dependencies:
-      '@clerk/types': 4.19.0
+      '@clerk/types': 4.40.0
       tslib: 2.4.1
-
-  '@clerk/types@4.19.0':
-    dependencies:
-      csstype: 3.1.1
-
-  '@clerk/types@4.25.0':
-    dependencies:
-      csstype: 3.1.1
-
-  '@clerk/types@4.39.2':
-    dependencies:
-      csstype: 3.1.1
 
   '@clerk/types@4.40.0':
     dependencies:
