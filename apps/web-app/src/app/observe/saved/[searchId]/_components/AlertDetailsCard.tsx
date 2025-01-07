@@ -1,7 +1,7 @@
 "use client";
 import { CardContent } from "~/components/ui/card";
 import { cn } from "~/lib/utils";
-import { type AlertWithDetails, type Filter } from "@repo/types/src/index";
+import { type AlertWithDetails } from "@repo/types/src/index";
 import {
   Select,
   SelectContent,
@@ -12,32 +12,33 @@ import {
 import { useEffect, useState, useMemo, useCallback } from "react";
 import { InstallSlackAppButton } from "~/components/SlackButton";
 import { alertLookbackPeriods } from "~/lib/instantiate";
+import { useObserveState } from "~/components/hooks/useObserveState";
+
+type LatencyOption = {
+  value: string;
+  label: string;
+  type: "latency";
+};
+
+type EvalSetOption = {
+  value: string;
+  label: string;
+  type: "evalSet";
+  evalSetId: string;
+};
+
+type AlertOption = LatencyOption | EvalSetOption;
 
 export function AlertCard({
   alert,
-  filter,
   searchId,
   onUpdate,
 }: {
   alert: AlertWithDetails;
-  filter: Filter;
   searchId: string;
   onUpdate: (alert: AlertWithDetails) => void;
 }) {
-  type LatencyOption = {
-    value: string;
-    label: string;
-    type: "latency";
-  };
-
-  type EvalSetOption = {
-    value: string;
-    label: string;
-    type: "evalSet";
-    evalSetId: string;
-  };
-
-  type AlertOption = LatencyOption | EvalSetOption;
+  const { savedSearch } = useObserveState();
 
   const [alertOptionIndex, setAlertOptionIndex] = useState(0);
   const alertOptions = useMemo<AlertOption[]>(
@@ -45,14 +46,14 @@ export function AlertCard({
       { value: "p50", label: "latency P50", type: "latency" },
       { value: "p90", label: "latency P90", type: "latency" },
       { value: "p95", label: "latency P95", type: "latency" },
-      ...(filter.evaluationGroups?.map((evalSet) => ({
+      ...(savedSearch?.evaluationGroups?.map((evalSet) => ({
         value: evalSet.id,
         label: evalSet.name,
         type: "evalSet" as const,
         evalSetId: evalSet.id,
       })) ?? []),
     ],
-    [filter.evaluationGroups],
+    [savedSearch?.evaluationGroups],
   );
 
   useEffect(() => {

@@ -2,7 +2,6 @@
 import { Dialog, DialogContent, DialogFooter } from "~/components/ui/dialog";
 import {
   type EvaluationGroupWithIncludes,
-  type Filter,
   type EvaluationTemplate,
   type EvaluationWithIncludes,
 } from "@repo/types/src/index";
@@ -31,6 +30,7 @@ import { EditableText } from "~/components/EditableText";
 import { CardHeader, CardContent } from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
 import { EvaluationTabSection } from "~/components/evaluations/EvaluationTabSection";
+import { useObserveState } from "~/components/hooks/useObserveState";
 
 export function EvaluationGroupDialog({
   open,
@@ -38,17 +38,14 @@ export function EvaluationGroupDialog({
   savedSearchId,
   selectedEvaluationGroup,
   voidSelectedEvaluationGroup,
-  filter,
-  setFilter,
 }: {
   open: boolean;
   setOpen: (open: boolean) => void;
   savedSearchId: string;
   selectedEvaluationGroup: EvaluationGroupWithIncludes | null;
   voidSelectedEvaluationGroup: () => void;
-  filter: Filter;
-  setFilter: React.Dispatch<React.SetStateAction<Filter>>;
 }) {
+  const { setSavedSearch } = useObserveState();
   const [evaluationGroup, setEvaluationGroup] =
     useState<EvaluationGroupWithIncludes>(
       selectedEvaluationGroup ?? instantiateEvaluationGroup({ savedSearchId }),
@@ -63,12 +60,16 @@ export function EvaluationGroupDialog({
   const { mutate: createEvaluationGroup, isPending: isCreating } =
     api.evaluation.createGroup.useMutation({
       onSuccess: (data) => {
-        setFilter({
-          ...filter,
-          evaluationGroups: filter.evaluationGroups
-            ? [...filter.evaluationGroups, data]
-            : [data],
-        });
+        setSavedSearch((prev) =>
+          prev
+            ? {
+                ...prev,
+                evaluationGroups: prev.evaluationGroups
+                  ? [...prev.evaluationGroups, data]
+                  : [data],
+              }
+            : prev,
+        );
         voidSelectedEvaluationGroup();
         setOpen(false);
       },
@@ -77,12 +78,16 @@ export function EvaluationGroupDialog({
   const { mutate: updateEvaluationGroup, isPending: isUpdating } =
     api.evaluation.updateGroup.useMutation({
       onSuccess: (data) => {
-        setFilter({
-          ...filter,
-          evaluationGroups: filter.evaluationGroups?.map((es) =>
-            es.id === data.id ? data : es,
-          ),
-        });
+        setSavedSearch((prev) =>
+          prev
+            ? {
+                ...prev,
+                evaluationGroups: prev.evaluationGroups?.map((es) =>
+                  es.id === data.id ? data : es,
+                ),
+              }
+            : prev,
+        );
         voidSelectedEvaluationGroup();
         setOpen(false);
       },
@@ -91,12 +96,16 @@ export function EvaluationGroupDialog({
   const { mutate: deleteEvaluationGroup, isPending: isDeleting } =
     api.evaluation.deleteGroup.useMutation({
       onSuccess: () => {
-        setFilter({
-          ...filter,
-          evaluationGroups: filter.evaluationGroups?.filter(
-            (es) => es.id !== evaluationGroup.id,
-          ),
-        });
+        setSavedSearch((prev) =>
+          prev
+            ? {
+                ...prev,
+                evaluationGroups: prev.evaluationGroups?.filter(
+                  (es) => es.id !== evaluationGroup.id,
+                ),
+              }
+            : prev,
+        );
         voidSelectedEvaluationGroup();
         setOpen(false);
       },

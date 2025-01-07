@@ -5,15 +5,11 @@ import { Button } from "~/components/ui/button";
 import { Switch } from "~/components/ui/switch";
 import { ToggleGroup, ToggleGroupItem } from "~/components/ui/toggle-group";
 import { api } from "~/trpc/react";
-import type {
-  EvaluationGroupWithIncludes,
-  Filter,
-} from "@repo/types/src/index";
+import type { EvaluationGroupWithIncludes } from "@repo/types/src/index";
+import { useObserveState } from "~/components/hooks/useObserveState";
 
 interface EvaluationGroupCardProps {
   evaluationGroup: EvaluationGroupWithIncludes;
-  filter: Filter;
-  setFilter: React.Dispatch<React.SetStateAction<Filter>>;
   setSelectedEvaluationGroup: React.Dispatch<
     React.SetStateAction<EvaluationGroupWithIncludes | null>
   >;
@@ -22,19 +18,22 @@ interface EvaluationGroupCardProps {
 
 export function EvaluationGroupCard({
   evaluationGroup,
-  filter,
-  setFilter,
   setSelectedEvaluationGroup,
   setEvalsModalOpen,
 }: EvaluationGroupCardProps) {
+  const { setSavedSearch } = useObserveState();
   const { mutate: updateGroup } = api.evaluation.updateGroup.useMutation({
     onSuccess: (data) => {
-      setFilter({
-        ...filter,
-        evaluationGroups: filter.evaluationGroups?.map((e) =>
-          e.id === evaluationGroup.id ? data : e,
-        ),
-      });
+      setSavedSearch((prev) =>
+        prev
+          ? {
+              ...prev,
+              evaluationGroups: prev.evaluationGroups?.map((e) =>
+                e.id === evaluationGroup.id ? data : e,
+              ),
+            }
+          : prev,
+      );
     },
   });
 
@@ -72,15 +71,19 @@ export function EvaluationGroupCard({
           <ToggleGroup
             type="single"
             onValueChange={(value: string) => {
-              setFilter({
-                ...filter,
-                evaluationGroupResult: value
+              setSavedSearch((prev) =>
+                prev
                   ? {
-                      id: evaluationGroup.id,
-                      result: value === "all" ? null : value === "passed",
+                      ...prev,
+                      evaluationGroupResult: value
+                        ? {
+                            id: evaluationGroup.id,
+                            result: value === "all" ? null : value === "passed",
+                          }
+                        : undefined,
                     }
-                  : undefined,
-              });
+                  : prev,
+              );
             }}
             className="text-xs"
           >
