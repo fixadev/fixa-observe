@@ -12,6 +12,15 @@ export const metadata: Metadata = {
   title: "fixa | AI voice agent testing and observability",
   description: "run tests, analyze calls, fix bugs in your voice agents",
   icons: [{ rel: "icon", url: "/favicon.ico" }],
+  openGraph: {
+    title: "fixa | AI voice agent testing and observability",
+    description: "run tests, analyze calls, fix bugs in your voice agents",
+    images: [
+      {
+        url: "/images/landing-page/og-image.png",
+      },
+    ],
+  },
 };
 
 export default function LandingPage() {
