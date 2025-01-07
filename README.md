@@ -18,13 +18,13 @@ get started for free with our cloud platform - no demos, no commitments, only pa
 
 ## ✨ Features
 
-|                                                                                                                                          |                                                                              |
-| ---------------------------------------------------------------------------------------------------------------------------------------- | :--------------------------------------------------------------------------: |
-| <h3>automated testing</h3> our voice agents call your voice agents to catch issues before they reach production                          |     <img alt="Recording" src=".github/assets/testing.png" width="250px">     |
-| <h3>deploy with peace of mind</h3> integrate seemlessly into your CI/CD pipeline using our prebuilt github action, API, or SDK           |     <img alt="Recording" src=".github/assets/testing.png" width="250px">     |
-| <h3>monitor production calls</h3> analyze latency, interruptions, and custom evals                                                       | <img alt="Test Suites" src=".github/assets/observability.png" width="250px"> |
-| <h3>measure what matters</h3> create evaluations to validate specific conversation flows and edge cases                                  |  <img alt="Alerts" src=".github/assets/evaluationgroup.png" width="250px">   |
-| <h3>catch issues instantly</h3> slack alerts notify you immediately if evaluations fail in production or latency thresholds are exceeded |       <img alt="alerts" src=".github/assets/alerts.png" width="250px">       |
+|                                                                                                                                        |                                                                              |
+| -------------------------------------------------------------------------------------------------------------------------------------- | :--------------------------------------------------------------------------: |
+| **Automated Testing**<br>Our voice agents call your voice agents to catch issues before they reach production                          |     <img alt="Recording" src=".github/assets/testing.png" width="250px">     |
+| **Deploy with Peace of Mind**<br>Integrate seamlessly into your CI/CD pipeline using our prebuilt github action, API, or SDK           |     <img alt="Recording" src=".github/assets/action.png" width="250px">      |
+| **Monitor Production Calls**<br>Analyze latency, interruptions, and custom evals                                                       | <img alt="Test Suites" src=".github/assets/observability.png" width="250px"> |
+| **Measure What Matters**<br>Create evaluations to validate specific conversation flows and edge cases                                  |  <img alt="Alerts" src=".github/assets/evaluationgroup.png" width="250px">   |
+| **Catch Issues Instantly**<br>Slack alerts notify you immediately if evaluations fail in production or latency thresholds are exceeded |       <img alt="alerts" src=".github/assets/alerts.png" width="250px">       |
 
 ## 📦 Installation & Setup
 
