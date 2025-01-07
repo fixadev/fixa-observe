@@ -34,6 +34,10 @@ export async function sendAlerts({
       }
 
       for (const alert of filter.data.alerts ?? []) {
+        if (!alert.enabled) {
+          console.log(`alert ${alert.id} is disabled`);
+          continue;
+        }
         if (alert.type === "latency") {
           // check cooldown period
           if (
@@ -92,9 +96,9 @@ export async function sendAlerts({
             );
           }
         } else if (alert.type === "evalSet") {
-          const { evaluationGroupId, trigger } = alert.details;
+          const { evalSetId, trigger } = alert.details;
           const evalSetResult = evalSetResults.find(
-            (result) => result.evalSetId === evaluationGroupId,
+            (result) => result.evalSetId === evalSetId,
           );
           if (evalSetResult?.success === trigger || trigger === null) {
             sendAlertSlackMessage({
