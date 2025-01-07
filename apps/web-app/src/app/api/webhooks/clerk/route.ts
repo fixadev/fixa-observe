@@ -98,7 +98,7 @@ export async function POST(req: Request) {
       const orgId = evt.data.id;
       const creatorId = evt.data.created_by;
 
-      const user = await clerkService.getUser(creatorId);
+      const user = await clerkService.getUser(creatorId ?? "");
       const orgs =
         await clerkService.clerkClient.users.getOrganizationMembershipList({
           userId: user.id,
