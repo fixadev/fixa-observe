@@ -38,9 +38,7 @@ export const columns: ColumnDef<CallWithIncludes>[] = [
       return (
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-1">
-            <div
-              className={cn("text-sm font-normal", !isRead && "font-medium")}
-            >
+            <div className={cn("text-sm font-normal", !isRead && "font-bold")}>
               {call.customerCallId ?? "unknown"}
             </div>
             <CopyButton text={call.customerCallId ?? ""} size="xs" />
