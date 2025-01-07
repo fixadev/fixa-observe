@@ -333,7 +333,10 @@ export const findRelevantEvalSets = async ({
 
     const evalSetsWithEvals = matchingSavedSearches
       .flatMap((savedSearch) => savedSearch.evaluationGroups)
-      .filter((evaluationGroup) => evaluationGroup !== undefined);
+      .filter(
+        (evaluationGroup) =>
+          evaluationGroup !== undefined && evaluationGroup.enabled,
+      );
 
     // remove evals and alerts to simplify prompt
     const evalSetsWithoutEvals = evalSetsWithEvals.map((evalSet) => ({
