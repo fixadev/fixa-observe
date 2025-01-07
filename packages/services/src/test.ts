@@ -14,7 +14,7 @@ import axios from "axios";
 import { type PostHog } from "posthog-node";
 
 export class TestService {
-  private env: { NODE_SERVER_URL: string };
+  private env: { NODE_SERVER_URL: string; NODE_SERVER_SECRET: string };
 
   constructor(
     private db: PrismaClient,
@@ -23,6 +23,7 @@ export class TestService {
     this.env = {
       NODE_SERVER_URL:
         process.env.NODE_SERVER_URL || process.env.NEXT_PUBLIC_SERVER_URL!,
+      NODE_SERVER_SECRET: process.env.NODE_SERVER_SECRET!,
     };
     this.checkEnv();
     this.agentServiceInstance = new AgentService(this.db);
@@ -34,6 +35,9 @@ export class TestService {
   private checkEnv = () => {
     if (!process.env.NODE_SERVER_URL && !process.env.NEXT_PUBLIC_SERVER_URL) {
       throw new Error("NODE_SERVER_URL or NEXT_PUBLIC_SERVER_URL is not set");
+    }
+    if (!process.env.NODE_SERVER_SECRET) {
+      throw new Error("NODE_SERVER_SECRET is not set");
     }
   };
   agentServiceInstance: AgentService;
@@ -362,10 +366,15 @@ export class TestService {
   ) {
     try {
       return await axios.post(
-        this.env.NODE_SERVER_URL + "/queue-ofone-kiosk-calls",
+        this.env.NODE_SERVER_URL + "/internal/queue-ofone-kiosk-calls",
         {
           deviceIds,
           callsToStart,
+        },
+        {
+          headers: {
+            "x-internal-secret": this.env.NODE_SERVER_SECRET,
+          },
         },
       );
     } catch (error) {

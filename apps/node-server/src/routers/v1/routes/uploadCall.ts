@@ -83,4 +83,4 @@ uploadCallRouter.post(
   },
 );
 
-export default uploadCallRouter;
+export { uploadCallRouter };

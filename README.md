@@ -1,81 +1,58 @@
-# Turborepo starter
+[![Fixa Logo](/.github/assets/logo.png)](https://fixa.dev)
 
-This is an official starter Turborepo.
+<h3 align="center">
+  <a href="https://docs.fixa.dev">📘 Docs</a>
+  | <a href="https://fixa.dev/">☁️ Cloud Platform</a>
+  | <a href="https://demo.fixa.dev/">✨ Demo</a>
+  | <a href="https://discord.fixa.dev">🎮 Discord</a>
+</h4>
 
-## Using this example
+# fixa: open-source testing and observability for voice agents
 
-Run the following command:
+fixa helps you run simulated tests, analyze production calls, fix bugs in your voice agents. oh, and we're fully open source.
 
-```sh
-npx create-turbo@latest
-```
+get started for free with our cloud platform - no demos, no commitments, only pay for what you use.
 
-## What's inside?
+<div align="center">
+<img alt="Fixa Dashboard" src=".github/assets/observability.png" width="400" />
+</div>
 
-This Turborepo includes the following packages/apps:
+## ✨ Features
 
-### Apps and Packages
+|                                                                                                                                          |                                                                              |
+| ---------------------------------------------------------------------------------------------------------------------------------------- | :--------------------------------------------------------------------------: |
+| <h3>automated testing</h3> our voice agents call your voice agents to catch issues before they reach production                          |     <img alt="Recording" src=".github/assets/testing.png" width="250px">     |
+| <h3>deploy with peace of mind</h3> integrate seemlessly into your CI/CD pipeline using our prebuilt github action, API, or SDK           |     <img alt="Recording" src=".github/assets/testing.png" width="250px">     |
+| <h3>monitor production calls</h3> analyze latency, interruptions, and custom evals                                                       | <img alt="Test Suites" src=".github/assets/observability.png" width="250px"> |
+| <h3>measure what matters</h3> create evaluations to validate specific conversation flows and edge cases                                  |  <img alt="Alerts" src=".github/assets/evaluationgroup.png" width="250px">   |
+| <h3>catch issues instantly</h3> slack alerts notify you immediately if evaluations fail in production or latency thresholds are exceeded |       <img alt="alerts" src=".github/assets/alerts.png" width="250px">       |
 
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `@repo/ui`: a stub React component library shared by both `web` and `docs` applications
-- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
+<!-- ## 📦 Installation & Setup
 
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
+1. Create an account at [fixa.dev](https://fixa.dev)
+2. Install the Fixa SDK:
+   ```bash
+   npm install @fixa/sdk
+   # or
+   yarn add @fixa/sdk
+   ```
+3. Configure your API key:
 
-### Utilities
+   ```typescript
+   import { FixaClient } from "@fixa/sdk";
 
-This Turborepo has some additional tools already setup for you:
+   const fixa = new FixaClient({
+     apiKey: "your_api_key_here",
+   });
+   ```
 
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
+4. Start testing:
+   ```typescript
+   await fixa.test.create({
+     name: "My First Test",
+     type: "voice",
+     phoneNumber: "+1234567890",
+   });
+   ```
 
-### Build
-
-To build all apps and packages, run the following command:
-
-```
-cd my-turborepo
-pnpm build
-```
-
-### Develop
-
-To develop all apps and packages, run the following command:
-
-```
-cd my-turborepo
-pnpm dev
-```
-
-### Remote Caching
-
-Turborepo can use a technique known as [Remote Caching](https://turbo.build/repo/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
-
-By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup), then enter the following commands:
-
-```
-cd my-turborepo
-npx turbo login
-```
-
-This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
-
-Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:
-
-```
-npx turbo link
-```
-
-## Useful Links
-
-Learn more about the power of Turborepo:
-
-- [Tasks](https://turbo.build/repo/docs/core-concepts/monorepos/running-tasks)
-- [Caching](https://turbo.build/repo/docs/core-concepts/caching)
-- [Remote Caching](https://turbo.build/repo/docs/core-concepts/remote-caching)
-- [Filtering](https://turbo.build/repo/docs/core-concepts/monorepos/filtering)
-- [Configuration Options](https://turbo.build/repo/docs/reference/configuration)
-- [CLI Usage](https://turbo.build/repo/docs/reference/command-line-reference)
+For detailed setup instructions and examples, visit our [documentation](https://docs.fixa.dev). -->

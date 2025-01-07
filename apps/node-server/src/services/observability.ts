@@ -71,6 +71,11 @@ export const transcribeAndSaveCall = async ({
         stereo_audio_url: urlToSave,
         language,
       },
+      {
+        headers: {
+          Authorization: `Bearer ${env.PYTHON_SERVER_SECRET}`,
+        },
+      },
     );
 
     const { segments, interruptions, latencyBlocks } = response.data;
@@ -326,7 +331,8 @@ export const findRelevantEvalSets = async ({
 
     const evalSetsWithEvals = matchingSavedSearches
       .flatMap((savedSearch) => savedSearch.evaluationGroups)
-      .filter((evaluationGroup) => evaluationGroup !== undefined);
+      .filter((evaluationGroup) => evaluationGroup !== undefined)
+      .filter((evalGroup) => evalGroup.enabled);
 
     // remove evals and alerts to simplify prompt
     const evalSetsWithoutEvals = evalSetsWithEvals.map((evalSet) => ({

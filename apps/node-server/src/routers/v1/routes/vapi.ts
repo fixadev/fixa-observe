@@ -32,4 +32,4 @@ vapiRouter.post("/", getContext, async (req: Request, res: Response) => {
   }
 });
 
-export default vapiRouter;
+export { vapiRouter };

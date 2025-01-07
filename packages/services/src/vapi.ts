@@ -172,7 +172,7 @@ export class VapiService {
           number: phoneNumber,
         },
         assistantOverrides: {
-          serverUrl: this.env.NODE_SERVER_URL + "/vapi",
+          serverUrl: this.env.NODE_SERVER_URL + "/internal/vapi",
           model: {
             provider: "openai",
             model: "gpt-4o",

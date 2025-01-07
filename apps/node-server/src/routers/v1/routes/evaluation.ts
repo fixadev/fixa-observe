@@ -149,4 +149,4 @@ evaluationRouter.delete("/group/:id", async (req, res) => {
   }
 });
 
-export default evaluationRouter;
+export { evaluationRouter };

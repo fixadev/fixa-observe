@@ -43,10 +43,19 @@ alertRouter.post("/:savedSearchId?", async (req: Request, res: Response) => {
         });
       }
       savedSearchId = defaultSavedSearch?.id;
+    } else {
+      const savedSearch = await db.savedSearch.findFirst({
+        where: { id: savedSearchId, ownerId },
+      });
+      if (!savedSearch) {
+        return res.status(400).json({
+          success: false,
+          error: "Saved search not found",
+        });
+      }
     }
 
     const alert = req.body;
-
     // Validate alert type
     if (!["latency", "evalSet"].includes(alert.type)) {
       return res.status(400).json({
@@ -59,6 +68,8 @@ alertRouter.post("/:savedSearchId?", async (req: Request, res: Response) => {
     if (alert.type === "latency") {
       const { lookbackPeriod, percentile, threshold, cooldownPeriod } =
         alert.details;
+
+      alert.details.lastAlerted = new Date(0).toISOString();
 
       if (!lookbackPeriod || typeof lookbackPeriod !== "object") {
         return res.status(400).json({
@@ -124,6 +135,8 @@ alertRouter.post("/:savedSearchId?", async (req: Request, res: Response) => {
       data: {
         id: uuidv4(),
         ...alert,
+        savedSearchId,
+        slackNames: [],
         ownerId,
       },
     });
@@ -259,4 +272,4 @@ alertRouter.delete("/:id", async (req: Request, res: Response) => {
   }
 });
 
-export default alertRouter;
+export { alertRouter };
