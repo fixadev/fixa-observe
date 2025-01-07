@@ -21,7 +21,7 @@ export function EvaluationGroupCard({
   setSelectedEvaluationGroup,
   setEvalsModalOpen,
 }: EvaluationGroupCardProps) {
-  const { setSavedSearch } = useObserveState();
+  const { setSavedSearch, setFilter } = useObserveState();
   const { mutate: updateGroup } = api.evaluation.updateGroup.useMutation({
     onSuccess: (data) => {
       setSavedSearch((prev) =>
@@ -71,7 +71,7 @@ export function EvaluationGroupCard({
           <ToggleGroup
             type="single"
             onValueChange={(value: string) => {
-              setSavedSearch((prev) =>
+              setFilter((prev) =>
                 prev
                   ? {
                       ...prev,
