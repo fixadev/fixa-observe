@@ -183,7 +183,7 @@ export const AudioPlayer = forwardRef<
   }, [activeEvalResult, isPlaying]);
 
   useEffect(() => {
-    if (audioLoaded && call.unread) {
+    if (audioLoaded && call.unread !== false) {
       const timer = setTimeout(() => {
         markCallAsRead.mutate({ callId: call.id });
       }, MARK_CALL_AS_READ_DELAY_MS);

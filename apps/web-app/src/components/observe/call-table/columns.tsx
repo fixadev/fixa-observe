@@ -1,4 +1,4 @@
-import { type ColumnDef } from "@tanstack/react-table";
+import { type ColumnDef, type Table } from "@tanstack/react-table";
 import { formatDistanceToNow } from "date-fns";
 import { CopyButton } from "~/components/CopyButton";
 import { useObserveState } from "~/components/hooks/useObserveState";
@@ -20,20 +20,26 @@ import {
 } from "~/components/ui/hover-card";
 import EvalResultChip from "~/components/dashboard/EvalResultChip";
 
+interface TableMeta {
+  readCallIds: Set<string>;
+}
+
 export const columns: ColumnDef<CallWithIncludes>[] = [
   {
     header: ({ column }) => <SortButton column={column} title="id" />,
     accessorKey: "customerCallId",
-    cell: ({ row }) => {
+    cell: ({ row, table }) => {
       const call = row.original;
+      const typedTable = table as Table<CallWithIncludes> & {
+        options: { meta: TableMeta };
+      };
+      const readCallIds = typedTable.options.meta?.readCallIds ?? new Set();
+      const isRead = call.unread === false || readCallIds.has(call.id);
       return (
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-1">
             <div
-              className={cn(
-                "text-sm font-normal",
-                call.unread && "font-medium",
-              )}
+              className={cn("text-sm font-normal", !isRead && "font-medium")}
             >
               {call.customerCallId ?? "unknown"}
             </div>

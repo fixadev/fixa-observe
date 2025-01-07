@@ -52,6 +52,15 @@ export function DataTable<TData, TValue>({
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = useState({});
+  const [readCallIds, setReadCallIds] = useState<Set<string>>(new Set());
+
+  const handleMarkCallAsRead = (callId: string) => {
+    setReadCallIds((prev) => {
+      const next = new Set(prev);
+      next.add(callId);
+      return next;
+    });
+  };
 
   const table = useReactTable({
     data,
@@ -71,6 +80,10 @@ export function DataTable<TData, TValue>({
 
     getRowCanExpand: () => true,
     getExpandedRowModel: getExpandedRowModel(),
+
+    meta: {
+      readCallIds,
+    },
 
     state: {
       sorting,
@@ -148,7 +161,11 @@ export function DataTable<TData, TValue>({
                           <AudioPlayer
                             small
                             call={row.original as CallWithIncludes}
-                            onMarkCallAsRead={() => null}
+                            onMarkCallAsRead={() =>
+                              handleMarkCallAsRead(
+                                (row.original as CallWithIncludes).id,
+                              )
+                            }
                           />
                         </TableCell>
                       </TableRow>
