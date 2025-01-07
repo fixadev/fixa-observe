@@ -7,28 +7,27 @@
   | <a href="https://discord.fixa.dev">🎮 Discord</a>
 </h4>
 
-# Fixa: Open-source Testing Platform for Voice & SMS Applications
+# fixa: open-source testing and observability for voice agents
 
-Fixa is a comprehensive testing platform designed for voice and SMS applications. It enables developers to automate testing of their communication systems with real phone calls and messages, ensuring reliability at scale.
+fixa helps you run simulated tests, analyze production calls, fix bugs in your voice agents. oh, and we're fully open source.
 
-Get started in minutes and access powerful testing features as your needs grow. Our cloud platform makes it easy to begin, while maintaining the flexibility to self-host when needed.
+get started for free with our cloud platform - no demos, no commitments, only pay for what you use.
 
 <div align="center">
-<img alt="Fixa Dashboard" src=".github/assets/dashboard.gif" width="400" />
+<img alt="Fixa Dashboard" src=".github/assets/observability.png" width="400" />
 </div>
 
 ## ✨ Features
 
-|                                                                                                                                                                                       |                                                                                |
-| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----------------------------------------------------------------------------: |
-| <h3>Real Phone Testing</h3> Test your voice applications with actual phone calls, not just simulations. Verify IVR flows, voice quality, and call routing with real-world conditions. | <img alt="Phone Testing" src=".github/assets/phone-testing.png" width="250px"> |
-| <h3>SMS Verification</h3> Automate SMS testing workflows, verify message delivery, content accuracy, and timing across different carriers and regions.                                |   <img alt="SMS Testing" src=".github/assets/sms-testing.png" width="250px">   |
-| <h3>Test Recording & Playback</h3> Record test sessions for debugging and quality assurance. Review calls with detailed analytics and transcriptions.                                 |     <img alt="Recording" src=".github/assets/recording.png" width="250px">     |
-| <h3>Automated Test Suites</h3> Create and manage comprehensive test suites. Schedule recurring tests and integrate with CI/CD pipelines.                                              |   <img alt="Test Suites" src=".github/assets/test-suites.png" width="250px">   |
-| <h3>Real-time Analytics</h3> Monitor test results, performance metrics, and system health in real-time through an intuitive dashboard.                                                |     <img alt="Analytics" src=".github/assets/analytics.png" width="250px">     |
-| <h3>API Integration</h3> RESTful API for seamless integration with your existing tools and workflows. Supports major programming languages and frameworks.                            |           <img alt="API" src=".github/assets/api.png" width="250px">           |
+|                                                                                                                                          |                                                                              |
+| ---------------------------------------------------------------------------------------------------------------------------------------- | :--------------------------------------------------------------------------: |
+| <h3>automated testing</h3> our voice agents call your voice agents to catch issues before they reach production                          |     <img alt="Recording" src=".github/assets/testing.png" width="250px">     |
+| <h3>deploy with peace of mind</h3> integrate seemlessly into your CI/CD pipeline using our prebuilt github action, API, or SDK           |     <img alt="Recording" src=".github/assets/testing.png" width="250px">     |
+| <h3>monitor production calls</h3> analyze latency, interruptions, and custom evals                                                       | <img alt="Test Suites" src=".github/assets/observability.png" width="250px"> |
+| <h3>measure what matters</h3> create evaluations to validate specific conversation flows and edge cases                                  |  <img alt="Alerts" src=".github/assets/evaluationgroup.png" width="250px">   |
+| <h3>catch issues instantly</h3> slack alerts notify you immediately if evaluations fail in production or latency thresholds are exceeded |       <img alt="alerts" src=".github/assets/alerts.png" width="250px">       |
 
-## 📦 Installation & Setup
+<!-- ## 📦 Installation & Setup
 
 1. Create an account at [fixa.dev](https://fixa.dev)
 2. Install the Fixa SDK:
@@ -56,4 +55,4 @@ Get started in minutes and access powerful testing features as your needs grow. 
    });
    ```
 
-For detailed setup instructions and examples, visit our [documentation](https://docs.fixa.dev).
+For detailed setup instructions and examples, visit our [documentation](https://docs.fixa.dev). -->
