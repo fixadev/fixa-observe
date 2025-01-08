@@ -26,6 +26,7 @@ import { type Dispatch, Fragment, type SetStateAction, useState } from "react";
 import { cn } from "~/lib/utils";
 import { type CallWithIncludes } from "@repo/types/src/index";
 import { AudioPlayer } from "../../dashboard/AudioPlayer";
+import { useObserveState } from "../../hooks/useObserveState";
 
 // Add this type declaration at the top of the file
 declare module "@tanstack/react-table" {
@@ -52,15 +53,9 @@ export function DataTable<TData, TValue>({
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = useState({});
-  const [readCallIds, setReadCallIds] = useState<Set<string>>(new Set());
 
-  const handleMarkCallAsRead = (callId: string) => {
-    setReadCallIds((prev) => {
-      const next = new Set(prev);
-      next.add(callId);
-      return next;
-    });
-  };
+  // Get read state from useObserveState instead of props
+  const { readCallIds } = useObserveState();
 
   const table = useReactTable({
     data,
@@ -161,11 +156,6 @@ export function DataTable<TData, TValue>({
                           <AudioPlayer
                             small
                             call={row.original as CallWithIncludes}
-                            onMarkCallAsRead={() =>
-                              handleMarkCallAsRead(
-                                (row.original as CallWithIncludes).id,
-                              )
-                            }
                           />
                         </TableCell>
                       </TableRow>

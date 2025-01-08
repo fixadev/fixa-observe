@@ -34,7 +34,8 @@ export const columns: ColumnDef<CallWithIncludes>[] = [
         options: { meta: TableMeta };
       };
       const readCallIds = typedTable.options.meta?.readCallIds ?? new Set();
-      const isRead = call.unread === false || readCallIds.has(call.id);
+      // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
+      const isRead = call.isRead || readCallIds.has(call.id);
       return (
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-1">
