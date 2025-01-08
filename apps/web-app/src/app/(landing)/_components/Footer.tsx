@@ -8,7 +8,7 @@ import { EnvelopeIcon } from "@heroicons/react/24/solid";
 export function Footer() {
   return (
     <div className="dark bg-background text-foreground">
-      <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:flex lg:items-center lg:justify-between lg:px-8 lg:py-16">
+      <div className="mx-auto max-w-7xl px-4 py-12 pb-32 sm:px-6 lg:flex lg:items-center lg:justify-between lg:px-8 lg:py-16 lg:pb-32">
         <div className="flex flex-col gap-2">
           <Logo />
           <ButtonRow />
