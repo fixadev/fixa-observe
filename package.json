@@ -3,6 +3,7 @@
   "private": true,
   "scripts": {
     "build": "turbo build",
+    "postinstall": "pnpm --filter @repo/db db:generate",
     "dev": "turbo dev --concurrency 20",
     "db:migrate": "pnpm --filter @repo/db db:migrate",
     "db:generate": "pnpm --filter @repo/db db:generate",

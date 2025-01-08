@@ -125,6 +125,7 @@ export const transcribeAndSaveCall = async ({
     const newCall = await db.call.create({
       data: {
         id: uuidv4(),
+        isRead: false,
         createdAt: createdAt || new Date(),
         ownerId,
         customerCallId: callId,

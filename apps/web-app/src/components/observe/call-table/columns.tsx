@@ -61,6 +61,30 @@ export const columns: ColumnDef<CallWithIncludes>[] = [
     size: 10,
   },
   {
+    header: ({ column }) => <SortButton column={column} title="TTFW" />,
+    accessorKey: "timeToFirstWord",
+    cell: ({ row }) => {
+      const call = row.original;
+      return (
+        <div className="flex flex-col">
+          <div className="flex items-center gap-1">
+            <div
+              className={cn(
+                "text-sm font-medium",
+                getLatencyColor(
+                  Math.round((call.latencyBlocks?.[0]?.duration ?? 0) * 1000),
+                ),
+              )}
+            >
+              {Math.round((call.latencyBlocks?.[0]?.duration ?? 0) * 1000)}ms
+            </div>
+          </div>
+        </div>
+      );
+    },
+    size: 10,
+  },
+  {
     header: ({ column }) => <SortButton column={column} title="50%" />,
     accessorKey: "latencyP50",
     cell: ({ row }) => {
