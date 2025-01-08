@@ -7,6 +7,7 @@ import { Pricing } from "./_components/Pricing";
 import { Footer } from "./_components/Footer";
 import { CTA } from "./_components/CTA";
 import { type Metadata } from "next";
+import { OpenSourceToast } from "./_components/OpenSourceToast";
 
 export const metadata: Metadata = {
   title: "fixa | AI voice agent testing and observability",
@@ -33,6 +34,7 @@ export default function LandingPage() {
       <Pricing />
       <CTA />
       <Footer />
+      <OpenSourceToast />
     </div>
   );
 }
