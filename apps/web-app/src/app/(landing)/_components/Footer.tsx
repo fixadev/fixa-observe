@@ -8,19 +8,25 @@ import { EnvelopeIcon } from "@heroicons/react/24/solid";
 export function Footer() {
   return (
     <div className="dark bg-background text-foreground">
-      <div className="mx-auto max-w-7xl px-4 py-12 pb-32 sm:px-6 lg:flex lg:items-center lg:justify-between lg:px-8 lg:py-16 lg:pb-32">
-        <div className="flex flex-col gap-2">
+      <div className="mx-auto flex max-w-7xl flex-col gap-4 px-4 py-12 pb-32 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:px-8 lg:py-16 lg:pb-32">
+        <div className="flex flex-col items-center gap-2 lg:items-start">
           <Logo />
           <ButtonRow />
         </div>
-        <a href="https://elevenlabs.io/text-to-speech" target="_blank">
-          <Image
-            src="https://storage.googleapis.com/eleven-public-cdn/images/elevenlabs_grants_white.png"
-            alt="Text to Speech"
-            width={250 * 0.75}
-            height={29 * 0.75}
-          />
-        </a>
+        <div className="flex justify-center">
+          <a
+            href="https://elevenlabs.io/text-to-speech"
+            target="_blank"
+            className="flex"
+          >
+            <Image
+              src="https://storage.googleapis.com/eleven-public-cdn/images/elevenlabs_grants_white.png"
+              alt="Text to Speech"
+              width={250 * 0.75}
+              height={29 * 0.75}
+            />
+          </a>
+        </div>
         <div className="flex flex-col gap-2">
           <Button variant="ghost" asChild>
             <Link

@@ -31,7 +31,7 @@ export function OpenSourceToast() {
           <div className="mb-1 text-center text-sm font-medium sm:text-left">
             we&apos;re open source!
           </div>
-          <div className="text-center text-xs sm:text-left">
+          <div className="whitespace-nowrap text-center text-xs sm:text-left">
             please help increase our star count 🥲
           </div>
         </div>
