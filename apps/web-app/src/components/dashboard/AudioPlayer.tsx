@@ -42,6 +42,7 @@ import {
   TooltipTrigger,
 } from "~/components/ui/tooltip";
 import { api } from "~/trpc/react";
+import { useObserveStateSafe } from "../hooks/useObserveState";
 
 export type AudioPlayerRef = {
   setActiveEvalResult: (
@@ -61,17 +62,9 @@ export const AudioPlayer = forwardRef<
     offsetFromStart?: number;
     onEvalResultHover?: (evalId: string | null) => void;
     onTimeUpdate?: (time: number) => void;
-    onMarkCallAsRead?: (callId: string) => void;
   }
 >(function AudioPlayer(
-  {
-    call,
-    small = false,
-    offsetFromStart = 0,
-    onEvalResultHover,
-    onTimeUpdate,
-    onMarkCallAsRead,
-  },
+  { call, small = false, offsetFromStart = 0, onEvalResultHover, onTimeUpdate },
   ref,
 ) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -102,9 +95,12 @@ export const AudioPlayer = forwardRef<
   const audioVisualizerId = useMemo(() => {
     return `audio-visualizer-${crypto.randomUUID()}`;
   }, []);
-  const markCallAsRead = api._call.markRead.useMutation({
+  const observeState = useObserveStateSafe();
+  const { mutate: markCallAsRead } = api._call.updateIsRead.useMutation({
     onSuccess: () => {
-      onMarkCallAsRead?.(call.id);
+      if (observeState) {
+        observeState.handleUpdateCallReadState(call.id, true);
+      }
     },
   });
 
@@ -183,9 +179,9 @@ export const AudioPlayer = forwardRef<
   }, [activeEvalResult, isPlaying]);
 
   useEffect(() => {
-    if (audioLoaded && call.unread !== false) {
+    if (observeState && audioLoaded && !call.isRead) {
       const timer = setTimeout(() => {
-        markCallAsRead.mutate({ callId: call.id });
+        markCallAsRead({ callId: call.id, isRead: true });
       }, MARK_CALL_AS_READ_DELAY_MS);
 
       return () => clearTimeout(timer);

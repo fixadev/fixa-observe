@@ -55,12 +55,14 @@ export const callRouter = createTRPCRouter({
       });
     }),
 
-  markRead: protectedProcedure
-    .input(z.object({ callId: z.string() }))
+  updateIsRead: protectedProcedure
+    .input(z.object({ callId: z.string(), isRead: z.boolean() }))
     .mutation(async ({ input, ctx }) => {
-      return await callService.markRead({
+      return await callService.updateIsRead({
         callId: input.callId,
         orgId: ctx.orgId,
+        userId: ctx.userId,
+        isRead: input.isRead,
       });
     }),
 
