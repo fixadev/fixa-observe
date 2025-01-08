@@ -18,4 +18,4 @@ ofOneRouter.post("/", async (req: Request, res: Response) => {
   }
 });
 
-export default ofOneRouter;
+export { ofOneRouter };

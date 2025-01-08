@@ -45,4 +45,4 @@ internalTestRouter.get("/db", async (_: Request, res: Response) => {
   }
 });
 
-export default internalTestRouter;
+export { internalTestRouter };

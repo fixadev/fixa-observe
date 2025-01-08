@@ -203,4 +203,4 @@ scenarioRouter.delete("/:id", async (req: Request, res: Response) => {
   }
 });
 
-export default scenarioRouter;
+export { scenarioRouter };

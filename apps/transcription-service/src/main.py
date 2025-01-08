@@ -1,32 +1,35 @@
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
 import os
+from typing import Optional
+from pydantic import BaseModel
+from dotenv import load_dotenv
+from fastapi import FastAPI, HTTPException, Depends
+from fastapi.security import HTTPBearer
 from utils.logger import logger
 from services.transcribe import transcribe_with_deepgram
 from services.split_channels import split_channels, cleanup_temp_files
 from services.create_transcript import create_transcript_from_deepgram
-from typing import Optional
-from dotenv import load_dotenv
+from utils.auth import authenticate_request
+
 load_dotenv()
 
 app = FastAPI()
-
-# one line change
+security = HTTPBearer()
 
 class TranscribeRequest(BaseModel):
     stereo_audio_url: str
     language: Optional[str] = "en"
+    
 class StartWebsocketCallOfOneRequest(BaseModel):
     device_id: str
     assistant_id: str
     assistant_overrides: dict
     base_url: str
 
-@app.get("/")
+@app.get("/", dependencies=[Depends(authenticate_request)])
 async def health():
     return {"status": "ok"}
 
-@app.post("/transcribe-deepgram")
+@app.post("/transcribe-deepgram", dependencies=[Depends(authenticate_request)])
 async def transcribe(request: TranscribeRequest):
     try: 
         user_audio_path, agent_audio_path = await split_channels(request.stereo_audio_url)
@@ -39,7 +42,7 @@ async def transcribe(request: TranscribeRequest):
         logger.error(f"Deepgram transcription failed: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.post("/websocket-call-ofone")
+@app.post("/websocket-call-ofone", dependencies=[Depends(authenticate_request)])
 async def start_websocket_call_ofone(request: StartWebsocketCallOfOneRequest):
     try:
         import httpx
