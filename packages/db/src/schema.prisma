@@ -106,6 +106,7 @@ model Call {
   endedAt            String?
   regionId           String?
   metadata           Json?
+  timeToFirstWord    Float?
   latencyP50         Float?
   latencyP90         Float?
   latencyP95         Float?

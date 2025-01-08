@@ -72,12 +72,12 @@ export const columns: ColumnDef<CallWithIncludes>[] = [
             <div
               className={cn(
                 "text-sm font-medium",
-                getLatencyColor(
-                  Math.round((call.latencyBlocks?.[0]?.duration ?? 0) * 1000),
-                ),
+                call.timeToFirstWord
+                  ? getLatencyColor(call.timeToFirstWord)
+                  : "text-muted-foreground",
               )}
             >
-              {Math.round((call.latencyBlocks?.[0]?.duration ?? 0) * 1000)}ms
+              {call.timeToFirstWord ? `${call.timeToFirstWord}ms` : "n/a"}
             </div>
           </div>
         </div>
