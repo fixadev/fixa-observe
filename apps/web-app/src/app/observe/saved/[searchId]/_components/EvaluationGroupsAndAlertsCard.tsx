@@ -92,9 +92,9 @@ export function EvaluationGroupsAndAlertsCard({
                       variant="outline"
                       onClick={handleAddEvaluationGroup}
                     >
-                      add manually
+                      add evaluation
                     </Button>
-                    <GenerateEvalGroupsDialog searchId={searchId} />
+                    {/* <GenerateEvalGroupsDialog searchId={searchId} /> */}
                   </div>
                 </div>
               </div>
