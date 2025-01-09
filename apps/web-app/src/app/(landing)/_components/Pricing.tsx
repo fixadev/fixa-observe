@@ -25,22 +25,8 @@ export function Pricing() {
             <p className="mt-4 lowercase text-gray-500">
               perfect for teams just getting started
             </p>
-            <div className="mt-8 flex flex-col gap-8 sm:h-16 sm:flex-row sm:items-center">
+            <div className="mt-8 flex flex-col gap-8 sm:h-12 sm:flex-row sm:items-center">
               <div className="flex flex-col gap-2">
-                <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                  TESTING
-                </div>
-                <div className="flex items-baseline">
-                  <div className="text-4xl font-extrabold text-black">
-                    $0.20
-                  </div>
-                  <div className="ml-2 text-gray-500">/minute</div>
-                </div>
-              </div>
-              <div className="flex flex-col gap-2">
-                <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                  OBSERVABILITY
-                </div>
                 <div className="flex items-baseline">
                   <div className="text-4xl font-extrabold text-black">
                     $0.03
@@ -53,9 +39,9 @@ export function Pricing() {
               <ul className="space-y-4">
                 {[
                   "no minimum commitment",
-                  "pay only for what you use",
+                  "only pay for what you use",
                   "discord support",
-                  "10 free tests",
+                  "10 free calls",
                 ].map((feature) => (
                   <li key={feature} className="flex items-center">
                     <Check className="mr-3 h-5 w-5 text-black" />
@@ -77,11 +63,8 @@ export function Pricing() {
             <p className="mt-4 lowercase text-gray-500">
               for organizations with custom needs
             </p>
-            <div className="mt-8 sm:flex sm:h-16 sm:items-center">
+            <div className="mt-8 sm:flex sm:h-12 sm:items-center">
               <div className="flex flex-col gap-2">
-                <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                  TESTING & OBSERVABILITY
-                </div>
                 <div className="text-4xl font-extrabold lowercase text-black">
                   contact us
                 </div>
@@ -95,7 +78,7 @@ export function Pricing() {
                 {[
                   "volume discounts",
                   "custom integrations",
-                  "priority feature access",
+                  "priority support",
                   "SOC 2 & HIPAA compliance",
                 ].map((feature) => (
                   <li key={feature} className="flex items-center">
