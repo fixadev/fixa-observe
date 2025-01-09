@@ -48,13 +48,13 @@ export const NotesCell = ({ call }: { call: CallWithIncludes }) => {
       <PopoverTrigger asChild>
         <Button
           variant="ghost"
-          className="h-auto p-0 text-xs text-muted-foreground hover:bg-transparent"
+          className="h-auto items-center justify-center p-0 pt-1 text-xs text-muted-foreground hover:bg-transparent"
           onClick={(e) => e.stopPropagation()}
         >
           {call?.notes?.length && call?.notes?.length > 0 ? (
-            <DocumentTextIconSolid className="h-4 w-4 text-gray-900" />
+            <DocumentTextIconSolid className="size-5 text-gray-700" />
           ) : (
-            <DocumentTextIconOutline className="h-4 w-4" />
+            <DocumentTextIconOutline className="size-5" />
           )}
         </Button>
       </PopoverTrigger>
