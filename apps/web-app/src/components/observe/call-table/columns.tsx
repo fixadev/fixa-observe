@@ -22,6 +22,7 @@ import {
 import EvalResultChip from "~/components/dashboard/EvalResultChip";
 import { api } from "~/trpc/react";
 import { useUser } from "@clerk/nextjs";
+import { NotesCell } from "./NotesCell";
 
 export const columns: ColumnDef<CallWithIncludes>[] = [
   {
@@ -30,6 +31,30 @@ export const columns: ColumnDef<CallWithIncludes>[] = [
     cell: ({ row }) => {
       const call = row.original;
       return <CallIdCell call={call} />;
+    },
+    size: 10,
+  },
+  {
+    header: ({ column }) => <SortButton column={column} title="TTFW" />,
+    accessorKey: "timeToFirstWord",
+    cell: ({ row }) => {
+      const call = row.original;
+      return (
+        <div className="flex flex-col">
+          <div className="flex items-center gap-1">
+            <div
+              className={cn(
+                "text-sm font-medium",
+                call.timeToFirstWord
+                  ? getLatencyColor(call.timeToFirstWord)
+                  : "text-muted-foreground/50",
+              )}
+            >
+              {call.timeToFirstWord ? `${call.timeToFirstWord}ms` : "n/a"}
+            </div>
+          </div>
+        </div>
+      );
     },
     size: 10,
   },
@@ -145,6 +170,15 @@ export const columns: ColumnDef<CallWithIncludes>[] = [
           {formatDistanceToNow(new Date(call.startedAt), { addSuffix: true })}
         </div>
       );
+    },
+    size: 50,
+  },
+  {
+    id: "notes",
+    header: () => <div className="text-xs font-medium">notes</div>,
+    cell: ({ row }) => {
+      const call = row.original;
+      return <NotesCell call={call} />;
     },
     size: 50,
   },

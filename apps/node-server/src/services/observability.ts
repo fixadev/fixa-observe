@@ -125,6 +125,7 @@ export const transcribeAndSaveCall = async ({
     const newCall = await db.call.create({
       data: {
         id: uuidv4(),
+        isRead: false,
         createdAt: createdAt || new Date(),
         ownerId,
         customerCallId: callId,
@@ -146,6 +147,7 @@ export const transcribeAndSaveCall = async ({
         evalSetToSuccess: Object.fromEntries(
           evalSetResults.map((result) => [result.evalSetId, result.success]),
         ),
+        timeToFirstWord: Math.round((latencyBlocks?.[0]?.duration ?? 0) * 1000),
         latencyP50,
         latencyP90,
         latencyP95,

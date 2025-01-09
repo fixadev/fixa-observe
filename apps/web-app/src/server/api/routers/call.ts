@@ -66,6 +66,16 @@ export const callRouter = createTRPCRouter({
       });
     }),
 
+  updateNotes: protectedProcedure
+    .input(z.object({ callId: z.string(), notes: z.string() }))
+    .mutation(async ({ input, ctx }) => {
+      return await callService.updateNotes({
+        callId: input.callId,
+        orgId: ctx.orgId,
+        notes: input.notes,
+      });
+    }),
+
   checkIfACallExists: protectedProcedure.query(async ({ ctx }) => {
     return await callService.checkIfACallExists(ctx.orgId);
   }),
