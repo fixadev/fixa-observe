@@ -284,10 +284,35 @@ export class CallService {
     return parsedCalls.filter((p) => p !== null);
   };
 
-  markRead = async ({ callId, orgId }: { callId: string; orgId: string }) => {
+  updateIsRead = async ({
+    callId,
+    orgId,
+    userId,
+    isRead,
+  }: {
+    callId: string;
+    orgId: string;
+    userId: string;
+    isRead: boolean;
+  }) => {
     await this.db.call.update({
       where: { id: callId, ownerId: orgId },
-      data: { unread: false },
+      data: { isRead, readBy: userId },
+    });
+  };
+
+  updateNotes = async ({
+    callId,
+    orgId,
+    notes,
+  }: {
+    callId: string;
+    orgId: string;
+    notes: string;
+  }) => {
+    return await this.db.call.update({
+      where: { id: callId, ownerId: orgId },
+      data: { notes },
     });
   };
 
