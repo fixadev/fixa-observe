@@ -106,6 +106,7 @@ model Call {
   endedAt            String?
   regionId           String?
   metadata           Json?
+  timeToFirstWord    Float?
   latencyP50         Float?
   latencyP90         Float?
   latencyP95         Float?
@@ -114,7 +115,11 @@ model Call {
   interruptionP95    Float?
   numInterruptions   Int?
   duration           Float?
-  unread             Boolean?
+
+  notes String?
+
+  isRead Boolean? // whether the call has been read
+  readBy String? // userId of the user who read the call
 
   agent   Agent?  @relation(fields: [agentId], references: [id], onDelete: Cascade)
   agentId String?

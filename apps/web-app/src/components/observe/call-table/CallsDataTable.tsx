@@ -148,7 +148,6 @@ export function DataTable<TData, TValue>({
                           <AudioPlayer
                             small
                             call={row.original as CallWithIncludes}
-                            onMarkCallAsRead={() => null}
                           />
                         </TableCell>
                       </TableRow>

@@ -10,15 +10,19 @@ import {
   ArrowTopRightOnSquareIcon,
   CheckCircleIcon,
   XCircleIcon,
+  XMarkIcon,
 } from "@heroicons/react/24/solid";
 import Link from "next/link";
-import { useMemo } from "react";
+import { useCallback, useMemo } from "react";
 import {
   HoverCard,
   HoverCardTrigger,
   HoverCardContent,
 } from "~/components/ui/hover-card";
 import EvalResultChip from "~/components/dashboard/EvalResultChip";
+import { api } from "~/trpc/react";
+import { useUser } from "@clerk/nextjs";
+import { NotesCell } from "./NotesCell";
 
 export const columns: ColumnDef<CallWithIncludes>[] = [
   {
@@ -26,31 +30,29 @@ export const columns: ColumnDef<CallWithIncludes>[] = [
     accessorKey: "customerCallId",
     cell: ({ row }) => {
       const call = row.original;
+      return <CallIdCell call={call} />;
+    },
+    size: 10,
+  },
+  {
+    header: ({ column }) => <SortButton column={column} title="TTFW" />,
+    accessorKey: "timeToFirstWord",
+    cell: ({ row }) => {
+      const call = row.original;
       return (
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col">
           <div className="flex items-center gap-1">
             <div
               className={cn(
-                "text-sm font-normal",
-                call.unread && "font-medium",
+                "text-sm font-medium",
+                call.timeToFirstWord
+                  ? getLatencyColor(call.timeToFirstWord)
+                  : "text-muted-foreground/50",
               )}
             >
-              {call.customerCallId ?? "unknown"}
+              {call.timeToFirstWord ? `${call.timeToFirstWord}ms` : "n/a"}
             </div>
-            <CopyButton text={call.customerCallId ?? ""} size="xs" />
           </div>
-          <Button
-            variant="ghost"
-            className="gap-2 text-xs text-muted-foreground"
-            asChild
-          >
-            <Link
-              href={`/observe/calls/${call.customerCallId}`}
-              target="_blank"
-            >
-              direct link <ArrowTopRightOnSquareIcon className="size-4" />
-            </Link>
-          </Button>
         </div>
       );
     },
@@ -172,6 +174,15 @@ export const columns: ColumnDef<CallWithIncludes>[] = [
     size: 50,
   },
   {
+    id: "notes",
+    header: () => <div className="text-xs font-medium">notes</div>,
+    cell: ({ row }) => {
+      const call = row.original;
+      return <NotesCell call={call} />;
+    },
+    size: 50,
+  },
+  {
     id: "actions",
     cell: ({ row }) => {
       const call = row.original;
@@ -180,6 +191,66 @@ export const columns: ColumnDef<CallWithIncludes>[] = [
     size: 50,
   },
 ];
+
+const CallIdCell = ({ call }: { call: CallWithIncludes }) => {
+  const { data: readByUser } = api.user.getUser.useQuery(
+    { userId: call.readBy ?? "" },
+    { enabled: !!call.readBy },
+  );
+  const { user: currentUser } = useUser();
+
+  const { mutate: updateIsRead } = api._call.updateIsRead.useMutation();
+  const { handleUpdateCallReadState, callReadState } = useObserveState();
+  const handleUpdateIsRead = useCallback(
+    (isRead: boolean) => {
+      updateIsRead({ callId: call.id, isRead });
+      handleUpdateCallReadState(call.id, isRead);
+    },
+    [call.id, updateIsRead, handleUpdateCallReadState],
+  );
+
+  // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
+  const isRead = callReadState[call.id] ?? call.isRead;
+  return (
+    <div className="flex items-center justify-between">
+      <div>
+        <div className="flex items-center gap-1">
+          <div className={cn("text-sm font-normal", !isRead && "font-bold")}>
+            {call.customerCallId ?? "unknown"}
+          </div>
+          <CopyButton text={call.customerCallId ?? ""} size="xs" />
+        </div>
+        {isRead && (
+          <div className="group flex items-center gap-1 text-xs text-muted-foreground">
+            <div>
+              viewed by {readByUser?.firstName ?? currentUser?.firstName}
+            </div>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="invisible size-4 gap-2 text-xs text-muted-foreground group-hover:visible"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleUpdateIsRead(false);
+              }}
+            >
+              <XMarkIcon className="size-4" />
+            </Button>
+          </div>
+        )}
+      </div>
+      <Button
+        variant="ghost"
+        className="gap-2 text-xs text-muted-foreground"
+        asChild
+      >
+        <Link href={`/observe/calls/${call.customerCallId}`} target="_blank">
+          direct link <ArrowTopRightOnSquareIcon className="size-4" />
+        </Link>
+      </Button>
+    </div>
+  );
+};
 
 const ActionCell = ({ call }: { call: CallWithIncludes }) => {
   const { setSelectedCallId } = useObserveState();

@@ -46,21 +46,19 @@ export const defaultFilter: Filter = {
 interface ObserveStateContextType {
   selectedCallId: string | null;
   setSelectedCallId: (callId: string | null) => void;
-
   includeTestCalls: boolean;
   setIncludeTestCalls: (includeTestCalls: boolean) => void;
-
   filter: Filter;
   setFilter: React.Dispatch<React.SetStateAction<Filter>>;
   resetFilter: () => void;
-
   orderBy: OrderBy | undefined;
   setOrderBy: (orderBy: OrderBy | undefined) => void;
-
   savedSearch: SavedSearchWithIncludes | undefined;
   setSavedSearch: React.Dispatch<
     React.SetStateAction<SavedSearchWithIncludes | undefined>
   >;
+  callReadState: Record<string, boolean>;
+  handleUpdateCallReadState: (callId: string, isRead: boolean) => void;
 }
 
 const ObserveStateContext = createContext<ObserveStateContextType | undefined>(
@@ -80,6 +78,10 @@ export function ObserveStateProvider({
   const [savedSearch, setSavedSearch] = useState<
     SavedSearchWithIncludes | undefined
   >();
+
+  const [callReadState, setCallReadState] = useState<Record<string, boolean>>(
+    {},
+  );
 
   const resetFilter = useCallback(() => {
     setFilter(defaultFilter);
@@ -125,6 +127,16 @@ export function ObserveStateProvider({
     }
   }, [filter.lookbackPeriod.value, filter.timeRange]);
 
+  const handleUpdateCallReadState = useCallback(
+    (callId: string, isRead: boolean) => {
+      setCallReadState((prev) => ({
+        ...prev,
+        [callId]: isRead,
+      }));
+    },
+    [],
+  );
+
   return (
     <ObserveStateContext.Provider
       value={{
@@ -139,6 +151,8 @@ export function ObserveStateProvider({
         setOrderBy,
         savedSearch,
         setSavedSearch,
+        callReadState,
+        handleUpdateCallReadState,
       }}
     >
       {children}
@@ -154,5 +168,11 @@ export function useObserveState() {
     );
   }
 
+  return context;
+}
+
+// Safe version of useObserveState that doesn't throw an error if the context is undefined
+export function useObserveStateSafe() {
+  const context = useContext(ObserveStateContext);
   return context;
 }
