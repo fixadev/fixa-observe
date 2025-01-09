@@ -31,9 +31,8 @@ export const validateUploadCallParams = async (
     return res.status(400).json({
       success: false,
       error:
-        "Could not verify audio channels. Please ensure the URL points to a valid stereo audio file.",
+        "Could not verify audio file channel metadata. Please ensure the URL points to a valid stereo audio file and is accessible.",
     });
   }
-
   next();
 };
