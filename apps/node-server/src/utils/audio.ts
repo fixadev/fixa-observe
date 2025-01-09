@@ -15,3 +15,15 @@ export async function getAudioDuration(url: string): Promise<number> {
     throw new Error("Failed to get audio duration for url: " + url);
   }
 }
+
+export async function getNumberOfAudioChannels(url: string): Promise<number> {
+  try {
+    const { stdout } = await execAsync(
+      `ffprobe -v error -select_streams a:0 -show_entries stream=channels -of default=noprint_wrappers=1:nokey=1 "${url}"`,
+    );
+    return parseInt(stdout.toString().trim());
+  } catch (error) {
+    console.error("Error getting audio channels:", error);
+    throw new Error("Failed to get audio channels for url: " + url);
+  }
+}
