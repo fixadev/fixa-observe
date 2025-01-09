@@ -34,7 +34,6 @@ io.on("connection", (socket) => {
   socket.on("disconnect", () => {
     if (userId) {
       connectedUsers.delete(userId);
-      // console.log(`User ${userId} disconnected`);
     }
   });
 });
