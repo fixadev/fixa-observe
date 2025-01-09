@@ -8,6 +8,7 @@ import { EvaluationService } from "@repo/services/src/evaluation";
 import { EvaluationSchema } from "@repo/types/src/index";
 import { z } from "zod";
 import { db } from "~/server/db";
+import { createEvaluationGroupsFromPrompt } from "~/server/helpers/generateEvaluationGroupsFromPrompt";
 
 const evalServiceInstance = new EvaluationService(db);
 
@@ -101,6 +102,23 @@ export const evaluationRouter = createTRPCRouter({
       return await evalServiceInstance.createGroup({
         group: input,
         ownerId: ctx.orgId,
+      });
+    }),
+
+  createGroupsFromPrompt: protectedProcedure
+    .input(
+      z.object({
+        prompt: z.string(),
+        count: z.number(),
+        savedSearchId: z.string(),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      return await createEvaluationGroupsFromPrompt({
+        prompt: input.prompt,
+        count: input.count,
+        savedSearchId: input.savedSearchId,
+        orgId: ctx.orgId,
       });
     }),
   updateGroup: protectedProcedure

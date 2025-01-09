@@ -146,6 +146,22 @@ export class EvaluationService {
     });
   }
 
+  async createTemplates({
+    templates,
+    ownerId,
+  }: {
+    templates: EvaluationTemplate[];
+    ownerId: string;
+  }): Promise<EvaluationTemplate[]> {
+    return await this.db.evaluationTemplate.createManyAndReturn({
+      data: templates.map((template) => ({
+        ...template,
+        id: uuidv4(),
+        ownerId,
+      })),
+    });
+  }
+
   async updateTemplate({
     template,
     ownerId,
