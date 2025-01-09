@@ -81,6 +81,7 @@ export const createEvaluationGroupsFromPrompt = async ({
     const createdEvaluationGroup = await evaluationService.createGroup({
       group: {
         ...evaluationGroup,
+        savedSearchId,
         evaluations: evaluationGroup.evaluations
           .map((evaluation) => ({
             ...evaluation,
