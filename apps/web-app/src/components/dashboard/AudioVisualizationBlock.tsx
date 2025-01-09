@@ -96,6 +96,9 @@ export function AudioVisualizationBlock({
     );
   }, [data.duration, data.secondsFromStart, duration, offsetFromStart, type]);
 
+  const blockSecondsFromStart = useMemo(() => {
+    return (startPercentage / 100) * duration + offsetFromStart;
+  }, [startPercentage, duration, offsetFromStart]);
   const blockDuration = useMemo(() => {
     return ((endPercentage - startPercentage) / 100) * duration;
   }, [endPercentage, startPercentage, duration]);
@@ -225,7 +228,7 @@ export function AudioVisualizationBlock({
             onClick={(e) => {
               if (dragState.isDragging) return;
               e.stopPropagation();
-              onSeek?.(data.secondsFromStart);
+              onSeek?.(blockSecondsFromStart);
               onPlay?.();
             }}
           >
@@ -290,7 +293,7 @@ export function AudioVisualizationBlock({
             onClick={(e) => {
               if (dragState.isDragging) return;
               e.stopPropagation();
-              onSeek?.(data.secondsFromStart);
+              onSeek?.(blockSecondsFromStart);
               onPlay?.();
             }}
           >
