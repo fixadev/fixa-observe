@@ -74,7 +74,6 @@ uploadCallRouter.post(
       res.json({ success: true, you: "are cool :)" });
     } catch (error) {
       console.error(error);
-      console.log("REQUEST BODY", req.body);
       res.status(500).json({ success: false, error: (error as Error).message });
     }
   },
