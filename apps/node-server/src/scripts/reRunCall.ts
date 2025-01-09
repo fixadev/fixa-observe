@@ -9,9 +9,6 @@ import { getScenariosWithGeneralEvals } from "../services/scenario";
 const main = async () => {
   console.log("RE-RUNNING CALL");
 
-  console.log("DB URL", env.DATABASE_URL);
-  console.log("DIRECT URL", env.DIRECT_URL);
-
   // const agents = await db.agent.findMany();
   // console.log("AGENTS", agents);
 
