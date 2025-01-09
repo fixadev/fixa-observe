@@ -45,6 +45,12 @@ export type AudioPlayerRef = {
   seek: (time: number) => void;
 };
 
+interface BlockChange {
+  blockId: string;
+  secondsFromStart: number;
+  duration: number;
+}
+
 export const AudioPlayer = forwardRef<
   AudioPlayerRef,
   {
@@ -94,6 +100,9 @@ export const AudioPlayer = forwardRef<
       }
     },
   });
+  const [unsavedChanges, setUnsavedChanges] = useState<
+    Record<string, BlockChange>
+  >({});
 
   // Load the audio visualizer
   useEffect(() => {
@@ -239,101 +248,172 @@ export const AudioPlayer = forwardRef<
     }
   }, [call.stereoRecordingUrl, call.id]);
 
+  const handleEditBlock = useCallback(
+    (blockId: string, secondsFromStart: number, duration: number) => {
+      setUnsavedChanges((prev) => ({
+        ...prev,
+        [blockId]: {
+          blockId,
+          secondsFromStart,
+          duration,
+        },
+      }));
+    },
+    [],
+  );
+
+  const handleDiscardChanges = useCallback(() => {
+    setUnsavedChanges({});
+  }, []);
+
+  const handleSaveChanges = useCallback(() => {
+    // TODO: Implement saving changes
+  }, []);
+
   return (
-    <div
-      className={cn(
-        "flex w-full gap-4",
-        small ? "flex-row-reverse" : "flex-col",
-      )}
-    >
+    <>
       <div
-        className={cn(
-          "relative w-full rounded-md border border-input shadow-sm",
-          small ? "h-[50px]" : "h-[100px]",
-        )}
-        ref={containerRef}
+        className={cn("flex w-full", small ? "flex-row-reverse" : "flex-col")}
       >
-        <div id={audioVisualizerId} className="size-full" />
-        {!audioLoaded && (
-          <Skeleton className="absolute left-0 top-0 size-full" />
-        )}
-        {call.evaluationResults?.map((evalResult, index) => (
-          <AudioVisualizationBlock
-            key={index}
-            type="evaluationResult"
-            data={evalResult}
-            duration={duration}
-            offsetFromStart={offsetFromStart}
-            hoveredEvalResult={hoveredEvalResult}
-            onEvalResultHover={handleEvalResultHover}
-            onEvalResultClick={handleEvalResultClick}
-          />
-        ))}
-        {call.latencyBlocks?.map((latencyBlock, index) => (
-          <AudioVisualizationBlock
-            key={index}
-            type="latencyBlock"
-            data={latencyBlock}
-            duration={duration}
-            hoveredEvalResult={hoveredEvalResult}
-            onEvalResultHover={handleEvalResultHover}
-          />
-        ))}
-        {call.interruptions?.map((interruption, index) => (
-          <AudioVisualizationBlock
-            key={index}
-            type="interruption"
-            data={interruption}
-            duration={duration}
-            hoveredEvalResult={hoveredEvalResult}
-            onEvalResultHover={handleEvalResultHover}
-          />
-        ))}
-      </div>
-      <div className="flex items-center gap-4">
-        <Button
-          size="icon"
-          onClick={() => {
-            isPlaying ? pause() : play();
-            setActiveEvalResult(null);
-          }}
-        >
-          {isPlaying ? (
-            <PauseIcon className="size-4" />
-          ) : (
-            <PlayIcon className="size-4" />
+        <div
+          className={cn(
+            "relative w-full rounded-md border border-input shadow-sm",
+            small ? "h-[50px]" : "h-[100px]",
           )}
-        </Button>
-
-        {!small && (
-          <>
-            <div className="text-sm text-muted-foreground">
-              {formatDurationHoursMinutesSeconds(currentTime)} /{" "}
-              {formatDurationHoursMinutesSeconds(duration)}
+          ref={containerRef}
+        >
+          <div id={audioVisualizerId} className="size-full" />
+          {!audioLoaded && (
+            <Skeleton className="absolute left-0 top-0 size-full" />
+          )}
+          {call.evaluationResults?.map((evalResult, index) => (
+            <AudioVisualizationBlock
+              key={index}
+              type="evaluationResult"
+              data={evalResult}
+              duration={duration}
+              offsetFromStart={offsetFromStart}
+              hoveredEvalResult={hoveredEvalResult}
+              onEvalResultHover={handleEvalResultHover}
+              onEvalResultClick={handleEvalResultClick}
+            />
+          ))}
+          {call.latencyBlocks?.map((latencyBlock, index) => (
+            <AudioVisualizationBlock
+              key={index}
+              type="latencyBlock"
+              data={latencyBlock}
+              duration={duration}
+              offsetFromStart={offsetFromStart}
+              hoveredEvalResult={hoveredEvalResult}
+              onEvalResultHover={handleEvalResultHover}
+              onEditBlock={handleEditBlock}
+            />
+          ))}
+          {call.interruptions?.map((interruption, index) => (
+            <AudioVisualizationBlock
+              key={index}
+              type="interruption"
+              data={interruption}
+              duration={duration}
+              offsetFromStart={offsetFromStart}
+              hoveredEvalResult={hoveredEvalResult}
+              onEvalResultHover={handleEvalResultHover}
+              onEditBlock={handleEditBlock}
+            />
+          ))}
+        </div>
+        {!small && Object.keys(unsavedChanges).length > 0 && (
+          <div className="mt-1 flex items-baseline gap-4">
+            <div className="text-xs">save changes?</div>
+            <div className="flex items-center">
+              <Button
+                size="sm"
+                variant="ghost"
+                className="h-8 px-1.5"
+                onClick={handleSaveChanges}
+              >
+                save
+              </Button>
+              <Button
+                size="sm"
+                variant="ghost"
+                className="h-8 px-1.5 text-muted-foreground hover:text-muted-foreground"
+                onClick={handleDiscardChanges}
+              >
+                discard
+              </Button>
             </div>
-
-            <div className="flex-1" />
-
-            <Select
-              value={playbackSpeed.toString()}
-              onValueChange={(value) => setPlaybackSpeed(parseFloat(value))}
-            >
-              <SelectTrigger className="w-20">
-                <SelectValue placeholder="Speed" />
-              </SelectTrigger>
-              <SelectContent className="w-20">
-                <SelectItem value="1">1x</SelectItem>
-                <SelectItem value="1.5">1.5x</SelectItem>
-                <SelectItem value="2">2x</SelectItem>
-              </SelectContent>
-            </Select>
-
-            <Button variant="outline" size="icon" onClick={downloadAudio}>
-              <ArrowDownTrayIcon className="size-4" />
-            </Button>
-          </>
+          </div>
         )}
+        <div className={cn("flex items-center gap-4", small ? "mr-4" : "mt-4")}>
+          <Button
+            size="icon"
+            onClick={() => {
+              isPlaying ? pause() : play();
+              setActiveEvalResult(null);
+            }}
+          >
+            {isPlaying ? (
+              <PauseIcon className="size-4" />
+            ) : (
+              <PlayIcon className="size-4" />
+            )}
+          </Button>
+
+          {!small && (
+            <>
+              <div className="text-sm text-muted-foreground">
+                {formatDurationHoursMinutesSeconds(currentTime)} /{" "}
+                {formatDurationHoursMinutesSeconds(duration)}
+              </div>
+
+              <div className="flex-1" />
+
+              <Select
+                value={playbackSpeed.toString()}
+                onValueChange={(value) => setPlaybackSpeed(parseFloat(value))}
+              >
+                <SelectTrigger className="w-20">
+                  <SelectValue placeholder="Speed" />
+                </SelectTrigger>
+                <SelectContent className="w-20">
+                  <SelectItem value="1">1x</SelectItem>
+                  <SelectItem value="1.5">1.5x</SelectItem>
+                  <SelectItem value="2">2x</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <Button variant="outline" size="icon" onClick={downloadAudio}>
+                <ArrowDownTrayIcon className="size-4" />
+              </Button>
+            </>
+          )}
+        </div>
       </div>
-    </div>
+      {small && Object.keys(unsavedChanges).length > 0 && (
+        <div className="mt-1 flex items-baseline gap-4">
+          <div className="text-xs">save changes?</div>
+          <div className="flex items-center">
+            <Button
+              size="sm"
+              variant="ghost"
+              className="h-8 px-1.5"
+              onClick={handleSaveChanges}
+            >
+              save
+            </Button>
+            <Button
+              size="sm"
+              variant="ghost"
+              className="h-8 px-1.5 text-muted-foreground hover:text-muted-foreground"
+              onClick={handleDiscardChanges}
+            >
+              discard
+            </Button>
+          </div>
+        </div>
+      )}
+    </>
   );
 });

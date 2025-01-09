@@ -15,6 +15,11 @@ interface BaseVisualizationProps {
   offsetFromStart?: number;
   hoveredEvalResult: string | null;
   onEvalResultHover?: (evalId: string | null) => void;
+  onEditBlock?: (
+    blockId: string,
+    secondsFromStart: number,
+    duration: number,
+  ) => void;
 }
 
 interface EvaluationResultProps extends BaseVisualizationProps {
@@ -51,6 +56,7 @@ export function AudioVisualizationBlock({
   offsetFromStart = 0,
   hoveredEvalResult,
   onEvalResultHover,
+  onEditBlock,
   ...props
 }: AudioVisualizationBlockProps) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -64,7 +70,7 @@ export function AudioVisualizationBlock({
   const [tooltipOpen, setTooltipOpen] = useState(false);
 
   // Update start and end percentages when data changes
-  useEffect(() => {
+  const resetStartPercentage = useCallback(() => {
     setStartPercentage(
       Math.min(
         1,
@@ -77,7 +83,7 @@ export function AudioVisualizationBlock({
       ) * 100,
     );
   }, [data.secondsFromStart, offsetFromStart, duration, type]);
-  useEffect(() => {
+  const resetEndPercentage = useCallback(() => {
     setEndPercentage(
       Math.min(
         1,
@@ -91,8 +97,17 @@ export function AudioVisualizationBlock({
       ) * 100,
     );
   }, [data.duration, data.secondsFromStart, duration, offsetFromStart, type]);
+  useEffect(() => {
+    resetStartPercentage();
+  }, [resetStartPercentage]);
+  useEffect(() => {
+    resetEndPercentage();
+  }, [resetEndPercentage]);
 
-  const blockDuration = useMemo(() => {
+  const currentSecondsFromStart = useMemo(() => {
+    return (startPercentage / 100) * duration;
+  }, [startPercentage, duration]);
+  const currentDuration = useMemo(() => {
     return ((endPercentage - startPercentage) / 100) * duration;
   }, [endPercentage, startPercentage, duration]);
 
@@ -152,11 +167,18 @@ export function AudioVisualizationBlock({
 
   const handleMouseUp = useCallback(() => {
     if (dragState.isDragging) {
+      onEditBlock?.(data.id, currentSecondsFromStart, currentDuration);
       setTimeout(() => {
         setDragState({ isDragging: false, initialX: 0, edge: null });
       }, 0);
     }
-  }, [dragState.isDragging]);
+  }, [
+    dragState.isDragging,
+    onEditBlock,
+    data.id,
+    currentSecondsFromStart,
+    currentDuration,
+  ]);
 
   useEffect(() => {
     if (dragState.isDragging) {
@@ -269,7 +291,7 @@ export function AudioVisualizationBlock({
             color: getLatencyBlockColor(data, 1),
           }}
         >
-          <p>latency: {Math.round(blockDuration * 1000)}ms</p>
+          <p>latency: {Math.round(currentDuration * 1000)}ms</p>
         </TooltipContent>
       </Tooltip>
     );
@@ -340,7 +362,7 @@ export function AudioVisualizationBlock({
             color: getInterruptionColor(1),
           }}
         >
-          <p>interruption: {Math.round(blockDuration * 1000)}ms</p>
+          <p>interruption: {Math.round(currentDuration * 1000)}ms</p>
         </TooltipContent>
       </Tooltip>
     );
