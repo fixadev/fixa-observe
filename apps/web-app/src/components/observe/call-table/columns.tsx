@@ -74,7 +74,7 @@ export const columns: ColumnDef<CallWithIncludes>[] = [
                 "text-sm font-medium",
                 call.timeToFirstWord
                   ? getLatencyColor(call.timeToFirstWord)
-                  : "text-muted-foreground",
+                  : "text-muted-foreground/50",
               )}
             >
               {call.timeToFirstWord ? `${call.timeToFirstWord}ms` : "n/a"}
