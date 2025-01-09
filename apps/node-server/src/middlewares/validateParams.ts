@@ -27,7 +27,6 @@ export const validateUploadCallParams = async (
       });
     }
   } catch (error) {
-    console.log("REQUEST BODY", req.body);
     return res.status(400).json({
       success: false,
       error:
