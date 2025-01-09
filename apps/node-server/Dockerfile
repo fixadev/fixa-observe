@@ -1,7 +1,7 @@
 # Use Node.js LTS image as base
 FROM node:20-slim
 
-RUN apt-get update -y && apt-get install -y openssl ffmpeg
+RUN apt-get update -y && apt-get install -y openssl ffmpeg curl
 
 WORKDIR /usr/src/app
 
