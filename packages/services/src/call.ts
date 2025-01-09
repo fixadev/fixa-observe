@@ -301,6 +301,21 @@ export class CallService {
     });
   };
 
+  updateNotes = async ({
+    callId,
+    orgId,
+    notes,
+  }: {
+    callId: string;
+    orgId: string;
+    notes: string;
+  }) => {
+    return await this.db.call.update({
+      where: { id: callId, ownerId: orgId },
+      data: { notes },
+    });
+  };
+
   // // WIP
   // getLatencyInterruptionPercentiles: async ({
   //   ownerId,

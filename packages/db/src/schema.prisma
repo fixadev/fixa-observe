@@ -116,6 +116,8 @@ model Call {
   numInterruptions   Int?
   duration           Float?
 
+  notes String?
+
   isRead Boolean? // whether the call has been read
   readBy String? // userId of the user who read the call
 

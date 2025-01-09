@@ -19,6 +19,7 @@ import {
   HoverCardContent,
 } from "~/components/ui/hover-card";
 import EvalResultChip from "~/components/dashboard/EvalResultChip";
+import { NotesCell } from "./NotesCell";
 
 interface TableMeta {
   readCallIds: Set<string>;
@@ -197,6 +198,15 @@ export const columns: ColumnDef<CallWithIncludes>[] = [
           {formatDistanceToNow(new Date(call.startedAt), { addSuffix: true })}
         </div>
       );
+    },
+    size: 50,
+  },
+  {
+    id: "notes",
+    header: () => <div className="text-xs font-medium">notes</div>,
+    cell: ({ row }) => {
+      const call = row.original;
+      return <NotesCell call={call} />;
     },
     size: 50,
   },
