@@ -15,8 +15,6 @@ interface BaseVisualizationProps {
   offsetFromStart?: number;
   hoveredEvalResult: string | null;
   onEvalResultHover?: (evalId: string | null) => void;
-  onSeek?: (time: number) => void;
-  onPlay?: () => void;
 }
 
 interface EvaluationResultProps extends BaseVisualizationProps {
@@ -43,7 +41,7 @@ type AudioVisualizationBlockProps =
 interface DragState {
   isDragging: boolean;
   initialX: number;
-  edge: "left" | "right" | null;
+  edge: "left" | "right" | "center" | null;
 }
 
 export function AudioVisualizationBlock({
@@ -53,8 +51,6 @@ export function AudioVisualizationBlock({
   offsetFromStart = 0,
   hoveredEvalResult,
   onEvalResultHover,
-  onSeek,
-  onPlay,
   ...props
 }: AudioVisualizationBlockProps) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -96,15 +92,12 @@ export function AudioVisualizationBlock({
     );
   }, [data.duration, data.secondsFromStart, duration, offsetFromStart, type]);
 
-  const blockSecondsFromStart = useMemo(() => {
-    return (startPercentage / 100) * duration + offsetFromStart;
-  }, [startPercentage, duration, offsetFromStart]);
   const blockDuration = useMemo(() => {
     return ((endPercentage - startPercentage) / 100) * duration;
   }, [endPercentage, startPercentage, duration]);
 
   const handleMouseDown = useCallback(
-    (e: React.MouseEvent, edge: "left" | "right") => {
+    (e: React.MouseEvent, edge: "left" | "right" | "center") => {
       e.stopPropagation();
       setDragState({
         isDragging: true,
@@ -126,7 +119,16 @@ export function AudioVisualizationBlock({
       const deltaX = e.clientX - dragState.initialX;
       const deltaPercentage = (deltaX / parentRect.width) * 100;
 
-      if (dragState.edge === "left") {
+      if (dragState.edge === "center") {
+        const blockWidth = endPercentage - startPercentage;
+        const newStart = Math.max(
+          0,
+          Math.min(100 - blockWidth, startPercentage + deltaPercentage),
+        );
+        const newEnd = newStart + blockWidth;
+        setStartPercentage(newStart);
+        setEndPercentage(newEnd);
+      } else if (dragState.edge === "left") {
         const newStart = Math.max(
           0,
           Math.min(endPercentage - 1, startPercentage + deltaPercentage),
@@ -215,7 +217,11 @@ export function AudioVisualizationBlock({
             ref={containerRef}
             className={cn(
               "absolute top-0 z-10 h-full cursor-pointer",
-              dragState.isDragging && "cursor-col-resize",
+              dragState.isDragging &&
+                (dragState.edge === "center"
+                  ? "cursor-grabbing"
+                  : "cursor-col-resize"),
+              !dragState.isDragging && "cursor-grab",
             )}
             style={{
               left: `${startPercentage}%`,
@@ -225,11 +231,13 @@ export function AudioVisualizationBlock({
                   ? getLatencyBlockColor(data, 0.5)
                   : getLatencyBlockColor(data),
             }}
-            onClick={(e) => {
-              if (dragState.isDragging) return;
-              e.stopPropagation();
-              onSeek?.(blockSecondsFromStart);
-              onPlay?.();
+            onMouseDown={(e) => {
+              const rect = e.currentTarget.getBoundingClientRect();
+              const leftEdge = e.clientX - rect.left < 8;
+              const rightEdge = rect.right - e.clientX < 8;
+              if (!leftEdge && !rightEdge) {
+                handleMouseDown(e, "center");
+              }
             }}
           >
             <div
@@ -278,7 +286,11 @@ export function AudioVisualizationBlock({
             ref={containerRef}
             className={cn(
               "absolute top-0 z-10 h-full cursor-pointer",
-              dragState.isDragging && "cursor-col-resize",
+              dragState.isDragging &&
+                (dragState.edge === "center"
+                  ? "cursor-grabbing"
+                  : "cursor-col-resize"),
+              !dragState.isDragging && "cursor-grab",
             )}
             style={{
               top: "50%",
@@ -290,11 +302,13 @@ export function AudioVisualizationBlock({
                   ? getInterruptionColor(0.5)
                   : getInterruptionColor(),
             }}
-            onClick={(e) => {
-              if (dragState.isDragging) return;
-              e.stopPropagation();
-              onSeek?.(blockSecondsFromStart);
-              onPlay?.();
+            onMouseDown={(e) => {
+              const rect = e.currentTarget.getBoundingClientRect();
+              const leftEdge = e.clientX - rect.left < 8;
+              const rightEdge = rect.right - e.clientX < 8;
+              if (!leftEdge && !rightEdge) {
+                handleMouseDown(e, "center");
+              }
             }}
           >
             <div

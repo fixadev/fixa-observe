@@ -265,8 +265,6 @@ export const AudioPlayer = forwardRef<
             hoveredEvalResult={hoveredEvalResult}
             onEvalResultHover={handleEvalResultHover}
             onEvalResultClick={handleEvalResultClick}
-            onSeek={seek}
-            onPlay={play}
           />
         ))}
         {call.latencyBlocks?.map((latencyBlock, index) => (
@@ -277,8 +275,6 @@ export const AudioPlayer = forwardRef<
             duration={duration}
             hoveredEvalResult={hoveredEvalResult}
             onEvalResultHover={handleEvalResultHover}
-            onSeek={seek}
-            onPlay={play}
           />
         ))}
         {call.interruptions?.map((interruption, index) => (
@@ -289,8 +285,6 @@ export const AudioPlayer = forwardRef<
             duration={duration}
             hoveredEvalResult={hoveredEvalResult}
             onEvalResultHover={handleEvalResultHover}
-            onSeek={seek}
-            onPlay={play}
           />
         ))}
       </div>
