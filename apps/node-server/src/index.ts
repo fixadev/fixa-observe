@@ -6,6 +6,7 @@ import { startQueueConsumer } from "./workers/queueConsumer";
 import { privateRouter } from "./routers/v1/private";
 import { publicRouter } from "./routers/v1/public";
 import { posthogClient } from "./clients/posthogClient";
+import { logFailedRequests } from "./middlewares/logFailedRequests";
 
 const app = express();
 const httpServer = createServer(app);
@@ -18,6 +19,7 @@ const io = new Server(httpServer, {
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(logFailedRequests);
 
 export const connectedUsers = new Map();
 

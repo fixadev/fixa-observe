@@ -18,7 +18,6 @@ export const validateUploadCallParams = async (
       error: `Missing required fields: ${missingFields.join(", ")}`,
     });
   }
-
   try {
     const numberOfChannels = await getNumberOfAudioChannels(stereoRecordingUrl);
     if (numberOfChannels !== 2) {
