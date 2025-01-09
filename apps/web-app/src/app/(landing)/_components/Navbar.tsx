@@ -89,7 +89,7 @@ export function Navbar() {
               </SignedOut>
               <SignedIn>
                 <Button asChild>
-                  <Link href="/dashboard">dashboard</Link>
+                  <Link href="/observe">dashboard</Link>
                 </Button>
               </SignedIn>
             </div>

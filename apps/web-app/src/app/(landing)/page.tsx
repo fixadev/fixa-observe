@@ -10,7 +10,7 @@ import { type Metadata } from "next";
 import { OpenSourceToast } from "./_components/OpenSourceToast";
 
 export const metadata: Metadata = {
-  title: "fixa | AI voice agent testing and observability",
+  title: "fixa | open source voice agent observability",
   description: "run tests, analyze calls, fix bugs in your voice agents",
   icons: [{ rel: "icon", url: "/favicon.ico" }],
   openGraph: {
