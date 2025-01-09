@@ -179,7 +179,11 @@ export const AudioPlayer = forwardRef<
   }, [activeEvalResult, isPlaying]);
 
   useEffect(() => {
-    if (observeState && audioLoaded && !call.isRead) {
+    if (
+      observeState &&
+      audioLoaded &&
+      (!call.isRead || !observeState.callReadState[call.id])
+    ) {
       const timer = setTimeout(() => {
         markCallAsRead({ callId: call.id, isRead: true });
       }, MARK_CALL_AS_READ_DELAY_MS);

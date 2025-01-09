@@ -26,7 +26,6 @@ import { type Dispatch, Fragment, type SetStateAction, useState } from "react";
 import { cn } from "~/lib/utils";
 import { type CallWithIncludes } from "@repo/types/src/index";
 import { AudioPlayer } from "../../dashboard/AudioPlayer";
-import { useObserveState } from "../../hooks/useObserveState";
 
 // Add this type declaration at the top of the file
 declare module "@tanstack/react-table" {
@@ -54,9 +53,6 @@ export function DataTable<TData, TValue>({
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = useState({});
 
-  // Get read state from useObserveState instead of props
-  const { readCallIds } = useObserveState();
-
   const table = useReactTable({
     data,
     columns,
@@ -75,10 +71,6 @@ export function DataTable<TData, TValue>({
 
     getRowCanExpand: () => true,
     getExpandedRowModel: getExpandedRowModel(),
-
-    meta: {
-      readCallIds,
-    },
 
     state: {
       sorting,

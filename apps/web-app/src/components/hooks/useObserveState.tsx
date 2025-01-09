@@ -57,7 +57,7 @@ interface ObserveStateContextType {
   setSavedSearch: React.Dispatch<
     React.SetStateAction<SavedSearchWithIncludes | undefined>
   >;
-  readCallIds: Set<string>;
+  callReadState: Record<string, boolean>;
   handleUpdateCallReadState: (callId: string, isRead: boolean) => void;
 }
 
@@ -79,7 +79,9 @@ export function ObserveStateProvider({
     SavedSearchWithIncludes | undefined
   >();
 
-  const [readCallIds, setReadCallIds] = useState<Set<string>>(new Set());
+  const [callReadState, setCallReadState] = useState<Record<string, boolean>>(
+    {},
+  );
 
   const resetFilter = useCallback(() => {
     setFilter(defaultFilter);
@@ -127,15 +129,10 @@ export function ObserveStateProvider({
 
   const handleUpdateCallReadState = useCallback(
     (callId: string, isRead: boolean) => {
-      setReadCallIds((prev) => {
-        const next = new Set(prev);
-        if (isRead) {
-          next.add(callId);
-        } else {
-          next.delete(callId);
-        }
-        return next;
-      });
+      setCallReadState((prev) => ({
+        ...prev,
+        [callId]: isRead,
+      }));
     },
     [],
   );
@@ -154,7 +151,7 @@ export function ObserveStateProvider({
         setOrderBy,
         savedSearch,
         setSavedSearch,
-        readCallIds,
+        callReadState,
         handleUpdateCallReadState,
       }}
     >
