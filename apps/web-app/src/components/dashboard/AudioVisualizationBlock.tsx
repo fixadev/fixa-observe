@@ -1,3 +1,4 @@
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   type CallWithIncludes,
   type EvaluationResultWithIncludes,
@@ -39,6 +40,12 @@ type AudioVisualizationBlockProps =
   | LatencyBlockProps
   | InterruptionProps;
 
+interface DragState {
+  isDragging: boolean;
+  initialX: number;
+  edge: "left" | "right" | null;
+}
+
 export function AudioVisualizationBlock({
   type,
   data,
@@ -50,34 +57,122 @@ export function AudioVisualizationBlock({
   onPlay,
   ...props
 }: AudioVisualizationBlockProps) {
-  if (!data.secondsFromStart || !data.duration) return null;
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [dragState, setDragState] = useState<DragState>({
+    isDragging: false,
+    initialX: 0,
+    edge: null,
+  });
+  const [startPercentage, setStartPercentage] = useState<number>(0);
+  const [endPercentage, setEndPercentage] = useState<number>(0);
+  const [tooltipOpen, setTooltipOpen] = useState(false);
 
-  const startPercentage =
-    Math.min(
-      1,
-      Math.max(
-        0,
-        (data.secondsFromStart -
-          (type === "evaluationResult" ? offsetFromStart : 0)) /
-          duration,
-      ),
-    ) * 100;
-  const endPercentage =
-    Math.min(
-      1,
-      Math.max(
-        0,
-        (data.secondsFromStart +
-          data.duration -
-          (type === "evaluationResult" ? offsetFromStart : 0)) /
-          duration,
-      ),
-    ) * 100;
+  // Update start and end percentages when data changes
+  useEffect(() => {
+    setStartPercentage(
+      Math.min(
+        1,
+        Math.max(
+          0,
+          ((data.secondsFromStart ?? 0) -
+            (type === "evaluationResult" ? offsetFromStart : 0)) /
+            duration,
+        ),
+      ) * 100,
+    );
+  }, [data.secondsFromStart, offsetFromStart, duration, type]);
+  useEffect(() => {
+    setEndPercentage(
+      Math.min(
+        1,
+        Math.max(
+          0,
+          ((data.secondsFromStart ?? 0) +
+            (data.duration ?? 0) -
+            (type === "evaluationResult" ? offsetFromStart : 0)) /
+            duration,
+        ),
+      ) * 100,
+    );
+  }, [data.duration, data.secondsFromStart, duration, offsetFromStart, type]);
+
+  const blockDuration = useMemo(() => {
+    return ((endPercentage - startPercentage) / 100) * duration;
+  }, [endPercentage, startPercentage, duration]);
+
+  const handleMouseDown = useCallback(
+    (e: React.MouseEvent, edge: "left" | "right") => {
+      e.stopPropagation();
+      setDragState({
+        isDragging: true,
+        initialX: e.clientX,
+        edge,
+      });
+    },
+    [],
+  );
+
+  const handleMouseMove = useCallback(
+    (e: MouseEvent) => {
+      if (!dragState.isDragging || !containerRef.current) return;
+
+      const parentRect =
+        containerRef.current.parentElement?.getBoundingClientRect();
+      if (!parentRect) return;
+
+      const deltaX = e.clientX - dragState.initialX;
+      const deltaPercentage = (deltaX / parentRect.width) * 100;
+
+      if (dragState.edge === "left") {
+        const newStart = Math.max(
+          0,
+          Math.min(endPercentage - 1, startPercentage + deltaPercentage),
+        );
+        setStartPercentage(newStart);
+      } else if (dragState.edge === "right") {
+        const newEnd = Math.min(
+          100,
+          Math.max(startPercentage + 1, endPercentage + deltaPercentage),
+        );
+        setEndPercentage(newEnd);
+      }
+
+      setDragState((prev) => ({
+        ...prev,
+        initialX: e.clientX,
+      }));
+    },
+    [dragState, containerRef, endPercentage, startPercentage],
+  );
+
+  const handleMouseUp = useCallback(() => {
+    if (dragState.isDragging) {
+      setTimeout(() => {
+        setDragState({ isDragging: false, initialX: 0, edge: null });
+      }, 0);
+    }
+  }, [dragState.isDragging]);
+
+  useEffect(() => {
+    if (dragState.isDragging) {
+      window.addEventListener("mousemove", handleMouseMove);
+      window.addEventListener("mouseup", handleMouseUp);
+    }
+
+    return () => {
+      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("mouseup", handleMouseUp);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dragState.isDragging]);
+
+  if (!data.secondsFromStart || !data.duration) return null;
 
   if (type === "evaluationResult") {
     const { onEvalResultClick } = props as EvaluationResultProps;
     return (
       <div
+        ref={containerRef}
         className="absolute top-0 z-10 h-full"
         style={{
           left: `${startPercentage}%`,
@@ -108,10 +203,17 @@ export function AudioVisualizationBlock({
 
   if (type === "latencyBlock") {
     return (
-      <Tooltip>
+      <Tooltip
+        open={tooltipOpen || dragState.isDragging}
+        onOpenChange={setTooltipOpen}
+      >
         <TooltipTrigger asChild>
           <div
-            className="absolute top-0 z-10 h-full cursor-pointer"
+            ref={containerRef}
+            className={cn(
+              "absolute top-0 z-10 h-full cursor-pointer",
+              dragState.isDragging && "cursor-col-resize",
+            )}
             style={{
               left: `${startPercentage}%`,
               width: `${endPercentage - startPercentage}%`,
@@ -121,6 +223,7 @@ export function AudioVisualizationBlock({
                   : getLatencyBlockColor(data),
             }}
             onClick={(e) => {
+              if (dragState.isDragging) return;
               e.stopPropagation();
               onSeek?.(data.secondsFromStart);
               onPlay?.();
@@ -131,11 +234,21 @@ export function AudioVisualizationBlock({
               style={{
                 border: `1px solid ${getLatencyBlockColor(data, 1)}`,
               }}
-              onMouseEnter={() => onEvalResultHover?.(data.id)}
-              onMouseLeave={() => onEvalResultHover?.(null)}
+              onMouseEnter={() =>
+                !dragState.isDragging && onEvalResultHover?.(data.id)
+              }
+              onMouseLeave={() =>
+                !dragState.isDragging && onEvalResultHover?.(null)
+              }
             />
-            <div className="absolute left-0 top-0 h-full w-1 cursor-col-resize" />
-            <div className="absolute right-0 top-0 h-full w-1 cursor-col-resize" />
+            <div
+              className="absolute left-0 top-0 h-full w-1 cursor-col-resize"
+              onMouseDown={(e) => handleMouseDown(e, "left")}
+            />
+            <div
+              className="absolute right-0 top-0 h-full w-1 cursor-col-resize"
+              onMouseDown={(e) => handleMouseDown(e, "right")}
+            />
           </div>
         </TooltipTrigger>
         <TooltipContent
@@ -145,7 +258,7 @@ export function AudioVisualizationBlock({
             color: getLatencyBlockColor(data, 1),
           }}
         >
-          <p>latency: {Math.round(data.duration * 1000)}ms</p>
+          <p>latency: {Math.round(blockDuration * 1000)}ms</p>
         </TooltipContent>
       </Tooltip>
     );
@@ -153,10 +266,17 @@ export function AudioVisualizationBlock({
 
   if (type === "interruption") {
     return (
-      <Tooltip>
+      <Tooltip
+        open={tooltipOpen || dragState.isDragging}
+        onOpenChange={setTooltipOpen}
+      >
         <TooltipTrigger asChild>
           <div
-            className="absolute top-0 z-10 h-full cursor-pointer"
+            ref={containerRef}
+            className={cn(
+              "absolute top-0 z-10 h-full cursor-pointer",
+              dragState.isDragging && "cursor-col-resize",
+            )}
             style={{
               top: "50%",
               height: "50%",
@@ -168,6 +288,7 @@ export function AudioVisualizationBlock({
                   : getInterruptionColor(),
             }}
             onClick={(e) => {
+              if (dragState.isDragging) return;
               e.stopPropagation();
               onSeek?.(data.secondsFromStart);
               onPlay?.();
@@ -178,11 +299,21 @@ export function AudioVisualizationBlock({
               style={{
                 border: `1px solid ${getInterruptionColor(1)}`,
               }}
-              onMouseEnter={() => onEvalResultHover?.(data.id)}
-              onMouseLeave={() => onEvalResultHover?.(null)}
+              onMouseEnter={() =>
+                !dragState.isDragging && onEvalResultHover?.(data.id)
+              }
+              onMouseLeave={() =>
+                !dragState.isDragging && onEvalResultHover?.(null)
+              }
             />
-            <div className="absolute left-0 top-0 h-full w-1 cursor-col-resize" />
-            <div className="absolute right-0 top-0 h-full w-1 cursor-col-resize" />
+            <div
+              className="absolute left-0 top-0 h-full w-1 cursor-col-resize"
+              onMouseDown={(e) => handleMouseDown(e, "left")}
+            />
+            <div
+              className="absolute right-0 top-0 h-full w-1 cursor-col-resize"
+              onMouseDown={(e) => handleMouseDown(e, "right")}
+            />
           </div>
         </TooltipTrigger>
         <TooltipContent
@@ -192,7 +323,7 @@ export function AudioVisualizationBlock({
             color: getInterruptionColor(1),
           }}
         >
-          <p>interruption: {Math.round(data.duration * 1000)}ms</p>
+          <p>interruption: {Math.round(blockDuration * 1000)}ms</p>
         </TooltipContent>
       </Tooltip>
     );
