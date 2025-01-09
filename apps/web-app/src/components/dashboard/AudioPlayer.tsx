@@ -27,22 +27,13 @@ import {
   type CallWithIncludes,
   type EvaluationResultWithIncludes,
 } from "@repo/types/src/index";
-import {
-  cn,
-  formatDurationHoursMinutesSeconds,
-  getInterruptionColor,
-  getLatencyBlockColor,
-} from "~/lib/utils";
+import { cn, formatDurationHoursMinutesSeconds } from "~/lib/utils";
 import WaveSurfer from "wavesurfer.js";
 import { Skeleton } from "../ui/skeleton";
 import { useAudioSettings } from "~/components/hooks/useAudioSettings";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "~/components/ui/tooltip";
 import { api } from "~/trpc/react";
 import { useObserveStateSafe } from "../hooks/useObserveState";
+import { AudioVisualizationBlock } from "./AudioVisualizationBlock";
 
 export type AudioPlayerRef = {
   setActiveEvalResult: (
@@ -223,6 +214,13 @@ export const AudioPlayer = forwardRef<
     },
     [play, seek, offsetFromStart],
   );
+  const handleEvalResultHover = useCallback(
+    (evalResultId: string | null) => {
+      setHoveredEvalResult(evalResultId);
+      onEvalResultHover?.(evalResultId);
+    },
+    [onEvalResultHover],
+  );
 
   const downloadAudio = useCallback(async () => {
     try {
@@ -257,192 +255,44 @@ export const AudioPlayer = forwardRef<
         {!audioLoaded && (
           <Skeleton className="absolute left-0 top-0 size-full" />
         )}
-        {call.evaluationResults?.map((evalResult, index) => {
-          if (
-            !containerRef.current ||
-            !duration ||
-            !evalResult.secondsFromStart ||
-            !evalResult.duration
-          )
-            return null;
-          const startPercentage =
-            Math.min(
-              1,
-              Math.max(
-                0,
-                (evalResult.secondsFromStart - offsetFromStart) / duration,
-              ),
-            ) * 100;
-          const endPercentage =
-            Math.min(
-              1,
-              Math.max(
-                0,
-                (evalResult.secondsFromStart +
-                  evalResult.duration -
-                  offsetFromStart) /
-                  duration,
-              ),
-            ) * 100;
-
-          return (
-            <div
-              key={index}
-              className="absolute top-0 z-10 h-full"
-              style={{
-                left: `${startPercentage}%`,
-                width: `${endPercentage - startPercentage}%`,
-              }}
-            >
-              <div
-                className={cn(
-                  "size-full cursor-pointer border-l-2",
-                  evalResult.success
-                    ? "border-green-500 bg-green-500/20 hover:bg-green-500/50"
-                    : "border-red-500 bg-red-500/20 hover:bg-red-500/50",
-                  hoveredEvalResult === evalResult.id &&
-                    (evalResult.success ? "bg-green-500/50" : "bg-red-500/50"),
-                )}
-                onMouseEnter={() => onEvalResultHover?.(evalResult.id)}
-                onMouseLeave={() => onEvalResultHover?.(null)}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleEvalResultClick(evalResult);
-                }}
-                onMouseDown={(e) => {
-                  e.stopPropagation();
-                }}
-                onMouseUp={(e) => {
-                  e.stopPropagation();
-                }}
-              />
-            </div>
-          );
-        })}
-        {call.latencyBlocks?.map((latencyBlock, index) => {
-          if (!containerRef.current || !duration) return null;
-          const startPercentage =
-            Math.min(1, Math.max(0, latencyBlock.secondsFromStart / duration)) *
-            100;
-          const endPercentage =
-            Math.min(
-              1,
-              Math.max(
-                0,
-                (latencyBlock.secondsFromStart + latencyBlock.duration) /
-                  duration,
-              ),
-            ) * 100;
-
-          return (
-            <Tooltip key={index}>
-              <TooltipTrigger asChild>
-                <div
-                  className="absolute top-0 z-10 h-full cursor-pointer"
-                  style={{
-                    left: `${startPercentage}%`,
-                    width: `${endPercentage - startPercentage}%`,
-                    background:
-                      hoveredEvalResult === latencyBlock.id
-                        ? getLatencyBlockColor(latencyBlock, 0.5)
-                        : getLatencyBlockColor(latencyBlock),
-                    border: `1px solid ${getLatencyBlockColor(latencyBlock, 1)}`,
-                  }}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    seek(latencyBlock.secondsFromStart);
-                    play();
-                  }}
-                >
-                  <div
-                    className="size-full"
-                    onMouseEnter={() => {
-                      setHoveredEvalResult(latencyBlock.id);
-                      onEvalResultHover?.(latencyBlock.id);
-                    }}
-                    onMouseLeave={() => {
-                      setHoveredEvalResult(null);
-                      onEvalResultHover?.(null);
-                    }}
-                  />
-                </div>
-              </TooltipTrigger>
-              <TooltipContent
-                style={{
-                  backgroundColor: "white",
-                  border: `1px solid ${getLatencyBlockColor(latencyBlock, 1)}`,
-                  color: getLatencyBlockColor(latencyBlock, 1),
-                }}
-              >
-                <p>latency: {Math.round(latencyBlock.duration * 1000)}ms</p>
-              </TooltipContent>
-            </Tooltip>
-          );
-        })}
-        {call.interruptions?.map((interruption, index) => {
-          if (!containerRef.current || !duration) return null;
-          const startPercentage =
-            Math.min(1, Math.max(0, interruption.secondsFromStart / duration)) *
-            100;
-          const endPercentage =
-            Math.min(
-              1,
-              Math.max(
-                0,
-                (interruption.secondsFromStart + interruption.duration) /
-                  duration,
-              ),
-            ) * 100;
-
-          return (
-            <Tooltip key={index}>
-              <TooltipTrigger asChild>
-                <div
-                  className="absolute top-0 z-10 h-full cursor-pointer"
-                  style={{
-                    top: "50%",
-                    height: "50%",
-                    left: `${startPercentage}%`,
-                    width: `${endPercentage - startPercentage}%`,
-                    background:
-                      hoveredEvalResult === interruption.id
-                        ? getInterruptionColor(0.5)
-                        : getInterruptionColor(),
-                    border: `1px solid ${getInterruptionColor(1)}`,
-                  }}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    seek(interruption.secondsFromStart);
-                    play();
-                  }}
-                >
-                  <div
-                    className="size-full"
-                    onMouseEnter={() => {
-                      setHoveredEvalResult(interruption.id);
-                      onEvalResultHover?.(interruption.id);
-                    }}
-                    onMouseLeave={() => {
-                      setHoveredEvalResult(null);
-                      onEvalResultHover?.(null);
-                    }}
-                  />
-                </div>
-              </TooltipTrigger>
-              <TooltipContent
-                style={{
-                  backgroundColor: "white",
-                  border: `1px solid ${getInterruptionColor(1)}`,
-                  color: getInterruptionColor(1),
-                }}
-              >
-                <p>
-                  interruption: {Math.round(interruption.duration * 1000)}ms
-                </p>
-              </TooltipContent>
-            </Tooltip>
-          );
-        })}
+        {call.evaluationResults?.map((evalResult, index) => (
+          <AudioVisualizationBlock
+            key={index}
+            type="evaluationResult"
+            data={evalResult}
+            duration={duration}
+            offsetFromStart={offsetFromStart}
+            hoveredEvalResult={hoveredEvalResult}
+            onEvalResultHover={handleEvalResultHover}
+            onEvalResultClick={handleEvalResultClick}
+            onSeek={seek}
+            onPlay={play}
+          />
+        ))}
+        {call.latencyBlocks?.map((latencyBlock, index) => (
+          <AudioVisualizationBlock
+            key={index}
+            type="latencyBlock"
+            data={latencyBlock}
+            duration={duration}
+            hoveredEvalResult={hoveredEvalResult}
+            onEvalResultHover={handleEvalResultHover}
+            onSeek={seek}
+            onPlay={play}
+          />
+        ))}
+        {call.interruptions?.map((interruption, index) => (
+          <AudioVisualizationBlock
+            key={index}
+            type="interruption"
+            data={interruption}
+            duration={duration}
+            hoveredEvalResult={hoveredEvalResult}
+            onEvalResultHover={handleEvalResultHover}
+            onSeek={seek}
+            onPlay={play}
+          />
+        ))}
       </div>
       <div className="flex items-center gap-4">
         <Button
