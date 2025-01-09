@@ -13,6 +13,7 @@ import {
   forwardRef,
   useImperativeHandle,
   useMemo,
+  Fragment,
 } from "react";
 import { Button } from "~/components/ui/button";
 import {
@@ -262,7 +263,9 @@ export const AudioPlayer = forwardRef<
     [],
   );
 
+  const [blocksKey, setBlocksKey] = useState(0);
   const handleDiscardChanges = useCallback(() => {
+    setBlocksKey((prev) => prev + 1);
     setUnsavedChanges({});
   }, []);
 
@@ -298,30 +301,32 @@ export const AudioPlayer = forwardRef<
               onEvalResultClick={handleEvalResultClick}
             />
           ))}
-          {call.latencyBlocks?.map((latencyBlock, index) => (
-            <AudioVisualizationBlock
-              key={index}
-              type="latencyBlock"
-              data={latencyBlock}
-              duration={duration}
-              offsetFromStart={offsetFromStart}
-              hoveredEvalResult={hoveredEvalResult}
-              onEvalResultHover={handleEvalResultHover}
-              onEditBlock={handleEditBlock}
-            />
-          ))}
-          {call.interruptions?.map((interruption, index) => (
-            <AudioVisualizationBlock
-              key={index}
-              type="interruption"
-              data={interruption}
-              duration={duration}
-              offsetFromStart={offsetFromStart}
-              hoveredEvalResult={hoveredEvalResult}
-              onEvalResultHover={handleEvalResultHover}
-              onEditBlock={handleEditBlock}
-            />
-          ))}
+          <Fragment key={blocksKey}>
+            {call.latencyBlocks?.map((latencyBlock, index) => (
+              <AudioVisualizationBlock
+                key={index}
+                type="latencyBlock"
+                data={latencyBlock}
+                duration={duration}
+                offsetFromStart={offsetFromStart}
+                hoveredEvalResult={hoveredEvalResult}
+                onEvalResultHover={handleEvalResultHover}
+                onEditBlock={handleEditBlock}
+              />
+            ))}
+            {call.interruptions?.map((interruption, index) => (
+              <AudioVisualizationBlock
+                key={index}
+                type="interruption"
+                data={interruption}
+                duration={duration}
+                offsetFromStart={offsetFromStart}
+                hoveredEvalResult={hoveredEvalResult}
+                onEvalResultHover={handleEvalResultHover}
+                onEditBlock={handleEditBlock}
+              />
+            ))}
+          </Fragment>
         </div>
         {!small && Object.keys(unsavedChanges).length > 0 && (
           <div className="mt-1 flex items-baseline gap-4">
