@@ -14,7 +14,7 @@ export const addCallToQueue = async (input: UploadCallParams) => {
       MessageBody: JSON.stringify(input),
     })
     .then((res) => {
-      console.log(res);
+      // console.log(res);
     })
     .catch((err) => {
       console.error(err);

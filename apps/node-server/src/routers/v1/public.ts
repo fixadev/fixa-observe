@@ -51,7 +51,6 @@ const apiRoutes: Record<string, ApiRoute> = {
   },
 };
 
-// Apply authentication middleware once for all routes
 publicRouter.use(authenticatePublicRequest);
 
 Object.values(apiRoutes).forEach(({ path, router }) => {

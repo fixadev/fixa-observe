@@ -50,20 +50,10 @@ export const transcribeAndSaveCall = async ({
 
     const duration = await getAudioDuration(stereoRecordingUrl);
 
-    console.log(
-      "===================SAVE RECORDING===================",
-      saveRecording,
-    );
-
-    console.log("============ownerID intital============", ownerId);
-
     const urlToSave =
       saveRecording === false
         ? stereoRecordingUrl
         : await uploadFromPresignedUrl(callId, stereoRecordingUrl);
-
-    // TODO: Figure out why old audio url is cached
-    console.log("calling audio service with language", language);
 
     const response = await axios.post<TranscribeResponse>(
       `${env.AUDIO_SERVICE_URL}/transcribe-deepgram`,
