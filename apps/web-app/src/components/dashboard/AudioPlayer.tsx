@@ -173,7 +173,9 @@ export const AudioPlayer = forwardRef<
     if (
       observeState &&
       audioLoaded &&
-      (!call.isRead || !observeState.callReadState[call.id])
+      (!call.isRead ||
+        (call.id in observeState.callReadState &&
+          !observeState.callReadState[call.id]))
     ) {
       const timer = setTimeout(() => {
         markCallAsRead({ callId: call.id, isRead: true });
