@@ -22,12 +22,12 @@ export const NotesCell = ({ call }: { call: CallWithIncludes }) => {
   const { mutate: updateCall } = api._call.updateNotes.useMutation({
     onSuccess: () => {
       toast({
-        title: "Notes updated successfully",
+        title: "notes updated successfully",
       });
     },
     onError: () => {
       toast({
-        title: "Failed to update notes",
+        title: "failed to update notes",
         variant: "destructive",
       });
     },
@@ -51,7 +51,7 @@ export const NotesCell = ({ call }: { call: CallWithIncludes }) => {
           className="h-auto items-center justify-center p-0 pt-1 text-xs text-muted-foreground hover:bg-transparent"
           onClick={(e) => e.stopPropagation()}
         >
-          {call?.notes?.length && call?.notes?.length > 0 ? (
+          {notes.length && notes.length > 0 ? (
             <DocumentTextIconSolid className="size-5 text-gray-700" />
           ) : (
             <DocumentTextIconOutline className="size-5" />
@@ -76,10 +76,10 @@ export const NotesCell = ({ call }: { call: CallWithIncludes }) => {
                   setIsEditing(false);
                 }}
               >
-                Cancel
+                cancel
               </Button>
               <Button size="sm" onClick={handleSave}>
-                Save
+                save
               </Button>
             </div>
           </div>
