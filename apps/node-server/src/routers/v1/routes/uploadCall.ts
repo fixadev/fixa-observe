@@ -13,17 +13,13 @@ uploadCallRouter.post(
     try {
       const {
         callId,
-        location,
         stereoRecordingUrl,
         agentId,
-        regionId,
         metadata,
         createdAt,
         saveRecording,
         language,
       } = req.body;
-
-      if (regionId) metadata.regionId = regionId;
 
       // Determine whether to decrement free calls left
       try {
@@ -67,7 +63,7 @@ uploadCallRouter.post(
 
       await addCallToQueue({
         callId,
-        stereoRecordingUrl: location || stereoRecordingUrl,
+        stereoRecordingUrl: stereoRecordingUrl,
         agentId,
         createdAt: createdAt || new Date().toISOString(),
         ownerId: res.locals.orgId,

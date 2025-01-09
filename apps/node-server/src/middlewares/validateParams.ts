@@ -1,16 +1,16 @@
 import { Request, Response, NextFunction } from "express";
+import { getNumberOfAudioChannels } from "../utils/audio";
 
-export const validateUploadCallParams = (
+export const validateUploadCallParams = async (
   req: Request,
   res: Response,
   next: NextFunction,
 ) => {
-  const { callId, location, stereoRecordingUrl, agentId } = req.body;
+  const { callId, stereoRecordingUrl, agentId } = req.body;
 
   const missingFields = [];
   if (!callId) missingFields.push("callId");
-  if (!location && !stereoRecordingUrl)
-    missingFields.push("stereoRecordingUrl");
+  if (!stereoRecordingUrl) missingFields.push("stereoRecordingUrl");
   if (!agentId) missingFields.push("agentId");
   if (missingFields.length > 0) {
     return res.status(400).json({
@@ -19,5 +19,20 @@ export const validateUploadCallParams = (
     });
   }
 
+  try {
+    const numberOfChannels = await getNumberOfAudioChannels(stereoRecordingUrl);
+    if (numberOfChannels !== 2) {
+      return res.status(400).json({
+        success: false,
+        error: "Audio file must be stereo (2 channels)",
+      });
+    }
+  } catch (error) {
+    return res.status(400).json({
+      success: false,
+      error:
+        "Could not verify audio file channel metadata. Please ensure the URL points to a valid stereo audio file and is accessible.",
+    });
+  }
   next();
 };
