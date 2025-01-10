@@ -36,6 +36,7 @@ import { api } from "~/trpc/react";
 import { useObserveStateSafe } from "../hooks/useObserveState";
 import { AudioVisualizationBlock } from "./AudioVisualizationBlock";
 import { type BlockChange } from "@repo/types/src";
+import Spinner from "../Spinner";
 
 export type AudioPlayerRef = {
   setActiveEvalResult: (
@@ -269,15 +270,16 @@ export const AudioPlayer = forwardRef<
     setUnsavedChanges({});
   }, []);
 
-  const { mutate: updateBlocks } = api._call.updateBlocks.useMutation({
-    onSuccess: (updatedCall) => {
-      if (updatedCall) {
-        setCall(updatedCall);
-        setBlocksKey((prev) => prev + 1);
-        setUnsavedChanges({});
-      }
-    },
-  });
+  const { mutate: updateBlocks, isPending: isUpdatingBlocks } =
+    api._call.updateBlocks.useMutation({
+      onSuccess: (updatedCall) => {
+        if (updatedCall) {
+          setCall(updatedCall);
+          setBlocksKey((prev) => prev + 1);
+          setUnsavedChanges({});
+        }
+      },
+    });
   const handleSaveChanges = useCallback(() => {
     updateBlocks({
       callId: call.id,
@@ -409,25 +411,30 @@ export const AudioPlayer = forwardRef<
         </div>
       </div>
       {small && Object.keys(unsavedChanges).length > 0 && (
-        <div className="mt-1 flex items-baseline gap-4">
-          <div className="text-xs">save changes?</div>
+        <div className="mt-1 flex items-center gap-4">
+          <div className="text-xs">
+            {isUpdatingBlocks ? "saving changes..." : "save changes?"}
+          </div>
           <div className="flex items-center">
             <Button
               size="sm"
               variant="ghost"
               className="h-8 px-1.5"
               onClick={handleSaveChanges}
+              disabled={isUpdatingBlocks}
             >
-              save
+              {isUpdatingBlocks ? <Spinner className="size-4" /> : "save"}
             </Button>
-            <Button
-              size="sm"
-              variant="ghost"
-              className="h-8 px-1.5 text-muted-foreground hover:text-muted-foreground"
-              onClick={handleDiscardChanges}
-            >
-              discard
-            </Button>
+            {!isUpdatingBlocks && (
+              <Button
+                size="sm"
+                variant="ghost"
+                className="h-8 px-1.5 text-muted-foreground hover:text-muted-foreground"
+                onClick={handleDiscardChanges}
+              >
+                discard
+              </Button>
+            )}
           </div>
         </div>
       )}
