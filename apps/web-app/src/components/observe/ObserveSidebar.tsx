@@ -64,6 +64,7 @@ import { DocumentTextIcon, KeyIcon } from "@heroicons/react/24/outline";
 import { OpenInNewWindowIcon } from "@radix-ui/react-icons";
 import { useFeatureFlagEnabled } from "posthog-js/react";
 import { CustomOrganizationSwitcher } from "../CustomOrganizationSwitcher";
+import Logo from "../Logo";
 
 export default function ObserveSidebar() {
   const pathname = usePathname();
@@ -89,6 +90,7 @@ export default function ObserveSidebar() {
   const [curSavedSearch, setCurSavedSearch] =
     useState<SavedSearchWithIncludes | null>(null);
 
+  const allowTesting = useFeatureFlagEnabled("allow-testing");
   const testsPageEnabled = useFeatureFlagEnabled("observability-tests-page");
 
   // Invalidate everything when organization changes
@@ -113,22 +115,26 @@ export default function ObserveSidebar() {
       <Sidebar>
         <SidebarHeader>
           <div className="-m-2 flex h-14 items-center justify-between border-b px-4 lg:h-[60px]">
-            <Select
-              defaultValue="observability"
-              onValueChange={(value) => {
-                if (value === "testing") {
-                  router.push(`/dashboard/new`);
-                }
-              }}
-            >
-              <SelectTrigger className="-ml-2 mr-2">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="testing">testing</SelectItem>
-                <SelectItem value="observability">observability</SelectItem>
-              </SelectContent>
-            </Select>
+            {allowTesting ? (
+              <Select
+                defaultValue="observability"
+                onValueChange={(value) => {
+                  if (value === "testing") {
+                    router.push(`/dashboard/new`);
+                  }
+                }}
+              >
+                <SelectTrigger className="-ml-2 mr-2">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="testing">testing</SelectItem>
+                  <SelectItem value="observability">observability</SelectItem>
+                </SelectContent>
+              </Select>
+            ) : (
+              <Logo href="/observe" />
+            )}
             <UserButton />
           </div>
         </SidebarHeader>

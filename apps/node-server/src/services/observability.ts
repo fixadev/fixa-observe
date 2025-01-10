@@ -50,20 +50,10 @@ export const transcribeAndSaveCall = async ({
 
     const duration = await getAudioDuration(stereoRecordingUrl);
 
-    console.log(
-      "===================SAVE RECORDING===================",
-      saveRecording,
-    );
-
-    console.log("============ownerID intital============", ownerId);
-
     const urlToSave =
       saveRecording === false
         ? stereoRecordingUrl
         : await uploadFromPresignedUrl(callId, stereoRecordingUrl);
-
-    // TODO: Figure out why old audio url is cached
-    console.log("calling audio service with language", language);
 
     const response = await axios.post<TranscribeResponse>(
       `${env.AUDIO_SERVICE_URL}/transcribe-deepgram`,
@@ -184,7 +174,6 @@ export const transcribeAndSaveCall = async ({
 
     // Accrue observability minutes after call is created in db
     try {
-      console.log("ACCRUING OBSERVABILITY MINUTES", duration);
       const durationMinutes = Math.ceil(duration / 60);
       await stripeServiceClient.accrueObservabilityMinutes({
         orgId: ownerId,
@@ -193,11 +182,6 @@ export const transcribeAndSaveCall = async ({
     } catch (error) {
       console.error("Error accruing observability minutes", error);
     }
-    console.log(
-      "===================saved call===================",
-      newCall.id,
-      newCall.customerCallId,
-    );
 
     await sendAlerts({
       ownerId,

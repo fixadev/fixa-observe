@@ -7,24 +7,27 @@ import { Button } from "~/components/ui/button";
 import { Textarea } from "~/components/ui/textarea";
 import { useState } from "react";
 import { type CallWithIncludes } from "@repo/types/src";
-import { DocumentTextIcon } from "@heroicons/react/24/outline";
+import { DocumentTextIcon as DocumentTextIconOutline } from "@heroicons/react/24/outline";
+import { DocumentTextIcon as DocumentTextIconSolid } from "@heroicons/react/24/solid";
 import { api } from "~/trpc/react";
 import { useToast } from "~/components/hooks/use-toast";
 
 export const NotesCell = ({ call }: { call: CallWithIncludes }) => {
-  const [isEditing, setIsEditing] = useState(false);
+  const [isEditing, setIsEditing] = useState(
+    !(call?.notes?.length && call?.notes?.length > 0),
+  );
   const [notes, setNotes] = useState(call?.notes ?? "");
   const { toast } = useToast();
 
   const { mutate: updateCall } = api._call.updateNotes.useMutation({
     onSuccess: () => {
       toast({
-        title: "Notes updated successfully",
+        title: "notes updated successfully",
       });
     },
     onError: () => {
       toast({
-        title: "Failed to update notes",
+        title: "failed to update notes",
         variant: "destructive",
       });
     },
@@ -45,10 +48,14 @@ export const NotesCell = ({ call }: { call: CallWithIncludes }) => {
       <PopoverTrigger asChild>
         <Button
           variant="ghost"
-          className="h-auto p-0 text-xs text-muted-foreground hover:bg-transparent"
+          className="h-auto items-center justify-center p-0 pt-1 text-xs text-muted-foreground hover:bg-transparent"
           onClick={(e) => e.stopPropagation()}
         >
-          <DocumentTextIcon className="h-4 w-4" />
+          {notes.length && notes.length > 0 ? (
+            <DocumentTextIconSolid className="size-5 text-gray-700" />
+          ) : (
+            <DocumentTextIconOutline className="size-5" />
+          )}
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-80" onClick={(e) => e.stopPropagation()}>
@@ -69,10 +76,10 @@ export const NotesCell = ({ call }: { call: CallWithIncludes }) => {
                   setIsEditing(false);
                 }}
               >
-                Cancel
+                cancel
               </Button>
               <Button size="sm" onClick={handleSave}>
-                Save
+                save
               </Button>
             </div>
           </div>

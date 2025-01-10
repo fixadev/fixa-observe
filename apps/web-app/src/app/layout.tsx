@@ -13,9 +13,20 @@ import { AudioSettingsProvider } from "~/components/hooks/useAudioSettings";
 import { type Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "fixa | AI voice agent testing and observability",
-  description: "run tests, analyze calls, fix bugs in your voice agents",
+  title: "fixa | open source voice agent observability",
+  description:
+    "monitor latency, interruptions, and correctness of your production calls to debug and improve your voice agent.",
   icons: [{ rel: "icon", url: "/favicon.ico" }],
+  openGraph: {
+    title: "fixa | open source voice agent observability",
+    description:
+      "monitor latency, interruptions, and correctness of your production calls to debug and improve your voice agent.",
+    images: [
+      {
+        url: "/images/landing-page/og-image.png",
+      },
+    ],
+  },
 };
 
 export default function RootLayout({

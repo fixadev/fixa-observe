@@ -1,8 +1,7 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { YCBadge } from "./YCBadge";
-import { PlayCircleIcon, RocketLaunchIcon } from "@heroicons/react/24/solid";
-import { Dialog, DialogContent, DialogTrigger } from "~/components/ui/dialog";
+import { RocketLaunchIcon } from "@heroicons/react/24/solid";
 import Link from "next/link";
 
 export function Hero() {
@@ -17,8 +16,10 @@ export function Hero() {
             <span className="block">fix your voice agents</span>
             <span className="block text-gray-600">faster</span>
           </h1>
-          <p className="mx-auto mt-3 text-base text-gray-500 sm:mt-5 sm:max-w-xl sm:text-lg md:mt-5 md:text-xl">
-            run tests, analyze calls, fix bugs in your AI voice agents
+          <p className="mx-auto mt-3 max-w-96 text-sm text-gray-500 sm:mt-5 sm:max-w-xl sm:text-lg md:mt-5 md:text-xl">
+            monitor latency, interruptions, and correctness of your calls{" "}
+            <br className="hidden sm:block" /> to debug and improve your voice
+            agent.
           </p>
           <div className="mt-5 flex flex-col items-center justify-center gap-2 sm:mt-8 sm:flex-row">
             <Button size="lg" asChild>
@@ -30,7 +31,7 @@ export function Hero() {
                 <RocketLaunchIcon className="ml-2 size-5" />
               </Link>
             </Button>
-            <Dialog>
+            {/* <Dialog>
               <DialogTrigger asChild>
                 <Button
                   size="lg"
@@ -53,7 +54,7 @@ export function Hero() {
                   ></iframe>
                 </div>
               </DialogContent>
-            </Dialog>
+            </Dialog> */}
           </div>
         </div>
 
@@ -70,7 +71,7 @@ export function Hero() {
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               className="block w-full rounded-lg border border-border shadow-2xl md:hidden"
-              src="/images/landing-page/analyze.png"
+              src="/images/landing-page/hero.png"
               alt="fixa dashboard interface"
             />
           </div>

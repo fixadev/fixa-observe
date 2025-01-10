@@ -93,7 +93,7 @@ export async function startQueueConsumer() {
             activeProcesses.push(processPromise);
           }
         } else {
-          console.log("No messages in queue");
+          // console.log("No messages in queue");
         }
       }
     } catch (error) {
