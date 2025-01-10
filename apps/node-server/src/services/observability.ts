@@ -257,7 +257,6 @@ export const analyzeBasedOnRules = async ({
         savedSearches,
       };
     } else {
-      console.log("NO RELEVANT EVAL SETS FOUND");
       return {
         evalSets: [],
         evalSetResults: [],
