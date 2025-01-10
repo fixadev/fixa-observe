@@ -35,6 +35,7 @@ import { useAudioSettings } from "~/components/hooks/useAudioSettings";
 import { api } from "~/trpc/react";
 import { useObserveStateSafe } from "../hooks/useObserveState";
 import { AudioVisualizationBlock } from "./AudioVisualizationBlock";
+import { type BlockChange } from "@repo/types/src";
 
 export type AudioPlayerRef = {
   setActiveEvalResult: (
@@ -46,12 +47,6 @@ export type AudioPlayerRef = {
   seek: (time: number) => void;
 };
 
-interface BlockChange {
-  blockId: string;
-  secondsFromStart: number;
-  duration: number;
-}
-
 export const AudioPlayer = forwardRef<
   AudioPlayerRef,
   {
@@ -62,9 +57,20 @@ export const AudioPlayer = forwardRef<
     onTimeUpdate?: (time: number) => void;
   }
 >(function AudioPlayer(
-  { call, small = false, offsetFromStart = 0, onEvalResultHover, onTimeUpdate },
+  {
+    call: _call,
+    small = false,
+    offsetFromStart = 0,
+    onEvalResultHover,
+    onTimeUpdate,
+  },
   ref,
 ) {
+  const [call, setCall] = useState<CallWithIncludes>(_call);
+  useEffect(() => {
+    setCall(_call);
+  }, [_call]);
+
   const containerRef = useRef<HTMLDivElement>(null);
   const [activeEvalResult, setActiveEvalResult] =
     useState<EvaluationResultWithIncludes | null>(null);
@@ -249,19 +255,13 @@ export const AudioPlayer = forwardRef<
     }
   }, [call.stereoRecordingUrl, call.id]);
 
-  const handleEditBlock = useCallback(
-    (blockId: string, secondsFromStart: number, duration: number) => {
-      setUnsavedChanges((prev) => ({
-        ...prev,
-        [blockId]: {
-          blockId,
-          secondsFromStart,
-          duration,
-        },
-      }));
-    },
-    [],
-  );
+  const handleEditBlock = useCallback((blockChange: BlockChange) => {
+    console.log("blockChange", blockChange);
+    setUnsavedChanges((prev) => ({
+      ...prev,
+      [blockChange.id]: blockChange,
+    }));
+  }, []);
 
   const [blocksKey, setBlocksKey] = useState(0);
   const handleDiscardChanges = useCallback(() => {
@@ -269,9 +269,21 @@ export const AudioPlayer = forwardRef<
     setUnsavedChanges({});
   }, []);
 
+  const { mutate: updateBlocks } = api._call.updateBlocks.useMutation({
+    onSuccess: (updatedCall) => {
+      if (updatedCall) {
+        setCall(updatedCall);
+        setBlocksKey((prev) => prev + 1);
+        setUnsavedChanges({});
+      }
+    },
+  });
   const handleSaveChanges = useCallback(() => {
-    // TODO: Implement saving changes
-  }, []);
+    updateBlocks({
+      callId: call.id,
+      blocks: Object.values(unsavedChanges),
+    });
+  }, [updateBlocks, call.id, unsavedChanges]);
 
   return (
     <>

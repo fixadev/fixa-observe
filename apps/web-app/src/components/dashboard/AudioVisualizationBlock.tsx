@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
+  type BlockChange,
   type CallWithIncludes,
   type EvaluationResultWithIncludes,
 } from "@repo/types/src/index";
@@ -15,11 +16,7 @@ interface BaseVisualizationProps {
   offsetFromStart?: number;
   hoveredEvalResult: string | null;
   onEvalResultHover?: (evalId: string | null) => void;
-  onEditBlock?: (
-    blockId: string,
-    secondsFromStart: number,
-    duration: number,
-  ) => void;
+  onEditBlock?: (blockChange: BlockChange) => void;
 }
 
 interface EvaluationResultProps extends BaseVisualizationProps {
@@ -166,13 +163,18 @@ export function AudioVisualizationBlock({
   );
 
   const handleMouseUp = useCallback(() => {
+    if (type === "evaluationResult") return;
     if (dragState.isDragging) {
-      onEditBlock?.(data.id, currentSecondsFromStart, currentDuration);
-      setTimeout(() => {
-        setDragState({ isDragging: false, initialX: 0, edge: null });
-      }, 0);
+      setDragState({ isDragging: false, initialX: 0, edge: null });
+      onEditBlock?.({
+        id: data.id,
+        type: type,
+        secondsFromStart: currentSecondsFromStart,
+        duration: currentDuration,
+      });
     }
   }, [
+    type,
     dragState.isDragging,
     onEditBlock,
     data.id,
@@ -190,8 +192,7 @@ export function AudioVisualizationBlock({
       window.removeEventListener("mousemove", handleMouseMove);
       window.removeEventListener("mouseup", handleMouseUp);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dragState.isDragging]);
+  }, [dragState.isDragging, handleMouseMove, handleMouseUp]);
 
   if (!data.secondsFromStart || !data.duration) return null;
 
