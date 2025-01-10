@@ -3,12 +3,12 @@ import axios from "axios";
 
 // Add these constants at the top
 const FIXA_API_KEY = process.env.FIXA_API_KEY;
-// const FIXA_API_URL = "https://api.fixa.dev/v1/upload-call";
-const FIXA_API_URL = "https://pixa.ngrok.dev/v1/upload-call";
+const FIXA_API_URL = "https://api.fixa.dev/v1/upload-call";
+// const FIXA_API_URL = "https://pixa.ngrok.dev/v1/upload-call";
 // Add arrays for random selection
 const REGIONS = ["UK", "US"];
 const LLMS = ["gpt-4", "o1-preview", "claude-3.5-sonnet"];
-const LANGUAGES = ["en", "de"];
+const LANGUAGES = ["en"];
 
 // Helper function to get random array element
 const getRandomElement = (arr: any[]) =>
@@ -16,7 +16,9 @@ const getRandomElement = (arr: any[]) =>
 
 async function fetchAndPrintVapiCalls() {
   try {
-    const calls = await vapiClient.calls.list();
+    const calls = await vapiClient.calls.list({
+      assistantId: "47e73fc9-fee3-490e-8eaf-c854b5bfba4e",
+    });
     console.log(`Found ${calls.length} calls:`);
 
     // Process each call
@@ -28,7 +30,7 @@ async function fetchAndPrintVapiCalls() {
       if (
         !stereoRecordingUrl ||
         false
-        // callId !== "c6f6d72b-bdf6-486a-b57e-d57787569e62"
+        // callId !== "af3bf71d-e755-47d3-92d6-15b92c29a91d"
       ) {
         continue;
       }

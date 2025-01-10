@@ -1,25 +1,40 @@
-import { ObserveStateProvider } from "~/components/hooks/useObserveState";
+"use client";
+
+import {
+  ObserveStateProvider,
+  useObserveState,
+} from "~/components/hooks/useObserveState";
 import ObserveSidebar from "~/components/observe/ObserveSidebar";
 import { SidebarProvider } from "~/components/ui/sidebar";
-import { type Metadata } from "next";
+import { useSearchParams } from "next/navigation";
+import { useEffect } from "react";
 
-export const metadata: Metadata = {
-  title: "fixa | observability",
-  description: "run tests, analyze calls, fix bugs in your voice agents",
-  icons: [{ rel: "icon", url: "/favicon.ico" }],
-};
+function ObserveLayout({ children }: { children: React.ReactNode }) {
+  const searchParams = useSearchParams();
+  const isDemo = searchParams.get("demo") === "true";
+  const { setIsDemo } = useObserveState();
 
-export default function ObserveLayout({
+  useEffect(() => {
+    setIsDemo(isDemo);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  return (
+    <SidebarProvider>
+      <ObserveSidebar />
+      <main className="flex-1">{children}</main>
+    </SidebarProvider>
+  );
+}
+
+export default function ObserveStateWrapper({
   children,
 }: {
   children: React.ReactNode;
 }) {
   return (
     <ObserveStateProvider>
-      <SidebarProvider>
-        <ObserveSidebar />
-        <main className="flex-1">{children}</main>
-      </SidebarProvider>
+      <ObserveLayout>{children}</ObserveLayout>
     </ObserveStateProvider>
   );
 }

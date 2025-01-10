@@ -59,6 +59,8 @@ interface ObserveStateContextType {
   >;
   callReadState: Record<string, boolean>;
   handleUpdateCallReadState: (callId: string, isRead: boolean) => void;
+  isDemo: boolean;
+  setIsDemo: (isDemo: boolean) => void;
 }
 
 const ObserveStateContext = createContext<ObserveStateContextType | undefined>(
@@ -72,6 +74,7 @@ export function ObserveStateProvider({
 }) {
   const [selectedCallId, setSelectedCallId] = useState<string | null>(null);
   const [includeTestCalls, setIncludeTestCalls] = useState<boolean>(false);
+  const [isDemo, setIsDemo] = useState<boolean>(false);
 
   const [_filter, setFilter] = useState<Filter>(defaultFilter);
   const [orderBy, setOrderBy] = useState<OrderBy | undefined>();
@@ -153,6 +156,8 @@ export function ObserveStateProvider({
         setSavedSearch,
         callReadState,
         handleUpdateCallReadState,
+        isDemo,
+        setIsDemo,
       }}
     >
       {children}

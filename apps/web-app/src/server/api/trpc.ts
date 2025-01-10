@@ -27,6 +27,8 @@ import { db } from "~/server/db";
  * @see https://trpc.io/docs/server/context
  */
 export const createTRPCContext = async (opts: { headers: Headers }) => {
+  const isDemo = opts.headers.get("x-demo") === "true";
+  console.log("========================= isDemo ====================", isDemo);
   const _auth = await auth();
   // const user = await currentUser();
 
