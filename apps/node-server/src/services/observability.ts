@@ -56,14 +56,14 @@ export const transcribeAndSaveCall = async ({
         : await uploadFromPresignedUrl(callId, stereoRecordingUrl);
 
     const response = await axios.post<TranscribeResponse>(
-      `${env.AUDIO_SERVICE_URL}/transcribe-deepgram`,
+      `${env.TRANSCRIPTION_SERVICE_URLL}/transcribe-deepgram`,
       {
         stereo_audio_url: urlToSave,
         language,
       },
       {
         headers: {
-          Authorization: `Bearer ${env.PYTHON_SERVER_SECRET}`,
+          Authorization: `Bearer ${env.TRANSCRIPTION_SERVICE_SECRET}`,
         },
       },
     );

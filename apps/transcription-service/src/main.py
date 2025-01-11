@@ -42,44 +42,6 @@ async def transcribe(request: TranscribeRequest):
         logger.error(f"Deepgram transcription failed: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.post("/websocket-call-ofone", dependencies=[Depends(authenticate_request)])
-async def start_websocket_call_ofone(request: StartWebsocketCallOfOneRequest):
-    try:
-        import httpx
-
-        # Prepare the request payload
-        payload = {
-            "device_id": request.device_id,
-            "assistant_id": request.assistant_id,
-            "assistant_overrides": request.assistant_overrides,
-            "base_url": request.base_url
-        }
-
-        # Make the POST request to the kiosk endpoint
-        endpoint = os.getenv('RUN_OFONE_KIOSK_ENDPOINT')
-        if not endpoint:
-            raise HTTPException(status_code=500, detail="RUN_OFONE_KIOSK_ENDPOINT is not set")
-        
-        async with httpx.AsyncClient() as client:
-            response = await client.post(
-                endpoint,
-                json=payload,
-            )
-            
-            if response.status_code != 200:
-                raise HTTPException(
-                    status_code=response.status_code,
-                    detail=f"Request failed: {response.text}"
-                )
-
-            response_data = response.json()
-            return {
-                "callId": response_data.get("callId")
-            }
-
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
     
 if __name__ == "__main__":
     import uvicorn

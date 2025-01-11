@@ -19,9 +19,9 @@ const envSchema = z.object({
   AWS_BUCKET_REGION: z.string().min(1),
   AWS_ACCESS_KEY_ID: z.string().min(1),
   AWS_SECRET_ACCESS_KEY: z.string().min(1),
-  AUDIO_SERVICE_URL: z.string().min(1),
-  GCP_CREDENTIALS: z.string().min(1),
-  GOOGLE_CLOUD_BUCKET_NAME: z.string().min(1),
+  TRANSCRIPTION_SERVICE_URLL: z.string().min(1),
+  // GCP_CREDENTIALS: z.string().min(1),
+  // GOOGLE_CLOUD_BUCKET_NAME: z.string().min(1),
   NEXT_BASE_URL: z.string().min(1),
   CLERK_SECRET_KEY: z.string().min(1),
   SQS_QUEUE_URL: z.string().min(1),
@@ -38,8 +38,9 @@ const envSchema = z.object({
   NEXT_PUBLIC_POSTHOG_HOST: z.string().min(1),
   OFONE_KIOSK_ENDPOINT: z.string().min(1),
   NODE_SERVER_SECRET: z.string().min(1),
-  PYTHON_SERVER_SECRET: z.string().min(1),
+  TRANSCRIPTION_SERVICE_SECRET: z.string().min(1),
   KEYWORDSAI_API_KEY: z.string().min(1),
+  USE_KEYWORDS: z.string().transform((val) => val === "true"),
 });
 
 // Validate and transform environment variables

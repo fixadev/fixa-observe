@@ -30,7 +30,7 @@ io.on("connection", (socket) => {
     userId = newUserId;
     connectedUsers.set(userId, socket);
     console.log(`User ${userId} registered`);
-    console.log("audio service url", env.AUDIO_SERVICE_URL);
+    console.log("audio service url", env.TRANSCRIPTION_SERVICE_URLL);
   });
 
   socket.on("disconnect", () => {
