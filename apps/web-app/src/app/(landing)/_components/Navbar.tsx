@@ -6,8 +6,8 @@ import { useCallback, useState } from "react";
 import Logo from "~/components/Logo";
 import { AnimatePresence, motion } from "framer-motion";
 import Link from "next/link";
-import { SignedIn } from "@clerk/nextjs";
-import { SignedOut } from "@clerk/nextjs";
+// import { SignedIn } from "@clerk/nextjs";
+// import { SignedOut } from "@clerk/nextjs";
 
 const navLinks = [
   {
@@ -82,7 +82,7 @@ export function Navbar() {
                   </Button>
                 );
               })}
-              <SignedOut>
+              {/* <SignedOut>
                 <Button asChild>
                   <Link href="/sign-up">get started</Link>
                 </Button>
@@ -91,7 +91,7 @@ export function Navbar() {
                 <Button asChild>
                   <Link href="/observe">dashboard</Link>
                 </Button>
-              </SignedIn>
+              </SignedIn> */}
             </div>
           </div>
 
@@ -142,7 +142,7 @@ export function Navbar() {
                   </Button>
                 );
               })}
-              <SignedOut>
+              {/* <SignedOut>
                 <Button className="w-full" asChild>
                   <Link href="/sign-up">get started</Link>
                 </Button>
@@ -151,7 +151,7 @@ export function Navbar() {
                 <Button className="w-full" asChild>
                   <Link href="/dashboard">dashboard</Link>
                 </Button>
-              </SignedIn>
+              </SignedIn> */}
             </div>
           </motion.div>
         )}

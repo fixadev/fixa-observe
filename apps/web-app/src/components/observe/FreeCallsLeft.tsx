@@ -1,6 +1,6 @@
 "use client";
 
-import { useOrganization } from "@clerk/nextjs";
+import { useOrganization } from "~/helpers/useSelfHostedAuth";
 import { type PublicMetadata } from "@repo/types/src";
 import { useCallback, useMemo } from "react";
 import { Button } from "../ui/button";

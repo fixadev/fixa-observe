@@ -43,7 +43,7 @@ import { Skeleton } from "../ui/skeleton";
 import { Button } from "../ui/button";
 import { AddAgentModal } from "~/app/dashboard/(agents)/_components/AddAgentModal";
 import { useAgent } from "~/app/contexts/UseAgent";
-import { useOrganization, UserButton } from "@clerk/nextjs";
+import { useOrganization, UserButton } from "~/helpers/useSelfHostedAuth";
 import FreeTestsLeft from "./FreeTestsLeft";
 import { CustomOrganizationSwitcher } from "../CustomOrganizationSwitcher";
 

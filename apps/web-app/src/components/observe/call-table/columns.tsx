@@ -21,7 +21,7 @@ import {
 } from "~/components/ui/hover-card";
 import EvalResultChip from "~/components/dashboard/EvalResultChip";
 import { api } from "~/trpc/react";
-import { useUser } from "@clerk/nextjs";
+import { useUser } from "~/helpers/useSelfHostedAuth";
 import { NotesCell } from "./NotesCell";
 
 export const columns: ColumnDef<CallWithIncludes>[] = [

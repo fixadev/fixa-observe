@@ -16,7 +16,7 @@ import {
   type AnalysisStartedData,
   type CallStartedData,
 } from "@repo/types/src/index";
-import { useOrganization } from "@clerk/nextjs";
+import { useOrganization } from "~/helpers/useSelfHostedAuth";
 import { SlashIcon } from "@heroicons/react/24/solid";
 import { CallResult, CallStatus } from "@prisma/client";
 import Link from "next/link";

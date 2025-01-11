@@ -4,7 +4,7 @@ import { Tabs, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import Image from "next/image";
-import { UserButton } from "@clerk/nextjs";
+import { UserButton } from "~/helpers/useSelfHostedAuth";
 import Logo from "../Logo";
 import { ChevronUpDownIcon, SlashIcon } from "@heroicons/react/24/solid";
 import { Button } from "../ui/button";

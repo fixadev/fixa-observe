@@ -26,53 +26,34 @@ get started for free with our cloud platform - no demos, no commitments, only pa
 | **Measure What Matters**<br>Create evaluations to validate specific conversation flows and edge cases                                  |  <img alt="Alerts" src=".github/assets/evaluationgroup.png" width="250px">   |
 | **Catch Issues Instantly**<br>Slack alerts notify you immediately if evaluations fail in production or latency thresholds are exceeded |       <img alt="alerts" src=".github/assets/alerts.png" width="250px">       |
 
-## 📦 Installation & Setup
+## 📦 self-hosting
 
-1. Create an account at [fixa.dev](https://fixa.dev)
-2. Install the Fixa SDK:
-   ```bash
-   npm install @fixa-dev/server
-   # or
-   yarn add @fixa-dev/server
-   ```
-3. Configure and use the client:
+### local development
 
-   ```typescript
-   import { FixaClient } from "@fixa-dev/server";
+1. clone this repo
+2. copy `.env.example` to `.env` for apps/web-app, apps/node-server, apps/transcription-service and packages/db and fill in the required values
+3. install dependencies:
 
-   const client = new FixaClient({ token: "YOUR_TOKEN" });
+```sh
+pnpm i
+```
 
-   await client.agent.create({
-     phoneNumber: "phoneNumber",
-     name: "name",
-     systemPrompt: "systemPrompt",
-   });
-   ```
+4. run the app
 
-4. Use TypeScript types:
+```sh
+pnpm dev
+```
 
-   ```typescript
-   import { Fixa } from "@fixa-dev/server";
+### production deployment
 
-   const request: Fixa.AgentCreateRequest = {
-     // your request object
-   };
-   ```
+1. apps/web-app is deployed on vercel
+   a. the easiest way to deploy is to create a vercel account and connect to your github account / fork of this repo.
+   b. make sure to set the environment variables in vercel to match the values in .env.example.
+   c. set root directory to 'apps/web-app'
+   d. set framework to 'next.js'
+   e. set build command to 'cd ../.. && pnpm vercel-build'
+   f. set install command to 'pnpm install'
 
-5. Handle errors:
+2. apps/node-server and apps/transcription-service are deployed on fly.io. so the easiest way to deploy is to create a fly.io account, create an app for apps/node-server and apps/transcription-service on fly.io, add the environment variables to the apps using the fly.io dashboard, and deploy using the github action in .github/workflows/fly-deploy.yml.
 
-   ```typescript
-   import { FixaError } from "@fixa-dev/server";
-
-   try {
-     await client.agent.create({...});
-   } catch (err) {
-     if (err instanceof FixaError) {
-       console.log(err.statusCode);
-       console.log(err.message);
-       console.log(err.body);
-     }
-   }
-   ```
-
-For detailed setup instructions and examples, visit our [documentation](https://docs.fixa.dev).
+3. if you cannot use fly.io, you can deploy the apps with infrastructure of your choice using the Dockerfile in each app directory.

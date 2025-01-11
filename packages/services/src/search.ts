@@ -181,7 +181,7 @@ export class SearchService {
   }: {
     ownerId: string;
   }): Promise<SavedSearchWithIncludes | null> {
-    const savedSearch = await this.db.savedSearch.findFirst({
+    let savedSearch = await this.db.savedSearch.findFirst({
       where: { ownerId, isDefault: true },
       include: {
         alerts: true,
@@ -194,6 +194,28 @@ export class SearchService {
         },
       },
     });
+    if (!savedSearch) {
+      savedSearch = await this.db.savedSearch.create({
+        data: {
+          name: "default",
+          ownerId,
+          isDefault: true,
+          agentId: [],
+          lookbackPeriod: { label: "2 days", value: 2 * 24 * 60 * 60 * 1000 },
+          chartPeriod: 60 * 60 * 1000,
+        },
+        include: {
+          alerts: true,
+          evaluationGroups: {
+            include: {
+              evaluations: {
+                include: { evaluationTemplate: true },
+              },
+            },
+          },
+        },
+      });
+    }
     const parsed = SavedSearchWithIncludesSchema.safeParse(savedSearch);
     return parsed.success ? parsed.data : null;
   }

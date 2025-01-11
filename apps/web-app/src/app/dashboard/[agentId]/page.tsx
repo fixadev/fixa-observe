@@ -23,7 +23,7 @@ import {
   type AgentWithIncludes,
 } from "@repo/types/src/index";
 
-import { useOrganization, useUser } from "@clerk/nextjs";
+import { useOrganization, useUser } from "~/helpers/useSelfHostedAuth";
 import { motion, AnimatePresence } from "framer-motion";
 import { type CallEndedData, type SocketMessage } from "@repo/types/src/index";
 import { type TestWithCalls } from "@repo/types/src/index";

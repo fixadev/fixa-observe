@@ -1,9 +1,9 @@
-import {
-  SignedIn,
-  SignedOut,
-  SignInButton,
-  SignOutButton,
-} from "@clerk/nextjs";
+// import {
+//   SignedIn,
+//   SignedOut,
+//   SignInButton,
+//   SignOutButton,
+// } from "@clerk/nextjs";
 import Link from "next/link";
 import Logo from "~/components/Logo";
 import { Button } from "~/components/ui/button";
@@ -15,11 +15,11 @@ export default function TopBar() {
         <div className="flex items-center justify-between">
           <Logo />
           <div className="flex items-center gap-2">
-            <SignedOut>
+            {/* <SignedOut>
               <SignInButton mode="modal">
                 <Button variant="ghost">sign in</Button>
-              </SignInButton>
-              {/* <Button size="lg" variant="outline" asChild>
+              </SignInButton> */}
+            {/* <Button size="lg" variant="outline" asChild>
                 <Link
                   href="https://cal.com/team/fixa/20-minute-meeting"
                   target="_blank"
@@ -27,7 +27,7 @@ export default function TopBar() {
                   book demo
                 </Link>
               </Button> */}
-            </SignedOut>
+            {/* </SignedOut>
             <SignedIn>
               <SignOutButton>
                 <Button variant="ghost">sign out</Button>
@@ -35,7 +35,7 @@ export default function TopBar() {
               <Button asChild>
                 <Link href="/dashboard/new">dashboard</Link>
               </Button>
-            </SignedIn>
+            </SignedIn> */}
           </div>
         </div>
       </div>

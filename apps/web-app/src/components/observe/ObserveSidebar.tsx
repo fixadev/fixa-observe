@@ -59,7 +59,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
-import { useOrganization, UserButton } from "@clerk/nextjs";
+import { useOrganization, UserButton } from "~/helpers/useSelfHostedAuth";
 import { DocumentTextIcon, KeyIcon } from "@heroicons/react/24/outline";
 import { OpenInNewWindowIcon } from "@radix-ui/react-icons";
 import { useFeatureFlagEnabled } from "posthog-js/react";

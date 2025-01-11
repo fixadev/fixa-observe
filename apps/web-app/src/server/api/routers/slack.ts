@@ -3,7 +3,7 @@ import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { env } from "~/env";
 import axios from "axios";
 import { type PublicMetadata } from "@repo/types/src";
-import { currentUser } from "@clerk/nextjs/server";
+import { currentUser } from "~/helpers/useSelfHostedAuth";
 import { ClerkService } from "@repo/services/src";
 import { db } from "~/server/db";
 import { SlackService } from "@repo/services/src/ee/slack";
@@ -28,12 +28,12 @@ export const slackRouter = createTRPCRouter({
           };
         }>(
           "https://slack.com/api/oauth.v2.access",
-          new URLSearchParams({
-            code: input.code,
-            client_id: env.NEXT_PUBLIC_SLACK_CLIENT_ID,
-            client_secret: env.SLACK_CLIENT_SECRET,
-            redirect_uri: env.NEXT_PUBLIC_SLACK_REDIRECT_URI,
-          }).toString(),
+          // new URLSearchParams({
+          //   code: input.code,
+          //   client_id: env.NEXT_PUBLIC_SLACK_CLIENT_ID,
+          //   client_secret: env.SLACK_CLIENT_SECRET,
+          //   redirect_uri: env.NEXT_PUBLIC_SLACK_REDIRECT_URI,
+          // }).toString(),
           {
             headers: {
               "Content-Type": "application/x-www-form-urlencoded",

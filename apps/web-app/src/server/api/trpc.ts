@@ -32,8 +32,10 @@ export const createTRPCContext = async (opts: { headers: Headers }) => {
 
   return {
     db,
-    userId: _auth.userId,
-    orgId: _auth.orgId,
+    // userId: _auth.userId,
+    // orgId: _auth.orgId,
+    userId: "self-hosted-user-id-123",
+    orgId: "self-hosted-org-id-123",
     ...opts,
   };
 };

@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { useOrganization } from "@clerk/nextjs";
+import { useOrganization } from "~/helpers/useSelfHostedAuth";
 import { ExclamationTriangleIcon } from "@heroicons/react/24/solid";
 import Link from "next/link";
 import { useCallback, useMemo } from "react";
@@ -167,7 +167,8 @@ export function BillingPage() {
                 </div>
                 <Button variant="outline" className="mt-4" asChild>
                   <Link
-                    href={`${env.NEXT_PUBLIC_STRIPE_CUSTOMER_PORTAL_URL}?prefilled_email=${billingDetails.email}`}
+                    // href={`${env.NEXT_PUBLIC_STRIPE_CUSTOMER_PORTAL_URL}?prefilled_email=${billingDetails.email}`}
+                    href="https://billing.stripe.com"
                     target="_blank"
                   >
                     edit info

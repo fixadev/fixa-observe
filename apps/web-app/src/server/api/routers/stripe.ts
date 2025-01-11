@@ -40,56 +40,56 @@ export const stripeRouter = createTRPCRouter({
   }),
 
   usageDetails: protectedProcedure.query(async ({ ctx }) => {
-    const metadata = await clerkService.getPublicMetadata({ orgId: ctx.orgId });
-    if (!metadata.stripeCustomerId) {
-      return null;
-    }
+    // const metadata = await clerkService.getPublicMetadata({ orgId: ctx.orgId });
+    // if (!metadata.stripeCustomerId) {
+    //   return null;
+    // }
 
-    const subscriptions = await stripeService.getSubscriptions(ctx.orgId);
-    const testingSubscriptionItems: Stripe.SubscriptionItem[] = [];
-    const observabilitySubscriptionItems: Stripe.SubscriptionItem[] = [];
-    for (const subscription of subscriptions.data) {
-      const subscriptionItems = subscription.items.data;
-      for (const subscriptionItem of subscriptionItems) {
-        const priceId = subscriptionItem.price.id;
-        if (priceId === env.TESTING_MINUTES_PRICE_ID) {
-          testingSubscriptionItems.push(subscriptionItem);
-        } else if (priceId === env.OBSERVABILITY_MINUTES_PRICE_ID) {
-          observabilitySubscriptionItems.push(subscriptionItem);
-        }
-      }
-    }
-    const currentPeriodStart = new Date(
-      subscriptions.data[0]!.current_period_start * 1000,
-    );
-    const currentPeriodEnd = new Date(
-      subscriptions.data[0]!.current_period_end * 1000,
-    );
+    // const subscriptions = await stripeService.getSubscriptions(ctx.orgId);
+    // const testingSubscriptionItems: Stripe.SubscriptionItem[] = [];
+    // const observabilitySubscriptionItems: Stripe.SubscriptionItem[] = [];
+    // for (const subscription of subscriptions.data) {
+    //   const subscriptionItems = subscription.items.data;
+    //   for (const subscriptionItem of subscriptionItems) {
+    //     const priceId = subscriptionItem.price.id;
+    //     if (priceId === env.TESTING_MINUTES_PRICE_ID) {
+    //       testingSubscriptionItems.push(subscriptionItem);
+    //     } else if (priceId === env.OBSERVABILITY_MINUTES_PRICE_ID) {
+    //       observabilitySubscriptionItems.push(subscriptionItem);
+    //     }
+    //   }
+    // }
+    // const currentPeriodStart = new Date(
+    //   subscriptions.data[0]!.current_period_start * 1000,
+    // );
+    // const currentPeriodEnd = new Date(
+    //   subscriptions.data[0]!.current_period_end * 1000,
+    // );
 
-    const getUsage = async (subs: Stripe.SubscriptionItem[]) => {
-      if (subs.length === 0) return null;
-      const subscription = subs[0]!;
-      const meterId = subscription.plan.meter;
-      const meterSummary = await stripeService.getMeterSummary({
-        orgId: ctx.orgId,
-        meterId: meterId!,
-        start: currentPeriodStart,
-        end: currentPeriodEnd,
-      });
-      const usage = meterSummary.data.reduce((acc, curr) => {
-        return acc + curr.aggregated_value;
-      }, 0);
-      return usage;
-    };
+    // const getUsage = async (subs: Stripe.SubscriptionItem[]) => {
+    //   if (subs.length === 0) return null;
+    //   const subscription = subs[0]!;
+    //   const meterId = subscription.plan.meter;
+    //   const meterSummary = await stripeService.getMeterSummary({
+    //     orgId: ctx.orgId,
+    //     meterId: meterId!,
+    //     start: currentPeriodStart,
+    //     end: currentPeriodEnd,
+    //   });
+    //   const usage = meterSummary.data.reduce((acc, curr) => {
+    //     return acc + curr.aggregated_value;
+    //   }, 0);
+    //   return usage;
+    // };
 
-    const testingUsage = await getUsage(testingSubscriptionItems);
-    const observabilityUsage = await getUsage(observabilitySubscriptionItems);
+    // const testingUsage = await getUsage(testingSubscriptionItems);
+    // const observabilityUsage = await getUsage(observabilitySubscriptionItems);
 
     return {
-      currentPeriodStart,
-      currentPeriodEnd,
-      testingUsage,
-      observabilityUsage,
+      currentPeriodStart: new Date(),
+      currentPeriodEnd: new Date(),
+      testingUsage: 0,
+      observabilityUsage: 0,
     };
   }),
 });

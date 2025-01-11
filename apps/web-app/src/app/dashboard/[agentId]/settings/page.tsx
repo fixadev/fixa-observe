@@ -24,7 +24,7 @@ import {
 } from "~/components/ui/dialog";
 import { useRouter } from "next/navigation";
 import { Switch } from "~/components/ui/switch";
-import { useUser } from "@clerk/nextjs";
+import { useUser } from "~/helpers/useSelfHostedAuth";
 import { cn } from "~/lib/utils";
 import {
   type ExtraProperties,

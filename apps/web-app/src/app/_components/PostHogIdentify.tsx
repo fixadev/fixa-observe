@@ -1,6 +1,6 @@
 "use client";
 
-import { useOrganization, useUser } from "@clerk/nextjs";
+import { useOrganization, useUser } from "~/helpers/useSelfHostedAuth";
 import { usePostHog } from "posthog-js/react";
 import { useEffect, useRef } from "react";
 

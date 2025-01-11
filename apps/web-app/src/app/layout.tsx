@@ -4,7 +4,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TRPCReactProvider } from "~/trpc/react";
 import { ibmPlexSans } from "./fonts";
 import { CSPostHogProvider } from "./providers";
-import { ClerkProvider } from "@clerk/nextjs";
+// import { ClerkProvider } from "@clerk/nextjs";
 
 // import { dark } from "@clerk/themes";
 import { PostHogIdentify } from "./_components/PostHogIdentify";
@@ -39,32 +39,32 @@ export default function RootLayout({
       style={{ colorScheme: "light" }}
       // suppressHydrationWarning
     >
-      <CSPostHogProvider>
-        <ClerkProvider
+      {/* <CSPostHogProvider> */}
+      {/* <ClerkProvider
           afterSignOutUrl="/"
           // appearance={{ baseTheme: dark }}
           // localization={localization}
-        >
-          <body className="h-full">
-            {/* <ThemeProvider
+        > */}
+      <body className="h-full">
+        {/* <ThemeProvider
                 attribute="class"
                 defaultTheme="light"
                 // enableSystem
                 disableTransitionOnChange
               > */}
-            <TRPCReactProvider>
-              <TooltipProvider delayDuration={100}>
-                <AudioSettingsProvider>
-                  {children}
-                  <Toaster />
-                  <PostHogIdentify />
-                </AudioSettingsProvider>
-              </TooltipProvider>
-            </TRPCReactProvider>
-            {/* </ThemeProvider> */}
-          </body>
-        </ClerkProvider>
-      </CSPostHogProvider>
+        <TRPCReactProvider>
+          <TooltipProvider delayDuration={100}>
+            <AudioSettingsProvider>
+              {children}
+              <Toaster />
+              <PostHogIdentify />
+            </AudioSettingsProvider>
+          </TooltipProvider>
+        </TRPCReactProvider>
+        {/* </ThemeProvider> */}
+      </body>
+      {/* </ClerkProvider>
+      </CSPostHogProvider> */}
     </html>
   );
 }

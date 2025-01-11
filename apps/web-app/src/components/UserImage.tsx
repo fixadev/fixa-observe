@@ -1,6 +1,6 @@
 "use client";
 
-import { useUser } from "@clerk/nextjs";
+import { useUser } from "~/helpers/useSelfHostedAuth";
 import Image from "next/image";
 
 export default function UserImage({
