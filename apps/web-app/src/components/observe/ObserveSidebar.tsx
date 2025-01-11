@@ -91,7 +91,7 @@ export default function ObserveSidebar() {
     useState<SavedSearchWithIncludes | null>(null);
 
   const allowTesting = useFeatureFlagEnabled("allow-testing");
-  const testsPageEnabled = useFeatureFlagEnabled("observability-tests-page");
+  // const testsPageEnabled = useFeatureFlagEnabled("observability-tests-page");a
 
   // Invalidate everything when organization changes
   const utils = api.useUtils();
