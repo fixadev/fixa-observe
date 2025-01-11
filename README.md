@@ -44,16 +44,27 @@ pnpm i
 pnpm dev
 ```
 
-### production deployment
+### Production Deployment
 
-1. apps/web-app is deployed on vercel
-   a. the easiest way to deploy is to create a vercel account and connect to your github account / fork of this repo.
-   b. make sure to set the environment variables in vercel to match the values in .env.example.
-   c. set root directory to 'apps/web-app'
-   d. set framework to 'next.js'
-   e. set build command to 'cd ../.. && pnpm vercel-build'
-   f. set install command to 'pnpm install'
+#### 1. Web App (Vercel)
 
-2. apps/node-server and apps/transcription-service are deployed on fly.io. so the easiest way to deploy is to create a fly.io account, create an app for apps/node-server and apps/transcription-service on fly.io, add the environment variables to the apps using the fly.io dashboard, and deploy using the github action in .github/workflows/fly-deploy.yml.
+- Create a Vercel account and connect to your GitHub account/fork
+- Set environment variables to match `.env.example`
+- Configure build settings:
+  - Root Directory: `apps/web-app`
+  - Framework: Next.js
+  - Build Command: `cd ../.. && pnpm vercel-build`
+  - Install Command: `pnpm install`
 
-3. if you cannot use fly.io, you can deploy the apps with infrastructure of your choice using the Dockerfile in each app directory.
+#### 2. Backend Services (Fly.io)
+
+The node-server and transcription-service can be deployed on Fly.io:
+
+- Create a Fly.io account
+- Create separate apps for `apps/node-server` and `apps/transcription-service`
+- Add environment variables via Fly.io dashboard
+- Deploy using the GitHub Action in `.github/workflows/fly-deploy.yml`
+
+#### 3. Alternative Deployment
+
+If you prefer not to use Fly.io, you can deploy the backend services using your preferred infrastructure - each app directory contains a Dockerfile for containerized deployment.
