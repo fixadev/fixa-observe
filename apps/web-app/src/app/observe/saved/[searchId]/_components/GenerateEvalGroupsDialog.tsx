@@ -77,8 +77,8 @@ export function GenerateEvalGroupsDialog({
         <DialogHeader>
           <DialogTitle>generate evaluation groups</DialogTitle>
           <DialogDescription>
-            paste your prompt, a brief description of your agent, or what you
-            want to evaluate.
+            paste your prompt, a brief description of your agent, or a
+            description of what you want to evaluate.
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">

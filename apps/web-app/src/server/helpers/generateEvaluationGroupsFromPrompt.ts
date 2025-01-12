@@ -1,17 +1,14 @@
 import { openai } from "~/server/utils/openAIClient";
 import { z } from "zod";
 import { zodResponseFormat } from "openai/helpers/zod";
-import {
-  type EvaluationGroup,
-  EvaluationGroupWithIncludesSchema,
-  EvaluationTemplateSchema,
-} from "@repo/types/src/index";
+import { type EvaluationGroup } from "@repo/types/src/index";
 import {
   generateCheckIfOutboundPrompt,
   generateEvaluationGroupsPrompt,
 } from "./prompts";
 import { db } from "../db";
 import { EvaluationService } from "@repo/services/src";
+import { EvalContentType, EvalResultType } from "@prisma/client";
 
 const evaluationService = new EvaluationService(db);
 
@@ -42,71 +39,115 @@ export const createEvaluationGroupsFromPrompt = async ({
   orgId: string;
   savedSearchId: string;
 }): Promise<{ evaluationGroups: EvaluationGroup[] }> => {
-  const outputSchema = z.object({
-    evaluationTemplatesToCreate: z.array(EvaluationTemplateSchema),
-    evaluationGroups: z.array(EvaluationGroupWithIncludesSchema),
-  });
+  try {
+    const outputSchema = z.object({
+      evaluationTemplatesToCreate: z.array(
+        z.object({
+          name: z.string(),
+          description: z.string(),
+          type: z.string(),
+          params: z.array(z.string()),
+        }),
+      ),
+      evaluationGroups: z.array(
+        z.object({
+          name: z.string(),
+          condition: z.string(),
+          enabled: z.boolean(),
+          evaluations: z.array(
+            z.object({
+              evaluationTemplateId: z.string(),
+              params: z.object({}).optional(),
+              evaluationTemplate: z.object({
+                name: z.string(),
+                description: z.string(),
+                type: z.string(),
+                params: z.array(z.string()),
+              }),
+            }),
+          ),
+        }),
+      ),
+    });
 
-  const existingEvaluationTemplates = await evaluationService.getTemplates({
-    ownerId: orgId,
-  });
+    const existingEvaluationTemplates = await evaluationService.getTemplates({
+      ownerId: orgId,
+    });
 
-  const combinedPrompt = `${generateEvaluationGroupsPrompt(
-    count,
-    existingEvaluationTemplates,
-  )}\n\n AGENT PROMPT: ${prompt}
+    const combinedPrompt = `${generateEvaluationGroupsPrompt(
+      count,
+      existingEvaluationTemplates,
+    )}\n\n AGENT PROMPT: ${prompt}
   \n\nmake sure to generate ${count} evaluation groups
   \n\nmake the evaluations granular and precise
   \n\ngenerate at least 3 evaluations for each scenario`;
 
-  const completion = await openai.beta.chat.completions.parse({
-    model: "gpt-4o",
-    messages: [{ role: "system", content: combinedPrompt }],
-    response_format: zodResponseFormat(outputSchema, "evaluationGroups"),
-  });
+    console.log("PROMPT", combinedPrompt);
 
-  const parsedResponse = completion.choices[0]?.message.parsed;
+    const completion = await openai.beta.chat.completions.parse({
+      model: "gpt-4o",
+      messages: [{ role: "system", content: combinedPrompt }],
+      response_format: zodResponseFormat(outputSchema, "evaluationGroups"),
+    });
 
-  if (!parsedResponse) {
-    throw new Error("No response from OpenAI");
-  }
-  const createdEvaluationTemplates = await evaluationService.createTemplates({
-    templates: parsedResponse.evaluationTemplatesToCreate,
-    ownerId: orgId,
-  });
+    const parsedResponse = completion.choices[0]?.message.parsed;
 
-  const createdEvaluationGroups: EvaluationGroup[] = [];
-
-  for (const evaluationGroup of parsedResponse.evaluationGroups) {
-    const createdEvaluationGroup = await evaluationService.createGroup({
-      group: {
-        ...evaluationGroup,
-        savedSearchId,
-        evaluations: evaluationGroup.evaluations
-          .map((evaluation) => ({
-            ...evaluation,
-            evaluationTemplateId:
-              createdEvaluationTemplates.find(
-                (template) =>
-                  template.name === evaluation.evaluationTemplate.name,
-              )?.id ?? null,
-          }))
-          .filter(
-            (
-              evaluation,
-            ): evaluation is typeof evaluation & {
-              evaluationTemplateId: string;
-            } =>
-              evaluation.evaluationTemplateId !== null &&
-              evaluation.evaluationTemplateId !== undefined,
-          ),
-      },
+    if (!parsedResponse) {
+      throw new Error("No response from OpenAI");
+    }
+    const createdEvaluationTemplates = await evaluationService.createTemplates({
+      templates: parsedResponse.evaluationTemplatesToCreate.map((template) => ({
+        ...template,
+        id: "temp-1",
+        params: template.params,
+        createdAt: new Date(),
+        ownerId: orgId,
+        resultType: EvalResultType.number,
+        contentType: EvalContentType.content,
+        toolCallExpectedResult: "",
+        deleted: false,
+        type: "general",
+      })),
       ownerId: orgId,
     });
-    createdEvaluationGroups.push(createdEvaluationGroup);
-  }
 
-  return {
-    evaluationGroups: createdEvaluationGroups,
-  };
+    const createdEvaluationGroups: EvaluationGroup[] = [];
+
+    for (const evaluationGroup of parsedResponse.evaluationGroups) {
+      const createdEvaluationGroup = await db.evaluationGroup.create({
+        data: {
+          ...evaluationGroup,
+          savedSearchId,
+          ownerId: orgId,
+          createdAt: new Date(),
+          evaluations: {
+            create: evaluationGroup.evaluations
+              ?.map((evaluation) => ({
+                params: evaluation.params,
+                createdAt: new Date(),
+                evaluationTemplate: {
+                  connect: {
+                    id: createdEvaluationTemplates
+                      .concat(existingEvaluationTemplates)
+                      .find(
+                        (template) =>
+                          template.name === evaluation.evaluationTemplate.name,
+                      )?.id,
+                  },
+                },
+              }))
+              .filter((evaluation) => evaluation.evaluationTemplate.connect.id),
+          },
+        },
+      });
+      createdEvaluationGroups.push(createdEvaluationGroup);
+    }
+
+    return {
+      evaluationGroups: createdEvaluationGroups,
+    };
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
 };

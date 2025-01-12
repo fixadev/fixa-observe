@@ -40,11 +40,11 @@ export const generateEvaluationGroupsPrompt = (
   
   ${JSON.stringify(existingEvaluationTemplates, null, 2)}
   
-  you can create new templates as needed.
+  you should create new templates as needed.
 
   your response will be an array of JSON objects with the following properties:
 
-  - evaluationTemplatesToCreate: an array of evaluation templates to create
+  - evaluationTemplatesToCreate: an array of evaluation templates to create (so DO NOT include existing evaluation templates in this array)
   - evaluationGroups: an array of evaluation groups to create -- each evaluation group should include evaluations that inherit from existing evaluation templates or evaluation templates that will be created
 
   i.e. if the system prompt is "your are an assistant that answers the phone at a restaurant", 
