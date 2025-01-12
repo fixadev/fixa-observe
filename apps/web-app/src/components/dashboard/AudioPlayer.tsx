@@ -274,9 +274,11 @@ export const AudioPlayer = forwardRef<
     api._call.updateBlocks.useMutation({
       onSuccess: (updatedCall) => {
         if (updatedCall) {
-          setCall(updatedCall);
           setBlocksKey((prev) => prev + 1);
           setUnsavedChanges({});
+          if (observeState) {
+            observeState.overrideCall(call.id, updatedCall);
+          }
         }
       },
     });
@@ -343,25 +345,30 @@ export const AudioPlayer = forwardRef<
           </Fragment>
         </div>
         {!small && Object.keys(unsavedChanges).length > 0 && (
-          <div className="mt-1 flex items-baseline gap-4">
-            <div className="text-xs">save changes?</div>
+          <div className="mt-1 flex items-center gap-4">
+            <div className="text-xs">
+              {isUpdatingBlocks ? "saving changes..." : "save changes?"}
+            </div>
             <div className="flex items-center">
               <Button
                 size="sm"
                 variant="ghost"
                 className="h-8 px-1.5"
                 onClick={handleSaveChanges}
+                disabled={isUpdatingBlocks}
               >
-                save
+                {isUpdatingBlocks ? <Spinner className="size-4" /> : "save"}
               </Button>
-              <Button
-                size="sm"
-                variant="ghost"
-                className="h-8 px-1.5 text-muted-foreground hover:text-muted-foreground"
-                onClick={handleDiscardChanges}
-              >
-                discard
-              </Button>
+              {!isUpdatingBlocks && (
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className="h-8 px-1.5 text-muted-foreground hover:text-muted-foreground"
+                  onClick={handleDiscardChanges}
+                >
+                  discard
+                </Button>
+              )}
             </div>
           </div>
         )}
