@@ -18,11 +18,15 @@ export default function CallTable({
   calls: CallWithIncludes[];
   isLoading?: boolean;
 }) {
-  const { setOrderBy, filter, setFilter } = useObserveState();
+  const { setOrderBy, filter, setFilter, callOverrides } = useObserveState();
 
   const [sorting, setSorting] = useState<SortingState>([
     { id: "startedAt", desc: true },
   ]);
+
+  const overriddenCalls = useMemo(() => {
+    return calls.map((call) => callOverrides[call.id] ?? call);
+  }, [calls, callOverrides]);
 
   const handleSortingChange = useCallback(
     (sorting: SortingState) => {
@@ -94,7 +98,7 @@ export default function CallTable({
           sorting={sorting}
           onSortingChange={setSorting}
           columns={columns}
-          data={calls}
+          data={overriddenCalls}
         />
       )}
     </div>

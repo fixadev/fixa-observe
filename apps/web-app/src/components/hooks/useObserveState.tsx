@@ -14,6 +14,7 @@ import {
   type Filter,
   type OrderBy,
   type SavedSearchWithIncludes,
+  type CallWithIncludes,
 } from "@repo/types/src/index";
 export const lookbackPeriods: SelectItem[] = [
   { label: "24 hours", value: 24 * 60 * 60 * 1000 },
@@ -59,6 +60,12 @@ interface ObserveStateContextType {
   >;
   callReadState: Record<string, boolean>;
   handleUpdateCallReadState: (callId: string, isRead: boolean) => void;
+  callOverrides: Record<string, CallWithIncludes>;
+  setCallOverrides: React.Dispatch<
+    React.SetStateAction<Record<string, CallWithIncludes>>
+  >;
+  overrideCall: (callId: string, call: CallWithIncludes) => void;
+  removeCallOverride: (callId: string) => void;
 }
 
 const ObserveStateContext = createContext<ObserveStateContextType | undefined>(
@@ -72,6 +79,9 @@ export function ObserveStateProvider({
 }) {
   const [selectedCallId, setSelectedCallId] = useState<string | null>(null);
   const [includeTestCalls, setIncludeTestCalls] = useState<boolean>(false);
+  const [callOverrides, setCallOverrides] = useState<
+    Record<string, CallWithIncludes>
+  >({});
 
   const [_filter, setFilter] = useState<Filter>(defaultFilter);
   const [orderBy, setOrderBy] = useState<OrderBy | undefined>();
@@ -137,6 +147,21 @@ export function ObserveStateProvider({
     [],
   );
 
+  const overrideCall = useCallback((callId: string, call: CallWithIncludes) => {
+    setCallOverrides((prev) => ({
+      ...prev,
+      [callId]: call,
+    }));
+  }, []);
+
+  const removeCallOverride = useCallback((callId: string) => {
+    setCallOverrides((prev) => {
+      const newOverrides = { ...prev };
+      delete newOverrides[callId];
+      return newOverrides;
+    });
+  }, []);
+
   return (
     <ObserveStateContext.Provider
       value={{
@@ -153,6 +178,10 @@ export function ObserveStateProvider({
         setSavedSearch,
         callReadState,
         handleUpdateCallReadState,
+        callOverrides,
+        setCallOverrides,
+        overrideCall,
+        removeCallOverride,
       }}
     >
       {children}
