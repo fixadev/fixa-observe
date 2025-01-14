@@ -158,6 +158,15 @@ export async function POST(req: Request) {
           }),
         ),
       );
+
+      // Set user onboarded flag to true
+      await clerkService.updatePublicMetadata({
+        orgId,
+        metadata: {
+          onboarded: true,
+        },
+      });
+
       break;
     }
   }
