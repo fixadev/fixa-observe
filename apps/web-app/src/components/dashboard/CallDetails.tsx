@@ -492,6 +492,18 @@ export default function CallDetails({
                               1,
                             ),
                           }}
+                          onMouseEnter={() => {
+                            setActiveEvalResultId(
+                              messageToLatencyMap[message.id]!.id,
+                            );
+                            audioPlayerRef.current?.setHoveredEvalResult(
+                              messageToLatencyMap[message.id]!.id,
+                            );
+                          }}
+                          onMouseLeave={() => {
+                            setActiveEvalResultId(null);
+                            audioPlayerRef.current?.setHoveredEvalResult(null);
+                          }}
                         >
                           {Math.round(
                             messageToLatencyMap[message.id]!.duration * 1000,
