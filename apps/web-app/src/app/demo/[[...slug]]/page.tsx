@@ -1,16 +1,28 @@
-export default async function Page({
-  params,
-}: {
-  params: Promise<{ slug?: string[] }>;
-}) {
-  const { slug } = await params;
+import dynamic from "next/dynamic";
+
+export default function Page({ params }: { params: { slug?: string[] } }) {
+  const { slug } = params;
   const path = slug ? slug.join("/") : "";
 
-  // Directly return the observe page component
-  return (
-    <iframe
-      src={`/observe/${path}?demo=true`}
-      className="h-screen w-full border-none"
-    />
-  );
+  // Use dynamic import based on path
+  if (path) {
+    if (slug && slug.length >= 2 && slug[0] === "saved") {
+      const searchId = slug[1]!;
+      const Component = dynamic(
+        () => import(`../../observe/saved/[searchId]/page`),
+        {
+          loading: () => <div>Loading...</div>,
+        },
+      );
+      return <Component params={{ searchId }} />;
+    } else {
+      return dynamic(() => import(`../../observe/${path}/page`), {
+        loading: () => <div>Loading...</div>,
+      });
+    }
+  }
+
+  return dynamic(() => import(`../../observe/page`), {
+    loading: () => <div>Loading...</div>,
+  });
 }

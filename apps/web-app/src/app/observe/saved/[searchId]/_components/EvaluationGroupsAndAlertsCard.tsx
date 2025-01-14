@@ -18,15 +18,13 @@ import { CreateEditAlertDialog } from "./AlertDialog";
 import { useObserveState } from "~/components/hooks/useObserveState";
 import { AlertCard } from "./AlertCard";
 import { EvaluationGroupCard } from "./EvaluationGroupCard";
-import { Button } from "~/components/ui/button";
-import { GenerateEvalGroupsDialog } from "./GenerateEvalGroupsDialog";
 
 export function EvaluationGroupsAndAlertsCard({
   searchId,
 }: {
   searchId: string;
 }) {
-  const { savedSearch } = useObserveState();
+  const { savedSearch, isDemo } = useObserveState();
 
   const [mode, setMode] = useState<"evaluations" | "alerts">("evaluations");
   const [evalsModalOpen, setEvalsModalOpen] = useState(false);
@@ -79,45 +77,6 @@ export function EvaluationGroupsAndAlertsCard({
       </div>
       <CardContent className="flex-1 overflow-y-auto">
         {mode === "evaluations" ? (
-          // <div className="flex h-full w-full flex-col items-center justify-center">
-          //   {savedSearch?.evaluationGroups?.length === 0 ? (
-          //     <div className="flex h-full flex-col items-center justify-center gap-2">
-          //       <div className="flex flex-col justify-center">
-          //         <h3 className="text-lg font-medium">no evaluations yet.</h3>
-          //         <p className="text-sm text-muted-foreground">
-          //           create your first evaluation
-          //         </p>
-          //         <div className="flex flex-row items-center gap-2 pt-3">
-          //           <Button
-          //             variant="outline"
-          //             onClick={handleAddEvaluationGroup}
-          //           >
-          //             add evaluation
-          //           </Button>
-          //           {/* <GenerateEvalGroupsDialog searchId={searchId} /> */}
-          //         </div>
-          //       </div>
-          //     </div>
-          //   ) : (
-          //     <div className="flex flex-col gap-2">
-          //       {savedSearch?.evaluationGroups?.map((evaluationGroup) => (
-          //         <EvaluationGroupCard
-          //           evaluationGroup={evaluationGroup}
-          //           setSelectedEvaluationGroup={setSelectedEvaluationGroup}
-          //           setEvalsModalOpen={setEvalsModalOpen}
-          //           key={evaluationGroup.id}
-          //         />
-          //       ))}
-          //       <div
-          //         className="flex flex-row items-center gap-2 rounded-lg bg-muted/70 p-4 text-muted-foreground hover:cursor-pointer hover:bg-muted"
-          //         onClick={handleAddEvaluationGroup}
-          //       >
-          //         <PlusIcon className="size-4" />
-          //         <span className="text-sm">add evaluation</span>
-          //       </div>
-          //     </div>
-          //   )}
-          // </div>
           <div className="flex flex-col gap-2">
             {savedSearch?.evaluationGroups?.map((evaluationGroup) => (
               <EvaluationGroupCard
@@ -128,8 +87,11 @@ export function EvaluationGroupsAndAlertsCard({
               />
             ))}
             <div
-              className="flex flex-row items-center gap-2 rounded-lg bg-muted/70 p-4 text-muted-foreground hover:cursor-pointer hover:bg-muted"
-              onClick={handleAddEvaluationGroup}
+              className={cn(
+                "flex flex-row items-center gap-2 rounded-lg bg-muted/70 p-4 text-muted-foreground",
+                isDemo ? "cursor-disabled" : "cursor-pointer hover:bg-muted",
+              )}
+              onClick={isDemo ? undefined : handleAddEvaluationGroup}
             >
               <PlusIcon className="size-4" />
               <span className="text-sm">add evaluation</span>
@@ -147,11 +109,20 @@ export function EvaluationGroupsAndAlertsCard({
               />
             ))}
             <div
-              className="flex flex-row items-center gap-2 rounded-md bg-muted/70 p-4 text-muted-foreground hover:cursor-pointer hover:bg-muted"
-              onClick={() => {
-                setSelectedAlert(instantiateAlert({ savedSearchId: searchId }));
-                setAlertsModalOpen(true);
-              }}
+              className={cn(
+                "flex flex-row items-center gap-2 rounded-md bg-muted/70 p-4 text-muted-foreground",
+                isDemo ? "cursor-disabled" : "cursor-pointer hover:bg-muted",
+              )}
+              onClick={
+                isDemo
+                  ? undefined
+                  : () => {
+                      setSelectedAlert(
+                        instantiateAlert({ savedSearchId: searchId }),
+                      );
+                      setAlertsModalOpen(true);
+                    }
+              }
             >
               <PlusIcon className="size-4" />
               <span className="text-sm">add alert</span>

@@ -14,6 +14,7 @@ import {
   type Filter,
   type OrderBy,
   type SavedSearchWithIncludes,
+  type CallWithIncludes,
 } from "@repo/types/src/index";
 export const lookbackPeriods: SelectItem[] = [
   { label: "24 hours", value: 24 * 60 * 60 * 1000 },
@@ -59,8 +60,13 @@ interface ObserveStateContextType {
   >;
   callReadState: Record<string, boolean>;
   handleUpdateCallReadState: (callId: string, isRead: boolean) => void;
+
+  // ---------------
+  // Demo variables
+  // ---------------
   isDemo: boolean;
-  setIsDemo: (isDemo: boolean) => void;
+  demoCalls: Record<string, CallWithIncludes>; // Mapping from saved search ID to calls
+  demoSavedSearches: SavedSearchWithIncludes[];
 }
 
 const ObserveStateContext = createContext<ObserveStateContextType | undefined>(
@@ -68,13 +74,18 @@ const ObserveStateContext = createContext<ObserveStateContextType | undefined>(
 );
 
 export function ObserveStateProvider({
+  isDemo = false,
+  demoCalls = {},
+  demoSavedSearches = [],
   children,
 }: {
+  isDemo?: boolean;
+  demoCalls?: Record<string, CallWithIncludes>;
+  demoSavedSearches?: SavedSearchWithIncludes[];
   children: React.ReactNode;
 }) {
   const [selectedCallId, setSelectedCallId] = useState<string | null>(null);
   const [includeTestCalls, setIncludeTestCalls] = useState<boolean>(false);
-  const [isDemo, setIsDemo] = useState<boolean>(false);
 
   const [_filter, setFilter] = useState<Filter>(defaultFilter);
   const [orderBy, setOrderBy] = useState<OrderBy | undefined>();
@@ -157,7 +168,8 @@ export function ObserveStateProvider({
         callReadState,
         handleUpdateCallReadState,
         isDemo,
-        setIsDemo,
+        demoCalls,
+        demoSavedSearches,
       }}
     >
       {children}
