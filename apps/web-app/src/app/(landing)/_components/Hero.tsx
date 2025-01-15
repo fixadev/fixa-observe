@@ -22,13 +22,21 @@ export function Hero() {
             agent.
           </p>
           <div className="mt-5 flex flex-col items-center justify-center gap-2 sm:mt-8 sm:flex-row">
-            <Button size="lg" asChild>
+            <Button size="lg" className="h-10 w-40" asChild>
               <Link
                 href="/sign-up"
                 className="flex items-center justify-center lowercase"
               >
                 get started
                 <RocketLaunchIcon className="ml-2 size-5" />
+              </Link>
+            </Button>
+            <Button size="lg" variant="outline" className="h-10 w-40" asChild>
+              <Link
+                href="/demo"
+                className="flex items-center justify-center lowercase"
+              >
+                interactive demo
               </Link>
             </Button>
             {/* <Dialog>

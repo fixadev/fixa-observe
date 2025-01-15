@@ -1,8 +1,13 @@
 import { ArrowTopRightOnSquareIcon } from "@heroicons/react/24/solid";
 import Link from "next/link";
 import { Button } from "../ui/button";
+import { useCallback } from "react";
 
 export default function NoCallsCard() {
+  const viewSampleDashboard = useCallback(() => {
+    window.location.href = "/demo";
+  }, []);
+
   return (
     <div className="flex h-full w-full flex-col items-center justify-center p-8">
       <div className="max-w-2xl rounded-lg border border-border bg-card p-6 text-card-foreground shadow-sm">
@@ -25,18 +30,27 @@ export default function NoCallsCard() {
           once you start sending calls, they will appear in this dashboard
           automatically.
         </p>
-        <Button
-          variant="link"
-          className="mt-4 flex w-fit gap-2 px-0 text-sm"
-          asChild
-        >
-          <Link
-            href="https://docs.fixa.dev/api-reference/endpoint/upload-call"
-            target="_blank"
+        <div className="mt-4 flex items-center justify-between gap-2">
+          <Button
+            variant="link"
+            className="flex w-fit gap-2 px-0 text-sm"
+            asChild
           >
-            view docs <ArrowTopRightOnSquareIcon className="size-4" />
-          </Link>
-        </Button>
+            <Link
+              href="https://docs.fixa.dev/api-reference/endpoint/upload-call"
+              target="_blank"
+            >
+              view docs <ArrowTopRightOnSquareIcon className="size-4" />
+            </Link>
+          </Button>
+          <Button
+            variant="outline"
+            className="flex w-fit gap-2 text-sm"
+            onClick={viewSampleDashboard}
+          >
+            view sample dashboard
+          </Button>
+        </div>
       </div>
     </div>
   );

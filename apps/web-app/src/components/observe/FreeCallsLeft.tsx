@@ -8,8 +8,10 @@ import { api } from "~/trpc/react";
 import Spinner from "../Spinner";
 import { useFeatureFlagEnabled } from "posthog-js/react";
 import { Card } from "../ui/card";
+import { useObserveState } from "../hooks/useObserveState";
 
 export default function FreeCallsLeft() {
+  const { isDemo } = useObserveState();
   const bypassPayment = useFeatureFlagEnabled("bypass-payment");
   const { organization, isLoaded } = useOrganization();
 
@@ -35,7 +37,7 @@ export default function FreeCallsLeft() {
   }, [getCheckoutUrl]);
 
   // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
-  if (isPaidUser || !isLoaded) {
+  if (isDemo || isPaidUser || !isLoaded) {
     return null;
   }
 

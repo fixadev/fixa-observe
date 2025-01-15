@@ -4,9 +4,14 @@ import { SignedIn, SignedOut, useAuth } from "@clerk/nextjs";
 import { Button } from "~/components/ui/button";
 import Link from "next/link";
 import { cn } from "~/lib/utils";
+import { useCallback } from "react";
 
 export function DemoBanner() {
   const { isLoaded } = useAuth();
+
+  const goToDashboard = useCallback(() => {
+    window.location.href = "/observe";
+  }, []);
 
   return (
     <div
@@ -28,8 +33,8 @@ export function DemoBanner() {
           </Button>
         </SignedOut>
         <SignedIn>
-          <Button variant="outline" asChild size="sm">
-            <Link href="/observe">back to dashboard</Link>
+          <Button variant="outline" size="sm" onClick={goToDashboard}>
+            back to dashboard
           </Button>
         </SignedIn>
       </div>
