@@ -1,6 +1,9 @@
 "use client";
 
-import { type SavedSearchWithIncludes } from "@repo/types/src";
+import {
+  type CallWithIncludes,
+  type SavedSearchWithIncludes,
+} from "@repo/types/src";
 import { ObserveStateProvider } from "~/components/hooks/useObserveState";
 import ObserveSidebar from "~/components/observe/ObserveSidebar";
 import Spinner from "~/components/Spinner";
@@ -12,7 +15,7 @@ export default function DemoLayout({
   children: React.ReactNode;
 }) {
   const loaded = true;
-  const demoCalls = {};
+  const demoCalls: Record<string, CallWithIncludes> = {};
   const demoSavedSearches: SavedSearchWithIncludes[] = [];
 
   if (!loaded) {

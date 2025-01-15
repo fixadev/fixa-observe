@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect } from "react";
 import { CopyText } from "~/components/CopyText";
 import { Label } from "~/components/ui/label";
@@ -8,11 +7,7 @@ import { SidebarTrigger } from "~/components/ui/sidebar";
 import { Skeleton } from "~/components/ui/skeleton";
 import { api } from "~/trpc/react";
 
-export default function ApiKeysPage({
-  params,
-}: {
-  params: { agentId: string };
-}) {
+export default function ApiKeysPage() {
   const { data: apiKey, refetch, isLoading } = api.user.getApiKey.useQuery();
   const { mutateAsync: generateApiKey, isPending: isGeneratingApiKey } =
     api.user.generateApiKey.useMutation();
@@ -33,9 +28,7 @@ export default function ApiKeysPage({
       <div className="sticky top-0 z-20 flex h-14 w-full items-center justify-between border-b border-input bg-sidebar px-4 lg:h-[60px]">
         <div className="flex flex-1 items-center gap-2">
           <SidebarTrigger />
-          <Link href={`/dashboard/${params.agentId}/api-keys`}>
-            <div className="font-medium">API keys</div>
-          </Link>
+          <div className="font-medium">API keys</div>
         </div>
       </div>
       <div className="container flex flex-col gap-4 p-4">

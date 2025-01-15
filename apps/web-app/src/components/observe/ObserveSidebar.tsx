@@ -140,7 +140,7 @@ export default function ObserveSidebar() {
             ) : (
               <Logo href={`/${rootPath}`} />
             )}
-            <UserButton />
+            {!isDemo && <UserButton />}
           </div>
         </SidebarHeader>
         <SidebarContent>
@@ -282,11 +282,13 @@ export default function ObserveSidebar() {
                     <OpenInNewWindowIcon />
                   </SidebarMenuBadge>
                 </SidebarMenuItem>
-                <SidebarMenuItem>
-                  <SidebarMenuButton asChild>
-                    <CustomOrganizationSwitcher />
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
+                {!isDemo && (
+                  <SidebarMenuItem>
+                    <SidebarMenuButton asChild>
+                      <CustomOrganizationSwitcher />
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                )}
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>

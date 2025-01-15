@@ -16,13 +16,15 @@ export default function Page({ params }: { params: { slug?: string[] } }) {
       );
       return <Component params={{ searchId }} />;
     } else {
-      return dynamic(() => import(`../../observe/${path}/page`), {
+      const Component = dynamic(() => import(`../../observe/${path}/page`), {
         loading: () => <div>Loading...</div>,
       });
+      return <Component />;
     }
   }
 
-  return dynamic(() => import(`../../observe/page`), {
+  const Component = dynamic(() => import(`../../observe/page`), {
     loading: () => <div>Loading...</div>,
   });
+  return <Component />;
 }
