@@ -66,6 +66,7 @@ import { useFeatureFlagEnabled } from "posthog-js/react";
 import { CustomOrganizationSwitcher } from "../CustomOrganizationSwitcher";
 import Logo from "../Logo";
 import { useObserveState } from "../hooks/useObserveState";
+import { DemoBanner } from "~/components/demo/DemoBanner";
 
 export default function ObserveSidebar() {
   const pathname = usePathname();
@@ -287,6 +288,11 @@ export default function ObserveSidebar() {
                     <SidebarMenuButton asChild>
                       <CustomOrganizationSwitcher />
                     </SidebarMenuButton>
+                  </SidebarMenuItem>
+                )}
+                {isDemo && (
+                  <SidebarMenuItem>
+                    <DemoBanner />
                   </SidebarMenuItem>
                 )}
               </SidebarMenu>
