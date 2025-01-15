@@ -7,6 +7,8 @@ import { privateRouter } from "./routers/v1/private";
 import { publicRouter } from "./routers/v1/public";
 import { posthogClient } from "./clients/posthogClient";
 import { logFailedRequests } from "./middlewares/logFailedRequests";
+import { CronJob } from "cron";
+import { populateDemoCalls } from "./utils/demo";
 
 const app = express();
 const httpServer = createServer(app);
@@ -65,6 +67,26 @@ const cleanup = () => {
 ["SIGINT", "SIGTERM", "SIGUSR2"].forEach((signal) => {
   process.on(signal, cleanup);
 });
+
+const populateDemoCallsCronJob = CronJob.from({
+  cronTime: "0 0 * * *", // Runs at midnight every day
+  onTick: async () => {
+    try {
+      console.log("Starting demo calls population...");
+      await populateDemoCalls();
+      console.log("Finished populating demo calls");
+    } catch (error) {
+      console.error("Error in demo calls cron job:", error);
+    }
+  },
+  timeZone: "America/Los_Angeles", // Timezone
+});
+
+// Start the cron job
+if (!env.DEBUG) {
+  console.log("=========== Starting populate demo calls cron job ===========");
+  populateDemoCallsCronJob.start();
+}
 
 httpServer.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
