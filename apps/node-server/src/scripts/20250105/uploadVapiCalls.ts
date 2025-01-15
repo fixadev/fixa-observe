@@ -3,7 +3,8 @@ import axios from "axios";
 
 // Add these constants at the top
 const FIXA_API_KEY = process.env.FIXA_API_KEY;
-const FIXA_API_URL = "https://api.fixa.dev/v1/upload-call";
+// const FIXA_API_URL = "https://api.fixa.dev/v1/upload-call";
+const FIXA_API_URL = "http://localhost:3003/v1/upload-call";
 // const FIXA_API_URL = "https://pixa.ngrok.dev/v1/upload-call";
 // Add arrays for random selection
 const REGIONS = ["UK", "US"];

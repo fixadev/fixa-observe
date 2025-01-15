@@ -31,6 +31,7 @@ export const env = createEnv({
     SLACK_ANALYTICS_BOT_WEBHOOK_URL: z.string(),
     NODE_SERVER_SECRET: z.string(),
     KEYWORDSAI_API_KEY: z.string(),
+    DEMO_ORG_ID: z.string(),
   },
 
   /**
@@ -95,6 +96,7 @@ export const env = createEnv({
       process.env.SLACK_ANALYTICS_BOT_WEBHOOK_URL,
     NODE_SERVER_SECRET: process.env.NODE_SERVER_SECRET,
     KEYWORDSAI_API_KEY: process.env.KEYWORDSAI_API_KEY,
+    DEMO_ORG_ID: process.env.DEMO_ORG_ID,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially

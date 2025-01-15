@@ -1,8 +1,9 @@
 import { z } from "zod";
-import { createTRPCRouter, protectedProcedure } from "../trpc";
+import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 import { AgentService } from "@repo/services/src/agent";
 import { db } from "~/server/db";
 import { AgentSchema } from "@repo/types/src/index";
+import { env } from "~/env";
 
 const agentServiceInstance = new AgentService(db);
 
@@ -72,8 +73,9 @@ export const agentRouter = createTRPCRouter({
       });
     }),
 
-  getAll: protectedProcedure.query(async ({ ctx }) => {
-    return await agentServiceInstance.getAllAgents(ctx.orgId);
+  getAll: publicProcedure.query(async ({ ctx }) => {
+    const orgId = ctx.orgId ?? env.DEMO_ORG_ID;
+    return await agentServiceInstance.getAllAgents(orgId);
   }),
 
   delete: protectedProcedure
