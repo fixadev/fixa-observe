@@ -1,7 +1,11 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 
-const isPrivateRoute = createRouteMatcher(["/dashboard(.*)", "/observe(.*)"]);
+const isPrivateRoute = createRouteMatcher([
+  "/dashboard(.*)",
+  "/observe(.*)",
+  "/onboard",
+]);
 
 export default clerkMiddleware(async (auth, req) => {
   // Skip middleware for static assets and public routes
