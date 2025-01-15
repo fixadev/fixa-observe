@@ -3,7 +3,11 @@ import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { TRPCError } from "@trpc/server";
 import { db } from "~/server/db";
 import { CallService } from "@repo/services/src/call";
-import { FilterSchema, OrderBySchema } from "@repo/types/src/index";
+import {
+  BlockChangeSchema,
+  FilterSchema,
+  OrderBySchema,
+} from "@repo/types/src/index";
 
 const callService = new CallService(db);
 
@@ -85,6 +89,16 @@ export const callRouter = createTRPCRouter({
     .query(async ({ input, ctx }) => {
       return await callService.getLatencyInterruptionPercentiles({
         filter: input.filter,
+        ownerId: ctx.orgId,
+      });
+    }),
+
+  updateBlocks: protectedProcedure
+    .input(z.object({ callId: z.string(), blocks: z.array(BlockChangeSchema) }))
+    .mutation(async ({ input, ctx }) => {
+      return await callService.updateBlocks({
+        callId: input.callId,
+        blocks: input.blocks,
         ownerId: ctx.orgId,
       });
     }),

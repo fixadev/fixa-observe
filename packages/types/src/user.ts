@@ -10,4 +10,5 @@ export interface PublicMetadata {
   stripeCustomerId?: string;
   freeTestsLeft?: number;
   freeObservabilityCallsLeft?: number;
+  onboarded?: boolean;
 }

@@ -60,3 +60,11 @@ export const UploadCallParams = z.object({
   saveRecording: z.boolean().optional(),
   language: z.string().optional(),
 });
+
+export type BlockChange = z.infer<typeof BlockChangeSchema>;
+export const BlockChangeSchema = z.object({
+  id: z.string(),
+  type: z.enum(["latencyBlock", "interruption"]),
+  secondsFromStart: z.number(),
+  duration: z.number(),
+});

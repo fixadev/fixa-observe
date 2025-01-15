@@ -150,7 +150,7 @@ export class EvaluationService {
     templates,
     ownerId,
   }: {
-    templates: EvaluationTemplate[];
+    templates: Array<EvaluationTemplate>;
     ownerId: string;
   }): Promise<EvaluationTemplate[]> {
     return await this.db.evaluationTemplate.createManyAndReturn({

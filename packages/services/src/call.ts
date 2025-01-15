@@ -3,6 +3,10 @@ import {
   type OrderBy,
   type Filter,
   CallWithIncludesSchema,
+  BlockChange,
+  CALL_INCLUDE,
+  LatencyBlockSchema,
+  InterruptionSchema,
 } from "@repo/types/src/index";
 import { type CallWithIncludes } from "@repo/types/src/index";
 import { calculateLatencyPercentiles } from "./utils";
@@ -472,6 +476,77 @@ export class CallService {
       latency: latencyByPeriod,
       interruptions: interruptionsByPeriod,
     };
+  };
+
+  updateBlocks = async ({
+    callId,
+    blocks,
+    ownerId,
+  }: {
+    callId: string;
+    blocks: BlockChange[];
+    ownerId: string;
+  }): Promise<CallWithIncludes | null> => {
+    const latencyBlocks: BlockChange[] = [];
+    const interruptions: BlockChange[] = [];
+
+    for (const block of blocks) {
+      if (block.type === "latencyBlock") {
+        latencyBlocks.push(block);
+      } else if (block.type === "interruption") {
+        interruptions.push(block);
+      }
+    }
+
+    // Calculate percentiles and TTFW
+    const call = await this.getCall(callId, ownerId);
+    if (!call) {
+      throw new Error(`call with ID ${callId} not found`);
+    }
+
+    const latencyBlockMap = new Map(
+      latencyBlocks.map((block) => [block.id, block]),
+    );
+    const allLatencyBlocks = call.latencyBlocks.map((block) => {
+      if (latencyBlockMap.has(block.id)) {
+        return latencyBlockMap.get(block.id)!;
+      }
+      return block;
+    });
+    allLatencyBlocks.sort((a, b) => a.secondsFromStart - b.secondsFromStart);
+
+    const timeToFirstWord = allLatencyBlocks[0]?.duration ?? 0;
+    const { p50, p90, p95 } = calculateLatencyPercentiles(
+      allLatencyBlocks.map((block) => block.duration),
+    );
+
+    // Update call
+    await this.db.call.update({
+      where: { id: callId, ownerId },
+      data: {
+        latencyP50: Math.round(p50 * 1000),
+        latencyP90: Math.round(p90 * 1000),
+        latencyP95: Math.round(p95 * 1000),
+        // numInterruptions: interruptions.length,
+        timeToFirstWord: Math.round(timeToFirstWord * 1000),
+        latencyBlocks: {
+          upsert: latencyBlocks.map((block) => ({
+            where: { id: block.id },
+            update: { ...block, type: undefined },
+            create: { ...block, type: undefined },
+          })),
+        },
+        interruptions: {
+          upsert: interruptions.map((interruption) => ({
+            where: { id: interruption.id },
+            update: { ...interruption, text: "", type: undefined },
+            create: { ...interruption, text: "", type: undefined },
+          })),
+        },
+      },
+    });
+
+    return await this.getCall(callId, ownerId);
   };
 
   getLatencyPercentilesForLookbackPeriod = async ({

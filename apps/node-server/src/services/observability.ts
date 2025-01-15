@@ -174,7 +174,6 @@ export const transcribeAndSaveCall = async ({
 
     // Accrue observability minutes after call is created in db
     try {
-      console.log("ACCRUING OBSERVABILITY MINUTES", duration);
       const durationMinutes = Math.ceil(duration / 60);
       await stripeServiceClient.accrueObservabilityMinutes({
         orgId: ownerId,
@@ -183,11 +182,6 @@ export const transcribeAndSaveCall = async ({
     } catch (error) {
       console.error("Error accruing observability minutes", error);
     }
-    console.log(
-      "===================saved call===================",
-      newCall.id,
-      newCall.customerCallId,
-    );
 
     await sendAlerts({
       ownerId,
@@ -263,7 +257,6 @@ export const analyzeBasedOnRules = async ({
         savedSearches,
       };
     } else {
-      console.log("NO RELEVANT EVAL SETS FOUND");
       return {
         evalSets: [],
         evalSetResults: [],

@@ -13,6 +13,7 @@ import {
   forwardRef,
   useImperativeHandle,
   useMemo,
+  Fragment,
 } from "react";
 import { Button } from "~/components/ui/button";
 import {
@@ -27,22 +28,15 @@ import {
   type CallWithIncludes,
   type EvaluationResultWithIncludes,
 } from "@repo/types/src/index";
-import {
-  cn,
-  formatDurationHoursMinutesSeconds,
-  getInterruptionColor,
-  getLatencyBlockColor,
-} from "~/lib/utils";
+import { cn, formatDurationHoursMinutesSeconds } from "~/lib/utils";
 import WaveSurfer from "wavesurfer.js";
 import { Skeleton } from "../ui/skeleton";
 import { useAudioSettings } from "~/components/hooks/useAudioSettings";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "~/components/ui/tooltip";
 import { api } from "~/trpc/react";
 import { useObserveStateSafe } from "../hooks/useObserveState";
+import { AudioVisualizationBlock } from "./AudioVisualizationBlock";
+import { type BlockChange } from "@repo/types/src";
+import Spinner from "../Spinner";
 
 export type AudioPlayerRef = {
   setActiveEvalResult: (
@@ -64,9 +58,20 @@ export const AudioPlayer = forwardRef<
     onTimeUpdate?: (time: number) => void;
   }
 >(function AudioPlayer(
-  { call, small = false, offsetFromStart = 0, onEvalResultHover, onTimeUpdate },
+  {
+    call: _call,
+    small = false,
+    offsetFromStart = 0,
+    onEvalResultHover,
+    onTimeUpdate,
+  },
   ref,
 ) {
+  const [call, setCall] = useState<CallWithIncludes>(_call);
+  useEffect(() => {
+    setCall(_call);
+  }, [_call]);
+
   const containerRef = useRef<HTMLDivElement>(null);
   const [activeEvalResult, setActiveEvalResult] =
     useState<EvaluationResultWithIncludes | null>(null);
@@ -103,6 +108,9 @@ export const AudioPlayer = forwardRef<
       }
     },
   });
+  const [unsavedChanges, setUnsavedChanges] = useState<
+    Record<string, BlockChange>
+  >({});
 
   // Load the audio visualizer
   useEffect(() => {
@@ -182,7 +190,9 @@ export const AudioPlayer = forwardRef<
     if (
       observeState &&
       audioLoaded &&
-      (!call.isRead || !observeState.callReadState[call.id])
+      (!call.isRead ||
+        (call.id in observeState.callReadState &&
+          !observeState.callReadState[call.id]))
     ) {
       const timer = setTimeout(() => {
         markCallAsRead({ callId: call.id, isRead: true });
@@ -223,6 +233,13 @@ export const AudioPlayer = forwardRef<
     },
     [play, seek, offsetFromStart],
   );
+  const handleEvalResultHover = useCallback(
+    (evalResultId: string | null) => {
+      setHoveredEvalResult(evalResultId);
+      onEvalResultHover?.(evalResultId);
+    },
+    [onEvalResultHover],
+  );
 
   const downloadAudio = useCallback(async () => {
     try {
@@ -239,255 +256,195 @@ export const AudioPlayer = forwardRef<
     }
   }, [call.stereoRecordingUrl, call.id]);
 
+  const handleEditBlock = useCallback((blockChange: BlockChange) => {
+    console.log("blockChange", blockChange);
+    setUnsavedChanges((prev) => ({
+      ...prev,
+      [blockChange.id]: blockChange,
+    }));
+  }, []);
+
+  const [blocksKey, setBlocksKey] = useState(0);
+  const handleDiscardChanges = useCallback(() => {
+    setBlocksKey((prev) => prev + 1);
+    setUnsavedChanges({});
+  }, []);
+
+  const { mutate: updateBlocks, isPending: isUpdatingBlocks } =
+    api._call.updateBlocks.useMutation({
+      onSuccess: (updatedCall) => {
+        if (updatedCall) {
+          setBlocksKey((prev) => prev + 1);
+          setUnsavedChanges({});
+          if (observeState) {
+            observeState.overrideCall(call.id, updatedCall);
+          }
+        }
+      },
+    });
+  const handleSaveChanges = useCallback(() => {
+    updateBlocks({
+      callId: call.id,
+      blocks: Object.values(unsavedChanges),
+    });
+  }, [updateBlocks, call.id, unsavedChanges]);
+
   return (
-    <div
-      className={cn(
-        "flex w-full gap-4",
-        small ? "flex-row-reverse" : "flex-col",
-      )}
-    >
+    <>
       <div
-        className={cn(
-          "relative w-full rounded-md border border-input shadow-sm",
-          small ? "h-[50px]" : "h-[100px]",
-        )}
-        ref={containerRef}
+        className={cn("flex w-full", small ? "flex-row-reverse" : "flex-col")}
       >
-        <div id={audioVisualizerId} className="size-full" />
-        {!audioLoaded && (
-          <Skeleton className="absolute left-0 top-0 size-full" />
-        )}
-        {call.evaluationResults?.map((evalResult, index) => {
-          if (
-            !containerRef.current ||
-            !duration ||
-            !evalResult.secondsFromStart ||
-            !evalResult.duration
-          )
-            return null;
-          const startPercentage =
-            Math.min(
-              1,
-              Math.max(
-                0,
-                (evalResult.secondsFromStart - offsetFromStart) / duration,
-              ),
-            ) * 100;
-          const endPercentage =
-            Math.min(
-              1,
-              Math.max(
-                0,
-                (evalResult.secondsFromStart +
-                  evalResult.duration -
-                  offsetFromStart) /
-                  duration,
-              ),
-            ) * 100;
-
-          return (
-            <div
-              key={index}
-              className="absolute top-0 z-10 h-full"
-              style={{
-                left: `${startPercentage}%`,
-                width: `${endPercentage - startPercentage}%`,
-              }}
-            >
-              <div
-                className={cn(
-                  "size-full cursor-pointer border-l-2",
-                  evalResult.success
-                    ? "border-green-500 bg-green-500/20 hover:bg-green-500/50"
-                    : "border-red-500 bg-red-500/20 hover:bg-red-500/50",
-                  hoveredEvalResult === evalResult.id &&
-                    (evalResult.success ? "bg-green-500/50" : "bg-red-500/50"),
-                )}
-                onMouseEnter={() => onEvalResultHover?.(evalResult.id)}
-                onMouseLeave={() => onEvalResultHover?.(null)}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleEvalResultClick(evalResult);
-                }}
-                onMouseDown={(e) => {
-                  e.stopPropagation();
-                }}
-                onMouseUp={(e) => {
-                  e.stopPropagation();
-                }}
-              />
-            </div>
-          );
-        })}
-        {call.latencyBlocks?.map((latencyBlock, index) => {
-          if (!containerRef.current || !duration) return null;
-          const startPercentage =
-            Math.min(1, Math.max(0, latencyBlock.secondsFromStart / duration)) *
-            100;
-          const endPercentage =
-            Math.min(
-              1,
-              Math.max(
-                0,
-                (latencyBlock.secondsFromStart + latencyBlock.duration) /
-                  duration,
-              ),
-            ) * 100;
-
-          return (
-            <Tooltip key={index}>
-              <TooltipTrigger asChild>
-                <div
-                  className="absolute top-0 z-10 h-full cursor-pointer"
-                  style={{
-                    left: `${startPercentage}%`,
-                    width: `${endPercentage - startPercentage}%`,
-                    background:
-                      hoveredEvalResult === latencyBlock.id
-                        ? getLatencyBlockColor(latencyBlock, 0.5)
-                        : getLatencyBlockColor(latencyBlock),
-                    border: `1px solid ${getLatencyBlockColor(latencyBlock, 1)}`,
-                  }}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    seek(latencyBlock.secondsFromStart);
-                    play();
-                  }}
-                >
-                  <div
-                    className="size-full"
-                    onMouseEnter={() => {
-                      setHoveredEvalResult(latencyBlock.id);
-                      onEvalResultHover?.(latencyBlock.id);
-                    }}
-                    onMouseLeave={() => {
-                      setHoveredEvalResult(null);
-                      onEvalResultHover?.(null);
-                    }}
-                  />
-                </div>
-              </TooltipTrigger>
-              <TooltipContent
-                style={{
-                  backgroundColor: "white",
-                  border: `1px solid ${getLatencyBlockColor(latencyBlock, 1)}`,
-                  color: getLatencyBlockColor(latencyBlock, 1),
-                }}
-              >
-                <p>latency: {Math.round(latencyBlock.duration * 1000)}ms</p>
-              </TooltipContent>
-            </Tooltip>
-          );
-        })}
-        {call.interruptions?.map((interruption, index) => {
-          if (!containerRef.current || !duration) return null;
-          const startPercentage =
-            Math.min(1, Math.max(0, interruption.secondsFromStart / duration)) *
-            100;
-          const endPercentage =
-            Math.min(
-              1,
-              Math.max(
-                0,
-                (interruption.secondsFromStart + interruption.duration) /
-                  duration,
-              ),
-            ) * 100;
-
-          return (
-            <Tooltip key={index}>
-              <TooltipTrigger asChild>
-                <div
-                  className="absolute top-0 z-10 h-full cursor-pointer"
-                  style={{
-                    top: "50%",
-                    height: "50%",
-                    left: `${startPercentage}%`,
-                    width: `${endPercentage - startPercentage}%`,
-                    background:
-                      hoveredEvalResult === interruption.id
-                        ? getInterruptionColor(0.5)
-                        : getInterruptionColor(),
-                    border: `1px solid ${getInterruptionColor(1)}`,
-                  }}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    seek(interruption.secondsFromStart);
-                    play();
-                  }}
-                >
-                  <div
-                    className="size-full"
-                    onMouseEnter={() => {
-                      setHoveredEvalResult(interruption.id);
-                      onEvalResultHover?.(interruption.id);
-                    }}
-                    onMouseLeave={() => {
-                      setHoveredEvalResult(null);
-                      onEvalResultHover?.(null);
-                    }}
-                  />
-                </div>
-              </TooltipTrigger>
-              <TooltipContent
-                style={{
-                  backgroundColor: "white",
-                  border: `1px solid ${getInterruptionColor(1)}`,
-                  color: getInterruptionColor(1),
-                }}
-              >
-                <p>
-                  interruption: {Math.round(interruption.duration * 1000)}ms
-                </p>
-              </TooltipContent>
-            </Tooltip>
-          );
-        })}
-      </div>
-      <div className="flex items-center gap-4">
-        <Button
-          size="icon"
-          onClick={() => {
-            isPlaying ? pause() : play();
-            setActiveEvalResult(null);
-          }}
-        >
-          {isPlaying ? (
-            <PauseIcon className="size-4" />
-          ) : (
-            <PlayIcon className="size-4" />
+        <div
+          className={cn(
+            "relative w-full rounded-md border border-input shadow-sm",
+            small ? "h-[50px]" : "h-[100px]",
           )}
-        </Button>
-
-        {!small && (
-          <>
-            <div className="text-sm text-muted-foreground">
-              {formatDurationHoursMinutesSeconds(currentTime)} /{" "}
-              {formatDurationHoursMinutesSeconds(duration)}
+          ref={containerRef}
+        >
+          <div id={audioVisualizerId} className="size-full" />
+          {!audioLoaded && (
+            <Skeleton className="absolute left-0 top-0 size-full" />
+          )}
+          {call.evaluationResults?.map((evalResult, index) => (
+            <AudioVisualizationBlock
+              key={index}
+              type="evaluationResult"
+              data={evalResult}
+              duration={duration}
+              offsetFromStart={offsetFromStart}
+              hoveredEvalResult={hoveredEvalResult}
+              onEvalResultHover={handleEvalResultHover}
+              onEvalResultClick={handleEvalResultClick}
+            />
+          ))}
+          <Fragment key={blocksKey}>
+            {call.latencyBlocks?.map((latencyBlock, index) => (
+              <AudioVisualizationBlock
+                key={index}
+                type="latencyBlock"
+                data={latencyBlock}
+                duration={duration}
+                offsetFromStart={offsetFromStart}
+                hoveredEvalResult={hoveredEvalResult}
+                onEvalResultHover={handleEvalResultHover}
+                onEditBlock={handleEditBlock}
+              />
+            ))}
+            {call.interruptions?.map((interruption, index) => (
+              <AudioVisualizationBlock
+                key={index}
+                type="interruption"
+                data={interruption}
+                duration={duration}
+                offsetFromStart={offsetFromStart}
+                hoveredEvalResult={hoveredEvalResult}
+                onEvalResultHover={handleEvalResultHover}
+                onEditBlock={handleEditBlock}
+              />
+            ))}
+          </Fragment>
+        </div>
+        {!small && Object.keys(unsavedChanges).length > 0 && (
+          <div className="mt-1 flex items-center gap-4">
+            <div className="text-xs">
+              {isUpdatingBlocks ? "saving changes..." : "save changes?"}
             </div>
-
-            <div className="flex-1" />
-
-            <Select
-              value={playbackSpeed.toString()}
-              onValueChange={(value) => setPlaybackSpeed(parseFloat(value))}
-            >
-              <SelectTrigger className="w-20">
-                <SelectValue placeholder="Speed" />
-              </SelectTrigger>
-              <SelectContent className="w-20">
-                <SelectItem value="1">1x</SelectItem>
-                <SelectItem value="1.5">1.5x</SelectItem>
-                <SelectItem value="2">2x</SelectItem>
-              </SelectContent>
-            </Select>
-
-            <Button variant="outline" size="icon" onClick={downloadAudio}>
-              <ArrowDownTrayIcon className="size-4" />
-            </Button>
-          </>
+            <div className="flex items-center">
+              <Button
+                size="sm"
+                variant="ghost"
+                className="h-8 px-1.5"
+                onClick={handleSaveChanges}
+                disabled={isUpdatingBlocks}
+              >
+                {isUpdatingBlocks ? <Spinner className="size-4" /> : "save"}
+              </Button>
+              {!isUpdatingBlocks && (
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className="h-8 px-1.5 text-muted-foreground hover:text-muted-foreground"
+                  onClick={handleDiscardChanges}
+                >
+                  discard
+                </Button>
+              )}
+            </div>
+          </div>
         )}
+        <div className={cn("flex items-center gap-4", small ? "mr-4" : "mt-4")}>
+          <Button
+            size="icon"
+            onClick={() => {
+              isPlaying ? pause() : play();
+              setActiveEvalResult(null);
+            }}
+          >
+            {isPlaying ? (
+              <PauseIcon className="size-4" />
+            ) : (
+              <PlayIcon className="size-4" />
+            )}
+          </Button>
+
+          {!small && (
+            <>
+              <div className="text-sm text-muted-foreground">
+                {formatDurationHoursMinutesSeconds(currentTime)} /{" "}
+                {formatDurationHoursMinutesSeconds(duration)}
+              </div>
+
+              <div className="flex-1" />
+
+              <Select
+                value={playbackSpeed.toString()}
+                onValueChange={(value) => setPlaybackSpeed(parseFloat(value))}
+              >
+                <SelectTrigger className="w-20">
+                  <SelectValue placeholder="Speed" />
+                </SelectTrigger>
+                <SelectContent className="w-20">
+                  <SelectItem value="1">1x</SelectItem>
+                  <SelectItem value="1.5">1.5x</SelectItem>
+                  <SelectItem value="2">2x</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <Button variant="outline" size="icon" onClick={downloadAudio}>
+                <ArrowDownTrayIcon className="size-4" />
+              </Button>
+            </>
+          )}
+        </div>
       </div>
-    </div>
+      {small && Object.keys(unsavedChanges).length > 0 && (
+        <div className="mt-1 flex items-center gap-4">
+          <div className="text-xs">
+            {isUpdatingBlocks ? "saving changes..." : "save changes?"}
+          </div>
+          <div className="flex items-center">
+            <Button
+              size="sm"
+              variant="ghost"
+              className="h-8 px-1.5"
+              onClick={handleSaveChanges}
+              disabled={isUpdatingBlocks}
+            >
+              {isUpdatingBlocks ? <Spinner className="size-4" /> : "save"}
+            </Button>
+            {!isUpdatingBlocks && (
+              <Button
+                size="sm"
+                variant="ghost"
+                className="h-8 px-1.5 text-muted-foreground hover:text-muted-foreground"
+                onClick={handleDiscardChanges}
+              >
+                discard
+              </Button>
+            )}
+          </div>
+        </div>
+      )}
+    </>
   );
 });

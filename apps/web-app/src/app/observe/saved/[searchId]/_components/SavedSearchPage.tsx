@@ -31,6 +31,7 @@ export default function SavedSearchPage({
     setFilter,
     orderBy,
     setSavedSearch,
+    callOverrides,
   } = useObserveState();
 
   useEffect(() => {
@@ -119,12 +120,23 @@ export default function SavedSearchPage({
     return () => observer.disconnect();
   }, [fetchNextPage, hasNextPage]);
 
-  const selectedCall = useMemo(
-    () => calls?.find((call) => call.id === selectedCallId),
-    [calls, selectedCallId],
-  );
+  const selectedCall = useMemo(() => {
+    if (!selectedCallId) return undefined;
+    return (
+      callOverrides[selectedCallId] ??
+      calls?.find((call) => call.id === selectedCallId)
+    );
+  }, [calls, selectedCallId, callOverrides]);
 
-  if (!callsExist && !isLoadingCallsExist) {
+  if (isLoadingCallsExist) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <Spinner />
+      </div>
+    );
+  }
+
+  if (!callsExist) {
     return <NoCallsCard />;
   }
 

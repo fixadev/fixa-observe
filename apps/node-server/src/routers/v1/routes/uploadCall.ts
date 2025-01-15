@@ -54,13 +54,6 @@ uploadCallRouter.post(
         }
       } catch (error) {}
 
-      console.log(
-        "ADDING CALL TO QUEUE",
-        callId,
-        "with org id",
-        res.locals.orgId,
-      );
-
       await addCallToQueue({
         callId,
         stereoRecordingUrl: stereoRecordingUrl,
