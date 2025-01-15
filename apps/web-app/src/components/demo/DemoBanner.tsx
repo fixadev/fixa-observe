@@ -33,7 +33,7 @@ export function DemoBanner() {
           </Button>
         </SignedOut>
         <SignedIn>
-          <Button variant="outline" size="sm" onClick={goToDashboard}>
+          <Button size="sm" onClick={goToDashboard}>
             back to dashboard
           </Button>
         </SignedIn>

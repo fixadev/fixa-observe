@@ -2,8 +2,11 @@ import { ArrowTopRightOnSquareIcon } from "@heroicons/react/24/solid";
 import Link from "next/link";
 import { Button } from "../ui/button";
 import { useCallback } from "react";
+import { useFeatureFlagEnabled } from "posthog-js/react";
 
 export default function NoCallsCard() {
+  const showDemo = useFeatureFlagEnabled("interactive-demo");
+
   const viewSampleDashboard = useCallback(() => {
     window.location.href = "/demo";
   }, []);
@@ -43,13 +46,15 @@ export default function NoCallsCard() {
               view docs <ArrowTopRightOnSquareIcon className="size-4" />
             </Link>
           </Button>
-          <Button
-            variant="outline"
-            className="flex w-fit gap-2 text-sm"
-            onClick={viewSampleDashboard}
-          >
-            view sample dashboard
-          </Button>
+          {showDemo && (
+            <Button
+              variant="outline"
+              className="flex w-fit gap-2 text-sm"
+              onClick={viewSampleDashboard}
+            >
+              view sample dashboard
+            </Button>
+          )}
         </div>
       </div>
     </div>
