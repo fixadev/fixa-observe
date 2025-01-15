@@ -40,6 +40,7 @@ const envSchema = z.object({
   NODE_SERVER_SECRET: z.string().min(1),
   PYTHON_SERVER_SECRET: z.string().min(1),
   KEYWORDSAI_API_KEY: z.string().min(1),
+  FIXA_DEMO_API_KEY: z.string().min(1),
 });
 
 // Validate and transform environment variables
