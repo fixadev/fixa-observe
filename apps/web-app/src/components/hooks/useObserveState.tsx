@@ -66,6 +66,13 @@ interface ObserveStateContextType {
   >;
   overrideCall: (callId: string, call: CallWithIncludes) => void;
   removeCallOverride: (callId: string) => void;
+
+  // ---------------
+  // Demo variables
+  // ---------------
+  isDemo: boolean;
+  demoCalls: Record<string, CallWithIncludes>; // Mapping from saved search ID to calls
+  demoSavedSearches: SavedSearchWithIncludes[];
 }
 
 const ObserveStateContext = createContext<ObserveStateContextType | undefined>(
@@ -73,8 +80,14 @@ const ObserveStateContext = createContext<ObserveStateContextType | undefined>(
 );
 
 export function ObserveStateProvider({
+  isDemo = false,
+  demoCalls = {},
+  demoSavedSearches = [],
   children,
 }: {
+  isDemo?: boolean;
+  demoCalls?: Record<string, CallWithIncludes>;
+  demoSavedSearches?: SavedSearchWithIncludes[];
   children: React.ReactNode;
 }) {
   const [selectedCallId, setSelectedCallId] = useState<string | null>(null);
@@ -182,6 +195,9 @@ export function ObserveStateProvider({
         setCallOverrides,
         overrideCall,
         removeCallOverride,
+        isDemo,
+        demoCalls,
+        demoSavedSearches,
       }}
     >
       {children}

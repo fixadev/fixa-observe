@@ -1,10 +1,15 @@
+"use client";
+
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { YCBadge } from "./YCBadge";
 import { RocketLaunchIcon } from "@heroicons/react/24/solid";
 import Link from "next/link";
+import { useFeatureFlagEnabled } from "posthog-js/react";
 
 export function Hero() {
+  const showDemo = useFeatureFlagEnabled("interactive-demo");
+
   return (
     <div className="relative bg-white pb-16 pt-32 sm:pt-48">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -22,7 +27,7 @@ export function Hero() {
             agent.
           </p>
           <div className="mt-5 flex flex-col items-center justify-center gap-2 sm:mt-8 sm:flex-row">
-            <Button size="lg" asChild>
+            <Button size="lg" className="h-10 w-40" asChild>
               <Link
                 href="/sign-up"
                 className="flex items-center justify-center lowercase"
@@ -31,6 +36,16 @@ export function Hero() {
                 <RocketLaunchIcon className="ml-2 size-5" />
               </Link>
             </Button>
+            {showDemo && (
+              <Button size="lg" variant="outline" className="h-10 w-40" asChild>
+                <Link
+                  href="/demo"
+                  className="flex items-center justify-center lowercase"
+                >
+                  interactive demo
+                </Link>
+              </Button>
+            )}
             {/* <Dialog>
               <DialogTrigger asChild>
                 <Button

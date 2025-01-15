@@ -1,3 +1,5 @@
+"use client";
+
 import { ObserveStateProvider } from "~/components/hooks/useObserveState";
 import ObserveSidebar from "~/components/observe/ObserveSidebar";
 import { SidebarProvider } from "~/components/ui/sidebar";

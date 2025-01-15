@@ -31,7 +31,7 @@ import {
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { removeTrailingSlash } from "~/lib/utils";
 import { api } from "~/trpc/react";
 import { Button } from "../ui/button";
@@ -65,21 +65,27 @@ import { OpenInNewWindowIcon } from "@radix-ui/react-icons";
 import { useFeatureFlagEnabled } from "posthog-js/react";
 import { CustomOrganizationSwitcher } from "../CustomOrganizationSwitcher";
 import Logo from "../Logo";
+import { useObserveState } from "../hooks/useObserveState";
+import { DemoBanner } from "~/components/demo/DemoBanner";
 
 export default function ObserveSidebar() {
   const pathname = usePathname();
   const router = useRouter();
+  const { isDemo } = useObserveState();
+
+  const rootPath = useMemo(() => (isDemo ? "demo" : "observe"), [isDemo]);
 
   const isCurrentPath = useCallback(
     (path: string) => {
       if (path === "/") {
-        return removeTrailingSlash(pathname) === `/observe`;
+        return removeTrailingSlash(pathname) === `/${rootPath}`;
       }
       return (
-        removeTrailingSlash(pathname) === removeTrailingSlash(`/observe${path}`)
+        removeTrailingSlash(pathname) ===
+        removeTrailingSlash(`/${rootPath}${path}`)
       );
     },
-    [pathname],
+    [pathname, rootPath],
   );
 
   const { data: savedSearches } = api.search.getAll.useQuery({
@@ -133,9 +139,9 @@ export default function ObserveSidebar() {
                 </SelectContent>
               </Select>
             ) : (
-              <Logo href="/observe" />
+              <Logo href={`/${rootPath}`} />
             )}
-            <UserButton />
+            {!isDemo && <UserButton />}
           </div>
         </SidebarHeader>
         <SidebarContent>
@@ -144,7 +150,7 @@ export default function ObserveSidebar() {
               <SidebarMenu>
                 <SidebarMenuItem>
                   <SidebarMenuButton asChild isActive={isCurrentPath("/")}>
-                    <Link href={`/observe`}>
+                    <Link href={`/${rootPath}`}>
                       <ChartBarIcon />
                       <span>dashboard</span>
                     </Link>
@@ -155,7 +161,7 @@ export default function ObserveSidebar() {
                     asChild
                     isActive={isCurrentPath("/eval-templates")}
                   >
-                    <Link href={`/observe/eval-templates`}>
+                    <Link href={`/${rootPath}/eval-templates`}>
                       <DocumentCheckIcon />
                       <span>evaluation templates</span>
                     </Link>
@@ -167,7 +173,7 @@ export default function ObserveSidebar() {
                       asChild
                       isActive={isCurrentPath("/tests")}
                     >
-                      <Link href={`/observe/tests`}>
+                      <Link href={`/${rootPath}/tests`}>
                         <BeakerIcon />
                         <span>test calls</span>
                       </Link>
@@ -193,7 +199,7 @@ export default function ObserveSidebar() {
                               isActive={isCurrentPath(`/saved/${search.id}`)}
                               className="group/saved-search-item relative data-[active=true]:font-medium"
                             >
-                              <Link href={`/observe/saved/${search.id}`}>
+                              <Link href={`/${rootPath}/saved/${search.id}`}>
                                 <p className="truncate">{search.name}</p>
                                 <DropdownMenu>
                                   <DropdownMenuTrigger asChild>
@@ -246,7 +252,7 @@ export default function ObserveSidebar() {
                     asChild
                     isActive={isCurrentPath("/api-keys")}
                   >
-                    <Link href="/observe/api-keys">
+                    <Link href={`/${rootPath}/api-keys`}>
                       <KeyIcon />
                       <span>API keys</span>
                     </Link>
@@ -277,11 +283,18 @@ export default function ObserveSidebar() {
                     <OpenInNewWindowIcon />
                   </SidebarMenuBadge>
                 </SidebarMenuItem>
-                <SidebarMenuItem>
-                  <SidebarMenuButton asChild>
-                    <CustomOrganizationSwitcher />
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
+                {!isDemo && (
+                  <SidebarMenuItem>
+                    <SidebarMenuButton asChild>
+                      <CustomOrganizationSwitcher />
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                )}
+                {isDemo && (
+                  <SidebarMenuItem>
+                    <DemoBanner />
+                  </SidebarMenuItem>
+                )}
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
@@ -298,6 +311,7 @@ export default function ObserveSidebar() {
         open={deleteDialogOpen}
         onOpenChange={setDeleteDialogOpen}
         savedSearch={curSavedSearch}
+        rootPath={rootPath}
       />
     </>
   );
@@ -369,10 +383,12 @@ function DeleteDialog({
   open,
   onOpenChange,
   savedSearch,
+  rootPath,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   savedSearch: SavedSearchWithIncludes | null;
+  rootPath: string;
 }) {
   const pathname = usePathname();
   const utils = api.useUtils();
@@ -386,7 +402,7 @@ function DeleteDialog({
 
         const currentPathId = pathname.split("/").pop();
         if (currentPathId === savedSearch?.id) {
-          router.push("/observe");
+          router.push(`/${rootPath}`);
         }
       },
     });

@@ -30,10 +30,12 @@ export const createTRPCContext = async (opts: { headers: Headers }) => {
   const _auth = await auth();
   // const user = await currentUser();
 
+  const isDemo = opts.headers.get("referer")?.includes("/demo") ?? false;
+
   return {
     db,
-    userId: _auth.userId,
-    orgId: _auth.orgId,
+    userId: isDemo ? undefined : _auth.userId,
+    orgId: isDemo ? undefined : _auth.orgId,
     ...opts,
   };
 };

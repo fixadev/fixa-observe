@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { createTRPCRouter } from "../trpc";
+import { createTRPCRouter, publicProcedure } from "../trpc";
 import { protectedProcedure } from "../trpc";
 import { SearchService } from "@repo/services/src/search";
 import {
@@ -9,6 +9,7 @@ import {
   SavedSearchWithIncludesSchema,
 } from "@repo/types/src/index";
 import { db } from "~/server/db";
+import { env } from "~/env";
 
 const searchServiceInstance = new SearchService(db);
 
@@ -48,27 +49,30 @@ export const searchRouter = createTRPCRouter({
       });
     }),
 
-  getAll: protectedProcedure
+  getAll: publicProcedure
     .input(z.object({ includeDefault: z.boolean().optional() }).optional())
     .query(async ({ ctx, input }) => {
+      const orgId = ctx.orgId ?? env.DEMO_ORG_ID;
       return await searchServiceInstance.getAll({
-        ownerId: ctx.orgId,
+        ownerId: orgId,
         includeDefault: input?.includeDefault ?? true,
       });
     }),
 
-  getById: protectedProcedure
+  getById: publicProcedure
     .input(z.object({ id: z.string() }))
     .query(async ({ input, ctx }) => {
+      const orgId = ctx.orgId ?? env.DEMO_ORG_ID;
       return await searchServiceInstance.getById({
         id: input.id,
-        ownerId: ctx.orgId,
+        ownerId: orgId,
       });
     }),
 
-  getDefault: protectedProcedure.query(async ({ ctx }) => {
+  getDefault: publicProcedure.query(async ({ ctx }) => {
+    const orgId = ctx.orgId ?? env.DEMO_ORG_ID;
     return await searchServiceInstance.getDefault({
-      ownerId: ctx.orgId,
+      ownerId: orgId,
     });
   }),
 

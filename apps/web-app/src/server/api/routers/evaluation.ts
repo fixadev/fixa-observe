@@ -1,4 +1,4 @@
-import { createTRPCRouter, protectedProcedure } from "../trpc";
+import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 import {
   EvaluationGroupWithIncludesSchema,
   EvaluationTemplateSchema,
@@ -9,6 +9,7 @@ import { EvaluationSchema } from "@repo/types/src/index";
 import { z } from "zod";
 import { db } from "~/server/db";
 import { createEvaluationGroupsFromPrompt } from "~/server/helpers/generateEvaluationGroupsFromPrompt";
+import { env } from "~/env";
 
 const evalServiceInstance = new EvaluationService(db);
 
@@ -28,9 +29,10 @@ export const evaluationRouter = createTRPCRouter({
       });
     }),
 
-  getTemplates: protectedProcedure.query(async ({ ctx }) => {
+  getTemplates: publicProcedure.query(async ({ ctx }) => {
+    const orgId = ctx.orgId ?? env.DEMO_ORG_ID;
     return await evalServiceInstance.getTemplates({
-      ownerId: ctx.orgId,
+      ownerId: orgId,
     });
   }),
 

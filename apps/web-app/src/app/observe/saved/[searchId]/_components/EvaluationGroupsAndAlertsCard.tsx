@@ -130,7 +130,7 @@ export function EvaluationGroupsAndAlertsCard({
               />
             ))}
             <div
-              className="flex flex-row items-center gap-2 rounded-md bg-muted/70 p-4 text-muted-foreground hover:cursor-pointer hover:bg-muted"
+              className="flex cursor-pointer flex-row items-center gap-2 rounded-md bg-muted/70 p-4 text-muted-foreground hover:bg-muted"
               onClick={() => {
                 setSelectedAlert(instantiateAlert({ savedSearchId: searchId }));
                 setAlertsModalOpen(true);

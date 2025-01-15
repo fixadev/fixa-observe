@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { createTRPCRouter, protectedProcedure } from "../trpc";
+import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 import { TRPCError } from "@trpc/server";
 import { db } from "~/server/db";
 import { CallService } from "@repo/services/src/call";
@@ -8,24 +8,24 @@ import {
   FilterSchema,
   OrderBySchema,
 } from "@repo/types/src/index";
+import { env } from "~/env";
 
 const callService = new CallService(db);
 
 export const callRouter = createTRPCRouter({
-  getCall: protectedProcedure
-    .input(z.string())
-    .query(async ({ input, ctx }) => {
-      const call = await callService.getCall(input, ctx.orgId);
-      if (!call) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Call not found",
-        });
-      }
-      return call;
-    }),
+  getCall: publicProcedure.input(z.string()).query(async ({ input, ctx }) => {
+    const orgId = ctx.orgId ?? env.DEMO_ORG_ID;
+    const call = await callService.getCall(input, orgId);
+    if (!call) {
+      throw new TRPCError({
+        code: "NOT_FOUND",
+        message: "Call not found",
+      });
+    }
+    return call;
+  }),
 
-  getCalls: protectedProcedure
+  getCalls: publicProcedure
     .input(
       z.object({
         testId: z.string().optional(),
@@ -37,10 +37,11 @@ export const callRouter = createTRPCRouter({
       }),
     )
     .query(async ({ input, ctx }) => {
+      const orgId = ctx.orgId ?? env.DEMO_ORG_ID;
       const limit = input.limit ?? 50;
       const result = await callService.getCalls({
         ...input,
-        ownerId: ctx.orgId,
+        ownerId: orgId,
         limit,
       });
 
@@ -50,12 +51,13 @@ export const callRouter = createTRPCRouter({
       };
     }),
 
-  getCallsByCustomerCallId: protectedProcedure
+  getCallsByCustomerCallId: publicProcedure
     .input(z.object({ customerCallId: z.string() }))
     .query(async ({ input, ctx }) => {
+      const orgId = ctx.orgId ?? env.DEMO_ORG_ID;
       return await callService.getCallsByCustomerCallId({
         customerCallId: input.customerCallId,
-        orgId: ctx.orgId,
+        orgId,
       });
     }),
 
@@ -80,16 +82,18 @@ export const callRouter = createTRPCRouter({
       });
     }),
 
-  checkIfACallExists: protectedProcedure.query(async ({ ctx }) => {
-    return await callService.checkIfACallExists(ctx.orgId);
+  checkIfACallExists: publicProcedure.query(async ({ ctx }) => {
+    const orgId = ctx.orgId ?? env.DEMO_ORG_ID;
+    return await callService.checkIfACallExists(orgId);
   }),
 
-  getLatencyInterruptionPercentiles: protectedProcedure
+  getLatencyInterruptionPercentiles: publicProcedure
     .input(z.object({ filter: FilterSchema.partial() }))
     .query(async ({ input, ctx }) => {
+      const orgId = ctx.orgId ?? env.DEMO_ORG_ID;
       return await callService.getLatencyInterruptionPercentiles({
         filter: input.filter,
-        ownerId: ctx.orgId,
+        ownerId: orgId,
       });
     }),
 
@@ -103,11 +107,8 @@ export const callRouter = createTRPCRouter({
       });
     }),
 
-  getAgentIds: protectedProcedure.query(async ({ ctx }) => {
-    return await callService.getAgentIds(ctx.orgId);
-  }),
-
-  getMetadata: protectedProcedure.query(async ({ ctx }) => {
-    return await callService.getMetadata(ctx.orgId);
+  getMetadata: publicProcedure.query(async ({ ctx }) => {
+    const orgId = ctx.orgId ?? env.DEMO_ORG_ID;
+    return await callService.getMetadata(orgId);
   }),
 });
