@@ -26,7 +26,7 @@ export function EvaluationGroupsAndAlertsCard({
 }: {
   searchId: string;
 }) {
-  const { savedSearch, isDemo } = useObserveState();
+  const { savedSearch } = useObserveState();
 
   const [mode, setMode] = useState<"evaluations" | "alerts">("evaluations");
   const [evalsModalOpen, setEvalsModalOpen] = useState(false);
@@ -130,20 +130,11 @@ export function EvaluationGroupsAndAlertsCard({
               />
             ))}
             <div
-              className={cn(
-                "flex flex-row items-center gap-2 rounded-md bg-muted/70 p-4 text-muted-foreground",
-                isDemo ? "cursor-disabled" : "cursor-pointer hover:bg-muted",
-              )}
-              onClick={
-                isDemo
-                  ? undefined
-                  : () => {
-                      setSelectedAlert(
-                        instantiateAlert({ savedSearchId: searchId }),
-                      );
-                      setAlertsModalOpen(true);
-                    }
-              }
+              className="flex cursor-pointer flex-row items-center gap-2 rounded-md bg-muted/70 p-4 text-muted-foreground hover:bg-muted"
+              onClick={() => {
+                setSelectedAlert(instantiateAlert({ savedSearchId: searchId }));
+                setAlertsModalOpen(true);
+              }}
             >
               <PlusIcon className="size-4" />
               <span className="text-sm">add alert</span>
