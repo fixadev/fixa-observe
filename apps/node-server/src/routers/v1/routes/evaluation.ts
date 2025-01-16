@@ -5,7 +5,6 @@ import { EvaluationService } from "@repo/services/src/evaluation";
 const evaluationRouter = express.Router();
 const evaluationService = new EvaluationService(db);
 
-// Get evaluation templates
 evaluationRouter.get("/templates", async (req, res) => {
   try {
     const templates = await evaluationService.getTemplates({
@@ -17,7 +16,6 @@ evaluationRouter.get("/templates", async (req, res) => {
   }
 });
 
-// Create evaluation template
 evaluationRouter.post("/template", async (req, res) => {
   try {
     const template = await evaluationService.createTemplate({
@@ -30,7 +28,6 @@ evaluationRouter.post("/template", async (req, res) => {
   }
 });
 
-// Update evaluation template
 evaluationRouter.put("/template/:id", async (req, res) => {
   try {
     const template = await evaluationService.updateTemplate({
@@ -43,20 +40,18 @@ evaluationRouter.put("/template/:id", async (req, res) => {
   }
 });
 
-// Create evaluation
-// evaluationRouter.post("/", async (req, res) => {
-//   try {
-//     const evaluation = await evaluationService.create({
-//       evaluation: req.body,
-//       ownerId: res.locals.orgId,
-//     });
-//     res.json(evaluation);
-//   } catch (error) {
-//     res.status(500).json({ error: "Failed to create evaluation" });
-//   }
-// });
+evaluationRouter.post("/", async (req, res) => {
+  try {
+    const evaluation = await evaluationService.create({
+      evaluation: req.body,
+      ownerId: res.locals.orgId,
+    });
+    res.json(evaluation);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to create evaluation" });
+  }
+});
 
-// Update evaluation
 evaluationRouter.put("/:id", async (req, res) => {
   try {
     const evaluation = await evaluationService.update({
@@ -69,7 +64,6 @@ evaluationRouter.put("/:id", async (req, res) => {
   }
 });
 
-// Toggle evaluation enabled status
 evaluationRouter.patch("/:id/toggle", async (req, res) => {
   try {
     const { enabled, agentId } = req.body;
@@ -85,7 +79,6 @@ evaluationRouter.patch("/:id/toggle", async (req, res) => {
   }
 });
 
-// Delete evaluation
 evaluationRouter.delete("/:id", async (req, res) => {
   try {
     const evaluation = await evaluationService.delete({
@@ -98,7 +91,6 @@ evaluationRouter.delete("/:id", async (req, res) => {
   }
 });
 
-// Get evaluation groups
 evaluationRouter.get("/groups", async (req, res) => {
   try {
     const groups = await evaluationService.getGroups({
@@ -110,7 +102,17 @@ evaluationRouter.get("/groups", async (req, res) => {
   }
 });
 
-// Create evaluation group
+evaluationRouter.get("/groups", async (req, res) => {
+  try {
+    const group = await evaluationService.getGroups({
+      ownerId: res.locals.orgId,
+    });
+    res.json(group);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to get evaluation group" });
+  }
+});
+
 evaluationRouter.post("/group", async (req, res) => {
   try {
     const group = await evaluationService.createGroup({
@@ -123,7 +125,6 @@ evaluationRouter.post("/group", async (req, res) => {
   }
 });
 
-// Update evaluation group
 evaluationRouter.put("/group/:id", async (req, res) => {
   try {
     const group = await evaluationService.updateGroup({
@@ -136,7 +137,6 @@ evaluationRouter.put("/group/:id", async (req, res) => {
   }
 });
 
-// Delete evaluation group
 evaluationRouter.delete("/group/:id", async (req, res) => {
   try {
     await evaluationService.deleteGroup({

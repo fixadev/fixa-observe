@@ -3,7 +3,6 @@ import { createTRPCRouter, publicProcedure } from "../trpc";
 import { protectedProcedure } from "../trpc";
 import { SearchService } from "@repo/services/src/search";
 import {
-  AlertWithDetailsSchema,
   type Filter,
   FilterSchema,
   SavedSearchWithIncludesSchema,
@@ -75,31 +74,4 @@ export const searchRouter = createTRPCRouter({
       ownerId: orgId,
     });
   }),
-
-  createAlert: protectedProcedure
-    .input(AlertWithDetailsSchema)
-    .mutation(async ({ input, ctx }) => {
-      return await searchServiceInstance.createAlert({
-        alert: input,
-        ownerId: ctx.orgId,
-      });
-    }),
-
-  updateAlert: protectedProcedure
-    .input(AlertWithDetailsSchema)
-    .mutation(async ({ input, ctx }) => {
-      return await searchServiceInstance.updateAlert({
-        alert: input,
-        ownerId: ctx.orgId,
-      });
-    }),
-
-  deleteAlert: protectedProcedure
-    .input(z.object({ id: z.string() }))
-    .mutation(async ({ input, ctx }) => {
-      return await searchServiceInstance.deleteAlert({
-        id: input.id,
-        ownerId: ctx.orgId,
-      });
-    }),
 });

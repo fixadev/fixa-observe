@@ -188,6 +188,28 @@ export class EvaluationService {
     });
   }
 
+  async create({
+    evaluation,
+    ownerId,
+  }: {
+    evaluation: Evaluation;
+    ownerId: string;
+  }): Promise<Evaluation> {
+    const template = await this.db.evaluationTemplate.findUnique({
+      where: { id: evaluation.evaluationTemplateId, ownerId },
+    });
+    if (!template) {
+      throw new Error("Evaluation template not found");
+    }
+    return await this.db.evaluation.create({
+      data: {
+        ...evaluation,
+        id: uuidv4(),
+        params: evaluation.params ?? {},
+      },
+    });
+  }
+
   async update({
     evaluation,
     ownerId,

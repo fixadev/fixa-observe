@@ -6,17 +6,16 @@ import {
   CreateAlertSchema,
   CreateAlert,
 } from "@repo/types/src/index";
+import { AlertService } from "@repo/services/src/alert";
 import { v4 as uuidv4 } from "uuid";
 
 const alertRouter = Router();
+const alertService = new AlertService(db);
 
-// Get alerts for a user
 alertRouter.get("/", async (req: Request, res: Response) => {
   try {
     const ownerId = res.locals.orgId;
-    const alerts = await db.alert.findMany({
-      where: { ownerId },
-    });
+    const alerts = await alertService.getByOwnerId(ownerId);
     res.json({ success: true, alerts });
   } catch (error) {
     console.error("Error getting alerts", error);
@@ -24,7 +23,18 @@ alertRouter.get("/", async (req: Request, res: Response) => {
   }
 });
 
-// Create alert
+alertRouter.get("/:id", async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const ownerId = res.locals.orgId;
+    const alert = await alertService.getById(ownerId, id);
+    res.json({ success: true, alert });
+  } catch (error) {
+    console.error("Error getting alert", error);
+    res.status(500).json({ success: false, error: (error as Error).message });
+  }
+});
+
 alertRouter.post("/:savedSearchId?", async (req: Request, res: Response) => {
   try {
     const ownerId = res.locals.orgId;
@@ -148,7 +158,6 @@ alertRouter.post("/:savedSearchId?", async (req: Request, res: Response) => {
   }
 });
 
-// Update alert
 alertRouter.put("/:id", async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
@@ -243,7 +252,6 @@ alertRouter.put("/:id", async (req: Request, res: Response) => {
   }
 });
 
-// Delete alert
 alertRouter.delete("/:id", async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
