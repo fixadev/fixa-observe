@@ -44,7 +44,7 @@ export function CreateEditAlertDialog({
   }, [selectedAlert, savedSearchId]);
 
   const { mutate: createAlert, isPending: isCreating } =
-    api.search.createAlert.useMutation({
+    api.alert.create.useMutation({
       onSuccess: (data) => {
         setSavedSearch((prev) =>
           prev
@@ -60,7 +60,7 @@ export function CreateEditAlertDialog({
     });
 
   const { mutate: updateAlert, isPending: isUpdating } =
-    api.search.updateAlert.useMutation({
+    api.alert.update.useMutation({
       onSuccess: (data) => {
         setSavedSearch((prev) =>
           prev
@@ -76,7 +76,7 @@ export function CreateEditAlertDialog({
     });
 
   const { mutate: deleteAlert, isPending: isDeleting } =
-    api.search.deleteAlert.useMutation({
+    api.alert.delete.useMutation({
       onSuccess: () => {
         setSavedSearch((prev) =>
           prev

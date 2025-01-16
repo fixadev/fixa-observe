@@ -23,7 +23,7 @@ export function AlertCard({
   setAlertsModalOpen,
 }: AlertCardProps) {
   const { setSavedSearch } = useObserveState();
-  const { mutate: updateAlert } = api.search.updateAlert.useMutation({
+  const { mutate: updateAlert } = api.alert.update.useMutation({
     onSuccess: (data) => {
       setSavedSearch((prev) =>
         prev
