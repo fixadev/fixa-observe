@@ -43,9 +43,9 @@ uploadCallRouter.post(
             metadata.freeObservabilityCallsLeft &&
             metadata.freeObservabilityCallsLeft > 0
           ) {
-            await clerkServiceClient.decrementFreeObservabilityCallsLeft(
-              res.locals.orgId,
-            );
+            await clerkServiceClient.decrementFreeObservabilityCallsLeft({
+              orgId: res.locals.orgId,
+            });
           } else {
             return res
               .status(403)

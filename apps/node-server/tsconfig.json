@@ -5,12 +5,11 @@
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
+    "noImplicitAny": true,
     "forceConsistentCasingInFileNames": true,
     "outDir": "dist",
-    "rootDir": "./src", 
+    "rootDir": "./src"
   },
-  "include": [
-    "src/**/*.ts"
-  ], 
+  "include": ["src/**/*.ts", "src/types/**/*.d.ts"],
   "exclude": ["dist"]
 }
