@@ -37,7 +37,7 @@ export function OpenSourceToast() {
         </div>
         <div>
           <GitHubButton
-            href="https://github.com/fixadev/fixa"
+            href="https://github.com/fixadev/fixa-observe"
             data-color-scheme="no-preference: light; light: light; dark: light;"
             data-size="large"
             data-show-count="true"
