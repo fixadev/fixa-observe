@@ -24,7 +24,8 @@ import {
   SelectTrigger,
 } from "~/components/ui/select";
 import {
-  MARK_CALL_AS_READ_DELAY_MS,
+  MARK_CALL_AS_READ_DURATION_MS,
+  MARK_CALL_AS_READ_PERCENTAGE,
   type CallWithIncludes,
   type EvaluationResultWithIncludes,
 } from "@repo/types/src/index";
@@ -103,11 +104,27 @@ export const AudioPlayer = forwardRef<
   const observeState = useObserveStateSafe();
   const { mutate: markCallAsRead } = api._call.updateIsRead.useMutation({
     onSuccess: () => {
-      if (observeState) {
-        observeState.handleUpdateCallReadState(call.id, true);
-      }
+      // if (observeState) {
+      //   observeState.handleUpdateCallReadState(call.id, true);
+      // }
     },
   });
+  const markCallAsReadIfNeeded = useCallback(() => {
+    if (observeState) {
+      if (call.id in observeState.callReadState) {
+        // If the call is already marked as read in local state, return
+        if (observeState.callReadState[call.id]) {
+          return;
+        }
+      } else if (call.isRead) {
+        // If the call is already marked as read in the database, return
+        return;
+      }
+
+      markCallAsRead({ callId: call.id, isRead: true });
+      observeState.handleUpdateCallReadState(call.id, true);
+    }
+  }, [call.id, call.isRead, markCallAsRead, observeState]);
   const [unsavedChanges, setUnsavedChanges] = useState<
     Record<string, BlockChange>
   >({});
@@ -155,6 +172,14 @@ export const AudioPlayer = forwardRef<
   // Update the time
   useEffect(() => {
     onTimeUpdate?.(currentTime);
+    if (
+      audioLoaded &&
+      (currentTime >= MARK_CALL_AS_READ_DURATION_MS / 1000 ||
+        currentTime >= duration * MARK_CALL_AS_READ_PERCENTAGE)
+    ) {
+      markCallAsReadIfNeeded();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentTime, onTimeUpdate]);
 
   // Update playback speed
@@ -185,23 +210,6 @@ export const AudioPlayer = forwardRef<
       setActiveEvalResult(null);
     }
   }, [activeEvalResult, isPlaying]);
-
-  useEffect(() => {
-    if (
-      observeState &&
-      audioLoaded &&
-      (!call.isRead ||
-        (call.id in observeState.callReadState &&
-          !observeState.callReadState[call.id]))
-    ) {
-      const timer = setTimeout(() => {
-        markCallAsRead({ callId: call.id, isRead: true });
-      }, MARK_CALL_AS_READ_DELAY_MS);
-
-      return () => clearTimeout(timer);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [audioLoaded]);
 
   useImperativeHandle(
     ref,
@@ -257,7 +265,6 @@ export const AudioPlayer = forwardRef<
   }, [call.stereoRecordingUrl, call.id]);
 
   const handleEditBlock = useCallback((blockChange: BlockChange) => {
-    console.log("blockChange", blockChange);
     setUnsavedChanges((prev) => ({
       ...prev,
       [blockChange.id]: blockChange,
