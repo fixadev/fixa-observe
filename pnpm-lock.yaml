@@ -493,6 +493,9 @@ importers:
         specifier: ^3.1.8
         version: 3.1.8
     devDependencies:
+      '@repo/typescript-config':
+        specifier: workspace:*
+        version: link:../typescript-config
       prisma:
         specifier: ^5.21.1
         version: 5.21.1
@@ -551,6 +554,9 @@ importers:
         specifier: ^9.0.0
         version: 9.0.1
     devDependencies:
+      '@repo/typescript-config':
+        specifier: workspace:*
+        version: link:../typescript-config
       '@types/node':
         specifier: ^20.10.0
         version: 20.14.15
@@ -569,6 +575,9 @@ importers:
       '@repo/db':
         specifier: workspace:*
         version: link:../db
+      '@repo/typescript-config':
+        specifier: workspace:*
+        version: link:../typescript-config
       zod:
         specifier: ^3.22.4
         version: 3.23.8
@@ -625,6 +634,9 @@ importers:
         specifier: workspace:*
         version: link:../types
     devDependencies:
+      '@repo/typescript-config':
+        specifier: workspace:*
+        version: link:../typescript-config
       '@types/node':
         specifier: ^20.10.0
         version: 20.14.15
