@@ -12,6 +12,10 @@ import { analyzeCallWitho1 } from "../textAnalysis";
 import { sendAlerts } from "../alert";
 import stripeServiceClient from "../../clients/stripeServiceClient";
 import { SearchService } from "@repo/services/src/search";
+import {
+  instantiateEvaluationTemplate,
+  instantiateEvaluation,
+} from "@repo/utils/src/instantiate";
 import { getAudioDuration } from "../../utils/audio";
 import {
   SavedSearchWithIncludes,
@@ -110,7 +114,7 @@ export const analyzeAndSaveCall = async ({
       toolCalls: null,
     }));
 
-    let evalResults: EvaluationResult[];
+    let evalResults;
     let evalSetResults: EvaluationGroupResult[];
     let savedSearches: SavedSearchWithIncludes[];
 
@@ -238,30 +242,73 @@ export const analyzeBasedOnScenario = async ({
   ownerId: string;
   scenario: TemporaryScenario;
 }) => {
-  const allEvaluations = await evaluationService.getByOwnerId(ownerId);
-  const existingRelevantEvaluations = allEvaluations.filter((evaluation) =>
-    scenario.evaluations.some(
-      (tempEval) =>
-        tempEval.prompt === evaluation.evaluationTemplate.description,
-    ),
-  );
-
-  const evaluationsToCreate = scenario.evaluations.filter(
-    (tempEval) =>
-      !existingRelevantEvaluations.some(
-        (existingEval) =>
-          existingEval.evaluationTemplate.description === tempEval.prompt,
+  try {
+    const allEvaluations = await evaluationService.getByOwnerId(ownerId);
+    const existingRelevantEvaluations = allEvaluations.filter((evaluation) =>
+      scenario.evaluations.some(
+        (tempEval) =>
+          tempEval.prompt === evaluation.evaluationTemplate.description,
       ),
-  );
+    );
 
-  const newEvaluationTemplates =
-    await evaluationService.createEvaluationTemplates(evaluationsToCreate);
+    const evaluationsToCreate = scenario.evaluations
+      .filter(
+        (tempEval) =>
+          !existingRelevantEvaluations.some(
+            (existingEval) =>
+              existingEval.evaluationTemplate.description === tempEval.prompt,
+          ),
+      )
+      .map((tempEval) => ({
+        ...instantiateEvaluationTemplate({
+          name: tempEval.name,
+          description: tempEval.prompt,
+        }),
+      }));
 
-  return {
-    evalResults: [],
-    evalSetResults: [],
-    savedSearches: [],
-  };
+    const createdEvaluationTemplates = await evaluationService.createTemplates({
+      templates: evaluationsToCreate,
+      ownerId,
+    });
+
+    const createdEvaluations = await evaluationService.createMany({
+      evaluations: [
+        ...createdEvaluationTemplates,
+        ...existingRelevantEvaluations,
+      ].map((template) => ({
+        ...instantiateEvaluation({
+          evaluationTemplateId: template.id,
+        }),
+      })),
+    });
+
+    const result = await analyzeCallWitho1({
+      callStartedAt: createdAt,
+      messages: messages || [],
+      testAgentPrompt: "",
+      scenario: undefined,
+      evals: createdEvaluations,
+    });
+
+    const validEvalResults = result.filter((result) =>
+      createdEvaluations.some(
+        (evaluation) => evaluation.id === result.evaluationId,
+      ),
+    );
+
+    return {
+      evalResults: validEvalResults,
+      evalSetResults: [],
+      savedSearches: [],
+    };
+  } catch (error) {
+    console.error("Error in analyzeBasedOnScenario:", error);
+    return {
+      evalResults: [],
+      evalSetResults: [],
+      savedSearches: [],
+    };
+  }
 };
 
 export const analyzeBasedOnRules = async ({

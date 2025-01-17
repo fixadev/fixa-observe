@@ -9,7 +9,7 @@ import { useCallback, useEffect, useState } from "react";
 import {
   instantiateEvaluation,
   instantiateEvaluationGroup,
-} from "~/lib/instantiate";
+} from "@repo/utils/src/instantiate";
 import { cn, isTempId } from "~/lib/utils";
 import { api } from "~/trpc/react";
 import { Button } from "~/components/ui/button";

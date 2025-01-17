@@ -7,7 +7,7 @@ import { NUM_FREE_OBSERVABILITY_CALLS, NUM_FREE_TESTS } from "@repo/types/src";
 import { ClerkService, EvaluationService } from "@repo/services/src";
 import { db } from "~/server/db";
 import { SlackService } from "@repo/services/src/ee/slack";
-import { instantiateEvaluationTemplate } from "~/lib/instantiate";
+import { instantiateEvaluationTemplate } from "@repo/utils/src/instantiate";
 
 const clerkService = new ClerkService(db);
 const slackService = new SlackService();

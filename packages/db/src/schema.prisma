@@ -226,7 +226,6 @@ model EvaluationTemplate {
   description String
   params      String[]
 
-  type                   EvalType
   contentType            EvalContentType @default(content)
   toolCallExpectedResult String          @default("")
 

@@ -54,6 +54,7 @@
     "@repo/db": "workspace:*",
     "@repo/services": "workspace:*",
     "@repo/types": "workspace:*",
+    "@repo/utils": "workspace:*",
     "@stripe/stripe-js": "^5.2.0",
     "@supabase/supabase-js": "^2.45.6",
     "@t3-oss/env-nextjs": "^0.10.1",

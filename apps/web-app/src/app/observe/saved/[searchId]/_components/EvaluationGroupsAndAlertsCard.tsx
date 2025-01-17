@@ -11,7 +11,7 @@ import { cn } from "~/lib/utils";
 import {
   instantiateAlert,
   instantiateEvaluationGroup,
-} from "~/lib/instantiate";
+} from "@repo/utils/src/instantiate";
 import { PlusIcon } from "@heroicons/react/24/solid";
 import { EvaluationGroupDialog } from "./EvaluationGroupDialog";
 import { CreateEditAlertDialog } from "./AlertDialog";

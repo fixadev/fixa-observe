@@ -8,7 +8,7 @@ import { ScenarioCard } from "./_components/ScenarioCard";
 import { ScenarioProvider, useScenario } from "./_components/ScenarioContext";
 import { useAgent } from "~/app/contexts/UseAgent";
 import { RunFirstTest } from "./_components/RunFirstTest";
-import { instantiateScenario } from "~/lib/instantiate";
+import { instantiateScenario } from "@repo/utils/src/instantiate";
 import { DashboardPageHeader } from "~/components/DashboardPageHeader";
 import { GeneralEvaluations } from "./_components/GeneralEvaluations";
 

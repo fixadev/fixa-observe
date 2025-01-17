@@ -8,7 +8,7 @@ import { EvaluationTemplateCard } from "./_components/EvaluationTemplateCard";
 import { EvaluationTemplateDialog } from "~/components/evaluations/EvaluationTemplateDialog";
 import { useCallback, useEffect, useState } from "react";
 import { type EvaluationTemplate } from "@repo/types/src";
-import { instantiateEvaluationTemplate } from "~/lib/instantiate";
+import { instantiateEvaluationTemplate } from "@repo/utils/src/instantiate";
 
 export default function EvalTemplatesPage() {
   const { data: _evaluationTemplates = [] } =

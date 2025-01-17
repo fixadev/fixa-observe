@@ -45,7 +45,6 @@ const addScenarios = async () => {
                         name: evaluation.title,
                         description:
                           "this evaluation should only be applied to the last tool_call_result with type 'check state event' in the conversation. prices and order of items should be ignored in the comparison. be very specific about why the tool call failed if it failed. ",
-                        type: "scenario",
                         toolCallExpectedResult:
                           evaluation.expected_output ?? "",
                         contentType: EvalContentType.tool,
@@ -53,7 +52,6 @@ const addScenarios = async () => {
                     : {
                         name: evaluation.title,
                         description: evaluation.instructions ?? "",
-                        type: "scenario",
                         contentType: EvalContentType.content,
                         resultType: EvalResultType.boolean,
                       },

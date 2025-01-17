@@ -13,7 +13,7 @@ import { useState, useEffect } from "react";
 import { api } from "~/trpc/react";
 import { isTempId } from "~/lib/utils";
 import { AlertCard } from "./AlertDetailsCard";
-import { instantiateAlert } from "~/lib/instantiate";
+import { instantiateAlert } from "@repo/utils/src/instantiate";
 import Spinner from "~/components/Spinner";
 import { TrashIcon } from "@heroicons/react/24/solid";
 import { useObserveState } from "~/components/hooks/useObserveState";

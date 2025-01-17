@@ -19,7 +19,7 @@ import {
 } from "@repo/types/src";
 import { EvaluationDescription } from "./EvaluationDescription";
 import { EvaluationTemplateDialog } from "./EvaluationTemplateDialog";
-import { instantiateEvaluationTemplate } from "~/lib/instantiate";
+import { instantiateEvaluationTemplate } from "@repo/utils/src/instantiate";
 
 interface EvaluationTabSectionProps {
   evaluations: EvaluationWithIncludes[];

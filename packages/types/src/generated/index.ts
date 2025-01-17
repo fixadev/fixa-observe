@@ -74,7 +74,7 @@ export const CallRecordingScalarFieldEnumSchema = z.enum(['id','audioUrl','creat
 
 export const ScenarioScalarFieldEnumSchema = z.enum(['id','createdAt','agentId','name','instructions','successCriteria','includeDateTime','timezone','deleted']);
 
-export const EvaluationTemplateScalarFieldEnumSchema = z.enum(['id','createdAt','name','description','params','type','resultType','contentType','toolCallExpectedResult','ownerId','deleted','hidden']);
+export const EvaluationTemplateScalarFieldEnumSchema = z.enum(['id','createdAt','name','description','params','contentType','toolCallExpectedResult','ownerId','deleted','hidden']);
 
 export const GeneralEvaluationScalarFieldEnumSchema = z.enum(['id','agentId','evaluationId']);
 
@@ -317,8 +317,6 @@ export type Scenario = z.infer<typeof ScenarioSchema>
 /////////////////////////////////////////
 
 export const EvaluationTemplateSchema = z.object({
-  type: EvalTypeSchema,
-  resultType: EvalResultTypeSchema,
   contentType: EvalContentTypeSchema,
   id: z.string(),
   createdAt: z.coerce.date(),
@@ -806,8 +804,6 @@ export const EvaluationTemplateSelectSchema: z.ZodType<Prisma.EvaluationTemplate
   name: z.boolean().optional(),
   description: z.boolean().optional(),
   params: z.boolean().optional(),
-  type: z.boolean().optional(),
-  resultType: z.boolean().optional(),
   contentType: z.boolean().optional(),
   toolCallExpectedResult: z.boolean().optional(),
   ownerId: z.boolean().optional(),
@@ -1891,8 +1887,6 @@ export const EvaluationTemplateWhereInputSchema: z.ZodType<Prisma.EvaluationTemp
   name: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   description: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   params: z.lazy(() => StringNullableListFilterSchema).optional(),
-  type: z.union([ z.lazy(() => EnumEvalTypeFilterSchema),z.lazy(() => EvalTypeSchema) ]).optional(),
-  resultType: z.union([ z.lazy(() => EnumEvalResultTypeFilterSchema),z.lazy(() => EvalResultTypeSchema) ]).optional(),
   contentType: z.union([ z.lazy(() => EnumEvalContentTypeFilterSchema),z.lazy(() => EvalContentTypeSchema) ]).optional(),
   toolCallExpectedResult: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   ownerId: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
@@ -1908,8 +1902,6 @@ export const EvaluationTemplateOrderByWithRelationInputSchema: z.ZodType<Prisma.
   name: z.lazy(() => SortOrderSchema).optional(),
   description: z.lazy(() => SortOrderSchema).optional(),
   params: z.lazy(() => SortOrderSchema).optional(),
-  type: z.lazy(() => SortOrderSchema).optional(),
-  resultType: z.lazy(() => SortOrderSchema).optional(),
   contentType: z.lazy(() => SortOrderSchema).optional(),
   toolCallExpectedResult: z.lazy(() => SortOrderSchema).optional(),
   ownerId: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
@@ -1931,8 +1923,6 @@ export const EvaluationTemplateWhereUniqueInputSchema: z.ZodType<Prisma.Evaluati
   name: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   description: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   params: z.lazy(() => StringNullableListFilterSchema).optional(),
-  type: z.union([ z.lazy(() => EnumEvalTypeFilterSchema),z.lazy(() => EvalTypeSchema) ]).optional(),
-  resultType: z.union([ z.lazy(() => EnumEvalResultTypeFilterSchema),z.lazy(() => EvalResultTypeSchema) ]).optional(),
   contentType: z.union([ z.lazy(() => EnumEvalContentTypeFilterSchema),z.lazy(() => EvalContentTypeSchema) ]).optional(),
   toolCallExpectedResult: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   ownerId: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
@@ -1948,8 +1938,6 @@ export const EvaluationTemplateOrderByWithAggregationInputSchema: z.ZodType<Pris
   name: z.lazy(() => SortOrderSchema).optional(),
   description: z.lazy(() => SortOrderSchema).optional(),
   params: z.lazy(() => SortOrderSchema).optional(),
-  type: z.lazy(() => SortOrderSchema).optional(),
-  resultType: z.lazy(() => SortOrderSchema).optional(),
   contentType: z.lazy(() => SortOrderSchema).optional(),
   toolCallExpectedResult: z.lazy(() => SortOrderSchema).optional(),
   ownerId: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
@@ -1969,8 +1957,6 @@ export const EvaluationTemplateScalarWhereWithAggregatesInputSchema: z.ZodType<P
   name: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
   description: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
   params: z.lazy(() => StringNullableListFilterSchema).optional(),
-  type: z.union([ z.lazy(() => EnumEvalTypeWithAggregatesFilterSchema),z.lazy(() => EvalTypeSchema) ]).optional(),
-  resultType: z.union([ z.lazy(() => EnumEvalResultTypeWithAggregatesFilterSchema),z.lazy(() => EvalResultTypeSchema) ]).optional(),
   contentType: z.union([ z.lazy(() => EnumEvalContentTypeWithAggregatesFilterSchema),z.lazy(() => EvalContentTypeSchema) ]).optional(),
   toolCallExpectedResult: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
   ownerId: z.union([ z.lazy(() => StringNullableWithAggregatesFilterSchema),z.string() ]).optional().nullable(),
@@ -3474,8 +3460,6 @@ export const EvaluationTemplateCreateInputSchema: z.ZodType<Prisma.EvaluationTem
   name: z.string(),
   description: z.string(),
   params: z.union([ z.lazy(() => EvaluationTemplateCreateparamsInputSchema),z.string().array() ]).optional(),
-  type: z.lazy(() => EvalTypeSchema),
-  resultType: z.lazy(() => EvalResultTypeSchema),
   contentType: z.lazy(() => EvalContentTypeSchema).optional(),
   toolCallExpectedResult: z.string().optional(),
   ownerId: z.string().optional().nullable(),
@@ -3491,8 +3475,6 @@ export const EvaluationTemplateUncheckedCreateInputSchema: z.ZodType<Prisma.Eval
   name: z.string(),
   description: z.string(),
   params: z.union([ z.lazy(() => EvaluationTemplateCreateparamsInputSchema),z.string().array() ]).optional(),
-  type: z.lazy(() => EvalTypeSchema),
-  resultType: z.lazy(() => EvalResultTypeSchema),
   contentType: z.lazy(() => EvalContentTypeSchema).optional(),
   toolCallExpectedResult: z.string().optional(),
   ownerId: z.string().optional().nullable(),
@@ -3508,8 +3490,6 @@ export const EvaluationTemplateUpdateInputSchema: z.ZodType<Prisma.EvaluationTem
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   description: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   params: z.union([ z.lazy(() => EvaluationTemplateUpdateparamsInputSchema),z.string().array() ]).optional(),
-  type: z.union([ z.lazy(() => EvalTypeSchema),z.lazy(() => EnumEvalTypeFieldUpdateOperationsInputSchema) ]).optional(),
-  resultType: z.union([ z.lazy(() => EvalResultTypeSchema),z.lazy(() => EnumEvalResultTypeFieldUpdateOperationsInputSchema) ]).optional(),
   contentType: z.union([ z.lazy(() => EvalContentTypeSchema),z.lazy(() => EnumEvalContentTypeFieldUpdateOperationsInputSchema) ]).optional(),
   toolCallExpectedResult: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   ownerId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
@@ -3525,8 +3505,6 @@ export const EvaluationTemplateUncheckedUpdateInputSchema: z.ZodType<Prisma.Eval
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   description: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   params: z.union([ z.lazy(() => EvaluationTemplateUpdateparamsInputSchema),z.string().array() ]).optional(),
-  type: z.union([ z.lazy(() => EvalTypeSchema),z.lazy(() => EnumEvalTypeFieldUpdateOperationsInputSchema) ]).optional(),
-  resultType: z.union([ z.lazy(() => EvalResultTypeSchema),z.lazy(() => EnumEvalResultTypeFieldUpdateOperationsInputSchema) ]).optional(),
   contentType: z.union([ z.lazy(() => EvalContentTypeSchema),z.lazy(() => EnumEvalContentTypeFieldUpdateOperationsInputSchema) ]).optional(),
   toolCallExpectedResult: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   ownerId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
@@ -3542,8 +3520,6 @@ export const EvaluationTemplateCreateManyInputSchema: z.ZodType<Prisma.Evaluatio
   name: z.string(),
   description: z.string(),
   params: z.union([ z.lazy(() => EvaluationTemplateCreateparamsInputSchema),z.string().array() ]).optional(),
-  type: z.lazy(() => EvalTypeSchema),
-  resultType: z.lazy(() => EvalResultTypeSchema),
   contentType: z.lazy(() => EvalContentTypeSchema).optional(),
   toolCallExpectedResult: z.string().optional(),
   ownerId: z.string().optional().nullable(),
@@ -3557,8 +3533,6 @@ export const EvaluationTemplateUpdateManyMutationInputSchema: z.ZodType<Prisma.E
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   description: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   params: z.union([ z.lazy(() => EvaluationTemplateUpdateparamsInputSchema),z.string().array() ]).optional(),
-  type: z.union([ z.lazy(() => EvalTypeSchema),z.lazy(() => EnumEvalTypeFieldUpdateOperationsInputSchema) ]).optional(),
-  resultType: z.union([ z.lazy(() => EvalResultTypeSchema),z.lazy(() => EnumEvalResultTypeFieldUpdateOperationsInputSchema) ]).optional(),
   contentType: z.union([ z.lazy(() => EvalContentTypeSchema),z.lazy(() => EnumEvalContentTypeFieldUpdateOperationsInputSchema) ]).optional(),
   toolCallExpectedResult: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   ownerId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
@@ -3572,8 +3546,6 @@ export const EvaluationTemplateUncheckedUpdateManyInputSchema: z.ZodType<Prisma.
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   description: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   params: z.union([ z.lazy(() => EvaluationTemplateUpdateparamsInputSchema),z.string().array() ]).optional(),
-  type: z.union([ z.lazy(() => EvalTypeSchema),z.lazy(() => EnumEvalTypeFieldUpdateOperationsInputSchema) ]).optional(),
-  resultType: z.union([ z.lazy(() => EvalResultTypeSchema),z.lazy(() => EnumEvalResultTypeFieldUpdateOperationsInputSchema) ]).optional(),
   contentType: z.union([ z.lazy(() => EvalContentTypeSchema),z.lazy(() => EnumEvalContentTypeFieldUpdateOperationsInputSchema) ]).optional(),
   toolCallExpectedResult: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   ownerId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
@@ -5087,20 +5059,6 @@ export const StringNullableListFilterSchema: z.ZodType<Prisma.StringNullableList
   isEmpty: z.boolean().optional()
 }).strict();
 
-export const EnumEvalTypeFilterSchema: z.ZodType<Prisma.EnumEvalTypeFilter> = z.object({
-  equals: z.lazy(() => EvalTypeSchema).optional(),
-  in: z.lazy(() => EvalTypeSchema).array().optional(),
-  notIn: z.lazy(() => EvalTypeSchema).array().optional(),
-  not: z.union([ z.lazy(() => EvalTypeSchema),z.lazy(() => NestedEnumEvalTypeFilterSchema) ]).optional(),
-}).strict();
-
-export const EnumEvalResultTypeFilterSchema: z.ZodType<Prisma.EnumEvalResultTypeFilter> = z.object({
-  equals: z.lazy(() => EvalResultTypeSchema).optional(),
-  in: z.lazy(() => EvalResultTypeSchema).array().optional(),
-  notIn: z.lazy(() => EvalResultTypeSchema).array().optional(),
-  not: z.union([ z.lazy(() => EvalResultTypeSchema),z.lazy(() => NestedEnumEvalResultTypeFilterSchema) ]).optional(),
-}).strict();
-
 export const EnumEvalContentTypeFilterSchema: z.ZodType<Prisma.EnumEvalContentTypeFilter> = z.object({
   equals: z.lazy(() => EvalContentTypeSchema).optional(),
   in: z.lazy(() => EvalContentTypeSchema).array().optional(),
@@ -5114,8 +5072,6 @@ export const EvaluationTemplateCountOrderByAggregateInputSchema: z.ZodType<Prism
   name: z.lazy(() => SortOrderSchema).optional(),
   description: z.lazy(() => SortOrderSchema).optional(),
   params: z.lazy(() => SortOrderSchema).optional(),
-  type: z.lazy(() => SortOrderSchema).optional(),
-  resultType: z.lazy(() => SortOrderSchema).optional(),
   contentType: z.lazy(() => SortOrderSchema).optional(),
   toolCallExpectedResult: z.lazy(() => SortOrderSchema).optional(),
   ownerId: z.lazy(() => SortOrderSchema).optional(),
@@ -5128,8 +5084,6 @@ export const EvaluationTemplateMaxOrderByAggregateInputSchema: z.ZodType<Prisma.
   createdAt: z.lazy(() => SortOrderSchema).optional(),
   name: z.lazy(() => SortOrderSchema).optional(),
   description: z.lazy(() => SortOrderSchema).optional(),
-  type: z.lazy(() => SortOrderSchema).optional(),
-  resultType: z.lazy(() => SortOrderSchema).optional(),
   contentType: z.lazy(() => SortOrderSchema).optional(),
   toolCallExpectedResult: z.lazy(() => SortOrderSchema).optional(),
   ownerId: z.lazy(() => SortOrderSchema).optional(),
@@ -5142,33 +5096,11 @@ export const EvaluationTemplateMinOrderByAggregateInputSchema: z.ZodType<Prisma.
   createdAt: z.lazy(() => SortOrderSchema).optional(),
   name: z.lazy(() => SortOrderSchema).optional(),
   description: z.lazy(() => SortOrderSchema).optional(),
-  type: z.lazy(() => SortOrderSchema).optional(),
-  resultType: z.lazy(() => SortOrderSchema).optional(),
   contentType: z.lazy(() => SortOrderSchema).optional(),
   toolCallExpectedResult: z.lazy(() => SortOrderSchema).optional(),
   ownerId: z.lazy(() => SortOrderSchema).optional(),
   deleted: z.lazy(() => SortOrderSchema).optional(),
   hidden: z.lazy(() => SortOrderSchema).optional()
-}).strict();
-
-export const EnumEvalTypeWithAggregatesFilterSchema: z.ZodType<Prisma.EnumEvalTypeWithAggregatesFilter> = z.object({
-  equals: z.lazy(() => EvalTypeSchema).optional(),
-  in: z.lazy(() => EvalTypeSchema).array().optional(),
-  notIn: z.lazy(() => EvalTypeSchema).array().optional(),
-  not: z.union([ z.lazy(() => EvalTypeSchema),z.lazy(() => NestedEnumEvalTypeWithAggregatesFilterSchema) ]).optional(),
-  _count: z.lazy(() => NestedIntFilterSchema).optional(),
-  _min: z.lazy(() => NestedEnumEvalTypeFilterSchema).optional(),
-  _max: z.lazy(() => NestedEnumEvalTypeFilterSchema).optional()
-}).strict();
-
-export const EnumEvalResultTypeWithAggregatesFilterSchema: z.ZodType<Prisma.EnumEvalResultTypeWithAggregatesFilter> = z.object({
-  equals: z.lazy(() => EvalResultTypeSchema).optional(),
-  in: z.lazy(() => EvalResultTypeSchema).array().optional(),
-  notIn: z.lazy(() => EvalResultTypeSchema).array().optional(),
-  not: z.union([ z.lazy(() => EvalResultTypeSchema),z.lazy(() => NestedEnumEvalResultTypeWithAggregatesFilterSchema) ]).optional(),
-  _count: z.lazy(() => NestedIntFilterSchema).optional(),
-  _min: z.lazy(() => NestedEnumEvalResultTypeFilterSchema).optional(),
-  _max: z.lazy(() => NestedEnumEvalResultTypeFilterSchema).optional()
 }).strict();
 
 export const EnumEvalContentTypeWithAggregatesFilterSchema: z.ZodType<Prisma.EnumEvalContentTypeWithAggregatesFilter> = z.object({
@@ -5245,6 +5177,13 @@ export const EvaluationMinOrderByAggregateInputSchema: z.ZodType<Prisma.Evaluati
   evaluationGroupId: z.lazy(() => SortOrderSchema).optional()
 }).strict();
 
+export const EnumEvalResultTypeFilterSchema: z.ZodType<Prisma.EnumEvalResultTypeFilter> = z.object({
+  equals: z.lazy(() => EvalResultTypeSchema).optional(),
+  in: z.lazy(() => EvalResultTypeSchema).array().optional(),
+  notIn: z.lazy(() => EvalResultTypeSchema).array().optional(),
+  not: z.union([ z.lazy(() => EvalResultTypeSchema),z.lazy(() => NestedEnumEvalResultTypeFilterSchema) ]).optional(),
+}).strict();
+
 export const CallNullableRelationFilterSchema: z.ZodType<Prisma.CallNullableRelationFilter> = z.object({
   is: z.lazy(() => CallWhereInputSchema).optional().nullable(),
   isNot: z.lazy(() => CallWhereInputSchema).optional().nullable()
@@ -5305,6 +5244,16 @@ export const EvaluationResultMinOrderByAggregateInputSchema: z.ZodType<Prisma.Ev
 export const EvaluationResultSumOrderByAggregateInputSchema: z.ZodType<Prisma.EvaluationResultSumOrderByAggregateInput> = z.object({
   secondsFromStart: z.lazy(() => SortOrderSchema).optional(),
   duration: z.lazy(() => SortOrderSchema).optional()
+}).strict();
+
+export const EnumEvalResultTypeWithAggregatesFilterSchema: z.ZodType<Prisma.EnumEvalResultTypeWithAggregatesFilter> = z.object({
+  equals: z.lazy(() => EvalResultTypeSchema).optional(),
+  in: z.lazy(() => EvalResultTypeSchema).array().optional(),
+  notIn: z.lazy(() => EvalResultTypeSchema).array().optional(),
+  not: z.union([ z.lazy(() => EvalResultTypeSchema),z.lazy(() => NestedEnumEvalResultTypeWithAggregatesFilterSchema) ]).optional(),
+  _count: z.lazy(() => NestedIntFilterSchema).optional(),
+  _min: z.lazy(() => NestedEnumEvalResultTypeFilterSchema).optional(),
+  _max: z.lazy(() => NestedEnumEvalResultTypeFilterSchema).optional()
 }).strict();
 
 export const LatencyBlockCountOrderByAggregateInputSchema: z.ZodType<Prisma.LatencyBlockCountOrderByAggregateInput> = z.object({
@@ -6365,14 +6314,6 @@ export const EvaluationTemplateUpdateparamsInputSchema: z.ZodType<Prisma.Evaluat
   push: z.union([ z.string(),z.string().array() ]).optional(),
 }).strict();
 
-export const EnumEvalTypeFieldUpdateOperationsInputSchema: z.ZodType<Prisma.EnumEvalTypeFieldUpdateOperationsInput> = z.object({
-  set: z.lazy(() => EvalTypeSchema).optional()
-}).strict();
-
-export const EnumEvalResultTypeFieldUpdateOperationsInputSchema: z.ZodType<Prisma.EnumEvalResultTypeFieldUpdateOperationsInput> = z.object({
-  set: z.lazy(() => EvalResultTypeSchema).optional()
-}).strict();
-
 export const EnumEvalContentTypeFieldUpdateOperationsInputSchema: z.ZodType<Prisma.EnumEvalContentTypeFieldUpdateOperationsInput> = z.object({
   set: z.lazy(() => EvalContentTypeSchema).optional()
 }).strict();
@@ -6607,6 +6548,10 @@ export const EvaluationTemplateCreateNestedOneWithoutEvaluationResultsInputSchem
   create: z.union([ z.lazy(() => EvaluationTemplateCreateWithoutEvaluationResultsInputSchema),z.lazy(() => EvaluationTemplateUncheckedCreateWithoutEvaluationResultsInputSchema) ]).optional(),
   connectOrCreate: z.lazy(() => EvaluationTemplateCreateOrConnectWithoutEvaluationResultsInputSchema).optional(),
   connect: z.lazy(() => EvaluationTemplateWhereUniqueInputSchema).optional()
+}).strict();
+
+export const EnumEvalResultTypeFieldUpdateOperationsInputSchema: z.ZodType<Prisma.EnumEvalResultTypeFieldUpdateOperationsInput> = z.object({
+  set: z.lazy(() => EvalResultTypeSchema).optional()
 }).strict();
 
 export const CallUpdateOneWithoutEvaluationResultsNestedInputSchema: z.ZodType<Prisma.CallUpdateOneWithoutEvaluationResultsNestedInput> = z.object({
@@ -7138,45 +7083,11 @@ export const NestedFloatWithAggregatesFilterSchema: z.ZodType<Prisma.NestedFloat
   _max: z.lazy(() => NestedFloatFilterSchema).optional()
 }).strict();
 
-export const NestedEnumEvalTypeFilterSchema: z.ZodType<Prisma.NestedEnumEvalTypeFilter> = z.object({
-  equals: z.lazy(() => EvalTypeSchema).optional(),
-  in: z.lazy(() => EvalTypeSchema).array().optional(),
-  notIn: z.lazy(() => EvalTypeSchema).array().optional(),
-  not: z.union([ z.lazy(() => EvalTypeSchema),z.lazy(() => NestedEnumEvalTypeFilterSchema) ]).optional(),
-}).strict();
-
-export const NestedEnumEvalResultTypeFilterSchema: z.ZodType<Prisma.NestedEnumEvalResultTypeFilter> = z.object({
-  equals: z.lazy(() => EvalResultTypeSchema).optional(),
-  in: z.lazy(() => EvalResultTypeSchema).array().optional(),
-  notIn: z.lazy(() => EvalResultTypeSchema).array().optional(),
-  not: z.union([ z.lazy(() => EvalResultTypeSchema),z.lazy(() => NestedEnumEvalResultTypeFilterSchema) ]).optional(),
-}).strict();
-
 export const NestedEnumEvalContentTypeFilterSchema: z.ZodType<Prisma.NestedEnumEvalContentTypeFilter> = z.object({
   equals: z.lazy(() => EvalContentTypeSchema).optional(),
   in: z.lazy(() => EvalContentTypeSchema).array().optional(),
   notIn: z.lazy(() => EvalContentTypeSchema).array().optional(),
   not: z.union([ z.lazy(() => EvalContentTypeSchema),z.lazy(() => NestedEnumEvalContentTypeFilterSchema) ]).optional(),
-}).strict();
-
-export const NestedEnumEvalTypeWithAggregatesFilterSchema: z.ZodType<Prisma.NestedEnumEvalTypeWithAggregatesFilter> = z.object({
-  equals: z.lazy(() => EvalTypeSchema).optional(),
-  in: z.lazy(() => EvalTypeSchema).array().optional(),
-  notIn: z.lazy(() => EvalTypeSchema).array().optional(),
-  not: z.union([ z.lazy(() => EvalTypeSchema),z.lazy(() => NestedEnumEvalTypeWithAggregatesFilterSchema) ]).optional(),
-  _count: z.lazy(() => NestedIntFilterSchema).optional(),
-  _min: z.lazy(() => NestedEnumEvalTypeFilterSchema).optional(),
-  _max: z.lazy(() => NestedEnumEvalTypeFilterSchema).optional()
-}).strict();
-
-export const NestedEnumEvalResultTypeWithAggregatesFilterSchema: z.ZodType<Prisma.NestedEnumEvalResultTypeWithAggregatesFilter> = z.object({
-  equals: z.lazy(() => EvalResultTypeSchema).optional(),
-  in: z.lazy(() => EvalResultTypeSchema).array().optional(),
-  notIn: z.lazy(() => EvalResultTypeSchema).array().optional(),
-  not: z.union([ z.lazy(() => EvalResultTypeSchema),z.lazy(() => NestedEnumEvalResultTypeWithAggregatesFilterSchema) ]).optional(),
-  _count: z.lazy(() => NestedIntFilterSchema).optional(),
-  _min: z.lazy(() => NestedEnumEvalResultTypeFilterSchema).optional(),
-  _max: z.lazy(() => NestedEnumEvalResultTypeFilterSchema).optional()
 }).strict();
 
 export const NestedEnumEvalContentTypeWithAggregatesFilterSchema: z.ZodType<Prisma.NestedEnumEvalContentTypeWithAggregatesFilter> = z.object({
@@ -7187,6 +7098,23 @@ export const NestedEnumEvalContentTypeWithAggregatesFilterSchema: z.ZodType<Pris
   _count: z.lazy(() => NestedIntFilterSchema).optional(),
   _min: z.lazy(() => NestedEnumEvalContentTypeFilterSchema).optional(),
   _max: z.lazy(() => NestedEnumEvalContentTypeFilterSchema).optional()
+}).strict();
+
+export const NestedEnumEvalResultTypeFilterSchema: z.ZodType<Prisma.NestedEnumEvalResultTypeFilter> = z.object({
+  equals: z.lazy(() => EvalResultTypeSchema).optional(),
+  in: z.lazy(() => EvalResultTypeSchema).array().optional(),
+  notIn: z.lazy(() => EvalResultTypeSchema).array().optional(),
+  not: z.union([ z.lazy(() => EvalResultTypeSchema),z.lazy(() => NestedEnumEvalResultTypeFilterSchema) ]).optional(),
+}).strict();
+
+export const NestedEnumEvalResultTypeWithAggregatesFilterSchema: z.ZodType<Prisma.NestedEnumEvalResultTypeWithAggregatesFilter> = z.object({
+  equals: z.lazy(() => EvalResultTypeSchema).optional(),
+  in: z.lazy(() => EvalResultTypeSchema).array().optional(),
+  notIn: z.lazy(() => EvalResultTypeSchema).array().optional(),
+  not: z.union([ z.lazy(() => EvalResultTypeSchema),z.lazy(() => NestedEnumEvalResultTypeWithAggregatesFilterSchema) ]).optional(),
+  _count: z.lazy(() => NestedIntFilterSchema).optional(),
+  _min: z.lazy(() => NestedEnumEvalResultTypeFilterSchema).optional(),
+  _max: z.lazy(() => NestedEnumEvalResultTypeFilterSchema).optional()
 }).strict();
 
 export const NestedEnumAlertTypeFilterSchema: z.ZodType<Prisma.NestedEnumAlertTypeFilter> = z.object({
@@ -9399,8 +9327,6 @@ export const EvaluationTemplateCreateWithoutEvaluationsInputSchema: z.ZodType<Pr
   name: z.string(),
   description: z.string(),
   params: z.union([ z.lazy(() => EvaluationTemplateCreateparamsInputSchema),z.string().array() ]).optional(),
-  type: z.lazy(() => EvalTypeSchema),
-  resultType: z.lazy(() => EvalResultTypeSchema),
   contentType: z.lazy(() => EvalContentTypeSchema).optional(),
   toolCallExpectedResult: z.string().optional(),
   ownerId: z.string().optional().nullable(),
@@ -9415,8 +9341,6 @@ export const EvaluationTemplateUncheckedCreateWithoutEvaluationsInputSchema: z.Z
   name: z.string(),
   description: z.string(),
   params: z.union([ z.lazy(() => EvaluationTemplateCreateparamsInputSchema),z.string().array() ]).optional(),
-  type: z.lazy(() => EvalTypeSchema),
-  resultType: z.lazy(() => EvalResultTypeSchema),
   contentType: z.lazy(() => EvalContentTypeSchema).optional(),
   toolCallExpectedResult: z.string().optional(),
   ownerId: z.string().optional().nullable(),
@@ -9559,8 +9483,6 @@ export const EvaluationTemplateUpdateWithoutEvaluationsInputSchema: z.ZodType<Pr
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   description: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   params: z.union([ z.lazy(() => EvaluationTemplateUpdateparamsInputSchema),z.string().array() ]).optional(),
-  type: z.union([ z.lazy(() => EvalTypeSchema),z.lazy(() => EnumEvalTypeFieldUpdateOperationsInputSchema) ]).optional(),
-  resultType: z.union([ z.lazy(() => EvalResultTypeSchema),z.lazy(() => EnumEvalResultTypeFieldUpdateOperationsInputSchema) ]).optional(),
   contentType: z.union([ z.lazy(() => EvalContentTypeSchema),z.lazy(() => EnumEvalContentTypeFieldUpdateOperationsInputSchema) ]).optional(),
   toolCallExpectedResult: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   ownerId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
@@ -9575,8 +9497,6 @@ export const EvaluationTemplateUncheckedUpdateWithoutEvaluationsInputSchema: z.Z
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   description: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   params: z.union([ z.lazy(() => EvaluationTemplateUpdateparamsInputSchema),z.string().array() ]).optional(),
-  type: z.union([ z.lazy(() => EvalTypeSchema),z.lazy(() => EnumEvalTypeFieldUpdateOperationsInputSchema) ]).optional(),
-  resultType: z.union([ z.lazy(() => EvalResultTypeSchema),z.lazy(() => EnumEvalResultTypeFieldUpdateOperationsInputSchema) ]).optional(),
   contentType: z.union([ z.lazy(() => EvalContentTypeSchema),z.lazy(() => EnumEvalContentTypeFieldUpdateOperationsInputSchema) ]).optional(),
   toolCallExpectedResult: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   ownerId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
@@ -9805,8 +9725,6 @@ export const EvaluationTemplateCreateWithoutEvaluationResultsInputSchema: z.ZodT
   name: z.string(),
   description: z.string(),
   params: z.union([ z.lazy(() => EvaluationTemplateCreateparamsInputSchema),z.string().array() ]).optional(),
-  type: z.lazy(() => EvalTypeSchema),
-  resultType: z.lazy(() => EvalResultTypeSchema),
   contentType: z.lazy(() => EvalContentTypeSchema).optional(),
   toolCallExpectedResult: z.string().optional(),
   ownerId: z.string().optional().nullable(),
@@ -9821,8 +9739,6 @@ export const EvaluationTemplateUncheckedCreateWithoutEvaluationResultsInputSchem
   name: z.string(),
   description: z.string(),
   params: z.union([ z.lazy(() => EvaluationTemplateCreateparamsInputSchema),z.string().array() ]).optional(),
-  type: z.lazy(() => EvalTypeSchema),
-  resultType: z.lazy(() => EvalResultTypeSchema),
   contentType: z.lazy(() => EvalContentTypeSchema).optional(),
   toolCallExpectedResult: z.string().optional(),
   ownerId: z.string().optional().nullable(),
@@ -9979,8 +9895,6 @@ export const EvaluationTemplateUpdateWithoutEvaluationResultsInputSchema: z.ZodT
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   description: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   params: z.union([ z.lazy(() => EvaluationTemplateUpdateparamsInputSchema),z.string().array() ]).optional(),
-  type: z.union([ z.lazy(() => EvalTypeSchema),z.lazy(() => EnumEvalTypeFieldUpdateOperationsInputSchema) ]).optional(),
-  resultType: z.union([ z.lazy(() => EvalResultTypeSchema),z.lazy(() => EnumEvalResultTypeFieldUpdateOperationsInputSchema) ]).optional(),
   contentType: z.union([ z.lazy(() => EvalContentTypeSchema),z.lazy(() => EnumEvalContentTypeFieldUpdateOperationsInputSchema) ]).optional(),
   toolCallExpectedResult: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   ownerId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
@@ -9995,8 +9909,6 @@ export const EvaluationTemplateUncheckedUpdateWithoutEvaluationResultsInputSchem
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   description: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   params: z.union([ z.lazy(() => EvaluationTemplateUpdateparamsInputSchema),z.string().array() ]).optional(),
-  type: z.union([ z.lazy(() => EvalTypeSchema),z.lazy(() => EnumEvalTypeFieldUpdateOperationsInputSchema) ]).optional(),
-  resultType: z.union([ z.lazy(() => EvalResultTypeSchema),z.lazy(() => EnumEvalResultTypeFieldUpdateOperationsInputSchema) ]).optional(),
   contentType: z.union([ z.lazy(() => EvalContentTypeSchema),z.lazy(() => EnumEvalContentTypeFieldUpdateOperationsInputSchema) ]).optional(),
   toolCallExpectedResult: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   ownerId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),

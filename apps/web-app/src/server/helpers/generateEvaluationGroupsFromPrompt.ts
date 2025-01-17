@@ -105,7 +105,6 @@ export const createEvaluationGroupsFromPrompt = async ({
         contentType: EvalContentType.content,
         toolCallExpectedResult: "",
         deleted: false,
-        type: "general",
         hidden: false,
       })),
       ownerId: orgId,

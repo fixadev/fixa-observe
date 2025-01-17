@@ -11,7 +11,7 @@ import {
 } from "~/components/ui/select";
 import { useEffect, useState, useMemo, useCallback } from "react";
 import { InstallSlackAppButton } from "~/components/SlackButton";
-import { alertLookbackPeriods } from "~/lib/instantiate";
+import { alertLookbackPeriods } from "@repo/utils/src/instantiate";
 import { useObserveState } from "~/components/hooks/useObserveState";
 
 type LatencyOption = {

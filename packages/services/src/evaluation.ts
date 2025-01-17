@@ -1,4 +1,4 @@
-import { EvalType, type PrismaClient } from "@repo/db/src/index";
+import { type PrismaClient } from "@repo/db/src/index";
 import { v4 as uuidv4 } from "uuid";
 import {
   type Evaluation,
@@ -208,6 +208,25 @@ export class EvaluationService {
         params: evaluation.params ?? {},
       },
     });
+  }
+
+  async createMany({
+    evaluations,
+  }: {
+    evaluations: Evaluation[];
+  }): Promise<EvaluationWithIncludes[]> {
+    const createdEvaluations = await this.db.evaluation.createManyAndReturn({
+      data: evaluations.map((evaluation) => ({
+        ...evaluation,
+        id: uuidv4(),
+        params: evaluation.params ?? {},
+      })),
+      include: { evaluationTemplate: true },
+    });
+    return createdEvaluations.map((evaluation) => ({
+      ...evaluation,
+      params: evaluation.params as Record<string, string>,
+    }));
   }
 
   async update({
