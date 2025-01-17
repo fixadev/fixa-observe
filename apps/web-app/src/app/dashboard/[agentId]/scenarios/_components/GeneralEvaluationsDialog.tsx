@@ -16,7 +16,7 @@ import {
 import {
   instantiateEvaluation,
   instantiateGeneralEvaluation,
-} from "~/lib/instantiate";
+} from "@repo/utils/src/instantiate";
 import { useParams } from "next/navigation";
 import { useAgent } from "~/app/contexts/UseAgent";
 import { api } from "~/trpc/react";

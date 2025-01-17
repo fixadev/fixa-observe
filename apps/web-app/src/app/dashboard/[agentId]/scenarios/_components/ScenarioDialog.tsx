@@ -11,7 +11,7 @@ import {
   type EvaluationWithIncludes,
   type EvaluationTemplate,
 } from "@repo/types/src";
-import { instantiateEvaluation } from "~/lib/instantiate";
+import { instantiateEvaluation } from "@repo/utils/src/instantiate";
 import { api } from "~/trpc/react";
 import Spinner from "~/components/Spinner";
 import { useAgent } from "~/app/contexts/UseAgent";
