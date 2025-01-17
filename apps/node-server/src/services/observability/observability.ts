@@ -278,6 +278,7 @@ export const analyzeBasedOnScenario = async ({
       ].map((template) => ({
         ...instantiateEvaluation({
           evaluationTemplateId: template.id,
+          evaluationTemplate: undefined,
         }),
       })),
     });
@@ -522,7 +523,9 @@ export const findRelevantEvalSets = async ({
       relevantEvalSets: evalSetsWithEvals.filter((evalSet) => {
         return parsedResponse.relevantEvalSets.some(
           (relevantEvalSet) =>
-            relevantEvalSet.id === evalSet.id && relevantEvalSet.relevant,
+            relevantEvalSet.id === evalSet.id &&
+            relevantEvalSet.relevant &&
+            evalSet.evaluations.length > 0,
         );
       }),
     };

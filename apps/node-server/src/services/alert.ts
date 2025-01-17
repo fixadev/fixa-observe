@@ -96,7 +96,11 @@ export async function sendAlerts({
           const evalSetResult = evalSetResults.find(
             (result) => result.id === evalSetId,
           );
-          if (evalSetResult?.result === trigger || trigger === null) {
+          console.log("EVAL SET RESULT", evalSetResult);
+          if (
+            evalSetResult?.result === trigger ||
+            (trigger === null && evalSetResult !== undefined)
+          ) {
             sendAlertSlackMessage({
               ownerId,
               call,

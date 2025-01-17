@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import { getNumberOfAudioChannels } from "../utils/audio";
-import { TemporaryScenarioSchema } from "@repo/types/src";
+import { TemporaryScenarioSchema } from "@repo/types/src/index";
 
 export const validateUploadCallParams = async (
   req: Request,

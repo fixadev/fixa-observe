@@ -4,7 +4,7 @@ import { AgentService } from "@repo/services/src/agent";
 import { sqs } from "../clients/s3Client";
 import { db } from "../db";
 import { Semaphore } from "../utils/semaphore";
-import { UploadCallParams } from "@repo/types/src";
+import { UploadCallParams } from "@repo/types/src/index";
 
 const agentService = new AgentService(db);
 
