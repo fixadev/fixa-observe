@@ -1,7 +1,7 @@
 import { z } from "zod";
-import { EvaluationGroupWithIncludesSchema, TimeRangeSchema } from "./db";
-import { AlertWithDetailsSchema } from "./alert";
+import { TimeRangeSchema } from "./db";
 
+export type EvaluationGroupResult = z.infer<typeof EvaluationGroupResultSchema>;
 export const EvaluationGroupResultSchema = z.object({
   id: z.string(),
   result: z.boolean().nullable(),

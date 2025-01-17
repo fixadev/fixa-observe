@@ -49,6 +49,18 @@ export const EvaluationGroupTextCondition = z.object({
   text: z.string(),
 });
 
+export type TemporaryScenario = z.infer<typeof TemporaryScenarioSchema>;
+export const TemporaryScenarioSchema = z.object({
+  name: z.string(),
+  prompt: z.string(),
+  evaluations: z.array(
+    z.object({
+      name: z.string(),
+      prompt: z.string(),
+    }),
+  ),
+});
+
 export type UploadCallParams = z.infer<typeof UploadCallParams>;
 export const UploadCallParams = z.object({
   callId: z.string(),
@@ -59,6 +71,7 @@ export const UploadCallParams = z.object({
   metadata: z.record(z.string(), z.string()).optional(),
   saveRecording: z.boolean().optional(),
   language: z.string().optional(),
+  scenario: TemporaryScenarioSchema.optional(),
 });
 
 export type BlockChange = z.infer<typeof BlockChangeSchema>;

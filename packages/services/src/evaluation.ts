@@ -399,4 +399,11 @@ export class EvaluationService {
   }): Promise<void> {
     await this.db.evaluationGroup.delete({ where: { id, ownerId } });
   }
+
+  async getByOwnerId(ownerId: string) {
+    return await this.db.evaluation.findMany({
+      where: { evaluationTemplate: { ownerId } },
+      include: { evaluationTemplate: true },
+    });
+  }
 }

@@ -5,6 +5,7 @@ import {
   Call,
   SavedSearchWithIncludes,
   Agent,
+  EvaluationGroupResult,
 } from "@repo/types/src/index";
 import { sendAlertSlackMessage } from "./slack";
 
@@ -22,18 +23,11 @@ export async function sendAlerts({
   call: Call & { agent: Agent | null };
   latencyDurations: number[] | undefined;
   savedSearches: SavedSearchWithIncludes[];
-  evalSetResults: Array<{ evalSetId: string; success: boolean }>;
+  evalSetResults: EvaluationGroupResult[];
 }) {
   try {
     for (const savedSearch of savedSearches) {
-      const filter = FilterSchema.safeParse(savedSearch);
-
-      if (!filter.success) {
-        console.log("failed to parse filter", filter);
-        continue;
-      }
-
-      for (const alert of filter.data.alerts ?? []) {
+      for (const alert of savedSearch.alerts ?? []) {
         if (!alert.enabled) {
           console.log(`alert ${alert.id} is disabled`);
           continue;
@@ -52,6 +46,8 @@ export async function sendAlerts({
             continue;
           }
 
+          const filter = FilterSchema.safeParse(savedSearch);
+
           const { lookbackPeriod, percentile, threshold } = alert.details;
           const latencyPercentiles =
             await callService.getLatencyPercentilesForLookbackPeriod({
@@ -62,7 +58,7 @@ export async function sendAlerts({
                 agentId:
                   (call?.metadata as { test?: string })?.test && call?.agentId
                     ? [call.agentId]
-                    : filter.data.agentId,
+                    : savedSearch.agentId,
               },
               newLatencyBlocks: latencyDurations ?? [],
             });
@@ -98,13 +94,13 @@ export async function sendAlerts({
         } else if (alert.type === "evalSet") {
           const { evalSetId, trigger } = alert.details;
           const evalSetResult = evalSetResults.find(
-            (result) => result.evalSetId === evalSetId,
+            (result) => result.id === evalSetId,
           );
-          if (evalSetResult?.success === trigger || trigger === null) {
+          if (evalSetResult?.result === trigger || trigger === null) {
             sendAlertSlackMessage({
               ownerId,
               call,
-              success: evalSetResult?.success ?? false,
+              success: evalSetResult?.result ?? false,
               alert: {
                 ...alert,
                 type: "evalSet",

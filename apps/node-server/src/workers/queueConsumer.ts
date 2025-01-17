@@ -1,9 +1,10 @@
 import { env } from "../env";
-import { transcribeAndSaveCall } from "../services/observability";
+import { analyzeAndSaveCall } from "../services/observability/observability";
 import { AgentService } from "@repo/services/src/agent";
 import { sqs } from "../clients/s3Client";
 import { db } from "../db";
 import { Semaphore } from "../utils/semaphore";
+import { UploadCallParams } from "@repo/types/src";
 
 const agentService = new AgentService(db);
 
@@ -12,7 +13,7 @@ async function processMessage(
   queueUrl: string,
 ) {
   try {
-    const data = JSON.parse(message.Body || "{}");
+    const data: UploadCallParams = JSON.parse(message.Body || "{}");
     const {
       callId,
       stereoRecordingUrl,
@@ -22,6 +23,7 @@ async function processMessage(
       metadata,
       saveRecording,
       language,
+      scenario,
     } = data;
     if (!callId || !stereoRecordingUrl || !ownerId || !createdAt) {
       console.error("Missing required fields in message:", data);
@@ -36,7 +38,7 @@ async function processMessage(
       ownerId,
     });
 
-    await transcribeAndSaveCall({
+    await analyzeAndSaveCall({
       callId,
       stereoRecordingUrl,
       createdAt: createdAt,
@@ -45,6 +47,7 @@ async function processMessage(
       ownerId,
       saveRecording,
       language,
+      scenario,
     });
 
     await sqs.deleteMessage({

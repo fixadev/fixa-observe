@@ -1,25 +1,31 @@
 import axios from "axios";
-import { db } from "../db";
+import { db } from "../../db";
 import { v4 as uuidv4 } from "uuid";
 import { CallStatus, Message, Role } from "@prisma/client";
-import { env } from "../env";
-import { calculateLatencyPercentiles } from "../utils/time";
-import { uploadFromPresignedUrl } from "./aws";
+import { env } from "../../env";
+import { calculateLatencyPercentiles } from "../../utils/time";
+import { uploadFromPresignedUrl } from "../aws";
 import { zodResponseFormat } from "openai/helpers/zod";
-import { openai } from "../clients/openAIClient";
+import { openai } from "../../clients/openAIClient";
 import { z } from "zod";
-import { analyzeCallWitho1 } from "./textAnalysis";
-import { sendAlerts } from "./alert";
-import stripeServiceClient from "../clients/stripeServiceClient";
+import { analyzeCallWitho1 } from "../textAnalysis";
+import { sendAlerts } from "../alert";
+import stripeServiceClient from "../../clients/stripeServiceClient";
 import { SearchService } from "@repo/services/src/search";
-import { getAudioDuration } from "../utils/audio";
+import { getAudioDuration } from "../../utils/audio";
 import {
   SavedSearchWithIncludes,
   UploadCallParams,
   EvaluationGroupWithIncludes,
+  EvaluationResult,
+  EvaluationGroupResult,
+  TemporaryScenario,
 } from "@repo/types/src/index";
+import { EvaluationService } from "@repo/services/src/evaluation";
 
-export const transcribeAndSaveCall = async ({
+const evaluationService = new EvaluationService(db);
+
+export const analyzeAndSaveCall = async ({
   callId,
   stereoRecordingUrl,
   createdAt,
@@ -28,6 +34,7 @@ export const transcribeAndSaveCall = async ({
   ownerId,
   saveRecording,
   language,
+  scenario,
 }: UploadCallParams) => {
   try {
     interface TranscribeResponse {
@@ -103,14 +110,30 @@ export const transcribeAndSaveCall = async ({
       toolCalls: null,
     }));
 
-    const { evalResults, evalSetResults, savedSearches } =
-      await analyzeBasedOnRules({
-        messages: messages || [],
-        createdAt: createdAt || new Date().toISOString(),
-        agentId,
-        callMetadata: callMetadata || {},
-        ownerId,
-      });
+    let evalResults: EvaluationResult[];
+    let evalSetResults: EvaluationGroupResult[];
+    let savedSearches: SavedSearchWithIncludes[];
+
+    if (scenario) {
+      ({ evalResults, evalSetResults, savedSearches } =
+        await analyzeBasedOnScenario({
+          messages: messages || [],
+          createdAt: createdAt || new Date().toISOString(),
+          agentId,
+          callMetadata: callMetadata || {},
+          ownerId,
+          scenario,
+        }));
+    } else {
+      ({ evalResults, evalSetResults, savedSearches } =
+        await analyzeBasedOnRules({
+          messages: messages || [],
+          createdAt: createdAt || new Date().toISOString(),
+          agentId,
+          callMetadata: callMetadata || {},
+          ownerId,
+        }));
+    }
 
     const newCall = await db.call.create({
       data: {
@@ -135,7 +158,7 @@ export const transcribeAndSaveCall = async ({
           })),
         },
         evalSetToSuccess: Object.fromEntries(
-          evalSetResults.map((result) => [result.evalSetId, result.success]),
+          evalSetResults.map((result) => [result.id, result.result]),
         ),
         timeToFirstWord: Math.round((latencyBlocks?.[0]?.duration ?? 0) * 1000),
         latencyP50,
@@ -183,19 +206,62 @@ export const transcribeAndSaveCall = async ({
       console.error("Error accruing observability minutes", error);
     }
 
-    await sendAlerts({
-      ownerId,
-      latencyDurations,
-      savedSearches,
-      evalSetResults,
-      call: newCall,
-    });
+    if (!scenario) {
+      await sendAlerts({
+        ownerId,
+        latencyDurations,
+        savedSearches,
+        evalSetResults,
+        call: newCall,
+      });
+    }
 
     return newCall;
   } catch (error) {
-    console.error("Error in transcribeAndSaveCall:", error);
+    console.error("Error in analyzeAndSaveCall:", error);
     throw error;
   }
+};
+
+export const analyzeBasedOnScenario = async ({
+  messages,
+  createdAt,
+  agentId,
+  callMetadata,
+  ownerId,
+  scenario,
+}: {
+  messages: Omit<Message, "callId">[];
+  createdAt: string;
+  agentId: string;
+  callMetadata: Record<string, string>;
+  ownerId: string;
+  scenario: TemporaryScenario;
+}) => {
+  const allEvaluations = await evaluationService.getByOwnerId(ownerId);
+  const existingRelevantEvaluations = allEvaluations.filter((evaluation) =>
+    scenario.evaluations.some(
+      (tempEval) =>
+        tempEval.prompt === evaluation.evaluationTemplate.description,
+    ),
+  );
+
+  const evaluationsToCreate = scenario.evaluations.filter(
+    (tempEval) =>
+      !existingRelevantEvaluations.some(
+        (existingEval) =>
+          existingEval.evaluationTemplate.description === tempEval.prompt,
+      ),
+  );
+
+  const newEvaluationTemplates =
+    await evaluationService.createEvaluationTemplates(evaluationsToCreate);
+
+  return {
+    evalResults: [],
+    evalSetResults: [],
+    savedSearches: [],
+  };
 };
 
 export const analyzeBasedOnRules = async ({
@@ -235,8 +301,8 @@ export const analyzeBasedOnRules = async ({
       );
 
       const evalSetResults = relevantEvalSets.map((evalSet) => ({
-        evalSetId: evalSet.id,
-        success: validEvalResults
+        id: evalSet.id,
+        result: validEvalResults
           .filter((result) =>
             evalSet.evaluations.some(
               (evaluation) => evaluation.id === result.evaluationId,

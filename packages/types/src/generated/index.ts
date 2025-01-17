@@ -74,7 +74,7 @@ export const CallRecordingScalarFieldEnumSchema = z.enum(['id','audioUrl','creat
 
 export const ScenarioScalarFieldEnumSchema = z.enum(['id','createdAt','agentId','name','instructions','successCriteria','includeDateTime','timezone','deleted']);
 
-export const EvaluationTemplateScalarFieldEnumSchema = z.enum(['id','createdAt','name','description','params','type','resultType','contentType','toolCallExpectedResult','ownerId','deleted']);
+export const EvaluationTemplateScalarFieldEnumSchema = z.enum(['id','createdAt','name','description','params','type','resultType','contentType','toolCallExpectedResult','ownerId','deleted','hidden']);
 
 export const GeneralEvaluationScalarFieldEnumSchema = z.enum(['id','agentId','evaluationId']);
 
@@ -328,6 +328,7 @@ export const EvaluationTemplateSchema = z.object({
   toolCallExpectedResult: z.string(),
   ownerId: z.string().nullable(),
   deleted: z.boolean(),
+  hidden: z.boolean(),
 })
 
 export type EvaluationTemplate = z.infer<typeof EvaluationTemplateSchema>
@@ -811,6 +812,7 @@ export const EvaluationTemplateSelectSchema: z.ZodType<Prisma.EvaluationTemplate
   toolCallExpectedResult: z.boolean().optional(),
   ownerId: z.boolean().optional(),
   deleted: z.boolean().optional(),
+  hidden: z.boolean().optional(),
   evaluationResults: z.union([z.boolean(),z.lazy(() => EvaluationResultFindManyArgsSchema)]).optional(),
   evaluations: z.union([z.boolean(),z.lazy(() => EvaluationFindManyArgsSchema)]).optional(),
   _count: z.union([z.boolean(),z.lazy(() => EvaluationTemplateCountOutputTypeArgsSchema)]).optional(),
@@ -1895,6 +1897,7 @@ export const EvaluationTemplateWhereInputSchema: z.ZodType<Prisma.EvaluationTemp
   toolCallExpectedResult: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   ownerId: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
   deleted: z.union([ z.lazy(() => BoolFilterSchema),z.boolean() ]).optional(),
+  hidden: z.union([ z.lazy(() => BoolFilterSchema),z.boolean() ]).optional(),
   evaluationResults: z.lazy(() => EvaluationResultListRelationFilterSchema).optional(),
   evaluations: z.lazy(() => EvaluationListRelationFilterSchema).optional()
 }).strict();
@@ -1911,6 +1914,7 @@ export const EvaluationTemplateOrderByWithRelationInputSchema: z.ZodType<Prisma.
   toolCallExpectedResult: z.lazy(() => SortOrderSchema).optional(),
   ownerId: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
   deleted: z.lazy(() => SortOrderSchema).optional(),
+  hidden: z.lazy(() => SortOrderSchema).optional(),
   evaluationResults: z.lazy(() => EvaluationResultOrderByRelationAggregateInputSchema).optional(),
   evaluations: z.lazy(() => EvaluationOrderByRelationAggregateInputSchema).optional()
 }).strict();
@@ -1933,6 +1937,7 @@ export const EvaluationTemplateWhereUniqueInputSchema: z.ZodType<Prisma.Evaluati
   toolCallExpectedResult: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   ownerId: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
   deleted: z.union([ z.lazy(() => BoolFilterSchema),z.boolean() ]).optional(),
+  hidden: z.union([ z.lazy(() => BoolFilterSchema),z.boolean() ]).optional(),
   evaluationResults: z.lazy(() => EvaluationResultListRelationFilterSchema).optional(),
   evaluations: z.lazy(() => EvaluationListRelationFilterSchema).optional()
 }).strict());
@@ -1949,6 +1954,7 @@ export const EvaluationTemplateOrderByWithAggregationInputSchema: z.ZodType<Pris
   toolCallExpectedResult: z.lazy(() => SortOrderSchema).optional(),
   ownerId: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
   deleted: z.lazy(() => SortOrderSchema).optional(),
+  hidden: z.lazy(() => SortOrderSchema).optional(),
   _count: z.lazy(() => EvaluationTemplateCountOrderByAggregateInputSchema).optional(),
   _max: z.lazy(() => EvaluationTemplateMaxOrderByAggregateInputSchema).optional(),
   _min: z.lazy(() => EvaluationTemplateMinOrderByAggregateInputSchema).optional()
@@ -1969,6 +1975,7 @@ export const EvaluationTemplateScalarWhereWithAggregatesInputSchema: z.ZodType<P
   toolCallExpectedResult: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
   ownerId: z.union([ z.lazy(() => StringNullableWithAggregatesFilterSchema),z.string() ]).optional().nullable(),
   deleted: z.union([ z.lazy(() => BoolWithAggregatesFilterSchema),z.boolean() ]).optional(),
+  hidden: z.union([ z.lazy(() => BoolWithAggregatesFilterSchema),z.boolean() ]).optional(),
 }).strict();
 
 export const GeneralEvaluationWhereInputSchema: z.ZodType<Prisma.GeneralEvaluationWhereInput> = z.object({
@@ -3473,6 +3480,7 @@ export const EvaluationTemplateCreateInputSchema: z.ZodType<Prisma.EvaluationTem
   toolCallExpectedResult: z.string().optional(),
   ownerId: z.string().optional().nullable(),
   deleted: z.boolean().optional(),
+  hidden: z.boolean().optional(),
   evaluationResults: z.lazy(() => EvaluationResultCreateNestedManyWithoutEvaluationTemplateInputSchema).optional(),
   evaluations: z.lazy(() => EvaluationCreateNestedManyWithoutEvaluationTemplateInputSchema).optional()
 }).strict();
@@ -3489,6 +3497,7 @@ export const EvaluationTemplateUncheckedCreateInputSchema: z.ZodType<Prisma.Eval
   toolCallExpectedResult: z.string().optional(),
   ownerId: z.string().optional().nullable(),
   deleted: z.boolean().optional(),
+  hidden: z.boolean().optional(),
   evaluationResults: z.lazy(() => EvaluationResultUncheckedCreateNestedManyWithoutEvaluationTemplateInputSchema).optional(),
   evaluations: z.lazy(() => EvaluationUncheckedCreateNestedManyWithoutEvaluationTemplateInputSchema).optional()
 }).strict();
@@ -3505,6 +3514,7 @@ export const EvaluationTemplateUpdateInputSchema: z.ZodType<Prisma.EvaluationTem
   toolCallExpectedResult: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   ownerId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   deleted: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
+  hidden: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   evaluationResults: z.lazy(() => EvaluationResultUpdateManyWithoutEvaluationTemplateNestedInputSchema).optional(),
   evaluations: z.lazy(() => EvaluationUpdateManyWithoutEvaluationTemplateNestedInputSchema).optional()
 }).strict();
@@ -3521,6 +3531,7 @@ export const EvaluationTemplateUncheckedUpdateInputSchema: z.ZodType<Prisma.Eval
   toolCallExpectedResult: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   ownerId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   deleted: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
+  hidden: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   evaluationResults: z.lazy(() => EvaluationResultUncheckedUpdateManyWithoutEvaluationTemplateNestedInputSchema).optional(),
   evaluations: z.lazy(() => EvaluationUncheckedUpdateManyWithoutEvaluationTemplateNestedInputSchema).optional()
 }).strict();
@@ -3536,7 +3547,8 @@ export const EvaluationTemplateCreateManyInputSchema: z.ZodType<Prisma.Evaluatio
   contentType: z.lazy(() => EvalContentTypeSchema).optional(),
   toolCallExpectedResult: z.string().optional(),
   ownerId: z.string().optional().nullable(),
-  deleted: z.boolean().optional()
+  deleted: z.boolean().optional(),
+  hidden: z.boolean().optional()
 }).strict();
 
 export const EvaluationTemplateUpdateManyMutationInputSchema: z.ZodType<Prisma.EvaluationTemplateUpdateManyMutationInput> = z.object({
@@ -3551,6 +3563,7 @@ export const EvaluationTemplateUpdateManyMutationInputSchema: z.ZodType<Prisma.E
   toolCallExpectedResult: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   ownerId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   deleted: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
+  hidden: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
 }).strict();
 
 export const EvaluationTemplateUncheckedUpdateManyInputSchema: z.ZodType<Prisma.EvaluationTemplateUncheckedUpdateManyInput> = z.object({
@@ -3565,6 +3578,7 @@ export const EvaluationTemplateUncheckedUpdateManyInputSchema: z.ZodType<Prisma.
   toolCallExpectedResult: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   ownerId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   deleted: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
+  hidden: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
 }).strict();
 
 export const GeneralEvaluationCreateInputSchema: z.ZodType<Prisma.GeneralEvaluationCreateInput> = z.object({
@@ -5105,7 +5119,8 @@ export const EvaluationTemplateCountOrderByAggregateInputSchema: z.ZodType<Prism
   contentType: z.lazy(() => SortOrderSchema).optional(),
   toolCallExpectedResult: z.lazy(() => SortOrderSchema).optional(),
   ownerId: z.lazy(() => SortOrderSchema).optional(),
-  deleted: z.lazy(() => SortOrderSchema).optional()
+  deleted: z.lazy(() => SortOrderSchema).optional(),
+  hidden: z.lazy(() => SortOrderSchema).optional()
 }).strict();
 
 export const EvaluationTemplateMaxOrderByAggregateInputSchema: z.ZodType<Prisma.EvaluationTemplateMaxOrderByAggregateInput> = z.object({
@@ -5118,7 +5133,8 @@ export const EvaluationTemplateMaxOrderByAggregateInputSchema: z.ZodType<Prisma.
   contentType: z.lazy(() => SortOrderSchema).optional(),
   toolCallExpectedResult: z.lazy(() => SortOrderSchema).optional(),
   ownerId: z.lazy(() => SortOrderSchema).optional(),
-  deleted: z.lazy(() => SortOrderSchema).optional()
+  deleted: z.lazy(() => SortOrderSchema).optional(),
+  hidden: z.lazy(() => SortOrderSchema).optional()
 }).strict();
 
 export const EvaluationTemplateMinOrderByAggregateInputSchema: z.ZodType<Prisma.EvaluationTemplateMinOrderByAggregateInput> = z.object({
@@ -5131,7 +5147,8 @@ export const EvaluationTemplateMinOrderByAggregateInputSchema: z.ZodType<Prisma.
   contentType: z.lazy(() => SortOrderSchema).optional(),
   toolCallExpectedResult: z.lazy(() => SortOrderSchema).optional(),
   ownerId: z.lazy(() => SortOrderSchema).optional(),
-  deleted: z.lazy(() => SortOrderSchema).optional()
+  deleted: z.lazy(() => SortOrderSchema).optional(),
+  hidden: z.lazy(() => SortOrderSchema).optional()
 }).strict();
 
 export const EnumEvalTypeWithAggregatesFilterSchema: z.ZodType<Prisma.EnumEvalTypeWithAggregatesFilter> = z.object({
@@ -9388,6 +9405,7 @@ export const EvaluationTemplateCreateWithoutEvaluationsInputSchema: z.ZodType<Pr
   toolCallExpectedResult: z.string().optional(),
   ownerId: z.string().optional().nullable(),
   deleted: z.boolean().optional(),
+  hidden: z.boolean().optional(),
   evaluationResults: z.lazy(() => EvaluationResultCreateNestedManyWithoutEvaluationTemplateInputSchema).optional()
 }).strict();
 
@@ -9403,6 +9421,7 @@ export const EvaluationTemplateUncheckedCreateWithoutEvaluationsInputSchema: z.Z
   toolCallExpectedResult: z.string().optional(),
   ownerId: z.string().optional().nullable(),
   deleted: z.boolean().optional(),
+  hidden: z.boolean().optional(),
   evaluationResults: z.lazy(() => EvaluationResultUncheckedCreateNestedManyWithoutEvaluationTemplateInputSchema).optional()
 }).strict();
 
@@ -9546,6 +9565,7 @@ export const EvaluationTemplateUpdateWithoutEvaluationsInputSchema: z.ZodType<Pr
   toolCallExpectedResult: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   ownerId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   deleted: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
+  hidden: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   evaluationResults: z.lazy(() => EvaluationResultUpdateManyWithoutEvaluationTemplateNestedInputSchema).optional()
 }).strict();
 
@@ -9561,6 +9581,7 @@ export const EvaluationTemplateUncheckedUpdateWithoutEvaluationsInputSchema: z.Z
   toolCallExpectedResult: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   ownerId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   deleted: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
+  hidden: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   evaluationResults: z.lazy(() => EvaluationResultUncheckedUpdateManyWithoutEvaluationTemplateNestedInputSchema).optional()
 }).strict();
 
@@ -9790,6 +9811,7 @@ export const EvaluationTemplateCreateWithoutEvaluationResultsInputSchema: z.ZodT
   toolCallExpectedResult: z.string().optional(),
   ownerId: z.string().optional().nullable(),
   deleted: z.boolean().optional(),
+  hidden: z.boolean().optional(),
   evaluations: z.lazy(() => EvaluationCreateNestedManyWithoutEvaluationTemplateInputSchema).optional()
 }).strict();
 
@@ -9805,6 +9827,7 @@ export const EvaluationTemplateUncheckedCreateWithoutEvaluationResultsInputSchem
   toolCallExpectedResult: z.string().optional(),
   ownerId: z.string().optional().nullable(),
   deleted: z.boolean().optional(),
+  hidden: z.boolean().optional(),
   evaluations: z.lazy(() => EvaluationUncheckedCreateNestedManyWithoutEvaluationTemplateInputSchema).optional()
 }).strict();
 
@@ -9962,6 +9985,7 @@ export const EvaluationTemplateUpdateWithoutEvaluationResultsInputSchema: z.ZodT
   toolCallExpectedResult: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   ownerId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   deleted: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
+  hidden: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   evaluations: z.lazy(() => EvaluationUpdateManyWithoutEvaluationTemplateNestedInputSchema).optional()
 }).strict();
 
@@ -9977,6 +10001,7 @@ export const EvaluationTemplateUncheckedUpdateWithoutEvaluationResultsInputSchem
   toolCallExpectedResult: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   ownerId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   deleted: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
+  hidden: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   evaluations: z.lazy(() => EvaluationUncheckedUpdateManyWithoutEvaluationTemplateNestedInputSchema).optional()
 }).strict();
 

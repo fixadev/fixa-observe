@@ -227,7 +227,6 @@ model EvaluationTemplate {
   params      String[]
 
   type                   EvalType
-  resultType             EvalResultType
   contentType            EvalContentType @default(content)
   toolCallExpectedResult String          @default("")
 
@@ -236,6 +235,7 @@ model EvaluationTemplate {
   ownerId String?
 
   deleted     Boolean      @default(false)
+  hidden      Boolean      @default(false)
   evaluations Evaluation[]
 }
 

@@ -26,7 +26,6 @@ import {
 //     scenarioId: null,
 
 //     type: "general",
-//     resultType: "boolean",
 //     contentType: "content",
 //     isCritical: true,
 //     toolCallExpectedResult: "",
@@ -120,7 +119,6 @@ export function instantiateEvaluationTemplate(
     createdAt: new Date(),
     params: [],
     type: EvalType.scenario,
-    resultType: EvalResultType.boolean,
     contentType: EvalContentType.content,
     toolCallExpectedResult: "",
     deleted: false,

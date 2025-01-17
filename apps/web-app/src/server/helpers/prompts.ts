@@ -54,7 +54,6 @@ export const generateEvaluationGroupsPrompt = (
     "evaluationTemplatesToCreate": [
       {
         "type": "CONVERSATION",
-        "resultType": "BOOLEAN", 
         "contentType": "TEXT",
         "id": "temp-1",
         "name": "book reservation",

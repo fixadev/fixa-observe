@@ -49,7 +49,6 @@ const addScenarios = async () => {
                         toolCallExpectedResult:
                           evaluation.expected_output ?? "",
                         contentType: EvalContentType.tool,
-                        resultType: EvalResultType.boolean,
                       }
                     : {
                         name: evaluation.title,

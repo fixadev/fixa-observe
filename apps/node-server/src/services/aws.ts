@@ -4,7 +4,6 @@ import { s3 } from "../clients/s3Client";
 import { PutObjectCommand } from "@aws-sdk/client-s3";
 import { Readable } from "stream";
 import { UploadCallParams } from "@repo/types/src/types";
-import { randomUUID } from "crypto";
 
 export const addCallToQueue = async (input: UploadCallParams) => {
   // Send message

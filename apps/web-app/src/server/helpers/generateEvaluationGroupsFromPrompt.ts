@@ -102,11 +102,11 @@ export const createEvaluationGroupsFromPrompt = async ({
         params: template.params,
         createdAt: new Date(),
         ownerId: orgId,
-        resultType: EvalResultType.number,
         contentType: EvalContentType.content,
         toolCallExpectedResult: "",
         deleted: false,
         type: "general",
+        hidden: false,
       })),
       ownerId: orgId,
     });

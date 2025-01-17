@@ -1,12 +1,13 @@
 import { Request, Response, NextFunction } from "express";
 import { getNumberOfAudioChannels } from "../utils/audio";
+import { TemporaryScenarioSchema } from "@repo/types/src";
 
 export const validateUploadCallParams = async (
   req: Request,
   res: Response,
   next: NextFunction,
 ) => {
-  const { callId, stereoRecordingUrl, agentId } = req.body;
+  const { callId, stereoRecordingUrl, agentId, scenario } = req.body;
 
   const missingFields = [];
   if (!callId) missingFields.push("callId");
@@ -25,6 +26,16 @@ export const validateUploadCallParams = async (
         success: false,
         error: "Audio file must be stereo (2 channels)",
       });
+    }
+
+    if (scenario) {
+      const parsedScenario = TemporaryScenarioSchema.safeParse(scenario);
+      if (!parsedScenario.success) {
+        return res.status(400).json({
+          success: false,
+          error: "Invalid scenario format",
+        });
+      }
     }
   } catch (error) {
     return res.status(400).json({

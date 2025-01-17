@@ -19,6 +19,7 @@ uploadCallRouter.post(
         createdAt,
         saveRecording,
         language,
+        scenario,
       } = req.body;
 
       // Determine whether to decrement free calls left
@@ -63,6 +64,7 @@ uploadCallRouter.post(
         metadata: metadata,
         saveRecording,
         language,
+        scenario,
       });
       res.json({ success: true, you: "are cool :)" });
     } catch (error) {
