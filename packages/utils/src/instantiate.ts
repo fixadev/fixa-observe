@@ -7,8 +7,11 @@ import {
   type GeneralEvaluationWithIncludes,
   EvaluationResult,
 } from "@repo/types/src/index";
-import { generateTempId } from "../../../apps/web-app/src/lib/utils";
-import { AlertType, EvalContentType } from "@prisma/client";
+import { AlertType, EvalContentType } from "@repo/db/src/index";
+
+function generateTempId() {
+  return `TEMP-${crypto.randomUUID()}`;
+}
 
 // export function instantiateEvaluation(
 //   partial?: Partial<Evaluation>,
