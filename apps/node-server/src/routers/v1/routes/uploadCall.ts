@@ -66,7 +66,7 @@ uploadCallRouter.post(
         language,
         scenario,
       });
-      res.json({ success: true, you: "are cool :)" });
+      res.json({ success: true, callId });
     } catch (error) {
       console.error(error);
       res.status(500).json({ success: false, error: (error as Error).message });

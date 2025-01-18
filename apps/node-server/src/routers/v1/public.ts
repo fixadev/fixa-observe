@@ -9,6 +9,7 @@ import { testsRouter } from "./routes/tests";
 import { toolCallRouter } from "./routes/toolCall";
 import { uploadCallRouter } from "./routes/uploadCall";
 import { authenticatePublicRequest } from "../../middlewares/auth";
+import { callRouter } from "./routes/call";
 
 const publicRouter = express.Router();
 
@@ -25,6 +26,10 @@ const apiRoutes: Record<string, ApiRoute> = {
   alerts: {
     path: "/alerts",
     router: alertRouter,
+  },
+  calls: {
+    path: "/calls",
+    router: callRouter,
   },
   evaluations: {
     path: "/evaluations",

@@ -61,6 +61,53 @@ export class CallService {
     return parsedCall.data;
   };
 
+  getCallByCustomerCallId = async (
+    customerCallId: string,
+    ownerId: string,
+  ): Promise<CallWithIncludes | null> => {
+    const call = await this.db.call.findFirst({
+      where: { customerCallId, ownerId },
+      include: {
+        messages: true,
+        scenario: {
+          include: {
+            evaluations: {
+              include: {
+                evaluationTemplate: true,
+              },
+            },
+          },
+        },
+        testAgent: true,
+        evaluationResults: {
+          include: {
+            evaluation: {
+              include: {
+                evaluationTemplate: true,
+              },
+            },
+          },
+        },
+        latencyBlocks: true,
+        interruptions: true,
+      },
+    });
+
+    if (!call) {
+      return null;
+    }
+
+    const parsedCall = CallWithIncludesSchema.safeParse(call);
+
+    if (!parsedCall.success) {
+      throw new Error(
+        `failed to parse call with customer call ID ${customerCallId}: ${parsedCall.error.message}`,
+      );
+    }
+
+    return parsedCall.data;
+  };
+
   getCalls = async ({
     ownerId,
     testId,
