@@ -46,7 +46,7 @@ async def process_single_file(deepgram_client: DeepgramClient, audio_path: str, 
     }
 
     options = PrerecordedOptions(
-        model="nova-2",
+        model="whisper-large" if language == "he" else "nova-2",
         smart_format=True,
         language=language,
     )
