@@ -64,14 +64,17 @@ export const analyzeAndSaveCall = async ({
     const urlToSave =
       saveRecording === false
         ? stereoRecordingUrl
-        : await uploadFromPresignedUrl(callId, stereoRecordingUrl);
+        : await uploadFromPresignedUrl(
+            callId,
+            stereoRecordingUrl,
+            scenario ? true : false,
+          );
 
     const response = await axios.post<TranscribeResponse>(
       `${env.AUDIO_SERVICE_URL}/transcribe-deepgram`,
       {
         stereo_audio_url: urlToSave,
         language,
-        flipped: scenario ? true : false,
       },
       {
         headers: {

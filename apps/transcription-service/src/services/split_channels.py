@@ -6,7 +6,7 @@ import aiohttp
 import aiofiles
 import os
 
-async def split_channels(stereo_audio_url: str, flipped: bool = False) -> tuple[str, str]:
+async def split_channels(stereo_audio_url: str) -> tuple[str, str]:
     """Split a stereo audio file into separate left and right channel files.
     
     Args:
@@ -54,7 +54,7 @@ async def split_channels(stereo_audio_url: str, flipped: bool = False) -> tuple[
         left_channel.export(str(left_path), format="wav")
         right_channel.export(str(right_path), format="wav")
         
-        return (str(right_path), str(left_path)) if flipped else (str(left_path), str(right_path))
+        return str(left_path), str(right_path)
     except Exception as e:
         print(f"Error splitting channels: {e}")
         raise e

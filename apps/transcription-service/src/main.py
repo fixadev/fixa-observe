@@ -18,7 +18,6 @@ security = HTTPBearer()
 class TranscribeRequest(BaseModel):
     stereo_audio_url: str
     language: Optional[str] = "en"
-    flipped: Optional[bool] = False
 class StartWebsocketCallOfOneRequest(BaseModel):
     device_id: str
     assistant_id: str
@@ -32,7 +31,7 @@ async def health():
 @app.post("/transcribe-deepgram", dependencies=[Depends(authenticate_request)])
 async def transcribe(request: TranscribeRequest):
     try: 
-        user_audio_path, agent_audio_path = await split_channels(request.stereo_audio_url, request.flipped)
+        user_audio_path, agent_audio_path = await split_channels(request.stereo_audio_url)
         transcriptions = await transcribe_with_deepgram([user_audio_path, agent_audio_path], request.language or "en")
         transcript = await create_transcript_from_deepgram(transcriptions[0], transcriptions[1], user_audio_path, agent_audio_path)
         cleanup_temp_files(user_audio_path, agent_audio_path)

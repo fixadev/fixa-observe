@@ -4,6 +4,7 @@ import { s3 } from "../clients/s3Client";
 import { PutObjectCommand } from "@aws-sdk/client-s3";
 import { Readable } from "stream";
 import { UploadCallParams } from "@repo/types/src/types";
+import { spawn } from "child_process";
 
 export const addCallToQueue = async (input: UploadCallParams) => {
   // Send message
@@ -23,6 +24,7 @@ export const addCallToQueue = async (input: UploadCallParams) => {
 export const uploadFromPresignedUrl = async (
   callId: string,
   recordingUrl: string,
+  flipped: boolean,
 ) => {
   if (!recordingUrl) {
     throw new Error("Recording URL is required");
@@ -33,7 +35,7 @@ export const uploadFromPresignedUrl = async (
     let url = recordingUrl;
     let username;
     let password;
-    if (recordingUrl.includes("api.twilio.com")) {
+    if (/^[^:]+:[^@]+@/.test(recordingUrl)) {
       const [protocol, rest] = recordingUrl.split("://");
       const [credentials, baseUrl] = rest.split("@");
       [username, password] = credentials.split(":");
@@ -73,18 +75,47 @@ export const uploadFromPresignedUrl = async (
 
     const buffer = await response.arrayBuffer();
 
-    const readableStream = new Readable({
-      read() {
-        this.push(Buffer.from(buffer));
-        this.push(null);
-      },
-    });
+    let finalBuffer = Buffer.from(buffer);
+
+    if (flipped) {
+      await new Promise((resolve, reject) => {
+        const ffmpeg = spawn("ffmpeg", [
+          "-i",
+          "pipe:0", // Read from stdin
+          "-af",
+          "pan=stereo|c1=c0|c0=c1", // Swap channels
+          "-f",
+          "wav", // Output format
+          "pipe:1", // Output to stdout
+        ]);
+
+        const chunks: Buffer[] = [];
+
+        ffmpeg.stdout.on("data", (chunk) => chunks.push(chunk));
+        ffmpeg.stderr.on("data", (data) =>
+          console.error(`ffmpeg stderr: ${data}`),
+        );
+
+        ffmpeg.on("close", (code) => {
+          if (code === 0) {
+            finalBuffer = Buffer.concat(chunks);
+            resolve(null);
+          } else {
+            reject(new Error(`ffmpeg process exited with code ${code}`));
+          }
+        });
+
+        // Write input buffer to ffmpeg's stdin
+        ffmpeg.stdin.write(Buffer.from(buffer));
+        ffmpeg.stdin.end();
+      });
+    }
 
     // Upload to S3
     const uploadParams = {
       Bucket: env.AWS_BUCKET_NAME,
       Key: `calls/${callId}-${Date.now()}.${extension}`,
-      Body: Buffer.from(buffer),
+      Body: finalBuffer,
       ContentType: contentType,
     };
 
