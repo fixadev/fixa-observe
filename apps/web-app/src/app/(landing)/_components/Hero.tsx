@@ -5,14 +5,26 @@ import { Button } from "@/components/ui/button";
 import { YCBadge } from "./YCBadge";
 import { RocketLaunchIcon } from "@heroicons/react/24/solid";
 import Link from "next/link";
+import { Heading } from "./text/heading";
 
 export function Hero() {
   return (
-    <div className="relative bg-white pb-16 pt-32 sm:pt-48">
+    <div className="relative bg-white pb-16 pt-40 sm:pt-48">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="text-center">
-          <div className="mb-4">
-            <YCBadge />
+          <div className="mb-4 flex items-baseline justify-center gap-2">
+            {/* <YCBadge /> */}
+            {/* <MagnifyingGlassIcon className="size-5" /> */}
+            <Heading>fixa observe</Heading>
+            {/* <div className="text-sm text-muted-foreground">
+              <Link
+                href="https://github.com/fixadev/fixa"
+                target="_blank"
+                className="underline underline-offset-2"
+              >
+                looking for fixa?
+              </Link>
+            </div> */}
           </div>
           <h1 className="text-3xl font-extrabold lowercase tracking-tight text-black sm:text-5xl md:text-6xl">
             <span className="block">fix your voice agents</span>
@@ -41,30 +53,9 @@ export function Hero() {
                 interactive demo
               </Link>
             </Button>
-            {/* <Dialog>
-              <DialogTrigger asChild>
-                <Button
-                  size="lg"
-                  variant="ghost"
-                  className="flex w-fit items-center gap-2"
-                >
-                  <PlayCircleIcon className="size-5" /> watch video
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="max-w-screen-lg rounded-none border-none bg-transparent p-0">
-                <div className="aspect-video w-full">
-                  <iframe
-                    className="h-full w-full"
-                    src="https://www.youtube.com/embed/Cnhf3Vs5Dcw?iv_load_policy=3&rel=0&modestbranding=1&playsinline=1&autoplay=1&color=white"
-                    title="YouTube video player"
-                    frameBorder="0"
-                    allow="presentation; fullscreen; accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
-                    referrerPolicy="strict-origin-when-cross-origin"
-                    allowFullScreen
-                  ></iframe>
-                </div>
-              </DialogContent>
-            </Dialog> */}
+          </div>
+          <div className="mt-4">
+            <YCBadge />
           </div>
         </div>
 

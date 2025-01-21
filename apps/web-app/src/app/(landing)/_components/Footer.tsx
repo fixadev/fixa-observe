@@ -2,7 +2,6 @@ import { Button } from "@/components/ui/button";
 import { LinkedInLogoIcon } from "@radix-ui/react-icons";
 import Link from "next/link";
 import Logo from "~/components/Logo";
-import Image from "next/image";
 import { EnvelopeIcon } from "@heroicons/react/24/solid";
 
 export function Footer() {
@@ -12,20 +11,6 @@ export function Footer() {
         <div className="flex flex-col items-center gap-2 lg:items-start">
           <Logo />
           <ButtonRow />
-        </div>
-        <div className="flex justify-center">
-          <a
-            href="https://elevenlabs.io/text-to-speech"
-            target="_blank"
-            className="flex"
-          >
-            <Image
-              src="https://storage.googleapis.com/eleven-public-cdn/images/elevenlabs_grants_white.png"
-              alt="Text to Speech"
-              width={250 * 0.75}
-              height={29 * 0.75}
-            />
-          </a>
         </div>
         <div className="flex flex-col gap-2">
           <Button variant="ghost" asChild>
