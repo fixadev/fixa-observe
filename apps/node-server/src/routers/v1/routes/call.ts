@@ -16,7 +16,11 @@ callRouter.get("/:callId", async (req: Request, res: Response) => {
     if (!call) {
       return res.status(404).json({ success: false, error: "Call not found" });
     }
-    res.json({ success: true, call });
+    res.json({
+      success: true,
+      call,
+      url: `https://fixa.dev/observe/${call.id}`,
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ success: false, error: (error as Error).message });
