@@ -41,9 +41,12 @@ export const uploadFromPresignedUrl = async (
     }
 
     const response = await fetch(url, {
-      headers: {
-        Authorization: `Basic ${Buffer.from(`${username}:${password}`).toString("base64")}`,
-      },
+      headers:
+        username && password
+          ? {
+              Authorization: `Basic ${Buffer.from(`${username}:${password}`).toString("base64")}`,
+            }
+          : undefined,
     });
     if (!response.ok) {
       throw new Error(`Failed to download file from URL: ${recordingUrl}`);
