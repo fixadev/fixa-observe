@@ -87,7 +87,7 @@ export const analyzeCallWitho1 = async ({
   \n\nCall Transcript: ${JSON.stringify(messages)}`;
 
   const completion = await openai.beta.chat.completions.parse({
-    model: "gpt-4o-mini",
+    model: "gpt-4o",
     messages: [
       {
         role: "user",
