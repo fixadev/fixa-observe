@@ -9,7 +9,7 @@ import { Heading } from "./text/heading";
 
 export function Hero() {
   return (
-    <div className="relative bg-white pb-16 pt-36 sm:pt-48">
+    <div className="relative bg-white pb-16 pt-40 sm:pt-48">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="text-center">
           <div className="mb-4 flex items-baseline justify-center gap-2">
