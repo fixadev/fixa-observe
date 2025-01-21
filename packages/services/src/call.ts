@@ -105,7 +105,11 @@ export class CallService {
       );
     }
 
-    return parsedCall.data;
+    return {
+      ...parsedCall.data,
+      id: customerCallId,
+      customerCallId: null,
+    };
   };
 
   getCalls = async ({
