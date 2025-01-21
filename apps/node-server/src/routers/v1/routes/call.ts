@@ -9,7 +9,10 @@ callRouter.get("/:callId", async (req: Request, res: Response) => {
   try {
     const { callId } = req.params;
     const { orgId } = res.locals;
-    const call = await callService.getCallByCustomerCallId(callId, orgId);
+    const call = await callService.getCallByCustomerCallId({
+      customerCallId: callId,
+      ownerId: orgId,
+    });
     if (!call) {
       return res.status(404).json({ success: false, error: "Call not found" });
     }

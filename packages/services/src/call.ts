@@ -61,10 +61,13 @@ export class CallService {
     return parsedCall.data;
   };
 
-  getCallByCustomerCallId = async (
-    customerCallId: string,
-    ownerId: string,
-  ): Promise<CallWithIncludes | null> => {
+  getCallByCustomerCallId = async ({
+    customerCallId,
+    ownerId,
+  }: {
+    customerCallId: string;
+    ownerId: string;
+  }): Promise<CallWithIncludes | null> => {
     const call = await this.db.call.findFirst({
       where: { customerCallId, ownerId },
       include: {
