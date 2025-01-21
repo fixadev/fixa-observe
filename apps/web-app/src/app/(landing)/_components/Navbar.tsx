@@ -8,6 +8,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import Link from "next/link";
 import { SignedIn } from "@clerk/nextjs";
 import { SignedOut } from "@clerk/nextjs";
+import { ArrowTopRightOnSquareIcon } from "@heroicons/react/24/solid";
 
 const navLinks = [
   {
@@ -56,6 +57,25 @@ export function Navbar() {
 
   return (
     <nav className="fixed z-50 w-full border-b border-gray-100 bg-white/90 backdrop-blur-sm">
+      <div className="dark bg-background text-foreground">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-row items-center justify-center">
+            <div className="py-4 text-sm">
+              we just launched an open source voice agent testing package!{" "}
+              <Button variant="link" asChild className="h-fit py-0">
+                <Link
+                  href="https://github.com/fixadev/fixa"
+                  target="_blank"
+                  className="flex items-center gap-2"
+                >
+                  check it out
+                  <ArrowTopRightOnSquareIcon className="size-4" />
+                </Link>
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
           <Logo />
