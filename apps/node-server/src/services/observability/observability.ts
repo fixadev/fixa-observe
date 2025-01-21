@@ -71,6 +71,7 @@ export const analyzeAndSaveCall = async ({
       {
         stereo_audio_url: urlToSave,
         language,
+        flipped: scenario ? true : false,
       },
       {
         headers: {
@@ -243,15 +244,16 @@ export const analyzeBasedOnScenario = async ({
   scenario: TemporaryScenario;
 }) => {
   try {
-    const allEvaluations = await evaluationService.getByOwnerId(ownerId);
-    const existingRelevantEvaluations = allEvaluations.filter((evaluation) =>
-      scenario.evaluations.some(
-        (tempEval) =>
-          tempEval.prompt === evaluation.evaluationTemplate.description,
-      ),
+    const existingEvaluations = await evaluationService.getByOwnerId(ownerId);
+    const existingRelevantEvaluations = existingEvaluations.filter(
+      (evaluation) =>
+        scenario.evaluations.some(
+          (tempEval) =>
+            tempEval.prompt === evaluation.evaluationTemplate.description,
+        ),
     );
 
-    const evaluationsToCreate = scenario.evaluations
+    const templatesToCreate = scenario.evaluations
       .filter(
         (tempEval) =>
           !existingRelevantEvaluations.some(
@@ -266,16 +268,13 @@ export const analyzeBasedOnScenario = async ({
         }),
       }));
 
-    const createdEvaluationTemplates = await evaluationService.createTemplates({
-      templates: evaluationsToCreate,
+    const newEvaluationTemplates = await evaluationService.createTemplates({
+      templates: templatesToCreate,
       ownerId,
     });
 
-    const createdEvaluations = await evaluationService.createMany({
-      evaluations: [
-        ...createdEvaluationTemplates,
-        ...existingRelevantEvaluations,
-      ].map((template) => ({
+    const newEvaluations = await evaluationService.createMany({
+      evaluations: newEvaluationTemplates.map((template) => ({
         ...instantiateEvaluation({
           evaluationTemplateId: template.id,
           evaluationTemplate: undefined,
@@ -283,19 +282,27 @@ export const analyzeBasedOnScenario = async ({
       })),
     });
 
+    const allEvaluations = [...newEvaluations, ...existingRelevantEvaluations];
+
+    console.log("allEvaluations", allEvaluations);
+
     const result = await analyzeCallWitho1({
       callStartedAt: createdAt,
       messages: messages || [],
       testAgentPrompt: "",
       scenario: undefined,
-      evals: createdEvaluations,
+      evals: allEvaluations,
     });
 
+    console.log("evalResults", result);
+
     const validEvalResults = result.filter((result) =>
-      createdEvaluations.some(
+      allEvaluations.some(
         (evaluation) => evaluation.id === result.evaluationId,
       ),
     );
+
+    console.log("validEvalResults", validEvalResults);
 
     return {
       evalResults: validEvalResults,

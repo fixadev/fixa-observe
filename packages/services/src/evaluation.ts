@@ -420,9 +420,13 @@ export class EvaluationService {
   }
 
   async getByOwnerId(ownerId: string) {
-    return await this.db.evaluation.findMany({
+    const result = await this.db.evaluation.findMany({
       where: { evaluationTemplate: { ownerId } },
       include: { evaluationTemplate: true },
     });
+    return result.map((evaluation) => ({
+      ...evaluation,
+      params: evaluation.params as Record<string, string>,
+    }));
   }
 }

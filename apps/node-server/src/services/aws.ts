@@ -30,7 +30,21 @@ export const uploadFromPresignedUrl = async (
 
   try {
     // Download the file from the URL
-    const response = await fetch(recordingUrl);
+    let url = recordingUrl;
+    let username;
+    let password;
+    if (recordingUrl.includes("api.twilio.com")) {
+      const [protocol, rest] = recordingUrl.split("://");
+      const [credentials, baseUrl] = rest.split("@");
+      [username, password] = credentials.split(":");
+      url = `${protocol}://${baseUrl}`;
+    }
+
+    const response = await fetch(url, {
+      headers: {
+        Authorization: `Basic ${Buffer.from(`${username}:${password}`).toString("base64")}`,
+      },
+    });
     if (!response.ok) {
       throw new Error(`Failed to download file from URL: ${recordingUrl}`);
     }
