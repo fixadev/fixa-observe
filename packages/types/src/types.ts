@@ -72,6 +72,7 @@ export const UploadCallParams = z.object({
   saveRecording: z.boolean().optional(),
   language: z.string().optional(),
   scenario: TemporaryScenarioSchema.optional(),
+  webhookUrl: z.string().optional(),
 });
 
 export type BlockChange = z.infer<typeof BlockChangeSchema>;

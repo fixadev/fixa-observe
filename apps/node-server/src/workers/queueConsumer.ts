@@ -5,6 +5,7 @@ import { sqs } from "../clients/s3Client";
 import { db } from "../db";
 import { Semaphore } from "../utils/semaphore";
 import { UploadCallParams } from "@repo/types/src/index";
+import axios from "axios";
 
 const agentService = new AgentService(db);
 
@@ -24,6 +25,7 @@ async function processMessage(
       saveRecording,
       language,
       scenario,
+      webhookUrl,
     } = data;
     if (!callId || !stereoRecordingUrl || !ownerId || !createdAt) {
       console.error("Missing required fields in message:", data);
@@ -38,7 +40,7 @@ async function processMessage(
       ownerId,
     });
 
-    await analyzeAndSaveCall({
+    const call = await analyzeAndSaveCall({
       callId,
       stereoRecordingUrl,
       createdAt: createdAt,
@@ -49,6 +51,14 @@ async function processMessage(
       language,
       scenario,
     });
+
+    if (webhookUrl) {
+      await axios.post(webhookUrl, {
+        success: true,
+        call,
+        url: `https://fixa.dev/observe/${call.id}`,
+      });
+    }
 
     await sqs.deleteMessage({
       QueueUrl: queueUrl,
