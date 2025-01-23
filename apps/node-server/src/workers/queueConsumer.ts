@@ -53,7 +53,7 @@ async function processMessage(
     });
 
     if (webhookUrl) {
-      await axios.post(webhookUrl, {
+      await axios.post(`${webhookUrl}/${call.id}`, {
         success: true,
         call,
         url: `https://fixa.dev/observe/${call.id}`,
