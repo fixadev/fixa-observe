@@ -271,7 +271,10 @@ export default function DashboardSidebar({
               </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild>
-                  <Link href={`https://docs.fixa.dev`} target="_blank">
+                  <Link
+                    href={`https://docs.fixa.dev/fixa-observe`}
+                    target="_blank"
+                  >
                     <DocumentTextIcon />
                     <span>documentation</span>
                   </Link>

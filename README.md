@@ -1,7 +1,7 @@
 [![Fixa Logo](/.github/assets/logo.png)](https://fixa.dev)
 
 <h3 align="center">
-  <a href="https://docs.fixa.dev">📘 Docs</a>
+  <a href="https://docs.fixa.dev/fixa-observe">📘 Docs</a>
   | <a href="https://fixa.dev/">☁️ Cloud Platform</a>
   | <a href="https://discord.gg/rT9cYkfybZ">🎮 Discord</a>
 </h4>
@@ -75,4 +75,4 @@ get started for free with our cloud platform - no demos, no commitments, only pa
    }
    ```
 
-For detailed setup instructions and examples, visit our [documentation](https://docs.fixa.dev).
+For detailed setup instructions and examples, visit our [documentation](https://docs.fixa.dev/fixa-observe).
