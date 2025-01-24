@@ -20,6 +20,7 @@ uploadCallRouter.post(
         saveRecording,
         language,
         scenario,
+        webhookUrl,
       } = req.body;
 
       // Determine whether to decrement free calls left
@@ -65,6 +66,7 @@ uploadCallRouter.post(
         saveRecording,
         language,
         scenario,
+        webhookUrl,
       });
       res.json({ success: true, callId });
     } catch (error) {

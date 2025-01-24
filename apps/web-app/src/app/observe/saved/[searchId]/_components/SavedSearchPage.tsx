@@ -18,10 +18,12 @@ export default function SavedSearchPage({
   params,
   savedSearch,
   includeTestCalls = false,
+  callId,
 }: {
   params: { searchId: string };
   savedSearch: SavedSearchWithIncludes;
   includeTestCalls?: boolean;
+  callId?: string;
 }) {
   const {
     selectedCallId,
@@ -51,6 +53,12 @@ export default function SavedSearchPage({
     setIncludeTestCalls,
     includeTestCalls,
   ]);
+
+  useEffect(() => {
+    if (callId) {
+      setSelectedCallId(callId);
+    }
+  }, [callId, setSelectedCallId]);
 
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -124,7 +132,10 @@ export default function SavedSearchPage({
     if (!selectedCallId) return undefined;
     return (
       callOverrides[selectedCallId] ??
-      calls?.find((call) => call.id === selectedCallId)
+      calls?.find(
+        (call) =>
+          call.id === selectedCallId || call.customerCallId === selectedCallId,
+      )
     );
   }, [calls, selectedCallId, callOverrides]);
 

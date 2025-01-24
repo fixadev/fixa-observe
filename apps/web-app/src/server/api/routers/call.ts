@@ -51,6 +51,16 @@ export const callRouter = createTRPCRouter({
       };
     }),
 
+  getByCustomerCallId: publicProcedure
+    .input(z.object({ id: z.string() }))
+    .query(async ({ input, ctx }) => {
+      const orgId = ctx.orgId ?? env.DEMO_ORG_ID;
+      return await callService.getCallByCustomerCallId({
+        customerCallId: input.id,
+        ownerId: orgId,
+      });
+    }),
+
   getCallsByCustomerCallId: publicProcedure
     .input(z.object({ customerCallId: z.string() }))
     .query(async ({ input, ctx }) => {
