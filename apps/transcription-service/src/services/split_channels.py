@@ -16,9 +16,8 @@ async def split_channels(stereo_audio_url: str) -> tuple[str, str]:
         Tuple of (left_channel_path, right_channel_path) as temporary file paths
         Note: Caller is responsible for cleaning up the temporary directory
     """
-    # Create temp directory that persists
+    tmp_dir = tempfile.mkdtemp()
     try: 
-        tmp_dir = tempfile.mkdtemp()
         tmp_path = Path(tmp_dir)
         
         # Download audio file asynchronously
@@ -56,6 +55,11 @@ async def split_channels(stereo_audio_url: str) -> tuple[str, str]:
         
         return str(left_path), str(right_path)
     except Exception as e:
+        # Clean up only on failure
+        try:
+            shutil.rmtree(tmp_dir)
+        except Exception as cleanup_error:
+            print(f"Error cleaning up temporary directory: {cleanup_error}")
         print(f"Error splitting channels: {e}")
         raise e
 

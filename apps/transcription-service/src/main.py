@@ -30,16 +30,17 @@ async def health():
 
 @app.post("/transcribe-deepgram", dependencies=[Depends(authenticate_request)])
 async def transcribe(request: TranscribeRequest):
+    user_audio_path, agent_audio_path = None, None
     try: 
         user_audio_path, agent_audio_path = await split_channels(request.stereo_audio_url)
         transcriptions = await transcribe_with_deepgram([user_audio_path, agent_audio_path], request.language or "en")
         transcript = await create_transcript_from_deepgram(transcriptions[0], transcriptions[1], user_audio_path, agent_audio_path)
-        cleanup_temp_files(user_audio_path, agent_audio_path)
         return transcript
-        
     except Exception as e:
         logger.error(f"Deepgram transcription failed: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        cleanup_temp_files(user_audio_path, agent_audio_path)
 
 @app.post("/websocket-call-ofone", dependencies=[Depends(authenticate_request)])
 async def start_websocket_call_ofone(request: StartWebsocketCallOfOneRequest):
