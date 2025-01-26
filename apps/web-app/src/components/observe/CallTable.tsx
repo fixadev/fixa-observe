@@ -76,7 +76,7 @@ export default function CallTable({
         </div>
         <Button size="sm" variant="link" className="px-0" asChild>
           <Link
-            href="https://docs.fixa.dev/api-reference/endpoint/upload-call"
+            href="https://docs.fixa.dev/fixa-observe/endpoint/calls/upload-call"
             target="_blank"
           >
             how do i upload a call?

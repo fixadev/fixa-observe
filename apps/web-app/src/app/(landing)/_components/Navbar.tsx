@@ -12,7 +12,7 @@ import { ArrowTopRightOnSquareIcon } from "@heroicons/react/24/solid";
 
 const navLinks = [
   {
-    href: "https://docs.fixa.dev",
+    href: "https://docs.fixa.dev/fixa-observe",
     label: "docs",
     isLink: true,
     target: "_blank",

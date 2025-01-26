@@ -37,7 +37,7 @@ export default function NoCallsCard() {
             asChild
           >
             <Link
-              href="https://docs.fixa.dev/api-reference/endpoint/upload-call"
+              href="https://docs.fixa.dev/fixa-observe/endpoint/calls/upload-call"
               target="_blank"
             >
               view docs <ArrowTopRightOnSquareIcon className="size-4" />
