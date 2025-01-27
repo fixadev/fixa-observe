@@ -9,6 +9,16 @@ from services.transcribe import transcribe_with_deepgram
 from services.split_channels import split_channels, cleanup_temp_files
 from services.create_transcript import create_transcript_from_deepgram
 from utils.auth import authenticate_request
+import sentry_sdk
+
+sentry_sdk.init(
+    dsn="https://ccc6149baca6c3b53fefa466c6396d4a@o4508718274969600.ingest.us.sentry.io/4508718278639616",
+    traces_sample_rate=1.0,
+    _experiments={
+        "continuous_profiling_auto_start": True,
+    },
+)
+
 
 load_dotenv()
 
@@ -27,6 +37,10 @@ class StartWebsocketCallOfOneRequest(BaseModel):
 @app.get("/", dependencies=[Depends(authenticate_request)])
 async def health():
     return {"status": "ok"}
+
+@app.get("/sentry-debug")
+async def trigger_error():
+    division_by_zero = 1 / 0
 
 @app.post("/transcribe-deepgram", dependencies=[Depends(authenticate_request)])
 async def transcribe(request: TranscribeRequest):
@@ -79,6 +93,8 @@ async def start_websocket_call_ofone(request: StartWebsocketCallOfOneRequest):
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+    
+    
 
     
 if __name__ == "__main__":

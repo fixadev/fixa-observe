@@ -7,3 +7,4 @@ deepgram-sdk
 pydub
 uvicorn
 boto3
+sentry-sdk[fastapi]
