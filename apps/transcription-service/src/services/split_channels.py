@@ -38,10 +38,7 @@ async def split_channels(stereo_audio_url: str) -> tuple[str, str]:
         channels = audio.split_to_mono()
 
         if len(channels) != 2:
-            print(f"Expected 2 channels, got {len(channels)}")
-            mono_path = tmp_path / "mono.wav"
-            channels[0].export(str(mono_path), format="wav")
-            return None, str(mono_path)
+            raise Exception(f"Expected 2 channels, got {len(channels)}")
         
          # Save individual channels
         left_path = tmp_path / "left.wav"
@@ -53,7 +50,7 @@ async def split_channels(stereo_audio_url: str) -> tuple[str, str]:
         left_channel.export(str(left_path), format="wav")
         right_channel.export(str(right_path), format="wav")
         
-        return str(left_path), str(right_path)
+        return str(left_path), str(right_path), tmp_dir
     except Exception as e:
         # Clean up only on failure
         try:
@@ -64,14 +61,19 @@ async def split_channels(stereo_audio_url: str) -> tuple[str, str]:
         raise e
 
 
-def cleanup_temp_files(*paths: str) -> None:
+def cleanup_temp_files(*paths: str | None) -> None:
     """Remove temporary files or directories.
     
     Args:
         *paths: Variable number of paths to files or directories to remove
     """
     for path in paths:
-        if os.path.isfile(path):
-            os.remove(path)
-        elif os.path.isdir(path):
-            shutil.rmtree(path)
+        if path is None:
+            continue
+        try:
+            if os.path.isfile(path):
+                os.remove(path)
+            elif os.path.isdir(path):
+                shutil.rmtree(path)
+        except Exception as e:
+            print(f"Error cleaning up path {path}: {e}")
