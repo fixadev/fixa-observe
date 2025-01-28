@@ -21,6 +21,7 @@
     "@repo/services": "workspace:*",
     "@repo/types": "workspace:*",
     "@repo/utils": "workspace:*",
+    "@sentry/esbuild-plugin": "^3.1.0",
     "@sentry/node": "^8.51.0",
     "@sentry/profiling-node": "^8.51.0",
     "@t3-oss/env-core": "^0.11.1",

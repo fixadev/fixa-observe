@@ -1,7 +1,6 @@
 import express, { NextFunction, Request, Response } from "express";
 import { createServer } from "http";
 import { Server } from "socket.io";
-import Sentry from "@sentry/node";
 import { env } from "./env";
 import { startQueueConsumer } from "./workers/queueConsumer";
 import { privateRouter } from "./routers/v1/private";
@@ -10,7 +9,6 @@ import { posthogClient } from "./clients/posthogClient";
 import { logFailedRequests } from "./middlewares/logFailedRequests";
 import { CronJob } from "cron";
 import { populateDemoCalls } from "./utils/demo";
-import "./instrument.js";
 
 const app = express();
 const httpServer = createServer(app);
@@ -48,14 +46,9 @@ app.get("/", (req, res) => {
   res.send("ollo");
 });
 
-app.get("/debug-sentry", function mainHandler(req, res) {
-  throw new Error("My first Sentry error!");
-});
-
 app.use("/internal", privateRouter);
 app.use("/", publicRouter);
 app.use("/v1", publicRouter);
-Sentry.setupExpressErrorHandler(app);
 
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
   console.error(err.stack);

@@ -2,3 +2,5 @@
 .env.development
 gcp-credentials.json
 node_modules/
+# Sentry Config File
+.env.sentry-build-plugin

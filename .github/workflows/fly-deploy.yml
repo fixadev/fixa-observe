@@ -20,6 +20,7 @@ jobs:
           cat > packages/db/.env << EOF
           DATABASE_URL=${{ github.ref == 'refs/heads/main' && secrets.PROD_DATABASE_URL || secrets.DEV_DATABASE_URL }}
           DIRECT_URL=${{ github.ref == 'refs/heads/main' && secrets.PROD_DIRECT_URL || secrets.DEV_DIRECT_URL }}
+          SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }}
           TEST_SECRET=test
           EOF
           flyctl deploy --remote-only \
