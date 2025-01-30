@@ -69,7 +69,7 @@ async function processMessage(
   }
 }
 
-export async function startQueueConsumer() {
+async function runQueueConsumer() {
   const semaphore = new Semaphore(5);
   const queueUrl = env.SQS_QUEUE_URL!;
   const activeProcesses: Promise<void>[] = [];
@@ -112,7 +112,18 @@ export async function startQueueConsumer() {
     } catch (error) {
       console.error("Error processing queue:", error);
     }
-    // Small delay to prevent tight loop
     await new Promise((resolve) => setTimeout(resolve, 1000));
+  }
+}
+
+export async function startQueueConsumer() {
+  while (true) {
+    try {
+      console.log("Starting queue consumer...");
+      await runQueueConsumer();
+    } catch (error) {
+      console.error("Queue consumer crashed, restarting in 5 seconds:", error);
+      await new Promise((resolve) => setTimeout(resolve, 5000));
+    }
   }
 }
