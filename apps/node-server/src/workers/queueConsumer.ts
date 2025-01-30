@@ -112,7 +112,6 @@ export async function startQueueConsumer() {
     } catch (error) {
       console.error("Error processing queue:", error);
     }
-
     // Small delay to prevent tight loop
     await new Promise((resolve) => setTimeout(resolve, 1000));
   }
