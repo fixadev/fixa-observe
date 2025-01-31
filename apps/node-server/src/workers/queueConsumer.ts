@@ -72,47 +72,27 @@ async function processMessage(
 async function runQueueConsumer() {
   const semaphore = new Semaphore(5);
   const queueUrl = env.SQS_QUEUE_URL!;
-  const activeProcesses: Promise<void>[] = [];
 
   while (true) {
     try {
-      // Clean up completed processes
-      for (let i = activeProcesses.length - 1; i >= 0; i--) {
-        const status = await Promise.race([
-          activeProcesses[i],
-          Promise.resolve("pending"),
-        ]);
-        if (status !== "pending") {
-          activeProcesses.splice(i, 1);
+      const response = await sqs.receiveMessage({
+        QueueUrl: queueUrl,
+        MaxNumberOfMessages: 1,
+        WaitTimeSeconds: 5,
+      });
+      if (response.Messages) {
+        for (const message of response.Messages) {
+          await semaphore.acquire();
+          processMessage(message, queueUrl).finally(() => {
+            semaphore.release();
+          });
         }
-      }
-
-      // Only fetch new messages if we have capacity
-      if (activeProcesses.length < 5) {
-        const response = await sqs.receiveMessage({
-          QueueUrl: queueUrl,
-          MaxNumberOfMessages: 5 - activeProcesses.length,
-          WaitTimeSeconds: 5,
-        });
-
-        if (response.Messages) {
-          for (const message of response.Messages) {
-            await semaphore.acquire();
-            const processPromise = processMessage(message, queueUrl).finally(
-              () => {
-                semaphore.release();
-              },
-            );
-            activeProcesses.push(processPromise);
-          }
-        } else {
-          console.log("No messages in queue");
-        }
+      } else {
+        console.log("No messages in queue");
       }
     } catch (error) {
-      console.error("Error processing queue:", error);
+      console.error("Error consuming queue:", error);
     }
-    await new Promise((resolve) => setTimeout(resolve, 1000));
   }
 }
 // comment
