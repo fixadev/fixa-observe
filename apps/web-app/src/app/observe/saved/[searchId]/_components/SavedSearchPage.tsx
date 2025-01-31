@@ -18,12 +18,12 @@ export default function SavedSearchPage({
   params,
   savedSearch,
   includeTestCalls = false,
-  callId,
+  customerCallId,
 }: {
   params: { searchId: string };
   savedSearch: SavedSearchWithIncludes;
   includeTestCalls?: boolean;
-  callId?: string;
+  customerCallId?: string;
 }) {
   const {
     selectedCallId,
@@ -55,10 +55,10 @@ export default function SavedSearchPage({
   ]);
 
   useEffect(() => {
-    if (callId) {
-      setSelectedCallId(callId);
+    if (customerCallId) {
+      setSelectedCallId(customerCallId);
     }
-  }, [callId, setSelectedCallId]);
+  }, [customerCallId, setSelectedCallId]);
 
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -128,17 +128,6 @@ export default function SavedSearchPage({
     return () => observer.disconnect();
   }, [fetchNextPage, hasNextPage]);
 
-  const selectedCall = useMemo(() => {
-    if (!selectedCallId) return undefined;
-    return (
-      callOverrides[selectedCallId] ??
-      calls?.find(
-        (call) =>
-          call.id === selectedCallId || call.customerCallId === selectedCallId,
-      )
-    );
-  }, [calls, selectedCallId, callOverrides]);
-
   if (isLoadingCallsExist) {
     return (
       <div className="flex h-screen items-center justify-center">
@@ -180,38 +169,65 @@ export default function SavedSearchPage({
           </div>
         )}
         <FreeCallsLeft />
-        {selectedCall && (
-          <Dialog
-            open={!!selectedCallId}
-            onOpenChange={(open) => {
-              if (!open) {
-                setSelectedCallId(null);
-              }
-            }}
-          >
-            <DialogContent className="max-h-[90vh] max-w-[90vw] p-0">
-              {/* <DialogHeader>
-            <DialogTitle>Call Details</DialogTitle>
-          </DialogHeader> */}
-              <div
-                className="h-[90vh] w-[90vw] overflow-hidden overflow-y-auto rounded-md focus:outline-none"
-                ref={containerRef}
-              >
-                <CallDetails
-                  call={selectedCall}
-                  botName="agent"
-                  userName="caller"
-                  headerHeight={44}
-                  includeHeaderTop={false}
-                  avatarUrl="/images/agent-avatars/jordan.png"
-                  type="latency"
-                  containerRef={containerRef}
-                />
-              </div>
-            </DialogContent>
-          </Dialog>
+        {selectedCallId && (
+          <CallDetailsDialog
+            selectedCallId={selectedCallId}
+            setSelectedCallId={setSelectedCallId}
+            containerRef={containerRef}
+          />
         )}
       </div>
     </div>
+  );
+}
+
+function CallDetailsDialog({
+  selectedCallId,
+  setSelectedCallId,
+  containerRef,
+}: {
+  selectedCallId: string | null;
+  setSelectedCallId: (callId: string | null) => void;
+  containerRef: React.RefObject<HTMLDivElement>;
+}) {
+  const { data: call } = api._call.getCall.useQuery(selectedCallId ?? "");
+  const { data: customerCall } = api._call.getByCustomerCallId.useQuery({
+    id: selectedCallId ?? "",
+  });
+
+  if (!call && !customerCall) {
+    return null;
+  }
+
+  return (
+    <Dialog
+      open={!!selectedCallId}
+      onOpenChange={(open) => {
+        if (!open) {
+          setSelectedCallId(null);
+        }
+      }}
+    >
+      <DialogContent className="max-h-[90vh] max-w-[90vw] p-0">
+        {/* <DialogHeader>
+            <DialogTitle>Call Details</DialogTitle>
+          </DialogHeader> */}
+        <div
+          className="h-[90vh] w-[90vw] overflow-hidden overflow-y-auto rounded-md focus:outline-none"
+          ref={containerRef}
+        >
+          <CallDetails
+            call={call ?? customerCall!}
+            botName="agent"
+            userName="caller"
+            headerHeight={44}
+            includeHeaderTop={false}
+            avatarUrl="/images/agent-avatars/jordan.png"
+            type="latency"
+            containerRef={containerRef}
+          />
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }

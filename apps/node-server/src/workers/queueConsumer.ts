@@ -56,7 +56,7 @@ async function processMessage(
       await axios.post(webhookUrl, {
         success: true,
         call,
-        url: `https://fixa.dev/observe/${call.id}`,
+        url: `https://fixa.dev/observe/${call.customerCallId}`,
       });
     }
 

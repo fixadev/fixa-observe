@@ -232,7 +232,7 @@ function TestPage({ params }: { params: { agentId: string; testId: string } }) {
           {selectedCall && agent && (
             <div className="min-h-screen flex-1">
               <CallDetails
-                call={selectedCall}
+                call={selectedCall ?? ""}
                 agentId={params.agentId}
                 botName={selectedCall.testAgent?.name ?? ""}
                 userName={agent.name}

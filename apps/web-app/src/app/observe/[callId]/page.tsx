@@ -29,7 +29,7 @@ export default function ObservePage({
     <SavedSearchPage
       params={{ searchId: defaultSavedSearch.id }}
       savedSearch={defaultSavedSearch}
-      callId={params.callId}
+      customerCallId={params.callId}
     />
   );
 }
