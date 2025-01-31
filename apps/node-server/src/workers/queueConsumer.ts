@@ -115,7 +115,6 @@ async function runQueueConsumer() {
     await new Promise((resolve) => setTimeout(resolve, 1000));
   }
 }
-// comment
 export async function startQueueConsumer() {
   while (true) {
     try {
