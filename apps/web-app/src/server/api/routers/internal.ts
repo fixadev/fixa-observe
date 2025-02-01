@@ -142,6 +142,11 @@ export const internalRouter = createTRPCRouter({
         }),
       );
 
+      // Sort organizations by call count in descending order
+      const sortedOrgUsage = [...orgUsage].sort(
+        (a, b) => b.callCount - a.callCount,
+      );
+
       // Get total calls across all organizations
       const totalCalls = await db.call.count({
         where: {
@@ -155,7 +160,7 @@ export const internalRouter = createTRPCRouter({
       return {
         startDate,
         endDate,
-        organizations: orgUsage,
+        organizations: sortedOrgUsage,
         totalOrganizations: organizations.length,
         totalCalls,
       };
