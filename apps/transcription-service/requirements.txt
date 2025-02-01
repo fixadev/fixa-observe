@@ -8,3 +8,4 @@ pydub
 uvicorn
 boto3
 sentry-sdk[fastapi]
+sentry-sdk

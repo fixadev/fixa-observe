@@ -32,6 +32,7 @@ export const env = createEnv({
     NODE_SERVER_SECRET: z.string(),
     KEYWORDSAI_API_KEY: z.string(),
     DEMO_ORG_ID: z.string(),
+    ADMIN_ORG_ID: z.string(),
   },
 
   /**
@@ -97,6 +98,7 @@ export const env = createEnv({
     NODE_SERVER_SECRET: process.env.NODE_SERVER_SECRET,
     KEYWORDSAI_API_KEY: process.env.KEYWORDSAI_API_KEY,
     DEMO_ORG_ID: process.env.DEMO_ORG_ID,
+    ADMIN_ORG_ID: process.env.ADMIN_ORG_ID,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially

@@ -11,6 +11,7 @@ import { auth } from "@clerk/nextjs/server";
 import { initTRPC, TRPCError } from "@trpc/server";
 import superjson from "superjson";
 import { ZodError } from "zod";
+import { env } from "~/env";
 
 import { db } from "~/server/db";
 
@@ -136,4 +137,13 @@ export const protectedProcedure = t.procedure
         orgId: ctx.orgId,
       },
     });
+  });
+
+export const adminProcedure = t.procedure
+  .use(timingMiddleware)
+  .use(({ ctx, next }) => {
+    if (!ctx.userId || !ctx.orgId || ctx.orgId !== env.ADMIN_ORG_ID) {
+      throw new TRPCError({ code: "UNAUTHORIZED" });
+    }
+    return next({ ctx: { userId: ctx.userId, orgId: ctx.orgId } });
   });
