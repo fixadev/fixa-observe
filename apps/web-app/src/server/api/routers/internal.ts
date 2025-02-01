@@ -6,6 +6,7 @@ import { db } from "~/server/db";
 import type Stripe from "stripe";
 import { env } from "~/env";
 import type { Organization } from "@clerk/nextjs/server";
+import { type PublicMetadata } from "@repo/types/src";
 
 const stripeService = new StripeService(db);
 const clerkService = new ClerkService(db);
@@ -47,9 +48,7 @@ export const internalRouter = createTRPCRouter({
       const orgUsage = await Promise.all(
         organizations.map(async (org) => {
           try {
-            const metadata = await clerkService.getPublicMetadata({
-              orgId: org.id,
-            });
+            const metadata = org.publicMetadata as PublicMetadata;
 
             // Get number of calls within the lookback period
             const callCount = await db.call.count({
